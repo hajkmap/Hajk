@@ -361,10 +361,11 @@ class MapOptions extends Component {
                 />
               </label>
               <input
-                type="text"
+                type="number"
+                min="0"
                 ref="input_zoom"
                 value={this.state.zoom}
-                className={this.getValidationClass("zoom")}
+                className={(this.getValidationClass("zoom"), "width-150")}
                 onChange={e => {
                   this.setState({ zoom: e.target.value }, () =>
                     this.validateField("zoom")
@@ -382,10 +383,11 @@ class MapOptions extends Component {
                 />
               </label>
               <input
-                type="text"
+                type="number"
+                min="0"
                 ref="input_maxZoom"
                 value={this.state.maxZoom}
-                className={this.getValidationClass("maxZoom")}
+                className={(this.getValidationClass("maxZoom"), "width-150")}
                 onChange={e => {
                   this.setState({ maxZoom: e.target.value }, () =>
                     this.validateField("maxZoom")
@@ -403,10 +405,11 @@ class MapOptions extends Component {
                 />
               </label>
               <input
-                type="text"
+                type="number"
+                min="0"
                 ref="input_minZoom"
                 value={this.state.minZoom}
-                className={this.getValidationClass("minZoom")}
+                className={(this.getValidationClass("minZoom"), "width-150")}
                 onChange={e => {
                   this.setState({ minZoom: e.target.value }, () =>
                     this.validateField("minZoom")

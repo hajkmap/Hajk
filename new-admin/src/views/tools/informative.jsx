@@ -298,6 +298,7 @@ class ToolOptions extends Component {
               name="index"
               type="number"
               min="0"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -309,6 +310,7 @@ class ToolOptions extends Component {
             <select
               id="target"
               name="target"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -331,6 +333,7 @@ class ToolOptions extends Component {
             <select
               id="position"
               name="position"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -354,6 +357,7 @@ class ToolOptions extends Component {
               name="width"
               type="number"
               min="0"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -374,6 +378,7 @@ class ToolOptions extends Component {
               name="height"
               type="number"
               min="0"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -405,7 +410,7 @@ class ToolOptions extends Component {
                 data-toggle="tooltip"
                 title="Om verktyget visas som widget (inställningen 'Verktygsplacering' sätts till 'left' eller 'right) så kommer denna beskrivning att visas inne i widget-knappen."
               />
-            </label>{" "}
+            </label>
             <input
               value={this.state.abstract}
               type="text"
@@ -491,6 +496,7 @@ class ToolOptions extends Component {
               id="document"
               name="document"
               value={this.state.document}
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}

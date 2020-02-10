@@ -1327,6 +1327,7 @@ class Menu extends Component {
                   <select
                     id="target"
                     name="target"
+                    className="width-150"
                     onChange={e => {
                       this.handleInputChange(e);
                     }}
@@ -1358,6 +1359,7 @@ class Menu extends Component {
                   <select
                     id="position"
                     name="position"
+                    className="width-150"
                     onChange={e => {
                       this.handleInputChange(e);
                     }}
@@ -1383,6 +1385,7 @@ class Menu extends Component {
                     name="width"
                     type="number"
                     min="0"
+                    className="width-150"
                     onChange={this.handleInputChange}
                     value={this.state.width}
                   />
@@ -1403,6 +1406,7 @@ class Menu extends Component {
                     name="height"
                     type="number"
                     min="0"
+                    className="width-150"
                     onChange={this.handleInputChange}
                     value={this.state.height}
                   />
@@ -1410,7 +1414,11 @@ class Menu extends Component {
               </div>
               <div className="row">
                 <div className="col-sm-12">
-                  <label htmlFor="title">Rubrik (Widget Plugin)</label>
+                  <label htmlFor="title">
+                    Rubrik
+                    <br />
+                    (Widget Plugin)
+                  </label>
                   <input
                     value={this.state.title}
                     type="text"
@@ -1422,13 +1430,15 @@ class Menu extends Component {
               <div className="row">
                 <div className="col-sm-12">
                   <label htmlFor="description">
-                    Beskrivning (Widget Plugin){" "}
+                    Beskrivning
+                    <br />
+                    (Widget Plugin){" "}
                     <i
                       className="fa fa-question-circle"
                       data-toggle="tooltip"
                       title="Om verktyget visas som widget (inställningen 'Verktygsplacering' sätts till 'left' eller 'right) så kommer denna beskrivning att visas inne i widget-knappen."
                     />
-                  </label>{" "}
+                  </label>
                   <input
                     value={this.state.description}
                     type="text"
@@ -1628,16 +1638,19 @@ class Menu extends Component {
                 this.createMap(e);
               }}
             >
-              <h3>Skapa karta</h3>
+              <h4>Skapa ny karta</h4>
               <label>Namn</label>
               &nbsp;
               <input type="text" ref="mapName" />
-              <br />
-              <br />
+              &nbsp;
               <button className="btn btn-primary">Skapa</button>
             </form>
           </div>
-          <br />
+
+          <div className="separator set-width">
+            <h4>Hantera befintlig karta</h4>
+          </div>
+
           <div className="inset-form">
             <label>Välj karta</label>
             &nbsp;
