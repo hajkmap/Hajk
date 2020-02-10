@@ -702,6 +702,10 @@ figure img {
   overflow: auto;
 }
 
+.width-150 {
+  width: 150px;
+}
+
 #map {
   border-bottom: 1px solid;
   margin-left: 250px;
@@ -786,4 +790,8 @@ figure img {
 }
 .separator::after {
   margin-left: 0.25em;
+}
+
+.separator.set-width {
+  width: 930px;
 }

@@ -553,6 +553,7 @@ class ToolOptions extends Component {
               min="0"
               step="10"
               name="maxFeatures"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -569,6 +570,7 @@ class ToolOptions extends Component {
               max="5000"
               step="100"
               name="delayBeforeAutoSearch"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -602,6 +604,7 @@ class ToolOptions extends Component {
               max="100"
               step="0.1"
               name="anchorX"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -617,6 +620,7 @@ class ToolOptions extends Component {
               max="100"
               step="0.1"
               name="anchorY"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -636,6 +640,7 @@ class ToolOptions extends Component {
               min="0.01"
               max="10"
               name="scale"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -652,6 +657,7 @@ class ToolOptions extends Component {
               max="100"
               step="1"
               name="strokeWidth"
+              className="width-150"
               onChange={e => {
                 this.handleInputChange(e);
               }}
