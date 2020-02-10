@@ -205,8 +205,8 @@ class ArcGISLayerForm extends Component {
       return typeof v === "string"
         ? v.trim() === ""
         : Array.isArray(v)
-          ? v[0] === ""
-          : false;
+        ? v[0] === ""
+        : false;
     }
 
     function array(v) {
@@ -229,7 +229,7 @@ class ArcGISLayerForm extends Component {
         }
         break;
       case "opacity":
-        if (!number(value) || (value < 0 || value > 1)) {
+        if (!number(value) || value < 0 || value > 1) {
           valid = false;
         }
         break;
@@ -523,10 +523,15 @@ class ArcGISLayerForm extends Component {
         <div>
           <label>Opacitet*</label>
           <input
-            type="text"
+            type="number"
+            step="0.01"
+            min="0"
+            max="1"
             ref="input_opacity"
             value={this.state.opacity}
-            className={this.getValidationClass("opacity")}
+            className={
+              (this.getValidationClass("opacity"), "control-fixed-width")
+            }
             onChange={e => {
               const v = e.target.value;
               this.setState({ opacity: v }, () =>

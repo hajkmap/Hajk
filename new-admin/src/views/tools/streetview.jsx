@@ -251,7 +251,7 @@ class ToolOptions extends Component {
               name="index"
               type="number"
               min="0"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -263,7 +263,7 @@ class ToolOptions extends Component {
             <select
               id="target"
               name="target"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -286,7 +286,7 @@ class ToolOptions extends Component {
             <select
               id="position"
               name="position"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -310,7 +310,7 @@ class ToolOptions extends Component {
               name="width"
               type="number"
               min="0"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -331,7 +331,7 @@ class ToolOptions extends Component {
               name="height"
               type="number"
               min="0"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
