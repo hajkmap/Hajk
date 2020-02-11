@@ -249,6 +249,7 @@ class ToolOptions extends Component {
               name="index"
               type="number"
               min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}

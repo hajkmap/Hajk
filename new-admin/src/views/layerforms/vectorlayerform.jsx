@@ -310,8 +310,8 @@ class VectorLayerForm extends Component {
       }
       this.setState({
         capabilities: capabilities,
-        projection: this.state.projection || (projection || ""),
-        legend: this.state.legend || (capabilities.legend || ""),
+        projection: this.state.projection || projection || "",
+        legend: this.state.legend || capabilities.legend || "",
         load: false
       });
 
@@ -929,10 +929,15 @@ class VectorLayerForm extends Component {
         <div>
           <label>Opacitet*</label>
           <input
-            type="text"
+            type="number"
+            step="0.01"
+            min="0"
+            max="1"
             ref="input_opacity"
             value={this.state.opacity}
-            className={this.getValidationClass("opacity")}
+            className={
+              (this.getValidationClass("opacity"), "control-fixed-width")
+            }
             onChange={e => {
               const v = e.target.value;
               this.setState({ opacity: v }, () =>

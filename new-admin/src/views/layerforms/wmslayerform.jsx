@@ -915,7 +915,7 @@ class WMSLayerForm extends Component {
         }
         break;
       case "opacity":
-        if (isNaN(Number(value)) || value <= 0 || value >= 1) {
+        if (isNaN(Number(value)) || value < 0 || value > 1) {
           valid = false;
         }
         break;
@@ -1201,12 +1201,15 @@ class WMSLayerForm extends Component {
           </label>
           <br />
           <input
-            style={{ width: "50%" }}
             type="number"
             step="0.01"
+            min="0"
+            max="1"
             ref="input_opacity"
             value={this.state.opacity}
-            className={this.getValidationClass("opacity")}
+            className={
+              (this.getValidationClass("opacity"), "control-fixed-width")
+            }
             onChange={e => {
               this.setState({ opacity: e.target.value });
               this.validateField("opacity");

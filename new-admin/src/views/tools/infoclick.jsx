@@ -298,7 +298,7 @@ class ToolOptions extends Component {
             <select
               id="position"
               name="position"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -323,7 +323,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.width}
               type="number"
               min="0"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -345,7 +345,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.height}
               type="number"
               min="0"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -376,7 +376,7 @@ class ToolOptions extends Component {
               max="100"
               step="0.1"
               name="anchorX"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -392,7 +392,7 @@ class ToolOptions extends Component {
               max="100"
               step="0.1"
               name="anchorY"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -408,7 +408,7 @@ class ToolOptions extends Component {
               min="0.01"
               max="10"
               name="scale"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -424,7 +424,7 @@ class ToolOptions extends Component {
               max="100"
               step="1"
               name="strokeWidth"
-              className="width-150"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
