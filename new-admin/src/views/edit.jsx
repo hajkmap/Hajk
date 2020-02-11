@@ -824,24 +824,7 @@ class Search extends Component {
           >
             <fieldset>
               <legend>Lägg till WFST-tjänst</legend>
-              <div>
-                <label>Visningsnamn*</label>
-                <input
-                  type="text"
-                  ref="input_caption"
-                  value={this.state.caption}
-                  onChange={e => {
-                    var v = e.target.value;
-                    this.setState(
-                      {
-                        caption: v
-                      },
-                      () => this.validateField("caption")
-                    );
-                  }}
-                  className={this.getValidationClass("caption")}
-                />
-              </div>
+              <div className="separator">Anslutning</div>
               <div>
                 <label>Url*</label>
                 <input
@@ -886,10 +869,12 @@ class Search extends Component {
                   className={this.getValidationClass("uri")}
                 />
               </div>
+              <div className="separator">Tillgängliga lager</div>
               <div>
-                <label>Projektion</label>
-                {this.renderProjections()}
+                <label>Lagerlista</label>
+                {this.renderLayerList()}
               </div>
+              <div className="separator">Hantera valt lager</div>
               <div>
                 <label>Valt lager*</label>
                 <div
@@ -902,12 +887,26 @@ class Search extends Component {
                 </div>
               </div>
               <div>
-                <label>Lagerlista</label>
-                {this.renderLayerList()}
+                <label>Visningsnamn*</label>
+                <input
+                  type="text"
+                  ref="input_caption"
+                  value={this.state.caption}
+                  onChange={e => {
+                    var v = e.target.value;
+                    this.setState(
+                      {
+                        caption: v
+                      },
+                      () => this.validateField("caption")
+                    );
+                  }}
+                  className={this.getValidationClass("caption")}
+                />
               </div>
               <div>
-                <label>Redigerbara fält</label>
-                {this.renderLayerProperties()}
+                <label>Projektion</label>
+                {this.renderProjections()}
               </div>
               <div>
                 <label>Geometrityper</label>
@@ -954,6 +953,10 @@ class Search extends Component {
                   />
                   <label htmlFor="polygon">&nbsp;Ytor</label>
                 </div>
+              </div>
+              <div>
+                <label>Redigerbara fält</label>
+                {this.renderLayerProperties()}
               </div>
             </fieldset>
             <button className="btn btn-primary">
