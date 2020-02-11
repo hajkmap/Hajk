@@ -1655,6 +1655,7 @@ class Menu extends Component {
             <label>Välj karta</label>
             &nbsp;
             <select
+              className="control-fixed-width"
               onChange={e => {
                 this.setSelectedConfig(e);
               }}
