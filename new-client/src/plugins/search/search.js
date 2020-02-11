@@ -104,18 +104,19 @@ class Search extends React.PureComponent {
      * If searchOnStart exists, grab the value for v (the search value string),
      * put the value in search box and do the search.
      *
-     * TODO: Limit WFS sources (if s-param is present).
+     * TODO: Limit WFS sources (if "s" query param is present, called "ds" below).
      */
 
     this.props.app.globalObserver.subscribe("appLoaded", () => {
       const { searchOnStart } = this.props.app.config.mapConfig.map;
+      // Hence this plugin (src/plugins/search) is the default Search plugin, act on both t="search" and t=undefined
       if (
-        searchOnStart !== undefined &&
-        (searchOnStart.t === undefined ||
-          searchOnStart.t.toLowerCase() === this.type.toLowerCase())
+        searchOnStart?.t === undefined ||
+        searchOnStart?.t.toLowerCase() === this.type.toLowerCase()
       ) {
-        // Hence this plugin (src/plugins/search) is the default Search plugin, act on both t="search" and t=undefined
         const { v, s } = searchOnStart;
+
+        //eslint-disable-next-line
         const { dv, ds } = {
           dv: v && window.decodeURI(v),
           ds: s && window.decodeURI(s)
