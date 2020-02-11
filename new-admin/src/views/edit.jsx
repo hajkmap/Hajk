@@ -737,6 +737,7 @@ class Search extends Component {
       <select
         ref="input_projection"
         value={this.state.projection}
+        className="control-fixed-width"
         onChange={e => {
           this.setState({
             projection: e.target.value

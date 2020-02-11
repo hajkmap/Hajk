@@ -635,6 +635,7 @@ class InformativeEditor extends Component {
         <div className="inset-form">
           <label>Välj dokument:&nbsp;</label>
           <select
+            className="control-fixed-width"
             onChange={e => {
               this.load(e.target.value);
             }}
