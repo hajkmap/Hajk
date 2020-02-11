@@ -804,6 +804,7 @@ class Search extends Component {
                 <select
                   ref="input_outputFormat"
                   value={this.state.outputFormat}
+                  className="control-fixed-width"
                   onChange={e => {
                     this.setState(
                       {

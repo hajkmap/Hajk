@@ -238,20 +238,7 @@ class WMTSLayerForm extends Component {
     return (
       <fieldset>
         <legend>WMTS-lager</legend>
-        <div>
-          <label>Visningsnamn*</label>
-          <input
-            type="text"
-            ref="input_caption"
-            value={this.state.caption}
-            className={this.getValidationClass("caption")}
-            onChange={e => {
-              this.setState({ caption: e.target.value }, () =>
-                this.validateField("caption")
-              );
-            }}
-          />
-        </div>
+        <div className="separator">Val av lager</div>
         <div>
           <label>Url*</label>
           <input
@@ -267,19 +254,29 @@ class WMTSLayerForm extends Component {
           />
         </div>
         <div>
-          <label>Senast ändrad</label>
-          <span ref="input_date">
-            <i>{this.props.model.parseDate(this.state.date)}</i>
-          </span>
-        </div>
-        <div>
-          <label>Innehåll</label>
+          <label>Lager*</label>
           <input
             type="text"
-            ref="input_content"
-            value={this.state.content}
+            ref="input_layer"
             onChange={e => {
-              this.setState({ content: e.target.value });
+              const v = e.target.value;
+              this.setState({ layer: v }, () => this.validateField("layer", v));
+            }}
+            value={this.state.layer}
+            className={this.getValidationClass("layer")}
+          />
+        </div>
+        <div>
+          <label>Visningsnamn*</label>
+          <input
+            type="text"
+            ref="input_caption"
+            value={this.state.caption}
+            className={this.getValidationClass("caption")}
+            onChange={e => {
+              this.setState({ caption: e.target.value }, () =>
+                this.validateField("caption")
+              );
             }}
           />
         </div>
@@ -300,19 +297,7 @@ class WMTSLayerForm extends Component {
             Välj fil {imageLoader}
           </span>
         </div>
-        <div>
-          <label>Lager*</label>
-          <input
-            type="text"
-            ref="input_layer"
-            onChange={e => {
-              const v = e.target.value;
-              this.setState({ layer: v }, () => this.validateField("layer", v));
-            }}
-            value={this.state.layer}
-            className={this.getValidationClass("layer")}
-          />
-        </div>
+        <div className="separator">Inställningar för request</div>
         <div>
           <label>Matrisuppsättning*</label>
           <input
@@ -401,6 +386,24 @@ class WMTSLayerForm extends Component {
             className={this.getValidationClass("matrixIds")}
           />
         </div>
+        <div className="separator">Metadata</div>
+        <div>
+          <label>Innehåll</label>
+          <input
+            type="text"
+            ref="input_content"
+            value={this.state.content}
+            onChange={e => {
+              this.setState({ content: e.target.value });
+            }}
+          />
+        </div>
+        <div>
+          <label>Senast ändrad</label>
+          <span ref="input_date">
+            <i>{this.props.model.parseDate(this.state.date)}</i>
+          </span>
+        </div>
         <div>
           <label>Upphovsrätt</label>
           <input
@@ -418,7 +421,6 @@ class WMTSLayerForm extends Component {
         </div>
         <div className="info-container">
           <div>
-            <label htmlFor="info-document">Infodokument</label>
             <input
               type="checkbox"
               ref="input_infoVisible"
@@ -428,6 +430,8 @@ class WMTSLayerForm extends Component {
               }}
               checked={this.state.infoVisible}
             />
+            &nbsp;
+            <label htmlFor="info-document">Infodokument</label>
           </div>
           <div className={infoClass}>
             <label>Rubrik</label>
