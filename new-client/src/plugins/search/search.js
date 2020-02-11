@@ -121,8 +121,6 @@ class Search extends React.PureComponent {
           ds: s && window.decodeURI(s)
         };
 
-        console.log("dv, ds: ", dv, ds);
-
         // Put decoded search phrase into the search box
         document.getElementById("searchbox").value = dv;
 
