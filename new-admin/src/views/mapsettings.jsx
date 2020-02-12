@@ -1631,6 +1631,9 @@ class Menu extends Component {
         <Alert options={this.getAlertOptions()} />
         <div>
           <h1>Kartinställningar</h1>
+          <div className="separator set-width">
+            <h4>Skapa ny karta</h4>
+          </div>
           <div className="inset-form">
             <form
               onSubmit={e => {
@@ -1638,7 +1641,6 @@ class Menu extends Component {
                 this.createMap(e);
               }}
             >
-              <h4>Skapa ny karta</h4>
               <label>Namn</label>
               &nbsp;
               <input type="text" ref="mapName" />
@@ -1651,11 +1653,11 @@ class Menu extends Component {
             <h4>Hantera befintlig karta</h4>
           </div>
 
-          <div className="inset-form">
+          <div className="inset-form set-width">
             <label>Välj karta</label>
             &nbsp;
             <select
-              className="control-fixed-width"
+              className="control-fixed"
               onChange={e => {
                 this.setSelectedConfig(e);
               }}
