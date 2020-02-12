@@ -1591,7 +1591,10 @@ class Menu extends Component {
     this.setState({
       alert: true,
       confirm: true,
-      alertMessage: "Vill du verkligen radera kartan?",
+      alertMessage:
+        "Vill du verkligen radera kartan '" +
+        this.props.model.attributes.mapFile +
+        "'?",
       confirmAction: () => {
         this.props.model.deleteMap(err => {
           var msg = err || "Kartan raderades";
