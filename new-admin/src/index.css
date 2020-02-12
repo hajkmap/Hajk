@@ -702,6 +702,12 @@ figure img {
   overflow: auto;
 }
 
+.control-fixed {
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+}
+
 .control-fixed-width {
   border: 1px solid #ccc;
   padding: 5px;
