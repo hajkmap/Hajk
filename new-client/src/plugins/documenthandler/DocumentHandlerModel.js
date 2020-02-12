@@ -1,3 +1,5 @@
+import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
+
 /**
  * @summary  DocumentHandler model that doesn't do much.
  * @description This model exposes only one method, getMap(),
@@ -7,11 +9,55 @@
  *
  * @class DocumentHandlerModel
  */
+
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 export default class DocumentHandlerModel {
-  constructor(settings) {
-    this.map = settings.map;
-    this.app = settings.app;
-    this.localObserver = settings.localObserver;
+  constructor(settings) {}
+
+  async list(callback) {
+    let response;
+    try {
+      response = await fetch(
+        "http://localhost:55630/informative/list",
+        fetchConfig
+      );
+      const text = await response.text();
+      const document = await JSON.parse(text);
+      callback(document);
+    } catch (err) {
+      console.log(err, "err");
+    }
+  }
+
+  setParentChapter(chapter, parent) {
+    chapter.parent = parent;
+    if (chapter.chapters.length > 0) {
+      chapter.chapters.forEach(child => {
+        this.setParentChapter(child, chapter);
+      });
+    }
+  }
+
+  async load(title, callback) {
+    let response;
+    try {
+      response = await fetch(
+        `http://localhost:55630/informative/load/${title}`,
+        fetchConfig
+      );
+      const text = await response.text();
+      const document = await JSON.parse(text);
+      document.chapters.forEach(chapter => {
+        this.setParentChapter(chapter, undefined);
+      });
+
+      callback(document);
+    } catch (err) {
+      console.log(err, "err");
+    }
   }
   /**
    * Returns the global Map object.

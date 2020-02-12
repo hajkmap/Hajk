@@ -34,9 +34,10 @@ class HeaderView extends React.PureComponent {
     super(props);
   }
 
-  reset = () => {
-    const { localObserver } = this.props;
-    localObserver.publish("reset");
+  goToParentChapters = () => {
+    const { localObserver, menuItems } = this.props;
+    var parentChapter = menuItems[0].parent;
+    localObserver.publish("goToParentChapters", parentChapter);
   };
   render() {
     const { classes, subMenu, title } = this.props;
@@ -54,7 +55,9 @@ class HeaderView extends React.PureComponent {
             <Grid item xs={12}>
               {subMenu ? (
                 <>
-                  <ArrowBackIcon onClick={this.reset}></ArrowBackIcon>
+                  <ArrowBackIcon
+                    onClick={this.goToParentChapters}
+                  ></ArrowBackIcon>
                   <Typography>{title}</Typography>
                 </>
               ) : (

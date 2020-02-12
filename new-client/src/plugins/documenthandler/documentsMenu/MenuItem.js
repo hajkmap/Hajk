@@ -38,7 +38,7 @@ class MenuItem extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.localObserver = this.props.localObserver;
+
     this.globalObserver = this.props.app.globalObserver;
   }
 
@@ -47,18 +47,20 @@ class MenuItem extends React.PureComponent {
     this.setState({ highlighted: !this.state.highlighted });
   };
 
-  handleMenuButtonClick = title => {
-    this.localObserver.publish("document-clicked", title);
+  handleMenuButtonClick = header => {
+    console.log(header, "title clicked");
+    const { localObserver } = this.props;
+    localObserver.publish("menu-item-clicked", header);
   };
 
   render() {
-    const { classes, color, title } = this.props;
+    const { classes, color, header } = this.props;
 
     return (
       <>
         <Paper
           onClick={() => {
-            this.handleMenuButtonClick(title);
+            this.handleMenuButtonClick(header);
           }}
           style={{ backgroundColor: color }}
           onMouseEnter={this.toggleHighlight}
@@ -85,7 +87,7 @@ class MenuItem extends React.PureComponent {
                 align="center"
                 color="textPrimary"
               >
-                {title}
+                {header}
               </Typography>
             </Grid>
           </Grid>

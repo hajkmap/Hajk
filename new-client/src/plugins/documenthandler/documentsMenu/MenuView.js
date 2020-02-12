@@ -1,7 +1,7 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import MenuItemView from "./MenuItem";
+import MenuItem from "./MenuItem";
 
 import Divider from "@material-ui/core/Divider";
 import Grid from "@material-ui/core/Grid";
@@ -54,9 +54,11 @@ class MenuView extends React.PureComponent {
   }
 
   renderMenuItem = menuItem => {
+    console.log(menuItem, "menuItem");
+    const { localObserver, app } = this.props;
     return (
       <Grid
-        key={menuItem.title}
+        key={menuItem.header}
         zeroMinWidth
         item
         xs={xs}
@@ -64,30 +66,26 @@ class MenuView extends React.PureComponent {
         md={md}
         lg={lg}
       >
-        <MenuItemView
+        <MenuItem
+          key={menuItem.header}
           model={this.DocumentHandlerModel}
-          app={this.props.app}
-          title={menuItem.title}
+          app={app}
+          header={menuItem.header}
           color={menuItem.color}
-          localObserver={this.localObserver}
-        ></MenuItemView>
+          localObserver={localObserver}
+        ></MenuItem>
       </Grid>
     );
   };
 
   render() {
-    const { menuItems, subMenuItems } = this.props;
+    const { chapters, menuItems } = this.props;
 
     return (
       <>
-        {this.state.activeDocumentMenu != null &&
-          subMenuItems.map(item => {
-            return this.renderMenuItem(item);
-          })}
-        {this.state.activeDocumentMenu == null &&
-          menuItems.map(item => {
-            return this.renderMenuItem(item);
-          })}
+        {menuItems.map(item => {
+          return this.renderMenuItem(item);
+        })}
       </>
     );
   }
