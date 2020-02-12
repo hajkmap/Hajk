@@ -184,8 +184,13 @@ $.fn.editable = function(component) {
       });
     });
 
+    // For Group Nodes we want to grab value from data-name attribute, where it's encoded properly.
+    const inputValue = node.parent()[0].classList.contains("group-node")
+      ? node.parent()[0].attributes.getNamedItem("data-name").value
+      : node.html();
+
     input
-      .val(node.parent()[0].attributes.getNamedItem("data-name").value)
+      .val(inputValue)
       .keydown(e => {
         if (e.keyCode === 13) {
           store();
