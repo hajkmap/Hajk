@@ -48,7 +48,9 @@ class MapOptions extends Component {
         minZoom: config.minZoom,
         center: config.center,
         logo: config.logo,
+        resolutions: config.resolutions,
         extent: config.extent,
+        origin: config.origin,
         constrainOnlyCenter: config.constrainOnlyCenter,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
@@ -87,7 +89,9 @@ class MapOptions extends Component {
       minZoom: mapConfig.minZoom,
       center: mapConfig.center,
       logo: mapConfig.logo,
+      resolutions: mapConfig.resolutions,
       extent: mapConfig.extent,
+      origin: mapConfig.origin,
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
@@ -112,7 +116,9 @@ class MapOptions extends Component {
     }
 
     if (fieldName === "center") value = value.split(",");
+    if (fieldName === "resolutions") value = value.split(",");
     if (fieldName === "extent") value = value.split(",");
+    if (fieldName === "origin") value = value.split(",");
     if (fieldName === "title") {
       if (value === "") {
         value = this.props.model.get("mapFile");
@@ -172,6 +178,10 @@ class MapOptions extends Component {
       return v.length === 2 && v.every(number);
     }
 
+    function resolutions(v) {
+      return v.length > 0 && v.every(number);
+    }
+
     function extent(v) {
       return v.length === 4 && v.every(number);
     }
@@ -182,11 +192,17 @@ class MapOptions extends Component {
           valid = false;
         }
         break;
+      case "resolutions":
+        if (!resolutions(value)) {
+          valid = false;
+        }
+        break;
       case "extent":
         if (!extent(value)) {
           valid = false;
         }
         break;
+      case "origin":
       case "center":
         if (!coord(value) || empty(value)) {
           valid = false;
@@ -245,7 +261,9 @@ class MapOptions extends Component {
         config.minZoom = this.getValue("minZoom");
         config.center = this.getValue("center");
         config.logo = this.getValue("logo");
+        config.resolutions = this.getValue("resolutions");
         config.extent = this.getValue("extent");
+        config.origin = this.getValue("origin");
         config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
@@ -446,6 +464,27 @@ class MapOptions extends Component {
             </div>
             <div>
               <label>
+                Upplösningar{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Används som OpenLayers View 'resolutions'-parameter, ex '4096,2048,1024,512'"
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_resolutions"
+                value={this.state.resolutions}
+                className={this.getValidationClass("resolutions")}
+                onChange={e => {
+                  this.setState({ resolutions: e.target.value }, () =>
+                    this.validateField("resolutions")
+                  );
+                }}
+              />
+            </div>
+            <div>
+              <label>
                 Extent{" "}
                 <i
                   className="fa fa-question-circle"
@@ -461,6 +500,27 @@ class MapOptions extends Component {
                 onChange={e => {
                   this.setState({ extent: e.target.value }, () =>
                     this.validateField("extent")
+                  );
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Origin{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Används som OpenLayers View 'origin'-parameter, ex '0,0'"
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_origin"
+                value={this.state.origin}
+                className={this.getValidationClass("origin")}
+                onChange={e => {
+                  this.setState({ origin: e.target.value }, () =>
+                    this.validateField("origin")
                   );
                 }}
               />
