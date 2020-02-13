@@ -158,15 +158,25 @@ class App extends React.PureComponent {
 
   constructor(props) {
     super(props);
+
     this.state = {
       alert: false,
       loading: false,
       mapClickDataResult: {},
 
       // Drawer-related states
-      drawerVisible: props.config.mapConfig.map.drawerVisible || false,
-      // For drawerPermanent===true, drawerVisible must be true too – we can't lock the Drawer if it's invisible at start.
+      // If cookie for "drawerPermanent" is true, we must also make the drawer visible
+      drawerVisible:
+        window.localStorage.getItem("drawerPermanent") === "true" ||
+        props.config.mapConfig.map.drawerVisible ||
+        false,
+
+      // To check whether drawer is permanent, first take a look at the cookie.
+      // If cookie is falsy, see if map config says that drawer should be visible and permanent.
+      // Both must be true before we show the drawer.
+      // Finally, fall back to "false" so we start without a visible, permanent, Drawer.
       drawerPermanent:
+        window.localStorage.getItem("drawerPermanent") === "true" ||
         (props.config.mapConfig.map.drawerVisible &&
           props.config.mapConfig.map.drawerPermanent) ||
         false,
@@ -312,6 +322,12 @@ class App extends React.PureComponent {
       // To ensure that our Windows still are inside the container, we dispach an
       // event that all Windows subscribe to.
       this.globalObserver.publish("drawerToggled");
+
+      // Save current state of drawerPermanent to LocalStorage, so app reloads to same state
+      window.localStorage.setItem(
+        "drawerPermanent",
+        this.state.drawerPermanent
+      );
 
       // If user clicked on Toggle Permanent and the result is,
       // that this.state.drawerPermanent===false, this means that we
