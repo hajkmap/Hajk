@@ -3,7 +3,9 @@ import PropTypes from "prop-types";
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
 import OverlayView from "./documentsMenu/OverlayView";
+import MenuBarView from "./documentsMenu/MenuBarView";
 import Observer from "react-event-observer";
+import Hidden from "@material-ui/core/Hidden";
 
 class DocumentHandler extends React.PureComponent {
   state = {};
@@ -36,11 +38,14 @@ class DocumentHandler extends React.PureComponent {
   render() {
     return (
       <>
-        <OverlayView
-          model={this.DocumentHandlerModel}
-          app={this.props.app}
-          localObserver={this.localObserver}
-        ></OverlayView>
+        <Hidden xlUp>
+          <OverlayView
+            model={this.DocumentHandlerModel}
+            app={this.props.app}
+            localObserver={this.localObserver}
+          ></OverlayView>
+        </Hidden>
+        <MenuBarView></MenuBarView>
         <DocumentWindowBase
           {...this.props}
           model={this.DocumentHandlerModel}
