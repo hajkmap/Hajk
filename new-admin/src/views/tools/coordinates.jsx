@@ -281,168 +281,193 @@ class ToolOptions extends Component {
   render() {
     return (
       <div>
-        <p>
-          <button className="btn btn-primary" onClick={() => this.save()}>
-            Spara
-          </button>
-        </p>
-        <div>
-          <input
-            id="active"
-            name="active"
-            type="checkbox"
-            onChange={e => {
-              this.handleInputChange(e);
-            }}
-            checked={this.state.active}
-          />
-          &nbsp;
-          <label htmlFor="active">Aktiverad</label>
-        </div>
-        <div>
-          <label htmlFor="index">Sorteringsordning</label>
-          <input
-            id="index"
-            name="index"
-            type="text"
-            onChange={e => {
-              this.handleInputChange(e);
-            }}
-            value={this.state.index}
-          />
-        </div>
-        <div>
-          <label htmlFor="target">Verktygsplacering</label>
-          <input
-            id="target"
-            name="target"
-            type="text"
-            onChange={e => {
-              this.handleInputChange(e);
-            }}
-            value={this.state.target}
-          />
-        </div>
-        <div>
-          <label htmlFor="position">
-            Fönsterplacering{" "}
-            <i
-              className="fa fa-question-circle"
-              data-toggle="tooltip"
-              title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
+        <form>
+          <p>
+            <button
+              className="btn btn-primary"
+              onClick={e => {
+                e.preventDefault();
+                this.save();
+              }}
+            >
+              Spara
+            </button>
+          </p>
+          <div>
+            <input
+              id="active"
+              name="active"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.active}
             />
-          </label>
-          <input
-            id="position"
-            name="position"
-            type="text"
-            onChange={e => {
-              this.handleInputChange(e);
-            }}
-            value={this.state.position}
-          />
-        </div>
-        <div>
-          <label htmlFor="width">
-            Fönsterbredd{" "}
-            <i
-              className="fa fa-question-circle"
-              data-toggle="tooltip"
-              title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
+            &nbsp;
+            <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div className="separator">Fönsterinställningar</div>
+          <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.index}
             />
-          </label>
-          <input
-            id="width"
-            name="width"
-            type="text"
-            onChange={e => {
-              this.handleInputChange(e);
-            }}
-            value={this.state.width}
-          />
-        </div>
-        <div>
-          <label htmlFor="height">
-            Fönsterhöjd{" "}
-            <i
-              className="fa fa-question-circle"
-              data-toggle="tooltip"
-              title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+          </div>
+          <div>
+            <label htmlFor="target">Verktygsplacering</label>
+            <select
+              id="target"
+              name="target"
+              className="control-fixed-width"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.target}
+            >
+              <option value="toolbar">Drawer</option>
+              <option value="left">Widget left</option>
+              <option value="right">Widget right</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="position">
+              Fönsterplacering{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
+              />
+            </label>
+            <select
+              id="position"
+              name="position"
+              className="control-fixed-width"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.position}
+            >
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="width">
+              Fönsterbredd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
+              />
+            </label>
+            <input
+              id="width"
+              name="width"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.width}
             />
-          </label>
-          <input
-            id="height"
-            name="height"
-            type="text"
-            onChange={e => {
-              this.handleInputChange(e);
-            }}
-            value={this.state.height}
-          />
-        </div>
-        <div>
-          <label htmlFor="instruction">
-            Instruktion{" "}
-            <i
-              className="fa fa-question-circle"
-              data-toggle="tooltip"
-              title="Visas som tooltip vid mouseover på verktygsknappen"
+          </div>
+          <div>
+            <label htmlFor="height">
+              Fönsterhöjd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+              />
+            </label>
+            <input
+              id="height"
+              name="height"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.height}
             />
-          </label>
-          <textarea
-            type="text"
-            id="instruction"
-            name="instruction"
-            onChange={e => {
-              this.handleInputChange(e);
-            }}
-            value={this.state.instruction ? atob(this.state.instruction) : ""}
-          />
-        </div>
-        {this.renderVisibleForGroups()}
-        <div>
-          <div>Transformationer</div>
-          {this.renderTransformations()}
-        </div>
-        <div>
-          <form
-            ref="transformationForm"
-            onSubmit={e => {
-              e.preventDefault();
-              this.addTransformation(e);
-            }}
-          >
-            <div>
-              <label>SRS-kod*</label>
-              <input name="code" type="text" />
-            </div>
-            <div>
-              <label>Standard*</label>
-              <input name="default" type="checkbox" />
-            </div>
-            <div>
-              <label>Beskrivning*</label>
-              <input name="hint" type="text" />
-            </div>
-            <div>
-              <label>Titel*</label>
-              <input name="title" type="text" />
-            </div>
-            <div>
-              <label>X-etikett*</label>
-              <input name="xtitle" type="text" />
-            </div>
-            <div>
-              <label>Y-etikett*</label>
-              <input name="ytitle" type="text" />
-            </div>
-            <div>
-              <label>Inverterad</label>
-              <input name="inverseAxis" type="checkbox" />
-            </div>
-            <button className="btn btn-success">Lägg till</button>
-          </form>
-        </div>
+          </div>
+          <div className="separator">Övriga inställningar</div>
+          <div>
+            <label htmlFor="instruction">
+              Instruktion{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Visas som tooltip vid mouseover på verktygsknappen"
+              />
+            </label>
+            <textarea
+              type="text"
+              id="instruction"
+              name="instruction"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.instruction ? atob(this.state.instruction) : ""}
+            />
+          </div>
+          {this.renderVisibleForGroups()}
+          <div>
+            <div>Transformationer</div>
+            {this.renderTransformations()}
+          </div>
+          <div>
+            <form
+              ref="transformationForm"
+              onSubmit={e => {
+                e.preventDefault();
+                this.addTransformation(e);
+              }}
+            >
+              <div>
+                <label>SRS-kod*</label>
+                <input name="code" type="text" />
+              </div>
+              <div>
+                <input name="default" type="checkbox" />
+                &nbsp;
+                <label>Standard*</label>
+              </div>
+              <div>
+                <label>Beskrivning*</label>
+                <input name="hint" type="text" />
+              </div>
+              <div>
+                <label>Titel*</label>
+                <input name="title" type="text" />
+              </div>
+              <div>
+                <label>X-etikett*</label>
+                <input name="xtitle" type="text" />
+              </div>
+              <div>
+                <label>Y-etikett*</label>
+                <input name="ytitle" type="text" />
+              </div>
+              <div>
+                <input name="inverseAxis" type="checkbox" />
+                &nbsp;
+                <label>Inverterad</label>
+              </div>
+              <button className="btn btn-success">Lägg till</button>
+            </form>
+          </div>
+        </form>
       </div>
     );
   }

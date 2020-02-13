@@ -295,16 +295,18 @@ class ToolOptions extends Component {
                 title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
               />
             </label>
-            <input
+            <select
               id="position"
               name="position"
-              placeholder={defaultState.position}
-              type="text"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
-            />
+            >
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
           </div>
           <div>
             <label htmlFor="width">
@@ -319,7 +321,9 @@ class ToolOptions extends Component {
               id="width"
               name="width"
               placeholder={defaultState.width}
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -339,7 +343,9 @@ class ToolOptions extends Component {
               id="height"
               name="height"
               placeholder={defaultState.height}
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -370,6 +376,7 @@ class ToolOptions extends Component {
               max="100"
               step="0.1"
               name="anchorX"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -385,6 +392,7 @@ class ToolOptions extends Component {
               max="100"
               step="0.1"
               name="anchorY"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -400,23 +408,10 @@ class ToolOptions extends Component {
               min="0.01"
               max="10"
               name="scale"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-            />
-          </div>
-          <div>
-            <label htmlFor="strokeColor">Färg på markerings ram (rgba)</label>
-            <SketchPicker
-              color={{
-                r: this.state.strokeColor.r,
-                b: this.state.strokeColor.b,
-                g: this.state.strokeColor.g,
-                a: this.state.strokeColor.a
-              }}
-              onChangeComplete={color =>
-                this.handleColorChange("strokeColor", color)
-              }
             />
           </div>
           <div>
@@ -429,26 +424,53 @@ class ToolOptions extends Component {
               max="100"
               step="1"
               name="strokeWidth"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
             />
           </div>
-          <div>
-            <label htmlFor="fillColor">
-              Färg på markeringens fyllnad (rgba)
-            </label>
-            <SketchPicker
-              color={{
-                r: this.state.fillColor.r,
-                b: this.state.fillColor.b,
-                g: this.state.fillColor.g,
-                a: this.state.fillColor.a
-              }}
-              onChangeComplete={color =>
-                this.handleColorChange("fillColor", color)
-              }
-            />
+          <div className="clearfix">
+            <span className="pull-left">
+              <div>
+                <label className="long-label" htmlFor="strokeColor">
+                  Färg på markerings ram (rgba)
+                </label>
+              </div>
+              <div>
+                <SketchPicker
+                  color={{
+                    r: this.state.strokeColor.r,
+                    b: this.state.strokeColor.b,
+                    g: this.state.strokeColor.g,
+                    a: this.state.strokeColor.a
+                  }}
+                  onChangeComplete={color =>
+                    this.handleColorChange("strokeColor", color)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <label className="long-label" htmlFor="fillColor">
+                  Färg på markeringens fyllnad (rgba)
+                </label>
+              </div>
+              <div>
+                <SketchPicker
+                  color={{
+                    r: this.state.fillColor.r,
+                    b: this.state.fillColor.b,
+                    g: this.state.fillColor.g,
+                    a: this.state.fillColor.a
+                  }}
+                  onChangeComplete={color =>
+                    this.handleColorChange("fillColor", color)
+                  }
+                />
+              </div>
+            </span>
           </div>
         </form>
       </div>

@@ -73,6 +73,13 @@ class Search extends React.PureComponent {
 
   tooltip = this.props.options.tooltip;
 
+  // Used for setTimeout/clearTimeout, in order to delay auto-search when user is typing
+  timer = null;
+  delayBeforeAutoSearch =
+    Number.isNaN(this.props.options.delayBeforeAutoSearch) === false
+      ? this.props.options.delayBeforeAutoSearch
+      : 500;
+
   activeSpatialTools = {
     radiusSearch: this.props.options.radiusSearch,
     selectionSearch: this.props.options.selectionSearch,
@@ -97,24 +104,23 @@ class Search extends React.PureComponent {
      * If searchOnStart exists, grab the value for v (the search value string),
      * put the value in search box and do the search.
      *
-     * TODO: Limit WFS sources (if s-param is present).
+     * TODO: Limit WFS sources (if "s" query param is present, called "ds" below).
      */
 
     this.props.app.globalObserver.subscribe("appLoaded", () => {
       const { searchOnStart } = this.props.app.config.mapConfig.map;
+      // Hence this plugin (src/plugins/search) is the default Search plugin, act on both t="search" and t=undefined
       if (
-        searchOnStart !== undefined &&
-        (searchOnStart.t === undefined ||
-          searchOnStart.t.toLowerCase() === this.type.toLowerCase())
+        searchOnStart?.t === undefined ||
+        searchOnStart?.t.toLowerCase() === this.type.toLowerCase()
       ) {
-        // Hence this plugin (src/plugins/search) is the default Search plugin, act on both t="search" and t=undefined
         const { v, s } = searchOnStart;
+
+        //eslint-disable-next-line
         const { dv, ds } = {
           dv: v && window.decodeURI(v),
           ds: s && window.decodeURI(s)
         };
-
-        console.log("dv, ds: ", dv, ds);
 
         // Put decoded search phrase into the search box
         document.getElementById("searchbox").value = dv;
@@ -205,6 +211,25 @@ class Search extends React.PureComponent {
     });
   }
 
+  handleSearchBoxInputChange = e => {
+    const v = e.target.value;
+    if (v.length <= 3) {
+      return;
+    }
+    if (this.delayBeforeAutoSearch > 0) {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.doSearch(v);
+      }, this.delayBeforeAutoSearch);
+    } else {
+      this.doSearch(v);
+    }
+  };
+
+  handleSearchBoxKeyPress = e => {
+    e.key === "Enter" && this.doSearch(e.target.value);
+  };
+
   renderSearchBox() {
     const { classes, onMenuClick, menuButtonDisabled } = this.props;
 
@@ -216,7 +241,7 @@ class Search extends React.PureComponent {
       <>
         <Paper className={classes.root}>
           <Tooltip title={tooltipText}>
-            <span>
+            <span id="drawerToggler">
               <IconButton
                 onClick={onMenuClick}
                 className={classes.iconButton}
@@ -234,18 +259,8 @@ class Search extends React.PureComponent {
               "aria-label": "search hajk maps",
               id: "searchbox"
             }}
-            onChange={e => {
-              const v = e.target.value;
-              if (v.length <= 3) {
-                return;
-              }
-              this.doSearch(v);
-            }}
-            onKeyPress={e => {
-              if (e.key === "Enter") {
-                this.doSearch(e.target.value);
-              }
-            }}
+            onChange={this.handleSearchBoxInputChange}
+            onKeyPress={this.handleSearchBoxKeyPress}
           />
           <Tooltip
             title={

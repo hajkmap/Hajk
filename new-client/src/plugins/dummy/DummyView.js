@@ -65,6 +65,11 @@ class DummyView extends React.PureComponent {
     this.props.enqueueSnackbar("Yay, a nice message with default styling.");
   };
 
+  showIntroduction = () => {
+    // Show the introduction guide, see components/Introduction.js
+    this.globalObserver.publish("showIntroduction");
+  };
+
   // A more complicate snackbar example, this one with an action button and persistent snackbar
   showAdvancedSnackbar = () => {
     const action = key => (
@@ -125,6 +130,15 @@ class DummyView extends React.PureComponent {
           onClick={this.showAdvancedSnackbar}
         >
           Show error snackbar
+        </Button>
+        <Button
+          className={classes.buttonWithBottomMargin}
+          variant="contained"
+          fullWidth={true}
+          color="primary"
+          onClick={this.showIntroduction}
+        >
+          Show Hajk Introduction
         </Button>
       </>
     );
