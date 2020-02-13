@@ -38,7 +38,6 @@ class MapOptions extends Component {
 
   componentDidMount() {
     this.props.model.on("change:mapConfig", e => {
-      console.log(this);
       var config = this.props.model.get("mapConfig");
       this.setState({
         primaryColor: config.colors.primaryColor,
