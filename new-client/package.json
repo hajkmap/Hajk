@@ -11,18 +11,18 @@
     "createdocs": "jsdoc src -r -d docs"
   },
   "devDependencies": {
-    "@types/react": "^16.9.17",
-    "@types/react-dom": "^16.9.4",
+    "@types/react": "^16.9.19",
+    "@types/react-dom": "^16.9.5",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.9.0",
+    "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
     "har-validator": "^5.1.3",
     "husky": "^3.1.0",
     "jsdoc": "^3.6.3",
     "prettier": "^1.19.1",
     "pretty-quick": "^2.0.1",
-    "react-scripts": "3.2.0",
-    "typescript": "^3.7.4"
+    "react-scripts": "^3.3.1",
+    "typescript": "^3.7.5"
   },
   "browserslist": [
     ">1% in SE",
@@ -36,11 +36,11 @@
     }
   },
   "dependencies": {
-    "@material-ui/core": "^4.8.3",
-    "@material-ui/icons": "^4.5.1",
-    "@material-ui/lab": "^4.0.0-alpha.39",
+    "@material-ui/core": "^4.9.2",
+    "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.42",
     "abortcontroller-polyfill": "^1.4.0",
-    "clsx": "^1.0.4",
+    "clsx": "^1.1.0",
     "detect-browser": "^4.8.0",
     "element-scroll-polyfill": "^1.0.1",
     "html2json": "^1.0.2",
@@ -50,15 +50,15 @@
     "load-google-maps-api": "^2.0.0",
     "marked": "^0.7.0",
     "notistack": "^0.9.7",
-    "ol": "^6.1.1",
+    "ol": "^6.2.0",
     "proj4": "^2.6.0",
     "react": "^16.12.0",
-    "react-app-polyfill": "^1.0.5",
+    "react-app-polyfill": "^1.0.6",
     "react-color": "^2.18.0",
     "react-dom": "^16.12.0",
     "react-event-observer": "^0.5.11",
-    "react-horizontal-scrolling-menu": "^0.7.4",
-    "react-rnd": "^10.1.3",
+    "react-horizontal-scrolling-menu": "^0.7.5",
+    "react-rnd": "^10.1.6",
     "recharts": "^1.8.5",
     "x2js": "^3.4.0"
   }
