@@ -2,8 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
+import { Paper, Button } from "@material-ui/core";
+
+import menuItem from "../MenuItemHOC";
+import MenuItem from "./MenuBarItem";
+
+const MenuBarItem = menuItem(MenuItem);
 
 const styles = theme => ({
   container: {
@@ -30,8 +34,14 @@ const styles = theme => ({
       height: "100%"
     }
   },
-  menu: {
-    width: "500px"
+
+  root: {
+    padding: "2px 4px",
+    display: "flex",
+    alignItems: "center",
+    marginRight: theme.spacing(6),
+    minWidth: theme.spacing(180), //DEBUG
+    minHeight: theme.spacing(8)
   }
 });
 
@@ -45,13 +55,30 @@ class MenuBarView extends React.PureComponent {
     super(props);
   }
 
-  render() {
+  renderButtons(menuItem) {
     const { classes, app, localObserver } = this.props;
-    console.log(document.getElementsByTagName("header"), "header?");
+
+    return (
+      <MenuBarItem
+        localObserver={localObserver}
+        key={menuItem.header}
+        model={this.DocumentHandlerModel}
+        app={app}
+        header={menuItem.header}
+        color={menuItem.color}
+      ></MenuBarItem>
+    );
+  }
+
+  render() {
+    const { classes, app, localObserver, menuItems } = this.props;
+
     return ReactDOM.createPortal(
-      <AppBar className={classes.menu} position="relative">
-        <Toolbar>{/* content */}</Toolbar>
-      </AppBar>,
+      <Paper className={classes.root}>
+        {menuItems.map(item => {
+          return this.renderButtons(item);
+        })}
+      </Paper>,
       document.getElementById("header")
     );
   }

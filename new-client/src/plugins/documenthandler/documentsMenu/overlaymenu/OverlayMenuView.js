@@ -1,10 +1,12 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import MenuItem from "./MenuItem";
+import MenuItem from "../overlaymenu/OverlayMenuItem";
+import menuItem from "../MenuItemHOC";
 
-import Divider from "@material-ui/core/Divider";
 import Grid from "@material-ui/core/Grid";
+
+const OverlayMenuItem = menuItem(MenuItem);
 
 const styles = theme => ({
   container: {
@@ -54,7 +56,6 @@ class MenuView extends React.PureComponent {
   }
 
   renderMenuItem = menuItem => {
-    console.log(menuItem, "menuItem");
     const { localObserver, app } = this.props;
     return (
       <Grid
@@ -66,14 +67,14 @@ class MenuView extends React.PureComponent {
         md={md}
         lg={lg}
       >
-        <MenuItem
+        <OverlayMenuItem
           key={menuItem.header}
           model={this.DocumentHandlerModel}
           app={app}
           header={menuItem.header}
           color={menuItem.color}
           localObserver={localObserver}
-        ></MenuItem>
+        ></OverlayMenuItem>
       </Grid>
     );
   };

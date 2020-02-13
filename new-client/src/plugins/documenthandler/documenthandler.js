@@ -1,11 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
-import DocumentHandlerModel from "./DocumentHandlerModel";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-import OverlayView from "./documentsMenu/OverlayView";
-import MenuBarView from "./documentsMenu/MenuBarView";
+import OverlayView from "./documentsMenu/overlaymenu/OverlayView";
+import menuComponent from "./documentsMenu/MenuViewHOC";
+import MenuBarView from "./documentsMenu/menubar/MenuBarView";
 import Observer from "react-event-observer";
 import Hidden from "@material-ui/core/Hidden";
+
+const OverlayViewMenu = menuComponent(OverlayView);
+const MenuBar = menuComponent(MenuBarView);
 
 class DocumentHandler extends React.PureComponent {
   state = {};
@@ -27,28 +30,25 @@ class DocumentHandler extends React.PureComponent {
     this.localObserver.subscribe("documentHandlerEvent", message => {
       console.log(message);
     });
-
-    this.documentHandlerModel = new DocumentHandlerModel({
-      localObserver: this.localObserver,
-      app: props.app,
-      map: props.map
-    });
   }
 
   render() {
     return (
       <>
         <Hidden xlUp>
-          <OverlayView
-            model={this.DocumentHandlerModel}
+          <OverlayViewMenu
             app={this.props.app}
             localObserver={this.localObserver}
-          ></OverlayView>
+          ></OverlayViewMenu>
         </Hidden>
-        <MenuBarView></MenuBarView>
+        <Hidden lgDown>
+          <MenuBar
+            app={this.props.app}
+            localObserver={this.localObserver}
+          ></MenuBar>
+        </Hidden>
         <DocumentWindowBase
           {...this.props}
-          model={this.DocumentHandlerModel}
           app={this.props.app}
           localObserver={this.localObserver}
         ></DocumentWindowBase>

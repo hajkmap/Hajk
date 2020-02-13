@@ -27,51 +27,40 @@ const styles = theme => ({
   }
 });
 
-class MenuItem extends React.PureComponent {
-  state = {
-    highlighted: false
-  };
-
+class OverlayMenuItem extends React.PureComponent {
   static propTypes = {};
 
   static defaultProps = {};
 
   constructor(props) {
     super(props);
-
     this.globalObserver = this.props.app.globalObserver;
   }
 
-  toggleHighlight = () => {
-    console.log();
-    this.setState({ highlighted: !this.state.highlighted });
-  };
-
-  handleMenuButtonClick = header => {
-    console.log(header, "title clicked");
-    const { localObserver } = this.props;
-    localObserver.publish("menu-item-clicked", header);
-  };
-
   render() {
-    const { classes, color, header } = this.props;
-
+    const {
+      classes,
+      color,
+      header,
+      toggleHighlight,
+      handleMenuButtonClick
+    } = this.props;
     return (
       <>
         <Paper
           onClick={() => {
-            this.handleMenuButtonClick(header);
+            handleMenuButtonClick(header);
           }}
           style={{ backgroundColor: color }}
-          onMouseEnter={this.toggleHighlight}
-          onMouseLeave={this.toggleHighlight}
+          onMouseEnter={toggleHighlight}
+          onMouseLeave={toggleHighlight}
           className={
-            this.state.highlighted > 0
+            this.props.highlighted > 0
               ? clsx(classes.menuItem, classes.noTransparency)
               : classes.menuItem
           }
           square={true}
-          elevation={this.state.highlighted ? 20 : 0}
+          elevation={this.props.highlighted ? 20 : 0}
         >
           <Grid
             className={classes.gridContainer}
@@ -97,4 +86,4 @@ class MenuItem extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(MenuItem));
+export default withStyles(styles)(withSnackbar(OverlayMenuItem));
