@@ -77,6 +77,9 @@ const styles = theme => {
     header: {
       zIndex: theme.zIndex.appBar,
       height: theme.spacing(8),
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
       [theme.breakpoints.down("xs")]: {
         zIndex: 3
       }
@@ -458,6 +461,7 @@ class App extends React.PureComponent {
             })}
           >
             <header
+              id="header"
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
               {clean === false && this.renderStandaloneDrawerToggler()}
