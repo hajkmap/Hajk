@@ -114,6 +114,10 @@ class SearchResultListContainer extends React.Component {
 
   setActiveTabId = searchResultId => {
     const { localObserver } = this.props;
+    if (searchResultId !== this.state.activeTabId) {
+      localObserver.publish("clear-highlight");
+    }
+
     localObserver.publish("hide-all-layers");
     localObserver.publish("toggle-visibility", searchResultId);
 
@@ -194,6 +198,7 @@ class SearchResultListContainer extends React.Component {
     localObserver.subscribe("search-result-list-close", () => {
       localObserver.publish("hide-all-layers");
       localObserver.publish("clear-highlight");
+      localObserver.publish("resize-map", getWindowContainerHeight());
       this.searchResults.length = 0;
       this.setState({
         minimized: false,
@@ -227,7 +232,9 @@ class SearchResultListContainer extends React.Component {
     const nextactiveTabId = this.getNextTabActive(searchResultId);
     console.log(nextactiveTabId, "nextActiveTabId");
     this.setState({ activeTabId: nextactiveTabId });
+    localObserver.publish("toggle-visibility", nextactiveTabId);
     this.removeSearchResult(searchResultId);
+    localObserver.publish("resize-map", 0);
   };
 
   addResultToSearchResultList = result => {

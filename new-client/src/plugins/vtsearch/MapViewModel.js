@@ -6,7 +6,7 @@ import "ol/ol.css";
 import Draw from "ol/interaction/Draw.js";
 import WKT from "ol/format/WKT";
 import { createBox } from "ol/interaction/Draw";
-import { isThisSecond } from "date-fns";
+
 /**
  * @summary ViewModel to handle interactions with map
  * @description Functionality used to interact with map.
@@ -81,8 +81,8 @@ export default class MapViewModel {
       this.highlightLayer.getSource().clear();
     });
 
-    this.localObserver.subscribe("resize-map", height => {
-      this.resizeMap(height);
+    this.localObserver.subscribe("resize-map", heightFromBottom => {
+      this.resizeMap(heightFromBottom);
     });
 
     this.localObserver.subscribe("journeys-search", this.journeySearch);
@@ -92,13 +92,13 @@ export default class MapViewModel {
     this.localObserver.subscribe("routes-search", this.routesSearch);
   };
 
-  resizeMap = height => {
+  resizeMap = heightFromBottom => {
     //Not so "reacty" but no other solution possible because if we don't want to rewrite core functionality in Hajk3
     [appContainer, mapContainer].forEach(container => {
-      container.style.bottom = `${height}px`;
+      container.style.bottom = `${heightFromBottom}px`;
     });
 
-    this.app.getMap().updateSize();
+    this.map.updateSize();
   };
 
   getSearchResultLayerFromId = searchResultId => {
@@ -114,36 +114,6 @@ export default class MapViewModel {
   };
   deactivateSearch = () => {
     this.map.removeInteraction(this.draw);
-  };
-
-  journeySearch = ({
-    selectedFromDate,
-    selectedEndDate,
-    selectedFormType,
-    searchCallback
-  }) => {
-    var value = selectedFormType;
-    var geometryFunction = undefined;
-    if (selectedFormType === "Box") {
-      this.map.removeInteraction(this.draw);
-      value = "Circle";
-      geometryFunction = createBox();
-    }
-    if (selectedFormType === "Polygon") {
-      this.map.removeInteraction(this.draw);
-    }
-    this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
-      searchCallback();
-      if (wktFeatureGeom != null) {
-        this.model.getJourneys(
-          selectedFromDate,
-          selectedEndDate,
-          wktFeatureGeom
-        );
-      }
-    });
-
-    this.map.addInteraction(this.draw);
   };
 
   getWktFromUser = (value, geometryFunction) => {
@@ -166,6 +136,30 @@ export default class MapViewModel {
     });
   };
 
+  journeySearch = ({
+    selectedFromDate,
+    selectedEndDate,
+    selectedFormType,
+    searchCallback
+  }) => {
+    var value = selectedFormType;
+    var geometryFunction = undefined;
+    if (selectedFormType === "Box") {
+      value = "Circle";
+      geometryFunction = createBox();
+    }
+    this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
+      searchCallback();
+      if (wktFeatureGeom != null) {
+        this.model.getJourneys(
+          selectedFromDate,
+          selectedEndDate,
+          wktFeatureGeom
+        );
+      }
+    });
+  };
+
   stopSearch = ({
     busStopValue,
     stopNameOrNr,
@@ -180,8 +174,6 @@ export default class MapViewModel {
       value = "Circle";
       geometryFunction = createBox();
     }
-
-    searchCallback();
     if (selectedFormType === "") {
       if (busStopValue === "stopAreas") {
         this.model.getStopAreas(stopNameOrNr, publicLine, municipality);
@@ -190,6 +182,7 @@ export default class MapViewModel {
       }
     } else {
       this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
+        searchCallback();
         if (busStopValue === "stopAreas") {
           this.model.getStopAreas(
             stopNameOrNr,
