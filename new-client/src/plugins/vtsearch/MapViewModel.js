@@ -6,6 +6,7 @@ import "ol/ol.css";
 import Draw from "ol/interaction/Draw.js";
 import WKT from "ol/format/WKT";
 import { createBox } from "ol/interaction/Draw";
+import { isThisSecond } from "date-fns";
 /**
  * @summary ViewModel to handle interactions with map
  * @description Functionality used to interact with map.
@@ -46,8 +47,6 @@ export default class MapViewModel {
       this.highlightFeature(olFeature);
     });
 
-    this.map.on("singleclick", this.onFeaturesClickedInMap);
-
     this.localObserver.subscribe(
       "add-search-result-to-map",
       ({ searchResultId, olFeatures }) => {
@@ -59,13 +58,13 @@ export default class MapViewModel {
     this.localObserver.subscribe("clear-search-result", searchResultId => {
       this.map.removeLayer(this.getSearchResultLayerFromId(searchResultId));
     });
+    this.localObserver.subscribe("deactivate-search", this.deactivateSearch);
 
     this.localObserver.subscribe("hide-all-layers", () => {
       this.hideAllLayers();
     });
     this.localObserver.subscribe("toggle-visibility", searchResultID => {
       this.toggleLayerVisibility(searchResultID);
-      this.highlightLayer.getSource().clear();
     });
 
     this.localObserver.subscribe("hide-current-layer", () => {
@@ -113,6 +112,9 @@ export default class MapViewModel {
         );
       })[0];
   };
+  deactivateSearch = () => {
+    this.map.removeInteraction(this.draw);
+  };
 
   journeySearch = ({
     selectedFromDate,
@@ -123,8 +125,12 @@ export default class MapViewModel {
     var value = selectedFormType;
     var geometryFunction = undefined;
     if (selectedFormType === "Box") {
+      this.map.removeInteraction(this.draw);
       value = "Circle";
       geometryFunction = createBox();
+    }
+    if (selectedFormType === "Polygon") {
+      this.map.removeInteraction(this.draw);
     }
     this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
       searchCallback();

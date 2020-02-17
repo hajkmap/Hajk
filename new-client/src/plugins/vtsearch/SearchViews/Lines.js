@@ -40,7 +40,7 @@ class Lines extends React.PureComponent {
     publicLineName: "",
     internalLineNumber: "",
     municipalities: [],
-    municipalityName: "",
+    municipality: "",
     trafficTransportNames: [],
     trafficTransportName: "",
     throughStopArea: "",
@@ -111,14 +111,14 @@ class Lines extends React.PureComponent {
     const {
       publicLineName,
       internalLineNumber,
-      municipalityName,
+      municipality,
       trafficTransportName,
       throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
-      municipalityName: municipalityName.gid,
+      municipality: municipality.gid,
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "",
@@ -130,14 +130,14 @@ class Lines extends React.PureComponent {
     const {
       publicLineName,
       internalLineNumber,
-      municipalityName,
+      municipality,
       trafficTransportName,
       throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
-      municipalityName: municipalityName.gid,
+      municipality: municipality.gid,
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "Polygon",
@@ -148,14 +148,14 @@ class Lines extends React.PureComponent {
     const {
       publicLineName,
       internalLineNumber,
-      municipalityName,
+      municipality,
       trafficTransportName,
       throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
-      municipalityName: municipalityName.gid,
+      municipality: municipality.gid,
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "Box",
@@ -175,7 +175,7 @@ class Lines extends React.PureComponent {
   };
   handleMunicipalChange = e => {
     this.setState({
-      municipalityName: e.target.value
+      municipality: e.target.value
     });
   };
   handleTrafficTransportChange = e => {
@@ -256,7 +256,7 @@ class Lines extends React.PureComponent {
         <FormControl fullWidth>
           <Typography variant="caption">KOMMUN</Typography>
           <Select
-            value={this.state.municipalityName}
+            value={this.state.municipality}
             onChange={this.handleMunicipalChange}
           >
             {municipalities.map((municipality, index) => {
