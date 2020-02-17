@@ -134,15 +134,20 @@ class Lines extends React.PureComponent {
       trafficTransportName,
       throughStopArea
     } = this.state;
-    this.localObserver.publish("routes-search", {
-      publicLineName: publicLineName,
-      internalLineNumber: internalLineNumber,
-      municipality: municipality.gid,
-      trafficTransportName: trafficTransportName,
-      throughStopArea: throughStopArea,
-      selectedFormType: "Polygon",
-      searchCallback: this.clearSearchInputAndButtons
-    });
+    if (!this.state.isPolygonActive) {
+      this.localObserver.publish("deactivate-search", () => {});
+    }
+    if (this.state.isPolygonActive && !this.state.isRectangleActive) {
+      this.localObserver.publish("routes-search", {
+        publicLineName: publicLineName,
+        internalLineNumber: internalLineNumber,
+        municipality: municipality.gid,
+        trafficTransportName: trafficTransportName,
+        throughStopArea: throughStopArea,
+        selectedFormType: "Polygon",
+        searchCallback: this.clearSearchInputAndButtons
+      });
+    }
   };
   handleRectangleClick = () => {
     const {
@@ -152,15 +157,20 @@ class Lines extends React.PureComponent {
       trafficTransportName,
       throughStopArea
     } = this.state;
-    this.localObserver.publish("routes-search", {
-      publicLineName: publicLineName,
-      internalLineNumber: internalLineNumber,
-      municipality: municipality.gid,
-      trafficTransportName: trafficTransportName,
-      throughStopArea: throughStopArea,
-      selectedFormType: "Box",
-      searchCallback: this.clearSearchInputAndButtons
-    });
+    if (!this.state.isRectangleActive) {
+      this.localObserver.publish("deactivate-search", () => {});
+    }
+    if (this.state.isRectangleActive && !this.state.isPolygonActive) {
+      this.localObserver.publish("routes-search", {
+        publicLineName: publicLineName,
+        internalLineNumber: internalLineNumber,
+        municipality: municipality.gid,
+        trafficTransportName: trafficTransportName,
+        throughStopArea: throughStopArea,
+        selectedFormType: "Box",
+        searchCallback: this.clearSearchInputAndButtons
+      });
+    }
   };
 
   handleInternalLineNrChange = event => {

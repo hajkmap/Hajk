@@ -70,12 +70,12 @@ class Stops extends React.PureComponent {
 
   togglePolygonState = () => {
     this.setState({ isPolygonActive: !this.state.isPolygonActive }, () => {
-      this.handlePolygonChange();
+      this.handlePolygonClick();
     });
   };
   toggleRectangleState = () => {
     this.setState({ isRectangleActive: !this.state.isRectangleActive }, () => {
-      this.handleRectangleChange();
+      this.handleRectangleClick();
     });
   };
 
@@ -109,7 +109,6 @@ class Stops extends React.PureComponent {
    * @memberof Stops
    */
   clearSearchInputAndButtons = () => {
-    this.setState({ isPolygonActive: false, isRectangleActive: false });
     this.setState({
       stopNameOrNr: "",
       publicLine: "",
@@ -117,8 +116,11 @@ class Stops extends React.PureComponent {
       selectedFormType: ""
     });
   };
+  inactivateSpatialSearchButtons = () => {
+    this.setState({ isPolygonActive: false, isRectangleActive: false });
+  };
 
-  doSpatialChange = () => {
+  searchButtonClick = () => {
     const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
@@ -130,27 +132,42 @@ class Stops extends React.PureComponent {
     });
   };
 
-  handlePolygonChange = () => {
+  handlePolygonClick = () => {
     const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
-    this.localObserver.publish("stops-search", {
-      busStopValue: busStopValue,
-      stopNameOrNr: stopNameOrNr,
-      publicLine: publicLine,
-      municipality: municipality.name,
-      selectedFormType: "Polygon",
-      searchCallback: this.inactivateSpatialSearchButtons
-    });
+    if (!this.state.isPolygonActive) {
+      this.localObserver.publish("deactivate-search", () => {});
+    }
+    if (this.state.isPolygonActive && !this.state.isRectangleActive) {
+      this.localObserver.publish("stops-search", {
+        busStopValue: busStopValue,
+        stopNameOrNr: stopNameOrNr,
+        publicLine: publicLine,
+        municipality: municipality.name,
+        selectedFormType: "Polygon",
+        searchCallback: this.inactivateSpatialSearchButtons
+      });
+    }
   };
-  handleRectangleChange = () => {
-    const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
-    this.localObserver.publish("stops-search", {
-      busStopValue: busStopValue,
-      stopNameOrNr: stopNameOrNr,
-      publicLine: publicLine,
-      municipality: municipality.name,
-      selectedFormType: "Box",
-      searchCallback: this.inactivateSpatialSearchButtons
-    });
+  handleRectangleClick = () => {
+    if (!this.state.isRectangleActive) {
+      this.localObserver.publish("deactivate-search", () => {});
+    }
+    if (this.state.isRectangleActive && !this.state.isPolygonActive) {
+      const {
+        busStopValue,
+        stopNameOrNr,
+        publicLine,
+        municipality
+      } = this.state;
+      this.localObserver.publish("stops-search", {
+        busStopValue: busStopValue,
+        stopNameOrNr: stopNameOrNr,
+        publicLine: publicLine,
+        municipality: municipality.name,
+        selectedFormType: "Box",
+        searchCallback: this.inactivateSpatialSearchButtons
+      });
+    }
   };
 
   renderRadioButtonSection = () => {
@@ -254,7 +271,7 @@ class Stops extends React.PureComponent {
         <ButtonGroup className={classes.searchButtonColor}>
           <Button
             className={classes.searchButtonColor}
-            onClick={this.doSpatialChange}
+            onClick={this.searchButtonClick}
             variant="outlined"
           >
             <Typography className={classes.searchButtonText}>SÖK</Typography>

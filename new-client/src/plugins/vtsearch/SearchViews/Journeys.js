@@ -159,14 +159,13 @@ class Journeys extends React.PureComponent {
         selectedFromDate: formatFromDate,
         selectedEndDate: formatEndDate,
         selectedFormType: "Polygon",
-        drawCallback: this.inactivateSpatialSearchButtons
+        searchCallback: this.inactivateSpatialSearchButtons
       });
     }
   };
   handleRectangleClick = () => {
     const { formatFromDate, formatEndDate } = this.getFormattedDate();
     if (!this.state.isRectangleActive) {
-      this.togglePolygonState();
       this.localObserver.publish("deactivate-search", () => {});
     }
     if (this.state.isRectangleActive && !this.state.isPolygonActive) {
@@ -174,7 +173,7 @@ class Journeys extends React.PureComponent {
         selectedFromDate: formatFromDate,
         selectedEndDate: formatEndDate,
         selectedFormType: "Box",
-        drawCallback: this.inactivateSpatialSearchButtons
+        searchCallback: this.inactivateSpatialSearchButtons
       });
     }
   };
