@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using log4net;
 
 #if USE_REF_TO_EDP
 using EDP.GIS.Kubb.Connector.EDP;
@@ -68,9 +69,13 @@ namespace EdpConn
 
     class ImplEdpConnector : EdpConnector
     {
+        ILog _log = LogManager.GetLogger(typeof(ImplEdpConnector));
+        string _user;
+
         public ImplEdpConnector(string user, string organisation, string client, string serverUrl)
             : base(new HubConnectionFactory(), new HubProxyFactory(), user, organisation, client, serverUrl)
         {
+            _user = user;
             OpenConnection();
         }
 
@@ -101,6 +106,7 @@ namespace EdpConn
 
         public override void HandleAskingForRealEstateIdentifiers()
         {
+            _log.DebugFormat("ImplEdpConnector.HandleAskingForRealEstateIdentifiers called for user '{0}'.", _user);
             if (RealEstateIdentifiersToSend != null)
                 SendRealEstateIdentifiers(RealEstateIdentifiersToSend);
         }
