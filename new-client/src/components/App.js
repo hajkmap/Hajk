@@ -14,8 +14,8 @@ import PluginWindows from "./PluginWindows";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
-import ScaleLine from "../controls/ScaleLine";
-import Attribution from "../controls/Attribution.js";
+// import ScaleLine from "../controls/ScaleLine";
+// import Attribution from "../controls/Attribution.js";
 import MapCleaner from "../controls/MapCleaner";
 import MapResetter from "../controls/MapResetter";
 import MapSwitcher from "../controls/MapSwitcher";
@@ -516,8 +516,8 @@ class App extends React.PureComponent {
             <footer
               className={cslx(classes.footer, classes.pointerEventsOnChildren)}
             >
-              <ScaleLine map={this.appModel.getMap()} />
-              <Attribution map={this.appModel.getMap()} />
+              {/* <ScaleLine map={this.appModel.getMap()} /> */}
+              {/* <Attribution map={this.appModel.getMap()} /> */}
             </footer>
           </div>
           <div

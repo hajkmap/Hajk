@@ -7,6 +7,7 @@ import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
 // IE 11 ends here.
 
 import "ol/ol.css";
+import "ol-ext/dist/ol-ext.css";
 import "./custom-ol.css";
 
 import * as serviceWorker from "./serviceWorker";
