@@ -9,7 +9,13 @@ import {
   MenuItem,
   Select
 } from "@material-ui/core";
+
 import * as jsPDF from "jspdf";
+import { getPointResolution } from "ol/proj";
+
+import Vector from "ol/layer/Vector.js";
+import VectorSource from "ol/source/Vector.js";
+import { Style, Stroke, Fill, Icon, Circle } from "ol/style.js";
 
 const styles = theme => ({
   root: {
@@ -23,13 +29,6 @@ const styles = theme => ({
 });
 
 class DummyView extends React.PureComponent {
-  state = {
-    format: "a5", // a0-a5
-    resolution: "150", // 72, 150, 300,
-    printInProgress: false,
-    previewLayerVisible: false
-  };
-
   static propTypes = {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
@@ -40,6 +39,15 @@ class DummyView extends React.PureComponent {
   };
 
   static defaultProps = {};
+
+  state = {
+    format: "a5", // a0-a5
+    orientation: "landscape",
+    resolution: 150, // 72, 150, 300,
+    scale: 100, // 10, 25, 50, 100, 200 (e.g. 1:10 000, 1:25 000, etc)
+    printInProgress: false,
+    previewLayerVisible: false
+  };
 
   dims = {
     a0: [1189, 841],
@@ -57,16 +65,37 @@ class DummyView extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
     this.map = this.props.map;
 
-    props.localObserver.subscribe("showPrintPreview", () => {
-      this.setState({ previewLayerVisible: true });
-      // this.addPreview(props.model.map);
-    });
+    // Add the preview layer to map (it doesn't contain any features yet!)
+    // TODO: Also add a preview layer
+    // this.addPreviewLayer();
 
-    props.localObserver.subscribe("hidePrintPreview", () => {
-      this.setState({ previewLayerVisible: false });
-      // this.removePreview();
-    });
+    // props.localObserver.subscribe("showPrintPreview", () => {
+    //   this.setState({ previewLayerVisible: true });
+    //   this.addPreview();
+    // });
+
+    // props.localObserver.subscribe("hidePrintPreview", () => {
+    //   this.setState({ previewLayerVisible: false });
+    //   this.removePreview();
+    // });
   }
+
+  // addPreviewLayer() {
+  //   this.previewLayer = new Vector({
+  //     source: new VectorSource(),
+  //     name: "preview-layer",
+  //     style: new Style({
+  //       stroke: new Stroke({
+  //         color: "rgba(0, 0, 0, 0.7)",
+  //         width: 2
+  //       }),
+  //       fill: new Fill({
+  //         color: "rgba(255, 145, 20, 0.4)"
+  //       })
+  //     })
+  //   });
+  //   this.map.addLayer(this.previewLayer);
+  // }
 
   initiatePrint = () => {
     // Print star, tell the user
@@ -79,40 +108,58 @@ class DummyView extends React.PureComponent {
       }
     );
 
+    // Read current dropdown values)
     const format = this.state.format;
+    const orientation = this.state.orientation;
     const resolution = this.state.resolution;
-    const dim = this.dims[format];
+    const scale = this.state.scale;
+
+    // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
+    const dim =
+      orientation === "portrait"
+        ? this.dims[format].reverse()
+        : this.dims[format];
+
     const width = Math.round((dim[0] * resolution) / 25.4);
     const height = Math.round((dim[1] * resolution) / 25.4);
     const size = this.map.getSize();
     const viewResolution = this.map.getView().getResolution();
-    // console.log(dim, width, height, size, viewResolution);
+
+    var scaleResolution =
+      scale /
+      getPointResolution(
+        this.map.getView().getProjection(),
+        resolution / 25.4,
+        this.map.getView().getCenter()
+      );
+
     this.map.once("rendercomplete", () => {
       const mapCanvas = document.createElement("canvas");
       mapCanvas.width = width;
       mapCanvas.height = height;
       const mapContext = mapCanvas.getContext("2d");
 
-      document.querySelectorAll(".ol-layer canvas").forEach(canvas => {
+      document.querySelectorAll(".ol-viewport canvas").forEach(canvas => {
         if (canvas.width > 0) {
           const opacity = canvas.parentNode.style.opacity;
           mapContext.globalAlpha = opacity === "" ? 1 : Number(opacity);
-          const transform = canvas.style.transform;
           // Get the transform parameters from the style's transform matrix
-          const matrix = transform
-            .match(/^matrix\(([^(]*)\)$/)[1]
-            .split(",")
-            .map(Number);
-          // Apply the transform to the export map context
-          CanvasRenderingContext2D.prototype.setTransform.apply(
-            mapContext,
-            matrix
-          );
+          if (canvas.style.transform) {
+            const matrix = canvas.style.transform
+              .match(/^matrix\(([^(]*)\)$/)[1]
+              .split(",")
+              .map(Number);
+            // Apply the transform to the export map context
+            CanvasRenderingContext2D.prototype.setTransform.apply(
+              mapContext,
+              matrix
+            );
+          }
           mapContext.drawImage(canvas, 0, 0);
         }
       });
 
-      const pdf = new jsPDF({ orientation: "landscape", format: format });
+      const pdf = new jsPDF({ orientation, format });
       pdf.addImage(
         mapCanvas.toDataURL("image/jpeg"),
         "JPEG",
@@ -135,11 +182,10 @@ class DummyView extends React.PureComponent {
       this.setState({ printInProgress: false });
     });
 
-    // Set print size (this will initiate print, as we have a listiner for renderComplete)
+    // Set print size (this will initiate print, as we have a listener for renderComplete)
     const printSize = [width, height];
     this.map.setSize(printSize);
-    const scaling = Math.min(width / size[0], height / size[1]);
-    this.map.getView().setResolution(viewResolution / scaling);
+    this.map.getView().setResolution(scaleResolution);
   };
   /**
    * @summary Take care of handling state of our resolution and format dropdowns.
@@ -154,6 +200,7 @@ class DummyView extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
+
     return (
       <form className={classes.root} autoComplete="off">
         <FormControl className={classes.formControl}>
@@ -173,7 +220,21 @@ class DummyView extends React.PureComponent {
           </Select>
         </FormControl>
         <FormControl className={classes.formControl}>
-          <InputLabel htmlFor="resolution">Upplösning</InputLabel>
+          <InputLabel htmlFor="orientation">Orientering</InputLabel>
+          <Select
+            value={this.state.orientation}
+            onChange={this.handleChange}
+            inputProps={{
+              name: "orientation",
+              id: "orientation"
+            }}
+          >
+            <MenuItem value={"landscape"}>Liggande</MenuItem>
+            <MenuItem value={"portrait"}>Stående</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl className={classes.formControl}>
+          <InputLabel htmlFor="resolution">Upplösning (DPI)</InputLabel>
           <Select
             value={this.state.resolution}
             onChange={this.handleChange}
@@ -182,9 +243,26 @@ class DummyView extends React.PureComponent {
               id: "resolution"
             }}
           >
-            <MenuItem value={72}>Låg</MenuItem>
-            <MenuItem value={150}>Normal</MenuItem>
-            <MenuItem value={300}>Hög</MenuItem>
+            <MenuItem value={72}>72</MenuItem>
+            <MenuItem value={150}>150</MenuItem>
+            <MenuItem value={300}>300</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl className={classes.formControl}>
+          <InputLabel htmlFor="scale">Skala</InputLabel>
+          <Select
+            value={this.state.scale}
+            onChange={this.handleChange}
+            inputProps={{
+              name: "scale",
+              id: "scale"
+            }}
+          >
+            <MenuItem value={10}>1:10 000</MenuItem>
+            <MenuItem value={25}>1:25 000</MenuItem>
+            <MenuItem value={50}>1:50 000</MenuItem>
+            <MenuItem value={100}>1:100 000</MenuItem>
+            <MenuItem value={200}>1:200 000</MenuItem>
           </Select>
         </FormControl>
         <FormControl className={classes.formControl}>
