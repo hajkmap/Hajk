@@ -66,13 +66,16 @@ class Print extends React.PureComponent {
           title: "Skriv ut",
           description: "Skapa en PDF av kartan",
           height: 400,
-          width: 200
+          width: 200,
+          onWindowShow: this.onWindowShow,
+          onWindowHide: this.onWindowHide
         }}
       >
         <PrintView
           model={this.printModel}
           app={this.props.app}
           map={this.props.map}
+          options={this.props.options}
           localObserver={this.localObserver}
         />
       </BaseWindowPlugin>
