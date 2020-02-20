@@ -1,4 +1,5 @@
 {
+  "version": null,
   "projections": [
     {
       "code": "EPSG:3006",
@@ -97,7 +98,7 @@
       "options": {
         "baselayers": [
           {
-            "id": "35",
+            "id": "4",
             "visibleAtStart": true,
             "drawOrder": 0,
             "visibleForGroups": null,
@@ -106,72 +107,47 @@
         ],
         "groups": [
           {
-            "id": "3a18c697-a52a-e5c9-cb77-2a7f03c648ec",
+            "id": "e97c5493-a9c9-6b2e-ecac-6d738f49c8c5",
             "parent": "-1",
-            "name": "Kartlager",
+            "name": "Havs- och vattenmyndigheten (sök- och buffermöjliga)",
             "toggled": true,
             "expanded": true,
             "layers": [
               {
-                "id": "32",
+                "id": "7",
                 "visibleAtStart": false,
-                "drawOrder": 1000,
+                "drawOrder": 4,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
-                "id": "16",
+                "id": "8",
                 "visibleAtStart": false,
-                "drawOrder": 1000,
+                "drawOrder": 2,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "8838c969-590c-8683-435c-1ecaca271096",
+            "parent": "-1",
+            "name": "Länsstyrelsen",
+            "toggled": true,
+            "expanded": true,
+            "layers": [
+              {
+                "id": "5",
+                "visibleAtStart": false,
+                "drawOrder": 3,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
-                "id": "17",
+                "id": "6",
                 "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "18",
-                "visibleAtStart": true,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "14",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "33",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "34",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "27",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "30",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
+                "drawOrder": 1,
                 "visibleForGroups": null,
                 "infobox": null
               }
@@ -179,17 +155,23 @@
             "groups": []
           }
         ],
-        "instruction": "",
         "active": true,
-        "visibleAtStart": false,
+        "visibleAtStart": true,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
-        "toggleAllButton": true,
+        "showBreadcrumbs": false,
+        "target": "toolbar",
+        "position": "left",
+        "width": 0,
+        "height": 0,
+        "title": "",
+        "description": "",
         "dropdownThemeMaps": true,
-        "themeMapHeaderCaption": "Rubrik temakarta",
+        "themeMapHeaderCaption": "Standardkartan",
+        "instruction": "",
         "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
       },
-      "index": 0
+      "index": 1
     },
     {
       "type": "infoclick",
@@ -202,7 +184,7 @@
         "popupOffsetY": 0,
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 2
     },
     {
       "type": "simple_layerswitcher",
@@ -227,7 +209,7 @@
         "proxyUrl": "",
         "visibleForGroups": []
       },
-      "index": 1
+      "index": 3
     },
     {
       "type": "measure",
@@ -236,7 +218,7 @@
         "instruction": "",
         "icons": ""
       },
-      "index": 3
+      "index": 4
     },
     {
       "type": "streetview",
@@ -246,7 +228,7 @@
         "instruction": "",
         "visibleForGroups": []
       },
-      "index": 4
+      "index": 5
     },
     {
       "type": "export",
@@ -272,13 +254,13 @@
         "instruction": "",
         "visibleForGroups": []
       },
-      "index": 5
+      "index": 7
     },
     {
       "type": "informative",
       "options": {
         "target": "toolbar",
-        "panel": "right",
+        "position": "right",
         "tocExpanded": false,
         "title": "Översiktsplan",
         "caption": "Översiktsplan",
@@ -290,22 +272,20 @@
         "visibleAtStart": false,
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 8
     },
     {
       "type": "information",
       "options": {
-        "target": "right",
-        "text": "Hej",
         "headerText": "Om kartan",
+        "text": "Här kan man konfigurera och lägga in information om kartan.",
+        "buttonText": "",
         "title": "",
-        "abstract": "",
         "visibleAtStart": false,
         "showInfoOnce": false,
-        "base64EncodeForInfotext": false,
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 9
     },
     {
       "type": "edit",
@@ -315,81 +295,141 @@
         "activeServices": ["25"],
         "visibleForGroups": []
       },
-      "index": 0
-    },
-    {
-      "type": "collector",
-      "options": {
-        "target": "left",
-        "url": "",
-        "featureType": "hpl",
-        "title": "Tyck till",
-        "abstract": "Vi vill veta vad du tycker!",
-        "featureNS": "",
-        "showThankYou": false,
-        "visibleAtStart": false,
-        "thankYou": "Tack",
-        "visibleForGroups": [],
-        "form": [
-          {
-            "id": 303302667498,
-            "order": 0,
-            "header": "Vem är du?",
-            "text": "<p>Ålder:</p>\n<div label=\"Namn\" field=\"name\"></div>\n<p>Namn:</p>\n<div label=\"Namn\" field=\"image\"></div>\n\n"
-          },
-          {
-            "id": 979784104217,
-            "order": 1,
-            "header": "Tyck till om en plats",
-            "text": "<p>Välj typ av plats, klicka sedan i kartan för att markera den</p>\n<div type=\"toolbar\"></div>"
-          }
-        ],
-        "serviceId": "25"
-      },
-      "index": 0
+      "index": 10
     },
     {
       "type": "search",
       "options": {
-        "target": "center",
-        "onMap": true,
-        "bothSynlig": true,
-        "enableViewTogglePopupInSnabbsok": true,
-        "toolbar": "bottom",
-        "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "selectionSearch": true,
-        "radiusSearch": true,
-        "polygonSearch": true,
-        "searchSettings": true,
-        "base64Encode": false,
-        "instruction": "",
-        "filterVisible": true,
         "anchor": [16, 32],
-        "imgSize": [32, 32],
-        "tooltip": "Sök...",
+        "scale": 0.15,
+        "strokeColor": {
+          "r": 244,
+          "g": 83,
+          "b": 63,
+          "a": 1
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 244,
+          "g": 83,
+          "b": 63,
+          "a": 0.2
+        },
+        "polygonSearch": true,
+        "radiusSearch": true,
+        "selectionSearch": true,
+        "tooltip": "Sök i kartlager",
         "searchWithinButtonText": "Markera i kartan",
-        "toolDescription": "<div>Sök innehåll i kartan</div>",
-        "popupOffsetY": 0,
-        "visibleForGroups": [],
-        "layers": [],
-        "selectedSources": ["30", "27", "32", "34", "33", "14", "18"]
+        "maxFeatures": 100,
+        "delayBeforeAutoSearch": 500,
+        "selectedSources": ["8", "7", "30", "27", "32", "34", "33", "14", "18"],
+        "layers": [
+          {
+            "id": "9",
+            "visibleForGroups": []
+          },
+          {
+            "id": "10",
+            "visibleForGroups": []
+          }
+        ],
+        "visibleForGroups": []
       },
-      "index": 7
+      "index": 11
+    },
+    {
+      "type": "routing",
+      "options": {
+        "target": "toolbar",
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 12
+    },
+    {
+      "type": "location",
+      "options": {
+        "target": "toolbar",
+        "visibleForGroups": []
+      },
+      "index": 13
+    },
+    {
+      "type": "preset",
+      "options": {
+        "presetList": [
+          {
+            "name": "Stockholm",
+            "presetUrl": "?m=map_1&x=673328.9918851338&y=6578549.249285473&z=9"
+          },
+          {
+            "name": "Göteborg",
+            "presetUrl": "?m=map_1&x=319842.7256730069&y=6402228.345506725&z=9"
+          },
+          {
+            "name": "Malmö",
+            "presetUrl": "?m=map_1&x=375728.86787375447&y=6163237.373553972&z=9"
+          },
+          {
+            "name": "Öland (kulturmiljövård)",
+            "presetUrl": "?m=map_1&x=601661.9935919463&y=6292161.042054954&z=5.22002529329714&l=4,5"
+          }
+        ],
+        "visibleForGroups": []
+      },
+      "index": 14
+    },
+    {
+      "type": "coordinates",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "transformations": [
+          {
+            "code": "EPSG:3006",
+            "default": true,
+            "hint": "Sweref99 TM",
+            "title": "Sweref99 TM",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
+          }
+        ],
+        "visibleForGroups": []
+      },
+      "index": 15
+    },
+    {
+      "type": "bookmark",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 16
+    },
+    {
+      "type": "buffer",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "varbergVer": false,
+        "geoserverUrl": "",
+        "notFeatureLayers": [],
+        "visibleForGroups": []
+      },
+      "index": 17
     }
   ],
   "map": {
     "target": "map",
-    "center": [415000, 6585000],
+    "center": [460000, 6320000],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 10,
-    "maxZoom": 18,
-    "minZoom": 3,
+    "zoom": 3,
+    "maxZoom": 10,
+    "minZoom": 0,
     "resolutions": [
       4096.0,
       2048.0,
@@ -400,24 +440,22 @@
       64.0,
       32.0,
       16.0,
-      8.0,
-      4.0,
-      2.0,
-      1.0,
-      0.5
+      8.0
     ],
-    "origin": [0.0, 0.0],
-    "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
+    "origin": [-1200000.0, 8500000.0],
+    "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
     "constrainOnlyCenter": false,
     "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
     "geoserverLegendOptions": "",
     "mapselector": false,
-    "mapcleaner": false,
+    "mapcleaner": true,
     "drawerVisible": false,
     "drawerPermanent": false,
     "colors": {
       "primaryColor": "#333333",
       "secondaryColor": "#ffffff"
-    }
+    },
+    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
   }
 }
