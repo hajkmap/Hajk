@@ -12,6 +12,7 @@ const styles = theme => ({
     maxWidth: theme.spacing(36),
     minWidth: theme.spacing(22),
     margin: theme.spacing(1),
+    backgroundColor: "blue",
     opacity: "0.8",
     cursor: "pointer",
     [theme.breakpoints.down("xs")]: {
@@ -32,25 +33,17 @@ class OverlayMenuItem extends React.PureComponent {
 
   static defaultProps = {};
 
-  constructor(props) {
-    super(props);
-    this.globalObserver = this.props.app.globalObserver;
-  }
+  handleClick = () => {
+    const { localObserver, title } = this.props;
+    localObserver.publish("open-document", title);
+  };
 
   render() {
-    const {
-      classes,
-      color,
-      header,
-      toggleHighlight,
-      handleMenuButtonClick
-    } = this.props;
+    const { classes, color, title, toggleHighlight } = this.props;
     return (
       <>
         <Paper
-          onClick={() => {
-            handleMenuButtonClick(header);
-          }}
+          onClick={this.handleClick}
           style={{ backgroundColor: color }}
           onMouseEnter={toggleHighlight}
           onMouseLeave={toggleHighlight}
@@ -68,7 +61,9 @@ class OverlayMenuItem extends React.PureComponent {
             alignItems="center"
             container
           >
-            <Grid align="center" xs={12} item></Grid>
+            <Grid align="center" xs={12} item>
+              {}
+            </Grid>
             <Grid xs={12} item>
               <Typography
                 style={{ wordWrap: "break-word" }}
@@ -76,7 +71,7 @@ class OverlayMenuItem extends React.PureComponent {
                 align="center"
                 color="textPrimary"
               >
-                {header}
+                {title}
               </Typography>
             </Grid>
           </Grid>

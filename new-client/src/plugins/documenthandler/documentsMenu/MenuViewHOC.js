@@ -1,33 +1,171 @@
 import React from "react";
 import DocumentHandlerModel from "../DocumentHandlerModel";
 
-const menuComponent = MenuComponent =>
+const menuJson = {
+  menu: [
+    {
+      title: "Markanvändningskarta",
+      document: "x",
+      icon: "",
+      maplink: "",
+      link: "",
+      menu: [
+        {
+          title: "Utvecklingsalternativ",
+          document: "",
+          maplink: "",
+          link: "",
+          menu: [
+            {
+              title: "Centrala Göteborg",
+              document: "x",
+              maplink: "x",
+              link: ""
+            },
+            {
+              title: "Frölunda Högsbo",
+              document: "x",
+              maplink: "x",
+              link: ""
+            },
+            {
+              title: "Torsviken",
+              document: "x",
+              maplink: "",
+              link: ""
+            },
+            {
+              title: "Södra skärgården",
+              document: "x",
+              maplink: "",
+              link: ""
+            }
+          ]
+        },
+        {
+          title: "Test",
+          document: "",
+          maplink: "",
+          link: "",
+          menu: [
+            {
+              title: "Centrala Göteborg",
+              document: "x",
+              maplink: "x",
+              link: ""
+            },
+            {
+              title: "Frölunda Högsbo",
+              document: "x",
+              maplink: "x",
+              link: ""
+            },
+            {
+              title: "Torsviken",
+              document: "x",
+              maplink: "",
+              link: ""
+            },
+            {
+              title: "Södra skärgården",
+              document: "x",
+              maplink: "",
+              link: ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: "Utgångspunkter",
+      document: "x",
+      maplink: "",
+      link: "",
+      menu: []
+    },
+    {
+      title: "Geografiska inriktningar",
+      document: "x",
+      maplink: "",
+      link: "",
+      menu: []
+    },
+    {
+      title: "Tematiska anspråk",
+      document: "x",
+      maplink: "",
+      link: "",
+      menu: []
+    },
+    {
+      title: "Genomförande",
+      document: "x",
+      maplink: "",
+      link: "",
+      menu: []
+    }
+  ]
+};
+
+const menuViewHoc = MenuComponent =>
   class WithMenuFunctionality extends React.Component {
     state = {
-      subMenu: false,
       activeDocument: null,
-      menuItems: []
+      activeMenuSection: menuJson.menu,
+      activeChapterLevel: null
     };
+
+    setParentAndContainingMenu(menuItem, containingMenu, parent) {
+      console.log(containingMenu, "containingMenu");
+      menuItem.parent = parent;
+      menuItem.containingMenu = containingMenu;
+
+      if (menuItem.menu && menuItem.menu.length > 0) {
+        menuItem.menu.forEach(subMenuItem => {
+          this.setParentAndContainingMenu(subMenuItem, menuItem.menu, menuItem);
+        });
+      }
+    }
 
     constructor(props) {
       super(props);
       this.documentHandlerModel = new DocumentHandlerModel();
-      this.initializeDocumentMenu();
+      //this.fetchMenuStructure();
+
+      menuJson.menu.forEach(menuItem => {
+        this.setParentAndContainingMenu(menuItem, menuJson.menu, undefined);
+      });
+
       this.bindSubscriptions();
     }
 
-    bindSubscriptions = () => {
-      const { localObserver } = this.props;
-
-      localObserver.subscribe("menu-item-clicked", header => {
-        console.log("menuItemClicked");
-        this.setMenuView(header);
+    getSubMenu = title => {
+      var menuItem = this.state.activeMenuSection.find(menuItem => {
+        return menuItem.title === title;
       });
-      localObserver.subscribe("goToParentChapters", parent => {
-        console.log(parent, "parent");
-      });
+      return menuItem.menu;
     };
 
+    bindSubscriptions = () => {
+      const { localObserver } = this.props;
+      localObserver.subscribe("show-containing-menu", containingMenu => {
+        this.setState({ activeMenuSection: containingMenu });
+      });
+
+      localObserver.subscribe("show-submenu", title => {
+        var activeMenuSection = this.getSubMenu(title);
+        this.setState({ activeMenuSection: activeMenuSection });
+      });
+
+      localObserver.subscribe("open-link", title => {
+        console.log("OPENLINK");
+      });
+
+      localObserver.subscribe("menu-item-clicked", header => {
+        this.setMenuView(header);
+      });
+    };
+    /*
     getMainChapters = header => {
       var document = this.documents.filter(document => {
         return document.header === header;
@@ -45,9 +183,10 @@ const menuComponent = MenuComponent =>
       return activeDocument.chapters.filter(chapter => {
         return chapter.header === header;
       })[0].chapters;
-    };
+    };*/
 
-    initializeDocumentMenu = () => {
+    /*
+    loadOPDOCUMENTS = () => {
       var promises = [];
       this.documentHandlerModel.list(documentTitles => {
         documentTitles.map(header => {
@@ -66,8 +205,8 @@ const menuComponent = MenuComponent =>
           });
         });
       });
-    };
-
+    };*/
+    /*
     setMainChaptersMenu = header => {
       this.setState({
         menuItems: this.getMainChapters(header),
@@ -98,24 +237,24 @@ const menuComponent = MenuComponent =>
         })
         .includes(header);
     };
+*/
+
+    fetchMenuStructure = () => {
+      this.setState({ activeMenuSection: null }, () => {
+        console.log(this.state, "state");
+      });
+    };
 
     render() {
+      const { localObserver } = this.props;
+
       return (
         <MenuComponent
-          subMenu={this.state.subMenu}
-          menuItems={this.state.menuItems}
-          activeDocument={this.state.activeDocument}
-          localObserver={this.props.localObserver}
-          app={this.props.app}
-          setMenuView={this.setMenuView}
-          isMainDocument={this.isMainDocument}
-          setSubChaptersMenu={this.setSubChaptersMenu}
-          setMainChaptersMenu={this.setMainChaptersMenu}
-          initializeDocumentMenu={this.initializeDocumentMenu}
-          getSubChapters={this.getSubChapters}
+          activeMenuSection={this.state.activeMenuSection}
+          localObserver={localObserver}
         ></MenuComponent>
       );
     }
   };
 
-export default menuComponent;
+export default menuViewHoc;

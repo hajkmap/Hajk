@@ -10,27 +10,19 @@ const menuItem = MenuItem =>
 
     static defaultProps = {};
 
-    constructor(props) {
-      super(props);
-      this.globalObserver = this.props.app.globalObserver;
-    }
-
     toggleHighlight = () => {
       this.setState({ highlighted: !this.state.highlighted });
     };
 
-    handleMenuButtonClick = header => {
-      const { localObserver } = this.props;
-      localObserver.publish("menu-item-clicked", header);
-    };
-
     render() {
-      const { app, localObserver, color, header } = this.props;
+      const { app, localObserver, color, title } = this.props;
+
+      console.log(title, "title");
       return (
         <MenuItem
           handleMenuButtonClick={this.handleMenuButtonClick}
           color={color}
-          header={header}
+          title={title}
           highlighted={this.state.highlighted}
           app={app}
           localObserver={localObserver}

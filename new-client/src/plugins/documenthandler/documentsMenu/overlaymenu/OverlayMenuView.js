@@ -1,12 +1,19 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import MenuItem from "../overlaymenu/OverlayMenuItem";
+
 import menuItem from "../MenuItemHOC";
 
 import Grid from "@material-ui/core/Grid";
+import _OverlayLinkMenuItem from "./OverlayLinkMenuItem";
+import _OverlayDocumentMenuItem from "./OverlayDocumentMenuItem";
+import _OverlayCascadeMenuItem from "./OverlayCascadeMenuItem";
+import _OverlayMapLinkMenuItem from "./OverlayMapLinkMenuItem";
 
-const OverlayMenuItem = menuItem(MenuItem);
+const OverlayCascadeMenuItem = menuItem(_OverlayCascadeMenuItem);
+const OverlayDocumentMenuItem = menuItem(_OverlayDocumentMenuItem);
+const OverlayLinkMenuItem = menuItem(_OverlayLinkMenuItem);
+const OverlayMapLinkMenuItem = menuItem(_OverlayMapLinkMenuItem);
 
 const styles = theme => ({
   container: {
@@ -49,42 +56,53 @@ class MenuView extends React.PureComponent {
   static propTypes = {};
   static defaultProps = {};
 
-  constructor(props) {
-    super(props);
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
-  }
-
-  renderMenuItem = menuItem => {
-    const { localObserver, app } = this.props;
-    return (
-      <Grid
-        key={menuItem.header}
-        zeroMinWidth
-        item
-        xs={xs}
-        sm={sm}
-        md={md}
-        lg={lg}
-      >
-        <OverlayMenuItem
-          key={menuItem.header}
-          model={this.DocumentHandlerModel}
-          app={app}
-          header={menuItem.header}
-          color={menuItem.color}
+  getMenuItem = item => {
+    const { localObserver } = this.props;
+    if (item.menu && item.menu.length > 0) {
+      return (
+        <OverlayCascadeMenuItem
           localObserver={localObserver}
-        ></OverlayMenuItem>
+          title={item.title}
+        ></OverlayCascadeMenuItem>
+      );
+    } else if (item.document) {
+      return (
+        <OverlayDocumentMenuItem
+          localObserver={localObserver}
+          title={item.title}
+        ></OverlayDocumentMenuItem>
+      );
+    } else if (item.link) {
+      return (
+        <OverlayLinkMenuItem
+          localObserver={localObserver}
+          title={item.title}
+        ></OverlayLinkMenuItem>
+      );
+    } else if (item.maplink) {
+      return (
+        <OverlayMapLinkMenuItem
+          localObserver={localObserver}
+          title={item.title}
+        ></OverlayMapLinkMenuItem>
+      );
+    }
+  };
+
+  renderMenuItem = item => {
+    console.log("HEj");
+    return (
+      <Grid key={item.title} zeroMinWidth item xs={xs} sm={sm} md={md} lg={lg}>
+        {this.getMenuItem(item)}
       </Grid>
     );
   };
 
   render() {
-    const { chapters, menuItems } = this.props;
-
+    const { activeMenuSection } = this.props;
     return (
       <>
-        {menuItems.map(item => {
+        {activeMenuSection.map(item => {
           return this.renderMenuItem(item);
         })}
       </>

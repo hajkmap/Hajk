@@ -2,10 +2,14 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import HeaderView from "../HeaderView";
-import OverlayMenuView from "./OverlayMenuView";
 import Modal from "@material-ui/core/Modal";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
+
+import _OverlayMenuView from "./OverlayMenuView";
+import menuViewHoc from "../MenuViewHOC";
+
+var OverlayMenuView = menuViewHoc(_OverlayMenuView);
 
 const styles = theme => ({
   container: {
@@ -61,8 +65,15 @@ class OverlayView extends React.PureComponent {
   };
 
   render() {
-    const { classes, localObserver, app, subMenu, menuItems } = this.props;
+    const {
+      classes,
+      localObserver,
+      app,
+
+      activeMenuSection
+    } = this.props;
     this.handleMapBlur();
+
     return (
       <>
         <Modal
@@ -73,15 +84,14 @@ class OverlayView extends React.PureComponent {
           <Container className={classes.container} fixed>
             <Grid zeroMinWidth item xs={fullWidth}>
               <HeaderView
-                subMenu={subMenu}
-                menuItems={menuItems}
+                activeMenuSection={activeMenuSection}
                 localObserver={localObserver}
               ></HeaderView>
             </Grid>
             <Grid container>
               <OverlayMenuView
                 app={app}
-                menuItems={menuItems}
+                activeMenuSection={activeMenuSection}
                 localObserver={localObserver}
               ></OverlayMenuView>
             </Grid>

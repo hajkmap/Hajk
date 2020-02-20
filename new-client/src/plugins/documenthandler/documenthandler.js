@@ -41,12 +41,7 @@ class DocumentHandler extends React.PureComponent {
             localObserver={this.localObserver}
           ></OverlayViewMenu>
         </Hidden>
-        <Hidden lgDown>
-          <MenuBar
-            app={this.props.app}
-            localObserver={this.localObserver}
-          ></MenuBar>
-        </Hidden>
+        <Hidden lgDown></Hidden>
         <DocumentWindowBase
           {...this.props}
           app={this.props.app}

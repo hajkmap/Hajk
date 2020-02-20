@@ -30,18 +30,23 @@ class HeaderView extends React.PureComponent {
 
   static defaultProps = {};
 
-  constructor(props) {
-    super(props);
-  }
+  isSubMenu = () => {
+    const { activeMenuSection } = this.props;
+    return activeMenuSection[0].parent === undefined ? false : true;
+  };
 
-  goToParentChapters = () => {
-    const { localObserver, menuItems } = this.props;
-    var parentChapter = menuItems[0].parent;
-    localObserver.publish("goToParentChapters", parentChapter);
+  getContainingMenu = () => {
+    const { activeMenuSection } = this.props;
+    return activeMenuSection[0].parent.containingMenu;
+  };
+
+  goToParentMenu = () => {
+    const { localObserver } = this.props;
+    localObserver.publish("show-containing-menu", this.getContainingMenu());
   };
   render() {
-    const { classes, subMenu, title } = this.props;
-    console.log(subMenu, "subMenu");
+    const { classes, title } = this.props;
+
     return (
       <>
         <Paper className={classes.logoItem} square={true} elevation={0}>
@@ -53,11 +58,9 @@ class HeaderView extends React.PureComponent {
             justify="center"
           >
             <Grid item xs={12}>
-              {subMenu ? (
+              {this.isSubMenu() ? (
                 <>
-                  <ArrowBackIcon
-                    onClick={this.goToParentChapters}
-                  ></ArrowBackIcon>
+                  <ArrowBackIcon onClick={this.goToParentMenu}></ArrowBackIcon>
                   <Typography>{title}</Typography>
                 </>
               ) : (
