@@ -63,7 +63,7 @@ class PrintView extends React.PureComponent {
     format: "a4", // a0-a5
     orientation: "landscape",
     resolution: 150, // 72, 150, 300,
-    scale: 10, // 0.5, 1, 5, 10, 25, 50, 100, 200 (e.g. 1:10 000, 1:25 000, etc)
+    scale: 10, // 0.5, 1, 2.5, 5, 10, 25, 50, 100, 200 (e.g. 1:10 000, 1:25 000, etc)
     printInProgress: false,
     previewLayerVisible: false
   };
@@ -276,7 +276,7 @@ class PrintView extends React.PureComponent {
       pdf.setFontSize(10);
       pdf.setTextColor(100);
       pdf.text(
-        `Print scale: 1:${Number(scale * 1000).toLocaleString("sv-SE")}`,
+        `Skala: 1:${Number(scale * 1000).toLocaleString("sv-SE")}`,
         10,
         pdf.internal.pageSize.height - 10
       );
@@ -403,6 +403,7 @@ class PrintView extends React.PureComponent {
               <MenuItem value={0.25}>1:250</MenuItem>
               <MenuItem value={0.5}>1:500</MenuItem>
               <MenuItem value={1}>1:1 000</MenuItem>
+              <MenuItem value={2.5}>1:2 500</MenuItem>
               <MenuItem value={5}>1:5 000</MenuItem>
               <MenuItem value={10}>1:10 000</MenuItem>
               <MenuItem value={25}>1:25 000</MenuItem>
