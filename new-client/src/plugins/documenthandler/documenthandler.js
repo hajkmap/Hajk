@@ -3,12 +3,12 @@ import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
 import OverlayView from "./documentsMenu/overlaymenu/OverlayView";
 import menuComponent from "./documentsMenu/MenuViewHOC";
-import MenuBarView from "./documentsMenu/menubar/MenuBarView";
+import _MenuBarView from "./documentsMenu/menubar/MenuBarView";
 import Observer from "react-event-observer";
 import Hidden from "@material-ui/core/Hidden";
 
 const OverlayViewMenu = menuComponent(OverlayView);
-const MenuBar = menuComponent(MenuBarView);
+const MenuBarView = menuComponent(_MenuBarView);
 
 class DocumentHandler extends React.PureComponent {
   state = {};
@@ -41,7 +41,12 @@ class DocumentHandler extends React.PureComponent {
             localObserver={this.localObserver}
           ></OverlayViewMenu>
         </Hidden>
-        <Hidden lgDown></Hidden>
+        <Hidden lgDown>
+          <MenuBarView
+            app={this.props.app}
+            localObserver={this.localObserver}
+          ></MenuBarView>
+        </Hidden>
         <DocumentWindowBase
           {...this.props}
           app={this.props.app}

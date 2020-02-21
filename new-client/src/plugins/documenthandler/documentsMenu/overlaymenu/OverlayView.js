@@ -65,13 +65,7 @@ class OverlayView extends React.PureComponent {
   };
 
   render() {
-    const {
-      classes,
-      localObserver,
-      app,
-
-      activeMenuSection
-    } = this.props;
+    const { classes, localObserver, app, menu, activeMenuSection } = this.props;
     this.handleMapBlur();
 
     return (
@@ -84,6 +78,7 @@ class OverlayView extends React.PureComponent {
           <Container className={classes.container} fixed>
             <Grid zeroMinWidth item xs={fullWidth}>
               <HeaderView
+                menu={menu}
                 activeMenuSection={activeMenuSection}
                 localObserver={localObserver}
               ></HeaderView>
@@ -92,6 +87,7 @@ class OverlayView extends React.PureComponent {
               <OverlayMenuView
                 app={app}
                 activeMenuSection={activeMenuSection}
+                menu={menu}
                 localObserver={localObserver}
               ></OverlayMenuView>
             </Grid>

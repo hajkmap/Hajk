@@ -2,12 +2,20 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import { Paper, Button } from "@material-ui/core";
-
+import Grid from "@material-ui/core/Grid";
+import { Paper } from "@material-ui/core";
 import menuItem from "../MenuItemHOC";
-import MenuItem from "./MenuBarItem";
+import _MenuBarItem from "./MenuBarItem";
+import _MenuBarCascadeMenuItem from "./MenuBarCascadeMenuItem";
 
-const MenuBarItem = menuItem(MenuItem);
+const MenuBarItem = menuItem(_MenuBarItem);
+const MenuBarCascadeMenuItem = menuItem(_MenuBarCascadeMenuItem);
+
+const xs = 12,
+  sm = 4,
+  md = 3,
+  lg = 2,
+  fullWidth = 12;
 
 const styles = theme => ({
   container: {
@@ -46,37 +54,81 @@ const styles = theme => ({
 });
 
 class MenuBarView extends React.PureComponent {
-  state = {};
+  state = {
+    menu: this.props.activeMenuSection
+  };
 
   static propTypes = {};
   static defaultProps = {};
 
-  constructor(props) {
-    super(props);
-  }
-
-  renderButtons(menuItem) {
-    const { classes, app, localObserver } = this.props;
-
+  renderMenuItem = item => {
     return (
-      <MenuBarItem
-        localObserver={localObserver}
-        key={menuItem.header}
-        model={this.DocumentHandlerModel}
-        app={app}
-        header={menuItem.header}
-        color={menuItem.color}
-      ></MenuBarItem>
+      <Grid key={item.title} zeroMinWidth item xs={xs} sm={sm} md={md} lg={lg}>
+        {this.getMenuItem(item)}
+      </Grid>
     );
-  }
+  };
+
+  getMenuItem = item => {
+    const { localObserver } = this.props;
+    if (item.menu && item.menu.length > 0) {
+      return (
+        <MenuBarCascadeMenuItem
+          localObserver={localObserver}
+          menuItems={item.menu}
+          title={item.title}
+        ></MenuBarCascadeMenuItem>
+      );
+    } else if (item.document) {
+      return (
+        <MenuBarItem
+          type="document"
+          localObserver={localObserver}
+          title={item.title}
+        ></MenuBarItem>
+      );
+    } else if (item.link) {
+      return (
+        <MenuBarItem
+          type="link"
+          localObserver={localObserver}
+          title={item.title}
+        ></MenuBarItem>
+      );
+    } else if (item.maplink) {
+      return (
+        <MenuBarItem
+          type="maplink"
+          localObserver={localObserver}
+          title={item.title}
+        ></MenuBarItem>
+      );
+    }
+  };
+
+  getSubMenu = () => {
+    var subMenu = this.getMenuTree()[1];
+
+    return subMenu ? subMenu : null;
+  };
+
+  getMenuTree = () => {
+    var currentMenu = this.props.activeMenuSection[0];
+    while (currentMenu && currentMenu.containingMenu && currentMenu.parent) {
+      currentMenu = currentMenu.parent;
+    }
+    console.log(currentMenu, "currentMenu");
+    return currentMenu.containingMenu;
+  };
 
   render() {
-    const { classes, app, localObserver, menuItems } = this.props;
+    const { classes, activeMenuSection } = this.props;
+    var menu = this.getMenuTree();
 
     return ReactDOM.createPortal(
       <Paper className={classes.root}>
-        {menuItems.map(item => {
-          return this.renderButtons(item);
+        {menu.map(item => {
+          return this.renderMenuItem(item);
         })}
       </Paper>,
       document.getElementById("header")

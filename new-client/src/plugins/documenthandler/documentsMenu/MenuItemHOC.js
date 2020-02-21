@@ -15,12 +15,12 @@ const menuItem = MenuItem =>
     };
 
     render() {
-      const { app, localObserver, color, title } = this.props;
+      const { app, localObserver, color, title, menuItems } = this.props;
 
-      console.log(title, "title");
       return (
         <MenuItem
           handleMenuButtonClick={this.handleMenuButtonClick}
+          menuItems={menuItems}
           color={color}
           title={title}
           highlighted={this.state.highlighted}

@@ -24,32 +24,32 @@ const styles = theme => ({
   }
 });
 
-class MenuBarItem extends React.PureComponent {
+class MenuBarDocumentMenuItem extends React.PureComponent {
   static propTypes = {};
 
   static defaultProps = {};
 
-  constructor(props) {
-    super(props);
-    this.globalObserver = this.props.app.globalObserver;
-  }
+  handleClick = () => {
+    const { localObserver, title } = this.props;
+    //localObserver.publish("show-submenu", title);
+  };
 
   render() {
-    const { toggleHighlight, handleMenuButtonClick, header } = this.props;
+    const { toggleHighlight, handleMenuButtonClick, title } = this.props;
     return (
       <Button
         onClick={() => {
-          handleMenuButtonClick(header);
+          handleMenuButtonClick(title);
         }}
         onMouseEnter={toggleHighlight}
         onMouseLeave={toggleHighlight}
         aria-controls="simple-menu"
         aria-haspopup="true"
       >
-        {header}
+        {title}
       </Button>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(MenuBarItem));
+export default withStyles(styles)(withSnackbar(MenuBarDocumentMenuItem));

@@ -5,15 +5,11 @@ import { withSnackbar } from "notistack";
 import menuItem from "../MenuItemHOC";
 
 import Grid from "@material-ui/core/Grid";
-import _OverlayLinkMenuItem from "./OverlayLinkMenuItem";
-import _OverlayDocumentMenuItem from "./OverlayDocumentMenuItem";
+import _OverlayMenuItem from "./OverlayMenuItem";
 import _OverlayCascadeMenuItem from "./OverlayCascadeMenuItem";
-import _OverlayMapLinkMenuItem from "./OverlayMapLinkMenuItem";
 
+const OverlayMenuItem = menuItem(_OverlayMenuItem);
 const OverlayCascadeMenuItem = menuItem(_OverlayCascadeMenuItem);
-const OverlayDocumentMenuItem = menuItem(_OverlayDocumentMenuItem);
-const OverlayLinkMenuItem = menuItem(_OverlayLinkMenuItem);
-const OverlayMapLinkMenuItem = menuItem(_OverlayMapLinkMenuItem);
 
 const styles = theme => ({
   container: {
@@ -67,24 +63,27 @@ class MenuView extends React.PureComponent {
       );
     } else if (item.document) {
       return (
-        <OverlayDocumentMenuItem
+        <OverlayMenuItem
+          type="document"
           localObserver={localObserver}
           title={item.title}
-        ></OverlayDocumentMenuItem>
+        ></OverlayMenuItem>
       );
     } else if (item.link) {
       return (
-        <OverlayLinkMenuItem
+        <OverlayMenuItem
+          type="link"
           localObserver={localObserver}
           title={item.title}
-        ></OverlayLinkMenuItem>
+        ></OverlayMenuItem>
       );
     } else if (item.maplink) {
       return (
-        <OverlayMapLinkMenuItem
+        <OverlayMenuItem
+          type="maplink"
           localObserver={localObserver}
           title={item.title}
-        ></OverlayMapLinkMenuItem>
+        ></OverlayMenuItem>
       );
     }
   };
