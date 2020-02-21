@@ -233,7 +233,8 @@
     {
       "type": "export",
       "options": {
-        "target": "toolbar",
+        "target": "right",
+        "position": "right",
         "exportUrl": "http:///localhost:55630/export/pdf",
         "exportTiffUrl": "",
         "pdfActive": true,
@@ -250,7 +251,8 @@
     {
       "type": "anchor",
       "options": {
-        "target": "toolbar",
+        "target": "right",
+        "position": "right",
         "instruction": "",
         "visibleForGroups": []
       },
