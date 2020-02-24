@@ -139,8 +139,8 @@ var ExportPdfSettings = React.createClass({
             // The "Varberg" version has four percent margins. If the value is changed in mapservice, it has to be
             // changed here too.
             return {
-                width: ((width / 25.4)) * (1 - 0.04 * 2),
-                height: ((height / 25.4)) * (1 - 0.04 * 2)
+                width: ((width / 25.4)) * (1 - 0.08 * 2),
+                height: ((height / 25.4)) * (1 - 0.08 * 2)
             }
         } else {
             return {

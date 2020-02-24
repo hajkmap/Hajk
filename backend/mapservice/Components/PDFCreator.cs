@@ -229,7 +229,7 @@ namespace MapService.Components
             else if (layout == 2)//new layout
             {
                 // x and y 0 0(top left corner?)-> change
-                double whiteScale = 0.04; // 4% margin on each side. This has to be the same as the margin in export.js!!! Otherwise the scale will be incorrect!
+                double whiteScale = 0.08; // 8% margin on each side. This has to be the same as the margin in export.js!!! Otherwise the scale will be incorrect!
                 this.drawImage(gfx, img, page.Width.Point * whiteScale, page.Height.Point * whiteScale, page);
 
                 List<string> copyrights = new List<string>();
@@ -244,7 +244,7 @@ namespace MapService.Components
                     infoText = ConfigurationManager.AppSettings["exportInfoText"];
                 }
 
-                this.drawTextTitle(gfx, fontNameTitle, titleText, 30, 33); //changed from 27 to 33 (y)
+                this.drawTextTitle(gfx, fontNameTitle, titleText, 30, 35); //changed from 27 to 35 (y)
 
                 int height = 1;
 
@@ -259,30 +259,30 @@ namespace MapService.Components
 
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
                 // x y
-                this.drawText(gfx, fontName, String.Format("Skala 1:{0}", exportItem.scale), 33, (int)page.Height.Point - 23, 8);
-                gfx.DrawLine(XPens.Black, new XPoint(33, (int)page.Height.Point - 18), new XPoint(33 + displayLength, (int)page.Height.Point - 18));
-                gfx.DrawLine(XPens.Black, new XPoint(33, (int)page.Height.Point - 15), new XPoint(33, (int)page.Height.Point - 21));
-                gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength / 2, (int)page.Height.Point - 17), new XPoint(33 + displayLength / 2, (int)page.Height.Point - 19));
-                gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength, (int)page.Height.Point - 15), new XPoint(33 + displayLength, (int)page.Height.Point - 21));
-                this.drawText(gfx, fontName, displayText, 38 + displayLength, (int)page.Height.Point - 16, 8);
+                this.drawText(gfx, fontName, String.Format("Skala 1:{0}", exportItem.scale), 40, (int)page.Height.Point - 30, 5); //skala 1:xx
+                gfx.DrawLine(XPens.Black, new XPoint(40, (int)page.Height.Point - 26), new XPoint(40 + displayLength, (int)page.Height.Point - 18)); //scalebar
+                gfx.DrawLine(XPens.Black, new XPoint(40, (int)page.Height.Point - 23), new XPoint(40, (int)page.Height.Point - 29)); //left
+                gfx.DrawLine(XPens.Black, new XPoint(40 + displayLength / 2, (int)page.Height.Point - 25), new XPoint(40 + displayLength / 2, (int)page.Height.Point - 19)); //middle
+                gfx.DrawLine(XPens.Black, new XPoint(40 + displayLength, (int)page.Height.Point - 23), new XPoint(40 + displayLength, (int)page.Height.Point - 21)); //right
+                this.drawText(gfx, fontName, displayText, 45 + displayLength, (int)page.Height.Point - 26, 5); //text "X m" next to the scale bar
 
                 var y = (int)page.Height.Point - 2;
 
                 var printText = commentText + "   " + pdfDate;
-                this.drawText(gfx, fontName, printText, 40, y - 40);
+                this.drawText(gfx, fontName, printText, 40, y - 38, 8); // comment
 
-                this.drawText(gfx, fontName, infoText, 33, y, 8);
+                this.drawText(gfx, fontName, infoText, 40, y - 13, 5); // text "kartled..."
 
                 int i = 0;
                 copyrights.ForEach(copyright =>
                 {
                     int start = (int)page.Height.Point - 15;
-                    this.drawText(gfx, fontName, String.Format("© {0}", copyright), (int)page.Width.Point - 100, start + i * 10, 8);
+                    this.drawText(gfx, fontName, String.Format("© {0}", copyright), (int)page.Width.Point - 120, start - 15 + i * 10, 8); // coyright
                     i++;
                 });
 
                 XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
-                gfx.DrawImage(logo, (gfx.PageSize.Width - logo.PixelWidth / 5) - 33, 4.5, logo.PixelWidth / 5, logo.PixelHeight / 5); //change fro, 3.5 to 4.5 (y)
+                gfx.DrawImage(logo, (gfx.PageSize.Width - logo.PixelWidth / 5) - 33, 7.5, logo.PixelWidth / 5, logo.PixelHeight / 5); //logotype
 
                 byte[] bytes;
 
