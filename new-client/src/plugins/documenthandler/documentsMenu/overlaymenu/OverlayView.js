@@ -5,7 +5,6 @@ import HeaderView from "../HeaderView";
 import Modal from "@material-ui/core/Modal";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
-
 import _OverlayMenuView from "./OverlayMenuView";
 import menuViewHoc from "../MenuViewHOC";
 
@@ -24,17 +23,6 @@ const styles = theme => ({
       marginTop: 0,
       marginBottom: 0
     }
-  },
-  menuItem: {
-    height: theme.spacing(20),
-    maxWidth: theme.spacing(30),
-    minWidth: theme.spacing(22),
-    margin: theme.spacing(1),
-    backgroundColor: "rgba(38, 44, 44, 0)",
-    cursor: "pointer",
-    [theme.breakpoints.down("xs")]: {
-      height: "100%"
-    }
   }
 });
 
@@ -43,10 +31,7 @@ const mapDiv = document.getElementById("map");
 
 class OverlayView extends React.PureComponent {
   state = {
-    open: true,
-    subMenu: false,
-    activeDocument: null,
-    menuItems: []
+    open: true
   };
 
   static propTypes = {};
@@ -65,7 +50,7 @@ class OverlayView extends React.PureComponent {
   };
 
   render() {
-    const { classes, localObserver, app, menu, activeMenuSection } = this.props;
+    const { classes, localObserver, activeMenuSection } = this.props;
     this.handleMapBlur();
 
     return (
@@ -78,16 +63,13 @@ class OverlayView extends React.PureComponent {
           <Container className={classes.container} fixed>
             <Grid zeroMinWidth item xs={fullWidth}>
               <HeaderView
-                menu={menu}
                 activeMenuSection={activeMenuSection}
                 localObserver={localObserver}
               ></HeaderView>
             </Grid>
             <Grid container>
               <OverlayMenuView
-                app={app}
                 activeMenuSection={activeMenuSection}
-                menu={menu}
                 localObserver={localObserver}
               ></OverlayMenuView>
             </Grid>

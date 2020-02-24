@@ -4,6 +4,7 @@ import { withSnackbar } from "notistack";
 import CascadeMenu from "./CascadeMenu";
 import MenuItem from "@material-ui/core/MenuItem";
 import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
+import Grid from "@material-ui/core/Grid";
 
 const styles = theme => ({});
 
@@ -17,30 +18,33 @@ class SubMenuItem extends React.PureComponent {
   };
 
   handleItemClick = event => {
-    console.log(event.currentTarget, "currentTarget");
     this.setState({
       anchorEl: event.currentTarget,
       menuOpen: !this.state.menuOpen
     });
   };
 
+  onClose = () => {
+    this.setState({ menuOpen: false });
+  };
+
   render() {
-    const { menuItems, title } = this.props;
+    const { item } = this.props;
     return (
       <>
-        <MenuItem onClick={this.handleItemClick}>
-          {title}
-          <ArrowRightIcon />
-        </MenuItem>
+        <Grid item>
+          <MenuItem onClick={this.handleItemClick}>
+            {item.title}
+            <ArrowRightIcon />
+          </MenuItem>
+        </Grid>
         <CascadeMenu
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right"
-          }}
           menuOpen={this.state.menuOpen}
-          menuItems={menuItems}
+          items={item.menu}
           anchorEl={this.state.anchorEl}
-          onClose={this.handleSubMenuClose}
+          onClose={this.onClose}
+          verticalAnchor="bottom"
+          horizontalAnchor="right"
         />
       </>
     );

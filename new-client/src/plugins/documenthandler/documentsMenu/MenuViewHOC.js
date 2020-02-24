@@ -93,7 +93,6 @@ const menuViewHoc = MenuComponent =>
     };
 
     setParentAndContainingMenu(menuItem, containingMenu, parent) {
-      console.log(containingMenu, "containingMenu");
       menuItem.parent = parent;
       menuItem.containingMenu = containingMenu;
 
@@ -129,24 +128,18 @@ const menuViewHoc = MenuComponent =>
         this.setState({ activeMenuSection: containingMenu });
       });
 
-      localObserver.subscribe("show-submenu", title => {
-        var activeMenuSection = this.getSubMenu(title);
+      localObserver.subscribe("cascade-clicked", item => {
+        var activeMenuSection = this.getSubMenu(item.title);
         this.setState({ activeMenuSection: activeMenuSection });
       });
 
-      localObserver.subscribe("open-link", title => {
-        console.log("OPENLINK");
-      });
-
-      localObserver.subscribe("menu-item-clicked", header => {
-        this.setMenuView(header);
+      localObserver.subscribe("open-link", item => {
+        console.log(item, "OPENLINK");
       });
     };
 
     fetchMenuStructure = () => {
-      this.setState({ activeMenuSection: null }, () => {
-        console.log(this.state, "state");
-      });
+      this.setState({ activeMenuSection: null }, () => {});
     };
 
     render() {

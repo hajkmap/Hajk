@@ -2,34 +2,9 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Button from "@material-ui/core/Button";
-
 import CascadeMenu from "./CascadeMenu";
-import menuComponent from "../MenuViewHOC";
 
-console.log(menuComponent, "menuViewHoc");
-
-//const CascadeMenu = menuViewHoc(_CascadeMenu);
-
-const styles = theme => ({
-  menuItem: {
-    height: theme.spacing(20),
-    maxWidth: theme.spacing(36),
-    minWidth: theme.spacing(22),
-    margin: theme.spacing(1),
-    opacity: "0.8",
-    cursor: "pointer",
-    [theme.breakpoints.down("xs")]: {
-      maxWidth: "none",
-      height: theme.spacing(10)
-    }
-  },
-  noTransparency: {
-    opacity: 1
-  },
-  gridContainer: {
-    height: "100%"
-  }
-});
+const styles = theme => ({});
 
 class MenuBarCascadeMenuItem extends React.PureComponent {
   static propTypes = {};
@@ -41,17 +16,20 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
   };
 
   handleClick = e => {
-    const { localObserver, title, subMenu } = this.props;
-    localObserver.publish("show-submenu", title);
-
     this.setState({
       anchorEl: e.currentTarget,
       menuOpen: !this.state.menuOpen
     });
   };
 
+  onCloseClick = () => {
+    this.setState({
+      menuOpen: false
+    });
+  };
+
   render() {
-    const { toggleHighlight, title, menuItems } = this.props;
+    const { toggleHighlight, item } = this.props;
 
     return (
       <>
@@ -62,12 +40,16 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
           aria-controls="simple-menu"
           aria-haspopup="true"
         >
-          {title}
+          {item.title}
         </Button>
+
         <CascadeMenu
-          menuItems={menuItems}
+          items={item.menu}
           menuOpen={this.state.menuOpen}
+          onClose={this.onCloseClick}
           anchorEl={this.state.anchorEl}
+          verticalAnchor="bottom"
+          horizontalAnchor="left"
         ></CascadeMenu>
       </>
     );

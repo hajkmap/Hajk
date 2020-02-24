@@ -26,10 +26,6 @@ class DocumentHandler extends React.PureComponent {
   constructor(props) {
     super(props);
     this.localObserver = Observer();
-
-    this.localObserver.subscribe("documentHandlerEvent", message => {
-      console.log(message);
-    });
   }
 
   render() {

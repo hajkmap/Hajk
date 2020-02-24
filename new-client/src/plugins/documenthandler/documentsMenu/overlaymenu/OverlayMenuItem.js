@@ -33,27 +33,30 @@ class OverlayMenuItem extends React.PureComponent {
 
   static defaultProps = {};
 
-  handleClick = () => {
-    const { localObserver, title } = this.props;
-    localObserver.publish("open-document", title);
-  };
-
   render() {
-    const { classes, color, title, toggleHighlight } = this.props;
+    const {
+      classes,
+      color,
+      item,
+      toggleHighlight,
+      highlighted,
+      handleMenuButtonClick
+    } = this.props;
+
     return (
       <>
         <Paper
-          onClick={this.handleClick}
+          onClick={handleMenuButtonClick}
           style={{ backgroundColor: color }}
           onMouseEnter={toggleHighlight}
           onMouseLeave={toggleHighlight}
           className={
-            this.props.highlighted > 0
+            highlighted > 0
               ? clsx(classes.menuItem, classes.noTransparency)
               : classes.menuItem
           }
           square={true}
-          elevation={this.props.highlighted ? 20 : 0}
+          elevation={highlighted ? 20 : 0}
         >
           <Grid
             className={classes.gridContainer}
@@ -71,7 +74,7 @@ class OverlayMenuItem extends React.PureComponent {
                 align="center"
                 color="textPrimary"
               >
-                {title}
+                {item.title}
               </Typography>
             </Grid>
           </Grid>

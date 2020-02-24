@@ -5,10 +5,11 @@ import Menu from "@material-ui/core/Menu";
 import SubMenuItem from "./SubMenuItem";
 import menuItem from "../MenuItemHOC";
 import _MenuBarItem from "./MenuBarItem";
-import _MenuBarCascadeMenuItem from "./MenuBarCascadeMenuItem";
+import _CascadeRootItem from "./CascadeRootItem";
+import Grid from "@material-ui/core/Grid";
 
 const MenuBarItem = menuItem(_MenuBarItem);
-const MenuBarCascadeMenuItem = menuItem(_MenuBarCascadeMenuItem);
+const CascadeRootItem = menuItem(_CascadeRootItem);
 
 const styles = theme => ({});
 
@@ -17,19 +18,22 @@ class CascadeMenu extends React.PureComponent {
   static defaultProps = {};
 
   renderMenuItems = () => {
-    const { menuItems } = this.props;
-    return menuItems.map(menuItem => {
-      if (menuItem.menu && menuItem.menu.length > 0) {
+    const { items } = this.props;
+    return items.map(item => {
+      if (item.menu && item.menu.length > 0) {
         return (
           <SubMenuItem
-            key={menuItem.title}
+            key={item.title}
             getMenuItem={this.getMenuItem}
-            title={menuItem.title}
-            menuItems={menuItem.menu}
+            item={item}
           ></SubMenuItem>
         );
       } else {
-        return this.getMenuItem(menuItem);
+        return (
+          <Grid key={item.title} item>
+            {this.getMenuItem(item)}
+          </Grid>
+        );
       }
     });
   };
@@ -38,59 +42,62 @@ class CascadeMenu extends React.PureComponent {
     const { localObserver } = this.props;
     if (item.menu && item.menu.length > 0) {
       return (
-        <MenuBarCascadeMenuItem
-          key={item.title}
+        <CascadeRootItem
           localObserver={localObserver}
-          menuItems={item.menu}
-          title={item.title}
-        ></MenuBarCascadeMenuItem>
+          item={item}
+        ></CascadeRootItem>
       );
     } else if (item.document) {
       return (
         <MenuBarItem
-          key={item.title}
           type="document"
           localObserver={localObserver}
-          title={item.title}
+          item={item}
         ></MenuBarItem>
       );
     } else if (item.link) {
       return (
         <MenuBarItem
-          key={item.title}
           type="link"
           localObserver={localObserver}
-          title={item.title}
+          item={item}
         ></MenuBarItem>
       );
     } else if (item.maplink) {
       return (
         <MenuBarItem
-          key={item.title}
           type="maplink"
           localObserver={localObserver}
-          title={item.title}
+          item={item}
         ></MenuBarItem>
       );
     }
   };
 
   render() {
-    const { anchorEl, menuItems, menuOpen } = this.props;
+    const {
+      anchorEl,
+      verticalAnchor,
+      horizontalAnchor,
+      items,
+      menuOpen,
+      onClose
+    } = this.props;
+
     return (
       <>
         <Menu
           id="simple-menu"
           getContentAnchorEl={null}
           anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left"
+            vertical: verticalAnchor,
+            horizontal: horizontalAnchor
           }}
           anchorEl={anchorEl}
-          keepMounted
+          onClose={onClose}
           open={menuOpen}
         >
-          {menuItems && this.renderMenuItems()}
+          <Grid>{items && this.renderMenuItems()}</Grid>
         </Menu>
       </>
     );

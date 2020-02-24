@@ -3,50 +3,24 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Button from "@material-ui/core/Button";
 
-const styles = theme => ({
-  menuItem: {
-    height: theme.spacing(20),
-    maxWidth: theme.spacing(36),
-    minWidth: theme.spacing(22),
-    margin: theme.spacing(1),
-    opacity: "0.8",
-    cursor: "pointer",
-    [theme.breakpoints.down("xs")]: {
-      maxWidth: "none",
-      height: theme.spacing(10)
-    }
-  },
-  noTransparency: {
-    opacity: 1
-  },
-  gridContainer: {
-    height: "100%"
-  }
-});
+const styles = theme => ({});
 
 class MenuBarDocumentMenuItem extends React.PureComponent {
   static propTypes = {};
 
   static defaultProps = {};
 
-  handleClick = () => {
-    const { localObserver, title } = this.props;
-    //localObserver.publish("show-submenu", title);
-  };
-
   render() {
-    const { toggleHighlight, handleMenuButtonClick, title } = this.props;
+    const { toggleHighlight, handleMenuButtonClick, item } = this.props;
     return (
       <Button
-        onClick={() => {
-          handleMenuButtonClick(title);
-        }}
+        onClick={handleMenuButtonClick}
         onMouseEnter={toggleHighlight}
         onMouseLeave={toggleHighlight}
         aria-controls="simple-menu"
         aria-haspopup="true"
       >
-        {title}
+        {item.title}
       </Button>
     );
   }

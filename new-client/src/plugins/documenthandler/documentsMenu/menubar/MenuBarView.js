@@ -6,43 +6,19 @@ import Grid from "@material-ui/core/Grid";
 import { Paper } from "@material-ui/core";
 import menuItem from "../MenuItemHOC";
 import _MenuBarItem from "./MenuBarItem";
-import _MenuBarCascadeMenuItem from "./MenuBarCascadeMenuItem";
+import _CascadeRootItem from "./CascadeRootItem";
 
 const MenuBarItem = menuItem(_MenuBarItem);
-const MenuBarCascadeMenuItem = menuItem(_MenuBarCascadeMenuItem);
+const CascadeRootItem = menuItem(_CascadeRootItem);
 
 const xs = 12,
   sm = 4,
   md = 3,
-  lg = 2,
-  fullWidth = 12;
+  lg = 2;
+
+const header = document.getElementById("header");
 
 const styles = theme => ({
-  container: {
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    outline: "none",
-    minHeight: "80%",
-    marginTop: "5%",
-    marginBottom: "5%",
-    [theme.breakpoints.down("xs")]: {
-      height: "100%",
-      overflow: "scroll",
-      marginTop: 0,
-      marginBottom: 0
-    }
-  },
-  menuItem: {
-    height: theme.spacing(20),
-    maxWidth: theme.spacing(30),
-    minWidth: theme.spacing(22),
-    margin: theme.spacing(1),
-    backgroundColor: "rgba(38, 44, 44, 0)",
-    cursor: "pointer",
-    [theme.breakpoints.down("xs")]: {
-      height: "100%"
-    }
-  },
-
   root: {
     padding: "2px 4px",
     display: "flex",
@@ -73,18 +49,17 @@ class MenuBarView extends React.PureComponent {
     const { localObserver } = this.props;
     if (item.menu && item.menu.length > 0) {
       return (
-        <MenuBarCascadeMenuItem
+        <CascadeRootItem
           localObserver={localObserver}
-          menuItems={item.menu}
-          title={item.title}
-        ></MenuBarCascadeMenuItem>
+          item={item}
+        ></CascadeRootItem>
       );
     } else if (item.document) {
       return (
         <MenuBarItem
           type="document"
           localObserver={localObserver}
-          title={item.title}
+          item={item}
         ></MenuBarItem>
       );
     } else if (item.link) {
@@ -92,7 +67,7 @@ class MenuBarView extends React.PureComponent {
         <MenuBarItem
           type="link"
           localObserver={localObserver}
-          title={item.title}
+          item={item}
         ></MenuBarItem>
       );
     } else if (item.maplink) {
@@ -100,7 +75,7 @@ class MenuBarView extends React.PureComponent {
         <MenuBarItem
           type="maplink"
           localObserver={localObserver}
-          title={item.title}
+          item={item}
         ></MenuBarItem>
       );
     }
@@ -117,12 +92,11 @@ class MenuBarView extends React.PureComponent {
     while (currentMenu && currentMenu.containingMenu && currentMenu.parent) {
       currentMenu = currentMenu.parent;
     }
-    console.log(currentMenu, "currentMenu");
     return currentMenu.containingMenu;
   };
 
   render() {
-    const { classes, activeMenuSection } = this.props;
+    const { classes } = this.props;
     var menu = this.getMenuTree();
 
     return ReactDOM.createPortal(
@@ -131,7 +105,7 @@ class MenuBarView extends React.PureComponent {
           return this.renderMenuItem(item);
         })}
       </Paper>,
-      document.getElementById("header")
+      header
     );
   }
 }

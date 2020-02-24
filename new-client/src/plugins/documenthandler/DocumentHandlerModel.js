@@ -27,9 +27,7 @@ export default class DocumentHandlerModel {
       const text = await response.text();
       const document = await JSON.parse(text);
       callback(document);
-    } catch (err) {
-      console.log(err, "err");
-    }
+    } catch (err) {}
   }
 
   setParentChapter(chapter, parent) {
@@ -55,9 +53,7 @@ export default class DocumentHandlerModel {
       });
 
       callback(document);
-    } catch (err) {
-      console.log(err, "err");
-    }
+    } catch (err) {}
   }
   /**
    * Returns the global Map object.
