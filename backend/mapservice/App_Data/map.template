@@ -50,17 +50,6 @@
         ]
       },
       "index": 1
-    },
-    {
-      "type": "simple_layerswitcher",
-      "options": {
-        "target": "left",
-        "abstract": "Välj innehåll att visa i kartan",
-        "title": "Innehållet",
-        "visibleAtStart": false,
-        "visibleForGroups": []
-      },
-      "index": 0
     }
   ],
   "map": {
