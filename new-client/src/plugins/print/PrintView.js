@@ -10,15 +10,17 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Backdrop,
-  CircularProgress,
-  Typography
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText
 } from "@material-ui/core";
 
 import * as jsPDF from "jspdf";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
-
 import Vector from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
 import Polygon from "ol/geom/Polygon";
@@ -31,16 +33,6 @@ const styles = theme => ({
   root: {
     display: "flex",
     flexWrap: "wrap"
-  },
-  backdrop: {
-    zIndex: theme.zIndex.drawer + 1,
-    color: "#fff",
-    display: "flex",
-    flexDirection: "column"
-  },
-  backdropText: {
-    marginTop: theme.spacing(3),
-    fontStyle: "italic"
   },
   formControl: {
     margin: theme.spacing(1),
@@ -81,6 +73,12 @@ class PrintView extends React.PureComponent {
     a4: [297, 210],
     a5: [210, 148]
   };
+
+  // Used to store some values that will be needed for resetting the map
+  valuesToRestoreFrom = {};
+
+  // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
+  pdfCreationCancelled = null;
 
   constructor(props) {
     super(props);
@@ -231,7 +229,20 @@ class PrintView extends React.PureComponent {
         originalCenter
       );
 
+    // Save some of our values that are neccessary to use if user want to cancel the process
+    this.valuesToRestoreFrom = {
+      size,
+      originalCenter,
+      originalResolution,
+      scaleResolution,
+      snackbarKey
+    };
+
     this.map.once("rendercomplete", async () => {
+      if (this.pdfCreationCancelled === true) {
+        this.pdfCreationCancelled = false;
+        return false;
+      }
       // This is needed to prevent some buggy output from some browsers
       // when a lot of tiles are being rendered (it could result in black
       // canvas PDF)
@@ -319,6 +330,34 @@ class PrintView extends React.PureComponent {
     this.map.getView().setCenter(printCenter);
     this.map.getView().setResolution(scaleResolution);
   };
+
+  /**
+   * @summary Make it possible to cancel a printout by clicking a button.
+   *
+   */
+  cancelPrint = () => {
+    // Set this flag to prevend "rendercomplete" from firing
+    this.pdfCreationCancelled = true;
+
+    // Reset map to how it was before print
+    this.previewLayer.setVisible(true);
+    this.map.setSize(this.valuesToRestoreFrom.size);
+    this.map
+      .getView()
+      .setResolution(this.valuesToRestoreFrom.originalResolution);
+    this.map.getView().setCenter(this.valuesToRestoreFrom.originalCenter);
+
+    // Print done, hide messages
+    this.props.closeSnackbar(this.valuesToRestoreFrom.snackbarKey);
+    this.props.enqueueSnackbar(
+      "Du avbröt utskriften – ingen data har sparats",
+      {
+        variant: "warning"
+      }
+    );
+    this.setState({ printInProgress: false });
+  };
+
   /**
    * @summary Take care of handling state of our resolution and format dropdowns.
    *
@@ -338,15 +377,30 @@ class PrintView extends React.PureComponent {
     return (
       <>
         {createPortal(
-          <Backdrop
+          <Dialog
+            disableBackdropClick={true}
+            disableEscapeKeyDown={true}
             open={this.state.printInProgress}
-            className={classes.backdrop}
           >
-            <CircularProgress color="inherit" />
-            <Typography className={classes.backdropText} variant="h5">
-              Din PDF skapas…
-            </Typography>
-          </Backdrop>,
+            <LinearProgress />
+            <DialogTitle>Din PDF skapas</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Det här kan ta en stund, speciellt om du har valt ett stort
+                format (A2-A3) och hög upplösning (>72 dpi). Men när allt är
+                klart kommer PDF-filen att laddas ner till din dator.
+                <br />
+                <br />
+                Om du inte vill vänta längre kan du avbryta utskriften genom att
+                trycka på knappen nedan.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button variant="contained" onClick={this.cancelPrint}>
+                Avbryt
+              </Button>
+            </DialogActions>
+          </Dialog>,
           document.getElementById("root")
         )}
         <form className={classes.root} autoComplete="off">
