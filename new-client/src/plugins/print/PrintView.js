@@ -1,5 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
+import { delay } from "../../utils/Delay";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
@@ -230,7 +231,12 @@ class PrintView extends React.PureComponent {
         originalCenter
       );
 
-    this.map.once("rendercomplete", () => {
+    this.map.once("rendercomplete", async () => {
+      // This is needed to prevent some buggy output from some browsers
+      // when a lot of tiles are being rendered (it could result in black
+      // canvas PDF)
+      await delay(500);
+
       const mapCanvas = document.createElement("canvas");
       mapCanvas.width = width;
       mapCanvas.height = height;
