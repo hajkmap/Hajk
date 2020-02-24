@@ -1630,7 +1630,7 @@ class Menu extends Component {
       this.setState({
         alert: true,
         alertMessage:
-          "En eller flera ogiltiga tecken har angivits. Giltiga tecken 0-9, a-z, A-Z, _"
+          "Ett eller flera ogiltiga tecken har angivits. Giltiga tecken 0-9, a-z, A-Z, _"
       });
     }
   }
