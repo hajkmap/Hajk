@@ -330,6 +330,10 @@ body.dragging * {
   overflow: hidden;
 }
 
+.nav-tabs .nav-link.active {
+  background-color: #f8f8f8;
+}
+
 .tab-pane-bar {
   margin: 0 0 18px 0;
 }
