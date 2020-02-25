@@ -260,10 +260,10 @@ namespace MapService.Components
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
                 // x y
                 this.drawText(gfx, fontName, String.Format("Skala 1:{0}", exportItem.scale), 40, (int)page.Height.Point - 30, 5); //skala 1:xx
-                gfx.DrawLine(XPens.Black, new XPoint(40, (int)page.Height.Point - 26), new XPoint(40 + displayLength, (int)page.Height.Point - 18)); //scalebar
+                gfx.DrawLine(XPens.Black, new XPoint(40, (int)page.Height.Point - 26), new XPoint(40 + displayLength, (int)page.Height.Point - 26)); //scalebar
                 gfx.DrawLine(XPens.Black, new XPoint(40, (int)page.Height.Point - 23), new XPoint(40, (int)page.Height.Point - 29)); //left
-                gfx.DrawLine(XPens.Black, new XPoint(40 + displayLength / 2, (int)page.Height.Point - 25), new XPoint(40 + displayLength / 2, (int)page.Height.Point - 19)); //middle
-                gfx.DrawLine(XPens.Black, new XPoint(40 + displayLength, (int)page.Height.Point - 23), new XPoint(40 + displayLength, (int)page.Height.Point - 21)); //right
+                gfx.DrawLine(XPens.Black, new XPoint(40 + displayLength / 2, (int)page.Height.Point - 25), new XPoint(40 + displayLength / 2, (int)page.Height.Point - 27)); //middle
+                gfx.DrawLine(XPens.Black, new XPoint(40 + displayLength, (int)page.Height.Point - 23), new XPoint(40 + displayLength, (int)page.Height.Point - 29)); //right
                 this.drawText(gfx, fontName, displayText, 45 + displayLength, (int)page.Height.Point - 26, 5); //text "X m" next to the scale bar
 
                 var y = (int)page.Height.Point - 2;
