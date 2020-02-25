@@ -304,17 +304,40 @@ var ExportModel = {
     return data;
   },
 
+    checkLayerResolution: function (layer, scale) {
+        var maxResPasses = true;
+        var minResPasses = true;
+
+        if (layer.get('minResolution') > 0 || layer.get('maxResolution') > 0) {
+            var scale = scale * 0.00028; // Convert to m/pixel
+
+            if (scale > layer.get('maxResolution')) {
+                maxResPasses = false;
+            }
+            if (scale < layer.get('minResolution')) {
+                minResPasses = false;
+            }
+        }
+
+        if (maxResPasses === false || minResPasses === false) {
+            return false;
+        }
+
+        return true;
+    },
+
   /**
    * Find WMS layer to export in the map.
    * @instance
    * @return {object[]} wms layers
    */
-  findWMS: function () {
+  findWMS: function (scale) {
     var exportable = layer =>
       (layer instanceof ol.layer.Tile || layer instanceof ol.layer.Image) && (
         layer.getSource() instanceof ol.source.TileWMS ||
     layer.getSource() instanceof ol.source.ImageWMS) &&
-    layer.getVisible();
+    layer.getVisible() &&
+    this.checkLayerResolution(layer, scale);
 
     var formatUrl = url =>
       /^\//.test(url)
@@ -744,7 +767,7 @@ var ExportModel = {
       };
 
     data.vectorLayers = this.findVector() || [];
-    data.wmsLayers = this.findWMS() || [];
+    data.wmsLayers = this.findWMS(options.scale) || [];
     data.wmtsLayers = this.findWMTS() || [];
     data.arcgisLayers = this.findArcGIS() || [];
 
