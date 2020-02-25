@@ -241,7 +241,8 @@
               },
               {
                 "displayName": "AVGÅNG",
-                "key": "EarliestDepartureTimeAtToStopPoint"
+                "key": "EarliestDepartureTimeAtToStopPoint",
+                "displayFormat": "YYYY-MM-DD hh:mm"
               }
             ]
           },

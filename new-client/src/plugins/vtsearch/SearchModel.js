@@ -249,6 +249,284 @@ export default class SearchModel {
   }
 
   /**
+   * Private method that
+   * @param {Object} featureCollection The feature collection with wrong display formats for some attributes.
+   * @param {Object} attributesToDisplay Settings with which attributes that should be displayed in a certain manner.
+   *
+   * @memberof SearchModel
+   */
+  updateDisplayFormat(featureCollection, attributesToDisplay) {
+    let columnsToChangeDisplayFormat = this.getColumsToChangeDisplayFormatFor(
+      attributesToDisplay
+    );
+
+    let fc = this.changeDisplayFormat(
+      featureCollection,
+      columnsToChangeDisplayFormat
+    );
+    return featureCollection;
+  }
+
+  /**
+   * Private help method that finds which columns that should be modified.
+   * @param {Object} attributesToDisplay
+   *
+   * @memberof SearchModel
+   */
+  getColumsToChangeDisplayFormatFor(attributesToDisplay) {
+    let columnsToChangeDisplayFormat = attributesToDisplay.filter(attribute => {
+      let attributeProperties = Object.keys(attribute);
+      if (attributeProperties.includes("displayFormat")) return true;
+      return false;
+    });
+
+    return columnsToChangeDisplayFormat;
+  }
+
+  /**
+   * Private help method that updates the value of specific columns according to the new display format.
+   * @param {Object} featureCollection The feature collection with wrong display formats for some attributes.
+   * @param {Object} columnsDisplayFormat Settings with which attributes that should be displayed in a certain manner.
+   *
+   * @memberof SearchModel
+   */
+  changeDisplayFormat(featureCollection, columnsDisplayFormat) {
+    if (featureCollection.features.length === 0) return featureCollection;
+
+    let formatChangeNames = this.filterColumnsDisplayFormat(
+      featureCollection,
+      columnsDisplayFormat
+    );
+
+    featureCollection.features.forEach(feature => {
+      formatChangeNames.forEach(formatChangeName => {
+        feature.properties[formatChangeName.key] = this.formatDate(
+          feature.properties[formatChangeName.key],
+          formatChangeName.displayFormat
+        );
+      });
+    });
+
+    return featureCollection;
+  }
+
+  /**
+   * Private help method that filters all columns that can be found in the feature collection.
+   * @param {Object} featureCollection The feature collection with wrong display formats for some attributes.
+   * @param {Object} columnsDisplayFormat Settings with which attributes that should be displayed in a certain manner.
+   *
+   * @memberof SearchModel
+   */
+  filterColumnsDisplayFormat(featureCollection, columnsDisplayFormat) {
+    let firstFeature = featureCollection.features[0];
+    let featurePropertyNames = Object.keys(firstFeature.properties);
+    let formatChangeNames = columnsDisplayFormat.filter(
+      attributesToDisplayFormat => {
+        for (
+          let indexPropertyName = 0;
+          indexPropertyName < featurePropertyNames.length;
+          indexPropertyName++
+        )
+          if (
+            featurePropertyNames[indexPropertyName] ===
+            attributesToDisplayFormat.key
+          )
+            return true;
+      }
+    );
+
+    return formatChangeNames;
+  }
+
+  /**
+   * Format the date from the current format of YYYY-MM-DDThh:mm:ssZ to a dateFormat.
+   * @param {String} originalDate The date.
+   * @param {String} dateFormat The date format.
+   *
+   * @memberof SearchModel
+   */
+  formatDate(originalDate, dateFormat) {
+    const year = originalDate.substring(0, 4);
+    const month = originalDate.substring(5, 7);
+    const day = originalDate.substring(8, 10);
+    const hours = originalDate.substring(11, 13);
+    const minutes = originalDate.substring(14, 16);
+    const seconds = originalDate.substring(17, 19);
+
+    let dateParts = dateFormat.split(/[^A-Za-z]/);
+    let dateSeparators = dateFormat.split(/[A-Za-z]/);
+    dateSeparators = dateSeparators.filter(x => x);
+    let pointCounter = 0;
+    let currentDateSeparator = dateSeparators.shift();
+    let newDate = "";
+    let answerDatePart;
+    dateParts.forEach(datePart => {
+      answerDatePart = this.addDatePart(
+        newDate,
+        originalDate,
+        datePart,
+        "YYYY",
+        year,
+        currentDateSeparator,
+        pointCounter
+      );
+      if (answerDatePart.dateUpdated) {
+        newDate = answerDatePart.newDate;
+        pointCounter = answerDatePart.pointCounter;
+        if (answerDatePart.addedSeparator)
+          currentDateSeparator = dateSeparators.shift();
+      }
+
+      answerDatePart = this.addDatePart(
+        newDate,
+        originalDate,
+        datePart,
+        "YY",
+        year,
+        currentDateSeparator,
+        pointCounter
+      );
+      if (answerDatePart.dateUpdated) {
+        newDate = answerDatePart.newDate;
+        pointCounter = answerDatePart.pointCounter;
+        if (answerDatePart.addedSeparator)
+          currentDateSeparator = dateSeparators.shift();
+      }
+
+      answerDatePart = this.addDatePart(
+        newDate,
+        originalDate,
+        datePart,
+        "MM",
+        month,
+        currentDateSeparator,
+        pointCounter
+      );
+      if (answerDatePart.dateUpdated) {
+        newDate = answerDatePart.newDate;
+        pointCounter = answerDatePart.pointCounter;
+        if (answerDatePart.addedSeparator)
+          currentDateSeparator = dateSeparators.shift();
+      }
+
+      answerDatePart = this.addDatePart(
+        newDate,
+        originalDate,
+        datePart,
+        "DD",
+        day,
+        currentDateSeparator,
+        pointCounter
+      );
+      if (answerDatePart.dateUpdated) {
+        newDate = answerDatePart.newDate;
+        pointCounter = answerDatePart.pointCounter;
+        if (answerDatePart.addedSeparator)
+          currentDateSeparator = dateSeparators.shift();
+      }
+
+      answerDatePart = this.addDatePart(
+        newDate,
+        originalDate,
+        datePart,
+        "hh",
+        hours,
+        currentDateSeparator,
+        pointCounter
+      );
+      if (answerDatePart.dateUpdated) {
+        newDate = answerDatePart.newDate;
+        pointCounter = answerDatePart.pointCounter;
+        if (answerDatePart.addedSeparator)
+          currentDateSeparator = dateSeparators.shift();
+      }
+
+      answerDatePart = this.addDatePart(
+        newDate,
+        originalDate,
+        datePart,
+        "mm",
+        minutes,
+        currentDateSeparator,
+        pointCounter
+      );
+      if (answerDatePart.dateUpdated) {
+        newDate = answerDatePart.newDate;
+        pointCounter = answerDatePart.pointCounter;
+        if (answerDatePart.addedSeparator)
+          currentDateSeparator = dateSeparators.shift();
+      }
+
+      answerDatePart = this.addDatePart(
+        newDate,
+        originalDate,
+        datePart,
+        "ss",
+        seconds,
+        currentDateSeparator,
+        pointCounter
+      );
+      if (answerDatePart.dateUpdated) {
+        newDate = answerDatePart.newDate;
+        pointCounter = answerDatePart.pointCounter;
+        if (answerDatePart.addedSeparator)
+          currentDateSeparator = dateSeparators.shift();
+      }
+    });
+
+    return newDate;
+  }
+
+  /**
+   * Private help method that adds a part to the new date.
+   * @param {string} newDate The new date that we wants to build up.
+   * @param {string} originalDate The original date.
+   * @param {string} datePart The current part we are investigating.
+   * @param {string} dateFormat The current date format we are comparing towards.
+   * @param {string} dateValue The current date value that matches the format.
+   * @param {string} currentDateSeparator The current date separator.
+   * @param {int} pointCounter The current pointer in the date format.
+   *
+   * @memberof SearchModel
+   */
+  addDatePart(
+    newDate,
+    originalDate,
+    datePart,
+    dateFormat,
+    dateValue,
+    currentDateSeparator,
+    pointCounter
+  ) {
+    let dateUpdated = false;
+    let addedSeparator = false;
+    if (datePart === dateFormat) {
+      dateUpdated = true;
+      newDate =
+        dateValue.length > dateFormat.length
+          ? newDate + (dateValue % 1000)
+          : newDate + dateValue;
+      pointCounter = pointCounter + dateValue.length;
+      if (
+        originalDate.substring(pointCounter, pointCounter + 1).match(/[^0-9]/)
+      ) {
+        addedSeparator = true;
+        newDate = currentDateSeparator
+          ? newDate + currentDateSeparator
+          : newDate;
+        pointCounter = pointCounter + currentDateSeparator?.length;
+      }
+    }
+
+    return {
+      dateUpdated: dateUpdated,
+      newDate: newDate,
+      pointCounter: pointCounter,
+      addedSeparator: addedSeparator
+    };
+  }
+
+  /**
    * Private method that swaps all coordinates in a WKT polygon so that Sql Server can read them correctly. Otherwise will
    * the N- and E-coordinates be swapped.
    * @param {string} polygonAsWkt The polygon as a WKT.
@@ -599,6 +877,11 @@ export default class SearchModel {
           );
           journeys.featureCollection = this.removeDuplicates(
             journeys.featureCollection
+          );
+          /*journeys.featureCollection = */
+          this.updateDisplayFormat(
+            journeys.featureCollection,
+            this.geoServer.journeys.attributesToDisplay
           );
 
           this.localObserver.publish("vtsearch-result-done", journeys);
