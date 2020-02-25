@@ -173,7 +173,12 @@ class AttributeTable extends React.Component {
   };
 
   render() {
-    const { resultListHeight, windowWidth, searchResult } = this.props;
+    const {
+      resultListHeight,
+      windowWidth,
+      searchResult,
+      rowHeight
+    } = this.props;
 
     return (
       <Paper style={{ height: resultListHeight }}>
@@ -189,6 +194,7 @@ class AttributeTable extends React.Component {
             scrollToIndex={this.state.focusedRow}
             scrollToAlignment="center"
             selectedRow={this.state.selectedRow}
+            rowHeight={rowHeight}
           />
         ) : (
           <Paper style={{ height: resultListHeight, width: windowWidth }}>

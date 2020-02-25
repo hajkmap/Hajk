@@ -20,6 +20,16 @@ class SummaryTable extends React.Component {
     rows: this.getRows()
   };
 
+  constructor(props) {
+    super(props);
+    this.height = this.getSummarizationHeight() + "px";
+  }
+
+  getSummarizationHeight() {
+    const { rowHeight } = this.props;
+    return this.getSummarization().length * rowHeight + 50;
+  }
+
   getColumns() {
     return [
       {
@@ -97,12 +107,16 @@ class SummaryTable extends React.Component {
   }
 
   render = () => {
-    const { classes, windowWidth } = this.props;
+    const { classes, windowWidth, rowHeight } = this.props;
     console.log(this.state, "thisstate");
     return (
-      <Paper className={classes.paper} style={{ width: windowWidth }}>
+      <Paper
+        className={classes.paper}
+        style={{ width: windowWidth, height: this.height }}
+      >
         <VirtualizedTable
           rowCount={this.state.rows.length}
+          rowHeight={rowHeight}
           rowGetter={({ index }) => this.state.rows[index]}
           columns={this.getColumns()}
           sortable={false}
