@@ -13,6 +13,8 @@ import Grid from "@material-ui/core/Grid";
  * @extends {React.PureComponent}
  */
 
+const rowHeight = 30;
+
 class TabPanel extends React.PureComponent {
   static propTypes = {
     activeTabId: PropTypes.number.isRequired,
@@ -45,6 +47,7 @@ class TabPanel extends React.PureComponent {
               localObserver={localObserver}
               height={100}
               searchResult={searchResult}
+              rowHeight={rowHeight}
             ></SummaryTable>
           </Grid>
         )}
@@ -54,6 +57,7 @@ class TabPanel extends React.PureComponent {
             toolConfig={toolConfig}
             resultListHeight={resultListHeight}
             localObserver={localObserver}
+            rowHeight={rowHeight}
           ></AttributeTable>
         </Grid>
       </Grid>
