@@ -169,7 +169,7 @@
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "instruction": "",
-        "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
+        "visibleForGroups": []
       },
       "index": 1
     },
@@ -185,17 +185,6 @@
         "visibleForGroups": []
       },
       "index": 2
-    },
-    {
-      "type": "simple_layerswitcher",
-      "options": {
-        "target": "left",
-        "abstract": "Välj innehåll att visa i kartan",
-        "title": "Innehållet",
-        "visibleAtStart": false,
-        "visibleForGroups": []
-      },
-      "index": 0
     },
     {
       "type": "draw",
