@@ -44,10 +44,7 @@
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "instruction": "",
-        "visibleForGroups": [
-          "Office-SEKSD01",
-          "All-SE129"
-        ]
+        "visibleForGroups": []
       },
       "index": 1
     }
@@ -80,10 +77,10 @@
       8500000.0
     ],
     "extent": [
-      -1200000.0,
-      4700000.0,
-      2600000.0,
-      8500000.0
+      218128.7031,
+      6126002.9379,
+      1083427.2970,
+      7692850.9468
     ],
     "constrainOnlyCenter": true,
     "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
