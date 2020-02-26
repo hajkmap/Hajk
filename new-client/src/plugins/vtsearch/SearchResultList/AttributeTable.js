@@ -123,7 +123,7 @@ class AttributeTable extends React.Component {
     var compareOne = null;
     var compareTwo = null;
     var rowsToBeSorted = this.state.rows;
-    var sortByNumber = rowsToBeSorted[0][sortBy].match(/[^0-9]/) ? false : true;
+    var sortByNumber = typeof rowsToBeSorted[0][sortBy] === "number";
 
     if (sortByNumber) {
       rowsToBeSorted.sort((a, b) => {
