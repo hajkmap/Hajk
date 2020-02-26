@@ -61,7 +61,7 @@ const getWindowContainerHeight = () => {
   return windowsContainer.getClientRects()[0].height;
 };
 
-const initialResultListHeight = 350;
+const initialResultListHeight = 520;
 
 /**
  * @summary SearchResultListContainer is the core container for the GUI used for showing search results
