@@ -35,6 +35,7 @@ class ToolOptions extends Component {
       //z index: 0,
       //z target: "toolbar",
       //z instruction: "",
+      visibleAtStart: false,
       visibleForGroups: [],
       editing: null,
       showResults: false
@@ -55,6 +56,7 @@ class ToolOptions extends Component {
         // height: tool.options.height,
         //z instruction: tool.options.instruction,
         presetList: tool.options.presetList || [],
+        visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -567,6 +569,19 @@ class ToolOptions extends Component {
           </div>
           <div className="separator">Övriga inställningar</div>
  */}
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           {this.renderVisibleForGroups()}
           <div>
             <div>
