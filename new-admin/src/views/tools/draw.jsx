@@ -34,6 +34,7 @@ var defaultState = {
   proxyUrl: "",
   base64Encode: false,
   instruction: "",
+  visibleAtStart: false,
   visibleForGroups: []
 };
 
@@ -63,6 +64,7 @@ class ToolOptions extends Component {
         proxyUrl: tool.options.proxyUrl,
         base64Encode: tool.options.base64Encode,
         instruction: tool.options.instruction,
+        visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -139,6 +141,7 @@ class ToolOptions extends Component {
         instruction: this.state.instruction,
         icons: this.state.icons,
         proxyUrl: this.state.proxyUrl,
+        visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -350,6 +353,19 @@ class ToolOptions extends Component {
             />
           </div>
           <div className="separator">Övriga inställningar</div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           <div>
             <label htmlFor="exportUrl">URL till export-tjänst</label>
             <input
