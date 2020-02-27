@@ -28,6 +28,7 @@ var defaultState = {
   active: false,
   index: 0,
   target: "toolbar",
+  visibleAtStart: false,
   visibleForGroups: []
 };
 
@@ -51,6 +52,7 @@ class ToolOptions extends Component {
         position: tool.options.position,
         width: tool.options.width,
         height: tool.options.height,
+        visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -116,6 +118,7 @@ class ToolOptions extends Component {
         position: this.state.position,
         width: this.state.width,
         height: this.state.height,
+        visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -327,7 +330,20 @@ class ToolOptions extends Component {
               value={this.state.height}
             />
           </div>
-          {/* <div className="separator">Övriga inställningar</div> */}
+          <div className="separator">Övriga inställningar</div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           {this.renderVisibleForGroups()}
         </form>
       </div>

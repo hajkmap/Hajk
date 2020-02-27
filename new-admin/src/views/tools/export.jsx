@@ -37,6 +37,7 @@ var defaultState = {
   instruction: "",
   scales: "250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000",
   proxyUrl: "",
+  visibleAtStart: false,
   visibleForGroups: []
 };
 
@@ -69,6 +70,7 @@ class ToolOptions extends Component {
         proxyUrl: tool.options.proxyUrl,
         instruction: tool.options.instruction,
         scales: tool.options.scales || this.state.scales,
+        visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -147,6 +149,7 @@ class ToolOptions extends Component {
         scales: this.state.scales,
         proxyUrl: this.state.proxyUrl,
         instruction: this.state.instruction,
+        visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -359,6 +362,19 @@ class ToolOptions extends Component {
             />
           </div>
           <div className="separator">Övriga inställningar</div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           <div>
             <label htmlFor="scales">Skalor</label>
             <input
