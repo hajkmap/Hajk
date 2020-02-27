@@ -217,7 +217,6 @@
       },
       "index": 5
     },
-
     {
       "type": "information",
       "options": {
@@ -277,8 +276,141 @@
     {
       "type": "documenthandler",
       "options": {
-        "target": "toolbar"
+        "target": "toolbar",
+        "menuConfig": {
+          "menu": [
+            {
+              "title": "Markanvändnings karta",
+              "document": "x",
+              "color": "#bfe4f2",
+              "description": "",
+              "icon": "",
+              "maplink": "",
+              "link": "",
+              "menu": [
+                {
+                  "title": "Utvecklingsalternativ",
+                  "document": "",
+                  "color": "#bfe4f2",
+                  "maplink": "",
+                  "link": "",
+                  "menu": [
+                    {
+                      "title": "Centrala Göteborg",
+                      "document": "",
+                      "color": "#f8ccdc",
+                      "maplink": "",
+                      "link": "http://goteborg.se"
+                    },
+                    {
+                      "title": "Frölunda Högsbo",
+                      "document": "x",
+                      "color": "#b7e1c8",
+                      "maplink": "x",
+                      "link": ""
+                    },
+                    {
+                      "title": "Torsviken",
+                      "document": "x",
+                      "color": "#b7e1c8",
+                      "maplink": "",
+                      "link": ""
+                    },
+                    {
+                      "title": "Södra skärgården",
+                      "document": "x",
+                      "color": "#b7e1c8",
+                      "maplink": "",
+                      "link": ""
+                    }
+                  ]
+                },
+                {
+                  "title": "Test",
+                  "document": "x",
+                  "color": "#b7e1c8",
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            },
+            {
+              "title": "Utgångspunkter",
+              "document": "x",
+              "color": "#b7e1c8",
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Geografiska inriktningar",
+              "document": "x",
+              "color": "#b7e1c8",
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Tematiska anspråk",
+              "document": "x",
+              "color": "#bfe4f2",
+              "maplink": "",
+              "link": "",
+              "menu": [
+                {
+                  "title": "Utvecklingsalternativ",
+                  "document": "",
+                  "color": "#f5bf42",
+                  "maplink": "",
+                  "link": ""
+                },
+                {
+                  "title": "Test",
+                  "document": "x",
+                  "color": "#b7e1c8",
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            },
+            {
+              "title": "Genomförande",
+              "document": "x",
+              "color": "#b7e1c8",
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Genomförande",
+              "document": "x",
+              "color": "#b7e1c8",
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Testarbarr",
+              "document": "x",
+              "color": "#b7e1c8",
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Testarbarr22222",
+              "document": "x",
+              "color": "#b7e1c8",
+              "maplink": "",
+              "link": "",
+              "menu": []
+            }
+          ]
+        }
       },
+
       "index": 8
     },
     {
@@ -313,6 +445,19 @@
         "selectedSources": ["30", "27", "32", "34", "33", "14", "18"]
       },
       "index": 7
+    },
+    {
+      "type": "preset",
+      "options": {
+        "presetList": [
+          {
+            "name": "Test",
+            "presetUrl": "http://localhost:3000/?m=map_1&x=319771&y=6399959&z=8&l=36&clean=false"
+          }
+        ],
+        "visibleForGroups": []
+      },
+      "index": 0
     }
   ],
   "map": {

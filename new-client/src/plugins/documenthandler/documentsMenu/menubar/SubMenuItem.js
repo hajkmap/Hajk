@@ -29,7 +29,7 @@ class SubMenuItem extends React.PureComponent {
   };
 
   render() {
-    const { item } = this.props;
+    const { item, localObserver } = this.props;
     return (
       <>
         <Grid item>
@@ -39,11 +39,12 @@ class SubMenuItem extends React.PureComponent {
           </MenuItem>
         </Grid>
         <CascadeMenu
+          localObserver={localObserver}
           menuOpen={this.state.menuOpen}
           items={item.menu}
           anchorEl={this.state.anchorEl}
           onClose={this.onClose}
-          verticalAnchor="bottom"
+          verticalAnchor="top"
           horizontalAnchor="right"
         />
       </>

@@ -5,16 +5,11 @@ import { withSnackbar } from "notistack";
 import Grid from "@material-ui/core/Grid";
 import { Paper } from "@material-ui/core";
 import menuItem from "../MenuItemHOC";
-import _MenuBarItem from "./MenuBarItem";
-import _CascadeRootItem from "./CascadeRootItem";
+import BarMenuItemPartialFunctionality from "./BarMenuItem";
+import CascadeRootItemPartialFunctionality from "./CascadeRootItem";
 
-const MenuBarItem = menuItem(_MenuBarItem);
-const CascadeRootItem = menuItem(_CascadeRootItem);
-
-const xs = 12,
-  sm = 4,
-  md = 3,
-  lg = 2;
+const BarMenuItem = menuItem(BarMenuItemPartialFunctionality);
+const CascadeRootItem = menuItem(CascadeRootItemPartialFunctionality);
 
 const header = document.getElementById("header");
 
@@ -29,61 +24,52 @@ const styles = theme => ({
   }
 });
 
-class MenuBarView extends React.PureComponent {
-  state = {
-    menu: this.props.activeMenuSection
-  };
-
+class BarMenuView extends React.PureComponent {
   static propTypes = {};
   static defaultProps = {};
 
-  renderMenuItem = item => {
+  componentDidMount = () => {
+    const { removeMapBlur } = this.props;
+    removeMapBlur();
+  };
+
+  getMenuItemType = (item, key, type) => {
+    const { localObserver } = this.props;
     return (
-      <Grid key={item.title} zeroMinWidth item xs={xs} sm={sm} md={md} lg={lg}>
-        {this.getMenuItem(item)}
-      </Grid>
+      <BarMenuItem
+        key={key}
+        type={type}
+        localObserver={localObserver}
+        item={item}
+      ></BarMenuItem>
     );
   };
 
-  getMenuItem = item => {
+  getCascadeMenuItem = (item, key) => {
     const { localObserver } = this.props;
+    return (
+      <CascadeRootItem
+        key={key}
+        localObserver={localObserver}
+        item={item}
+      ></CascadeRootItem>
+    );
+  };
+
+  getMenuItem = (item, reactKey) => {
     if (item.menu && item.menu.length > 0) {
-      return (
-        <CascadeRootItem
-          localObserver={localObserver}
-          item={item}
-        ></CascadeRootItem>
-      );
+      return this.getCascadeMenuItem(item, reactKey);
     } else if (item.document) {
-      return (
-        <MenuBarItem
-          type="document"
-          localObserver={localObserver}
-          item={item}
-        ></MenuBarItem>
-      );
+      return this.getMenuItemType(item, reactKey, "document");
     } else if (item.link) {
-      return (
-        <MenuBarItem
-          type="link"
-          localObserver={localObserver}
-          item={item}
-        ></MenuBarItem>
-      );
+      return this.getMenuItemType(item, reactKey, "link");
     } else if (item.maplink) {
-      return (
-        <MenuBarItem
-          type="maplink"
-          localObserver={localObserver}
-          item={item}
-        ></MenuBarItem>
-      );
+      return this.getMenuItemType(item, reactKey, "maplink");
     }
   };
 
   getSubMenu = () => {
     var subMenu = this.getMenuTree()[1];
-
     return subMenu ? subMenu : null;
   };
 
@@ -101,13 +87,15 @@ class MenuBarView extends React.PureComponent {
 
     return ReactDOM.createPortal(
       <Paper className={classes.root}>
-        {menu.map(item => {
-          return this.renderMenuItem(item);
-        })}
+        <Grid container alignItems="stretch">
+          {menu.map((item, index) => {
+            return this.getMenuItem(item, index);
+          })}
+        </Grid>
       </Paper>,
       header
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(MenuBarView));
+export default withStyles(styles)(withSnackbar(BarMenuView));

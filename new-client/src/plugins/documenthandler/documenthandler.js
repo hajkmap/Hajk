@@ -1,14 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-import OverlayView from "./documentsMenu/overlaymenu/OverlayView";
+import OverlayMenuViewPartialFunctionality from "./documentsMenu/overlaymenu/OverlayMenuView";
 import menuComponent from "./documentsMenu/MenuViewHOC";
-import _MenuBarView from "./documentsMenu/menubar/MenuBarView";
+import BarMenuViewPartialFunctionality from "./documentsMenu/menubar/BarMenuView";
 import Observer from "react-event-observer";
 import Hidden from "@material-ui/core/Hidden";
 
-const OverlayViewMenu = menuComponent(OverlayView);
-const MenuBarView = menuComponent(_MenuBarView);
+const OverlayMenuView = menuComponent(OverlayMenuViewPartialFunctionality);
+const BarMenuView = menuComponent(BarMenuViewPartialFunctionality);
 
 class DocumentHandler extends React.PureComponent {
   state = {};
@@ -32,16 +32,18 @@ class DocumentHandler extends React.PureComponent {
     return (
       <>
         <Hidden xlUp>
-          <OverlayViewMenu
+          <OverlayMenuView
             app={this.props.app}
+            initialMenu={this.props.options.menuConfig}
             localObserver={this.localObserver}
-          ></OverlayViewMenu>
+          ></OverlayMenuView>
         </Hidden>
         <Hidden lgDown>
-          <MenuBarView
+          <BarMenuView
             app={this.props.app}
+            initialMenu={this.props.options.menuConfig}
             localObserver={this.localObserver}
-          ></MenuBarView>
+          ></BarMenuView>
         </Hidden>
         <DocumentWindowBase
           {...this.props}

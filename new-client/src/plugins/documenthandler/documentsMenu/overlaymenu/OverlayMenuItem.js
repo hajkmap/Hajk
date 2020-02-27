@@ -36,7 +36,7 @@ class OverlayMenuItem extends React.PureComponent {
   render() {
     const {
       classes,
-      color,
+
       item,
       toggleHighlight,
       highlighted,
@@ -47,7 +47,7 @@ class OverlayMenuItem extends React.PureComponent {
       <>
         <Paper
           onClick={handleMenuButtonClick}
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: item.color }}
           onMouseEnter={toggleHighlight}
           onMouseLeave={toggleHighlight}
           className={

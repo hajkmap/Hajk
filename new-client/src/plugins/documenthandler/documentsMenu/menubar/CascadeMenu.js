@@ -4,25 +4,30 @@ import { withSnackbar } from "notistack";
 import Menu from "@material-ui/core/Menu";
 import SubMenuItem from "./SubMenuItem";
 import menuItem from "../MenuItemHOC";
-import _MenuBarItem from "./MenuBarItem";
-import _CascadeRootItem from "./CascadeRootItem";
+import MenuBarItemPartialFunctionality from "./BarMenuItem";
+import StrippedCascadeRootItemPartialFunctionality from "./CascadeRootItem";
 import Grid from "@material-ui/core/Grid";
 
-const MenuBarItem = menuItem(_MenuBarItem);
-const CascadeRootItem = menuItem(_CascadeRootItem);
+const BarMenuItem = menuItem(MenuBarItemPartialFunctionality);
+const CascadeRootItem = menuItem(StrippedCascadeRootItemPartialFunctionality);
 
-const styles = theme => ({});
+const styles = theme => ({
+  noPadding: {
+    padding: 0
+  }
+});
 
 class CascadeMenu extends React.PureComponent {
   static propTypes = {};
   static defaultProps = {};
 
   renderMenuItems = () => {
-    const { items } = this.props;
+    const { items, localObserver } = this.props;
     return items.map(item => {
       if (item.menu && item.menu.length > 0) {
         return (
           <SubMenuItem
+            localObserver={localObserver}
             key={item.title}
             getMenuItem={this.getMenuItem}
             item={item}
@@ -38,39 +43,36 @@ class CascadeMenu extends React.PureComponent {
     });
   };
 
-  getMenuItem = item => {
+  getMenuItemType = (item, type) => {
     const { localObserver } = this.props;
+    return (
+      <BarMenuItem
+        type={type}
+        localObserver={localObserver}
+        item={item}
+      ></BarMenuItem>
+    );
+  };
+
+  getCascadeMenuItem = item => {
+    const { localObserver } = this.props;
+    return (
+      <CascadeRootItem
+        localObserver={localObserver}
+        item={item}
+      ></CascadeRootItem>
+    );
+  };
+
+  getMenuItem = item => {
     if (item.menu && item.menu.length > 0) {
-      return (
-        <CascadeRootItem
-          localObserver={localObserver}
-          item={item}
-        ></CascadeRootItem>
-      );
+      return this.getCascadeMenuItem(item);
     } else if (item.document) {
-      return (
-        <MenuBarItem
-          type="document"
-          localObserver={localObserver}
-          item={item}
-        ></MenuBarItem>
-      );
+      return this.getMenuItemType(item, "document");
     } else if (item.link) {
-      return (
-        <MenuBarItem
-          type="link"
-          localObserver={localObserver}
-          item={item}
-        ></MenuBarItem>
-      );
+      return this.getMenuItemType(item, "link");
     } else if (item.maplink) {
-      return (
-        <MenuBarItem
-          type="maplink"
-          localObserver={localObserver}
-          item={item}
-        ></MenuBarItem>
-      );
+      return this.getMenuItemType(item, "maplink");
     }
   };
 
@@ -81,13 +83,15 @@ class CascadeMenu extends React.PureComponent {
       horizontalAnchor,
       items,
       menuOpen,
-      onClose
+      onClose,
+      classes
     } = this.props;
 
     return (
       <>
         <Menu
           id="simple-menu"
+          classes={{ list: classes.noPadding }}
           getContentAnchorEl={null}
           anchorOrigin={{
             vertical: verticalAnchor,

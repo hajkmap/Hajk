@@ -1,81 +1,111 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import menuItem from "../MenuItemHOC";
+import HeaderView from "../HeaderView";
+import Modal from "@material-ui/core/Modal";
+import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
+import menuItem from "../MenuItemHOC";
+import OverlayMenuItemStripped from "./OverlayMenuItem";
 
-import _OverlayMenuItem from "./OverlayMenuItem";
-const OverlayMenuItem = menuItem(_OverlayMenuItem);
+const OverlayMenuItem = menuItem(OverlayMenuItemStripped);
 
-const styles = theme => ({});
+const styles = theme => ({
+  container: {
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    outline: "none",
+    minHeight: "80%",
+    marginTop: "5%",
+    marginBottom: "5%",
+    [theme.breakpoints.down("xs")]: {
+      height: "100%",
+      overflow: "scroll",
+      marginTop: 0,
+      marginBottom: 0
+    }
+  }
+});
+
+const fullWidth = 12;
 
 const xs = 12,
   sm = 4,
   md = 3,
   lg = 2;
 
-class MenuView extends React.PureComponent {
+class OverlayView extends React.PureComponent {
+  state = {
+    open: true
+  };
+
   static propTypes = {};
   static defaultProps = {};
 
-  getMenuItem = item => {
+  close = () => {
+    this.setState({ open: false });
+  };
+
+  getMenuItemType = (item, type) => {
     const { localObserver } = this.props;
+    return (
+      <OverlayMenuItem
+        type={type}
+        item={item}
+        localObserver={localObserver}
+      ></OverlayMenuItem>
+    );
+  };
+
+  getMenuItem = (item, reactKey) => {
     if (item.menu && item.menu.length > 0) {
-      return (
-        <OverlayMenuItem
-          type="cascade"
-          item={item}
-          localObserver={localObserver}
-          color="#456576"
-        ></OverlayMenuItem>
-      );
+      return this.getMenuItemType(item, "cascade");
     } else if (item.document) {
-      return (
-        <OverlayMenuItem
-          type="document"
-          item={item}
-          localObserver={localObserver}
-          color="#458876"
-        ></OverlayMenuItem>
-      );
+      return this.getMenuItemType(item, "document");
     } else if (item.link) {
-      return (
-        <OverlayMenuItem
-          type="link"
-          item={item}
-          localObserver={localObserver}
-          color="#458876"
-        ></OverlayMenuItem>
-      );
+      return this.getMenuItemType(item, "link");
     } else if (item.maplink) {
-      return (
-        <OverlayMenuItem
-          type="maplink"
-          item={item}
-          localObserver={localObserver}
-        ></OverlayMenuItem>
-      );
+      return this.getMenuItemType(item, "maplink");
     }
   };
 
-  renderMenuItem = item => {
+  renderMenuItem = (item, reactKey) => {
     return (
-      <Grid key={item.title} zeroMinWidth item xs={xs} sm={sm} md={md} lg={lg}>
+      <Grid key={reactKey} zeroMinWidth item xs={xs} sm={sm} md={md} lg={lg}>
         {this.getMenuItem(item)}
       </Grid>
     );
   };
 
   render() {
-    const { activeMenuSection } = this.props;
+    const { classes, localObserver, activeMenuSection } = this.props;
+    const { open } = this.state;
+
+    open ? this.props.addMapBlur() : this.props.removeMapBlur();
+
     return (
       <>
-        {activeMenuSection.map(item => {
-          return this.renderMenuItem(item);
-        })}
+        <Modal
+          className={classes.modal}
+          onBackdropClick={this.close}
+          open={open}
+        >
+          <Container className={classes.container} fixed>
+            <Grid zeroMinWidth item xs={fullWidth}>
+              <HeaderView
+                activeMenuSection={activeMenuSection}
+                localObserver={localObserver}
+              ></HeaderView>
+            </Grid>
+            <Grid container>
+              {activeMenuSection.map((item, index) => {
+                return this.renderMenuItem(item, index);
+              })}
+            </Grid>
+          </Container>
+        </Modal>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(MenuView));
+export default withStyles(styles)(withSnackbar(OverlayView));

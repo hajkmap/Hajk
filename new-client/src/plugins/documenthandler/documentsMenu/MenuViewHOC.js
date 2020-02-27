@@ -1,96 +1,24 @@
 import React from "react";
 import DocumentHandlerModel from "../DocumentHandlerModel";
-
-const menuJson = {
-  menu: [
-    {
-      title: "Markanvändningskarta",
-      document: "x",
-      color: "#",
-      description: "",
-      icon: "",
-      maplink: "",
-      link: "",
-      menu: [
-        {
-          title: "Utvecklingsalternativ",
-          document: "",
-          maplink: "",
-          link: "",
-          menu: [
-            {
-              title: "Centrala Göteborg",
-              document: "x",
-              maplink: "x",
-              link: ""
-            },
-            {
-              title: "Frölunda Högsbo",
-              document: "x",
-              maplink: "x",
-              link: ""
-            },
-            {
-              title: "Torsviken",
-              document: "x",
-              maplink: "",
-              link: ""
-            },
-            {
-              title: "Södra skärgården",
-              document: "x",
-              maplink: "",
-              link: ""
-            }
-          ]
-        },
-        {
-          title: "Test",
-          document: "x",
-          maplink: "",
-          link: "",
-          menu: []
-        }
-      ]
-    },
-    {
-      title: "Utgångspunkter",
-      document: "x",
-      maplink: "",
-      link: "",
-      menu: []
-    },
-    {
-      title: "Geografiska inriktningar",
-      document: "x",
-      maplink: "",
-      link: "",
-      menu: []
-    },
-    {
-      title: "Tematiska anspråk",
-      document: "x",
-      maplink: "",
-      link: "",
-      menu: []
-    },
-    {
-      title: "Genomförande",
-      document: "x",
-      maplink: "",
-      link: "",
-      menu: []
-    }
-  ]
-};
-
+const mapDiv = document.getElementById("map");
+const blurCss = "filter : blur(7px)";
 const menuViewHoc = MenuComponent =>
   class WithMenuFunctionality extends React.Component {
-    state = {
-      activeDocument: null,
-      activeMenuSection: menuJson.menu,
-      activeChapterLevel: null
-    };
+    constructor(props) {
+      super(props);
+      console.log(props, "props");
+
+      this.documentHandlerModel = new DocumentHandlerModel();
+      this.state = { activeMenuSection: this.props.initialMenu.menu };
+      this.props.initialMenu.menu.forEach(menuItem => {
+        this.setParentAndContainingMenu(
+          menuItem,
+          this.props.initialMenu.menu,
+          undefined
+        );
+      });
+      this.bindSubscriptions();
+    }
 
     setParentAndContainingMenu(menuItem, containingMenu, parent) {
       menuItem.parent = parent;
@@ -103,23 +31,19 @@ const menuViewHoc = MenuComponent =>
       }
     }
 
-    constructor(props) {
-      super(props);
-      this.documentHandlerModel = new DocumentHandlerModel();
-      //this.fetchMenuStructure();
-
-      menuJson.menu.forEach(menuItem => {
-        this.setParentAndContainingMenu(menuItem, menuJson.menu, undefined);
-      });
-
-      this.bindSubscriptions();
-    }
-
     getSubMenu = title => {
       var menuItem = this.state.activeMenuSection.find(menuItem => {
         return menuItem.title === title;
       });
       return menuItem.menu;
+    };
+
+    removeMapBlur = () => {
+      mapDiv.removeAttribute("style", blurCss);
+    };
+
+    addMapBlur = () => {
+      mapDiv.setAttribute("style", blurCss);
     };
 
     bindSubscriptions = () => {
@@ -133,13 +57,13 @@ const menuViewHoc = MenuComponent =>
         this.setState({ activeMenuSection: activeMenuSection });
       });
 
-      localObserver.subscribe("open-link", item => {
-        console.log(item, "OPENLINK");
+      localObserver.subscribe("link-clicked", item => {
+        window.open(item.link, "_blank");
       });
-    };
 
-    fetchMenuStructure = () => {
-      this.setState({ activeMenuSection: null }, () => {});
+      localObserver.subscribe("maplink-clicked", item => {
+        console.log("maplink clicked");
+      });
     };
 
     render() {
@@ -147,6 +71,8 @@ const menuViewHoc = MenuComponent =>
 
       return (
         <MenuComponent
+          removeMapBlur={this.removeMapBlur}
+          addMapBlur={this.addMapBlur}
           getMenuItem={this.getMenuItem}
           activeMenuSection={this.state.activeMenuSection}
           localObserver={localObserver}
