@@ -24,9 +24,6 @@ import { Map, View } from "ol";
 // ZoomSlider,
 // ZoomToExtent
 // } from "ol/control";
-import CanvasScaleLine from "ol-ext/control/CanvasScaleLine";
-import CanvasAttribution from "ol-ext/control/CanvasAttribution";
-import CenterPosition from "ol-ext/control/CenterPosition";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
@@ -168,11 +165,8 @@ class AppModel {
    */
   createMap() {
     var config = this.translateConfig();
-
     map = new Map({
       controls: [
-        new CanvasScaleLine(),
-        new CenterPosition()
         // new FullScreen({ target: document.getElementById("controls-column") }),
         // new Rotate({ target: document.getElementById("controls-column") }),
         // new MousePosition({
@@ -201,12 +195,6 @@ class AppModel {
         zoom: config.map.zoom
       })
     });
-
-    // CanvasAttribution control
-    const attributionControl = new CanvasAttribution();
-    map.addControl(attributionControl);
-    attributionControl.setCanvas(true);
-
     setTimeout(() => {
       map.updateSize();
     }, 0);
