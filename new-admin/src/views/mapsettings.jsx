@@ -1616,14 +1616,23 @@ class Menu extends Component {
 
   createMap() {
     var name = this.refs.mapName.value;
-    this.props.model.createMap(name, () => {
-      this.setState({
-        content: "mapsettings",
-        alert: true,
-        alertMessage: "En ny karta skapades utan problem."
+    var result = /[^0-9a-zA-Z_]/.test(name);
+    if (!result) {
+      this.props.model.createMap(name, () => {
+        this.setState({
+          content: "mapsettings",
+          alert: true,
+          alertMessage: "En ny karta skapades utan problem."
+        });
+        this.load("maps");
       });
-      this.load("maps");
-    });
+    } else {
+      this.setState({
+        alert: true,
+        alertMessage:
+          "Ett eller flera ogiltiga tecken har angivits. Giltiga tecken 0-9, a-z, A-Z, _"
+      });
+    }
   }
 
   /**
