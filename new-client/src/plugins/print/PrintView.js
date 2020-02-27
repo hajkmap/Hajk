@@ -15,7 +15,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  DialogContentText
+  DialogContentText,
+  TextField
 } from "@material-ui/core";
 
 import * as jsPDF from "jspdf";
@@ -28,6 +29,12 @@ import Feature from "ol/Feature.js";
 import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
+
+// import CanvasScaleLine from "ol-ext/control/CanvasScaleLine";
+// import CanvasAttribution from "ol-ext/control/CanvasAttribution";
+// import CenterPosition from "ol-ext/control/CenterPosition";
+
+import "ol-ext/dist/ol-ext.css";
 
 const styles = theme => ({
   root: {
@@ -56,7 +63,8 @@ class PrintView extends React.PureComponent {
     format: "a4", // a0-a5
     orientation: "landscape",
     resolution: 150, // 72, 150, 300,
-    scale: 10, // 0.5, 1, 2.5, 5, 10, 25, 50, 100, 200 (e.g. 1:10 000, 1:25 000, etc)
+    scale: 10000, // 0.5, 1, 2.5, 5, 10, 25, 50, 100, 200 (e.g. 1:10 000, 1:25 000, etc)
+    mapTitle: "",
     printInProgress: false,
     previewLayerVisible: false
   };
@@ -74,6 +82,26 @@ class PrintView extends React.PureComponent {
     a5: [210, 148]
   };
 
+  // Default scales, used if none supplied in options
+  scales = [
+    100,
+    250,
+    500,
+    1000,
+    2500,
+    5000,
+    10000,
+    25000,
+    50000,
+    100000,
+    200000,
+    500000
+  ];
+
+  getUserFriendlyScale = scale => {
+    return `1:${Number(scale).toLocaleString("sv-SE")}`;
+  };
+
   // Used to store some values that will be needed for resetting the map
   valuesToRestoreFrom = {};
 
@@ -86,6 +114,22 @@ class PrintView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
     this.map = this.props.map;
+
+    // Prepare scales from admin options, fallback to default if needed
+    if (typeof props?.options?.scales !== "string") {
+      // We expect a string from admin, if we don't get it, use hard-coded defaults
+      props.options.scales = this.scales;
+    } else {
+      // If we have a string, remove all whitespace in it and split into an Array
+      props.options.scales = props.options.scales.replace(/\s/g, "").split(",");
+    }
+    // If no valid max logo width is supplied, use a hard-coded default
+    props.options.logoMaxWidth =
+      typeof props.options?.logoMaxWidth === "number"
+        ? props.options.logoMaxWidth
+        : 40;
+
+    this.options = props.options;
 
     // Add the preview layer to map (it doesn't contain any features yet!)
     this.addPreviewLayer();
@@ -132,7 +176,7 @@ class PrintView extends React.PureComponent {
   };
 
   addPreview() {
-    const scale = this.state.scale * 1000;
+    const scale = this.state.scale;
     const format = this.state.format;
     const orientation = this.state.orientation;
 
@@ -192,9 +236,46 @@ class PrintView extends React.PureComponent {
       this.removePreview();
     }
   };
+  /**
+   * @summary Returns a Promise which resolves if image loading succeeded.
+   * @description The Promise will contain an object with data blob of the loaded image. If loading fails, the Promise rejects
+   *
+   * @param {*} url
+   * @returns {Promise}
+   */
+  getImageDataBlogFromUrl = url => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.setAttribute("crossOrigin", "anonymous"); //getting images from external domain
+
+      // We must resolve the promise even if
+      image.onerror = function(err) {
+        reject(err);
+      };
+
+      // When load succeeds
+      image.onload = function() {
+        const imgCanvas = document.createElement("canvas");
+        imgCanvas.width = this.naturalWidth;
+        imgCanvas.height = this.naturalHeight;
+
+        // Draw the image on canvas so that we can read the data blob later on
+        imgCanvas.getContext("2d").drawImage(this, 0, 0);
+
+        resolve({
+          data: imgCanvas.toDataURL("image/png"), // read data blob fron canvas
+          width: imgCanvas.width, // also return dimensions so we can use them later
+          height: imgCanvas.height
+        });
+      };
+
+      // Go, load!
+      image.src = url;
+    });
+  };
 
   initiatePrint = () => {
-    // Print star, tell the user
+    // Print starts, tell the user
     this.setState({ printInProgress: true });
     const snackbarKey = this.props.enqueueSnackbar(
       "Utskrift pågår – var god vänta…",
@@ -204,11 +285,11 @@ class PrintView extends React.PureComponent {
       }
     );
 
-    // Read current dropdown values)
+    // Read current dropdown values
     const format = this.state.format;
     const orientation = this.state.orientation;
     const resolution = this.state.resolution;
-    const scale = this.state.scale;
+    const scale = this.state.scale / 1000;
 
     // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
     const dim =
@@ -229,7 +310,7 @@ class PrintView extends React.PureComponent {
         originalCenter
       );
 
-    // Save some of our values that are neccessary to use if user want to cancel the process
+    // Save some of our values that are necessary to use if user want to cancel the process
     this.valuesToRestoreFrom = {
       size,
       originalCenter,
@@ -243,16 +324,24 @@ class PrintView extends React.PureComponent {
         this.pdfCreationCancelled = false;
         return false;
       }
+
+      // TODO: Add some canvas controls that should be printed
+      // CanvasScaleLine control
+      // const scaleLineControl = new CanvasScaleLine();
+      // this.map.addControl(scaleLineControl);
+
       // This is needed to prevent some buggy output from some browsers
       // when a lot of tiles are being rendered (it could result in black
       // canvas PDF)
       await delay(500);
 
+      // Create the map canvas that will hold all of our map tiles
       const mapCanvas = document.createElement("canvas");
       mapCanvas.width = width;
       mapCanvas.height = height;
       const mapContext = mapCanvas.getContext("2d");
 
+      // Each canvas element inside OpenLayer's viewport should get printed
       document.querySelectorAll(".ol-viewport canvas").forEach(canvas => {
         if (canvas.width > 0) {
           const opacity = canvas.parentNode.style.opacity;
@@ -273,6 +362,7 @@ class PrintView extends React.PureComponent {
         }
       });
 
+      // Initiate the PDF object
       const pdf = new jsPDF({
         orientation,
         format,
@@ -280,24 +370,56 @@ class PrintView extends React.PureComponent {
         compress: true
       });
 
-      pdf.addImage(
-        // mapCanvas.toDataURL("image/jpeg"),
-        mapCanvas,
-        "JPEG",
-        0,
-        0,
-        dim[0],
-        dim[1]
-      );
+      // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
+      pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
 
-      pdf.setFontSize(10);
+      // If logo URL is provided, add the logo to the map
+      if (this.options.logo.trim().length >= 5) {
+        try {
+          // Use the supplied logo URL to get img data blob and dimensions
+          const { data, width, height } = await this.getImageDataBlogFromUrl(
+            this.options.logo
+          );
+
+          // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
+          const ratio = this.options.logoMaxWidth / width;
+          const newWidth = width * ratio;
+          const newHeight = height * ratio;
+
+          pdf.addImage(
+            data,
+            "PNG",
+            pdf.internal.pageSize.width - newWidth - 6,
+            4,
+            newWidth,
+            newHeight
+          );
+        } catch (error) {
+          // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
+          this.props.enqueueSnackbar(
+            "Felaktiga inställningar för logotyp. Var god meddela administratören.",
+            { variant: "warning" }
+          );
+        }
+      }
+
+      // Add scale text
+      pdf.setFontSize(8);
       pdf.setTextColor(100);
       pdf.text(
-        `Skala: 1:${Number(scale * 1000).toLocaleString("sv-SE")}`,
-        10,
-        pdf.internal.pageSize.height - 10
+        `Skala: ${this.getUserFriendlyScale(scale * 1000)}`,
+        6,
+        pdf.internal.pageSize.height - 4
       );
-      pdf.text("Test string", 0, 0);
+
+      // Add map title if user supplied one
+      if (this.state.mapTitle.trim().length > 0) {
+        pdf.setFontSize(24);
+        pdf.setTextColor(100);
+        pdf.text(this.state.mapTitle, 6, 12);
+      }
+
+      // Finally, save the PDF, add a timestamp to filename
       pdf.save(`Hajk - ${new Date().toLocaleString()}.pdf`);
 
       // Reset map to how it was before print
@@ -326,6 +448,7 @@ class PrintView extends React.PureComponent {
     // Hide our preview feature so it won't get printed
     this.previewLayer.setVisible(false);
 
+    // Set map size and resolution
     this.map.setSize(printSize);
     this.map.getView().setCenter(printCenter);
     this.map.getView().setResolution(scaleResolution);
@@ -336,7 +459,7 @@ class PrintView extends React.PureComponent {
    *
    */
   cancelPrint = () => {
-    // Set this flag to prevend "rendercomplete" from firing
+    // Set this flag to prevent "rendercomplete" from firing
     this.pdfCreationCancelled = true;
 
     // Reset map to how it was before print
@@ -459,18 +582,29 @@ class PrintView extends React.PureComponent {
                 id: "scale"
               }}
             >
-              <MenuItem value={0.1}>1:100</MenuItem>
-              <MenuItem value={0.25}>1:250</MenuItem>
-              <MenuItem value={0.5}>1:500</MenuItem>
-              <MenuItem value={1}>1:1 000</MenuItem>
-              <MenuItem value={2.5}>1:2 500</MenuItem>
-              <MenuItem value={5}>1:5 000</MenuItem>
-              <MenuItem value={10}>1:10 000</MenuItem>
-              <MenuItem value={25}>1:25 000</MenuItem>
-              <MenuItem value={50}>1:50 000</MenuItem>
-              <MenuItem value={100}>1:100 000</MenuItem>
-              <MenuItem value={200}>1:200 000</MenuItem>
+              {this.options.scales.map((scale, i) => {
+                // Note: it is crucial to keep the scale value (in state) diveded by 1000 from what is shown to user!
+                return (
+                  <MenuItem key={i} value={scale}>
+                    {this.getUserFriendlyScale(scale)}
+                  </MenuItem>
+                );
+              })}
             </Select>
+          </FormControl>
+
+          <FormControl className={classes.formControl}>
+            <TextField
+              value={this.state.mapTitle}
+              onChange={this.handleChange}
+              label="Valfri titel"
+              placeholder="Kan lämnas tomt"
+              variant="standard"
+              inputProps={{
+                id: "mapTitle",
+                name: "mapTitle"
+              }}
+            />
           </FormControl>
           <FormControl className={classes.formControl}>
             <Button
