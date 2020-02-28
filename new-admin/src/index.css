@@ -56,6 +56,10 @@ article label.full {
   width: 300px;
 }
 
+.long-label {
+  white-space: nowrap;
+}
+
 article input[type="text"] {
   width: 400px;
   margin-right: 5px;
@@ -698,6 +702,19 @@ figure img {
   overflow: auto;
 }
 
+.control-fixed {
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.control-fixed-width {
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+  width: 150px;
+}
+
 #map {
   border-bottom: 1px solid;
   margin-left: 250px;
@@ -782,4 +799,8 @@ figure img {
 }
 .separator::after {
   margin-left: 0.25em;
+}
+
+.separator.set-width {
+  width: 930px;
 }

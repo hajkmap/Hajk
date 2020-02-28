@@ -310,8 +310,8 @@ class VectorLayerForm extends Component {
       }
       this.setState({
         capabilities: capabilities,
-        projection: this.state.projection || (projection || ""),
-        legend: this.state.legend || (capabilities.legend || ""),
+        projection: this.state.projection || projection || "",
+        legend: this.state.legend || capabilities.legend || "",
         load: false
       });
 
@@ -534,11 +534,13 @@ class VectorLayerForm extends Component {
     return (
       <fieldset>
         <legend>Vektor-lager</legend>
+        <div className="separator">Anslutning</div>
         <div>
           <label>Dataformat*</label>
           <select
             ref="input_dataFormat"
             value={this.state.dataFormat}
+            className="control-fixed-width"
             onChange={e => {
               this.setState({
                 dataFormat: e.target.value
@@ -548,21 +550,6 @@ class VectorLayerForm extends Component {
             <option>WFS</option>
             <option>GeoJSON</option>
           </select>
-        </div>
-        <div>
-          <label>Visningsnamn*</label>
-          <input
-            type="text"
-            ref="input_caption"
-            value={this.state.caption}
-            className={this.getValidationClass("caption")}
-            onChange={e => {
-              const v = e.target.value;
-              this.setState({ caption: v }, () =>
-                this.validateField("caption")
-              );
-            }}
-          />
         </div>
         <div>
           <label>Url*</label>
@@ -585,23 +572,12 @@ class VectorLayerForm extends Component {
             Ladda {loader}
           </span>
         </div>
+        <div className="separator">Tillgängliga lager</div>
         <div>
-          <label>Senast ändrad</label>
-          <span ref="input_date">
-            <i>{this.props.model.parseDate(this.state.date)}</i>
-          </span>
+          <label>Lagerlista</label>
+          {this.renderLayerList()}
         </div>
-        <div>
-          <label>Innehåll</label>
-          <input
-            type="text"
-            ref="input_content"
-            value={this.state.content}
-            onChange={e => {
-              this.setState({ content: e.target.value });
-            }}
-          />
-        </div>
+        <div className="separator">Hantera valda lager</div>
         <div>
           <label>Valt lager*</label>
           <div
@@ -612,8 +588,67 @@ class VectorLayerForm extends Component {
           </div>
         </div>
         <div>
-          <label>Lagerlista</label>
-          {this.renderLayerList()}
+          <label>Visningsnamn*</label>
+          <input
+            type="text"
+            ref="input_caption"
+            value={this.state.caption}
+            className={this.getValidationClass("caption")}
+            onChange={e => {
+              const v = e.target.value;
+              this.setState({ caption: v }, () =>
+                this.validateField("caption")
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Projektion*</label>
+          <input
+            type="text"
+            ref="input_projection"
+            value={this.state.projection}
+            className={this.getValidationClass("projection")}
+            onChange={e => {
+              const v = e.target.value;
+              this.setState({ projection: v }, () =>
+                this.validateField("projection")
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Opacitet*</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="1"
+            ref="input_opacity"
+            value={this.state.opacity}
+            className={
+              (this.getValidationClass("opacity"), "control-fixed-width")
+            }
+            onChange={e => {
+              const v = e.target.value;
+              this.setState({ opacity: v }, () =>
+                this.validateField("opacity")
+              );
+            }}
+          />
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_queryable"
+            id="queryable"
+            onChange={e => {
+              this.setState({ queryable: e.target.checked });
+            }}
+            checked={this.state.queryable}
+          />
+          &nbsp;
+          <label htmlFor="queryable">Infoklickbar</label>
         </div>
         <div>
           <label>Inforuta</label>
@@ -622,6 +657,20 @@ class VectorLayerForm extends Component {
             value={this.state.infobox}
             onChange={e => this.setState({ infobox: e.target.value })}
           />
+        </div>
+        <div className="separator">Filtrering</div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_filterable"
+            id="filterable"
+            onChange={e => {
+              this.setState({ filterable: e.target.checked });
+            }}
+            checked={this.state.filterable}
+          />
+          &nbsp;
+          <label htmlFor="filterable">Filterbar</label>
         </div>
         <div>
           <label>Filterattribut</label>
@@ -639,6 +688,7 @@ class VectorLayerForm extends Component {
           <select
             ref="input_filterComparer"
             value={this.state.filterComparer}
+            className="control-fixed-width"
             onChange={e => {
               this.setState({
                 filterComparer: e.target.value
@@ -662,6 +712,7 @@ class VectorLayerForm extends Component {
             }}
           />
         </div>
+        <div className="separator">Inställningar för objekt</div>
         <div>
           <label>Ikon</label>
           <input
@@ -717,6 +768,7 @@ class VectorLayerForm extends Component {
           <select
             ref="input_pointSize"
             value={this.state.pointSize}
+            className="control-fixed-width"
             onChange={e => {
               this.setPointSize(e);
             }}
@@ -733,6 +785,7 @@ class VectorLayerForm extends Component {
           <select
             ref="input_lineWidth"
             value={this.state.lineWidth}
+            className="control-fixed-width"
             onChange={e => {
               this.setLineWidth(e);
             }}
@@ -748,6 +801,7 @@ class VectorLayerForm extends Component {
           <select
             ref="input_lineStyle"
             value={this.state.lineStyle}
+            className="control-fixed-width"
             onChange={e => {
               this.setLineStyle(e);
             }}
@@ -757,29 +811,47 @@ class VectorLayerForm extends Component {
             <option value="dot">Punktad</option>
           </select>
         </div>
-        <div>
-          <label>Linjefärg</label>
-          <SketchPicker
-            color={this.state.lineColor}
-            onChangeComplete={color => this.setLineColor(color.rgb)}
-          />
+        <div className="clearfix">
+          <span className="pull-left">
+            <label>Fyllnadsfärg</label>
+            <br />
+            <SketchPicker
+              color={this.state.fillColor}
+              onChangeComplete={color => this.setFillColor(color.rgb)}
+            />
+          </span>
+          <span className="pull-left" style={{ marginLeft: "10px" }}>
+            <label>Linjefärg</label>
+            <br />
+            <SketchPicker
+              color={this.state.lineColor}
+              onChangeComplete={color => this.setLineColor(color.rgb)}
+            />
+          </span>
         </div>
+        <div className="separator">Inställningar för etiketter</div>
         <div>
-          <label>Fyllnadsfärg</label>
-          <SketchPicker
-            color={this.state.fillColor}
-            onChangeComplete={color => this.setFillColor(color.rgb)}
-          />
-        </div>
-        <div>
-          <label>Visa etikett</label>
           <input
             type="checkbox"
             ref="input_showLabels"
+            id="showLabels"
             onChange={e => {
               this.setState({ showLabels: e.target.checked });
             }}
             checked={this.state.showLabels}
+          />
+          &nbsp;
+          <label htmlFor="showLabels">Visa etikett</label>
+        </div>
+        <div>
+          <label>Attribut för text</label>
+          <input
+            type="text"
+            ref="input_labelAttribute"
+            value={this.state.labelAttribute}
+            onChange={e => {
+              this.setState({ labelAttribute: e.target.value });
+            }}
           />
         </div>
         <div>
@@ -787,6 +859,7 @@ class VectorLayerForm extends Component {
           <select
             ref="input_labelAlign"
             value={this.state.labelAlign}
+            className="control-fixed-width"
             onChange={e => {
               this.setLabelAlign(e);
             }}
@@ -802,6 +875,7 @@ class VectorLayerForm extends Component {
           <select
             ref="input_labelBaseline"
             value={this.state.labelBaseline}
+            className="control-fixed-width"
             onChange={e => {
               this.setLabelBaseline(e);
             }}
@@ -852,6 +926,7 @@ class VectorLayerForm extends Component {
           <select
             ref="input_labelWeight"
             value={this.state.labelWeight}
+            className="control-fixed-width"
             onChange={e => {
               this.setLabelWeight(e);
             }}
@@ -865,6 +940,7 @@ class VectorLayerForm extends Component {
           <select
             ref="input_labelFont"
             value={this.state.labelFont}
+            className="control-fixed-width"
             onChange={e => {
               this.setLabelFont(e);
             }}
@@ -875,99 +951,60 @@ class VectorLayerForm extends Component {
             <option value="Verdana">Verdana</option>
           </select>
         </div>
-        <div>
-          <label>Fyllnadsfärg (text)</label>
-          <SketchPicker
-            color={this.state.labelFillColor}
-            onChangeComplete={color => this.setLabelFillColor(color.rgb)}
-          />
-        </div>
-        <div>
-          <label>Kantlinjefärg (text)</label>
-          <SketchPicker
-            color={this.state.labelOutlineColor}
-            onChangeComplete={color => this.setLabelOutlineColor(color.rgb)}
-          />
-        </div>
+        <div className="separator">Etikettfärger</div>
         <div>
           <label>Kantlinjebredd (text)</label>
           <input
-            type="text"
+            type="number"
+            min="0"
             ref="input_labelOutlineWidth"
             value={this.state.labelOutlineWidth}
+            className="control-fixed-width"
             onChange={e => {
               this.setState({ labelOutlineWidth: e.target.value });
             }}
           />
         </div>
+        <div className="clearfix">
+          <span className="pull-left">
+            <label>Fyllnadsfärg (text)</label>
+            <br />
+            <SketchPicker
+              color={this.state.labelFillColor}
+              onChangeComplete={color => this.setLabelFillColor(color.rgb)}
+            />
+          </span>
+          <span className="pull-left" style={{ marginLeft: "10px" }}>
+            <label>Kantlinjefärg (text)</label>
+            <br />
+            <SketchPicker
+              color={this.state.labelOutlineColor}
+              onChangeComplete={color => this.setLabelOutlineColor(color.rgb)}
+            />
+          </span>
+        </div>
+
+        <div className="separator">Metadata</div>
         <div>
-          <label>Attribut för text</label>
+          <label>Innehåll</label>
           <input
             type="text"
-            ref="input_labelAttribute"
-            value={this.state.labelAttribute}
+            ref="input_content"
+            value={this.state.content}
             onChange={e => {
-              this.setState({ labelAttribute: e.target.value });
+              this.setState({ content: e.target.value });
             }}
           />
         </div>
         <div>
-          <label>Projektion*</label>
-          <input
-            type="text"
-            ref="input_projection"
-            value={this.state.projection}
-            className={this.getValidationClass("projection")}
-            onChange={e => {
-              const v = e.target.value;
-              this.setState({ projection: v }, () =>
-                this.validateField("projection")
-              );
-            }}
-          />
+          <label>Senast ändrad</label>
+          <span ref="input_date">
+            <i>{this.props.model.parseDate(this.state.date)}</i>
+          </span>
         </div>
-        <div>
-          <label>Opacitet*</label>
-          <input
-            type="text"
-            ref="input_opacity"
-            value={this.state.opacity}
-            className={this.getValidationClass("opacity")}
-            onChange={e => {
-              const v = e.target.value;
-              this.setState({ opacity: v }, () =>
-                this.validateField("opacity")
-              );
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="queryable">Infoklickbar</label>
-          <input
-            type="checkbox"
-            ref="input_queryable"
-            id="queryable"
-            onChange={e => {
-              this.setState({ queryable: e.target.checked });
-            }}
-            checked={this.state.queryable}
-          />
-        </div>
-        <div>
-          <label htmlFor="filterable">Filterbar</label>
-          <input
-            type="checkbox"
-            ref="input_filterable"
-            id="filterable"
-            onChange={e => {
-              this.setState({ filterable: e.target.checked });
-            }}
-            checked={this.state.filterable}
-          />
-        </div>
+
         <div className="info-container">
           <div>
-            <label htmlFor="info-document">Infodokument</label>
             <input
               type="checkbox"
               ref="input_infoVisible"
@@ -977,6 +1014,8 @@ class VectorLayerForm extends Component {
               }}
               checked={this.state.infoVisible}
             />
+            &nbsp;
+            <label htmlFor="info-document">Infodokument</label>
           </div>
           <div className={infoClass}>
             <label>Rubrik</label>

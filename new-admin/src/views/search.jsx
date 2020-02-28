@@ -673,23 +673,7 @@ class Search extends Component {
           >
             <fieldset>
               <legend>Lägg till WFS-tjänst</legend>
-              <div>
-                <label>Visningsnamn*</label>
-                <input
-                  type="text"
-                  ref="input_caption"
-                  value={this.state.caption}
-                  onChange={e => {
-                    this.setState(
-                      {
-                        caption: e.target.value
-                      },
-                      () => this.validateField("caption", true)
-                    );
-                  }}
-                  className={this.getValidationClass("caption")}
-                />
-              </div>
+              <div className="separator">Anslutning</div>
               <div>
                 <label>Url*</label>
                 <input
@@ -716,6 +700,31 @@ class Search extends Component {
                 </span>
               </div>
               <div>
+                <label>Responstyp</label>
+                <select
+                  ref="input_outputFormat"
+                  value={this.state.outputFormat}
+                  className="control-fixed-width"
+                  onChange={e => {
+                    this.setState(
+                      {
+                        outputFormat: e.target.value
+                      },
+                      () => this.validateField("outputFormat", true)
+                    );
+                  }}
+                >
+                  <option value="GML3">GML3</option>
+                  <option value="GML2">GML2</option>
+                </select>
+              </div>
+              <div className="separator">Tillgängliga lager</div>
+              <div>
+                <label>Lagerlista</label>
+                {this.renderLayerList()}
+              </div>
+              <div className="separator">Hantera valt lager</div>
+              <div>
                 <label>Valt lager*</label>
                 <div
                   ref="input_layers"
@@ -727,9 +736,23 @@ class Search extends Component {
                 </div>
               </div>
               <div>
-                <label>Lagerlista</label>
-                {this.renderLayerList()}
+                <label>Visningsnamn*</label>
+                <input
+                  type="text"
+                  ref="input_caption"
+                  value={this.state.caption}
+                  onChange={e => {
+                    this.setState(
+                      {
+                        caption: e.target.value
+                      },
+                      () => this.validateField("caption", true)
+                    );
+                  }}
+                  className={this.getValidationClass("caption")}
+                />
               </div>
+
               <div>
                 <label>Inforuta</label>
                 <textarea
@@ -798,24 +821,6 @@ class Search extends Component {
                   value={this.state.geometryField}
                   className={this.getValidationClass("geometryField")}
                 />
-              </div>
-              <div>
-                <label>Responstyp</label>
-                <select
-                  ref="input_outputFormat"
-                  value={this.state.outputFormat}
-                  onChange={e => {
-                    this.setState(
-                      {
-                        outputFormat: e.target.value
-                      },
-                      () => this.validateField("outputFormat", true)
-                    );
-                  }}
-                >
-                  <option value="GML3">GML3</option>
-                  <option value="GML2">GML2</option>
-                </select>
               </div>
             </fieldset>
             <button className="btn btn-primary">

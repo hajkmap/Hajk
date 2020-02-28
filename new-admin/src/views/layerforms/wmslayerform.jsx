@@ -373,6 +373,7 @@ class WMSLayerForm extends Component {
           </div>
           <select
             value={layerInfo.style}
+            className="control-fixed-width"
             onChange={e => {
               let addedLayersInfo = this.state.addedLayersInfo;
               addedLayersInfo[layerInfo.id].style = e.target.value;
@@ -915,7 +916,7 @@ class WMSLayerForm extends Component {
         }
         break;
       case "opacity":
-        if (isNaN(Number(value)) || value <= 0 || value >= 1) {
+        if (isNaN(Number(value)) || value < 0 || value > 1) {
           valid = false;
         }
         break;
@@ -961,11 +962,24 @@ class WMSLayerForm extends Component {
     return (
       <fieldset>
         <legend>WMS-lager</legend>
+        <div className="separator">Anslutning</div>
         <div>
-          <label>
-            <b>Url*</b>
-          </label>
-          <br />
+          <label>Servertyp</label>
+          <select
+            className="control-fixed-width"
+            style={{ width: "50%" }}
+            ref="input_serverType"
+            value={this.state.serverType}
+            onChange={e => this.setState({ serverType: e.target.value })}
+          >
+            <option>geoserver</option>
+            <option>mapserver</option>
+            <option>qgis</option>
+            <option>arcgis</option>
+          </select>
+        </div>
+        <div>
+          <label>Url*</label>
           <input
             type="text"
             ref="input_url"
@@ -985,76 +999,74 @@ class WMSLayerForm extends Component {
             Ladda {loader}
           </span>
         </div>
-        <div
-          style={{
-            background: "rgb(238, 238, 238)",
-            float: "left",
-            width: "100%"
-          }}
-        >
-          <div style={{ width: "50%", padding: "15px", float: "left" }}>
-            <label>
-              <b>Version</b>
-            </label>
-            <br />
-            <select
-              ref="input_version"
-              onChange={this.selectVersion.bind(this)}
-              value={version}
-              className="form-control"
-            >
-              {this.state.capabilitiesList.map(capa => {
-                return (
-                  <option key={capa.version} value={capa.version}>
-                    {capa.version}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div style={{ width: "50%", padding: "15px", float: "left" }}>
-            <label>
-              <b>Single tile</b>
-            </label>
-            <br />
-            <input
-              type="checkbox"
-              ref="input_singleTile"
-              onChange={e => this.setState({ singleTile: e.target.checked })}
-              checked={this.state.singleTile}
-            />
-          </div>
+        <div className="separator">Inställningar för request</div>
+        <div>
+          <label>Version</label>
+          <select
+            className="control-fixed-width"
+            style={{ width: "50%" }}
+            ref="input_version"
+            onChange={this.selectVersion.bind(this)}
+            value={version}
+          >
+            {this.state.capabilitiesList.map(capa => {
+              return (
+                <option key={capa.version} value={capa.version}>
+                  {capa.version}
+                </option>
+              );
+            })}
+          </select>
         </div>
         <div>
-          <label>
-            <b>Bildformat</b>
-          </label>
-          <br />
+          <label>Bildformat</label>
           <select
+            className="control-fixed-width"
             style={{ width: "50%" }}
             ref="input_imageFormat"
             value={this.state.imageFormat}
             onChange={e => this.setState({ imageFormat: e.target.value })}
-            className="form-control"
           >
             {this.setImageFormats()}
           </select>
         </div>
         <div>
-          <label>
-            <b>Koordinatsystem</b>
-          </label>
-          <br />
+          <label>Koordinatsystem</label>
           <select
+            className="control-fixed-width"
             style={{ width: "50%" }}
             ref="input_projection"
             value={this.state.projection !== null ? this.state.projection : ""}
             onChange={e => this.setState({ projection: e.target.value })}
-            className="form-control"
           >
             {this.setProjections()}
           </select>
         </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_singleTile"
+            id="input_singleTile"
+            onChange={e => this.setState({ singleTile: e.target.checked })}
+            checked={this.state.singleTile}
+          />
+          &nbsp;
+          <label htmlFor="input_singleTile">Single tile</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_tiled"
+            id="input_tiled"
+            onChange={e => {
+              this.setState({ tiled: e.target.checked });
+            }}
+            checked={this.state.tiled}
+          />
+          &nbsp;
+          <label htmlFor="input_tiled">GeoWebCache</label>
+        </div>
+        <div className="separator">Tillgängliga lager</div>
         <div>
           <table
             style={{
@@ -1074,11 +1086,9 @@ class WMSLayerForm extends Component {
             {this.renderLayerList()}
           </table>
         </div>
+        <div className="separator">Hantera valda lager</div>
         <div>
-          <label>
-            <b>Valda lager*</b>
-          </label>
-          <br />
+          <label>Valda lager*</label>
           <div
             ref="input_layers"
             className={
@@ -1089,10 +1099,7 @@ class WMSLayerForm extends Component {
           </div>
         </div>
         <div>
-          <label>
-            <b>Visningsnamn*</b>
-          </label>
-          <br />
+          <label>Visningsnamn*</label>
           <input
             type="text"
             ref="input_caption"
@@ -1104,49 +1111,9 @@ class WMSLayerForm extends Component {
             className={this.getValidationClass("caption")}
           />
         </div>
+
         <div>
-          <label>
-            <b>Innehåll</b>
-          </label>
-          <br />
-          <input
-            type="text"
-            ref="input_content"
-            value={this.state.content}
-            onChange={e => this.setState({ content: e.target.value })}
-            className="form-control"
-          />
-        </div>
-        <div>
-          <label>
-            <b>Senast ändrad</b>
-          </label>
-          <br />
-          <span ref="input_date">
-            <i>{this.props.model.parseDate(this.state.date)}</i>
-          </span>
-        </div>
-        <div>
-          <label>
-            <b>Upphovsrätt</b>
-          </label>
-          <br />
-          <input
-            type="text"
-            ref="input_attribution"
-            onChange={e => {
-              this.setState({ attribution: e.target.value });
-              this.validateField("attribution", e);
-            }}
-            value={this.state.attribution}
-            className={this.getValidationClass("attribution")}
-          />
-        </div>
-        <div>
-          <label>
-            <b>Teckenförklaring</b>
-          </label>
-          <br />
+          <label>Teckenförklaring</label>
           <input
             type="text"
             ref="input_legend"
@@ -1163,61 +1130,68 @@ class WMSLayerForm extends Component {
           </span>
         </div>
         <div>
-          <label>
-            <b>Infoklick-format</b>
-          </label>
-          <br />
+          <label>Infoklick-format</label>
           <select
-            style={{ width: "50%" }}
+            className="control-fixed-width"
+            style={{ width: "50%", dispaly: "in-line" }}
             ref="input_infoFormat"
             value={infoFormat}
             onChange={e => this.setState({ infoFormat: e.target.value })}
-            className="form-control"
           >
             {this.setInfoFormats()}
           </select>
         </div>
+
         <div>
-          <label>
-            <b>Servertyp</b>
-          </label>
-          <br />
-          <select
-            style={{ width: "50%" }}
-            ref="input_serverType"
-            value={this.state.serverType}
-            onChange={e => this.setState({ serverType: e.target.value })}
-            className="form-control"
-          >
-            <option>geoserver</option>
-            <option>mapserver</option>
-            <option>qgis</option>
-            <option>arcgis</option>
-          </select>
-        </div>
-        <div>
-          <label>
-            <b>Opacitet*</b>
-          </label>
-          <br />
+          <label>Opacitet*</label>
           <input
-            style={{ width: "50%" }}
             type="number"
             step="0.01"
+            min="0"
+            max="1"
             ref="input_opacity"
             value={this.state.opacity}
-            className={this.getValidationClass("opacity")}
+            className={
+              (this.getValidationClass("opacity"), "control-fixed-width")
+            }
             onChange={e => {
               this.setState({ opacity: e.target.value });
               this.validateField("opacity");
             }}
           />
         </div>
+        <div className="separator">Metadata</div>
+        <div>
+          <label>Innehåll</label>
+          <input
+            className="control-fixed-width"
+            type="text"
+            ref="input_content"
+            value={this.state.content}
+            onChange={e => this.setState({ content: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>Senast ändrad</label>
+          <span ref="input_date">
+            <i>{this.props.model.parseDate(this.state.date)}</i>
+          </span>
+        </div>
+        <div>
+          <label>Upphovsrätt</label>
+          <input
+            type="text"
+            ref="input_attribution"
+            onChange={e => {
+              this.setState({ attribution: e.target.value });
+              this.validateField("attribution", e);
+            }}
+            value={this.state.attribution}
+            className={this.getValidationClass("attribution")}
+          />
+        </div>
         <div className="info-container">
           <div>
-            <label htmlFor="info-document">
-              <b>Infodokument</b>
-            </label>
             <input
               type="checkbox"
               ref="input_infoVisible"
@@ -1227,6 +1201,8 @@ class WMSLayerForm extends Component {
               }}
               checked={this.state.infoVisible}
             />
+            &nbsp;
+            <label htmlFor="info-document">Infodokument</label>
           </div>
           <div className={infoClass}>
             <label>Rubrik</label>
@@ -1296,20 +1272,8 @@ class WMSLayerForm extends Component {
             />
           </div>
         </div>
-        <div>
-          <label>
-            <b>GeoWebCache</b>
-          </label>
-          <input
-            type="checkbox"
-            ref="input_tiled"
-            onChange={e => {
-              this.setState({ tiled: e.target.checked });
-            }}
-            checked={this.state.tiled}
-          />
-        </div>
-        <h2>Sökning</h2>
+        <div className="separator">Sökning</div>
+        {/* <h2>Sökning</h2> */}
         <div>
           <label>Url</label>
           <input

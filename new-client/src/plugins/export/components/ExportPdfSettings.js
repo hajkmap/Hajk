@@ -1,6 +1,8 @@
 import React from "react";
 import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
+import { withSnackbar } from "notistack";
+
 import {
   Paper,
   FormControl,
@@ -253,10 +255,23 @@ class ExportPdfSettings extends React.PureComponent {
     };
 
     this.props.model.exportPDF(options, pdfUrl => {
-      this.setState({
-        loading: false,
-        url: pdfUrl
-      });
+      let newState = {
+        loading: false
+      };
+
+      // Set URL in state only if respons ends with ".pdf"
+      if (pdfUrl.trimEnd().substr(-4) === ".pdf") {
+        newState["url"] = pdfUrl;
+      } else {
+        this.props.enqueueSnackbar(
+          "Utskriften kunde inte skapas. Prova med lägre upplösning, mindre område eller färre lager i kartan.",
+          {
+            variant: "error"
+          }
+        );
+      }
+
+      this.setState(newState);
     });
   };
 
@@ -415,4 +430,4 @@ class ExportPdfSettings extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(ExportPdfSettings);
+export default withStyles(styles)(withSnackbar(ExportPdfSettings));

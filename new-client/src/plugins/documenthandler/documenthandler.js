@@ -1,8 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import DocumentHandlerModel from "./DocumentHandlerModel";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
+import OverlayMenuViewPartialFunctionality from "./documentsMenu/overlaymenu/OverlayMenuView";
+import menuComponent from "./documentsMenu/MenuViewHOC";
+import BarMenuViewPartialFunctionality from "./documentsMenu/menubar/BarMenuView";
 import Observer from "react-event-observer";
+import Hidden from "@material-ui/core/Hidden";
+import MapViewModel from "./MapViewModel";
+
+const OverlayMenuView = menuComponent(OverlayMenuViewPartialFunctionality);
+const BarMenuView = menuComponent(BarMenuViewPartialFunctionality);
 
 class DocumentHandler extends React.PureComponent {
   state = {};
@@ -19,27 +26,37 @@ class DocumentHandler extends React.PureComponent {
 
   constructor(props) {
     super(props);
+
     this.localObserver = Observer();
-
-    this.localObserver.subscribe("documentHandlerEvent", message => {
-      console.log(message);
-    });
-
-    this.documentHandlerModel = new DocumentHandlerModel({
+    this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,
-      app: props.app,
       map: props.map
     });
   }
 
   render() {
     return (
-      <DocumentWindowBase
-        {...this.props}
-        model={this.DocumentHandlerModel}
-        app={this.props.app}
-        localObserver={this.localObserver}
-      ></DocumentWindowBase>
+      <>
+        <Hidden xlUp>
+          <OverlayMenuView
+            app={this.props.app}
+            initialMenu={this.props.options.menuConfig}
+            localObserver={this.localObserver}
+          ></OverlayMenuView>
+        </Hidden>
+        <Hidden lgDown>
+          <BarMenuView
+            app={this.props.app}
+            initialMenu={this.props.options.menuConfig}
+            localObserver={this.localObserver}
+          ></BarMenuView>
+        </Hidden>
+        <DocumentWindowBase
+          {...this.props}
+          app={this.props.app}
+          localObserver={this.localObserver}
+        ></DocumentWindowBase>
+      </>
     );
   }
 }

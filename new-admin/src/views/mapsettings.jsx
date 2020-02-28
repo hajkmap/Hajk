@@ -184,8 +184,13 @@ $.fn.editable = function(component) {
       });
     });
 
+    // For Group Nodes we want to grab value from data-name attribute, where it's encoded properly.
+    const inputValue = node.parent()[0].classList.contains("group-node")
+      ? node.parent()[0].attributes.getNamedItem("data-name").value
+      : node.html();
+
     input
-      .val(node.html())
+      .val(inputValue)
       .keydown(e => {
         if (e.keyCode === 13) {
           store();
@@ -1201,21 +1206,16 @@ class Menu extends Component {
    */
   renderThemeMapCheckbox() {
     return (
-      <div className="row">
-        <div className="col-sm-1">
-          <input
-            id="dropdownThemeMaps"
-            name="dropdownThemeMaps"
-            type="checkbox"
-            onChange={this.handleInputChange}
-            checked={this.state.dropdownThemeMaps}
-          />
-          &nbsp;
-        </div>
-        <label
-          className="layer-menu-label-checkbox"
-          htmlFor="dropdownThemeMaps"
-        >
+      <div>
+        <input
+          id="dropdownThemeMaps"
+          name="dropdownThemeMaps"
+          type="checkbox"
+          onChange={this.handleInputChange}
+          checked={this.state.dropdownThemeMaps}
+        />
+        &nbsp;
+        <label className="long-label" htmlFor="dropdownThemeMaps">
           Visa kartan i lista över tillgängliga kartor
         </label>
       </div>
@@ -1271,6 +1271,12 @@ class Menu extends Component {
               </button>
               &nbsp;
               <ul>{this.renderDrawOrder()}</ul>
+              <button
+                className="btn btn-primary"
+                onClick={e => this.saveDrawOrder(e)}
+              >
+                Spara
+              </button>
             </fieldset>
           </article>
         </div>
@@ -1299,102 +1305,20 @@ class Menu extends Component {
                 Spara
               </button>
               &nbsp;
-              <button
-                className="btn btn-success"
-                onClick={e => this.createGroup("Ny grupp", false, false)}
-              >
-                Ny grupp
-              </button>
-              &nbsp;
-              <div className="row">
-                <div className="col-sm-1">
-                  <input
-                    id="active"
-                    name="active"
-                    type="checkbox"
-                    onChange={this.handleInputChange}
-                    checked={this.state.active}
-                  />
-                  &nbsp;
-                </div>
-                <label className="layer-menu-label-checkbox" htmlFor="active">
+              <div>
+                <input
+                  id="active"
+                  name="active"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.active}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="active">
                   Aktiverad
                 </label>
               </div>
-              <div className="row">
-                <div className="col-sm-1">
-                  <input
-                    id="visibleAtStart"
-                    name="visibleAtStart"
-                    type="checkbox"
-                    onChange={this.handleInputChange}
-                    checked={this.state.visibleAtStart}
-                  />
-                  &nbsp;
-                </div>
-                <label
-                  className="layer-menu-label-checkbox"
-                  htmlFor="visibleAtStart"
-                >
-                  Synlig vid start
-                </label>
-              </div>
-              <div className="row">
-                <div className="col-sm-1">
-                  <input
-                    id="backgroundSwitcherBlack"
-                    name="backgroundSwitcherBlack"
-                    type="checkbox"
-                    onChange={this.handleInputChange}
-                    checked={this.state.backgroundSwitcherBlack}
-                  />
-                  &nbsp;
-                </div>
-                <label
-                  className="layer-menu-label-checkbox"
-                  htmlFor="backgroundSwitcherBlack"
-                >
-                  Svart bakgrundskarta
-                </label>
-              </div>
-              <div className="row">
-                <div className="col-sm-1">
-                  <input
-                    id="backgroundSwitcherWhite"
-                    name="backgroundSwitcherWhite"
-                    type="checkbox"
-                    onChange={this.handleInputChange}
-                    checked={this.state.backgroundSwitcherWhite}
-                  />
-                  &nbsp;
-                </div>
-                <label htmlFor="backgroundSwitcherWhite">
-                  Vit bakgrundskarta
-                </label>
-              </div>
-              <div className="row">
-                <div className="col-sm-1">
-                  <input
-                    id="showBreadcrumbs"
-                    name="showBreadcrumbs"
-                    type="checkbox"
-                    onChange={this.handleInputChange}
-                    checked={this.state.showBreadcrumbs}
-                  />
-                  &nbsp;
-                </div>
-                <label
-                  className="layer-menu-label-checkbox"
-                  htmlFor="showBreadcrumbs"
-                >
-                  Visa "brödsmulor"{" "}
-                  <i
-                    className="fa fa-question-circle"
-                    data-toggle="tooltip"
-                    title="När rutan är ikryssad visas små kort längst ned på skärmen, ett för varje lager som är aktivt"
-                  />
-                </label>
-              </div>
+              <div className="separator">Fönsterinställningar</div>
               <div className="row">
                 <div className="col-sm-12">
                   <label htmlFor="target">
@@ -1405,13 +1329,26 @@ class Menu extends Component {
                       title="Avgör om verktyget visas som en Widget Plugin (om 'left' eller 'right' anges här) eller Drawer Plugin (om 'toolbar' anges här)."
                     />
                   </label>
-                  <input
+                  <select
+                    id="target"
+                    name="target"
+                    className="control-fixed-width"
+                    onChange={e => {
+                      this.handleInputChange(e);
+                    }}
+                    value={this.state.target}
+                  >
+                    <option value="toolbar">Drawer</option>
+                    <option value="left">Widget left</option>
+                    <option value="right">Widget right</option>
+                  </select>
+                  {/* <input
                     id="target"
                     name="target"
                     type="text"
                     onChange={this.handleInputChange}
                     value={this.state.target}
-                  />
+                  /> */}
                 </div>
               </div>
               <div className="row">
@@ -1424,13 +1361,18 @@ class Menu extends Component {
                       title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
                     />
                   </label>
-                  <input
+                  <select
                     id="position"
                     name="position"
-                    type="text"
-                    onChange={this.handleInputChange}
+                    className="control-fixed-width"
+                    onChange={e => {
+                      this.handleInputChange(e);
+                    }}
                     value={this.state.position}
-                  />
+                  >
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                  </select>
                 </div>
               </div>
               <div className="row">
@@ -1446,7 +1388,9 @@ class Menu extends Component {
                   <input
                     id="width"
                     name="width"
-                    type="text"
+                    type="number"
+                    min="0"
+                    className="control-fixed-width"
                     onChange={this.handleInputChange}
                     value={this.state.width}
                   />
@@ -1465,7 +1409,9 @@ class Menu extends Component {
                   <input
                     id="height"
                     name="height"
-                    type="text"
+                    type="number"
+                    min="0"
+                    className="control-fixed-width"
                     onChange={this.handleInputChange}
                     value={this.state.height}
                   />
@@ -1473,7 +1419,11 @@ class Menu extends Component {
               </div>
               <div className="row">
                 <div className="col-sm-12">
-                  <label htmlFor="title">Rubrik (Widget Plugin)</label>
+                  <label htmlFor="title">
+                    Rubrik
+                    <br />
+                    (Widget Plugin)
+                  </label>
                   <input
                     value={this.state.title}
                     type="text"
@@ -1485,13 +1435,15 @@ class Menu extends Component {
               <div className="row">
                 <div className="col-sm-12">
                   <label htmlFor="description">
-                    Beskrivning (Widget Plugin){" "}
+                    Beskrivning
+                    <br />
+                    (Widget Plugin){" "}
                     <i
                       className="fa fa-question-circle"
                       data-toggle="tooltip"
                       title="Om verktyget visas som widget (inställningen 'Verktygsplacering' sätts till 'left' eller 'right) så kommer denna beskrivning att visas inne i widget-knappen."
                     />
-                  </label>{" "}
+                  </label>
                   <input
                     value={this.state.description}
                     type="text"
@@ -1500,8 +1452,38 @@ class Menu extends Component {
                   />
                 </div>
               </div>
-              {this.renderThemeMapCheckbox()}
-              {this.renderThemeMapHeaderInput()}
+              <div className="separator">Inställningar för plugins</div>
+              <div>
+                <input
+                  id="visibleAtStart"
+                  name="visibleAtStart"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.visibleAtStart}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="visibleAtStart">
+                  Synlig vid start
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showBreadcrumbs"
+                  name="showBreadcrumbs"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showBreadcrumbs}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showBreadcrumbs">
+                  Visa "brödsmulor"{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas små kort längst ned på skärmen, ett för varje lager som är aktivt"
+                  />
+                </label>
+              </div>
               <div className="row">
                 <div className="col-sm-12">
                   <label htmlFor="instruction">Instruktion</label>
@@ -1517,7 +1499,58 @@ class Menu extends Component {
                 </div>
               </div>
               <div className="row">{this.renderAuthGrps()}</div>
+              <div className="separator">Kartinställningar</div>
+              {this.renderThemeMapCheckbox()}
+              {this.renderThemeMapHeaderInput()}
+              <div className="separator">Inställningar för bakgrundslager</div>
+              <div>
+                <input
+                  id="backgroundSwitcherBlack"
+                  name="backgroundSwitcherBlack"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.backgroundSwitcherBlack}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="backgroundSwitcherBlack">
+                  Svart bakgrundskarta
+                </label>
+              </div>
+              <div>
+                <input
+                  id="backgroundSwitcherWhite"
+                  name="backgroundSwitcherWhite"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.backgroundSwitcherWhite}
+                />
+                &nbsp;
+                <label htmlFor="backgroundSwitcherWhite">
+                  Vit bakgrundskarta
+                </label>
+              </div>
+              <div className="separator">Justera lagerhanteraren</div>
+              <button
+                className="btn btn-primary"
+                onClick={e => this.saveSettings(e)}
+              >
+                Spara
+              </button>
+              &nbsp;
+              <button
+                className="btn btn-success"
+                onClick={e => this.createGroup("Ny grupp", false, false)}
+              >
+                Ny grupp
+              </button>
+              &nbsp;
               {this.renderLayerMenu()}
+              <button
+                className="btn btn-primary"
+                onClick={e => this.saveSettings(e)}
+              >
+                Spara
+              </button>
             </fieldset>
           </article>
           {this.state.adList}
@@ -1563,7 +1596,10 @@ class Menu extends Component {
     this.setState({
       alert: true,
       confirm: true,
-      alertMessage: "Vill du verkligen radera kartan?",
+      alertMessage:
+        "Vill du verkligen radera kartan '" +
+        this.props.model.attributes.mapFile +
+        "'?",
       confirmAction: () => {
         this.props.model.deleteMap(err => {
           var msg = err || "Kartan raderades";
@@ -1603,6 +1639,9 @@ class Menu extends Component {
         <Alert options={this.getAlertOptions()} />
         <div>
           <h1>Kartinställningar</h1>
+          <div className="separator set-width">
+            <h4>Skapa ny karta</h4>
+          </div>
           <div className="inset-form">
             <form
               onSubmit={e => {
@@ -1610,20 +1649,23 @@ class Menu extends Component {
                 this.createMap(e);
               }}
             >
-              <h3>Skapa karta</h3>
               <label>Namn</label>
               &nbsp;
               <input type="text" ref="mapName" />
-              <br />
-              <br />
+              &nbsp;
               <button className="btn btn-primary">Skapa</button>
             </form>
           </div>
-          <br />
-          <div className="inset-form">
+
+          <div className="separator set-width">
+            <h4>Hantera befintlig karta</h4>
+          </div>
+
+          <div className="inset-form set-width">
             <label>Välj karta</label>
             &nbsp;
             <select
+              className="control-fixed"
               onChange={e => {
                 this.setSelectedConfig(e);
               }}

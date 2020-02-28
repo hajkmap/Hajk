@@ -44,6 +44,8 @@
     "detect-browser": "^4.8.0",
     "element-scroll-polyfill": "^1.0.1",
     "html2json": "^1.0.2",
+    "intro.js": "^2.9.3",
+    "intro.js-react": "^0.2.0",
     "jsts": "^2.1.0",
     "load-google-maps-api": "^2.0.0",
     "marked": "^0.7.0",

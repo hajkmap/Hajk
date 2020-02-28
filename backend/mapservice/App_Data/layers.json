@@ -450,6 +450,50 @@
       "version": "1.1.1",
       "infoFormat": "application/json",
       "zIndex": null
+    },
+    {
+      "id": "36",
+      "caption": "Stadskarta",
+      "url": "https://opengeodata.goteborg.se/services/stadskarta/wms/v4",
+      "owner": "",
+      "date": "1581004540233",
+      "content": "",
+      "legend": "",
+      "projection": "EPSG:3006",
+      "layers": ["stadskarta"],
+      "layersInfo": [
+        {
+          "id": "stadskarta",
+          "caption": "",
+          "legend": "",
+          "infobox": "",
+          "style": "",
+          "queryable": false
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "opacity": 1.0,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "Sammansatt bakgrundskarta i färg",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "zIndex": null
     }
   ],
   "wfslayers": [

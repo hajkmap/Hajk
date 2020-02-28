@@ -172,7 +172,8 @@ class ToolOptions extends Component {
           <input
             id="index"
             name="index"
-            type="text"
+            type="number"
+            min="0"
             onChange={e => {
               this.handleInputChange(e);
             }}

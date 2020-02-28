@@ -721,6 +721,7 @@ class Manager extends Component {
               <select
                 disabled={typeSelectorDisabled}
                 value={this.state.layerType}
+                className="control-fixed-width"
                 onChange={e => {
                   this.setState({ layerType: e.target.value });
                 }}

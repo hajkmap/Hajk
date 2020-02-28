@@ -205,8 +205,8 @@ class ArcGISLayerForm extends Component {
       return typeof v === "string"
         ? v.trim() === ""
         : Array.isArray(v)
-          ? v[0] === ""
-          : false;
+        ? v[0] === ""
+        : false;
     }
 
     function array(v) {
@@ -229,7 +229,7 @@ class ArcGISLayerForm extends Component {
         }
         break;
       case "opacity":
-        if (!number(value) || (value < 0 || value > 1)) {
+        if (!number(value) || value < 0 || value > 1) {
           valid = false;
         }
         break;
@@ -420,21 +420,7 @@ class ArcGISLayerForm extends Component {
     return (
       <fieldset>
         <legend>ArcGIS MapServer-lager</legend>
-        <div>
-          <label>Visningsnamn*</label>
-          <input
-            type="text"
-            ref="input_caption"
-            value={this.state.caption}
-            className={this.getValidationClass("caption")}
-            onChange={e => {
-              const v = e.target.value;
-              this.setState({ caption: v }, () =>
-                this.validateField("caption", v)
-              );
-            }}
-          />
-        </div>
+        <div className="separator">Anslutning</div>
         <div>
           <label>Url*</label>
           <input
@@ -456,40 +442,7 @@ class ArcGISLayerForm extends Component {
             Ladda {loader}
           </span>
         </div>
-        <div>
-          <label>Senast ändrad</label>
-          <span ref="input_date">
-            <i>{this.props.model.parseDate(this.state.date)}</i>
-          </span>
-        </div>
-        <div>
-          <label>Innehåll</label>
-          <input
-            type="text"
-            ref="input_content"
-            value={this.state.content}
-            onChange={e => {
-              this.setState({ content: e.target.value });
-            }}
-          />
-        </div>
-        <div>
-          <label>Teckenförklaring</label>
-          <input
-            type="text"
-            ref="input_legend"
-            value={this.state.legend}
-            onChange={e => this.setState({ legend: e.target.value })}
-          />
-          <span
-            onClick={e => {
-              this.loadLegendImage(e);
-            }}
-            className="btn btn-default"
-          >
-            Välj fil {imageLoader}
-          </span>
-        </div>
+        <div className="separator">Inställningar för request</div>
         <div>
           <label>Projektion*</label>
           <input
@@ -521,33 +474,6 @@ class ArcGISLayerForm extends Component {
           />
         </div>
         <div>
-          <label>Opacitet*</label>
-          <input
-            type="text"
-            ref="input_opacity"
-            value={this.state.opacity}
-            className={this.getValidationClass("opacity")}
-            onChange={e => {
-              const v = e.target.value;
-              this.setState({ opacity: v }, () =>
-                this.validateField("opacity", v)
-              );
-            }}
-          />
-        </div>
-        <div>
-          <label>Infoklickbar</label>
-          <input
-            type="checkbox"
-            ref="input_queryable"
-            onChange={e => {
-              this.setState({ queryable: e.target.checked });
-            }}
-            checked={this.state.queryable}
-          />
-        </div>
-        <div>
-          <label>Single tile</label>
           <input
             type="checkbox"
             ref="input_singleTile"
@@ -556,7 +482,15 @@ class ArcGISLayerForm extends Component {
             }}
             checked={this.state.singleTile}
           />
+          &nbsp;
+          <label>Single tile</label>
         </div>
+        <div className="separator">Tillgängliga lager</div>
+        <div>
+          <label>Lagerlista</label>
+          {this.renderLayerList()}
+        </div>
+        <div className="separator">Hantera valda lager</div>
         <div>
           <label>Valda lager*</label>
           <div
@@ -569,8 +503,19 @@ class ArcGISLayerForm extends Component {
           </div>
         </div>
         <div>
-          <label>Lagerlista</label>
-          {this.renderLayerList()}
+          <label>Visningsnamn*</label>
+          <input
+            type="text"
+            ref="input_caption"
+            value={this.state.caption}
+            className={this.getValidationClass("caption")}
+            onChange={e => {
+              const v = e.target.value;
+              this.setState({ caption: v }, () =>
+                this.validateField("caption", v)
+              );
+            }}
+          />
         </div>
         <div>
           <label>Inforuta</label>
@@ -579,6 +524,74 @@ class ArcGISLayerForm extends Component {
             value={this.state.infobox}
             onChange={e => this.setState({ infobox: e.target.value })}
           />
+        </div>
+        <div>
+          <label>Teckenförklaring</label>
+          <input
+            type="text"
+            ref="input_legend"
+            value={this.state.legend}
+            onChange={e => this.setState({ legend: e.target.value })}
+          />
+          <span
+            onClick={e => {
+              this.loadLegendImage(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+
+        <div>
+          <label>Opacitet*</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="1"
+            ref="input_opacity"
+            value={this.state.opacity}
+            className={
+              (this.getValidationClass("opacity"), "control-fixed-width")
+            }
+            onChange={e => {
+              const v = e.target.value;
+              this.setState({ opacity: v }, () =>
+                this.validateField("opacity", v)
+              );
+            }}
+          />
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_queryable"
+            onChange={e => {
+              this.setState({ queryable: e.target.checked });
+            }}
+            checked={this.state.queryable}
+          />
+          &nbsp;
+          <label>Infoklickbar</label>
+        </div>
+        <div className="separator">Metadata</div>
+        <div>
+          <label>Innehåll</label>
+          <input
+            type="text"
+            ref="input_content"
+            value={this.state.content}
+            onChange={e => {
+              this.setState({ content: e.target.value });
+            }}
+          />
+        </div>
+        <div>
+          <label>Senast ändrad</label>
+          <span ref="input_date">
+            <i>{this.props.model.parseDate(this.state.date)}</i>
+          </span>
         </div>
         <div>
           <label>Upphovsrätt</label>
@@ -597,7 +610,6 @@ class ArcGISLayerForm extends Component {
         </div>
         <div className="info-container">
           <div>
-            <label htmlFor="info-document">Infodokument</label>
             <input
               type="checkbox"
               ref="input_infoVisible"
@@ -607,6 +619,8 @@ class ArcGISLayerForm extends Component {
               }}
               checked={this.state.infoVisible}
             />
+            &nbsp;
+            <label htmlFor="info-document">Infodokument</label>
           </div>
           <div className={infoClass}>
             <label>Rubrik</label>

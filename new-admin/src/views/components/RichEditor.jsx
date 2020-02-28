@@ -313,7 +313,17 @@ class RichEditor extends Component {
     };
   }
 
-  handlePastedText = (text, html) => {
+  handlePastedText = (text = "", html) => {
+    // If clipboard contains unformatted text, the first parameter
+    // is used, while the second is empty. In the code below, we
+    // only take care for the second parameter. So to handle
+    // those cases where unformatted text is pasted in, we must
+    // ensure that the second paramter always is defined.
+    // That can be done by copying the contents of the first parameter
+    // if the second parameter is empty/undefined.
+    if (html?.trim().length === 0 || html === undefined) {
+      html = text;
+    }
     const { editorState } = this.state;
     const generatedState = stateFromHTML(html);
     const generatedHtml = stateToHTML(generatedState);

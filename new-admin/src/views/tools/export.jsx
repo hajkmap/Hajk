@@ -263,12 +263,15 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+          <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -277,15 +280,19 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="target">Verktygsplacering</label>
-            <input
+            <select
               id="target"
               name="target"
-              type="text"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
-            />
+            >
+              <option value="toolbar">Drawer</option>
+              <option value="left">Widget left</option>
+              <option value="right">Widget right</option>
+            </select>
           </div>
           <div>
             <label htmlFor="position">
@@ -296,15 +303,18 @@ class ToolOptions extends Component {
                 title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
               />
             </label>
-            <input
+            <select
               id="position"
               name="position"
-              type="text"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
-            />
+            >
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
           </div>
           <div>
             <label htmlFor="width">
@@ -318,7 +328,9 @@ class ToolOptions extends Component {
             <input
               id="width"
               name="width"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -337,13 +349,16 @@ class ToolOptions extends Component {
             <input
               id="height"
               name="height"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.height}
             />
           </div>
+          <div className="separator">Övriga inställningar</div>
           <div>
             <label htmlFor="scales">Skalor</label>
             <input
@@ -414,7 +429,9 @@ class ToolOptions extends Component {
               checked={this.state.base64Encode}
             />
             &nbsp;
-            <label htmlFor="Base64-active">Base64-encoding</label>
+            <label className="long-label" htmlFor="Base64-active">
+              Base64-encoding
+            </label>
           </div>
           <div>
             <input

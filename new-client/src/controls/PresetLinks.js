@@ -1,9 +1,12 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import propTypes from "prop-types";
 
 import { Button, Paper, Tooltip, Menu, MenuItem } from "@material-ui/core";
 import Bookmarks from "@material-ui/icons/Bookmarks";
+
+import Dialog from "../components/Dialog.js";
 
 const styles = theme => {
   return {
@@ -22,7 +25,12 @@ class Preset extends React.PureComponent {
     appModel: propTypes.object.isRequired
   };
 
-  state = {};
+  state = {
+    dialogOpen: false,
+    view: null,
+    location: null,
+    zoom: null
+  };
 
   constructor(props) {
     super(props);
@@ -30,6 +38,8 @@ class Preset extends React.PureComponent {
     this.config = props.appModel.config.mapConfig.tools.find(
       t => t.type === "preset"
     );
+
+    this.appModel = props.appModel;
 
     // If config wasn't found, it means that Preset is not configured. Quit.
     if (this.config === undefined) return null;
@@ -57,11 +67,22 @@ class Preset extends React.PureComponent {
       let x = url[1].substring(2);
       let y = url[2].substring(2);
       let z = url[3].substring(2);
+      let l = url[4]?.substring(2);
+
       const view = this.map.getView();
-      view.animate({
-        center: [x, y],
-        zoom: z
-      });
+      let location = [x, y];
+      let zoom = z;
+
+      if (l) {
+        this.setState({
+          view: view,
+          location: location,
+          zoom: zoom
+        });
+        this.openDialog();
+      } else {
+        this.flyTo(view, location, zoom);
+      }
     } else {
       this.props.enqueueSnackbar(
         "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
@@ -93,6 +114,54 @@ class Preset extends React.PureComponent {
     });
     return menuItems;
   };
+
+  flyTo(view, location, zoom) {
+    view.animate({
+      center: location,
+      zoom: zoom
+    });
+  }
+
+  openDialog = () => {
+    this.setState({
+      dialogOpen: true
+    });
+  };
+
+  closeDialog = () => {
+    this.setState({
+      dialogOpen: false
+    });
+    this.appModel.clear();
+    this.flyTo(this.state.view, this.state.location, this.state.zoom);
+  };
+
+  abortDialog = () => {
+    this.setState({
+      dialogOpen: false
+    });
+  };
+
+  renderDialog() {
+    if (this.state.dialogOpen) {
+      return createPortal(
+        <Dialog
+          options={{
+            text: "Alla lager i kartan kommer nu att släckas.",
+            headerText: "Visa snabbval",
+            buttonText: "OK",
+            abortText: "Avbryt"
+          }}
+          open={this.state.dialogOpen}
+          onClose={this.closeDialog}
+          onAbort={this.abortDialog}
+        />,
+        document.getElementById("windows-container")
+      );
+    } else {
+      return null;
+    }
+  }
 
   render() {
     // If config for Control isn't found, or if the config doesn't contain any presets, quit.
@@ -127,6 +196,7 @@ class Preset extends React.PureComponent {
           >
             {this.renderMenuItems()}
           </Menu>
+          {this.renderDialog()}
         </>
       );
     }

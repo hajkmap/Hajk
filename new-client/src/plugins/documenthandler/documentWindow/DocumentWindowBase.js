@@ -1,16 +1,11 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
 
-const styles = theme => ({
-  buttonWithBottomMargin: {
-    marginBottom: theme.spacing(2)
-  }
-});
+const styles = theme => ({});
 
 class DocumentWindowBase extends React.PureComponent {
   state = {

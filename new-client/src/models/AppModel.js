@@ -281,7 +281,7 @@ class AppModel {
   lookup(layers, type) {
     var matchedLayers = [];
     layers.forEach(layer => {
-      var layerConfig = this.config.layersConfig.find(
+      const layerConfig = this.config.layersConfig.find(
         lookupLayer => lookupLayer.id === layer.id
       );
       layer.layerType = type;
@@ -311,14 +311,10 @@ class AppModel {
   }
 
   flattern(layerSwitcherConfig) {
-    var layers = [
+    const layers = [
       ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
       ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer")
     ];
-    // layers = layers.reduce((a, b) => {
-    //   a[b["id"]] = b;
-    //   return a;
-    // }, {});
 
     return layers;
   }
