@@ -8,7 +8,8 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   button: {
-    height: "100%"
+    height: "100%",
+    buttonWidth: "170px" //MAKE THIS DYNAMIC SOMEHOW?
   }
 });
 class MenuBarCascadeMenuItem extends React.PureComponent {
@@ -21,7 +22,6 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
   };
 
   handleClick = e => {
-    console.log(e.currentTarget.parentNode, "e");
     this.setState({
       anchorEl: e.currentTarget.parentNode,
       menuOpen: !this.state.menuOpen

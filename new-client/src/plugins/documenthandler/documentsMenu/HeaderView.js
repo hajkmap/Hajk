@@ -32,7 +32,6 @@ class HeaderView extends React.PureComponent {
 
   isSubMenu = () => {
     const { activeMenuSection } = this.props;
-    console.log(activeMenuSection, "activeMenu");
     return activeMenuSection[0].parent === undefined ? false : true;
   };
 

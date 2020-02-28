@@ -14,6 +14,9 @@ const CascadeRootItem = menuItem(StrippedCascadeRootItemPartialFunctionality);
 const styles = theme => ({
   noPadding: {
     padding: 0
+  },
+  menu: {
+    minWidth: "179px"
   }
 });
 
@@ -84,9 +87,11 @@ class CascadeMenu extends React.PureComponent {
       items,
       menuOpen,
       onClose,
+
+      forwardedRef,
       classes
     } = this.props;
-
+    console.log(forwardedRef, "parentWidth");
     return (
       <>
         <Menu
@@ -101,7 +106,9 @@ class CascadeMenu extends React.PureComponent {
           onClose={onClose}
           open={menuOpen}
         >
-          <Grid>{items && this.renderMenuItems()}</Grid>
+          <Grid className={classes.menu} direction="column" container>
+            {items && this.renderMenuItems()}
+          </Grid>
         </Menu>
       </>
     );

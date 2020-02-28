@@ -4,12 +4,15 @@ const mapDiv = document.getElementById("map");
 const blurCss = "filter : blur(7px)";
 const menuViewHoc = MenuComponent =>
   class WithMenuFunctionality extends React.Component {
+    state = {
+      activeMenuSection: this.props.initialMenu.menu
+    };
+
     constructor(props) {
       super(props);
-      console.log(props, "props");
 
       this.documentHandlerModel = new DocumentHandlerModel();
-      this.state = { activeMenuSection: this.props.initialMenu.menu };
+
       this.props.initialMenu.menu.forEach(menuItem => {
         this.setParentAndContainingMenu(
           menuItem,
@@ -62,7 +65,8 @@ const menuViewHoc = MenuComponent =>
       });
 
       localObserver.subscribe("maplink-clicked", item => {
-        console.log("maplink clicked");
+        console.log(item, "item");
+        localObserver.publish("fly-to", item.maplink);
       });
     };
 

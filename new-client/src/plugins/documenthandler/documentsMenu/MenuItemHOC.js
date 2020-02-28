@@ -12,7 +12,6 @@ const menuItem = MenuItem => {
 
     handleMenuButtonClick = () => {
       const { localObserver, type, item } = this.props;
-      console.log(type, "type");
       localObserver.publish(`${type}-clicked`, item);
     };
 

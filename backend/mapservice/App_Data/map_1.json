@@ -344,10 +344,19 @@
               "menu": []
             },
             {
-              "title": "Geografiska inriktningar",
-              "document": "x",
+              "title": "Kartlänk test Mölndal",
+              "document": "",
               "color": "#b7e1c8",
-              "maplink": "",
+              "maplink": {
+                "center": [323222.6, 6395257.21],
+                "zoom": 15,
+                "extent": [
+                  414162.76923076925,
+                  6581602,
+                  417678.76923076925,
+                  6584898
+                ]
+              },
               "link": "",
               "menu": []
             },
