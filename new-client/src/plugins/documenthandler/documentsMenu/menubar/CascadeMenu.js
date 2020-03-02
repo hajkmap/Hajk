@@ -48,6 +48,7 @@ class CascadeMenu extends React.PureComponent {
 
   getMenuItemType = (item, type) => {
     const { localObserver } = this.props;
+
     return (
       <BarMenuItem
         type={type}
@@ -59,6 +60,7 @@ class CascadeMenu extends React.PureComponent {
 
   getCascadeMenuItem = item => {
     const { localObserver } = this.props;
+
     return (
       <CascadeRootItem
         localObserver={localObserver}
@@ -68,6 +70,7 @@ class CascadeMenu extends React.PureComponent {
   };
 
   getMenuItem = item => {
+    console.log(item.menu && item.menu.length > 0, "item");
     if (item.menu && item.menu.length > 0) {
       return this.getCascadeMenuItem(item);
     } else if (item.document) {

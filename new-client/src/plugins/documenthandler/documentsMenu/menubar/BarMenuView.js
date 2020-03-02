@@ -19,7 +19,9 @@ const styles = theme => ({
     display: "flex",
     alignItems: "center",
     marginRight: theme.spacing(6),
-    minWidth: theme.spacing(180), //DEBUG
+    minHeight: theme.spacing(8)
+  },
+  grid: {
     minHeight: theme.spacing(8)
   }
 });
@@ -87,7 +89,7 @@ class BarMenuView extends React.PureComponent {
 
     return ReactDOM.createPortal(
       <Paper className={classes.root}>
-        <Grid container alignItems="stretch">
+        <Grid className={classes.grid} container>
           {menu.map((item, index) => {
             return this.getMenuItem(item, index);
           })}

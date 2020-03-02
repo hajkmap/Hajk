@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "@material-ui/core/Icon";
 
 const menuItem = MenuItem => {
   return class WithMenuFunctionality extends React.PureComponent {
@@ -9,6 +10,14 @@ const menuItem = MenuItem => {
     static propTypes = {};
 
     static defaultProps = {};
+
+    getIcon = icon => {
+      return (
+        <Icon style={{ fontSize: icon.fontSize }}>
+          {icon.materialUiIconName}
+        </Icon>
+      );
+    };
 
     handleMenuButtonClick = () => {
       const { localObserver, type, item } = this.props;
@@ -26,6 +35,7 @@ const menuItem = MenuItem => {
         <>
           <MenuItem
             handleMenuButtonClick={this.handleMenuButtonClick}
+            getIcon={this.getIcon}
             type={type}
             menuItems={menuItems}
             color={color}

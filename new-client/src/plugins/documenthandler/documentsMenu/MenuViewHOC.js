@@ -5,18 +5,18 @@ const blurCss = "filter : blur(7px)";
 const menuViewHoc = MenuComponent =>
   class WithMenuFunctionality extends React.Component {
     state = {
-      activeMenuSection: this.props.initialMenu.menu
+      activeMenuSection: this.props.options.menuConfig.menu
     };
 
     constructor(props) {
       super(props);
-
+      console.log(this.props, "props");
       this.documentHandlerModel = new DocumentHandlerModel();
 
-      this.props.initialMenu.menu.forEach(menuItem => {
+      this.props.options.menuConfig.menu.forEach(menuItem => {
         this.setParentAndContainingMenu(
           menuItem,
-          this.props.initialMenu.menu,
+          this.props.options.menuConfig.menu,
           undefined
         );
       });
@@ -71,13 +71,14 @@ const menuViewHoc = MenuComponent =>
     };
 
     render() {
-      const { localObserver } = this.props;
+      const { localObserver, options } = this.props;
 
       return (
         <MenuComponent
           removeMapBlur={this.removeMapBlur}
           addMapBlur={this.addMapBlur}
           getMenuItem={this.getMenuItem}
+          options={options}
           activeMenuSection={this.state.activeMenuSection}
           localObserver={localObserver}
         ></MenuComponent>

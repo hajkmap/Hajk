@@ -9,19 +9,9 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { Typography } from "@material-ui/core";
 
 const styles = theme => ({
-  logoItem: {
-    height: theme.spacing(20),
-    maxWidth: theme.spacing(36),
-    minWidth: theme.spacing(22),
-    margin: theme.spacing(1),
-    cursor: "pointer",
-    backgroundColor: "rgba(0,0,0,0)",
-    [theme.breakpoints.down("xs")]: {
-      maxWidth: "none"
-    }
-  },
   gridContainer: {
-    height: "100%"
+    height: "100%",
+    margin: theme.spacing(2)
   }
 });
 
@@ -45,33 +35,27 @@ class HeaderView extends React.PureComponent {
     localObserver.publish("show-containing-menu", this.getContainingMenu());
   };
   render() {
-    const { classes, title } = this.props;
-
+    const { options } = this.props;
     return (
       <>
-        <Paper className={classes.logoItem} square={true} elevation={0}>
-          <Grid
-            className={classes.gridContainer}
-            container
-            spacing={0}
-            alignItems="flex-end"
-            justify="center"
-          >
-            <Grid item xs={12}>
-              {this.isSubMenu() ? (
-                <>
-                  <ArrowBackIcon onClick={this.goToParentMenu}></ArrowBackIcon>
-                  <Typography>{title}</Typography>
-                </>
-              ) : (
-                <CardMedia
-                  style={{ width: "302px", height: "113px" }}
-                  image={"http://localhost:3000/logo-share.png"}
-                ></CardMedia>
-              )}
-            </Grid>
-          </Grid>
-        </Paper>
+        <Grid container item xs={12}>
+          {this.isSubMenu() ? (
+            <>
+              <Grid item>
+                <ArrowBackIcon onClick={this.goToParentMenu}></ArrowBackIcon>
+              </Grid>
+              <Grid item>
+                <Typography>Tillbaka</Typography>
+              </Grid>
+            </>
+          ) : (
+            <CardMedia
+              style={{ width: "302px", height: "113px" }}
+              image={options.overlayLogoUrl}
+            ></CardMedia>
+          )}
+        </Grid>
+
         <Divider variant="fullWidth"></Divider>
       </>
     );

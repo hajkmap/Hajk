@@ -2,15 +2,16 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Button from "@material-ui/core/Button";
+import MenuItem from "@material-ui/core/MenuItem";
 import CascadeMenu from "./CascadeMenu";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
-  button: {
-    height: "100%",
-    buttonWidth: "170px" //MAKE THIS DYNAMIC SOMEHOW?
-  }
+  menu: {
+    height: "100%"
+  },
+  typography: { whiteSpace: "pre-line", margin: theme.spacing(1) }
 });
 class MenuBarCascadeMenuItem extends React.PureComponent {
   static propTypes = {};
@@ -34,8 +35,31 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
     });
   };
 
+  getButton = () => {
+    const { toggleHighlight, item, classes, getIcon } = this.props;
+
+    var icon = item.icon ? getIcon(item.icon) : null;
+    return (
+      <MenuItem
+        onClick={this.handleClick}
+        className={classes.menu}
+        onMouseEnter={toggleHighlight}
+        onMouseLeave={toggleHighlight}
+        aria-controls="simple-menu"
+        aria-haspopup="true"
+      >
+        {icon}
+        {item.title && (
+          <Typography className={classes.typography} variant="button">
+            {item.title}
+          </Typography>
+        )}
+      </MenuItem>
+    );
+  };
+
   render() {
-    const { toggleHighlight, item, localObserver, classes } = this.props;
+    const { item, localObserver } = this.props;
 
     return (
       <>
@@ -43,21 +67,11 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
           style={{ backgroundColor: item.color }}
           key={item.title}
           zeroMinWidth
+          justify="flex-start"
           item
           lg
         >
-          <Button
-            fullWidth
-            onClick={this.handleClick}
-            className={classes.button}
-            onMouseEnter={toggleHighlight}
-            onMouseLeave={toggleHighlight}
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-          >
-            <Typography variant="button">{item.title}</Typography>
-          </Button>
-
+          {this.getButton()}
           <CascadeMenu
             items={item.menu}
             menuOpen={this.state.menuOpen}

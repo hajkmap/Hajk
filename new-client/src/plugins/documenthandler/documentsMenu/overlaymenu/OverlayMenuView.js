@@ -8,7 +8,11 @@ import Grid from "@material-ui/core/Grid";
 import menuItem from "../MenuItemHOC";
 import OverlayMenuItemStripped from "./OverlayMenuItem";
 
+import { Paper, Typography } from "@material-ui/core";
+import ReactDOM from "react-dom";
+
 const OverlayMenuItem = menuItem(OverlayMenuItemStripped);
+const header = document.getElementById("header");
 
 const styles = theme => ({
   container: {
@@ -23,6 +27,17 @@ const styles = theme => ({
       marginTop: 0,
       marginBottom: 0
     }
+  },
+  gridContainer: {
+    paddingTop: theme.spacing(3)
+  },
+  root: {
+    padding: "2px 4px",
+    display: "flex",
+    cursor: "pointer",
+    alignItems: "center",
+    marginRight: theme.spacing(6),
+    minHeight: theme.spacing(6)
   }
 });
 
@@ -35,7 +50,7 @@ const xs = 12,
 
 class OverlayView extends React.PureComponent {
   state = {
-    open: true
+    open: false
   };
 
   static propTypes = {};
@@ -43,6 +58,10 @@ class OverlayView extends React.PureComponent {
 
   close = () => {
     this.setState({ open: false });
+  };
+
+  open = () => {
+    this.setState({ open: true });
   };
 
   getMenuItemType = (item, type) => {
@@ -77,21 +96,40 @@ class OverlayView extends React.PureComponent {
   };
 
   render() {
-    const { classes, localObserver, activeMenuSection } = this.props;
+    const { classes, options, localObserver, activeMenuSection } = this.props;
     const { open } = this.state;
 
     open ? this.props.addMapBlur() : this.props.removeMapBlur();
 
     return (
       <>
+        {open === false &&
+          ReactDOM.createPortal(
+            <Paper
+              onClick={this.open}
+              style={{ backgroundColor: options.openOverlayButtonColor }}
+              className={classes.root}
+            >
+              <Typography
+                style={{ wordWrap: "break-word" }}
+                variant="subtitle1"
+                align="center"
+                color="textPrimary"
+              >
+                ÖPPNA MENY
+              </Typography>
+            </Paper>,
+            header
+          )}
         <Modal
           className={classes.modal}
           onBackdropClick={this.close}
           open={open}
         >
           <Container className={classes.container} fixed>
-            <Grid zeroMinWidth item xs={fullWidth}>
+            <Grid zeroMinWidth className={classes.gridContainer} xs={fullWidth}>
               <HeaderView
+                options={options}
                 activeMenuSection={activeMenuSection}
                 localObserver={localObserver}
               ></HeaderView>
