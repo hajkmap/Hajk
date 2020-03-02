@@ -277,14 +277,20 @@
       "type": "documenthandler",
       "options": {
         "target": "toolbar",
+        "overlayLogoUrl": "http://localhost:3000/logo-share.png",
+        "openOverlayButtonColor": "#456785",
         "menuConfig": {
           "menu": [
             {
               "title": "Markanvändnings karta",
               "document": "x",
               "color": "#bfe4f2",
+              "icon": {
+                "materialUiIconName": "audiotrack",
+                "fontSize": "30px"
+              },
               "description": "",
-              "icon": "",
+
               "maplink": "",
               "link": "",
               "menu": [
@@ -292,6 +298,10 @@
                   "title": "Utvecklingsalternativ",
                   "document": "",
                   "color": "#bfe4f2",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "30px"
+                  },
                   "maplink": "",
                   "link": "",
                   "menu": [
@@ -299,6 +309,10 @@
                       "title": "Centrala Göteborg",
                       "document": "",
                       "color": "#f8ccdc",
+                      "icon": {
+                        "materialUiIconName": "alarm_add",
+                        "fontSize": "30px"
+                      },
                       "maplink": "",
                       "link": "http://goteborg.se"
                     },
@@ -306,6 +320,10 @@
                       "title": "Frölunda Högsbo",
                       "document": "x",
                       "color": "#b7e1c8",
+                      "icon": {
+                        "materialUiIconName": "alarm_add",
+                        "fontSize": "30px"
+                      },
                       "maplink": "x",
                       "link": ""
                     },
@@ -313,6 +331,10 @@
                       "title": "Torsviken",
                       "document": "x",
                       "color": "#b7e1c8",
+                      "icon": {
+                        "materialUiIconName": "alarm_add",
+                        "fontSize": "30px"
+                      },
                       "maplink": "",
                       "link": ""
                     },
@@ -320,6 +342,10 @@
                       "title": "Södra skärgården",
                       "document": "x",
                       "color": "#b7e1c8",
+                      "icon": {
+                        "materialUiIconName": "alarm_add",
+                        "fontSize": "30px"
+                      },
                       "maplink": "",
                       "link": ""
                     }
@@ -329,6 +355,10 @@
                   "title": "Test",
                   "document": "x",
                   "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "30px"
+                  },
                   "maplink": "",
                   "link": "",
                   "menu": []
@@ -339,6 +369,10 @@
               "title": "Utgångspunkter",
               "document": "x",
               "color": "#b7e1c8",
+              "icon": {
+                "materialUiIconName": "alarm_add",
+                "fontSize": "30px"
+              },
               "maplink": "",
               "link": "",
               "menu": []
@@ -347,6 +381,10 @@
               "title": "Kartlänk test Mölndal",
               "document": "",
               "color": "#b7e1c8",
+              "icon": {
+                "materialUiIconName": "alarm_add",
+                "fontSize": "30px"
+              },
               "maplink": {
                 "center": [323222.6, 6395257.21],
                 "zoom": 15,
@@ -364,6 +402,10 @@
               "title": "Tematiska anspråk",
               "document": "x",
               "color": "#bfe4f2",
+              "icon": {
+                "materialUiIconName": "alarm_add",
+                "fontSize": "30px"
+              },
               "maplink": "",
               "link": "",
               "menu": [
@@ -371,6 +413,10 @@
                   "title": "Utvecklingsalternativ",
                   "document": "",
                   "color": "#f5bf42",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "30px"
+                  },
                   "maplink": "",
                   "link": ""
                 },
@@ -378,6 +424,10 @@
                   "title": "Test",
                   "document": "x",
                   "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
                   "maplink": "",
                   "link": "",
                   "menu": []
@@ -385,36 +435,76 @@
               ]
             },
             {
-              "title": "Genomförande",
+              "title": "Tematiska anspråk",
               "document": "x",
-              "color": "#b7e1c8",
+              "color": "#bfe4f2",
+              "icon": {
+                "materialUiIconName": "alarm_add",
+                "fontSize": "large"
+              },
               "maplink": "",
               "link": "",
-              "menu": []
+              "menu": [
+                {
+                  "title": "Utvecklingsalternativ",
+                  "document": "",
+                  "color": "#f5bf42",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": ""
+                },
+                {
+                  "title": "Test",
+                  "document": "x",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
             },
             {
-              "title": "Genomförande",
+              "title": "",
               "document": "x",
-              "color": "#b7e1c8",
+              "color": "#bfe4f2",
+              "icon": {
+                "materialUiIconName": "alarm_add",
+                "fontSize": "large"
+              },
               "maplink": "",
               "link": "",
-              "menu": []
-            },
-            {
-              "title": "Testarbarr",
-              "document": "x",
-              "color": "#b7e1c8",
-              "maplink": "",
-              "link": "",
-              "menu": []
-            },
-            {
-              "title": "Testarbarr22222",
-              "document": "x",
-              "color": "#b7e1c8",
-              "maplink": "",
-              "link": "",
-              "menu": []
+              "menu": [
+                {
+                  "title": "Utvecklingsalternativ",
+                  "document": "x",
+                  "color": "#f5bf42",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": ""
+                },
+                {
+                  "title": "Test",
+                  "document": "x",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
             }
           ]
         }

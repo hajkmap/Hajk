@@ -4,6 +4,7 @@ import { withSnackbar } from "notistack";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
+
 import clsx from "clsx";
 
 const styles = theme => ({
@@ -36,13 +37,13 @@ class OverlayMenuItem extends React.PureComponent {
   render() {
     const {
       classes,
-
       item,
       toggleHighlight,
       highlighted,
-      handleMenuButtonClick
+      handleMenuButtonClick,
+      getIcon
     } = this.props;
-
+    console.log(item, "icon");
     return (
       <>
         <Paper
@@ -65,18 +66,20 @@ class OverlayMenuItem extends React.PureComponent {
             container
           >
             <Grid align="center" xs={12} item>
-              {}
+              {item.icon && getIcon(item.icon)}
             </Grid>
-            <Grid xs={12} item>
-              <Typography
-                style={{ wordWrap: "break-word" }}
-                variant="subtitle1"
-                align="center"
-                color="textPrimary"
-              >
-                {item.title}
-              </Typography>
-            </Grid>
+            {item.title && (
+              <Grid xs={12} item>
+                <Typography
+                  style={{ wordWrap: "break-word" }}
+                  variant="subtitle1"
+                  align="center"
+                  color="textPrimary"
+                >
+                  {item.title}
+                </Typography>
+              </Grid>
+            )}
           </Grid>
         </Paper>
       </>

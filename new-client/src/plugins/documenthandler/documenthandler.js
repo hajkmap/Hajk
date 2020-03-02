@@ -8,6 +8,13 @@ import Observer from "react-event-observer";
 import Hidden from "@material-ui/core/Hidden";
 import MapViewModel from "./MapViewModel";
 
+const iconFontElement = (
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+  />
+);
+
 const OverlayMenuView = menuComponent(OverlayMenuViewPartialFunctionality);
 const BarMenuView = menuComponent(BarMenuViewPartialFunctionality);
 
@@ -24,6 +31,10 @@ class DocumentHandler extends React.PureComponent {
     options: {}
   };
 
+  dynamicallyImportIconFonts = () => {
+    return iconFontElement;
+  };
+
   constructor(props) {
     super(props);
 
@@ -37,17 +48,18 @@ class DocumentHandler extends React.PureComponent {
   render() {
     return (
       <>
+        {this.dynamicallyImportIconFonts()}
         <Hidden xlUp>
           <OverlayMenuView
             app={this.props.app}
-            initialMenu={this.props.options.menuConfig}
+            options={this.props.options}
             localObserver={this.localObserver}
           ></OverlayMenuView>
         </Hidden>
         <Hidden lgDown>
           <BarMenuView
             app={this.props.app}
-            initialMenu={this.props.options.menuConfig}
+            options={this.props.options}
             localObserver={this.localObserver}
           ></BarMenuView>
         </Hidden>
