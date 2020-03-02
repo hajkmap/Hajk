@@ -16,10 +16,13 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
-  TextField
+  TextField,
+  Menu
 } from "@material-ui/core";
 
 import * as jsPDF from "jspdf";
+import { TwitterPicker as ColorPicker } from "react-color";
+
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
 import Vector from "ol/layer/Vector.js";
@@ -43,7 +46,7 @@ const styles = theme => ({
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 150
+    minWidth: 225
   }
 });
 
@@ -65,6 +68,7 @@ class PrintView extends React.PureComponent {
     resolution: 150, // 72, 150, 300,
     scale: 10000, // 0.5, 1, 2.5, 5, 10, 25, 50, 100, 200 (e.g. 1:10 000, 1:25 000, etc)
     mapTitle: "",
+    mapTextColor: "#636363",
     printInProgress: false,
     previewLayerVisible: false
   };
@@ -145,6 +149,16 @@ class PrintView extends React.PureComponent {
     props.localObserver.subscribe("hidePrintPreview", () => {
       this.setState({ previewLayerVisible: false });
     });
+
+    // FIXME: Prevent rotation of the preview feature
+    // props.map.getView().on("change:rotation", event => {
+    //   if (this.previewFeature === undefined) return;
+    //   console.log("view rotation: ", event.target.getRotation());
+    //   const geometry = this.previewFeature.getGeometry();
+    //   // console.log("feature: ", this.previewFeature);
+    //   // console.log("geometry: ", geometry);
+    //   geometry.rotate(-1 * event.target.getRotation(), this.getPreviewCenter());
+    // });
   }
 
   addPreviewLayer() {
@@ -405,7 +419,7 @@ class PrintView extends React.PureComponent {
 
       // Add scale text
       pdf.setFontSize(8);
-      pdf.setTextColor(100);
+      pdf.setTextColor(this.state.mapTextColor);
       pdf.text(
         `Skala: ${this.getUserFriendlyScale(scale * 1000)}`,
         6,
@@ -414,8 +428,8 @@ class PrintView extends React.PureComponent {
 
       // Add map title if user supplied one
       if (this.state.mapTitle.trim().length > 0) {
+        // TODO: Add options for: font size, text color RGB
         pdf.setFontSize(24);
-        pdf.setTextColor(100);
         pdf.text(this.state.mapTitle, 6, 12);
       }
 
@@ -490,6 +504,18 @@ class PrintView extends React.PureComponent {
     this.setState({
       [event.target.name]: event.target.value
     });
+  };
+
+  toggleColorPicker = e => {
+    this.setState({ anchorEl: e.currentTarget });
+  };
+
+  hideColorPicker = e => {
+    this.setState({ anchorEl: null });
+  };
+
+  handleMapTextColorChangeComplete = color => {
+    this.setState({ mapTextColor: color.hex });
   };
 
   render() {
@@ -605,6 +631,31 @@ class PrintView extends React.PureComponent {
                 name: "mapTitle"
               }}
             />
+          </FormControl>
+          {/* <FormControl className={classes.formControl}>
+            <InputLabel htmlFor="mapTextColor">Textfärg</InputLabel>
+            <ColorPicker
+              color={this.state.mapTextColor}
+              onChangeComplete={this.handleMapTextColorChangeComplete}
+            />
+          </FormControl> */}
+          <FormControl className={classes.formControl}>
+            <Button onClick={this.toggleColorPicker}>
+              {this.state.mapTextColor}
+            </Button>
+            {/* TODO: Replace the Menu with Popper? */}
+            <Menu
+              id="color-picker-menu"
+              anchorEl={this.state.anchorEl}
+              keepMounted
+              open={Boolean(this.state.anchorEl)}
+              onClose={this.hideColorPicker}
+            >
+              <ColorPicker
+                color={this.state.mapTextColor}
+                onChangeComplete={this.handleMapTextColorChangeComplete}
+              />
+            </Menu>
           </FormControl>
           <FormControl className={classes.formControl}>
             <Button

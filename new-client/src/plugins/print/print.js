@@ -65,8 +65,8 @@ class Print extends React.PureComponent {
           icon: <PrintIcon />,
           title: "Skriv ut",
           description: "Skapa en PDF av kartan",
-          height: 460,
-          width: 200,
+          height: 500,
+          width: 250,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide
         }}
