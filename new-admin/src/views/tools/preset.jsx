@@ -32,7 +32,7 @@ class ToolOptions extends Component {
       validationErrors: [],
       presetList: [],
       active: false,
-      //z index: 0,
+      index: 0,
       //z target: "toolbar",
       //z instruction: "",
       visibleAtStart: false,
@@ -49,7 +49,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         authActive: this.props.parent.props.parent.state.authActive,
-        //z index: tool.index,
+        index: tool.index,
         //z target: tool.options.target || "toolbar",
         //z position: tool.options.position,
         //width: tool.options.width,
@@ -119,7 +119,7 @@ class ToolOptions extends Component {
   save() {
     var tool = {
       type: this.type,
-      //z index: this.state.index,
+      index: this.state.index,
       options: {
         //z target: this.state.target,
         //z position: this.state.position,
@@ -195,93 +195,19 @@ class ToolOptions extends Component {
     });
   }
 
-  editPresetValue(e) {
-    var elements = this.refs.editForm.elements;
+  editPreset(e, name, url) {
+    if (name && url) {
+      var elements = this.refs.editName;
+      var elements2 = this.refs.editUrl;
 
-    if (elements) {
-      e.name = elements["name"].value;
-      e.presetUrl = "test-url";
+      e.name = elements.value;
+      e.presetUrl = elements2.value;
     }
-
-    this.state.presetList.forEach(t => {
-      var preset = {
-        name: elements["name"].value,
-        presetUrl: elements["presetUrl"].value
-      };
-      this.state.presetList.push(preset);
+    this.setState({
+      editing: e.name,
+      editUrl: e.presetUrl,
+      showResults: !this.state.showResults
     });
-    this.renderForm(e);
-  }
-
-  results(value) {
-    if (value.name === this.state.editing) {
-      return (
-        <div ref="editForm">
-          <label>Name:</label>
-          <br />
-          <input name="name" type="text" defaultValue={value.name} />
-          <br />
-          <input name="url" type="text" defaultValue={value.presetUrl} />
-          <br />
-          <input
-            type="submit"
-            value="Spara"
-            onSubmit={e => {
-              e.preventDefault();
-              this.handleSubmit(e);
-            }}
-          />
-        </div>
-      );
-    }
-  }
-
-  editPreset(e, newValue, newUrl) {
-    if (newValue && newUrl) {
-      this.setState({
-        editing: this.refs.newValue,
-        editUrl: this.refs.newUrl,
-        showResults: !this.state.showResults
-      });
-    }
-  }
-
-  cancelEdit() {
-    this.setState({ editing: null });
-  }
-
-  isActive(value) {
-    return (
-      "layer-node preset-name" +
-      (value === this.state.editing ? "preset-active" : "preset-default")
-    );
-  }
-
-  isActives(value) {
-    return value.name === this.state.editing ? this.renderForm(value) : null;
-  }
-
-  handleSubmit(e) {}
-
-  renderForm(value) {
-    if (value.name === this.state.editing) {
-      return (
-        <div>
-          <label>Name:</label>
-          <input type="text" name="name" defaultValue={this.state.presetList} />
-          <input type="text" name="test" value="asd" />
-          <button
-            className="btn btn-success"
-            onClick={e => {
-              e.preventDefault();
-              this.handleSubmit(e);
-            }}
-          >
-            Lägg till
-          </button>
-        </div>
-      );
-    }
   }
 
   createGuid() {
@@ -306,23 +232,6 @@ class ToolOptions extends Component {
     );
   }
 
-  createPreset(name, url, expanded, toggled) {
-    var elements = this.refs.presetForm.elements,
-      id = this.createGuid(),
-      layerName = elements["name"].value,
-      layer = $(`
-      <div><li
-        class="layer-node preset-name"
-        data-id=${id}
-        data-type="layer">
-        <span class="preset-name">${layerName}</span>
-      </li></div>
-    `);
-    $(".tree-view > ul").prepend(layer);
-    layer.editable(this);
-    this.forceUpdate();
-  }
-
   renderPresets() {
     return this.state.presetList.map((t, i) => (
       <div key={i}>
@@ -336,14 +245,14 @@ class ToolOptions extends Component {
             this.state.showResults ? (
               <div>
                 <input
-                  ref="newValue"
+                  ref="editName"
                   type="text"
                   defaultValue={t.name}
                   placeholder="Namn på snabbval"
                 />
                 <br />
                 <input
-                  ref="newUrl"
+                  ref="editUrl"
                   type="text"
                   defaultValue={t.presetUrl}
                   placeholder="Url"
@@ -353,7 +262,7 @@ class ToolOptions extends Component {
                   className="btn btn-success"
                   onClick={() => this.editPreset(t, t.name, t.presetUrl)}
                 >
-                  Spara
+                  Klar
                 </button>
                 <button
                   className="btn btn-default"
@@ -375,7 +284,7 @@ class ToolOptions extends Component {
             t.name
           )}
           <i
-            className="fa fa-pencil preset-icon"
+            className={this.state.showResults ? "" : "fa fa-pencil preset-icon"}
             onClick={() => this.editPreset(t)}
           />
         </li>
@@ -448,23 +357,21 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
-          {/*
-            <div className="separator">Fönsterinställningar</div>
-            <div>
-              <label htmlFor="index">Sorteringsordning</label>
-              <input
-                id="index"
-                name="index"
-                type="number"
-                min="0"
-                className="control-fixed-width"
-                onChange={e => {
-                  this.handleInputChange(e);
-                }}
-                value={this.state.index}
-              />
-            </div>
-          */}
+          <div className="separator">Fönsterinställningar</div>
+          <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.index}
+            />
+          </div>
           {/*           <div>
             <label htmlFor="target">Verktygsplacering</label>
             <select
@@ -569,7 +476,9 @@ class ToolOptions extends Component {
           </div>
           <div className="separator">Övriga inställningar</div>
  */}
-          <div>
+
+          <div className="separator">Övriga inställningar</div>
+          {/*<div>
             <input
               id="visibleAtStart"
               name="visibleAtStart"
@@ -581,7 +490,7 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
-          </div>
+          </div>*/}
           {this.renderVisibleForGroups()}
           <div>
             <div>
