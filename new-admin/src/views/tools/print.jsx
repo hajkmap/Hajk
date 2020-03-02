@@ -31,6 +31,7 @@ var defaultState = {
   instruction: "",
   scales: "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
   logo: "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+  visibleAtStart: false,
   visibleForGroups: []
 };
 
@@ -57,6 +58,7 @@ class ToolOptions extends Component {
         instruction: tool.options.instruction,
         scales: tool.options.scales || this.state.scales,
         logo: tool.options.logo,
+        visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -129,6 +131,7 @@ class ToolOptions extends Component {
         scales: this.state.scales,
         logo: this.state.logo,
         instruction: this.state.instruction,
+        visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -371,6 +374,19 @@ class ToolOptions extends Component {
             />
           </div>
           <div className="separator">Övriga inställningar</div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}
