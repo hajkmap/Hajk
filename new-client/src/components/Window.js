@@ -144,6 +144,12 @@ class Window extends React.PureComponent {
     width: propTypes.number.isRequired
   };
 
+  static defaultProps = {
+    draggingEnabled: true,
+    resizingEnabled: true,
+    allowMaximizedWindow: true
+  };
+
   constructor(props) {
     super(props);
     document.windows.push(this);
@@ -331,7 +337,7 @@ class Window extends React.PureComponent {
   };
 
   maximize = e => {
-    const { onMaximize } = this.props;
+    const { onMaximize, allowMaximizedWindow } = this.props;
     if (getIsMobile()) {
       this.moveToTop();
     } else {
@@ -340,7 +346,8 @@ class Window extends React.PureComponent {
           this.enlarge();
           break;
         case "window":
-          this.fit(document.getElementById("windows-container"));
+          allowMaximizedWindow &&
+            this.fit(document.getElementById("windows-container"));
           break;
         case "maximized":
           this.reset(document.getElementById("windows-container"));
@@ -388,7 +395,15 @@ class Window extends React.PureComponent {
   }
 
   render() {
-    const { children, classes, features, open, title } = this.props;
+    const {
+      children,
+      classes,
+      features,
+      open,
+      title,
+      resizingEnabled,
+      draggingEnabled
+    } = this.props;
     const { left, top, width, height } = this.state;
 
     let resizeBottom = true,
@@ -408,6 +423,10 @@ class Window extends React.PureComponent {
       }
       if (this.mode === "minimized") {
         resizeBottom = resizeBottomLeft = resizeBottomRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+      }
+
+      if (!resizingEnabled) {
+        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
       }
     }
 
@@ -447,7 +466,7 @@ class Window extends React.PureComponent {
         }}
         cancel="section,nav"
         bounds={"#windows-container"}
-        disableDragging={false || getIsMobile()}
+        disableDragging={!draggingEnabled || false || getIsMobile()}
         enableResizing={{
           bottom: resizeBottom,
           bottomLeft: resizeBottomLeft,
