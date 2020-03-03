@@ -17,8 +17,12 @@ import {
   DialogActions,
   DialogContentText,
   TextField,
-  Menu
+  Popover,
+  Tooltip,
+  IconButton,
+  FormControlLabel
 } from "@material-ui/core";
+import PaletteIcon from "@material-ui/icons/Palette";
 
 import * as jsPDF from "jspdf";
 import { TwitterPicker as ColorPicker } from "react-color";
@@ -47,6 +51,9 @@ const styles = theme => ({
   formControl: {
     margin: theme.spacing(1),
     minWidth: 225
+  },
+  mapTextColorLabel: {
+    margin: 0
   }
 });
 
@@ -68,7 +75,7 @@ class PrintView extends React.PureComponent {
     resolution: 150, // 72, 150, 300,
     scale: 10000, // 0.5, 1, 2.5, 5, 10, 25, 50, 100, 200 (e.g. 1:10 000, 1:25 000, etc)
     mapTitle: "",
-    mapTextColor: "#636363",
+    mapTextColor: "#ffffff",
     printInProgress: false,
     previewLayerVisible: false
   };
@@ -288,7 +295,9 @@ class PrintView extends React.PureComponent {
     });
   };
 
-  initiatePrint = () => {
+  initiatePrint = e => {
+    // Print can be initiated by submitting the <form>. In that case, we must prevent default behavior.
+    e.preventDefault();
     // Print starts, tell the user
     this.setState({ printInProgress: true });
     const snackbarKey = this.props.enqueueSnackbar(
@@ -384,6 +393,8 @@ class PrintView extends React.PureComponent {
         compress: true
       });
 
+      console.log("pdf.getFontList(): ", pdf.getFontList());
+
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
 
@@ -418,6 +429,7 @@ class PrintView extends React.PureComponent {
       }
 
       // Add scale text
+      pdf.setFontStyle("bold");
       pdf.setFontSize(8);
       pdf.setTextColor(this.state.mapTextColor);
       pdf.text(
@@ -515,6 +527,7 @@ class PrintView extends React.PureComponent {
   };
 
   handleMapTextColorChangeComplete = color => {
+    this.hideColorPicker();
     this.setState({ mapTextColor: color.hex });
   };
 
@@ -552,7 +565,11 @@ class PrintView extends React.PureComponent {
           </Dialog>,
           document.getElementById("root")
         )}
-        <form className={classes.root} autoComplete="off">
+        <form
+          className={classes.root}
+          autoComplete="off"
+          onSubmit={this.initiatePrint}
+        >
           <FormControl className={classes.formControl}>
             <InputLabel htmlFor="format">Format</InputLabel>
             <Select
@@ -609,7 +626,7 @@ class PrintView extends React.PureComponent {
               }}
             >
               {this.options.scales.map((scale, i) => {
-                // Note: it is crucial to keep the scale value (in state) diveded by 1000 from what is shown to user!
+                // Note: it is crucial to keep the scale value (in state) divided by 1000 from what is shown to user!
                 return (
                   <MenuItem key={i} value={scale}>
                     {this.getUserFriendlyScale(scale)}
@@ -632,31 +649,66 @@ class PrintView extends React.PureComponent {
               }}
             />
           </FormControl>
-          {/* <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="mapTextColor">Textfärg</InputLabel>
+          <FormControl className={classes.formControl}>
+            <Tooltip title="Textfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
+              <FormControlLabel
+                value="mapTextColor"
+                className={classes.mapTextColorLabel}
+                control={
+                  <IconButton
+                    id="mapTextColor"
+                    onClick={this.toggleColorPicker}
+                    style={{
+                      backgroundColor: this.state.mapTextColor,
+                      marginRight: 4
+                    }}
+                    size="small"
+                    edge="start"
+                  >
+                    <PaletteIcon />
+                  </IconButton>
+                }
+                label="Textfärg"
+              />
+            </Tooltip>
+          </FormControl>
+
+          <Popover
+            id="color-picker-menu"
+            anchorEl={this.state.anchorEl}
+            open={Boolean(this.state.anchorEl)}
+            onClose={this.hideColorPicker}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center"
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "center"
+            }}
+          >
             <ColorPicker
               color={this.state.mapTextColor}
+              colors={[
+                "#FFFFFF",
+                "#D0021B",
+                "#F5A623",
+                "#F8E71C",
+                "#8B572A",
+                "#7ED321",
+                "#417505",
+                "#9013FE",
+                "#4A90E2",
+                "#50E3C2",
+                "#B8E986",
+                "#000000",
+                "#4A4A4A",
+                "#9B9B9B"
+              ]}
               onChangeComplete={this.handleMapTextColorChangeComplete}
             />
-          </FormControl> */}
-          <FormControl className={classes.formControl}>
-            <Button onClick={this.toggleColorPicker}>
-              {this.state.mapTextColor}
-            </Button>
-            {/* TODO: Replace the Menu with Popper? */}
-            <Menu
-              id="color-picker-menu"
-              anchorEl={this.state.anchorEl}
-              keepMounted
-              open={Boolean(this.state.anchorEl)}
-              onClose={this.hideColorPicker}
-            >
-              <ColorPicker
-                color={this.state.mapTextColor}
-                onChangeComplete={this.handleMapTextColorChangeComplete}
-              />
-            </Menu>
-          </FormControl>
+          </Popover>
+          {/* </FormControl> */}
           <FormControl className={classes.formControl}>
             <Button
               variant="contained"
