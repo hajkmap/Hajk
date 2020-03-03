@@ -96,8 +96,11 @@ class Lines extends React.PureComponent {
    *
    * @memberof Lines
    */
-  clearSearchInputAndButtons = () => {
+  inactivateSpatialSearchButtons = () => {
     this.setState({ isPolygonActive: false, isRectangleActive: false });
+  };
+
+  clearSearchInputAndButtons = () => {
     this.setState({
       publicLineName: "",
       internalLineNumber: "",
@@ -137,7 +140,11 @@ class Lines extends React.PureComponent {
     if (!this.state.isPolygonActive) {
       this.localObserver.publish("deactivate-search", () => {});
     }
-    if (this.state.isPolygonActive && !this.state.isRectangleActive) {
+    if (this.state.isPolygonActive && this.state.isRectangleActive) {
+      this.localObserver.publish("deactivate-search", () => {});
+      this.setState({ isRectangleActive: false });
+    }
+    if (this.state.isPolygonActive) {
       this.localObserver.publish("routes-search", {
         publicLineName: publicLineName,
         internalLineNumber: internalLineNumber,
@@ -160,7 +167,11 @@ class Lines extends React.PureComponent {
     if (!this.state.isRectangleActive) {
       this.localObserver.publish("deactivate-search", () => {});
     }
-    if (this.state.isRectangleActive && !this.state.isPolygonActive) {
+    if (this.state.isRectangleActive && this.state.isPolygonActive) {
+      this.localObserver.publish("deactivate-search", () => {});
+      this.setState({ isPolygonActive: false });
+    }
+    if (this.state.isRectangleActive) {
       this.localObserver.publish("routes-search", {
         publicLineName: publicLineName,
         internalLineNumber: internalLineNumber,
