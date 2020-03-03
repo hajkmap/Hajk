@@ -154,7 +154,11 @@ class Journeys extends React.PureComponent {
     if (!this.state.isPolygonActive) {
       this.localObserver.publish("deactivate-search", () => {});
     }
-    if (this.state.isPolygonActive && !this.state.isRectangleActive) {
+    if (this.state.isPolygonActive && this.state.isRectangleActive) {
+      this.localObserver.publish("deactivate-search", () => {});
+      this.setState({ isRectangleActive: false });
+    }
+    if (this.state.isPolygonActive) {
       this.localObserver.publish("journeys-search", {
         selectedFromDate: formatFromDate,
         selectedEndDate: formatEndDate,
@@ -168,7 +172,11 @@ class Journeys extends React.PureComponent {
     if (!this.state.isRectangleActive) {
       this.localObserver.publish("deactivate-search", () => {});
     }
-    if (this.state.isRectangleActive && !this.state.isPolygonActive) {
+    if (this.state.isPolygonActive && this.state.isRectangleActive) {
+      this.localObserver.publish("deactivate-search", () => {});
+      this.setState({ isPolygonActive: false });
+    }
+    if (this.state.isRectangleActive) {
       this.localObserver.publish("journeys-search", {
         selectedFromDate: formatFromDate,
         selectedEndDate: formatEndDate,
