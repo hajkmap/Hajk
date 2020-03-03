@@ -166,6 +166,7 @@ class VTSearch extends React.PureComponent {
 
   handleChange = e => {
     var typeOfSearch = searchTypes[e.target.value];
+    this.localObserver.publish("deactivate-search", () => {});
     this.setState({
       activeSearchTool: typeOfSearch,
       expanded: typeOfSearch === searchTypes.DEFAULT ? false : true
