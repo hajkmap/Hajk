@@ -10,6 +10,12 @@ const zIndexStart = 1e3;
 // Patch the RND component's onDragStart method with the ability to disable drag by its internal state.
 // This is necessary so we can disable/enable drag at any time.
 //
+// Please note that since we override the onDragStart on prototype level, we must ensure that it's
+// kept up-to-date with the current version, see https://github.com/bokuweb/react-rnd/blob/master/src/index.tsx
+// for latest version of this method.
+//
+// TODO: Perhaps there's no need to disable drag at any time anymore, so this override could be removed?
+//
 Rnd.prototype.onDragStart = function(e, data) {
   if (this.state.disableDrag) {
     return false;
@@ -18,49 +24,67 @@ Rnd.prototype.onDragStart = function(e, data) {
   if (this.props.onDragStart) {
     this.props.onDragStart(e, data);
   }
-
   if (!this.props.bounds) return;
-
-  var parent = this.getParent();
-  var boundary;
+  const parent = this.getParent();
+  const scale = this.props.scale;
+  let boundary;
   if (this.props.bounds === "parent") {
     boundary = parent;
   } else if (this.props.bounds === "body") {
-    boundary = document.body;
+    const parentRect = parent.getBoundingClientRect();
+    const parentLeft = parentRect.left;
+    const parentTop = parentRect.top;
+    const bodyRect = document.body.getBoundingClientRect();
+    const left =
+      -(parentLeft - parent.offsetLeft * scale - bodyRect.left) / scale;
+    const top = -(parentTop - parent.offsetTop * scale - bodyRect.top) / scale;
+    const right =
+      (document.body.offsetWidth - this.resizable.size.width * scale) / scale +
+      left;
+    const bottom =
+      (document.body.offsetHeight - this.resizable.size.height * scale) /
+        scale +
+      top;
+    return this.setState({ bounds: { top, right, bottom, left } });
   } else if (this.props.bounds === "window") {
     if (!this.resizable) return;
-    return this.setState({
-      bounds: {
-        top: 0,
-        right: window.innerWidth - this.resizable.size.width,
-        bottom: window.innerHeight - this.resizable.size.height,
-        left: 0
-      }
-    });
+    const parentRect = parent.getBoundingClientRect();
+    const parentLeft = parentRect.left;
+    const parentTop = parentRect.top;
+    const left = -(parentLeft - parent.offsetLeft * scale) / scale;
+    const top = -(parentTop - parent.offsetTop * scale) / scale;
+    const right =
+      (window.innerWidth - this.resizable.size.width * scale) / scale + left;
+    const bottom =
+      (window.innerHeight - this.resizable.size.height * scale) / scale + top;
+    return this.setState({ bounds: { top, right, bottom, left } });
   } else {
     boundary = document.querySelector(this.props.bounds);
   }
   if (!(boundary instanceof HTMLElement) || !(parent instanceof HTMLElement)) {
     return;
   }
-  var boundaryRect = boundary.getBoundingClientRect();
-  var boundaryLeft = boundaryRect.left;
-  var boundaryTop = boundaryRect.top;
-  var parentRect = parent.getBoundingClientRect();
-  var parentLeft = parentRect.left;
-  var parentTop = parentRect.top;
-  var left = boundaryLeft - parentLeft;
-  var top = boundaryTop - parentTop;
+  const boundaryRect = boundary.getBoundingClientRect();
+  const boundaryLeft = boundaryRect.left;
+  const boundaryTop = boundaryRect.top;
+  const parentRect = parent.getBoundingClientRect();
+  const parentLeft = parentRect.left;
+  const parentTop = parentRect.top;
+  const left = (boundaryLeft - parentLeft) / scale;
+  const top = boundaryTop - parentTop;
   if (!this.resizable) return;
-  var offset = this.getOffsetFromParent();
+  this.updateOffsetFromParent();
+  const offset = this.offsetFromParent;
   this.setState({
     bounds: {
       top: top - offset.top,
       right:
-        left + (boundary.offsetWidth - this.resizable.size.width) - offset.left,
+        left +
+        (boundary.offsetWidth - this.resizable.size.width) -
+        offset.left / scale,
       bottom:
         top + (boundary.offsetHeight - this.resizable.size.height) - offset.top,
-      left: left - offset.left
+      left: left - offset.left / scale
     }
   });
 };
@@ -118,6 +142,12 @@ class Window extends React.PureComponent {
     position: propTypes.string.isRequired,
     title: propTypes.string.isRequired,
     width: propTypes.number.isRequired
+  };
+
+  static defaultProps = {
+    draggingEnabled: true,
+    resizingEnabled: true,
+    allowMaximizedWindow: true
   };
 
   constructor(props) {
@@ -307,7 +337,7 @@ class Window extends React.PureComponent {
   };
 
   maximize = e => {
-    const { onMaximize } = this.props;
+    const { onMaximize, allowMaximizedWindow } = this.props;
     if (getIsMobile()) {
       this.moveToTop();
     } else {
@@ -316,7 +346,8 @@ class Window extends React.PureComponent {
           this.enlarge();
           break;
         case "window":
-          this.fit(document.getElementById("windows-container"));
+          allowMaximizedWindow &&
+            this.fit(document.getElementById("windows-container"));
           break;
         case "maximized":
           this.reset(document.getElementById("windows-container"));
@@ -364,7 +395,15 @@ class Window extends React.PureComponent {
   }
 
   render() {
-    const { children, classes, features, open, title } = this.props;
+    const {
+      children,
+      classes,
+      features,
+      open,
+      title,
+      resizingEnabled,
+      draggingEnabled
+    } = this.props;
     const { left, top, width, height } = this.state;
 
     let resizeBottom = true,
@@ -384,6 +423,10 @@ class Window extends React.PureComponent {
       }
       if (this.mode === "minimized") {
         resizeBottom = resizeBottomLeft = resizeBottomRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+      }
+
+      if (!resizingEnabled) {
+        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
       }
     }
 
@@ -423,7 +466,7 @@ class Window extends React.PureComponent {
         }}
         cancel="section,nav"
         bounds={"#windows-container"}
-        disableDragging={false || getIsMobile()}
+        disableDragging={!draggingEnabled || false || getIsMobile()}
         enableResizing={{
           bottom: resizeBottom,
           bottomLeft: resizeBottomLeft,

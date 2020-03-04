@@ -88,7 +88,7 @@ class ToolOptions extends Component {
                 exportUrl: tool.options.exportUrl,
                 exportRoot: tool.options.exportRoot,
                 document: tool.options.document || list[0],
-                visibleAtStart: tool.options.visibleAtStart || false,
+                visibleAtStart: tool.options.visibleAtStart,
                 visibleForGroups: tool.options.visibleForGroups
                   ? tool.options.visibleForGroups
                   : []
@@ -386,6 +386,19 @@ class ToolOptions extends Component {
             />
           </div>
           <div className="separator">Övriga inställningar</div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           {this.renderVisibleForGroups()}
           <div>
             <input

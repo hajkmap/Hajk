@@ -29,7 +29,8 @@ class Preset extends React.PureComponent {
     dialogOpen: false,
     view: null,
     location: null,
-    zoom: null
+    zoom: null,
+    layers: null
   };
 
   constructor(props) {
@@ -40,6 +41,7 @@ class Preset extends React.PureComponent {
     );
 
     this.appModel = props.appModel;
+    this.globalObserver = props.appModel.globalObserver;
 
     // If config wasn't found, it means that Preset is not configured. Quit.
     if (this.config === undefined) return null;
@@ -68,20 +70,18 @@ class Preset extends React.PureComponent {
       let y = url[2].substring(2);
       let z = url[3].substring(2);
       let l = url[4]?.substring(2);
-
-      const view = this.map.getView();
       let location = [x, y];
       let zoom = z;
 
       if (l) {
         this.setState({
-          view: view,
           location: location,
-          zoom: zoom
+          zoom: zoom,
+          layers: l
         });
         this.openDialog();
       } else {
-        this.flyTo(view, location, zoom);
+        this.flyTo(this.map.getView(), location, zoom);
       }
     } else {
       this.props.enqueueSnackbar(
@@ -116,9 +116,11 @@ class Preset extends React.PureComponent {
   };
 
   flyTo(view, location, zoom) {
+    const duration = 1500;
     view.animate({
       center: location,
-      zoom: zoom
+      zoom: zoom,
+      duration: duration
     });
   }
 
@@ -129,11 +131,11 @@ class Preset extends React.PureComponent {
   };
 
   closeDialog = () => {
+    var visibleLayers = this.state.layers.split(",");
     this.setState({
       dialogOpen: false
     });
-    this.appModel.clear();
-    this.flyTo(this.state.view, this.state.location, this.state.zoom);
+    this.displayMap(visibleLayers);
   };
 
   abortDialog = () => {
@@ -141,6 +143,43 @@ class Preset extends React.PureComponent {
       dialogOpen: false
     });
   };
+
+  displayMap(visibleLayers) {
+    const layers = this.map.getLayers().getArray();
+
+    visibleLayers.forEach(arrays =>
+      layers
+        .filter(
+          layer =>
+            layer.getProperties()["layerInfo"] &&
+            layer.getProperties()["layerInfo"]["layerType"] !== "base"
+        )
+        .forEach(layer => {
+          if (layer.getProperties()["name"] === arrays) {
+            this.globalObserver.publish("showLayer", layer);
+            layer.setVisible(true);
+          }
+          if (
+            visibleLayers.some(
+              arrays => arrays === layer.getProperties()["name"]
+            )
+          ) {
+            if (layer.layerType === "group") {
+              this.globalObserver.publish("showLayer", layer);
+            } else {
+              layer.setVisible(true);
+            }
+          } else {
+            if (layer.layerType === "group") {
+              this.globalObserver.publish("hideLayer", layer);
+            } else {
+              layer.setVisible(false);
+            }
+          }
+        })
+    );
+    this.flyTo(this.map.getView(), this.state.location, this.state.zoom);
+  }
 
   renderDialog() {
     if (this.state.dialogOpen) {

@@ -28,6 +28,7 @@ var defaultState = {
   index: 0,
   target: "toolbar",
   icons: "",
+  visibleAtStart: false,
   instruction: ""
 };
 
@@ -52,6 +53,7 @@ class ToolOptions extends Component {
         width: tool.options.width,
         height: tool.options.height,
         icons: tool.options.icons,
+        visibleAtStart: tool.options.visibleAtStart,
         instruction: tool.options.instruction
       });
     } else {
@@ -123,6 +125,7 @@ class ToolOptions extends Component {
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
         base64Encode: this.state.base64Encode,
+        visibleAtStart: this.state.visibleAtStart,
         instruction: this.state.instruction,
         icons: this.state.icons,
         proxyUrl: this.state.proxyUrl
@@ -297,6 +300,19 @@ class ToolOptions extends Component {
             />
           </div>
           <div className="separator">Övriga inställningar</div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}

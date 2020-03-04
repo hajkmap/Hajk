@@ -33,6 +33,7 @@ var defaultState = {
   geoserverUrl: "",
   notFeatureLayers: [],
   geoserverNameToCategoryName: {},
+  visibleAtStart: false,
   visibleForGroups: []
 };
 
@@ -63,6 +64,7 @@ class ToolOptions extends Component {
           ? tool.options.notFeatureLayers
           : [],
         geoserverNameToCategoryName: tool.options.geoserverNameToCategoryName,
+        visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -137,6 +139,7 @@ class ToolOptions extends Component {
         varbergVer: this.state.varbergVer,
         geoserverUrl: this.state.geoserverUrl,
         notFeatureLayers: this.state.notFeatureLayers,
+        visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -360,6 +363,19 @@ class ToolOptions extends Component {
             />
           </div>
           <div className="separator">Övriga inställningar</div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}

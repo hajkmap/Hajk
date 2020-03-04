@@ -238,7 +238,7 @@ class Search extends React.PureComponent {
       : "Visa verktygspanelen";
 
     return (
-      <>
+      <div>
         <Paper className={classes.root}>
           <Tooltip title={tooltipText}>
             <span id="drawerToggler">
@@ -301,7 +301,7 @@ class Search extends React.PureComponent {
           {this.state.activeSearchView && this.renderSpatialBar()}
         </Paper>
         {this.renderSearchResultList("center")}
-      </>
+      </div>
     );
   }
 
