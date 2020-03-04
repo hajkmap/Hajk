@@ -30,6 +30,7 @@ var defaultState = {
   index: 0,
   target: 0,
   instruction: "",
+  visibleAtStart: false,
   visibleForGroups: []
 };
 
@@ -58,6 +59,7 @@ class ToolOptions extends Component {
         height: tool.options.height,
         instruction: tool.options.instruction,
         transformations: tool.options.transformations || [],
+        visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -130,6 +132,7 @@ class ToolOptions extends Component {
         height: this.state.height,
         instruction: this.state.instruction,
         transformations: this.state.transformations,
+        visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -402,6 +405,19 @@ class ToolOptions extends Component {
             />
           </div>
           <div className="separator">Övriga inställningar</div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}

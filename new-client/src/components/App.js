@@ -162,27 +162,36 @@ class App extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    const drawerPermanentFromLocalStorage =
+      window.localStorage.getItem("drawerPermanent") !== null
+        ? window.localStorage.getItem("drawerPermanent") === "true"
+          ? true
+          : false
+        : null;
+
     this.state = {
       alert: false,
       loading: false,
       mapClickDataResult: {},
 
       // Drawer-related states
-      // If cookie for "drawerPermanent" is true, we must also make the drawer visible
+      // If cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
+      // else fall back to value from config, or finally don't show Drawer.
       drawerVisible:
-        window.localStorage.getItem("drawerPermanent") === "true" ||
-        props.config.mapConfig.map.drawerVisible ||
-        false,
+        drawerPermanentFromLocalStorage !== null
+          ? drawerPermanentFromLocalStorage
+          : props.config.mapConfig.map.drawerVisible || false,
 
       // To check whether drawer is permanent, first take a look at the cookie.
-      // If cookie is falsy, see if map config says that drawer should be visible and permanent.
-      // Both must be true before we show the drawer.
-      // Finally, fall back to "false" so we start without a visible, permanent, Drawer.
+      // If cookie is not null, use it to show/hide Drawer.
+      // If cookie however is null, fall back to the values from config.
+      // Finally, fall back to "false" if no cookie or config is found.
       drawerPermanent:
-        window.localStorage.getItem("drawerPermanent") === "true" ||
-        (props.config.mapConfig.map.drawerVisible &&
-          props.config.mapConfig.map.drawerPermanent) ||
-        false,
+        drawerPermanentFromLocalStorage !== null
+          ? drawerPermanentFromLocalStorage
+          : (props.config.mapConfig.map.drawerVisible &&
+              props.config.mapConfig.map.drawerPermanent) ||
+            false,
       drawerMouseOverLock: false
     };
     this.globalObserver = new Observer();

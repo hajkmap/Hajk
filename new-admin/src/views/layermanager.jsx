@@ -732,6 +732,11 @@ class Manager extends Component {
                 <option value="Vector">Vektor</option>
               </select>
             </p>
+            <button className="btn btn-primary">
+              {this.state.mode === "edit" ? "Spara" : "Lägg till"}
+            </button>
+            &nbsp;
+            {abort}
             {this.renderForm()}
             <button className="btn btn-primary">
               {this.state.mode === "edit" ? "Spara" : "Lägg till"}
