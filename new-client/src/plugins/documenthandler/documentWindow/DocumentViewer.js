@@ -1,6 +1,7 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
+import { Typography } from "@material-ui/core";
 
 const styles = theme => ({});
 
@@ -19,7 +20,11 @@ class DocumentViewer extends React.PureComponent {
   }
 
   render() {
-    return <></>;
+    return (
+      <>
+        <Typography>dsadsadas</Typography>
+      </>
+    );
   }
 }
 

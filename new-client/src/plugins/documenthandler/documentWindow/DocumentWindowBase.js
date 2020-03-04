@@ -19,15 +19,17 @@ class DocumentWindowBase extends React.PureComponent {
   constructor(props) {
     super(props);
     this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
+
+    this.bindSubscriptions();
   }
 
-  buttonClick = () => {
-    this.localObserver.publish(
-      "documentHandlerEvent",
-      "This has been sent from  DocumentHandlerView using the Observer"
-    );
+  bindSubscriptions = () => {
+    const { app, localObserver } = this.props;
+    localObserver.subscribe("show-document-window", () => {
+      app.globalObserver.publish("showDocumentviewer", {
+        hideOtherPlugins: false
+      });
+    });
   };
 
   render() {
@@ -40,14 +42,13 @@ class DocumentWindowBase extends React.PureComponent {
           title: "Documents",
           description: "En kort beskrivning som visas i widgeten",
           height: 700,
-          width: 400
+          width: 400,
+          draggingEnabled: false,
+          resizingEnabled: false,
+          allowMaximizedWindow: false
         }}
       >
-        <DocumentViewer
-          model={this.dummyModel}
-          app={this.props.app}
-          localObserver={this.localObserver}
-        />
+        <DocumentViewer app={this.props.app} />
       </BaseWindowPlugin>
     );
   }
