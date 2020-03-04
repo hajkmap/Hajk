@@ -2,7 +2,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import AttributeTable from "./AttributeTable";
-import SummaryTable from "./SummaryTable";
+import AdvancedAttributeTable from "./AdvancedAttributeTable";
 import Grid from "@material-ui/core/Grid";
 
 /**
@@ -24,7 +24,7 @@ class TabPanel extends React.PureComponent {
   render() {
     const {
       activeTabId,
-      resultListHeight,
+      attributeTableContainerHeight,
       searchResult,
       tabId,
       localObserver,
@@ -41,25 +41,23 @@ class TabPanel extends React.PureComponent {
         alignItems="flex-start"
         spacing={0}
       >
-        {renderSummary && (
-          <Grid item xs={12}>
-            <SummaryTable
-              localObserver={localObserver}
-              height={100}
-              searchResult={searchResult}
-              rowHeight={rowHeight}
-            ></SummaryTable>
-          </Grid>
-        )}
-        <Grid item xs={12}>
+        {renderSummary ? (
+          <AdvancedAttributeTable
+            searchResult={searchResult}
+            toolConfig={toolConfig}
+            attributeTableContainerHeight={attributeTableContainerHeight}
+            localObserver={localObserver}
+            rowHeight={rowHeight}
+          ></AdvancedAttributeTable>
+        ) : (
           <AttributeTable
             searchResult={searchResult}
             toolConfig={toolConfig}
-            resultListHeight={resultListHeight}
+            height={attributeTableContainerHeight}
             localObserver={localObserver}
             rowHeight={rowHeight}
           ></AttributeTable>
-        </Grid>
+        )}
       </Grid>
     );
   }

@@ -368,7 +368,9 @@ class SearchResultListContainer extends React.Component {
         toolConfig={toolConfig}
         activeTabId={this.state.activeTabId}
         tabId={searchResult.id}
-        resultListHeight={this.state.resultListHeight}
+        attributeTableContainerHeight={
+          this.state.resultListHeight - this.appbarHeight
+        }
         windowWidth={this.state.windowWidth}
         localObserver={localObserver}
         searchResult={searchResult}

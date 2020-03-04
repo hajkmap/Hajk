@@ -125,7 +125,7 @@ class Lines extends React.PureComponent {
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "",
-      searchCallback: this.clearSearchInputAndButtons
+      searchCallback: this.inactivateSpatialSearchButtons
     });
   };
 
@@ -152,7 +152,7 @@ class Lines extends React.PureComponent {
         trafficTransportName: trafficTransportName,
         throughStopArea: throughStopArea,
         selectedFormType: "Polygon",
-        searchCallback: this.clearSearchInputAndButtons
+        searchCallback: this.inactivateSpatialSearchButtons
       });
     }
   };
