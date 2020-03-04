@@ -1,5 +1,3 @@
-import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-
 /**
  * @summary  DocumentHandler model that doesn't do much.
  * @description This model exposes only one method, getMap(),
@@ -15,9 +13,7 @@ const fetchConfig = {
 };
 
 export default class DocumentHandlerModel {
-  constructor(settings) {}
-
-  async list(callback) {
+  async listAllAvailableDocuments(callback) {
     let response;
     try {
       response = await fetch(
@@ -30,16 +26,7 @@ export default class DocumentHandlerModel {
     } catch (err) {}
   }
 
-  setParentChapter(chapter, parent) {
-    chapter.parent = parent;
-    if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
-        this.setParentChapter(child, chapter);
-      });
-    }
-  }
-
-  async load(title, callback) {
+  async fetchJsonDocument(title, callback) {
     let response;
     try {
       response = await fetch(
@@ -55,13 +42,13 @@ export default class DocumentHandlerModel {
       callback(document);
     } catch (err) {}
   }
-  /**
-   * Returns the global Map object.
-   *
-   * @returns {object} Map
-   * @memberof  DocumentHandlerModel
-   */
-  getMap() {
-    return this.map;
+
+  setParentChapter(chapter, parent) {
+    chapter.parent = parent;
+    if (chapter.chapters.length > 0) {
+      chapter.chapters.forEach(child => {
+        this.setParentChapter(child, chapter);
+      });
+    }
   }
 }
