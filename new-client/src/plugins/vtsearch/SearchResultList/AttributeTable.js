@@ -173,15 +173,10 @@ class AttributeTable extends React.Component {
   };
 
   render() {
-    const {
-      resultListHeight,
-      windowWidth,
-      searchResult,
-      rowHeight
-    } = this.props;
+    const { height, searchResult, rowHeight } = this.props;
 
     return (
-      <Paper style={{ height: resultListHeight }}>
+      <Paper style={{ height: height }}>
         {searchResult.featureCollection.features.length > 0 ? (
           <VirtualizedTable
             rowCount={this.state.rows.length}
@@ -197,9 +192,7 @@ class AttributeTable extends React.Component {
             rowHeight={rowHeight}
           />
         ) : (
-          <Paper style={{ height: resultListHeight, width: windowWidth }}>
-            Inga sökresultat
-          </Paper>
+          <Paper style={{ height: height }}>Inga sökresultat</Paper>
         )}
       </Paper>
     );
