@@ -206,7 +206,7 @@ export default class MapViewModel {
     publicLineName,
     internalLineNumber,
     municipality,
-    trafficTransportName,
+    trafficTransport,
     throughStopArea,
     selectedFormType,
     searchCallback
@@ -224,7 +224,7 @@ export default class MapViewModel {
         publicLineName,
         internalLineNumber,
         municipality,
-        trafficTransportName,
+        trafficTransport,
         throughStopArea
       );
     } else {
@@ -233,7 +233,7 @@ export default class MapViewModel {
           publicLineName,
           internalLineNumber,
           municipality,
-          trafficTransportName,
+          trafficTransport,
           throughStopArea,
           wktFeatureGeom
         );

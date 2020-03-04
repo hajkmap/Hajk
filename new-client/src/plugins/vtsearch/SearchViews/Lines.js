@@ -41,8 +41,8 @@ class Lines extends React.PureComponent {
     internalLineNumber: "",
     municipalities: [],
     municipality: "",
-    trafficTransportNames: [],
-    trafficTransportName: "",
+    trafficTransports: [],
+    trafficTransport: "",
     throughStopArea: "",
     isPolygonActive: false,
     isRectangleActive: false
@@ -74,7 +74,7 @@ class Lines extends React.PureComponent {
       });
       this.model.fetchAllPossibleTransportModeTypeName().then(result => {
         this.setState({
-          trafficTransportNames: result.length > 0 ? result : []
+          trafficTransports: result.length > 0 ? result : []
         });
       });
     });
@@ -105,7 +105,7 @@ class Lines extends React.PureComponent {
       publicLineName: "",
       internalLineNumber: "",
       municipalityName: "",
-      trafficTransportName: "",
+      trafficTransport: "",
       throughStopArea: ""
     });
   };
@@ -115,14 +115,14 @@ class Lines extends React.PureComponent {
       publicLineName,
       internalLineNumber,
       municipality,
-      trafficTransportName,
+      trafficTransport,
       throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
       municipality: municipality.gid,
-      trafficTransportName: trafficTransportName,
+      trafficTransport: trafficTransport,
       throughStopArea: throughStopArea,
       selectedFormType: "",
       searchCallback: this.inactivateSpatialSearchButtons
@@ -134,7 +134,7 @@ class Lines extends React.PureComponent {
       publicLineName,
       internalLineNumber,
       municipality,
-      trafficTransportName,
+      trafficTransport,
       throughStopArea
     } = this.state;
     if (!this.state.isPolygonActive) {
@@ -149,7 +149,7 @@ class Lines extends React.PureComponent {
         publicLineName: publicLineName,
         internalLineNumber: internalLineNumber,
         municipality: municipality.gid,
-        trafficTransportName: trafficTransportName,
+        trafficTransport: trafficTransport,
         throughStopArea: throughStopArea,
         selectedFormType: "Polygon",
         searchCallback: this.inactivateSpatialSearchButtons
@@ -161,7 +161,7 @@ class Lines extends React.PureComponent {
       publicLineName,
       internalLineNumber,
       municipality,
-      trafficTransportName,
+      trafficTransport,
       throughStopArea
     } = this.state;
     if (!this.state.isRectangleActive) {
@@ -176,7 +176,7 @@ class Lines extends React.PureComponent {
         publicLineName: publicLineName,
         internalLineNumber: internalLineNumber,
         municipality: municipality.gid,
-        trafficTransportName: trafficTransportName,
+        trafficTransportName: trafficTransport,
         throughStopArea: throughStopArea,
         selectedFormType: "Box",
         searchCallback: this.clearSearchInputAndButtons
@@ -201,7 +201,7 @@ class Lines extends React.PureComponent {
   };
   handleTrafficTransportChange = e => {
     this.setState({
-      trafficTransportName: e.target.value
+      trafficTransport: e.target.value
     });
   };
   handleThroughStopAreaChange = event => {
@@ -248,21 +248,34 @@ class Lines extends React.PureComponent {
   };
 
   renderTrafficTypeSection = () => {
-    const { trafficTransportNames } = this.state;
+    const { trafficTransports } = this.state;
+    const { classes } = this.props;
     return (
       <Grid item xs={12}>
         <FormControl fullWidth>
           <Typography variant="caption">TRAFIKSLAG</Typography>
           <Select
-            value={this.state.trafficTransportName}
+            value={this.state.trafficTransport}
             onChange={this.handleTrafficTransportChange}
           >
-            {trafficTransportNames.map((name, index) => {
-              return (
-                <MenuItem key={index} value={name}>
-                  {name}
-                </MenuItem>
-              );
+            {trafficTransports.map((name, index) => {
+              if (name === "") {
+                return (
+                  <MenuItem
+                    key={index}
+                    value={name}
+                    className={classes.firstMenuItem}
+                  >
+                    {name}
+                  </MenuItem>
+                );
+              } else {
+                return (
+                  <MenuItem key={index} value={name}>
+                    <Typography>{name}</Typography>
+                  </MenuItem>
+                );
+              }
             })}
           </Select>
         </FormControl>
