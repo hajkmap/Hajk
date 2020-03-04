@@ -1,5 +1,5 @@
 import React from "react";
-import DocumentHandlerModel from "../DocumentHandlerModel";
+
 const mapDiv = document.getElementById("map");
 const blurCss = "filter : blur(7px)";
 const menuViewHoc = MenuComponent =>
@@ -10,8 +10,6 @@ const menuViewHoc = MenuComponent =>
 
     constructor(props) {
       super(props);
-      console.log(this.props, "props");
-      this.documentHandlerModel = new DocumentHandlerModel();
 
       this.props.options.menuConfig.menu.forEach(menuItem => {
         this.setParentAndContainingMenu(
@@ -61,7 +59,7 @@ const menuViewHoc = MenuComponent =>
       });
 
       localObserver.subscribe("document-clicked", item => {
-        localObserver.publish("show-document-window");
+        localObserver.publish("show-document-window", item);
       });
 
       localObserver.subscribe("link-clicked", item => {
