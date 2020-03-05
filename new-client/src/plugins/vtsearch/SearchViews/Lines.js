@@ -43,9 +43,7 @@ class Lines extends React.PureComponent {
     municipality: "",
     trafficTransports: [],
     trafficTransport: "",
-    throughStopArea: "",
-    isPolygonActive: false,
-    isRectangleActive: false
+    throughStopArea: ""
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -125,7 +123,7 @@ class Lines extends React.PureComponent {
       trafficTransport: trafficTransport,
       throughStopArea: throughStopArea,
       selectedFormType: "",
-      searchCallback: this.inactivateSpatialSearchButtons
+      searchCallback: this.clearSearchInputAndButtons
     });
   };
 
@@ -179,7 +177,7 @@ class Lines extends React.PureComponent {
         trafficTransportName: trafficTransport,
         throughStopArea: throughStopArea,
         selectedFormType: "Box",
-        searchCallback: this.clearSearchInputAndButtons
+        searchCallback: this.inactivateSpatialSearchButtons
       });
     }
   };

@@ -218,7 +218,6 @@ export default class MapViewModel {
       geometryFunction = createBox();
     }
 
-    searchCallback();
     if (selectedFormType === "") {
       this.model.getRoutes(
         publicLineName,
@@ -229,6 +228,7 @@ export default class MapViewModel {
       );
     } else {
       this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
+        searchCallback();
         this.model.getRoutes(
           publicLineName,
           internalLineNumber,

@@ -30,7 +30,7 @@ class AdvancedAttributeTable extends React.Component {
     return [
       {
         width: 300,
-        label: "TRAFIKSLAG",
+        label: "TRAFIKFÖRETAG",
         dataKey: "operator"
       },
       { width: 800, label: "LINJER", dataKey: "lines" }
