@@ -380,6 +380,7 @@ export default class MapViewModel {
     this.map.getLayers().forEach(layer => {
       if (layer.get("searchResultId") === searchResultId) {
         layer.set("visible", !layer.get("visible"));
+        this.zoomToExtent(layer.getSource().getExtent());
       }
     });
   };
