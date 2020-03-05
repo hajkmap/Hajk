@@ -23,6 +23,10 @@
 import React from "react";
 import { Component } from "react";
 import FieldEditor from "../components/FieldEditor.jsx";
+import Button from "@material-ui/core/Button";
+import { withStyles } from "@material-ui/core/styles";
+import { blue } from "@material-ui/core/colors";
+import SaveIcon from "@material-ui/icons/Save";
 
 class LayerDescription extends Component {
   render() {
@@ -63,6 +67,16 @@ var defaultState = {
   editServices: [],
   layerDescription: undefined
 };
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 class ToolOptions extends Component {
   /**
@@ -286,15 +300,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div>
             <input
@@ -531,15 +547,17 @@ class ToolOptions extends Component {
             }}
           />
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
         </form>
       </div>

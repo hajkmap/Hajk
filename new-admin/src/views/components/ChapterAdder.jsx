@@ -1,6 +1,31 @@
 import React from "react";
 import { Component } from "react";
+import Button from "@material-ui/core/Button";
+import AddIcon from "@material-ui/icons/Add";
+import DoneIcon from "@material-ui/icons/DoneOutline";
+import CancelIcon from "@material-ui/icons/Cancel";
+import { withStyles } from "@material-ui/core/styles";
+import { green, blue } from "@material-ui/core/colors";
 
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 class ChapterAdder extends Component {
   constructor(props) {
     super(props);
@@ -70,24 +95,36 @@ class ChapterAdder extends Component {
             }}
           />
           &nbsp;
-          <span className="btn btn-primary" onClick={() => this.addChapter()}>
+          <ColorButtonGreen
+            variant="contained"
+            className="btn"
+            onClick={() => this.addChapter()}
+            startIcon={<DoneIcon />}
+          >
             Ok
-          </span>
+          </ColorButtonGreen>
           &nbsp;
-          <span className="btn btn-danger" onClick={() => this.cancel()}>
+          <ColorButtonBlue
+            variant="contained"
+            className="btn btn-danger"
+            onClick={() => this.cancel()}
+            startIcon={<CancelIcon />}
+          >
             Avbryt
-          </span>
+          </ColorButtonBlue>
         </div>
       );
     } else {
       return (
         <div style={{ display: "inline-block" }}>
-          <span
-            className="btn btn-success"
+          <ColorButtonGreen
+            variant="contained"
+            className="btn"
             onClick={() => this.toggleInputVisibility()}
+            startIcon={<AddIcon />}
           >
             Lägg till kapitel
-          </span>
+          </ColorButtonGreen>
         </div>
       );
     }
