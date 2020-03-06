@@ -31,6 +31,7 @@ import DoneIcon from "@material-ui/icons/Done";
 import RemoveIcon from "@material-ui/icons/Remove";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import CancelIcon from "@material-ui/icons/Cancel";
+import NoteAddIcon from "@material-ui/icons/NoteAdd";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { withStyles } from "@material-ui/core/styles";
@@ -530,14 +531,14 @@ class InformativeEditor extends Component {
 
   renderModal() {
     var abortButton = this.state.showAbortButton ? (
-      <ColorButtonBlue
+      <ColorButtonRed
         variant="contained"
         className="btn"
         onClick={e => this.hideModal()}
         startIcon={<CancelIcon />}
       >
         Avbryt
-      </ColorButtonBlue>
+      </ColorButtonRed>
     ) : (
       ""
     );
@@ -564,7 +565,12 @@ class InformativeEditor extends Component {
           <ColorButtonGreen
             variant="contained"
             className="btn"
-            onClick={e => this.hideModal()}
+            onClick={e => {
+              if (this.state.modalConfirmCallback) {
+                this.state.modalConfirmCallback();
+              }
+              this.hideModal();
+            }}
             startIcon={<DoneIcon />}
           >
             {this.state.okButtonText || "OK"}
@@ -674,13 +680,15 @@ class InformativeEditor extends Component {
     return (
       <div>
         {this.renderModal()}
-        <div>
-          <span
-            className="btn btn-default"
+        <div className="margined">
+          <ColorButtonGreen
+            variant="contained"
+            className="btn"
             onClick={() => this.renderCreateDialog()}
+            startIcon={<NoteAddIcon />}
           >
             Skapa nytt dokument
-          </span>
+          </ColorButtonGreen>
         </div>
         <div className="inset-form">
           <label>Välj dokument:&nbsp;</label>
