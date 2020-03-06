@@ -315,6 +315,7 @@ class Menu extends Component {
       visibleAtStart: true,
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
+      enableOSM: false,
       showBreadcrumbs: false,
       instruction: "",
       dropdownThemeMaps: false,
@@ -354,6 +355,7 @@ class Menu extends Component {
             .backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherWhite,
+          enableOSM: this.props.model.get("layerMenuConfig").enableOSM,
           showBreadcrumbs: this.props.model.get("layerMenuConfig")
             .showBreadcrumbs,
           instruction: this.props.model.get("layerMenuConfig").instruction,
@@ -562,6 +564,7 @@ class Menu extends Component {
       visibleAtStart: this.state.visibleAtStart,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
+      enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -1576,6 +1579,17 @@ class Menu extends Component {
                 <label htmlFor="backgroundSwitcherWhite">
                   Vit bakgrundskarta
                 </label>
+              </div>
+              <div>
+                <input
+                  id="enableOSM"
+                  name="enableOSM"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableOSM}
+                />
+                &nbsp;
+                <label htmlFor="enableOSM">OpenStreetMap</label>
               </div>
               <div className="separator">Justera lagerhanteraren</div>
               <div className="margined">
