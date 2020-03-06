@@ -28,6 +28,42 @@ import WMSLayerForm from "./layerforms/wmslayerform.jsx";
 import WMTSLayerForm from "./layerforms/wmtslayerform.jsx";
 import ArcGISLayerForm from "./layerforms/arcgislayerform.jsx";
 import VectorLayerForm from "./layerforms/vectorlayerform.jsx";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import AddIcon from "@material-ui/icons/Add";
+import CancelIcon from "@material-ui/icons/Cancel";
+import { withStyles } from "@material-ui/core/styles";
+import { red, green, blue } from "@material-ui/core/colors";
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 const defaultState = {
   layerType: "WMS",
@@ -660,9 +696,14 @@ class Manager extends Component {
   render() {
     var abort =
         this.state.mode === "edit" ? (
-          <span className="btn btn-danger" onClick={e => this.abort(e)}>
+          <ColorButtonRed
+            variant="contained"
+            className="btn btn-danger"
+            onClick={e => this.abort(e)}
+            startIcon={<CancelIcon />}
+          >
             Avbryt
-          </span>
+          </ColorButtonRed>
         ) : null,
       url = this.props.config.url_import, // "/mapservice/export/importimage"
       typeSelectorDisabled = this.state.mode === "edit";
@@ -732,15 +773,47 @@ class Manager extends Component {
                 <option value="Vector">Vektor</option>
               </select>
             </p>
-            <button className="btn btn-primary">
-              {this.state.mode === "edit" ? "Spara" : "Lägg till"}
-            </button>
+            {this.state.mode === "edit" ? (
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<SaveIcon />}
+              >
+                Spara
+              </ColorButtonBlue>
+            ) : (
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<AddIcon />}
+              >
+                Lägg till
+              </ColorButtonGreen>
+            )}
             &nbsp;
             {abort}
             {this.renderForm()}
-            <button className="btn btn-primary">
-              {this.state.mode === "edit" ? "Spara" : "Lägg till"}
-            </button>
+            {this.state.mode === "edit" ? (
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<SaveIcon />}
+              >
+                Spara
+              </ColorButtonBlue>
+            ) : (
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<AddIcon />}
+              >
+                Lägg till
+              </ColorButtonGreen>
+            )}
             &nbsp;
             {abort}
           </form>

@@ -23,6 +23,20 @@
 import React from "react";
 import { Component } from "react";
 import { SketchPicker } from "react-color";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { blue } from "@material-ui/core/colors";
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 var defaultState = {
   primaryColor: "#00F",
@@ -320,9 +334,14 @@ class MapOptions extends Component {
         <article>
           <fieldset className="tree-view">
             <legend>Kartinställningar</legend>
-            <button className="btn btn-primary" onClick={e => this.save(e)}>
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              onClick={e => this.save(e)}
+              startIcon={<SaveIcon />}
+            >
               Spara
-            </button>
+            </ColorButtonBlue>
             <br />
             <div>
               <label>
@@ -742,9 +761,14 @@ class MapOptions extends Component {
               </span>
             </div>
             <br />
-            <button className="btn btn-primary" onClick={e => this.save(e)}>
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              onClick={e => this.save(e)}
+              startIcon={<SaveIcon />}
+            >
               Spara
-            </button>
+            </ColorButtonBlue>
             &nbsp;
           </fieldset>
         </article>

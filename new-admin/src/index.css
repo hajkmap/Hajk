@@ -231,7 +231,8 @@ article fieldset > span > div {
   padding-right: 5px;
 }
 
-.config-layer-list .options-box {
+.config-layer-list .options-box,
+.map-management {
   display: flex;
 }
 
@@ -807,4 +808,8 @@ figure img {
 
 .separator.set-width {
   width: 930px;
+}
+
+.map-management-margin-left {
+  margin-left: 10px;
 }

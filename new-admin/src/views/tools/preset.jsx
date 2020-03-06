@@ -23,6 +23,44 @@
 import React from "react";
 import { Component } from "react";
 import $ from "jquery";
+import Button from "@material-ui/core/Button";
+import AddIcon from "@material-ui/icons/Add";
+import CancelIcon from "@material-ui/icons/Cancel";
+import DoneIcon from "@material-ui/icons/Done";
+import RemoveIcon from "@material-ui/icons/Remove";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { red, green, blue } from "@material-ui/core/colors";
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 class ToolOptions extends Component {
   constructor() {
@@ -258,24 +296,30 @@ class ToolOptions extends Component {
                   placeholder="Url"
                 />
                 <br />
-                <button
-                  className="btn btn-success"
+                <ColorButtonGreen
+                  variant="contained"
+                  className="btn"
                   onClick={() => this.editPreset(t, t.name, t.presetUrl)}
+                  startIcon={<DoneIcon />}
                 >
                   Klar
-                </button>
-                <button
-                  className="btn btn-default"
+                </ColorButtonGreen>
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
                   onClick={() => this.editPreset(t)}
+                  startIcon={<CancelIcon />}
                 >
                   Avbryt
-                </button>
-                <button
+                </ColorButtonBlue>
+                <ColorButtonRed
+                  variant="contained"
                   className="btn btn-danger"
                   onClick={() => this.removePreset(t.name)}
+                  startIcon={<RemoveIcon />}
                 >
                   Radera
-                </button>
+                </ColorButtonRed>
               </div>
             ) : (
               t.name
@@ -334,15 +378,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div>
             <input
@@ -515,15 +561,17 @@ class ToolOptions extends Component {
                   ref="preset_url"
                 />
               </div>
-              <button
-                className="btn btn-success"
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
                 onClick={e => {
                   e.preventDefault();
                   this.addPreset(e);
                 }}
+                startIcon={<AddIcon />}
               >
                 Lägg till
-              </button>
+              </ColorButtonGreen>
             </div>
             <h4>Lista över aktiva snabbval</h4>
             <fieldset className="tree-view">

@@ -22,8 +22,21 @@
 
 import React, { Component } from "react";
 import { SketchPicker } from "react-color";
-
 import Tree from "../tree.jsx";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { blue } from "@material-ui/core/colors";
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 /**
  * I've removed the following from defaultState and save:
@@ -495,15 +508,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div>
             <input

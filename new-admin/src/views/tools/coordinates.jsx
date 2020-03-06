@@ -22,6 +22,42 @@
 
 import React from "react";
 import { Component } from "react";
+import Button from "@material-ui/core/Button";
+import AddIcon from "@material-ui/icons/Add";
+import RemoveIcon from "@material-ui/icons/Remove";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { red, green, blue } from "@material-ui/core/colors";
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 var defaultState = {
   validationErrors: [],
@@ -210,12 +246,14 @@ class ToolOptions extends Component {
     return this.state.transformations.map((t, i) => (
       <div key={i} className="inset-form">
         <div>
-          <span
+          <ColorButtonRed
+            variant="contained"
+            className="btn"
             onClick={() => this.removeTransformation(t.code)}
-            className="btn btn-danger"
+            startIcon={<RemoveIcon />}
           >
             Ta bort
-          </span>
+          </ColorButtonRed>
         </div>
         <div>
           <span>SRS-kod</span>: <span>{t.code}</span>
@@ -286,15 +324,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div>
             <input
@@ -480,7 +520,14 @@ class ToolOptions extends Component {
                 &nbsp;
                 <label>Inverterad</label>
               </div>
-              <button className="btn btn-success">Lägg till</button>
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<AddIcon />}
+              >
+                Lägg till
+              </ColorButtonGreen>
             </form>
           </div>
         </form>
