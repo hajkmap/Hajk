@@ -66,6 +66,7 @@ class Lines extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.bindSubscriptions();
     this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
       this.setState({
         municipalities: result.length > 0 ? result : []
@@ -88,7 +89,12 @@ class Lines extends React.PureComponent {
       this.handleRectangleClick();
     });
   };
-
+  bindSubscriptions() {
+    const { localObserver } = this.props;
+    localObserver.subscribe("vtsearch-result-done", () => {
+      this.clearSearchInputAndButtons();
+    });
+  }
   /**
    * Method that in actives all search inputs and both spatial buttons.
    *

@@ -61,6 +61,7 @@ class Stops extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.bindSubscriptions();
     this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
       this.setState({
         municipalities: result.length > 0 ? result : []
@@ -102,6 +103,13 @@ class Stops extends React.PureComponent {
       municipality: event.target.value
     });
   };
+
+  bindSubscriptions() {
+    const { localObserver } = this.props;
+    localObserver.subscribe("vtsearch-result-done", () => {
+      this.clearSearchInputAndButtons();
+    });
+  }
 
   /**
    * Method that in actives all search inputs and both spatial buttons.
