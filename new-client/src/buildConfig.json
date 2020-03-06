@@ -12,6 +12,7 @@
     "layerswitcher",
     "location",
     "measure",
+    "print",
     "routing",
     "search",
     "streetview"
@@ -29,6 +30,7 @@
     "layerswitcher",
     "location",
     "measure",
+    "print",
     "routing",
     "search",
     "streetview",
