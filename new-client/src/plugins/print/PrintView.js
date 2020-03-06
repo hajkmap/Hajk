@@ -37,10 +37,6 @@ import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
 
-// import CanvasScaleLine from "ol-ext/control/CanvasScaleLine";
-// import CanvasAttribution from "ol-ext/control/CanvasAttribution";
-// import CenterPosition from "ol-ext/control/CenterPosition";
-
 import "ol-ext/dist/ol-ext.css";
 
 const styles = theme => ({
@@ -73,15 +69,15 @@ class PrintView extends React.PureComponent {
     format: "a4", // a0-a5
     orientation: "landscape",
     resolution: 150, // 72, 150, 300,
-    scale: 10000, // 0.5, 1, 2.5, 5, 10, 25, 50, 100, 200 (e.g. 1:10 000, 1:25 000, etc)
-    mapTitle: "",
-    mapTextColor: "#ffffff",
+    scale: 10000, // 10000 means scale of 1:10000
+    mapTitle: "", // User can set a title that will get printed on the map
+    mapTextColor: "#ffffff", // Default color of text printed on the map
     printInProgress: false,
     previewLayerVisible: false
   };
 
-  previewFeature = null;
   previewLayer = null;
+  previewFeature = null;
 
   // Paper dimensions: Array[width, height]
   dims = {
@@ -109,15 +105,39 @@ class PrintView extends React.PureComponent {
     500000
   ];
 
-  getUserFriendlyScale = scale => {
-    return `1:${Number(scale).toLocaleString("sv-SE")}`;
-  };
+  // Default colors for color picker used to set text color (used in map title, scale, etc)
+  mapTextAvailableColors = [
+    "#FFFFFF",
+    "#D0021B",
+    "#F5A623",
+    "#F8E71C",
+    "#8B572A",
+    "#7ED321",
+    "#417505",
+    "#9013FE",
+    "#4A90E2",
+    "#50E3C2",
+    "#B8E986",
+    "#000000",
+    "#4A4A4A",
+    "#9B9B9B"
+  ];
 
   // Used to store some values that will be needed for resetting the map
   valuesToRestoreFrom = {};
 
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
+
+  /**
+   * @description Using toLocalString for sv-SE is the easiest way to get space as thousand separator.
+   *
+   * @param {*} scale Number that will be prefixed with "1:"
+   * @returns {string} Input parameter, prefixed by "1:" and with spaces as thousands separator, e.g "5000" -> "1:5 000".
+   */
+  getUserFriendlyScale = scale => {
+    return `1:${Number(scale).toLocaleString("sv-SE")}`;
+  };
 
   constructor(props) {
     super(props);
@@ -134,6 +154,7 @@ class PrintView extends React.PureComponent {
       // If we have a string, remove all whitespace in it and split into an Array
       props.options.scales = props.options.scales.replace(/\s/g, "").split(",");
     }
+
     // If no valid max logo width is supplied, use a hard-coded default
     props.options.logoMaxWidth =
       typeof props.options?.logoMaxWidth === "number"
@@ -156,16 +177,6 @@ class PrintView extends React.PureComponent {
     props.localObserver.subscribe("hidePrintPreview", () => {
       this.setState({ previewLayerVisible: false });
     });
-
-    // FIXME: Prevent rotation of the preview feature
-    // props.map.getView().on("change:rotation", event => {
-    //   if (this.previewFeature === undefined) return;
-    //   console.log("view rotation: ", event.target.getRotation());
-    //   const geometry = this.previewFeature.getGeometry();
-    //   // console.log("feature: ", this.previewFeature);
-    //   // console.log("geometry: ", geometry);
-    //   geometry.rotate(-1 * event.target.getRotation(), this.getPreviewCenter());
-    // });
   }
 
   addPreviewLayer() {
@@ -257,6 +268,7 @@ class PrintView extends React.PureComponent {
       this.removePreview();
     }
   };
+
   /**
    * @summary Returns a Promise which resolves if image loading succeeded.
    * @description The Promise will contain an object with data blob of the loaded image. If loading fails, the Promise rejects
@@ -284,7 +296,7 @@ class PrintView extends React.PureComponent {
         imgCanvas.getContext("2d").drawImage(this, 0, 0);
 
         resolve({
-          data: imgCanvas.toDataURL("image/png"), // read data blob fron canvas
+          data: imgCanvas.toDataURL("image/png"), // read data blob from canvas
           width: imgCanvas.width, // also return dimensions so we can use them later
           height: imgCanvas.height
         });
@@ -293,6 +305,27 @@ class PrintView extends React.PureComponent {
       // Go, load!
       image.src = url;
     });
+  };
+  /**
+   * @summary Helper function that takes a URL and max width and returns the ready data blob as well as width/height which fit into the specified max value.
+   *
+   * @param {*} url
+   * @param {*} maxWidth
+   * @returns {Object} image data blob, image width, image height
+   */
+  getImageForPdfFromUrl = async (url, maxWidth) => {
+    // Use the supplied logo URL to get img data blob and dimensions
+    const {
+      data,
+      width: sourceWidth,
+      height: sourceHeight
+    } = await this.getImageDataBlogFromUrl(url);
+
+    // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
+    const ratio = maxWidth / sourceWidth;
+    const width = sourceWidth * ratio;
+    const height = sourceHeight * ratio;
+    return { data, width, height };
   };
 
   initiatePrint = e => {
@@ -348,11 +381,6 @@ class PrintView extends React.PureComponent {
         return false;
       }
 
-      // TODO: Add some canvas controls that should be printed
-      // CanvasScaleLine control
-      // const scaleLineControl = new CanvasScaleLine();
-      // this.map.addControl(scaleLineControl);
-
       // This is needed to prevent some buggy output from some browsers
       // when a lot of tiles are being rendered (it could result in black
       // canvas PDF)
@@ -360,8 +388,11 @@ class PrintView extends React.PureComponent {
 
       // Create the map canvas that will hold all of our map tiles
       const mapCanvas = document.createElement("canvas");
+
+      // Set canvas dimensions to the newly calculated ones that take user's desired resolution etc into account
       mapCanvas.width = width;
       mapCanvas.height = height;
+
       const mapContext = mapCanvas.getContext("2d");
 
       // Each canvas element inside OpenLayer's viewport should get printed
@@ -393,31 +424,27 @@ class PrintView extends React.PureComponent {
         compress: true
       });
 
-      console.log("pdf.getFontList(): ", pdf.getFontList());
-
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
 
       // If logo URL is provided, add the logo to the map
       if (this.options.logo.trim().length >= 5) {
         try {
-          // Use the supplied logo URL to get img data blob and dimensions
-          const { data, width, height } = await this.getImageDataBlogFromUrl(
-            this.options.logo
+          const {
+            data: logoData,
+            width: logoWidth,
+            height: logoHeight
+          } = await this.getImageForPdfFromUrl(
+            this.options.logo,
+            this.options.logoMaxWidth
           );
-
-          // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
-          const ratio = this.options.logoMaxWidth / width;
-          const newWidth = width * ratio;
-          const newHeight = height * ratio;
-
           pdf.addImage(
-            data,
+            logoData,
             "PNG",
-            pdf.internal.pageSize.width - newWidth - 6,
+            pdf.internal.pageSize.width - logoWidth - 6,
             4,
-            newWidth,
-            newHeight
+            logoWidth,
+            logoHeight
           );
         } catch (error) {
           // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
@@ -440,7 +467,6 @@ class PrintView extends React.PureComponent {
 
       // Add map title if user supplied one
       if (this.state.mapTitle.trim().length > 0) {
-        // TODO: Add options for: font size, text color RGB
         pdf.setFontSize(24);
         pdf.text(this.state.mapTitle, 6, 12);
       }
@@ -689,26 +715,10 @@ class PrintView extends React.PureComponent {
           >
             <ColorPicker
               color={this.state.mapTextColor}
-              colors={[
-                "#FFFFFF",
-                "#D0021B",
-                "#F5A623",
-                "#F8E71C",
-                "#8B572A",
-                "#7ED321",
-                "#417505",
-                "#9013FE",
-                "#4A90E2",
-                "#50E3C2",
-                "#B8E986",
-                "#000000",
-                "#4A4A4A",
-                "#9B9B9B"
-              ]}
+              colors={this.mapTextAvailableColors}
               onChangeComplete={this.handleMapTextColorChangeComplete}
             />
           </Popover>
-          {/* </FormControl> */}
           <FormControl className={classes.formControl}>
             <Button
               variant="contained"
