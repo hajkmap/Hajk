@@ -211,7 +211,9 @@ class SearchResultListContainer extends React.Component {
 
   handleTabChange = (event, newValue) => {
     const { localObserver } = this.props;
-    localObserver.publish("remove-highlight-attribute-row");
+    if (newValue !== this.state.activeTabId) {
+      localObserver.publish("remove-highlight-attribute-row");
+    }
     this.setActiveTabId(newValue);
   };
 
