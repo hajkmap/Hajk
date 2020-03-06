@@ -1,17 +1,20 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import ExpansionPanel from "@material-ui/core/ExpansionPanel";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Grid from "@material-ui/core/Grid";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
-import Collapse from "@material-ui/core/Collapse";
 
-const styles = theme => ({
-  root: {
-    height: 240,
-    flexGrow: 1,
-    maxWidth: 400
-  }
-});
+const styles = theme => {
+  return {
+    tableOfContents: {
+      maxWidth: 370
+    }
+  };
+};
 
 const chapters = [
   {
@@ -104,14 +107,26 @@ class TableOfContents extends React.PureComponent {
   };
 
   render() {
+    const { classes } = this.props;
     return (
       <>
-        <Typography variant="h4">Innehåll</Typography>
-        <Collapse in={true}>
-          <Grid container spacing={0}>
-            {this.renderChapters(chapters)}
-          </Grid>
-        </Collapse>
+        <ExpansionPanel
+          className={classes.tableOfContents}
+          defaultExpanded={true}
+        >
+          <ExpansionPanelSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography variant="h4">Innehåll</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails>
+            <Grid container spacing={0}>
+              {this.renderChapters(chapters)}
+            </Grid>
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
       </>
     );
   }
