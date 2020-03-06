@@ -172,8 +172,18 @@
    */
   that.start = function (config, done) {
     function load_map (map_config) {
+      var layerSwitcherTool = map_config.tools.find(tool => {
+        return tool.type === "layerswitcher";
+      });
+      if (layerSwitcherTool === undefined) {
+        var msg = "Kartans konfiguration kunde inte laddas in. Ingen lagerhanterare angiven.";
+        if (HAJK2.noMapMessage !== undefined) {
+          msg = HAJK2.noMapMessage;
+        }
+        done(false, msg);
+      }
+      
       var layers = $.getJSON(config.layersPath || layersPath);
-
       layers.done(data => {
         // Set <title> in HTML if map has a title property in JSON config
         if (map_config.hasOwnProperty('map') && map_config.map.hasOwnProperty('title')) {
