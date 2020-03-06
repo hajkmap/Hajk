@@ -5,6 +5,8 @@ import { Typography } from "@material-ui/core";
 import Fab from "@material-ui/core/Fab";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
+import Link from "@material-ui/core/Link";
+import TableOfContents from "./TableOfContents";
 
 const styles = theme => ({
   gridContainer: {
@@ -31,7 +33,9 @@ class DocumentViewer extends React.PureComponent {
     console.log(this.props, "myRef");
   }
 
-  scrollToTop = () => {};
+  scrollToTop = () => {
+    this.globalObserver.publish("scrollDocumentviewer");
+  };
 
   render() {
     const { classes, baseWindow } = this.props;
@@ -49,6 +53,7 @@ class DocumentViewer extends React.PureComponent {
             <NavigationIcon />
           </Fab>
           <Grid item>
+            <TableOfContents />
             <Typography>
               dsadsadasdsadsadasdsadsadasdsadsad
               adasdsadsadasdsadsadasdsadsadasds
