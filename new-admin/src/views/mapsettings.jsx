@@ -1733,7 +1733,7 @@ class Menu extends Component {
 
             <Divider orientation="vertical" flexItem />
 
-            <div className="inset-form map-management-margin-left">
+            <div className="inset-form map-management-margin-left margined">
               <form
                 onSubmit={e => {
                   e.preventDefault();
