@@ -20,9 +20,7 @@ const styles = theme => {
 class TableOfContents extends React.PureComponent {
   state = {};
 
-  static propTypes = {
-    document: PropTypes.object.isRequired
-  };
+  static propTypes = {};
 
   /**
    * Constructor for the table of contents which renders from all chapters in the document.
@@ -45,7 +43,7 @@ class TableOfContents extends React.PureComponent {
     let mainChapter = 0;
     return (
       <>
-        {Array.isArray(document.chapters)
+        {Array.isArray(document?.chapters)
           ? document.chapters.map(chapter =>
               this.renderSubChapters(chapter, 0, (++mainChapter).toString())
             )

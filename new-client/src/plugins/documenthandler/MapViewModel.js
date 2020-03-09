@@ -1,6 +1,5 @@
 export default class MapViewModel {
   constructor(settings) {
-    console.log(settings, "settings");
     this.localObserver = settings.localObserver;
     this.map = settings.map;
     this.bindSubscriptions();

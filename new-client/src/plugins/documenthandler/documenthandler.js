@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
 import OverlayMenuViewPartialFunctionality from "./documentsMenu/overlaymenu/OverlayMenuView";
+import DocumentHandlerModel from "./DocumentHandlerModel";
 import menuComponent from "./documentsMenu/MenuViewHOC";
 import BarMenuViewPartialFunctionality from "./documentsMenu/menubar/BarMenuView";
 import Observer from "react-event-observer";
@@ -43,7 +44,20 @@ class DocumentHandler extends React.PureComponent {
       localObserver: this.localObserver,
       map: props.map
     });
+
+    this.model = new DocumentHandlerModel({
+      localObserver: this.localObserver,
+      app: props.app,
+      map: props.map
+    });
+    this.getListOfDocuments();
   }
+
+  getListOfDocuments = () => {
+    this.model.listAllAvailableDocuments(list => {
+      console.log(list, "list");
+    });
+  };
 
   render() {
     return (
@@ -52,6 +66,7 @@ class DocumentHandler extends React.PureComponent {
         <Hidden xlUp>
           <OverlayMenuView
             app={this.props.app}
+            model={this.model}
             options={this.props.options}
             localObserver={this.localObserver}
           ></OverlayMenuView>
@@ -59,12 +74,14 @@ class DocumentHandler extends React.PureComponent {
         <Hidden lgDown>
           <BarMenuView
             app={this.props.app}
+            model={this.model}
             options={this.props.options}
             localObserver={this.localObserver}
           ></BarMenuView>
         </Hidden>
         <DocumentWindowBase
           {...this.props}
+          model={this.model}
           app={this.props.app}
           localObserver={this.localObserver}
         ></DocumentWindowBase>

@@ -1,7 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import { Typography } from "@material-ui/core";
 import Fab from "@material-ui/core/Fab";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
@@ -10,10 +9,8 @@ import TableOfContents from "./TableOfContents";
 
 const styles = theme => ({
   gridContainer: {
-    height: "100%"
-  },
-  test: {
-    overflow: "scroll"
+    height: "100%",
+    overflowY: "scroll"
   }
 });
 
@@ -26,11 +23,9 @@ class DocumentViewer extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.myRef = React.createRef();
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-    console.log(this.props, "myRef");
   }
 
   scrollToTop = () => {
@@ -38,8 +33,7 @@ class DocumentViewer extends React.PureComponent {
   };
 
   render() {
-    const { classes, baseWindow } = this.props;
-    console.log(baseWindow, "baseWindow");
+    const { classes, activeDocument } = this.props;
     return (
       <>
         <Grid className={classes.gridContainer} container>
@@ -53,69 +47,9 @@ class DocumentViewer extends React.PureComponent {
             <NavigationIcon />
           </Fab>
           <Grid item>
-            <TableOfContents />
-            <Typography>
-              dsadsadasdsadsadasdsadsadasdsadsad
-              adasdsadsadasdsadsadasdsadsadasds
-              asdsadsadasdsadsadasdsadsadasdsadsds
-              adsadasdsadsadasdsadsadasdsadsadasdsadasdsa
-              dsadasdsadsadasdsadsadasdsadsadasdsads
-              dsadsadasdsadsadasdsadsadasdsadsadasdsdasdsadsadasds
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-              adsadasdsadsadasdsadsadasdsadsadasdsaddsadas
-              dsadsadasdsadsadasdsadsadasdsadsadasdsads
-            </Typography>
+            <TableOfContents document={activeDocument} />
+
+            <div>{/*DEBUG*/ activeDocument?.chapters[0].html}</div>
           </Grid>
         </Grid>
       </>
