@@ -5,6 +5,7 @@ import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile, getIsMobile } from "../utils/IsMobile.js";
 import FeatureInfo from "./FeatureInfo.js";
+import clsx from "clsx";
 
 const zIndexStart = 1e3;
 // Patch the RND component's onDragStart method with the ability to disable drag by its internal state.
@@ -120,6 +121,10 @@ const styles = theme => {
       overflowY: "auto",
       padding: "10px",
       cursor: "default !important"
+    },
+    nonScrollable: {
+      overflowY: "hidden",
+      padding: "0px"
     }
   };
 };
@@ -147,7 +152,8 @@ class Window extends React.PureComponent {
   static defaultProps = {
     draggingEnabled: true,
     resizingEnabled: true,
-    allowMaximizedWindow: true
+    allowMaximizedWindow: true,
+    scrollable: true
   };
 
   constructor(props) {
@@ -499,7 +505,12 @@ class Window extends React.PureComponent {
             onMinimize={this.minimize}
             mode={this.mode}
           />
-          <section className={classes.content}>
+          <section
+            className={clsx(
+              classes.content,
+              this.props.scrollable ? null : classes.nonScrollable
+            )}
+          >
             {features ? (
               <FeatureInfo
                 features={this.props.features}
