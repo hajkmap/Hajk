@@ -41,6 +41,7 @@ class DocumentHandler extends React.PureComponent {
     this.localObserver = Observer();
     this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,
+      globalObserver: props.app.globalObserver,
       map: props.map
     });
   }
