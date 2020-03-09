@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
@@ -16,57 +17,36 @@ const styles = theme => {
   };
 };
 
-const chapters = [
-  {
-    header: "Utgångspunkter",
-    link: "abc",
-    chapters: [
-      {
-        header: "Bakgrund",
-        link: "abc"
-      },
-      {
-        header: "Utmaningar",
-        link: "abc",
-        chapters: [
-          {
-            header: "Fler utmaningar",
-            link: "abc",
-            chapters: [
-              {
-                header: "Har vi fler utmaningar?",
-                link: "abc",
-                chapters: [
-                  {
-                    header: "Jajamänsan, det har vi!",
-                    link: "abc"
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  { header: "Hållbar utveckling", link: "abc" }
-];
-
 class TableOfContents extends React.PureComponent {
   state = {};
 
+  static propTypes = {
+    document: PropTypes.object.isRequired
+  };
+
   /**
-   * Render all chapters of the document.
-   * @param {Array} chapters An array with all chapters of the document.
+   * Constructor for the table of contents which renders from all chapters in the document.
+   * @param {object} document The document that holds all chapters.
    *
    * @memberof TableOfContents
    */
-  renderChapters = chapters => {
+  constructor(props) {
+    super(props);
+    this.document = this.props.document;
+  }
+
+  /**
+   * Render all chapters of the document.
+   * @param {Array} document An array with all chapters of the document.
+   *
+   * @memberof TableOfContents
+   */
+  renderChapters = document => {
     let mainChapter = 0;
     return (
       <>
-        {Array.isArray(chapters)
-          ? chapters.map(chapter =>
+        {Array.isArray(document.chapters)
+          ? document.chapters.map(chapter =>
               this.renderSubChapters(chapter, 0, (++mainChapter).toString())
             )
           : null}
@@ -76,9 +56,9 @@ class TableOfContents extends React.PureComponent {
 
   /**
    * Private help method that recursive renders all sub chapters of a chapter.
-   * @param chapter A chapter with all it's sub chapters that will be rendered.
-   * @param level A recursive level that help with the table construction.
-   * @param subChapterNumber A counter of the current sub chapter number
+   * @param {object} chapter A chapter with all it's sub chapters that will be rendered.
+   * @param {string} level A recursive level that help with the table construction.
+   * @param {umber} subChapterNumber A counter of the current sub chapter number
    *
    * @memberof TableOfContents
    */
@@ -107,7 +87,7 @@ class TableOfContents extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, document } = this.props;
     return (
       <>
         <ExpansionPanel
@@ -123,7 +103,7 @@ class TableOfContents extends React.PureComponent {
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <Grid container spacing={0}>
-              {this.renderChapters(chapters)}
+              {this.renderChapters(document)}
             </Grid>
           </ExpansionPanelDetails>
         </ExpansionPanel>
