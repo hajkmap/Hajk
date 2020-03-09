@@ -1,5 +1,3 @@
-import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-
 /**
  * @summary  DocumentHandler model that doesn't do much.
  * @description This model exposes only one method, getMap(),
@@ -15,8 +13,6 @@ const fetchConfig = {
 };
 
 export default class DocumentHandlerModel {
-  constructor(settings) {}
-
   async list(callback) {
     let response;
     try {

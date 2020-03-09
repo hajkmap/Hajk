@@ -1,6 +1,5 @@
 export default class MapViewModel {
   constructor(settings) {
-    console.log(settings, "settings");
     this.localObserver = settings.localObserver;
     this.globalObserver = settings.globalObserver;
     this.map = settings.map;
@@ -45,7 +44,6 @@ export default class MapViewModel {
         )
         .forEach(layer => {
           if (layer.getProperties()["name"] === arrays) {
-            debugger;
             this.globalObserver.publish("showLayer", layer);
             layer.setVisible(true);
           }
@@ -68,16 +66,14 @@ export default class MapViewModel {
           }
         })
     );
-    console.log(mapSettings, "mapSettings");
     this.flyTo(this.map.getView(), mapSettings.center, mapSettings.zoom);
   }
 
-  flyTo(view, location, zoom) {
-    const duration = 1500;
+  flyTo(view, center, zoom) {
     view.animate({
-      center: location,
+      center: center,
       zoom: zoom,
-      duration: duration
+      duration: 1500
     });
   }
 }

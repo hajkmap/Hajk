@@ -10,7 +10,6 @@ const menuViewHoc = MenuComponent =>
 
     constructor(props) {
       super(props);
-      console.log(this.props, "props");
       this.documentHandlerModel = new DocumentHandlerModel();
 
       this.props.options.menuConfig.menu.forEach(menuItem => {
@@ -65,7 +64,6 @@ const menuViewHoc = MenuComponent =>
       });
 
       localObserver.subscribe("maplink-clicked", item => {
-        console.log(item, "item");
         localObserver.publish("fly-to", item.maplink);
       });
     };

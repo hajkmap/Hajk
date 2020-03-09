@@ -41,8 +41,6 @@ const styles = theme => ({
   }
 });
 
-const fullWidth = 12;
-
 const xs = 12,
   sm = 4,
   md = 3,
@@ -127,7 +125,7 @@ class OverlayView extends React.PureComponent {
           open={open}
         >
           <Container className={classes.container} fixed>
-            <Grid zeroMinWidth className={classes.gridContainer} xs={fullWidth}>
+            <Grid className={classes.gridContainer}>
               <HeaderView
                 options={options}
                 activeMenuSection={activeMenuSection}

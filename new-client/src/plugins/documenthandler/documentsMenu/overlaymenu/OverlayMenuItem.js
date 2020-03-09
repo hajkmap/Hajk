@@ -43,7 +43,7 @@ class OverlayMenuItem extends React.PureComponent {
       handleMenuButtonClick,
       getIcon
     } = this.props;
-    console.log(item, "icon");
+
     return (
       <>
         <Paper
