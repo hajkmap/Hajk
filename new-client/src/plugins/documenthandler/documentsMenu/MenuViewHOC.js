@@ -60,6 +60,10 @@ const menuViewHoc = MenuComponent =>
         this.setState({ activeMenuSection: activeMenuSection });
       });
 
+      localObserver.subscribe("document-clicked", item => {
+        localObserver.publish("show-document-window");
+      });
+
       localObserver.subscribe("link-clicked", item => {
         window.open(item.link, "_blank");
       });
