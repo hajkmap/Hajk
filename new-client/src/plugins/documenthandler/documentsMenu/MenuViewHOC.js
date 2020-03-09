@@ -67,7 +67,6 @@ const menuViewHoc = MenuComponent =>
       });
 
       localObserver.subscribe("maplink-clicked", item => {
-        console.log(item, "item");
         localObserver.publish("fly-to", item.maplink);
       });
     };
