@@ -34,6 +34,7 @@
         "visibleAtStart": true,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
+        "enableOSM": false,
         "showBreadcrumbs": false,
         "target": "toolbar",
         "position": "left",
