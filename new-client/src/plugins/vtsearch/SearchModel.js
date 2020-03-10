@@ -23,6 +23,9 @@ export default class SearchModel {
     this.mapColors = settings.mapColors;
   }
 
+  encodePercentForUrl = url => {
+    return url.replace(/%/g, "%25");
+  };
   /**
    * Private method that a adjusts the CQL filter so that it's supported for a web browser and GeoServer.
    * @param {string} cql The CQL that needs to be adjusted.
@@ -945,12 +948,18 @@ export default class SearchModel {
       if (addAndInCql) cql = cql + " AND ";
       if (this.containsOnlyNumbers(stopAreaNameOrNumber))
         cql = cql + `StopAreaNumber like '${stopAreaNameOrNumber}'`;
-      else cql = cql + `StopAreaName like '${stopAreaNameOrNumber}'`;
+      else
+        cql =
+          cql +
+          this.encodePercentForUrl(
+            `StopAreaName like '%${stopAreaNameOrNumber}%'`
+          );
       addAndInCql = true;
     }
     if (polygonAsWkt) {
       if (addAndInCql) cql = cql + " AND ";
       polygonAsWkt = this.encodeWktInCqlForGeoServer(polygonAsWkt);
+
       cql = cql + `INTERSECTS(Geom, ${polygonAsWkt})`;
       addAndInCql = true;
     }
