@@ -355,7 +355,7 @@ class Menu extends Component {
             .backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherWhite,
-          enableOSM: this.props.model.get("layerMenuConfig").enableOSM,
+          enableOSM: this.props.model.get("layerMenuConfig").enableOSM || false,
           showBreadcrumbs: this.props.model.get("layerMenuConfig")
             .showBreadcrumbs,
           instruction: this.props.model.get("layerMenuConfig").instruction,
