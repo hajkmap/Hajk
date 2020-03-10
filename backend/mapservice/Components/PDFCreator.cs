@@ -116,21 +116,24 @@ namespace MapService.Components
             double pixelLength = 2.82e3;
 
             //adding support for scalebar with different size, orientation and scales
-            if (!ConfigurationManager.AppSettings.AllKeys.Contains("hardcodedScalebar") || ConfigurationManager.AppSettings["hardcodedScalebar"] == "") {
+            if (!ConfigurationManager.AppSettings.AllKeys.Contains("exportScalebarSettings") || ConfigurationManager.AppSettings["exportScalebarSettings"] == "")
+            {
                 pixelLength = 2.82e3;
             }
-            else {
-                // hardcodedScalebar has been added to web.config
-                //string json = "{\"A3\":\"{100:2.84e3, 1000:2.84e3, 10000:2.84e3, 100000:2.84e3, 1000000:2.84e3}\",\"key2\":\"value2\"}";
-                var scalebarJson = System.Text.ASCIIEncoding.ASCII.GetString(System.Convert.FromBase64String(ConfigurationManager.AppSettings["hardcodedScalebar"]));
+            else
+            {
+                // exportScalebarSettings has been added to web.config
+                //string json = {"A3":{"Landscape":{"1000":"2.84e3",...},"Portrait":{"1000":"2.84e3",...}},"A4":{"Landscape":{"1000":"2.84e3",...},"Portrait":{"1000":"2.84e3",...}},}
+                var scalebarJson = System.Text.ASCIIEncoding.ASCII.GetString(System.Convert.FromBase64String(ConfigurationManager.AppSettings["exportScalebarSettings"]));
                 _log.InfoFormat("scalebar pixelLength is : {0}", scalebarJson);
                 var values = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, Dictionary<int, float>>>>(scalebarJson);
                 _log.InfoFormat("Orientation is : {0}", page.Orientation);
                 _log.InfoFormat("Size is : {0}", page.Size);
                 _log.InfoFormat("Scale is : {0}", scale);
-                _log.InfoFormat("scalebar pixelLength is : {0}", values[page.Size.ToString()][page.Orientation.ToString()][scale]);
-                pixelLength = values[page.Size.ToString()][page.Orientation.ToString()][scale];
-                };
+                _log.InfoFormat("test containsKey : {0}", values[page.Size.ToString()][page.Orientation.ToString()].ContainsKey(scale));
+                pixelLength = values[page.Size.ToString()][page.Orientation.ToString()].ContainsKey(scale) ? values[page.Size.ToString()][page.Orientation.ToString()][scale] : pixelLength;
+                _log.InfoFormat("scalebar pixelLength is : {0}", pixelLength);
+            }
 
 
             double unitLength = length * pixelLength;
