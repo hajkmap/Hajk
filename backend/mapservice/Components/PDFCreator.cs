@@ -15,11 +15,14 @@ using System.Drawing.Imaging;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using PdfSharp;
+using Newtonsoft.Json;
+using log4net;
 
 namespace MapService.Components
 {
     public class PDFCreator
     {
+        ILog _log = LogManager.GetLogger(typeof(PDFCreator));
         /// <summary>
         /// 
         /// </summary>
@@ -109,7 +112,24 @@ namespace MapService.Components
 
             int scale = int.Parse(exportItem.scale);
             double length = (1.0 / scale);
-            double unitLength = (length * 2.82e3);
+            double pixelLength = 2.82e3;
+
+            //adding support for scalebar with different size, orientation and scales
+            if (!ConfigurationManager.AppSettings.AllKeys.Contains("exportScalebarSettings") || ConfigurationManager.AppSettings["exportScalebarSettings"] == "")
+            {
+                pixelLength = 2.82e3;
+            }
+            else
+            {
+                // exportScalebarSettings has been added to web.config
+                //string json = {"A3":{"Landscape":{"1000":"2.84e3",...},"Portrait":{"1000":"2.84e3",...}},"A4":{"Landscape":{"1000":"2.84e3",...},"Portrait":{"1000":"2.84e3",...}},}
+                var scalebarJson = System.Text.ASCIIEncoding.ASCII.GetString(System.Convert.FromBase64String(ConfigurationManager.AppSettings["exportScalebarSettings"]));
+                var values = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, Dictionary<int, float>>>>(scalebarJson);
+                pixelLength = values[page.Size.ToString()][page.Orientation.ToString()].ContainsKey(scale) ? values[page.Size.ToString()][page.Orientation.ToString()][scale] : pixelLength;
+            }
+
+
+            double unitLength = length * pixelLength;
 
             Dictionary<int, string> scaleBarTexts = new Dictionary<int, string>()
                     {
@@ -262,7 +282,7 @@ namespace MapService.Components
                 this.drawText(gfx, fontName, String.Format("Skala 1:{0}", exportItem.scale), 40, (int)page.Height.Point - 30, 5); //skala 1:xx
                 gfx.DrawLine(XPens.Black, new XPoint(40, (int)page.Height.Point - 26), new XPoint(40 + displayLength, (int)page.Height.Point - 26)); //scalebar
                 gfx.DrawLine(XPens.Black, new XPoint(40, (int)page.Height.Point - 23), new XPoint(40, (int)page.Height.Point - 29)); //left
-                gfx.DrawLine(XPens.Black, new XPoint(40 + displayLength / 2, (int)page.Height.Point - 25), new XPoint(40 + displayLength / 2, (int)page.Height.Point - 27)); //middle
+                gfx.DrawLine(XPens.Black, new XPoint(40 + (displayLength / 2), (int)page.Height.Point - 25), new XPoint(40 + (displayLength / 2), (int)page.Height.Point - 27)); //middle
                 gfx.DrawLine(XPens.Black, new XPoint(40 + displayLength, (int)page.Height.Point - 23), new XPoint(40 + displayLength, (int)page.Height.Point - 29)); //right
                 this.drawText(gfx, fontName, displayText, 45 + displayLength, (int)page.Height.Point - 26, 5); //text "X m" next to the scale bar
 
@@ -303,6 +323,7 @@ namespace MapService.Components
             int scaleBarLength = 0;
             if (scaleBarLengths.TryGetValue(scale, out scaleBarLength))
             {
+                _log.InfoFormat("displayLength is {0}", unitLength * scaleBarLength);
                 return (int)(unitLength * scaleBarLength);
             }
             if (scale <= 500)
