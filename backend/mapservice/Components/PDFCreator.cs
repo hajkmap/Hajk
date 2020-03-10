@@ -107,7 +107,6 @@ namespace MapService.Components
 
             page.Size = GetPageSize(exportItem);
             page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
-            _log.InfoFormat("pageOrientation is {0}", page.Orientation);
 
             XGraphics gfx = XGraphics.FromPdfPage(page);
 
@@ -125,19 +124,12 @@ namespace MapService.Components
                 // exportScalebarSettings has been added to web.config
                 //string json = {"A3":{"Landscape":{"1000":"2.84e3",...},"Portrait":{"1000":"2.84e3",...}},"A4":{"Landscape":{"1000":"2.84e3",...},"Portrait":{"1000":"2.84e3",...}},}
                 var scalebarJson = System.Text.ASCIIEncoding.ASCII.GetString(System.Convert.FromBase64String(ConfigurationManager.AppSettings["exportScalebarSettings"]));
-                _log.InfoFormat("scalebar pixelLength is : {0}", scalebarJson);
                 var values = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, Dictionary<int, float>>>>(scalebarJson);
-                _log.InfoFormat("Orientation is : {0}", page.Orientation);
-                _log.InfoFormat("Size is : {0}", page.Size);
-                _log.InfoFormat("Scale is : {0}", scale);
-                _log.InfoFormat("test containsKey : {0}", values[page.Size.ToString()][page.Orientation.ToString()].ContainsKey(scale));
                 pixelLength = values[page.Size.ToString()][page.Orientation.ToString()].ContainsKey(scale) ? values[page.Size.ToString()][page.Orientation.ToString()][scale] : pixelLength;
-                _log.InfoFormat("scalebar pixelLength is : {0}", pixelLength);
             }
 
 
             double unitLength = length * pixelLength;
-            _log.InfoFormat("unitLength is {0}", unitLength);
 
             Dictionary<int, string> scaleBarTexts = new Dictionary<int, string>()
                     {
