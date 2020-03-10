@@ -30,6 +30,7 @@ const styles = theme => ({
   spaceToFromDate: { marginBottom: 40 },
   divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
   textFields: { marginLeft: 10 },
+  errorMessage: { color: theme.palette.error.main },
   polygonAndRectangleForm: {
     verticalAlign: "baseline",
     float: "left",
@@ -47,8 +48,9 @@ class Journeys extends React.PureComponent {
     selectedFromDate: new Date(),
     selectedFromTime: new Date().setHours(new Date().getHours()),
     selectedEndDate: new Date(),
-    selectedEndDTime: new Date().setHours(new Date().getHours() + 1),
-    selectedFormType: ""
+    selectedEndTime: new Date().setHours(new Date().getHours() + 1),
+    selectedFormType: "",
+    showError: false
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -72,6 +74,28 @@ class Journeys extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
   }
+  showErrorMessage = () => {
+    const { classes } = this.props;
+    if (this.state.selectedEndTime < this.state.selectedFromTime) {
+      return (
+        <Grid item xs={12}>
+          <Typography variant="body2" className={classes.errorMessage}>
+            TILL OCH MED FÅR INTE VARA MINDRE ÄN FRÅN OCH MED
+          </Typography>
+        </Grid>
+      );
+    } else if (this.state.selectedFromDate > this.state.selectedEndDate) {
+      return (
+        <Grid item xs={12}>
+          <Typography variant="body2" className={classes.errorMessage}>
+            TILL OCH MED FÅR INTE VARA MINDRE ÄN FRÅN OCH MED
+          </Typography>
+        </Grid>
+      );
+    } else {
+      return <Typography></Typography>;
+    }
+  };
 
   togglePolygonState = () => {
     this.setState({ isPolygonActive: !this.state.isPolygonActive }, () => {
@@ -83,9 +107,13 @@ class Journeys extends React.PureComponent {
       this.handleRectangleClick();
     });
   };
+
   handleFromTimeChange = time => {
+    let endTime = new Date(time);
+    endTime.setHours(time.getHours() + 1);
     this.setState({
-      selectedFromTime: time
+      selectedFromTime: time,
+      selectedEndTime: endTime
     });
   };
   handleFromDateChange = date => {
@@ -94,8 +122,9 @@ class Journeys extends React.PureComponent {
     });
   };
   handleEndTimeChange = time => {
+    const { classes } = this.props;
     this.setState({
-      selectedEndDTime: time
+      selectedEndTime: time
     });
   };
   handleEndDateChange = date => {
@@ -108,11 +137,11 @@ class Journeys extends React.PureComponent {
     const {
       selectedFromDate,
       selectedEndDate,
-      selectedEndDTime,
+      selectedEndTime,
       selectedFromTime
     } = this.state;
     let fromTime = new Date(selectedFromTime);
-    let endTime = new Date(selectedEndDTime);
+    let endTime = new Date(selectedEndTime);
 
     let formatFromDate = new Date(
       selectedFromDate.getFullYear(),
@@ -234,7 +263,7 @@ class Journeys extends React.PureComponent {
             className={classes.dateForm}
             invalidDateMessage="FEL VÄRDE PÅ TID"
             keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
-            value={this.state.selectedEndDTime}
+            value={this.state.selectedEndTime}
             onChange={this.handleEndTimeChange}
             KeyboardButtonProps={{
               "aria-label": "change time"
@@ -252,6 +281,7 @@ class Journeys extends React.PureComponent {
             "aria-label": "change date"
           }}
         />
+        {this.showErrorMessage()}
       </Grid>
     );
   };
