@@ -75,16 +75,9 @@ class Journeys extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
   }
   showErrorMessage = () => {
+    const { formatFromDate, formatEndDate } = this.getFormattedDate();
     const { classes } = this.props;
-    if (this.state.selectedEndTime < this.state.selectedFromTime) {
-      return (
-        <Grid item xs={12}>
-          <Typography variant="body2" className={classes.errorMessage}>
-            TILL OCH MED FÅR INTE VARA MINDRE ÄN FRÅN OCH MED
-          </Typography>
-        </Grid>
-      );
-    } else if (this.state.selectedFromDate > this.state.selectedEndDate) {
+    if (formatFromDate > formatEndDate) {
       return (
         <Grid item xs={12}>
           <Typography variant="body2" className={classes.errorMessage}>
@@ -122,7 +115,6 @@ class Journeys extends React.PureComponent {
     });
   };
   handleEndTimeChange = time => {
-    const { classes } = this.props;
     this.setState({
       selectedEndTime: time
     });
