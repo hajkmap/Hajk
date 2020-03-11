@@ -122,6 +122,19 @@ fetch("appConfig.json", fetchConfig)
                   activeMap: defaultMap
                 };
 
+                // Make sure that the current user is allowed to display the current map
+                const layerSwitcherConfig = config.mapConfig.tools.find(
+                  tool => tool.type === "layerswitcher"
+                );
+                if (layerSwitcherConfig === undefined) {
+                  throw new Error(
+                    "noLayerSwitcher: " +
+                      (config.appConfig.noLayerSwitcherMessage === undefined
+                        ? "This map has no layerSwitcher indicating that you are not allowed to use this map!"
+                        : config.appConfig.noLayerSwitcherMessage)
+                  );
+                }
+
                 let theme = getTheme(config, customTheme);
 
                 // Invoke React's renderer
@@ -139,13 +152,18 @@ fetch("appConfig.json", fetchConfig)
                 );
               })
               .catch(err => {
-                console.error("Parse error: ", err);
+                console.error("Parse error: ", err.message);
+                var errMsg = parseErrorMessage;
+                if (err.message.startsWith("noLayerSwitcher:")) {
+                  errMsg = err.message.substr(err.message.indexOf(":") + 2);
+                }
+                var html = { __html: errMsg };
                 ReactDOM.render(
                   <div className="start-error">
                     <div>
                       <ErrorIcon />
                     </div>
-                    <div>{parseErrorMessage}</div>
+                    <div dangerouslySetInnerHTML={html} />
                   </div>,
                   document.getElementById("root")
                 );
