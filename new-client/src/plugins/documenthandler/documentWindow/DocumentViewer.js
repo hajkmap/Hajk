@@ -4,8 +4,8 @@ import { withSnackbar } from "notistack";
 import Fab from "@material-ui/core/Fab";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
-import Link from "@material-ui/core/Link";
 import TableOfContents from "./TableOfContents";
+import Contents from "./Contents";
 
 const styles = theme => ({
   gridContainer: {
@@ -48,8 +48,7 @@ class DocumentViewer extends React.PureComponent {
           </Fab>
           <Grid item>
             <TableOfContents document={activeDocument} />
-
-            <div>{/*DEBUG*/ activeDocument?.chapters[0].html}</div>
+            <Contents document={activeDocument} />
           </Grid>
         </Grid>
       </>

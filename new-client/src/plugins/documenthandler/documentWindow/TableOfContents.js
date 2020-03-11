@@ -56,7 +56,7 @@ class TableOfContents extends React.PureComponent {
    * Private help method that recursive renders all sub chapters of a chapter.
    * @param {object} chapter A chapter with all it's sub chapters that will be rendered.
    * @param {string} level A recursive level that help with the table construction.
-   * @param {umber} subChapterNumber A counter of the current sub chapter number
+   * @param {number} subChapterNumber A counter of the current sub chapter number
    *
    * @memberof TableOfContents
    */
