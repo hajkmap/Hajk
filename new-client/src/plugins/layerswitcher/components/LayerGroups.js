@@ -1,8 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import LayerGroup from "./LayerGroup.js";
+// import LayerGroup from "./LayerGroup.js";
 import { TextField } from "@material-ui/core";
+import { TreeView, TreeItem } from "@material-ui/lab";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 
 const styles = theme => ({});
 
@@ -17,12 +20,21 @@ class LayerGroups extends React.PureComponent {
     model: PropTypes.object.isRequired
   };
 
+  defaultExpanded = [];
+  defaultSelected = [];
+
   constructor(props) {
     super(props);
+    console.log("props: ", props);
+    console.log("crap: ", props.groups);
+    const fixed = this.fixIncomingData(props.groups);
+    console.log("fixed: ", fixed);
+
     this.state = {
       chapters: [],
       groups: props.groups,
-      layersFilterValue: ""
+      layersFilterValue: "",
+      fixed
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", chapters => {
@@ -34,9 +46,33 @@ class LayerGroups extends React.PureComponent {
     });
   }
 
-  componentDidMount() {
-    this.props.groups.map(console.log);
-  }
+  fixIncomingData = groups => {
+    const iterateLayers = layers => {
+      return layers.map(l => {
+        l.visibleAtStart === true && this.defaultSelected.push(l.id);
+
+        return {
+          id: l.id,
+          title: this.props.model.layerMap[l.id].get("caption")
+        };
+      });
+    };
+
+    const iterateGroups = groups => {
+      return groups.map(g => {
+        g.expanded === true && this.defaultExpanded.push(g.id);
+        return {
+          id: g.id,
+          title: g.name,
+          children: [...iterateGroups(g.groups), ...iterateLayers(g.layers)]
+        };
+      });
+    };
+
+    return iterateGroups(groups);
+  };
+
+  componentDidMount() {}
 
   copy(o) {
     return Object.assign({}, o);
@@ -83,6 +119,7 @@ class LayerGroups extends React.PureComponent {
 
   handleFilterLayers = e => {
     const v = e.target.value;
+    console.log("Searching for: ", v);
     this.setState({ layersFilterValue: v }, () => {
       // Special case if empty string
       if (v.length === 0) {
@@ -93,6 +130,24 @@ class LayerGroups extends React.PureComponent {
         this.setState({ groups: r });
       }
     });
+  };
+
+  renderTree = nodes => {
+    return (
+      <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.title}>
+        {Array.isArray(nodes.children)
+          ? nodes.children.map(node => this.renderTree(node))
+          : null}
+      </TreeItem>
+    );
+  };
+
+  onNodeSelect = (event, nodeIds) => {
+    console.log("select: ", event, nodeIds);
+  };
+
+  onNodeToggle = (event, nodeIds) => {
+    console.log("toggle: ", event, nodeIds);
   };
 
   render() {
@@ -107,11 +162,23 @@ class LayerGroups extends React.PureComponent {
           label="Filtera lager"
           onChange={this.handleFilterLayers}
           value={this.state.layersFilterValue}
-          variant="filled"
+          variant="outlined"
           fullWidth
         />
-        {this.state.groups.map((group, i) => {
-          console.log("Rendering group: ", group);
+        <TreeView
+          // className={classes.root}
+          defaultCollapseIcon={<ExpandMoreIcon />}
+          defaultExpanded={this.defaultExpanded}
+          defaultExpandIcon={<ChevronRightIcon />}
+          defaultSelected={this.defaultSelected}
+          multiSelect={true}
+          onNodeSelect={this.onNodeSelect}
+          onNodeToggle={this.onNodeToggle}
+        >
+          {this.state.fixed.map(this.renderTree)}
+        </TreeView>
+
+        {/* {this.state.groups.map((group, i) => {
           return (
             <LayerGroup
               app={this.props.app}
@@ -121,7 +188,7 @@ class LayerGroups extends React.PureComponent {
               model={this.props.model}
             />
           );
-        })}
+        })} */}
       </div>
     );
   }
