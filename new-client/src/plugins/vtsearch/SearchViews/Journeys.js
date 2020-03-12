@@ -75,9 +75,25 @@ class Journeys extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
   }
   showErrorMessage = () => {
-    const { formatFromDate, formatEndDate } = this.getFormattedDate();
     const { classes } = this.props;
-    if (formatFromDate > formatEndDate) {
+    const {
+      selectedFromDate,
+      selectedEndDate,
+      selectedEndTime,
+      selectedFromTime
+    } = this.state;
+    //Had to format date because of time will mess up the date if the date was the same and u only changed one input
+    let endDate = new Date(
+      selectedEndDate.getFullYear(),
+      selectedEndDate.getMonth(),
+      selectedEndDate.getDate()
+    );
+    let fromDate = new Date(
+      selectedFromDate.getFullYear(),
+      selectedFromDate.getMonth(),
+      selectedFromDate.getDate()
+    );
+    if (fromDate > endDate || selectedFromTime > selectedEndTime) {
       return (
         <Grid item xs={12}>
           <Typography variant="body2" className={classes.errorMessage}>
