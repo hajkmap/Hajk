@@ -117,13 +117,20 @@ class Journeys extends React.PureComponent {
     });
   };
 
+  addOneHourTime = time => {
+    if (!isNaN(time)) {
+      let endTime = new Date(time);
+      endTime.setHours(time.getHours() + 1);
+      this.setState({
+        selectedEndTime: endTime
+      });
+    }
+  };
   handleFromTimeChange = time => {
-    let endTime = new Date(time);
-    endTime.setHours(time.getHours() + 1);
     this.setState({
-      selectedFromTime: time,
-      selectedEndTime: endTime
+      selectedFromTime: time
     });
+    this.addOneHourTime(time);
   };
   handleFromDateChange = date => {
     this.setState({
