@@ -108,7 +108,7 @@ class Lines extends React.PureComponent {
     this.setState({
       publicLineName: "",
       internalLineNumber: "",
-      municipalityName: "",
+      municipality: "",
       trafficTransport: "",
       throughStopArea: ""
     });
