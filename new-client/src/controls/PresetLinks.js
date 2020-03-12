@@ -44,7 +44,7 @@ class Preset extends React.PureComponent {
     this.globalObserver = props.appModel.globalObserver;
 
     // If config wasn't found, it means that Preset is not configured. Quit.
-    if (this.config === undefined) return null;
+    if (this.config === undefined) return;
 
     // Else, if we're still here, go on.
     this.options = this.config.options;
