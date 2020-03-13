@@ -22,19 +22,19 @@ class LayerGroups extends React.PureComponent {
 
   defaultExpanded = [];
   defaultSelected = [];
+  treeData = null;
 
   constructor(props) {
     super(props);
-    console.log("props: ", props);
-    console.log("crap: ", props.groups);
-    const fixed = this.fixIncomingData(props.groups);
-    console.log("fixed: ", fixed);
+
+    // Clean up the groups prop so we obtain a nice tree that can be used in our TreeView
+    this.treeData = this.fixIncomingData(props.groups);
 
     this.state = {
       chapters: [],
       groups: props.groups,
       layersFilterValue: "",
-      fixed
+      filteredTreeData: this.treeData
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", chapters => {
@@ -72,62 +72,38 @@ class LayerGroups extends React.PureComponent {
     return iterateGroups(groups);
   };
 
-  componentDidMount() {}
-
   copy(o) {
     return Object.assign({}, o);
   }
 
-  layerNameMatch = m => {
-    const layer = this.props.app.layers.find(l => l.id === m.id);
-    const v = this.state.layersFilterValue;
-
-    if (layer !== undefined && layer.hasOwnProperty("caption")) {
-      // If 'caption' contains our search string, keep this layer in results
-      if (layer.caption.toLowerCase().includes(v)) return true;
-    }
-  };
-
   filterLayers = o => {
     // GOOD STARTING POINT: https://stackoverflow.com/questions/38132146/recursively-filter-array-of-objects
-    const v = this.state.layersFilterValue;
-    // Top level groups already have a name, so let's check directly
-    if (o.name && o.name.toLowerCase().includes(v)) return true;
-    // If name doesn't exist it could mean that we entered the recursive
-    // phase of filter. If so, see if we have an ID.
-    else if (o.id) {
-      // If ID exists, try to extract one layer using the current layer ID.
-      const layer = this.props.app.layers.find(l => l.id === o.id);
-      // If layer was found, see if it has a 'caption' property.
-      if (layer !== undefined && layer.hasOwnProperty("caption")) {
-        // If 'caption' contains our search string, keep this layer in results
-        if (layer.caption.toLowerCase().includes(v)) return true;
-      }
-    }
+    const { layersFilterValue } = this.state;
+    // Check top level, if match, return, including all children
+    if (
+      o.title &&
+      o.title.toLowerCase().includes(layersFilterValue.toLowerCase())
+    )
+      return true;
 
-    // Call our filter function recursively if 'layers' property exists.
-    if (o.layers) {
-      o.layers = o.layers.map(this.copy).filter(this.layerNameMatch);
-    }
-
-    // TODO: Also handle o.layers
-    if (o.groups) {
-      return (o.groups = o.groups.map(this.copy).filter(this.filterLayers))
+    // Else, let's run this recursively on children
+    if (o.children) {
+      return (o.children = o.children.map(this.copy).filter(this.filterLayers))
         .length;
     }
   };
 
-  handleFilterLayers = e => {
-    const v = e.target.value;
-    console.log("Searching for: ", v);
-    this.setState({ layersFilterValue: v }, () => {
-      // Special case if empty string
-      if (v.length === 0) {
-        this.setState({ groups: this.props.groups });
+  handleChangeInLayersFilter = e => {
+    const layersFilterValue = e.target.value;
+    this.setState({ layersFilterValue }, () => {
+      if (layersFilterValue.length === 0) {
+        // Special case if empty string, reset to full tree data obtained in constructor()
+        this.setState({ filteredTreeData: this.treeData });
       } else {
-        const r = this.props.groups.map(this.copy).filter(this.filterLayers);
-        console.log("*** Filtered groups ***", r);
-        this.setState({ groups: r });
+        const filteredTreeData = this.treeData
+          .map(this.copy)
+          .filter(this.filterLayers);
+        this.setState({ filteredTreeData });
       }
     });
   };
@@ -151,6 +127,8 @@ class LayerGroups extends React.PureComponent {
   };
 
   render() {
+    const { layersFilterValue, filteredTreeData } = this.state;
+
     return (
       <div
         style={{
@@ -160,13 +138,12 @@ class LayerGroups extends React.PureComponent {
         <TextField
           id="layers-filter"
           label="Filtera lager"
-          onChange={this.handleFilterLayers}
-          value={this.state.layersFilterValue}
+          onChange={this.handleChangeInLayersFilter}
+          value={layersFilterValue}
           variant="outlined"
           fullWidth
         />
         <TreeView
-          // className={classes.root}
           defaultCollapseIcon={<ExpandMoreIcon />}
           defaultExpanded={this.defaultExpanded}
           defaultExpandIcon={<ChevronRightIcon />}
@@ -175,7 +152,7 @@ class LayerGroups extends React.PureComponent {
           onNodeSelect={this.onNodeSelect}
           onNodeToggle={this.onNodeToggle}
         >
-          {this.state.fixed.map(this.renderTree)}
+          {filteredTreeData.map(this.renderTree)}
         </TreeView>
 
         {/* {this.state.groups.map((group, i) => {
