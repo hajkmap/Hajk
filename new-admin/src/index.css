@@ -813,3 +813,13 @@ figure img {
 .map-management-margin-left {
   margin-left: 10px;
 }
+
+.information-box {
+  background-color: #fbe0a4;
+  width: 580px;
+  font-style: italic;
+  color: black;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  padding: 5px;
+}

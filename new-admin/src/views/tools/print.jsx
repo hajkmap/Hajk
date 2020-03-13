@@ -235,6 +235,15 @@ class ToolOptions extends Component {
               Spara
             </button>
           </p>
+          <div className="information-box">
+            Tänk på att öka minnesanvändningen i GeoServer för WMS om du
+            använder detta verktyg. Utskrifter med hög DPI och SingeTile kräver
+            mycket minne. Standard för GeoServer är 128MB och det är inte säkert
+            det räcker för alla requests ska returneras korrekt. <br />
+            <div className="separator">För att ändra minnesanvändningen</div>
+            Logga in i GeoServer > Tjänster > WMS > Gränser för
+            resursförbrukning > Max renderingsminne (KB)
+          </div>
           <div>
             <input
               id="active"
@@ -248,6 +257,7 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+
           <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
