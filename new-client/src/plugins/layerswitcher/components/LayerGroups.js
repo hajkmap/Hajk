@@ -6,6 +6,9 @@ import { TextField } from "@material-ui/core";
 import { TreeView, TreeItem } from "@material-ui/lab";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+// import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBox";
 
 const styles = theme => ({});
 
@@ -34,7 +37,9 @@ class LayerGroups extends React.PureComponent {
       chapters: [],
       groups: props.groups,
       layersFilterValue: "",
-      filteredTreeData: this.treeData
+      filteredTreeData: this.treeData,
+      // expanded: [],
+      selected: this.defaultSelected
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", chapters => {
@@ -76,6 +81,12 @@ class LayerGroups extends React.PureComponent {
     return Object.assign({}, o);
   }
 
+  toggleArrayValue(arrayList, arrayValue) {
+    return arrayList.includes(arrayValue)
+      ? arrayList.filter(el => el !== arrayValue)
+      : [...arrayList, arrayValue];
+  }
+
   filterLayers = o => {
     // GOOD STARTING POINT: https://stackoverflow.com/questions/38132146/recursively-filter-array-of-objects
     const { layersFilterValue } = this.state;
@@ -109,8 +120,18 @@ class LayerGroups extends React.PureComponent {
   };
 
   renderTree = nodes => {
+    const icon = this.isLayerVisible(nodes.id) ? (
+      <CheckBoxIcon />
+    ) : (
+      <CheckBoxOutlineBlankIcon />
+    );
     return (
-      <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.title}>
+      <TreeItem
+        key={nodes.id}
+        nodeId={nodes.id}
+        label={nodes.title}
+        endIcon={icon}
+      >
         {Array.isArray(nodes.children)
           ? nodes.children.map(node => this.renderTree(node))
           : null}
@@ -118,13 +139,28 @@ class LayerGroups extends React.PureComponent {
     );
   };
 
-  onNodeSelect = (event, nodeIds) => {
-    console.log("select: ", event, nodeIds);
+  isLayerVisible = nodeId => {
+    return this.state.selected.includes(nodeId);
   };
 
-  onNodeToggle = (event, nodeIds) => {
-    console.log("toggle: ", event, nodeIds);
+  onNodeSelect = (event, nodeId) => {
+    const layerId = Number(nodeId);
+    // Handle click on Hajk groups - they will have an MD5 as ID, so we can filter them out that way.
+    if (Number.isNaN(layerId)) return;
+
+    // Else, we've got a real layer/layergroup with valid ID. Let's add/remove it from our selected state array.
+    this.setState({
+      selected: this.toggleArrayValue(this.state.selected, nodeId)
+    });
+    const mapLayer = this.props.model.layerMap[layerId];
+    mapLayer.setVisible(!this.isLayerVisible(nodeId));
   };
+
+  // Does nothing compared to default functionality, except that we have access to current array
+  // onNodeToggle = (event, nodeIds) => {
+  //
+  //   this.setState({ expanded: nodeIds });
+  // };
 
   render() {
     const { layersFilterValue, filteredTreeData } = this.state;
@@ -147,8 +183,10 @@ class LayerGroups extends React.PureComponent {
           defaultCollapseIcon={<ExpandMoreIcon />}
           defaultExpanded={this.defaultExpanded}
           defaultExpandIcon={<ChevronRightIcon />}
-          defaultSelected={this.defaultSelected}
-          multiSelect={true}
+          // defaultSelected={this.defaultSelected} // We use the controlled "selected" prop
+          // expanded={this.state.expanded} // We set defaultExpanded and then let the component handle expansion logic
+          selected={this.state.selected}
+          multiSelect={false} // We will take care of the select state ourselves, user will of course be allowed to have multiple selected layers at once
           onNodeSelect={this.onNodeSelect}
           onNodeToggle={this.onNodeToggle}
         >
