@@ -20,8 +20,21 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from "react";
-import { Component } from "react";
+import React, { Component } from "react";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { blue } from "@material-ui/core/colors";
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 var defaultState = {
   validationErrors: [],
@@ -225,15 +238,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div className="information-box">
             Tänk på att öka minnesanvändningen i GeoServer för WMS om du
