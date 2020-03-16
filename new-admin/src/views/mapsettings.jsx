@@ -315,6 +315,7 @@ class Menu extends Component {
       visibleAtStart: true,
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
+      enableOSM: false,
       showBreadcrumbs: false,
       instruction: "",
       dropdownThemeMaps: false,
@@ -354,6 +355,7 @@ class Menu extends Component {
             .backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherWhite,
+          enableOSM: this.props.model.get("layerMenuConfig").enableOSM || false,
           showBreadcrumbs: this.props.model.get("layerMenuConfig")
             .showBreadcrumbs,
           instruction: this.props.model.get("layerMenuConfig").instruction,
@@ -562,6 +564,7 @@ class Menu extends Component {
       visibleAtStart: this.state.visibleAtStart,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
+      enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -1577,6 +1580,17 @@ class Menu extends Component {
                   Vit bakgrundskarta
                 </label>
               </div>
+              <div>
+                <input
+                  id="enableOSM"
+                  name="enableOSM"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableOSM}
+                />
+                &nbsp;
+                <label htmlFor="enableOSM">OpenStreetMap</label>
+              </div>
               <div className="separator">Justera lagerhanteraren</div>
               <div className="margined">
                 <ColorButtonBlue
@@ -1733,7 +1747,7 @@ class Menu extends Component {
 
             <Divider orientation="vertical" flexItem />
 
-            <div className="inset-form map-management-margin-left">
+            <div className="inset-form map-management-margin-left margined">
               <form
                 onSubmit={e => {
                   e.preventDefault();

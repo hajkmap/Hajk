@@ -1,5 +1,5 @@
 {
-  "version": null,
+  "version": "3.2.0",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -159,6 +159,7 @@
         "visibleAtStart": true,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
+        "enableOSM": true,
         "showBreadcrumbs": false,
         "target": "toolbar",
         "position": "left",
@@ -190,8 +191,8 @@
       "type": "draw",
       "options": {
         "target": "toolbar",
-        "exportUrl": "http://localhost:55630/export/kml",
-        "importUrl": "http://localhost:55630/import/kml",
+        "exportUrl": "/mapservice/export/kml",
+        "importUrl": "/mapservice/import/kml",
         "base64Encode": false,
         "instruction": "",
         "icons": "",
@@ -220,24 +221,6 @@
       "index": 5
     },
     {
-      "type": "export",
-      "options": {
-        "target": "right",
-        "position": "right",
-        "exportUrl": "http:///localhost:55630/export/pdf",
-        "exportTiffUrl": "",
-        "pdfActive": true,
-        "tiffActive": false,
-        "base64Encode": false,
-        "autoScale": false,
-        "scales": "5000, 10000, 25000, 50000, 100000, 250000",
-        "proxyUrl": "",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 6
-    },
-    {
       "type": "anchor",
       "options": {
         "target": "right",
@@ -255,8 +238,8 @@
         "tocExpanded": false,
         "title": "Översiktsplan",
         "caption": "Översiktsplan",
-        "serviceUrl": "http://localhost:55630/informative/load",
-        "exportUrl": "http://localhost:55630/export/document",
+        "serviceUrl": "/mapservice/informative/load",
+        "exportUrl": "/mapservice/export/document",
         "abstract": "Läs mer om vad som planeras i kommunen",
         "html": "<div>HTML som beskriver dokumentets innehåll</div>",
         "document": "oversiktsplan",
@@ -411,6 +394,18 @@
         "visibleForGroups": []
       },
       "index": 17
+    },
+    {
+      "type": "print",
+      "options": {
+        "target": "toolbar",
+        "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
+        "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+        "instruction": "",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 2
     }
   ],
   "map": {
@@ -440,8 +435,8 @@
     "geoserverLegendOptions": "",
     "mapselector": false,
     "mapcleaner": true,
-    "drawerVisible": false,
-    "drawerPermanent": false,
+    "drawerVisible": true,
+    "drawerPermanent": true,
     "colors": {
       "primaryColor": "#333333",
       "secondaryColor": "#ffa000"

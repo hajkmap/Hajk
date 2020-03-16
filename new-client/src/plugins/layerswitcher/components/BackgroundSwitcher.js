@@ -6,6 +6,9 @@ import Radio from "@material-ui/core/Radio";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
 
+import OSM from "ol/source/OSM";
+import TileLayer from "ol/layer/Tile";
+
 const styles = theme => ({
   layerItemContainer: {
     borderBottom: "1px solid #ccc"
@@ -22,9 +25,12 @@ class BackgroundSwitcher extends React.PureComponent {
     selectedLayer: -1 // By default, select special case "white background"
   };
 
+  osmLayer = undefined;
+
   static propTypes = {
     backgroundSwitcherBlack: propTypes.bool.isRequired,
     backgroundSwitcherWhite: propTypes.bool.isRequired,
+    enableOSM: propTypes.bool.isRequired,
     classes: propTypes.object.isRequired,
     display: propTypes.bool.isRequired,
     layerMap: propTypes.object.isRequired,
@@ -43,6 +49,17 @@ class BackgroundSwitcher extends React.PureComponent {
       this.setState({
         selectedLayer: backgroundVisibleFromStart.name
       });
+
+    // Initiate our special case layer, OpenStreetMap
+    const osmSource = new OSM({
+      reprojectionErrorThreshold: 5
+    });
+    this.osmLayer = new TileLayer({
+      visible: false,
+      source: osmSource,
+      zIndex: -1
+    });
+    this.props.map.addLayer(this.osmLayer);
   }
   /**
    * @summary Hides previously selected background and shows current selection.
@@ -57,6 +74,9 @@ class BackgroundSwitcher extends React.PureComponent {
     Number(this.state.selectedLayer) > 0 &&
       this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);
 
+    // Also, take care of hiding our OSM layer
+    this.osmLayer.setVisible(false);
+
     // Make the currently clicked layer visible, but also handle our special cases.
     Number(selectedLayer) > 0 &&
       this.props.layerMap[Number(selectedLayer)].setVisible(true);
@@ -66,6 +86,9 @@ class BackgroundSwitcher extends React.PureComponent {
       (document.getElementById("map").style.backgroundColor = "#000");
     selectedLayer === "-1" &&
       (document.getElementById("map").style.backgroundColor = "#FFF");
+
+    // Another special case is the OSM layer
+    selectedLayer === "-3" && this.osmLayer.setVisible(true);
 
     // Finally, store current selection in state
     this.setState({
@@ -119,7 +142,11 @@ class BackgroundSwitcher extends React.PureComponent {
    * @memberof BackgroundSwitcher
    */
   renderBaseLayerComponents() {
-    const { backgroundSwitcherWhite, backgroundSwitcherBlack } = this.props;
+    const {
+      backgroundSwitcherWhite,
+      backgroundSwitcherBlack,
+      enableOSM
+    } = this.props;
     let radioButtons = [],
       defaults = [];
 
@@ -150,6 +177,11 @@ class BackgroundSwitcher extends React.PureComponent {
         )
       );
     }
+
+    enableOSM &&
+      defaults.push(
+        this.renderRadioButton({ name: "-3", caption: "OpenStreetMap" }, -3)
+      );
 
     /**
      * Let's construct the final array of radio buttons. It will consists

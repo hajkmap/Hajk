@@ -17,7 +17,17 @@ import AddIcon from "@material-ui/icons/Add";
 import CancelIcon from "@material-ui/icons/Cancel";
 import EditIcon from "@material-ui/icons/Edit";
 import { withStyles } from "@material-ui/core/styles";
-import { green, blue } from "@material-ui/core/colors";
+import { red, green, blue } from "@material-ui/core/colors";
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
 
 const ColorButtonGreen = withStyles(theme => ({
   root: {
@@ -414,7 +424,7 @@ class RichEditor extends Component {
       );
     } else {
       return (
-        <div>
+        <div className="margined">
           <ColorButtonGreen
             variant="contained"
             className="btn"
@@ -424,14 +434,14 @@ class RichEditor extends Component {
             Ok
           </ColorButtonGreen>
           &nbsp;
-          <ColorButtonBlue
+          <ColorButtonRed
             variant="contained"
             className="btn btn-danger"
             onClick={() => this.cancel()}
             startIcon={<CancelIcon />}
           >
             Avbryt
-          </ColorButtonBlue>
+          </ColorButtonRed>
           <div className="RichEditor-root">
             <ImageButton addImage={url => this.addImage(url)} />
             <BlockStyleControls
