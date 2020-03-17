@@ -497,7 +497,9 @@ class Menu extends Component {
    */
   getLayersWithFilter(filter) {
     return this.props.model.get("layers").filter(layer => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      return new RegExp(this.state.filter).test(
+        layer.workCaption.toLowerCase()
+      );
     });
   }
 
@@ -506,7 +508,7 @@ class Menu extends Component {
    */
   getLayerNameFromId(id) {
     var layer = this.props.model.get("layers").find(layer => layer.id === id);
-    return layer ? layer.caption : `---[layer id ${id} not found]---`;
+    return layer ? layer.workCaption : `---[layer id ${id} not found]---`;
   }
 
   /**
@@ -808,20 +810,22 @@ class Menu extends Component {
 
     if (this.state.filter) {
       layers.forEach(layer => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.workCaption.toLowerCase().indexOf(this.state.filter) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function(a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        if (a.workCaption.toLowerCase() < b.workCaption.toLowerCase())
+          return -1;
+        if (a.workCaption.toLowerCase() > b.workCaption.toLowerCase()) return 1;
         return 0;
       });
 
       alphabetically.sort(function(a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        if (a.workCaption.toLowerCase() < b.workCaption.toLowerCase())
+          return -1;
+        if (a.workCaption.toLowerCase() > b.workCaption.toLowerCase()) return 1;
         return 0;
       });
 
@@ -864,7 +868,7 @@ class Menu extends Component {
           <span className={cls} />
           &nbsp;
           <span className="main-box">
-            {layer.caption} {displayType}
+            {layer.workCaption} {displayType}
           </span>
         </li>
       );

@@ -178,7 +178,8 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
-          infoOwner: layer.infoOwner
+          infoOwner: layer.infoOwner,
+          workCaption: layer.workCaption
         });
 
         this.refs["ArcGISLayerForm"].loadLayers(layer, () => {
@@ -238,7 +239,8 @@ class Manager extends Component {
           pointSize: layer.pointSize,
           filterAttribute: layer.filterAttribute,
           filterValue: layer.filterValue,
-          filterComparer: layer.filterComparer
+          filterComparer: layer.filterComparer,
+          workCaption: layer.workCaption
         });
 
         this.refs["VectorLayerForm"].loadLayers(layer, () => {
@@ -282,7 +284,8 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
-          infoOwner: layer.infoOwner
+          infoOwner: layer.infoOwner,
+          workCaption: layer.workCaption
         });
 
         this.refs["WMSLayerForm"].loadLayers(layer, () => {
@@ -321,7 +324,8 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
-          infoOwner: layer.infoOwner
+          infoOwner: layer.infoOwner,
+          workCaption: layer.workCaption
         });
         setTimeout(() => {
           this.refs["WMTSLayerForm"].validate();
@@ -418,20 +422,22 @@ class Manager extends Component {
 
     if (this.state.filter) {
       layers.forEach(layer => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.workCaption.toLowerCase().indexOf(this.state.filter) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function(a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        if (a.workCaption.toLowerCase() < b.workCaption.toLowerCase())
+          return -1;
+        if (a.workCaption.toLowerCase() > b.workCaption.toLowerCase()) return 1;
         return 0;
       });
 
       alphabetically.sort(function(a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        if (a.workCaption.toLowerCase() < b.workCaption.toLowerCase())
+          return -1;
+        if (a.workCaption.toLowerCase() > b.workCaption.toLowerCase()) return 1;
         return 0;
       });
 
@@ -461,7 +467,7 @@ class Manager extends Component {
         <li onClick={e => this.loadLayer(e, layer)} key={"layer_" + i}>
           <div className="main-box">
             <span>
-              {layer.caption} {displayType}
+              {layer.workCaption} {displayType}
             </span>
           </div>
           <div className="options-box">

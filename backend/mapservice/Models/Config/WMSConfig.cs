@@ -94,5 +94,7 @@ namespace MapService.Models.Config
         public string infoFormat { get; set; }
 
         public int? zIndex { get; set; }
+
+        public string workCaption { get; set; }
     }
 }

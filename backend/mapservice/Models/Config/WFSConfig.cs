@@ -41,5 +41,7 @@ namespace MapService.Models.Config
         public string infoOwner { get; set; }
 
         public int? zIndex { get; set; }
+
+        public string workCaption { get; set; }
     }
 }
