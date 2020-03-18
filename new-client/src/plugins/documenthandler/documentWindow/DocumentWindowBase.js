@@ -50,6 +50,7 @@ class DocumentWindowBase extends React.PureComponent {
           description: "En kort beskrivning som visas i widgeten",
           height: 1000,
           width: 400,
+          scrollable: false,
           draggingEnabled: false,
           resizingEnabled: false,
           allowMaximizedWindow: false
