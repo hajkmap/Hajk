@@ -198,10 +198,11 @@ const renderHtmlTagImg = imgTag => {
   let imageSource = imgTag.substring(indexOfSrcMaterial, imgTag.length - 3);
   //return <Typography variant="h1">{textToRender}</Typography>;
   return (
-    <Card>
-      <CardActionArea>
-        <CardMedia image={imageSource} />
-      </CardActionArea>
+    <Card elevation="0">
+      <CardMedia
+        style={{ height: "100px", width: "100px" }} //TODO - Dynamic size of pictures, discuss this
+        image={imageSource}
+      />
     </Card>
   );
 };
