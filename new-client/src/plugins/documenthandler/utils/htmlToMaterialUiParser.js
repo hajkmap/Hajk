@@ -1,6 +1,5 @@
 import React from "react";
 import Card from "@material-ui/core/Card";
-import CardActionArea from "@material-ui/core/CardActionArea";
 import CardMedia from "@material-ui/core/CardMedia";
 import Typography from "@material-ui/core/Typography";
 
@@ -10,6 +9,7 @@ import Typography from "@material-ui/core/Typography";
  * @returns {Array} Returns array with MaterialUI Components - see getAllowedHtmlTags to see the translation used
  * @memberof htmlToMaterialUiParser
  */
+
 export default html => {
   let generatedHtml = [];
   let allowedHtmlTags = getAllowedHtmlTags();
@@ -18,7 +18,7 @@ export default html => {
     let foundTag = allowedHtmlTags.find(
       element => element.tagType === tag.tagType
     );
-    return foundTag.callback(tag.tagValue);
+    return foundTag.callback(tag);
   });
 };
 
@@ -29,14 +29,14 @@ export default html => {
  */
 const getAllowedHtmlTags = () => {
   let allowedHtmlTags = [];
-  allowedHtmlTags.push({ tagType: "h1", callback: renderHtmlTagH1 });
-  allowedHtmlTags.push({ tagType: "h2", callback: renderHtmlTagH2 });
-  allowedHtmlTags.push({ tagType: "h3", callback: renderHtmlTagH3 });
-  allowedHtmlTags.push({ tagType: "h4", callback: renderHtmlTagH4 });
-  allowedHtmlTags.push({ tagType: "h5", callback: renderHtmlTagH5 });
-  allowedHtmlTags.push({ tagType: "h6", callback: renderHtmlTagH6 });
-  allowedHtmlTags.push({ tagType: "img", callback: renderHtmlTagImg });
-  allowedHtmlTags.push({ tagType: "p", callback: renderHtmlTagP });
+  allowedHtmlTags.push({ tagType: "h1", callback: getHeadingTypography });
+  allowedHtmlTags.push({ tagType: "h2", callback: getHeadingTypography });
+  allowedHtmlTags.push({ tagType: "h3", callback: getHeadingTypography });
+  allowedHtmlTags.push({ tagType: "h4", callback: getHeadingTypography });
+  allowedHtmlTags.push({ tagType: "h5", callback: getHeadingTypography });
+  allowedHtmlTags.push({ tagType: "h6", callback: getHeadingTypography });
+  allowedHtmlTags.push({ tagType: "img", callback: getTagImgCard });
+  allowedHtmlTags.push({ tagType: "p", callback: getPtagTypography });
   return allowedHtmlTags;
 };
 
@@ -121,70 +121,9 @@ const removeOuterTagTypeFromTagValue = (tagType, tagValue) => {
   return tagValue.substring(indexStart + tagType.length + 2, indexEnd);
 };
 
-/**
- * The render function for the h1-tag.
- * @param {string} h1Tag The h1-tag.
- *
- * @memberof Contents
- */
-const renderHtmlTagH1 = h1Tag => {
-  let textToRender = h1Tag.substring(4, h1Tag.length - 5);
-  return <Typography variant="h1">{textToRender}</Typography>;
-};
-
-/**
- * The render function for the h2-tag.
- * @param {string} h2Tag The h2-tag.
- *
- * @memberof Contents
- */
-const renderHtmlTagH2 = h2Tag => {
-  let textToRender = h2Tag.substring(4, h2Tag.length - 5);
-  return <Typography variant="h2">{textToRender}</Typography>;
-};
-
-/**
- * The render function for the h3-tag.
- * @param {string} h3Tag The h3-tag.
- *
- * @memberof Contents
- */
-const renderHtmlTagH3 = h3Tag => {
-  let textToRender = h3Tag.substring(4, h3Tag.length - 5);
-  return <Typography variant="h3">{textToRender}</Typography>;
-};
-
-/**
- * The render function for the h4-tag.
- * @param {string} h4Tag The h4-tag.
- *
- * @memberof Contents
- */
-const renderHtmlTagH4 = h4Tag => {
-  let textToRender = h4Tag.substring(4, h4Tag.length - 5);
-  return <Typography variant="h4">{textToRender}</Typography>;
-};
-
-/**
- * The render function for the h5-tag.
- * @param {string} h5Tag The h5-tag.
- *
- * @memberof Contents
- */
-const renderHtmlTagH5 = h5Tag => {
-  let textToRender = h5Tag.substring(4, h5Tag.length - 5);
-  return <Typography variant="h5">{textToRender}</Typography>;
-};
-
-/**
- * The render function for the h6-tag.
- * @param {string} h6Tag The h6-tag.
- *
- * @memberof Contents
- */
-const renderHtmlTagH6 = h6Tag => {
-  let textToRender = h6Tag.substring(4, h6Tag.length - 5);
-  return <Typography variant="h6">{textToRender}</Typography>;
+const getHeadingTypography = tag => {
+  let textToRender = tag.tagValue.substring(4, tag.tagValue.length - 5);
+  return <Typography variant={tag.tagType}>{textToRender}</Typography>;
 };
 
 /**
@@ -193,12 +132,15 @@ const renderHtmlTagH6 = h6Tag => {
  *
  * @memberof Contents
  */
-const renderHtmlTagImg = imgTag => {
-  const indexOfSrcMaterial = imgTag.indexOf("=") + 2;
-  let imageSource = imgTag.substring(indexOfSrcMaterial, imgTag.length - 3);
+const getTagImgCard = imgTag => {
+  const indexOfSrcMaterial = imgTag.tagValue.indexOf("=") + 2;
+  let imageSource = imgTag.tagValue.substring(
+    indexOfSrcMaterial,
+    imgTag.tagValue.length - 3
+  );
   //return <Typography variant="h1">{textToRender}</Typography>;
   return (
-    <Card elevation="0">
+    <Card elevation={0}>
       <CardMedia
         style={{ height: "100px", width: "100px" }} //TODO - Dynamic size of pictures, discuss this
         image={imageSource}
@@ -213,8 +155,8 @@ const renderHtmlTagImg = imgTag => {
  *
  * @memberof Contents
  */
-const renderHtmlTagP = pTag => {
-  let textToRender = pTag.substring(3, pTag.length - 4);
+const getPtagTypography = pTag => {
+  let textToRender = pTag.tagValue.substring(3, pTag.tagValue.length - 4);
   return <Typography variant="body1">{textToRender}</Typography>;
 };
 

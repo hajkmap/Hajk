@@ -37,10 +37,21 @@ export default class DocumentHandlerModel {
       const document = await JSON.parse(text);
       document.chapters.forEach(chapter => {
         this.setParentChapter(chapter, undefined);
+        this.setInternalId(chapter, 0);
       });
 
       callback(document);
     } catch (err) {}
+  }
+
+  setInternalId(chapter, id) {
+    chapter.id = id;
+    if (chapter.chapters.length > 0) {
+      chapter.chapters.forEach(child => {
+        id = id + 1;
+        this.setInternalId(child, id);
+      });
+    }
   }
 
   setParentChapter(chapter, parent) {
