@@ -1,5 +1,8 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import Card from "@material-ui/core/Card";
+import CardActionArea from "@material-ui/core/CardActionArea";
+import CardMedia from "@material-ui/core/CardMedia";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 
@@ -32,13 +35,14 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   addAllowedHtmlTags = () => {
-    allowedHtmlTags.push({ tagType: "p", callback: this.renderHtmlTagP });
     allowedHtmlTags.push({ tagType: "h1", callback: this.renderHtmlTagH1 });
     allowedHtmlTags.push({ tagType: "h2", callback: this.renderHtmlTagH2 });
     allowedHtmlTags.push({ tagType: "h3", callback: this.renderHtmlTagH3 });
     allowedHtmlTags.push({ tagType: "h4", callback: this.renderHtmlTagH4 });
     allowedHtmlTags.push({ tagType: "h5", callback: this.renderHtmlTagH5 });
     allowedHtmlTags.push({ tagType: "h6", callback: this.renderHtmlTagH6 });
+    allowedHtmlTags.push({ tagType: "img", callback: this.renderHtmlTagImg });
+    allowedHtmlTags.push({ tagType: "p", callback: this.renderHtmlTagP });
   };
 
   /**
@@ -120,7 +124,12 @@ class Contents extends React.PureComponent {
     const indexStartLast = htmlInsideTag.lastIndexOf("<");
     const indexEndFirst = htmlInsideTag.indexOf(">");
     const indexEndLast = htmlInsideTag.lastIndexOf(">");
-    if (indexStartFirst === indexStartLast || indexEndFirst === indexEndLast)
+    if (
+      indexStartFirst === -1 ||
+      indexStartLast === -1 ||
+      indexEndFirst === -1 ||
+      indexEndLast === -1
+    )
       return false;
 
     return true;
@@ -195,6 +204,7 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderContents = chapter => {
+    generatedHtml = [];
     this.parseHtml(chapter.html);
     return generatedHtml.map(tag => {
       let foundTag = allowedHtmlTags.find(
@@ -202,17 +212,6 @@ class Contents extends React.PureComponent {
       );
       return foundTag.callback(tag.tagValue);
     });
-  };
-
-  /**
-   * The render function for the p-tag.
-   * @param {string} pTag The p-tag.
-   *
-   * @memberof Contents
-   */
-  renderHtmlTagP = pTag => {
-    let textToRender = pTag.substring(3, pTag.length - 4);
-    return <Typography variant="body1">{textToRender}</Typography>;
   };
 
   /**
@@ -279,6 +278,36 @@ class Contents extends React.PureComponent {
   renderHtmlTagH6 = h6Tag => {
     let textToRender = h6Tag.substring(4, h6Tag.length - 5);
     return <Typography variant="h6">{textToRender}</Typography>;
+  };
+
+  /**
+   * The render function for the img-tag.
+   * @param {string} imgTag The img-tag.
+   *
+   * @memberof Contents
+   */
+  renderHtmlTagImg = imgTag => {
+    const indexOfSrcMaterial = imgTag.indexOf("=") + 2;
+    let imageSource = imgTag.substring(indexOfSrcMaterial, imgTag.length - 3);
+    //return <Typography variant="h1">{textToRender}</Typography>;
+    return (
+      <Card>
+        <CardActionArea>
+          <CardMedia image={imageSource} />
+        </CardActionArea>
+      </Card>
+    );
+  };
+
+  /**
+   * The render function for the p-tag.
+   * @param {string} pTag The p-tag.
+   *
+   * @memberof Contents
+   */
+  renderHtmlTagP = pTag => {
+    let textToRender = pTag.substring(3, pTag.length - 4);
+    return <Typography variant="body1">{textToRender}</Typography>;
   };
 
   render() {
