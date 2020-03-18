@@ -6,21 +6,22 @@ import TileWMS from "ol/source/TileWMS";
 import GeoJSON from "ol/format/GeoJSON";
 import LayerInfo from "./LayerInfo.js";
 
-var WmsLayerProperties = {
-  url: "",
-  projection: "EPSG:3006",
-  serverType: "geoserver",
-  opacity: 1,
-  status: "ok",
-  params: {}
-};
+// var WmsLayerProperties = {
+//   url: "",
+//   projection: "EPSG:3006",
+//   serverType: "geoserver",
+//   crossOrigin: "anonymous",
+//   opacity: 1,
+//   status: "ok",
+//   params: {}
+// };
 
 class WMSLayer {
   constructor(config, proxyUrl, globalObserver) {
     this.proxyUrl = proxyUrl;
     this.globalObserver = globalObserver;
     this.validInfo = true;
-    this.defaultProperties = WmsLayerProperties;
+    // this.defaultProperties = WmsLayerProperties;
     this.legend = config.legend;
     this.attribution = config.attribution;
     this.layerInfo = new LayerInfo(config);
@@ -31,6 +32,7 @@ class WMSLayer {
       params: config.params,
       projection: config.projection,
       serverType: config.serverType,
+      crossOrigin: "anonymous",
       imageFormat: config.imageFormat,
       attributions: config.attribution,
       cacheSize: this.subLayers.length > 1 ? 32 : 2048,

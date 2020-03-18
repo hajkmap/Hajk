@@ -22,6 +22,32 @@
 
 import React from "react";
 import { Component } from "react";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import CancelIcon from "@material-ui/icons/Cancel";
+import DoneIcon from "@material-ui/icons/Done";
+import { withStyles } from "@material-ui/core/styles";
+import { green, blue } from "@material-ui/core/colors";
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 class LayerAlert extends Component {
   constructor(props) {
@@ -79,21 +105,22 @@ class LayerAlert extends Component {
               </div>
             </div>
             <div className="modal-footer">
-              <button
-                type="button"
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
                 onClick={e => this._onCancelClick(e)}
-                className="btn btn-default"
+                startIcon={<CancelIcon />}
               >
                 Avbryt
-              </button>
-              &nbsp;
-              <button
-                type="button"
+              </ColorButtonBlue>
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
                 onClick={e => this._onSaveClick(e)}
-                className="btn btn-primary"
+                startIcon={<SaveIcon />}
               >
                 Spara
-              </button>
+              </ColorButtonBlue>
             </div>
           </div>
         </div>
@@ -141,21 +168,22 @@ class Alert extends Component {
                 <p>{options.message}</p>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  onClick={options.denyAction}
-                  className="btn btn-default"
-                >
-                  Avbryt
-                </button>
-                &nbsp;
-                <button
-                  type="button"
+                <ColorButtonGreen
+                  variant="contained"
+                  className="btn"
                   onClick={options.confirmAction}
-                  className="btn btn-primary"
+                  startIcon={<DoneIcon />}
                 >
                   OK
-                </button>
+                </ColorButtonGreen>
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={options.denyAction}
+                  startIcon={<CancelIcon />}
+                >
+                  Avbryt
+                </ColorButtonBlue>
               </div>
             </div>
           </div>
@@ -196,13 +224,13 @@ class Alert extends Component {
                 )}
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
+                <ColorButtonGreen
+                  variant="contained"
+                  className="btn"
                   onClick={options.onClick}
-                  className="btn btn-default"
                 >
                   OK
-                </button>
+                </ColorButtonGreen>
               </div>
             </div>
           </div>

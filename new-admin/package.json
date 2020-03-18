@@ -4,6 +4,8 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
+    "@material-ui/core": "^4.9.5",
+    "@material-ui/icons": "^4.9.1",
     "backbone": "^1.4.0",
     "draft-js": "^0.10.5",
     "draft-js-export-html": "^1.4.1",

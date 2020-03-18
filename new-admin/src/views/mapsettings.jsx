@@ -24,9 +24,21 @@ import React from "react";
 import { Component } from "react";
 import MapOptions from "./mapoptions.jsx";
 import ToolOptions from "./tooloptions.jsx";
+import Button from "@material-ui/core/Button";
 import $ from "jquery";
 import Alert from "../views/alert.jsx";
 import ListProperties from "../views/listproperties.jsx";
+import Divider from "@material-ui/core/Divider";
+import DeleteIcon from "@material-ui/icons/DeleteForever";
+import AddIcon from "@material-ui/icons/Add";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
+import LayersIcon from "@material-ui/icons/Layers";
+import SwapVertIcon from "@material-ui/icons/SwapVert";
+import SettingsIcon from "@material-ui/icons/Settings";
+import BuildIcon from "@material-ui/icons/Build";
+import { withStyles } from "@material-ui/core/styles";
+import { red, green, blue } from "@material-ui/core/colors";
 
 var defaultState = {
   alert: false,
@@ -37,6 +49,36 @@ var defaultState = {
   confirmAction: () => {},
   denyAction: () => {}
 };
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 $.fn.editable = function(component) {
   function edit(node, e) {
@@ -273,6 +315,7 @@ class Menu extends Component {
       visibleAtStart: true,
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
+      enableOSM: false,
       showBreadcrumbs: false,
       instruction: "",
       dropdownThemeMaps: false,
@@ -312,6 +355,7 @@ class Menu extends Component {
             .backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherWhite,
+          enableOSM: this.props.model.get("layerMenuConfig").enableOSM || false,
           showBreadcrumbs: this.props.model.get("layerMenuConfig")
             .showBreadcrumbs,
           instruction: this.props.model.get("layerMenuConfig").instruction,
@@ -520,6 +564,7 @@ class Menu extends Component {
       visibleAtStart: this.state.visibleAtStart,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
+      enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -1263,20 +1308,24 @@ class Menu extends Component {
           <article>
             <fieldset className="tree-view">
               <legend>Hantera ritordning</legend>
-              <button
-                className="btn btn-primary"
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
                 onClick={e => this.saveDrawOrder(e)}
+                startIcon={<SaveIcon />}
               >
                 Spara
-              </button>
+              </ColorButtonBlue>
               &nbsp;
               <ul>{this.renderDrawOrder()}</ul>
-              <button
-                className="btn btn-primary"
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
                 onClick={e => this.saveDrawOrder(e)}
+                startIcon={<SaveIcon />}
               >
                 Spara
-              </button>
+              </ColorButtonBlue>
             </fieldset>
           </article>
         </div>
@@ -1298,12 +1347,14 @@ class Menu extends Component {
           <article>
             <fieldset className="tree-view">
               <legend>Hantera lagermeny</legend>
-              <button
-                className="btn btn-primary"
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
                 onClick={e => this.saveSettings(e)}
+                startIcon={<SaveIcon />}
               >
                 Spara
-              </button>
+              </ColorButtonBlue>
               &nbsp;
               <div>
                 <input
@@ -1529,28 +1580,48 @@ class Menu extends Component {
                   Vit bakgrundskarta
                 </label>
               </div>
+              <div>
+                <input
+                  id="enableOSM"
+                  name="enableOSM"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableOSM}
+                />
+                &nbsp;
+                <label htmlFor="enableOSM">OpenStreetMap</label>
+              </div>
               <div className="separator">Justera lagerhanteraren</div>
-              <button
-                className="btn btn-primary"
-                onClick={e => this.saveSettings(e)}
-              >
-                Spara
-              </button>
-              &nbsp;
-              <button
-                className="btn btn-success"
-                onClick={e => this.createGroup("Ny grupp", false, false)}
-              >
-                Ny grupp
-              </button>
-              &nbsp;
+              <div className="margined">
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={e => this.saveSettings(e)}
+                  startIcon={<SaveIcon />}
+                >
+                  Spara
+                </ColorButtonBlue>
+                &nbsp;
+                <ColorButtonGreen
+                  variant="contained"
+                  className="btn"
+                  onClick={e => this.createGroup("Ny grupp", false, false)}
+                  startIcon={<CreateNewFolderIcon />}
+                >
+                  Ny grupp
+                </ColorButtonGreen>
+              </div>
               {this.renderLayerMenu()}
-              <button
-                className="btn btn-primary"
-                onClick={e => this.saveSettings(e)}
-              >
-                Spara
-              </button>
+              <div>
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={e => this.saveSettings(e)}
+                  startIcon={<SaveIcon />}
+                >
+                  Spara
+                </ColorButtonBlue>
+              </div>
             </fieldset>
           </article>
           {this.state.adList}
@@ -1616,8 +1687,7 @@ class Menu extends Component {
 
   createMap() {
     var name = this.refs.mapName.value;
-    var result = /[^0-9a-zA-Z_]/.test(name);
-    if (!result) {
+    if (!/[^0-9a-zA-Z_]/.test(name) && name.trim().length > 0) {
       this.props.model.createMap(name, () => {
         this.setState({
           content: "mapsettings",
@@ -1630,7 +1700,7 @@ class Menu extends Component {
       this.setState({
         alert: true,
         alertMessage:
-          "Ett eller flera ogiltiga tecken har angivits. Giltiga tecken 0-9, a-z, A-Z, _"
+          "Felaktigt namn på kartan \nInga eller ogiltiga tecken har angivits. \n\nGiltiga tecken: 0-9 a-z A-Z _"
       });
     }
   }
@@ -1649,72 +1719,96 @@ class Menu extends Component {
         <div>
           <h1>Kartinställningar</h1>
           <div className="separator set-width">
-            <h4>Skapa ny karta</h4>
+            <h4>Hantera / Skapa karta</h4>
           </div>
-          <div className="inset-form">
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                this.createMap(e);
-              }}
-            >
-              <label>Namn</label>
+          <div className="map-management">
+            <div className="inset-form margined">
+              <label>Välj karta</label>
               &nbsp;
-              <input type="text" ref="mapName" />
+              <select
+                className="control-fixed"
+                onChange={e => {
+                  this.setSelectedConfig(e);
+                }}
+                ref="map-chooser"
+              >
+                {options}
+              </select>
               &nbsp;
-              <button className="btn btn-primary">Skapa</button>
-            </form>
+              <ColorButtonRed
+                variant="contained"
+                className="btn"
+                onClick={e => this.deleteMap()}
+                startIcon={<DeleteIcon />}
+              >
+                Ta bort karta
+              </ColorButtonRed>
+            </div>
+
+            <Divider orientation="vertical" flexItem />
+
+            <div className="inset-form map-management-margin-left margined">
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  this.createMap(e);
+                }}
+              >
+                <label>Namn</label>
+                &nbsp;
+                <input type="text" ref="mapName" />
+                &nbsp;
+                <ColorButtonGreen
+                  variant="contained"
+                  className="btn"
+                  type="submit"
+                  startIcon={<AddIcon />}
+                >
+                  Skapa ny karta
+                </ColorButtonGreen>
+              </form>
+            </div>
           </div>
 
           <div className="separator set-width">
-            <h4>Hantera befintlig karta</h4>
-          </div>
-
-          <div className="inset-form set-width">
-            <label>Välj karta</label>
-            &nbsp;
-            <select
-              className="control-fixed"
-              onChange={e => {
-                this.setSelectedConfig(e);
-              }}
-              ref="map-chooser"
-            >
-              {options}
-            </select>
+            <h5>Inställningar för vald karta</h5>
           </div>
           <div className="tab-pane-bar">
-            <button className="btn btn-danger" onClick={e => this.deleteMap()}>
-              Ta bort karta
-            </button>
-            &nbsp;
-            <button
-              className="btn btn-info"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => this.toggleLayerMenu()}
+              startIcon={<LayersIcon />}
             >
               Lagermeny
-            </button>
+            </ColorButtonBlue>
             &nbsp;
-            <button
-              className="btn btn-info"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => this.toggleDrawOrderMenu()}
+              startIcon={<SwapVertIcon />}
             >
               Ritordning
-            </button>
+            </ColorButtonBlue>
             &nbsp;
-            <button
-              className="btn btn-info"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => this.toggleMapOptionsMenu()}
+              startIcon={<SettingsIcon />}
             >
               Inställningar
-            </button>
+            </ColorButtonBlue>
             &nbsp;
-            <button
-              className="btn btn-info"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => this.toggleToolMenu()}
+              startIcon={<BuildIcon />}
             >
               Verktyg
-            </button>
+            </ColorButtonBlue>
           </div>
           {this.renderArticleContent()}
         </div>

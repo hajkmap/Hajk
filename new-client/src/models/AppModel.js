@@ -11,18 +11,19 @@ import { bindMapClickEvent } from "./Click.js";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { Map, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
-import // defaults as defaultControls,
+// import {
+// defaults as defaultControls,
 // Attribution,
 // Control,
 // FullScreen, // TODO: Consider implementation
 // MousePosition, // TODO: Consider implementation, perhaps in a separate plugin
 // OverviewMap // TODO: Consider implementation
 // Rotate,
-// ScaleLine,
+// ScaleLine
 // Zoom,
 // ZoomSlider,
 // ZoomToExtent
-"ol/control";
+// } from "ol/control";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";

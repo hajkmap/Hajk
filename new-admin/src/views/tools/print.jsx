@@ -20,8 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from "react";
-import { Component } from "react";
+import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
@@ -42,15 +41,9 @@ var defaultState = {
   active: false,
   index: 0,
   target: "toolbar",
-  exportUrl: "/mapservice/export/pdf",
-  exportTiffUrl: "/mapservice/export/tiff",
-  pdfActive: true,
-  tiffActive: true,
-  base64Encode: false,
-  autoScale: false,
   instruction: "",
-  scales: "250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000",
-  proxyUrl: "",
+  scales: "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
+  logo: "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
   visibleAtStart: false,
   visibleForGroups: []
 };
@@ -62,7 +55,7 @@ class ToolOptions extends Component {
   constructor() {
     super();
     this.state = defaultState;
-    this.type = "export";
+    this.type = "print";
   }
 
   componentDidMount() {
@@ -75,15 +68,9 @@ class ToolOptions extends Component {
         position: tool.options.position,
         width: tool.options.width,
         height: tool.options.height,
-        exportUrl: tool.options.exportUrl,
-        exportTiffUrl: tool.options.exportTiffUrl,
-        tiffActive: tool.options.tiffActive,
-        pdfActive: tool.options.pdfActive,
-        base64Encode: tool.options.base64Encode,
-        autoScale: tool.options.autoScale,
-        proxyUrl: tool.options.proxyUrl,
         instruction: tool.options.instruction,
         scales: tool.options.scales || this.state.scales,
+        logo: tool.options.logo,
         visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
@@ -154,14 +141,8 @@ class ToolOptions extends Component {
         position: this.state.position,
         width: this.state.width,
         height: this.state.height,
-        exportUrl: this.state.exportUrl,
-        exportTiffUrl: this.state.exportTiffUrl,
-        pdfActive: this.state.pdfActive,
-        tiffActive: this.state.tiffActive,
-        base64Encode: this.state.base64Encode,
-        autoScale: this.state.autoScale,
         scales: this.state.scales,
-        proxyUrl: this.state.proxyUrl,
+        logo: this.state.logo,
         instruction: this.state.instruction,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -269,6 +250,15 @@ class ToolOptions extends Component {
               Spara
             </ColorButtonBlue>
           </p>
+          <div className="information-box">
+            Tänk på att öka minnesanvändningen i GeoServer för WMS om du
+            använder detta verktyg. Utskrifter med hög DPI och SingeTile kräver
+            mycket minne. Standard för GeoServer är 128MB och det är inte säkert
+            det räcker för att alla requests ska returneras korrekt. <br />
+            <div className="separator">För att ändra minnesanvändningen</div>
+            Logga in i GeoServer > Tjänster > WMS > Gränser för
+            resursförbrukning > Max renderingsminne (KB)
+          </div>
           <div>
             <input
               id="active"
@@ -282,6 +272,7 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+
           <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
@@ -377,6 +368,36 @@ class ToolOptions extends Component {
               value={this.state.height}
             />
           </div>
+          <div className="separator">Inställningar för utskrift</div>
+          <div>
+            <label htmlFor="scales">Skalor</label>
+            <input
+              type="text"
+              name="scales"
+              value={this.state.scales}
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="logo">
+              Logo{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Sökväg till logga att använda i utskrifterna. Kan vara relativ Hajk-root eller absolut."
+              />
+            </label>
+            <input
+              type="text"
+              name="logo"
+              value={this.state.logo}
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
           <div className="separator">Övriga inställningar</div>
           <div>
             <input
@@ -390,93 +411,6 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
-          </div>
-          <div>
-            <label htmlFor="scales">Skalor</label>
-            <input
-              value={this.state.scales}
-              type="text"
-              name="scales"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="exportUrl">URL till PDF-tjänst</label>
-            <input
-              value={this.state.exportUrl}
-              type="text"
-              name="exportUrl"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="exportTiffUrl">URL till TIFF-tjänst</label>
-            <input
-              value={this.state.exportTiffUrl}
-              type="text"
-              name="exportTiffUrl"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <input
-              id="pdf-active"
-              name="pdfActive"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.pdfActive}
-            />
-            &nbsp;
-            <label htmlFor="pdf-active">PDF aktiverad</label>
-          </div>
-          <div>
-            <input
-              id="tiff-active"
-              name="tiffActive"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.tiffActive}
-            />
-            &nbsp;
-            <label htmlFor="tiff-active">TIFF aktiverad</label>
-          </div>
-          <div>
-            <input
-              id="Base64-active"
-              name="base64Encode"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.base64Encode}
-            />
-            &nbsp;
-            <label className="long-label" htmlFor="Base64-active">
-              Base64-encoding
-            </label>
-          </div>
-          <div>
-            <input
-              id="autoScale-active"
-              name="autoScale"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.autoScale}
-            />
-            &nbsp;
-            <label htmlFor="autoScale-active">Automatisk skala</label>
           </div>
           <div>
             <label htmlFor="instruction">
@@ -494,21 +428,14 @@ class ToolOptions extends Component {
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              value={this.state.instruction ? atob(this.state.instruction) : ""}
+              value={
+                this.state.instruction
+                  ? atob(this.state.instruction)
+                  : "Utskriften sker på klienten och inte på servern som den gamla gjorde."
+              }
             />
           </div>
           {this.renderVisibleForGroups()}
-          <div>
-            <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>
-            <input
-              value={this.state.proxyUrl}
-              type="text"
-              name="proxyUrl"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
         </form>
       </div>
     );

@@ -23,6 +23,32 @@
 import React from "react";
 import { Component } from "react";
 import Alert from "../views/alert.jsx";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import AddIcon from "@material-ui/icons/Add";
+import CancelIcon from "@material-ui/icons/Cancel";
+import { withStyles } from "@material-ui/core/styles";
+import { green, blue } from "@material-ui/core/colors";
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 const defaultState = {
   load: false,
@@ -798,9 +824,14 @@ class Search extends Component {
     ) : null;
     var abort =
       this.state.mode === "edit" ? (
-        <span className="btn btn-danger" onClick={e => this.abort(e)}>
+        <ColorButtonBlue
+          variant="contained"
+          className="btn btn-danger"
+          onClick={e => this.abort(e)}
+          startIcon={<CancelIcon />}
+        >
           Avbryt
-        </span>
+        </ColorButtonBlue>
       ) : null;
 
     return (
@@ -959,9 +990,25 @@ class Search extends Component {
                 {this.renderLayerProperties()}
               </div>
             </fieldset>
-            <button className="btn btn-primary">
-              {this.state.mode === "edit" ? "Spara" : "Lägg till"}
-            </button>
+            {this.state.mode === "edit" ? (
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<SaveIcon />}
+              >
+                Spara
+              </ColorButtonBlue>
+            ) : (
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<AddIcon />}
+              >
+                Lägg till
+              </ColorButtonGreen>
+            )}
             &nbsp;
             {abort}
           </form>
