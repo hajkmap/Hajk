@@ -91,6 +91,7 @@ class TableOfContents extends React.PureComponent {
     return (
       <>
         <ExpansionPanel
+          elevation={0}
           className={classes.tableOfContents}
           defaultExpanded={true}
         >
@@ -99,7 +100,7 @@ class TableOfContents extends React.PureComponent {
             aria-controls="panel1a-content"
             id="panel1a-header"
           >
-            <Typography variant="h4">Innehåll</Typography>
+            <Typography variant="h1">Innehåll</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <Grid container spacing={0}>

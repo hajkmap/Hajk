@@ -138,11 +138,10 @@ const getTagImgCard = imgTag => {
     indexOfSrcMaterial,
     imgTag.tagValue.length - 3
   );
-  //return <Typography variant="h1">{textToRender}</Typography>;
   return (
     <Card elevation={0}>
       <CardMedia
-        style={{ height: "100px", width: "100px" }} //TODO - Dynamic size of pictures, discuss this
+        style={{ height: "200px", width: "200px" }} //TODO - Dynamic size of pictures, discuss this
         image={imageSource}
       />
     </Card>
