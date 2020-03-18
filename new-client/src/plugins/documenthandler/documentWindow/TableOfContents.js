@@ -56,17 +56,21 @@ class TableOfContents extends React.PureComponent {
    * Private help method that recursive renders all sub chapters of a chapter.
    * @param {object} chapter A chapter with all it's sub chapters that will be rendered.
    * @param {string} level A recursive level that help with the table construction.
-   * @param {umber} subChapterNumber A counter of the current sub chapter number
+   * @param {number} subChapterNumber A counter of the current sub chapter number
    *
    * @memberof TableOfContents
    */
   renderSubChapters = (chapter, level, subChapterNumber) => {
     let newLevel = level + 1;
     let number = 0;
+    if (level > 0) console.log("key: " + subChapterNumber + " space");
+    console.log("key: " + subChapterNumber);
     return (
       <>
-        {level > 0 ? <Grid item xs={level}></Grid> : null}
-        <Grid item xs={12 - level}>
+        {level > 0 ? (
+          <Grid key={subChapterNumber + " space"} item xs={level}></Grid>
+        ) : null}
+        <Grid key={subChapterNumber} item xs={12 - level}>
           <Link href="#" underline="hover" onClick={this.linkClick}>
             {subChapterNumber + " " + chapter.header}
           </Link>
