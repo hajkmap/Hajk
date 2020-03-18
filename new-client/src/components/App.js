@@ -78,7 +78,7 @@ const styles = theme => {
       zIndex: theme.zIndex.appBar,
       height: theme.spacing(8),
       display: "flex",
-      justifyContent: "space-between",
+      justifyContent: "flex-start",
       alignItems: "flex-start",
       [theme.breakpoints.down("xs")]: {
         zIndex: 3
