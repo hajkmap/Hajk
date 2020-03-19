@@ -15,7 +15,6 @@ const header = document.getElementById("header");
 
 const styles = theme => ({
   root: {
-    padding: "2px 4px",
     display: "flex",
     alignItems: "center",
     marginLeft: theme.spacing(6)
