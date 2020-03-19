@@ -1,9 +1,9 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import Card from "@material-ui/core/Card";
-import CardMedia from "@material-ui/core/CardMedia";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
+import Paper from "@material-ui/core/Paper";
+
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 
 const styles = theme => {
@@ -68,7 +68,12 @@ class Contents extends React.PureComponent {
     if (chapter.parent === undefined)
       return <Typography variant="h1">{chapter.header}</Typography>;
 
-    return <Typography variant="h2">{chapter.header}</Typography>;
+    return (
+      <>
+        <Paper elevation="0" style={{ height: "30px" }} />
+        <Typography variant="h2">{chapter.header}</Typography>
+      </>
+    );
   };
 
   /**
