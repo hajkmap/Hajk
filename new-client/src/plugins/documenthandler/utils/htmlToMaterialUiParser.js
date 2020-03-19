@@ -10,7 +10,6 @@ import Paper from "@material-ui/core/Paper";
  * @returns {Array} Returns array with MaterialUI Components - see getAllowedHtmlTags to see the translation used
  * @memberof htmlToMaterialUiParser
  */
-
 export default html => {
   let generatedHtml = [];
   let allowedHtmlTags = getAllowedHtmlTags();
@@ -26,10 +25,11 @@ export default html => {
 /**
  * Private help method that adds all allowed html tags.
  *
- * @memberof Contents
+ * @memberof htmlToMaterialUiParser
  */
 const getAllowedHtmlTags = () => {
   let allowedHtmlTags = [];
+  allowedHtmlTags.push({ tagType: "br", callback: getBrtagTypography });
   allowedHtmlTags.push({ tagType: "h1", callback: getHeadingTypography });
   allowedHtmlTags.push({ tagType: "h2", callback: getHeadingTypography });
   allowedHtmlTags.push({ tagType: "h3", callback: getHeadingTypography });
@@ -42,17 +42,25 @@ const getAllowedHtmlTags = () => {
 };
 
 /**
+ * Private help method that adds all tags that has no ending, e.g. the br tag.
+ *
+ * @memberof htmlToMaterialUiParser
+ */
+const getTagsWithoutEnding = () => {
+  return ["br"];
+};
+
+/**
  * Parse the html code so that it can be translated into Material UI components.
  * Only html tags that can be found in the allowedHtmlTags will be added. The rest
  * will be ignored.
  * @param {object} html The html code.
  *
- * @memberof Contents
+ * @memberof htmlToMaterialUiParser
  */
 const parseHtml = (html, generatedHtml, allowedHtmlTags) => {
   let { tagType, tagValue, tagEndIndex } = findStartTag(html);
   html = html.substring(tagEndIndex);
-  //if (tagEndIndex === TAG_HAS_NO_INTERNAL_VALUE) html = "";
 
   if (hasTagInside(tagType, tagValue)) {
     tagValue = removeOuterTagTypeFromTagValue(tagType, tagValue);
@@ -70,7 +78,7 @@ const parseHtml = (html, generatedHtml, allowedHtmlTags) => {
  * @param {string} html The html code.
  * @returns {string, string, string} Returns the tag type, tag value and the last index of the fist tag.
  *
- * @memberof Contents
+ * @memberof htmlToMaterialUiParser
  */
 const findStartTag = html => {
   const indexStart = html.indexOf("<");
@@ -80,7 +88,7 @@ const findStartTag = html => {
   const tagType = html.substring(indexStart + 1, indexEnd);
   let tagEndIndex = findEndTag(html, tagType);
   if (tagEndIndex === -1) tagEndIndex = 1;
-  const tagValue = html.substring(indexStart, tagEndIndex);
+  let tagValue = html.substring(indexStart, tagEndIndex);
 
   return { tagType: tagType, tagValue: tagValue, tagEndIndex: tagEndIndex };
 };
@@ -90,15 +98,25 @@ const findStartTag = html => {
  * @param {string} html The html text.
  * @param {string} tagType The type of html tag.
  *
- * @memberof Contents
+ * @memberof htmlToMaterialUiParser
  */
 const findEndTag = (html, tagType) => {
+  if (
+    getTagsWithoutEnding()
+      .map(item => item)
+      .includes(tagType)
+  ) {
+    return tagType.length + 2;
+  }
+
   let hasEndTag = true;
   let indexStart = html.indexOf("</" + tagType + ">");
   if (indexStart === -1) {
     indexStart = html.indexOf("/>");
     hasEndTag = false;
   }
+  if (indexStart === -1) indexStart = html.indexOf("<" + tagType + ">");
+
   let indexEnd = indexStart + 2;
   if (hasEndTag) indexEnd = indexEnd + tagType.length + 1;
 
@@ -111,6 +129,7 @@ const findEndTag = (html, tagType) => {
  * @param {string} tagValue The text inside a tag, including the tag itself.
  * @return {boolean} Returns true if the tag contains another tag.
  *
+ * @memberof htmlToMaterialUiParser
  */
 const hasTagInside = (tagType, tagValue) => {
   let htmlInsideTag = tagValue.substring(tagType.length + 2);
@@ -137,6 +156,8 @@ const hasTagInside = (tagType, tagValue) => {
  * @param {string} tagType The tag type.
  * @param {string} tagValue The tag value.
  * @returns {string} Returns the tag value minus the outer tag.
+ *
+ * @memberof htmlToMaterialUiParser
  */
 const removeOuterTagTypeFromTagValue = (tagType, tagValue) => {
   const indexStart = tagValue.indexOf("<" + tagType + ">");
@@ -146,6 +167,22 @@ const removeOuterTagTypeFromTagValue = (tagType, tagValue) => {
   return tagValue.substring(indexStart + tagType.length + 2, indexEnd);
 };
 
+/**
+ * The render function for the br-tag.
+ * @param {string} brTag The br-tag.
+ *
+ * @memberof htmlToMaterialUiParser
+ */
+const getBrtagTypography = brTag => {
+  return <Paper elevation="0" style={{ height: "20px" }} />;
+};
+
+/**
+ * The render function for the h1 to h6-tag.
+ * @param {string} tag The h1, h2, h3, h4, h5 or h6 tag.
+ *
+ * @memberof htmlToMaterialUiParser
+ */
 const getHeadingTypography = tag => {
   let textToRender = tag.tagValue.substring(4, tag.tagValue.length - 5);
   return <Typography variant={tag.tagType}>{textToRender}</Typography>;
@@ -155,7 +192,7 @@ const getHeadingTypography = tag => {
  * The render function for the img-tag.
  * @param {string} imgTag The img-tag.
  *
- * @memberof Contents
+ * @memberof htmlToMaterialUiParser
  */
 const getTagImgCard = imgTag => {
   const indexOfSrcMaterial = imgTag.tagValue.indexOf("=") + 2;
@@ -184,7 +221,7 @@ const getTagImgCard = imgTag => {
  * The render function for the p-tag.
  * @param {string} pTag The p-tag.
  *
- * @memberof Contents
+ * @memberof htmlToMaterialUiParser
  */
 const getPtagTypography = pTag => {
   let textToRender = pTag.tagValue.substring(3, pTag.tagValue.length - 4);
