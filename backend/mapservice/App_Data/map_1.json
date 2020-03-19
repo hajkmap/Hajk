@@ -235,43 +235,14 @@
       },
       "index": 0
     },
-    {
-      "type": "collector",
-      "options": {
-        "target": "left",
-        "url": "",
-        "featureType": "hpl",
-        "title": "Tyck till",
-        "abstract": "Vi vill veta vad du tycker!",
-        "featureNS": "",
-        "showThankYou": false,
-        "visibleAtStart": false,
-        "thankYou": "Tack",
-        "visibleForGroups": [],
-        "form": [
-          {
-            "id": 303302667498,
-            "order": 0,
-            "header": "Vem är du?",
-            "text": "<p>Ålder:</p>\n<div label=\"Namn\" field=\"name\"></div>\n<p>Namn:</p>\n<div label=\"Namn\" field=\"image\"></div>\n\n"
-          },
-          {
-            "id": 979784104217,
-            "order": 1,
-            "header": "Tyck till om en plats",
-            "text": "<p>Välj typ av plats, klicka sedan i kartan för att markera den</p>\n<div type=\"toolbar\"></div>"
-          }
-        ],
-        "serviceId": "25"
-      },
-      "index": 0
-    },
+
     {
       "type": "documenthandler",
       "options": {
         "target": "toolbar",
         "overlayLogoUrl": "http://localhost:3000/logo-share.png",
         "openOverlayButtonColor": "#456785",
+        "showScrollButtonLimit": 400,
         "menuConfig": {
           "menu": [
             {
@@ -360,7 +331,7 @@
             },
             {
               "title": "Utgångspunkter",
-              "document": "x",
+              "document": "utgangspunkter",
               "color": "#b7e1c8",
               "icon": {
                 "materialUiIconName": "alarm_add",
