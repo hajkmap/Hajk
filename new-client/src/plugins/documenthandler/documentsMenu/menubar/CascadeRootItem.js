@@ -4,6 +4,7 @@ import { withSnackbar } from "notistack";
 import MenuItem from "@material-ui/core/MenuItem";
 import CascadeMenu from "./CascadeMenu";
 import Grid from "@material-ui/core/Grid";
+import ArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
@@ -59,9 +60,12 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
         >
           {icon}
           {item.title && (
-            <Typography className={classes.typography} variant="button">
-              {item.title}
-            </Typography>
+            <>
+              <Typography className={classes.typography} variant="button">
+                {item.title}
+              </Typography>
+              <ArrowDownIcon></ArrowDownIcon>
+            </>
           )}
         </MenuItem>
       </Grid>
