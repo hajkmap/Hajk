@@ -3,11 +3,18 @@ import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
-
+import Card from "@material-ui/core/Card";
+import CardMedia from "@material-ui/core/CardMedia";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 
 const styles = theme => {
-  return {};
+  return {
+    cardMedia: { height: "200px", width: "auto", objectFit: "contain" },
+    typography: {
+      paddingRight: theme.spacing(1),
+      paddingLeft: theme.spacing(1)
+    }
+  };
 };
 
 class Contents extends React.PureComponent {
@@ -23,6 +30,102 @@ class Contents extends React.PureComponent {
     super(props);
     this.document = this.props.document;
   }
+
+  getHeadingTypography = tag => {
+    const { classes } = this.props;
+    let textToRender = tag.tagValue.substring(4, tag.tagValue.length - 5);
+    return (
+      <Typography className={classes.typography} variant={tag.tagType}>
+        {textToRender}
+      </Typography>
+    );
+  };
+
+  /**
+   * The render function for the img-tag.
+   * @param {string} imgTag The img-tag.
+   *
+   * @memberof Contents
+   */
+  getTagImgCard = imgTag => {
+    const { classes } = this.props;
+    const indexOfSrcMaterial = imgTag.tagValue.indexOf("=") + 2;
+    let imageSource = imgTag.tagValue.substring(
+      indexOfSrcMaterial,
+      imgTag.tagValue.length - 3
+    );
+    return (
+      <>
+        <Paper elevation="0" style={{ height: "10px" }} /> {/*What is this*/}
+        <Card elevation={0}>
+          <CardMedia
+            component="img"
+            className={classes.cardMedia}
+            image={imageSource}
+          />
+        </Card>
+        <Typography className={classes.typography} variant="subtitle2">
+          Lägg till bildtext här
+        </Typography>
+        <Typography className={classes.typography} variant="subtitle2">
+          Lägg till källa/fotograf här
+        </Typography>
+        <Paper elevation="0" style={{ height: "20px" }} />
+      </>
+    );
+  };
+
+  /**
+   * The render function for the p-tag.
+   * @param {string} pTag The p-tag.
+   *
+   * @memberof Contents
+   */
+  getPtagTypography = pTag => {
+    const { classes } = this.props;
+    let textToRender = pTag.tagValue.substring(3, pTag.tagValue.length - 4);
+    return (
+      <Typography className={classes.typography} variant="body1">
+        {textToRender}
+      </Typography>
+    );
+  };
+
+  /**
+   * Private help method that adds all allowed html tags.
+   *
+   * @memberof Contents
+   */
+  getTagSpecificCallbacks = () => {
+    let allowedHtmlTags = [];
+    allowedHtmlTags.push({
+      tagType: "h1",
+      callback: this.getHeadingTypography
+    });
+    allowedHtmlTags.push({
+      tagType: "h2",
+      callback: this.getHeadingTypography
+    });
+    allowedHtmlTags.push({
+      tagType: "h3",
+      callback: this.getHeadingTypography
+    });
+    allowedHtmlTags.push({
+      tagType: "h4",
+      callback: this.getHeadingTypography
+    });
+    allowedHtmlTags.push({
+      tagType: "h5",
+      callback: this.getHeadingTypography
+    });
+    allowedHtmlTags.push({
+      tagType: "h6",
+      callback: this.getHeadingTypography
+    });
+    allowedHtmlTags.push({ tagType: "img", callback: this.getTagImgCard });
+    allowedHtmlTags.push({ tagType: "p", callback: this.getPtagTypography });
+    return allowedHtmlTags;
+  };
 
   /**
    * Renders the document with all it's chapters and sub chapters.
@@ -44,7 +147,7 @@ class Contents extends React.PureComponent {
    */
   renderChapter = chapter => {
     return (
-      <Grid container key={chapter.id}>
+      <Grid container alignItems="center" key={chapter.id}>
         <Grid item xs={12}>
           {this.renderHeadline(chapter)}
         </Grid>
@@ -65,13 +168,20 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderHeadline = chapter => {
+    const { classes } = this.props;
     if (chapter.parent === undefined)
-      return <Typography variant="h1">{chapter.header}</Typography>;
+      return (
+        <Typography className={classes.typography} variant="h1">
+          {chapter.header}
+        </Typography>
+      );
 
     return (
       <>
-        <Paper elevation="0" style={{ height: "30px" }} />
-        <Typography variant="h2">{chapter.header}</Typography>
+        <Paper elevation="0" style={{ height: "30px" }} /> {/*What is this*/}
+        <Typography className={classes.typography} variant="h2">
+          {chapter.header}
+        </Typography>
       </>
     );
   };
@@ -83,13 +193,16 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderContents = chapter => {
-    return htmlToMaterialUiParser(chapter.html).map((component, index) => {
+    return htmlToMaterialUiParser(
+      chapter.html,
+      this.getTagSpecificCallbacks()
+    ).map((component, index) => {
       return <React.Fragment key={index}>{component}</React.Fragment>;
     });
   };
 
   render() {
-    const { classes, document } = this.props;
+    const { document } = this.props;
     return this.renderChapters(document?.chapters);
   }
 }

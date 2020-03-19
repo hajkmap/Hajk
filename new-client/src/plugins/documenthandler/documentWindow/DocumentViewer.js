@@ -10,6 +10,7 @@ import Contents from "./Contents";
 const styles = theme => ({
   gridContainer: {
     height: "100%",
+    padding: theme.spacing(2),
     overflowY: "scroll"
   }
 });
@@ -76,6 +77,8 @@ class DocumentViewer extends React.PureComponent {
           )}
           <Grid item>
             <TableOfContents document={activeDocument} />
+          </Grid>
+          <Grid item>
             <Contents document={activeDocument} />
           </Grid>
         </Grid>

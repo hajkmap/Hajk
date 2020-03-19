@@ -89,26 +89,24 @@ class TableOfContents extends React.PureComponent {
   render() {
     const { classes, document } = this.props;
     return (
-      <>
-        <ExpansionPanel
-          elevation={0}
-          className={classes.tableOfContents}
-          defaultExpanded={true}
+      <ExpansionPanel
+        elevation={0}
+        className={classes.tableOfContents}
+        defaultExpanded={true}
+      >
+        <ExpansionPanelSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
         >
-          <ExpansionPanelSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-          >
-            <Typography variant="h1">Innehåll</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-            <Grid container spacing={0}>
-              {this.renderChapters(document)}
-            </Grid>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
-      </>
+          <Typography variant="h1">INNEHÅLL</Typography>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
+          <Grid container spacing={0}>
+            {this.renderChapters(document)}
+          </Grid>
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
     );
   }
 }
