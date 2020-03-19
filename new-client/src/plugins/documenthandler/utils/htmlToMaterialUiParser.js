@@ -1,44 +1,20 @@
-import React from "react";
-import Card from "@material-ui/core/Card";
-import CardMedia from "@material-ui/core/CardMedia";
-import Typography from "@material-ui/core/Typography";
-import Paper from "@material-ui/core/Paper";
-
 /**
  * Default export of function that takes html-string as input and returns array with MaterialUIComponents
  * @param {string} html String with html that needs to be converted to materialUIComponents
- * @returns {Array} Returns array with MaterialUI Components - see getAllowedHtmlTags to see the translation used
+ * @returns {Array} Returns array with MaterialUI Components - see gettagSpecificCallbacks to see the translation used
  * @memberof htmlToMaterialUiParser
  */
-export default html => {
+
+export default (html, tagSpecificCallbacks) => {
   let generatedHtml = [];
-  let allowedHtmlTags = getAllowedHtmlTags();
-  parseHtml(html, generatedHtml, allowedHtmlTags);
+
+  parseHtml(html, generatedHtml, tagSpecificCallbacks);
   return generatedHtml.map(tag => {
-    let foundTag = allowedHtmlTags.find(
+    let foundTag = tagSpecificCallbacks.find(
       element => element.tagType === tag.tagType
     );
     return foundTag.callback(tag);
   });
-};
-
-/**
- * Private help method that adds all allowed html tags.
- *
- * @memberof htmlToMaterialUiParser
- */
-const getAllowedHtmlTags = () => {
-  let allowedHtmlTags = [];
-  allowedHtmlTags.push({ tagType: "br", callback: getBrtagTypography });
-  allowedHtmlTags.push({ tagType: "h1", callback: getHeadingTypography });
-  allowedHtmlTags.push({ tagType: "h2", callback: getHeadingTypography });
-  allowedHtmlTags.push({ tagType: "h3", callback: getHeadingTypography });
-  allowedHtmlTags.push({ tagType: "h4", callback: getHeadingTypography });
-  allowedHtmlTags.push({ tagType: "h5", callback: getHeadingTypography });
-  allowedHtmlTags.push({ tagType: "h6", callback: getHeadingTypography });
-  allowedHtmlTags.push({ tagType: "img", callback: getTagImgCard });
-  allowedHtmlTags.push({ tagType: "p", callback: getPtagTypography });
-  return allowedHtmlTags;
 };
 
 /**
@@ -51,26 +27,27 @@ const getTagsWithoutEnding = () => {
 };
 
 /**
+
  * Parse the html code so that it can be translated into Material UI components.
- * Only html tags that can be found in the allowedHtmlTags will be added. The rest
+ * Only html tags that can be found in the tagSpecificCallbacks will be added. The rest
  * will be ignored.
  * @param {object} html The html code.
  *
  * @memberof htmlToMaterialUiParser
  */
-const parseHtml = (html, generatedHtml, allowedHtmlTags) => {
+const parseHtml = (html, generatedHtml, tagSpecificCallbacks) => {
   let { tagType, tagValue, tagEndIndex } = findStartTag(html);
   html = html.substring(tagEndIndex);
 
   if (hasTagInside(tagType, tagValue)) {
     tagValue = removeOuterTagTypeFromTagValue(tagType, tagValue);
-    parseHtml(tagValue, generatedHtml, allowedHtmlTags);
+    parseHtml(tagValue, generatedHtml, tagSpecificCallbacks);
   }
 
-  if (allowedHtmlTags.map(item => item.tagType).includes(tagType))
+  if (tagSpecificCallbacks.map(item => item.tagType).includes(tagType))
     generatedHtml.push({ tagType: tagType, tagValue: tagValue });
 
-  if (html.length > 0) parseHtml(html, generatedHtml, allowedHtmlTags);
+  if (html.length > 0) parseHtml(html, generatedHtml, tagSpecificCallbacks);
 };
 
 /**
@@ -165,65 +142,4 @@ const removeOuterTagTypeFromTagValue = (tagType, tagValue) => {
   if (indexEnd === -1) indexEnd = tagValue.lastIndexOf("/>");
 
   return tagValue.substring(indexStart + tagType.length + 2, indexEnd);
-};
-
-/**
- * The render function for the br-tag.
- * @param {string} brTag The br-tag.
- *
- * @memberof htmlToMaterialUiParser
- */
-const getBrtagTypography = brTag => {
-  return <Paper elevation="0" style={{ height: "20px" }} />;
-};
-
-/**
- * The render function for the h1 to h6-tag.
- * @param {string} tag The h1, h2, h3, h4, h5 or h6 tag.
- *
- * @memberof htmlToMaterialUiParser
- */
-const getHeadingTypography = tag => {
-  let textToRender = tag.tagValue.substring(4, tag.tagValue.length - 5);
-  return <Typography variant={tag.tagType}>{textToRender}</Typography>;
-};
-
-/**
- * The render function for the img-tag.
- * @param {string} imgTag The img-tag.
- *
- * @memberof htmlToMaterialUiParser
- */
-const getTagImgCard = imgTag => {
-  const indexOfSrcMaterial = imgTag.tagValue.indexOf("=") + 2;
-  let imageSource = imgTag.tagValue.substring(
-    indexOfSrcMaterial,
-    imgTag.tagValue.length - 3
-  );
-  return (
-    <>
-      <Paper elevation="0" style={{ height: "10px" }} />
-      <Card elevation={0}>
-        <CardMedia
-          component="img"
-          style={{ height: "200px", width: "auto", objectFit: "contain" }}
-          image={imageSource}
-        />
-      </Card>
-      <Typography variant="subtitle2">Lägg till bildtext här</Typography>
-      <Typography variant="subtitle2">Lägg till källa/fotograf här</Typography>
-      <Paper elevation="0" style={{ height: "20px" }} />
-    </>
-  );
-};
-
-/**
- * The render function for the p-tag.
- * @param {string} pTag The p-tag.
- *
- * @memberof htmlToMaterialUiParser
- */
-const getPtagTypography = pTag => {
-  let textToRender = pTag.tagValue.substring(3, pTag.tagValue.length - 4);
-  return <Typography variant="body1">{textToRender}</Typography>;
 };
