@@ -8,7 +8,11 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   menuItem: {
-    maxHeight: theme.spacing(6)
+    maxHeight: theme.spacing(6),
+    minHeight: theme.spacing(6)
+  },
+  menuItemRootOverride: {
+    minHeight: 0
   },
   typography: { whiteSpace: "pre-line", margin: theme.spacing(1) }
 });
@@ -39,21 +43,28 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
 
     var icon = item.icon ? getIcon(item.icon) : null;
     return (
-      <MenuItem
-        onClick={this.handleClick}
-        className={classes.menuItem}
-        onMouseEnter={toggleHighlight}
-        onMouseLeave={toggleHighlight}
-        aria-controls="simple-menu"
-        aria-haspopup="true"
+      <Grid
+        style={{ backgroundColor: item.color }}
+        key={item.title}
+        item
+        lg={icon && !item.title ? false : true}
       >
-        {icon}
-        {item.title && (
-          <Typography className={classes.typography} variant="button">
-            {item.title}
-          </Typography>
-        )}
-      </MenuItem>
+        <MenuItem
+          onClick={this.handleClick}
+          className={classes.menuItem}
+          onMouseEnter={toggleHighlight}
+          onMouseLeave={toggleHighlight}
+          aria-controls="simple-menu"
+          aria-haspopup="true"
+        >
+          {icon}
+          {item.title && (
+            <Typography className={classes.typography} variant="button">
+              {item.title}
+            </Typography>
+          )}
+        </MenuItem>
+      </Grid>
     );
   };
 
@@ -62,25 +73,16 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
 
     return (
       <>
-        <Grid
-          style={{ backgroundColor: item.color }}
-          key={item.title}
-          zeroMinWidth
-          justify="flex-start"
-          item
-          lg
-        >
-          {this.getButton()}
-          <CascadeMenu
-            items={item.menu}
-            menuOpen={this.state.menuOpen}
-            onClose={this.onCloseClick}
-            anchorEl={this.state.anchorEl}
-            localObserver={localObserver}
-            verticalAnchor="bottom"
-            horizontalAnchor="left"
-          ></CascadeMenu>
-        </Grid>
+        {this.getButton()}
+        <CascadeMenu
+          items={item.menu}
+          menuOpen={this.state.menuOpen}
+          onClose={this.onCloseClick}
+          anchorEl={this.state.anchorEl}
+          localObserver={localObserver}
+          verticalAnchor="bottom"
+          horizontalAnchor="left"
+        ></CascadeMenu>
       </>
     );
   }

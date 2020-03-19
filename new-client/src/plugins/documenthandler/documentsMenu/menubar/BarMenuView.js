@@ -85,7 +85,7 @@ class BarMenuView extends React.PureComponent {
 
     return ReactDOM.createPortal(
       <Paper className={classes.root}>
-        <Grid container>
+        <Grid wrap="nowrap" container>
           {menu.map((item, index) => {
             return this.getMenuItem(item, index);
           })}

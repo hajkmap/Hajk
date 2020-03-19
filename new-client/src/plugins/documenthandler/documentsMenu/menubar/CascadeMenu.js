@@ -70,7 +70,6 @@ class CascadeMenu extends React.PureComponent {
   };
 
   getMenuItem = item => {
-    console.log(item.menu && item.menu.length > 0, "item");
     if (item.menu && item.menu.length > 0) {
       return this.getCascadeMenuItem(item);
     } else if (item.document) {
@@ -90,11 +89,9 @@ class CascadeMenu extends React.PureComponent {
       items,
       menuOpen,
       onClose,
-
-      forwardedRef,
       classes
     } = this.props;
-    console.log(forwardedRef, "parentWidth");
+
     return (
       <>
         <Menu
