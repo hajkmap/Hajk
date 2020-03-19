@@ -83,7 +83,6 @@ class DocumentHandler extends React.PureComponent {
         <DocumentWindowBase
           {...this.props}
           model={this.model}
-          app={this.props.app}
           localObserver={this.localObserver}
         ></DocumentWindowBase>
       </>
