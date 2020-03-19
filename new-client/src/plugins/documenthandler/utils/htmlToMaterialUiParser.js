@@ -2,6 +2,7 @@ import React from "react";
 import Card from "@material-ui/core/Card";
 import CardMedia from "@material-ui/core/CardMedia";
 import Typography from "@material-ui/core/Typography";
+import Paper from "@material-ui/core/Paper";
 
 /**
  * Default export of function that takes html-string as input and returns array with MaterialUIComponents
@@ -38,6 +39,30 @@ const getAllowedHtmlTags = () => {
   allowedHtmlTags.push({ tagType: "img", callback: getTagImgCard });
   allowedHtmlTags.push({ tagType: "p", callback: getPtagTypography });
   return allowedHtmlTags;
+};
+
+/**
+ * Parse the html code so that it can be translated into Material UI components.
+ * Only html tags that can be found in the allowedHtmlTags will be added. The rest
+ * will be ignored.
+ * @param {object} html The html code.
+ *
+ * @memberof Contents
+ */
+const parseHtml = (html, generatedHtml, allowedHtmlTags) => {
+  let { tagType, tagValue, tagEndIndex } = findStartTag(html);
+  html = html.substring(tagEndIndex);
+  //if (tagEndIndex === TAG_HAS_NO_INTERNAL_VALUE) html = "";
+
+  if (hasTagInside(tagType, tagValue)) {
+    tagValue = removeOuterTagTypeFromTagValue(tagType, tagValue);
+    parseHtml(tagValue, generatedHtml, allowedHtmlTags);
+  }
+
+  if (allowedHtmlTags.map(item => item.tagType).includes(tagType))
+    generatedHtml.push({ tagType: tagType, tagValue: tagValue });
+
+  if (html.length > 0) parseHtml(html, generatedHtml, allowedHtmlTags);
 };
 
 /**
@@ -139,12 +164,19 @@ const getTagImgCard = imgTag => {
     imgTag.tagValue.length - 3
   );
   return (
-    <Card elevation={0}>
-      <CardMedia
-        style={{ height: "200px", width: "200px" }} //TODO - Dynamic size of pictures, discuss this
-        image={imageSource}
-      />
-    </Card>
+    <>
+      <Paper elevation="0" style={{ height: "10px" }} />
+      <Card elevation={0}>
+        <CardMedia
+          component="img"
+          style={{ height: "200px", width: "auto", objectFit: "contain" }}
+          image={imageSource}
+        />
+      </Card>
+      <Typography variant="subtitle2">Lägg till bildtext här</Typography>
+      <Typography variant="subtitle2">Lägg till källa/fotograf här</Typography>
+      <Paper elevation="0" style={{ height: "20px" }} />
+    </>
   );
 };
 
@@ -157,27 +189,4 @@ const getTagImgCard = imgTag => {
 const getPtagTypography = pTag => {
   let textToRender = pTag.tagValue.substring(3, pTag.tagValue.length - 4);
   return <Typography variant="body1">{textToRender}</Typography>;
-};
-
-/**
- * Parse the html code so that it can be translated into Material UI components.
- * Only html tags that can be found in the allowedHtmlTags will be added. The rest
- * will be ignored.
- * @param {object} html The html code.
- *
- * @memberof Contents
- */
-const parseHtml = (html, generatedHtml, allowedHtmlTags) => {
-  let { tagType, tagValue, tagEndIndex } = findStartTag(html);
-  html = html.substring(tagEndIndex);
-
-  if (hasTagInside(tagType, tagValue)) {
-    tagValue = removeOuterTagTypeFromTagValue(tagType, tagValue);
-    parseHtml(tagValue, generatedHtml, allowedHtmlTags);
-  }
-
-  if (allowedHtmlTags.map(item => item.tagType).includes(tagType))
-    generatedHtml.push({ tagType: tagType, tagValue: tagValue });
-
-  if (html.length > 0) parseHtml(html, generatedHtml, allowedHtmlTags);
 };
