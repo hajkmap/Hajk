@@ -15,7 +15,9 @@ const styles = theme => ({
 });
 
 class DocumentViewer extends React.PureComponent {
-  state = {};
+  state = {
+    showScrollButton: false
+  };
 
   static propTypes = {};
 
@@ -23,29 +25,55 @@ class DocumentViewer extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
+    let showScrollButtonLimit = props.options.showScrollButtonLimit;
+    this.model = props.model;
+    this.localObserver = props.localObserver;
+    this.globalObserver = props.app.globalObserver;
+    this.scrollLimit =
+      showScrollButtonLimit != null && showScrollButtonLimit !== ""
+        ? showScrollButtonLimit
+        : 400;
+    this.scrollElementRef = React.createRef();
   }
 
+  onScroll = e => {
+    if (e.target.scrollTop > this.scrollLimit) {
+      this.setState({
+        showScrollButton: true
+      });
+    } else {
+      this.setState({
+        showScrollButton: false
+      });
+    }
+  };
+
   scrollToTop = () => {
-    this.globalObserver.publish("scrollDocumentviewer");
+    this.scrollElementRef.current.scrollTo(0, 0);
   };
 
   render() {
     const { classes, activeDocument } = this.props;
+    const { showScrollButton } = this.state;
     return (
       <>
-        <Grid className={classes.gridContainer} container>
-          <Fab
-            style={{ position: "fixed", bottom: 10, right: 10 }}
-            size="small"
-            color="primary"
-            aria-label="goto-top"
-            onClick={this.scrollToTop}
-          >
-            <NavigationIcon />
-          </Fab>
+        <Grid
+          onScroll={this.onScroll}
+          ref={this.scrollElementRef}
+          className={classes.gridContainer}
+          container
+        >
+          {showScrollButton && (
+            <Fab
+              style={{ position: "fixed", bottom: 10, right: 10 }}
+              size="small"
+              color="primary"
+              aria-label="goto-top"
+              onClick={this.scrollToTop}
+            >
+              <NavigationIcon />
+            </Fab>
+          )}
           <Grid item>
             <TableOfContents document={activeDocument} />
             <Contents document={activeDocument} />

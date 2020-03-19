@@ -56,11 +56,7 @@ class DocumentWindowBase extends React.PureComponent {
           allowMaximizedWindow: false
         }}
       >
-        <DocumentViewer
-          activeDocument={this.state.document}
-          model={this.props.model}
-          app={this.props.app}
-        />
+        <DocumentViewer activeDocument={this.state.document} {...this.props} />
       </BaseWindowPlugin>
     );
   }
