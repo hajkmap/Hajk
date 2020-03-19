@@ -7,8 +7,8 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
-  menu: {
-    height: "100%"
+  menuItem: {
+    maxHeight: theme.spacing(6)
   },
   typography: { whiteSpace: "pre-line", margin: theme.spacing(1) }
 });
@@ -41,7 +41,7 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
     return (
       <MenuItem
         onClick={this.handleClick}
-        className={classes.menu}
+        className={classes.menuItem}
         onMouseEnter={toggleHighlight}
         onMouseLeave={toggleHighlight}
         aria-controls="simple-menu"

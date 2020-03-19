@@ -31,13 +31,16 @@ const styles = theme => ({
   gridContainer: {
     paddingTop: theme.spacing(3)
   },
-  root: {
-    padding: "2px 4px",
+  menuButtonText: {
+    wordWrap: "break-word",
+    padding: theme.spacing(1)
+  },
+  menuButtonRoot: {
     display: "flex",
     cursor: "pointer",
     alignItems: "center",
-    marginRight: theme.spacing(6),
-    minHeight: theme.spacing(6)
+    marginLeft: theme.spacing(2),
+    minHeight: theme.spacing(6) + 4 //Ugly fix to get same height as search
   }
 });
 
@@ -106,15 +109,15 @@ class OverlayView extends React.PureComponent {
             <Paper
               onClick={this.open}
               style={{ backgroundColor: options.openOverlayButtonColor }}
-              className={classes.root}
+              className={classes.menuButtonRoot}
             >
               <Typography
-                style={{ wordWrap: "break-word" }}
+                className={classes.menuButtonText}
                 variant="subtitle1"
                 align="center"
                 color="textPrimary"
               >
-                ÖPPNA MENY
+                Meny
               </Typography>
             </Paper>,
             header

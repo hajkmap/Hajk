@@ -7,7 +7,7 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   menuItem: {
-    height: "100%"
+    maxHeight: theme.spacing(6)
   },
   typography: { whiteSpace: "pre-line", margin: theme.spacing(1) }
 });
