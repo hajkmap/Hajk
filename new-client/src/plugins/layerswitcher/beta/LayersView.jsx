@@ -10,9 +10,22 @@ import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 // import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBox";
 
-const styles = theme => ({});
+const styles = theme => ({
+  iconContainer: {
+    width: "auto"
+  },
+  group: {
+    marginLeft: 32
+  },
+  treeItemRoot: {
+    marginLeft: -18
+  },
+  treeViewRoot: {
+    marginLeft: 20
+  }
+});
 
-class LayerGroups extends React.PureComponent {
+class LayersView extends React.PureComponent {
   static defaultProps = {};
 
   static propTypes = {
@@ -31,7 +44,10 @@ class LayerGroups extends React.PureComponent {
     super(props);
 
     // Clean up the groups prop so we obtain a nice tree that can be used in our TreeView
+
+    console.log("pre: ", props.groups);
     this.treeData = this.fixIncomingData(props.groups);
+    console.log("post: ", this.treeData);
 
     this.state = {
       chapters: [],
@@ -42,6 +58,17 @@ class LayerGroups extends React.PureComponent {
       selected: this.defaultSelected
     };
 
+    // Let all layers subscribe to visibility changed event.
+    // We do it to ensure that our checkboxes are updated whether layer visiblity is changed
+    // in some other way than by clicking on a layer in LayerSwitcher.
+    for (let [layerId, layer] of Object.entries(props.model.layerMap)) {
+      // When layer's visibility is changed, ensure that correct checkboxes are ticked.
+      layer.on("change:visible", e => {
+        this.toggleCheckboxForLayer(layerId);
+      });
+    }
+
+    // If Informative is loaded, inject the "chapters" so we can take care of rendering "go-to chapter" buttons next to layer's name.
     props.app.globalObserver.subscribe("informativeLoaded", chapters => {
       if (Array.isArray(chapters)) {
         this.setState({
@@ -50,10 +77,16 @@ class LayerGroups extends React.PureComponent {
       }
     });
   }
-
+  /**
+   * @summary Re-format the incoming layers object to fit the TreeView/TreeItem model.
+   *
+   * @param {*} groups
+   * @returns {Object[]} Groups of groups and layers
+   */
   fixIncomingData = groups => {
     const iterateLayers = layers => {
       return layers.map(l => {
+        // If config says layer should be visible at start, put it into our state
         l.visibleAtStart === true && this.defaultSelected.push(l.id);
 
         return {
@@ -65,7 +98,9 @@ class LayerGroups extends React.PureComponent {
 
     const iterateGroups = groups => {
       return groups.map(g => {
+        // If config says that current group should be expanded at start, put it into our state
         g.expanded === true && this.defaultExpanded.push(g.id);
+
         return {
           id: g.id,
           title: g.name,
@@ -76,6 +111,15 @@ class LayerGroups extends React.PureComponent {
 
     return iterateGroups(groups);
   };
+
+  toggleCheckboxForLayer(layerId) {
+    // this.state.selected is an array that holds ids of visible layers.
+    // By updating the array, we ensure that React checks the correct checkboxes.
+    this.setState(state => {
+      const selected = this.toggleArrayValue(state.selected, layerId);
+      return { selected };
+    });
+  }
 
   copy(o) {
     return Object.assign({}, o);
@@ -119,22 +163,93 @@ class LayerGroups extends React.PureComponent {
     });
   };
 
+  // handleClickOnCheckbox = (e, nodeId) => {
+  //
+  // };
+
+  handleClickOnToggle = (e, nodeId) => {};
+
   renderTree = nodes => {
-    const icon = this.isLayerVisible(nodes.id) ? (
-      <CheckBoxIcon />
+    const { classes } = this.props;
+    const hasChildren = Array.isArray(nodes.children);
+
+    const selectedIcon = this.isLayerVisible(nodes.id) ? (
+      <CheckBoxIcon
+        onClick={e => {
+          this.onNodeSelect(e, nodes.id);
+        }}
+      />
     ) : (
-      <CheckBoxOutlineBlankIcon />
+      <CheckBoxOutlineBlankIcon
+        onClick={e => {
+          this.onNodeSelect(e, nodes.id);
+        }}
+      />
     );
+
+    const collapseIcon = hasChildren ? (
+      <>
+        <ExpandMoreIcon
+          onClick={e => {
+            this.handleClickOnToggle(nodes.id);
+          }}
+        />
+        {selectedIcon}
+      </>
+    ) : (
+      selectedIcon
+    );
+    const expandIcon = hasChildren ? (
+      <>
+        <ChevronRightIcon
+          onClick={e => {
+            this.handleClickOnToggle(nodes.id);
+          }}
+        />
+        {selectedIcon}
+      </>
+    ) : (
+      selectedIcon
+    );
+
+    const label = (
+      <div
+        onClick={e => {
+          this.onNodeSelect(e, nodes.id);
+        }}
+      >
+        {nodes.title}
+      </div>
+    );
+
     return (
       <TreeItem
         key={nodes.id}
         nodeId={nodes.id}
-        label={nodes.title}
-        endIcon={icon}
+        label={label}
+        // endIcon={selectedIcon}
+        collapseIcon={collapseIcon}
+        expandIcon={expandIcon}
+        onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          return false;
+        }}
+        classes={{
+          iconContainer: classes.iconContainer,
+          group: classes.group,
+          // If item has children, it will have a collapse/expand button. In that case, we need
+          // justify a bit to compensate for the margin, so that all checkboxes will line up nicely.
+          root: hasChildren ? classes.treeItemRoot : false
+        }}
       >
-        {Array.isArray(nodes.children)
-          ? nodes.children.map(node => this.renderTree(node))
-          : null}
+        <>
+          {/* <Typography>Hej</Typography> */}
+          {Array.isArray(nodes.children)
+            ? nodes.children.map(node => this.renderTree(node))
+            : null}
+        </>
       </TreeItem>
     );
   };
@@ -145,25 +260,18 @@ class LayerGroups extends React.PureComponent {
 
   onNodeSelect = (event, nodeId) => {
     const layerId = Number(nodeId);
+
     // Handle click on Hajk groups - they will have an MD5 as ID, so we can filter them out that way.
     if (Number.isNaN(layerId)) return;
 
     // Else, we've got a real layer/layergroup with valid ID. Let's add/remove it from our selected state array.
-    this.setState({
-      selected: this.toggleArrayValue(this.state.selected, nodeId)
-    });
     const mapLayer = this.props.model.layerMap[layerId];
     mapLayer.setVisible(!this.isLayerVisible(nodeId));
   };
 
-  // Does nothing compared to default functionality, except that we have access to current array
-  // onNodeToggle = (event, nodeIds) => {
-  //
-  //   this.setState({ expanded: nodeIds });
-  // };
-
   render() {
     const { layersFilterValue, filteredTreeData } = this.state;
+    const { classes } = this.props;
 
     return (
       <div
@@ -180,33 +288,25 @@ class LayerGroups extends React.PureComponent {
           fullWidth
         />
         <TreeView
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpanded={this.defaultExpanded}
-          defaultExpandIcon={<ChevronRightIcon />}
+          // defaultCollapseIcon={<ExpandMoreIcon />}
+          // defaultExpandIcon={<ChevronRightIcon />}
           // defaultSelected={this.defaultSelected} // We use the controlled "selected" prop
           // expanded={this.state.expanded} // We set defaultExpanded and then let the component handle expansion logic
+          defaultExpanded={this.defaultExpanded}
           selected={this.state.selected}
           multiSelect={false} // We will take care of the select state ourselves, user will of course be allowed to have multiple selected layers at once
-          onNodeSelect={this.onNodeSelect}
-          onNodeToggle={this.onNodeToggle}
+          // disableSelection={true}
+          // onNodeSelect={this.onNodeSelect}
+          onNodeToggle={e => {
+            return false;
+          }}
+          className={classes.treeViewRoot}
         >
           {filteredTreeData.map(this.renderTree)}
         </TreeView>
-
-        {/* {this.state.groups.map((group, i) => {
-          return (
-            <LayerGroup
-              app={this.props.app}
-              chapters={this.state.chapters}
-              group={group}
-              key={i}
-              model={this.props.model}
-            />
-          );
-        })} */}
       </div>
     );
   }
 }
 
-export default withStyles(styles)(LayerGroups);
+export default withStyles(styles)(LayersView);

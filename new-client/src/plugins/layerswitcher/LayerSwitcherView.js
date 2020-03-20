@@ -6,8 +6,9 @@ import { withStyles } from "@material-ui/core/styles";
 import { AppBar, Tab, Tabs } from "@material-ui/core";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
-import LayerGroups from "./components/LayerGroups.js";
+import LayerGroup from "./components/LayerGroup";
 import BreadCrumbs from "./components/BreadCrumbs.js";
+import LayersView from "./beta/LayersView";
 
 const styles = theme => ({
   windowContent: {
@@ -33,11 +34,19 @@ class LayersSwitcherView extends React.PureComponent {
 
   constructor(props) {
     super(props);
-
     this.state = {
+      chapters: [],
       baseLayers: props.model.getBaseLayers(),
-      activeTab: 0
+      activeTab: 2
     };
+
+    props.app.globalObserver.subscribe("informativeLoaded", chapters => {
+      if (Array.isArray(chapters)) {
+        this.setState({
+          chapters: chapters
+        });
+      }
+    });
   }
 
   /**
@@ -68,6 +77,35 @@ class LayersSwitcherView extends React.PureComponent {
     setTimeout(() => {
       ref !== null && ref.updateIndicator();
     }, 1);
+  };
+
+  /**
+   * @summary Loops through map configuration and
+   * renders all groups. Visible only if @param shouldRender is true.
+   *
+   * @param {boolean} [shouldRender=true]
+   * @returns {<div>}
+   */
+  renderLayerGroups = (shouldRender = true) => {
+    return (
+      <div
+        style={{
+          display: shouldRender === true ? "block" : "none"
+        }}
+      >
+        {this.props.options.groups.map((group, i) => {
+          return (
+            <LayerGroup
+              key={i}
+              group={group}
+              model={this.props.model}
+              chapters={this.state.chapters}
+              app={this.props.app}
+            />
+          );
+        })}
+      </div>
+    );
   };
 
   /**
@@ -111,19 +149,14 @@ class LayersSwitcherView extends React.PureComponent {
               value={this.state.activeTab}
               variant="fullWidth"
             >
-              <Tab label="Kartlager" />
               <Tab label="Bakgrund" />
+              <Tab label="Lager" />
+              <Tab label="Lager (beta)" />
             </Tabs>
           </AppBar>
           <div className={classes.tabContent}>
-            <LayerGroups
-              app={this.props.app}
-              groups={this.props.options.groups}
-              model={this.props.model}
-              display={this.state.activeTab === 0}
-            />
             <BackgroundSwitcher
-              display={this.state.activeTab === 1}
+              display={this.state.activeTab === 0}
               layers={this.state.baseLayers}
               layerMap={this.props.model.layerMap}
               backgroundSwitcherBlack={
@@ -134,6 +167,13 @@ class LayersSwitcherView extends React.PureComponent {
               }
               enableOSM={this.props.options.enableOSM}
               map={this.props.map}
+            />
+            {this.renderLayerGroups(this.state.activeTab === 1)}
+            <LayersView
+              app={this.props.app}
+              groups={this.props.options.groups}
+              model={this.props.model}
+              display={this.state.activeTab === 2}
             />
           </div>
         </div>
