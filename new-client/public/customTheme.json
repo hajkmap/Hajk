@@ -19,6 +19,7 @@
     "h4": { "fontSize": "1.2rem", "fontWeight": 600 },
     "h5": { "fontSize": "1.0rem", "fontWeight": 600, "font-style": "italic" },
     "h6": { "fontSize": "1.0rem", "fontWeight": 600 },
+    "body1": { "fontSize": "0.875rem" },
     "subtitle2": { "fontSize": "0.875rem", "fontStyle": "italic" }
   }
 }

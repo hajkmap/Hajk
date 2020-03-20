@@ -9,13 +9,17 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   menuItem: {
-    maxHeight: theme.spacing(6),
-    minHeight: theme.spacing(6)
+    maxHeight: theme.spacing(5),
+    minHeight: theme.spacing(5)
   },
   menuItemRootOverride: {
     minHeight: 0
   },
-  typography: { whiteSpace: "pre-line", margin: theme.spacing(1) }
+  typography: {
+    maxHeight: "inherit",
+
+    margin: theme.spacing(1)
+  }
 });
 class MenuBarCascadeMenuItem extends React.PureComponent {
   static propTypes = {};

@@ -40,7 +40,7 @@ const styles = theme => ({
     cursor: "pointer",
     alignItems: "center",
     marginLeft: theme.spacing(2),
-    minHeight: theme.spacing(6) + 4 //Ugly fix to get same height as search
+    minHeight: theme.spacing(5) + 1 //Ugly fix to get same height as search
   }
 });
 

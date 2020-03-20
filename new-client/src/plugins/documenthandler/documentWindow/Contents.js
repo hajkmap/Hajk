@@ -38,7 +38,7 @@ class Contents extends React.PureComponent {
    * @memberof htmlToMaterialUiParser
    */
   getBrtagTypography = brTag => {
-    return <Paper elevation="0" style={{ height: "20px" }} />;
+    return <Paper elevation={0} style={{ height: "20px" }} />;
   };
 
   getHeadingTypography = tag => {
@@ -66,7 +66,7 @@ class Contents extends React.PureComponent {
     );
     return (
       <>
-        <Paper elevation="0" style={{ height: "10px" }} /> {/*What is this*/}
+        <Paper elevation={0} style={{ height: "10px" }} /> {/*What is this*/}
         <Card elevation={0}>
           <CardMedia
             component="img"
@@ -80,7 +80,7 @@ class Contents extends React.PureComponent {
         <Typography className={classes.typography} variant="subtitle2">
           Lägg till källa/fotograf här
         </Typography>
-        <Paper elevation="0" style={{ height: "20px" }} />
+        <Paper elevation={0} style={{ height: "20px" }} />
       </>
     );
   };
@@ -189,7 +189,7 @@ class Contents extends React.PureComponent {
 
     return (
       <>
-        <Paper elevation="0" style={{ height: "30px" }} /> {/*What is this*/}
+        <Paper elevation={0} style={{ height: "30px" }} /> {/*What is this*/}
         <Typography className={classes.typography} variant="h2">
           {chapter.header}
         </Typography>

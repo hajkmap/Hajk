@@ -55,9 +55,7 @@ class DocumentHandler extends React.PureComponent {
   }
 
   getListOfDocuments = () => {
-    this.model.listAllAvailableDocuments(list => {
-      console.log(list, "list");
-    });
+    this.model.listAllAvailableDocuments(list => {});
   };
 
   render() {
