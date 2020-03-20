@@ -178,4 +178,4 @@ Temporary Items
 proxy/lmproxy
 
 #Log-file for backend
-backend/mapservice/Logs
+backend/mapservice/Logs/log-file.txt
