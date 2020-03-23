@@ -193,6 +193,8 @@
     <Content Include="App_Data\layers.json" />
     <Content Include="App_Data\map_1.json" />
     <Content Include="App_Data\documents\oversiktsplan.json" />
+    <Content Include="App_Data\templates\projections.template" />
+    <Content Include="App_Data\templates\map.template" />
     <None Include="Properties\PublishProfiles\File.pubxml" />
   </ItemGroup>
   <ItemGroup>
