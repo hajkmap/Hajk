@@ -1,8 +1,10 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { withStyles, ThemeProvider } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Container from "@material-ui/core/Container";
+import IconButton from "@material-ui/core/IconButton";
 import clsx from "clsx";
+import Grid from "@material-ui/core/Grid";
 import CloseIcon from "@material-ui/icons/Close";
 
 import Modal from "@material-ui/core/Modal";
@@ -35,6 +37,14 @@ const styles = theme => ({
       marginTop: 0,
       marginBottom: 0
     }
+  },
+  modalHeader: {
+    paddingTop: theme.spacing(1),
+    height: theme.spacing(7)
+  },
+  modalBottom: {
+    paddingBottom: theme.spacing(1),
+    height: theme.spacing(7)
   }
 });
 
@@ -60,7 +70,17 @@ class CustomModal extends React.PureComponent {
               this.props.fullScreen ? classes.fullScreen : classes.container
             )}
           >
-            {this.props.children}
+            <Grid justify="flex-end" container>
+              <Grid className={classes.modalHeader} item>
+                <IconButton onClick={close} aria-label="delete">
+                  <CloseIcon></CloseIcon>
+                </IconButton>
+              </Grid>
+              <Grid container lg={12} item>
+                {this.props.children}
+              </Grid>
+            </Grid>
+            <Grid className={classes.modalBottom}></Grid>
           </Container>
         </Modal>
       </>
