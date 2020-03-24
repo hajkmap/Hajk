@@ -149,9 +149,9 @@ class LayerGroupItem extends Component {
    */
   componentDidMount() {
     const { model } = this.props;
-    model.globalObserver.subscribe("hideLayer", this.setHidden);
+    model.globalObserver.subscribe("layerswitcher.hideLayer", this.setHidden);
+    model.globalObserver.subscribe("layerswitcher.showLayer", this.setVisible);
     model.observer.subscribe("hideLayer", this.setHidden);
-    model.globalObserver.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("toggleGroup", this.toggleGroupVisible);
 
@@ -160,7 +160,7 @@ class LayerGroupItem extends Component {
     // don't change it back to "ok": we'll get a response for each tile, so most of
     // the tiles might be "ok", but if only one of the tiles has "loaderror", we
     // consider that the layer has failed loading and want to inform the user.
-    model.globalObserver.subscribe("wmsLayerLoadStatus", d => {
+    model.globalObserver.subscribe("layerswitcher.wmsLayerLoadStatus", d => {
       this.state.status !== "loaderror" &&
         this.state.name === d.id &&
         this.setState({

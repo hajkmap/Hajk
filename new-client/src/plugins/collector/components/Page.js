@@ -486,7 +486,7 @@ class Page extends Component {
 
   saveError = () => {
     this.props.model.globalObserver.publish(
-      "alert",
+      "core.alert",
       "Det gick inte att spara, försök igen senare."
     );
   };
