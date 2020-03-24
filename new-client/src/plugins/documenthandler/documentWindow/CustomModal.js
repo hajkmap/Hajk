@@ -1,12 +1,10 @@
 import React from "react";
-import { withStyles, ThemeProvider } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
+import { withStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import IconButton from "@material-ui/core/IconButton";
 import clsx from "clsx";
 import Grid from "@material-ui/core/Grid";
 import CloseIcon from "@material-ui/icons/Close";
-
 import Modal from "@material-ui/core/Modal";
 
 const mapDiv = document.getElementById("map");
@@ -76,7 +74,7 @@ class CustomModal extends React.PureComponent {
                   <CloseIcon></CloseIcon>
                 </IconButton>
               </Grid>
-              <Grid container lg={12} item>
+              <Grid container item>
                 {this.props.children}
               </Grid>
             </Grid>
@@ -88,4 +86,4 @@ class CustomModal extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(CustomModal));
+export default withStyles(styles)(CustomModal);

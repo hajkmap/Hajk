@@ -12,7 +12,7 @@
   },
   "typography": {
     "fontFamily": "'Open Sans', sans-serif",
-    "fontSize": "0.875rem",
+    "fontSize": 14,
     "h1": { "fontSize": "2.0rem", "fontWeight": 600 },
     "h2": { "fontSize": "1.8rem", "fontWeight": 600 },
     "h3": { "fontSize": "1.5rem", "fontWeight": 600, "margin-top": "10px" },

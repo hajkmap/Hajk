@@ -3,7 +3,8 @@ import React from "react";
 const menuViewHoc = MenuComponent =>
   class WithMenuFunctionality extends React.Component {
     state = {
-      activeMenuSection: this.props.options.menuConfig.menu
+      activeMenuSection: this.props.options.menuConfig.menu,
+      isOverlayMenuOpen: false
     };
 
     constructor(props) {
@@ -18,6 +19,14 @@ const menuViewHoc = MenuComponent =>
       });
       this.bindSubscriptions();
     }
+
+    closeOverlayMenu = () => {
+      this.setState({ isOverlayMenuOpen: false });
+    };
+
+    openOverlayMenu = () => {
+      this.setState({ isOverlayMenuOpen: true });
+    };
 
     setParentAndContainingMenu(menuItem, containingMenu, parent) {
       menuItem.parent = parent;
@@ -49,6 +58,7 @@ const menuViewHoc = MenuComponent =>
       });
 
       localObserver.subscribe("document-clicked", item => {
+        this.closeOverlayMenu();
         localObserver.publish("show-document-window", item);
       });
 
@@ -63,15 +73,18 @@ const menuViewHoc = MenuComponent =>
 
     render() {
       const { localObserver, options } = this.props;
-
+      const { activeMenuSection, isOverlayMenuOpen } = this.state;
       return (
         <MenuComponent
           removeMapBlur={this.removeMapBlur}
           addMapBlur={this.addMapBlur}
           getMenuItem={this.getMenuItem}
+          closeOverlayMenu={this.closeOverlayMenu}
+          openOverlayMenu={this.openOverlayMenu}
           options={options}
-          activeMenuSection={this.state.activeMenuSection}
+          activeMenuSection={activeMenuSection}
           localObserver={localObserver}
+          isOverlayMenuOpen={isOverlayMenuOpen}
         ></MenuComponent>
       );
     }

@@ -1,6 +1,5 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import HeaderView from "../HeaderView";
 import CustomModal from "../../documentWindow/CustomModal";
 import Grid from "@material-ui/core/Grid";
@@ -26,7 +25,7 @@ const styles = theme => ({
     cursor: "pointer",
     alignItems: "center",
     marginLeft: theme.spacing(2),
-    minHeight: theme.spacing(5) + 1 //Ugly fix to get same height as search
+    minHeight: theme.spacing(6) + 4 //Ugly fix to get same height as search
   }
 });
 
@@ -36,20 +35,8 @@ const xs = 12,
   lg = 2;
 
 class OverlayView extends React.PureComponent {
-  state = {
-    open: false
-  };
-
   static propTypes = {};
   static defaultProps = {};
-
-  close = () => {
-    this.setState({ open: false });
-  };
-
-  open = () => {
-    this.setState({ open: true });
-  };
 
   getMenuItemType = (item, type) => {
     const { localObserver } = this.props;
@@ -83,15 +70,22 @@ class OverlayView extends React.PureComponent {
   };
 
   render() {
-    const { classes, options, localObserver, activeMenuSection } = this.props;
-    const { open } = this.state;
+    const {
+      classes,
+      options,
+      localObserver,
+      activeMenuSection,
+      isOverlayMenuOpen,
+      openOverlayMenu,
+      closeOverlayMenu
+    } = this.props;
 
     return (
       <>
-        {open === false &&
+        {isOverlayMenuOpen === false &&
           ReactDOM.createPortal(
             <Paper
-              onClick={this.open}
+              onClick={openOverlayMenu}
               style={{ backgroundColor: options.openOverlayButtonColor }}
               className={classes.menuButtonRoot}
             >
@@ -109,17 +103,18 @@ class OverlayView extends React.PureComponent {
         <CustomModal
           fullScreen={false}
           className={classes.modal}
-          close={this.close}
-          open={open}
+          close={closeOverlayMenu}
+          open={isOverlayMenuOpen}
         >
           <>
-            <Grid className={classes.gridContainer}>
+            <Grid item xs={12} className={classes.gridContainer}>
               <HeaderView
                 options={options}
                 activeMenuSection={activeMenuSection}
                 localObserver={localObserver}
               ></HeaderView>
             </Grid>
+
             <Grid container>
               {activeMenuSection.map((item, index) => {
                 return this.renderMenuItem(item, index);
@@ -132,4 +127,4 @@ class OverlayView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(OverlayView));
+export default withStyles(styles)(OverlayView);

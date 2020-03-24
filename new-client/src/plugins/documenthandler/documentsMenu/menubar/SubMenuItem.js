@@ -32,7 +32,7 @@ class SubMenuItem extends React.PureComponent {
     const { item, localObserver } = this.props;
     return (
       <>
-        <Grid item>
+        <Grid style={{ backgroundColor: item.color }} item>
           <MenuItem onClick={this.handleItemClick}>
             {item.title}
             <ArrowRightIcon />

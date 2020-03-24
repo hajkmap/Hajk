@@ -34,6 +34,21 @@ class OverlayMenuItem extends React.PureComponent {
 
   static defaultProps = {};
 
+  renderItemTitle = item => {
+    return (
+      <Grid xs={12} item>
+        <Typography
+          style={{ wordWrap: "break-word" }}
+          variant="subtitle1"
+          align="center"
+          color="textPrimary"
+        >
+          {item.title}
+        </Typography>
+      </Grid>
+    );
+  };
+
   render() {
     const {
       classes,
@@ -68,18 +83,7 @@ class OverlayMenuItem extends React.PureComponent {
             <Grid align="center" xs={12} item>
               {item.icon && getIcon(item.icon)}
             </Grid>
-            {item.title && (
-              <Grid xs={12} item>
-                <Typography
-                  style={{ wordWrap: "break-word" }}
-                  variant="subtitle1"
-                  align="center"
-                  color="textPrimary"
-                >
-                  {item.title}
-                </Typography>
-              </Grid>
-            )}
+            {item.title && this.renderItemTitle(item)}
           </Grid>
         </Paper>
       </>

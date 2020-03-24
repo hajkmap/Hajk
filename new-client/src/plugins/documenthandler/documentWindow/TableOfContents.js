@@ -75,6 +75,7 @@ class TableOfContents extends React.PureComponent {
         <Grid item xs={12 - level}>
           <Link
             href="#"
+            variant="h4"
             underline="hover"
             onClick={() => {
               this.linkClick(chapter);
