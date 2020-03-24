@@ -90,6 +90,19 @@ export default class MapViewModel {
     this.localObserver.subscribe("stops-search", this.stopSearch);
 
     this.localObserver.subscribe("routes-search", this.routesSearch);
+
+    this.localObserver.subscribe("vtsearch-result-done", result => {
+      this.clearDrawLayer();
+    });
+  };
+
+  /**
+   * Private help method that clear all draw graphics, e.g. the polygon and the rectangle tool.
+   *
+   * @memberof MapViewModel
+   */
+  clearDrawLayer = () => {
+    this.drawlayer.getSource().clear();
   };
 
   resizeMap = heightFromBottom => {
@@ -117,7 +130,7 @@ export default class MapViewModel {
   };
 
   getWktFromUser = (value, geometryFunction) => {
-    this.drawlayer.getSource().clear();
+    this.clearDrawLayer();
     this.draw = new Draw({
       source: this.drawlayer.getSource(),
       type: value,
