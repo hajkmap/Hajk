@@ -1,6 +1,7 @@
 /**
- * Default export of function that takes html-string as input and returns array with MaterialUIComponents
+ * Default export of function that takes a html-string as input and returns array with MaterialUIComponents
  * @param {string} html String with html that needs to be converted to materialUIComponents
+ * @param {Array} tagSpecificCallbacks Tags that should be interpreted to Material UI components, the rest will be ignored.
  * @returns {Array} Returns array with MaterialUI Components - see gettagSpecificCallbacks to see the translation used
  * @memberof htmlToMaterialUiParser
  */
@@ -37,7 +38,6 @@ const getTagsWithoutEnding = () => {
  */
 const parseHtml = (html, generatedHtml, tagSpecificCallbacks) => {
   let { tagType, tagValue, tagEndIndex } = findStartTag(html);
-  html = html.substring(tagEndIndex);
 
   if (hasTagInside(tagType, tagValue)) {
     tagValue = removeOuterTagTypeFromTagValue(tagType, tagValue);
@@ -45,8 +45,10 @@ const parseHtml = (html, generatedHtml, tagSpecificCallbacks) => {
   }
 
   if (tagSpecificCallbacks.map(item => item.tagType).includes(tagType))
-    generatedHtml.push({ tagType: tagType, tagValue: tagValue });
+    if (!addTagToGeneratedHtml(tagType, tagValue))
+      generatedHtml.push({ tagType: tagType, tagValue: tagValue });
 
+  html = html.substring(tagEndIndex);
   if (html.length > 0) parseHtml(html, generatedHtml, tagSpecificCallbacks);
 };
 
@@ -142,4 +144,22 @@ const removeOuterTagTypeFromTagValue = (tagType, tagValue) => {
   if (indexEnd === -1) indexEnd = tagValue.lastIndexOf("/>");
 
   return tagValue.substring(indexStart + tagType.length + 2, indexEnd);
+};
+
+/**
+ * Private help method that determines if a tag should be added.
+ * @param {string} tagValue The html tag value that should be investigated.
+ */
+const addTagToGeneratedHtml = (tagType, tagValue) => {
+  let startTag = findStartTag(tagValue).tagType;
+  if (
+    tagType !== startTag &&
+    getTagsWithoutEnding()
+      .map(item => item)
+      .includes(startTag)
+  ) {
+    return true;
+  }
+
+  return false;
 };
