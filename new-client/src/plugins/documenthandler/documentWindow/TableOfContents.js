@@ -51,6 +51,12 @@ class TableOfContents extends React.PureComponent {
     );
   };
 
+  linkClick = chapter => {
+    const { localObserver } = this.props;
+    console.log(chapter, "chapter");
+    localObserver.publish("scroll-to", chapter);
+  };
+
   /**
    * Private help method that recursive renders all sub chapters of a chapter.
    * @param {object} chapter A chapter with all it's sub chapters that will be rendered.
@@ -62,12 +68,18 @@ class TableOfContents extends React.PureComponent {
   renderSubChapters = (chapter, level, subChapterNumber) => {
     let newLevel = level + 1;
     let number = 0;
-
+    console.log(chapter, "chapter");
     return (
       <Grid container key={subChapterNumber}>
         {level > 0 ? <Grid item xs={level}></Grid> : null}
         <Grid item xs={12 - level}>
-          <Link href="#" underline="hover" onClick={this.linkClick}>
+          <Link
+            href="#"
+            underline="hover"
+            onClick={() => {
+              this.linkClick(chapter);
+            }}
+          >
             {subChapterNumber + " " + chapter.header}
           </Link>
         </Grid>

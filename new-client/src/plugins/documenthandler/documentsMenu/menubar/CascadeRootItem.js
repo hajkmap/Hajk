@@ -30,6 +30,12 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
     menuOpen: false
   };
 
+  closeMenu = () => {
+    this.setState({
+      menuOpen: false
+    });
+  };
+
   handleClick = e => {
     this.setState({
       anchorEl: e.currentTarget.parentNode,

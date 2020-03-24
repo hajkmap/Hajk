@@ -25,10 +25,7 @@ class BarMenuView extends React.PureComponent {
   static propTypes = {};
   static defaultProps = {};
 
-  componentDidMount = () => {
-    const { removeMapBlur } = this.props;
-    removeMapBlur();
-  };
+  componentDidMount = () => {};
 
   getMenuItemType = (item, key, type) => {
     const { localObserver } = this.props;

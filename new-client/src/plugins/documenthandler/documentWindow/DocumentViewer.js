@@ -6,18 +6,21 @@ import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import Contents from "./Contents";
+import CustomModal from "./CustomModal";
 
 const styles = theme => ({
   gridContainer: {
     height: "100%",
     padding: theme.spacing(2),
-    overflowY: "scroll"
+    overflowY: "scroll",
+    overflowX: "hidden"
   }
 });
 
 class DocumentViewer extends React.PureComponent {
   state = {
-    showScrollButton: false
+    showScrollButton: false,
+    refObject: {}
   };
 
   static propTypes = {};
@@ -35,7 +38,17 @@ class DocumentViewer extends React.PureComponent {
         ? showScrollButtonLimit
         : 400;
     this.scrollElementRef = React.createRef();
+
+    this.bindSubscriptions();
   }
+
+  bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("scroll-to", chapter => {
+      console.log(chapter.scrollRef.current, "chapter");
+      chapter.scrollRef.current.scrollIntoView();
+    });
+  };
 
   onScroll = e => {
     if (e.target.scrollTop > this.scrollLimit) {
@@ -49,12 +62,18 @@ class DocumentViewer extends React.PureComponent {
     }
   };
 
+  componentDidUpdate = prevProps => {
+    if (prevProps.activeDocument !== this.props.activeDocument) {
+      this.scrollToTop();
+    }
+  };
+
   scrollToTop = () => {
     this.scrollElementRef.current.scrollTo(0, 0);
   };
 
   render() {
-    const { classes, activeDocument } = this.props;
+    const { classes, activeDocument, localObserver } = this.props;
     const { showScrollButton } = this.state;
     return (
       <>
@@ -76,7 +95,10 @@ class DocumentViewer extends React.PureComponent {
             </Fab>
           )}
           <Grid item>
-            <TableOfContents document={activeDocument} />
+            <TableOfContents
+              localObserver={localObserver}
+              document={activeDocument}
+            />
           </Grid>
           <Grid item>
             <Contents document={activeDocument} />
