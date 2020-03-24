@@ -10,14 +10,21 @@ import Contents from "./Contents";
 const styles = theme => ({
   gridContainer: {
     height: "100%",
-    padding: theme.spacing(2),
-    overflowY: "scroll"
+    padding: theme.spacing(3),
+    overflowY: "scroll",
+    overflowX: "hidden"
+  },
+  scrollToTopButton: {
+    position: "fixed",
+    bottom: theme.spacing(2),
+    right: theme.spacing(3)
   }
 });
 
 class DocumentViewer extends React.PureComponent {
   state = {
-    showScrollButton: false
+    showScrollButton: false,
+    refObject: {}
   };
 
   static propTypes = {};
@@ -35,7 +42,16 @@ class DocumentViewer extends React.PureComponent {
         ? showScrollButtonLimit
         : 400;
     this.scrollElementRef = React.createRef();
+
+    this.bindSubscriptions();
   }
+
+  bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("scroll-to", chapter => {
+      chapter.scrollRef.current.scrollIntoView();
+    });
+  };
 
   onScroll = e => {
     if (e.target.scrollTop > this.scrollLimit) {
@@ -49,12 +65,39 @@ class DocumentViewer extends React.PureComponent {
     }
   };
 
+  componentDidUpdate = prevProps => {
+    if (prevProps.activeDocument !== this.props.activeDocument) {
+      this.scrollToTop();
+    }
+  };
+
   scrollToTop = () => {
     this.scrollElementRef.current.scrollTo(0, 0);
   };
 
+  renderScrollToTopButton = () => {
+    const { classes } = this.props;
+    return (
+      <Fab
+        className={classes.scrollToTopButton}
+        size="small"
+        color="primary"
+        aria-label="goto-top"
+        onClick={this.scrollToTop}
+      >
+        <NavigationIcon />
+      </Fab>
+    );
+  };
+
   render() {
-    const { classes, activeDocument } = this.props;
+    const {
+      classes,
+      activeDocument,
+      localObserver,
+      documentWindowMaximized
+    } = this.props;
+
     const { showScrollButton } = this.state;
     return (
       <>
@@ -64,24 +107,19 @@ class DocumentViewer extends React.PureComponent {
           className={classes.gridContainer}
           container
         >
-          {showScrollButton && (
-            <Fab
-              style={{ position: "fixed", bottom: 10, right: 10 }}
-              size="small"
-              color="primary"
-              aria-label="goto-top"
-              onClick={this.scrollToTop}
-            >
-              <NavigationIcon />
-            </Fab>
-          )}
           <Grid item>
-            <TableOfContents document={activeDocument} />
+            <TableOfContents
+              localObserver={localObserver}
+              document={activeDocument}
+            />
           </Grid>
           <Grid item>
             <Contents document={activeDocument} />
           </Grid>
         </Grid>
+        {showScrollButton &&
+          documentWindowMaximized &&
+          this.renderScrollToTopButton()}
       </>
     );
   }

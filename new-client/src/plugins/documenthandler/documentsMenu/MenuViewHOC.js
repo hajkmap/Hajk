@@ -1,7 +1,5 @@
 import React from "react";
 
-const mapDiv = document.getElementById("map");
-const blurCss = "filter : blur(7px)";
 const menuViewHoc = MenuComponent =>
   class WithMenuFunctionality extends React.Component {
     state = {
@@ -37,14 +35,6 @@ const menuViewHoc = MenuComponent =>
         return menuItem.title === title;
       });
       return menuItem.menu;
-    };
-
-    removeMapBlur = () => {
-      mapDiv.removeAttribute("style", blurCss);
-    };
-
-    addMapBlur = () => {
-      mapDiv.setAttribute("style", blurCss);
     };
 
     bindSubscriptions = () => {

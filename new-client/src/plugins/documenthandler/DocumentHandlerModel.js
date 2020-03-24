@@ -1,3 +1,5 @@
+import React from "react";
+
 /**
  * @summary  DocumentHandler model that doesn't do much.
  * @description This model exposes only one method, getMap(),
@@ -13,6 +15,8 @@ const fetchConfig = {
 };
 
 export default class DocumentHandlerModel {
+  internalId = 0;
+
   async listAllAvailableDocuments(callback) {
     let response;
     try {
@@ -35,21 +39,33 @@ export default class DocumentHandlerModel {
       );
       const text = await response.text();
       const document = await JSON.parse(text);
+      this.internalId = 0;
       document.chapters.forEach(chapter => {
         this.setParentChapter(chapter, undefined);
-        this.setInternalId(chapter, 0);
+        this.setInternalId(chapter);
+        this.setScrollReferences(chapter);
+        this.internalId = this.internalId + 1;
       });
 
       callback(document);
     } catch (err) {}
   }
 
-  setInternalId(chapter, id) {
-    chapter.id = id;
+  setScrollReferences = chapter => {
+    chapter.scrollRef = React.createRef();
     if (chapter.chapters.length > 0) {
       chapter.chapters.forEach(child => {
-        id = id + 1;
-        this.setInternalId(child, id);
+        this.setScrollReferences(child);
+      });
+    }
+  };
+
+  setInternalId(chapter) {
+    chapter.id = this.internalId;
+    if (chapter.chapters.length > 0) {
+      chapter.chapters.forEach(child => {
+        this.internalId = this.internalId + 1;
+        this.setInternalId(child);
       });
     }
   }

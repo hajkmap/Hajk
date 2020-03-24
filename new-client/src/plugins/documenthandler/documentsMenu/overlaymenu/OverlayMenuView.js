@@ -2,12 +2,10 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import HeaderView from "../HeaderView";
-import Modal from "@material-ui/core/Modal";
-import Container from "@material-ui/core/Container";
+import CustomModal from "../../documentWindow/CustomModal";
 import Grid from "@material-ui/core/Grid";
 import menuItem from "../MenuItemHOC";
 import OverlayMenuItemStripped from "./OverlayMenuItem";
-
 import { Paper, Typography } from "@material-ui/core";
 import ReactDOM from "react-dom";
 
@@ -15,22 +13,10 @@ const OverlayMenuItem = menuItem(OverlayMenuItemStripped);
 const header = document.getElementById("header");
 
 const styles = theme => ({
-  container: {
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    outline: "none",
-    minHeight: "80%",
-    marginTop: "5%",
-    marginBottom: "5%",
-    [theme.breakpoints.down("xs")]: {
-      height: "100%",
-      overflow: "scroll",
-      marginTop: 0,
-      marginBottom: 0
-    }
-  },
   gridContainer: {
     paddingTop: theme.spacing(3)
   },
+
   menuButtonText: {
     wordWrap: "break-word",
     padding: theme.spacing(1)
@@ -100,8 +86,6 @@ class OverlayView extends React.PureComponent {
     const { classes, options, localObserver, activeMenuSection } = this.props;
     const { open } = this.state;
 
-    open ? this.props.addMapBlur() : this.props.removeMapBlur();
-
     return (
       <>
         {open === false &&
@@ -122,12 +106,13 @@ class OverlayView extends React.PureComponent {
             </Paper>,
             header
           )}
-        <Modal
+        <CustomModal
+          fullScreen={false}
           className={classes.modal}
-          onBackdropClick={this.close}
+          close={this.close}
           open={open}
         >
-          <Container className={classes.container} fixed>
+          <>
             <Grid className={classes.gridContainer}>
               <HeaderView
                 options={options}
@@ -140,8 +125,8 @@ class OverlayView extends React.PureComponent {
                 return this.renderMenuItem(item, index);
               })}
             </Grid>
-          </Container>
-        </Modal>
+          </>
+        </CustomModal>
       </>
     );
   }

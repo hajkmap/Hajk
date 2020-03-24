@@ -10,8 +10,9 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => {
   return {
-    tableOfContents: {
-      maxWidth: 370
+    tableOfContentsHeader: {
+      paddingLeft: 0,
+      paddingRight: 0
     }
   };
 };
@@ -51,6 +52,11 @@ class TableOfContents extends React.PureComponent {
     );
   };
 
+  linkClick = chapter => {
+    const { localObserver } = this.props;
+    localObserver.publish("scroll-to", chapter);
+  };
+
   /**
    * Private help method that recursive renders all sub chapters of a chapter.
    * @param {object} chapter A chapter with all it's sub chapters that will be rendered.
@@ -62,12 +68,18 @@ class TableOfContents extends React.PureComponent {
   renderSubChapters = (chapter, level, subChapterNumber) => {
     let newLevel = level + 1;
     let number = 0;
-
+    console.log(chapter, "chapter");
     return (
       <Grid container key={subChapterNumber}>
         {level > 0 ? <Grid item xs={level}></Grid> : null}
         <Grid item xs={12 - level}>
-          <Link href="#" underline="hover" onClick={this.linkClick}>
+          <Link
+            href="#"
+            underline="hover"
+            onClick={() => {
+              this.linkClick(chapter);
+            }}
+          >
             {subChapterNumber + " " + chapter.header}
           </Link>
         </Grid>
@@ -95,6 +107,7 @@ class TableOfContents extends React.PureComponent {
       >
         <ExpansionPanelSummary
           expandIcon={<ExpandMoreIcon />}
+          className={classes.tableOfContentsHeader}
           aria-controls="panel1a-content"
           id="panel1a-header"
         >

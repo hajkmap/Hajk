@@ -5,20 +5,19 @@ import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import Card from "@material-ui/core/Card";
 import CardMedia from "@material-ui/core/CardMedia";
+import CustomModal from "./CustomModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 
 const styles = theme => {
   return {
-    cardMedia: { height: "200px", width: "auto", objectFit: "contain" },
-    typography: {
-      paddingRight: theme.spacing(1),
-      paddingLeft: theme.spacing(1)
-    }
+    cardMedia: { height: "200px", width: "auto", objectFit: "contain" }
   };
 };
 
 class Contents extends React.PureComponent {
-  state = {};
+  state = {
+    popupImage: null
+  };
 
   /**
    * Constructor for the contents which renders all chapters in the document.
@@ -51,6 +50,30 @@ class Contents extends React.PureComponent {
     );
   };
 
+  closePopupImageModal = () => {
+    this.setState({ popupImage: null });
+  };
+
+  renderImageInModal = () => {
+    return (
+      <CustomModal
+        fullScreen={false}
+        close={this.closePopupImageModal}
+        open={this.state.popupImage ? true : false}
+      >
+        <CardMedia
+          style={{ margin: "auto" }}
+          component="img"
+          image={this.state.popupImage}
+        />
+      </CustomModal>
+    );
+  };
+
+  showPopup = imageSource => {
+    this.setState({ popupImage: imageSource });
+  };
+
   /**
    * The render function for the img-tag.
    * @param {string} imgTag The img-tag.
@@ -69,6 +92,9 @@ class Contents extends React.PureComponent {
         <Paper elevation={0} style={{ height: "10px" }} /> {/*What is this*/}
         <Card elevation={0}>
           <CardMedia
+            onClick={() => {
+              this.showPopup(imageSource);
+            }}
             component="img"
             className={classes.cardMedia}
             image={imageSource}
@@ -157,6 +183,7 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderChapter = chapter => {
+    console.log(chapter.id, "id");
     return (
       <Grid container alignItems="center" key={chapter.id}>
         <Grid item xs={12}>
@@ -180,9 +207,14 @@ class Contents extends React.PureComponent {
    */
   renderHeadline = chapter => {
     const { classes } = this.props;
+
     if (chapter.parent === undefined)
       return (
-        <Typography className={classes.typography} variant="h1">
+        <Typography
+          ref={chapter.scrollRef}
+          className={classes.typography}
+          variant="h1"
+        >
           {chapter.header}
         </Typography>
       );
@@ -190,7 +222,11 @@ class Contents extends React.PureComponent {
     return (
       <>
         <Paper elevation={0} style={{ height: "30px" }} /> {/*What is this*/}
-        <Typography className={classes.typography} variant="h2">
+        <Typography
+          ref={chapter.scrollRef}
+          className={classes.typography}
+          variant="h2"
+        >
           {chapter.header}
         </Typography>
       </>
@@ -214,7 +250,13 @@ class Contents extends React.PureComponent {
 
   render() {
     const { document } = this.props;
-    return this.renderChapters(document?.chapters);
+    const { popupImage } = this.state;
+    return (
+      <>
+        {popupImage && this.renderImageInModal()}
+        {this.renderChapters(document?.chapters)};
+      </>
+    );
   }
 }
 

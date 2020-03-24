@@ -10,7 +10,8 @@ const styles = theme => ({});
 class DocumentWindowBase extends React.PureComponent {
   state = {
     counter: 0,
-    document: null
+    document: null,
+    documentWindowMaximized: true
   };
 
   static propTypes = {};
@@ -29,6 +30,14 @@ class DocumentWindowBase extends React.PureComponent {
     });
   };
 
+  onMinimize = () => {
+    this.setState({ documentWindowMaximized: false });
+  };
+
+  onMaximize = () => {
+    this.setState({ documentWindowMaximized: true });
+  };
+
   bindSubscriptions = () => {
     const { app, localObserver } = this.props;
     localObserver.subscribe("show-document-window", item => {
@@ -40,6 +49,7 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   render() {
+    const { documentWindowMaximized, document } = this.state;
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -48,15 +58,22 @@ class DocumentWindowBase extends React.PureComponent {
           icon: <MenuBookIcon />,
           title: "Documents",
           description: "En kort beskrivning som visas i widgeten",
-          height: 1000,
-          width: 400,
+          height: "90vh",
+          width: 600,
           scrollable: false,
+          onMinimize: this.onMinimize,
+          onMaximize: this.onMaximize,
+          onResize: this.onResize,
           draggingEnabled: false,
           resizingEnabled: false,
           allowMaximizedWindow: false
         }}
       >
-        <DocumentViewer activeDocument={this.state.document} {...this.props} />
+        <DocumentViewer
+          documentWindowMaximized={documentWindowMaximized}
+          activeDocument={document}
+          {...this.props}
+        />
       </BaseWindowPlugin>
     );
   }
