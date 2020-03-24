@@ -10,8 +10,9 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => {
   return {
-    tableOfContents: {
-      maxWidth: 370
+    tableOfContentsHeader: {
+      paddingLeft: 0,
+      paddingRight: 0
     }
   };
 };
@@ -53,7 +54,6 @@ class TableOfContents extends React.PureComponent {
 
   linkClick = chapter => {
     const { localObserver } = this.props;
-    console.log(chapter, "chapter");
     localObserver.publish("scroll-to", chapter);
   };
 
@@ -107,6 +107,7 @@ class TableOfContents extends React.PureComponent {
       >
         <ExpansionPanelSummary
           expandIcon={<ExpandMoreIcon />}
+          className={classes.tableOfContentsHeader}
           aria-controls="panel1a-content"
           id="panel1a-header"
         >

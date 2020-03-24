@@ -10,11 +10,7 @@ import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 
 const styles = theme => {
   return {
-    cardMedia: { height: "200px", width: "auto", objectFit: "contain" },
-    typography: {
-      paddingRight: theme.spacing(1),
-      paddingLeft: theme.spacing(1)
-    }
+    cardMedia: { height: "200px", width: "auto", objectFit: "contain" }
   };
 };
 

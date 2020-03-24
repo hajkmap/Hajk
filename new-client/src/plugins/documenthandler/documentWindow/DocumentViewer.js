@@ -6,14 +6,18 @@ import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import Contents from "./Contents";
-import CustomModal from "./CustomModal";
 
 const styles = theme => ({
   gridContainer: {
     height: "100%",
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     overflowY: "scroll",
     overflowX: "hidden"
+  },
+  scrollToTopButton: {
+    position: "fixed",
+    bottom: theme.spacing(2),
+    right: theme.spacing(3)
   }
 });
 
@@ -45,7 +49,6 @@ class DocumentViewer extends React.PureComponent {
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe("scroll-to", chapter => {
-      console.log(chapter.scrollRef.current, "chapter");
       chapter.scrollRef.current.scrollIntoView();
     });
   };
@@ -72,8 +75,29 @@ class DocumentViewer extends React.PureComponent {
     this.scrollElementRef.current.scrollTo(0, 0);
   };
 
+  renderScrollToTopButton = () => {
+    const { classes } = this.props;
+    return (
+      <Fab
+        className={classes.scrollToTopButton}
+        size="small"
+        color="primary"
+        aria-label="goto-top"
+        onClick={this.scrollToTop}
+      >
+        <NavigationIcon />
+      </Fab>
+    );
+  };
+
   render() {
-    const { classes, activeDocument, localObserver } = this.props;
+    const {
+      classes,
+      activeDocument,
+      localObserver,
+      documentWindowMaximized
+    } = this.props;
+
     const { showScrollButton } = this.state;
     return (
       <>
@@ -83,17 +107,6 @@ class DocumentViewer extends React.PureComponent {
           className={classes.gridContainer}
           container
         >
-          {showScrollButton && (
-            <Fab
-              style={{ position: "fixed", bottom: 10, right: 10 }}
-              size="small"
-              color="primary"
-              aria-label="goto-top"
-              onClick={this.scrollToTop}
-            >
-              <NavigationIcon />
-            </Fab>
-          )}
           <Grid item>
             <TableOfContents
               localObserver={localObserver}
@@ -104,6 +117,9 @@ class DocumentViewer extends React.PureComponent {
             <Contents document={activeDocument} />
           </Grid>
         </Grid>
+        {showScrollButton &&
+          documentWindowMaximized &&
+          this.renderScrollToTopButton()}
       </>
     );
   }
