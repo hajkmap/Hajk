@@ -1,17 +1,18 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import CardMedia from "@material-ui/core/CardMedia";
 import Grid from "@material-ui/core/Grid";
-import Divider from "@material-ui/core/Divider";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { Typography } from "@material-ui/core";
+import Divider from "@material-ui/core/Divider";
+import IconButton from "@material-ui/core/IconButton";
 
 const styles = theme => ({
   gridContainer: {
     height: "100%",
     margin: theme.spacing(2)
-  }
+  },
+  logo: { width: "302px", height: "113px" }
 });
 
 class HeaderView extends React.PureComponent {
@@ -34,31 +35,32 @@ class HeaderView extends React.PureComponent {
     localObserver.publish("show-containing-menu", this.getContainingMenu());
   };
   render() {
-    const { options } = this.props;
+    const { options, classes } = this.props;
     return (
       <>
-        <Grid container item xs={12}>
+        <Grid container>
           {this.isSubMenu() ? (
             <>
               <Grid item>
-                <ArrowBackIcon onClick={this.goToParentMenu}></ArrowBackIcon>
-              </Grid>
-              <Grid item>
-                <Typography>Tillbaka</Typography>
+                <IconButton onClick={this.goToParentMenu}>
+                  <ArrowBackIcon></ArrowBackIcon>
+                  <Typography>Tillbaka</Typography>
+                </IconButton>
               </Grid>
             </>
           ) : (
             <CardMedia
-              style={{ width: "302px", height: "113px" }}
+              className={classes.logo}
               image={options.overlayLogoUrl}
             ></CardMedia>
           )}
         </Grid>
-
-        <Divider variant="fullWidth"></Divider>
+        <Grid item>
+          <Divider variant="fullWidth"></Divider>
+        </Grid>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(HeaderView));
+export default withStyles(styles)(HeaderView);

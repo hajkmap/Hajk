@@ -50,6 +50,8 @@ class DocumentWindowBase extends React.PureComponent {
 
   render() {
     const { documentWindowMaximized, document } = this.state;
+    const { options } = this.props;
+
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -58,8 +60,8 @@ class DocumentWindowBase extends React.PureComponent {
           icon: <MenuBookIcon />,
           title: "Documents",
           description: "En kort beskrivning som visas i widgeten",
-          height: "90vh",
-          width: 600,
+          height: options.height || "90vh",
+          width: options.width || 600,
           scrollable: false,
           onMinimize: this.onMinimize,
           onMaximize: this.onMaximize,
