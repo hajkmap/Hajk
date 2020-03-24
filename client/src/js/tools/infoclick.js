@@ -74,7 +74,7 @@ var InfoClickModelProperties = {
     32
   ],
   displayPopup: true,
-  moveablePopup: true,
+  moveablePopup: false,
   popupOffsetY: 0
 };
 
@@ -560,20 +560,17 @@ var InfoClickModel = {
     return true;
   },
 
-  makeMoveable: function(map, overlay, featureCoordinate) {
+  makeMoveable: function(map, overlay) {
+    const element = overlay.getElement();
+    const viewport = map.getViewport();
+    
     this.set('moveListener', this.movePopup.bind(this));
     this.set('endMoveListener', this.endMovePopup.bind(this));
 
-    var that = this;
-    this.set('featureCoordinate', featureCoordinate);
-
-
-    const element = overlay.getElement();
-
     element.addEventListener('mousedown', function (event) {
-      window.addEventListener('mousemove', that.get('moveListener'));
-      window.addEventListener('mouseup', that.get('endMoveListener'));
-    })
+      viewport.addEventListener('mousemove', this.get('moveListener'));
+      viewport.addEventListener('mouseup', this.get('endMoveListener'));
+    }.bind(this))
 
   },
 
@@ -582,14 +579,12 @@ var InfoClickModel = {
   },
 
   endMovePopup: function(event) {
-    const featureCoordinate = this.get("FeatureCoordinate");
-    const overlayCoordinate = overlay.getPosition();
     this.removePopupListeners();
   },
 
   removePopupListeners: function() {
-    window.removeEventListener('mousemove', this.get('moveListener'));
-    window.removeEventListener('mouseup', this.get('endMoveListener'));
+    this.map.getViewport().removeEventListener('mousemove', this.get('moveListener'));
+    this.map.getViewport().removeEventListener('mouseup', this.get('endMoveListener'));
   } 
 
 };
