@@ -48,9 +48,8 @@ class BaseWindowPlugin extends React.PureComponent {
     props.app.registerWindowPlugin(this);
 
     // Subscribe to a global event that makes it possible to show/hide Windows.
-    // First we prepare a unique event name for each plugin so it looks like 'showSomeplugin'.
-    const eventName = `show${this.type.charAt(0).toUpperCase() +
-      this.type.slice(1)}`;
+    // First we prepare a unique event name for each plugin so it looks like '{pluginName}.showWindow'.
+    const eventName = `${this.type}.showWindow`;
     // Next, subscribe to that event, expect 'opts' array.
     // To find all places where this event is publish, search for 'globalObserver.publish("show'
     props.app.globalObserver.subscribe(eventName, opts => {
@@ -71,7 +70,7 @@ class BaseWindowPlugin extends React.PureComponent {
       hideOtherPluginWindows: true,
       runCallback: true
     });
-    this.props.app.globalObserver.publish("hideDrawer");
+    this.props.app.globalObserver.publish("core.hideDrawer");
   };
 
   showWindow = opts => {

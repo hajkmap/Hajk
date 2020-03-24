@@ -58,7 +58,7 @@ function CookieNotice({
 
   // Display only if "cookie" hasn't been set yet
   parseInt(window.localStorage.getItem("cookieNoticeShown")) !== 1 &&
-    globalObserver.subscribe("appLoaded", () => {
+    globalObserver.subscribe("core.appLoaded", () => {
       enqueueSnackbar(defaultCookieNoticeMessage, {
         persist: true,
         anchorOrigin: {

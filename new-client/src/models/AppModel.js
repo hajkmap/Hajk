@@ -202,7 +202,7 @@ class AppModel {
 
     if (config.tools.some(tool => tool.type === "infoclick")) {
       bindMapClickEvent(map, mapClickDataResult => {
-        this.globalObserver.publish("mapClick", mapClickDataResult);
+        this.globalObserver.publish("core.mapClick", mapClickDataResult);
       });
     }
     return this;
@@ -225,7 +225,7 @@ class AppModel {
           layer.getProperties().layerInfo.layerType === "layer"
         ) {
           if (layer.layerType === "group") {
-            this.globalObserver.publish("hideLayer", layer);
+            this.globalObserver.publish("layerswitcher.hideLayer", layer);
           } else {
             layer.setVisible(false);
           }

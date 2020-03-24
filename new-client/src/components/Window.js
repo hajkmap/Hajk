@@ -178,13 +178,13 @@ class Window extends React.PureComponent {
   componentDidMount() {
     const { globalObserver } = this.props;
     if (globalObserver) {
-      globalObserver.subscribe("appLoaded", () => {
+      globalObserver.subscribe("core.appLoaded", () => {
         this.updatePosition();
       });
-      globalObserver.subscribe("drawerToggled", () => {
+      globalObserver.subscribe("core.drawerToggled", () => {
         this.updatePosition();
       });
-      globalObserver.subscribe("dialogOpen", open => {
+      globalObserver.subscribe("core.dialogOpen", open => {
         this.rnd.setState({
           disableDrag: open
         });
