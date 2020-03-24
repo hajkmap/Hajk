@@ -119,6 +119,8 @@ class BaseWindowPlugin extends React.PureComponent {
           onClose={this.closeWindow}
           open={this.state.windowVisible}
           onResize={this.props.custom.onResize}
+          onMaximize={this.props.custom.onMaximize}
+          onMinimize={this.props.custom.onMinimize}
           draggingEnabled={this.props.custom.draggingEnabled}
           resizingEnabled={this.props.custom.resizingEnabled}
           scrollable={this.props.custom.scrollable}
