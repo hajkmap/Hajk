@@ -66,6 +66,7 @@ class MapOptions extends Component {
         extent: config.extent,
         origin: config.origin,
         constrainOnlyCenter: config.constrainOnlyCenter,
+        constrainResolution: config.constrainResolution,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
         drawerVisible: config.drawerVisible,
@@ -107,6 +108,7 @@ class MapOptions extends Component {
       extent: mapConfig.extent,
       origin: mapConfig.origin,
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
+      constrainResolution: mapConfig.constrainResolution,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
       drawerVisible: mapConfig.drawerVisible,
@@ -235,6 +237,7 @@ class MapOptions extends Component {
         }
         break;
       case "constrainOnlyCenter":
+      case "constrainResolution":
       case "mapselector":
       case "mapcleaner":
       case "drawerVisible":
@@ -279,6 +282,7 @@ class MapOptions extends Component {
         config.extent = this.getValue("extent");
         config.origin = this.getValue("origin");
         config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
+        config.constrainResolution = this.getValue("constrainResolution");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
         config.drawerVisible = this.getValue("drawerVisible");
@@ -561,6 +565,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Styr ol.Views 'constrainOnlyCenter'-parameter. Om sant kommer endast centrumkoordinaten att begränsas till extent."
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_constrainResolution"
+                type="checkbox"
+                ref="input_constrainResolution"
+                onChange={e => {
+                  this.setState({ constrainResolution: e.target.checked });
+                }}
+                checked={this.state.constrainResolution}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_constrainResolution">
+                Lås zoom till satta upplösningar{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styr ol.Views 'constrainResolution'-parameter. Om sant kommer det endast gå att zooma mellan satta resolutions"
                 />
               </label>
             </div>
