@@ -26,7 +26,6 @@ import SearchIcon from "@material-ui/icons/Search";
 const styles = theme => {
   return {
     root: {
-      padding: "2px 4px",
       display: "flex",
       alignItems: "center",
       minWidth: 200,
