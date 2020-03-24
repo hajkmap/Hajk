@@ -426,7 +426,7 @@ namespace MapService.Controllers
 		{
 			string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
 			string file = String.Format("{0}\\{1}.json", folder, id);
-            System.IO.File.Copy(folder + "\\map.template", file);
+            System.IO.File.Copy(folder + "\\templates\\map.template", file);
         }
 		
 		public string List(string id)
