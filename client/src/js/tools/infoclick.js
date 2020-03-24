@@ -74,6 +74,7 @@ var InfoClickModelProperties = {
     32
   ],
   displayPopup: true,
+  moveablePopup: true,
   popupOffsetY: 0
 };
 
@@ -299,6 +300,11 @@ var InfoClickModel = {
    */
   togglePopup: function (infos, coordinate) {
     const ovl = this.get('map').getOverlayById('popup-0');
+
+    //moveablePopup - if popup is set to moveable, make it moveable. 
+    if(this.get("moveablePopup")){
+      this.makeMoveable(this.map, ovl, coordinate);  
+    }
 
     function isPoint (coord) {
       if (coord.length === 1) {
@@ -552,7 +558,39 @@ var InfoClickModel = {
     }
 
     return true;
-  }
+  },
+
+  makeMoveable: function(map, overlay, featureCoordinate) {
+    this.set('moveListener', this.movePopup.bind(this));
+    this.set('endMoveListener', this.endMovePopup.bind(this));
+
+    var that = this;
+    this.set('featureCoordinate', featureCoordinate);
+
+
+    const element = overlay.getElement();
+
+    element.addEventListener('mousedown', function (event) {
+      window.addEventListener('mousemove', that.get('moveListener'));
+      window.addEventListener('mouseup', that.get('endMoveListener'));
+    })
+
+  },
+
+  movePopup: function(event) {
+    overlay.setPosition(this.map.getEventCoordinate(event));
+  },
+
+  endMovePopup: function(event) {
+    const featureCoordinate = this.get("FeatureCoordinate");
+    const overlayCoordinate = overlay.getPosition();
+    this.removePopupListeners();
+  },
+
+  removePopupListeners: function() {
+    window.removeEventListener('mousemove', this.get('moveListener'));
+    window.removeEventListener('mouseup', this.get('endMoveListener'));
+  } 
 
 };
 
