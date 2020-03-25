@@ -563,15 +563,16 @@ var InfoClickModel = {
   makeMoveable: function(map, overlay) {
     const element = overlay.getElement();
     const viewport = map.getViewport();
-    
+  
     this.set('moveListener', this.movePopup.bind(this));
     this.set('endMoveListener', this.endMovePopup.bind(this));
 
     element.addEventListener('mousedown', function (event) {
-      viewport.addEventListener('mousemove', this.get('moveListener'));
-      viewport.addEventListener('mouseup', this.get('endMoveListener'));
+      if (event.target === element) { //don't want events on children such as popup-content.  
+        viewport.addEventListener('mousemove', this.get('moveListener'));
+        viewport.addEventListener('mouseup', this.get('endMoveListener'));
+      }
     }.bind(this))
-
   },
 
   movePopup: function(event) {
