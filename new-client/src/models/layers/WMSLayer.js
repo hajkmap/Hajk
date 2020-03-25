@@ -160,7 +160,7 @@ class WMSLayer {
    * @instance
    */
   tileLoadError() {
-    this.globalObserver.publish("wmsLayerLoadStatus", {
+    this.globalObserver.publish("layerswitcher.wmsLayerLoadStatus", {
       id: this.layer.get("name"),
       status: "loaderror"
     });
@@ -171,7 +171,7 @@ class WMSLayer {
    * @instance
    */
   tileLoadOk() {
-    this.globalObserver.publish("wmsLayerLoadStatus", {
+    this.globalObserver.publish("layerswitcher.wmsLayerLoadStatus", {
       id: this.layer.get("name"),
       status: "ok"
     });

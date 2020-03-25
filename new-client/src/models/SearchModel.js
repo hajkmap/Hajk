@@ -447,14 +447,14 @@ class SearchModel {
 
     this.hiddenLayers.forEach(layer => {
       if (layer.layerType === "group") {
-        this.globalObserver.publish("hideLayer", layer);
+        this.globalObserver.publish("layerswitcher.hideLayer", layer);
       } else {
         layer.setVisible(false);
       }
     });
     this.visibleLayers.forEach(layer => {
       if (layer.layerType === "group") {
-        this.globalObserver.publish("showLayer", layer);
+        this.globalObserver.publish("layerswitcher.showLayer", layer);
       } else {
         layer.setVisible(true);
       }

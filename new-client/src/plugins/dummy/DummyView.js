@@ -67,7 +67,7 @@ class DummyView extends React.PureComponent {
 
   showIntroduction = () => {
     // Show the introduction guide, see components/Introduction.js
-    this.globalObserver.publish("showIntroduction");
+    this.globalObserver.publish("core.showIntroduction");
   };
 
   // A more complicate snackbar example, this one with an action button and persistent snackbar

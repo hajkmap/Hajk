@@ -120,13 +120,16 @@ class LayerItem extends React.PureComponent {
     // don't change it back to "ok": we'll get a response for each tile, so most of
     // the tiles might be "ok", but if only one of the tiles has "loaderror", we
     // consider that the layer has failed loading and want to inform the user.
-    this.props.app.globalObserver.subscribe("wmsLayerLoadStatus", d => {
-      this.state.status !== "loaderror" &&
-        this.state.name === d.id &&
-        this.setState({
-          status: d.status
-        });
-    });
+    this.props.app.globalObserver.subscribe(
+      "layerswitcher.wmsLayerLoadStatus",
+      d => {
+        this.state.status !== "loaderror" &&
+          this.state.name === d.id &&
+          this.setState({
+            status: d.status
+          });
+      }
+    );
   }
 
   /**

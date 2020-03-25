@@ -77,7 +77,7 @@ class Introduction extends React.PureComponent {
      * Otherwise, we would show intro steps even for non-existing elements,
      * which wouldn't be nice.
      */
-    this.props.globalObserver.subscribe("appLoaded", () => {
+    this.props.globalObserver.subscribe("core.appLoaded", () => {
       // First check if we have any steps in our config
       const { experimentalIntroductionSteps } = this.props;
       // We must have at least 2 elements in the array in order to properly show intro guide
@@ -92,7 +92,7 @@ class Introduction extends React.PureComponent {
       this.setState({ steps: filteredSteps });
     });
 
-    this.props.globalObserver.subscribe("showIntroduction", () => {
+    this.props.globalObserver.subscribe("core.showIntroduction", () => {
       this.setState({
         initialStep: 0,
         stepsEnabled: true,

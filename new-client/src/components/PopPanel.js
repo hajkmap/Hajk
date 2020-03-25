@@ -44,7 +44,7 @@ class PopPanel extends Component {
   };
   componentDidMount() {
     if (this.props.globalObserver) {
-      this.props.globalObserver.subscribe("toolbarExpanded", open => {
+      this.props.globalObserver.subscribe("core.toolbarExpanded", open => {
         this.setState(
           {
             placement: "right"

@@ -207,7 +207,7 @@ class App extends React.PureComponent {
       this.setState({
         tools: this.appModel.getPlugins()
       });
-      this.globalObserver.publish("appLoaded"); // Both Controls and Plugins can subscribe to this event and get things done
+      this.globalObserver.publish("core.appLoaded"); // Both Controls and Plugins can subscribe to this event and get things done
     });
     this.bindHandlers();
   }
@@ -217,21 +217,21 @@ class App extends React.PureComponent {
   }
 
   bindHandlers() {
-    this.globalObserver.subscribe("mapClick", mapClickDataResult => {
+    this.globalObserver.subscribe("core.mapClick", mapClickDataResult => {
       this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: mapClickDataResult
       });
     });
 
-    this.globalObserver.subscribe("alert", message => {
+    this.globalObserver.subscribe("core.alert", message => {
       this.setState({
         alert: true,
         alertMessage: message
       });
     });
 
-    this.globalObserver.subscribe("hideDrawer", () => {
+    this.globalObserver.subscribe("core.hideDrawer", () => {
       this.state.drawerVisible &&
         !this.state.drawerPermanent &&
         this.setState({ drawerVisible: false });
@@ -333,7 +333,7 @@ class App extends React.PureComponent {
       // If Drawer has been "(un)permanented", our #windows-container size has changed.
       // To ensure that our Windows still are inside the container, we dispach an
       // event that all Windows subscribe to.
-      this.globalObserver.publish("drawerToggled");
+      this.globalObserver.publish("core.drawerToggled");
 
       // Save current state of drawerPermanent to LocalStorage, so app reloads to same state
       window.localStorage.setItem(

@@ -156,7 +156,7 @@ class Preset extends React.PureComponent {
         )
         .forEach(layer => {
           if (layer.getProperties()["name"] === arrays) {
-            this.globalObserver.publish("showLayer", layer);
+            this.globalObserver.publish("layerswitcher.showLayer", layer);
             layer.setVisible(true);
           }
           if (
@@ -165,13 +165,13 @@ class Preset extends React.PureComponent {
             )
           ) {
             if (layer.layerType === "group") {
-              this.globalObserver.publish("showLayer", layer);
+              this.globalObserver.publish("layerswitcher.showLayer", layer);
             } else {
               layer.setVisible(true);
             }
           } else {
             if (layer.layerType === "group") {
-              this.globalObserver.publish("hideLayer", layer);
+              this.globalObserver.publish("layerswitcher.hideLayer", layer);
             } else {
               layer.setVisible(false);
             }
