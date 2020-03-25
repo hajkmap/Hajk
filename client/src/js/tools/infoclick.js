@@ -568,6 +568,9 @@ var InfoClickModel = {
     this.set('endMoveListener', this.endMovePopup.bind(this));
 
     element.addEventListener('mousedown', function (event) {
+      this.set('originalDownPosition', this.map.getEventCoordinate(event));
+      this.set('originalOverlayPosition', overlay.getPosition());
+
       if (event.target === element) { //don't want events on children such as popup-content.  
         viewport.addEventListener('mousemove', this.get('moveListener'));
         viewport.addEventListener('mouseup', this.get('endMoveListener'));
@@ -576,7 +579,29 @@ var InfoClickModel = {
   },
 
   movePopup: function(event) {
-    overlay.setPosition(this.map.getEventCoordinate(event));
+    var originalClickedPosition = this.get('originalDownPosition');
+    var originalOverlayPosition = this.get('originalOverlayPosition');
+
+    var originalClickedX = originalClickedPosition[0];
+    var originalClickedY = originalClickedPosition[1];
+
+    //work out the changes to the original clicked position.
+    var currentX = this.map.getEventCoordinate(event)[0];
+    var currentY = this.map.getEventCoordinate(event)[1];
+
+    var xChange = originalClickedX - currentX;
+    var yChange = originalClickedY - currentY;
+
+    //apply these changes to the popup position.
+    var overlayX = originalOverlayPosition[0];
+    var overlayY = originalOverlayPosition[1];
+
+    newPopupX = overlayX - xChange;
+    newPopupY = overlayY - yChange;
+    var newOverlayPosition  = [newPopupX, newPopupY];
+
+    //set the new popup position.
+    overlay.setPosition(newOverlayPosition);
   },
 
   endMovePopup: function(event) {
@@ -587,7 +612,6 @@ var InfoClickModel = {
     this.map.getViewport().removeEventListener('mousemove', this.get('moveListener'));
     this.map.getViewport().removeEventListener('mouseup', this.get('endMoveListener'));
   } 
-
 };
 
 /**
