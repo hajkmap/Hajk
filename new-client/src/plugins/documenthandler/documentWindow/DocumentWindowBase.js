@@ -41,7 +41,7 @@ class DocumentWindowBase extends React.PureComponent {
   bindSubscriptions = () => {
     const { app, localObserver } = this.props;
     localObserver.subscribe("show-document-window", item => {
-      app.globalObserver.publish("showDocumentviewer", {
+      app.globalObserver.publish("documentviewer.showWindow", {
         hideOtherPlugins: false
       });
       this.setActiveDocument(item.document);
