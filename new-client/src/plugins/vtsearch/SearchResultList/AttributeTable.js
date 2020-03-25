@@ -85,9 +85,35 @@ class AttributeTable extends React.Component {
     return displayName;
   };
 
+  /**
+   * Private method that reorders the property keys in the attribute table so that they match
+   * the order in the tool config.
+   * @param {Array} attributeDisplayOrder The display order for this search result.
+   * @param {object} propertyKeys The property keys from feature collection with the search result in it.
+   *
+   * @memberof AttributeTable
+   */
+  reorderPropertyKeys = (attributeDisplayOrder, propertyKeys) => {
+    let newDisplayOrder = attributeDisplayOrder.map(attribute => {
+      if (propertyKeys.includes(attribute.key)) return attribute.key;
+      return null;
+    });
+
+    return newDisplayOrder;
+  };
+
   getColumns() {
-    const { searchResult } = this.props;
-    return this.getFeaturePropertiesKeys(searchResult).map(key => {
+    const { searchResult, toolConfig } = this.props;
+
+    let propertyKeys = this.getFeaturePropertiesKeys(searchResult);
+    let attributeDisplayOrder =
+      toolConfig.geoServer[searchResult.type].attributesToDisplay;
+    propertyKeys = this.reorderPropertyKeys(
+      attributeDisplayOrder,
+      propertyKeys
+    );
+
+    return propertyKeys.map(key => {
       var displayName = this.getDisplayName(key);
       console.log(displayName, "displayName");
       return {
