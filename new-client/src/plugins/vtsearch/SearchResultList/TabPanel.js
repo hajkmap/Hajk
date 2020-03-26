@@ -25,6 +25,7 @@ class TabPanel extends React.PureComponent {
     const {
       activeTabId,
       attributeTableContainerHeight,
+      windowWidth,
       searchResult,
       tabId,
       localObserver,
@@ -46,6 +47,7 @@ class TabPanel extends React.PureComponent {
             searchResult={searchResult}
             toolConfig={toolConfig}
             attributeTableContainerHeight={attributeTableContainerHeight}
+            windowWidth={windowWidth}
             localObserver={localObserver}
             rowHeight={rowHeight}
           ></AdvancedAttributeTable>
