@@ -1,3 +1,4 @@
+import SearchModel from "./SearchModel";
 import Plugin from "./Plugin.js";
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
@@ -210,6 +211,16 @@ class AppModel {
 
   getMap() {
     return map;
+  }
+
+  addSearchModel() {
+    // TODO: Move configuration somewhere else, shouldn't be plugin-dependent.
+    const searchConfig = this.config.mapConfig.tools.find(
+      t => t.type === "search"
+    ).options;
+    this.searchModel = new SearchModel(searchConfig, this.getMap(), this);
+
+    return this;
   }
 
   clear() {

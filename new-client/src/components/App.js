@@ -11,6 +11,8 @@ import CookieNotice from "./CookieNotice";
 import Introduction from "./Introduction";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
+// Temporarily commended out the new plugin as I focus on rewriting the search model
+// import Search from "./search/Search";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
@@ -201,6 +203,7 @@ class App extends React.PureComponent {
   componentDidMount() {
     var promises = this.appModel
       .createMap()
+      .addSearchModel()
       .addLayers()
       .loadPlugins(this.props.activeTools);
     Promise.all(promises).then(() => {
@@ -375,6 +378,25 @@ class App extends React.PureComponent {
       return null;
     }
   }
+
+  // Temporarily commended out the new plugin as I focus on rewriting the search model
+  // renderSearchPlugin() {
+  //   // FIXME: Move somewhere else from plugins - Search is part of Core
+  //   const searchPlugin = this.appModel.plugins.search;
+  //   if (searchPlugin) {
+  //     return (
+  //       <Search
+  //         map={searchPlugin.map}
+  //         app={searchPlugin.app}
+  //         options={searchPlugin.options}
+  //         onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
+  //         menuButtonDisabled={this.state.drawerPermanent}
+  //       />
+  //     );
+  //   } else {
+  //     return null;
+  //   }
+  // }
 
   /**
    * In the case of a disabled Search plugin, we must

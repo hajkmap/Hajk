@@ -1,3 +1,4 @@
+import Observer from "react-event-observer";
 import { WFS, GeoJSON } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
 import Or from "ol/format/filter/Or";
@@ -37,9 +38,9 @@ class SearchModel {
   layerList = [];
   controllers = [];
 
-  constructor(settings, map, app, observer) {
+  constructor(settings, map, app) {
     // Validate
-    if (!settings || !map || !app || !observer) {
+    if (!settings || !map || !app) {
       throw new Error(
         "One of the required parameters for SearchModel is missing. Here are the values."
       );
@@ -48,7 +49,7 @@ class SearchModel {
     this.options = settings;
     this.olMap = map;
     this.app = app;
-    this.localObserver = observer;
+    this.localObserver = new Observer();
 
     this.wfsParser = new WFS();
     this.globalObserver = app.globalObserver;
