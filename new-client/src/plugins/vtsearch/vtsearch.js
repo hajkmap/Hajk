@@ -290,7 +290,7 @@ class VTSearch extends React.PureComponent {
             <div className={classes.loaderContainer}>{this.renderLoader()}</div>
           </CardActions>
 
-          <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
+          <Collapse in={this.state.expanded} timeout="auto">
             <CardContent
               className={classes.searchModuleContainer}
               classes={{ root: classes.searchModuleContainerRoot }}
