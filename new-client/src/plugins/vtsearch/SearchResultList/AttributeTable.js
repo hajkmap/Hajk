@@ -145,6 +145,47 @@ class AttributeTable extends React.Component {
     }
   };
 
+  sortAlphaNumerical = (compareOne, compareTwo) => {
+    var compareOneString;
+    var compareTwoString;
+    var compareOneChar;
+    var compareTwoChar;
+    var i = 0;
+    var n = null;
+    var length = null;
+    var regex = /(\.\d+)|(\d+(\.\d+)?)|([^\d.]+)|(\.\D+)|(\.$)/g;
+
+    if (compareOne === compareTwo) return 0;
+
+    compareOneString = compareOne
+      .toString()
+      .toLowerCase()
+      .match(regex);
+
+    compareTwoString = compareTwo
+      .toString()
+      .toLowerCase()
+      .match(regex);
+
+    length = compareOneString.length;
+
+    while (i < length) {
+      if (!compareTwoString[i]) return 1;
+
+      compareOneChar = compareOneString[i];
+      compareTwoChar = compareTwoString[i++];
+
+      if (compareOneChar !== compareTwoChar) {
+        n = compareOneChar - compareTwoChar;
+        if (!isNaN(n)) return n;
+
+        return compareOneChar > compareTwoChar ? 1 : -1;
+      }
+    }
+
+    return compareTwoString[i] ? -1 : 0;
+  };
+
   sort = ({ sortBy, sortDirection }) => {
     var compareOne = null;
     var compareTwo = null;
@@ -162,7 +203,7 @@ class AttributeTable extends React.Component {
         compareOne = a[sortBy] === "" ? null : a[sortBy]; //Handle empty string same way as null
         compareTwo = b[sortBy] === "" ? null : b[sortBy]; //Handle empty string same way as null
         if (compareOne !== null && compareTwo !== null) {
-          return compareOne.localeCompare(compareTwo);
+          return this.sortAlphaNumerical(compareOne, compareTwo);
         } else {
           return this.sortNulls(compareOne, compareTwo);
         }
