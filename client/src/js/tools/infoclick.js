@@ -299,11 +299,12 @@ var InfoClickModel = {
    * @param {array} coordinate
    */
   togglePopup: function (infos, coordinate) {
+
     const ovl = this.get('map').getOverlayById('popup-0');
 
     //moveablePopup - if popup is set to moveable, make it moveable. 
     if(this.get("moveablePopup")){
-      this.makeMoveable(this.map, ovl, coordinate);  
+      this.makeMoveable(this.map, ovl);  
     }
 
     function isPoint (coord) {
@@ -320,7 +321,7 @@ var InfoClickModel = {
     }
 
     infos.forEach((info, i) => {
-      function display (index, inf) {
+      function display (index, inf, moved) {
         var coords = inf.feature.getGeometry() ? inf.feature.getGeometry().getCoordinates() : false,
           position = coordinate,
           feature = new Backbone.Model(),
@@ -333,6 +334,8 @@ var InfoClickModel = {
           markdown = '',
           offsetY = 0,
           html = '';
+
+
 
         inf.layer.once('change:visible', () => {
           ovl.setPosition(undefined);
@@ -369,6 +372,11 @@ var InfoClickModel = {
           offsetY = this.get('popupOffsetY');
         }
 
+        //For moveable popups  - if call to display from a click on next/previous, keep the popups position. 
+        if (moved && this.get("movedOverlayPosition")) {
+          position = this.get("movedOverlayPosition");
+        }
+
         ovl.setPosition(position);
         ovl.setOffset([0, offsetY]);
 
@@ -381,12 +389,12 @@ var InfoClickModel = {
 
         prev.click(() => {
           if (infos[index - 1]) {
-            display.call(this, index - 1, infos[index - 1]);
+            display.call(this, index - 1, infos[index - 1], true);
           }
         });
         next.click(() => {
           if (infos[index + 1]) {
-            display.call(this, index + 1, infos[index + 1]);
+            display.call(this, index + 1, infos[index + 1], true);
           }
         });
       }
@@ -561,8 +569,13 @@ var InfoClickModel = {
   },
 
   makeMoveable: function(map, overlay) {
+    //clear attributes from previous popup moves. 
+    if (this.get('originalDownPosition')) {this.unset('originalDownPosition')};
+    if (this.get('originalOverlayPosition')) {this.unset('originalOverlayPosition')};
+    if (this.get('movedOverlayPosition')) {this.unset('movedOverlayPosition')};
     const element = overlay.getElement();
     const viewport = map.getViewport();
+
   
     this.set('moveListener', this.movePopup.bind(this));
     this.set('endMoveListener', this.endMovePopup.bind(this));
@@ -579,11 +592,11 @@ var InfoClickModel = {
   },
 
   movePopup: function(event) {
-    var originalClickedPosition = this.get('originalDownPosition');
-    var originalOverlayPosition = this.get('originalOverlayPosition');
+    const originalClickedPosition = this.get('originalDownPosition');
+    const originalOverlayPosition = this.get('originalOverlayPosition');
 
-    var originalClickedX = originalClickedPosition[0];
-    var originalClickedY = originalClickedPosition[1];
+    const originalClickedX = originalClickedPosition[0];
+    const originalClickedY = originalClickedPosition[1];
 
     //work out the changes to the original clicked position.
     var currentX = this.map.getEventCoordinate(event)[0];
@@ -606,6 +619,7 @@ var InfoClickModel = {
 
   endMovePopup: function(event) {
     this.removePopupListeners();
+    this.set("movedOverlayPosition", this.get('map').getOverlayById("popup-0").getPosition());
   },
 
   removePopupListeners: function() {
