@@ -27,13 +27,14 @@ class AdvancedAttributeTable extends React.Component {
   }
 
   getColumns() {
+    const { windowWidth } = this.props;
     return [
       {
         width: 300,
         label: "TRAFIKFÖRETAG",
         dataKey: "operator"
       },
-      { width: 800, label: "LINJER", dataKey: "lines" }
+      { width: windowWidth - 300, label: "LINJER", dataKey: "lines" }
     ];
   }
 
