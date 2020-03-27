@@ -33,6 +33,7 @@ var Tool = require('tools/tool'),
   Buffer = require('tools/buffer'),
   StreetView = require('tools/streetview'),
   Information = require('tools/information'),
+  News = require('tools/news'),
   Location = require('tools/location'),
   Routing = require('tools/routing'),
   Fir = require('tools/fir'),
@@ -92,6 +93,8 @@ var ToolCollection = {
         return new Kir(args.options);
       case 'information':
         return new Information(args.options);
+      case 'news':
+        return new News(args.options);
       case 'selection':
         return new Selection(args.options);
       case 'location':

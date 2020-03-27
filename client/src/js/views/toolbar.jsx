@@ -82,7 +82,7 @@ var ToolbarView = {
             className={c}
             onClick={() => {
               tool.clicked();
-              if (tool.get('type') !== 'information') {
+              if (tool.get('type') !== 'information' || tool.get('type') !== 'news') {
                 this.props.navigationModel.set('r', Math.random());
               }
             }}
@@ -114,7 +114,7 @@ var ToolbarView = {
             className={c}
             onClick={() => {
               tool.clicked();
-              if (tool.get('type') !== 'information') {
+              if (tool.get('type') !== 'information' || tool.get('type') !== 'news') {
                 this.props.navigationModel.set('r', Math.random());
               }
             }}
@@ -163,6 +163,7 @@ var ToolbarView = {
           </div>
           <div className='upper-toolbar'>{widgets}</div>
           <div className='information' id='information' />
+          <div className='news' id='news' />
         </div>
       </div>
     );
