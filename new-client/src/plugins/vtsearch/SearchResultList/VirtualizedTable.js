@@ -182,7 +182,6 @@ class VirtualizedTable extends React.PureComponent {
                 dataKey !== "id" && (
                   <Column
                     key={dataKey}
-                    flexShrink={0}
                     headerRenderer={headerProps =>
                       this.headerRenderer({
                         ...headerProps,
