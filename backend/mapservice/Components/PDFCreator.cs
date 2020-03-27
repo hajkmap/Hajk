@@ -30,15 +30,33 @@ namespace MapService.Components
         /// <param name="jpegSamplePath"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void drawImage(XGraphics gfx, Image img, double x, double y, PdfPage page)
+        private void drawImage(XGraphics gfx, Image img, double x, double y, PdfPage page, int layout)
         {
             using (MemoryStream ms = new MemoryStream())
             {
                 img.Save(ms, ImageFormat.Jpeg);
                 XImage image = XImage.FromStream(ms);
-                double horizontal = (page.Width.Millimeter / 25.4) * 72 - (x * 2);
-                double vertical = (page.Height.Millimeter / 25.4) * 72 - (y * 2);
-                gfx.DrawImage(image, x, y, horizontal, vertical);
+                if (layout == 3)
+                {
+
+                    double oneCM = page.Height.Point * 0.02;
+                    double horizontal = (page.Width.Millimeter / 25.4) * 72 - (x * 2);
+                    double vertical = (page.Height.Millimeter / 25.4) * 72 - (y * 2);
+
+                    //draw svartram
+                    XRect rect = new XRect(x - 2, y - oneCM- 2, horizontal + 4, vertical + 4);
+                    gfx.DrawRectangle(XBrushes.Black, rect);
+
+                    gfx.DrawImage(image, x, y - oneCM, horizontal, vertical);
+
+                }
+                else
+                {
+                    double horizontal = (page.Width.Millimeter / 25.4) * 72 - (x * 2);
+                    double vertical = (page.Height.Millimeter / 25.4) * 72 - (y * 2);
+                    gfx.DrawImage(image, x, y, horizontal, vertical);
+                }
+           
             }
         }
 
@@ -171,7 +189,7 @@ namespace MapService.Components
             if (exportItem.pdftitle != null)
             {
                 titleText = exportItem.pdftitle;
-                titleText = titleText.ToUpper();
+                //titleText = titleText.ToUpper();
             }
             DateTime thisDay = DateTime.Today;
             string pdfDate = thisDay.ToString("d");
@@ -183,8 +201,7 @@ namespace MapService.Components
             if (layout == 1)//original layout
             {
                 //origina code from github
-
-                this.drawImage(gfx, img, 0, 0, page);
+                this.drawImage(gfx, img, 0, 0, page, layout);
 
                 List<string> copyrights = new List<string>();
                 if (ConfigurationManager.AppSettings["exportCopyrightText"] != null)
@@ -250,7 +267,7 @@ namespace MapService.Components
             {
                 // x and y 0 0(top left corner?)-> change
                 double whiteScale = 0.08; // 8% margin on each side. This has to be the same as the margin in export.js!!! Otherwise the scale will be incorrect!
-                this.drawImage(gfx, img, page.Width.Point * whiteScale, page.Height.Point * whiteScale, page);
+                this.drawImage(gfx, img, page.Width.Point * whiteScale, page.Height.Point * whiteScale, page, layout);
 
                 List<string> copyrights = new List<string>();
                 if (ConfigurationManager.AppSettings["exportCopyrightText"] != null)
@@ -314,6 +331,130 @@ namespace MapService.Components
 
                 return bytes;
             }
+            else if (layout == 3)//new layout
+                // kodändringar krävs när man byter logo, copyrights och % för marginal
+            {
+                // x and y 0 0(top left corner?)-> change
+                double xWhiteScale = 0.10; // 10% margin on each side. This has to be the same as the margin in export.js!!! Otherwise the scale will be incorrect!
+                double yWhiteScale = 0.12; // 12% margin on each side. This has to be the same as the margin in export.js!!! Otherwise the scale will be incorrect!
+                double oneCM = page.Height.Point * 0.02;
+                this.drawImage(gfx, img, page.Width.Point * xWhiteScale, page.Height.Point * yWhiteScale, page, layout);
+
+               
+
+                List<string> copyrights = new List<string>();
+                if (ConfigurationManager.AppSettings["exportCopyrightText"] != null)
+                {
+                    copyrights = ConfigurationManager.AppSettings["exportCopyrightText"].Split(',').ToList();
+                }
+
+                string infoText = String.Empty;
+                if (ConfigurationManager.AppSettings["exportInfoText"] != null)
+                {
+                    infoText = ConfigurationManager.AppSettings["exportInfoText"];
+                }
+
+
+                int height = 1;
+
+                XPoint[] points = new XPoint[]
+                {
+                new XPoint(12, 12),
+                new XPoint(12, height),
+                new XPoint(55 + displayLength, height),
+                new XPoint(55 + displayLength, 12),
+                new XPoint(12, 12)
+                };
+
+                //define x and y for each corner (kartbild)
+                int xLeft = (int)(page.Width.Point * xWhiteScale);
+                int xRight =(int)(page.Width.Point) - xLeft;
+                int yWhiteSpace = (int)(page.Height.Point * yWhiteScale);
+                int yBottom = (int)(page.Height.Point - yWhiteSpace);
+
+
+                gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
+
+                //scaleText "Skala 1:{0}"
+                string scaleTextScalebar = exportItem.scale;
+                if (int.Parse(exportItem.scale)> 1000)
+                {
+                    scaleTextScalebar = exportItem.scale.Substring(0, exportItem.scale.Length - 3) + " " + exportItem.scale.Substring(exportItem.scale.Length - 3);
+                }
+                
+
+                // x y
+                int xLeftAfterScale = xLeft + 100;
+                int yScaleText = (int)(yBottom + (yWhiteSpace * 0.38));
+                int yScalebarTop = (int)(yBottom + (yWhiteSpace * 0.30)); //29
+                int yScalebarMiddle = (int)(yBottom + (yWhiteSpace * 0.35)); //26
+                int yScalebarBottom = (int)(yBottom + (yWhiteSpace * 0.40)); //23
+                this.drawText(gfx, fontName, String.Format("Skala 1:{0}", scaleTextScalebar), xLeft, yScaleText, 12); //skala 1:xx
+                gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale, yScalebarMiddle), new XPoint(xLeftAfterScale + displayLength, yScalebarMiddle)); //scalebar
+                gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale, yScalebarBottom), new XPoint(xLeftAfterScale, yScalebarTop)); //left
+                gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle - 2), new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle  + 2)); //middle
+                gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + displayLength, yScalebarBottom), new XPoint(xLeftAfterScale + displayLength, yScalebarTop)); //right
+                this.drawText(gfx, fontName, displayText, xLeftAfterScale + 5 + displayLength, yScaleText, 12); //text "X m" next to the scale bar
+
+                // comment
+                var printText = commentText;
+                int yKomment = (int)(yBottom + (yWhiteSpace * 0.05));
+                //**yLeftBottom + number(>font size)
+                this.drawText(gfx, fontName, printText, xLeft, yKomment, 12); // comment 
+                var printDate = pdfDate;
+
+                //text "kartled..."
+                int yTextBottom = (int)(yBottom + (yWhiteSpace * 0.60));
+                this.drawText(gfx, fontName, infoText, xLeft, yTextBottom, 9); // text "kartled..."
+                
+               // copyright ** use xRect/XStringFormat(?) to place the copyrights instead of using pixel
+                int i = 0;
+                copyrights.ForEach(copyright =>
+                {
+                    int startOrg= (int)page.Height.Point - 15;
+                    this.drawText(gfx, fontName, String.Format("© {0}", copyright), xRight - 90,  yKomment+ i * 12, 9); // coyright
+                    i++;
+                });
+
+                XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
+                var logo1Path = HostingEnvironment.ApplicationPhysicalPath + ConfigurationManager.AppSettings["exportLogotype"];
+                XImage logo1 = XImage.FromFile(logo1Path);
+                
+
+                // Layout3 title
+                XStringFormat myTitle = new XStringFormat();
+                myTitle.LineAlignment = XLineAlignment.Center;
+                myTitle.Alignment = XStringAlignment.Center;
+
+                XColor color = XColors.Black;
+                XFont font = new XFont(fontNameTitle, 20, XFontStyle.Bold);
+                XBrush brush = new XSolidBrush(color);
+                
+
+                //logotype title and date
+                if (page.Size.ToString() == "A4" && page.Orientation.ToString() == "Landscape") {
+                    gfx.DrawString(titleText, font, brush, (int)page.Width.Point / 2, (int)(page.Height.Point * yWhiteScale) - oneCM - 20, myTitle);
+                    this.drawText(gfx, fontName, printDate, xRight - 80, (int)(page.Height.Point * yWhiteScale) - (int)oneCM - 15, 12); // date (x:(int)page.Width.Point - (int)(page.Width.Point * whiteScale *2 + 20))
+                    gfx.DrawImage(logo1, xLeft, (page.Height.Point * yWhiteScale) - oneCM - (logo.PixelHeight * 0.26), logo.PixelWidth * 0.12, logo.PixelHeight * 0.24); //logotype 0.1 & 0.2
+                }
+                else
+                {
+                    gfx.DrawString(titleText, font, brush, (int)page.Width.Point / 2, (int)(page.Height.Point * yWhiteScale) - oneCM - 40, myTitle);
+                    this.drawText(gfx, fontName, printDate, xRight - 80, (int)(page.Height.Point * yWhiteScale) - (int)oneCM - 35, 12); // date (x:(int)page.Width.Point - (int)(page.Width.Point * whiteScale *2 + 20))
+                    gfx.DrawImage(logo1, xLeft, (page.Height.Point * yWhiteScale) - oneCM - (logo.PixelHeight * 0.45), logo.PixelWidth * 0.18, logo.PixelHeight * 0.4); //logotype
+                }
+               
+
+                byte[] bytes;
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    document.Save(ms);
+                    bytes = ReadFully(ms);
+                }
+
+                return bytes;
+            }
 
             return null;
         }
@@ -323,7 +464,6 @@ namespace MapService.Components
             int scaleBarLength = 0;
             if (scaleBarLengths.TryGetValue(scale, out scaleBarLength))
             {
-                _log.InfoFormat("displayLength is {0}", unitLength * scaleBarLength);
                 return (int)(unitLength * scaleBarLength);
             }
             if (scale <= 500)
