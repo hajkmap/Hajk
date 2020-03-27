@@ -59,6 +59,7 @@ class SearchModel {
       style: this.getVectorLayerStyle()
     });
     this.vectorLayer.set("type", "searchResultLayer");
+    this.vectorLayer.setZIndex(1);
 
     this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
@@ -66,7 +67,10 @@ class SearchModel {
       style: drawStyle
     });
 
+    // Add layer that will hold highlighted search results
     this.olMap.addLayer(this.vectorLayer);
+
+    // Add layer that will be used to allow user draw on map - used for spatial search
     this.olMap.addLayer(this.drawLayer);
   }
 
@@ -562,6 +566,7 @@ class SearchModel {
   }
 
   highlightFeatures(features) {
+    console.log("highlighting features: ", features);
     this.vectorLayer.getSource().addFeatures(features);
     this.olMap.getView().fit(this.vectorLayer.getSource().getExtent(), {
       size: this.olMap.getSize(),
