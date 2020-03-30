@@ -59,7 +59,9 @@ const menuViewHoc = MenuComponent =>
 
       localObserver.subscribe("document-clicked", item => {
         this.closeOverlayMenu();
-        localObserver.publish("show-document-window", item);
+        localObserver.publish("show-document-window", {
+          documentName: item.document
+        });
       });
 
       localObserver.subscribe("link-clicked", item => {

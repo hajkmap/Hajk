@@ -155,7 +155,12 @@ class Contents extends React.PureComponent {
 
     if (headerLink) {
       if (documentLink) {
-        return this.getLinkComponent(aTagObject, () => {});
+        return this.getLinkComponent(aTagObject, () => {
+          localObserver.publish("show-document-window", {
+            documentName: documentLink,
+            headerToScrollTo: headerLink
+          });
+        });
       }
     }
 
@@ -164,7 +169,7 @@ class Contents extends React.PureComponent {
         localObserver.publish("fly-to", mapLink);
       });
     }
-    console.log(externalLink, "externalLink");
+
     if (externalLink) {
       return (
         <Link
