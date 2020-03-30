@@ -6,6 +6,7 @@ import Paper from "@material-ui/core/Paper";
 import CardMedia from "@material-ui/core/CardMedia";
 import CustomModal from "./CustomModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
+import { Link } from "@material-ui/core";
 
 const styles = theme => {
   return {
@@ -76,9 +77,125 @@ class Contents extends React.PureComponent {
       tagType: "h6",
       callback: this.getHeadingTypography
     });
+    allowedHtmlTags.push({
+      tagType: "a",
+      callback: this.getLink
+    });
     allowedHtmlTags.push({ tagType: "img", callback: this.getTagImgCard });
     allowedHtmlTags.push({ tagType: "p", callback: this.getPtagTypography });
     return allowedHtmlTags;
+  };
+
+  parseStringToHtmlObject = (htmlString, type) => {
+    var mockedHtmlObject = document.createElement(type);
+    mockedHtmlObject.innerHTML = htmlString;
+    return mockedHtmlObject.firstChild;
+  };
+
+  /**
+   * Extracts value for a key-value-pair
+   * @param {Object} attributes object with key-value-pair of attributes.
+   * @param {String} dataKey key to extract value from
+   * @returns {String} Returns data value
+   *
+   * @memberof Contents
+   */
+  getValueFromAttribute = (attributes, dataKey) => {
+    return attributes.find(attribute => {
+      return attribute.dataAttribute === dataKey;
+    })?.dataValue;
+  };
+
+  getLinkDataPerType = attributes => {
+    const { 0: mapLink, 1: headerLink, 2: documentLink, 3: externalLink } = [
+      "data-maplink",
+      "data-header",
+      "data-document",
+      "data-link"
+    ].map(attributeKey => {
+      return this.getValueFromAttribute(attributes, attributeKey);
+    });
+
+    return { mapLink, headerLink, documentLink, externalLink };
+  };
+
+  /**
+   * Callback used to render different link-components from a-elements
+   * @param {Element} htmlObject a-element.
+   * @param {Function} clickHandler callback to run when link is clicked
+   * @returns {<Link>} Returns materialUI component <Link>
+   *
+   * @memberof Contents
+   */
+  getLinkComponent = (htmlObject, clickHandler) => {
+    return (
+      <Link href="#" variant="body2" onClick={clickHandler}>
+        {htmlObject.innerHTML}
+      </Link>
+    );
+  };
+
+  /**
+   * Callback used to render different link-components from a-elements
+   * @param {Element} aTag a-element.
+   * @returns {<Link>} Returns materialUI component <Link>
+   *
+   * @memberof Contents
+   */
+  getLink = aTag => {
+    const { localObserver } = this.props;
+    const aTagObject = this.parseStringToHtmlObject(aTag.tagValue, "a");
+    const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
+    const {
+      mapLink,
+      headerLink,
+      documentLink,
+      externalLink
+    } = this.getLinkDataPerType(attributes);
+
+    if (headerLink) {
+      if (documentLink) {
+        return this.getLinkComponent(aTagObject, () => {});
+      }
+    }
+
+    if (mapLink) {
+      return this.getLinkComponent(aTagObject, () => {
+        localObserver.publish("fly-to", mapLink);
+      });
+    }
+    console.log(externalLink, "externalLink");
+    if (externalLink) {
+      return (
+        <Link
+          href={externalLink}
+          target="_blank"
+          rel="noopener"
+          variant="body2"
+        >
+          {aTagObject.innerHTML}
+        </Link>
+      );
+    }
+  };
+
+  /**
+   * Helper method to extract attributes from html-element
+   * @param {Element} htmlObject Basic html-element.
+   * @returns {Object{dataAttribute : string, dataValue : string}} Returns name of attribute and its value ion key-value-pair
+   *
+   * @memberof Contents
+   */
+  getDataAttributesFromHtmlObject = htmlObject => {
+    let attributes = htmlObject
+      .getAttributeNames()
+      .map(function(attributeName) {
+        return {
+          dataAttribute: attributeName,
+          dataValue: htmlObject.getAttribute(attributeName)
+        };
+      });
+    return attributes;
   };
 
   /**
@@ -248,6 +365,7 @@ class Contents extends React.PureComponent {
       chapter.html,
       this.getTagSpecificCallbacks()
     ).map((component, index) => {
+      console.log(component, "component");
       return <React.Fragment key={index}>{component}</React.Fragment>;
     });
   };

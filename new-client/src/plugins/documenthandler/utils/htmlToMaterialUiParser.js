@@ -62,14 +62,49 @@ const parseHtml = (html, generatedHtml, tagSpecificCallbacks) => {
 const findStartTag = html => {
   const indexStart = html.indexOf("<");
   let indexEnd = html.indexOf(">");
+
   let possibleIndexEnd = html.indexOf("/>");
-  if (indexEnd - 1 === possibleIndexEnd) indexEnd = html.indexOf(" ");
-  const tagType = html.substring(indexStart + 1, indexEnd);
+  if (indexEnd - 1 === possibleIndexEnd) {
+    indexEnd = html.indexOf(" ");
+  }
+
+  let tagType = getTagType(html, indexStart, indexEnd);
+
   let tagEndIndex = findEndTag(html, tagType);
   if (tagEndIndex === -1) tagEndIndex = 1;
   let tagValue = html.substring(indexStart, tagEndIndex);
 
-  return { tagType: tagType, tagValue: tagValue, tagEndIndex: tagEndIndex };
+  return {
+    tagType: tagType,
+    tagValue: tagValue,
+    tagEndIndex: tagEndIndex
+  };
+};
+
+/**
+ * Private help method that finds the start tag in the html text.
+ * @param {string} html The html code.
+ * @param {int} indexStart The html code.
+ * @param {int} indexEnd The html code.
+ * @returns {string, int, int} Returns the tag type, tag value and the last index of the fist tag.
+ *
+ * @memberof htmlToMaterialUiParser
+ */
+const getTagType = (html, indexStart, indexEnd) => {
+  const tagTypeWithOptionalAttributes = html.substring(
+    indexStart + 1,
+    indexEnd
+  );
+  let startIndexOfAttributes = tagTypeWithOptionalAttributes.indexOf(" ");
+  let tagType = tagTypeWithOptionalAttributes;
+
+  if (startIndexOfAttributes > -1) {
+    tagType = html.substring(
+      indexStart + 1,
+      indexStart + 1 + startIndexOfAttributes
+    );
+  }
+  return tagType;
 };
 
 /**

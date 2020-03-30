@@ -114,7 +114,7 @@ class DocumentViewer extends React.PureComponent {
             />
           </Grid>
           <Grid item>
-            <Contents document={activeDocument} />
+            <Contents localObserver={localObserver} document={activeDocument} />
           </Grid>
         </Grid>
         {showScrollButton &&
