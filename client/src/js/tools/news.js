@@ -39,10 +39,11 @@ var NewsModelProperties = {
     panel: '',
     toolbar: 'top-right',
     icon: 'fa fa-rss',
-    title: 'Om kartan',
+    title: 'Nyhet',
     display: false,
-    headerText: 'Om kartan',
-    text: 'Information om kartan.'
+    headerText: 'Nyhet',
+    text: '',
+    latestShown: ''
 };
 
 /**
@@ -58,8 +59,24 @@ var NewsModel = {
      */
     defaults: NewsModelProperties,
 
+
     initialize: function (options) {
-        var cookies = document.cookie;
+        var cat = localStorage.getItem('lastUpdate');
+        if(cat == null || cat == ''){
+            this.set({'display': true});
+            this.set({'visibleAtStart': true});
+        }else if(this.get('text') + this.get('headerText')!= cat){
+            this.set({'display': true});
+            this.set({'visibleAtStart': true});
+        }else{
+            this.set({'display': false});
+            this.set({'visibleAtStart': false});
+        }
+
+        localStorage.setItem('lastUpdate', this.get('text') + this.get('headerText'));
+        ToolModel.prototype.initialize.call(this);
+
+        /*var cookies = document.cookie;
         if (cookies.length == 0 || !options.showInfoOnce) {
             // TODO: Titta efter om vi ska använda cookie för att visa informationsrutan endast en gång
             // OBS! json.showInfoOnce kan vara undefined, då ska det fungera som innan cookie användes
@@ -70,7 +87,7 @@ var NewsModel = {
             this.set({'display': false});
             this.set({'visibleAtStart': false});
         }
-        ToolModel.prototype.initialize.call(this);
+        ToolModel.prototype.initialize.call(this);*/
     },
 
     configure: function (shell) {
