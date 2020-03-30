@@ -72,7 +72,7 @@ class DocumentViewer extends React.PureComponent {
   };
 
   scrollToTop = () => {
-    this.scrollElementRef.current.scrollTo(0, 0);
+    this.scrollElementRef.current.scrollTop = 0;
   };
 
   renderScrollToTopButton = () => {

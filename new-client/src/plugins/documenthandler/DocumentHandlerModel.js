@@ -17,11 +17,17 @@ const fetchConfig = {
 export default class DocumentHandlerModel {
   internalId = 0;
 
+  constructor(settings) {
+    this.mapServiceUrl =
+      settings.app.config.appConfig.proxy +
+      settings.app.config.appConfig.mapserviceBase;
+  }
+
   async listAllAvailableDocuments(callback) {
     let response;
     try {
       response = await fetch(
-        "http://localhost:55630/informative/list",
+        `${this.mapServiceUrl}/informative/list`,
         fetchConfig
       );
       const text = await response.text();
@@ -34,7 +40,7 @@ export default class DocumentHandlerModel {
     let response;
     try {
       response = await fetch(
-        `http://localhost:55630/informative/load/${title}`,
+        `${this.mapServiceUrl}/informative/load/${title}`,
         fetchConfig
       );
       const text = await response.text();
