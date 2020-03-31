@@ -166,8 +166,12 @@ var PanelView = {
                 <span>{this.props.title}</span>
                 {instructionBtn}
                 <i className={closeIcon} onClick={() => {
+                  if(isMobile){
+                    document.getElementById('sidebar-toggle-swipe').click();
+                  } else {
                   if (this.props.onUnmountClicked) {
                     this.props.onUnmountClicked();
+                  }
                   }
                 }} />
                 {instructionTxt}

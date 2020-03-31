@@ -156,7 +156,9 @@ var RoutingModel = {
     }
 
     if (isMobile) {
-      this.props.navigationPanel.minimize();
+      $('.container-swipe-menu').removeClass('open-sidebar');
+      $('#sidebar-toggle-swipe').removeClass('sidebar-open-after');
+      $('#sidebar-toggle-swipe').addClass('sidebar-close-after');
     }
   },
 
@@ -180,7 +182,9 @@ var RoutingModel = {
     }
 
     if (isMobile) {
-      this.props.navigationPanel.minimize();
+      $(".container-swipe-menu").removeClass("open-sidebar");
+      $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
+      $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
     }
   },
 
