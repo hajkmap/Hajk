@@ -26,7 +26,6 @@ import SearchIcon from "@material-ui/icons/Search";
 const styles = theme => {
   return {
     root: {
-      padding: "2px 4px",
       display: "flex",
       alignItems: "center",
       minWidth: 200,
@@ -107,7 +106,7 @@ class Search extends React.PureComponent {
      * TODO: Limit WFS sources (if "s" query param is present, called "ds" below).
      */
 
-    this.props.app.globalObserver.subscribe("appLoaded", () => {
+    this.props.app.globalObserver.subscribe("core.appLoaded", () => {
       const { searchOnStart } = this.props.app.config.mapConfig.map;
       // Hence this plugin (src/plugins/search) is the default Search plugin, act on both t="search" and t=undefined
       if (

@@ -176,3 +176,6 @@ Temporary Items
 .apdisk
 
 proxy/lmproxy
+
+#Log-file for backend
+backend/mapservice/Logs/log-file.txt

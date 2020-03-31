@@ -44,7 +44,7 @@ class Preset extends React.PureComponent {
     this.globalObserver = props.appModel.globalObserver;
 
     // If config wasn't found, it means that Preset is not configured. Quit.
-    if (this.config === undefined) return null;
+    if (this.config === undefined) return;
 
     // Else, if we're still here, go on.
     this.options = this.config.options;
@@ -156,7 +156,7 @@ class Preset extends React.PureComponent {
         )
         .forEach(layer => {
           if (layer.getProperties()["name"] === arrays) {
-            this.globalObserver.publish("showLayer", layer);
+            this.globalObserver.publish("layerswitcher.showLayer", layer);
             layer.setVisible(true);
           }
           if (
@@ -165,13 +165,13 @@ class Preset extends React.PureComponent {
             )
           ) {
             if (layer.layerType === "group") {
-              this.globalObserver.publish("showLayer", layer);
+              this.globalObserver.publish("layerswitcher.showLayer", layer);
             } else {
               layer.setVisible(true);
             }
           } else {
             if (layer.layerType === "group") {
-              this.globalObserver.publish("hideLayer", layer);
+              this.globalObserver.publish("layerswitcher.hideLayer", layer);
             } else {
               layer.setVisible(false);
             }

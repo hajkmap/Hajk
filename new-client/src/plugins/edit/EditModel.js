@@ -67,7 +67,10 @@ class EditModel {
           if (layer.getSource().getParams) {
             let params = layer.getSource().getParams();
             if (typeof params === "object") {
-              let paramName = params.LAYERS.split(":");
+              // FIXME: Can be a bug here: we can't expect our edited layer to always be of index 0 if a LayerGroup (which gives Array so we must handle that as well)
+              let paramName = Array.isArray(params.LAYERS)
+                ? params.LAYERS[0].split(":")
+                : params.LAYERS.split(":");
               let layerSplit = layerName.split(":");
               if (paramName.length === 2 && layerSplit.length === 2) {
                 match = layerName === params.LAYERS;

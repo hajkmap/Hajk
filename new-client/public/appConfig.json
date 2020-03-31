@@ -1,8 +1,11 @@
 {
   "appName": "Hajk",
-  "version": "3.0.0",
+  "version": "3.3.0",
   "mapserviceBase": "http://localhost:55630",
   "proxy": "",
   "searchProxy": "",
-  "defaultMap": "map_1"
+  "defaultMap": "map_1",
+  "experimentalIntroductionEnabled": true,
+  "experimentalIntroductionSteps": [],
+  "noLayerSwitcherMessage": "This map has no layerSwitcher indicating that you are not allowed to use this map!"
 }
