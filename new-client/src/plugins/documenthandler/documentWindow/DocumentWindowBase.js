@@ -25,8 +25,12 @@ class DocumentWindowBase extends React.PureComponent {
   }
 
   setActiveDocument = title => {
-    this.model.fetchJsonDocument(title, document => {
-      this.setState({ document: document });
+    return new Promise((resolve, reject) => {
+      this.model.fetchJsonDocument(title, document => {
+        this.setState({ document: document }, () => {
+          resolve();
+        });
+      });
     });
   };
 
@@ -38,14 +42,24 @@ class DocumentWindowBase extends React.PureComponent {
     this.setState({ documentWindowMaximized: true });
   };
 
-  bindSubscriptions = () => {
+  showDocumentWindow = ({ documentName, headerIdentifier }) => {
     const { app, localObserver } = this.props;
-    localObserver.subscribe("show-document-window", item => {
-      app.globalObserver.publish("documentviewer.showWindow", {
-        hideOtherPlugins: false
-      });
-      this.setActiveDocument(item.document);
+    app.globalObserver.publish("documentviewer.showWindow", {
+      hideOtherPlugins: false
     });
+    this.setActiveDocument(documentName).then(() => {
+      if (headerIdentifier) {
+        localObserver.publish(
+          "scroll-to",
+          this.model.getHeaderRef(this.state.document, headerIdentifier)
+        );
+      }
+    });
+  };
+
+  bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("show-document-window", this.showDocumentWindow);
   };
 
   render() {
@@ -58,7 +72,7 @@ class DocumentWindowBase extends React.PureComponent {
         type="DocumentViewer"
         custom={{
           icon: <MenuBookIcon />,
-          title: "Documents",
+          title: options.windowTitle || "Documents",
           description: "En kort beskrivning som visas i widgeten",
           height: options.height || "90vh",
           width: options.width || 600,

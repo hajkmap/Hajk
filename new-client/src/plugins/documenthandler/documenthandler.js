@@ -16,6 +16,14 @@ const iconFontElement = (
   />
 );
 
+const fontElement = (
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://fonts.googleapis.com/css?family=Open+Sans"
+  />
+);
+
 const OverlayMenuView = menuComponent(OverlayMenuViewPartialFunctionality);
 const BarMenuView = menuComponent(BarMenuViewPartialFunctionality);
 
@@ -30,6 +38,10 @@ class DocumentHandler extends React.PureComponent {
 
   static defaultProps = {
     options: {}
+  };
+
+  dynamicallyImportOpenSans = () => {
+    return fontElement;
   };
 
   dynamicallyImportIconFonts = () => {
@@ -51,7 +63,7 @@ class DocumentHandler extends React.PureComponent {
       app: props.app,
       map: props.map
     });
-    this.getListOfDocuments();
+    this.getListOfDocuments(); //DEBUG
   }
 
   getListOfDocuments = () => {
@@ -61,6 +73,7 @@ class DocumentHandler extends React.PureComponent {
   render() {
     return (
       <>
+        {this.dynamicallyImportOpenSans()}
         {this.dynamicallyImportIconFonts()}
         <Hidden xlUp>
           <OverlayMenuView
