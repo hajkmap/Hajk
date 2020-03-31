@@ -95,7 +95,8 @@ class DocumentViewer extends React.PureComponent {
       classes,
       activeDocument,
       localObserver,
-      documentWindowMaximized
+      documentWindowMaximized,
+      model
     } = this.props;
 
     const { showScrollButton } = this.state;
@@ -114,7 +115,11 @@ class DocumentViewer extends React.PureComponent {
             />
           </Grid>
           <Grid item>
-            <Contents localObserver={localObserver} document={activeDocument} />
+            <Contents
+              model={model}
+              localObserver={localObserver}
+              document={activeDocument}
+            />
           </Grid>
         </Grid>
         {showScrollButton &&

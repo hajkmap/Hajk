@@ -57,6 +57,26 @@ export default class DocumentHandlerModel {
     } catch (err) {}
   }
 
+  findChapter(chapter, headerIdentifierToFind) {
+    if (chapter.headerIdentifier === headerIdentifierToFind) {
+      return chapter;
+    }
+    if (chapter.chapters.length > 0) {
+      return chapter.chapters.find(child => {
+        return this.findChapter(child, headerIdentifierToFind);
+      });
+    }
+  }
+
+  getHeaderRef = (activeDocument, headerIdentifierToFind) => {
+    var foundChapter;
+    activeDocument.chapters.some(chapter => {
+      foundChapter = this.findChapter(chapter, headerIdentifierToFind);
+      return foundChapter;
+    });
+    return foundChapter;
+  };
+
   setScrollReferences = chapter => {
     chapter.scrollRef = React.createRef();
     if (chapter.chapters.length > 0) {

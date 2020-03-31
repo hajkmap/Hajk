@@ -107,16 +107,18 @@ class Contents extends React.PureComponent {
   };
 
   getLinkDataPerType = attributes => {
-    const { 0: mapLink, 1: headerLink, 2: documentLink, 3: externalLink } = [
-      "data-maplink",
-      "data-header",
-      "data-document",
-      "data-link"
-    ].map(attributeKey => {
-      return this.getValueFromAttribute(attributes, attributeKey);
-    });
+    const {
+      0: mapLink,
+      1: headerIdentifier,
+      2: documentLink,
+      3: externalLink
+    } = ["data-maplink", "data-header", "data-document", "data-link"].map(
+      attributeKey => {
+        return this.getValueFromAttribute(attributes, attributeKey);
+      }
+    );
 
-    return { mapLink, headerLink, documentLink, externalLink };
+    return { mapLink, headerIdentifier, documentLink, externalLink };
   };
 
   /**
@@ -143,23 +145,30 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getLink = aTag => {
-    const { localObserver } = this.props;
+    const { localObserver, model } = this.props;
     const aTagObject = this.parseStringToHtmlObject(aTag.tagValue, "a");
     const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
     const {
       mapLink,
-      headerLink,
+      headerIdentifier,
       documentLink,
       externalLink
     } = this.getLinkDataPerType(attributes);
 
-    if (headerLink) {
+    if (headerIdentifier) {
       if (documentLink) {
         return this.getLinkComponent(aTagObject, () => {
           localObserver.publish("show-document-window", {
             documentName: documentLink,
-            headerToScrollTo: headerLink
+            headerIdentifier: headerIdentifier
           });
+        });
+      } else {
+        return this.getLinkComponent(aTagObject, () => {
+          localObserver.publish(
+            "scroll-to",
+            model.getHeaderRef(this.props.document, headerIdentifier)
+          );
         });
       }
     }

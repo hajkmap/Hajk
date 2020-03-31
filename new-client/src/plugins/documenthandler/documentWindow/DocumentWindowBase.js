@@ -42,17 +42,18 @@ class DocumentWindowBase extends React.PureComponent {
     this.setState({ documentWindowMaximized: true });
   };
 
-  getHeaderRef = () => {
-    //TODO - NEED TO GET ChapterObject from GUID
-  };
-
-  showDocumentWindow = ({ documentName, headerToScrollTo }) => {
+  showDocumentWindow = ({ documentName, headerIdentifier }) => {
     const { app, localObserver } = this.props;
     app.globalObserver.publish("documentviewer.showWindow", {
       hideOtherPlugins: false
     });
     this.setActiveDocument(documentName).then(() => {
-      localObserver.publish("scroll-to", this.getHeaderRef(headerToScrollTo)); //TODO
+      if (headerIdentifier) {
+        localObserver.publish(
+          "scroll-to",
+          this.model.getHeaderRef(this.state.document, headerIdentifier)
+        );
+      }
     });
   };
 
