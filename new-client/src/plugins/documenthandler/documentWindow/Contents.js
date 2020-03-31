@@ -137,6 +137,45 @@ class Contents extends React.PureComponent {
     );
   };
 
+  getHeaderLinkForSameDocument = (aTagObject, headerIdentifier) => {
+    const { localObserver, model } = this.props;
+    return this.getLinkComponent(aTagObject, () => {
+      localObserver.publish(
+        "scroll-to",
+        model.getHeaderRef(this.props.document, headerIdentifier)
+      );
+    });
+  };
+
+  getHeaderLinkForNonActiveDocument = (
+    aTagObject,
+    headerIdentifier,
+    documentLink
+  ) => {
+    const { localObserver } = this.props;
+    return this.getLinkComponent(aTagObject, () => {
+      localObserver.publish("show-document-window", {
+        documentName: documentLink,
+        headerIdentifier: headerIdentifier
+      });
+    });
+  };
+
+  getExternalLink = (aTagObject, externalLink) => {
+    return (
+      <Link href={externalLink} target="_blank" rel="noopener" variant="body2">
+        {aTagObject.innerHTML}
+      </Link>
+    );
+  };
+
+  getMapLink = (aTagObject, mapLink) => {
+    const { localObserver } = this.props;
+    return this.getLinkComponent(aTagObject, () => {
+      localObserver.publish("fly-to", mapLink);
+    });
+  };
+
   /**
    * Callback used to render different link-components from a-elements
    * @param {Element} aTag a-element.
@@ -145,7 +184,6 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getLink = aTag => {
-    const { localObserver, model } = this.props;
     const aTagObject = this.parseStringToHtmlObject(aTag.tagValue, "a");
     const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
     const {
@@ -157,39 +195,21 @@ class Contents extends React.PureComponent {
 
     if (headerIdentifier) {
       if (documentLink) {
-        return this.getLinkComponent(aTagObject, () => {
-          localObserver.publish("show-document-window", {
-            documentName: documentLink,
-            headerIdentifier: headerIdentifier
-          });
-        });
+        return this.getHeaderLinkForNonActiveDocument(
+          aTagObject,
+          headerIdentifier
+        );
       } else {
-        return this.getLinkComponent(aTagObject, () => {
-          localObserver.publish(
-            "scroll-to",
-            model.getHeaderRef(this.props.document, headerIdentifier)
-          );
-        });
+        return this.getHeaderLinkForSameDocument(aTagObject, headerIdentifier);
       }
     }
 
     if (mapLink) {
-      return this.getLinkComponent(aTagObject, () => {
-        localObserver.publish("fly-to", mapLink);
-      });
+      return this.getMapLink(aTagObject, mapLink);
     }
 
     if (externalLink) {
-      return (
-        <Link
-          href={externalLink}
-          target="_blank"
-          rel="noopener"
-          variant="body2"
-        >
-          {aTagObject.innerHTML}
-        </Link>
-      );
+      return this.getExternalLink(aTagObject, externalLink);
     }
   };
 
@@ -379,7 +399,6 @@ class Contents extends React.PureComponent {
       chapter.html,
       this.getTagSpecificCallbacks()
     ).map((component, index) => {
-      console.log(component, "component");
       return <React.Fragment key={index}>{component}</React.Fragment>;
     });
   };
