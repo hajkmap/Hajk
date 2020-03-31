@@ -10,6 +10,9 @@ import InactivePolygon from "../img/polygonmarkering.png";
 import InactiveRectangle from "../img/rektangelmarkering.png";
 import ActivePolygon from "../img/polygonmarkering-blue.png";
 import ActiveRectangle from "../img/rektangelmarkering-blue.png";
+import DisabledPolygon from "../img/polygonmarkering-lightgrey.png";
+import DisabledRectangle from "../img/rektangelmarkering-ligthgrey.png";
+import CardMedia from "@material-ui/core/CardMedia";
 
 import {
   MuiPickersUtilsProvider,
@@ -29,16 +32,11 @@ const styles = theme => ({
   },
   spaceToFromDate: { marginBottom: 40 },
   divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
-  textFields: { marginLeft: 10 },
   errorMessage: { color: theme.palette.error.main },
-  polygonAndRectangleForm: {
-    verticalAlign: "baseline",
-    float: "left",
-    marginBottom: 10
+  polygonAndRectangleImage: {
+    width: "80%"
   }
 });
-
-//TODO - Only mockup //Tobias
 
 class Journeys extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
@@ -49,8 +47,7 @@ class Journeys extends React.PureComponent {
     selectedFromTime: new Date().setHours(new Date().getHours()),
     selectedEndDate: new Date(),
     selectedEndTime: new Date().setHours(new Date().getHours() + 1),
-    selectedFormType: "",
-    showError: false
+    selectedFormType: ""
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -74,43 +71,13 @@ class Journeys extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
   }
-  showErrorMessage = () => {
-    const { classes } = this.props;
-    const {
-      selectedFromDate,
-      selectedEndDate,
-      selectedEndTime,
-      selectedFromTime
-    } = this.state;
-    //Had to format date because of time will mess up the date if the date was the same and u only changed one input
-    let endDate = new Date(
-      selectedEndDate.getFullYear(),
-      selectedEndDate.getMonth(),
-      selectedEndDate.getDate()
-    );
-    let fromDate = new Date(
-      selectedFromDate.getFullYear(),
-      selectedFromDate.getMonth(),
-      selectedFromDate.getDate()
-    );
-    if (fromDate > endDate || selectedFromTime > selectedEndTime) {
-      return (
-        <Grid item xs={12}>
-          <Typography variant="body2" className={classes.errorMessage}>
-            TILL OCH MED FÅR INTE VARA MINDRE ÄN FRÅN OCH MED
-          </Typography>
-        </Grid>
-      );
-    } else {
-      return <Typography></Typography>;
-    }
-  };
 
   togglePolygonState = () => {
     this.setState({ isPolygonActive: !this.state.isPolygonActive }, () => {
       this.handlePolygonClick();
     });
   };
+
   toggleRectangleState = () => {
     this.setState({ isRectangleActive: !this.state.isRectangleActive }, () => {
       this.handleRectangleClick();
@@ -118,7 +85,7 @@ class Journeys extends React.PureComponent {
   };
 
   addOneHourTime = time => {
-    if (!isNaN(time)) {
+    if (time & !isNaN(time)) {
       let endTime = new Date(time);
       endTime.setHours(time.getHours() + 1);
       this.setState({
@@ -211,6 +178,7 @@ class Journeys extends React.PureComponent {
       });
     }
   };
+
   handleRectangleClick = () => {
     const { formatFromDate, formatEndDate } = this.getFormattedDate();
     if (!this.state.isRectangleActive) {
@@ -301,7 +269,96 @@ class Journeys extends React.PureComponent {
     );
   };
 
-  renderSpatialSearchSection = () => {
+  validateTimeAndDate() {
+    const {
+      selectedFromDate,
+      selectedEndDate,
+      selectedEndTime,
+      selectedFromTime
+    } = this.state;
+
+    let isPolygonEnabled = true;
+    let isRectangleEnabled = true;
+
+    if (
+      selectedFromDate.toString() === "Invalid Date" ||
+      selectedEndDate.toString() === "Invalid Date" ||
+      selectedFromTime.toString() === "Invalid Date" ||
+      selectedEndTime.toString() === "Invalid Date"
+    ) {
+      isPolygonEnabled = false;
+      isRectangleEnabled = false;
+    }
+
+    return {
+      polygon: {
+        enabled: isPolygonEnabled,
+        active: this.state.isPolygonActive
+      },
+      rectangle: {
+        enabled: isRectangleEnabled,
+        active: this.state.isRectangleActive
+      }
+    };
+  }
+
+  showErrorMessage = () => {
+    const { classes } = this.props;
+    const {
+      selectedFromDate,
+      selectedEndDate,
+      selectedEndTime,
+      selectedFromTime
+    } = this.state;
+
+    if (!selectedFromDate || !selectedEndDate)
+      return (
+        <Grid item xs={12}>
+          <Typography variant="body2" className={classes.errorMessage}>
+            DATUM MÅSTE ANGES
+          </Typography>
+        </Grid>
+      );
+
+    //Had to format date because of time will mess up the date if the date was the same and u only changed one input
+    let endDate = new Date(
+      selectedEndDate.getFullYear(),
+      selectedEndDate.getMonth(),
+      selectedEndDate.getDate()
+    );
+    let fromDate = new Date(
+      selectedFromDate.getFullYear(),
+      selectedFromDate.getMonth(),
+      selectedFromDate.getDate()
+    );
+
+    if (!selectedFromTime || !selectedEndTime) {
+      //this.setState({ isPolygonEnabled: false });
+      return (
+        <Grid item xs={12}>
+          <Typography variant="body2" className={classes.errorMessage}>
+            KLOCKSLAG MÅSTE ANGES
+          </Typography>
+        </Grid>
+      );
+    }
+
+    if (fromDate > endDate || selectedFromTime > selectedEndTime) {
+      //this.setState({ isPolygonEnabled: false });
+      return (
+        <Grid item xs={12}>
+          <Typography variant="body2" className={classes.errorMessage}>
+            TILL OCH MED FÅR INTE VARA MINDRE ÄN FRÅN OCH MED
+          </Typography>
+        </Grid>
+      );
+    }
+
+    //if (!this.isPolygonEnabled) this.setState({ isPolygonEnabled: true });
+    return <Typography></Typography>;
+  };
+
+  renderSpatialSearchSection = (polygon, rectangle) => {
     const { classes } = this.props;
     return (
       <>
@@ -313,33 +370,13 @@ class Journeys extends React.PureComponent {
         </Grid>
         <Grid justify="center" container>
           <Grid item xs={4}>
-            <div>
-              <img
-                src={
-                  this.state.isPolygonActive ? ActivePolygon : InactivePolygon
-                }
-                onClick={this.togglePolygonState}
-                value={this.state.selectedFormType}
-                alt="#"
-              ></img>
-            </div>
+            {this.getImageSourceForPolygon(polygon)}
             <Grid item xs={4}>
               <Typography variant="body2">POLYGON</Typography>
             </Grid>
           </Grid>
           <Grid item xs={4}>
-            <div>
-              <img
-                src={
-                  this.state.isRectangleActive
-                    ? ActiveRectangle
-                    : InactiveRectangle
-                }
-                onClick={this.toggleRectangleState}
-                value={this.state.selectedFormType}
-                alt="#"
-              ></img>
-            </div>
+            {this.getImageSourceForRectangle(rectangle)}
             <Grid item xs={4}>
               <Typography variant="body2">REKTANGEL</Typography>
             </Grid>
@@ -348,8 +385,48 @@ class Journeys extends React.PureComponent {
       </>
     );
   };
+
+  getImageSourceForPolygon = polygon => {
+    const { classes } = this.props;
+
+    let imageSrc = ActivePolygon;
+    if (!polygon.active) imageSrc = InactivePolygon;
+    if (!polygon.enabled) imageSrc = DisabledPolygon;
+
+    return (
+      <CardMedia
+        image={imageSrc}
+        className={classes.polygonAndRectangleImage}
+        component="img"
+        onClick={this.togglePolygonState}
+        value={this.state.selectedFormType}
+        alt="#"
+      ></CardMedia>
+    );
+  };
+
+  getImageSourceForRectangle = rectangle => {
+    const { classes } = this.props;
+
+    let imageSrc = ActiveRectangle;
+    if (!rectangle.active) imageSrc = InactiveRectangle;
+    if (!rectangle.enabled) imageSrc = DisabledRectangle;
+
+    return (
+      <CardMedia
+        image={imageSrc}
+        className={classes.polygonAndRectangleImage}
+        component="img"
+        onClick={this.toggleRectangleState}
+        value={this.state.selectedFormType}
+        alt="#"
+      ></CardMedia>
+    );
+  };
+
   render() {
     const { classes } = this.props;
+    const { polygon, rectangle } = this.validateTimeAndDate();
 
     return (
       <div>
@@ -360,7 +437,7 @@ class Journeys extends React.PureComponent {
           {this.renderFromDateSection()}
           {this.renderEndDateSection()}
         </MuiPickersUtilsProvider>
-        {this.renderSpatialSearchSection()}
+        {this.renderSpatialSearchSection(polygon, rectangle)}
       </div>
     );
   }
