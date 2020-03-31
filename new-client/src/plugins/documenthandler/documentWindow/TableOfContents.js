@@ -68,7 +68,6 @@ class TableOfContents extends React.PureComponent {
   renderSubChapters = (chapter, level, subChapterNumber) => {
     let newLevel = level + 1;
     let number = 0;
-    console.log(chapter, "chapter");
     return (
       <Grid container key={subChapterNumber}>
         {level > 0 ? <Grid item xs={level}></Grid> : null}
