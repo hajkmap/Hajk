@@ -75,35 +75,58 @@ class Journeys extends React.PureComponent {
 
   handleFromTimeChange = time => {
     this.updateStateForTimeOrDateChange(time);
-    this.setState({
-      selectedFromTime: time
-    });
+    this.setState(
+      {
+        selectedFromTime: time
+      },
+      () => {
+        this.reactiveSelectSpatialTool();
+      }
+    );
     this.addOneHourTime(time);
   };
 
   handleFromDateChange = date => {
     this.updateStateForTimeOrDateChange(date);
-    this.setState({
-      selectedFromDate: date
-    });
+    this.setState(
+      {
+        selectedFromDate: date
+      },
+      () => {
+        this.reactiveSelectSpatialTool();
+      }
+    );
   };
 
   handleEndTimeChange = time => {
     this.updateStateForTimeOrDateChange(time);
-    this.setState({
-      selectedEndTime: time
-    });
+    this.setState(
+      {
+        selectedEndTime: time
+      },
+      () => {
+        this.reactiveSelectSpatialTool();
+      }
+    );
   };
 
   handleEndDateChange = date => {
     this.updateStateForTimeOrDateChange(date);
-    this.setState({
-      selectedEndDate: date
-    });
+    this.setState(
+      {
+        selectedEndDate: date
+      },
+      () => {
+        this.reactiveSelectSpatialTool();
+      }
+    );
   };
 
-  isTimeOrDateValid = timeOrDate => {
-    return timeOrDate.toString() !== "Invalid Date";
+  reactiveSelectSpatialTool = () => {
+    if (this.state.spatialToolsEnabled && this.state.isPolygonActive)
+      this.activateSearch("Polygon");
+    if (this.state.spatialToolsEnabled && this.state.isRectangleActive)
+      this.activateSearch("Box");
   };
 
   updateStateForTimeOrDateChange(timeOrDate) {
@@ -115,12 +138,17 @@ class Journeys extends React.PureComponent {
       this.setState({ spatialToolsEnabled: true });
   }
 
+  isTimeOrDateValid = timeOrDate => {
+    return timeOrDate.toString() !== "Invalid Date";
+  };
+
   addOneHourTime = time => {
-    if (time & !isNaN(time)) {
+    if (time && !isNaN(time)) {
       let endTime = new Date(time);
       endTime.setHours(time.getHours() + 1);
       this.setState({
-        selectedEndTime: endTime
+        selectedEndTime: endTime,
+        selectedEndDate: endTime
       });
     }
   };
@@ -186,7 +214,8 @@ class Journeys extends React.PureComponent {
         isPolygonActive: false
       },
       () => {
-        if (this.state.isRectangleActive) this.activateSearch("Box");
+        if (this.state.isRectangleActive && this.state.spatialToolsEnabled)
+          this.activateSearch("Box");
       }
     );
   };
