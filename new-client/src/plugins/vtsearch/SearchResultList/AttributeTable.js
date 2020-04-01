@@ -63,10 +63,6 @@ class AttributeTable extends React.Component {
     });
     localObserver.subscribe("highlight-attribute-row", olFeatureId => {
       var foundRowIndex = this.getRowIndexFromOlFeatureId(olFeatureId);
-      localObserver.publish(
-        "set-active-tab",
-        this.state.rows[foundRowIndex].searchResultId
-      );
       this.setState({
         selectedRow: { index: foundRowIndex, olFeatureId: olFeatureId },
         focusedRow: foundRowIndex
