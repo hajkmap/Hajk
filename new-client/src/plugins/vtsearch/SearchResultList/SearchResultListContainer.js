@@ -72,7 +72,6 @@ const initialResultListHeight = 520;
 class SearchResultListContainer extends React.Component {
   state = {
     resultListHeight: initialResultListHeight,
-
     windowWidth: getWindowContainerWidth(),
     windowHeight: getWindowContainerHeight(),
     value: 0,
@@ -152,7 +151,12 @@ class SearchResultListContainer extends React.Component {
       });
     });
 
+    localObserver.subscribe("vtsearch-clicked", () => {
+      this.sendToBackSearchResultContainer();
+    });
+
     localObserver.subscribe("vtsearch-result-done", result => {
+      this.bringToFrontSearchResultContainer();
       this.onSearchDone(result);
     });
 
@@ -165,6 +169,7 @@ class SearchResultListContainer extends React.Component {
     });
 
     localObserver.subscribe("features-clicked-in-map", features => {
+      this.bringToFrontSearchResultContainer();
       localObserver.publish("highlight-attribute-row", features[0].getId());
     });
 
@@ -385,6 +390,18 @@ class SearchResultListContainer extends React.Component {
     localObserver.publish("resize-map", this.state.resultListHeight);
   };
 
+  bringToFrontSearchResultContainer = () => {
+    this.setState({ zIndex: 1100 });
+  };
+
+  sendToBackSearchResultContainer = () => {
+    this.setState({ zIndex: 800 });
+  };
+
+  onClickSearchResultContainer = () => {
+    this.bringToFrontSearchResultContainer();
+  };
+
   renderSearchResultContainer = () => {
     const { classes, windowContainerId } = this.props;
     let searchResults = this.getSearchResults();
@@ -392,6 +409,10 @@ class SearchResultListContainer extends React.Component {
 
     return (
       <Rnd
+        style={{
+          zIndex: this.state.zIndex
+        }}
+        onClick={this.onClickSearchResultContainer}
         className={classes.window}
         size={{
           width: this.state.windowWidth,

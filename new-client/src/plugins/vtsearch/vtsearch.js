@@ -275,13 +275,20 @@ class VTSearch extends React.PureComponent {
     return this.state.loading ? <LinearProgress /> : null;
   }
 
+  onClickSearchContainer = () => {
+    this.localObserver.publish("vtsearch-clicked");
+  };
+
   render() {
     const { classes, app, options } = this.props;
 
     //OBS We need to keep the tooltip and IconButton to render menu!! //Tobias
     return (
       <>
-        <Card className={classes.searchContainer}>
+        <Card
+          className={classes.searchContainer}
+          onClick={this.onClickSearchContainer}
+        >
           <CardActions disableSpacing className={classes.searchContainerBox}>
             {this.renderMenuButton()}
             {this.renderDropDown()}
