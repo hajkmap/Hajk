@@ -45,9 +45,18 @@ class Journeys extends React.PureComponent {
     isPolygonActive: false,
     isRectangleActive: false,
     selectedFromDate: new Date(),
-    selectedFromTime: new Date().setHours(new Date().getHours()),
+    selectedFromTime: new Date(
+      new Date().setHours(new Date().getHours(), new Date().getMinutes(), 0, 0)
+    ),
     selectedEndDate: new Date(),
-    selectedEndTime: new Date().setHours(new Date().getHours() + 1),
+    selectedEndTime: new Date(
+      new Date().setHours(
+        new Date().getHours() + 1,
+        new Date().getMinutes(),
+        0,
+        0
+      )
+    ),
     selectedFormType: ""
   };
 
@@ -346,7 +355,10 @@ class Journeys extends React.PureComponent {
       );
     }
 
-    if (fromDate > endDate || selectedFromTime > selectedEndTime) {
+    if (
+      fromDate > endDate ||
+      (fromDate === endDate && selectedFromTime > selectedEndTime)
+    ) {
       return (
         <Grid item xs={12}>
           <Typography variant="body2" className={classes.errorMessage}>
