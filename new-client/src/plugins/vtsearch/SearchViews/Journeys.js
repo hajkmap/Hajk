@@ -44,11 +44,11 @@ class Journeys extends React.PureComponent {
     spatialToolsEnabled: true,
     isPolygonActive: false,
     isRectangleActive: false,
-    selectedFromDate: new Date(),
+    selectedFromDate: new Date(new Date().setHours(0, 0, 0, 0)),
     selectedFromTime: new Date(
       new Date().setHours(new Date().getHours(), new Date().getMinutes(), 0, 0)
     ),
-    selectedEndDate: new Date(),
+    selectedEndDate: new Date(new Date().setHours(0, 0, 0, 0)),
     selectedEndTime: new Date(
       new Date().setHours(
         new Date().getHours() + 1,
@@ -89,6 +89,12 @@ class Journeys extends React.PureComponent {
         selectedFromTime: time
       },
       () => {
+        this.validateDateAndTime(
+          this.disablePolygonAndRectangleSearch,
+          this.disablePolygonAndRectangleSearch,
+          this.disablePolygonAndRectangleSearch,
+          this.enablePolygonAndRectangleSearch
+        );
         this.reactiveSelectSpatialTool();
       }
     );
@@ -102,6 +108,12 @@ class Journeys extends React.PureComponent {
         selectedFromDate: date
       },
       () => {
+        this.validateDateAndTime(
+          this.disablePolygonAndRectangleSearch,
+          this.disablePolygonAndRectangleSearch,
+          this.disablePolygonAndRectangleSearch,
+          this.enablePolygonAndRectangleSearch
+        );
         this.reactiveSelectSpatialTool();
       }
     );
@@ -114,6 +126,12 @@ class Journeys extends React.PureComponent {
         selectedEndTime: time
       },
       () => {
+        this.validateDateAndTime(
+          this.disablePolygonAndRectangleSearch,
+          this.disablePolygonAndRectangleSearch,
+          this.disablePolygonAndRectangleSearch,
+          this.enablePolygonAndRectangleSearch
+        );
         this.reactiveSelectSpatialTool();
       }
     );
@@ -126,6 +144,12 @@ class Journeys extends React.PureComponent {
         selectedEndDate: date
       },
       () => {
+        this.validateDateAndTime(
+          this.disablePolygonAndRectangleSearch,
+          this.disablePolygonAndRectangleSearch,
+          this.disablePolygonAndRectangleSearch,
+          this.enablePolygonAndRectangleSearch
+        );
         this.reactiveSelectSpatialTool();
       }
     );
@@ -140,15 +164,57 @@ class Journeys extends React.PureComponent {
 
   updateStateForTimeOrDateChange(timeOrDate) {
     if (!this.isTimeOrDateValid(timeOrDate)) {
-      this.setState({ spatialToolsEnabled: false }, this.deactivateSearch);
+      this.disablePolygonAndRectangleSearch();
       return;
     }
-    if (!this.state.spatialToolsEnabled)
-      this.setState({ spatialToolsEnabled: true });
+    if (!this.state.spatialToolsEnabled) this.enablePolygonAndRectangleSearch();
   }
 
   isTimeOrDateValid = timeOrDate => {
     return timeOrDate.toString() !== "Invalid Date";
+  };
+
+  disablePolygonAndRectangleSearch = () => {
+    this.setState({ spatialToolsEnabled: false }, this.deactivateSearch);
+  };
+
+  enablePolygonAndRectangleSearch = () => {
+    this.setState({ spatialToolsEnabled: true });
+  };
+
+  validateDateAndTime = (
+    callbackInvalidDate,
+    callbackInvalidTime,
+    callbackWrongDateAndTime,
+    callbackAllIsOK
+  ) => {
+    const {
+      selectedFromDate,
+      selectedEndDate,
+      selectedEndTime,
+      selectedFromTime
+    } = this.state;
+
+    if (
+      !this.isTimeOrDateValid(selectedFromDate) ||
+      !this.isTimeOrDateValid(selectedEndDate)
+    )
+      return callbackInvalidDate();
+
+    if (
+      !this.isTimeOrDateValid(selectedFromTime) ||
+      !this.isTimeOrDateValid(selectedEndTime)
+    )
+      return callbackInvalidTime();
+
+    if (
+      selectedFromDate > selectedEndDate ||
+      selectedFromTime > selectedEndTime
+    ) {
+      return callbackWrongDateAndTime();
+    }
+
+    if (callbackAllIsOK) return callbackAllIsOK();
   };
 
   addOneHourTime = time => {
@@ -157,7 +223,7 @@ class Journeys extends React.PureComponent {
       endTime.setHours(time.getHours() + 1);
       this.setState({
         selectedEndTime: endTime,
-        selectedEndDate: endTime
+        selectedEndDate: this.state.selectedFromDate
       });
     }
   };
@@ -203,6 +269,8 @@ class Journeys extends React.PureComponent {
   };
 
   handlePolygonClick = () => {
+    if (!this.state.spatialToolsEnabled) return;
+
     this.deactivateSearch();
     this.setState(
       {
@@ -216,6 +284,8 @@ class Journeys extends React.PureComponent {
   };
 
   handleRectangleClick = () => {
+    if (!this.state.spatialToolsEnabled) return;
+
     this.deactivateSearch();
     this.setState(
       {
@@ -316,58 +386,48 @@ class Journeys extends React.PureComponent {
   };
 
   showErrorMessage = () => {
+    return this.validateDateAndTime(
+      this.renderErrorMessageInvalidDate,
+      this.renderErrorMessageInvalidTime,
+      this.renderErrorMessageStartTimeBiggerThanEndTime,
+      this.renderNoErrorMessage
+    );
+  };
+
+  renderErrorMessageInvalidDate = () => {
     const { classes } = this.props;
-    const {
-      selectedFromDate,
-      selectedEndDate,
-      selectedEndTime,
-      selectedFromTime
-    } = this.state;
-
-    if (!selectedFromDate || !selectedEndDate)
-      return (
-        <Grid item xs={12}>
-          <Typography variant="body2" className={classes.errorMessage}>
-            DATUM MÅSTE ANGES
-          </Typography>
-        </Grid>
-      );
-
-    //Had to format date because of time will mess up the date if the date was the same and u only changed one input
-    let endDate = new Date(
-      selectedEndDate.getFullYear(),
-      selectedEndDate.getMonth(),
-      selectedEndDate.getDate()
+    return (
+      <Grid item xs={12}>
+        <Typography variant="body2" className={classes.errorMessage}>
+          DATUM MÅSTE ANGES
+        </Typography>
+      </Grid>
     );
-    let fromDate = new Date(
-      selectedFromDate.getFullYear(),
-      selectedFromDate.getMonth(),
-      selectedFromDate.getDate()
+  };
+
+  renderErrorMessageInvalidTime = () => {
+    const { classes } = this.props;
+    return (
+      <Grid item xs={12}>
+        <Typography variant="body2" className={classes.errorMessage}>
+          KLOCKSLAG MÅSTE ANGES
+        </Typography>
+      </Grid>
     );
+  };
 
-    if (!selectedFromTime || !selectedEndTime) {
-      return (
-        <Grid item xs={12}>
-          <Typography variant="body2" className={classes.errorMessage}>
-            KLOCKSLAG MÅSTE ANGES
-          </Typography>
-        </Grid>
-      );
-    }
+  renderErrorMessageStartTimeBiggerThanEndTime = () => {
+    const { classes } = this.props;
+    return (
+      <Grid item xs={12}>
+        <Typography variant="body2" className={classes.errorMessage}>
+          TILL OCH MED FÅR INTE VARA MINDRE ÄN FRÅN OCH MED
+        </Typography>
+      </Grid>
+    );
+  };
 
-    if (
-      fromDate > endDate ||
-      (fromDate === endDate && selectedFromTime > selectedEndTime)
-    ) {
-      return (
-        <Grid item xs={12}>
-          <Typography variant="body2" className={classes.errorMessage}>
-            TILL OCH MED FÅR INTE VARA MINDRE ÄN FRÅN OCH MED
-          </Typography>
-        </Grid>
-      );
-    }
-
+  renderNoErrorMessage = () => {
     return <Typography></Typography>;
   };
 
