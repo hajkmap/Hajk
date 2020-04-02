@@ -171,6 +171,7 @@ class Journeys extends React.PureComponent {
   }
 
   isTimeOrDateValid = timeOrDate => {
+    if (!timeOrDate) return false;
     return timeOrDate.toString() !== "Invalid Date";
   };
 
