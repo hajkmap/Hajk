@@ -17,26 +17,28 @@ import { Stroke, Style, Circle, Fill, Icon } from "ol/style";
 import { arraySort } from "../utils/ArraySort.js";
 import { handleClick } from "./Click.js";
 
-var drawStyle = new Style({
-  stroke: new Stroke({
-    color: "rgba(255, 214, 91, 0.6)",
-    width: 4
-  }),
-  fill: new Fill({
-    color: "rgba(255, 214, 91, 0.2)"
-  }),
-  image: new Circle({
-    radius: 6,
+class SearchModel {
+  // Private instance fields, see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields
+  #layerList = [];
+  #controllers = [];
+  #timeout = -1;
+
+  #drawStyle = new Style({
     stroke: new Stroke({
       color: "rgba(255, 214, 91, 0.6)",
-      width: 2
+      width: 4
+    }),
+    fill: new Fill({
+      color: "rgba(255, 214, 91, 0.2)"
+    }),
+    image: new Circle({
+      radius: 6,
+      stroke: new Stroke({
+        color: "rgba(255, 214, 91, 0.6)",
+        width: 2
+      })
     })
-  })
-});
-
-class SearchModel {
-  layerList = [];
-  controllers = [];
+  });
 
   constructor(settings, map, app) {
     // Validate
@@ -56,7 +58,7 @@ class SearchModel {
 
     this.vectorLayer = new VectorLayer({
       source: new VectorSource({}),
-      style: this.getVectorLayerStyle()
+      style: this._getVectorLayerStyle()
     });
     this.vectorLayer.set("type", "searchResultLayer");
     this.vectorLayer.setZIndex(1);
@@ -64,7 +66,7 @@ class SearchModel {
     this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
       source: this.drawSource,
-      style: drawStyle
+      style: this.#drawStyle
     });
 
     // Add layer that will hold highlighted search results
@@ -75,6 +77,178 @@ class SearchModel {
   }
 
   /**
+   * Below follows a classification of methods. I've organized them the following way:
+   * 1. Most probably part of future public API
+   * 2. Not yet decided
+   * 3. Candidates for consolidation (merging many current public methods into one and making it part of the public API)
+   * 4. Candidates for refactoring (perhaps they shouldn't be part of core model, perhaps they are just too similar and should be consolidated?)
+   * 5. Private methods (used only in this class)
+   */
+
+  // 1. PUBLIC API
+  search = (searchInput, force, callback) => {
+    clearTimeout(this.#timeout);
+
+    this.clearRecentSpatialSearch();
+    //var autoExecution = searchInput.length > 3;
+
+    if (/*autoExecution ||*/ force === true) {
+      this.abortSearches();
+      this.#timeout = setTimeout(() => {
+        this.localObserver.publish("searchStarted");
+        var promises = [];
+
+        this.#controllers.splice(0, this.#controllers.length);
+
+        this.options.sources.forEach(source => {
+          const { promise, controller } = this._lookup(source, searchInput);
+          promises.push(promise);
+          this.#controllers.push(controller);
+        });
+
+        const timeout = this.#timeout;
+
+        Promise.all(promises)
+          .then(responses => {
+            Promise.all(responses.map(result => result.json()))
+              .then(jsonResults => {
+                if (this.#timeout !== timeout) {
+                  return this.localObserver.publish("searchComplete");
+                }
+                jsonResults.forEach((jsonResult, i) => {
+                  if (jsonResult.features.length > 0) {
+                    arraySort({
+                      array: jsonResult.features,
+                      index: this.options.sources[i].searchFields[0]
+                    });
+                  }
+                  jsonResult.source = this.options.sources[i];
+                });
+                setTimeout(() => {
+                  this.localObserver.publish("searchComplete");
+                }, 500);
+                if (callback) callback(jsonResults);
+              })
+              .catch(parseErrors => {});
+          })
+          .catch(responseErrors => {});
+      }, 200);
+    } else {
+      this.#timeout = -1;
+      this._clear();
+      callback(false);
+    }
+  };
+
+  abortSearches() {
+    if (this.#controllers.length > 0) {
+      this.#controllers.forEach(controller => {
+        controller.abort();
+        this.localObserver.publish("searchComplete");
+      });
+    }
+    this.#controllers.splice(0, this.#controllers.length);
+  }
+
+  // 2. UNSURE ABOUT THE FOLLOWING (PUBLIC OR NOT?)
+  highlightFeatures(features) {
+    this.vectorLayer.getSource().addFeatures(features);
+    this.olMap.getView().fit(this.vectorLayer.getSource().getExtent(), {
+      size: this.olMap.getSize(),
+      maxZoom: 7
+    });
+  }
+
+  highlightImpact(feature) {
+    this._clear();
+    this.vectorLayer.getSource().addFeature(feature);
+    this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());
+    this._searchWithinArea(feature, true, featureCollections => {
+      var layerIds = featureCollections.map(featureCollection => {
+        return featureCollection.source.layerId;
+      });
+      this.#layerList = layerIds.reduce(this._getLayerAsSource, []);
+      this.#layerList.forEach(layer => {
+        layer.setVisible(true);
+      });
+    });
+  }
+
+  // 3. FIXME: PROBABLY CANDIDATES FOR REFACTORING - CONSIDER CREATING ONE clear() METHOD INSTEAD
+  clearRecentSpatialSearch = () => {
+    this._toggleDraw(false);
+    this._toggleSelectGeometriesForSpatialSearch(false);
+    this.clearHighlight();
+    this._clear();
+  };
+
+  clearLayerList() {
+    this.#layerList.forEach(layer => {
+      layer.setVisible(false);
+    });
+    this._hideVisibleLayers();
+  }
+
+  clearFeatureHighlight(feature) {
+    this.vectorLayer
+      .getSource()
+      .removeFeature(
+        this.vectorLayer.getSource().getFeatureById(feature.getId())
+      );
+  }
+
+  clearHighlight() {
+    this.vectorLayer.getSource().clear();
+  }
+
+  // 4. FIXME: CANDIDATES FOR REFACTORING
+
+  selectionSearch = (selectionDone, searchDone) => {
+    // FIXME: Used only in SearchWithSelectionInput
+    this._toggleSelectGeometriesForSpatialSearch(
+      true,
+      selectionDone,
+      searchDone
+    );
+  };
+
+  withinSearch = (radiusDrawn, searchDone) => {
+    // FIXME: Used only in SaerchWithRadiusInput
+    this._toggleDraw(true, "Circle", true, e => {
+      radiusDrawn();
+      // TODO: Change second parameter to FALSE in order to use global defined WFS search sources
+      this._searchWithinArea(e.feature, true, featureCollections => {
+        let layerIds = featureCollections.map(featureCollection => {
+          return featureCollection.source.layerId;
+        });
+
+        this._showLayers(layerIds);
+        searchDone(layerIds);
+      });
+    });
+  };
+
+  polygonSearch = (polygonDrawn, searchDone) => {
+    // FIXME: Used only in SpatialSearchMenu
+    this._toggleDraw(true, "Polygon", false, e => {
+      polygonDrawn();
+      this._searchWithinArea(e.feature, false, featureCollections => {
+        searchDone(featureCollections);
+      });
+    });
+  };
+
+  // 5. PRIVATE METHODS
+  // FIXME: When private methods become part of ES standard or Stage 4,
+  // convert all these to #privateMethod instead of _privateMethod.
+  // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_Methods
+
+  _clear = () => {
+    this.clearHighlight();
+    this.drawSource.clear();
+  };
+
+  /**
    * @summary Takes a RGBA Object as input and returns it as an Array
    * formatted according to ol.Color. If no value is provided, the defaults
    * are used.
@@ -83,7 +257,7 @@ class SearchModel {
    * @param {Array} [def={ r: 100, g: 100, b: 100, a: 0.7 }]
    * @returns {Array} RGBA values formatted as an ol.Color Array
    */
-  convertRgbaColorObjectToArray = (
+  _convertRgbaColorObjectToArray = (
     obj = {},
     def = { r: 100, g: 100, b: 100, a: 0.7 }
   ) => {
@@ -92,12 +266,12 @@ class SearchModel {
   };
 
   /**
-   * @summary Prepares and returnes an ol.Style object, used to
+   * @summary Prepares and returns an ol.Style object, used to
    * style the search results layer.
    *
    * @returns {Object} ol.Style
    */
-  getVectorLayerStyle = () => {
+  _getVectorLayerStyle = () => {
     const {
       anchor,
       scale,
@@ -110,7 +284,7 @@ class SearchModel {
     const style = new Style({
       // Polygons stroke color and width
       stroke: new Stroke({
-        color: this.convertRgbaColorObjectToArray(strokeColor, {
+        color: this._convertRgbaColorObjectToArray(strokeColor, {
           r: 244,
           g: 83,
           b: 63,
@@ -120,7 +294,7 @@ class SearchModel {
       }),
       // Polygons fill color
       fill: new Fill({
-        color: this.convertRgbaColorObjectToArray(fillColor, {
+        color: this._convertRgbaColorObjectToArray(fillColor, {
           r: 244,
           g: 83,
           b: 63,
@@ -156,7 +330,7 @@ class SearchModel {
     return style;
   };
 
-  mapSourceAsWFSPromise = (feature, projCode, source) => {
+  _mapSourceAsWFSPromise = (feature, projCode, source) => {
     let geometry = feature.getGeometry();
     if (geometry.getType() === "Circle") {
       geometry = fromCircle(geometry);
@@ -214,7 +388,7 @@ class SearchModel {
     return { promise, controller };
   };
 
-  getLayerAsSource = (sourceList, layerId) => {
+  _getLayerAsSource = (sourceList, layerId) => {
     var mapLayer = this.olMap
       .getLayers()
       .getArray()
@@ -227,8 +401,8 @@ class SearchModel {
     return sourceList;
   };
 
-  //Only handles single select and is restricted to polygon and multipolygon atm
-  onSelectFeatures = (evt, selectionDone, callback) => {
+  _onSelectFeatures = (evt, selectionDone, callback) => {
+    //Only handles single select and is restricted to polygon and multipolygon atm
     handleClick(evt, evt.map, response => {
       if (response.features.length > 0) {
         var geometryType = response.features[0].getGeometry().getType();
@@ -240,7 +414,7 @@ class SearchModel {
           this.drawLayer.getSource().addFeatures(response.features);
           if (response.features.length > 0) {
             selectionDone();
-            this.searchWithinArea(
+            this._searchWithinArea(
               response.features[0],
               false,
               featureCollections => {
@@ -249,28 +423,28 @@ class SearchModel {
             );
           }
         } else {
-          this.activateSelectionClick(selectionDone, callback);
+          this._activateSelectionClick(selectionDone, callback);
         }
       } else {
-        this.activateSelectionClick(selectionDone, callback);
+        this._activateSelectionClick(selectionDone, callback);
       }
     });
   };
 
-  activateSelectionClick = (selectionDone, callback) => {
+  _activateSelectionClick = (selectionDone, callback) => {
     this.olMap.clicklock = true;
     this.olMap.once("singleclick", e => {
-      this.onSelectFeatures(e, selectionDone, callback);
+      this._onSelectFeatures(e, selectionDone, callback);
     });
   };
 
-  toggleSelectGeometriesForSpatialSearch = (
+  _toggleSelectGeometriesForSpatialSearch = (
     active,
     selectionDone,
     callback
   ) => {
     if (active) {
-      this.activateSelectionClick(selectionDone, callback);
+      this._activateSelectionClick(selectionDone, callback);
     } else {
       this.olMap.clicklock = false;
       this.clearHighlight();
@@ -284,7 +458,7 @@ class SearchModel {
    * @param {boolean} useTransformedWmsSource If true, uses sources specified in Admin->Tools->Search in admin->"Visningstjänster för sök inom", instead of the global WFS sources (Admin->Söktjänster).
    * @param {*} callback Function to call when search is completed
    */
-  searchWithinArea = (feature, useTransformedWmsSource, callback) => {
+  _searchWithinArea = (feature, useTransformedWmsSource, callback) => {
     const projCode = this.olMap
       .getView()
       .getProjection()
@@ -297,23 +471,23 @@ class SearchModel {
 
       if (useTransformedWmsSource) {
         const searchLayers = this.options.selectedSources.reduce(
-          this.getLayerAsSource,
+          this._getLayerAsSource,
           []
         );
 
         searchSources = searchLayers
-          .map(this.mapDisplayLayerAsSearchLayer)
+          .map(this._mapDisplayLayerAsSearchLayer)
           .filter(source => source.layers);
       }
-      this.controllers.splice(0, this.controllers.length);
+      this.#controllers.splice(0, this.#controllers.length);
       searchSources.forEach(source => {
-        const { promise, controller } = this.mapSourceAsWFSPromise(
+        const { promise, controller } = this._mapSourceAsWFSPromise(
           feature,
           projCode,
           source
         );
         promises.push(promise);
-        this.controllers.push(controller);
+        this.#controllers.push(controller);
       });
 
       this.localObserver.publish("spatialSearchStarted");
@@ -343,7 +517,7 @@ class SearchModel {
     if (feature.getGeometry().getType() === "Point") {
       this.options.sources.forEach(source => {
         if (source.caption.toLowerCase() === "fastighet") {
-          this.lookupEstate(source, feature, estates => {
+          this._lookupEstate(source, feature, estates => {
             var olEstate = new GeoJSON().readFeatures(estates)[0];
             feature = olEstate;
             search();
@@ -355,78 +529,7 @@ class SearchModel {
     }
   };
 
-  timeout = -1;
-
-  abortSearches() {
-    if (this.controllers.length > 0) {
-      this.controllers.forEach(controller => {
-        controller.abort();
-        this.localObserver.publish("searchComplete");
-      });
-    }
-    this.controllers.splice(0, this.controllers.length);
-  }
-
-  search = (searchInput, force, callback) => {
-    clearTimeout(this.timeout);
-
-    this.clearRecentSpatialSearch();
-    //var autoExecution = searchInput.length > 3;
-
-    if (/*autoExecution ||*/ force === true) {
-      this.abortSearches();
-      this.timeout = setTimeout(() => {
-        this.localObserver.publish("searchStarted");
-        var promises = [];
-
-        this.controllers.splice(0, this.controllers.length);
-
-        this.options.sources.forEach(source => {
-          const { promise, controller } = this.lookup(source, searchInput);
-          promises.push(promise);
-          this.controllers.push(controller);
-        });
-
-        var timeout = this.timeout;
-
-        Promise.all(promises)
-          .then(responses => {
-            Promise.all(responses.map(result => result.json()))
-              .then(jsonResults => {
-                if (this.timeout !== timeout) {
-                  return this.localObserver.publish("searchComplete");
-                }
-                jsonResults.forEach((jsonResult, i) => {
-                  if (jsonResult.features.length > 0) {
-                    arraySort({
-                      array: jsonResult.features,
-                      index: this.options.sources[i].searchFields[0]
-                    });
-                  }
-                  jsonResult.source = this.options.sources[i];
-                });
-                setTimeout(() => {
-                  this.localObserver.publish("searchComplete");
-                }, 500);
-                if (callback) callback(jsonResults);
-              })
-              .catch(parseErrors => {});
-          })
-          .catch(responseErrors => {});
-      }, 200);
-    } else {
-      this.timeout = -1;
-      this.clear();
-      callback(false);
-    }
-  };
-
-  clear = () => {
-    this.clearHighlight();
-    this.drawSource.clear();
-  };
-
-  getHiddenLayers(layerIds) {
+  _getHiddenLayers(layerIds) {
     return this.olMap
       .getLayers()
       .getArray()
@@ -446,9 +549,9 @@ class SearchModel {
       });
   }
 
-  showLayers = layerIds => {
-    this.visibleLayers = layerIds.reduce(this.getLayerAsSource, []);
-    this.hiddenLayers = this.getHiddenLayers(layerIds);
+  _showLayers = layerIds => {
+    this.visibleLayers = layerIds.reduce(this._getLayerAsSource, []);
+    this.hiddenLayers = this._getHiddenLayers(layerIds);
 
     this.hiddenLayers.forEach(layer => {
       if (layer.layerType === "group") {
@@ -466,53 +569,14 @@ class SearchModel {
     });
   };
 
-  clearRecentSpatialSearch = () => {
-    this.toggleDraw(false);
-    this.toggleSelectGeometriesForSpatialSearch(false);
-    this.clearHighlight();
-    this.clear();
-  };
-
-  selectionSearch = (selectionDone, searchDone) => {
-    this.toggleSelectGeometriesForSpatialSearch(
-      true,
-      selectionDone,
-      searchDone
-    );
-  };
-
-  withinSearch = (radiusDrawn, searchDone) => {
-    this.toggleDraw(true, "Circle", true, e => {
-      radiusDrawn();
-      // TODO: Change second parameter to FALSE in order to use global defined WFS search sources
-      this.searchWithinArea(e.feature, true, featureCollections => {
-        let layerIds = featureCollections.map(featureCollection => {
-          return featureCollection.source.layerId;
-        });
-
-        this.showLayers(layerIds);
-        searchDone(layerIds);
-      });
-    });
-  };
-
-  polygonSearch = (polygonDrawn, searchDone) => {
-    this.toggleDraw(true, "Polygon", false, e => {
-      polygonDrawn();
-      this.searchWithinArea(e.feature, false, featureCollections => {
-        searchDone(featureCollections);
-      });
-    });
-  };
-
-  toggleDraw = (active, type, freehand, drawEndCallback) => {
+  _toggleDraw = (active, type, freehand, drawEndCallback) => {
     if (active) {
       this.draw = new Draw({
         source: this.drawSource,
         type: type,
         freehand: freehand,
         stopClick: true,
-        style: drawStyle
+        style: this.#drawStyle
       });
       this.draw.on("drawend", e => {
         //this.clear();
@@ -528,68 +592,26 @@ class SearchModel {
       this.olMap.addInteraction(this.draw);
     } else {
       if (this.draw) {
-        this.clear();
+        this._clear();
         this.olMap.removeInteraction(this.draw);
       }
       this.olMap.clicklock = false;
     }
   };
 
-  hideVisibleLayers() {
+  _hideVisibleLayers() {
     this.olMap
       .getLayers()
       .getArray()
       .forEach(layer => {
-        var props = layer.getProperties();
+        const props = layer.getProperties();
         if (props.layerInfo && props.layerInfo.layerType !== "base") {
           layer.setVisible(false);
         }
       });
   }
 
-  clearLayerList() {
-    this.layerList.forEach(layer => {
-      layer.setVisible(false);
-    });
-    this.hideVisibleLayers();
-  }
-
-  clearFeatureHighlight(feature) {
-    this.vectorLayer
-      .getSource()
-      .removeFeature(
-        this.vectorLayer.getSource().getFeatureById(feature.getId())
-      );
-  }
-  clearHighlight() {
-    this.vectorLayer.getSource().clear();
-  }
-
-  highlightFeatures(features) {
-    console.log("highlighting features: ", features);
-    this.vectorLayer.getSource().addFeatures(features);
-    this.olMap.getView().fit(this.vectorLayer.getSource().getExtent(), {
-      size: this.olMap.getSize(),
-      maxZoom: 7
-    });
-  }
-
-  highlightImpact(feature) {
-    this.clear();
-    this.vectorLayer.getSource().addFeature(feature);
-    this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());
-    this.searchWithinArea(feature, true, featureCollections => {
-      var layerIds = featureCollections.map(featureCollection => {
-        return featureCollection.source.layerId;
-      });
-      this.layerList = layerIds.reduce(this.getLayerAsSource, []);
-      this.layerList.forEach(layer => {
-        layer.setVisible(true);
-      });
-    });
-  }
-
-  mapDisplayLayerAsSearchLayer(searchLayer) {
+  _mapDisplayLayerAsSearchLayer(searchLayer) {
     // Admin has the possibility to set some search options for WMS layers,
     // one of them is name of geometry field. If it exists, use it.
     const layerInfo = searchLayer.get("layerInfo");
@@ -642,7 +664,7 @@ class SearchModel {
     return source;
   }
 
-  lookupEstate(source, feature, callback) {
+  _lookupEstate(source, feature, callback) {
     const projCode = this.olMap
       .getView()
       .getProjection()
@@ -680,7 +702,7 @@ class SearchModel {
     );
   }
 
-  lookup(source, searchInput) {
+  _lookup(source, searchInput) {
     const projCode = this.olMap
       .getView()
       .getProjection()
