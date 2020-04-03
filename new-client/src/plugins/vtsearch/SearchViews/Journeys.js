@@ -82,11 +82,19 @@ class Journeys extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
   }
 
-  handleFromTimeChange = time => {
-    this.updateStateForTimeOrDateChange(time);
+  handleFromTimeChange = fromTime => {
+    this.updateStateForTimeOrDateChange(fromTime);
+
+    // Bug in KeyboardTimePicker, sends today instead of correct date. Merge date and time to fix it.
+    const newFromTime = this.mergeDateIntoTime(
+      this.state.selectedFromDate,
+      fromTime
+    );
+    if (this.isTimeOrDateValid(newFromTime)) fromTime = newFromTime;
+
     this.setState(
       {
-        selectedFromTime: time
+        selectedFromTime: fromTime
       },
       () => {
         this.validateDateAndTime(
@@ -98,14 +106,38 @@ class Journeys extends React.PureComponent {
         this.reactiveSelectSpatialTool();
       }
     );
-    this.addOneHourTime(time);
+    this.addOneHourTime(fromTime);
   };
 
-  handleFromDateChange = date => {
-    this.updateStateForTimeOrDateChange(date);
+  handleFromDateChange = fromDate => {
+    this.updateStateForTimeOrDateChange(fromDate);
+    const newFromTime = this.mergeDateIntoTime(
+      fromDate,
+      this.state.selectedFromTime
+    );
+    const newEndTime = this.mergeDateIntoTime(
+      fromDate,
+      this.state.selectedEndTime
+    );
+    let fromTime = this.state.selectedFromTime;
+    let endTime = this.state.selectedEndTime;
+    if (
+      this.isTimeOrDateValid(newFromTime) &&
+      this.isTimeOrDateValid(newEndTime)
+    ) {
+      fromTime = newFromTime;
+      endTime = newEndTime;
+    }
+
+    let endDate = this.state.selectedEndDate;
+    if (this.isTimeOrDateValid(fromDate)) endDate = fromDate;
+
     this.setState(
       {
-        selectedFromDate: date
+        selectedFromDate: fromDate,
+        selectedFromTime: fromTime,
+        selectedEndDate: endDate,
+        selectedEndTime: endTime
       },
       () => {
         this.validateDateAndTime(
@@ -119,11 +151,19 @@ class Journeys extends React.PureComponent {
     );
   };
 
-  handleEndTimeChange = time => {
-    this.updateStateForTimeOrDateChange(time);
+  handleEndTimeChange = endTime => {
+    this.updateStateForTimeOrDateChange(endTime);
+
+    // Bug in KeyboardTimePicker, sends today instead of correct date. Merge date and time to fix it.
+    const newEndTime = this.mergeDateIntoTime(
+      this.state.selectedEndDate,
+      endTime
+    );
+    if (this.isTimeOrDateValid(newEndTime)) endTime = newEndTime;
+
     this.setState(
       {
-        selectedEndTime: time
+        selectedEndTime: endTime
       },
       () => {
         this.validateDateAndTime(
@@ -137,11 +177,19 @@ class Journeys extends React.PureComponent {
     );
   };
 
-  handleEndDateChange = date => {
-    this.updateStateForTimeOrDateChange(date);
+  handleEndDateChange = endDate => {
+    this.updateStateForTimeOrDateChange(endDate);
+    const newEndTime = this.mergeDateIntoTime(
+      endDate,
+      this.state.selectedEndTime
+    );
+    let endTime = this.state.selectedEndTime;
+    if (this.isTimeOrDateValid(newEndTime)) endTime = newEndTime;
+
     this.setState(
       {
-        selectedEndDate: date
+        selectedEndDate: endDate,
+        selectedEndTime: endTime
       },
       () => {
         this.validateDateAndTime(
@@ -173,6 +221,18 @@ class Journeys extends React.PureComponent {
   isTimeOrDateValid = timeOrDate => {
     if (!timeOrDate) return false;
     return timeOrDate.toString() !== "Invalid Date";
+  };
+
+  mergeDateIntoTime = (date, time) => {
+    return new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      time.getHours(),
+      time.getMinutes(),
+      0,
+      0
+    );
   };
 
   disablePolygonAndRectangleSearch = () => {
@@ -208,12 +268,9 @@ class Journeys extends React.PureComponent {
     )
       return callbackInvalidTime();
 
-    if (
-      selectedFromDate > selectedEndDate ||
-      selectedFromTime > selectedEndTime
-    ) {
+    const dateAndTimeValues = this.getFormattedDate();
+    if (dateAndTimeValues.formatFromDate > dateAndTimeValues.formatEndDate)
       return callbackWrongDateAndTime();
-    }
 
     if (callbackAllIsOK) return callbackAllIsOK();
   };
@@ -224,7 +281,7 @@ class Journeys extends React.PureComponent {
       endTime.setHours(time.getHours() + 1);
       this.setState({
         selectedEndTime: endTime,
-        selectedEndDate: this.state.selectedFromDate
+        selectedEndDate: endTime
       });
     }
   };
@@ -322,6 +379,7 @@ class Journeys extends React.PureComponent {
         <Grid item xs={12}>
           <Typography variant="caption">FRÅN OCH MED</Typography>
           <KeyboardTimePicker
+            format="HH:mm"
             margin="normal"
             id="time-picker"
             ampm={false}
@@ -358,6 +416,7 @@ class Journeys extends React.PureComponent {
         <Grid item xs={12}>
           <Typography variant="caption">TILL OCH MED</Typography>
           <KeyboardTimePicker
+            format="HH:mm"
             margin="normal"
             ampm={false}
             className={classes.dateForm}
