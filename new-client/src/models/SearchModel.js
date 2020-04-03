@@ -18,11 +18,20 @@ import { arraySort } from "../utils/ArraySort.js";
 import { handleClick } from "./Click.js";
 
 class SearchModel {
-  // Private instance fields, see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields
+  // Public field declarations (why? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Defining_classes)
+  options;
+  localObserver = new Observer();
+
+  // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
+  #map;
+  #app;
   #layerList = [];
   #controllers = [];
   #timeout = -1;
-
+  #wfsParser = new WFS();
+  #vectorLayer;
+  #drawSource;
+  #drawLayer;
   #drawStyle = new Style({
     stroke: new Stroke({
       color: "rgba(255, 214, 91, 0.6)",
@@ -40,40 +49,37 @@ class SearchModel {
     })
   });
 
-  constructor(settings, map, app) {
+  constructor(options, map, app) {
     // Validate
-    if (!settings || !map || !app) {
+    if (!options || !map || !app) {
       throw new Error(
-        "One of the required parameters for SearchModel is missing. Here are the values."
+        "One of the required parameters for SearchModel is missing."
       );
     }
 
-    this.options = settings;
-    this.olMap = map;
-    this.app = app;
-    this.localObserver = new Observer();
+    // FIXME: Currently this is public as it's used outside this class - but should it? I mean, these options are internal, right?
+    this.options = options; // FIXME: Options, currently from search plugin
+    this.#map = map; // The OpenLayers map instance
+    this.#app = app; // Supplies appConfig and globalObserver
 
-    this.wfsParser = new WFS();
-    this.globalObserver = app.globalObserver;
-
-    this.vectorLayer = new VectorLayer({
+    this.#vectorLayer = new VectorLayer({
       source: new VectorSource({}),
       style: this._getVectorLayerStyle()
     });
-    this.vectorLayer.set("type", "searchResultLayer");
-    this.vectorLayer.setZIndex(1);
+    this.#vectorLayer.set("type", "searchResultLayer");
+    this.#vectorLayer.setZIndex(1);
 
-    this.drawSource = new VectorSource({ wrapX: false });
-    this.drawLayer = new VectorLayer({
-      source: this.drawSource,
+    this.#drawSource = new VectorSource({ wrapX: false });
+    this.#drawLayer = new VectorLayer({
+      source: this.#drawSource,
       style: this.#drawStyle
     });
 
     // Add layer that will hold highlighted search results
-    this.olMap.addLayer(this.vectorLayer);
+    this.#map.addLayer(this.#vectorLayer);
 
     // Add layer that will be used to allow user draw on map - used for spatial search
-    this.olMap.addLayer(this.drawLayer);
+    this.#map.addLayer(this.#drawLayer);
   }
 
   /**
@@ -90,13 +96,12 @@ class SearchModel {
     clearTimeout(this.#timeout);
 
     this.clearRecentSpatialSearch();
-    //var autoExecution = searchInput.length > 3;
 
-    if (/*autoExecution ||*/ force === true) {
+    if (force === true) {
       this.abortSearches();
       this.#timeout = setTimeout(() => {
         this.localObserver.publish("searchStarted");
-        var promises = [];
+        const promises = [];
 
         this.#controllers.splice(0, this.#controllers.length);
 
@@ -152,17 +157,17 @@ class SearchModel {
 
   // 2. UNSURE ABOUT THE FOLLOWING (PUBLIC OR NOT?)
   highlightFeatures(features) {
-    this.vectorLayer.getSource().addFeatures(features);
-    this.olMap.getView().fit(this.vectorLayer.getSource().getExtent(), {
-      size: this.olMap.getSize(),
+    this.#vectorLayer.getSource().addFeatures(features);
+    this.#map.getView().fit(this.#vectorLayer.getSource().getExtent(), {
+      size: this.#map.getSize(),
       maxZoom: 7
     });
   }
 
   highlightImpact(feature) {
     this._clear();
-    this.vectorLayer.getSource().addFeature(feature);
-    this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());
+    this.#vectorLayer.getSource().addFeature(feature);
+    this.#map.getView().fit(feature.getGeometry(), this.#map.getSize());
     this._searchWithinArea(feature, true, featureCollections => {
       var layerIds = featureCollections.map(featureCollection => {
         return featureCollection.source.layerId;
@@ -190,15 +195,15 @@ class SearchModel {
   }
 
   clearFeatureHighlight(feature) {
-    this.vectorLayer
+    this.#vectorLayer
       .getSource()
       .removeFeature(
-        this.vectorLayer.getSource().getFeatureById(feature.getId())
+        this.#vectorLayer.getSource().getFeatureById(feature.getId())
       );
   }
 
   clearHighlight() {
-    this.vectorLayer.getSource().clear();
+    this.#vectorLayer.getSource().clear();
   }
 
   // 4. FIXME: CANDIDATES FOR REFACTORING
@@ -245,7 +250,7 @@ class SearchModel {
 
   _clear = () => {
     this.clearHighlight();
-    this.drawSource.clear();
+    this.#drawSource.clear();
   };
 
   /**
@@ -355,7 +360,7 @@ class SearchModel {
       filter: new Intersects(finalGeom, geometry, projCode)
     };
 
-    const node = this.wfsParser.writeGetFeature(options);
+    const node = this.#wfsParser.writeGetFeature(options);
     const xmlSerializer = new XMLSerializer();
     const xmlString = xmlSerializer.serializeToString(node);
     const controller = new AbortController();
@@ -377,19 +382,19 @@ class SearchModel {
     // current util/proxy with something that works with POST, we can use just one
     // proxy for all types of requests).
     let urlWithoutProxy = source.url.replace(
-      this.app.config.appConfig.proxy,
+      this.#app.config.appConfig.proxy,
       ""
     );
 
     const promise = fetch(
-      this.app.config.appConfig.searchProxy + urlWithoutProxy,
+      this.#app.config.appConfig.searchProxy + urlWithoutProxy,
       request
     );
     return { promise, controller };
   };
 
   _getLayerAsSource = (sourceList, layerId) => {
-    var mapLayer = this.olMap
+    var mapLayer = this.#map
       .getLayers()
       .getArray()
       .find(l => l.get("name") === layerId);
@@ -411,7 +416,7 @@ class SearchModel {
           geometryType === GeometryType.POLYGON ||
           geometryType === GeometryType.MULTI_POLYGON
         ) {
-          this.drawLayer.getSource().addFeatures(response.features);
+          this.#drawLayer.getSource().addFeatures(response.features);
           if (response.features.length > 0) {
             selectionDone();
             this._searchWithinArea(
@@ -432,8 +437,8 @@ class SearchModel {
   };
 
   _activateSelectionClick = (selectionDone, callback) => {
-    this.olMap.clicklock = true;
-    this.olMap.once("singleclick", e => {
+    this.#map.clicklock = true;
+    this.#map.once("singleclick", e => {
       this._onSelectFeatures(e, selectionDone, callback);
     });
   };
@@ -446,7 +451,7 @@ class SearchModel {
     if (active) {
       this._activateSelectionClick(selectionDone, callback);
     } else {
-      this.olMap.clicklock = false;
+      this.#map.clicklock = false;
       this.clearHighlight();
     }
   };
@@ -459,7 +464,7 @@ class SearchModel {
    * @param {*} callback Function to call when search is completed
    */
   _searchWithinArea = (feature, useTransformedWmsSource, callback) => {
-    const projCode = this.olMap
+    const projCode = this.#map
       .getView()
       .getProjection()
       .getCode();
@@ -530,7 +535,7 @@ class SearchModel {
   };
 
   _getHiddenLayers(layerIds) {
-    return this.olMap
+    return this.#map
       .getLayers()
       .getArray()
       .filter(layer => {
@@ -555,14 +560,14 @@ class SearchModel {
 
     this.hiddenLayers.forEach(layer => {
       if (layer.layerType === "group") {
-        this.globalObserver.publish("layerswitcher.hideLayer", layer);
+        this.#app.globalObserver.publish("layerswitcher.hideLayer", layer);
       } else {
         layer.setVisible(false);
       }
     });
     this.visibleLayers.forEach(layer => {
       if (layer.layerType === "group") {
-        this.globalObserver.publish("layerswitcher.showLayer", layer);
+        this.#app.globalObserver.publish("layerswitcher.showLayer", layer);
       } else {
         layer.setVisible(true);
       }
@@ -572,7 +577,7 @@ class SearchModel {
   _toggleDraw = (active, type, freehand, drawEndCallback) => {
     if (active) {
       this.draw = new Draw({
-        source: this.drawSource,
+        source: this.#drawSource,
         type: type,
         freehand: freehand,
         stopClick: true,
@@ -580,27 +585,27 @@ class SearchModel {
       });
       this.draw.on("drawend", e => {
         //this.clear();
-        this.olMap.removeInteraction(this.draw);
+        this.#map.removeInteraction(this.draw);
         setTimeout(() => {
-          this.olMap.clicklock = false;
+          this.#map.clicklock = false;
         }, 1000);
         if (drawEndCallback) {
           drawEndCallback(e);
         }
       });
-      this.olMap.clicklock = true;
-      this.olMap.addInteraction(this.draw);
+      this.#map.clicklock = true;
+      this.#map.addInteraction(this.draw);
     } else {
       if (this.draw) {
         this._clear();
-        this.olMap.removeInteraction(this.draw);
+        this.#map.removeInteraction(this.draw);
       }
-      this.olMap.clicklock = false;
+      this.#map.clicklock = false;
     }
   };
 
   _hideVisibleLayers() {
-    this.olMap
+    this.#map
       .getLayers()
       .getArray()
       .forEach(layer => {
@@ -665,7 +670,7 @@ class SearchModel {
   }
 
   _lookupEstate(source, feature, callback) {
-    const projCode = this.olMap
+    const projCode = this.#map
       .getView()
       .getProjection()
       .getCode();
@@ -680,7 +685,7 @@ class SearchModel {
       filter: new Intersects(source.geometryField, geometry, projCode)
     };
 
-    const node = this.wfsParser.writeGetFeature(options);
+    const node = this.#wfsParser.writeGetFeature(options);
     const xmlSerializer = new XMLSerializer();
     const xmlString = xmlSerializer.serializeToString(node);
 
@@ -693,7 +698,7 @@ class SearchModel {
       body: xmlString
     };
 
-    fetch(this.app.config.appConfig.searchProxy + source.url, request).then(
+    fetch(this.#app.config.appConfig.searchProxy + source.url, request).then(
       response => {
         response.json().then(estate => {
           callback(estate);
@@ -703,7 +708,7 @@ class SearchModel {
   }
 
   _lookup(source, searchInput) {
-    const projCode = this.olMap
+    const projCode = this.#map
       .getView()
       .getProjection()
       .getCode();
@@ -731,7 +736,7 @@ class SearchModel {
       filter: filter
     };
 
-    const node = this.wfsParser.writeGetFeature(options);
+    const node = this.#wfsParser.writeGetFeature(options);
     const xmlSerializer = new XMLSerializer();
     const xmlString = xmlSerializer.serializeToString(node);
     const controller = new AbortController();
@@ -747,7 +752,7 @@ class SearchModel {
       body: xmlString
     };
     const promise = fetch(
-      this.app.config.appConfig.searchProxy + source.url,
+      this.#app.config.appConfig.searchProxy + source.url,
       request
     );
 
