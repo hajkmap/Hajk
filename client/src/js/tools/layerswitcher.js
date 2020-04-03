@@ -77,7 +77,7 @@ var LayerSwitcherModel = {
 
   configure: function (shell) {
     this.set('layerCollection', shell.getLayerCollection());
-    if (this.get('visibleAtStart') && document.body.scrollWidth >= 600) {
+    if (this.get('visibleAtStart')) {
       this.set('visible', true);
     }
   },

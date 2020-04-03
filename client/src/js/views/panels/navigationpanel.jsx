@@ -106,6 +106,10 @@ var NavigationPanelView = {
       if (this.forced) {
         minimized = false;
       }
+      
+      if(minimized && isMobile){
+        document.getElementById('sidebar-toggle-swipe').click();
+      }
       this.setState({minimized: minimized});
       this.forced = false;
     });
@@ -187,7 +191,7 @@ var NavigationPanelView = {
       panelInstance = null,
       Panel = null;
 
-    if (this.state.minimized) {
+    if (this.state.minimized && !isMobile) {
       classes += ' minimized';
     }
 

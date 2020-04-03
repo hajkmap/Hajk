@@ -29,6 +29,7 @@ var defaultState = {
   index: 0,
   markerImg: 'assets/icons/marker.png',
   displayPopup: false,
+  moveablePopup: false,
   imgSizeX: 32,
   imgSizeY: 32,
   anchorX: 16,
@@ -55,6 +56,7 @@ class ToolOptions extends Component {
         index: tool.index,
         markerImg: tool.options.markerImg,
         displayPopup: tool.options.displayPopup,
+        moveablePopup: tool.options.moveablePopup,
         imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
         imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
         anchorX: tool.options.anchor[0] || this.state.anchorX,
@@ -118,6 +120,7 @@ class ToolOptions extends Component {
       'index': this.state.index,
       'options': {
         displayPopup: this.state.displayPopup,
+        moveablePopup: this.state.moveablePopup,
         markerImg: this.state.markerImg,
         anchor: [this.state.anchorX, this.state.anchorY],
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
@@ -254,6 +257,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               checked={this.state.displayPopup} />&nbsp;
             <label htmlFor='displayPopup'>Visa som popup</label>
+          </div>
+          <div>
+            <input
+              id='moveablePopup'
+              name='moveablePopup'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.moveablePopup} />&nbsp;
+            <label htmlFor='moveablePopup'>Flyttbar popup</label>
           </div>
         </form>
       </div>
