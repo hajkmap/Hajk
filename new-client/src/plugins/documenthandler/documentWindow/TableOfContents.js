@@ -13,6 +13,9 @@ const styles = theme => {
     tableOfContentsHeader: {
       paddingLeft: 0,
       paddingRight: 0
+    },
+    selectableText: {
+      userSelect: "text"
     }
   };
 };
@@ -111,7 +114,9 @@ class TableOfContents extends React.PureComponent {
           aria-controls="panel1a-content"
           id="panel1a-header"
         >
-          <Typography variant="h1">INNEHÅLL</Typography>
+          <Typography className={classes.selectableText} variant="h1">
+            INNEHÅLL
+          </Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <Grid container spacing={0}>
