@@ -12,7 +12,8 @@ const styles = theme => ({
     height: "100%",
     padding: theme.spacing(3),
     overflowY: "scroll",
-    overflowX: "hidden"
+    overflowX: "hidden",
+    userSelect: "text"
   },
   scrollToTopButton: {
     position: "fixed",
@@ -90,6 +91,13 @@ class DocumentViewer extends React.PureComponent {
     );
   };
 
+  selectAllText = () => {
+    var range = document.createRange();
+    range.selectNode(this.scrollElementRef.current);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+  };
+
   render() {
     const {
       classes,
@@ -103,6 +111,14 @@ class DocumentViewer extends React.PureComponent {
     return (
       <>
         <Grid
+          tabIndex="0" //Focus grid to be able to use onKeyDown
+          onKeyDown={e => {
+            //If ctrl-a or command-a is pressed
+            if ((e.ctrlKey || e.metaKey) && e.keyCode === 65) {
+              this.selectAllText();
+              e.preventDefault();
+            }
+          }}
           onScroll={this.onScroll}
           ref={this.scrollElementRef}
           className={classes.gridContainer}

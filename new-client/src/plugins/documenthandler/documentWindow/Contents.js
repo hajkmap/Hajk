@@ -22,7 +22,6 @@ const styles = theme => {
     },
 
     chapter: {
-      userSelect: "text",
       cursor: "text",
       marginTop: theme.spacing(4)
     }
