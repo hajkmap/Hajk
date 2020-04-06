@@ -112,7 +112,15 @@
             "name": "Kartlager",
             "toggled": true,
             "expanded": true,
-            "layers": [],
+            "layers": [
+              {
+                "id": "5",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
             "groups": []
           }
         ],
@@ -120,7 +128,6 @@
         "visibleAtStart": false,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
-        "enableOSM": true,
         "showBreadcrumbs": false,
         "target": "toolbar",
         "position": "left",
@@ -196,15 +203,7 @@
       "type": "anchor",
       "options": {
         "target": "toolbar",
-        "position": "right",
-        "tocExpanded": false,
-        "title": "Översiktsplan",
-        "caption": "Översiktsplan",
-        "serviceUrl": "/mapservice/informative/load",
-        "exportUrl": "/mapservice/export/document",
-        "abstract": "Läs mer om vad som planeras i kommunen",
-        "html": "<div>HTML som beskriver dokumentets innehåll</div>",
-        "document": "oversiktsplan",
+        "position": "left",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
@@ -235,204 +234,41 @@
       },
       "index": 0
     },
-
     {
       "type": "documenthandler",
       "options": {
         "target": "toolbar",
         "overlayLogoUrl": "http://localhost:3000/logo-share.png",
-        "openOverlayButtonColor": "#456785",
+        "openOverlayButtonColor": "#ffffff",
         "showScrollButtonLimit": 400,
+        "width": 600,
+        "height": "90vh",
         "menuConfig": {
           "menu": [
             {
-              "title": "Markanvändnings karta",
-              "document": "x",
-              "color": "#bfe4f2",
-              "icon": {
-                "materialUiIconName": "audiotrack",
-                "fontSize": "30px"
-              },
-              "description": "",
-
-              "maplink": "",
-              "link": "",
-              "menu": [
-                {
-                  "title": "Utvecklingsalternativ",
-                  "document": "",
-                  "color": "#bfe4f2",
-                  "icon": {
-                    "materialUiIconName": "alarm_add",
-                    "fontSize": "30px"
-                  },
-                  "maplink": "",
-                  "link": "",
-                  "menu": [
-                    {
-                      "title": "Centrala Göteborg",
-                      "document": "",
-                      "color": "#f8ccdc",
-                      "icon": {
-                        "materialUiIconName": "alarm_add",
-                        "fontSize": "30px"
-                      },
-                      "maplink": "",
-                      "link": "http://goteborg.se"
-                    },
-                    {
-                      "title": "Frölunda Högsbo",
-                      "document": "x",
-                      "color": "#b7e1c8",
-                      "icon": {
-                        "materialUiIconName": "alarm_add",
-                        "fontSize": "30px"
-                      },
-                      "maplink": "x",
-                      "link": ""
-                    },
-                    {
-                      "title": "Torsviken",
-                      "document": "x",
-                      "color": "#b7e1c8",
-                      "icon": {
-                        "materialUiIconName": "alarm_add",
-                        "fontSize": "30px"
-                      },
-                      "maplink": "",
-                      "link": ""
-                    },
-                    {
-                      "title": "Södra skärgården",
-                      "document": "x",
-                      "color": "#b7e1c8",
-                      "icon": {
-                        "materialUiIconName": "alarm_add",
-                        "fontSize": "30px"
-                      },
-                      "maplink": "",
-                      "link": ""
-                    }
-                  ]
-                },
-                {
-                  "title": "Test",
-                  "document": "x",
-                  "color": "#b7e1c8",
-                  "icon": {
-                    "materialUiIconName": "alarm_add",
-                    "fontSize": "30px"
-                  },
-                  "maplink": "",
-                  "link": "",
-                  "menu": []
-                }
-              ]
-            },
-            {
-              "title": "Utgångspunkter",
+              "title": "Öppna Dokumentfönster",
               "document": "utgangspunkter",
-              "color": "#b7e1c8",
+              "color": "#546344",
               "icon": {
-                "materialUiIconName": "alarm_add",
-                "fontSize": "30px"
-              },
-              "maplink": "",
-              "link": "",
-              "menu": []
-            },
-            {
-              "title": "Kartlänk test Mölndal",
-              "document": "",
-              "color": "#b7e1c8",
-              "icon": {
-                "materialUiIconName": "alarm_add",
-                "fontSize": "30px"
-              },
-              "maplink": {
-                "center": [323222.6, 6395257.21],
-                "zoom": 15,
-                "extent": [
-                  414162.76923076925,
-                  6581602,
-                  417678.76923076925,
-                  6584898
-                ]
-              },
-              "link": "",
-              "menu": []
-            },
-            {
-              "title": "Tematiska anspråk",
-              "document": "x",
-              "color": "#bfe4f2",
-              "icon": {
-                "materialUiIconName": "alarm_add",
-                "fontSize": "30px"
-              },
-              "maplink": "",
-              "link": "",
-              "menu": [
-                {
-                  "title": "Utvecklingsalternativ",
-                  "document": "",
-                  "color": "#f5bf42",
-                  "icon": {
-                    "materialUiIconName": "alarm_add",
-                    "fontSize": "30px"
-                  },
-                  "maplink": "",
-                  "link": ""
-                },
-                {
-                  "title": "Test",
-                  "document": "x",
-                  "color": "#b7e1c8",
-                  "icon": {
-                    "materialUiIconName": "alarm_add",
-                    "fontSize": "large"
-                  },
-                  "maplink": "",
-                  "link": "",
-                  "menu": []
-                }
-              ]
-            },
-            {
-              "title": "Tematiska anspråk",
-              "document": "x",
-              "color": "#bfe4f2",
-              "icon": {
-                "materialUiIconName": "alarm_add",
+                "materialUiIconName": "add_shopping_cart",
                 "fontSize": "large"
               },
               "maplink": "",
               "link": "",
-              "menu": [
-                {
-                  "title": "Utvecklingsalternativ",
-                  "document": "",
-                  "color": "#f5bf42",
-                  "icon": {
-                    "materialUiIconName": "alarm_add",
-                    "fontSize": "large"
-                  },
-                  "maplink": "",
-                  "link": ""
-                },
-                {
-                  "title": "Test",
-                  "document": "x",
-                  "color": "#b7e1c8",
-                  "icon": {
-                    "materialUiIconName": "alarm_add",
-                    "fontSize": "large"
-                  },
-                  "maplink": "",
-                  "link": "",
-                  "menu": []
-                }
-              ]
+              "menu": []
+            },
+            {
+              "title": "Öppna dokuentfönster",
+              "document": "x",
+              "color": "#bfe4f2",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "10px"
+              },
+              "description": "",
+              "maplink": "",
+              "link": "",
+              "menu": []
             },
             {
               "title": "",
@@ -444,21 +280,183 @@
               },
               "maplink": "",
               "link": "",
+              "menu": []
+            },
+            {
+              "title": "öppna PDF",
+              "document": "",
+              "color": "#bfe4f2",
+              "icon": {
+                "materialUiIconName": "audiotrack",
+                "fontSize": "10px"
+              },
+              "description": "",
+              "maplink": "",
+              "link": "https://goteborg.se/wps/wcm/connect/489cfea5-35bd-48ee-96ef-8bb151790500/OFFICIELL+Prislista+-+Fr%C3%A5n+200101.pdf?MOD=AJPERES",
+              "menu": []
+            },
+            {
+              "title": "Hantera kartan",
+              "document": "",
+              "color": "#b7e1c8",
+              "icon": {
+                "materialUiIconName": "alarm_add",
+                "fontSize": "30px"
+              },
+              "maplink": "http://testservergbg.northeurope.cloudapp.azure.com/?m=map_1&x=299265.69724349305&y=6404675.177492046&z=7.8&l=1,5&clean=false",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Öppna Submeny",
+              "document": "x",
+              "color": "#b7e1c8",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": ""
+              },
+              "maplink": "",
+              "link": "",
               "menu": [
                 {
-                  "title": "Utvecklingsalternativ",
-                  "document": "x",
-                  "color": "#f5bf42",
+                  "title": "Centrala Göteborg",
+                  "document": "",
+                  "color": "#b7e1c8",
                   "icon": {
                     "materialUiIconName": "alarm_add",
                     "fontSize": "large"
                   },
                   "maplink": "",
-                  "link": ""
+                  "link": "http://goteborg.se",
+                  "menu": []
+                },
+
+                {
+                  "title": "Frölunda Högsbo",
+                  "document": "",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "http://goteborg.se",
+                  "menu": []
+                }
+              ]
+            },
+            {
+              "title": "Test av länktyper",
+              "document": "",
+              "color": "#bfe4f2",
+              "icon": {
+                "materialUiIconName": "alarm_add",
+                "fontSize": "30px"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": [
+                {
+                  "title": "Gå till webbsida",
+                  "document": "",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "http://google.se",
+                  "menu": []
                 },
                 {
-                  "title": "Test",
-                  "document": "x",
+                  "title": "Öppna PDF",
+                  "document": "",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "https://goteborg.se/wps/wcm/connect/489cfea5-35bd-48ee-96ef-8bb151790500/OFFICIELL+Prislista+-+Fr%C3%A5n+200101.pdf?MOD=AJPERES",
+                  "menu": []
+                },
+                {
+                  "title": "Hantera kartan",
+                  "document": "",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "30px"
+                  },
+                  "maplink": "http://testservergbg.northeurope.cloudapp.azure.com/?m=map_1&x=299265.69724349305&y=6404675.177492046&z=7.8&l=1,5&clean=false",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Öppna ÖP dokument",
+                  "document": "utgangspunkter",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            },
+
+            {
+              "title": "",
+              "document": "",
+              "color": "#bfe4f2",
+              "icon": {
+                "materialUiIconName": "alarm_add",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": [
+                {
+                  "title": "Gå till webbsida",
+                  "document": "",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "http://google.se",
+                  "menu": []
+                },
+                {
+                  "title": "Öppna PDF",
+                  "document": "",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "https://goteborg.se/wps/wcm/connect/489cfea5-35bd-48ee-96ef-8bb151790500/OFFICIELL+Prislista+-+Fr%C3%A5n+200101.pdf?MOD=AJPERES",
+                  "menu": []
+                },
+                {
+                  "title": "Hantera kartan",
+                  "document": "",
+                  "color": "#b7e1c8",
+                  "icon": {
+                    "materialUiIconName": "alarm_add",
+                    "fontSize": "30px"
+                  },
+                  "maplink": "http://testservergbg.northeurope.cloudapp.azure.com/?m=map_1&x=299265.69724349305&y=6404675.177492046&z=7.8&l=1,5&clean=false",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Öppna ÖP dokument",
+                  "document": "utgangspunkter",
                   "color": "#b7e1c8",
                   "icon": {
                     "materialUiIconName": "alarm_add",
@@ -473,7 +471,6 @@
           ]
         }
       },
-
       "index": 8
     },
     {
@@ -515,7 +512,7 @@
         "presetList": [
           {
             "name": "Test",
-            "presetUrl": "http://localhost:3000/?m=map_1&x=319771&y=6399959&z=8&l=36&clean=false"
+            "presetUrl": "http://localhost:3000/?m=map_1&x=317632&y=6397262.000000002&z=13&l=36,5&clean=false"
           }
         ],
         "visibleForGroups": []
