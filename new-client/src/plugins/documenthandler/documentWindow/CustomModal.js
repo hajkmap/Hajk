@@ -78,7 +78,6 @@ class CustomModal extends React.PureComponent {
                 {this.props.children}
               </Grid>
             </Grid>
-            <Grid className={classes.modalBottom}></Grid>
           </Container>
         </Modal>
       </>

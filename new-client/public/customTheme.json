@@ -11,7 +11,7 @@
     }
   },
   "typography": {
-    "fontFamily": "'Open Sans', sans-serif",
+    "fontFamily": "'Open Sans'",
     "fontSize": 14,
     "h1": { "fontSize": "2.0rem", "fontWeight": 600 },
     "h2": { "fontSize": "1.8rem", "fontWeight": 600 },

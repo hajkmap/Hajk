@@ -60,13 +60,13 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
       <Grid
         style={{ backgroundColor: item.color }}
         key={item.title}
-        className={classes.menuItem}
         ref={this.ref}
         item
         lg={icon && !item.title ? false : true}
       >
         <MenuItem
           onClick={this.handleClick}
+          className={classes.menuItem}
           onMouseEnter={toggleHighlight}
           onMouseLeave={toggleHighlight}
           aria-controls="simple-menu"
