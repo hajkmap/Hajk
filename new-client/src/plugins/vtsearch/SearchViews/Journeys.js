@@ -224,6 +224,9 @@ class Journeys extends React.PureComponent {
   };
 
   mergeDateIntoTime = (date, time) => {
+    if (!this.isTimeOrDateValid(date)) return date;
+    if (!this.isTimeOrDateValid(time)) return time;
+
     return new Date(
       date.getFullYear(),
       date.getMonth(),
