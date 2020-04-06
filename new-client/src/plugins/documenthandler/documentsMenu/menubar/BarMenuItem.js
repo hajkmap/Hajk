@@ -7,8 +7,8 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   menuItem: {
-    maxHeight: theme.spacing(6) + 4,
-    minHeight: theme.spacing(6) + 4
+    maxHeight: theme.spacing(6),
+    minHeight: theme.spacing(6)
   },
 
   typography: {

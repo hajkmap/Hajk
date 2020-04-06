@@ -6,7 +6,12 @@ import MenuItem from "@material-ui/core/MenuItem";
 import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 import Grid from "@material-ui/core/Grid";
 
-const styles = theme => ({});
+const styles = theme => ({
+  menuItem: {
+    maxHeight: theme.spacing(6),
+    minHeight: theme.spacing(6)
+  }
+});
 
 class SubMenuItem extends React.PureComponent {
   static propTypes = {};
@@ -29,11 +34,11 @@ class SubMenuItem extends React.PureComponent {
   };
 
   render() {
-    const { item, localObserver } = this.props;
+    const { item, localObserver, classes } = this.props;
     return (
       <>
         <Grid style={{ backgroundColor: item.color }} item>
-          <MenuItem onClick={this.handleItemClick}>
+          <MenuItem className={classes.menuItem} onClick={this.handleItemClick}>
             {item.title}
             <ArrowRightIcon />
           </MenuItem>
