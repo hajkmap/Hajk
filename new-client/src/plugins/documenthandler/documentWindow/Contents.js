@@ -311,16 +311,18 @@ class Contents extends React.PureComponent {
 
   renderImageInModal = () => {
     const { classes } = this.props;
+    const { popupImage } = this.state;
+
     return (
       <CustomModal
         fullScreen={false}
         close={this.closePopupModal}
-        open={this.state.popupImage ? true : false}
+        open={popupImage ? true : false}
       >
         <CardMedia
           component="img"
           className={classes.modalImage}
-          image={this.state.popupImage}
+          image={popupImage}
         />
       </CustomModal>
     );
@@ -405,10 +407,9 @@ class Contents extends React.PureComponent {
 
   render() {
     const { document } = this.props;
-    const { popupImage } = this.state;
     return (
       <>
-        {popupImage && this.renderImageInModal()}
+        {this.renderImageInModal()}
         {this.renderChapters(document?.chapters)};
       </>
     );
