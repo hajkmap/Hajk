@@ -89,9 +89,10 @@ class CascadeMenu extends React.PureComponent {
       items,
       menuOpen,
       onClose,
-      classes
+      classes,
+      width
     } = this.props;
-
+    console.log(width, "width");
     return (
       <>
         <Menu
@@ -106,7 +107,12 @@ class CascadeMenu extends React.PureComponent {
           onClose={onClose}
           open={menuOpen}
         >
-          <Grid className={classes.menu} direction="column" container>
+          <Grid
+            style={{ width: width }}
+            className={classes.menu}
+            direction="column"
+            container
+          >
             {items && this.renderMenuItems()}
           </Grid>
         </Menu>

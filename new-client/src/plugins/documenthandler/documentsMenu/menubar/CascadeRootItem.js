@@ -9,11 +9,8 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   menuItem: {
-    maxHeight: theme.spacing(6) + 4,
-    minHeight: theme.spacing(6) + 4
-  },
-  menuItemRootOverride: {
-    minHeight: 0
+    maxHeight: theme.spacing(6),
+    minHeight: theme.spacing(6)
   },
   typography: {
     maxHeight: "inherit",
@@ -27,8 +24,14 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
 
   state = {
     anchorEl: null,
-    menuOpen: false
+    menuOpen: false,
+    childWidth: 200
   };
+
+  constructor() {
+    super();
+    this.ref = React.createRef();
+  }
 
   closeMenu = () => {
     this.setState({
@@ -57,12 +60,13 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
       <Grid
         style={{ backgroundColor: item.color }}
         key={item.title}
+        className={classes.menuItem}
+        ref={this.ref}
         item
         lg={icon && !item.title ? false : true}
       >
         <MenuItem
           onClick={this.handleClick}
-          className={classes.menuItem}
           onMouseEnter={toggleHighlight}
           onMouseLeave={toggleHighlight}
           aria-controls="simple-menu"
@@ -89,6 +93,7 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
       <>
         {this.getButton()}
         <CascadeMenu
+          width={this.ref.current != null ? this.ref.current.offsetWidth : 200}
           items={item.menu}
           menuOpen={this.state.menuOpen}
           onClose={this.onCloseClick}
