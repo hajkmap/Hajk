@@ -86,8 +86,8 @@ var ExportTiffSettings = React.createClass({
 });
 
 var ExportPdfSettings = React.createClass({
-    resolutions: [72, 96, 150, 200],
-    paperFormats: ["A3", "A4"],
+    resolutions: [72, 96, 150, 200, 300],
+    paperFormats: ["A2", "A3", "A4"],
 
   getInitialState: function () {
     return {
