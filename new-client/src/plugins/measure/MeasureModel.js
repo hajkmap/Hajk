@@ -263,19 +263,16 @@ class MeasureModel {
   eventHandler = event => {
     const key = event.key; // Or const {key} = event; in ES6+
     if (key === "Escape") {
-      console.log("Do things: ", this.draw);
       this.draw.finishDrawing();
     }
   };
 
   setActive(active) {
     if (active && !this.active) {
-      console.log("activating");
       document.addEventListener("keydown", this.eventHandler);
       this.addInteraction();
     }
     if (active === false) {
-      console.log("deactivating");
       document.removeEventListener("keydown", this.eventHandler);
       this.removeInteraction();
     }
