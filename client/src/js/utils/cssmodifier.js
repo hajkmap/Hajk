@@ -72,6 +72,7 @@ module.exports = {
     var drawToolsSelected = getCSSRule('.draw-tools li.selected');
     var informationBlanketHeader = getCSSRule('.information #blanket #container #header');
     var informationBlanketContainer = getCSSRule('.information #blanket #container');
+    var newsBlanketHeader = getCSSRule('.news #blanket #container #header');
 
     var olControlButton = getCSSRule('.ol-control button');
     var olControlButtonHover = getCSSRule('.ol-control button:hover');
@@ -172,6 +173,12 @@ module.exports = {
     if (informationBlanketContainer) {
       informationBlanketContainer.style.borderColor = config.primaryColor;
     }
+
+    if (newsBlanketHeader) {
+      newsBlanketHeader.style.backgroundColor = config.primaryColor;
+      newsBlanketHeader.style.color = config.secondaryColor;
+    }
+
     if (olControlButton) {
       olControlButton.style.backgroundColor = config.primaryColor;
       olControlButton.style.color = config.secondaryColor;

@@ -38,12 +38,13 @@ var NewsModelProperties = {
     type: 'news',
     panel: '',
     toolbar: 'top-right',
-    icon: 'fa fa-rss',
+    icon: 'fa fa-bell fa-lg',
     title: 'Nyhet',
     display: false,
     headerText: 'Nyhet',
     text: '',
-    latestShown: ''
+    latestShown: '',
+    Id: 'nyhetBtn'
 };
 
 /**
@@ -91,10 +92,6 @@ var NewsModel = {
     },
 
     configure: function (shell) {
-        console.log("news configures");
-        console.log("this", this);
-        console.log("NewsView", NewsView);
-        console.log("id:news",document.getElementById('news'));
         this.set({'display': this.get('visibleAtStart')});
         const element = <NewsView model={this} />;
         ReactDOM.render(
