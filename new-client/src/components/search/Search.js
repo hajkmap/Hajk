@@ -163,6 +163,19 @@ class Search extends React.PureComponent {
 
   functions = [];
 
+  constructor(props) {
+    super(props);
+    this.handleStringChanged = this.handleStringChanged.bind(this);
+
+    this.props.globalObserver.subscribe("search.addFunctionality", "");
+    this.props.globalObserver.subscribe("search.populateAutocomplete", "");
+    this.props.globalObserver.subscribe("search.populateResultsList", "");
+  }
+
+  handleStringChanged(e) {
+    this.props.onStringChanged(e.target.value);
+  }
+
   addFunctionality(func) {
     this.functions.push(func());
   }
@@ -204,7 +217,8 @@ class Search extends React.PureComponent {
               "aria-label": "search hajk maps",
               id: "searchbox"
             }}
-            onChange={this.handleSearchBoxInputChange}
+            value={this.props.stringChanged}
+            onChange={this.handleStringChanged}
             onKeyPress={this.handleSearchBoxKeyPress}
           />
           <Tooltip
@@ -236,13 +250,13 @@ class Search extends React.PureComponent {
             </IconButton>
           </Tooltip>
           {/* <SpatialSearchMenu
-            onToolChanged={toolType => {
-              this.setState({
-                activeSearchView: toolType
-              });
-            }}
-            activeSpatialTools={this.activeSpatialTools}
-          /> */}
+              onToolChanged={toolType => {
+                this.setState({
+                  activeSearchView: toolType
+                });
+              }}
+              activeSpatialTools={this.activeSpatialTools}
+            /> */}
           {/* {this.state.activeSearchView && this.renderSpatialBar()} */}
         </Paper>
         {/* {this.renderSearchResultList("center")} */}
