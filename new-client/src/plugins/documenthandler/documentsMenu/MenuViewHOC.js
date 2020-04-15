@@ -46,7 +46,6 @@ const menuViewHoc = MenuComponent =>
 
     resetMenu = () => {
       const { activeMenuSection } = this.state;
-
       if (this.hasParentMenu(activeMenuSection[0])) {
         let parentMenu = activeMenuSection[0].parent;
         let containingMenu = parentMenu.containingMenu;
@@ -85,6 +84,7 @@ const menuViewHoc = MenuComponent =>
       });
 
       localObserver.subscribe("maplink-clicked", item => {
+        this.closeOverlayMenu();
         localObserver.publish("fly-to", item.maplink);
       });
     };

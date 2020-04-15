@@ -17,9 +17,9 @@ const styles = theme => ({
     minHeight: "80%",
     marginTop: "5%",
     marginBottom: "5%",
-    [theme.breakpoints.down("xs")]: {
+    overflow: "auto",
+    [`${theme.breakpoints.down("sm")}`]: {
       height: "100%",
-      overflow: "scroll",
       marginTop: 0,
       marginBottom: 0
     }
@@ -29,9 +29,9 @@ const styles = theme => ({
     outline: "none",
     width: "100%",
     height: "100%",
+    overflow: "auto",
     [theme.breakpoints.down("xs")]: {
       height: "100%",
-      overflow: "scroll",
       marginTop: 0,
       marginBottom: 0
     }
