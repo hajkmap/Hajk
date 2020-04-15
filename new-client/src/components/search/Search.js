@@ -167,6 +167,14 @@ class Search extends React.PureComponent {
     this.functions.push(func());
   }
 
+  abort() {
+    console.log("Abort search.");
+  }
+
+  search() {
+    console.log("Start search.");
+  }
+
   render() {
     const { classes, onMenuClick, menuButtonDisabled } = this.props;
 
