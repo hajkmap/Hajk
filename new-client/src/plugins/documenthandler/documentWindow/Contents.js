@@ -196,10 +196,15 @@ class Contents extends React.PureComponent {
       if (documentLink) {
         return this.getHeaderLinkForNonActiveDocument(
           aTagObject,
-          headerIdentifier
+          headerIdentifier,
+          documentLink
         );
       } else {
-        return this.getHeaderLinkForSameDocument(aTagObject, headerIdentifier);
+        return this.getHeaderLinkForSameDocument(
+          aTagObject,
+          headerIdentifier,
+          documentLink
+        );
       }
     }
 
