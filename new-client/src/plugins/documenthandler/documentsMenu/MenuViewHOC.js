@@ -21,6 +21,7 @@ const menuViewHoc = MenuComponent =>
     }
 
     closeOverlayMenu = () => {
+      this.resetMenu();
       this.setState({ isOverlayMenuOpen: false });
     };
 
@@ -39,11 +40,27 @@ const menuViewHoc = MenuComponent =>
       }
     }
 
-    getSubMenu = title => {
-      var menuItem = this.state.activeMenuSection.find(menuItem => {
-        return menuItem.title === title;
-      });
-      return menuItem.menu;
+    hasParentMenu = menuSection => {
+      return menuSection.parent ? true : false;
+    };
+
+    resetMenu = () => {
+      const { activeMenuSection } = this.state;
+
+      if (this.hasParentMenu(activeMenuSection[0])) {
+        let parentMenu = activeMenuSection[0].parent;
+        let containingMenu = parentMenu.containingMenu;
+
+        while (this.hasParentMenu(parentMenu)) {
+          parentMenu = parentMenu.parent;
+          containingMenu = parentMenu.containingMenu;
+        }
+        this.setState({ activeMenuSection: containingMenu });
+      }
+    };
+
+    getSubMenu = item => {
+      return item.menu;
     };
 
     bindSubscriptions = () => {
@@ -53,8 +70,7 @@ const menuViewHoc = MenuComponent =>
       });
 
       localObserver.subscribe("cascade-clicked", item => {
-        var activeMenuSection = this.getSubMenu(item.title);
-        this.setState({ activeMenuSection: activeMenuSection });
+        this.setState({ activeMenuSection: this.getSubMenu(item) });
       });
 
       localObserver.subscribe("document-clicked", item => {
