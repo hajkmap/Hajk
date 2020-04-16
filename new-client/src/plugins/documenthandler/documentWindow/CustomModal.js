@@ -6,6 +6,7 @@ import clsx from "clsx";
 import Grid from "@material-ui/core/Grid";
 import CloseIcon from "@material-ui/icons/Close";
 import Modal from "@material-ui/core/Modal";
+import { FormHelperText } from "@material-ui/core";
 
 const mapDiv = document.getElementById("map");
 const blurCss = "filter : blur(7px)";
@@ -13,15 +14,18 @@ const blurCss = "filter : blur(7px)";
 const styles = theme => ({
   container: {
     backgroundColor: "rgba(255, 255, 255, 0.6)",
+    display: "flex",
+    position: "absolute",
+    top: "5%",
+    left: 0,
+    right: 0,
+    bottom: "5%",
     outline: "none",
-    minHeight: "80%",
-    marginTop: "5%",
-    marginBottom: "5%",
     overflow: "auto",
-    [`${theme.breakpoints.down("sm")}`]: {
+    [`${theme.breakpoints.down("xs")}`]: {
       height: "100%",
-      marginTop: 0,
-      marginBottom: 0
+      top: 0,
+      bottom: 0
     }
   },
   fullScreen: {
@@ -35,6 +39,10 @@ const styles = theme => ({
       marginTop: 0,
       marginBottom: 0
     }
+  },
+  closeButton: {
+    position: "absolute",
+    right: theme.spacing(2)
   },
   modalHeader: {
     paddingTop: theme.spacing(1),
@@ -70,12 +78,18 @@ class CustomModal extends React.PureComponent {
           >
             <Grid justify="flex-end" container>
               <Grid className={classes.modalHeader} item>
-                <IconButton onClick={close} aria-label="delete">
+                <IconButton
+                  className={classes.closeButton}
+                  onClick={close}
+                  aria-label="delete"
+                >
                   <CloseIcon></CloseIcon>
                 </IconButton>
               </Grid>
-              <Grid container item>
-                {this.props.children}
+              <Grid alignContent="center" justify="flex-end" container>
+                <Grid xs={12} item>
+                  {this.props.children}
+                </Grid>
               </Grid>
             </Grid>
           </Container>

@@ -130,7 +130,7 @@ class DocumentViewer extends React.PureComponent {
               document={activeDocument}
             />
           </Grid>
-          <Grid item>
+          <Grid container item>
             <Contents
               model={model}
               localObserver={localObserver}

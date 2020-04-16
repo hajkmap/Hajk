@@ -18,7 +18,11 @@ const styles = theme => {
     },
     modalImage: {
       width: "100%",
-      objectFit: "contain"
+      objectFit: "contain",
+      height: "fit-content"
+    },
+    typography: {
+      overflowWrap: "break-word"
     },
 
     chapter: {
@@ -356,6 +360,7 @@ class Contents extends React.PureComponent {
       <Grid
         className={classes.chapter}
         container
+        item
         alignItems="center"
         key={chapter.id}
       >
