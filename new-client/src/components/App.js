@@ -11,8 +11,8 @@ import CookieNotice from "./CookieNotice";
 import Introduction from "./Introduction";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
-// Temporarily commended out the new plugin as I focus on rewriting the search model
-// import Search from "./search/Search";
+
+import Search from "./search/Search";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
@@ -362,30 +362,12 @@ class App extends React.PureComponent {
     this.setState({ drawerMouseOverLock: false });
   };
 
-  renderSearchPlugin() {
-    const searchPlugin = this.appModel.plugins.search;
-    if (searchPlugin) {
-      return (
-        <searchPlugin.component
-          map={searchPlugin.map}
-          app={searchPlugin.app}
-          options={searchPlugin.options}
-          onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
-          menuButtonDisabled={this.state.drawerPermanent}
-        />
-      );
-    } else {
-      return null;
-    }
-  }
-
-  // Temporarily commended out the new plugin as I focus on rewriting the search model
+  // Method below renders the **old** Search plugin. See below for the current implementation.
   // renderSearchPlugin() {
-  //   // FIXME: Move somewhere else from plugins - Search is part of Core
   //   const searchPlugin = this.appModel.plugins.search;
   //   if (searchPlugin) {
   //     return (
-  //       <Search
+  //       <searchPlugin.component
   //         map={searchPlugin.map}
   //         app={searchPlugin.app}
   //         options={searchPlugin.options}
@@ -397,6 +379,23 @@ class App extends React.PureComponent {
   //     return null;
   //   }
   // }
+
+  renderSearchPlugin() {
+    // FIXME: We should get config from somewhere else now when Search is part of Core
+    if (this.appModel.plugins.search) {
+      return (
+        <Search
+          map={this.appModel.getMap()}
+          app={this}
+          options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
+          onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
+          menuButtonDisabled={this.state.drawerPermanent}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
 
   /**
    * In the case of a disabled Search plugin, we must

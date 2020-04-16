@@ -14,15 +14,21 @@ import {
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill, Icon } from "ol/style";
 
-import { arraySort } from "../utils/ArraySort.js";
-import { handleClick } from "./Click.js";
+import { deepMerge } from "../utils/DeepMerge";
+import { arraySort } from "../utils/ArraySort";
+import { handleClick } from "./Click";
 
 class SearchModel {
   // Public field declarations (why? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Defining_classes)
-  options;
+  modelOptions;
   localObserver = new Observer();
 
   // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
+  #options = {
+    limit: 100,
+    extentLimit: null
+  };
+  #sources = null;
   #map;
   #app;
   #layerList = [];
@@ -49,16 +55,16 @@ class SearchModel {
     })
   });
 
-  constructor(options, map, app) {
+  constructor(searchPluginOptions, map, app) {
     // Validate
-    if (!options || !map || !app) {
+    if (!searchPluginOptions || !map || !app) {
       throw new Error(
         "One of the required parameters for SearchModel is missing."
       );
     }
 
     // FIXME: Currently this is public as it's used outside this class - but should it? I mean, these options are internal, right?
-    this.options = options; // FIXME: Options, currently from search plugin
+    this.modelOptions = searchPluginOptions; // FIXME: Options, currently from search plugin
     this.#map = map; // The OpenLayers map instance
     this.#app = app; // Supplies appConfig and globalObserver
 
@@ -92,6 +98,52 @@ class SearchModel {
    * 5. Private methods (used only in this class)
    */
 
+  #sleep = (delay = 0) => {
+    return new Promise(resolve => {
+      setTimeout(resolve, delay);
+    });
+  };
+
+  // 0. NEW PUBLIC API
+  getAutocomplete = async (searchString, options = null) => {
+    // Just a demo that autocompletes the same, no matter value of searchString.
+    console.log("getAutocomplete for string:", searchString);
+    const response = await fetch(
+      "https://country.register.gov.uk/records.json?page-size=5000"
+    );
+    const countries = await response.json();
+    await this.#sleep(1e3); // For demo purposes.
+
+    return countries;
+  };
+
+  getResults = async (searchString, options = null) => {
+    console.log("getResults for string: ", searchString);
+    return [{ id: 0, value: searchString }];
+  };
+
+  abort = () => {
+    return true;
+  };
+
+  getOptions = () => {
+    return this.#options;
+  };
+
+  setOptions = options => {
+    this.#options = deepMerge(this.#options, options);
+  };
+
+  getSources = () => {
+    return this.#sources;
+  };
+
+  setSources = (sources = null) => {
+    return sources === null
+      ? (this.#sources = this.modelOptions.layers)
+      : sources;
+  };
+
   // 1. PUBLIC API
   search = (searchInput, force, callback) => {
     clearTimeout(this.#timeout);
@@ -106,7 +158,7 @@ class SearchModel {
 
         this.#controllers.splice(0, this.#controllers.length);
 
-        this.options.sources.forEach(source => {
+        this.modelOptions.sources.forEach(source => {
           const { promise, controller } = this.#lookup(source, searchInput);
           promises.push(promise);
           this.#controllers.push(controller);
@@ -125,10 +177,10 @@ class SearchModel {
                   if (jsonResult.features.length > 0) {
                     arraySort({
                       array: jsonResult.features,
-                      index: this.options.sources[i].searchFields[0]
+                      index: this.modelOptions.sources[i].searchFields[0]
                     });
                   }
-                  jsonResult.source = this.options.sources[i];
+                  jsonResult.source = this.modelOptions.sources[i];
                 });
                 setTimeout(() => {
                   this.localObserver.publish("searchComplete");
@@ -283,7 +335,7 @@ class SearchModel {
       strokeColor,
       strokeWidth,
       fillColor
-    } = this.options;
+    } = this.modelOptions;
 
     const style = new Style({
       // Polygons stroke color and width
@@ -354,7 +406,7 @@ class SearchModel {
       featureTypes: source.layers,
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
-      maxFeatures: this.options.maxFeatures || 100,
+      maxFeatures: this.modelOptions.maxFeatures || 100,
       geometryName: finalGeom,
       filter: new Intersects(finalGeom, geometry, projCode)
     };
@@ -470,11 +522,11 @@ class SearchModel {
 
     var search = () => {
       let promises = [];
-      let searchSources = this.options.sources;
+      let searchSources = this.modelOptions.sources;
       this.abortSearches();
 
       if (useTransformedWmsSource) {
-        const searchLayers = this.options.selectedSources.reduce(
+        const searchLayers = this.modelOptions.selectedSources.reduce(
           this.#getLayerAsSource,
           []
         );
@@ -519,7 +571,7 @@ class SearchModel {
     };
 
     if (feature.getGeometry().getType() === "Point") {
-      this.options.sources.forEach(source => {
+      this.modelOptions.sources.forEach(source => {
         if (source.caption.toLowerCase() === "fastighet") {
           this.#lookupEstate(source, feature, estates => {
             var olEstate = new GeoJSON().readFeatures(estates)[0];
@@ -731,7 +783,7 @@ class SearchModel {
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
-      maxFeatures: this.options.maxFeatures || 100,
+      maxFeatures: this.modelOptions.maxFeatures || 100,
       filter: filter
     };
 
