@@ -103,144 +103,128 @@
  * }, ...]
  */
 
+//
+// *https://www.registers.service.gov.uk/registers/country/use-the-api*
 import React from "react";
-import PropTypes from "prop-types";
-// import Observer from "react-event-observer";
-import { withStyles } from "@material-ui/core/styles";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import {
   CircularProgress,
   IconButton,
-  InputBase,
   Paper,
-  Tooltip
-  // Divider
+  TextField,
+  Tooltip,
+  makeStyles
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
-import SearchIcon from "@material-ui/icons/Search";
-import ClearIcon from "@material-ui/icons/Clear";
+const useStyles = makeStyles(theme => ({
+  iconButtons: {
+    padding: 10
+  }
+}));
 
-const styles = theme => {
-  return {
-    root: {
-      padding: "2px 4px",
-      display: "flex",
-      alignItems: "center",
-      width: 400
-    },
-    input: {
-      marginLeft: theme.spacing(1),
-      flex: 1
-    },
-    iconButton: {
-      padding: 10
-    },
-    divider: {
-      height: 28,
-      margin: 4
+export default function Search(props) {
+  const classes = useStyles();
+
+  // Grab some stuff from props
+  const { menuButtonDisabled, onMenuClick } = props;
+  const searchModel = props.app.appModel.searchModel;
+
+  // React state
+  const [open, setOpen] = React.useState(false);
+  const [options, setOptions] = React.useState([]);
+  const loading = open && options.length === 0;
+
+  React.useEffect(() => {
+    const searchString = document.getElementById("searchbox").value;
+    if (searchString.length > 3) return undefined;
+
+    let active = true;
+
+    if (!loading) {
+      return undefined;
     }
-  };
-};
 
-const STARTVIEW = "startview";
+    (async () => {
+      const countries = await searchModel.getAutocomplete(searchString);
 
-class Search extends React.PureComponent {
-  static propTypes = {
-    app: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
-    map: PropTypes.object.isRequired,
-    menuButtonDisabled: PropTypes.bool.isRequired,
-    onMenuClick: PropTypes.func.isRequired,
-    options: PropTypes.object.isRequired
-  };
+      if (active) {
+        setOptions(Object.keys(countries).map(key => countries[key].item[0]));
+      }
+    })();
 
-  // Define initial state
-  state = {
-    visible: true,
-    loading: false,
-    activeSearchView: STARTVIEW,
-    searchboxPlaceholder: this.props.options.tooltip || "Sök i Hajk"
-  };
+    return () => {
+      active = false;
+    };
+  }, [loading, searchModel]);
 
-  functions = [];
+  React.useEffect(() => {
+    if (!open) {
+      setOptions([]);
+    }
+  }, [open]);
 
-  addFunctionality(func) {
-    this.functions.push(func());
+  async function handleOnChange(event, value, reason) {
+    const results = await searchModel.getResults(value);
+    console.log("results: ", results);
   }
 
-  render() {
-    const { classes, onMenuClick, menuButtonDisabled } = this.props;
+  const tooltipText = menuButtonDisabled
+    ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
+    : "Visa verktygspanelen";
 
-    const tooltipText = menuButtonDisabled
-      ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
-      : "Visa verktygspanelen";
-
-    return (
-      <div>
-        <Paper className={classes.root}>
-          <Tooltip title={tooltipText}>
-            <span id="drawerToggler">
-              <IconButton
-                onClick={onMenuClick}
-                className={classes.iconButton}
-                disabled={menuButtonDisabled}
-                aria-label="menu"
-              >
-                <MenuIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
-          <InputBase
-            className={classes.input}
-            placeholder={this.state.searchboxPlaceholder}
-            inputProps={{
-              "aria-label": "search hajk maps",
-              id: "searchbox"
+  return (
+    <Paper className={classes.root}>
+      <Autocomplete
+        freeSolo
+        id="searchbox"
+        clearOnEscape
+        style={{ width: 500 }}
+        open={open}
+        onOpen={() => {
+          setOpen(true);
+        }}
+        onClose={() => {
+          setOpen(false);
+        }}
+        onChange={handleOnChange}
+        getOptionSelected={(option, value) => option.name === value.name}
+        getOptionLabel={option => option?.name || option}
+        options={options}
+        loading={loading}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label={undefined}
+            variant="outlined"
+            placeholder="Skriv eller välj bland förslagen nedan..."
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: (
+                <Tooltip title={tooltipText}>
+                  <span id="drawerToggler">
+                    <IconButton
+                      onClick={onMenuClick}
+                      className={classes.iconButton}
+                      disabled={menuButtonDisabled}
+                      aria-label="menu"
+                    >
+                      <MenuIcon size={20} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              ),
+              endAdornment: (
+                <React.Fragment>
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </React.Fragment>
+              )
             }}
-            onChange={this.handleSearchBoxInputChange}
-            onKeyPress={this.handleSearchBoxKeyPress}
           />
-          <Tooltip
-            title={
-              this.state.activeSearchView === STARTVIEW
-                ? this.state.searchboxPlaceholder
-                : "Återställ sökruta"
-            }
-          >
-            <IconButton
-              className={classes.iconButton}
-              aria-label="search"
-              onClick={e => {
-                if (this.state.activeSearchView === STARTVIEW) {
-                  const v = document.getElementById("searchbox").value;
-                  this.doSearch(v);
-                } else {
-                  this.resetToStartView();
-                }
-              }}
-            >
-              {this.state.activeSearchView === STARTVIEW && <SearchIcon />}
-              {this.state.activeSearchView !== STARTVIEW &&
-                (this.state.loading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <ClearIcon />
-                ))}
-            </IconButton>
-          </Tooltip>
-          {/* <SpatialSearchMenu
-            onToolChanged={toolType => {
-              this.setState({
-                activeSearchView: toolType
-              });
-            }}
-            activeSpatialTools={this.activeSpatialTools}
-          /> */}
-          {/* {this.state.activeSearchView && this.renderSpatialBar()} */}
-        </Paper>
-        {/* {this.renderSearchResultList("center")} */}
-      </div>
-    );
-  }
+        )}
+      />
+    </Paper>
+  );
 }
-
-export default withStyles(styles)(Search);
