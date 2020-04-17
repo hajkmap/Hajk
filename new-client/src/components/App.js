@@ -363,24 +363,24 @@ class App extends React.PureComponent {
   };
 
   // Method below renders the **old** Search plugin. See below for the current implementation.
-  // renderSearchPlugin() {
-  //   const searchPlugin = this.appModel.plugins.search;
-  //   if (searchPlugin) {
-  //     return (
-  //       <searchPlugin.component
-  //         map={searchPlugin.map}
-  //         app={searchPlugin.app}
-  //         options={searchPlugin.options}
-  //         onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
-  //         menuButtonDisabled={this.state.drawerPermanent}
-  //       />
-  //     );
-  //   } else {
-  //     return null;
-  //   }
-  // }
-
   renderSearchPlugin() {
+    const searchPlugin = this.appModel.plugins.search;
+    if (searchPlugin) {
+      return (
+        <searchPlugin.component
+          map={searchPlugin.map}
+          app={searchPlugin.app}
+          options={searchPlugin.options}
+          onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
+          menuButtonDisabled={this.state.drawerPermanent}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
+
+  renderSearchComponent() {
     // FIXME: We should get config from somewhere else now when Search is part of Core
     if (this.appModel.plugins.search) {
       return (
@@ -496,6 +496,7 @@ class App extends React.PureComponent {
             >
               {clean === false && this.renderStandaloneDrawerToggler()}
               {clean === false && this.renderSearchPlugin()}
+              {clean === false && this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div
