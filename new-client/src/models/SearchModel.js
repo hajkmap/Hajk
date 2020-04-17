@@ -20,7 +20,7 @@ import { handleClick } from "./Click";
 
 class SearchModel {
   // Public field declarations (why? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Defining_classes)
-  modelOptions;
+  options;
   localObserver = new Observer();
 
   // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
@@ -64,7 +64,7 @@ class SearchModel {
     }
 
     // FIXME: Currently this is public as it's used outside this class - but should it? I mean, these options are internal, right?
-    this.modelOptions = searchPluginOptions; // FIXME: Options, currently from search plugin
+    this.options = searchPluginOptions; // FIXME: Options, currently from search plugin
     this.#map = map; // The OpenLayers map instance
     this.#app = app; // Supplies appConfig and globalObserver
 
@@ -86,7 +86,6 @@ class SearchModel {
 
     // Add layer that will be used to allow user draw on map - used for spatial search
     this.#map.addLayer(this.#drawLayer);
-    console.log(this);
   }
 
   /**
@@ -104,22 +103,82 @@ class SearchModel {
     });
   };
 
+  #mapDisplayFieldsInFeature = (featureProperties, displayFields) => {
+    return displayFields.map(df => featureProperties[df]).join(", ");
+  };
+
   // 0. NEW PUBLIC API
   getAutocomplete = async (searchString, options = null) => {
-    // Just a demo that autocompletes the same, no matter value of searchString.
-    console.log("getAutocomplete for string:", searchString);
-    const response = await fetch(
-      "https://country.register.gov.uk/records.json?page-size=5000"
-    );
-    const countries = await response.json();
-    await this.#sleep(1e3); // For demo purposes.
+    const featureCollections = await this.#getRawResults(searchString);
+    const rr = featureCollections.map(featureCollection => {
+      return featureCollection.features.map(feature => {
+        const autocompleteEntry = this.#mapDisplayFieldsInFeature(
+          feature.properties,
+          featureCollection.source.displayFields
+        );
+        const dataset = featureCollection.source.caption;
+        return {
+          dataset,
+          autocompleteEntry
+        };
+      });
+    });
+    const flattened = rr.reduce((a, b) => a.concat(b), []);
+    // const response = await fetch(
+    //   "https://country.register.gov.uk/records.json?page-size=5000"
+    // );
+    // const countries = await response.json();
+    // console.log("countries: ", countries);
+    // await this.#sleep(1e3); // For demo purposes.
 
-    return countries;
+    return flattened;
+  };
+
+  #getRawResults = async (searchString, options = null) => {
+    // Fast fail if no search string provided
+    if (searchString === null) return [];
+    const sources = this.getSources();
+    const promises = [];
+    let rawResults = null;
+    console.log(`Will look for ${searchString} in sources:`, sources);
+
+    sources.forEach(source => {
+      const { promise, controller } = this.#lookup(source, searchString);
+      promises.push(promise);
+      this.#controllers.push(controller);
+    });
+
+    await Promise.all(promises)
+      .then(async responses => {
+        await Promise.all(responses.map(result => result.json()))
+          .then(jsonResults => {
+            // if (this.#timeout !== timeout) {
+            //   return this.localObserver.publish("searchComplete");
+            // }
+            jsonResults.forEach((jsonResult, i) => {
+              if (jsonResult.features.length > 0) {
+                arraySort({
+                  array: jsonResult.features,
+                  index: this.options.sources[i].searchFields[0]
+                });
+              }
+              jsonResult.source = this.options.sources[i];
+            });
+            // setTimeout(() => {
+            //   this.localObserver.publish("searchComplete");
+            // }, 500);
+            rawResults = jsonResults;
+          })
+          .catch(parseErrors => {});
+      })
+      .catch(responseErrors => {});
+
+    console.log("rawResults: ", rawResults);
+    return rawResults;
   };
 
   getResults = async (searchString, options = null) => {
-    console.log("getResults for string: ", searchString);
-    return [{ id: 0, value: searchString }];
+    return await this.#getRawResults(searchString, options);
   };
 
   abort = () => {
@@ -135,17 +194,17 @@ class SearchModel {
   };
 
   getSources = () => {
-    return this.#sources;
+    // return this.#sources;
+    return this.options.sources;
   };
 
   setSources = (sources = null) => {
-    return sources === null
-      ? (this.#sources = this.modelOptions.layers)
-      : sources;
+    return sources === null ? (this.#sources = this.options.layers) : sources;
   };
 
   // 1. PUBLIC API
   search = (searchInput, force, callback) => {
+    console.log("searchInput: ", searchInput);
     clearTimeout(this.#timeout);
 
     this.clearRecentSpatialSearch();
@@ -158,7 +217,7 @@ class SearchModel {
 
         this.#controllers.splice(0, this.#controllers.length);
 
-        this.modelOptions.sources.forEach(source => {
+        this.options.sources.forEach(source => {
           const { promise, controller } = this.#lookup(source, searchInput);
           promises.push(promise);
           this.#controllers.push(controller);
@@ -177,10 +236,10 @@ class SearchModel {
                   if (jsonResult.features.length > 0) {
                     arraySort({
                       array: jsonResult.features,
-                      index: this.modelOptions.sources[i].searchFields[0]
+                      index: this.options.sources[i].searchFields[0]
                     });
                   }
-                  jsonResult.source = this.modelOptions.sources[i];
+                  jsonResult.source = this.options.sources[i];
                 });
                 setTimeout(() => {
                   this.localObserver.publish("searchComplete");
@@ -335,7 +394,7 @@ class SearchModel {
       strokeColor,
       strokeWidth,
       fillColor
-    } = this.modelOptions;
+    } = this.options;
 
     const style = new Style({
       // Polygons stroke color and width
@@ -406,7 +465,7 @@ class SearchModel {
       featureTypes: source.layers,
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
-      maxFeatures: this.modelOptions.maxFeatures || 100,
+      maxFeatures: this.options.maxFeatures || 100,
       geometryName: finalGeom,
       filter: new Intersects(finalGeom, geometry, projCode)
     };
@@ -522,11 +581,11 @@ class SearchModel {
 
     var search = () => {
       let promises = [];
-      let searchSources = this.modelOptions.sources;
+      let searchSources = this.options.sources;
       this.abortSearches();
 
       if (useTransformedWmsSource) {
-        const searchLayers = this.modelOptions.selectedSources.reduce(
+        const searchLayers = this.options.selectedSources.reduce(
           this.#getLayerAsSource,
           []
         );
@@ -571,7 +630,7 @@ class SearchModel {
     };
 
     if (feature.getGeometry().getType() === "Point") {
-      this.modelOptions.sources.forEach(source => {
+      this.options.sources.forEach(source => {
         if (source.caption.toLowerCase() === "fastighet") {
           this.#lookupEstate(source, feature, estates => {
             var olEstate = new GeoJSON().readFeatures(estates)[0];
@@ -764,7 +823,7 @@ class SearchModel {
       .getProjection()
       .getCode();
 
-    var isLikeFilters = source.searchFields.map(searchField => {
+    const isLikeFilters = source.searchFields.map(searchField => {
       return new IsLike(
         searchField,
         searchInput + "*",
@@ -775,7 +834,7 @@ class SearchModel {
       );
     });
 
-    var filter =
+    const filter =
       isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
 
     const options = {
@@ -783,7 +842,7 @@ class SearchModel {
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
-      maxFeatures: this.modelOptions.maxFeatures || 100,
+      maxFeatures: this.options.maxFeatures || 100,
       filter: filter
     };
 

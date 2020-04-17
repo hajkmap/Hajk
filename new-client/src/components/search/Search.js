@@ -145,10 +145,12 @@ export default function Search(props) {
     }
 
     (async () => {
-      const countries = await searchModel.getAutocomplete(searchString);
+      const autocompleteList = await searchModel.getAutocomplete(searchString);
+      console.log("countries: ", autocompleteList);
 
       if (active) {
-        setOptions(Object.keys(countries).map(key => countries[key].item[0]));
+        // setOptions(Object.keys(countries).map(key => countries[key].item[0]));
+        setOptions(autocompleteList);
       }
     })();
 
@@ -187,8 +189,11 @@ export default function Search(props) {
           setOpen(false);
         }}
         onChange={handleOnChange}
-        getOptionSelected={(option, value) => option.name === value.name}
-        getOptionLabel={option => option?.name || option}
+        getOptionSelected={(option, value) =>
+          option.autocompleteEntry === value.autocompleteEntry
+        }
+        getOptionLabel={option => option.autocompleteEntry}
+        groupBy={option => option.dataset}
         options={options}
         loading={loading}
         renderInput={params => (
