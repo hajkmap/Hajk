@@ -103,26 +103,45 @@ class SearchModel {
     });
   };
 
-  // 0. NEW PUBLIC API
-  getAutocomplete = async (searchString, options = null) => {
-    // Just a demo that autocompletes the same, no matter value of searchString.
-    console.log("getAutocomplete for string:", searchString);
-    const response = await fetch(
-      "https://country.register.gov.uk/records.json?page-size=5000"
-    );
-    const countries = await response.json();
-    await this.#sleep(1e3); // For demo purposes.
-
-    return countries;
+  #mapDisplayFieldsInFeature = (featureProperties, displayFields) => {
+    return displayFields.map(df => featureProperties[df]).join(", ");
   };
 
-  getResults = async (searchString, options = null) => {
+  // 0. NEW PUBLIC API
+  getAutocomplete = async (searchString, options = null) => {
+    const featureCollections = await this.#getRawResults(searchString);
+    const rr = featureCollections.map(featureCollection => {
+      return featureCollection.features.map(feature => {
+        const autocompleteEntry = this.#mapDisplayFieldsInFeature(
+          feature.properties,
+          featureCollection.source.displayFields
+        );
+        const dataset = featureCollection.source.caption;
+        return {
+          dataset,
+          autocompleteEntry
+        };
+      });
+    });
+    const flattened = rr.reduce((a, b) => a.concat(b), []);
+    // const response = await fetch(
+    //   "https://country.register.gov.uk/records.json?page-size=5000"
+    // );
+    // const countries = await response.json();
+    // console.log("countries: ", countries);
+    // await this.#sleep(1e3); // For demo purposes.
+
+    return flattened;
+  };
+
+  #getRawResults = async (searchString, options = null) => {
     // Fast fail if no search string provided
     if (searchString === null) return [];
     const sources = this.getSources();
     const promises = [];
-    let results = null;
+    let rawResults = null;
     console.log(`Will look for ${searchString} in sources:`, sources);
+
     sources.forEach(source => {
       const { promise, controller } = this.#lookup(source, searchString);
       promises.push(promise);
@@ -148,14 +167,18 @@ class SearchModel {
             // setTimeout(() => {
             //   this.localObserver.publish("searchComplete");
             // }, 500);
-            results = jsonResults;
-            console.log("jsonResults: ", jsonResults);
+            rawResults = jsonResults;
           })
           .catch(parseErrors => {});
       })
       .catch(responseErrors => {});
 
-    return results;
+    console.log("rawResults: ", rawResults);
+    return rawResults;
+  };
+
+  getResults = async (searchString, options = null) => {
+    return await this.#getRawResults(searchString, options);
   };
 
   abort = () => {
@@ -800,7 +823,7 @@ class SearchModel {
       .getProjection()
       .getCode();
 
-    var isLikeFilters = source.searchFields.map(searchField => {
+    const isLikeFilters = source.searchFields.map(searchField => {
       return new IsLike(
         searchField,
         searchInput + "*",
@@ -811,7 +834,7 @@ class SearchModel {
       );
     });
 
-    var filter =
+    const filter =
       isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
 
     const options = {
