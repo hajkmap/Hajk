@@ -18,6 +18,8 @@ import { deepMerge } from "../utils/DeepMerge";
 import { arraySort } from "../utils/ArraySort";
 import { handleClick } from "./Click";
 
+import { delay } from "../utils/Delay";
+
 class SearchModel {
   // Public field declarations (why? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Defining_classes)
   options;
@@ -97,20 +99,30 @@ class SearchModel {
    * 5. Private methods (used only in this class)
    */
 
-  #sleep = (delay = 0) => {
-    return new Promise(resolve => {
-      setTimeout(resolve, delay);
-    });
-  };
-
+  /**
+   * @summary Use FeatureCollection's selected displayFields to create a relevant string to display autocomplete results.
+   *
+   * @param {Object} featureProperties Key-value pair where KEY corresponds to one of the keys in displayFields.
+   * @param {Array} displayFields Selection of fields that will be used to read out values from featureProperties.
+   * @returns {String} Comma-separated string of values according to selection and order in displayFields.
+   */
   #mapDisplayFieldsInFeature = (featureProperties, displayFields) => {
     return displayFields.map(df => featureProperties[df]).join(", ");
   };
 
-  // 0. NEW PUBLIC API
+  /**
+   * @summary Grab results for @param {String} searchString and prepare an array to be sent into the Autocomplete component.
+   *
+   * @param {String} searchString The search string as typed in by the user.
+   * @param {Object} [options=null] Options to be sent with this request.
+   * @returns {Array} All matching results to be displayed in Autocomplete.
+   */
   getAutocomplete = async (searchString, options = null) => {
-    const featureCollections = await this.#getRawResults(searchString);
-    const rr = featureCollections.map(featureCollection => {
+    // Grab raw results from the common private function
+    const featureCollections = await this.#getRawResults(searchString, options);
+
+    // Generate an array with results, one per dataset (dataset = search source)
+    const resultsPerDataset = featureCollections.map(featureCollection => {
       return featureCollection.features.map(feature => {
         const autocompleteEntry = this.#mapDisplayFieldsInFeature(
           feature.properties,
@@ -123,15 +135,14 @@ class SearchModel {
         };
       });
     });
-    const flattened = rr.reduce((a, b) => a.concat(b), []);
-    // const response = await fetch(
-    //   "https://country.register.gov.uk/records.json?page-size=5000"
-    // );
-    // const countries = await response.json();
-    // console.log("countries: ", countries);
-    // await this.#sleep(1e3); // For demo purposes.
 
+    // resultsPerDataset is an Array of Arrays. We need ONE Array, so we flatten it:
+    const flattened = resultsPerDataset.reduce((a, b) => a.concat(b), []);
     return flattened;
+  };
+
+  getResults = async (searchString, options = null) => {
+    return await this.#getRawResults(searchString, options);
   };
 
   #getRawResults = async (searchString, options = null) => {
@@ -142,9 +153,18 @@ class SearchModel {
     let rawResults = null;
     console.log(`Will look for ${searchString} in sources:`, sources);
 
+    // Ensure that we've cleaned obsolete AbortControllers before we put new ones there
+    this.#controllers = [];
+
+    // Loop through all defined search sources
     sources.forEach(source => {
+      // Expect the Promise and an AbortController from each Source
       const { promise, controller } = this.#lookup(source, searchString);
+
+      // Push promises to local Array so we can act when all Promises have resolved
       promises.push(promise);
+
+      // Also, put AbortController to the global collection of controllers, so we can abort searches at any time
       this.#controllers.push(controller);
     });
 
@@ -168,20 +188,30 @@ class SearchModel {
             //   this.localObserver.publish("searchComplete");
             // }, 500);
             rawResults = jsonResults;
+            return rawResults;
           })
-          .catch(parseErrors => {});
+          .catch(parseErrors => {
+            console.error("parseErrors: ", parseErrors);
+          });
       })
-      .catch(responseErrors => {});
+      .catch(responseErrors => {
+        console.error("responseErrors: ", responseErrors);
+      });
 
     console.log("rawResults: ", rawResults);
-    return rawResults;
-  };
-
-  getResults = async (searchString, options = null) => {
-    return await this.#getRawResults(searchString, options);
+    return rawResults || [];
   };
 
   abort = () => {
+    if (this.#controllers.length > 0) {
+      this.#controllers.forEach(controller => {
+        controller.abort();
+        this.localObserver.publish("searchComplete");
+      });
+    }
+
+    // Clean up our list of AbortControllers
+    this.#controllers = [];
     return true;
   };
 
