@@ -347,7 +347,7 @@ class Contents extends React.PureComponent {
    * @memberof htmlToMaterialUiParser
    */
   getBrtagTypography = brTag => {
-    return <Paper elevation={0} style={{ height: "20px" }} />;
+    return <br />;
   };
 
   getHeadingTypography = tag => {
