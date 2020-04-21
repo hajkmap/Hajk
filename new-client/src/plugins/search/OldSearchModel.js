@@ -63,7 +63,6 @@ class OldSearchModel {
   });
 
   constructor(searchPluginOptions, map, app) {
-    console.log(this);
     // Validate
     if (!searchPluginOptions || !map || !app) {
       throw new Error(

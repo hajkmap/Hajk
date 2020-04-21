@@ -85,7 +85,6 @@ class Search extends React.PureComponent {
   };
 
   addLocalSearchModel() {
-    console.log("local sm", this);
     const { app, map } = this.props;
 
     const searchConfig = app.config.mapConfig.tools.find(
