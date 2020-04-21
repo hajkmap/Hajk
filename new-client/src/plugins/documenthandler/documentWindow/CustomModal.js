@@ -6,7 +6,6 @@ import clsx from "clsx";
 import Grid from "@material-ui/core/Grid";
 import CloseIcon from "@material-ui/icons/Close";
 import Modal from "@material-ui/core/Modal";
-import { FormHelperText } from "@material-ui/core";
 
 const mapDiv = document.getElementById("map");
 const blurCss = "filter : blur(7px)";
@@ -61,6 +60,10 @@ class CustomModal extends React.PureComponent {
 
   addMapBlur = () => {
     mapDiv.setAttribute("style", blurCss);
+  };
+
+  componentWillUnmount = () => {
+    this.removeMapBlur();
   };
 
   render() {
