@@ -8,14 +8,9 @@
 
 export default (html, tagSpecificCallbacks) => {
   let generatedHtml = [];
-
   parseHtml(html, generatedHtml, tagSpecificCallbacks);
   return generatedHtml.map(tag => {
-    let foundTag = tagSpecificCallbacks.find(
-      element => element.tagType === tag.tagType
-    );
-    if (foundTag) return foundTag.callback(tag);
-    return null;
+    return tag.renderCallback(tag);
   });
 };
 
@@ -38,9 +33,14 @@ const getTagsWithoutEnding = () => {
  */
 const parseHtml = (html, generatedHtml, tagSpecificCallbacks) => {
   const { tagType, tagValue, tagEndIndex } = findStartTag(html);
-  generatedHtml.push({ tagType: tagType, text: [] });
+  generatedHtml.push({
+    tagType: tagType,
+    text: [],
+    renderCallback: getTagSpecificCallback(tagType, tagSpecificCallbacks)
+  });
+
   recursiveParseSubTags(
-    [...generatedHtml].pop().text,
+    generatedHtml[generatedHtml.length - 1],
     tagType,
     tagValue,
     tagSpecificCallbacks
@@ -53,7 +53,7 @@ const parseHtml = (html, generatedHtml, tagSpecificCallbacks) => {
 
 /**
  * Private help method that parsers all sub tags within a tag.
- * @param {array} textArray The current part ot the generated array that will be filled up.
+ * @param {array} parsedObject The current part ot the generated array that will be filled up.
  * @param {string} tagType The type of the most outer tag.
  * @param {string} tagValue The text value of the most outer tag as pure text.
  * @param {array} tagSpecificCallbacks An array of all tags that should be handled as React components.
@@ -61,7 +61,7 @@ const parseHtml = (html, generatedHtml, tagSpecificCallbacks) => {
  * @memberof htmlToMaterialUiParser
  */
 const recursiveParseSubTags = (
-  textArray,
+  parsedObject,
   tagType,
   tagValue,
   tagSpecificCallbacks
@@ -71,10 +71,23 @@ const recursiveParseSubTags = (
     tagValue,
     tagSpecificCallbacks
   );
-  if (addTag) text.map(textElement => textArray.push(textElement));
+  if (addTag) {
+    text.forEach(textElement => {
+      textElement.renderCallback = getTagSpecificCallback(
+        textElement.tagType,
+        tagSpecificCallbacks
+      );
+      parsedObject.text.push(textElement);
+    });
+  }
 
   if (restHtml.length > 0)
-    recursiveParseSubTags(textArray, tagType, restHtml, tagSpecificCallbacks);
+    recursiveParseSubTags(
+      parsedObject,
+      tagType,
+      restHtml,
+      tagSpecificCallbacks
+    );
 };
 
 /**
@@ -314,6 +327,14 @@ const addPossibleOnlyTextToParentTag = (firstTag, pureTag) => {
   return false;
 };
 
+const getTagSpecificCallback = (tagType, tagSpecificCallbacks) => {
+  let foundTag = tagSpecificCallbacks.find(
+    element => element.tagType === tagType
+  );
+  if (foundTag) return foundTag.callback;
+  return null;
+};
+
 /**
  * Private help method that determines if a tag is an allowed tag according to the tag specific array.
  * @param {string} tagType The type of html tag.
@@ -323,11 +344,8 @@ const addPossibleOnlyTextToParentTag = (firstTag, pureTag) => {
  */
 const isTagSpecific = (tagType, tagSpecificCallbacks, allowNull = false) => {
   if (allowNull && tagType === null) return true;
-
-  let foundTag = tagSpecificCallbacks.find(
-    element => element.tagType === tagType
-  );
-  if (foundTag) return true;
-
+  if (getTagSpecificCallback(tagType, tagSpecificCallbacks)) {
+    return true;
+  }
   return false;
 };

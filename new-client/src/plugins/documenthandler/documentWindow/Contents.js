@@ -57,6 +57,10 @@ class Contents extends React.PureComponent {
       callback: this.getHeadingTypography
     });
     allowedHtmlTags.push({
+      tagType: "blockquote",
+      callback: this.getBlockQuote
+    });
+    allowedHtmlTags.push({
       tagType: "h2",
       callback: this.getHeadingTypography
     });
@@ -82,6 +86,10 @@ class Contents extends React.PureComponent {
     });
     allowedHtmlTags.push({ tagType: "img", callback: this.getTagImgCard });
     allowedHtmlTags.push({ tagType: "p", callback: this.getPtagTypography });
+    allowedHtmlTags.push({
+      tagType: "figure",
+      callback: this.getFigure
+    });
     return allowedHtmlTags;
   };
 
@@ -103,6 +111,21 @@ class Contents extends React.PureComponent {
     return attributes.find(attribute => {
       return attribute.dataAttribute === dataKey;
     })?.dataValue;
+  };
+
+  getBlockQuote = tag => {
+    var result = tag.text.map((element, index) => {
+      if (element.tagType === null) {
+        return <blockquote key={index}>{element.text}</blockquote>;
+      }
+      return (
+        <React.Fragment key={index}>
+          {element.renderCallback(element)}
+        </React.Fragment>
+      );
+    });
+
+    return result;
   };
 
   getLinkDataPerType = attributes => {
@@ -183,7 +206,7 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getLink = aTag => {
-    const aTagObject = this.parseStringToHtmlObject(aTag.tagValue, "a");
+    const aTagObject = this.parseStringToHtmlObject(`<a ${aTag.text}</a>`, "a");
     const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
     const {
       mapLink,
@@ -231,6 +254,21 @@ class Contents extends React.PureComponent {
     return attributes;
   };
 
+  getFigure = figureTag => {
+    var result = figureTag.text.map((element, index) => {
+      if (element.tagType === null) {
+        return null;
+      }
+      return (
+        <React.Fragment key={index}>
+          {element.renderCallback(element)}
+        </React.Fragment>
+      );
+    });
+
+    return result;
+  };
+
   /**
    * The render function for the img-tag.
    * @param {string} imgTag The img-tag.
@@ -239,10 +277,10 @@ class Contents extends React.PureComponent {
    */
   getTagImgCard = imgTag => {
     const { classes } = this.props;
-    const indexOfSrcMaterial = imgTag.tagValue.indexOf("=") + 2;
-    let imageSource = imgTag.tagValue.substring(
+    const indexOfSrcMaterial = imgTag.text.indexOf("=") + 2;
+    let imageSource = imgTag.text.substring(
       indexOfSrcMaterial,
-      imgTag.tagValue.length - 3
+      imgTag.text.length
     );
     return (
       <>
@@ -272,12 +310,25 @@ class Contents extends React.PureComponent {
    */
   getPtagTypography = pTag => {
     const { classes } = this.props;
-    let textToRender = pTag.tagValue.substring(3, pTag.tagValue.length - 4);
-    return (
-      <Typography className={classes.typography} variant="body1">
-        {textToRender}
-      </Typography>
-    );
+
+    return pTag.text.map((element, index) => {
+      if (element.tagType === null) {
+        return (
+          <Typography
+            key={index}
+            className={classes.typography}
+            variant="body1"
+          >
+            {element.text}
+          </Typography>
+        );
+      }
+      return (
+        <React.Fragment key={index}>
+          {element.renderCallback(element)}
+        </React.Fragment>
+      );
+    });
   };
 
   /**
@@ -292,12 +343,26 @@ class Contents extends React.PureComponent {
 
   getHeadingTypography = tag => {
     const { classes } = this.props;
-    let textToRender = tag.tagValue.substring(4, tag.tagValue.length - 5);
-    return (
-      <Typography className={classes.typography} variant={tag.tagType}>
-        {textToRender}
-      </Typography>
-    );
+
+    return tag.text.map((element, index) => {
+      if (element.tagType === null) {
+        return (
+          <Typography
+            key={index}
+            className={classes.typography}
+            variant={tag.tagType}
+          >
+            {element.text}
+          </Typography>
+        );
+      }
+
+      return (
+        <React.Fragment key={index}>
+          {element.renderCallback(element)}
+        </React.Fragment>
+      );
+    });
   };
 
   closePopupModal = () => {
@@ -409,7 +474,7 @@ class Contents extends React.PureComponent {
     return (
       <>
         {this.renderImageInModal()}
-        {this.renderChapters(document?.chapters)};
+        {this.renderChapters(document?.chapters)}
       </>
     );
   }
