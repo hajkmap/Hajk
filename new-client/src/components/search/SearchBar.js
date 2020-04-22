@@ -1,37 +1,34 @@
 import React from "react";
-import {
-  CircularProgress,
-  IconButton,
-  Paper,
-  TextField,
-  Tooltip,
-  makeStyles
-} from "@material-ui/core";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import { Paper, TextField } from "@material-ui/core";
 
-class SearchBar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleOnChange = this.handleOnChange.bind(this);
-
-    //this.searchModel = props.app.appModel.searchModel;
-  }
-
-  handleOnChange(e) {
-    this.props.onSearchStringChange(e.target.value);
-  }
-
-  render() {
-    return (
-      <Paper>
-        <TextField
-          variant="outlined"
-          placeholder="Skriv eller välj bland förslagen nedan..."
-          value={this.props.searchString}
-          onChange={this.handleOnChange}
-        />
-      </Paper>
-    );
-  }
-}
+const SearchBar = props => {
+  return (
+    <Paper>
+      <Autocomplete
+        id="searchbox"
+        freeSolo
+        clearOnEscape
+        style={{ width: 500 }}
+        onInput={props.updateInput}
+        onChange={props.updateChange}
+        getOptionSelected={(option, value) =>
+          option.autocompleteEntry === value.autocompleteEntry
+        }
+        options={props.autocompleteList.map(option => option.autocompleteEntry)}
+        groupBy={option => option.dataset}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label={undefined}
+            margin="normal"
+            variant="outlined"
+            placeholder="Skriv eller välj bland förslagen nedan..."
+          />
+        )}
+      />
+    </Paper>
+  );
+};
 
 export default SearchBar;
