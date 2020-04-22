@@ -146,7 +146,10 @@ export default function Search(props) {
 
     (async () => {
       const autocompleteList = await searchModel.getAutocomplete(searchString);
-      console.log("countries: ", autocompleteList);
+      console.log(
+        "Got this back to populate autocomplete with: ",
+        autocompleteList
+      );
 
       if (active) {
         // setOptions(Object.keys(countries).map(key => countries[key].item[0]));
@@ -167,7 +170,10 @@ export default function Search(props) {
 
   async function handleOnChange(event, value, reason) {
     const results = await searchModel.getResults(value);
-    console.log("results: ", results);
+    console.log(
+      "Change in Autocomplete detected - got following results: ",
+      results
+    );
   }
 
   const tooltipText = menuButtonDisabled

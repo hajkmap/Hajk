@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 
+import OldSearchModel from "./OldSearchModel";
+
 import SpatialSearchMenu from "./components/startview/SpatialSearchMenu.js";
 import SearchResultList from "./components/resultlist/SearchResultList.js";
 import SearchWithRadiusInput from "./components/searchviews/SearchWithRadiusInput";
@@ -82,7 +84,17 @@ class Search extends React.PureComponent {
     polygonSearch: this.props.options.polygonSearch
   };
 
+  addLocalSearchModel() {
+    const { app, map } = this.props;
+
+    const searchConfig = app.config.mapConfig.tools.find(
+      t => t.type === "search"
+    ).options;
+    this.searchModel = new OldSearchModel(searchConfig, map, app);
+  }
+
   componentDidMount() {
+    this.addLocalSearchModel();
     /**
      * When appLoaded is triggered, we want to look see if automatic
      * search has been requested. If query param contains values for v,
@@ -114,30 +126,27 @@ class Search extends React.PureComponent {
         document.getElementById("searchbox").value = dv;
 
         // Invoke search for search phrase
-        this.props.app.searchModel.search(dv, true, d => {
+        this.searchModel.search(dv, true, d => {
           this.resolve(d);
           this.selectFirstFeatureInResultsList();
         });
       }
     });
 
-    this.props.app.searchModel.localObserver.subscribe("searchStarted", () => {
+    this.searchModel.localObserver.subscribe("searchStarted", () => {
       this.setState({
         loading: true,
         activeSearchView: TEXTSEARCH
       });
     });
 
-    this.props.app.searchModel.localObserver.subscribe(
-      "spatialSearchStarted",
-      () => {
-        this.setState({
-          loading: true
-        });
-      }
-    );
+    this.searchModel.localObserver.subscribe("spatialSearchStarted", () => {
+      this.setState({
+        loading: true
+      });
+    });
 
-    this.props.app.searchModel.localObserver.subscribe(
+    this.searchModel.localObserver.subscribe(
       "searchToolChanged",
       placeholderText => {
         this.setState({
@@ -149,7 +158,7 @@ class Search extends React.PureComponent {
       }
     );
 
-    this.props.app.searchModel.localObserver.subscribe("searchComplete", () => {
+    this.searchModel.localObserver.subscribe("searchComplete", () => {
       this.setState({
         loading: false
       });
@@ -191,7 +200,7 @@ class Search extends React.PureComponent {
       <SearchResultList
         result={result}
         renderAffectButton={this.activeSpatialTools.radiusSearch}
-        model={this.props.app.searchModel}
+        model={this.searchModel}
         target={target}
       />
     );
@@ -199,8 +208,8 @@ class Search extends React.PureComponent {
 
   doSearch(v) {
     if (v.length <= 3) return null;
-    this.props.app.searchModel.localObserver.publish("searchToolChanged");
-    this.props.app.searchModel.search(v, true, d => {
+    this.searchModel.localObserver.publish("searchToolChanged");
+    this.searchModel.search(v, true, d => {
       this.resolve(d);
     });
   }
@@ -301,9 +310,9 @@ class Search extends React.PureComponent {
 
   resetToStartView() {
     document.getElementById("searchbox").value = "";
-    this.props.app.searchModel.localObserver.publish("searchToolChanged");
-    this.props.app.searchModel.abortSearches();
-    this.props.app.searchModel.clearRecentSpatialSearch();
+    this.searchModel.localObserver.publish("searchToolChanged");
+    this.searchModel.abortSearches();
+    this.searchModel.clearRecentSpatialSearch();
     this.setState({ activeSearchView: STARTVIEW });
   }
 
@@ -312,11 +321,11 @@ class Search extends React.PureComponent {
       case POLYGON:
         return (
           <SearchWithPolygonInput
-            model={this.props.app.searchModel}
+            model={this.searchModel}
             resetToStartView={() => {
               this.resetToStartView();
             }}
-            localObserver={this.props.app.searchModel.localObserver}
+            localObserver={this.searchModel.localObserver}
             onSearchDone={featureCollections => {
               this.resolve(featureCollections);
             }}
@@ -325,7 +334,7 @@ class Search extends React.PureComponent {
       case RADIUS: {
         return (
           <SearchWithRadiusInput
-            localObserver={this.props.app.searchModel.localObserver}
+            localObserver={this.searchModel.localObserver}
             resetToStartView={() => {
               this.resetToStartView();
             }}
@@ -333,20 +342,20 @@ class Search extends React.PureComponent {
               this.setState({
                 result: layerIds
               });
-              this.props.app.searchModel.clearRecentSpatialSearch();
+              this.searchModel.clearRecentSpatialSearch();
             }}
-            model={this.props.app.searchModel}
+            model={this.searchModel}
           />
         );
       }
       case SELECTION: {
         return (
           <SearchWithSelectionInput
-            localObserver={this.props.app.searchModel.localObserver}
+            localObserver={this.searchModel.localObserver}
             resetToStartView={() => {
               this.resetToStartView();
             }}
-            model={this.props.app.searchModel}
+            model={this.searchModel}
             onSearchDone={featureCollections => {
               this.resolve(featureCollections);
             }}
