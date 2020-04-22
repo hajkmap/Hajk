@@ -33,21 +33,21 @@ class TableOfContents extends React.PureComponent {
    */
   constructor(props) {
     super(props);
-    this.document = this.props.document;
+    this.activeDocument = this.props.activeDocument;
   }
 
   /**
-   * Render all chapters of the document.
-   * @param {Array} document An array with all chapters of the document.
+   * Render all chapters of the activeDocument.
+   * @param {Array} activeDocument An array with all chapters of the activeDocument.
    *
    * @memberof TableOfContents
    */
-  renderChapters = document => {
+  renderChapters = activeDocument => {
     let mainChapter = 0;
     return (
       <>
-        {Array.isArray(document?.chapters)
-          ? document.chapters.map(chapter =>
+        {Array.isArray(activeDocument?.chapters)
+          ? activeDocument.chapters.map(chapter =>
               this.renderSubChapters(chapter, 0, (++mainChapter).toString())
             )
           : null}
@@ -101,7 +101,7 @@ class TableOfContents extends React.PureComponent {
   };
 
   render() {
-    const { classes, document } = this.props;
+    const { classes, activeDocument } = this.props;
     return (
       <ExpansionPanel
         elevation={0}
@@ -120,7 +120,7 @@ class TableOfContents extends React.PureComponent {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <Grid container spacing={0}>
-            {this.renderChapters(document)}
+            {this.renderChapters(activeDocument)}
           </Grid>
         </ExpansionPanelDetails>
       </ExpansionPanel>
