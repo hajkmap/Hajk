@@ -4,8 +4,14 @@ import { withSnackbar } from "notistack";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
+import Grid from "@material-ui/core/Grid";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
-const styles = theme => ({});
+const styles = theme => ({
+  loader: {
+    height: "100%"
+  }
+});
 
 class DocumentWindowBase extends React.PureComponent {
   state = {
@@ -64,7 +70,7 @@ class DocumentWindowBase extends React.PureComponent {
 
   render() {
     const { documentWindowMaximized, document } = this.state;
-    const { options } = this.props;
+    const { options, classes } = this.props;
 
     return (
       <BaseWindowPlugin
@@ -92,7 +98,18 @@ class DocumentWindowBase extends React.PureComponent {
             {...this.props}
           />
         ) : (
-          <div>Laddar</div>
+          <Grid
+            className={classes.loader}
+            alignItems="center"
+            justify="center"
+            container
+          >
+            <CircularProgress
+              justify="center"
+              alignItems="center"
+              className={classes.loader}
+            />
+          </Grid>
         )}
       </BaseWindowPlugin>
     );
