@@ -139,6 +139,61 @@ var CoordinatesList = React.createClass({
   }
 });
 
+//Sök på Coordinate
+var SearchOnCoordinates = React.createClass({
+
+  addInput: function(item){
+    console.log("item", item);
+    return (
+        <option key={item.code} value={item.code}>{item.title}</option>
+    );
+  },
+
+  getInitialState:function() {
+    console.log("getInitialState",this.props.model.get("transformations")[0].code);
+    return {
+      selectValue: this.props.model.get("transformations")[0].code
+    };
+  },
+
+  updateSelect: function(event){
+    this.state.selectValue = event.target.value;
+    this.props.model.moveFeature(event)
+  },
+
+
+  render: function () {
+    console.log("this.props.model.get(\"transformations\").map", this.props.model.get("transformations").map);
+
+    return(
+      <div>
+        <p>Välj en plats i kartan genom att ange koordinater</p>
+        <dl>
+          <dt>
+            Välj koordinatsystem:
+          </dt>
+          <dd>
+            Välj koordinatsystem:
+            <select id="coordSystem-coord-tool" value={this.state.selectValue} onChange={(event) => this.updateSelect(event)}>
+              {this.props.model.get("transformations").map((item) => this.addInput(item))}
+            </select>
+            <div>
+              Ange platsens koordinater <br/>
+              N: <input type='text' id='latSOC' onChange={(event) => this.props.model.moveFeature(event)} /> &nbsp;&nbsp;&nbsp;
+              E: <input type='text' id='lonSOC' onChange={(event) => this.props.model.moveFeature(event)} /><br/>
+            </div><br/>
+            <div className='pull-right'>
+              <button onClick={(event) => this.props.model.panoreraCoords(event)} className='btn btn-primary' id='panoreraCoords'>Panorera</button>
+              <button onClick={(event) => this.props.model.zoomaCoords(event)} className='btn btn-primary' id='zoomaCoords'>Zooma</button>
+              <button onClick={(event) => this.props.model.resetCoords(event)} className='btn btn-primary' id='restCoords'>Reset</button>
+            </div><br/><br/>
+          </dd>
+        </dl>
+      </div>
+    );
+
+  }
+});
 /**
  * @class
  */
@@ -215,6 +270,7 @@ var CoordinatesPanelView = {
             Välj en plats i kartan genom att dra i siktet. <br />
           </p>
           <CoordinatesList coordinates={coordinates} />
+          <SearchOnCoordinates model={this.props.model}/>
         </div>
       </Panel>
     );

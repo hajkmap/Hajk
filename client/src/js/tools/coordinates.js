@@ -86,14 +86,22 @@ var CoordinatesModel = {
     this.set('toggled', !this.get('toggled'));
   },
 
+  /* reset to original*/
+  resetToOriginal: function(){
+    this.get('sightFeature').setGeometry(new ol.geom.Point(this.get('center')));
+    this.get('map').getView().setCenter(this.get('center'));
+  },
+
   /**
    * Create and add marker interaction to map.
    * @instance
    */
   createInteractions: function () {
     var center = this.get('map').getView().getCenter();
+    this.set('center', center);
     var source = this.get('interactionLayer').getSource();
     var feature = new ol.Feature({geometry: new ol.geom.Point(center)});
+    this.set("sightFeature", feature);
     var iconStyle =
       new ol.style.Style({
         image: new ol.style.Icon({
@@ -151,12 +159,13 @@ var CoordinatesModel = {
     this.set('interactions', []);
   },
 
-  /**
+  /**;
    * Set position property value
    * @instance
    * @param {array} xy
    */
   setCoordinates: function (xy) {
+    console.log("setCoordinates xy", xy);
     this.set('position', {
       x: xy[0],
       y: xy[1]
@@ -186,6 +195,7 @@ var CoordinatesModel = {
    *
    */
   transform: function (coordinates, to) {
+    console.log("transform coordinates", coordinates);
     var from = this.get('map').getView().getProjection();
     return ol.proj.transform(coordinates, from, to);
   },
@@ -202,6 +212,7 @@ var CoordinatesModel = {
     var transformedCoordinates = {};
     var transformations = this.get('transformations');
     var coordinates = this.extractXYArray(presentedCoordinates['raw']);
+    console.log("coordinates", coordinates);
 
     _.each(transformations, (transformation) => {
       transformedCoordinates[transformation.title] = this.transform(coordinates, transformation.code);
@@ -254,7 +265,75 @@ var CoordinatesModel = {
       }
     });
     return coordinates;
+  },
+
+  moveFeature: function(event){
+    console.log("moveFeature");
+    try {
+      var coord1 = document.getElementById("latSOC").value;
+      var coord2 = document.getElementById("lonSOC").value;
+      var type = document.getElementById("coordSystem-coord-tool").value;
+      var coordinates = [];
+      if(type === 'EPSG:4326'){
+        coordinates.push(parseFloat(coord2));
+        coordinates.push(parseFloat(coord1));
+      }else{
+        coordinates.push(parseInt(coord2,10));
+        coordinates.push(parseInt(coord1, 10));
+      }
+
+      console.log("coordinates", coordinates);
+      console.log("type", type);
+
+
+      // convert the coordinates
+      var to = this.get('map').getView().getProjection();
+      console.log("type", type);
+      console.log("to", to);
+      var convertedCoords = ol.proj.transform(coordinates, type, to);
+      console.log("convertedCoords", convertedCoords);
+
+      // Get the feature from the layer
+      console.log(this);
+      var item =  this.get("sightFeature");
+      console.log("item", item);
+
+      // Update the coordinates;
+      var coords = item.getGeometry();
+      coords.Longitude = convertedCoords[0];
+      coords.Latitude = convertedCoords[1];
+      console.log("coords", coords);
+      var updatedCoords = [parseInt(convertedCoords[0],10), parseInt(convertedCoords[1],10)];
+      item.getGeometry().setCoordinates(updatedCoords);
+      console.log("before this setCoords");
+      this.setCoordinates(item.getGeometry().getCoordinates());
+      console.log("after this setCoords");
+    }
+    catch(err) {
+      console.log(err.stack);
+      console.log(err.message);
+    }
+  },
+
+  zoomaCoords: function(event){
+    console.log("zooma coord", event);
+    this.moveFeature();
+    this.get('map').getView().setCenter(this.get("sightFeature").getGeometry().getCoordinates());
+    console.log("zoom",this.get('map').getView().getZoom());
+    this.get('map').getView().setZoom(5);
+  },
+
+  panoreraCoords: function(event){
+    console.log("panorera coord", event);
+    this.moveFeature();
+  },
+
+  resetCoords: function(event){
+    console.log("reset coord", event);
+    this.resetToOriginal();
+//    this.setCoordinates();
   }
+
 
 };
 
