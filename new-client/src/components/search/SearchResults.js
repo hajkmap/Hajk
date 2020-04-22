@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  CircularProgress,
-  IconButton,
-  Paper,
-  TextField,
-  Tooltip,
-  makeStyles
-} from "@material-ui/core";
+import { Paper } from "@material-ui/core";
 
 class SearchResults extends React.Component {
   constructor(props) {
@@ -14,7 +7,11 @@ class SearchResults extends React.Component {
   }
 
   render() {
-    return <h1>Placeholder for search results</h1>;
+    return (
+      <Paper>
+        <h1>Placeholder for search results</h1>
+      </Paper>
+    );
   }
 }
 
