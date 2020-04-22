@@ -85,11 +85,15 @@ class DocumentWindowBase extends React.PureComponent {
           allowMaximizedWindow: false
         }}
       >
-        <DocumentViewer
-          documentWindowMaximized={documentWindowMaximized}
-          activeDocument={document}
-          {...this.props}
-        />
+        {document != null ? (
+          <DocumentViewer
+            documentWindowMaximized={documentWindowMaximized}
+            activeDocument={document}
+            {...this.props}
+          />
+        ) : (
+          <div>Laddar</div>
+        )}
       </BaseWindowPlugin>
     );
   }

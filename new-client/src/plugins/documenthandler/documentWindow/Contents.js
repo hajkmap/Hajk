@@ -38,153 +38,108 @@ class Contents extends React.PureComponent {
   };
 
   /**
-   * Constructor for the contents which renders all chapters in the document.
-   * @param {object} props Contains the document that holds all chapters.
-   *
-   * @memberof Contents
-   */
-  constructor(props) {
-    super(props);
-    this.document = this.props.document;
-  }
-
-  /**
    * Private help method that adds all allowed html tags.
    *
    * @memberof Contents
    */
   getTagSpecificCallbacks = () => {
     let allowedHtmlTags = [];
-    allowedHtmlTags.push({ tagType: "br", callback: this.getBrtagTypography });
+    allowedHtmlTags.push({
+      tagType: "br",
+      callback: this.getBrtagTypographyComponent
+    });
     allowedHtmlTags.push({
       tagType: "h1",
-      callback: this.getHeadingTypography
+      callback: this.getHeadingTypographyComponents
     });
     allowedHtmlTags.push({
       tagType: "blockquote",
-      callback: this.getBlockQuote
+      callback: this.getBlockQuoteComponents
     });
     allowedHtmlTags.push({
       tagType: "h2",
-      callback: this.getHeadingTypography
+      callback: this.getHeadingTypographyComponents
     });
     allowedHtmlTags.push({
       tagType: "h3",
-      callback: this.getHeadingTypography
+      callback: this.getHeadingTypographyComponents
     });
     allowedHtmlTags.push({
       tagType: "h4",
-      callback: this.getHeadingTypography
+      callback: this.getHeadingTypographyComponents
     });
     allowedHtmlTags.push({
       tagType: "h5",
-      callback: this.getHeadingTypography
+      callback: this.getHeadingTypographyComponents
     });
     allowedHtmlTags.push({
       tagType: "h6",
-      callback: this.getHeadingTypography
+      callback: this.getHeadingTypographyComponents
     });
     allowedHtmlTags.push({
       tagType: "a",
-      callback: this.getLink
+      callback: this.getLinkComponent
     });
-    allowedHtmlTags.push({ tagType: "img", callback: this.getTagImgCard });
-    allowedHtmlTags.push({ tagType: "p", callback: this.getPtagTypography });
+    allowedHtmlTags.push({
+      tagType: "img",
+      callback: this.getImgCardComponent
+    });
+    allowedHtmlTags.push({
+      tagType: "p",
+      callback: this.getPtagTypographyComponents
+    });
     allowedHtmlTags.push({
       tagType: "figure",
-      callback: this.getFigure
+      callback: this.getFigureComponents
     });
     return allowedHtmlTags;
   };
 
-  parseStringToHtmlObject = (htmlString, type) => {
-    var mockedHtmlObject = document.createElement(type);
-    mockedHtmlObject.innerHTML = htmlString;
-    return mockedHtmlObject.firstChild;
-  };
-
-  /**
-   * Extracts value for a key-value-pair
-   * @param {Object} attributes object with key-value-pair of attributes.
-   * @param {String} dataKey key to extract value from
-   * @returns {String} Returns data value
-   *
-   * @memberof Contents
-   */
-  getValueFromAttribute = (attributes, dataKey) => {
-    return attributes.find(attribute => {
-      return attribute.dataAttribute === dataKey;
-    })?.dataValue;
-  };
-
-  getBlockQuote = tag => {
-    var result = tag.text.map((element, index) => {
-      if (element.tagType === null) {
-        return <blockquote key={index}>{element.text}</blockquote>;
-      }
-      return (
-        <React.Fragment key={index}>
-          {element.renderCallback(element)}
-        </React.Fragment>
-      );
-    });
-
-    return result;
-  };
-
-  getLinkDataPerType = attributes => {
-    const {
-      0: mapLink,
-      1: headerIdentifier,
-      2: documentLink,
-      3: externalLink
-    } = ["data-maplink", "data-header", "data-document", "data-link"].map(
-      attributeKey => {
-        return this.getValueFromAttribute(attributes, attributeKey);
-      }
-    );
-
-    return { mapLink, headerIdentifier, documentLink, externalLink };
-  };
-
-  /**
-   * Callback used to render different link-components from a-elements
-   * @param {Element} htmlObject a-element.
-   * @param {Function} clickHandler callback to run when link is clicked
-   * @returns {<Link>} Returns materialUI component <Link>
-   *
-   * @memberof Contents
-   */
-  getLinkComponent = (htmlObject, clickHandler) => {
-    return (
-      <Link href="#" variant="body2" onClick={clickHandler}>
-        {htmlObject.innerHTML}
-      </Link>
-    );
-  };
-
-  getHeaderLinkForSameDocument = (aTagObject, headerIdentifier) => {
-    const { localObserver, model } = this.props;
-    return this.getLinkComponent(aTagObject, () => {
-      localObserver.publish(
-        "scroll-to",
-        model.getHeaderRef(this.props.document, headerIdentifier)
-      );
+  getMaterialUIComponentsForChapter = chapter => {
+    return htmlToMaterialUiParser(
+      chapter.html,
+      this.getTagSpecificCallbacks()
+    ).map((component, index) => {
+      return <React.Fragment key={index}>{component}</React.Fragment>;
     });
   };
 
-  getHeaderLinkForNonActiveDocument = (
-    aTagObject,
-    headerIdentifier,
-    documentLink
-  ) => {
-    const { localObserver } = this.props;
-    return this.getLinkComponent(aTagObject, () => {
-      localObserver.publish("show-document-window", {
-        documentName: documentLink,
-        headerIdentifier: headerIdentifier
+  appendComponentsToChapter = chapter => {
+    if (chapter.chapters.length > 0) {
+      chapter.chapters.forEach((subChapter, index) => {
+        subChapter.components = this.getMaterialUIComponentsForChapter(
+          subChapter
+        );
       });
+    }
+    chapter.components = this.getMaterialUIComponentsForChapter(chapter);
+    return chapter;
+  };
+
+  appendParsedComponentsToDocument = () => {
+    const { activeDocument } = this.props;
+    activeDocument.chapters.forEach((chapter, index) => {
+      activeDocument.chapters[index] = this.appendComponentsToChapter(chapter);
     });
+  };
+
+  /**
+   * Helper method to extract attributes from html-element
+   * @param {Element} htmlObject Basic html-element.
+   * @returns {Object{dataAttribute : string, dataValue : string}} Returns name of attribute and its value ion key-value-pair
+   *
+   * @memberof Contents
+   */
+  getDataAttributesFromHtmlObject = htmlObject => {
+    let attributes = htmlObject
+      .getAttributeNames()
+      .map(function(attributeName) {
+        return {
+          dataAttribute: attributeName,
+          dataValue: htmlObject.getAttribute(attributeName)
+        };
+      });
+    return attributes;
   };
 
   getExternalLink = (aTagObject, externalLink) => {
@@ -202,6 +157,79 @@ class Contents extends React.PureComponent {
     });
   };
 
+  getHeaderLinkForNonActiveDocument = (
+    aTagObject,
+    headerIdentifier,
+    documentLink
+  ) => {
+    const { localObserver } = this.props;
+    return this.getLinkComponent(aTagObject, () => {
+      localObserver.publish("show-document-window", {
+        documentName: documentLink,
+        headerIdentifier: headerIdentifier
+      });
+    });
+  };
+
+  getHeaderLinkForSameDocument = (aTagObject, headerIdentifier) => {
+    const { localObserver, model } = this.props;
+    return this.getLinkComponent(aTagObject, () => {
+      localObserver.publish(
+        "scroll-to",
+        model.getHeaderRef(this.props.activeDocument, headerIdentifier)
+      );
+    });
+  };
+
+  getLinkDataPerType = attributes => {
+    const {
+      0: mapLink,
+      1: headerIdentifier,
+      2: documentLink,
+      3: externalLink
+    } = ["data-maplink", "data-header", "data-document", "data-link"].map(
+      attributeKey => {
+        return this.getValueFromAttribute(attributes, attributeKey);
+      }
+    );
+
+    return { mapLink, headerIdentifier, documentLink, externalLink };
+  };
+
+  parseStringToHtmlObject = (htmlString, type) => {
+    var mockedHtmlObject = document.createElement(type);
+    mockedHtmlObject.innerHTML = htmlString;
+    return mockedHtmlObject.firstChild;
+  };
+  /**
+   * Extracts value for a key-value-pair
+   * @param {Object} attributes object with key-value-pair of attributes.
+   * @param {String} dataKey key to extract value from
+   * @returns {String} Returns data value
+   *
+   * @memberof Contents
+   */
+  getValueFromAttribute = (attributes, dataKey) => {
+    return attributes.find(attribute => {
+      return attribute.dataAttribute === dataKey;
+    })?.dataValue;
+  };
+
+  getBlockQuoteComponents = tag => {
+    var result = tag.text.map((element, index) => {
+      if (element.tagType === null) {
+        return <blockquote key={index}>{element.text}</blockquote>;
+      }
+      return (
+        <React.Fragment key={index}>
+          {element.renderCallback(element)}
+        </React.Fragment>
+      );
+    });
+
+    return result;
+  };
+
   /**
    * Callback used to render different link-components from a-elements
    * @param {Element} aTag a-element.
@@ -209,7 +237,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  getLink = aTag => {
+  getLinkComponent = aTag => {
     const aTagObject = this.parseStringToHtmlObject(`<a ${aTag.text}</a>`, "a");
     const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
     const {
@@ -244,26 +272,7 @@ class Contents extends React.PureComponent {
     }
   };
 
-  /**
-   * Helper method to extract attributes from html-element
-   * @param {Element} htmlObject Basic html-element.
-   * @returns {Object{dataAttribute : string, dataValue : string}} Returns name of attribute and its value ion key-value-pair
-   *
-   * @memberof Contents
-   */
-  getDataAttributesFromHtmlObject = htmlObject => {
-    let attributes = htmlObject
-      .getAttributeNames()
-      .map(function(attributeName) {
-        return {
-          dataAttribute: attributeName,
-          dataValue: htmlObject.getAttribute(attributeName)
-        };
-      });
-    return attributes;
-  };
-
-  getFigure = figureTag => {
+  getFigureComponents = figureTag => {
     var result = figureTag.text.map((element, index) => {
       if (element.tagType === null) {
         return null;
@@ -284,7 +293,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  getTagImgCard = imgTag => {
+  getImgCardComponent = imgTag => {
     const { classes } = this.props;
     const indexOfSrcMaterial = imgTag.text.indexOf("=") + 2;
     let imageSource = imgTag.text.substring(
@@ -317,7 +326,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  getPtagTypography = pTag => {
+  getPtagTypographyComponents = pTag => {
     const { classes } = this.props;
 
     return pTag.text.map((element, index) => {
@@ -346,11 +355,11 @@ class Contents extends React.PureComponent {
    *
    * @memberof htmlToMaterialUiParser
    */
-  getBrtagTypography = brTag => {
+  getBrtagTypographyComponent = brTag => {
     return <br />;
   };
 
-  getHeadingTypography = tag => {
+  getHeadingTypographyComponents = tag => {
     const { classes } = this.props;
 
     return tag.text.map((element, index) => {
@@ -433,7 +442,7 @@ class Contents extends React.PureComponent {
           {this.renderHeadline(chapter)}
         </Grid>
         <Grid item xs={12}>
-          {this.renderContents(chapter)}
+          {chapter.components}
         </Grid>
         {Array.isArray(chapter.chapters)
           ? chapter.chapters.map(subChapter => this.renderChapter(subChapter))
@@ -464,30 +473,16 @@ class Contents extends React.PureComponent {
     );
   };
 
-  /**
-   * Render all the contents.
-   * @param {object} chapter The chapter to be rendered.
-   *
-   * @memberof Contents
-   */
-  renderContents = chapter => {
-    return htmlToMaterialUiParser(
-      chapter.html,
-      this.getTagSpecificCallbacks()
-    ).map((component, index) => {
-      return <React.Fragment key={index}>{component}</React.Fragment>;
-    });
-  };
-
-  render() {
-    const { document } = this.props;
+  render = () => {
+    const { activeDocument } = this.props;
+    this.appendParsedComponentsToDocument();
     return (
       <>
         {this.renderImageInModal()}
-        {this.renderChapters(document?.chapters)}
+        {this.renderChapters(activeDocument.chapters)}
       </>
     );
-  }
+  };
 }
 
 export default withStyles(styles)(Contents);
