@@ -159,6 +159,7 @@ var SearchOnCoordinates = React.createClass({
   updateSelect: function(event){
     this.state.selectValue = event.target.value;
     this.props.model.moveFeature(event)
+    this.forceUpdate();
   },
 
 
@@ -170,7 +171,7 @@ var SearchOnCoordinates = React.createClass({
         <p>Välj en plats i kartan genom att ange koordinater</p>
         <dl>
           <dt>
-            Välj koordinatsystem:
+            Söka på koordinater
           </dt>
           <dd>
             Välj koordinatsystem:
@@ -179,12 +180,13 @@ var SearchOnCoordinates = React.createClass({
             </select>
             <div>
               Ange platsens koordinater <br/>
-              N: <input type='text' id='latSOC' onChange={(event) => this.props.model.moveFeature(event)} /> &nbsp;&nbsp;&nbsp;
-              E: <input type='text' id='lonSOC' onChange={(event) => this.props.model.moveFeature(event)} /><br/>
+              N/Lon: <input type='text' id='latSOC'  /> &nbsp;&nbsp;&nbsp;
+              E/Lat: <input type='text' id='lonSOC'  /><br/>
             </div><br/>
             <div className='pull-right'>
               <button onClick={(event) => this.props.model.panoreraCoords(event)} className='btn btn-primary' id='panoreraCoords'>Panorera</button>
               <button onClick={(event) => this.props.model.zoomaCoords(event)} className='btn btn-primary' id='zoomaCoords'>Zooma</button>
+              <button onClick={(event) => this.props.model.laddaCoords(event)} className='btn btn-primary' id='laddaCoords'>Ladda koordinater</button>
               <button onClick={(event) => this.props.model.resetCoords(event)} className='btn btn-primary' id='restCoords'>Reset</button>
             </div><br/><br/>
           </dd>
@@ -228,6 +230,12 @@ var CoordinatesPanelView = {
     this.setState({
       coordinates: this.props.model.presentCoordinates()
     });
+    console.log("thispropsmodel", this.props.model);
+    var positionN = this.props.model.get("position").y;
+    var positionE = this.props.model.get("position").x;
+    console.log("positionN", positionN);
+    document.getElementById('latSOC').value == '11111';
+    document.getElementById('lonSOC').value == positionE;
   },
 
   /**

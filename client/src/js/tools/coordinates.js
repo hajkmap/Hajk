@@ -62,6 +62,8 @@ var CoordinatesModel = {
 
   configure: function (shell) {
     this.set('map', shell.getMap().getMap());
+    this.set('extent', shell.get('map').get('extent'));
+    this.set('centerCoords', shell.get('map').get('center'));
     this.set('interactionLayer', new ol.layer.Vector({
       source: new ol.source.Vector({}),
       name: 'coordinatesToolInteractionLayer'
@@ -88,6 +90,8 @@ var CoordinatesModel = {
 
   /* reset to original*/
   resetToOriginal: function(){
+    document.getElementById('latSOC').value='';
+    document.getElementById('lonSOC').value='';
     this.get('sightFeature').setGeometry(new ol.geom.Point(this.get('center')));
     this.get('map').getView().setCenter(this.get('center'));
   },
@@ -134,6 +138,14 @@ var CoordinatesModel = {
     feature.on('change', event => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => { this.updateCoordinates(event); }, 50);
+
+      // update coordinates to the box
+      console.log("set coordinate to the boxes",event.target.getGeometry().getCoordinates());
+      console.log("get the value from boxes", document.getElementById('latSOC').value);
+      console.log("transformations", this.get('transformations'));
+      //maybe need to convert depends on which transfomation uses choose
+      //document.getElementById('latSOC').value = event.target.getGeometry().getCoordinates()[1];
+      //document.getElementById('lonSOC').value = event.target.getGeometry().getCoordinates()[0];
     });
 
     selectedFeatures.push(feature);
@@ -180,6 +192,7 @@ var CoordinatesModel = {
   updateCoordinates: function (e) {
     var coordinates = e.target.getGeometry().getCoordinates();
     this.setCoordinates(coordinates);
+
   },
 
   /**
@@ -267,6 +280,33 @@ var CoordinatesModel = {
     return coordinates;
   },
 
+  //move from feature to box?
+  laddaCoords: function(event){
+    console.log("laddaCoords");
+    try {
+      var item =  this.get("sightFeature");
+      var type = document.getElementById("coordSystem-coord-tool").value;
+
+      // Update the coordinates;
+      var coords = item.getGeometry().getCoordinates();
+
+      // convert the coordinates
+      var to = this.get('map').getView().getProjection();
+      console.log("type", type);
+      console.log("to", to);
+      var convertedCoords = ol.proj.transform(coords, to, type);
+      document.getElementById("latSOC").value = convertedCoords[1];
+      document.getElementById("lonSOC").value = convertedCoords[0];
+
+
+    }
+    catch(err) {
+      console.log(err.stack);
+      console.log(err.message);
+    }
+  },
+
+
   moveFeature: function(event){
     console.log("moveFeature");
     try {
@@ -274,13 +314,9 @@ var CoordinatesModel = {
       var coord2 = document.getElementById("lonSOC").value;
       var type = document.getElementById("coordSystem-coord-tool").value;
       var coordinates = [];
-      if(type === 'EPSG:4326'){
         coordinates.push(parseFloat(coord2));
         coordinates.push(parseFloat(coord1));
-      }else{
-        coordinates.push(parseInt(coord2,10));
-        coordinates.push(parseInt(coord1, 10));
-      }
+
 
       console.log("coordinates", coordinates);
       console.log("type", type);
@@ -291,7 +327,15 @@ var CoordinatesModel = {
       console.log("type", type);
       console.log("to", to);
       var convertedCoords = ol.proj.transform(coordinates, type, to);
+
+      //check if given coordinates are inside extent area
+      console.log("extent", this.get('extent'));
       console.log("convertedCoords", convertedCoords);
+      if(this.get('extent')[0] > convertedCoords[0] || this.get('extent')[2] < convertedCoords[0]){
+        return false;
+      }else if(this.get('extent')[1] > convertedCoords[1] || this.get('extent')[3] < convertedCoords[1]){
+        return false;
+      }
 
       // Get the feature from the layer
       console.log(this);
@@ -308,24 +352,48 @@ var CoordinatesModel = {
       console.log("before this setCoords");
       this.setCoordinates(item.getGeometry().getCoordinates());
       console.log("after this setCoords");
+
+
+      return true;
     }
     catch(err) {
       console.log(err.stack);
       console.log(err.message);
+      return false;
     }
   },
 
   zoomaCoords: function(event){
-    console.log("zooma coord", event);
-    this.moveFeature();
-    this.get('map').getView().setCenter(this.get("sightFeature").getGeometry().getCoordinates());
-    console.log("zoom",this.get('map').getView().getZoom());
-    this.get('map').getView().setZoom(5);
+    if( document.getElementById('latSOC').value == '' || document.getElementById('lonSOC').value == ''){
+      console.log("lat lon måste vara tomma", document.getElementById('latSOC').value);
+      return;
+    }else {
+      console.log("zooma coord", event);
+      var result = this.moveFeature();
+      if(result){
+        this.get('map').getView().setCenter(this.get("sightFeature").getGeometry().getCoordinates());
+        console.log("zoom", this.get('map').getView().getZoom());
+        this.get('map').getView().setZoom(5);
+      }
+
+    }
   },
 
   panoreraCoords: function(event){
     console.log("panorera coord", event);
-    this.moveFeature();
+    if( document.getElementById('latSOC').value == '' || document.getElementById('lonSOC').value == ''){
+      return;
+    }else {
+      var result = this.moveFeature();
+      console.log("result", result);
+      if(result){
+        var item =  this.get("sightFeature");
+        console.log("item in panorera", item);
+        this.setCoordinates(item.getGeometry().getCoordinates());
+        this.get('map').getView().setZoom(0);
+        this.get('map').getView().setCenter(this.get('centerCoords'));
+      }
+    }
   },
 
   resetCoords: function(event){
