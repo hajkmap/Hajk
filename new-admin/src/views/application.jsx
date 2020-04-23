@@ -27,6 +27,7 @@ import Alert from "../views/alert.jsx";
 import Edit from "../views/edit.jsx";
 import LayerManager from "../views/layermanager.jsx";
 import InformativeEditor from "../views/informativeeditor.jsx";
+import MenuEditor from "../views/menuEditor.jsx";
 import MapSettings from "../views/mapsettings.jsx";
 import Info from "../views/info.jsx";
 import Release from "../views/release.jsx";
@@ -39,6 +40,7 @@ import mapSettingsModel from "../models/mapsettings.js";
 import infoModel from "../models/info.js";
 import releaseModel from "../models/release.js";
 import searchModel from "../models/search.js";
+import menuEditor from "../models/menuEditor.js";
 
 var defaultState = {
   alert: false,
@@ -152,6 +154,8 @@ class Application extends Component {
         return Release;
       case "search":
         return Search;
+      case "menueditor":
+        return MenuEditor;
       default:
         return null;
     }
@@ -173,6 +177,8 @@ class Application extends Component {
         return new releaseModel();
       case "search":
         return new searchModel();
+      case "menueditor":
+        return new menuEditor();
       default:
         return undefined;
     }
