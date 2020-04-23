@@ -141,12 +141,12 @@ const findStartTag = html => {
       tagEndIndex: tagEndIndex
     };
 
-  let tagValue = html.substring(
-    indexStart + 2 + tagType.length,
-    tagEndIndex - 3 - tagType.length > 0
-      ? tagEndIndex - 3 - tagType.length
-      : indexStart + 2 + tagType.length
-  );
+  const startIndex = indexStart + 2 + tagType.length;
+  let endIndex = tagEndIndex - 3 - tagType.length;
+  if (tagEndIndex - 3 - tagType.length <= 0)
+    endIndex = indexStart + 2 + tagType.length;
+  if (possibleIndexEnd > 0) endIndex = tagEndIndex - tagType.length;
+  const tagValue = html.substring(startIndex, endIndex);
 
   return {
     tagType: tagType,
@@ -184,7 +184,8 @@ const extractDataFromFirstTag = (html, tagSpecificCallbacks) => {
   if (!textAddedToTag) addPossibleOnlyTextToParentTag(firstTag, pureTag);
 
   let restHtml = html.substr(textBeforeTag.length + tagEndIndex);
-  if (!isTagSpecific(tagType, tagSpecificCallbacks)) restHtml = tagValue;
+  if (!isTagSpecific(tagType, tagSpecificCallbacks) || isTextATag(tagValue))
+    restHtml = tagValue;
   if (tagEndIndex === -1) restHtml = "";
 
   return {
@@ -302,12 +303,21 @@ const addPossibleTextToTag = (
   tagValue,
   tagSpecificCallbacks
 ) => {
+  if (isTextATag(tagValue)) return false;
+
   if (textBeforeTag !== "" || tagValue !== "") {
     if (tagType === null || isTagSpecific(tagType, tagSpecificCallbacks)) {
       firstTag.push({ tagType: tagType, text: tagValue });
       return true;
     }
   }
+  return false;
+};
+
+const isTextATag = tagValue => {
+  const { tagType } = findStartTag(tagValue);
+  if (tagType) return true;
+
   return false;
 };
 
@@ -320,6 +330,8 @@ const addPossibleTextToTag = (
  * @memberof htmlToMaterialUiParser
  */
 const addPossibleOnlyTextToParentTag = (firstTag, pureTag) => {
+  if (isTextATag(pureTag)) return false;
+
   if (pureTag !== "") {
     firstTag.push({ tagType: null, text: pureTag });
     return true;

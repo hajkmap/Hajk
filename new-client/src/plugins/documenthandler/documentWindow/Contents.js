@@ -295,26 +295,36 @@ class Contents extends React.PureComponent {
    */
   getImgCardComponent = imgTag => {
     const { classes } = this.props;
-    const indexOfSrcMaterial = imgTag.text.indexOf("=") + 2;
-    let imageSource = imgTag.text.substring(
-      indexOfSrcMaterial,
+    const indexOfCaption = imgTag.text.indexOf("data-caption=");
+    const indexOfSource = imgTag.text.indexOf("data-source=");
+    const indexOfSrcMaterial = imgTag.text.indexOf("src=");
+    const imageCaption = imgTag.text.substring(
+      indexOfCaption + 14,
+      indexOfSource - 2
+    );
+    const imageSource = imgTag.text.substring(
+      indexOfSource + 13,
+      indexOfSrcMaterial - 2
+    );
+    const imageUrl = imgTag.text.substring(
+      indexOfSrcMaterial + 5,
       imgTag.text.length
     );
     return (
       <>
         <CardMedia
           onClick={() => {
-            this.showPopupModal(imageSource);
+            this.showPopupModal(imageUrl);
           }}
           component="img"
           className={classes.documentImage}
-          image={imageSource}
+          image={imageUrl}
         />
         <Typography className={classes.typography} variant="subtitle2">
-          Lägg till bildtext här
+          {imageCaption}
         </Typography>
         <Typography className={classes.typography} variant="subtitle2">
-          Lägg till källa/fotograf här
+          {imageSource}
         </Typography>
       </>
     );
