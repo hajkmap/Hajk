@@ -108,7 +108,7 @@
 import React from "react";
 import SearchBar from "./SearchBar";
 import { makeStyles } from "@material-ui/core";
-import Observer from "react-event-observer";
+import PropTypes from "prop-types";
 
 const useStyles = makeStyles(theme => ({
   iconButtons: {
@@ -116,21 +116,25 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-//const autocompleteList = [];
-
 export default class Search extends React.PureComponent {
+  state = {
+    inputValue: "",
+    autocompleteList: [],
+    open: false,
+    setOpen: false
+  };
+
+  static propTypes = {
+    globalObserver: PropTypes.object.isRequired
+  };
+
+  static defaultProps = {
+    globalObserver: {}
+  };
+
   constructor(props) {
     super(props);
-    this.state = {
-      inputValue: "",
-      autocompleteList: []
-    };
-
-    this.globalObserver = new Observer();
     this.searchModel = props.app.appModel.searchModel;
-
-    this.handleOnChange = this.handleOnChange.bind(this);
-    this.handleOnInput = this.handleOnInput.bind(this);
   }
 
   componentDidMount() {
@@ -151,27 +155,25 @@ export default class Search extends React.PureComponent {
     });
   }
 
-  async handleOnChange(event, value, reason) {
+  handleOnChange = async (event, value, reason) => {
     const results = await this.searchModel.getResults(value);
-    console.log("Results: " + results);
-  }
+    console.log("Results: ", results);
+  };
 
-  async handleOnInput(event, value, reason) {
+  handleOnInput = (event, value, reason) => {
     this.setState({
       inputValue: event.target.value
     });
     console.log("Input: " + event.target.value);
-  }
+  };
 
   render() {
     return (
-      <div>
-        <SearchBar
-          updateChange={this.handleOnChange}
-          updateInput={this.handleOnInput}
-          autocompleteList={this.state.autocompleteList}
-        />
-      </div>
+      <SearchBar
+        updateChange={this.handleOnChange}
+        updateInput={this.handleOnInput}
+        autocompleteList={this.state.autocompleteList}
+      />
     );
   }
 }

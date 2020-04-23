@@ -2,9 +2,9 @@ import React from "react";
 import { Paper } from "@material-ui/core";
 
 class SearchResults extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+  state = {};
+  static propTypes = {};
+  static defaultProps = {};
 
   render() {
     return (
