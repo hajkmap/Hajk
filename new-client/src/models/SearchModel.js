@@ -11,7 +11,7 @@ class SearchModel {
 
   // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
   #searchOptions = {
-    extent: null,
+    featuresToFilter: [],
     maxResultsPerDataset: 100, // how many results to get (at most), per dataset
     wildcardAtStart: false, // should the search string start with the wildcard character?
     wildcardAtEnd: true, // should the search string be end with the wildcard character?
@@ -97,6 +97,13 @@ class SearchModel {
     searchSources = this.getSources(),
     searchOptions = this.getSearchOptions()
   ) => {
+    console.log(
+      "searchString, searchSources, searchOptions: ",
+      searchString,
+      searchSources,
+      searchOptions
+    );
+
     const results = await this.#getRawResults(
       searchString,
       searchSources,
@@ -148,8 +155,10 @@ class SearchModel {
     searchSources = this.getSources(),
     searchOptions = null
   ) => {
+    // TODO: Handle empty/null/undefined searchString (can happen on spatial search)
+    // TODO: Handle empty/null/undefined searchSources (should search in all sources)
     // Fast fail if no search string provided
-    if (searchString === null) return [];
+    // if (searchString === null) return [];
 
     const promises = [];
     let rawResults = null;
@@ -228,6 +237,13 @@ class SearchModel {
         searchOptions.matchCase // match case
       );
     });
+
+    // TODO: Actually apply filters based on geometries from features (if provided)
+    const filters = searchOptions.featuresToFilter.map(feature => {
+      // FIXME: new Intersects(finalGeom, geometry, projCode)
+      return feature.getGeometry();
+    });
+    console.log("WILL APPLY filters: ", filters);
 
     const filter =
       isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
