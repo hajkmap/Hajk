@@ -12,8 +12,10 @@ class SearchModel {
   // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
   #searchOptions = {
     extent: null,
-    maxResultsPerDataset: 100,
-    wildcardActive: true
+    maxResultsPerDataset: 100, // how many results to get (at most), per dataset
+    wildcardAtStart: false, // should the search string start with the wildcard character?
+    wildcardAtEnd: true, // should the search string be end with the wildcard character?
+    matchCase: false // should search be case sensitive?
   };
 
   #componentOptions;
@@ -55,7 +57,7 @@ class SearchModel {
   getAutocomplete = async (
     searchString,
     searchSources = this.getSources(),
-    searchOptions = null
+    searchOptions = this.getSearchOptions()
   ) => {
     // Grab raw results from the common private function
     const featureCollections = await this.#getRawResults(
@@ -93,7 +95,7 @@ class SearchModel {
   getResults = async (
     searchString,
     searchSources = this.getSources(),
-    searchOptions = null
+    searchOptions = this.getSearchOptions()
   ) => {
     const results = await this.#getRawResults(
       searchString,
@@ -157,9 +159,13 @@ class SearchModel {
     this.#controllers = [];
 
     // Loop through all defined search sources
-    searchSources.forEach(source => {
+    searchSources.forEach(searchSource => {
       // Expect the Promise and an AbortController from each Source
-      const { promise, controller } = this.#lookup(source, searchString);
+      const { promise, controller } = this.#lookup(
+        searchString,
+        searchSource,
+        searchOptions
+      );
 
       // Push promises to local Array so we can act when all Promises have resolved
       promises.push(promise);
@@ -196,20 +202,30 @@ class SearchModel {
     return rawResults || [];
   };
 
-  #lookup = (source, searchInput) => {
+  #lookup = (searchString, searchSource, searchOptions) => {
+    console.log("#lookup searchString: ", searchString);
+    console.log("#lookup searchSource: ", searchSource);
+    console.log("#lookup searchOptions: ", searchOptions);
     const projCode = this.#map
       .getView()
       .getProjection()
       .getCode();
 
-    const isLikeFilters = source.searchFields.map(searchField => {
+    const maxFeatures = searchOptions.maxResultsPerDataset;
+
+    // Should the search string be surrounded by wildcard?
+    let pattern = searchString;
+    pattern = searchOptions.wildcardAtStart ? `*${pattern}` : pattern;
+    pattern = searchOptions.wildcardAtEnd ? `${pattern}*` : pattern;
+
+    const isLikeFilters = searchSource.searchFields.map(propertyName => {
       return new IsLike(
-        searchField,
-        searchInput + "*",
-        "*", // wild card
+        propertyName,
+        pattern,
+        "*", // wildcard char
         ".", // single char
         "!", // escape char
-        false // match case
+        searchOptions.matchCase // match case
       );
     });
 
@@ -217,12 +233,12 @@ class SearchModel {
       isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
 
     const options = {
-      featureTypes: source.layers,
+      featureTypes: searchSource.layers,
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
-      geometryName: source.geometryField,
-      maxFeatures: this.#componentOptions.maxFeatures || 100,
-      filter: filter
+      geometryName: searchSource.geometryField,
+      maxFeatures,
+      filter
     };
 
     const node = this.#wfsParser.writeGetFeature(options);
@@ -241,7 +257,7 @@ class SearchModel {
       body: xmlString
     };
     const promise = fetch(
-      this.#app.config.appConfig.searchProxy + source.url,
+      this.#app.config.appConfig.searchProxy + searchSource.url,
       request
     );
 
