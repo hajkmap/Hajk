@@ -56,6 +56,12 @@
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
     "wms_layers": "topowebbkartan"
   },
+  "menueditor": {
+    "url_proxy": "",
+    "url_map": "http://localhost:55630/config",
+    "url_map_list": "http://localhost:55630/config/list",
+    "url_layers": "http://localhost:55630/config/layers"
+  },
   "router": [
     { "name": "layermanager", "title": "Lager", "default": true },
     { "name": "search", "title": "Söktjänster" },

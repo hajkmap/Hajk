@@ -70,7 +70,7 @@ const fetchConfig = {
 
   function load(config) {
     var application_model = new ApplicationModel();
-
+    console.log(config, "config");
     var application_element = React.createElement(ApplicationView, {
       model: application_model,
       tabs: config.router,
@@ -86,6 +86,7 @@ const fetchConfig = {
 
   fetch("config.json", fetchConfig).then(response => {
     response.json().then(config => {
+      console.log(config, "config");
       try {
         load(config);
       } catch (error) {

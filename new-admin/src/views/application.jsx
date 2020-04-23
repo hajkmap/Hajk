@@ -40,7 +40,6 @@ import mapSettingsModel from "../models/mapsettings.js";
 import infoModel from "../models/info.js";
 import releaseModel from "../models/release.js";
 import searchModel from "../models/search.js";
-import menuEditor from "../models/menuEditor.js";
 
 var defaultState = {
   alert: false,
@@ -177,8 +176,6 @@ class Application extends Component {
         return new releaseModel();
       case "search":
         return new searchModel();
-      case "menueditor":
-        return new menuEditor();
       default:
         return undefined;
     }
@@ -199,7 +196,7 @@ class Application extends Component {
       console.error(e);
       return <div>{e.message}</div>;
     }
-
+    console.log(this.props.config, "+");
     return React.createElement(content, {
       model: model,
       config: this.props.config[this.state.content],
