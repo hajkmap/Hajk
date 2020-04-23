@@ -107,30 +107,62 @@
 // *https://www.registers.service.gov.uk/registers/country/use-the-api*
 import React from "react";
 import SearchBar from "./SearchBar";
-import { makeStyles } from "@material-ui/core";
 import Observer from "react-event-observer";
 
-const useStyles = makeStyles(theme => ({
-  iconButtons: {
-    padding: 10
-  }
-}));
-
-//const autocompleteList = [];
+import { Vector as VectorLayer } from "ol/layer";
+import VectorSource from "ol/source/Vector";
+import { Stroke, Style, Circle, Fill } from "ol/style";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import CheckIcon from "@material-ui/icons/Check";
+import Draw from "ol/interaction/Draw";
+import { Button } from "@material-ui/core";
 
 export default class Search extends React.PureComponent {
+  #map;
+  #drawSource;
+  #drawLayer;
+  #drawStyle = new Style({
+    stroke: new Stroke({
+      color: "rgba(255, 214, 91, 0.6)",
+      width: 4
+    }),
+    fill: new Fill({
+      color: "rgba(255, 214, 91, 0.2)"
+    }),
+    image: new Circle({
+      radius: 6,
+      stroke: new Stroke({
+        color: "rgba(255, 214, 91, 0.6)",
+        width: 2
+      })
+    })
+  });
+
+  state = {
+    inputValue: "",
+    autocompleteList: [],
+    drawActive: false
+  };
+
   constructor(props) {
+    console.log("props in SC: ", props);
     super(props);
-    this.state = {
-      inputValue: "",
-      autocompleteList: []
-    };
 
     this.globalObserver = new Observer();
     this.searchModel = props.app.appModel.searchModel;
 
     this.handleOnChange = this.handleOnChange.bind(this);
     this.handleOnInput = this.handleOnInput.bind(this);
+
+    this.#map = props.map;
+
+    this.#drawSource = new VectorSource({ wrapX: false });
+    this.#drawLayer = new VectorLayer({
+      source: this.#drawSource,
+      style: this.#drawStyle
+    });
+    // Add layer that will be used to allow user draw on map - used for spatial search
+    this.#map.addLayer(this.#drawLayer);
   }
 
   componentDidMount() {
@@ -163,15 +195,72 @@ export default class Search extends React.PureComponent {
     console.log("Input: " + event.target.value);
   }
 
+  #toggleDraw = (
+    active,
+    type = "Polygon",
+    freehand = false,
+    drawEndCallback
+  ) => {
+    console.log("active: ", active);
+    if (active) {
+      this.draw = new Draw({
+        source: this.#drawSource,
+        type: type,
+        freehand: freehand,
+        stopClick: true,
+        style: this.#drawStyle
+      });
+
+      this.#map.clicklock = true;
+      this.#map.addInteraction(this.draw);
+    } else {
+      this.#map.removeInteraction(this.draw);
+      this.#map.clicklock = false;
+      this.#drawSource.clear();
+    }
+  };
+
+  handleClickOnDrawToggle = () => {
+    this.setState(
+      (prevState, props) => ({
+        drawActive: !prevState.drawActive
+      }),
+      () => {
+        this.#toggleDraw(this.state.drawActive);
+      }
+    );
+  };
+
+  handleClickOnFireSpatialSearch = async () => {
+    let originalSearchOptions = this.searchModel.getSearchOptions();
+    console.log("originalSearchOptions: ", originalSearchOptions);
+    originalSearchOptions["featuresToFilter"] = this.#drawSource.getFeatures();
+    console.log("originalSearchOptions: ", originalSearchOptions);
+    const results = await this.searchModel.getResults(
+      "",
+      undefined,
+      originalSearchOptions
+    );
+    console.log("results: ", results);
+  };
+
   render() {
     return (
-      <div>
+      <>
         <SearchBar
           updateChange={this.handleOnChange}
           updateInput={this.handleOnInput}
           autocompleteList={this.state.autocompleteList}
         />
-      </div>
+        <ToggleButton
+          value="check"
+          selected={this.state.drawActive}
+          onChange={this.handleClickOnDrawToggle}
+        >
+          <CheckIcon />
+        </ToggleButton>
+        <Button onClick={this.handleClickOnFireSpatialSearch}>Search</Button>
+      </>
     );
   }
 }
