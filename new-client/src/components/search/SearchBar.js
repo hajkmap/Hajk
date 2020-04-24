@@ -7,6 +7,7 @@ const SearchBar = props => {
     <Paper>
       <Autocomplete
         id="searchbox"
+        autoHighlight
         freeSolo
         clearOnEscape
         style={{ width: 500 }}
