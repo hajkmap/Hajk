@@ -109,59 +109,13 @@ import React from "react";
 import SearchBar from "./SearchBar";
 import SpatialSearch from "./SpatialSearch";
 
-export default class Search extends React.PureComponent {
-  #map;
+const Search = props => {
+  return (
+    <>
+      <SearchBar {...props} />
+      <SpatialSearch {...props} />
+    </>
+  );
+};
 
-  state = {
-    inputValue: "",
-    autocompleteList: []
-  };
-
-  constructor(props) {
-    console.log("props in SC: ", props);
-    super(props);
-
-    this.searchModel = props.app.appModel.searchModel;
-
-    this.#map = props.map;
-  }
-
-  autocompleteList = async () => {
-    const autocompleteList = await this.searchModel.getAutocomplete(
-      this.state.inputValue
-    );
-    console.log(
-      "Got this back to populate autocomplete with: ",
-      autocompleteList
-    );
-
-    this.setState({
-      autocompleteList: autocompleteList
-    });
-  };
-
-  handleOnChange = async (event, value, reason) => {
-    const results = await this.searchModel.getResults(value);
-    console.log("Results: " + results);
-  };
-
-  handleOnInput = (event, value, reason) => {
-    this.setState({
-      inputValue: event.target.value
-    });
-    console.log("Input: " + event.target.value);
-  };
-
-  render() {
-    return (
-      <>
-        <SearchBar
-          updateChange={this.handleOnChange}
-          updateInput={this.handleOnInput}
-          autocompleteList={this.state.autocompleteList}
-        />
-        <SpatialSearch searchModel={this.searchModel} map={this.#map} />
-      </>
-    );
-  }
-}
+export default Search;

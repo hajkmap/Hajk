@@ -13,6 +13,7 @@ const SpatialSearch = props => {
   const drawSource = useRef();
   const drawLayer = useRef();
   const map = useRef(props.map);
+  const searchModel = props.app.appModel.searchModel;
 
   const drawStyle = useRef(
     new Style({
@@ -78,13 +79,13 @@ const SpatialSearch = props => {
   };
 
   const handleClickOnFireSpatialSearch = async () => {
-    let originalSearchOptions = props.searchModel.getSearchOptions();
+    let originalSearchOptions = searchModel.getSearchOptions();
     console.log("originalSearchOptions: ", originalSearchOptions);
     originalSearchOptions[
       "featuresToFilter"
     ] = drawSource.current.getFeatures();
     console.log("originalSearchOptions: ", originalSearchOptions);
-    const results = await props.searchModel.getResults(
+    const results = await searchModel.getResults(
       "",
       undefined,
       originalSearchOptions
