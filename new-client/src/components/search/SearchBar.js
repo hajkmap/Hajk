@@ -105,8 +105,10 @@
 
 //
 // *https://www.registers.service.gov.uk/registers/country/use-the-api*
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+
 import {
   CircularProgress,
   IconButton,
@@ -116,6 +118,7 @@ import {
   makeStyles
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
+import FormatSizeIcon from "@material-ui/icons/FormatSize";
 
 const useStyles = makeStyles(theme => ({
   iconButtons: {
@@ -123,7 +126,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 const SearchBar = props => {
-  console.log("searchbar props: ", props);
   const classes = useStyles();
 
   // Grab some stuff from props
@@ -133,6 +135,9 @@ const SearchBar = props => {
   // React state
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
+  const [wildcardAtStart, setWildcardAtStart] = useState(false);
+  const [wildcardAtEnd, setWildcardAtEnd] = useState(true);
+  const [matchCase, setMatchCase] = useState(false);
   const loading = open && options.length === 0;
 
   useEffect(() => {
@@ -177,11 +182,25 @@ const SearchBar = props => {
    * @param {String} reason
    */
   async function handleOnChange(event, value, reason) {
-    const results = await searchModel.getResults(value);
-    console.log(
-      "Change in Autocomplete detected - got following results: ",
-      results
+    // "value" can be String (if freeSolo) or Object (if autocomplete entry selected)
+    // We must ensure that we grab the string either way.
+    const searchString = value?.autocompleteEntry || value;
+
+    // Grab existing search options from model
+    const searchOptions = searchModel.getSearchOptions();
+
+    // Apply our custom options based on user's selection
+    searchOptions["matchCase"] = matchCase;
+    searchOptions["wildcardAtStart"] = wildcardAtStart;
+    searchOptions["wildcardAtEnd"] = wildcardAtEnd;
+
+    console.log("searching for value: ", value, searchOptions);
+    const results = await searchModel.getResults(
+      searchString,
+      undefined,
+      searchOptions
     );
+    console.log("onChange, got results: ", results);
   }
   /**
    * @summary Triggered each time user changes input field value (e.g. onKeyPress etc). Makes a call to get the autocomplete list.
@@ -204,7 +223,6 @@ const SearchBar = props => {
       <Autocomplete
         id="searchInputField"
         style={{ width: 500 }}
-        autoHighlight
         freeSolo
         clearOnEscape
         // open={open}
@@ -221,7 +239,7 @@ const SearchBar = props => {
         getOptionSelected={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
-        getOptionLabel={option => option.autocompleteEntry}
+        getOptionLabel={option => option?.autocompleteEntry || option}
         groupBy={option => option.dataset}
         options={options}
         loading={loading}
@@ -253,6 +271,27 @@ const SearchBar = props => {
                     <CircularProgress color="inherit" size={20} />
                   ) : null}
                   {params.InputProps.endAdornment}
+                  <ToggleButton
+                    value="wildcardAtStart"
+                    selected={wildcardAtStart}
+                    onChange={() => setWildcardAtStart(!wildcardAtStart)}
+                  >
+                    *.
+                  </ToggleButton>
+                  <ToggleButton
+                    value="wildcardAtEnd"
+                    selected={wildcardAtEnd}
+                    onChange={() => setWildcardAtEnd(!wildcardAtEnd)}
+                  >
+                    .*
+                  </ToggleButton>
+                  <ToggleButton
+                    value=""
+                    selected={matchCase}
+                    onChange={() => setMatchCase(!matchCase)}
+                  >
+                    <FormatSizeIcon />
+                  </ToggleButton>
                 </>
               )
             }}

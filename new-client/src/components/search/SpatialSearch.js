@@ -79,16 +79,16 @@ const SpatialSearch = props => {
   };
 
   const handleClickOnFireSpatialSearch = async () => {
-    let originalSearchOptions = searchModel.getSearchOptions();
-    console.log("originalSearchOptions: ", originalSearchOptions);
-    originalSearchOptions[
-      "featuresToFilter"
-    ] = drawSource.current.getFeatures();
-    console.log("originalSearchOptions: ", originalSearchOptions);
+    const searchOptions = searchModel.getSearchOptions();
+    console.log("originalSearchOptions: ", searchOptions.featuresToFilter);
+    searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
+    console.log("originalSearchOptions: ", searchOptions.featuresToFilter);
+    const searchString = document.getElementById("searchInputField").value;
+    console.log("searchString: ", searchString);
     const results = await searchModel.getResults(
-      "",
+      searchString,
       undefined,
-      originalSearchOptions
+      searchOptions
     );
     console.log("results: ", results);
   };

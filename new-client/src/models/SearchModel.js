@@ -2,6 +2,8 @@ import Observer from "react-event-observer";
 import { WFS } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
 import Or from "ol/format/filter/Or";
+import And from "ol/format/filter/And";
+import Intersects from "ol/format/filter/Intersects";
 
 import { arraySort } from "../utils/ArraySort";
 
@@ -38,11 +40,6 @@ class SearchModel {
     this.#map = map; // The OpenLayers map instance
     this.#app = app; // Supplies appConfig and globalObserver
     this.#searchSources = this.#componentOptions.sources;
-
-    // Just a demo - we don't need to subscribe internally, but I wanted this to be explicit for anyone wondering.
-    this.localObserver.subscribe("searchCompleted", e =>
-      console.log("DEMO USE OF LOCAL OBSERVER", e)
-    );
 
     console.log("SearchModel initiated!", this);
   }
@@ -151,14 +148,18 @@ class SearchModel {
   };
 
   #getRawResults = async (
-    searchString,
+    searchString = "",
     searchSources = this.getSources(),
     searchOptions = null
   ) => {
     // TODO: Handle empty/null/undefined searchString (can happen on spatial search)
-    // TODO: Handle empty/null/undefined searchSources (should search in all sources)
     // Fast fail if no search string provided
     // if (searchString === null) return [];
+
+    if (Array.isArray(searchSources) === false || searchSources.length < 1) {
+      console.warn("searchSources empty, resetting to default.", searchSources);
+      searchSources = this.getSources();
+    }
 
     const promises = [];
     let rawResults = null;
@@ -212,49 +213,82 @@ class SearchModel {
   };
 
   #lookup = (searchString, searchSource, searchOptions) => {
-    console.log("#lookup searchString: ", searchString);
-    console.log("#lookup searchSource: ", searchSource);
-    console.log("#lookup searchOptions: ", searchOptions);
-    const projCode = this.#map
+    console.log("searchSource: ", searchSource);
+    const srsName = this.#map
       .getView()
       .getProjection()
       .getCode();
-
+    const geometryName =
+      searchSource.geometryField || searchSource.geometryName || "geom";
     const maxFeatures = searchOptions.maxResultsPerDataset;
+    let finalFilters = null;
+    let isLikeFilters = null;
+    let intersectsFilters = null;
 
-    // Should the search string be surrounded by wildcard?
-    let pattern = searchString;
-    pattern = searchOptions.wildcardAtStart ? `*${pattern}` : pattern;
-    pattern = searchOptions.wildcardAtEnd ? `${pattern}*` : pattern;
+    if (searchString?.length > 0) {
+      // Should the search string be surrounded by wildcard?
+      let pattern = searchString;
+      pattern = searchOptions.wildcardAtStart ? `*${pattern}` : pattern;
+      pattern = searchOptions.wildcardAtEnd ? `${pattern}*` : pattern;
 
-    const isLikeFilters = searchSource.searchFields.map(propertyName => {
-      return new IsLike(
-        propertyName,
-        pattern,
-        "*", // wildcard char
-        ".", // single char
-        "!", // escape char
-        searchOptions.matchCase // match case
-      );
-    });
+      // Each searchSource (e.g. WFS layer) will have its own searchFields
+      // defined (e.g. columns in the data table, such as "name" or "address").
+      // Let's loop through the searchFields and create an IsLike filter
+      // for each one of them (e.g. "name=bla", "address=bla").
+      isLikeFilters = searchSource.searchFields.map(propertyName => {
+        return new IsLike(
+          propertyName,
+          pattern,
+          "*", // wildcard char
+          ".", // single char
+          "!", // escape char
+          searchOptions.matchCase // match case
+        );
+      });
 
-    // TODO: Actually apply filters based on geometries from features (if provided)
-    const filters = searchOptions.featuresToFilter.map(feature => {
-      // FIXME: new Intersects(finalGeom, geometry, projCode)
-      return feature.getGeometry();
-    });
-    console.log("WILL APPLY filters: ", filters);
+      // Depending on the searchSource configuration, we will now have 1 or more
+      // IsLike filters created. If we just have one, let's use it. But if we have
+      // many, we must combine them using an Or filter, so we tell the WFS to search
+      // where "name=bla OR address=bla OR etc...".
+      isLikeFilters =
+        isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
+    }
 
-    const filter =
-      isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
+    // If searchOptions contain any features, we should filter the results
+    // using those features.
+    if (searchOptions.featuresToFilter.length > 0) {
+      // Loop through supplied features and create a new filter using it's geometry
+      intersectsFilters = searchOptions.featuresToFilter.map(feature => {
+        return new Intersects(geometryName, feature.getGeometry(), srsName);
+      });
 
+      // If one feature was supplied, we end up with one filter. Let's use it.
+      // But if more features were supplied, we must combine them into an Or filter.
+      intersectsFilters =
+        intersectsFilters.length > 1
+          ? new Or(...intersectsFilters)
+          : intersectsFilters[0];
+    }
+
+    // Finally, let's combine the text and spatial filters into
+    // one filter that will be sent with the request.
+    if (isLikeFilters !== null && intersectsFilters !== null) {
+      // We have both text and spatial filters - let's combine them with an And filter.
+      finalFilters = new And(isLikeFilters, intersectsFilters);
+    } else if (isLikeFilters !== null) {
+      finalFilters = isLikeFilters;
+    } else if (intersectsFilters !== null) {
+      finalFilters = intersectsFilters;
+    }
+
+    // Prepare the options for the upcoming request.
     const options = {
       featureTypes: searchSource.layers,
-      srsName: projCode,
+      srsName: srsName,
       outputFormat: "JSON", //source.outputFormat,
-      geometryName: searchSource.geometryField,
-      maxFeatures,
-      filter
+      geometryName: geometryName,
+      maxFeatures: maxFeatures,
+      filter: finalFilters
     };
 
     const node = this.#wfsParser.writeGetFeature(options);
@@ -262,6 +296,7 @@ class SearchModel {
     const xmlString = xmlSerializer.serializeToString(node);
     const controller = new AbortController();
     const signal = controller.signal;
+    console.log("xmlString: ", xmlString);
 
     const request = {
       credentials: "same-origin",
