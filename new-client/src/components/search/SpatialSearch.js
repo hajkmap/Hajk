@@ -3,7 +3,7 @@ import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill } from "ol/style";
 import ToggleButton from "@material-ui/lab/ToggleButton";
-import CheckIcon from "@material-ui/icons/Check";
+import CheckIcon from "@material-ui/icons/BrushTwoTone";
 import Draw from "ol/interaction/Draw";
 import { Button } from "@material-ui/core";
 

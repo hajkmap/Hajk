@@ -105,9 +105,13 @@
 
 //
 // *https://www.registers.service.gov.uk/registers/country/use-the-api*
-import React, { useEffect, useState } from "react";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import ToggleButton from "@material-ui/lab/ToggleButton";
+import React, { useEffect, useRef, useState } from "react";
+
+import { Vector as VectorLayer } from "ol/layer";
+import VectorSource from "ol/source/Vector";
+import { Stroke, Style, Circle, Fill } from "ol/style";
+import Draw from "ol/interaction/Draw";
+import GeoJSON from "ol/format/GeoJSON";
 
 import {
   CircularProgress,
@@ -117,8 +121,17 @@ import {
   Tooltip,
   makeStyles
 } from "@material-ui/core";
+
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import Divider from "@material-ui/core/Divider";
+
 import MenuIcon from "@material-ui/icons/Menu";
 import FormatSizeIcon from "@material-ui/icons/FormatSize";
+import SearchIcon from "@material-ui/icons/Search";
+import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
+import WithinIcon from "@material-ui/icons/Adjust";
+import IntersectsIcon from "@material-ui/icons/Toll";
 
 const useStyles = makeStyles(theme => ({
   iconButtons: {
@@ -132,13 +145,99 @@ const SearchBar = props => {
   const { menuButtonDisabled, onMenuClick } = props;
   const searchModel = props.app.appModel.searchModel;
 
-  // React state
+  // Autocomplete state
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
+  const loading = open && options.length === 0;
+
+  // Settings to be sent to SearchModel
   const [wildcardAtStart, setWildcardAtStart] = useState(false);
   const [wildcardAtEnd, setWildcardAtEnd] = useState(true);
   const [matchCase, setMatchCase] = useState(false);
-  const loading = open && options.length === 0;
+  const [activeSpatialFilter, setActiveSpatialFilter] = useState("intersects");
+
+  // Layer to draw into (spatial search)
+  const [drawActive, setDrawActive] = useState(false);
+  const drawInteraction = useRef();
+  const drawSource = useRef();
+  const drawLayer = useRef();
+
+  // Layer to visualize results
+  const resultsSource = useRef();
+  const resultsLayer = useRef();
+
+  const map = useRef(props.map);
+
+  const drawStyle = useRef(
+    new Style({
+      stroke: new Stroke({
+        color: "rgba(255, 214, 91, 0.6)",
+        width: 4
+      }),
+      fill: new Fill({
+        color: "rgba(255, 214, 91, 0.2)"
+      }),
+      image: new Circle({
+        radius: 6,
+        stroke: new Stroke({
+          color: "rgba(255, 214, 91, 0.6)",
+          width: 2
+        })
+      })
+    })
+  );
+
+  useEffect(() => {
+    drawSource.current = new VectorSource({ wrapX: false });
+    drawLayer.current = new VectorLayer({
+      source: drawSource.current,
+      style: drawStyle.current
+    });
+
+    // Add layer that will be used to allow user draw on map - used for spatial search
+    map.current.addLayer(drawLayer.current);
+  }, []);
+
+  useEffect(() => {
+    resultsSource.current = new VectorSource({ wrapX: false });
+    resultsLayer.current = new VectorLayer({
+      source: resultsSource.current
+      // style: drawStyle.current
+    });
+
+    map.current.addLayer(resultsLayer.current);
+  }, []);
+
+  const toggleDraw = (
+    active,
+    type = "Polygon",
+    freehand = false,
+    drawEndCallback
+  ) => {
+    if (active) {
+      drawInteraction.current = new Draw({
+        source: drawSource.current,
+        type: type,
+        freehand: freehand,
+        stopClick: true,
+        style: drawStyle.current
+      });
+
+      map.current.clicklock = true;
+      map.current.addInteraction(drawInteraction.current);
+    } else {
+      map.current.removeInteraction(drawInteraction.current);
+      map.current.clicklock = false;
+      drawSource.current.clear();
+    }
+  };
+
+  const handleClickOnDrawToggle = () => {
+    setDrawActive(prevState => {
+      toggleDraw(!prevState);
+      return !prevState;
+    });
+  };
 
   useEffect(() => {
     const searchString = document.getElementById("searchInputField").value;
@@ -174,6 +273,56 @@ const SearchBar = props => {
     }
   }, [open]);
 
+  function addFeaturesToResultsLayer(featureCollections) {
+    // Start with cleaning up
+    resultsSource.current.clear();
+
+    const features = featureCollections.map(fc =>
+      fc.features.map(f => {
+        const geoJsonFeature = new GeoJSON().readFeature(f);
+        return geoJsonFeature;
+      })
+    );
+
+    features.map(f => resultsSource.current.addFeatures(f));
+    const currentExtent = resultsSource.current.getExtent();
+
+    // If the extent doesn't include any "Infite" values, let's go on - else abort zooming
+    if (currentExtent.map(Number.isFinite).includes(false) === false) {
+      map.current.getView().fit(currentExtent, {
+        size: map.current.getSize(),
+        maxZoom: 7
+      });
+    }
+  }
+
+  async function doSearch(searchString) {
+    // Grab existing search options from model
+    const searchOptions = searchModel.getSearchOptions();
+
+    // Apply our custom options based on user's selection
+    searchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
+    searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
+    searchOptions["matchCase"] = matchCase;
+    searchOptions["wildcardAtStart"] = wildcardAtStart;
+    searchOptions["wildcardAtEnd"] = wildcardAtEnd;
+
+    console.log("doSearch: ", searchString, searchOptions);
+    const results = await searchModel.getResults(
+      searchString,
+      undefined,
+      searchOptions
+    );
+    console.log("doSearch results: ", results);
+
+    addFeaturesToResultsLayer(results);
+  }
+
+  function handleClickOnSearch() {
+    const searchString = document.getElementById("searchInputField").value;
+    doSearch(searchString);
+  }
+
   /**
    * @summary Triggered when user selects a value/presses [Enter]. Makes a call and gets the actual search results.
    *
@@ -181,26 +330,11 @@ const SearchBar = props => {
    * @param {String} value
    * @param {String} reason
    */
-  async function handleOnChange(event, value, reason) {
+  function handleOnChange(event, value, reason) {
     // "value" can be String (if freeSolo) or Object (if autocomplete entry selected)
     // We must ensure that we grab the string either way.
     const searchString = value?.autocompleteEntry || value;
-
-    // Grab existing search options from model
-    const searchOptions = searchModel.getSearchOptions();
-
-    // Apply our custom options based on user's selection
-    searchOptions["matchCase"] = matchCase;
-    searchOptions["wildcardAtStart"] = wildcardAtStart;
-    searchOptions["wildcardAtEnd"] = wildcardAtEnd;
-
-    console.log("searching for value: ", value, searchOptions);
-    const results = await searchModel.getResults(
-      searchString,
-      undefined,
-      searchOptions
-    );
-    console.log("onChange, got results: ", results);
+    doSearch(searchString);
   }
   /**
    * @summary Triggered each time user changes input field value (e.g. onKeyPress etc). Makes a call to get the autocomplete list.
@@ -286,12 +420,40 @@ const SearchBar = props => {
                     .*
                   </ToggleButton>
                   <ToggleButton
-                    value=""
+                    value="matchCase"
                     selected={matchCase}
                     onChange={() => setMatchCase(!matchCase)}
                   >
                     <FormatSizeIcon />
                   </ToggleButton>
+                  <Divider orientation="vertical" />
+                  <ToggleButton
+                    value="drawActive"
+                    selected={drawActive}
+                    onChange={handleClickOnDrawToggle}
+                  >
+                    <BrushTwoToneIcon />
+                  </ToggleButton>
+                  <ToggleButton
+                    value="activeSpatialFilter"
+                    selected={activeSpatialFilter === "intersects"}
+                    onChange={() =>
+                      setActiveSpatialFilter(
+                        activeSpatialFilter === "intersects"
+                          ? "within"
+                          : "intersects"
+                      )
+                    }
+                  >
+                    {activeSpatialFilter === "intersects" ? (
+                      <IntersectsIcon />
+                    ) : (
+                      <WithinIcon />
+                    )}
+                  </ToggleButton>
+                  <IconButton onClick={handleClickOnSearch}>
+                    <SearchIcon />
+                  </IconButton>
                 </>
               )
             }}

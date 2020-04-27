@@ -4,6 +4,7 @@ import IsLike from "ol/format/filter/IsLike";
 import Or from "ol/format/filter/Or";
 import And from "ol/format/filter/And";
 import Intersects from "ol/format/filter/Intersects";
+import Within from "ol/format/filter/Within";
 
 import { arraySort } from "../utils/ArraySort";
 
@@ -13,11 +14,12 @@ class SearchModel {
 
   // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
   #searchOptions = {
-    featuresToFilter: [],
+    activeSpatialFilter: "intersects", // Make it possible to control which filter is used
+    featuresToFilter: [], // features, who's geometries will be read and used to limit the search extent
     maxResultsPerDataset: 100, // how many results to get (at most), per dataset
+    matchCase: false, // should search be case sensitive?
     wildcardAtStart: false, // should the search string start with the wildcard character?
-    wildcardAtEnd: true, // should the search string be end with the wildcard character?
-    matchCase: false // should search be case sensitive?
+    wildcardAtEnd: true // should the search string be end with the wildcard character?
   };
 
   #componentOptions;
@@ -94,13 +96,6 @@ class SearchModel {
     searchSources = this.getSources(),
     searchOptions = this.getSearchOptions()
   ) => {
-    console.log(
-      "searchString, searchSources, searchOptions: ",
-      searchString,
-      searchSources,
-      searchOptions
-    );
-
     const results = await this.#getRawResults(
       searchString,
       searchSources,
@@ -163,7 +158,11 @@ class SearchModel {
 
     const promises = [];
     let rawResults = null;
-    console.log(`Will look for ${searchString} in sources:`, searchSources);
+    console.log(
+      `getRawResults for: ${searchString}. sources. options.`,
+      searchSources,
+      searchOptions
+    );
 
     // Ensure that we've cleaned obsolete AbortControllers before we put new ones there
     this.#controllers = [];
@@ -213,7 +212,6 @@ class SearchModel {
   };
 
   #lookup = (searchString, searchSource, searchOptions) => {
-    console.log("searchSource: ", searchSource);
     const srsName = this.#map
       .getView()
       .getProjection()
@@ -221,9 +219,9 @@ class SearchModel {
     const geometryName =
       searchSource.geometryField || searchSource.geometryName || "geom";
     const maxFeatures = searchOptions.maxResultsPerDataset;
+    let comparisonFilters = null;
+    let spatialFilters = null;
     let finalFilters = null;
-    let isLikeFilters = null;
-    let intersectsFilters = null;
 
     if (searchString?.length > 0) {
       // Should the search string be surrounded by wildcard?
@@ -235,7 +233,7 @@ class SearchModel {
       // defined (e.g. columns in the data table, such as "name" or "address").
       // Let's loop through the searchFields and create an IsLike filter
       // for each one of them (e.g. "name=bla", "address=bla").
-      isLikeFilters = searchSource.searchFields.map(propertyName => {
+      comparisonFilters = searchSource.searchFields.map(propertyName => {
         return new IsLike(
           propertyName,
           pattern,
@@ -250,35 +248,44 @@ class SearchModel {
       // IsLike filters created. If we just have one, let's use it. But if we have
       // many, we must combine them using an Or filter, so we tell the WFS to search
       // where "name=bla OR address=bla OR etc...".
-      isLikeFilters =
-        isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
+      comparisonFilters =
+        comparisonFilters.length > 1
+          ? new Or(...comparisonFilters)
+          : comparisonFilters[0];
     }
 
     // If searchOptions contain any features, we should filter the results
     // using those features.
     if (searchOptions.featuresToFilter.length > 0) {
-      // Loop through supplied features and create a new filter using it's geometry
-      intersectsFilters = searchOptions.featuresToFilter.map(feature => {
-        return new Intersects(geometryName, feature.getGeometry(), srsName);
+      // First determine which spatial filter should be used:
+      const activeSpatialFilter =
+        searchOptions.activeSpatialFilter === "within" ? Within : Intersects;
+      // Next, loop through supplied features and create the desired filter
+      spatialFilters = searchOptions.featuresToFilter.map(feature => {
+        return new activeSpatialFilter(
+          geometryName,
+          feature.getGeometry(),
+          srsName
+        );
       });
 
       // If one feature was supplied, we end up with one filter. Let's use it.
       // But if more features were supplied, we must combine them into an Or filter.
-      intersectsFilters =
-        intersectsFilters.length > 1
-          ? new Or(...intersectsFilters)
-          : intersectsFilters[0];
+      spatialFilters =
+        spatialFilters.length > 1
+          ? new Or(...spatialFilters)
+          : spatialFilters[0];
     }
 
     // Finally, let's combine the text and spatial filters into
     // one filter that will be sent with the request.
-    if (isLikeFilters !== null && intersectsFilters !== null) {
+    if (comparisonFilters !== null && spatialFilters !== null) {
       // We have both text and spatial filters - let's combine them with an And filter.
-      finalFilters = new And(isLikeFilters, intersectsFilters);
-    } else if (isLikeFilters !== null) {
-      finalFilters = isLikeFilters;
-    } else if (intersectsFilters !== null) {
-      finalFilters = intersectsFilters;
+      finalFilters = new And(comparisonFilters, spatialFilters);
+    } else if (comparisonFilters !== null) {
+      finalFilters = comparisonFilters;
+    } else if (spatialFilters !== null) {
+      finalFilters = spatialFilters;
     }
 
     // Prepare the options for the upcoming request.
@@ -296,7 +303,6 @@ class SearchModel {
     const xmlString = xmlSerializer.serializeToString(node);
     const controller = new AbortController();
     const signal = controller.signal;
-    console.log("xmlString: ", xmlString);
 
     const request = {
       credentials: "same-origin",

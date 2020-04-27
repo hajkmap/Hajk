@@ -107,13 +107,13 @@
 // *https://www.registers.service.gov.uk/registers/country/use-the-api*
 import React from "react";
 import SearchBar from "./SearchBar";
-import SpatialSearch from "./SpatialSearch";
+// import SpatialSearch from "./SpatialSearch";
 
 const Search = props => {
   return (
     <>
       <SearchBar {...props} />
-      <SpatialSearch {...props} />
+      {/* <SpatialSearch {...props} /> */}
     </>
   );
 };
