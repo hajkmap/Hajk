@@ -139,6 +139,60 @@ var CoordinatesList = React.createClass({
   }
 });
 
+//Sök på Coordinate
+var SearchOnCoordinates = React.createClass({
+
+  addInput: function(item){
+    return (
+        <option key={item.code} value={item.code}>{item.title}</option>
+    );
+  },
+
+  getInitialState:function() {
+    return {
+      selectValue: this.props.model.get("transformations")[0].code
+    };
+  },
+
+  updateSelect: function(event){
+    this.state.selectValue = event.target.value;
+    this.props.model.moveFeature(event)
+    this.forceUpdate();
+  },
+
+
+  render: function () {
+
+    return(
+      <div>
+        <p>Välj en plats i kartan genom att ange koordinater. </p>
+        <dl>
+          <dt>
+            Söka på koordinater
+          </dt>
+          <dd>
+            Välj koordinatsystem:&nbsp;&nbsp;
+            <select id="coordSystem-coord-tool" value={this.state.selectValue} onChange={(event) => this.updateSelect(event)}>
+              {this.props.model.get("transformations").map((item) => this.addInput(item))}
+            </select>
+            <div>
+              Ange platsens koordinater <br/>
+              N/Long: <input type='text' id='latSOC'  /> &nbsp;&nbsp;&nbsp;
+              E/Lat: <input type='text' id='lonSOC'  /><br/>
+            </div><br/>
+            <div className='pull-right'>
+              <button onClick={(event) => this.props.model.zoomaCoords(event)} className='btn btn-primary' id='zoomaCoords'>Zooma</button>
+              <button onClick={(event) => this.props.model.panoreraCoords(event)} className='btn btn-primary' id='panoreraCoords'>Panorera</button>
+              <button onClick={(event) => this.props.model.laddaCoords(event)} className='btn btn-primary' id='laddaCoords'>Koordinater</button>
+              <button onClick={(event) => this.props.model.resetCoords(event)} className='btn btn-primary' id='restCoords'>Rensa</button>
+            </div><br/><br/>
+          </dd>
+        </dl>
+      </div>
+    );
+
+  }
+});
 /**
  * @class
  */
@@ -173,6 +227,10 @@ var CoordinatesPanelView = {
     this.setState({
       coordinates: this.props.model.presentCoordinates()
     });
+    var positionN = this.props.model.get("position").y;
+    var positionE = this.props.model.get("position").x;
+    document.getElementById('latSOC').value == '11111';
+    document.getElementById('lonSOC').value == positionE;
   },
 
   /**
@@ -212,9 +270,10 @@ var CoordinatesPanelView = {
       <Panel title='Koordinater' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className='coordinate-display'>
           <p>
-            Välj en plats i kartan genom att dra i siktet. <br />
+            Välj en plats i kartan genom att flytta på siktet. <br />
           </p>
           <CoordinatesList coordinates={coordinates} />
+          <SearchOnCoordinates model={this.props.model}/>
         </div>
       </Panel>
     );
