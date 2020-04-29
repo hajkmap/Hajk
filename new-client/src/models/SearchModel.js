@@ -150,6 +150,10 @@ class SearchModel {
     // TODO: Handle empty/null/undefined searchString (can happen on spatial search)
     // Fast fail if no search string provided
     // if (searchString === null) return [];
+    if (Array.isArray(searchSources) && searchSources.length === 0) {
+      throw new Error("No search sources selected, aborting.");
+    }
+    console.log("!!!searchSources: ", searchSources);
 
     if (Array.isArray(searchSources) === false || searchSources.length < 1) {
       console.warn("searchSources empty, resetting to default.", searchSources);

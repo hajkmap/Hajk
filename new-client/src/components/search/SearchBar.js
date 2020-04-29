@@ -119,7 +119,8 @@ import {
   Paper,
   TextField,
   Tooltip,
-  makeStyles
+  makeStyles,
+  Checkbox
 } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -132,6 +133,9 @@ import SearchIcon from "@material-ui/icons/Search";
 import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
 import WithinIcon from "@material-ui/icons/Adjust";
 import IntersectsIcon from "@material-ui/icons/Toll";
+
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
 
 const useStyles = makeStyles(theme => ({
   iconButtons: {
@@ -186,6 +190,11 @@ const SearchBar = props => {
       })
     })
   );
+
+  // For Search Sources Autocomplete
+  const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+  const checkedIcon = <CheckBoxIcon fontSize="small" />;
+  const [searchSources, setSearchSources] = useState(searchModel.getSources());
 
   useEffect(() => {
     drawSource.current = new VectorSource({ wrapX: false });
@@ -307,10 +316,10 @@ const SearchBar = props => {
     searchOptions["wildcardAtStart"] = wildcardAtStart;
     searchOptions["wildcardAtEnd"] = wildcardAtEnd;
 
-    console.log("doSearch: ", searchString, searchOptions);
+    console.log("doSearch: ", searchString, searchSources, searchOptions);
     const results = await searchModel.getResults(
       searchString,
-      undefined,
+      searchSources, // this is a state variable!
       searchOptions
     );
     console.log("doSearch results: ", results);
@@ -457,6 +466,37 @@ const SearchBar = props => {
                 </>
               )
             }}
+          />
+        )}
+      />
+      <Autocomplete
+        onChange={(event, value, reason) => {
+          setSearchSources(value);
+        }}
+        value={searchSources}
+        multiple
+        id="searchSources"
+        options={searchModel.getSources()}
+        disableCloseOnSelect
+        getOptionLabel={option => option.caption}
+        renderOption={(option, { selected }) => (
+          <>
+            <Checkbox
+              icon={icon}
+              checkedIcon={checkedIcon}
+              style={{ marginRight: 8 }}
+              checked={selected}
+            />
+            {option.caption}
+          </>
+        )}
+        style={{ width: 500 }}
+        renderInput={params => (
+          <TextField
+            {...params}
+            variant="outlined"
+            // label="Sökkällor"
+            placeholder="Välj sökkälla"
           />
         )}
       />
