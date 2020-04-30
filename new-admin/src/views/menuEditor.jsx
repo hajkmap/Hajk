@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
 import MenuEditorModel from "../models/menuEditorModel";
 import Grid from "@material-ui/core/Grid";
 import Table from "@material-ui/core/Table";
@@ -6,17 +6,27 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import DeleteIcon from "@material-ui/icons/Delete";
+import SettingsIcon from "@material-ui/icons/Settings";
 import DragHandle from "@material-ui/icons/DragHandle";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import TableHead from "@material-ui/core/TableHead";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+
 import TableRow from "@material-ui/core/TableRow";
 import { withStyles } from "@material-ui/core/styles";
 import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 import Switch from "@material-ui/core/Switch";
 import { IconButton } from "@material-ui/core";
 import Tree from "antd/es/tree"; //Specific import to keep bundle-size small
 import "antd/es/tree/style/css"; //Specific import to keep bundle-size small
 import { Typography } from "@material-ui/core";
+
+const MENU_CONNECTION_TYPES = [
+  "Koppla dokument",
+  "Koppla karta och lager",
+  "Koppla webblänk"
+];
 
 const styles = theme => ({
   container: {
@@ -33,12 +43,12 @@ const styles = theme => ({
   }
 });
 
-class MenuEditor extends PureComponent {
+class MenuEditor extends Component {
   state = {
     menuConfig: null
   };
 
-  index = 0;
+  treeKeys = [];
 
   constructor(props) {
     super(props);
@@ -48,11 +58,7 @@ class MenuEditor extends PureComponent {
   componentDidMount = () => {
     this.model.loadMenuConfigForMap("map_1").then(data => {
       console.log(data, "data");
-      this.setState({ menuConfig: data }, () => {
-        this.setState({ treeData: this.create() }, () => {
-          console.log(this.state, "state");
-        });
-      });
+      this.setState({ menuConfig: data }, () => {});
     });
   };
 
@@ -63,6 +69,7 @@ class MenuEditor extends PureComponent {
   };
 
   create = () => {
+    this.treeKeys = [];
     let menu = this.state.menuConfig;
     return this.createTree(menu);
   };
@@ -73,18 +80,101 @@ class MenuEditor extends PureComponent {
     });
   };
 
+  getNewTreeKey = () => {
+    let newKey = 0;
+    if (this.treeKeys.length > 0) {
+      newKey = this.treeKeys[this.treeKeys.length - 1] + 1;
+    }
+    this.treeKeys.push(newKey);
+    return newKey;
+  };
+
   createTreeChild = menuItem => {
     let children = [];
     if (menuItem.menu.length > 0) {
       children = this.createTree(menuItem.menu);
     }
-    this.index = this.index + 1;
+
     return {
       title: this.getComponent(menuItem),
       children: children,
-
-      key: this.index
+      menuItem: menuItem,
+      key: this.getNewTreeKey().toString()
     };
+  };
+
+  renderSettingsMenu = () => {
+    return (
+      <IconButton>
+        <SettingsIcon></SettingsIcon>
+      </IconButton>
+    );
+  };
+
+  renderConnectionMenuSelectOption = title => {
+    return (
+      <MenuItem value={<Typography>{title}</Typography>}>
+        <ListItemIcon>
+          <SettingsIcon></SettingsIcon>
+          <Typography>{title}</Typography>
+        </ListItemIcon>
+      </MenuItem>
+    );
+  };
+
+  renderConnectionSelect = menuItem => {
+    return (
+      <Select
+        MenuProps={{
+          disableScrollLock: true,
+          anchorOrigin: {
+            vertical: "bottom",
+            horizontal: "left"
+          },
+          transformOrigin: {
+            vertical: "top",
+            horizontal: "left"
+          },
+          getContentAnchorEl: null
+        }}
+        renderValue={value => {
+          return value;
+        }}
+        inputProps={{
+          name: "age",
+          id: "age-native-simple"
+        }}
+      >
+        {MENU_CONNECTION_TYPES.map(title => {
+          return this.renderConnectionMenuSelectOption(title);
+        })}
+      </Select>
+    );
+  };
+
+  deleteMenuItem = menuItem => {
+    let newState = [...this.state.menuConfig];
+    newState.splice(this.state.menuConfig.indexOf(menuItem), 1);
+    this.setState({ menuConfig: newState });
+  };
+
+  updateMenuItem = menuItem => {
+    let newMenuItem = { ...menuItem, title: "hej" };
+    let newState = [...this.state.menuConfig];
+    newState[this.state.menuConfig.indexOf(menuItem)] = newMenuItem;
+    this.setState({ menuConfig: newState });
+  };
+
+  renderRemoveButton = menuItem => {
+    return (
+      <IconButton>
+        <DeleteIcon
+          onClick={() => {
+            this.deleteMenuItem(menuItem);
+          }}
+        ></DeleteIcon>
+      </IconButton>
+    );
   };
 
   getComponent = menuItem => {
@@ -97,46 +187,13 @@ class MenuEditor extends PureComponent {
           <Typography>{menuItem.title}</Typography>
         </Grid>
         <Grid xs={9} container item>
+          <Grid xs={1}>{this.renderSettingsMenu()}</Grid>
           <Grid xs={2} item>
-            <Select
-              native
-              value={10}
-              inputProps={{
-                name: "age",
-                id: "age-native-simple"
-              }}
-            >
-              <option value="" />
-              <option value={10}>Ten</option>
-              <option value={20}>Twenty</option>
-              <option value={30}>Thirty</option>
-            </Select>
+            {this.renderConnectionSelect(menuItem)}
           </Grid>
+
           <Grid xs={2} item>
-            <Select
-              native
-              value={10}
-              inputProps={{
-                name: "age",
-                id: "age-native-simple"
-              }}
-            >
-              <option value="" />
-              <option value={10}>Ten</option>
-              <option value={20}>Twenty</option>
-              <option value={30}>Thirty</option>
-            </Select>
-          </Grid>
-          <Grid xs={2} item>
-            <Switch
-              name="checkedA"
-              inputProps={{ "aria-label": "secondary checkbox" }}
-            />
-          </Grid>
-          <Grid xs={2} item>
-            <IconButton>
-              <DeleteIcon></DeleteIcon>
-            </IconButton>
+            {this.renderRemoveButton(menuItem)}
             <IconButton>
               <FileCopyIcon></FileCopyIcon>
             </IconButton>
@@ -171,17 +228,24 @@ class MenuEditor extends PureComponent {
   };
 
   render() {
+    let tree = this.state.menuConfig ? this.create() : null;
+    let expandedKeys = this.treeKeys.map(key => {
+      return key.toString();
+    });
+    console.log(tree, "tree");
+    console.log(expandedKeys, "render");
+
     const { classes } = this.props;
     return (
       <section className="tab-pane active">
         {this.renderTableHeader()}
         <Grid>
-          {this.state.treeData && (
+          {this.state.menuConfig && expandedKeys && (
             <Tree
               className={classes.background}
-              defaultExpandAll
               blockNode
-              treeData={this.state.treeData}
+              expandedKeys={expandedKeys}
+              treeData={tree}
               draggable
             ></Tree>
           )}
