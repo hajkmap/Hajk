@@ -2,13 +2,16 @@ import React, { Component } from "react";
 import MenuEditorModel from "../models/menuEditorModel";
 import Grid from "@material-ui/core/Grid";
 import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
+
+import InputLabel from "@material-ui/core/InputLabel";
+
+import FormControl from "@material-ui/core/FormControl";
+
 import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
+
 import DeleteIcon from "@material-ui/icons/Delete";
 import SettingsIcon from "@material-ui/icons/Settings";
 import DragHandle from "@material-ui/icons/DragHandle";
-import FileCopyIcon from "@material-ui/icons/FileCopy";
 import TableHead from "@material-ui/core/TableHead";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 
@@ -16,7 +19,6 @@ import TableRow from "@material-ui/core/TableRow";
 import { withStyles } from "@material-ui/core/styles";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import Switch from "@material-ui/core/Switch";
 import { IconButton } from "@material-ui/core";
 import Tree from "antd/es/tree"; //Specific import to keep bundle-size small
 import "antd/es/tree/style/css"; //Specific import to keep bundle-size small
@@ -43,6 +45,55 @@ const styles = theme => ({
   }
 });
 
+class MenuConnectionSelector extends React.Component {
+  state = { value: this.props.menuItem.title };
+
+  renderConnectionMenuSelectOption = (title, index) => {
+    return (
+      <MenuItem key={index} value={title}>
+        <ListItemIcon>
+          <SettingsIcon></SettingsIcon>
+        </ListItemIcon>
+        <Typography>{title}</Typography>
+      </MenuItem>
+    );
+  };
+
+  handleChange = e => {
+    console.log(e, "e");
+    this.setState({ value: e.target.value });
+  };
+  render = () => {
+    return (
+      <FormControl>
+        <Select
+          MenuProps={{
+            disableScrollLock: true,
+            anchorOrigin: {
+              vertical: "bottom",
+              horizontal: "left"
+            },
+            transformOrigin: {
+              vertical: "top",
+              horizontal: "left"
+            },
+            getContentAnchorEl: null
+          }}
+          onChange={this.handleChange}
+          renderValue={value => {
+            return value;
+          }}
+          value={this.state.value}
+        >
+          {MENU_CONNECTION_TYPES.map((title, index) => {
+            return this.renderConnectionMenuSelectOption(title, index);
+          })}
+        </Select>
+      </FormControl>
+    );
+  };
+}
+
 class MenuEditor extends Component {
   state = {
     menuConfig: null
@@ -57,7 +108,6 @@ class MenuEditor extends Component {
 
   componentDidMount = () => {
     this.model.loadMenuConfigForMap("map_1").then(data => {
-      console.log(data, "data");
       this.setState({ menuConfig: data }, () => {});
     });
   };
@@ -96,7 +146,7 @@ class MenuEditor extends Component {
     }
 
     return {
-      title: this.getComponent(menuItem),
+      title: this.renderMenuRow(menuItem),
       children: children,
       menuItem: menuItem,
       key: this.getNewTreeKey().toString()
@@ -111,44 +161,9 @@ class MenuEditor extends Component {
     );
   };
 
-  renderConnectionMenuSelectOption = title => {
-    return (
-      <MenuItem value={<Typography>{title}</Typography>}>
-        <ListItemIcon>
-          <SettingsIcon></SettingsIcon>
-          <Typography>{title}</Typography>
-        </ListItemIcon>
-      </MenuItem>
-    );
-  };
-
   renderConnectionSelect = menuItem => {
     return (
-      <Select
-        MenuProps={{
-          disableScrollLock: true,
-          anchorOrigin: {
-            vertical: "bottom",
-            horizontal: "left"
-          },
-          transformOrigin: {
-            vertical: "top",
-            horizontal: "left"
-          },
-          getContentAnchorEl: null
-        }}
-        renderValue={value => {
-          return value;
-        }}
-        inputProps={{
-          name: "age",
-          id: "age-native-simple"
-        }}
-      >
-        {MENU_CONNECTION_TYPES.map(title => {
-          return this.renderConnectionMenuSelectOption(title);
-        })}
-      </Select>
+      <MenuConnectionSelector menuItem={menuItem}></MenuConnectionSelector>
     );
   };
 
@@ -167,36 +182,38 @@ class MenuEditor extends Component {
 
   renderRemoveButton = menuItem => {
     return (
-      <IconButton>
-        <DeleteIcon
-          onClick={() => {
-            this.deleteMenuItem(menuItem);
-          }}
-        ></DeleteIcon>
+      <IconButton
+        onClick={() => {
+          this.deleteMenuItem(menuItem);
+        }}
+      >
+        <DeleteIcon></DeleteIcon>
       </IconButton>
     );
   };
 
-  getComponent = menuItem => {
+  renderMenuTitle = menuItem => {
+    return <Typography>{menuItem.title}</Typography>;
+  };
+
+  renderMenuRow = menuItem => {
     return (
       <Grid justify="flex-end" container>
         <Grid xs={1} item>
           <DragHandle></DragHandle>
         </Grid>
         <Grid xs={2} item>
-          <Typography>{menuItem.title}</Typography>
+          {this.renderMenuTitle(menuItem)}
         </Grid>
         <Grid xs={9} container item>
-          <Grid xs={1}>{this.renderSettingsMenu()}</Grid>
-          <Grid xs={2} item>
+          <Grid xs={3} item>
+            {this.renderSettingsMenu()}
+          </Grid>
+          <Grid xs={3} item>
             {this.renderConnectionSelect(menuItem)}
           </Grid>
-
-          <Grid xs={2} item>
+          <Grid xs={3} item>
             {this.renderRemoveButton(menuItem)}
-            <IconButton>
-              <FileCopyIcon></FileCopyIcon>
-            </IconButton>
           </Grid>
         </Grid>
       </Grid>
@@ -206,7 +223,7 @@ class MenuEditor extends Component {
   renderTableCell = columnName => {
     const { classes } = this.props;
     return (
-      <TableCell className={classes.cell}>
+      <TableCell key={columnName} className={classes.cell}>
         <Typography>{columnName}</Typography>
       </TableCell>
     );
@@ -227,6 +244,46 @@ class MenuEditor extends Component {
     );
   };
 
+  findDropNode = (treeNode, dropKey) => {
+    if (treeNode.key == dropKey) {
+      console.log(treeNode, "treeNode");
+      return treeNode;
+    } else {
+      if (treeNode.children) {
+        var x = treeNode.children.find(childNode => {
+          return this.findDropNode(childNode, dropKey);
+        });
+        console.log(x, "x");
+        return x;
+      } else {
+        return null;
+      }
+    }
+  };
+
+  onDrop = (info, tree) => {
+    console.log(info, "info");
+    const dropKey = info.node.props.eventKey;
+    const dragKey = info.dragNode.props.eventKey;
+
+    console.log(tree, "tree");
+    console.log(dropKey, "dropKey");
+    console.log(dragKey, "dragKey");
+
+    let foundDragNode = tree.filter(treeNode => {
+      return this.findDropNode(treeNode, dragKey) != undefined;
+    })[0];
+
+    let foundDropNode = tree.filter(treeNode => {
+      return this.findDropNode(treeNode, dropKey) != undefined;
+    })[0];
+
+    foundDropNode.children.push(foundDragNode);
+
+    console.log(foundDropNode, "foundrDropNode");
+    console.log(foundDragNode, "foundDragNode");
+  };
+
   render() {
     let tree = this.state.menuConfig ? this.create() : null;
     let expandedKeys = this.treeKeys.map(key => {
@@ -244,6 +301,9 @@ class MenuEditor extends Component {
             <Tree
               className={classes.background}
               blockNode
+              onDrop={e => {
+                this.onDrop(e, tree);
+              }}
               expandedKeys={expandedKeys}
               treeData={tree}
               draggable
