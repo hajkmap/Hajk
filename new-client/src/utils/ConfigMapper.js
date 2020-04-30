@@ -128,6 +128,7 @@ export default class ConfigMapper {
         legend: getLegends(),
         params: {
           LAYERS: args.layers.join(","),
+          ...(args.cqlFilter && { CQL_FILTER: args.cqlFilter }), // nice way to add property only if needed
           FORMAT: args.imageFormat,
           INFO_FORMAT: args.infoFormat,
           VERSION: args.version || "1.1.1",

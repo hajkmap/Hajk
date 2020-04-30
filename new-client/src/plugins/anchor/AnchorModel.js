@@ -2,9 +2,10 @@ class AnchorModel {
   constructor(settings) {
     this.app = settings.app;
     this.getCleanUrl = settings.getCleanUrl;
+    this.cqlFilters = {};
     this.map = settings.map;
     this.localObserver = settings.localObserver;
-    var update = e => {
+    const update = e => {
       setTimeout(() => {
         if (!e.target.getAnimating() && !e.target.getInteracting()) {
           this.localObserver.publish("mapUpdated", this.getAnchor());
@@ -17,7 +18,19 @@ class AnchorModel {
       .getLayers()
       .getArray()
       .forEach(layer => {
-        layer.on("change:visible", layer => {
+        // Grab an unique ID for each layer, we'll need this to save CQL filter value for each layer
+        const layerId = layer.get("name");
+        layer.on("change:visible", event => {
+          this.localObserver.publish("mapUpdated", this.getAnchor());
+        });
+        layer.getSource().on("change", ({ target }) => {
+          if (
+            target.constructor.name !== "ImageWMS" &&
+            target.constructor.name !== "TiledWMS"
+          )
+            return;
+          const cqlFilterForCurrentLayer = target.getParams()?.CQL_FILTER;
+          this.cqlFilters[layerId] = cqlFilterForCurrentLayer;
           this.localObserver.publish("mapUpdated", this.getAnchor());
         });
       });
@@ -55,6 +68,7 @@ class AnchorModel {
       y: this.map.getView().getCenter()[1],
       z: this.map.getView().getZoom(),
       l: this.getVisibleLayers(),
+      f: encodeURIComponent(JSON.stringify(this.cqlFilters)),
       clean: this.getCleanUrl()
     });
 
