@@ -229,7 +229,7 @@ var CoordinatesPanelView = {
     });
     var positionN = this.props.model.get("position").y;
     var positionE = this.props.model.get("position").x;
-    document.getElementById('latSOC').value == '11111';
+    document.getElementById('latSOC').value == positionN;
     document.getElementById('lonSOC').value == positionE;
   },
 
