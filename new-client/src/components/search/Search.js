@@ -105,10 +105,9 @@
 
 //
 // *https://www.registers.service.gov.uk/registers/country/use-the-api*
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SearchBar from "./SearchBar";
 import { makeStyles } from "@material-ui/core";
-import PropTypes from "prop-types";
 
 const useStyles = makeStyles(theme => ({
   iconButtons: {
@@ -116,64 +115,61 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default class Search extends React.PureComponent {
-  state = {
-    inputValue: "",
-    autocompleteList: [],
-    open: false,
-    setOpen: false
-  };
+const Search = props => {
+  const { menuButtonDisabled, onMenuClick } = props;
+  const searchModel = props.app.appModel.searchModel;
 
-  static propTypes = {
-    globalObserver: PropTypes.object.isRequired
-  };
+  const [input, setInput] = useState("");
 
-  static defaultProps = {
-    globalObserver: {}
-  };
+  // Autocomplete state
+  const [options, setOptions] = useState([]);
 
-  constructor(props) {
-    super(props);
-    this.searchModel = props.app.appModel.searchModel;
-  }
+  // Triggered when typing
+  const handleOnInput = async (event, value, reason) => {
+    setInput(event.target.value);
+    console.log("Input: ", event.target.value);
 
-  componentDidMount() {
-    this.autocompleteList();
-  }
-
-  async autocompleteList() {
-    const autocompleteList = await this.searchModel.getAutocomplete(
-      this.state.inputValue
+    const autocompleteList = await searchModel.getAutocomplete(
+      event.target.value
     );
     console.log(
       "Got this back to populate autocomplete with: ",
       autocompleteList
     );
 
-    this.setState({
-      autocompleteList: autocompleteList
-    });
-  }
+    setOptions(autocompleteList);
+    console.log("List:", options);
+  };
 
-  handleOnChange = async (event, value, reason) => {
-    const results = await this.searchModel.getResults(value);
+  // Triggered when selecting an option from autocomplete list
+  const handleOnChange = (event, value, reason) => {
+    console.log("Selected from list: ", value);
+    const searchString = value?.autocompleteEntry || value;
+    doSearch(searchString);
+  };
+
+  const handleOnSearch = () => {
+    doSearch(input);
+  };
+
+  const doSearch = async searchString => {
+    //const searchOptions = searchModel.getSearchOptions();
+
+    const results = await searchModel.getResults(searchString);
     console.log("Results: ", results);
   };
 
-  handleOnInput = (event, value, reason) => {
-    this.setState({
-      inputValue: event.target.value
-    });
-    console.log("Input: " + event.target.value);
-  };
-
-  render() {
-    return (
+  return (
+    <>
       <SearchBar
-        updateChange={this.handleOnChange}
-        updateInput={this.handleOnInput}
-        autocompleteList={this.state.autocompleteList}
+        {...props}
+        handleOnInput={handleOnInput}
+        handleOnChange={handleOnChange}
+        handleOnSearch={handleOnSearch}
+        autocompleteList={options}
       />
-    );
-  }
-}
+    </>
+  );
+};
+
+export default Search;
