@@ -11,16 +11,15 @@ import RefreshIcon from "@material-ui/icons/Refresh";
 const CQLFilter = ({ layer }) => {
   const source = layer.getSource();
   const currentCqlFilterValue =
-    source.constructor.name !== "ImageWMS" &&
-    source.constructor.name !== "TiledWMS"
-      ? ""
-      : source.getParams()?.CQL_FILTER;
+    (typeof source.getParams === "function" &&
+      source.getParams()?.CQL_FILTER) ||
+    "";
 
   const [cqlFilter, setCqlFilter] = useState(currentCqlFilterValue);
 
   const updateFilter = () => {
     let filter = cqlFilter.trim();
-    if (filter.length === 0) filter = undefined;
+    if (filter.length === 0) filter = undefined; // If length === 0, unset filter.
     layer.getSource().updateParams({ CQL_FILTER: filter });
   };
 

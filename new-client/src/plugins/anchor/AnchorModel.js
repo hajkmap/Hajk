@@ -20,15 +20,15 @@ class AnchorModel {
       .forEach(layer => {
         // Grab an unique ID for each layer, we'll need this to save CQL filter value for each layer
         const layerId = layer.get("name");
+
+        // Update anchor each time layer visibility changes (to reflect current visible layers)
         layer.on("change:visible", event => {
           this.localObserver.publish("mapUpdated", this.getAnchor());
         });
+
+        // Update anchor each time an underlaying Source changes in some way (could be new CQL params, for example).
         layer.getSource().on("change", ({ target }) => {
-          if (
-            target.constructor.name !== "ImageWMS" &&
-            target.constructor.name !== "TiledWMS"
-          )
-            return;
+          if (typeof target.getParams !== "function") return;
           const cqlFilterForCurrentLayer = target.getParams()?.CQL_FILTER;
           this.cqlFilters[layerId] = cqlFilterForCurrentLayer;
           this.localObserver.publish("mapUpdated", this.getAnchor());
