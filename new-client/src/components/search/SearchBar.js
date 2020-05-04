@@ -1,37 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Vector as VectorLayer } from "ol/layer";
-import VectorSource from "ol/source/Vector";
-import { Stroke, Style, Circle, Fill } from "ol/style";
-import Draw from "ol/interaction/Draw";
-import GeoJSON from "ol/format/GeoJSON";
+import SearchTools from "./SearchTools";
 
 import {
-  CircularProgress,
   IconButton,
   Paper,
   TextField,
   Tooltip,
-  makeStyles,
-  Checkbox
+  makeStyles
 } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import ToggleButton from "@material-ui/lab/ToggleButton";
 import Divider from "@material-ui/core/Divider";
 
 import MenuIcon from "@material-ui/icons/Menu";
-import FormatSizeIcon from "@material-ui/icons/FormatSize";
 import SearchIcon from "@material-ui/icons/Search";
-import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
-import WithinIcon from "@material-ui/icons/Adjust";
-import IntersectsIcon from "@material-ui/icons/Toll";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import InputAdornment from "@material-ui/core/InputAdornment";
-import InputBase from "@material-ui/core/InputBase";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -88,7 +71,8 @@ const SearchBar = props => {
         renderOption={option => (
           <React.Fragment>
             <span>
-              {option.autocompleteEntry + " (" + option.dataset + ")"}
+              {option.autocompleteEntry}
+              <em>{"(" + option.dataset + ")"}</em>
             </span>
           </React.Fragment>
         )}
@@ -125,13 +109,7 @@ const SearchBar = props => {
                     <SearchIcon />
                   </IconButton>
                   <Divider className={classes.divider} orientation="vertical" />
-                  <IconButton
-                    color="primary"
-                    className={classes.iconButton}
-                    aria-label="directions"
-                  >
-                    <MoreHorizIcon />
-                  </IconButton>
+                  <SearchTools />
                 </>
               )
             }}
