@@ -81,9 +81,12 @@ const recursiveParseSubTags = (
     });
   }
 
+  let parentObject = parsedObject;
+  if (text[0]?.text.length === 0) parentObject = [...parsedObject.text].pop();
+
   if (restHtml.length > 0)
     recursiveParseSubTags(
-      parsedObject,
+      parentObject,
       tagType,
       restHtml,
       tagSpecificCallbacks
@@ -125,6 +128,14 @@ const findStartTag = html => {
   const indexStart = html.indexOf("<");
   let indexEnd = html.indexOf(">");
 
+  if (indexEnd < indexStart)
+    return {
+      tagType: null,
+      tagValue: html,
+      tagStartIndex: indexStart,
+      tagEndIndex: indexEnd
+    };
+
   let possibleIndexEnd = html.indexOf("/>");
   if (indexEnd - 1 === possibleIndexEnd) indexEnd = html.indexOf(" ");
   if (indexEnd === possibleIndexEnd) indexEnd = html.length;
@@ -142,11 +153,10 @@ const findStartTag = html => {
     };
 
   const startIndex = indexStart + 2 + tagType.length;
-  let endIndex = tagEndIndex - 3 - tagType.length;
-  if (tagEndIndex - 3 - tagType.length <= 0)
-    endIndex = indexStart + 2 + tagType.length;
-  if (possibleIndexEnd > 0) endIndex = tagEndIndex - tagType.length;
-  const tagValue = html.substring(startIndex, endIndex);
+  let tagLength = tagEndIndex - 3 - tagType.length;
+  if (possibleIndexEnd + 2 === tagEndIndex) tagLength = possibleIndexEnd;
+  if (tagLength <= 0) tagLength = tagEndIndex;
+  const tagValue = html.substring(startIndex, tagLength);
 
   return {
     tagType: tagType,
@@ -182,6 +192,8 @@ const extractDataFromFirstTag = (html, tagSpecificCallbacks) => {
   );
 
   if (!textAddedToTag) addPossibleOnlyTextToParentTag(firstTag, pureTag);
+
+  addPossibleTagTypeWithoutTextToParentTag(firstTag, tagType, pureTag);
 
   let restHtml = html.substr(textBeforeTag.length + tagEndIndex);
   if (!isTagSpecific(tagType, tagSpecificCallbacks) || isTextATag(tagValue))
@@ -303,7 +315,7 @@ const addPossibleTextToTag = (
   tagValue,
   tagSpecificCallbacks
 ) => {
-  if (isTextATag(tagValue)) return false;
+  if (tagType === null /*&&*/ || isTextATag(tagValue)) return false;
 
   if (textBeforeTag !== "" || tagValue !== "") {
     if (tagType === null || isTagSpecific(tagType, tagSpecificCallbacks)) {
@@ -314,6 +326,13 @@ const addPossibleTextToTag = (
   return false;
 };
 
+/**
+ * Private help method that determines if a tag value contains a tag.
+ * @param {string} tagValue The value of the tag.
+ * @returns {boolean} Returns true if the tagValue parameter contains a tag inside itself.
+ *
+ * @memberof htmlToMaterialUiParser
+ */
 const isTextATag = tagValue => {
   const { tagType } = findStartTag(tagValue);
   if (tagType) return true;
@@ -339,6 +358,31 @@ const addPossibleOnlyTextToParentTag = (firstTag, pureTag) => {
   return false;
 };
 
+/**
+ * Private help method that adds a possible tag without a text, e.g. the figure tag.
+ * @param {object} firstTag The first tag object that we push parsed html tag into.
+ * @param {string} tagType The tag type.
+ * @param {string} pureTag The pure tag without the surrounding parent tag.
+ */
+const addPossibleTagTypeWithoutTextToParentTag = (
+  firstTag,
+  tagType,
+  pureTag
+) => {
+  if (firstTag.length === 0 && isTextATag(pureTag)) {
+    firstTag.push({ tagType: tagType, text: [] });
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Private help method that determines if a tag type is among those tag that we parse.
+ * @param {string} tagType The type of the tag.
+ * @param {Array} tagSpecificCallbacks The array of all tag type that should be parsed.
+ *
+ * @memberof htmlToMaterialUiParser
+ */
 const getTagSpecificCallback = (tagType, tagSpecificCallbacks) => {
   let foundTag = tagSpecificCallbacks.find(
     element => element.tagType === tagType
@@ -353,6 +397,8 @@ const getTagSpecificCallback = (tagType, tagSpecificCallbacks) => {
  * @param {array} tagSpecificCallbacks An array of all tags that should be handled as React components.
  * @param {boolean} allowNull Optional boolean that specifies if a null tag should be threated as an
  * allowed tag.
+ *
+ * @memberof htmlToMaterialUiParser
  */
 const isTagSpecific = (tagType, tagSpecificCallbacks, allowNull = false) => {
   if (allowNull && tagType === null) return true;
