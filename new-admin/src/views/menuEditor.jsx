@@ -121,7 +121,6 @@ class MenuEditor extends Component {
   };
 
   create = menu => {
-    console.log(menu, "menu");
     this.treeKeys = [];
     let tree = this.createTree(menu);
     tree.forEach(treeNode => {
@@ -142,7 +141,6 @@ class MenuEditor extends Component {
 
   createTree = menu => {
     return menu.map(menuItem => {
-      console.log(menuItem, "menuItem");
       return this.createTreeChild(menuItem);
     });
   };
@@ -159,13 +157,16 @@ class MenuEditor extends Component {
   createTreeChild = menuItem => {
     let children = [];
     if (menuItem.menu.length > 0) {
-      console.log(menuItem.menu, "menuitemmenu");
       children = this.createTree(menuItem.menu);
     }
+
+    let strippedMenuitem = { ...menuItem };
+    delete strippedMenuitem.menu;
+
     return {
       title: this.renderMenuRow(menuItem),
       children: children,
-      menuItem: menuItem,
+      menuItem: strippedMenuitem,
       key: this.getNewTreeKey().toString()
     };
   };
@@ -311,11 +312,9 @@ class MenuEditor extends Component {
 
   addToDropNode = (nodeToBeAddedTo, nodeToAdd) => {
     nodeToBeAddedTo.children.push(nodeToAdd);
-    nodeToBeAddedTo.menuItem.menu.push(nodeToAdd.menuItem);
   };
 
   updateDragNode = (newTree, dragNode, dropNode) => {
-    console.log(dragNode.parent, "dragNode.parent");
     if (dragNode.parent) {
       dragNode.parent.children.splice(
         dragNode.parent.children.indexOf(dragNode),
@@ -344,11 +343,30 @@ class MenuEditor extends Component {
       this.updateDragNode(newTree, foundDragNode, foundDropNode);
       this.addToDropNode(foundDropNode, foundDragNode);
 
-      this.setState({ tree: newTree });
+      this.setState({ tree: newTree }, () => {
+        this.exportTreeAsMenuJson();
+      });
     }
   };
 
-  onDrop = (info, tree) => {};
+  createMenu = (menu, tree) => {
+    tree.forEach(treeNode => {
+      if (treeNode.children.length > 0) {
+        menu.push(treeNode.menuItem);
+        treeNode.menuItem.menu = [];
+        return this.createMenu(treeNode.menuItem.menu, treeNode.children);
+      } else {
+        menu.push(treeNode.menuItem);
+      }
+    });
+    return menu;
+  };
+
+  exportTreeAsMenuJson = () => {
+    let menu = [];
+    let jsonMenu = this.createMenu(menu, this.state.tree);
+    console.log(jsonMenu, "jsonMenu");
+  };
 
   render() {
     let expandedKeys = this.treeKeys.map(key => {
