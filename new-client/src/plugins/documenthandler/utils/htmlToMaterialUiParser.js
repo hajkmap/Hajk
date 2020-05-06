@@ -10,7 +10,8 @@ export default (html, tagSpecificCallbacks) => {
   let generatedHtml = [];
   parseHtml(html, generatedHtml, tagSpecificCallbacks);
   return generatedHtml.map(tag => {
-    return tag.renderCallback(tag);
+    if (tag.renderCallback) return tag.renderCallback(tag);
+    return null;
   });
 };
 
