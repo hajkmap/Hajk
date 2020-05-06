@@ -308,7 +308,7 @@ class Contents extends React.PureComponent {
     );
     const imageUrl = imgTag.text.substring(
       indexOfSrcMaterial + 5,
-      imgTag.text.length
+      imgTag.text.length - 1
     );
     return (
       <>
