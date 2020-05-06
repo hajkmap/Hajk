@@ -47,6 +47,7 @@ var defaultState = {
   icons: "",
   proxyUrl: "",
   base64Encode: false,
+  useClientHost: false,
   instruction: "",
   visibleAtStart: false,
   visibleForGroups: []
@@ -77,6 +78,7 @@ class ToolOptions extends Component {
         icons: tool.options.icons,
         proxyUrl: tool.options.proxyUrl,
         base64Encode: tool.options.base64Encode,
+        useClientHost: tool.options.useClientHost,
         instruction: tool.options.instruction,
         visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
@@ -152,6 +154,7 @@ class ToolOptions extends Component {
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
         base64Encode: this.state.base64Encode,
+        useClientHost: this.state.useClientHost,
         instruction: this.state.instruction,
         icons: this.state.icons,
         proxyUrl: this.state.proxyUrl,
@@ -381,6 +384,21 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
+          <div>
+            <input
+              id="useClientHost"
+              name="useClientHost"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.useClientHost}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="useClientHost">
+              Använd klientens host
+            </label>
           </div>
           <div>
             <label htmlFor="exportUrl">URL till export-tjänst</label>
