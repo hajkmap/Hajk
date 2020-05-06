@@ -96,10 +96,11 @@ class MenuConnectionSelector extends React.Component {
 
 class MenuEditor extends Component {
   state = {
-    menuConfig: null
+    treeData: []
   };
 
   treeKeys = [];
+  menuConfig = null;
 
   constructor(props) {
     super(props);
@@ -107,9 +108,11 @@ class MenuEditor extends Component {
   }
 
   componentDidMount = () => {
-    this.model.loadMenuConfigForMap("map_1").then(menu => {
-      let treeData = this.create(menu);
-      console.log(treeData, "treeData");
+    this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
+      this.menuConfig = menuConfig;
+      let treeData = this.createTreeStructure(
+        menuConfig.options.menuConfig.menu
+      );
       this.setState({ tree: treeData }, () => {});
     });
   };
@@ -120,24 +123,14 @@ class MenuEditor extends Component {
     });
   };
 
-  create = menu => {
+  createTreeStructure = menu => {
     this.treeKeys = [];
     let tree = this.createTree(menu);
     tree.forEach(treeNode => {
-      this.setParent(treeNode, undefined);
+      this.model.setParent(treeNode, undefined);
     });
     return tree;
   };
-
-  setParent(treeNode, parent) {
-    treeNode.parent = parent;
-
-    if (treeNode.children.length > 0) {
-      treeNode.children.forEach(child => {
-        this.setParent(child, treeNode);
-      });
-    }
-  }
 
   createTree = menu => {
     return menu.map(menuItem => {
@@ -160,15 +153,49 @@ class MenuEditor extends Component {
       children = this.createTree(menuItem.menu);
     }
 
-    let strippedMenuitem = { ...menuItem };
-    delete strippedMenuitem.menu;
-
     return {
       title: this.renderMenuRow(menuItem),
       children: children,
-      menuItem: strippedMenuitem,
+      menuItem: this.model.getMenuItemWithoutChildren(menuItem),
       key: this.getNewTreeKey().toString()
     };
+  };
+
+  /*WIP
+  deleteMenuItem = (menuItem) => {
+    let newState = [...this.state.menuConfig];
+    newState.splice(this.state.menuConfig.indexOf(menuItem), 1);
+    this.setState({ menuConfig: newState });
+  };
+
+  updateMenuItem = (menuItem) => {
+    let newMenuItem = { ...menuItem, title: "hej" };
+    console.log(newMenuItem, "newMenuItem");
+    let newState = [...this.state.menuConfig];
+    newState[this.state.menuConfig.indexOf(menuItem)] = newMenuItem;
+    this.setState({ menuConfig: newState });
+  };
+  */
+
+  isSameNode = (foundDropNode, foundDragNode) => {
+    return foundDropNode.key === foundDragNode.key;
+  };
+
+  onDropNode = info => {
+    const dropKey = info.node.props.eventKey;
+    const dragKey = info.dragNode.props.eventKey;
+    let newTree = [...this.state.tree];
+    let foundDragNode = this.model.getNodeFromTree(newTree, dragKey);
+    let foundDropNode = this.model.getNodeFromTree(newTree, dropKey);
+
+    if (!this.isSameNode(foundDropNode, foundDragNode)) {
+      this.model.updateDragNode(newTree, foundDragNode, foundDropNode);
+      this.model.addToDropNode(foundDropNode, foundDragNode);
+
+      this.setState({ tree: newTree }, () => {
+        this.model.exportTreeAsMenuJson(this.state.tree, this.menuConfig);
+      });
+    }
   };
 
   renderSettingsMenu = () => {
@@ -183,26 +210,6 @@ class MenuEditor extends Component {
     return (
       <MenuConnectionSelector menuItem={menuItem}></MenuConnectionSelector>
     );
-  };
-
-  deleteMenuItem = menuItem => {
-    let newState = [...this.state.menuConfig];
-    newState.splice(this.state.menuConfig.indexOf(menuItem), 1);
-    this.setState({ menuConfig: newState });
-  };
-
-  updateMenuItem = menuItem => {
-    let newMenuItem = { ...menuItem, title: "hej" };
-    console.log(newMenuItem, "newMenuItem");
-    let newState = [...this.state.menuConfig];
-    newState[this.state.menuConfig.indexOf(menuItem)] = newMenuItem;
-    this.setState({ menuConfig: newState });
-  };
-
-  findMenuItem = menuItem => {
-    if (this.state.menuConfig.indexOf(menuItem)) {
-      return this.state.menuConfig;
-    }
   };
 
   renderRemoveButton = menuItem => {
@@ -269,112 +276,12 @@ class MenuEditor extends Component {
     );
   };
 
-  find = (tree, key) => {
-    console.log(tree, "tree");
-    let foundNode = null;
-    tree.forEach(treeNode => {
-      let found = this.findNode(treeNode, key);
-      if (found) {
-        foundNode = found;
-        console.log(foundNode, "foundNode");
-      }
-    });
-    return foundNode;
-  };
-
-  findNode = (treeNode, key) => {
-    if (treeNode.key == key) {
-      console.log(treeNode, "treeNode", key, "key");
-      return treeNode;
-    } else {
-      if (treeNode.children.length > 0) {
-        return this.find(treeNode.children, key);
-      }
-    }
-  };
-
-  getTreeObject = (newTree, node) => {
-    return newTree.find(treeNode => {
-      if (treeNode.key == node.key) {
-        console.log(treeNode, "treeNode");
-        return treeNode;
-      } else {
-        if (treeNode.children.length > 0) {
-          return this.getTreeObject(treeNode.children, node);
-        }
-      }
-    });
-  };
-
-  getNodeFromTree = (tree, key) => {
-    return this.find(tree, key);
-  };
-
-  addToDropNode = (nodeToBeAddedTo, nodeToAdd) => {
-    nodeToBeAddedTo.children.push(nodeToAdd);
-  };
-
-  updateDragNode = (newTree, dragNode, dropNode) => {
-    if (dragNode.parent) {
-      dragNode.parent.children.splice(
-        dragNode.parent.children.indexOf(dragNode),
-        1
-      );
-    } else {
-      newTree.splice(newTree.indexOf(dragNode), 1);
-    }
-    dragNode.parent = { ...dropNode };
-  };
-
-  rearrangeTree = info => {
-    const dropKey = info.node.props.eventKey;
-    const dragKey = info.dragNode.props.eventKey;
-    console.log(dropKey, "dropKey");
-    console.log(dragKey, "dragKey");
-    let foundDropNode = null;
-    let foundDragNode = null;
-    let newTree = [...this.state.tree];
-
-    foundDragNode = this.getNodeFromTree(newTree, dragKey);
-    foundDropNode = this.getNodeFromTree(newTree, dropKey);
-    console.log(foundDropNode, "foundDropNode");
-    console.log(foundDragNode, "foundDragNode");
-    if (foundDropNode.key != foundDragNode.key) {
-      this.updateDragNode(newTree, foundDragNode, foundDropNode);
-      this.addToDropNode(foundDropNode, foundDragNode);
-
-      this.setState({ tree: newTree }, () => {
-        this.exportTreeAsMenuJson();
-      });
-    }
-  };
-
-  createMenu = (menu, tree) => {
-    tree.forEach(treeNode => {
-      if (treeNode.children.length > 0) {
-        menu.push(treeNode.menuItem);
-        treeNode.menuItem.menu = [];
-        return this.createMenu(treeNode.menuItem.menu, treeNode.children);
-      } else {
-        menu.push(treeNode.menuItem);
-      }
-    });
-    return menu;
-  };
-
-  exportTreeAsMenuJson = () => {
-    let menu = [];
-    let jsonMenu = this.createMenu(menu, this.state.tree);
-    console.log(jsonMenu, "jsonMenu");
-  };
-
   render() {
     let expandedKeys = this.treeKeys.map(key => {
       return key.toString();
     });
 
     const { classes } = this.props;
-    console.log(this.state.tree);
     return (
       <section className="tab-pane active">
         {this.renderTableHeader()}
@@ -383,7 +290,7 @@ class MenuEditor extends Component {
             <Tree
               className={classes.background}
               blockNode
-              onDrop={this.rearrangeTree}
+              onDrop={this.onDropNode}
               expandedKeys={expandedKeys}
               treeData={this.state.tree}
               draggable
