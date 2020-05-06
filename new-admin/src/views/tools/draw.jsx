@@ -26,7 +26,6 @@ import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
-import { TableSortLabel } from "@material-ui/core";
 
 const ColorButtonBlue = withStyles(theme => ({
   root: {
