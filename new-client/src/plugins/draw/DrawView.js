@@ -199,7 +199,14 @@ class DrawView extends React.PureComponent {
             <Button
               onClick={() => {
                 this.props.model.export(url => {
-                  document.location.href = url;
+                  // If admin selected to extract only the host from client's url, let's do it.
+                  // Otherwise, fall back to the default behavior, which is to use the returned string as-is.
+                  const finalUrl =
+                    this.props.model.options?.useClientHost === true
+                      ? document.location.host + new URL(url).pathname
+                      : url;
+
+                  document.location.href = finalUrl;
                 });
               }}
             >
