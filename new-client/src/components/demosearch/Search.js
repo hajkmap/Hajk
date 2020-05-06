@@ -106,136 +106,16 @@
 //
 // *https://www.registers.service.gov.uk/registers/country/use-the-api*
 import React from "react";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import {
-  CircularProgress,
-  IconButton,
-  Paper,
-  TextField,
-  Tooltip,
-  makeStyles
-} from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-const useStyles = makeStyles(theme => ({
-  iconButtons: {
-    padding: 10
-  }
-}));
+import SearchBar from "./SearchBar";
+// import SpatialSearch from "./SpatialSearch";
 
-export default function Search(props) {
-  const classes = useStyles();
-
-  // Grab some stuff from props
-  const { menuButtonDisabled, onMenuClick } = props;
-  const searchModel = props.app.appModel.searchModel;
-
-  // React state
-  const [open, setOpen] = React.useState(false);
-  const [options, setOptions] = React.useState([]);
-  const loading = open && options.length === 0;
-
-  React.useEffect(() => {
-    const searchString = document.getElementById("searchbox").value;
-    if (searchString.length > 3) return undefined;
-
-    let active = true;
-
-    if (!loading) {
-      return undefined;
-    }
-
-    (async () => {
-      const autocompleteList = await searchModel.getAutocomplete(searchString);
-      console.log(
-        "Got this back to populate autocomplete with: ",
-        autocompleteList
-      );
-
-      if (active) {
-        // setOptions(Object.keys(countries).map(key => countries[key].item[0]));
-        setOptions(autocompleteList);
-      }
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [loading, searchModel]);
-
-  React.useEffect(() => {
-    if (!open) {
-      setOptions([]);
-    }
-  }, [open]);
-
-  async function handleOnChange(event, value, reason) {
-    const results = await searchModel.getResults(value);
-    console.log(
-      "Change in Autocomplete detected - got following results: ",
-      results
-    );
-  }
-
-  const tooltipText = menuButtonDisabled
-    ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
-    : "Visa verktygspanelen";
-
+const Search = props => {
   return (
-    <Paper className={classes.root}>
-      <Autocomplete
-        freeSolo
-        id="searchbox"
-        clearOnEscape
-        style={{ width: 500 }}
-        open={open}
-        onOpen={() => {
-          setOpen(true);
-        }}
-        onClose={() => {
-          setOpen(false);
-        }}
-        onChange={handleOnChange}
-        getOptionSelected={(option, value) =>
-          option.autocompleteEntry === value.autocompleteEntry
-        }
-        getOptionLabel={option => option.autocompleteEntry}
-        groupBy={option => option.dataset}
-        options={options}
-        loading={loading}
-        renderInput={params => (
-          <TextField
-            {...params}
-            label={undefined}
-            variant="outlined"
-            placeholder="Skriv eller välj bland förslagen nedan..."
-            InputProps={{
-              ...params.InputProps,
-              startAdornment: (
-                <Tooltip title={tooltipText}>
-                  <span id="drawerToggler">
-                    <IconButton
-                      onClick={onMenuClick}
-                      className={classes.iconButton}
-                      disabled={menuButtonDisabled}
-                      aria-label="menu"
-                    >
-                      <MenuIcon size={20} />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              ),
-              endAdornment: (
-                <React.Fragment>
-                  {loading ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </React.Fragment>
-              )
-            }}
-          />
-        )}
-      />
-    </Paper>
+    <>
+      <SearchBar {...props} />
+      {/* <SpatialSearch {...props} /> */}
+    </>
   );
-}
+};
+
+export default Search;

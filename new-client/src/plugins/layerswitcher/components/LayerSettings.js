@@ -1,5 +1,6 @@
 import React from "react";
 import VectorFilter from "./VectorFilter";
+import CQLFilter from "./CQLFilter";
 import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import { withStyles } from "@material-ui/core/styles";
@@ -111,6 +112,7 @@ class LayerSettings extends React.PureComponent {
           {this.props.layer.getProperties().filterable ? (
             <VectorFilter layer={this.props.layer} />
           ) : null}
+          <CQLFilter layer={this.props.layer} />
         </div>
       </div>
     );
