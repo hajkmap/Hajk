@@ -50,7 +50,7 @@ var menuEditorModel = Model.extend({
   //We remove children of menuItem and uses structure of tree as hierarchy for menu instead
   getMenuItemWithoutChildren: function(menuItem) {
     let strippedMenuitem = { ...menuItem };
-    delete strippedMenuitem.menu;
+    strippedMenuitem.menu = [];
     return strippedMenuitem;
   },
 
@@ -82,20 +82,9 @@ var menuEditorModel = Model.extend({
   exportTreeAsMenuJson: function(tree, menuConfig) {
     let menu = [];
     let jsonMenu = this.createMenuFromTreeStructure(menu, tree);
-    menuConfig.options.menuConfig.menu = jsonMenu;
-    this.updateToolConfig(menuConfig, "map_1");
-  },
-
-  updateToolConfig: function(config, map) {
-    var url = this.config.url_tool_settings;
-    console.log(config, "config");
-    return fetch(`${url}?mapFile=${map}.json`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(config)
-    });
+    console.log(jsonMenu, "jsonMenu");
+    menuConfig.menu = jsonMenu;
+    return menuConfig;
   },
 
   loadMenuConfigForMap: function(map) {

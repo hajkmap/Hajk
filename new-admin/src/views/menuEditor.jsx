@@ -8,6 +8,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 
 import TableCell from "@material-ui/core/TableCell";
+import Popover from "@material-ui/core/Popover";
 
 import DeleteIcon from "@material-ui/icons/Delete";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -153,12 +154,14 @@ class MenuEditor extends Component {
       children = this.createTree(menuItem.menu);
     }
 
-    return {
-      title: this.renderMenuRow(menuItem),
+    let key = this.getNewTreeKey().toString();
+    let returnObject = {
+      title: this.renderMenuRow(menuItem, key),
       children: children,
       menuItem: this.model.getMenuItemWithoutChildren(menuItem),
-      key: this.getNewTreeKey().toString()
+      key: key
     };
+    return returnObject;
   };
 
   /*WIP
@@ -167,15 +170,14 @@ class MenuEditor extends Component {
     newState.splice(this.state.menuConfig.indexOf(menuItem), 1);
     this.setState({ menuConfig: newState });
   };
-
-  updateMenuItem = (menuItem) => {
+*/
+  updateMenuItem = menuItem => {
     let newMenuItem = { ...menuItem, title: "hej" };
     console.log(newMenuItem, "newMenuItem");
     let newState = [...this.state.menuConfig];
     newState[this.state.menuConfig.indexOf(menuItem)] = newMenuItem;
     this.setState({ menuConfig: newState });
   };
-  */
 
   isSameNode = (foundDropNode, foundDragNode) => {
     return foundDropNode.key === foundDragNode.key;
@@ -198,9 +200,27 @@ class MenuEditor extends Component {
     }
   };
 
-  renderSettingsMenu = () => {
+  openSettingsMenu = e => {
+    console.log(e.target, "e");
     return (
-      <IconButton>
+      <Popover
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right"
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left"
+        }}
+      >
+        The content of the Popover.
+      </Popover>
+    );
+  };
+
+  renderSettingsMenu = (menuItem, key) => {
+    return (
+      <IconButton onClick={this.openSettingsMenu}>
         <SettingsIcon></SettingsIcon>
       </IconButton>
     );
@@ -228,24 +248,24 @@ class MenuEditor extends Component {
     return <Typography>{menuItem.title}</Typography>;
   };
 
-  renderMenuRow = menuItem => {
+  renderMenuRow = (menuItem, key) => {
     return (
       <Grid justify="flex-end" container>
         <Grid xs={1} item>
           <DragHandle></DragHandle>
         </Grid>
         <Grid xs={2} item>
-          {this.renderMenuTitle(menuItem)}
+          {this.renderMenuTitle(menuItem, key)}
         </Grid>
         <Grid xs={9} container item>
           <Grid xs={3} item>
-            {this.renderSettingsMenu()}
+            {this.renderSettingsMenu(menuItem, key)}
           </Grid>
           <Grid xs={3} item>
-            {this.renderConnectionSelect(menuItem)}
+            {this.renderConnectionSelect(menuItem, key)}
           </Grid>
           <Grid xs={3} item>
-            {this.renderRemoveButton(menuItem)}
+            {this.renderRemoveButton(menuItem, key)}
           </Grid>
         </Grid>
       </Grid>
