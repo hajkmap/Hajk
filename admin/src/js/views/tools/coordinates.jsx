@@ -29,6 +29,7 @@ var defaultState = {
   active: false,
   index: 0,
   instruction: '',
+  searchOnCoordinates,
   visibleForGroups: []
 };
 
@@ -52,6 +53,7 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         instruction: tool.options.instruction,
+        searchOnCoordinates: tool.options.searchOnCoordinates,
         transformations: tool.options.transformations || [],
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
@@ -116,6 +118,7 @@ class ToolOptions extends Component {
       'index': this.state.index,
       'options': {
         'instruction': this.state.instruction,
+        'searchOnCoordinates': this.state.searchOnCoordinates,
         'transformations': this.state.transformations,
         'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
@@ -255,6 +258,15 @@ class ToolOptions extends Component {
             type='text'
             onChange={(e) => { this.handleInputChange(e); }}
             value={this.state.index} />
+        </div>
+        <div>
+          <input
+              id='searchOnCoordinates'
+              name='searchOnCoordinates'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.searchOnCoordinates} />&nbsp;
+          <label htmlFor='active'>activate searchOnCoordinates</label>
         </div>
         <div>
           <label htmlFor='instruction'>Instruktion</label>

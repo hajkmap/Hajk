@@ -266,6 +266,11 @@ var CoordinatesPanelView = {
       this.props.model.createInteractions();
     }
     coordinates = this.state.coordinates ? this.state.coordinates.transformed : {};
+
+    var searchOnCoordinates = this.props.model.get('searchOnCoordinates')
+        ? <SearchOnCoordinates model={this.props.model}/>
+        : "";
+
     return (
       <Panel title='Koordinater' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className='coordinate-display'>
@@ -273,7 +278,7 @@ var CoordinatesPanelView = {
             Välj en plats i kartan genom att flytta på siktet. <br />
           </p>
           <CoordinatesList coordinates={coordinates} />
-          <SearchOnCoordinates model={this.props.model}/>
+          {searchOnCoordinates}
         </div>
       </Panel>
     );
