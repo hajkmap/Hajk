@@ -154,13 +154,17 @@ namespace MapService.Components
                         {250, "25 m"},
                         {500, "50 m"},
                         {1000, "50 m"},
+                        {2000, "100 m"},
                         {2500, "100 m"},
                         {5000, "200 m"},
                         {10000, "500 m"},
+                        {20000, "1 km"},
                         {25000, "1 km"},
                         {50000, "2 km"},
                         {100000, "5 km"},
-                        {250000, "10 km"}
+                        {200000, "10 km"},
+                        {250000, "10 km"},
+                        {300000, "10 km"}
                     };
 
             Dictionary<int, int> scaleBarLengths = new Dictionary<int, int>()
@@ -168,13 +172,17 @@ namespace MapService.Components
                         {250, 25},
                         {500, 50},
                         {1000, 50},
+                        {2000, 100},
                         {2500, 100},
                         {5000, 200},
                         {10000, 500},
+                        {20000, 1000},
                         {25000, 1000},
                         {50000, 2000},
                         {100000, 5000},
-                        {250000, 10000}
+                        {200000, 10000},
+                        {250000, 10000},
+                        {300000, 10000}
                     };
 
             int displayLength = GetDisplayLength(unitLength, scaleBarLengths, scale);
@@ -386,20 +394,33 @@ namespace MapService.Components
                 {
                     scaleTextScalebar = exportItem.scale.Substring(0, exportItem.scale.Length - 3) + " " + exportItem.scale.Substring(exportItem.scale.Length - 3);
                 }
-                
 
-                // skalstocken x y
-                int xLeftAfterScale = xLeft + 100;
-                int yScaleText = (int)(yBottom + (yWhiteSpace * 0.38));
-                int yScalebarTop = (int)(yBottom + (yWhiteSpace * 0.30)); //29
-                int yScalebarMiddle = (int)(yBottom + (yWhiteSpace * 0.35)); //26
-                int yScalebarBottom = (int)(yBottom + (yWhiteSpace * 0.40)); //23
-                this.drawText(gfx, fontName, String.Format("Skala 1:{0}", scaleTextScalebar), xLeft, yScaleText, 12); //skala 1:xx
-                gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale, yScalebarMiddle), new XPoint(xLeftAfterScale + displayLength, yScalebarMiddle)); //scalebar
-                gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale, yScalebarBottom), new XPoint(xLeftAfterScale, yScalebarTop)); //left
-                gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle - 2), new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle  + 2)); //middle
-                gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + displayLength, yScalebarBottom), new XPoint(xLeftAfterScale + displayLength, yScalebarTop)); //right
-                this.drawText(gfx, fontName, displayText, xLeftAfterScale + 5 + displayLength, yScaleText, 12); //text "X m" next to the scale bar
+                bool showScale = false;
+                string[] scales = ConfigurationManager.AppSettings["scaleStep"].Split(',');
+                foreach (var s in scales)
+                {
+                    if (s == exportItem.scale)
+                    {
+                        showScale = true;
+                        break;
+                    }
+                }
+
+                if (showScale)
+                {
+                    // skalstocken x y
+                    int xLeftAfterScale = xLeft + 100;
+                    int yScaleText = (int)(yBottom + (yWhiteSpace * 0.38));
+                    int yScalebarTop = (int)(yBottom + (yWhiteSpace * 0.30)); //29
+                    int yScalebarMiddle = (int)(yBottom + (yWhiteSpace * 0.35)); //26
+                    int yScalebarBottom = (int)(yBottom + (yWhiteSpace * 0.40)); //23
+                    this.drawText(gfx, fontName, String.Format("Skala 1:{0}", scaleTextScalebar), xLeft, yScaleText, 12); //skala 1:xx
+                    gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale, yScalebarMiddle), new XPoint(xLeftAfterScale + displayLength, yScalebarMiddle)); //scalebar
+                    gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale, yScalebarBottom), new XPoint(xLeftAfterScale, yScalebarTop)); //left
+                    gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle - 2), new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle + 2)); //middle
+                    gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + displayLength, yScalebarBottom), new XPoint(xLeftAfterScale + displayLength, yScalebarTop)); //right
+                    this.drawText(gfx, fontName, displayText, xLeftAfterScale + 5 + displayLength, yScaleText, 12); //text "X m" next to the scale bar
+                }
 
                 //comment
                 //make a box
