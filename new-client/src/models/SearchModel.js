@@ -1,4 +1,3 @@
-import Observer from "react-event-observer";
 import { WFS } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
 import Or from "ol/format/filter/Or";
@@ -10,7 +9,6 @@ import { arraySort } from "../utils/ArraySort";
 
 class SearchModel {
   // Public field declarations (why? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Defining_classes)
-  localObserver = new Observer();
 
   // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
   #searchOptions = {
@@ -42,8 +40,6 @@ class SearchModel {
     this.#map = map; // The OpenLayers map instance
     this.#app = app; // Supplies appConfig and globalObserver
     this.#searchSources = this.#componentOptions.sources;
-
-    console.log("SearchModel initiated!", this);
   }
 
   /**
@@ -93,11 +89,6 @@ class SearchModel {
       []
     );
 
-    this.localObserver.publish("searchCompleted", {
-      reason: "autocomplete",
-      results: flatAutocompleteArray
-    });
-
     return { flatAutocompleteArray, errors };
   };
 
@@ -112,23 +103,14 @@ class SearchModel {
       searchOptions
     );
 
-    this.localObserver.publish("searchCompleted", {
-      reason: "textSearch",
-      featureCollections
-    });
-
     return { featureCollections, errors };
   };
 
   abort = () => {
     if (this.#controllers.length > 0) {
-      console.log("Aborting: ", this.#controllers);
       this.#controllers.forEach(controller => {
         controller.abort();
-        this.localObserver.publish("searchCompleted", { reason: "aborted" });
       });
-    } else {
-      console.log("Nothing to abort");
     }
 
     // Clean up our list of AbortControllers
@@ -221,27 +203,13 @@ class SearchModel {
 
     jsonResponses.forEach((r, i) => {
       if (r.status === "fulfilled") {
-        console.log("Fulfilled", r);
         r.source = searchSources[i];
         featureCollections.push(r);
       } else if (r => r.status === "rejected") {
-        console.log("Rejected", r);
         r.source = searchSources[i];
         errors.push(r);
       }
     });
-
-    // jsonResponses is an array of objects that either fulfilled (status=fulfilled)
-    // or got rejected (status=rejected) if response couldn't be parsed as JSON.
-    // Let's filter out the valid responses, and put the failed ones in another array.
-    // const featureCollections = jsonResponses
-    //   .filter(r => r.status === "fulfilled")
-    //   .map(r => r.value);
-
-    // // Similarly, let's filter out the rejected responses
-    // const errors = jsonResponses
-    //   .filter(r => r.status === "rejected")
-    //   .map(r => r.reason);
 
     // Do some magic on our valid results
     featureCollections.forEach((featureCollection, i) => {
@@ -252,14 +220,13 @@ class SearchModel {
           index: featureCollection.source.searchFields[0]
         });
       }
-      // jsonResult.source = this.#componentOptions.sources[i];
     });
 
     // Return an object with out results and errors
     rawResults = { featureCollections, errors };
 
-    console.log("rawResults: ", rawResults);
-    return rawResults || [];
+    console.log("getRawResults() => ", rawResults);
+    return rawResults;
   };
 
   #lookup = (searchString, searchSource, searchOptions) => {
