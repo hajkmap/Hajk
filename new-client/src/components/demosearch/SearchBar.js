@@ -260,14 +260,21 @@ const SearchBar = props => {
 
     (async () => {
       console.log("Getting Autocomplete for: ", searchString);
-      const autocompleteList = await searchModel.getAutocomplete(searchString);
+      const {
+        flatAutocompleteArray,
+        errors
+      } = await searchModel.getAutocomplete(searchString);
+
       console.log(
         "Got this back to populate autocomplete with: ",
-        autocompleteList
+        flatAutocompleteArray
       );
 
+      // It is possible to check if Search Model returned any errors
+      errors.length > 0 && console.error("Autocomplete error: ", errors);
+
       if (active) {
-        setOptions(autocompleteList);
+        setOptions(flatAutocompleteArray);
       }
     })();
 
@@ -287,7 +294,7 @@ const SearchBar = props => {
     resultsSource.current.clear();
 
     const features = featureCollections.map(fc =>
-      fc.features.map(f => {
+      fc.value.features.map(f => {
         const geoJsonFeature = new GeoJSON().readFeature(f);
         return geoJsonFeature;
       })
@@ -317,14 +324,17 @@ const SearchBar = props => {
     searchOptions["wildcardAtEnd"] = wildcardAtEnd;
 
     console.log("doSearch: ", searchString, searchSources, searchOptions);
-    const results = await searchModel.getResults(
+    const { featureCollections, errors } = await searchModel.getResults(
       searchString,
       searchSources, // this is a state variable!
       searchOptions
     );
-    console.log("doSearch results: ", results);
+    console.log("doSearch results: ", featureCollections);
 
-    addFeaturesToResultsLayer(results);
+    // It's possible to handle any errors in the UI by checking if Search Model returned any
+    errors.length > 0 && console.error(errors);
+
+    addFeaturesToResultsLayer(featureCollections);
   }
 
   function handleClickOnSearch() {

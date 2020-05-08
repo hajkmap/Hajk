@@ -1,4 +1,3 @@
-import Observer from "react-event-observer";
 import { WFS } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
 import Or from "ol/format/filter/Or";
@@ -10,7 +9,6 @@ import { arraySort } from "../utils/ArraySort";
 
 class SearchModel {
   // Public field declarations (why? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Defining_classes)
-  localObserver = new Observer();
 
   // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
   #searchOptions = {
@@ -42,8 +40,6 @@ class SearchModel {
     this.#map = map; // The OpenLayers map instance
     this.#app = app; // Supplies appConfig and globalObserver
     this.#searchSources = this.#componentOptions.sources;
-
-    console.log("SearchModel initiated!", this);
   }
 
   /**
@@ -51,7 +47,7 @@ class SearchModel {
    *
    * @param {String} searchString The search string as typed in by the user.
    * @param {Object} [options=null] Options to be sent with this request.
-   * @returns {Array} All matching results to be displayed in Autocomplete.
+   * @returns {Object} All matching results to be displayed in Autocomplete.
    */
   getAutocomplete = async (
     searchString,
@@ -59,19 +55,25 @@ class SearchModel {
     searchOptions = this.getSearchOptions()
   ) => {
     // Grab raw results from the common private function
-    const featureCollections = await this.#getRawResults(
+    const { featureCollections, errors } = await this.#getRawResults(
       searchString,
       searchSources,
       searchOptions
     );
 
-    // Generate an array with results, one per dataset (dataset = search source)
+    // Next we must do some tricks to make the result of this function match
+    // the required input of Material UI's Autocomplete component.
+
+    // Let's generate an array with results, one per dataset (dataset = search source)
     const resultsPerDataset = featureCollections.map(featureCollection => {
-      return featureCollection.features.map(feature => {
+      return featureCollection.value.features.map(feature => {
+        // It's admin configurable in which order results columns are displayed, let's map accordingly.
         const autocompleteEntry = this.#mapDisplayFieldsInFeature(
           feature.properties,
           featureCollection.source.displayFields
         );
+
+        // Let's provide a name for each dataset, so it can be displayed nicely to the user.
         const dataset = featureCollection.source.caption;
         return {
           dataset,
@@ -80,15 +82,14 @@ class SearchModel {
       });
     });
 
-    // resultsPerDataset is an Array of Arrays. We need ONE Array, so we flatten it:
-    const results = resultsPerDataset.reduce((a, b) => a.concat(b), []);
+    // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
+    // however, we need just one Array, so let's flatten the results:
+    const flatAutocompleteArray = resultsPerDataset.reduce(
+      (a, b) => a.concat(b),
+      []
+    );
 
-    this.localObserver.publish("searchCompleted", {
-      reason: "autocomplete",
-      results
-    });
-
-    return results;
+    return { flatAutocompleteArray, errors };
   };
 
   getResults = async (
@@ -96,25 +97,19 @@ class SearchModel {
     searchSources = this.getSources(),
     searchOptions = this.getSearchOptions()
   ) => {
-    const results = await this.#getRawResults(
+    const { featureCollections, errors } = await this.#getRawResults(
       searchString,
       searchSources,
       searchOptions
     );
 
-    this.localObserver.publish("searchCompleted", {
-      reason: "textSearch",
-      results
-    });
-
-    return results;
+    return { featureCollections, errors };
   };
 
   abort = () => {
     if (this.#controllers.length > 0) {
       this.#controllers.forEach(controller => {
         controller.abort();
-        this.localObserver.publish("searchCompleted", { reason: "aborted" });
       });
     }
 
@@ -147,22 +142,22 @@ class SearchModel {
     searchSources = this.getSources(),
     searchOptions = null
   ) => {
-    // TODO: Handle empty/null/undefined searchString (can happen on spatial search)
-    // Fast fail if no search string provided
-    // if (searchString === null) return [];
+    // If searchSources is explicitly provided as an empty Array, something's wrong. Abort.
+    if (Array.isArray(searchSources) && searchSources.length === 0) {
+      throw new Error("No search sources selected, aborting.");
+    }
 
-    if (Array.isArray(searchSources) === false || searchSources.length < 1) {
+    // If searchSources is something else than an Array, use the default search sources.
+    if (Array.isArray(searchSources) === false) {
       console.warn("searchSources empty, resetting to default.", searchSources);
       searchSources = this.getSources();
     }
 
+    // Will hold our Promises, one for each search source
     const promises = [];
+
+    // Will hold the end results
     let rawResults = null;
-    console.log(
-      `getRawResults for: ${searchString}. sources. options.`,
-      searchSources,
-      searchOptions
-    );
 
     // Ensure that we've cleaned obsolete AbortControllers before we put new ones there
     this.#controllers = [];
@@ -183,32 +178,55 @@ class SearchModel {
       this.#controllers.push(controller);
     });
 
-    await Promise.all(promises)
-      .then(async responses => {
-        await Promise.all(responses.map(result => result.json()))
-          .then(jsonResults => {
-            jsonResults.forEach((jsonResult, i) => {
-              if (jsonResult.features.length > 0) {
-                arraySort({
-                  array: jsonResult.features,
-                  index: this.#componentOptions.sources[i].searchFields[0]
-                });
-              }
-              jsonResult.source = this.#componentOptions.sources[i];
-            });
-            rawResults = jsonResults;
-            return rawResults;
-          })
-          .catch(parseErrors => {
-            console.error("parseErrors: ", parseErrors);
-          });
-      })
-      .catch(responseErrors => {
-        console.error("responseErrors: ", responseErrors);
-      });
+    // Start fetching, allow both fulfilled and rejected Promises
+    const fetchResponses = await Promise.allSettled(promises);
 
-    console.log("rawResults: ", rawResults);
-    return rawResults || [];
+    // fetchedResponses will be an array of Promises in object form.
+    // Each object will have a "status" and a "value" property.
+    const jsonResponses = await Promise.allSettled(
+      fetchResponses.map(fetchResponse => {
+        // We look at the status and filter out only those that fulfilled.
+        if (fetchResponse.status === "rejected")
+          Promise.reject("Could not fetch");
+        // The Fetch Promise might have fulfilled, but it doesn't mean the Response
+        // can be parsed with JSON (i.e. errors from GeoServer will arrive as XML),
+        // so we must be careful before invoking .json() on our Response's value.
+        if (typeof fetchResponse.value.json !== "function")
+          Promise.reject("Fetched result is not JSON");
+        // If Response can be parsed as JSON, return it.
+        return fetchResponse.value.json();
+      })
+    );
+
+    let featureCollections = [];
+    let errors = [];
+
+    jsonResponses.forEach((r, i) => {
+      if (r.status === "fulfilled") {
+        r.source = searchSources[i];
+        featureCollections.push(r);
+      } else if (r => r.status === "rejected") {
+        r.source = searchSources[i];
+        errors.push(r);
+      }
+    });
+
+    // Do some magic on our valid results
+    featureCollections.forEach((featureCollection, i) => {
+      if (featureCollection.value.features.length > 0) {
+        // FIXME: Investigate if this sorting is really needed, and if so, if we can find some Unicode variant and not only for Swedish characters
+        arraySort({
+          array: featureCollection.value.features,
+          index: featureCollection.source.searchFields[0]
+        });
+      }
+    });
+
+    // Return an object with out results and errors
+    rawResults = { featureCollections, errors };
+
+    console.log("getRawResults() => ", rawResults);
+    return rawResults;
   };
 
   #lookup = (searchString, searchSource, searchOptions) => {
