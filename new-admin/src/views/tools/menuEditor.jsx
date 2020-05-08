@@ -30,10 +30,16 @@ import Grid from "@material-ui/core/Grid";
 import Table from "@material-ui/core/Table";
 import Modal from "@material-ui/core/Modal";
 
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormLabel from "@material-ui/core/FormLabel";
+
 import FormControl from "@material-ui/core/FormControl";
 
 import TableCell from "@material-ui/core/TableCell";
 import Popover from "@material-ui/core/Popover";
+import TextField from "@material-ui/core/TextField";
 
 import DeleteIcon from "@material-ui/icons/Delete";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -64,14 +70,190 @@ const styles = () => ({
     borderLeft: "none",
     borderColor: "#6c6c6c"
   },
-  iconButton: {
-    padding: "0px"
-  },
 
   background: {
     backgroundColor: "#e8e8e8"
   }
 });
+
+class SettingsPopover extends React.Component {
+  state = { color: this.props.menuItem.color, icon: this.props.menuItem.icon };
+
+  constructor(props) {
+    super(props);
+  }
+
+  updateColorState = e => {
+    this.setState({ color: e.target.value });
+  };
+
+  updateIconState = e => {
+    let value = e.target.value;
+    this.setState(prevState => {
+      prevState.icon.materialUiIconName = value;
+      return {
+        icon: prevState.icon
+      };
+    });
+  };
+
+  saveAndClosePopover = () => {
+    const { close, updateMenuItem, treeNodeId } = this.props;
+    let objectWithKeyValuesToUpdate = this.state;
+    updateMenuItem(treeNodeId, objectWithKeyValuesToUpdate);
+    close();
+  };
+
+  renderTextField = (label, value, onChangeFunction) => {
+    return (
+      <TextField
+        id="icon-picker"
+        label={label}
+        type="icon"
+        variant="outlined"
+        value={value}
+        onChange={onChangeFunction}
+      />
+    );
+  };
+
+  renderSettings = () => {
+    return (
+      <form
+        style={{ width: "400px", height: "350px" }}
+        noValidate
+        autoComplete="off"
+      >
+        <Grid container>
+          <Grid item>
+            {this.renderTextField(
+              "Ikon",
+              this.state.icon.materialUiIconName,
+              this.updateIconState
+            )}
+          </Grid>
+          <Grid item>
+            {this.renderTextField(
+              "Färg",
+              this.state.color,
+              this.updateColorState
+            )}
+          </Grid>
+        </Grid>
+      </form>
+    );
+  };
+
+  render = () => {
+    const { anchorEl, open, close } = this.props;
+    return (
+      <>
+        <Popover
+          open={open}
+          onClose={this.saveAndClosePopover}
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right"
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "left"
+          }}
+        >
+          {this.renderSettings()}
+        </Popover>
+      </>
+    );
+  };
+}
+
+class TreeRow extends React.Component {
+  state = { settingsMenuOpen: false };
+
+  constructor(props) {
+    super(props);
+    console.log(props, "props");
+  }
+
+  renderConnectionSelect = menuItem => {
+    return (
+      <MenuConnectionSelector menuItem={menuItem}></MenuConnectionSelector>
+    );
+  };
+
+  renderRemoveButton = menuItem => {
+    const { classes } = this.props;
+    return (
+      <IconButton
+        style={{ padding: "0px" }}
+        onClick={() => {
+          this.deleteMenuItem(menuItem);
+        }}
+      >
+        <DeleteIcon></DeleteIcon>
+      </IconButton>
+    );
+  };
+
+  openSettingsMenu = e => {
+    this.setState({
+      settingsMenuAnchorEl: e.currentTarget
+    });
+  };
+
+  closeSettingsMenu = () => {
+    this.setState({ settingsMenuAnchorEl: null });
+  };
+
+  renderSettingsMenu = (menuItem, treeNodeId) => {
+    const { settingsMenuAnchorEl } = this.state;
+    return (
+      <>
+        <IconButton size="small" onClick={this.openSettingsMenu}>
+          <SettingsIcon></SettingsIcon>
+        </IconButton>
+        <SettingsPopover
+          treeNodeId={treeNodeId}
+          menuItem={menuItem}
+          updateMenuItem={this.props.updateMenuItem}
+          anchorEl={settingsMenuAnchorEl}
+          open={Boolean(settingsMenuAnchorEl)}
+          close={this.closeSettingsMenu}
+        ></SettingsPopover>
+      </>
+    );
+  };
+
+  renderMenuTitle = menuItem => {
+    return <Typography>{menuItem.title}</Typography>;
+  };
+
+  render = () => {
+    const { menuItem, treeNodeId } = this.props;
+    return (
+      <Grid justify="flex-end" container>
+        <Grid xs={1} item>
+          <DragHandle></DragHandle>
+        </Grid>
+        <Grid xs={2} item>
+          {this.renderMenuTitle(menuItem, treeNodeId)}
+        </Grid>
+        <Grid xs={9} container item>
+          <Grid xs={3} item>
+            {this.renderSettingsMenu(menuItem, treeNodeId)}
+          </Grid>
+          <Grid xs={3} item>
+            {this.renderConnectionSelect(menuItem, treeNodeId)}
+          </Grid>
+          <Grid xs={3} item>
+            {this.renderRemoveButton(menuItem, treeNodeId)}
+          </Grid>
+        </Grid>
+      </Grid>
+    );
+  };
+}
 
 class MenuConnectionSelector extends React.Component {
   state = { value: this.props.menuItem.title };
@@ -88,7 +270,6 @@ class MenuConnectionSelector extends React.Component {
   };
 
   handleChange = e => {
-    console.log(e, "e");
     this.setState({ value: e.target.value });
   };
   render = () => {
@@ -233,6 +414,11 @@ class ToolOptions extends Component {
   }
 
   save() {
+    this.menuConfig = this.model.exportTreeAsMenuJson(
+      this.state.tree,
+      this.menuConfig
+    );
+
     var tool = {
       type: this.type,
       index: this.state.index,
@@ -318,8 +504,15 @@ class ToolOptions extends Component {
     }
 
     let key = this.getNewTreeKey().toString();
+
     let returnObject = {
-      title: this.renderMenuRow(menuItem, key),
+      title: (
+        <TreeRow
+          updateMenuItem={this.updateMenuItem}
+          menuItem={menuItem}
+          treeNodeId={key}
+        ></TreeRow>
+      ),
       children: children,
       menuItem: this.model.getMenuItemWithoutChildren(menuItem),
       key: key
@@ -374,50 +567,24 @@ class ToolOptions extends Component {
     }
   };
 
-  openSettingsMenu = e => {
-    console.log(e.target, "e");
-    return (
-      <Popover
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right"
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left"
-        }}
-      >
-        The content of the Popover.
-      </Popover>
-    );
-  };
-
-  renderSettingsMenu = (menuItem, key) => {
-    return (
-      <IconButton
-        size="small"
-        onClick={() => {
-          //DEBUG
-          this.updateMenuItem(key, {
-            color: "blue",
-            title: "HEJSAN!!!",
-            maplink: "xdasdsadsa"
-          });
-        }}
-      >
-        <SettingsIcon></SettingsIcon>
-      </IconButton>
-    );
-  };
-
-  updateMenuItem = (key, objectWithKeyValuesToUpdate) => {
+  updateMenuItem = (treeNodeId, objectWithKeyValuesToUpdate) => {
     let newTreeState = [...this.state.tree];
-    let treeNode = this.findInTree(newTreeState, key);
+    let treeNode = this.findInTree(newTreeState, treeNodeId);
+    console.log(treeNode, "treeNode");
+    console.log(objectWithKeyValuesToUpdate, "objectWithKeyValuesToUpdate");
     treeNode.menuItem = {
       ...treeNode.menuItem,
       ...objectWithKeyValuesToUpdate
     };
-    treeNode.title = this.renderMenuRow(treeNode.menuItem, treeNode.key);
+
+    treeNode.title = (
+      <TreeRow
+        updateMenuItem={this.updateMenuItem}
+        menuItem={treeNode.menuItem}
+        treeNodeId={treeNode.key}
+      ></TreeRow>
+    );
+
     this.setState({ tree: newTreeState }, () => {
       console.log(this.state.tree, "tree");
     });
@@ -429,54 +596,7 @@ class ToolOptions extends Component {
     this.setState({ menuConfig: newState });
   };
 
-  renderConnectionSelect = menuItem => {
-    return (
-      <MenuConnectionSelector menuItem={menuItem}></MenuConnectionSelector>
-    );
-  };
-
-  renderRemoveButton = menuItem => {
-    const { classes } = this.props;
-    return (
-      <IconButton
-        className={classes.iconButton}
-        onClick={() => {
-          this.deleteMenuItem(menuItem);
-        }}
-      >
-        <DeleteIcon></DeleteIcon>
-      </IconButton>
-    );
-  };
-
-  renderMenuTitle = menuItem => {
-    console.log("RnderMenu");
-    return <Typography>{menuItem.title}</Typography>;
-  };
-
-  renderMenuRow = (menuItem, key) => {
-    return (
-      <Grid justify="flex-end" container>
-        <Grid xs={1} item>
-          <DragHandle></DragHandle>
-        </Grid>
-        <Grid xs={2} item>
-          {this.renderMenuTitle(menuItem, key)}
-        </Grid>
-        <Grid xs={9} container item>
-          <Grid xs={3} item>
-            {this.renderSettingsMenu(menuItem, key)}
-          </Grid>
-          <Grid xs={3} item>
-            {this.renderConnectionSelect(menuItem, key)}
-          </Grid>
-          <Grid xs={3} item>
-            {this.renderRemoveButton(menuItem, key)}
-          </Grid>
-        </Grid>
-      </Grid>
-    );
-  };
+  renderMenuRow = (menuItem, key) => {};
 
   renderTableCell = columnName => {
     const { classes } = this.props;
@@ -556,7 +676,9 @@ class ToolOptions extends Component {
           <section className="tab-pane active">
             <Modal
               onBackdropClick={() => {
-                this.setState({ openMenuEditor: false });
+                this.setState({ openMenuEditor: false }, () => {
+                  console.log(this.state, "state");
+                });
               }}
               style={{
                 position: "absolute",
