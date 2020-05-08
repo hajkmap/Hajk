@@ -119,7 +119,7 @@ var ResidentList = {
       row.push(f.get(_config.postnrFieldName));
       row.push(f.get(_config.postortFieldName));
 
-      if (f.get(_config.alderFieldName) && (parseInt(f.get(_config.alderFieldName)) < this.state.minAge)) {
+      if (f.get(_config.alderFieldName) && (parseInt(f.get(_config.alderFieldName)) < parseInt(document.getElementById("min-age").value))) {
         return;
       }
 

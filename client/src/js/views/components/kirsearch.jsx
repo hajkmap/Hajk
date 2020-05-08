@@ -340,7 +340,7 @@ var KirSearchView = {
 
                   <div className="kir-filters">
                     Ålder från
-                    <input type="text" defaultValue={this.state.minAge} onChange={(e) => this.setState({ minAge: e.target.value })} />
+                    <input type="text" defaultValue={this.state.minAge} id="minAge-search" onChange={(e) => {this.setState({ minAge: e.target.value }); document.getElementById("min-age").value = e.target.value}} />
                     <span>till</span>
                     <input type="text" defaultValue={this.state.maxAge} onChange={(e) => this.setState({ maxAge: e.target.value })} />
                   </div>
