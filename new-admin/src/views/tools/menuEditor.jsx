@@ -173,7 +173,6 @@ class TreeRow extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log(props, "props");
   }
 
   renderConnectionSelect = menuItem => {
@@ -182,13 +181,13 @@ class TreeRow extends React.Component {
     );
   };
 
-  renderRemoveButton = menuItem => {
-    const { classes } = this.props;
+  renderRemoveButton = (menuItem, treeNodeId) => {
+    const { deleteMenuItem } = this.props;
     return (
       <IconButton
         style={{ padding: "0px" }}
         onClick={() => {
-          this.deleteMenuItem(menuItem);
+          deleteMenuItem(treeNodeId);
         }}
       >
         <DeleteIcon></DeleteIcon>
@@ -446,7 +445,6 @@ class ToolOptions extends Component {
         }
       );
     }
-    console.log(this.state.active, "active");
     if (!this.state.active) {
       if (existing) {
         this.props.parent.props.parent.setState({
@@ -509,6 +507,7 @@ class ToolOptions extends Component {
       title: (
         <TreeRow
           updateMenuItem={this.updateMenuItem}
+          deleteMenuItem={this.deleteMenuItem}
           menuItem={menuItem}
           treeNodeId={key}
         ></TreeRow>
@@ -520,24 +519,23 @@ class ToolOptions extends Component {
     return returnObject;
   };
 
+  //Can this recursion be written better????
   findInTree = (tree, key) => {
     return tree
       .map(treeNode => {
         var found = this.findTreeNode(treeNode, key);
-        console.log(found, "found");
         return found;
       })
-      .filter(x => {
-        return x != undefined;
+      .filter(res => {
+        return res != undefined;
       })[0];
   };
-
+  //Can this recursion be written better????
   findTreeNode = (treeNode, key) => {
     if (treeNode.key == key) {
       return treeNode;
     } else {
       if (treeNode.children.length > 0) {
-        console.log(treeNode, "TreeNode");
         return this.findInTree(treeNode.children, key);
       }
     }
@@ -570,8 +568,6 @@ class ToolOptions extends Component {
   updateMenuItem = (treeNodeId, objectWithKeyValuesToUpdate) => {
     let newTreeState = [...this.state.tree];
     let treeNode = this.findInTree(newTreeState, treeNodeId);
-    console.log(treeNode, "treeNode");
-    console.log(objectWithKeyValuesToUpdate, "objectWithKeyValuesToUpdate");
     treeNode.menuItem = {
       ...treeNode.menuItem,
       ...objectWithKeyValuesToUpdate
@@ -590,13 +586,31 @@ class ToolOptions extends Component {
     });
   };
 
-  deleteMenuItem = menuItem => {
-    let newState = [...this.state.menuConfig];
-    newState.splice(this.state.menuConfig.indexOf(menuItem), 1);
-    this.setState({ menuConfig: newState });
+  deleteTreeNode = (nodeArrayToSearch, treeNodeToDelete) => {
+    nodeArrayToSearch.forEach((child, index) => {
+      if (child.key == treeNodeToDelete.key) {
+        nodeArrayToSearch.splice(
+          nodeArrayToSearch.indexOf(treeNodeToDelete),
+          1
+        );
+      }
+    });
   };
 
-  renderMenuRow = (menuItem, key) => {};
+  isRootNode = treeNode => {
+    return treeNode.parent == undefined ? true : false;
+  };
+
+  deleteMenuItem = treeNodeId => {
+    let newTreeState = [...this.state.tree];
+    let treeNode = this.findInTree(newTreeState, treeNodeId);
+    if (this.isRootNode(treeNode)) {
+      this.deleteTreeNode(newTreeState, treeNode);
+    } else {
+      this.deleteTreeNode(treeNode.parent.children, treeNode);
+    }
+    this.setState({ tree: newTreeState });
+  };
 
   renderTableCell = columnName => {
     const { classes } = this.props;
@@ -676,9 +690,7 @@ class ToolOptions extends Component {
           <section className="tab-pane active">
             <Modal
               onBackdropClick={() => {
-                this.setState({ openMenuEditor: false }, () => {
-                  console.log(this.state, "state");
-                });
+                this.setState({ openMenuEditor: false });
               }}
               style={{
                 position: "absolute",
