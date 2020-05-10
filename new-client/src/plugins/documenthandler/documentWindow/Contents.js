@@ -142,6 +142,17 @@ class Contents extends React.PureComponent {
     return attributes;
   };
 
+  /**
+   * Private help method that extracts the text, i.e. the link text it selfs, from an a-tag.
+   * @param {object} htmlObject The a-tag.
+   * @returns {string} The link text in the a-tag.
+   *
+   * @memberof Contents
+   */
+  getTextLinkTextFromHtmlObject = htmlObject => {
+    return htmlObject.text;
+  };
+
   getExternalLink = (aTagObject, externalLink) => {
     return (
       <Link href={externalLink} target="_blank" rel="noopener" variant="body2">
@@ -163,22 +174,18 @@ class Contents extends React.PureComponent {
     documentLink
   ) => {
     const { localObserver } = this.props;
-    return this.getLinkComponent(aTagObject, () => {
-      localObserver.publish("show-document-window", {
-        documentName: documentLink,
-        headerIdentifier: headerIdentifier
-      });
+    localObserver.publish("show-document-window", {
+      documentName: documentLink,
+      headerIdentifier: headerIdentifier
     });
   };
 
   getHeaderLinkForSameDocument = (aTagObject, headerIdentifier) => {
     const { localObserver, model } = this.props;
-    return this.getLinkComponent(aTagObject, () => {
-      localObserver.publish(
-        "scroll-to",
-        model.getHeaderRef(this.props.activeDocument, headerIdentifier)
-      );
-    });
+    localObserver.publish(
+      "scroll-to",
+      model.getHeaderRef(this.props.activeDocument, headerIdentifier)
+    );
   };
 
   getLinkDataPerType = attributes => {
@@ -240,6 +247,7 @@ class Contents extends React.PureComponent {
   getLinkComponent = aTag => {
     const aTagObject = this.parseStringToHtmlObject(`<a ${aTag.text}</a>`, "a");
     const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
+    const text = this.getTextLinkTextFromHtmlObject(aTagObject);
     const {
       mapLink,
       headerIdentifier,
@@ -249,16 +257,34 @@ class Contents extends React.PureComponent {
 
     if (headerIdentifier) {
       if (documentLink) {
-        return this.getHeaderLinkForNonActiveDocument(
-          aTagObject,
-          headerIdentifier,
-          documentLink
+        return (
+          <Link
+            onClick={() => {
+              this.getHeaderLinkForNonActiveDocument(
+                aTagObject,
+                headerIdentifier,
+                documentLink
+              );
+            }}
+          >
+            {text}
+          </Link>
         );
       } else {
-        return this.getHeaderLinkForSameDocument(
-          aTagObject,
-          headerIdentifier,
-          documentLink
+        return (
+          <Link
+            href="#"
+            underline="hover"
+            onClick={() => {
+              this.getHeaderLinkForSameDocument(
+                aTagObject,
+                headerIdentifier,
+                documentLink
+              );
+            }}
+          >
+            {text}
+          </Link>
         );
       }
     }
