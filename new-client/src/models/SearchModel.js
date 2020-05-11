@@ -1,5 +1,6 @@
 import { WFS } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
+import EqualTo from "ol/format/filter/EqualTo";
 import Or from "ol/format/filter/Or";
 import And from "ol/format/filter/And";
 import Intersects from "ol/format/filter/Intersects";
@@ -242,25 +243,34 @@ class SearchModel {
     let finalFilters = null;
 
     if (searchString?.length > 0) {
-      // Should the search string be surrounded by wildcard?
-      let pattern = searchString;
-      pattern = searchOptions.wildcardAtStart ? `*${pattern}` : pattern;
-      pattern = searchOptions.wildcardAtEnd ? `${pattern}*` : pattern;
+      // If search string contains only numbers, let's do an EqualTo search
+      if (/^\d+$/.test(searchString.trim())) {
+        comparisonFilters = searchSource.searchFields.map(propertyName => {
+          return new EqualTo(propertyName, Number(searchString));
+        });
+      }
+      // Else, let's do a IsLike search
+      else {
+        // Should the search string be surrounded by wildcard?
+        let pattern = searchString;
+        pattern = searchOptions.wildcardAtStart ? `*${pattern}` : pattern;
+        pattern = searchOptions.wildcardAtEnd ? `${pattern}*` : pattern;
 
-      // Each searchSource (e.g. WFS layer) will have its own searchFields
-      // defined (e.g. columns in the data table, such as "name" or "address").
-      // Let's loop through the searchFields and create an IsLike filter
-      // for each one of them (e.g. "name=bla", "address=bla").
-      comparisonFilters = searchSource.searchFields.map(propertyName => {
-        return new IsLike(
-          propertyName,
-          pattern,
-          "*", // wildcard char
-          ".", // single char
-          "!", // escape char
-          searchOptions.matchCase // match case
-        );
-      });
+        // Each searchSource (e.g. WFS layer) will have its own searchFields
+        // defined (e.g. columns in the data table, such as "name" or "address").
+        // Let's loop through the searchFields and create an IsLike filter
+        // for each one of them (e.g. "name=bla", "address=bla").
+        comparisonFilters = searchSource.searchFields.map(propertyName => {
+          return new IsLike(
+            propertyName,
+            pattern,
+            "*", // wildcard char
+            ".", // single char
+            "!", // escape char
+            searchOptions.matchCase // match case
+          );
+        });
+      }
 
       // Depending on the searchSource configuration, we will now have 1 or more
       // IsLike filters created. If we just have one, let's use it. But if we have
