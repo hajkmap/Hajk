@@ -171,19 +171,19 @@ var SearchOnCoordinates = React.createClass({
             Söka på koordinater
           </dt>
           <dd>
-            Välj koordinatsystem:&nbsp;&nbsp;
+            <h4>Välj koordinatsystem:&nbsp;&nbsp;
             <select id="coordSystem-coord-tool" value={this.state.selectValue} onChange={(event) => this.updateSelect(event)}>
               {this.props.model.get("transformations").map((item) => this.addInput(item))}
-            </select>
+            </select></h4>
             <div>
               Ange platsens koordinater <br/>
               N/Long: <input type='text' id='latSOC'  /> &nbsp;&nbsp;&nbsp;
               E/Lat: <input type='text' id='lonSOC'  /><br/>
             </div><br/>
             <div className='pull-right'>
-              <button onClick={(event) => this.props.model.zoomaCoords(event)} className='btn btn-primary' id='zoomaCoords'>Zooma</button>
-              <button onClick={(event) => this.props.model.panoreraCoords(event)} className='btn btn-primary' id='panoreraCoords'>Panorera</button>
-              <button onClick={(event) => this.props.model.laddaCoords(event)} className='btn btn-primary' id='laddaCoords'>Koordinater</button>
+              <button onClick={(event) => this.props.model.zoomaCoords(event)} className='btn btn-primary' id='zoomaCoords'>Zooma</button>&nbsp;
+              <button onClick={(event) => this.props.model.panoreraCoords(event)} className='btn btn-primary' id='panoreraCoords'>Panorera</button>&nbsp;
+              <button onClick={(event) => this.props.model.laddaCoords(event)} className='btn btn-primary' id='laddaCoords'>Koordinater</button>&nbsp;
               <button onClick={(event) => this.props.model.resetCoords(event)} className='btn btn-primary' id='restCoords'>Rensa</button>
             </div><br/><br/>
           </dd>
