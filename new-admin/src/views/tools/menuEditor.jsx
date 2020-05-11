@@ -29,6 +29,7 @@ import MenuEditorModel from "../../models/menuEditorModel";
 import Grid from "@material-ui/core/Grid";
 import Table from "@material-ui/core/Table";
 import Modal from "@material-ui/core/Modal";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -168,16 +169,52 @@ class SettingsPopover extends React.Component {
   };
 }
 
+class MenuConnectionPopover extends React.Component {
+  state = {};
+
+  constructor(props) {
+    super(props);
+  }
+
+  render = () => {
+    const { anchorEl, open, close } = this.props;
+    return (
+      <>
+        <Popover
+          open={open}
+          onClose={close}
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right"
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "left"
+          }}
+        >
+          {this.children}
+        </Popover>
+      </>
+    );
+  };
+}
+
 class TreeRow extends React.Component {
-  state = { settingsMenuOpen: false };
+  state = {};
 
   constructor(props) {
     super(props);
   }
 
   renderConnectionSelect = menuItem => {
+    const { model } = this.props;
+    console.log(model, "haveModelHere??");
     return (
-      <MenuConnectionSelector menuItem={menuItem}></MenuConnectionSelector>
+      <MenuConnectionSelector
+        model={model}
+        menuItem={menuItem}
+      ></MenuConnectionSelector>
     );
   };
 
@@ -255,7 +292,21 @@ class TreeRow extends React.Component {
 }
 
 class MenuConnectionSelector extends React.Component {
-  state = { value: this.props.menuItem.title };
+  state = { open: false };
+
+  constructor(props) {
+    super(props);
+  }
+  openConnectionsMenu = e => {
+    console.log(e, "e");
+    this.setState({
+      connectionsMenuAnchorEl: e.currentTarget
+    });
+  };
+
+  closeConnectionsMenu = () => {
+    this.setState({ connectionsMenuAnchorEl: null, open: false });
+  };
 
   renderConnectionMenuSelectOption = (title, index) => {
     return (
@@ -264,12 +315,44 @@ class MenuConnectionSelector extends React.Component {
           <SettingsIcon></SettingsIcon>
         </ListItemIcon>
         <Typography>{title}</Typography>
+        <ArrowRightIcon></ArrowRightIcon>
       </MenuItem>
     );
   };
 
+  renderMenuConnectionSettings = value => {
+    console.log(value, "value");
+    return (
+      <MenuConnectionPopover
+        anchorEl={this.state.connectionsMenuAnchorEl}
+        open={Boolean(this.state.connectionsMenuAnchorEl)}
+        close={this.closeConnectionsMenu}
+        model={this.props.model}
+      >
+        {this.getOptions()}
+      </MenuConnectionPopover>
+    );
+  };
+
+  getOptions = () => {};
+
+  renderDocumentConnection = () => {
+    const { model } = this.props;
+    model.listAllAvailableDocuments();
+  };
+
   handleChange = e => {
-    this.setState({ value: e.target.value });
+    console.log(e.currentTarget, "e");
+    this.setState(
+      {
+        value: e.currentTarget,
+        connectionsMenuAnchorEl: e.currentTarget,
+        open: true
+      },
+      () => {
+        console.log(this.state, "state");
+      }
+    );
   };
   render = () => {
     return (
@@ -287,16 +370,22 @@ class MenuConnectionSelector extends React.Component {
             },
             getContentAnchorEl: null
           }}
-          onChange={this.handleChange}
           renderValue={value => {
+            console.log(value, "valueee");
             return value;
           }}
+          onOpen={() => {
+            this.setState({ open: true });
+          }}
+          onChange={this.handleChange}
+          open={this.state.open}
           value={this.state.value}
         >
           {MENU_CONNECTION_TYPES.map((title, index) => {
             return this.renderConnectionMenuSelectOption(title, index);
           })}
         </Select>
+        {this.renderMenuConnectionSettings(this.state.value)}
       </FormControl>
     );
   };
@@ -502,12 +591,13 @@ class ToolOptions extends Component {
     }
 
     let key = this.getNewTreeKey().toString();
-
+    console.log(this.model, "WHYYYY");
     let returnObject = {
       title: (
         <TreeRow
           updateMenuItem={this.updateMenuItem}
           deleteMenuItem={this.deleteMenuItem}
+          model={this.model}
           menuItem={menuItem}
           treeNodeId={key}
         ></TreeRow>
@@ -577,6 +667,7 @@ class ToolOptions extends Component {
       <TreeRow
         updateMenuItem={this.updateMenuItem}
         menuItem={treeNode.menuItem}
+        model={this.model}
         treeNodeId={treeNode.key}
       ></TreeRow>
     );

@@ -1,9 +1,23 @@
 import { Model } from "backbone";
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 var menuEditorModel = Model.extend({
   constructor: function(settings) {
     this.config = settings.config;
     console.log(this.config, "config");
+  },
+
+  async listAllAvailableDocuments(callback) {
+    let response;
+    try {
+      response = await fetch(this.config.url_map_list, fetchConfig);
+      const text = await response.text();
+      const document = await JSON.parse(text);
+      callback(document);
+    } catch (err) {}
   },
 
   removeNodeFromParent: function(node, newTree) {
