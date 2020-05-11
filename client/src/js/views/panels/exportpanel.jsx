@@ -280,6 +280,9 @@ var ExportPdfSettings = React.createClass({
       case '1000':
         preScale = 5;
         break;
+      case '2000':
+        preScale = 4;
+        break;
       case '2500':
         preScale = 4;
         break;
@@ -288,6 +291,9 @@ var ExportPdfSettings = React.createClass({
         break;
       case '10000':
         preScale = 2;
+        break;
+      case '20000':
+        preScale = 1;
         break;
       case '25000':
         preScale = 1;
@@ -298,7 +304,13 @@ var ExportPdfSettings = React.createClass({
       case '100000':
         preScale = 0;
         break;
+      case '200000':
+        preScale = 0;
+        break;
       case '250000':
+        preScale = 0;
+        break;
+      case '300000':
         preScale = 0;
         break;
       default:
