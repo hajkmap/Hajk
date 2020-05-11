@@ -36,6 +36,7 @@ var CoordinatesModelProperties = {
   interactionLayer: undefined,
   interactions: [],
   instruction: '',
+  searchOnCoordinates: true,
   position: {
     x: undefined,
     y: undefined
@@ -286,9 +287,13 @@ var CoordinatesModel = {
       // convert the coordinates
       var to = this.get('map').getView().getProjection();
       var convertedCoords = ol.proj.transform(coords, to, type);
-      document.getElementById("latSOC").value = convertedCoords[1];
-      document.getElementById("lonSOC").value = convertedCoords[0];
-
+      if(type == "EPSG:4326"){
+        document.getElementById("latSOC").value = convertedCoords[1].toFixed(7);
+        document.getElementById("lonSOC").value = convertedCoords[0].toFixed(7);
+      }else {
+        document.getElementById("latSOC").value = convertedCoords[1].toFixed(2);
+        document.getElementById("lonSOC").value = convertedCoords[0].toFixed(2);
+      }
 
     }
     catch(err) {
