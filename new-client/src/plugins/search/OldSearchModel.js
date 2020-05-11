@@ -1,7 +1,9 @@
 import Observer from "react-event-observer";
 import { WFS, GeoJSON } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
+import EqualTo from "ol/format/filter/EqualTo";
 import Or from "ol/format/filter/Or";
+
 import Intersects from "ol/format/filter/Intersects";
 import GeometryType from "ol/geom/GeometryType";
 import { fromCircle } from "ol/geom/Polygon";
@@ -239,7 +241,6 @@ class OldSearchModel {
 
   // 1. PUBLIC API
   search = (searchInput, force, callback) => {
-    console.log("searchInput: ", searchInput);
     clearTimeout(this.#timeout);
 
     this.clearRecentSpatialSearch();
@@ -857,17 +858,27 @@ class OldSearchModel {
       .getView()
       .getProjection()
       .getCode();
+    let isLikeFilters = null;
 
-    const isLikeFilters = source.searchFields.map(searchField => {
-      return new IsLike(
-        searchField,
-        searchInput + "*",
-        "*", // wild card
-        ".", // single char
-        "!", // escape char
-        false // match case
-      );
-    });
+    // If search string contains only numbers, let's do an EqualTo search
+    if (/^\d+$/.test(searchInput.trim())) {
+      isLikeFilters = source.searchFields.map(searchField => {
+        return new EqualTo(searchField, Number(searchInput));
+      });
+    }
+    // Else, let's do a IsLike search
+    else {
+      isLikeFilters = source.searchFields.map(searchField => {
+        return new IsLike(
+          searchField,
+          searchInput + "*",
+          "*", // wild card
+          ".", // single char
+          "!", // escape char
+          false // match case
+        );
+      });
+    }
 
     const filter =
       isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
