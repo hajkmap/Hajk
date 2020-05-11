@@ -10,13 +10,15 @@ var menuEditorModel = Model.extend({
     console.log(this.config, "config");
   },
 
-  async listAllAvailableDocuments(callback) {
-    let response;
+  async listAllAvailableDocuments() {
     try {
-      response = await fetch(this.config.url_map_list, fetchConfig);
-      const text = await response.text();
-      const document = await JSON.parse(text);
-      callback(document);
+      return fetch(this.config.url_document_list, fetchConfig).then(
+        response => {
+          return response.text().then(text => {
+            return JSON.parse(text);
+          });
+        }
+      );
     } catch (err) {}
   },
 

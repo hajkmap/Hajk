@@ -30,6 +30,13 @@ import Grid from "@material-ui/core/Grid";
 import Table from "@material-ui/core/Table";
 import Modal from "@material-ui/core/Modal";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import DescriptionIcon from "@material-ui/icons/Description";
+import RoomIcon from "@material-ui/icons/Room";
+import LanguageIcon from "@material-ui/icons/Language";
+
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
 
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -56,11 +63,12 @@ import Tree from "antd/es/tree"; //Specific import to keep bundle-size small
 import "antd/es/tree/style/css"; //Specific import to keep bundle-size small
 import { Typography } from "@material-ui/core";
 
-const MENU_CONNECTION_TYPES = [
-  "Koppla dokument",
-  "Koppla karta och lager",
-  "Koppla webblÃ¤nk"
-];
+const MENU_CONNECTION_TYPES = {
+  documentConnection: "Koppla dokument",
+  mapLink: "Koppla karta och lager",
+  link: "Koppla webblänk",
+  subMenu: "Inget valt"
+};
 
 const styles = () => ({
   container: {
@@ -193,7 +201,7 @@ class MenuConnectionPopover extends React.Component {
             horizontal: "left"
           }}
         >
-          {this.children}
+          {this.props.children}
         </Popover>
       </>
     );
@@ -208,10 +216,12 @@ class TreeRow extends React.Component {
   }
 
   renderConnectionSelect = menuItem => {
-    const { model } = this.props;
-    console.log(model, "haveModelHere??");
+    const { model, treeNodeId } = this.props;
     return (
       <MenuConnectionSelector
+        treeNodeId={treeNodeId}
+        updateMenuItem={this.props.updateMenuItem}
+        availableDocuments={this.props.availableDocuments}
         model={model}
         menuItem={menuItem}
       ></MenuConnectionSelector>
@@ -297,8 +307,31 @@ class MenuConnectionSelector extends React.Component {
   constructor(props) {
     super(props);
   }
+
+  componentDidMount = () => {
+    this.setState({ value: this.getInitialValue() });
+  };
+  getInitialValue = () => {
+    const { menuItem } = this.props;
+
+    if (menuItem.menu.length > 0) {
+      return MENU_CONNECTION_TYPES.subMenu;
+    }
+
+    if (menuItem.document != "") {
+      return MENU_CONNECTION_TYPES.documentConnection;
+    }
+
+    if (menuItem.link) {
+      return MENU_CONNECTION_TYPES.link;
+    }
+
+    if (menuItem.maplink) {
+      return MENU_CONNECTION_TYPES.mapLink;
+    }
+  };
+
   openConnectionsMenu = e => {
-    console.log(e, "e");
     this.setState({
       connectionsMenuAnchorEl: e.currentTarget
     });
@@ -308,86 +341,195 @@ class MenuConnectionSelector extends React.Component {
     this.setState({ connectionsMenuAnchorEl: null, open: false });
   };
 
-  renderConnectionMenuSelectOption = (title, index) => {
+  renderConnectionMenuSelectOption = (value, index) => {
     return (
-      <MenuItem key={index} value={title}>
+      <MenuItem key={index} value={value}>
         <ListItemIcon>
           <SettingsIcon></SettingsIcon>
         </ListItemIcon>
-        <Typography>{title}</Typography>
-        <ArrowRightIcon></ArrowRightIcon>
+        <Typography>{value}</Typography>
+        {value !== MENU_CONNECTION_TYPES.subMenu && (
+          <ArrowRightIcon></ArrowRightIcon>
+        )}
       </MenuItem>
     );
   };
 
   renderMenuConnectionSettings = value => {
-    console.log(value, "value");
     return (
-      <MenuConnectionPopover
-        anchorEl={this.state.connectionsMenuAnchorEl}
+      <Popover
+        PaperProps={{
+          style: { width: "500px", height: "500px", padding: "20px" }
+        }}
         open={Boolean(this.state.connectionsMenuAnchorEl)}
-        close={this.closeConnectionsMenu}
-        model={this.props.model}
+        onClose={this.closeConnectionsMenu}
+        anchorEl={this.state.connectionsMenuAnchorEl}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right"
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left"
+        }}
       >
-        {this.getOptions()}
-      </MenuConnectionPopover>
+        <Grid container>{this.renderPopoverContent()}</Grid>
+      </Popover>
     );
   };
 
-  getOptions = () => {};
+  update = newMenuItem => {
+    const { treeNodeId } = this.props;
+    this.props.updateMenuItem(treeNodeId, newMenuItem);
+  };
 
-  renderDocumentConnection = () => {
-    const { model } = this.props;
-    model.listAllAvailableDocuments();
+  renderDocumentList = () => {
+    return (
+      <Grid item>
+        <List component="nav">
+          {this.props.availableDocuments.map(availableDocument => {
+            return (
+              <ListItem
+                onClick={() => {
+                  this.update({ document: availableDocument });
+                }}
+                button
+              >
+                <ListItemText primary={availableDocument}></ListItemText>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Grid>
+    );
+  };
+
+  getLink = (label, value, onChangeFunction) => {
+    return (
+      <Grid xs={12} item>
+        <TextField
+          id="icon-picker"
+          label={label}
+          type="icon"
+          variant="outlined"
+          value={value}
+          onChange={onChangeFunction}
+        />
+      </Grid>
+    );
+  };
+
+  renderMapLink = () => {
+    return this.getLink("Kartlänk", "maplink", () => {
+      console.log("mapLink");
+    });
+  };
+
+  renderLink = () => {
+    return this.getLink("Webblänk", "link", () => {
+      console.log("link");
+    });
+  };
+
+  renderPopoverContent = () => {
+    if (this.state.value == MENU_CONNECTION_TYPES.subMenu) {
+      return null;
+    }
+    if (this.state.value == MENU_CONNECTION_TYPES.documentConnection) {
+      return this.renderDocumentList();
+    }
+
+    if (this.state.value == MENU_CONNECTION_TYPES.link) {
+      return this.renderLink();
+    }
+    console.log(this.state.value, "value");
+    if (this.state.value == MENU_CONNECTION_TYPES.mapLink) {
+      return this.renderMapLink();
+    }
   };
 
   handleChange = e => {
-    console.log(e.currentTarget, "e");
-    this.setState(
-      {
-        value: e.currentTarget,
-        connectionsMenuAnchorEl: e.currentTarget,
-        open: true
-      },
-      () => {
-        console.log(this.state, "state");
-      }
+    console.log(e.target.value, "currentTarget");
+    this.setState({
+      value: e.target.value,
+      connectionsMenuAnchorEl: e.currentTarget,
+      open: true
+    });
+  };
+
+  getRenderedSelectionText = (label, icon) => {
+    return (
+      <Grid container>
+        {icon && <Grid item>{icon}</Grid>}
+        <Grid item>
+          <Typography>{label}</Typography>
+        </Grid>
+      </Grid>
     );
   };
+
+  getRenderValue = value => {
+    const { menuItem } = this.props;
+    if (this.state.value == MENU_CONNECTION_TYPES.documentConnection) {
+      return this.getRenderedSelectionText(
+        menuItem.document,
+        <DescriptionIcon></DescriptionIcon>
+      );
+    }
+
+    if (this.state.value == MENU_CONNECTION_TYPES.subMenu) {
+      return this.getRenderedSelectionText("Undermeny");
+    }
+
+    if (this.state.value == MENU_CONNECTION_TYPES.link) {
+      return this.getRenderedSelectionText("Webblänk", <RoomIcon></RoomIcon>);
+    }
+
+    if (this.state.value == MENU_CONNECTION_TYPES.maplink) {
+      return this.getRenderedSelectionText(
+        "Karta",
+        <LanguageIcon></LanguageIcon>
+      );
+    }
+
+    return this.getRenderedSelectionText("Ingen koppling");
+  };
+
   render = () => {
-    return (
-      <FormControl>
-        <Select
-          MenuProps={{
-            disableScrollLock: true,
-            anchorOrigin: {
-              vertical: "bottom",
-              horizontal: "left"
-            },
-            transformOrigin: {
-              vertical: "top",
-              horizontal: "left"
-            },
-            getContentAnchorEl: null
-          }}
-          renderValue={value => {
-            console.log(value, "valueee");
-            return value;
-          }}
-          onOpen={() => {
-            this.setState({ open: true });
-          }}
-          onChange={this.handleChange}
-          open={this.state.open}
-          value={this.state.value}
-        >
-          {MENU_CONNECTION_TYPES.map((title, index) => {
-            return this.renderConnectionMenuSelectOption(title, index);
-          })}
-        </Select>
-        {this.renderMenuConnectionSettings(this.state.value)}
-      </FormControl>
-    );
+    if (this.state.value) {
+      return (
+        <FormControl>
+          <Select
+            MenuProps={{
+              disableScrollLock: true,
+              anchorOrigin: {
+                vertical: "bottom",
+                horizontal: "left"
+              },
+              transformOrigin: {
+                vertical: "top",
+                horizontal: "left"
+              },
+              getContentAnchorEl: null
+            }}
+            onOpen={() => {
+              this.setState({ open: true });
+            }}
+            renderValue={this.getRenderValue}
+            onChange={this.handleChange}
+            open={this.state.open}
+            value={this.state.value}
+          >
+            {Object.values(MENU_CONNECTION_TYPES).map((value, index) => {
+              return this.renderConnectionMenuSelectOption(value, index);
+            })}
+          </Select>
+          {this.renderMenuConnectionSettings(this.state.value)}
+        </FormControl>
+      );
+    } else {
+      return null;
+    }
   };
 }
 
@@ -416,11 +558,15 @@ class ToolOptions extends Component {
   };
   treeKeys = [];
   menuConfig = null;
+  availableDocuments = [];
 
   constructor(props) {
     super(props);
     this.type = "documenthandler";
     this.model = this.getModel();
+    this.model.listAllAvailableDocuments().then(list => {
+      this.availableDocuments = list;
+    });
   }
 
   getModel = () => {
@@ -598,6 +744,7 @@ class ToolOptions extends Component {
           updateMenuItem={this.updateMenuItem}
           deleteMenuItem={this.deleteMenuItem}
           model={this.model}
+          availableDocuments={this.availableDocuments}
           menuItem={menuItem}
           treeNodeId={key}
         ></TreeRow>
@@ -667,6 +814,7 @@ class ToolOptions extends Component {
       <TreeRow
         updateMenuItem={this.updateMenuItem}
         menuItem={treeNode.menuItem}
+        availableDocuments={this.availableDocuments}
         model={this.model}
         treeNodeId={treeNode.key}
       ></TreeRow>
