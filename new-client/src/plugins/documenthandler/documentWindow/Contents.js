@@ -153,6 +153,14 @@ class Contents extends React.PureComponent {
     return htmlObject.text;
   };
 
+  getCustomLink = (htmlObject, clickHandler) => {
+    return (
+      <Link href="#" variant="body2" onClick={clickHandler}>
+        {htmlObject.innerHTML}
+      </Link>
+    );
+  };
+
   getExternalLink = (aTagObject, externalLink) => {
     return (
       <Link href={externalLink} target="_blank" rel="noopener" variant="body2">
@@ -163,7 +171,7 @@ class Contents extends React.PureComponent {
 
   getMapLink = (aTagObject, mapLink) => {
     const { localObserver } = this.props;
-    return this.getLinkComponent(aTagObject, () => {
+    return this.getCustomLink(aTagObject, () => {
       localObserver.publish("fly-to", mapLink);
     });
   };
