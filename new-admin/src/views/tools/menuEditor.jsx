@@ -33,22 +33,13 @@ import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import DescriptionIcon from "@material-ui/icons/Description";
 import RoomIcon from "@material-ui/icons/Room";
 import LanguageIcon from "@material-ui/icons/Language";
-
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
-
-import Radio from "@material-ui/core/Radio";
-import RadioGroup from "@material-ui/core/RadioGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormLabel from "@material-ui/core/FormLabel";
-
 import FormControl from "@material-ui/core/FormControl";
-
 import TableCell from "@material-ui/core/TableCell";
 import Popover from "@material-ui/core/Popover";
 import TextField from "@material-ui/core/TextField";
-
 import DeleteIcon from "@material-ui/icons/Delete";
 import SettingsIcon from "@material-ui/icons/Settings";
 import DragHandle from "@material-ui/icons/DragHandle";
@@ -85,6 +76,19 @@ const styles = () => ({
   }
 });
 
+const getTextField = (label, value, onChangeFunction) => {
+  return (
+    <TextField
+      id="icon-picker"
+      label={label}
+      type="icon"
+      variant="outlined"
+      value={value}
+      onChange={onChangeFunction}
+    />
+  );
+};
+
 class SettingsPopover extends React.Component {
   state = { color: this.props.menuItem.color, icon: this.props.menuItem.icon };
 
@@ -113,19 +117,6 @@ class SettingsPopover extends React.Component {
     close();
   };
 
-  renderTextField = (label, value, onChangeFunction) => {
-    return (
-      <TextField
-        id="icon-picker"
-        label={label}
-        type="icon"
-        variant="outlined"
-        value={value}
-        onChange={onChangeFunction}
-      />
-    );
-  };
-
   renderSettings = () => {
     return (
       <form
@@ -135,18 +126,14 @@ class SettingsPopover extends React.Component {
       >
         <Grid container>
           <Grid item>
-            {this.renderTextField(
+            {getTextField(
               "Ikon",
               this.state.icon.materialUiIconName,
               this.updateIconState
             )}
           </Grid>
           <Grid item>
-            {this.renderTextField(
-              "Färg",
-              this.state.color,
-              this.updateColorState
-            )}
+            {getTextField("Färg", this.state.color, this.updateColorState)}
           </Grid>
         </Grid>
       </form>
@@ -177,37 +164,6 @@ class SettingsPopover extends React.Component {
   };
 }
 
-class MenuConnectionPopover extends React.Component {
-  state = {};
-
-  constructor(props) {
-    super(props);
-  }
-
-  render = () => {
-    const { anchorEl, open, close } = this.props;
-    return (
-      <>
-        <Popover
-          open={open}
-          onClose={close}
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right"
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "left"
-          }}
-        >
-          {this.props.children}
-        </Popover>
-      </>
-    );
-  };
-}
-
 class TreeRow extends React.Component {
   state = {};
 
@@ -215,21 +171,28 @@ class TreeRow extends React.Component {
     super(props);
   }
 
-  renderConnectionSelect = menuItem => {
-    const { model, treeNodeId } = this.props;
+  renderConnectionSelect = () => {
+    const {
+      model,
+      treeNodeId,
+      updateMenuItem,
+      availableDocuments,
+      menuItem
+    } = this.props;
+
     return (
       <MenuConnectionSelector
         treeNodeId={treeNodeId}
-        updateMenuItem={this.props.updateMenuItem}
-        availableDocuments={this.props.availableDocuments}
+        updateMenuItem={updateMenuItem}
+        availableDocuments={availableDocuments}
         model={model}
         menuItem={menuItem}
       ></MenuConnectionSelector>
     );
   };
 
-  renderRemoveButton = (menuItem, treeNodeId) => {
-    const { deleteMenuItem } = this.props;
+  renderRemoveButton = () => {
+    const { deleteMenuItem, menuItem, treeNodeId } = this.props;
     return (
       <IconButton
         style={{ padding: "0px" }}
@@ -252,8 +215,9 @@ class TreeRow extends React.Component {
     this.setState({ settingsMenuAnchorEl: null });
   };
 
-  renderSettingsMenu = (menuItem, treeNodeId) => {
+  renderSettingsMenu = () => {
     const { settingsMenuAnchorEl } = this.state;
+    const { updateMenuItem, menuItem, treeNodeId } = this.props;
     return (
       <>
         <IconButton size="small" onClick={this.openSettingsMenu}>
@@ -262,7 +226,7 @@ class TreeRow extends React.Component {
         <SettingsPopover
           treeNodeId={treeNodeId}
           menuItem={menuItem}
-          updateMenuItem={this.props.updateMenuItem}
+          updateMenuItem={updateMenuItem}
           anchorEl={settingsMenuAnchorEl}
           open={Boolean(settingsMenuAnchorEl)}
           close={this.closeSettingsMenu}
@@ -271,29 +235,29 @@ class TreeRow extends React.Component {
     );
   };
 
-  renderMenuTitle = menuItem => {
+  renderMenuTitle = () => {
+    const { menuItem } = this.props;
     return <Typography>{menuItem.title}</Typography>;
   };
 
   render = () => {
-    const { menuItem, treeNodeId } = this.props;
     return (
       <Grid justify="flex-end" container>
         <Grid xs={1} item>
           <DragHandle></DragHandle>
         </Grid>
         <Grid xs={2} item>
-          {this.renderMenuTitle(menuItem, treeNodeId)}
+          {this.renderMenuTitle()}
         </Grid>
         <Grid xs={9} container item>
           <Grid xs={3} item>
-            {this.renderSettingsMenu(menuItem, treeNodeId)}
+            {this.renderSettingsMenu()}
           </Grid>
           <Grid xs={3} item>
-            {this.renderConnectionSelect(menuItem, treeNodeId)}
+            {this.renderConnectionSelect()}
           </Grid>
           <Grid xs={3} item>
-            {this.renderRemoveButton(menuItem, treeNodeId)}
+            {this.renderRemoveButton()}
           </Grid>
         </Grid>
       </Grid>
@@ -302,7 +266,7 @@ class TreeRow extends React.Component {
 }
 
 class MenuConnectionSelector extends React.Component {
-  state = { open: false };
+  state = { open: false, mapLinkValue: "", linkValue: "" };
 
   constructor(props) {
     super(props);
@@ -355,15 +319,16 @@ class MenuConnectionSelector extends React.Component {
     );
   };
 
-  renderMenuConnectionSettings = value => {
+  renderMenuConnectionSettings = () => {
+    const { connectionsMenuAnchorEl } = this.state;
     return (
       <Popover
         PaperProps={{
           style: { width: "500px", height: "500px", padding: "20px" }
         }}
-        open={Boolean(this.state.connectionsMenuAnchorEl)}
+        open={Boolean(connectionsMenuAnchorEl)}
         onClose={this.closeConnectionsMenu}
-        anchorEl={this.state.connectionsMenuAnchorEl}
+        anchorEl={connectionsMenuAnchorEl}
         anchorOrigin={{
           vertical: "top",
           horizontal: "right"
@@ -379,15 +344,16 @@ class MenuConnectionSelector extends React.Component {
   };
 
   update = newMenuItem => {
-    const { treeNodeId } = this.props;
-    this.props.updateMenuItem(treeNodeId, newMenuItem);
+    const { treeNodeId, updateMenuItem } = this.props;
+    updateMenuItem(treeNodeId, newMenuItem);
   };
 
   renderDocumentList = () => {
+    const { availableDocuments } = this.props;
     return (
       <Grid item>
         <List component="nav">
-          {this.props.availableDocuments.map(availableDocument => {
+          {availableDocuments.map(availableDocument => {
             return (
               <ListItem
                 onClick={() => {
@@ -407,49 +373,42 @@ class MenuConnectionSelector extends React.Component {
   getLink = (label, value, onChangeFunction) => {
     return (
       <Grid xs={12} item>
-        <TextField
-          id="icon-picker"
-          label={label}
-          type="icon"
-          variant="outlined"
-          value={value}
-          onChange={onChangeFunction}
-        />
+        {getTextField(label, value, onChangeFunction)}
       </Grid>
     );
   };
 
   renderMapLink = () => {
-    return this.getLink("Kartlänk", "maplink", () => {
-      console.log("mapLink");
+    return this.getLink("Kartlänk", this.state.mapLinkValue, e => {
+      this.setState({ mapLinkValue: e.target.value });
     });
   };
 
   renderLink = () => {
-    return this.getLink("Webblänk", "link", () => {
-      console.log("link");
+    return this.getLink("Webblänk", this.state.linkValue, () => {
+      //this.setState({ mapLinkValue: e.target.value });
     });
   };
 
   renderPopoverContent = () => {
-    if (this.state.value == MENU_CONNECTION_TYPES.subMenu) {
+    const { value } = this.state;
+    if (value === MENU_CONNECTION_TYPES.subMenu) {
       return null;
     }
-    if (this.state.value == MENU_CONNECTION_TYPES.documentConnection) {
+    if (value === MENU_CONNECTION_TYPES.documentConnection) {
       return this.renderDocumentList();
     }
 
-    if (this.state.value == MENU_CONNECTION_TYPES.link) {
+    if (value === MENU_CONNECTION_TYPES.link) {
       return this.renderLink();
     }
-    console.log(this.state.value, "value");
-    if (this.state.value == MENU_CONNECTION_TYPES.mapLink) {
+
+    if (value === MENU_CONNECTION_TYPES.mapLink) {
       return this.renderMapLink();
     }
   };
 
   handleChange = e => {
-    console.log(e.target.value, "currentTarget");
     this.setState({
       value: e.target.value,
       connectionsMenuAnchorEl: e.currentTarget,
@@ -468,7 +427,7 @@ class MenuConnectionSelector extends React.Component {
     );
   };
 
-  getRenderValue = value => {
+  getRenderValue = () => {
     const { menuItem } = this.props;
     if (this.state.value == MENU_CONNECTION_TYPES.documentConnection) {
       return this.getRenderedSelectionText(
@@ -496,7 +455,8 @@ class MenuConnectionSelector extends React.Component {
   };
 
   render = () => {
-    if (this.state.value) {
+    const { value, open } = this.state;
+    if (value) {
       return (
         <FormControl>
           <Select
@@ -517,8 +477,8 @@ class MenuConnectionSelector extends React.Component {
             }}
             renderValue={this.getRenderValue}
             onChange={this.handleChange}
-            open={this.state.open}
-            value={this.state.value}
+            open={open}
+            value={value}
           >
             {Object.values(MENU_CONNECTION_TYPES).map((value, index) => {
               return this.renderConnectionMenuSelectOption(value, index);
@@ -813,6 +773,7 @@ class ToolOptions extends Component {
     treeNode.title = (
       <TreeRow
         updateMenuItem={this.updateMenuItem}
+        deleteMenuItem={this.deleteMenuItem}
         menuItem={treeNode.menuItem}
         availableDocuments={this.availableDocuments}
         model={this.model}
@@ -820,9 +781,7 @@ class ToolOptions extends Component {
       ></TreeRow>
     );
 
-    this.setState({ tree: newTreeState }, () => {
-      console.log(this.state.tree, "tree");
-    });
+    this.setState({ tree: newTreeState });
   };
 
   deleteTreeNode = (nodeArrayToSearch, treeNodeToDelete) => {
