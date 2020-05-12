@@ -962,6 +962,7 @@ class ToolOptions extends Component {
                     <Tree
                       blockNode
                       height="1000px"
+                      switcherIcon={<></>}
                       onDrop={this.onDropNode}
                       expandedKeys={expandedKeys}
                       treeData={this.state.tree}
