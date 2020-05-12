@@ -29,7 +29,7 @@ var defaultState = {
   active: false,
   index: 0,
   instruction: '',
-  searchOnCoordinates,
+  searchOnCoordinates: '',
   visibleForGroups: []
 };
 
