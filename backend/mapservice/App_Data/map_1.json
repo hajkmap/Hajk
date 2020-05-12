@@ -500,6 +500,18 @@
         }
       },
       "index": 13
+    },
+    {
+      "type": "news",
+      "options": {
+        "text": "<font size=\"5\">2020-03-27</font></br>\nMatts födelsedag <i class=\"fa fa-birthday-cake\" aria-hidden=\"true\"></i> \n<br/><br/>\n\n<font size=\"5\">2020-03-25</font></br>\nvåffeldagen <i class=\"fa fa-coffee\" aria-hidden=\"true\"></i>\n<br/><br/>\n\n<font size=\"5\">2020-03-11</font></br>\nKarins födelsedag <i class=\"fa fa-birthday-cake\" aria-hidden=\"true\"></i> \n<br/><br/>\n\n\n</br></br></br>\nLog från februari finns nedan</br></br>                                                                                                                                                                                                                                 \n<a href=\"https://kommungis-utv.varberg.se/nyhetslog/februari2020.html\" target=\"_blank\">Öppna log från 2020 februari</a> <br><br>",
+        "headerText": "Nyhet!",
+        "visibleAtStart": true,
+        "showInfoOnce": true,
+        "base64EncodeForInfotext": false,
+        "visibleForGroups": []
+      },
+      "index": 14
     }
   ],
   "map": {

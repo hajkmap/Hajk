@@ -42,6 +42,7 @@ var NewsModelProperties = {
     title: 'Nyhet',
     display: false,
     headerText: 'Nyhet',
+    visibleAtStart: '',
     text: '',
     latestShown: '',
     Id: 'nyhetBtn'
@@ -63,7 +64,7 @@ var NewsModel = {
 
     initialize: function (options) {
         var cat = localStorage.getItem('lastUpdate');
-        if(cat == null || cat == ''){
+        if(cat == null || cat == '' && this.get('visibleAtStart')){
             this.set({'display': true});
             this.set({'visibleAtStart': true});
         }else if(this.get('text') + this.get('headerText')!= cat){
