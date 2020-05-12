@@ -27,7 +27,6 @@ import Alert from "../views/alert.jsx";
 import Edit from "../views/edit.jsx";
 import LayerManager from "../views/layermanager.jsx";
 import InformativeEditor from "../views/informativeeditor.jsx";
-import MenuEditor from "../views/menuEditor.jsx";
 import MapSettings from "../views/mapsettings.jsx";
 import Info from "../views/info.jsx";
 import Release from "../views/release.jsx";
@@ -153,8 +152,6 @@ class Application extends Component {
         return Release;
       case "search":
         return Search;
-      case "menueditor":
-        return MenuEditor;
       default:
         return null;
     }
