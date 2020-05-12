@@ -207,7 +207,7 @@ class Search extends React.PureComponent {
   }
 
   doSearch(v) {
-    if (v.length <= 3) return null;
+    if (v.length < 1) return null;
     this.searchModel.localObserver.publish("searchToolChanged");
     this.searchModel.search(v, true, d => {
       this.resolve(d);
