@@ -69,7 +69,6 @@
     { "name": "search", "title": "Söktjänster" },
     { "name": "edit", "title": "Redigeringstjänster" },
     { "name": "mapsettings", "title": "Kartor" },
-    { "name": "informative", "title": "Dokumenthanterare" },
-    { "name": "menueditor", "title": "MenuEditor" }
+    { "name": "informative", "title": "Dokumenthanterare" }
   ]
 }

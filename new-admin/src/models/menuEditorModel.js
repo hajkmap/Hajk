@@ -54,7 +54,7 @@ var menuEditorModel = Model.extend({
   },
 
   findNode: function(treeNode, key) {
-    if (treeNode.key == key) {
+    if (treeNode.key === key) {
       return treeNode;
     } else {
       if (treeNode.children.length > 0) {

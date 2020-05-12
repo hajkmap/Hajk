@@ -76,13 +76,17 @@ const styles = () => ({
   }
 });
 
-const getTextField = (label, value, onChangeFunction) => {
+const getPopoverMenuItemTitle = label => {
+  return <Typography variant="h6">{label}: </Typography>;
+};
+
+const getTextField = (label, value, onChangeFunction, variant) => {
   return (
     <TextField
       id="icon-picker"
-      label={label}
+      label=""
       type="icon"
-      variant="outlined"
+      variant={variant}
       value={value}
       onChange={onChangeFunction}
     />
@@ -91,10 +95,6 @@ const getTextField = (label, value, onChangeFunction) => {
 
 class SettingsPopover extends React.Component {
   state = { color: this.props.menuItem.color, icon: this.props.menuItem.icon };
-
-  constructor(props) {
-    super(props);
-  }
 
   updateColorState = e => {
     this.setState({ color: e.target.value });
@@ -125,15 +125,23 @@ class SettingsPopover extends React.Component {
         autoComplete="off"
       >
         <Grid container>
-          <Grid item>
+          <Grid xs={12} item>
+            {getPopoverMenuItemTitle("Ikon")}
             {getTextField(
               "Ikon",
               this.state.icon.materialUiIconName,
-              this.updateIconState
+              this.updateIconState,
+              "standard"
             )}
           </Grid>
-          <Grid item>
-            {getTextField("Färg", this.state.color, this.updateColorState)}
+          <Grid xs={12} item>
+            {getPopoverMenuItemTitle("Färg")}
+            {getTextField(
+              "Färg",
+              this.state.color,
+              this.updateColorState,
+              "standard"
+            )}
           </Grid>
         </Grid>
       </form>
@@ -141,7 +149,7 @@ class SettingsPopover extends React.Component {
   };
 
   render = () => {
-    const { anchorEl, open, close } = this.props;
+    const { anchorEl, open } = this.props;
     return (
       <>
         <Popover
@@ -165,11 +173,12 @@ class SettingsPopover extends React.Component {
 }
 
 class TreeRow extends React.Component {
-  state = {};
+  state = { menuItemTitle: this.props.menuItem.title };
 
-  constructor(props) {
-    super(props);
-  }
+  componentWillUnmount = () => {
+    const { updateMenuItem, treeNodeId } = this.props;
+    updateMenuItem(treeNodeId, { title: this.state.menuItemTitle });
+  };
 
   renderConnectionSelect = () => {
     const {
@@ -192,7 +201,7 @@ class TreeRow extends React.Component {
   };
 
   renderRemoveButton = () => {
-    const { deleteMenuItem, menuItem, treeNodeId } = this.props;
+    const { deleteMenuItem, treeNodeId } = this.props;
     return (
       <IconButton
         style={{ padding: "0px" }}
@@ -237,7 +246,14 @@ class TreeRow extends React.Component {
 
   renderMenuTitle = () => {
     const { menuItem } = this.props;
-    return <Typography>{menuItem.title}</Typography>;
+    return getTextField(
+      menuItem.title,
+      this.state.menuItemTitle,
+      e => {
+        this.setState({ menuItemTitle: e.target.value });
+      },
+      "standard"
+    );
   };
 
   render = () => {
@@ -268,10 +284,6 @@ class TreeRow extends React.Component {
 class MenuConnectionSelector extends React.Component {
   state = { open: false, mapLinkValue: "", linkValue: "" };
 
-  constructor(props) {
-    super(props);
-  }
-
   componentDidMount = () => {
     this.setState({ value: this.getInitialValue() });
   };
@@ -282,7 +294,7 @@ class MenuConnectionSelector extends React.Component {
       return MENU_CONNECTION_TYPES.subMenu;
     }
 
-    if (menuItem.document != "") {
+    if (menuItem.document !== "") {
       return MENU_CONNECTION_TYPES.documentConnection;
     }
 
@@ -302,6 +314,7 @@ class MenuConnectionSelector extends React.Component {
   };
 
   closeConnectionsMenu = () => {
+    this.update({ maplink: this.state.mapLinkValue, link: this.state.link });
     this.setState({ connectionsMenuAnchorEl: null, open: false });
   };
 
@@ -353,9 +366,10 @@ class MenuConnectionSelector extends React.Component {
     return (
       <Grid item>
         <List component="nav">
-          {availableDocuments.map(availableDocument => {
+          {availableDocuments.map((availableDocument, index) => {
             return (
               <ListItem
+                key={index}
                 onClick={() => {
                   this.update({ document: availableDocument });
                 }}
@@ -373,7 +387,8 @@ class MenuConnectionSelector extends React.Component {
   getLink = (label, value, onChangeFunction) => {
     return (
       <Grid xs={12} item>
-        {getTextField(label, value, onChangeFunction)}
+        {getPopoverMenuItemTitle(label)}
+        {getTextField(label, value, onChangeFunction, "standard")}
       </Grid>
     );
   };
@@ -409,11 +424,17 @@ class MenuConnectionSelector extends React.Component {
   };
 
   handleChange = e => {
-    this.setState({
-      value: e.target.value,
-      connectionsMenuAnchorEl: e.currentTarget,
-      open: true
-    });
+    if (e.target.value !== MENU_CONNECTION_TYPES.subMenu) {
+      this.setState({
+        value: e.target.value,
+        connectionsMenuAnchorEl: e.currentTarget,
+        open: true
+      });
+    } else {
+      this.setState({
+        value: e.target.value
+      });
+    }
   };
 
   getRenderedSelectionText = (label, icon) => {
@@ -429,22 +450,22 @@ class MenuConnectionSelector extends React.Component {
 
   getRenderValue = () => {
     const { menuItem } = this.props;
-    if (this.state.value == MENU_CONNECTION_TYPES.documentConnection) {
+    if (this.state.value === MENU_CONNECTION_TYPES.documentConnection) {
       return this.getRenderedSelectionText(
         menuItem.document,
         <DescriptionIcon></DescriptionIcon>
       );
     }
 
-    if (this.state.value == MENU_CONNECTION_TYPES.subMenu) {
+    if (this.state.value === MENU_CONNECTION_TYPES.subMenu) {
       return this.getRenderedSelectionText("Undermeny");
     }
 
-    if (this.state.value == MENU_CONNECTION_TYPES.link) {
+    if (this.state.value === MENU_CONNECTION_TYPES.link) {
       return this.getRenderedSelectionText("Webblänk", <RoomIcon></RoomIcon>);
     }
 
-    if (this.state.value == MENU_CONNECTION_TYPES.maplink) {
+    if (this.state.value === MENU_CONNECTION_TYPES.maplink) {
       return this.getRenderedSelectionText(
         "Karta",
         <LanguageIcon></LanguageIcon>
@@ -474,6 +495,9 @@ class MenuConnectionSelector extends React.Component {
             }}
             onOpen={() => {
               this.setState({ open: true });
+            }}
+            onClose={() => {
+              this.setState({ open: false });
             }}
             renderValue={this.getRenderValue}
             onChange={this.handleChange}
@@ -535,12 +559,57 @@ class ToolOptions extends Component {
     });
   };
 
+  getHeader = () => {
+    return (
+      <Grid
+        style={{ paddingTop: "10px", paddingBottom: "10px" }}
+        justify="flex-end"
+        container
+      >
+        <Grid xs={1} item>
+          <DragHandle></DragHandle>
+        </Grid>
+        <Grid xs={2} item>
+          <Typography variant="h5">Namn</Typography>
+        </Grid>
+        <Grid xs={9} container item>
+          <Grid xs={3} item></Grid>
+          <Grid xs={3} item>
+            <Typography variant="h5">Koppling</Typography>
+          </Grid>
+          <Grid xs={4} item></Grid>
+          <Grid xs={2} item>
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              onClick={e => {
+                e.preventDefault();
+                this.setState({ openMenuEditor: false });
+                this.save();
+              }}
+              startIcon={<SaveIcon />}
+            >
+              Spara
+            </ColorButtonBlue>
+          </Grid>
+        </Grid>
+      </Grid>
+    );
+  };
+
   loadTreeView = () => {
     this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
       this.menuConfig = menuConfig.options.menuConfig;
       let treeData = this.createTreeStructure(
         menuConfig.options.menuConfig.menu
       );
+      treeData.unshift({
+        title: this.getHeader(),
+        disabled: true,
+        children: [],
+        menuItem: [],
+        key: -2
+      });
       this.setState({ tree: treeData }, () => {});
     });
   };
@@ -697,7 +766,6 @@ class ToolOptions extends Component {
     }
 
     let key = this.getNewTreeKey().toString();
-    console.log(this.model, "WHYYYY");
     let returnObject = {
       title: (
         <TreeRow
@@ -710,6 +778,7 @@ class ToolOptions extends Component {
         ></TreeRow>
       ),
       children: children,
+      selectable: false,
       menuItem: this.model.getMenuItemWithoutChildren(menuItem),
       key: key
     };
@@ -724,12 +793,12 @@ class ToolOptions extends Component {
         return found;
       })
       .filter(res => {
-        return res != undefined;
+        return res !== undefined;
       })[0];
   };
   //Can this recursion be written better????
   findTreeNode = (treeNode, key) => {
-    if (treeNode.key == key) {
+    if (treeNode.key === key) {
       return treeNode;
     } else {
       if (treeNode.children.length > 0) {
@@ -786,7 +855,7 @@ class ToolOptions extends Component {
 
   deleteTreeNode = (nodeArrayToSearch, treeNodeToDelete) => {
     nodeArrayToSearch.forEach((child, index) => {
-      if (child.key == treeNodeToDelete.key) {
+      if (child.key === treeNodeToDelete.key) {
         nodeArrayToSearch.splice(
           nodeArrayToSearch.indexOf(treeNodeToDelete),
           1
@@ -796,7 +865,7 @@ class ToolOptions extends Component {
   };
 
   isRootNode = treeNode => {
-    return treeNode.parent == undefined ? true : false;
+    return treeNode.parent === undefined ? true : false;
   };
 
   deleteMenuItem = treeNodeId => {
@@ -820,18 +889,7 @@ class ToolOptions extends Component {
   };
 
   renderTableHeader = () => {
-    const { classes } = this.props;
-    return (
-      <Table className={classes.background}>
-        <TableHead>
-          <TableRow>
-            {["Namn", "Koppling"].map(columnName => {
-              return this.renderTableCell(columnName);
-            })}
-          </TableRow>
-        </TableHead>
-      </Table>
-    );
+    return <></>;
   };
 
   render() {
@@ -898,12 +956,10 @@ class ToolOptions extends Component {
               }}
               open={this.state.openMenuEditor}
             >
-              <>
-                {this.renderTableHeader()}
-                <Grid>
-                  {this.state.tree && expandedKeys && (
+              {this.state.tree && expandedKeys ? (
+                <Grid className={classes.background} container>
+                  <Grid xs={12} item>
                     <Tree
-                      className={classes.background}
                       blockNode
                       height="1000px"
                       onDrop={this.onDropNode}
@@ -911,9 +967,11 @@ class ToolOptions extends Component {
                       treeData={this.state.tree}
                       draggable
                     ></Tree>
-                  )}
+                  </Grid>
                 </Grid>
-              </>
+              ) : (
+                <></>
+              )}
             </Modal>
           </section>
         </form>
