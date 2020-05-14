@@ -107,16 +107,14 @@
 // *https://www.registers.service.gov.uk/registers/country/use-the-api*
 import React, { useEffect, useRef, useState } from "react";
 import SearchBar from "./SearchBar";
-import { makeStyles } from "@material-ui/core";
 
-const useStyles = makeStyles(theme => ({
-  iconButtons: {
-    padding: 10
-  }
-}));
+import { Vector as VectorLayer } from "ol/layer";
+import VectorSource from "ol/source/Vector";
+import { Stroke, Style, Circle, Fill } from "ol/style";
+import Draw from "ol/interaction/Draw";
+import GeoJSON from "ol/format/GeoJSON";
 
 const Search = props => {
-  const { menuButtonDisabled, onMenuClick } = props;
   const searchModel = props.app.appModel.searchModel;
 
   const [input, setInput] = useState("");
@@ -124,40 +122,167 @@ const Search = props => {
   // Autocomplete state
   const [options, setOptions] = useState([]);
 
+  const [searchSources, setSearchSources] = useState(searchModel.getSources());
+
+  // Layer to draw into (spatial search)
+  const [drawActive, setDrawActive] = useState(false);
+  const drawInteraction = useRef();
+  const drawSource = useRef();
+  const drawLayer = useRef();
+
+  const [results, setResults] = useState([]);
+
+  // Layer to visualize results
+  const resultsSource = useRef();
+  const resultsLayer = useRef();
+
+  const map = useRef(props.map);
+
+  const drawStyle = useRef(
+    new Style({
+      stroke: new Stroke({
+        color: "rgba(0, 0, 0, 1)",
+        width: 4
+      }),
+      fill: new Fill({
+        color: "rgba(255, 214, 91, 0.2)"
+      }),
+      image: new Circle({
+        radius: 6,
+        stroke: new Stroke({
+          color: "rgba(0, 0, 0, 1)",
+          width: 2
+        })
+      })
+    })
+  );
+
+  useEffect(() => {
+    drawSource.current = new VectorSource({ wrapX: false });
+    drawLayer.current = new VectorLayer({
+      source: drawSource.current,
+      style: drawStyle.current
+    });
+
+    // Add layer that will be used to allow user draw on map - used for spatial search
+    map.current.addLayer(drawLayer.current);
+  }, []);
+
+  useEffect(() => {
+    resultsSource.current = new VectorSource({ wrapX: false });
+    resultsLayer.current = new VectorLayer({
+      source: resultsSource.current
+      // style: drawStyle.current
+    });
+
+    map.current.addLayer(resultsLayer.current);
+  }, []);
+
   // Triggered when typing
   const handleOnInput = async (event, value, reason) => {
     setInput(event.target.value);
-    console.log("Input: ", event.target.value);
 
-    const autocompleteList = await searchModel.getAutocomplete(
+    const { flatAutocompleteArray, errors } = await searchModel.getAutocomplete(
       event.target.value
     );
+
     console.log(
       "Got this back to populate autocomplete with: ",
-      autocompleteList
+      flatAutocompleteArray
     );
 
-    setOptions(autocompleteList);
-    console.log("List:", options);
+    // It is possible to check if Search Model returned any errors
+    errors.length > 0 && console.error("Autocomplete error: ", errors);
+
+    setOptions(flatAutocompleteArray);
   };
 
   // Triggered when selecting an option from autocomplete list
-  const handleOnChange = (event, value, reason) => {
+  const handleOnChange = async (event, value, reason) => {
     console.log("Selected from list: ", value);
     const searchString = value?.autocompleteEntry || value;
+
+    setInput(searchString);
     doSearch(searchString);
   };
 
-  const handleOnSearch = () => {
-    doSearch(input);
+  const toggleDraw = (active, type, freehand = false, drawEndCallback) => {
+    if (active) {
+      drawSource.current.clear();
+      drawInteraction.current = new Draw({
+        source: drawSource.current,
+        type: type,
+        freehand: freehand,
+        stopClick: true,
+        style: drawStyle.current
+      });
+      map.current.addInteraction(drawInteraction.current);
+
+      map.current.clicklock = true;
+      drawInteraction.current.on("drawend", () => {
+        drawSource.current.clear();
+      });
+    } else {
+      map.current.removeInteraction(drawInteraction.current);
+      map.current.clicklock = false;
+      drawSource.current.clear();
+    }
+    setDrawActive(active);
   };
 
-  const doSearch = async searchString => {
-    //const searchOptions = searchModel.getSearchOptions();
+  function addFeaturesToResultsLayer(featureCollections) {
+    resultsSource.current.clear();
 
-    const results = await searchModel.getResults(searchString);
-    console.log("Results: ", results);
+    const features = featureCollections.map(fc =>
+      fc.value.features.map(f => {
+        const geoJsonFeature = new GeoJSON().readFeature(f);
+        return geoJsonFeature;
+      })
+    );
+
+    features.map(f => resultsSource.current.addFeatures(f));
+    const currentExtent = resultsSource.current.getExtent();
+
+    if (currentExtent.map(Number.isFinite).includes(false) === false) {
+      map.current.getView().fit(currentExtent, {
+        size: map.current.getSize(),
+        maxZoom: 7
+      });
+    }
+  }
+
+  async function doSearch(searchString) {
+    const searchOptions = searchModel.getSearchOptions();
+    // Apply our custom options based on user's selection
+    //searchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
+    searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
+    searchOptions["matchCase"] = false;
+    //searchOptions["wildcardAtStart"] = wildcardAtStart;
+    //searchOptions["wildcardAtEnd"] = wildcardAtEnd;
+
+    const { featureCollections, errors } = await searchModel.getResults(
+      searchString,
+      searchSources,
+      searchOptions
+    );
+    console.log("doSearch results: ", featureCollections);
+
+    // It's possible to handle any errors in the UI by checking if Search Model returned any
+    errors.length > 0 && console.error(errors);
+
+    setResults(featureCollections);
+
+    addFeaturesToResultsLayer(featureCollections);
+  }
+
+  const handleOnClear = () => {
+    searchModel.abort();
   };
+
+  function handleClickOnSearch() {
+    const searchString = document.getElementById("searchInputField").value;
+    doSearch(searchString);
+  }
 
   return (
     <>
@@ -165,8 +290,13 @@ const Search = props => {
         {...props}
         handleOnInput={handleOnInput}
         handleOnChange={handleOnChange}
-        handleOnSearch={handleOnSearch}
+        handleOnSearch={handleClickOnSearch}
+        handleOnClear={handleOnClear}
         autocompleteList={options}
+        toggleDraw={toggleDraw}
+        drawSource={drawSource}
+        drawActive={drawActive}
+        resultList={results}
       />
     </>
   );
