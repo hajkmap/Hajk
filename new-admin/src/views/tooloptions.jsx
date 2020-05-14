@@ -41,6 +41,7 @@ import Measure from "./tools/measure.jsx";
 import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
+import MenuEditor from "./tools/menuEditor.jsx";
 
 var defaultState = {
   activeTool: ""
@@ -82,6 +83,7 @@ class ToolOptions extends Component {
   }
 
   getActiveTool(tool) {
+    console.log(tool, "tool");
     switch (tool) {
       case "anchor":
         return <Anchor parent={this} model={this.props.model} />;
@@ -121,6 +123,8 @@ class ToolOptions extends Component {
         return <Routing parent={this} model={this.props.model} />;
       case "collector":
         return <Collector parent={this} model={this.props.model} />;
+      case "documenthandler":
+        return <MenuEditor parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -147,11 +151,13 @@ class ToolOptions extends Component {
 
   getClassNamesForActive(tool) {
     var found = false;
+    console.log(this.props.model.get("toolConfig"), "?????");
     if (Array.isArray(this.props.model.get("toolConfig"))) {
       found =
         this.props.model.get("toolConfig").filter(t => t.type === tool).length >
         0;
     }
+    console.log(tool, "tool", found, "found");
     return found ? "fa fa-check-square-o" : "fa fa-square-o";
   }
 
@@ -181,7 +187,8 @@ class ToolOptions extends Component {
       location: "Visa min position",
       routing: "Navigation",
       collector: "Tyck till",
-      dummy: "Dummy plugin"
+      dummy: "Dummy plugin",
+      documenthandler: "MenyHANTERING"
     };
 
     return (

@@ -193,7 +193,7 @@ class Application extends Component {
       console.error(e);
       return <div>{e.message}</div>;
     }
-
+    console.log(this.props.config, "+");
     return React.createElement(content, {
       model: model,
       config: this.props.config[this.state.content],
