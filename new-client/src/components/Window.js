@@ -7,7 +7,7 @@ import { isMobile, getIsMobile } from "../utils/IsMobile.js";
 import FeatureInfo from "./FeatureInfo.js";
 import clsx from "clsx";
 
-const zIndexStart = 1e3;
+const zIndexStart = 1100;
 // Patch the RND component's onDragStart method with the ability to disable drag by its internal state.
 // This is necessary so we can disable/enable drag at any time.
 //
@@ -219,7 +219,7 @@ class Window extends React.PureComponent {
 
     //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
     this.left = 16; // Make sure we respect padding
-    this.top = 16 + 62; // Respect padding + nasty hack to ensure that Window is placed below Search bar
+    this.top = 16 + 62 + 50; // Respect padding + nasty hack to ensure that Window is placed below Search bar
     this.width = width || 400;
     this.height = height || 300;
 
@@ -239,8 +239,8 @@ class Window extends React.PureComponent {
     // If Window renders on the right, there are some things that we need to compensate for
     if (position === "right") {
       this.left = parent.getBoundingClientRect().width - width - 16 - 56; // -16 to take care of usual right padding, -56 to not cover the Control buttons that are on the right
-      this.top = this.top - 62; // We won't overlap Search bar if Window is placed to the right, so don't take Search bar's height into account
-      this.height = this.height + 62; // Same as above
+      this.top = this.top - 62 - 50; // We won't overlap Search bar if Window is placed to the right, so don't take Search bar's height into account
+      this.height = this.height + 62 + 50; // Same as above
     }
 
     // Mobile screens are another special case: here our Window should take up max space available
