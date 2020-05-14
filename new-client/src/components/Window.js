@@ -233,6 +233,7 @@ class Window extends React.PureComponent {
         16 - // Reduce height with top margin
         16 - // Reduce height with bottom margin
         62 - // Reduce with space for Search bar
+        50 - // Reduce with space for Search results
         spaceForBreadcrumbs; // If Breadcrumbs are active, make space for them as well
     }
 
