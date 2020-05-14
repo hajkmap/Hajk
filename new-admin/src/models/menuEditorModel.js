@@ -80,8 +80,10 @@ var menuEditorModel = Model.extend({
   },
 
   createMenuFromTreeStructure: function(menu, tree) {
+    console.log(tree, "TREE");
     tree.forEach(treeNode => {
       if (treeNode.children.length > 0) {
+        console.log(menu, "menu");
         menu.push(treeNode.menuItem);
         treeNode.menuItem.menu = [];
         return this.createMenuFromTreeStructure(
@@ -89,17 +91,21 @@ var menuEditorModel = Model.extend({
           treeNode.children
         );
       } else {
+        console.log(menu, "menu2");
+        console.log(treeNode, "treeNode2");
         menu.push(treeNode.menuItem);
       }
     });
     return menu;
   },
 
+  removeHeaderTreeRow: function(tree) {
+    tree.shift();
+  },
+
   exportTreeAsMenuJson: function(tree, menuConfig) {
-    let menu = [];
-    let jsonMenu = this.createMenuFromTreeStructure(menu, tree);
-    console.log(jsonMenu, "jsonMenu");
-    menuConfig.menu = jsonMenu;
+    this.removeHeaderTreeRow(tree);
+    menuConfig.menu = this.createMenuFromTreeStructure([], tree);
     return menuConfig;
   },
 

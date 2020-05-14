@@ -24,7 +24,7 @@ import React from "react";
 import { Component } from "react";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
-import { blue } from "@material-ui/core/colors";
+import { blue, green, red } from "@material-ui/core/colors";
 import MenuEditorModel from "../../models/menuEditorModel";
 import Grid from "@material-ui/core/Grid";
 import Table from "@material-ui/core/Table";
@@ -41,6 +41,7 @@ import TableCell from "@material-ui/core/TableCell";
 import Popover from "@material-ui/core/Popover";
 import TextField from "@material-ui/core/TextField";
 import DeleteIcon from "@material-ui/icons/Delete";
+import HomeIcon from "@material-ui/icons/Home";
 import SettingsIcon from "@material-ui/icons/Settings";
 import DragHandle from "@material-ui/icons/DragHandle";
 import TableHead from "@material-ui/core/TableHead";
@@ -80,11 +81,11 @@ const getPopoverMenuItemTitle = label => {
   return <Typography variant="h6">{label}: </Typography>;
 };
 
-const getTextField = (label, value, onChangeFunction, variant) => {
+const getTextField = (value, onChangeFunction, variant) => {
   return (
     <TextField
       id="icon-picker"
-      label=""
+      label={""}
       type="icon"
       variant={variant}
       value={value}
@@ -128,7 +129,6 @@ class SettingsPopover extends React.Component {
           <Grid xs={12} item>
             {getPopoverMenuItemTitle("Ikon")}
             {getTextField(
-              "Ikon",
               this.state.icon.materialUiIconName,
               this.updateIconState,
               "standard"
@@ -136,12 +136,7 @@ class SettingsPopover extends React.Component {
           </Grid>
           <Grid xs={12} item>
             {getPopoverMenuItemTitle("Färg")}
-            {getTextField(
-              "Färg",
-              this.state.color,
-              this.updateColorState,
-              "standard"
-            )}
+            {getTextField(this.state.color, this.updateColorState, "standard")}
           </Grid>
         </Grid>
       </form>
@@ -179,6 +174,11 @@ class TreeRow extends React.Component {
     const { updateMenuItem, treeNodeId } = this.props;
     updateMenuItem(treeNodeId, { title: this.state.menuItemTitle });
   };
+
+  constructor(props) {
+    super(props);
+    console.log(props, "props");
+  }
 
   renderConnectionSelect = () => {
     const {
@@ -246,8 +246,11 @@ class TreeRow extends React.Component {
 
   renderMenuTitle = () => {
     const { menuItem } = this.props;
+    if (menuItem.title == "Öppna Submeny") {
+      console.log(this.state.menuItemTitle, "menuItem");
+    }
+
     return getTextField(
-      menuItem.title,
       this.state.menuItemTitle,
       e => {
         this.setState({ menuItemTitle: e.target.value });
@@ -258,7 +261,14 @@ class TreeRow extends React.Component {
 
   render = () => {
     return (
-      <Grid justify="flex-end" container>
+      <Grid
+        style={{
+          border: "1px solid rgba(153,164,161,0.5)",
+          borderRadius: "8px"
+        }}
+        justify="flex-end"
+        container
+      >
         <Grid xs={1} item>
           <DragHandle></DragHandle>
         </Grid>
@@ -388,7 +398,7 @@ class MenuConnectionSelector extends React.Component {
     return (
       <Grid xs={12} item>
         {getPopoverMenuItemTitle(label)}
-        {getTextField(label, value, onChangeFunction, "standard")}
+        {getTextField(value, onChangeFunction, "standard")}
       </Grid>
     );
   };
@@ -517,6 +527,27 @@ class MenuConnectionSelector extends React.Component {
   };
 }
 
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[500]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    },
+    marginRight: theme.spacing(2)
+  }
+}))(Button);
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
 const ColorButtonBlue = withStyles(theme => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
@@ -572,13 +603,26 @@ class ToolOptions extends Component {
         <Grid xs={2} item>
           <Typography variant="h5">Namn</Typography>
         </Grid>
+
         <Grid xs={9} container item>
-          <Grid xs={3} item></Grid>
+          <Grid xs={3} item>
+            <Typography variant="h5">Inställningar</Typography>
+          </Grid>
           <Grid xs={3} item>
             <Typography variant="h5">Koppling</Typography>
           </Grid>
-          <Grid xs={4} item></Grid>
-          <Grid xs={2} item>
+
+          <Grid xs={4} item>
+            <ColorButtonGreen
+              variant="contained"
+              className="btn"
+              onClick={e => {
+                e.preventDefault();
+                this.addNewItem();
+              }}
+            >
+              Ny menylänk
+            </ColorButtonGreen>
             <ColorButtonBlue
               variant="contained"
               className="btn"
@@ -592,13 +636,46 @@ class ToolOptions extends Component {
               Spara
             </ColorButtonBlue>
           </Grid>
+          <Grid xs={1} item></Grid>
+          <Grid xs={1} item>
+            <ColorButtonRed
+              variant="contained"
+              className="btn"
+              onClick={e => {
+                e.preventDefault();
+                this.setState({ openMenuEditor: false });
+              }}
+            >
+              Avbryt
+            </ColorButtonRed>
+          </Grid>
         </Grid>
       </Grid>
     );
   };
 
+  addNewItem = () => {
+    let menuItem = {
+      title: "",
+      document: "",
+      color: "",
+      icon: {
+        materialUiIconName: "",
+        fontSize: "large"
+      },
+      maplink: "",
+      link: "",
+      menu: []
+    };
+
+    let newTree = [...this.state.tree];
+    newTree.push(this.createTreeChild(menuItem));
+    this.setState({ tree: newTree });
+  };
+
   loadTreeView = () => {
     this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
+      console.log(this.menuConfig, "menuConfig");
       this.menuConfig = menuConfig.options.menuConfig;
       let treeData = this.createTreeStructure(
         menuConfig.options.menuConfig.menu
@@ -610,7 +687,9 @@ class ToolOptions extends Component {
         menuItem: [],
         key: -2
       });
-      this.setState({ tree: treeData }, () => {});
+      this.setState({ tree: treeData }, () => {
+        console.log(this.state.tree, "tree");
+      });
     });
   };
 
@@ -766,6 +845,7 @@ class ToolOptions extends Component {
     }
 
     let key = this.getNewTreeKey().toString();
+    console.log(menuItem, "menuItem");
     let returnObject = {
       title: (
         <TreeRow
@@ -822,35 +902,32 @@ class ToolOptions extends Component {
       this.model.updateDragNode(newTree, foundDragNode, foundDropNode);
       this.model.addToDropNode(foundDropNode, foundDragNode);
 
-      this.setState({ tree: newTree }, () => {
-        this.menuConfig = this.model.exportTreeAsMenuJson(
-          this.state.tree,
-          this.menuConfig
-        );
-      });
+      this.setState({ tree: newTree });
     }
   };
 
   updateMenuItem = (treeNodeId, objectWithKeyValuesToUpdate) => {
     let newTreeState = [...this.state.tree];
     let treeNode = this.findInTree(newTreeState, treeNodeId);
-    treeNode.menuItem = {
-      ...treeNode.menuItem,
-      ...objectWithKeyValuesToUpdate
-    };
+    if (treeNode) {
+      treeNode.menuItem = {
+        ...treeNode.menuItem,
+        ...objectWithKeyValuesToUpdate
+      };
 
-    treeNode.title = (
-      <TreeRow
-        updateMenuItem={this.updateMenuItem}
-        deleteMenuItem={this.deleteMenuItem}
-        menuItem={treeNode.menuItem}
-        availableDocuments={this.availableDocuments}
-        model={this.model}
-        treeNodeId={treeNode.key}
-      ></TreeRow>
-    );
+      treeNode.title = (
+        <TreeRow
+          updateMenuItem={this.updateMenuItem}
+          deleteMenuItem={this.deleteMenuItem}
+          menuItem={treeNode.menuItem}
+          availableDocuments={this.availableDocuments}
+          model={this.model}
+          treeNodeId={treeNode.key}
+        ></TreeRow>
+      );
 
-    this.setState({ tree: newTreeState });
+      this.setState({ tree: newTreeState });
+    }
   };
 
   deleteTreeNode = (nodeArrayToSearch, treeNodeToDelete) => {
@@ -909,19 +986,8 @@ class ToolOptions extends Component {
               className="btn"
               onClick={e => {
                 e.preventDefault();
-                this.save();
-              }}
-              startIcon={<SaveIcon />}
-            >
-              Spara
-            </ColorButtonBlue>
-          </p>
-          <p>
-            <ColorButtonBlue
-              variant="contained"
-              className="btn"
-              onClick={e => {
-                e.preventDefault();
+                console.log("HERE");
+                this.loadTreeView();
                 this.setState({ openMenuEditor: true });
               }}
               startIcon={<SaveIcon />}
