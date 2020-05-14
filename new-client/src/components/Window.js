@@ -7,7 +7,7 @@ import { isMobile, getIsMobile } from "../utils/IsMobile.js";
 import FeatureInfo from "./FeatureInfo.js";
 import clsx from "clsx";
 
-const zIndexStart = 1100;
+const zIndexStart = 1000;
 // Patch the RND component's onDragStart method with the ability to disable drag by its internal state.
 // This is necessary so we can disable/enable drag at any time.
 //
