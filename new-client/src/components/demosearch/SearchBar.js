@@ -102,415 +102,155 @@
  *  geom: // whatever to mark/select in map
  * }, ...]
  */
+import React from "react";
 
-//
-// *https://www.registers.service.gov.uk/registers/country/use-the-api*
-import React, { useEffect, useRef, useState } from "react";
-
-import { Vector as VectorLayer } from "ol/layer";
-import VectorSource from "ol/source/Vector";
-import { Stroke, Style, Circle, Fill } from "ol/style";
-import Draw from "ol/interaction/Draw";
-import GeoJSON from "ol/format/GeoJSON";
+import SearchTools from "./SearchTools";
+import SearchResultList from "./SearchResultList";
+import SearchFeatureList from "./SearchFeatureList";
 
 import {
-  CircularProgress,
   IconButton,
   Paper,
   TextField,
   Tooltip,
   makeStyles,
-  Checkbox
 } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import ToggleButton from "@material-ui/lab/ToggleButton";
 import Divider from "@material-ui/core/Divider";
-
 import MenuIcon from "@material-ui/icons/Menu";
-import FormatSizeIcon from "@material-ui/icons/FormatSize";
 import SearchIcon from "@material-ui/icons/Search";
-import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
-import WithinIcon from "@material-ui/icons/Adjust";
-import IntersectsIcon from "@material-ui/icons/Toll";
+import ClearIcon from "@material-ui/icons/Clear";
+import Alert from "@material-ui/lab/Alert";
+import Collapse from "@material-ui/core/Collapse";
+import CloseIcon from "@material-ui/icons/Close";
 
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-
-const useStyles = makeStyles(theme => ({
-  iconButtons: {
-    padding: 10
-  }
+const useStyles = makeStyles((theme) => ({
+  root: {
+    padding: "2px 4px",
+    display: "flex",
+    alignItems: "center",
+  },
+  input: {
+    marginLeft: theme.spacing(1),
+    flex: 1,
+  },
+  iconButton: {
+    padding: 10,
+  },
+  divider: {
+    height: 28,
+    margin: 4,
+  },
 }));
-const SearchBar = props => {
+
+const SearchBar = (props) => {
   const classes = useStyles();
 
-  // Grab some stuff from props
   const { menuButtonDisabled, onMenuClick } = props;
-  const searchModel = props.app.appModel.searchModel;
-
-  // Autocomplete state
-  const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState([]);
-  const loading = open && options.length === 0;
-
-  // Settings to be sent to SearchModel
-  const [wildcardAtStart, setWildcardAtStart] = useState(false);
-  const [wildcardAtEnd, setWildcardAtEnd] = useState(true);
-  const [matchCase, setMatchCase] = useState(false);
-  const [activeSpatialFilter, setActiveSpatialFilter] = useState("intersects");
-
-  // Layer to draw into (spatial search)
-  const [drawActive, setDrawActive] = useState(false);
-  const drawInteraction = useRef();
-  const drawSource = useRef();
-  const drawLayer = useRef();
-
-  // Layer to visualize results
-  const resultsSource = useRef();
-  const resultsLayer = useRef();
-
-  const map = useRef(props.map);
-
-  const drawStyle = useRef(
-    new Style({
-      stroke: new Stroke({
-        color: "rgba(255, 214, 91, 0.6)",
-        width: 4
-      }),
-      fill: new Fill({
-        color: "rgba(255, 214, 91, 0.2)"
-      }),
-      image: new Circle({
-        radius: 6,
-        stroke: new Stroke({
-          color: "rgba(255, 214, 91, 0.6)",
-          width: 2
-        })
-      })
-    })
-  );
-
-  // For Search Sources Autocomplete
-  const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-  const checkedIcon = <CheckBoxIcon fontSize="small" />;
-  const [searchSources, setSearchSources] = useState(searchModel.getSources());
-
-  useEffect(() => {
-    drawSource.current = new VectorSource({ wrapX: false });
-    drawLayer.current = new VectorLayer({
-      source: drawSource.current,
-      style: drawStyle.current
-    });
-
-    // Add layer that will be used to allow user draw on map - used for spatial search
-    map.current.addLayer(drawLayer.current);
-  }, []);
-
-  useEffect(() => {
-    resultsSource.current = new VectorSource({ wrapX: false });
-    resultsLayer.current = new VectorLayer({
-      source: resultsSource.current
-      // style: drawStyle.current
-    });
-
-    map.current.addLayer(resultsLayer.current);
-  }, []);
-
-  const toggleDraw = (
-    active,
-    type = "Polygon",
-    freehand = false,
-    drawEndCallback
-  ) => {
-    if (active) {
-      drawInteraction.current = new Draw({
-        source: drawSource.current,
-        type: type,
-        freehand: freehand,
-        stopClick: true,
-        style: drawStyle.current
-      });
-
-      map.current.clicklock = true;
-      map.current.addInteraction(drawInteraction.current);
-    } else {
-      map.current.removeInteraction(drawInteraction.current);
-      map.current.clicklock = false;
-      drawSource.current.clear();
-    }
-  };
-
-  const handleClickOnDrawToggle = () => {
-    setDrawActive(prevState => {
-      toggleDraw(!prevState);
-      return !prevState;
-    });
-  };
-
-  useEffect(() => {
-    const searchString = document.getElementById("searchInputField").value;
-    if (searchString.length > 3) return undefined;
-
-    let active = true;
-
-    if (!loading) {
-      return undefined;
-    }
-
-    (async () => {
-      console.log("Getting Autocomplete for: ", searchString);
-      const {
-        flatAutocompleteArray,
-        errors
-      } = await searchModel.getAutocomplete(searchString);
-
-      console.log(
-        "Got this back to populate autocomplete with: ",
-        flatAutocompleteArray
-      );
-
-      // It is possible to check if Search Model returned any errors
-      errors.length > 0 && console.error("Autocomplete error: ", errors);
-
-      if (active) {
-        setOptions(flatAutocompleteArray);
-      }
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [loading, searchModel]);
-
-  useEffect(() => {
-    if (!open) {
-      setOptions([]);
-    }
-  }, [open]);
-
-  function addFeaturesToResultsLayer(featureCollections) {
-    // Start with cleaning up
-    resultsSource.current.clear();
-
-    const features = featureCollections.map(fc =>
-      fc.value.features.map(f => {
-        const geoJsonFeature = new GeoJSON().readFeature(f);
-        return geoJsonFeature;
-      })
-    );
-
-    features.map(f => resultsSource.current.addFeatures(f));
-    const currentExtent = resultsSource.current.getExtent();
-
-    // If the extent doesn't include any "Infite" values, let's go on - else abort zooming
-    if (currentExtent.map(Number.isFinite).includes(false) === false) {
-      map.current.getView().fit(currentExtent, {
-        size: map.current.getSize(),
-        maxZoom: 7
-      });
-    }
-  }
-
-  async function doSearch(searchString) {
-    // Grab existing search options from model
-    const searchOptions = searchModel.getSearchOptions();
-
-    // Apply our custom options based on user's selection
-    searchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
-    searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
-    searchOptions["matchCase"] = matchCase;
-    searchOptions["wildcardAtStart"] = wildcardAtStart;
-    searchOptions["wildcardAtEnd"] = wildcardAtEnd;
-
-    console.log("doSearch: ", searchString, searchSources, searchOptions);
-    const { featureCollections, errors } = await searchModel.getResults(
-      searchString,
-      searchSources, // this is a state variable!
-      searchOptions
-    );
-    console.log("doSearch results: ", featureCollections);
-
-    // It's possible to handle any errors in the UI by checking if Search Model returned any
-    errors.length > 0 && console.error(errors);
-
-    addFeaturesToResultsLayer(featureCollections);
-  }
-
-  function handleClickOnSearch() {
-    const searchString = document.getElementById("searchInputField").value;
-    doSearch(searchString);
-  }
-
-  /**
-   * @summary Triggered when user selects a value/presses [Enter]. Makes a call and gets the actual search results.
-   *
-   * @param {Object} event
-   * @param {String} value
-   * @param {String} reason
-   */
-  function handleOnChange(event, value, reason) {
-    // "value" can be String (if freeSolo) or Object (if autocomplete entry selected)
-    // We must ensure that we grab the string either way.
-    const searchString = value?.autocompleteEntry || value;
-    doSearch(searchString);
-  }
-  /**
-   * @summary Triggered each time user changes input field value (e.g. onKeyPress etc). Makes a call to get the autocomplete list.
-   *
-   * @param {Object} event
-   * @param {String} value
-   * @param {String} reason
-   */
-  function handleOnInputChange(event, value, reason) {
-    console.log("Current input value", value);
-    setOpen(value.length >= 3);
-  }
 
   const tooltipText = menuButtonDisabled
     ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
     : "Visa verktygspanelen";
 
   return (
-    <Paper className={classes.root}>
-      <Autocomplete
-        id="searchInputField"
-        style={{ width: 500 }}
-        freeSolo
-        clearOnEscape
-        // open={open}
-        // onOpen={e => {
-        //   console.log("onOpen: ", e);
-        //   // setOpen(true);
-        // }}
-        // onClose={(e, r) => {
-        //   console.log("onClose: ", e, r);
-        //   // setOpen(false);
-        // }}
-        onChange={handleOnChange}
-        onInputChange={handleOnInputChange}
-        getOptionSelected={(option, value) =>
-          option.autocompleteEntry === value.autocompleteEntry
-        }
-        getOptionLabel={option => option?.autocompleteEntry || option}
-        groupBy={option => option.dataset}
-        options={options}
-        loading={loading}
-        renderInput={params => (
-          <TextField
-            {...params}
-            label={undefined}
-            variant="outlined"
-            placeholder="Skriv eller välj bland förslagen nedan..."
-            InputProps={{
-              ...params.InputProps,
-              startAdornment: (
-                <Tooltip title={tooltipText}>
-                  <span id="drawerToggler">
+    <div>
+      <Paper className={classes.root}>
+        <Autocomplete
+          id="searchInputField"
+          freeSolo
+          clearOnEscape
+          style={{ width: 500 }}
+          options={props.autocompleteList}
+          onInput={props.handleOnInput}
+          onChange={props.handleOnChange}
+          getOptionSelected={(option, value) =>
+            option.autocompleteEntry === value.autocompleteEntry
+          }
+          getOptionLabel={(option) => option?.autocompleteEntry || option}
+          groupBy={(option) => option.dataset}
+          renderOption={(option) => (
+            <React.Fragment>
+              <span>
+                {option.autocompleteEntry}
+                <em>{"(" + option.dataset + ")"}</em>
+              </span>
+            </React.Fragment>
+          )}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={undefined}
+              margin="normal"
+              variant="outlined"
+              placeholder="Skriv eller välj bland förslagen nedan..."
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <Tooltip title={tooltipText}>
+                    <span id="drawerToggler">
+                      <IconButton
+                        className={classes.iconButton}
+                        aria-label="menu"
+                        onClick={onMenuClick}
+                        disabled={menuButtonDisabled}
+                      >
+                        <MenuIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                ),
+                endAdornment: (
+                  <>
                     <IconButton
-                      onClick={onMenuClick}
                       className={classes.iconButton}
-                      disabled={menuButtonDisabled}
-                      aria-label="menu"
+                      aria-label="search"
+                      onClick={props.handleOnSearch}
                     >
-                      <MenuIcon size={20} />
+                      <SearchIcon />
                     </IconButton>
-                  </span>
-                </Tooltip>
-              ),
-              endAdornment: (
-                <>
-                  {loading ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                  <ToggleButton
-                    value="wildcardAtStart"
-                    selected={wildcardAtStart}
-                    onChange={() => setWildcardAtStart(!wildcardAtStart)}
-                  >
-                    *.
-                  </ToggleButton>
-                  <ToggleButton
-                    value="wildcardAtEnd"
-                    selected={wildcardAtEnd}
-                    onChange={() => setWildcardAtEnd(!wildcardAtEnd)}
-                  >
-                    .*
-                  </ToggleButton>
-                  <ToggleButton
-                    value="matchCase"
-                    selected={matchCase}
-                    onChange={() => setMatchCase(!matchCase)}
-                  >
-                    <FormatSizeIcon />
-                  </ToggleButton>
-                  <Divider orientation="vertical" />
-                  <ToggleButton
-                    value="drawActive"
-                    selected={drawActive}
-                    onChange={handleClickOnDrawToggle}
-                  >
-                    <BrushTwoToneIcon />
-                  </ToggleButton>
-                  <ToggleButton
-                    value="activeSpatialFilter"
-                    selected={activeSpatialFilter === "intersects"}
-                    onChange={() =>
-                      setActiveSpatialFilter(
-                        activeSpatialFilter === "intersects"
-                          ? "within"
-                          : "intersects"
-                      )
-                    }
-                  >
-                    {activeSpatialFilter === "intersects" ? (
-                      <IntersectsIcon />
-                    ) : (
-                      <WithinIcon />
-                    )}
-                  </ToggleButton>
-                  <IconButton onClick={handleClickOnSearch}>
-                    <SearchIcon />
-                  </IconButton>
-                </>
-              )
-            }}
-          />
-        )}
-      />
-      <Autocomplete
-        onChange={(event, value, reason) => {
-          setSearchSources(value);
-        }}
-        value={searchSources}
-        multiple
-        id="searchSources"
-        options={searchModel.getSources()}
-        disableCloseOnSelect
-        getOptionLabel={option => option.caption}
-        renderOption={(option, { selected }) => (
-          <>
-            <Checkbox
-              icon={icon}
-              checkedIcon={checkedIcon}
-              style={{ marginRight: 8 }}
-              checked={selected}
+                    <Divider
+                      className={classes.divider}
+                      orientation="vertical"
+                    />
+                    <SearchTools {...props} />
+                    <IconButton
+                      className={classes.iconButton}
+                      aria-label="clear"
+                      onClick={props.handleOnClear}
+                      disabled={true}
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </>
+                ),
+              }}
             />
-            {option.caption}
-          </>
-        )}
-        style={{ width: 500 }}
-        renderInput={params => (
-          <TextField
-            {...params}
-            variant="outlined"
-            // label="Sökkällor"
-            placeholder="Välj sökkälla"
-          />
-        )}
-      />
-    </Paper>
+          )}
+        />
+      </Paper>
+      {props.drawSource.length ? <SearchFeatureList /> : null}
+      <Collapse in={props.drawActive}>
+        <Alert
+          severity="info"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                props.toggleDraw(false);
+              }}
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
+        >
+          Markeringsverktyg aktiverat!
+        </Alert>
+      </Collapse>
+      <SearchResultList {...props} />
+    </div>
   );
 };
 
