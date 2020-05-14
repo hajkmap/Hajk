@@ -106,14 +106,13 @@ import React from "react";
 
 import SearchTools from "./SearchTools";
 import SearchResultList from "./SearchResultList";
-import SearchFeatureList from "./SearchFeatureList";
 
 import {
   IconButton,
   Paper,
   TextField,
   Tooltip,
-  makeStyles,
+  makeStyles
 } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -125,26 +124,26 @@ import Alert from "@material-ui/lab/Alert";
 import Collapse from "@material-ui/core/Collapse";
 import CloseIcon from "@material-ui/icons/Close";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     padding: "2px 4px",
     display: "flex",
-    alignItems: "center",
+    alignItems: "center"
   },
   input: {
     marginLeft: theme.spacing(1),
-    flex: 1,
+    flex: 1
   },
   iconButton: {
-    padding: 10,
+    padding: 10
   },
   divider: {
     height: 28,
-    margin: 4,
-  },
+    margin: 4
+  }
 }));
 
-const SearchBar = (props) => {
+const SearchBar = props => {
   const classes = useStyles();
 
   const { menuButtonDisabled, onMenuClick } = props;
@@ -167,9 +166,9 @@ const SearchBar = (props) => {
           getOptionSelected={(option, value) =>
             option.autocompleteEntry === value.autocompleteEntry
           }
-          getOptionLabel={(option) => option?.autocompleteEntry || option}
-          groupBy={(option) => option.dataset}
-          renderOption={(option) => (
+          getOptionLabel={option => option?.autocompleteEntry || option}
+          groupBy={option => option.dataset}
+          renderOption={option => (
             <React.Fragment>
               <span>
                 {option.autocompleteEntry}
@@ -177,7 +176,7 @@ const SearchBar = (props) => {
               </span>
             </React.Fragment>
           )}
-          renderInput={(params) => (
+          renderInput={params => (
             <TextField
               {...params}
               label={undefined}
@@ -223,13 +222,12 @@ const SearchBar = (props) => {
                       <ClearIcon />
                     </IconButton>
                   </>
-                ),
+                )
               }}
             />
           )}
         />
       </Paper>
-      {props.drawSource.length ? <SearchFeatureList /> : null}
       <Collapse in={props.drawActive}>
         <Alert
           severity="info"
