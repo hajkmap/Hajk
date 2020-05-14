@@ -64,12 +64,22 @@ var NewsModel = {
 
     initialize: function (options) {
         var cat = localStorage.getItem('lastUpdate');
-        if(cat == null || cat == '' && this.get('visibleAtStart')){
-            this.set({'display': true});
-            this.set({'visibleAtStart': true});
+        if(cat == null || cat == ''){
+            if(this.get('visibleAtStart')){
+                this.set({'display': true});
+                this.set({'visibleAtStart': true});
+            }else{
+                this.set({'display': false});
+                this.set({'visibleAtStart': false});
+            }
         }else if(this.get('text') + this.get('headerText')!= cat){
-            this.set({'display': true});
-            this.set({'visibleAtStart': true});
+            if(this.get('visibleAtStart')){
+                this.set({'display': true});
+                this.set({'visibleAtStart': true});
+            }else{
+                this.set({'display': false});
+                this.set({'visibleAtStart': false});
+            }
         }else{
             this.set({'display': false});
             this.set({'visibleAtStart': false});
