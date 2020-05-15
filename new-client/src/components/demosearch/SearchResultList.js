@@ -24,7 +24,7 @@ const SearchResultList = props => {
 
   return (
     <Paper id="searchResultList" className={classes.root}>
-      <SearchResultGroup {...props} />
+      <SearchResultGroup id="searchResultGroup" {...props} />
     </Paper>
   );
 };
