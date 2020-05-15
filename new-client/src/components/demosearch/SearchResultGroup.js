@@ -2,7 +2,6 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 
 import SearchResultItem from "./SearchResultItem";
-import SearchOption from "./SearchOption";
 
 import List from "@material-ui/core/List";
 import MuiExpansionPanel from "@material-ui/core/ExpansionPanel";
@@ -74,42 +73,39 @@ const PlaceIcon = withStyles(theme => ({
 const SearchResultGroup = props => {
   const classes = useStyles();
 
-  if (props.resultList) {
-    return Object.entries(props.resultList).map(([key, value]) => {
-      const displayFields = value.source.displayFields;
-      const features = value.value.features;
-      const numberReturned = value.value.numberReturned;
+  return Object.entries(props.resultList).map(([key, value]) => {
+    const displayFields = value.source.displayFields;
+    const features = value.value.features;
+    const numberReturned = value.value.numberReturned;
 
-      if (numberReturned) {
-        return (
-          <div key={key}>
-            <SearchOption />
-            <ExpansionPanel>
-              <ExpansionPanelSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id={key}
-              >
-                <PlaceIcon />
-                <Typography>{value.source.caption}</Typography>
-                <span>({numberReturned})</span>
-              </ExpansionPanelSummary>
-              <ExpansionPanelDetails>
-                <List dense className={classes.root}>
-                  <SearchResultItem
-                    features={features}
-                    displayFields={displayFields}
-                  />
-                </List>
-              </ExpansionPanelDetails>
-            </ExpansionPanel>
-          </div>
-        );
-      } else {
-        return null;
-      }
-    });
-  }
+    if (numberReturned) {
+      return (
+        <div key={key}>
+          <ExpansionPanel>
+            <ExpansionPanelSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id={key}
+            >
+              <PlaceIcon />
+              <Typography>{value.source.caption}</Typography>
+              <span>({numberReturned})</span>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+              <List dense className={classes.root}>
+                <SearchResultItem
+                  features={features}
+                  displayFields={displayFields}
+                />
+              </List>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  });
 };
 
 export default SearchResultGroup;

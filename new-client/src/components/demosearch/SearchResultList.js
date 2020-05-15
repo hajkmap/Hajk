@@ -1,6 +1,7 @@
 import React from "react";
 
 import SearchResultGroup from "./SearchResultGroup";
+import SearchOption from "./SearchOption";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { Paper } from "@material-ui/core";
@@ -22,11 +23,16 @@ const useStyles = makeStyles(theme => ({
 const SearchResultList = props => {
   const classes = useStyles();
 
-  return (
-    <Paper id="searchResultList" className={classes.root}>
-      <SearchResultGroup id="searchResultGroup" {...props} />
-    </Paper>
-  );
+  if (props.resultList.length) {
+    return (
+      <Paper id="searchResultList" className={classes.root}>
+        <SearchOption />
+        <SearchResultGroup id="searchResultGroup" {...props} />
+      </Paper>
+    );
+  } else {
+    return null;
+  }
 };
 
 export default SearchResultList;
