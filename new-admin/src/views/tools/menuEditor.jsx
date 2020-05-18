@@ -41,6 +41,7 @@ import Popover from "@material-ui/core/Popover";
 import TextField from "@material-ui/core/TextField";
 import DeleteIcon from "@material-ui/icons/Delete";
 import SettingsIcon from "@material-ui/icons/Settings";
+import WarningIcon from "@material-ui/icons/Warning";
 import DragHandle from "@material-ui/icons/DragHandle";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import { withStyles } from "@material-ui/core/styles";
@@ -57,21 +58,6 @@ const MENU_CONNECTION_TYPES = {
   link: "Koppla webblänk",
   subMenu: "Inget valt"
 };
-
-const styles = () => ({
-  container: {
-    backgroundColor: "#e8e8e8"
-  },
-  cell: {
-    borderRight: "none",
-    borderLeft: "none",
-    borderColor: "#6c6c6c"
-  },
-
-  background: {
-    backgroundColor: "#e8e8e8"
-  }
-});
 
 const getPopoverMenuItemTitle = label => {
   return <Typography variant="h6">{label}: </Typography>;
@@ -90,466 +76,20 @@ const getTextField = (value, onChangeFunction, variant) => {
   );
 };
 
-class SettingsPopover extends React.Component {
-  state = { color: this.props.menuItem.color, icon: this.props.menuItem.icon };
+const styles = () => ({
+  container: {
+    backgroundColor: "#e8e8e8"
+  },
+  cell: {
+    borderRight: "none",
+    borderLeft: "none",
+    borderColor: "#6c6c6c"
+  },
 
-  updateColorState = e => {
-    this.setState({ color: e.target.value });
-  };
-
-  updateIconState = e => {
-    let value = e.target.value;
-    this.setState(prevState => {
-      prevState.icon.materialUiIconName = value;
-      return {
-        icon: prevState.icon
-      };
-    });
-  };
-
-  saveAndClosePopover = () => {
-    const { close, updateMenuItem, treeNodeId } = this.props;
-    let objectWithKeyValuesToUpdate = this.state;
-    updateMenuItem(treeNodeId, objectWithKeyValuesToUpdate);
-    close();
-  };
-
-  renderSettings = () => {
-    return (
-      <form
-        style={{ width: "400px", height: "350px" }}
-        noValidate
-        autoComplete="off"
-      >
-        <Grid container>
-          <Grid xs={12} item>
-            {getPopoverMenuItemTitle("Ikon")}
-            {getTextField(
-              this.state.icon.materialUiIconName,
-              this.updateIconState,
-              "standard"
-            )}
-          </Grid>
-          <Grid xs={12} item>
-            {getPopoverMenuItemTitle("Färg")}
-            {getTextField(this.state.color, this.updateColorState, "standard")}
-          </Grid>
-        </Grid>
-      </form>
-    );
-  };
-
-  render = () => {
-    const { anchorEl, open } = this.props;
-    return (
-      <>
-        <Popover
-          open={open}
-          onClose={this.saveAndClosePopover}
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "right"
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "left"
-          }}
-        >
-          {this.renderSettings()}
-        </Popover>
-      </>
-    );
-  };
-}
-
-class TreeRow extends React.Component {
-  state = { menuItemTitle: this.props.menuItem.title };
-
-  componentWillUnmount = () => {
-    const { updateMenuItem, treeNodeId } = this.props;
-    updateMenuItem(treeNodeId, { title: this.state.menuItemTitle });
-  };
-
-  constructor(props) {
-    super(props);
-    console.log(props, "props");
+  background: {
+    backgroundColor: "#e8e8e8"
   }
-
-  renderConnectionSelect = () => {
-    const {
-      model,
-      treeNodeId,
-      updateMenuItem,
-      availableDocuments,
-      menuItem
-    } = this.props;
-
-    return (
-      <MenuConnectionSelector
-        treeNodeId={treeNodeId}
-        updateMenuItem={updateMenuItem}
-        availableDocuments={availableDocuments}
-        model={model}
-        menuItem={menuItem}
-      ></MenuConnectionSelector>
-    );
-  };
-
-  renderRemoveButton = () => {
-    const { deleteMenuItem, treeNodeId } = this.props;
-    return (
-      <IconButton
-        style={{ padding: "0px" }}
-        onClick={() => {
-          deleteMenuItem(treeNodeId);
-        }}
-      >
-        <DeleteIcon></DeleteIcon>
-      </IconButton>
-    );
-  };
-
-  openSettingsMenu = e => {
-    this.setState({
-      settingsMenuAnchorEl: e.currentTarget
-    });
-  };
-
-  closeSettingsMenu = () => {
-    this.setState({ settingsMenuAnchorEl: null });
-  };
-
-  renderSettingsMenu = () => {
-    const { settingsMenuAnchorEl } = this.state;
-    const { updateMenuItem, menuItem, treeNodeId } = this.props;
-    return (
-      <>
-        <IconButton size="small" onClick={this.openSettingsMenu}>
-          <SettingsIcon></SettingsIcon>
-        </IconButton>
-        <SettingsPopover
-          treeNodeId={treeNodeId}
-          menuItem={menuItem}
-          updateMenuItem={updateMenuItem}
-          anchorEl={settingsMenuAnchorEl}
-          open={Boolean(settingsMenuAnchorEl)}
-          close={this.closeSettingsMenu}
-        ></SettingsPopover>
-      </>
-    );
-  };
-
-  renderMenuTitle = () => {
-    const { menuItem } = this.props;
-
-    return getTextField(
-      this.state.menuItemTitle,
-      e => {
-        this.setState({ menuItemTitle: e.target.value });
-      },
-      "standard"
-    );
-  };
-
-  render = () => {
-    return (
-      <Grid
-        style={{
-          border: "1px solid rgba(153,164,161,0.5)",
-          borderRadius: "8px"
-        }}
-        justify="flex-end"
-        container
-      >
-        <Grid xs={1} item>
-          <DragHandle></DragHandle>
-        </Grid>
-        <Grid xs={2} item>
-          {this.renderMenuTitle()}
-        </Grid>
-        <Grid xs={9} container item>
-          <Grid xs={3} item>
-            {this.renderSettingsMenu()}
-          </Grid>
-          <Grid xs={3} item>
-            {this.renderConnectionSelect()}
-          </Grid>
-          <Grid xs={3} item>
-            {this.renderRemoveButton()}
-          </Grid>
-        </Grid>
-      </Grid>
-    );
-  };
-}
-
-class MenuConnectionSelector extends React.Component {
-  state = { open: false, mapLinkValue: "", linkValue: "" };
-
-  componentDidMount = () => {
-    this.setState({ value: this.getInitialValue() });
-  };
-  getInitialValue = () => {
-    const { menuItem } = this.props;
-
-    if (menuItem.menu.length > 0) {
-      return MENU_CONNECTION_TYPES.subMenu;
-    }
-
-    if (menuItem.document !== "") {
-      return MENU_CONNECTION_TYPES.documentConnection;
-    }
-
-    if (menuItem.link) {
-      return MENU_CONNECTION_TYPES.link;
-    }
-
-    if (menuItem.maplink) {
-      return MENU_CONNECTION_TYPES.mapLink;
-    }
-  };
-
-  openConnectionsMenu = e => {
-    this.setState({
-      connectionsMenuAnchorEl: e.currentTarget
-    });
-  };
-
-  closeConnectionsMenu = () => {
-    this.update({ maplink: this.state.mapLinkValue, link: this.state.link });
-    this.setState({ connectionsMenuAnchorEl: null, open: false });
-  };
-
-  renderConnectionMenuSelectOption = (value, index) => {
-    return (
-      <MenuItem key={index} value={value}>
-        <ListItemIcon>
-          <SettingsIcon></SettingsIcon>
-        </ListItemIcon>
-        <Typography>{value}</Typography>
-        {value !== MENU_CONNECTION_TYPES.subMenu && (
-          <ArrowRightIcon></ArrowRightIcon>
-        )}
-      </MenuItem>
-    );
-  };
-
-  renderMenuConnectionSettings = () => {
-    const { connectionsMenuAnchorEl } = this.state;
-    return (
-      <Popover
-        PaperProps={{
-          style: { width: "500px", height: "500px", padding: "20px" }
-        }}
-        open={Boolean(connectionsMenuAnchorEl)}
-        onClose={this.closeConnectionsMenu}
-        anchorEl={connectionsMenuAnchorEl}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "right"
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left"
-        }}
-      >
-        <Grid container>{this.renderPopoverContent()}</Grid>
-      </Popover>
-    );
-  };
-
-  update = newMenuItem => {
-    const { treeNodeId, updateMenuItem } = this.props;
-    updateMenuItem(treeNodeId, newMenuItem);
-  };
-
-  renderDocumentList = () => {
-    const { availableDocuments } = this.props;
-    return (
-      <Grid item>
-        <List component="nav">
-          {availableDocuments.map((availableDocument, index) => {
-            return (
-              <ListItem
-                key={index}
-                onClick={() => {
-                  this.update({ document: availableDocument });
-                }}
-                button
-              >
-                <ListItemText primary={availableDocument}></ListItemText>
-              </ListItem>
-            );
-          })}
-        </List>
-      </Grid>
-    );
-  };
-
-  getLink = (label, value, onChangeFunction) => {
-    return (
-      <Grid xs={12} item>
-        {getPopoverMenuItemTitle(label)}
-        {getTextField(value, onChangeFunction, "standard")}
-      </Grid>
-    );
-  };
-
-  renderMapLink = () => {
-    return this.getLink("Kartlänk", this.state.mapLinkValue, e => {
-      this.setState({ mapLinkValue: e.target.value });
-    });
-  };
-
-  renderLink = () => {
-    return this.getLink("Webblänk", this.state.linkValue, () => {
-      //this.setState({ mapLinkValue: e.target.value });
-    });
-  };
-
-  renderPopoverContent = () => {
-    const { value } = this.state;
-    if (value === MENU_CONNECTION_TYPES.subMenu) {
-      return null;
-    }
-    if (value === MENU_CONNECTION_TYPES.documentConnection) {
-      return this.renderDocumentList();
-    }
-
-    if (value === MENU_CONNECTION_TYPES.link) {
-      return this.renderLink();
-    }
-
-    if (value === MENU_CONNECTION_TYPES.mapLink) {
-      return this.renderMapLink();
-    }
-  };
-
-  handleChange = e => {
-    if (e.target.value !== MENU_CONNECTION_TYPES.subMenu) {
-      this.setState({
-        value: e.target.value,
-        connectionsMenuAnchorEl: e.currentTarget,
-        open: true
-      });
-    } else {
-      this.setState({
-        value: e.target.value
-      });
-    }
-  };
-
-  getRenderedSelectionText = (label, icon) => {
-    return (
-      <Grid container>
-        {icon && <Grid item>{icon}</Grid>}
-        <Grid item>
-          <Typography>{label}</Typography>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  getRenderValue = () => {
-    const { menuItem } = this.props;
-    if (this.state.value === MENU_CONNECTION_TYPES.documentConnection) {
-      return this.getRenderedSelectionText(
-        menuItem.document,
-        <DescriptionIcon></DescriptionIcon>
-      );
-    }
-
-    if (this.state.value === MENU_CONNECTION_TYPES.subMenu) {
-      return this.getRenderedSelectionText("Undermeny");
-    }
-
-    if (this.state.value === MENU_CONNECTION_TYPES.link) {
-      return this.getRenderedSelectionText("Webblänk", <RoomIcon></RoomIcon>);
-    }
-
-    if (this.state.value === MENU_CONNECTION_TYPES.maplink) {
-      return this.getRenderedSelectionText(
-        "Karta",
-        <LanguageIcon></LanguageIcon>
-      );
-    }
-
-    return this.getRenderedSelectionText("Ingen koppling");
-  };
-
-  render = () => {
-    const { value, open } = this.state;
-    if (value) {
-      return (
-        <FormControl>
-          <Select
-            MenuProps={{
-              disableScrollLock: true,
-              anchorOrigin: {
-                vertical: "bottom",
-                horizontal: "left"
-              },
-              transformOrigin: {
-                vertical: "top",
-                horizontal: "left"
-              },
-              getContentAnchorEl: null
-            }}
-            onOpen={() => {
-              this.setState({ open: true });
-            }}
-            onClose={() => {
-              this.setState({ open: false });
-            }}
-            renderValue={this.getRenderValue}
-            onChange={this.handleChange}
-            open={open}
-            value={value}
-          >
-            {Object.values(MENU_CONNECTION_TYPES).map((value, index) => {
-              return this.renderConnectionMenuSelectOption(value, index);
-            })}
-          </Select>
-          {this.renderMenuConnectionSettings(this.state.value)}
-        </FormControl>
-      );
-    } else {
-      return null;
-    }
-  };
-}
-
-const ColorButtonGreen = withStyles(theme => ({
-  root: {
-    color: theme.palette.getContrastText(green[500]),
-    backgroundColor: green[500],
-    "&:hover": {
-      backgroundColor: green[700]
-    },
-    marginRight: theme.spacing(2)
-  }
-}))(Button);
-
-const ColorButtonRed = withStyles(theme => ({
-  root: {
-    color: theme.palette.getContrastText(red[500]),
-    backgroundColor: red[500],
-    "&:hover": {
-      backgroundColor: red[700]
-    }
-  }
-}))(Button);
-
-const ColorButtonBlue = withStyles(theme => ({
-  root: {
-    color: theme.palette.getContrastText(blue[500]),
-    backgroundColor: blue[500],
-    "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
-}))(Button);
+});
 
 class ToolOptions extends Component {
   state = {
@@ -562,7 +102,8 @@ class ToolOptions extends Component {
     width: 600,
     height: "90vh",
     menuConfig: {},
-    openMenuEditor: false
+    openMenuEditor: false,
+    validationErrors: []
   };
   treeKeys = [];
   menuConfig = null;
@@ -608,7 +149,6 @@ class ToolOptions extends Component {
           <Grid xs={4} item>
             <ColorButtonGreen
               variant="contained"
-              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.addNewItem();
@@ -668,7 +208,6 @@ class ToolOptions extends Component {
 
   loadTreeView = () => {
     this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
-      console.log(this.menuConfig, "menuConfig");
       this.menuConfig = menuConfig.options.menuConfig;
       let treeData = this.createTreeStructure(this.menuConfig.menu);
       treeData.unshift({
@@ -827,6 +366,17 @@ class ToolOptions extends Component {
     return newKey;
   };
 
+  isSelectionValid = (children, menuItem) => {
+    if (
+      (menuItem.mapLink || menuItem.document || menuItem.link) &&
+      children.length > 0
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
   createTreeChild = menuItem => {
     let children = [];
     if (menuItem.menu.length > 0) {
@@ -834,6 +384,7 @@ class ToolOptions extends Component {
     }
 
     let key = this.getNewTreeKey().toString();
+
     return {
       title: (
         <TreeRow
@@ -842,6 +393,7 @@ class ToolOptions extends Component {
           model={this.model}
           availableDocuments={this.availableDocuments}
           menuItem={menuItem}
+          validSelection={this.isSelectionValid(children, menuItem)}
           treeNodeId={key}
         ></TreeRow>
       ),
@@ -888,7 +440,6 @@ class ToolOptions extends Component {
     if (!this.isSameNode(foundDropNode, foundDragNode)) {
       this.model.updateDragNode(newTree, foundDragNode, foundDropNode);
       this.model.addToDropNode(foundDropNode, foundDragNode);
-
       this.setState({ tree: newTree });
     }
   };
@@ -906,7 +457,12 @@ class ToolOptions extends Component {
         <TreeRow
           updateMenuItem={this.updateMenuItem}
           deleteMenuItem={this.deleteMenuItem}
+          hasChildren={treeNode.children > 0}
           menuItem={treeNode.menuItem}
+          validSelection={this.isSelectionValid(
+            treeNode.children,
+            treeNode.menuItem
+          )}
           availableDocuments={this.availableDocuments}
           model={this.model}
           treeNodeId={treeNode.key}
@@ -915,6 +471,7 @@ class ToolOptions extends Component {
 
       this.setState({ tree: newTreeState });
     }
+    return treeNode;
   };
 
   deleteTreeNode = (nodeArrayToSearch, treeNodeToDelete) => {
@@ -995,9 +552,6 @@ class ToolOptions extends Component {
 
           <section className="tab-pane active">
             <Modal
-              onBackdropClick={() => {
-                this.setState({ openMenuEditor: false });
-              }}
               style={{
                 position: "absolute",
                 top: "100px",
@@ -1030,5 +584,565 @@ class ToolOptions extends Component {
     );
   }
 }
+
+const SettingsPopover = withStyles(theme => {
+  return {
+    test: { padding: "100px" }
+  };
+})(
+  class SettingsPopover extends React.Component {
+    state = {
+      color: this.props.menuItem.color,
+      icon: this.props.menuItem.icon
+    };
+
+    updateColorState = e => {
+      this.setState({ color: e.target.value });
+    };
+
+    updateIconState = e => {
+      let value = e.target.value;
+      this.setState(prevState => {
+        prevState.icon.materialUiIconName = value;
+        return {
+          icon: prevState.icon
+        };
+      });
+    };
+
+    saveAndClosePopover = () => {
+      const { close, updateMenuItem, treeNodeId } = this.props;
+      let objectWithKeyValuesToUpdate = this.state;
+      updateMenuItem(treeNodeId, objectWithKeyValuesToUpdate);
+      close();
+    };
+
+    renderSettings = () => {
+      return (
+        <form
+          style={{ width: "400px", height: "350px" }}
+          noValidate
+          autoComplete="off"
+        >
+          <Grid container>
+            <Grid xs={12} item>
+              {getPopoverMenuItemTitle("Ikon")}
+              {getTextField(
+                this.state.icon.materialUiIconName,
+                this.updateIconState,
+                "standard"
+              )}
+            </Grid>
+            <Grid xs={12} item>
+              {getPopoverMenuItemTitle("Färg")}
+              {getTextField(
+                this.state.color,
+                this.updateColorState,
+                "standard"
+              )}
+            </Grid>
+          </Grid>
+        </form>
+      );
+    };
+
+    render = () => {
+      const { anchorEl, open } = this.props;
+      return (
+        <>
+          <Popover
+            open={open}
+            onClose={this.saveAndClosePopover}
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right"
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "left"
+            }}
+          >
+            {this.renderSettings()}
+          </Popover>
+        </>
+      );
+    };
+  }
+);
+
+const TreeRow = withStyles(theme => {
+  return {
+    test: { padding: "100px" }
+  };
+})(
+  class TreeRow extends React.Component {
+    state = { menuItemTitle: this.props.menuItem.title };
+
+    componentWillUnmount = () => {
+      const { updateMenuItem, treeNodeId } = this.props;
+      updateMenuItem(treeNodeId, { title: this.state.menuItemTitle });
+    };
+
+    constructor(props) {
+      super(props);
+    }
+
+    renderConnectionSelect = () => {
+      const {
+        model,
+        treeNodeId,
+        updateMenuItem,
+        availableDocuments,
+        menuItem
+      } = this.props;
+
+      return (
+        <MenuConnectionSelector
+          rowHasChildren={this.props.hasChildren}
+          validSelection={this.props.validSelection}
+          treeNodeId={treeNodeId}
+          updateMenuItem={updateMenuItem}
+          availableDocuments={availableDocuments}
+          model={model}
+          menuItem={menuItem}
+        ></MenuConnectionSelector>
+      );
+    };
+
+    renderRemoveButton = () => {
+      const { deleteMenuItem, treeNodeId } = this.props;
+      return (
+        <IconButton
+          style={{ padding: "0px" }}
+          onClick={() => {
+            deleteMenuItem(treeNodeId);
+          }}
+        >
+          <DeleteIcon></DeleteIcon>
+        </IconButton>
+      );
+    };
+
+    openSettingsMenu = e => {
+      this.setState({
+        settingsMenuAnchorEl: e.currentTarget
+      });
+    };
+
+    closeSettingsMenu = () => {
+      this.setState({ settingsMenuAnchorEl: null });
+    };
+
+    renderSettingsMenu = () => {
+      const { settingsMenuAnchorEl } = this.state;
+      const { updateMenuItem, menuItem, treeNodeId } = this.props;
+      return (
+        <>
+          <IconButton size="small" onClick={this.openSettingsMenu}>
+            <SettingsIcon></SettingsIcon>
+          </IconButton>
+          <SettingsPopover
+            treeNodeId={treeNodeId}
+            menuItem={menuItem}
+            updateMenuItem={updateMenuItem}
+            anchorEl={settingsMenuAnchorEl}
+            open={Boolean(settingsMenuAnchorEl)}
+            close={this.closeSettingsMenu}
+          ></SettingsPopover>
+        </>
+      );
+    };
+
+    renderMenuTitle = () => {
+      const { menuItem } = this.props;
+
+      return getTextField(
+        this.state.menuItemTitle,
+        e => {
+          this.setState({ menuItemTitle: e.target.value });
+        },
+        "standard"
+      );
+    };
+
+    render = () => {
+      return (
+        <Grid
+          style={{
+            border: "1px solid rgba(153,164,161,0.5)",
+            borderRadius: "8px"
+          }}
+          justify="flex-end"
+          container
+        >
+          <Grid xs={1} item>
+            <DragHandle></DragHandle>
+          </Grid>
+          <Grid xs={2} item>
+            {this.renderMenuTitle()}
+          </Grid>
+          <Grid xs={9} container item>
+            <Grid xs={3} item>
+              {this.renderSettingsMenu()}
+            </Grid>
+            <Grid xs={3} item>
+              {this.renderConnectionSelect()}
+            </Grid>
+            <Grid xs={3} item>
+              {this.renderRemoveButton()}
+            </Grid>
+          </Grid>
+        </Grid>
+      );
+    };
+  }
+);
+
+const MenuConnectionSelector = withStyles(theme => {
+  return {
+    popoverActionArea: { paddingTop: "10px" },
+    menuItem: {
+      "&:focus": {
+        backgroundColor: theme.palette.primary.light
+      }
+    }
+  };
+})(
+  class MenuConnectionSelector extends React.Component {
+    state = {
+      open: false,
+      mapLinkValue: this.props.menuItem.maplink,
+      linkValue: this.props.menuItem.link,
+      documentValue: this.props.menuItem.document,
+      activeMenu: ""
+    };
+
+    componentDidMount = () => {
+      this.setState({
+        value: this.getInitialValue()
+      });
+    };
+
+    getInitialValue = () => {
+      const { menuItem } = this.props;
+
+      if (menuItem.menu.length > 0) {
+        return MENU_CONNECTION_TYPES.subMenu;
+      }
+
+      if (menuItem.document !== "") {
+        return MENU_CONNECTION_TYPES.documentConnection;
+      }
+
+      if (menuItem.link) {
+        return MENU_CONNECTION_TYPES.link;
+      }
+
+      if (menuItem.maplink) {
+        return MENU_CONNECTION_TYPES.mapLink;
+      }
+    };
+
+    openConnectionsMenu = e => {
+      this.setState({
+        connectionsMenuAnchorEl: e.currentTarget
+      });
+    };
+
+    closeConnectionsMenu = () => {
+      this.setState({ connectionsMenuAnchorEl: null, open: false });
+    };
+
+    renderConnectionMenuSelectOption = (value, index) => {
+      return (
+        <MenuItem key={index} value={value}>
+          <ListItemIcon>
+            <SettingsIcon></SettingsIcon>
+          </ListItemIcon>
+          <Typography>{value}</Typography>
+          {value !== MENU_CONNECTION_TYPES.subMenu && (
+            <ArrowRightIcon></ArrowRightIcon>
+          )}
+        </MenuItem>
+      );
+    };
+
+    renderMenuConnectionSettings = () => {
+      const { connectionsMenuAnchorEl } = this.state;
+      const { classes } = this.props;
+      return (
+        <Popover
+          PaperProps={{
+            style: { width: "500px", height: "500px", padding: "20px" }
+          }}
+          open={Boolean(connectionsMenuAnchorEl)}
+          onClose={this.closeConnectionsMenu}
+          anchorEl={connectionsMenuAnchorEl}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right"
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "left"
+          }}
+        >
+          <Grid container>
+            <Grid xs={12} item>
+              {this.renderPopoverContent()}
+            </Grid>
+            <Grid className={classes.popoverActionArea} xs={12} item>
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                onClick={this.update}
+              >
+                OK
+              </ColorButtonGreen>
+            </Grid>
+          </Grid>
+        </Popover>
+      );
+    };
+
+    update = e => {
+      const { treeNodeId, updateMenuItem } = this.props;
+      const { activeMenu } = this.state;
+      e.preventDefault();
+      let newMenuItem = {
+        maplink: "",
+        link: "",
+        document: ""
+      };
+      if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
+        newMenuItem = { ...newMenuItem, document: this.state.documentValue };
+      }
+
+      if (activeMenu === MENU_CONNECTION_TYPES.link) {
+        newMenuItem = { ...newMenuItem, link: this.state.linkValue };
+      }
+
+      if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
+        newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
+      }
+
+      updateMenuItem(treeNodeId, newMenuItem);
+
+      this.setState({
+        connectionsMenuAnchorEl: null,
+        open: false,
+        value: this.state.activeMenu
+      });
+    };
+
+    renderDocumentList = () => {
+      const { availableDocuments, classes } = this.props;
+      const { documentValue } = this.state;
+      return (
+        <Grid item>
+          <List component="nav">
+            {availableDocuments.map((availableDocument, index) => {
+              return (
+                <ListItem
+                  autoFocus={availableDocument === documentValue ? true : false}
+                  className={classes.menuItem}
+                  key={index}
+                  onClick={e => {
+                    this.setState({ documentValue: availableDocuments[index] });
+                  }}
+                  button
+                >
+                  <ListItemText primary={availableDocument}></ListItemText>
+                </ListItem>
+              );
+            })}
+          </List>
+        </Grid>
+      );
+    };
+
+    getLink = (label, value, onChangeFunction) => {
+      return (
+        <Grid xs={12} item>
+          {getPopoverMenuItemTitle(label)}
+          {getTextField(value, onChangeFunction, "standard")}
+        </Grid>
+      );
+    };
+
+    renderMapLink = () => {
+      return this.getLink("Kartlänk", this.state.mapLinkValue, e => {
+        this.setState({ mapLinkValue: e.target.value });
+      });
+    };
+
+    renderLink = () => {
+      return this.getLink("Webblänk", this.state.linkValue, e => {
+        this.setState({ linkValue: e.target.value });
+      });
+    };
+
+    renderPopoverContent = () => {
+      const { activeMenu } = this.state;
+      if (activeMenu === MENU_CONNECTION_TYPES.subMenu) {
+        return null;
+      }
+      if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
+        return this.renderDocumentList();
+      }
+
+      if (activeMenu === MENU_CONNECTION_TYPES.link) {
+        return this.renderLink();
+      }
+
+      if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
+        return this.renderMapLink();
+      }
+    };
+
+    handleChange = e => {
+      if (e.target.value !== MENU_CONNECTION_TYPES.subMenu) {
+        this.setState({
+          activeMenu: e.target.value,
+          connectionsMenuAnchorEl: e.currentTarget,
+          open: true
+        });
+      } else {
+        this.setState({
+          value: e.target.value
+        });
+      }
+    };
+
+    getRenderedSelectionText = (label, icon) => {
+      return (
+        <Grid container>
+          {icon && <Grid item>{icon}</Grid>}
+          <Grid item>
+            <Typography>{label}</Typography>
+          </Grid>
+        </Grid>
+      );
+    };
+
+    getRenderValue = () => {
+      const { menuItem } = this.props;
+      if (this.state.value === MENU_CONNECTION_TYPES.documentConnection) {
+        return this.getRenderedSelectionText(
+          menuItem.document,
+          <DescriptionIcon></DescriptionIcon>
+        );
+      }
+
+      if (this.state.value === MENU_CONNECTION_TYPES.subMenu) {
+        return this.getRenderedSelectionText("Undermeny");
+      }
+
+      if (this.state.value === MENU_CONNECTION_TYPES.link) {
+        return this.getRenderedSelectionText("Webblänk", <RoomIcon></RoomIcon>);
+      }
+
+      if (this.state.value === MENU_CONNECTION_TYPES.mapLink) {
+        return this.getRenderedSelectionText(
+          "Karta",
+          <LanguageIcon></LanguageIcon>
+        );
+      }
+
+      return this.getRenderedSelectionText("Ingen koppling");
+    };
+
+    render = () => {
+      const { value, open } = this.state;
+      const { validSelection } = this.props;
+
+      if (value) {
+        console.log(validSelection, "validSelection");
+        return (
+          <>
+            <FormControl>
+              <Grid container>
+                <Grid item>
+                  {!validSelection && <WarningIcon></WarningIcon>}
+                </Grid>
+
+                <Grid item>
+                  <Select
+                    MenuProps={{
+                      disableScrollLock: true,
+                      anchorOrigin: {
+                        vertical: "bottom",
+                        horizontal: "left"
+                      },
+                      transformOrigin: {
+                        vertical: "top",
+                        horizontal: "left"
+                      },
+                      getContentAnchorEl: null
+                    }}
+                    onOpen={() => {
+                      this.setState({ open: true });
+                    }}
+                    onClose={() => {
+                      this.setState({ open: false });
+                    }}
+                    renderValue={this.getRenderValue}
+                    onChange={this.handleChange}
+                    open={open}
+                    value={value}
+                  >
+                    {Object.values(MENU_CONNECTION_TYPES).map(
+                      (value, index) => {
+                        return this.renderConnectionMenuSelectOption(
+                          value,
+                          index
+                        );
+                      }
+                    )}
+                  </Select>
+                  {this.renderMenuConnectionSettings()}
+                </Grid>
+              </Grid>
+            </FormControl>
+          </>
+        );
+      } else {
+        return null;
+      }
+    };
+  }
+);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[500]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    },
+    marginRight: theme.spacing(2)
+  }
+}))(Button);
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 export default withStyles(styles)(ToolOptions);
