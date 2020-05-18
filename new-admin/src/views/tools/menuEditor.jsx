@@ -27,7 +27,6 @@ import SaveIcon from "@material-ui/icons/SaveSharp";
 import { blue, green, red } from "@material-ui/core/colors";
 import MenuEditorModel from "../../models/menuEditorModel";
 import Grid from "@material-ui/core/Grid";
-import Table from "@material-ui/core/Table";
 import Modal from "@material-ui/core/Modal";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import DescriptionIcon from "@material-ui/icons/Description";
@@ -41,12 +40,9 @@ import TableCell from "@material-ui/core/TableCell";
 import Popover from "@material-ui/core/Popover";
 import TextField from "@material-ui/core/TextField";
 import DeleteIcon from "@material-ui/icons/Delete";
-import HomeIcon from "@material-ui/icons/Home";
 import SettingsIcon from "@material-ui/icons/Settings";
 import DragHandle from "@material-ui/icons/DragHandle";
-import TableHead from "@material-ui/core/TableHead";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
-import TableRow from "@material-ui/core/TableRow";
 import { withStyles } from "@material-ui/core/styles";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -246,9 +242,6 @@ class TreeRow extends React.Component {
 
   renderMenuTitle = () => {
     const { menuItem } = this.props;
-    if (menuItem.title == "Öppna Submeny") {
-      console.log(this.state.menuItemTitle, "menuItem");
-    }
 
     return getTextField(
       this.state.menuItemTitle,
@@ -643,7 +636,7 @@ class ToolOptions extends Component {
               className="btn"
               onClick={e => {
                 e.preventDefault();
-                this.setState({ openMenuEditor: false });
+                this.setState({ openMenuEditor: false, tree: [] });
               }}
             >
               Avbryt
@@ -677,9 +670,7 @@ class ToolOptions extends Component {
     this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
       console.log(this.menuConfig, "menuConfig");
       this.menuConfig = menuConfig.options.menuConfig;
-      let treeData = this.createTreeStructure(
-        menuConfig.options.menuConfig.menu
-      );
+      let treeData = this.createTreeStructure(this.menuConfig.menu);
       treeData.unshift({
         title: this.getHeader(),
         disabled: true,
@@ -687,9 +678,7 @@ class ToolOptions extends Component {
         menuItem: [],
         key: -2
       });
-      this.setState({ tree: treeData }, () => {
-        console.log(this.state.tree, "tree");
-      });
+      this.setState({ tree: treeData });
     });
   };
 
@@ -845,8 +834,7 @@ class ToolOptions extends Component {
     }
 
     let key = this.getNewTreeKey().toString();
-    console.log(menuItem, "menuItem");
-    let returnObject = {
+    return {
       title: (
         <TreeRow
           updateMenuItem={this.updateMenuItem}
@@ -862,7 +850,6 @@ class ToolOptions extends Component {
       menuItem: this.model.getMenuItemWithoutChildren(menuItem),
       key: key
     };
-    return returnObject;
   };
 
   //Can this recursion be written better????
@@ -970,13 +957,11 @@ class ToolOptions extends Component {
   };
 
   render() {
+    const { classes } = this.props;
     let expandedKeys = this.treeKeys.map(key => {
       return key.toString();
     });
-    if (this.state.tree) {
-    }
 
-    const { classes } = this.props;
     return (
       <div>
         <form>
@@ -986,7 +971,6 @@ class ToolOptions extends Component {
               className="btn"
               onClick={e => {
                 e.preventDefault();
-                console.log("HERE");
                 this.loadTreeView();
                 this.setState({ openMenuEditor: true });
               }}
