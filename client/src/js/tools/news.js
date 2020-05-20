@@ -76,6 +76,9 @@ var NewsModel = {
             if(this.get('visibleAtStart')){
                 this.set({'display': true});
                 this.set({'visibleAtStart': true});
+            }else if(this.get('showInfoOnce')){
+                this.set({'display': true});
+                this.set({'visibleAtStart': false});
             }else{
                 this.set({'display': false});
                 this.set({'visibleAtStart': false});

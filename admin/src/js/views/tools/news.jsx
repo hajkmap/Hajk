@@ -232,7 +232,7 @@ class ToolOptions extends Component {
                     </div>
                     <div>
                         <label htmlFor='text'>Infotext</label>
-                        <textarea value={this.state.text} type='text' name='text' onChange={(e) => { this.handleInputChange(e); }} />
+                        <textarea id='nyhet' value={this.state.text} type='text' name='text' onChange={(e) => { this.handleInputChange(e); }} />
                     </div>
                     {this.renderVisibleForGroups()}
                     <div>
