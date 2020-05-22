@@ -43,6 +43,7 @@ var AnchorModelProperties = {
   shell: undefined,
   anchor: '',
   instruction: '',
+  firstTime: true,
   varberg: false,
 };
 
@@ -84,7 +85,14 @@ var AnchorModel = {
    * @instance
    * @return {string} anchor
    */
+
+
   generate: function () {
+
+    if(this.get("firstTime")){
+      this.set("anchor", "");
+      this.set("firstTime", false);
+    } else {
     var a = document.location.protocol + '//' + document.location.host + document.location.pathname,
       map = this.get('map'),
       olMap = map.getMap(),
@@ -97,11 +105,11 @@ var AnchorModel = {
       l = layers.filter(layer => layer.getVisible() === true)
         .map(layer => encodeURIComponent(layer.getName())).join(',');
 
-
     a += `?m=${HAJK2.configFile}&x=${x}&y=${y}&z=${z}&l=${l}`;
     this.set('anchor', a);
 
     return a;
+    }
   },
 
   /**
@@ -118,6 +126,7 @@ var AnchorModel = {
   clicked: function (arg) {
     this.set('visible', true);
     this.set('toggled', !this.get('toggled'));
+    this.set('firstTime', true);
   }
 };
 
