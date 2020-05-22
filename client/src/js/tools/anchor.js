@@ -42,7 +42,8 @@ var AnchorModelProperties = {
   visible: false,
   shell: undefined,
   anchor: '',
-  instruction: ''
+  instruction: '',
+  varberg: false,
 };
 
 /**
