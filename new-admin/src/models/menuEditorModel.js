@@ -80,10 +80,8 @@ var menuEditorModel = Model.extend({
   },
 
   createMenuFromTreeStructure: function(menu, tree) {
-    console.log(tree, "TREE");
     tree.forEach(treeNode => {
       if (treeNode.children.length > 0) {
-        console.log(menu, "menu");
         menu.push(treeNode.menuItem);
         treeNode.menuItem.menu = [];
         return this.createMenuFromTreeStructure(
@@ -91,8 +89,6 @@ var menuEditorModel = Model.extend({
           treeNode.children
         );
       } else {
-        console.log(menu, "menu2");
-        console.log(treeNode, "treeNode2");
         menu.push(treeNode.menuItem);
       }
     });
@@ -103,9 +99,48 @@ var menuEditorModel = Model.extend({
     tree.shift();
   },
 
+  getNewMenuItemObject: function() {
+    return {
+      title: "",
+      document: "",
+      color: "",
+      icon: {
+        materialUiIconName: "",
+        fontSize: "large"
+      },
+      maplink: "",
+      link: "",
+      menu: []
+    };
+  },
+
+  //Can this recursion be written better????
+  findInTree: function(tree, key) {
+    return tree
+      .map(treeNode => {
+        var found = this.findTreeNode(treeNode, key);
+        return found;
+      })
+      .filter(res => {
+        return res !== undefined;
+      })[0];
+  },
+  //Can this recursion be written better????
+  findTreeNode: function(treeNode, key) {
+    if (treeNode.key === key) {
+      return treeNode;
+    } else {
+      if (treeNode.children.length > 0) {
+        return this.findInTree(treeNode.children, key);
+      }
+    }
+  },
+
   exportTreeAsMenuJson: function(tree, menuConfig) {
     this.removeHeaderTreeRow(tree);
+    console.log(tree, "treeBeforeExport");
     menuConfig.menu = this.createMenuFromTreeStructure([], tree);
+    console.log(menuConfig, "menuConfig");
     return menuConfig;
   },
 

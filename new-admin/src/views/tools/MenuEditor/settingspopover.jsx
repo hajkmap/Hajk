@@ -4,10 +4,15 @@ import Grid from "@material-ui/core/Grid";
 import Popover from "@material-ui/core/Popover";
 import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
+import { SketchPicker } from "react-color";
+import Link from "@material-ui/core/Link";
+import { ColorButtonGreen } from "./custombuttons";
 
 const getPopoverMenuItemTitle = label => {
   return <Typography variant="h6">{label}: </Typography>;
 };
+
+const presetColors = [];
 
 const getTextField = (value, onChangeFunction, variant) => {
   return (
@@ -53,15 +58,19 @@ class SettingsPopover extends React.Component {
     closePopover();
   };
 
+  handleChange = color => {
+    this.setState({ color: color.hex });
+  };
+
   renderSettings = () => {
     return (
       <form
-        style={{ width: "400px", height: "350px" }}
+        style={{ width: "500px", height: "350px" }}
         noValidate
         autoComplete="off"
       >
         <Grid container>
-          <Grid xs={12} item>
+          <Grid xs={9} item>
             {getPopoverMenuItemTitle("Ikon")}
             {getTextField(
               this.state.icon.materialUiIconName,
@@ -69,9 +78,30 @@ class SettingsPopover extends React.Component {
               "standard"
             )}
           </Grid>
+          <Grid xs={3} item>
+            <ColorButtonGreen onClick={this.saveAndClosePopover}>
+              OK
+            </ColorButtonGreen>
+          </Grid>
           <Grid xs={12} item>
-            {getPopoverMenuItemTitle("Färg")}
+            <Link
+              target="_blank"
+              href={this.props.iconLibraryLink}
+              color="inherit"
+            >
+              {this.props.iconLibraryLink}
+            </Link>
+          </Grid>
+          <Grid xs={12} item>
+            {getPopoverMenuItemTitle("F�rg")}
             {getTextField(this.state.color, this.updateColorState, "standard")}
+          </Grid>
+          <Grid xs={12} item>
+            <SketchPicker
+              presetColors={this.presetColors}
+              color={this.state.color}
+              onChange={this.handleChange}
+            ></SketchPicker>
           </Grid>
         </Grid>
       </form>
@@ -84,7 +114,6 @@ class SettingsPopover extends React.Component {
       <>
         <Popover
           open={open}
-          onClose={this.saveAndClosePopover}
           anchorEl={anchorEl}
           anchorOrigin={{
             vertical: "bottom",

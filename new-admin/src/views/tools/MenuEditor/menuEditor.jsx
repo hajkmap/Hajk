@@ -2,6 +2,7 @@ import React from "react";
 import { Component } from "react";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { Typography } from "@material-ui/core";
+import WarningDialog from "./warningdialog.jsx";
 import MenuEditorModel from "../../../models/menuEditorModel";
 import Grid from "@material-ui/core/Grid";
 import Modal from "@material-ui/core/Modal";
@@ -46,6 +47,7 @@ class ToolOptions extends Component {
     width: 600,
     height: "90vh",
     menuConfig: {},
+    iconLibraryLink: "https://material.io/resources/icons/?style=baseline",
     openMenuEditor: false,
     validationErrors: []
   };
@@ -68,109 +70,9 @@ class ToolOptions extends Component {
     });
   };
 
-  onCloseMenuEditorClick = e => {
-    e.preventDefault();
-    this.setState({ openMenuEditor: false, tree: [] });
-  };
-
-  onSaveMenuEditsClick = e => {
-    e.preventDefault();
-    this.setState({ openMenuEditor: false });
-    this.save();
-  };
-
-  onNewTreeRowClick = e => {
-    e.preventDefault();
-    this.addNewItem();
-  };
-
-  getHeader = () => {
-    return (
-      <Grid
-        style={{ paddingTop: "10px", paddingBottom: "10px" }}
-        justify="flex-end"
-        container
-      >
-        <Grid xs={1} item>
-          <DragHandle></DragHandle>
-        </Grid>
-        <Grid xs={2} item>
-          <Typography variant="h5">Namn</Typography>
-        </Grid>
-
-        <Grid xs={9} container item>
-          <Grid xs={3} item>
-            <Typography variant="h5">Inställningar</Typography>
-          </Grid>
-          <Grid xs={3} item>
-            <Typography variant="h5">Koppling</Typography>
-          </Grid>
-
-          <Grid xs={4} item>
-            <ColorButtonGreen
-              variant="contained"
-              onClick={this.onNewTreeRowClick}
-            >
-              Ny menylänk
-            </ColorButtonGreen>
-            <ColorButtonBlue
-              variant="contained"
-              className="btn"
-              onClick={this.onSaveMenuEditsClick}
-              startIcon={<SaveIcon />}
-            >
-              Spara
-            </ColorButtonBlue>
-          </Grid>
-          <Grid xs={1} item></Grid>
-          <Grid xs={1} item>
-            <ColorButtonRed
-              variant="contained"
-              className="btn"
-              onClick={this.onCloseMenuEditorClick}
-            >
-              Avbryt
-            </ColorButtonRed>
-          </Grid>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  addNewItem = () => {
-    let menuItem = {
-      title: "",
-      document: "",
-      color: "",
-      icon: {
-        materialUiIconName: "",
-        fontSize: "large"
-      },
-      maplink: "",
-      link: "",
-      menu: []
-    };
-
-    let newTree = [...this.state.tree];
-    newTree.push(this.createTreeChild(menuItem));
-    this.setState({ tree: newTree });
-  };
-
-  getTreeView = () => {
-    return this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
-      this.menuConfig = menuConfig.options.menuConfig;
-      let treeData = this.createTreeStructure(this.menuConfig.menu);
-      treeData.unshift({
-        title: this.getHeader(),
-        disabled: true,
-        children: [],
-        menuItem: [],
-        key: HEADER_KEY
-      });
-      return treeData;
-    });
-  };
-
+  // Methods copied from other admin-tools to save settings correctly
+  //
+  //
   componentDidMount = () => {
     var tool = this.getTool();
     if (tool) {
@@ -183,7 +85,8 @@ class ToolOptions extends Component {
         showScrollButtonLimit: tool.options.showScrollButtonLimit,
         width: tool.options.width,
         height: tool.options.height,
-        menuConfig: tool.options.menuConfig
+        menuConfig: tool.options.menuConfig,
+        iconLibraryLink: tool.options.iconLibraryLink
       });
     } else {
       this.setState({
@@ -236,7 +139,6 @@ class ToolOptions extends Component {
       this.state.tree,
       this.menuConfig
     );
-
     var tool = {
       type: this.type,
       index: this.state.index,
@@ -245,6 +147,7 @@ class ToolOptions extends Component {
         overlayLogoUrl: this.state.overlayLogoUrl,
         openOverlayButtonColor: this.state.openOverlayButtonColor,
         showScrollButtonLimit: this.state.showScrollButtonLimit,
+        iconLibraryLink: this.state.iconLibraryLink,
         width: this.state.width,
         height: this.state.height,
         menuConfig: this.menuConfig
@@ -289,6 +192,110 @@ class ToolOptions extends Component {
       update.call(this);
     }
   }
+  //
+  //
+  //END
+
+  onCloseMenuEditorClick = e => {
+    e.preventDefault();
+    this.setState({ openMenuEditor: false, tree: [] });
+  };
+
+  onSaveMenuEditsClick = e => {
+    e.preventDefault();
+    if (this.canSave(this.state.tree)) {
+      console.log(this.state.tree, "tree");
+      this.setState({ openMenuEditor: false }, () => {
+        this.save();
+      });
+    } else {
+      console.warn("Cant save");
+    }
+  };
+
+  onNewTreeRowClick = e => {
+    e.preventDefault();
+    this.addNewItem();
+  };
+
+  getHeader = () => {
+    return (
+      <Grid
+        style={{ paddingTop: "10px", paddingBottom: "10px" }}
+        justify="flex-end"
+        container
+      >
+        <Grid xs={1} item>
+          <DragHandle></DragHandle>
+        </Grid>
+        <Grid xs={2} item>
+          <Typography variant="h5">Namn</Typography>
+        </Grid>
+
+        <Grid xs={9} container item>
+          <Grid xs={3} item>
+            <Typography variant="h5">Inställningar</Typography>
+          </Grid>
+          <Grid xs={3} item>
+            <Typography variant="h5">Koppling</Typography>
+          </Grid>
+
+          <Grid xs={4} item>
+            <ColorButtonGreen
+              variant="contained"
+              onClick={this.onNewTreeRowClick}
+            >
+              <Typography variant="button">Ny menylänk</Typography>
+            </ColorButtonGreen>
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              onClick={this.onSaveMenuEditsClick}
+              startIcon={<SaveIcon />}
+            >
+              <Typography variant="button">Spara</Typography>
+            </ColorButtonBlue>
+          </Grid>
+          <Grid xs={1} item></Grid>
+          <Grid xs={1} item>
+            <ColorButtonRed
+              variant="contained"
+              className="btn"
+              onClick={this.onCloseMenuEditorClick}
+            >
+              <Typography variant="button">Avbryt</Typography>
+            </ColorButtonRed>
+          </Grid>
+        </Grid>
+      </Grid>
+    );
+  };
+
+  addNewItem = () => {
+    let menuItem = this.props.model.getNewMenuItemObject();
+    let newTree = [...this.state.tree];
+    newTree.push(this.createTreeChild(menuItem));
+    this.setState({ tree: newTree });
+  };
+
+  addHeaderRowToTreeStructure = treeData => {
+    treeData.unshift({
+      title: this.getHeader(),
+      disabled: true,
+      children: [],
+      menuItem: [],
+      key: HEADER_KEY
+    });
+  };
+
+  getTreeView = () => {
+    return this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
+      this.menuConfig = menuConfig.options.menuConfig;
+      let treeData = this.createTreeStructure(this.menuConfig.menu);
+      this.addHeaderRowToTreeStructure(treeData);
+      return treeData;
+    });
+  };
 
   createTreeStructure = menu => {
     this.treeKeys = [];
@@ -315,17 +322,27 @@ class ToolOptions extends Component {
   };
 
   getRowComponent = (menuItem, key, valid) => {
+    console.log(menuItem, "menuItem");
     return (
       <TreeRow
+        iconLibraryLink={this.state.iconLibraryLink}
         updateMenuItem={this.updateMenuItem}
         deleteMenuItem={this.deleteMenuItem}
         model={this.model}
         availableDocuments={this.availableDocuments}
         menuItem={menuItem}
+        updateValidationForTreeNode={this.updateValidationForTreeNode}
+        updateValidation={this.updateValidation}
         valid={valid}
         treeNodeId={key}
       ></TreeRow>
     );
+  };
+
+  updateValidationForTreeNode = treeNodeId => {
+    let newTree = [...this.state.tree];
+    let foundTreeNode = this.model.findInTree(newTree, treeNodeId);
+    this.updateValidation(foundTreeNode);
   };
 
   updateValidation = treeNode => {
@@ -362,25 +379,23 @@ class ToolOptions extends Component {
     };
   };
 
-  //Can this recursion be written better????
-  findInTree = (tree, key) => {
-    return tree
-      .map(treeNode => {
-        var found = this.findTreeNode(treeNode, key);
-        return found;
-      })
-      .filter(res => {
-        return res !== undefined;
-      })[0];
+  canSave = tree => {
+    return tree.some(treeNode => {
+      return this.checkForInvalidTreeNodes(treeNode);
+    });
   };
-  //Can this recursion be written better????
-  findTreeNode = (treeNode, key) => {
-    if (treeNode.key === key) {
-      return treeNode;
+
+  checkForInvalidTreeNodes = treeNode => {
+    console.log(treeNode, "treeNode");
+    if (!treeNode.title.props.valid) {
+      return false;
     } else {
       if (treeNode.children.length > 0) {
-        return this.findInTree(treeNode.children, key);
+        treeNode.children.forEach(child => {
+          return this.checkForInvalidTreeNodes(child);
+        });
       }
+      return true;
     }
   };
 
@@ -424,14 +439,19 @@ class ToolOptions extends Component {
 
   updateMenuItem = (treeNodeId, objectWithKeyValuesToUpdate) => {
     let newTreeState = [...this.state.tree];
-    let treeNode = this.findInTree(newTreeState, treeNodeId);
+    let treeNode = this.model.findInTree(newTreeState, treeNodeId);
     if (treeNode) {
       treeNode.menuItem = {
         ...treeNode.menuItem,
         ...objectWithKeyValuesToUpdate
       };
-
-      treeNode.title = this.getRowComponent(treeNode.menuItem, treeNode.key);
+      var valid = this.isSelectionValid(treeNode.menuItem, treeNode.children);
+      console.log(treeNode.menuItem, "MENU");
+      treeNode.title = this.getRowComponent(
+        treeNode.menuItem,
+        treeNode.key,
+        valid
+      );
       this.setState({ tree: newTreeState });
     }
     return treeNode;
@@ -454,12 +474,13 @@ class ToolOptions extends Component {
 
   deleteMenuItem = treeNodeId => {
     let newTreeState = [...this.state.tree];
-    let treeNode = this.findInTree(newTreeState, treeNodeId);
+    let treeNode = this.model.findInTree(newTreeState, treeNodeId);
     if (this.isRootNode(treeNode)) {
       this.deleteTreeNode(newTreeState, treeNode);
     } else {
       this.deleteTreeNode(treeNode.parent.children, treeNode);
     }
+    this.updateTreeValidation(newTreeState);
     this.setState({ tree: newTreeState });
   };
 

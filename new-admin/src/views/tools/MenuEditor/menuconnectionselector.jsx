@@ -1,7 +1,4 @@
 import React from "react";
-import { Component } from "react";
-import Button from "@material-ui/core/Button";
-import { blue, green, red } from "@material-ui/core/colors";
 import { Typography } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
@@ -16,7 +13,6 @@ import Popover from "@material-ui/core/Popover";
 import TextField from "@material-ui/core/TextField";
 import SettingsIcon from "@material-ui/icons/Settings";
 import WarningIcon from "@material-ui/icons/Warning";
-
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import { withStyles } from "@material-ui/core/styles";
 import Select from "@material-ui/core/Select";
@@ -44,7 +40,7 @@ const MENU_CONNECTION_TYPES = {
   documentConnection: "Koppla dokument",
   mapLink: "Koppla karta och lager",
   link: "Koppla webblänk",
-  subMenu: "Inget valt"
+  none: "Inget valt"
 };
 
 const styles = theme => ({
@@ -74,10 +70,6 @@ class MenuConnectionSelector extends React.Component {
   getInitialValue = () => {
     const { menuItem } = this.props;
 
-    if (menuItem.menu.length > 0) {
-      return MENU_CONNECTION_TYPES.subMenu;
-    }
-
     if (menuItem.document !== "") {
       return MENU_CONNECTION_TYPES.documentConnection;
     }
@@ -89,6 +81,8 @@ class MenuConnectionSelector extends React.Component {
     if (menuItem.maplink) {
       return MENU_CONNECTION_TYPES.mapLink;
     }
+
+    return MENU_CONNECTION_TYPES.none;
   };
 
   openConnectionsMenu = e => {
@@ -108,7 +102,7 @@ class MenuConnectionSelector extends React.Component {
           <SettingsIcon></SettingsIcon>
         </ListItemIcon>
         <Typography>{value}</Typography>
-        {value !== MENU_CONNECTION_TYPES.subMenu && (
+        {value !== MENU_CONNECTION_TYPES.none && (
           <ArrowRightIcon></ArrowRightIcon>
         )}
       </MenuItem>
@@ -124,7 +118,6 @@ class MenuConnectionSelector extends React.Component {
           style: { width: "500px", height: "500px", padding: "20px" }
         }}
         open={Boolean(connectionsMenuAnchorEl)}
-        onClose={this.closeConnectionsMenu}
         anchorEl={connectionsMenuAnchorEl}
         anchorOrigin={{
           vertical: "top",
@@ -153,24 +146,43 @@ class MenuConnectionSelector extends React.Component {
     );
   };
 
-  update = e => {
+  setDropdownValueToNone = () => {
+    this.setState({
+      connectionsMenuAnchorEl: null,
+      open: false,
+      value: MENU_CONNECTION_TYPES.none
+    });
+  };
+
+  update = () => {
     const { treeNodeId, updateMenuItem } = this.props;
     const { activeMenu } = this.state;
-    e.preventDefault();
+    let value = this.state.activeMenu;
+
     let newMenuItem = {
       maplink: "",
       link: "",
       document: ""
     };
+
     if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
+      if (!this.state.documentValue) {
+        value = MENU_CONNECTION_TYPES.none;
+      }
       newMenuItem = { ...newMenuItem, document: this.state.documentValue };
     }
 
     if (activeMenu === MENU_CONNECTION_TYPES.link) {
+      if (!this.state.linkValue) {
+        value = MENU_CONNECTION_TYPES.none;
+      }
       newMenuItem = { ...newMenuItem, link: this.state.linkValue };
     }
 
     if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
+      if (!this.state.mapLinkValue) {
+        value = MENU_CONNECTION_TYPES.none;
+      }
       newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
     }
 
@@ -179,7 +191,7 @@ class MenuConnectionSelector extends React.Component {
     this.setState({
       connectionsMenuAnchorEl: null,
       open: false,
-      value: this.state.activeMenu
+      value: value
     });
   };
 
@@ -232,7 +244,8 @@ class MenuConnectionSelector extends React.Component {
 
   renderPopoverContent = () => {
     const { activeMenu } = this.state;
-    if (activeMenu === MENU_CONNECTION_TYPES.subMenu) {
+
+    if (activeMenu === MENU_CONNECTION_TYPES.none) {
       return null;
     }
     if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
@@ -249,16 +262,24 @@ class MenuConnectionSelector extends React.Component {
   };
 
   handleChange = e => {
-    if (e.target.value !== MENU_CONNECTION_TYPES.subMenu) {
+    this.props.updateValidationForTreeNode(this.props.treeNodeId);
+    if (e.target.value !== MENU_CONNECTION_TYPES.none) {
       this.setState({
         activeMenu: e.target.value,
         connectionsMenuAnchorEl: e.currentTarget,
         open: true
       });
     } else {
-      this.setState({
-        value: e.target.value
-      });
+      console.log("Not here");
+      this.setState(
+        {
+          activeMenu: e.target.value,
+          value: e.target.value
+        },
+        () => {
+          this.update();
+        }
+      );
     }
   };
 
@@ -282,8 +303,8 @@ class MenuConnectionSelector extends React.Component {
       );
     }
 
-    if (this.state.value === MENU_CONNECTION_TYPES.subMenu) {
-      return this.getRenderedSelectionText("Undermeny");
+    if (this.state.value === MENU_CONNECTION_TYPES.none) {
+      return this.getRenderedSelectionText("Inget valt");
     }
 
     if (this.state.value === MENU_CONNECTION_TYPES.link) {
@@ -309,7 +330,9 @@ class MenuConnectionSelector extends React.Component {
         <>
           <FormControl>
             <Grid container>
-              <Grid item>{!valid && <WarningIcon></WarningIcon>}</Grid>
+              <Grid item>
+                {!valid && <WarningIcon color="error"></WarningIcon>}
+              </Grid>
 
               <Grid item>
                 <Select

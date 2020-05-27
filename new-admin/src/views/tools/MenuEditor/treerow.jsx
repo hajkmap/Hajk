@@ -27,15 +27,19 @@ const styles = () => ({
 });
 
 class TreeRow extends React.Component {
-  state = { menuItemTitle: this.props.menuItem.title };
+  state = {
+    menuItemTitle: this.props.menuItem.title
+  };
 
   componentWillUnmount = () => {
     const { updateMenuItem, treeNodeId } = this.props;
+    console.log(this.state.menuItemTitle, "this.state.menuItemTitle");
     updateMenuItem(treeNodeId, { title: this.state.menuItemTitle });
   };
 
   constructor(props) {
     super(props);
+    console.log(this.props.menuItem.title, "menuItemTitle");
   }
 
   renderConnectionSelect = () => {
@@ -46,12 +50,16 @@ class TreeRow extends React.Component {
       availableDocuments,
       menuItem
     } = this.props;
-
+    console.log(this.props.tree, "this.props.tree");
     return (
       <MenuConnectionSelector
         treeNodeId={treeNodeId}
         updateMenuItem={updateMenuItem}
+        updateTreeValidation={this.updateTreeValidation}
         availableDocuments={availableDocuments}
+        model={this.props.model}
+        updateValidation={this.props.updateValidation}
+        updateValidationForTreeNode={this.props.updateValidationForTreeNode}
         valid={this.props.valid}
         model={model}
         menuItem={menuItem}
@@ -92,6 +100,7 @@ class TreeRow extends React.Component {
           <SettingsIcon></SettingsIcon>
         </IconButton>
         <SettingsPopover
+          iconLibraryLink={this.props.iconLibraryLink}
           treeNodeId={treeNodeId}
           menuItem={menuItem}
           updateMenuItem={updateMenuItem}
