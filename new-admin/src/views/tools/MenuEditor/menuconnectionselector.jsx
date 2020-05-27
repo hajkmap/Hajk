@@ -49,7 +49,8 @@ const styles = theme => ({
     "&:focus": {
       backgroundColor: theme.palette.primary.light
     }
-  }
+  },
+  paper: { width: "500px", height: "500px", padding: "20px" }
 });
 
 class MenuConnectionSelector extends React.Component {
@@ -114,9 +115,7 @@ class MenuConnectionSelector extends React.Component {
     const { classes } = this.props;
     return (
       <Popover
-        PaperProps={{
-          style: { width: "500px", height: "500px", padding: "20px" }
-        }}
+        PaperProps={{ className: classes.paper }}
         open={Boolean(connectionsMenuAnchorEl)}
         anchorEl={connectionsMenuAnchorEl}
         anchorOrigin={{

@@ -203,8 +203,7 @@ class ToolOptions extends Component {
 
   onSaveMenuEditsClick = e => {
     e.preventDefault();
-    if (this.canSave(this.state.tree)) {
-      console.log(this.state.tree, "tree");
+    if (this.model.canSave(this.state.tree)) {
       this.setState({ openMenuEditor: false }, () => {
         this.save();
       });
@@ -300,9 +299,7 @@ class ToolOptions extends Component {
   createTreeStructure = menu => {
     this.treeKeys = [];
     let tree = this.createTree(menu);
-    tree.forEach(treeNode => {
-      this.model.setParent(treeNode, undefined);
-    });
+    this.model.setParentForAllTreeNodes(tree);
     return tree;
   };
 
@@ -321,8 +318,13 @@ class ToolOptions extends Component {
     return newKey;
   };
 
-  getRowComponent = (menuItem, key, valid) => {
-    console.log(menuItem, "menuItem");
+  updateValidationForTreeNode = treeNodeId => {
+    let newTree = [...this.state.tree];
+    let foundTreeNode = this.model.findInTree(newTree, treeNodeId);
+    this.updateValidation(foundTreeNode);
+  };
+
+  getRowTitleComponent = (menuItem, children, key) => {
     return (
       <TreeRow
         iconLibraryLink={this.state.iconLibraryLink}
@@ -332,86 +334,18 @@ class ToolOptions extends Component {
         availableDocuments={this.availableDocuments}
         menuItem={menuItem}
         updateValidationForTreeNode={this.updateValidationForTreeNode}
-        updateValidation={this.updateValidation}
-        valid={valid}
+        valid={this.model.isSelectionValid(menuItem, children)}
         treeNodeId={key}
       ></TreeRow>
     );
   };
 
-  updateValidationForTreeNode = treeNodeId => {
-    let newTree = [...this.state.tree];
-    let foundTreeNode = this.model.findInTree(newTree, treeNodeId);
-    this.updateValidation(foundTreeNode);
-  };
-
-  updateValidation = treeNode => {
-    var valid = this.isSelectionValid(treeNode.menuItem, treeNode.children);
-    treeNode.title = this.getRowComponent(
+  updateTreeRowComponent = treeNode => {
+    treeNode.title = this.getRowTitleComponent(
       treeNode.menuItem,
-      treeNode.key,
-      valid
+      treeNode.children,
+      treeNode.key
     );
-
-    if (treeNode.children.length > 0) {
-      treeNode.children.forEach(child => {
-        this.updateValidation(child);
-      });
-    }
-  };
-
-  createTreeChild = menuItem => {
-    let children = [];
-
-    if (menuItem.menu.length > 0) {
-      children = this.createTree(menuItem.menu);
-    }
-
-    let key = this.getNewTreeKey().toString();
-    let valid = this.isSelectionValid(menuItem, children);
-
-    return {
-      title: this.getRowComponent(menuItem, key, valid),
-      children: children,
-      selectable: false,
-      menuItem: this.model.getMenuItemWithoutChildren(menuItem),
-      key: key
-    };
-  };
-
-  canSave = tree => {
-    return tree.some(treeNode => {
-      return this.checkForInvalidTreeNodes(treeNode);
-    });
-  };
-
-  checkForInvalidTreeNodes = treeNode => {
-    console.log(treeNode, "treeNode");
-    if (!treeNode.title.props.valid) {
-      return false;
-    } else {
-      if (treeNode.children.length > 0) {
-        treeNode.children.forEach(child => {
-          return this.checkForInvalidTreeNodes(child);
-        });
-      }
-      return true;
-    }
-  };
-
-  isSameNode = (foundDropNode, foundDragNode) => {
-    return foundDropNode.key === foundDragNode.key;
-  };
-
-  isSelectionValid = (menuItem, children) => {
-    if (
-      (menuItem.maplink || menuItem.document || menuItem.link) &&
-      children.length > 0
-    ) {
-      return false;
-    }
-
-    return true;
   };
 
   updateTreeValidation = tree => {
@@ -422,6 +356,32 @@ class ToolOptions extends Component {
     });
   };
 
+  updateValidation = treeNode => {
+    this.updateTreeRowComponent(treeNode);
+
+    if (treeNode.children.length > 0) {
+      treeNode.children.forEach(child => {
+        this.updateValidation(child);
+      });
+    }
+  };
+
+  createTreeChild = menuItem => {
+    let children = [];
+    if (menuItem.menu.length > 0) {
+      children = this.createTree(menuItem.menu);
+    }
+    let key = this.getNewTreeKey().toString();
+
+    return {
+      title: this.getRowTitleComponent(menuItem, children, key),
+      children: children,
+      selectable: false,
+      menuItem: this.model.getMenuItemWithoutChildren(menuItem),
+      key: key
+    };
+  };
+
   onDropNode = info => {
     const dropKey = info.node.props.eventKey;
     const dragKey = info.dragNode.props.eventKey;
@@ -429,7 +389,7 @@ class ToolOptions extends Component {
     let foundDragNode = this.model.getNodeFromTree(newTree, dragKey);
     let foundDropNode = this.model.getNodeFromTree(newTree, dropKey);
 
-    if (!this.isSameNode(foundDropNode, foundDragNode)) {
+    if (!this.model.isSameNode(foundDropNode, foundDragNode)) {
       this.model.updateDragNode(newTree, foundDragNode, foundDropNode);
       this.model.addToDropNode(foundDropNode, foundDragNode);
       this.updateTreeValidation(newTree);
@@ -445,13 +405,7 @@ class ToolOptions extends Component {
         ...treeNode.menuItem,
         ...objectWithKeyValuesToUpdate
       };
-      var valid = this.isSelectionValid(treeNode.menuItem, treeNode.children);
-      console.log(treeNode.menuItem, "MENU");
-      treeNode.title = this.getRowComponent(
-        treeNode.menuItem,
-        treeNode.key,
-        valid
-      );
+      this.updateTreeRowComponent(treeNode);
       this.setState({ tree: newTreeState });
     }
     return treeNode;
@@ -482,15 +436,6 @@ class ToolOptions extends Component {
     }
     this.updateTreeValidation(newTreeState);
     this.setState({ tree: newTreeState });
-  };
-
-  renderTableCell = columnName => {
-    const { classes } = this.props;
-    return (
-      <TableCell key={columnName} className={classes.cell}>
-        <Typography>{columnName}</Typography>
-      </TableCell>
-    );
   };
 
   onEditMenuClick = e => {

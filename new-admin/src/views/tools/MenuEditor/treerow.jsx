@@ -23,7 +23,10 @@ const getTextField = (value, onChangeFunction, variant) => {
 };
 
 const styles = () => ({
-  test: { padding: "100px" }
+  treeRowRoot: {
+    border: "1px solid rgba(153,164,161,0.5)",
+    borderRadius: "8px"
+  }
 });
 
 class TreeRow extends React.Component {
@@ -33,13 +36,11 @@ class TreeRow extends React.Component {
 
   componentWillUnmount = () => {
     const { updateMenuItem, treeNodeId } = this.props;
-    console.log(this.state.menuItemTitle, "this.state.menuItemTitle");
     updateMenuItem(treeNodeId, { title: this.state.menuItemTitle });
   };
 
   constructor(props) {
     super(props);
-    console.log(this.props.menuItem.title, "menuItemTitle");
   }
 
   renderConnectionSelect = () => {
@@ -50,7 +51,7 @@ class TreeRow extends React.Component {
       availableDocuments,
       menuItem
     } = this.props;
-    console.log(this.props.tree, "this.props.tree");
+
     return (
       <MenuConnectionSelector
         treeNodeId={treeNodeId}
@@ -58,7 +59,6 @@ class TreeRow extends React.Component {
         updateTreeValidation={this.updateTreeValidation}
         availableDocuments={availableDocuments}
         model={this.props.model}
-        updateValidation={this.props.updateValidation}
         updateValidationForTreeNode={this.props.updateValidationForTreeNode}
         valid={this.props.valid}
         model={model}
@@ -71,7 +71,6 @@ class TreeRow extends React.Component {
     const { deleteMenuItem, treeNodeId } = this.props;
     return (
       <IconButton
-        style={{ padding: "0px" }}
         onClick={() => {
           deleteMenuItem(treeNodeId);
         }}
@@ -123,15 +122,9 @@ class TreeRow extends React.Component {
   };
 
   render = () => {
+    const { classes } = this.props;
     return (
-      <Grid
-        style={{
-          border: "1px solid rgba(153,164,161,0.5)",
-          borderRadius: "8px"
-        }}
-        justify="flex-end"
-        container
-      >
+      <Grid className={classes.treeRowRoot} justify="flex-end" container>
         <Grid xs={1} item>
           <DragHandle></DragHandle>
         </Grid>

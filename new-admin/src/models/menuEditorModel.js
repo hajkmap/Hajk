@@ -79,6 +79,33 @@ var menuEditorModel = Model.extend({
     }
   },
 
+  canSave: function(tree) {
+    return tree.some(treeNode => {
+      return this.checkForInvalidTreeNodes(treeNode);
+    });
+  },
+
+  setParentForAllTreeNodes: function(tree) {
+    tree.forEach(treeNode => {
+      this.setParent(treeNode, undefined);
+    });
+  },
+
+  isSameNode: function(foundDropNode, foundDragNode) {
+    return foundDropNode.key === foundDragNode.key;
+  },
+
+  isSelectionValid: function(menuItem, children) {
+    if (
+      (menuItem.maplink || menuItem.document || menuItem.link) &&
+      children.length > 0
+    ) {
+      return false;
+    }
+
+    return true;
+  },
+
   createMenuFromTreeStructure: function(menu, tree) {
     tree.forEach(treeNode => {
       if (treeNode.children.length > 0) {
@@ -97,6 +124,19 @@ var menuEditorModel = Model.extend({
 
   removeHeaderTreeRow: function(tree) {
     tree.shift();
+  },
+
+  checkForInvalidTreeNodes: function(treeNode) {
+    if (!treeNode.title.props.valid) {
+      return false;
+    } else {
+      if (treeNode.children.length > 0) {
+        treeNode.children.forEach(child => {
+          return this.checkForInvalidTreeNodes(child);
+        });
+      }
+      return true;
+    }
   },
 
   getNewMenuItemObject: function() {
