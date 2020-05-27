@@ -41,7 +41,7 @@ import Measure from "./tools/measure.jsx";
 import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
-import MenuEditor from "./tools/menuEditor.jsx";
+import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 
 var defaultState = {
   activeTool: ""
