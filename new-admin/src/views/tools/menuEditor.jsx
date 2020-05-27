@@ -206,8 +206,8 @@ class ToolOptions extends Component {
     this.setState({ tree: newTree });
   };
 
-  loadTreeView = () => {
-    this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
+  getTreeView = () => {
+    return this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
       this.menuConfig = menuConfig.options.menuConfig;
       let treeData = this.createTreeStructure(this.menuConfig.menu);
       treeData.unshift({
@@ -217,7 +217,7 @@ class ToolOptions extends Component {
         menuItem: [],
         key: -2
       });
-      this.setState({ tree: treeData });
+      return treeData;
     });
   };
 
@@ -240,8 +240,6 @@ class ToolOptions extends Component {
         active: false
       });
     }
-
-    this.loadTreeView();
   };
 
   handleInputChange(event) {
@@ -366,15 +364,33 @@ class ToolOptions extends Component {
     return newKey;
   };
 
-  isSelectionValid = (children, menuItem) => {
-    if (
-      (menuItem.mapLink || menuItem.document || menuItem.link) &&
-      children.length > 0
-    ) {
-      return false;
-    }
+  getRowComponent = (menuItem, key, valid) => {
+    return (
+      <TreeRow
+        updateMenuItem={this.updateMenuItem}
+        deleteMenuItem={this.deleteMenuItem}
+        model={this.model}
+        availableDocuments={this.availableDocuments}
+        menuItem={menuItem}
+        valid={valid}
+        treeNodeId={key}
+      ></TreeRow>
+    );
+  };
 
-    return true;
+  traverse = treeNode => {
+    var valid = this.isSelectionValid(treeNode.menuItem, treeNode.children);
+    treeNode.title = this.getRowComponent(
+      treeNode.menuItem,
+      treeNode.key,
+      valid
+    );
+
+    if (treeNode.children.length > 0) {
+      treeNode.children.forEach(child => {
+        this.traverse(child);
+      });
+    }
   };
 
   createTreeChild = menuItem => {
@@ -384,19 +400,10 @@ class ToolOptions extends Component {
     }
 
     let key = this.getNewTreeKey().toString();
+    var valid = this.isSelectionValid(menuItem, children);
 
     return {
-      title: (
-        <TreeRow
-          updateMenuItem={this.updateMenuItem}
-          deleteMenuItem={this.deleteMenuItem}
-          model={this.model}
-          availableDocuments={this.availableDocuments}
-          menuItem={menuItem}
-          validSelection={this.isSelectionValid(children, menuItem)}
-          treeNodeId={key}
-        ></TreeRow>
-      ),
+      title: this.getRowComponent(menuItem, key, valid),
       children: children,
       selectable: false,
       menuItem: this.model.getMenuItemWithoutChildren(menuItem),
@@ -430,6 +437,17 @@ class ToolOptions extends Component {
     return foundDropNode.key === foundDragNode.key;
   };
 
+  isSelectionValid = (menuItem, children) => {
+    if (
+      (menuItem.maplink || menuItem.document || menuItem.link) &&
+      children.length > 0
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
   onDropNode = info => {
     const dropKey = info.node.props.eventKey;
     const dragKey = info.dragNode.props.eventKey;
@@ -440,6 +458,11 @@ class ToolOptions extends Component {
     if (!this.isSameNode(foundDropNode, foundDragNode)) {
       this.model.updateDragNode(newTree, foundDragNode, foundDropNode);
       this.model.addToDropNode(foundDropNode, foundDragNode);
+      newTree.forEach(treeNode => {
+        if (treeNode.key != -2) {
+          this.traverse(treeNode);
+        }
+      });
       this.setState({ tree: newTree });
     }
   };
@@ -453,22 +476,7 @@ class ToolOptions extends Component {
         ...objectWithKeyValuesToUpdate
       };
 
-      treeNode.title = (
-        <TreeRow
-          updateMenuItem={this.updateMenuItem}
-          deleteMenuItem={this.deleteMenuItem}
-          hasChildren={treeNode.children > 0}
-          menuItem={treeNode.menuItem}
-          validSelection={this.isSelectionValid(
-            treeNode.children,
-            treeNode.menuItem
-          )}
-          availableDocuments={this.availableDocuments}
-          model={this.model}
-          treeNodeId={treeNode.key}
-        ></TreeRow>
-      );
-
+      treeNode.title = this.getRowComponent(treeNode.menuItem, treeNode.key);
       this.setState({ tree: newTreeState });
     }
     return treeNode;
@@ -514,6 +522,12 @@ class ToolOptions extends Component {
   };
 
   render() {
+    if (this.state.tree) {
+      this.state.tree.forEach(treeNode => {
+        //this.model.traverse(treeNode);
+      });
+    }
+
     const { classes } = this.props;
     let expandedKeys = this.treeKeys.map(key => {
       return key.toString();
@@ -528,8 +542,9 @@ class ToolOptions extends Component {
               className="btn"
               onClick={e => {
                 e.preventDefault();
-                this.loadTreeView();
-                this.setState({ openMenuEditor: true });
+                this.getTreeView().then(treeData => {
+                  this.setState({ openMenuEditor: true, tree: treeData });
+                });
               }}
               startIcon={<SaveIcon />}
             >
@@ -704,6 +719,7 @@ const TreeRow = withStyles(theme => {
           treeNodeId={treeNodeId}
           updateMenuItem={updateMenuItem}
           availableDocuments={availableDocuments}
+          valid={this.props.valid}
           model={model}
           menuItem={menuItem}
         ></MenuConnectionSelector>
@@ -1055,17 +1071,14 @@ const MenuConnectionSelector = withStyles(theme => {
 
     render = () => {
       const { value, open } = this.state;
-      const { validSelection } = this.props;
+      const { valid } = this.props;
 
       if (value) {
-        console.log(validSelection, "validSelection");
         return (
           <>
             <FormControl>
               <Grid container>
-                <Grid item>
-                  {!validSelection && <WarningIcon></WarningIcon>}
-                </Grid>
+                <Grid item>{!valid && <WarningIcon></WarningIcon>}</Grid>
 
                 <Grid item>
                   <Select
