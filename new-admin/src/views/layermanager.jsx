@@ -159,7 +159,7 @@ class Manager extends Component {
     this.setState({
       alert: true,
       confirm: true,
-      alertMessage: "Lagret kommer att tas bort. Är detta ok?",
+      alertMessage: `Lagret "${layer.caption}" kommer att tas bort. Är detta ok?`,
       confirmAction: () => {
         this.props.model.removeLayer(layer, success => {
           if (success) {
@@ -174,7 +174,7 @@ class Manager extends Component {
           } else {
             this.setState({
               alert: true,
-              alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
+              alertMessage: `Lagret "${layer.caption}" kunde inte tas bort. Försök igen senare.`
             });
           }
         });
