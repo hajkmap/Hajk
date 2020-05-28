@@ -120,12 +120,13 @@ import {
   TextField,
   Tooltip,
   makeStyles,
-  Checkbox
+  Checkbox,
+  Popover,
+  Typography
 } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import ToggleButton from "@material-ui/lab/ToggleButton";
-import Divider from "@material-ui/core/Divider";
 
 import MenuIcon from "@material-ui/icons/Menu";
 import FormatSizeIcon from "@material-ui/icons/FormatSize";
@@ -133,15 +134,18 @@ import SearchIcon from "@material-ui/icons/Search";
 import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
 import WithinIcon from "@material-ui/icons/Adjust";
 import IntersectsIcon from "@material-ui/icons/Toll";
-
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+
+import SearchResultsContainer from "./SearchResultsContainer";
 
 const useStyles = makeStyles(theme => ({
   iconButtons: {
     padding: 10
   }
 }));
+
 const SearchBar = props => {
   const classes = useStyles();
 
@@ -170,6 +174,12 @@ const SearchBar = props => {
   const resultsSource = useRef();
   const resultsLayer = useRef();
 
+  // Holder for search results that will be sent to the Results component
+  const [searchResults, setSearchResults] = useState({
+    featureCollections: [],
+    errors: []
+  });
+
   const map = useRef(props.map);
 
   const drawStyle = useRef(
@@ -195,6 +205,17 @@ const SearchBar = props => {
   const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
   const checkedIcon = <CheckBoxIcon fontSize="small" />;
   const [searchSources, setSearchSources] = useState(searchModel.getSources());
+
+  // For the Popover with Additional Search Options
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const handleClickOnMoreOptions = event => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const moreOptionsIsOpen = Boolean(anchorEl);
+  const moreOptionsId = open ? "simple-popover" : undefined;
 
   useEffect(() => {
     drawSource.current = new VectorSource({ wrapX: false });
@@ -301,8 +322,9 @@ const SearchBar = props => {
     );
 
     features.map(f => resultsSource.current.addFeatures(f));
-    const currentExtent = resultsSource.current.getExtent();
 
+    // Zoom to fit all features
+    const currentExtent = resultsSource.current.getExtent();
     // If the extent doesn't include any "Infite" values, let's go on - else abort zooming
     if (currentExtent.map(Number.isFinite).includes(false) === false) {
       map.current.getView().fit(currentExtent, {
@@ -333,6 +355,8 @@ const SearchBar = props => {
 
     // It's possible to handle any errors in the UI by checking if Search Model returned any
     errors.length > 0 && console.error(errors);
+
+    setSearchResults({ featureCollections, errors });
 
     addFeaturesToResultsLayer(featureCollections);
   }
@@ -372,145 +396,176 @@ const SearchBar = props => {
     : "Visa verktygspanelen";
 
   return (
-    <Paper className={classes.root}>
-      <Autocomplete
-        id="searchInputField"
-        style={{ width: 500 }}
-        freeSolo
-        clearOnEscape
-        // open={open}
-        // onOpen={e => {
-        //   console.log("onOpen: ", e);
-        //   // setOpen(true);
-        // }}
-        // onClose={(e, r) => {
-        //   console.log("onClose: ", e, r);
-        //   // setOpen(false);
-        // }}
-        onChange={handleOnChange}
-        onInputChange={handleOnInputChange}
-        getOptionSelected={(option, value) =>
-          option.autocompleteEntry === value.autocompleteEntry
-        }
-        getOptionLabel={option => option?.autocompleteEntry || option}
-        groupBy={option => option.dataset}
-        options={options}
-        loading={loading}
-        renderInput={params => (
-          <TextField
-            {...params}
-            label={undefined}
-            variant="outlined"
-            placeholder="Skriv eller välj bland förslagen nedan..."
-            InputProps={{
-              ...params.InputProps,
-              startAdornment: (
-                <Tooltip title={tooltipText}>
-                  <span id="drawerToggler">
-                    <IconButton
-                      onClick={onMenuClick}
-                      className={classes.iconButton}
-                      disabled={menuButtonDisabled}
-                      aria-label="menu"
-                    >
-                      <MenuIcon size={20} />
+    <>
+      <Paper className={classes.root}>
+        <Autocomplete
+          id="searchInputField"
+          style={{ width: 400 }}
+          freeSolo
+          clearOnEscape
+          autoComplete
+          autoHighlight
+          // open={open}
+          // onOpen={e => {
+          //   console.log("onOpen: ", e);
+          //   // setOpen(true);
+          // }}
+          // onClose={(e, r) => {
+          //   console.log("onClose: ", e, r);
+          //   // setOpen(false);
+          // }}
+          onChange={handleOnChange}
+          onInputChange={handleOnInputChange}
+          getOptionSelected={(option, value) =>
+            option.autocompleteEntry === value.autocompleteEntry
+          }
+          getOptionLabel={option => option?.autocompleteEntry || option}
+          groupBy={option => option.dataset}
+          options={options}
+          loading={loading}
+          renderInput={params => (
+            <TextField
+              {...params}
+              label={undefined}
+              variant="outlined"
+              placeholder="Skriv eller välj bland förslagen nedan..."
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <Tooltip title={tooltipText}>
+                    <span id="drawerToggler">
+                      <IconButton
+                        onClick={onMenuClick}
+                        className={classes.iconButton}
+                        disabled={menuButtonDisabled}
+                        aria-label="menu"
+                      >
+                        <MenuIcon size={20} />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                ),
+                endAdornment: (
+                  <>
+                    {loading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
+                    {params.InputProps.endAdornment}
+                    <IconButton onClick={handleClickOnSearch}>
+                      <SearchIcon />
                     </IconButton>
-                  </span>
-                </Tooltip>
-              ),
-              endAdornment: (
-                <>
-                  {loading ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                  <ToggleButton
-                    value="wildcardAtStart"
-                    selected={wildcardAtStart}
-                    onChange={() => setWildcardAtStart(!wildcardAtStart)}
-                  >
-                    *.
-                  </ToggleButton>
-                  <ToggleButton
-                    value="wildcardAtEnd"
-                    selected={wildcardAtEnd}
-                    onChange={() => setWildcardAtEnd(!wildcardAtEnd)}
-                  >
-                    .*
-                  </ToggleButton>
-                  <ToggleButton
-                    value="matchCase"
-                    selected={matchCase}
-                    onChange={() => setMatchCase(!matchCase)}
-                  >
-                    <FormatSizeIcon />
-                  </ToggleButton>
-                  <Divider orientation="vertical" />
-                  <ToggleButton
-                    value="drawActive"
-                    selected={drawActive}
-                    onChange={handleClickOnDrawToggle}
-                  >
-                    <BrushTwoToneIcon />
-                  </ToggleButton>
-                  <ToggleButton
-                    value="activeSpatialFilter"
-                    selected={activeSpatialFilter === "intersects"}
-                    onChange={() =>
-                      setActiveSpatialFilter(
-                        activeSpatialFilter === "intersects"
-                          ? "within"
-                          : "intersects"
-                      )
-                    }
-                  >
-                    {activeSpatialFilter === "intersects" ? (
-                      <IntersectsIcon />
-                    ) : (
-                      <WithinIcon />
-                    )}
-                  </ToggleButton>
-                  <IconButton onClick={handleClickOnSearch}>
-                    <SearchIcon />
-                  </IconButton>
-                </>
-              )
-            }}
-          />
-        )}
-      />
-      <Autocomplete
-        onChange={(event, value, reason) => {
-          setSearchSources(value);
-        }}
-        value={searchSources}
-        multiple
-        id="searchSources"
-        options={searchModel.getSources()}
-        disableCloseOnSelect
-        getOptionLabel={option => option.caption}
-        renderOption={(option, { selected }) => (
-          <>
-            <Checkbox
-              icon={icon}
-              checkedIcon={checkedIcon}
-              style={{ marginRight: 8 }}
-              checked={selected}
+                    <IconButton
+                      aria-describedby={moreOptionsId}
+                      onClick={handleClickOnMoreOptions}
+                    >
+                      <MoreHorizIcon />
+                    </IconButton>
+                  </>
+                )
+              }}
             />
-            {option.caption}
-          </>
-        )}
-        style={{ width: 500 }}
-        renderInput={params => (
-          <TextField
-            {...params}
-            variant="outlined"
-            // label="Sökkällor"
-            placeholder="Välj sökkälla"
-          />
-        )}
+          )}
+        />
+        <Popover
+          id={moreOptionsId}
+          open={moreOptionsIsOpen}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center"
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center"
+          }}
+        >
+          <Paper>
+            <Typography>Fler inställningar</Typography>
+            <ToggleButton
+              value="wildcardAtStart"
+              selected={wildcardAtStart}
+              onChange={() => setWildcardAtStart(!wildcardAtStart)}
+            >
+              *.
+            </ToggleButton>
+            <ToggleButton
+              value="wildcardAtEnd"
+              selected={wildcardAtEnd}
+              onChange={() => setWildcardAtEnd(!wildcardAtEnd)}
+            >
+              .*
+            </ToggleButton>
+            <ToggleButton
+              value="matchCase"
+              selected={matchCase}
+              onChange={() => setMatchCase(!matchCase)}
+            >
+              <FormatSizeIcon />
+            </ToggleButton>
+            <ToggleButton
+              value="drawActive"
+              selected={drawActive}
+              onChange={handleClickOnDrawToggle}
+            >
+              <BrushTwoToneIcon />
+            </ToggleButton>
+            <ToggleButton
+              value="activeSpatialFilter"
+              selected={activeSpatialFilter === "intersects"}
+              onChange={() =>
+                setActiveSpatialFilter(
+                  activeSpatialFilter === "intersects" ? "within" : "intersects"
+                )
+              }
+            >
+              {activeSpatialFilter === "intersects" ? (
+                <IntersectsIcon />
+              ) : (
+                <WithinIcon />
+              )}
+            </ToggleButton>
+          </Paper>
+        </Popover>
+
+        <Autocomplete
+          onChange={(event, value, reason) => {
+            setSearchSources(value);
+          }}
+          value={searchSources}
+          multiple
+          id="searchSources"
+          options={searchModel.getSources()}
+          disableCloseOnSelect
+          getOptionLabel={option => option.caption}
+          renderOption={(option, { selected }) => (
+            <>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+              {option.caption}
+            </>
+          )}
+          style={{ width: 400 }}
+          renderInput={params => (
+            <TextField
+              {...params}
+              variant="outlined"
+              // label="Sökkällor"
+              placeholder="Välj sökkälla"
+            />
+          )}
+        />
+      </Paper>
+      <SearchResultsContainer
+        searchResults={searchResults}
+        resultsSource={resultsSource}
+        map={map}
       />
-    </Paper>
+    </>
   );
 };
 
