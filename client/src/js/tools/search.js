@@ -43,7 +43,8 @@ var SearchModelProperties = {
   displayPopupBar: true,
   hits: [],
   popupOffsetY: 0,
-  aliasDict: {}
+  aliasDict: {},
+  placeholder: 'Sök i kartan...'
 };
 
 /**

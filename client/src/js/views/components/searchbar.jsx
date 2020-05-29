@@ -653,6 +653,8 @@ var SearchBarView = {
       showResults, //= this.props.model.shouldRenderResult(true),
       options = this.renderOptions();
 
+    var placeholder = this.props.model.get("placeholder");
+
     const Loading = (
       <div id="searchbar-loading-spinner">
         <span className="sr-only">Laddar...</span>
@@ -711,7 +713,7 @@ var SearchBarView = {
             type="text"
             ref="searchInput"
             className={inputClassName}
-            placeholder="Sök i kartan..."
+            placeholder={placeholder}
             value={valueBar}
             onKeyDown={this.handleKeyDown}
             onChange={this.searchOnInput}
