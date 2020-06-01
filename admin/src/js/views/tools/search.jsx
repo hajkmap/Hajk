@@ -49,6 +49,7 @@ var defaultState = {
   visibleForGroups: [],
   searchableLayers: {},
   tree: '',
+  placeholder: '',
   layers: []
 };
 
@@ -92,7 +93,8 @@ class ToolOptions extends Component {
         imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
         popupOffsetY: tool.options.popupOffsetY,
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : [],
-        layers: tool.options.layers ? tool.options.layers : []
+        layers: tool.options.layers ? tool.options.layers : [],
+        placeholder: tool.options.placeholder,
       }, () => { this.loadLayers(); });
     } else {
       this.setState({
@@ -215,7 +217,8 @@ class ToolOptions extends Component {
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
         popupOffsetY: this.state.popupOffsetY,
         visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim),
-        layers: this.state.layers ? this.state.layers : []
+        layers: this.state.layers ? this.state.layers : [],
+        placeholder: this.state.placeholder
       }
     };
 
@@ -468,6 +471,14 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor='imgSizeY'>Bildhöjd</label>
             <input value={this.state.imgSizeY} type='text' name='imgSizeY' onChange={(e) => { this.handleInputChange(e); }} />
+          </div>
+          <div>
+            <label htmlFor='placeholder'>Text för placeholder</label>
+            <textarea
+                id='placeholder'
+                name='placeholder'
+                onChange={(e) => { this.handleInputChange(e); }}
+                value={this.state.placeholder} />
           </div>
         </form>
         {this.state.tree}

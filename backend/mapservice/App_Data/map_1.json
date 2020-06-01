@@ -279,6 +279,7 @@
         "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": true,
         "selectionTools": true,
+        "placeholder":  '',
         "anchor": [
           16,
           32
