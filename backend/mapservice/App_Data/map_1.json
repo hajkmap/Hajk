@@ -373,7 +373,8 @@
     {
       "type": "anchor",
       "options": {},
-      "index": 0
+      "index": 0,
+      "varberg":  false
     },
     {
       "type": "draw",
