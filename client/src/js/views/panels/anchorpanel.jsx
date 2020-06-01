@@ -73,19 +73,34 @@ var AnchorPanelView = {
    */
   render: function () {
     var anchor = this.props.model.get('anchor');
+    if(this.props.model.get('varberg')){
     return (
       <Panel title='Länk till karta' onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
         <div className='panel-content'>
           <button onClick={this.generate} className='btn btn-primary'>Skapa länk</button><br /><br />
-          <p>
-            När du har skapat en länk kan du kopiera länkadressen genom att högerklicka på "Länk" nedan.<br />
-          </p>
-          <div className='alert alert-success'>
-            <a target='_blank' href={anchor}>Länk</a>
+              <div>
+                <input type="text" id="link" value={anchor}></input><br/>
+                <a target="_blank" className="linktext" href={anchor}>Öppna länk i nytt fönster</a>
           </div>
         </div>
       </Panel>
     );
+  }else{
+    return(
+      <Panel title="Länk till karta" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
+        <div className="panel-content">
+          <button onClick={this.generate} className="btn btn-default">Uppdatera länk</button>
+          <p>
+            En direktlänk har genererats som visar aktuell utbretning, zoomnivå och tända/släckta lager.<br/>
+            Tryck på länken nedan för att öppna kartan i ny flik för exempelvis bokmärkning.<br/>
+            Högerklika på länken och välj kopiera genväg för att spara länken i urklipp för inklistring i ett e-mail exempelvis.<br/>
+          </p>
+          <div className="alert alert-success">
+            <a target="_blank" href={anchor}>Länk</a>
+          </div>
+        </div>
+      </Panel>
+  );}
   }
 };
 
