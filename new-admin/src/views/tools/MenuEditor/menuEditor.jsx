@@ -10,6 +10,7 @@ import TableCell from "@material-ui/core/TableCell";
 import DragHandle from "@material-ui/icons/DragHandle";
 import { withStyles } from "@material-ui/core/styles";
 import TreeRow from "./treerow.jsx";
+
 import {
   ColorButtonBlue,
   ColorButtonGreen,
@@ -20,6 +21,7 @@ import Tree from "antd/es/tree"; //Specific import to keep bundle-size small
 import "antd/es/tree/style/css"; //Specific import to keep bundle-size small
 
 const HEADER_KEY = -2;
+const { TreeNode } = Tree;
 
 const styles = () => ({
   container: {
@@ -45,6 +47,7 @@ class ToolOptions extends Component {
     openOverlayButtonColor: "#ffffff",
     showScrollButtonLimit: 400,
     width: 600,
+    canSave: true,
     height: "90vh",
     menuConfig: {},
     iconLibraryLink: "https://material.io/resources/icons/?style=baseline",
@@ -208,7 +211,9 @@ class ToolOptions extends Component {
         this.save();
       });
     } else {
-      console.warn("Cant save");
+      this.setState({ openMenuEditor: false }, () => {
+        this.save();
+      });
     }
   };
 
@@ -217,9 +222,10 @@ class ToolOptions extends Component {
     this.addNewItem();
   };
 
-  getHeader = () => {
+  getHeader = canSave => {
     return (
       <Grid
+        valid={true}
         style={{ paddingTop: "10px", paddingBottom: "10px" }}
         justify="flex-end"
         container
@@ -239,7 +245,7 @@ class ToolOptions extends Component {
             <Typography variant="h5">Koppling</Typography>
           </Grid>
 
-          <Grid xs={4} item>
+          <Grid ref={this.buttonHeaderRef} xs={4} item>
             <ColorButtonGreen
               variant="contained"
               onClick={this.onNewTreeRowClick}
@@ -249,6 +255,7 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
+              disabled={!canSave}
               onClick={this.onSaveMenuEditsClick}
               startIcon={<SaveIcon />}
             >
@@ -271,7 +278,7 @@ class ToolOptions extends Component {
   };
 
   addNewItem = () => {
-    let menuItem = this.props.model.getNewMenuItemObject();
+    let menuItem = this.model.getNewMenuItemObject();
     let newTree = [...this.state.tree];
     newTree.push(this.createTreeChild(menuItem));
     this.setState({ tree: newTree });
@@ -279,7 +286,7 @@ class ToolOptions extends Component {
 
   addHeaderRowToTreeStructure = treeData => {
     treeData.unshift({
-      title: this.getHeader(),
+      title: this.getHeader(this.model.canSave(treeData)),
       disabled: true,
       children: [],
       menuItem: [],
@@ -291,7 +298,7 @@ class ToolOptions extends Component {
     return this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
       this.menuConfig = menuConfig.options.menuConfig;
       let treeData = this.createTreeStructure(this.menuConfig.menu);
-      this.addHeaderRowToTreeStructure(treeData);
+
       return treeData;
     });
   };
@@ -316,12 +323,6 @@ class ToolOptions extends Component {
     }
     this.treeKeys.push(newKey);
     return newKey;
-  };
-
-  updateValidationForTreeNode = treeNodeId => {
-    let newTree = [...this.state.tree];
-    let foundTreeNode = this.model.findInTree(newTree, treeNodeId);
-    this.updateValidation(foundTreeNode);
   };
 
   getRowTitleComponent = (menuItem, children, key) => {
@@ -354,6 +355,13 @@ class ToolOptions extends Component {
         this.updateValidation(treeNode);
       }
     });
+  };
+
+  updateValidationForTreeNode = treeNodeId => {
+    let newTree = [...this.state.tree];
+    let foundTreeNode = this.model.findInTree(newTree, treeNodeId);
+    this.updateValidation(foundTreeNode);
+    this.setState({ tree: newTree });
   };
 
   updateValidation = treeNode => {
@@ -390,11 +398,24 @@ class ToolOptions extends Component {
     let foundDropNode = this.model.getNodeFromTree(newTree, dropKey);
 
     if (!this.model.isSameNode(foundDropNode, foundDragNode)) {
-      this.model.updateDragNode(newTree, foundDragNode, foundDropNode);
-      this.model.addToDropNode(foundDropNode, foundDragNode);
-      this.updateTreeValidation(newTree);
-      this.setState({ tree: newTree });
+      if (info.dropToGap) {
+        if (this.model.isParentRootOfTree(foundDropNode.parent)) {
+          this.model.addToTreeRoot(newTree, foundDragNode, foundDropNode, info);
+        } else {
+          this.model.addToGap(newTree, foundDragNode, foundDropNode, info);
+        }
+      } else {
+        this.model.addToDropNode(newTree, foundDragNode, foundDropNode);
+      }
+
+      this.saveNewTree(newTree);
     }
+  };
+
+  saveNewTree = newTree => {
+    this.updateTreeValidation(newTree);
+    newTree[0].title = this.getHeader(this.model.canSave(newTree));
+    this.setState({ tree: newTree });
   };
 
   updateMenuItem = (treeNodeId, objectWithKeyValuesToUpdate) => {
@@ -405,8 +426,9 @@ class ToolOptions extends Component {
         ...treeNode.menuItem,
         ...objectWithKeyValuesToUpdate
       };
+
       this.updateTreeRowComponent(treeNode);
-      this.setState({ tree: newTreeState });
+      this.saveNewTree(newTreeState);
     }
     return treeNode;
   };
@@ -434,13 +456,13 @@ class ToolOptions extends Component {
     } else {
       this.deleteTreeNode(treeNode.parent.children, treeNode);
     }
-    this.updateTreeValidation(newTreeState);
-    this.setState({ tree: newTreeState });
+    this.saveNewTree(newTreeState);
   };
 
   onEditMenuClick = e => {
     e.preventDefault();
     this.getTreeView().then(treeData => {
+      this.addHeaderRowToTreeStructure(treeData);
       this.setState({ openMenuEditor: true, tree: treeData });
     });
   };
@@ -464,19 +486,6 @@ class ToolOptions extends Component {
               Redigera meny
             </ColorButtonBlue>
           </p>
-          <div>
-            <input
-              id="active"
-              name="active"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.active}
-            />
-            &nbsp;
-            <label htmlFor="active">Aktiverad</label>
-          </div>
 
           <section className="tab-pane active">
             <Modal

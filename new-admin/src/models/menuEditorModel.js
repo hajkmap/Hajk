@@ -7,7 +7,6 @@ const fetchConfig = {
 var menuEditorModel = Model.extend({
   constructor: function(settings) {
     this.config = settings.config;
-    console.log(this.config, "config");
   },
 
   async listAllAvailableDocuments() {
@@ -22,6 +21,55 @@ var menuEditorModel = Model.extend({
     } catch (err) {}
   },
 
+  isParentRootOfTree: function(parent) {
+    return parent === undefined ? true : false;
+  },
+
+  insertBeforeDropNode: function(foundDropNode, foundDragNode, tree) {
+    var children = foundDropNode.parent ? foundDropNode.parent.children : tree;
+    children.splice(children.indexOf(foundDropNode), 0, foundDragNode);
+  },
+
+  insertAfterDropNode: function(foundDropNode, foundDragNode, tree) {
+    var children = foundDropNode.parent ? foundDropNode.parent.children : tree;
+    children.splice(children.indexOf(foundDropNode) + 1, 0, foundDragNode);
+  },
+
+  addToDropNode: function(newTree, foundDragNode, foundDropNode) {
+    this.updateDragNode(newTree, foundDragNode, foundDropNode);
+    this.addToNode(foundDropNode, foundDragNode);
+  },
+
+  addToGap: function(newTree, foundDragNode, foundDropNode, info) {
+    this.removeNodeFromParent(foundDragNode, newTree);
+    this.setParentOfNode(foundDragNode, foundDropNode.parent);
+
+    if (info.node.dragOverGapBottom) {
+      this.insertAfterDropNode(foundDropNode, foundDragNode, newTree);
+    }
+    if (info.node.dragOverGapTop) {
+      this.insertBeforeDropNode(foundDropNode, foundDragNode, newTree);
+    }
+  },
+
+  addToTreeRoot: function(newTree, foundDragNode, foundDropNode, info) {
+    if (foundDragNode.parent) {
+      foundDragNode.parent.children.splice(
+        foundDragNode.parent.children.indexOf(foundDragNode),
+        1
+      );
+    } else {
+      newTree.splice(newTree.indexOf(foundDragNode), 1);
+    }
+
+    if (info.node.dragOverGapBottom) {
+      this.insertAfterDropNode(foundDropNode, foundDragNode, newTree);
+    }
+    if (info.node.dragOverGapTop) {
+      this.insertBeforeDropNode(foundDropNode, foundDragNode, newTree);
+    }
+  },
+
   removeNodeFromParent: function(node, newTree) {
     if (node.parent) {
       node.parent.children.splice(node.parent.children.indexOf(node), 1);
@@ -29,12 +77,17 @@ var menuEditorModel = Model.extend({
       newTree.splice(newTree.indexOf(node), 1);
     }
   },
-  addToDropNode: function(nodeToBeAddedTo, nodeToAdd) {
+
+  addToNode: function(nodeToBeAddedTo, nodeToAdd) {
     nodeToBeAddedTo.children.push(nodeToAdd);
   },
 
   setParentOfNode: function(node, newParentNode) {
-    node.parent = { ...newParentNode };
+    if (newParentNode) {
+      node.parent = { ...newParentNode };
+    } else {
+      node.parent = undefined;
+    }
   },
 
   updateDragNode: function(newTree, dragNode, dropNode) {
@@ -80,9 +133,7 @@ var menuEditorModel = Model.extend({
   },
 
   canSave: function(tree) {
-    return tree.some(treeNode => {
-      return this.checkForInvalidTreeNodes(treeNode);
-    });
+    return !this.hasTreeInvalidTreeNodes(tree);
   },
 
   setParentForAllTreeNodes: function(tree) {
@@ -126,16 +177,21 @@ var menuEditorModel = Model.extend({
     tree.shift();
   },
 
-  checkForInvalidTreeNodes: function(treeNode) {
+  hasTreeInvalidTreeNodes: function(tree) {
+    return tree.some(treeNode => {
+      return this.hasInvalidTreeNodes(treeNode);
+    });
+  },
+
+  hasInvalidTreeNodes: function(treeNode) {
     if (!treeNode.title.props.valid) {
-      return false;
+      console.log("GERE");
+      return true;
     } else {
       if (treeNode.children.length > 0) {
-        treeNode.children.forEach(child => {
-          return this.checkForInvalidTreeNodes(child);
-        });
+        return this.hasTreeInvalidTreeNodes(treeNode.children);
       }
-      return true;
+      return false;
     }
   },
 
@@ -178,9 +234,7 @@ var menuEditorModel = Model.extend({
 
   exportTreeAsMenuJson: function(tree, menuConfig) {
     this.removeHeaderTreeRow(tree);
-    console.log(tree, "treeBeforeExport");
     menuConfig.menu = this.createMenuFromTreeStructure([], tree);
-    console.log(menuConfig, "menuConfig");
     return menuConfig;
   },
 
