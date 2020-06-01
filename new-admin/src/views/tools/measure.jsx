@@ -249,6 +249,7 @@ class ToolOptions extends Component {
               <option value="toolbar">Drawer</option>
               <option value="left">Widget left</option>
               <option value="right">Widget right</option>
+              <option value="control">Control button</option>
             </select>
           </div>
           <div>
