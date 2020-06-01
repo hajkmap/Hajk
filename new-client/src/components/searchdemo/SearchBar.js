@@ -106,6 +106,7 @@
 //
 // *https://www.registers.service.gov.uk/registers/country/use-the-api*
 import React, { useEffect, useRef, useState } from "react";
+import cslx from "clsx";
 
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
@@ -137,12 +138,25 @@ import IntersectsIcon from "@material-ui/icons/Toll";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 
 import SearchResultsContainer from "./SearchResultsContainer";
 
 const useStyles = makeStyles(theme => ({
   iconButtons: {
     padding: 10
+  },
+  collapseContainer: {
+    position: "absolute",
+    top: theme.spacing(1),
+    left: 440
+  },
+  searchContainer: {
+    position: "absolute"
+  },
+  searchCollapsed: {
+    left: -440
   }
 }));
 
@@ -173,6 +187,9 @@ const SearchBar = props => {
   // Layer to visualize results
   const resultsSource = useRef();
   const resultsLayer = useRef();
+
+  // Make it  possible to collapse the panel with search
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
 
   // Holder for search results that will be sent to the Results component
   const [searchResults, setSearchResults] = useState({
@@ -265,6 +282,13 @@ const SearchBar = props => {
   const handleClickOnDrawToggle = () => {
     setDrawActive(prevState => {
       toggleDraw(!prevState);
+      return !prevState;
+    });
+  };
+
+  const handlePanelCollapse = () => {
+    console.log(panelCollapsed);
+    setPanelCollapsed(prevState => {
       return !prevState;
     });
   };
@@ -396,7 +420,11 @@ const SearchBar = props => {
     : "Visa verktygspanelen";
 
   return (
-    <>
+    <div
+      className={cslx(classes.searchContainer, {
+        [classes.searchCollapsed]: panelCollapsed
+      })}
+    >
       <Paper className={classes.root}>
         <Autocomplete
           id="searchInputField"
@@ -564,8 +592,15 @@ const SearchBar = props => {
         searchResults={searchResults}
         resultsSource={resultsSource}
         map={map}
+        panelCollapsed={panelCollapsed}
+        setPanelCollapsed={setPanelCollapsed}
       />
-    </>
+      <Paper className={classes.collapseContainer}>
+        <IconButton onClick={handlePanelCollapse}>
+          {panelCollapsed ? <ArrowRightIcon /> : <ArrowLeftIcon />}
+        </IconButton>
+      </Paper>
+    </div>
   );
 };
 

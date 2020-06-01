@@ -12,7 +12,7 @@ import Introduction from "./Introduction";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
-import Search from "./search/Search";
+import Search from "./searchdemo/Search";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
@@ -31,7 +31,10 @@ import {
   Hidden,
   IconButton,
   Tooltip,
-  Fab
+  Fab,
+  Typography,
+  Grid,
+  Box
 } from "@material-ui/core";
 
 import LockIcon from "@material-ui/icons/Lock";
@@ -121,22 +124,25 @@ const styles = theme => {
         marginLeft: theme.spacing(1)
       }
     },
-    drawerHeader: {
+    drawerPaper: {
       width: DRAWER_WIDTH,
-      display: "flex",
-      alignItems: "center",
-      padding: theme.spacing(0, 2),
-      ...theme.mixins.toolbar,
-      justifyContent: "space-between"
+      backgroundColor: "#f9f9f9"
+    },
+    logoBox: {
+      padding: theme.spacing(1, 2)
     },
     logo: {
       maxHeight: 35
     },
+    drawerGrid: {
+      padding: theme.spacing(0, 2),
+      backgroundColor: "#fff"
+    },
+    drawerLiveContent: {
+      backgroundColor: "#fff"
+    },
     backdrop: {
       zIndex: theme.zIndex.drawer - 1 // Carefully selected to be above Window but below Drawer
-    },
-    widgetItem: {
-      width: "220px"
     },
     // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
     shiftedLeft: {
@@ -570,44 +576,64 @@ class App extends React.PureComponent {
             // re-mounts it the next time, so we would re-rendering
             // our plugins all the time.
             variant="persistent"
+            classes={{
+              paper: classes.drawerPaper
+            }}
           >
-            <div className={classes.drawerHeader}>
+            <Box className={classes.logoBox}>
               <img
                 alt="Logo"
-                className={classes.logo}
                 src={config.mapConfig.map.logo}
+                className={classes.logo}
               />
-              {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
-              <Hidden smDown>
-                <Tooltip
-                  title={
-                    (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
-                    " verktygspanelen"
-                  }
-                >
-                  <IconButton
-                    aria-label="pin"
-                    onClick={this.togglePermanent}
-                    onMouseEnter={this.handleMouseEnter}
-                    onMouseLeave={this.handleMouseLeave}
-                  >
-                    {this.state.drawerPermanent ? (
-                      this.state.drawerMouseOverLock ? (
-                        <LockOpenIcon />
-                      ) : (
-                        <LockIcon />
-                      )
-                    ) : this.state.drawerMouseOverLock ? (
-                      <LockIcon />
-                    ) : (
-                      <LockOpenIcon />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              </Hidden>
-            </div>
+            </Box>
             <Divider />
-            <div id="plugin-buttons" />
+            <Grid
+              className={classes.drawerGrid}
+              item
+              container
+              direction="row"
+              justify="space-between"
+              alignItems="center"
+            >
+              <Grid item>
+                <Typography variant="button">Kartverktyg</Typography>
+              </Grid>
+              {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
+              <Grid item>
+                <Hidden smDown>
+                  <Tooltip
+                    title={
+                      (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
+                      " verktygspanelen"
+                    }
+                  >
+                    <IconButton
+                      aria-label="pin"
+                      onClick={this.togglePermanent}
+                      onMouseEnter={this.handleMouseEnter}
+                      onMouseLeave={this.handleMouseLeave}
+                    >
+                      {this.state.drawerPermanent ? (
+                        this.state.drawerMouseOverLock ? (
+                          <LockOpenIcon />
+                        ) : (
+                          <LockIcon />
+                        )
+                      ) : this.state.drawerMouseOverLock ? (
+                        <LockIcon />
+                      ) : (
+                        <LockOpenIcon />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                </Hidden>
+              </Grid>
+            </Grid>
+            <Divider />
+            <div id="drawer-live-content" className={classes.drawerLiveContent}>
+              <div id="plugin-buttons" />
+            </div>
           </Drawer>
           <Backdrop
             open={this.state.drawerVisible && !this.state.drawerPermanent}
