@@ -420,6 +420,14 @@ namespace MapService.Components
                     gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle - 2), new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle + 2)); //middle
                     gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + displayLength, yScalebarBottom), new XPoint(xLeftAfterScale + displayLength, yScalebarTop)); //right
                     this.drawText(gfx, fontName, displayText, xLeftAfterScale + 5 + displayLength, yScaleText, 12); //text "X m" next to the scale bar
+                }else
+                {
+                    int xLeftAfterScale = xLeft + 100;
+                    int yScaleText = (int)(yBottom + (yWhiteSpace * 0.38));
+                    int yScalebarTop = (int)(yBottom + (yWhiteSpace * 0.30)); //29
+                    int yScalebarMiddle = (int)(yBottom + (yWhiteSpace * 0.35)); //26
+                    int yScalebarBottom = (int)(yBottom + (yWhiteSpace * 0.40)); //23
+                    this.drawText(gfx, fontName, String.Format("Skala 1:{0}", scaleTextScalebar), xLeft, yScaleText, 12); //skala 1:xx
                 }
 
                 //comment
@@ -443,20 +451,7 @@ namespace MapService.Components
                 int yTextBottom = (int)(yBottom + (yWhiteSpace * 0.60));
                 this.drawText(gfx, fontName, infoText, xLeft, yTextBottom, 9); // text "kartled..."
 
-                //text "kartunderlag..."
-                //make a box
-                XStringFormat mySource = new XStringFormat();
-                mySource.LineAlignment = XLineAlignment.Center;
-                mySource.Alignment = XStringAlignment.Far;
-
-                XColor colorSource = XColors.Black;
-                XFont fontSource = new XFont(fontName, 9, XFontStyle.Regular);
-                XBrush brushSource = new XSolidBrush(colorSource);
-
-                int ySourceText = (int)(yBottom + (yWhiteSpace * 0.70));
-                XRect rectForText = new XRect(xRight - 125, page.Height.Point * yWhiteScale - oneCM - 15, 125, 0);
-                gfx.DrawString(sourceText, fontSource, brushSource, rectForText, mySource);
-                gfx.DrawRectangle(XPens.Transparent, rectForText);
+                
 
                 //gfx.DrawString(sourceText, fontSource, brushSource, xRight - 125, (int)(page.Height.Point * yWhiteScale) - (int)oneCM - 15);
                 //this.drawText(gfx, fontName, sourceText, xRight - 125, (int)(page.Height.Point * yWhiteScale) - (int)oneCM - 15, 9);
@@ -481,9 +476,18 @@ namespace MapService.Components
                 myTitle.LineAlignment = XLineAlignment.Center;
                 myTitle.Alignment = XStringAlignment.Center;
 
+
+                XStringFormat mySource = new XStringFormat();
+                mySource.LineAlignment = XLineAlignment.Center;
+                mySource.Alignment = XStringAlignment.Far;
+
                 XColor color = XColors.Black;
                 XFont font = new XFont(fontNameTitle, 20, XFontStyle.Bold);
                 XBrush brush = new XSolidBrush(color);
+                
+                XColor colorSource = XColors.Black;
+                XFont fontSource = new XFont(fontName, 9, XFontStyle.Regular);
+                XBrush brushSource = new XSolidBrush(colorSource);
 
                 //logotype title and date
                 var printDate = pdfDate;
@@ -505,7 +509,15 @@ namespace MapService.Components
                     //this.drawText(gfx, fontName, printDate, xRight - 80, (int)(page.Height.Point * yWhiteScale) - (int)oneCM - 35, 12); // gamla
                     gfx.DrawImage(logo1, xLeft, (page.Height.Point * yWhiteScale) - oneCM - (logo.PixelHeight * 0.45), logo.PixelWidth * 0.18, logo.PixelHeight * 0.4); //logotype
                 }
-               
+
+
+                //text "kartunderlag..."
+                //make a box
+
+                int ySourceText = (int)(yBottom + (yWhiteSpace * 0.70));
+                XRect rectForText = new XRect(xRight - 125, page.Height.Point * yWhiteScale - oneCM - 15, 125, 0);
+                gfx.DrawString(sourceText, fontSource, brushSource, rectForText, mySource);
+                gfx.DrawRectangle(XPens.Transparent, rectForText);
 
                 byte[] bytes;
 
