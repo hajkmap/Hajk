@@ -74,6 +74,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target,
         title: tool.options.title || "",
         overlayLogoUrl: tool.options.overlayLogoUrl,
         openOverlayButtonColor: tool.options.openOverlayButtonColor,
@@ -140,6 +141,7 @@ class ToolOptions extends Component {
       options: {
         title: this.state.title,
         overlayLogoUrl: this.state.overlayLogoUrl,
+        target: this.state.target,
         openOverlayButtonColor: this.state.openOverlayButtonColor,
         showScrollButtonLimit: this.state.showScrollButtonLimit,
         iconLibraryLink: this.state.iconLibraryLink,
