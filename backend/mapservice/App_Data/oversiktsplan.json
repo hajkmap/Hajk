@@ -1,4 +1,4 @@
-{
+﻿{
   "version": "1.0.5",
   "projections": [
     {
@@ -24,14 +24,14 @@
             "visibleAtStart": true,
             "drawOrder": 0,
             "visibleForGroups": null,
-            "infobox": ""
+            "infobox": null
           },
           {
             "id": "2",
             "visibleAtStart": false,
             "drawOrder": 0,
             "visibleForGroups": null,
-            "infobox": ""
+            "infobox": null
           }
         ],
         "groups": [
@@ -55,63 +55,63 @@
                     "visibleAtStart": false,
                     "drawOrder": 61,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "27",
                     "visibleAtStart": false,
                     "drawOrder": 30,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "32",
                     "visibleAtStart": false,
                     "drawOrder": 29,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "13",
                     "visibleAtStart": false,
                     "drawOrder": 28,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "19",
                     "visibleAtStart": false,
                     "drawOrder": 26,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "26",
                     "visibleAtStart": false,
                     "drawOrder": 25,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "47",
                     "visibleAtStart": false,
                     "drawOrder": 24,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "31",
                     "visibleAtStart": false,
                     "drawOrder": 23,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "12",
                     "visibleAtStart": false,
                     "drawOrder": 22,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   }
                 ],
                 "groups": []
@@ -128,42 +128,42 @@
                     "visibleAtStart": false,
                     "drawOrder": 57,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "29",
                     "visibleAtStart": false,
                     "drawOrder": 19,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "24",
                     "visibleAtStart": false,
                     "drawOrder": 18,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "33",
                     "visibleAtStart": false,
                     "drawOrder": 17,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "7",
                     "visibleAtStart": false,
                     "drawOrder": 16,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "28",
                     "visibleAtStart": false,
                     "drawOrder": 15,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   }
                 ],
                 "groups": []
@@ -180,105 +180,105 @@
                     "visibleAtStart": false,
                     "drawOrder": 60,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "14",
                     "visibleAtStart": false,
                     "drawOrder": 58,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "20",
                     "visibleAtStart": false,
                     "drawOrder": 56,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "16",
                     "visibleAtStart": false,
                     "drawOrder": 55,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "17",
                     "visibleAtStart": false,
                     "drawOrder": 54,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "6",
                     "visibleAtStart": false,
                     "drawOrder": 53,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "48",
                     "visibleAtStart": false,
                     "drawOrder": 52,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "37",
                     "visibleAtStart": false,
                     "drawOrder": 48,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "21",
                     "visibleAtStart": false,
                     "drawOrder": 38,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "35",
                     "visibleAtStart": false,
                     "drawOrder": 37,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "36",
                     "visibleAtStart": false,
                     "drawOrder": 36,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "15",
                     "visibleAtStart": false,
                     "drawOrder": 35,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "5",
                     "visibleAtStart": false,
                     "drawOrder": 34,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "38",
                     "visibleAtStart": false,
                     "drawOrder": 33,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "49",
                     "visibleAtStart": false,
                     "drawOrder": 32,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   }
                 ],
                 "groups": []
@@ -295,35 +295,35 @@
                     "visibleAtStart": false,
                     "drawOrder": 62,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "44",
                     "visibleAtStart": false,
                     "drawOrder": 59,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "45",
                     "visibleAtStart": false,
                     "drawOrder": 43,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "46",
                     "visibleAtStart": false,
                     "drawOrder": 42,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "42",
                     "visibleAtStart": false,
                     "drawOrder": 41,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   }
                 ],
                 "groups": []
@@ -340,21 +340,21 @@
                     "visibleAtStart": false,
                     "drawOrder": 31,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "11",
                     "visibleAtStart": false,
                     "drawOrder": 21,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "10",
                     "visibleAtStart": false,
                     "drawOrder": 20,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   }
                 ],
                 "groups": []
@@ -373,70 +373,70 @@
                 "visibleAtStart": false,
                 "drawOrder": 51,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "30",
                 "visibleAtStart": false,
                 "drawOrder": 50,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "9",
                 "visibleAtStart": false,
                 "drawOrder": 49,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "25",
                 "visibleAtStart": false,
                 "drawOrder": 47,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "23",
                 "visibleAtStart": false,
                 "drawOrder": 46,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "40",
                 "visibleAtStart": false,
                 "drawOrder": 45,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "22",
                 "visibleAtStart": false,
                 "drawOrder": 44,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "50",
                 "visibleAtStart": false,
                 "drawOrder": 40,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "51",
                 "visibleAtStart": false,
                 "drawOrder": 39,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "18",
                 "visibleAtStart": false,
                 "drawOrder": 27,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               }
             ],
             "groups": []
@@ -453,14 +453,14 @@
                 "visibleAtStart": false,
                 "drawOrder": 13,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "81",
                 "visibleAtStart": false,
                 "drawOrder": 14,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               }
             ],
             "groups": [
@@ -476,84 +476,84 @@
                     "visibleAtStart": false,
                     "drawOrder": 3,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "73",
                     "visibleAtStart": false,
                     "drawOrder": 4,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "80",
                     "visibleAtStart": false,
                     "drawOrder": 11,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "77",
                     "visibleAtStart": false,
                     "drawOrder": 5,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "74",
                     "visibleAtStart": false,
                     "drawOrder": 6,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "71",
                     "visibleAtStart": false,
                     "drawOrder": 7,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "83",
                     "visibleAtStart": false,
                     "drawOrder": 10,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "72",
                     "visibleAtStart": false,
                     "drawOrder": 8,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "76",
                     "visibleAtStart": false,
                     "drawOrder": 1,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "79",
                     "visibleAtStart": false,
                     "drawOrder": 12,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "75",
                     "visibleAtStart": false,
                     "drawOrder": 2,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   },
                   {
                     "id": "70",
                     "visibleAtStart": false,
                     "drawOrder": 9,
                     "visibleForGroups": null,
-                    "infobox": ""
+                    "infobox": null
                   }
                 ],
                 "groups": []
@@ -572,7 +572,7 @@
                 "visibleAtStart": false,
                 "drawOrder": 64,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               }
             ],
             "groups": []
@@ -582,7 +582,6 @@
         "visibleAtStart": false,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": false,
-        "enableOSM": false,
         "showBreadcrumbs": false,
         "target": "toolbar",
         "position": "left",
@@ -635,11 +634,11 @@
     {
       "type": "documenthandler",
       "options": {
-        "title": "",
-        "overlayLogoUrl": "/logo-share.png",
         "target": "toolbar",
+        "overlayLogoUrl": "/logo-share.png",
         "openOverlayButtonColor": "#ffffff",
         "showScrollButtonLimit": 400,
+        "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
         "width": 600,
         "height": "90vh",
         "menuConfig": {
@@ -658,15 +657,15 @@
               "menu": []
             },
             {
-              "title": "Tänd blandad bebyggelse",
-              "document": "",
+              "title": "Utgångspunkter",
+              "document": "utgangspunkter",
               "color": "#ffffff",
               "description": "",
               "icon": {
                 "materialUiIconName": "",
                 "fontSize": ""
               },
-              "maplink": "http://localhost:3000/?m=oversiktsplan&x=140700&y=6399400&z=1&l=1,12,31,47,26,19,13,32,27,41&f=%7B%7D&clean=false",
+              "maplink": "",
               "link": "",
               "menu": []
             },
@@ -842,16 +841,6 @@
         "visibleForGroups": []
       },
       "index": 7
-    },
-    {
-      "type": "anchor",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "visibleAtStart": false,
-        "visibleForGroups": []
-      },
-      "index": 0
     }
   ],
   "map": {
