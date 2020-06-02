@@ -68,11 +68,13 @@ class SearchModel {
     // Let's generate an array with results, one per dataset (dataset = search source)
     const resultsPerDataset = featureCollections.map(featureCollection => {
       return featureCollection.value.features.map(feature => {
-        // It's admin configurable in which order results columns are displayed, let's map accordingly.
-        const autocompleteEntry = this.#mapDisplayFieldsInFeature(
-          feature.properties,
-          featureCollection.source.displayFields
-        );
+        // TODO: We should add another property in admin that'll decide which FIELD (and it should
+        // be one (1) field only) should be used for Autocomplete.
+        // There's a huge problem with the previous approach (mapping displayFields and using that
+        // in Autocomplete) because __there will never be a match in on searchField if the search
+        // string consists of values that have been stitched together from multiple fields__!
+        const autocompleteEntry =
+          feature.properties[featureCollection.source.searchFields[0]];
 
         // Let's provide a name for each dataset, so it can be displayed nicely to the user.
         const dataset = featureCollection.source.caption;
@@ -125,17 +127,6 @@ class SearchModel {
 
   getSources = () => {
     return this.#searchSources;
-  };
-
-  /**
-   * @summary Use FeatureCollection's selected displayFields to create a relevant string to display autocomplete results.
-   *
-   * @param {Object} featureProperties Key-value pair where KEY corresponds to one of the keys in displayFields.
-   * @param {Array} displayFields Selection of fields that will be used to read out values from featureProperties.
-   * @returns {String} Comma-separated string of values according to selection and order in displayFields.
-   */
-  #mapDisplayFieldsInFeature = (featureProperties, displayFields) => {
-    return displayFields.map(df => featureProperties[df]).join(", ");
   };
 
   #getRawResults = async (
