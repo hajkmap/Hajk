@@ -8,7 +8,6 @@ export default class MapViewModel {
 
   convertMapSettingsUrlToOlSettings = inputUrl => {
     let url = inputUrl.toLowerCase();
-    console.log(url, "url");
     if (url.includes("x=") && url.includes("y=") && url.includes("z=")) {
       let url = inputUrl.split("&");
       let x = url[1].substring(2);
@@ -17,7 +16,6 @@ export default class MapViewModel {
       let l = url[4]?.substring(2);
       let center = [x, y];
       let zoom = z;
-      console.log(z, "z");
       return {
         center: center,
         zoom: zoom,
@@ -43,7 +41,7 @@ export default class MapViewModel {
         .filter(
           layer =>
             layer.getProperties()["layerInfo"] &&
-            layer.getProperties()["layerInfo"]["layerType"] !== "base"
+            layer.getProperties()["layerInfo"]["layerType"]
         )
         .forEach(layer => {
           if (layer.getProperties()["name"] === arrays) {
