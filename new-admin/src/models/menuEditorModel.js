@@ -7,7 +7,6 @@ const fetchConfig = {
 var menuEditorModel = Model.extend({
   constructor: function(settings) {
     this.config = settings.config;
-    console.log(this.config, "config");
   },
 
   async listAllAvailableDocuments() {
@@ -22,6 +21,55 @@ var menuEditorModel = Model.extend({
     } catch (err) {}
   },
 
+  isParentRootOfTree: function(parent) {
+    return parent === undefined ? true : false;
+  },
+
+  insertBeforeDropNode: function(foundDropNode, foundDragNode, tree) {
+    var children = foundDropNode.parent ? foundDropNode.parent.children : tree;
+    children.splice(children.indexOf(foundDropNode), 0, foundDragNode);
+  },
+
+  insertAfterDropNode: function(foundDropNode, foundDragNode, tree) {
+    var children = foundDropNode.parent ? foundDropNode.parent.children : tree;
+    children.splice(children.indexOf(foundDropNode) + 1, 0, foundDragNode);
+  },
+
+  addToDropNode: function(newTree, foundDragNode, foundDropNode) {
+    this.updateDragNode(newTree, foundDragNode, foundDropNode);
+    this.addToNode(foundDropNode, foundDragNode);
+  },
+
+  addToGap: function(newTree, foundDragNode, foundDropNode, info) {
+    this.removeNodeFromParent(foundDragNode, newTree);
+    this.setParentOfNode(foundDragNode, foundDropNode.parent);
+
+    if (info.node.dragOverGapBottom) {
+      this.insertAfterDropNode(foundDropNode, foundDragNode, newTree);
+    }
+    if (info.node.dragOverGapTop) {
+      this.insertBeforeDropNode(foundDropNode, foundDragNode, newTree);
+    }
+  },
+
+  addToTreeRoot: function(newTree, foundDragNode, foundDropNode, info) {
+    if (foundDragNode.parent) {
+      foundDragNode.parent.children.splice(
+        foundDragNode.parent.children.indexOf(foundDragNode),
+        1
+      );
+    } else {
+      newTree.splice(newTree.indexOf(foundDragNode), 1);
+    }
+
+    if (info.node.dragOverGapBottom) {
+      this.insertAfterDropNode(foundDropNode, foundDragNode, newTree);
+    }
+    if (info.node.dragOverGapTop) {
+      this.insertBeforeDropNode(foundDropNode, foundDragNode, newTree);
+    }
+  },
+
   removeNodeFromParent: function(node, newTree) {
     if (node.parent) {
       node.parent.children.splice(node.parent.children.indexOf(node), 1);
@@ -29,12 +77,17 @@ var menuEditorModel = Model.extend({
       newTree.splice(newTree.indexOf(node), 1);
     }
   },
-  addToDropNode: function(nodeToBeAddedTo, nodeToAdd) {
+
+  addToNode: function(nodeToBeAddedTo, nodeToAdd) {
     nodeToBeAddedTo.children.push(nodeToAdd);
   },
 
   setParentOfNode: function(node, newParentNode) {
-    node.parent = { ...newParentNode };
+    if (newParentNode) {
+      node.parent = { ...newParentNode };
+    } else {
+      node.parent = undefined;
+    }
   },
 
   updateDragNode: function(newTree, dragNode, dropNode) {
@@ -79,11 +132,34 @@ var menuEditorModel = Model.extend({
     }
   },
 
+  canSave: function(tree) {
+    return !this.hasTreeInvalidTreeNodes(tree);
+  },
+
+  setParentForAllTreeNodes: function(tree) {
+    tree.forEach(treeNode => {
+      this.setParent(treeNode, undefined);
+    });
+  },
+
+  isSameNode: function(foundDropNode, foundDragNode) {
+    return foundDropNode.key === foundDragNode.key;
+  },
+
+  isSelectionValid: function(menuItem, children) {
+    if (
+      (menuItem.maplink || menuItem.document || menuItem.link) &&
+      children.length > 0
+    ) {
+      return false;
+    }
+
+    return true;
+  },
+
   createMenuFromTreeStructure: function(menu, tree) {
-    console.log(tree, "TREE");
     tree.forEach(treeNode => {
       if (treeNode.children.length > 0) {
-        console.log(menu, "menu");
         menu.push(treeNode.menuItem);
         treeNode.menuItem.menu = [];
         return this.createMenuFromTreeStructure(
@@ -91,8 +167,6 @@ var menuEditorModel = Model.extend({
           treeNode.children
         );
       } else {
-        console.log(menu, "menu2");
-        console.log(treeNode, "treeNode2");
         menu.push(treeNode.menuItem);
       }
     });
@@ -101,6 +175,61 @@ var menuEditorModel = Model.extend({
 
   removeHeaderTreeRow: function(tree) {
     tree.shift();
+  },
+
+  hasTreeInvalidTreeNodes: function(tree) {
+    return tree.some(treeNode => {
+      return this.hasInvalidTreeNodes(treeNode);
+    });
+  },
+
+  hasInvalidTreeNodes: function(treeNode) {
+    if (!treeNode.title.props.valid) {
+      console.log("GERE");
+      return true;
+    } else {
+      if (treeNode.children.length > 0) {
+        return this.hasTreeInvalidTreeNodes(treeNode.children);
+      }
+      return false;
+    }
+  },
+
+  getNewMenuItemObject: function() {
+    return {
+      title: "",
+      document: "",
+      color: "",
+      icon: {
+        materialUiIconName: "",
+        fontSize: "large"
+      },
+      maplink: "",
+      link: "",
+      menu: []
+    };
+  },
+
+  //Can this recursion be written better????
+  findInTree: function(tree, key) {
+    return tree
+      .map(treeNode => {
+        var found = this.findTreeNode(treeNode, key);
+        return found;
+      })
+      .filter(res => {
+        return res !== undefined;
+      })[0];
+  },
+  //Can this recursion be written better????
+  findTreeNode: function(treeNode, key) {
+    if (treeNode.key === key) {
+      return treeNode;
+    } else {
+      if (treeNode.children.length > 0) {
+        return this.findInTree(treeNode.children, key);
+      }
+    }
   },
 
   exportTreeAsMenuJson: function(tree, menuConfig) {
