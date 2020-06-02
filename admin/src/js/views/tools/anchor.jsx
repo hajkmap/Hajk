@@ -28,7 +28,8 @@ var defaultState = {
   active: false,
   index: 0,
   instruction: '',
-  visibleForGroups: []
+  visibleForGroups: [],
+  varberg: false
 };
 
 class ToolOptions extends Component {
@@ -48,7 +49,8 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         instruction: tool.options.instruction,
-        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : [],
+        varberg: tool.options.varberg
       });
     } else {
       this.setState({
@@ -100,6 +102,7 @@ class ToolOptions extends Component {
         t.index = tool.index;
         t.options = tool.options;
         t.instruction = tool.instruction;
+        t.varberg = tool.varberg;
       }
     });
   }
@@ -110,7 +113,8 @@ class ToolOptions extends Component {
       'index': this.state.index,
       'options': {
         'instruction': this.state.instruction,
-        'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
+        'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim),
+        'varberg': this.state.varberg
       }
     };
 
@@ -218,6 +222,13 @@ class ToolOptions extends Component {
               value={this.state.instruction ? atob(this.state.instruction) : ''}
             />
           </div>
+            <input
+                id='varberg'
+                name='varberg'
+                type='checkbox'
+                onChange={(e) => { this.handleInputChange(e); }}
+                checked={this.state.varberg} />&nbsp;
+            <label htmlFor='varberg'>Varbergs version</label>
           {this.renderVisibleForGroups()}
         </form>
       </div>
