@@ -110,7 +110,9 @@ class AppModel {
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
       .filter(plugin => {
-        return ["toolbar", "left", "right"].includes(plugin.options.target);
+        return ["toolbar", "left", "right", "control"].includes(
+          plugin.options.target
+        );
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
     return r;
