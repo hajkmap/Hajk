@@ -1,15 +1,13 @@
 import React from "react";
 import { Component } from "react";
 import SaveIcon from "@material-ui/icons/SaveSharp";
-import { Typography } from "@material-ui/core";
-import WarningDialog from "./warningdialog.jsx";
 import MenuEditorModel from "../../../models/menuEditorModel";
 import Grid from "@material-ui/core/Grid";
 import Modal from "@material-ui/core/Modal";
-import TableCell from "@material-ui/core/TableCell";
 import DragHandle from "@material-ui/icons/DragHandle";
-import { withStyles } from "@material-ui/core/styles";
 import TreeRow from "./treerow.jsx";
+import { withStyles, ThemeProvider } from "@material-ui/core/styles";
+import { Typography } from "@material-ui/core";
 
 import {
   ColorButtonBlue,
@@ -21,20 +19,14 @@ import Tree from "antd/es/tree"; //Specific import to keep bundle-size small
 import "antd/es/tree/style/css"; //Specific import to keep bundle-size small
 
 const HEADER_KEY = -2;
-const { TreeNode } = Tree;
 
-const styles = () => ({
-  container: {
-    backgroundColor: "#e8e8e8"
-  },
-  cell: {
-    borderRight: "none",
-    borderLeft: "none",
-    borderColor: "#6c6c6c"
-  },
-
+const styles = theme => ({
   background: {
     backgroundColor: "#e8e8e8"
+  },
+  header: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1)
   }
 });
 
@@ -47,7 +39,6 @@ class ToolOptions extends Component {
     openOverlayButtonColor: "#ffffff",
     showScrollButtonLimit: 400,
     width: 600,
-    canSave: true,
     height: "90vh",
     menuConfig: {},
     iconLibraryLink: "https://material.io/resources/icons/?style=baseline",
@@ -61,13 +52,14 @@ class ToolOptions extends Component {
   constructor(props) {
     super(props);
     this.type = "documenthandler";
-    this.model = this.getModel();
-    this.model.listAllAvailableDocuments().then(list => {
+    this.mapSettingsModel = props.model;
+    this.menuEditorModel = this.getMenuEditorModel();
+    this.menuEditorModel.listAllAvailableDocuments().then(list => {
       this.availableDocuments = list;
     });
   }
 
-  getModel = () => {
+  getMenuEditorModel = () => {
     return new MenuEditorModel({
       config: this.props.model.get("config")
     });
@@ -138,7 +130,7 @@ class ToolOptions extends Component {
   }
 
   save() {
-    this.menuConfig = this.model.exportTreeAsMenuJson(
+    this.menuConfig = this.menuEditorModel.exportTreeAsMenuJson(
       this.state.tree,
       this.menuConfig
     );
@@ -206,15 +198,9 @@ class ToolOptions extends Component {
 
   onSaveMenuEditsClick = e => {
     e.preventDefault();
-    if (this.model.canSave(this.state.tree)) {
-      this.setState({ openMenuEditor: false }, () => {
-        this.save();
-      });
-    } else {
-      this.setState({ openMenuEditor: false }, () => {
-        this.save();
-      });
-    }
+    this.setState({ openMenuEditor: false }, () => {
+      this.save();
+    });
   };
 
   onNewTreeRowClick = e => {
@@ -223,31 +209,35 @@ class ToolOptions extends Component {
   };
 
   getHeader = canSave => {
+    const { classes } = this.props;
     return (
       <Grid
-        valid={true}
-        style={{ paddingTop: "10px", paddingBottom: "10px" }}
+        className={classes.header}
+        spacing={1}
+        alignItems="center"
         justify="flex-end"
         container
       >
         <Grid xs={1} item>
           <DragHandle></DragHandle>
         </Grid>
+        <Grid xs={1} item></Grid>
         <Grid xs={2} item>
           <Typography variant="h5">Namn</Typography>
         </Grid>
 
-        <Grid xs={9} container item>
+        <Grid xs={8} container item>
           <Grid xs={3} item>
             <Typography variant="h5">Inställningar</Typography>
           </Grid>
-          <Grid xs={3} item>
+          <Grid xs={2} item>
             <Typography variant="h5">Koppling</Typography>
           </Grid>
 
           <Grid ref={this.buttonHeaderRef} xs={4} item>
             <ColorButtonGreen
               variant="contained"
+              className="btn"
               onClick={this.onNewTreeRowClick}
             >
               <Typography variant="button">Ny menylänk</Typography>
@@ -278,7 +268,7 @@ class ToolOptions extends Component {
   };
 
   addNewItem = () => {
-    let menuItem = this.model.getNewMenuItemObject();
+    let menuItem = this.menuEditorModel.getNewMenuItemObject();
     let newTree = [...this.state.tree];
     newTree.push(this.createTreeChild(menuItem));
     this.setState({ tree: newTree });
@@ -286,7 +276,9 @@ class ToolOptions extends Component {
 
   addHeaderRowToTreeStructure = treeData => {
     treeData.unshift({
-      title: this.getHeader(this.model.canSave(treeData)),
+      title: this.getHeader(
+        this.menuEditorModel.canSave(this.getTreeWithoutHeader(treeData))
+      ),
       disabled: true,
       children: [],
       menuItem: [],
@@ -295,18 +287,19 @@ class ToolOptions extends Component {
   };
 
   getTreeView = () => {
-    return this.model.loadMenuConfigForMap("map_1").then(menuConfig => {
-      this.menuConfig = menuConfig.options.menuConfig;
-      let treeData = this.createTreeStructure(this.menuConfig.menu);
-
-      return treeData;
-    });
+    return this.menuEditorModel
+      .loadMenuConfigForMap(this.mapSettingsModel.get("mapFile"))
+      .then(menuConfig => {
+        this.menuConfig = menuConfig.options.menuConfig;
+        let treeData = this.createTreeStructure(this.menuConfig.menu);
+        return treeData;
+      });
   };
 
   createTreeStructure = menu => {
     this.treeKeys = [];
     let tree = this.createTree(menu);
-    this.model.setParentForAllTreeNodes(tree);
+    this.menuEditorModel.setParentForAllTreeNodes(tree);
     return tree;
   };
 
@@ -331,16 +324,17 @@ class ToolOptions extends Component {
         iconLibraryLink={this.state.iconLibraryLink}
         updateMenuItem={this.updateMenuItem}
         deleteMenuItem={this.deleteMenuItem}
-        model={this.model}
+        model={this.menuEditorModel}
         availableDocuments={this.availableDocuments}
         menuItem={menuItem}
         updateValidationForTreeNode={this.updateValidationForTreeNode}
-        valid={this.model.isSelectionValid(menuItem, children)}
+        valid={this.menuEditorModel.isSelectionValid(menuItem, children)}
         treeNodeId={key}
       ></TreeRow>
     );
   };
 
+  //Need to manually update title-component because cant incorporate into render method
   updateTreeRowComponent = treeNode => {
     treeNode.title = this.getRowTitleComponent(
       treeNode.menuItem,
@@ -359,7 +353,7 @@ class ToolOptions extends Component {
 
   updateValidationForTreeNode = treeNodeId => {
     let newTree = [...this.state.tree];
-    let foundTreeNode = this.model.findInTree(newTree, treeNodeId);
+    let foundTreeNode = this.menuEditorModel.findInTree(newTree, treeNodeId);
     this.updateValidation(foundTreeNode);
     this.setState({ tree: newTree });
   };
@@ -376,7 +370,7 @@ class ToolOptions extends Component {
 
   createTreeChild = menuItem => {
     let children = [];
-    if (menuItem.menu.length > 0) {
+    if (menuItem.menu && menuItem.menu.length > 0) {
       children = this.createTree(menuItem.menu);
     }
     let key = this.getNewTreeKey().toString();
@@ -385,7 +379,7 @@ class ToolOptions extends Component {
       title: this.getRowTitleComponent(menuItem, children, key),
       children: children,
       selectable: false,
-      menuItem: this.model.getMenuItemWithoutChildren(menuItem),
+      menuItem: this.menuEditorModel.getMenuItemWithoutChildren(menuItem),
       key: key
     };
   };
@@ -394,33 +388,56 @@ class ToolOptions extends Component {
     const dropKey = info.node.props.eventKey;
     const dragKey = info.dragNode.props.eventKey;
     let newTree = [...this.state.tree];
-    let foundDragNode = this.model.getNodeFromTree(newTree, dragKey);
-    let foundDropNode = this.model.getNodeFromTree(newTree, dropKey);
+    let foundDragNode = this.menuEditorModel.getNodeFromTree(newTree, dragKey);
+    let foundDropNode = this.menuEditorModel.getNodeFromTree(newTree, dropKey);
 
-    if (!this.model.isSameNode(foundDropNode, foundDragNode)) {
+    if (!this.menuEditorModel.isSameNode(foundDropNode, foundDragNode)) {
       if (info.dropToGap) {
-        if (this.model.isParentRootOfTree(foundDropNode.parent)) {
-          this.model.addToTreeRoot(newTree, foundDragNode, foundDropNode, info);
+        if (this.menuEditorModel.isParentRootOfTree(foundDropNode.parent)) {
+          this.menuEditorModel.addToTreeRoot(
+            newTree,
+            foundDragNode,
+            foundDropNode,
+            info
+          );
         } else {
-          this.model.addToGap(newTree, foundDragNode, foundDropNode, info);
+          this.menuEditorModel.addToGap(
+            newTree,
+            foundDragNode,
+            foundDropNode,
+            info
+          );
         }
       } else {
-        this.model.addToDropNode(newTree, foundDragNode, foundDropNode);
+        this.menuEditorModel.addToDropNode(
+          newTree,
+          foundDragNode,
+          foundDropNode
+        );
       }
 
       this.saveNewTree(newTree);
     }
   };
 
+  getTreeWithoutHeader = tree => {
+    return tree.filter(treeNode => {
+      return treeNode.key != HEADER_KEY;
+    });
+  };
+
+  //Need to manually update title-component because cant incorporate into render method
   saveNewTree = newTree => {
     this.updateTreeValidation(newTree);
-    newTree[0].title = this.getHeader(this.model.canSave(newTree));
+    newTree[0].title = this.getHeader(
+      this.menuEditorModel.canSave(this.getTreeWithoutHeader(newTree))
+    );
     this.setState({ tree: newTree });
   };
 
   updateMenuItem = (treeNodeId, objectWithKeyValuesToUpdate) => {
     let newTreeState = [...this.state.tree];
-    let treeNode = this.model.findInTree(newTreeState, treeNodeId);
+    let treeNode = this.menuEditorModel.findInTree(newTreeState, treeNodeId);
     if (treeNode) {
       treeNode.menuItem = {
         ...treeNode.menuItem,
@@ -450,7 +467,7 @@ class ToolOptions extends Component {
 
   deleteMenuItem = treeNodeId => {
     let newTreeState = [...this.state.tree];
-    let treeNode = this.model.findInTree(newTreeState, treeNodeId);
+    let treeNode = this.menuEditorModel.findInTree(newTreeState, treeNodeId);
     if (this.isRootNode(treeNode)) {
       this.deleteTreeNode(newTreeState, treeNode);
     } else {
@@ -483,7 +500,7 @@ class ToolOptions extends Component {
               onClick={this.onEditMenuClick}
               startIcon={<SaveIcon />}
             >
-              Redigera meny
+              <Typography variant="button">Redigera meny</Typography>
             </ColorButtonBlue>
           </p>
 
@@ -502,7 +519,6 @@ class ToolOptions extends Component {
                   <Grid xs={12} item>
                     <Tree
                       blockNode
-                      height="1000px"
                       switcherIcon={<></>}
                       onDrop={this.onDropNode}
                       expandedKeys={expandedKeys}

@@ -6,7 +6,7 @@ import TextField from "@material-ui/core/TextField";
 import { withStyles } from "@material-ui/core/styles";
 import { SketchPicker } from "react-color";
 import Link from "@material-ui/core/Link";
-import { ColorButtonGreen } from "./custombuttons";
+import { ColorButtonGreen, ColorButtonRed } from "./custombuttons";
 
 const getPopoverMenuItemTitle = label => {
   return <Typography variant="h6">{label}: </Typography>;
@@ -28,7 +28,7 @@ const getTextField = (value, onChangeFunction, variant) => {
 };
 
 const styles = theme => ({
-  test: { padding: "100px" }
+  paper: { width: "20%", padding: "20px" }
 });
 
 class SettingsPopover extends React.Component {
@@ -58,19 +58,22 @@ class SettingsPopover extends React.Component {
     closePopover();
   };
 
-  handleChange = color => {
+  handleColorPickerChange = color => {
     this.setState({ color: color.hex });
   };
 
   renderSettings = () => {
+    const { classes } = this.props;
+    const { closePopover } = this.props;
     return (
       <form
-        style={{ width: "500px", height: "350px" }}
+        className={classes.paper}
+        style={{ width: "500px", height: "600px" }}
         noValidate
         autoComplete="off"
       >
-        <Grid container>
-          <Grid xs={9} item>
+        <Grid spacing={2} container>
+          <Grid xs={12} item>
             {getPopoverMenuItemTitle("Ikon")}
             {getTextField(
               this.state.icon.materialUiIconName,
@@ -78,11 +81,7 @@ class SettingsPopover extends React.Component {
               "standard"
             )}
           </Grid>
-          <Grid xs={3} item>
-            <ColorButtonGreen onClick={this.saveAndClosePopover}>
-              OK
-            </ColorButtonGreen>
-          </Grid>
+
           <Grid xs={12} item>
             <Link
               target="_blank"
@@ -93,15 +92,27 @@ class SettingsPopover extends React.Component {
             </Link>
           </Grid>
           <Grid xs={12} item>
-            {getPopoverMenuItemTitle("F�rg")}
+            {getPopoverMenuItemTitle("Färg")}
             {getTextField(this.state.color, this.updateColorState, "standard")}
           </Grid>
           <Grid xs={12} item>
             <SketchPicker
               presetColors={this.presetColors}
               color={this.state.color}
-              onChange={this.handleChange}
+              onChange={this.handleColorPickerChange}
             ></SketchPicker>
+          </Grid>
+          <Grid xs={12} container item>
+            <Grid xs={2} item>
+              <ColorButtonGreen onClick={this.saveAndClosePopover}>
+                <Typography variant="button">OK</Typography>
+              </ColorButtonGreen>
+            </Grid>
+            <Grid xs={2} container item>
+              <ColorButtonRed onClick={closePopover}>
+                <Typography variant="button">AVBRYT</Typography>
+              </ColorButtonRed>
+            </Grid>
           </Grid>
         </Grid>
       </form>

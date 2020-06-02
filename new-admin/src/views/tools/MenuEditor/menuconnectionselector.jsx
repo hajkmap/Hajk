@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography } from "@material-ui/core";
+
 import Grid from "@material-ui/core/Grid";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import DescriptionIcon from "@material-ui/icons/Description";
@@ -14,10 +14,11 @@ import TextField from "@material-ui/core/TextField";
 import SettingsIcon from "@material-ui/icons/Settings";
 import WarningIcon from "@material-ui/icons/Warning";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
-import { withStyles } from "@material-ui/core/styles";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import { ColorButtonGreen } from "./custombuttons.jsx";
+import { Typography } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
+import { ColorButtonGreen, ColorButtonRed } from "./custombuttons.jsx";
 
 const getPopoverMenuItemTitle = label => {
   return <Typography variant="h6">{label}: </Typography>;
@@ -43,14 +44,18 @@ const MENU_CONNECTION_TYPES = {
   none: "Inget valt"
 };
 
+const MAPLINK_TEXT = "Kartlänk";
+const WEBLINK_TEXT = "Webblänk";
+const NONE_TEXT = "Inget valt";
+const MAP_TEXT = "Karta";
+
 const styles = theme => ({
-  popoverActionArea: { paddingTop: "10px" },
   menuItem: {
     "&:focus": {
       backgroundColor: theme.palette.primary.light
     }
   },
-  paper: { width: "500px", height: "500px", padding: "20px" }
+  paper: { width: "20%", padding: "20px" }
 });
 
 class MenuConnectionSelector extends React.Component {
@@ -127,37 +132,35 @@ class MenuConnectionSelector extends React.Component {
           horizontal: "left"
         }}
       >
-        <Grid container>
+        <Grid spacing={2} container>
           <Grid xs={12} item>
             {this.renderPopoverContent()}
           </Grid>
-          <Grid className={classes.popoverActionArea} xs={12} item>
+          <Grid xs={12} item>
             <ColorButtonGreen
               variant="contained"
               className="btn"
-              onClick={this.update}
+              onClick={this.updateSelection}
             >
-              OK
+              <Typography variant="button">OK</Typography>
             </ColorButtonGreen>
+            <ColorButtonRed
+              onClick={() => {
+                this.setState({ connectionsMenuAnchorEl: null });
+              }}
+            >
+              <Typography variant="button">Avbryt</Typography>
+            </ColorButtonRed>
           </Grid>
         </Grid>
       </Popover>
     );
   };
 
-  setDropdownValueToNone = () => {
-    this.setState({
-      connectionsMenuAnchorEl: null,
-      open: false,
-      value: MENU_CONNECTION_TYPES.none
-    });
-  };
-
-  update = () => {
+  updateSelection = () => {
     const { treeNodeId, updateMenuItem } = this.props;
     const { activeMenu } = this.state;
     let value = this.state.activeMenu;
-
     let newMenuItem = {
       maplink: "",
       link: "",
@@ -194,6 +197,11 @@ class MenuConnectionSelector extends React.Component {
     });
   };
 
+  setSelectedDocument = index => {
+    const { availableDocuments } = this.props;
+    this.setState({ documentValue: availableDocuments[index] });
+  };
+
   renderDocumentList = () => {
     const { availableDocuments, classes } = this.props;
     const { documentValue } = this.state;
@@ -206,8 +214,8 @@ class MenuConnectionSelector extends React.Component {
                 autoFocus={availableDocument === documentValue ? true : false}
                 className={classes.menuItem}
                 key={index}
-                onClick={e => {
-                  this.setState({ documentValue: availableDocuments[index] });
+                onClick={() => {
+                  this.setSelectedDocument(index);
                 }}
                 button
               >
@@ -230,13 +238,13 @@ class MenuConnectionSelector extends React.Component {
   };
 
   renderMapLink = () => {
-    return this.getLink("Kartlänk", this.state.mapLinkValue, e => {
+    return this.getLink(MAPLINK_TEXT, this.state.mapLinkValue, e => {
       this.setState({ mapLinkValue: e.target.value });
     });
   };
 
   renderLink = () => {
-    return this.getLink("Webblänk", this.state.linkValue, e => {
+    return this.getLink(WEBLINK_TEXT, this.state.linkValue, e => {
       this.setState({ linkValue: e.target.value });
     });
   };
@@ -269,24 +277,33 @@ class MenuConnectionSelector extends React.Component {
         open: true
       });
     } else {
-      console.log("Not here");
       this.setState(
         {
           activeMenu: e.target.value,
           value: e.target.value
         },
         () => {
-          this.update();
+          this.updateSelection();
         }
       );
     }
   };
 
+  getDropDownSelectionIcon = icon => {
+    return (
+      icon && (
+        <Grid xs={2} item>
+          {icon}
+        </Grid>
+      )
+    );
+  };
+
   getRenderedSelectionText = (label, icon) => {
     return (
-      <Grid container>
-        {icon && <Grid item>{icon}</Grid>}
-        <Grid item>
+      <Grid wrap="nowrap" spacing={1} container>
+        <Grid item>{this.getDropDownSelectionIcon(icon)}</Grid>
+        <Grid xs={8} item>
           <Typography>{label}</Typography>
         </Grid>
       </Grid>
@@ -303,21 +320,33 @@ class MenuConnectionSelector extends React.Component {
     }
 
     if (this.state.value === MENU_CONNECTION_TYPES.none) {
-      return this.getRenderedSelectionText("Inget valt");
+      return this.getRenderedSelectionText(NONE_TEXT);
     }
 
     if (this.state.value === MENU_CONNECTION_TYPES.link) {
-      return this.getRenderedSelectionText("Webblänk", <RoomIcon></RoomIcon>);
+      return this.getRenderedSelectionText(WEBLINK_TEXT, <RoomIcon></RoomIcon>);
     }
 
     if (this.state.value === MENU_CONNECTION_TYPES.mapLink) {
       return this.getRenderedSelectionText(
-        "Karta",
+        MAP_TEXT,
         <LanguageIcon></LanguageIcon>
       );
     }
 
-    return this.getRenderedSelectionText("Ingen koppling");
+    return this.getRenderedSelectionText(NONE_TEXT);
+  };
+
+  openDropDown = () => {
+    this.setState({ open: true });
+  };
+
+  closeDropDown = () => {
+    this.setState({ open: false });
+  };
+
+  renderWarning = () => {
+    return <WarningIcon color="error"></WarningIcon>;
   };
 
   render = () => {
@@ -328,12 +357,13 @@ class MenuConnectionSelector extends React.Component {
       return (
         <>
           <FormControl>
-            <Grid container>
-              <Grid item>
-                {!valid && <WarningIcon color="error"></WarningIcon>}
-              </Grid>
-
-              <Grid item>
+            <Grid alignItems="center" container>
+              {!valid && (
+                <Grid xs={2} item>
+                  {this.renderWarning()}
+                </Grid>
+              )}
+              <Grid xs={10} item>
                 <Select
                   MenuProps={{
                     disableScrollLock: true,
@@ -347,12 +377,8 @@ class MenuConnectionSelector extends React.Component {
                     },
                     getContentAnchorEl: null
                   }}
-                  onOpen={() => {
-                    this.setState({ open: true });
-                  }}
-                  onClose={() => {
-                    this.setState({ open: false });
-                  }}
+                  onOpen={this.openDropDown}
+                  onClose={this.closeDropDown}
                   renderValue={this.getRenderValue}
                   onChange={this.handleChange}
                   open={open}

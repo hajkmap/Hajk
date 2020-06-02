@@ -6,6 +6,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import DragHandle from "@material-ui/icons/DragHandle";
 import { withStyles } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
+import Icon from "@material-ui/core/Icon";
 import SettingsPopover from "./settingspopover.jsx";
 import MenuConnectionSelector from "./menuconnectionselector.jsx";
 
@@ -22,6 +23,14 @@ const getTextField = (value, onChangeFunction, variant) => {
   );
 };
 
+//TODO - HARDCODED
+const iconFontElement = (
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+  />
+);
+
 const styles = () => ({
   treeRowRoot: {
     border: "1px solid rgba(153,164,161,0.5)",
@@ -32,6 +41,14 @@ const styles = () => ({
 class TreeRow extends React.Component {
   state = {
     menuItemTitle: this.props.menuItem.title
+  };
+
+  dynamicallyImportIconFonts = () => {
+    return iconFontElement;
+  };
+
+  getIcon = icon => {
+    return <Icon>{icon.materialUiIconName}</Icon>;
   };
 
   componentWillUnmount = () => {
@@ -58,7 +75,6 @@ class TreeRow extends React.Component {
         updateMenuItem={updateMenuItem}
         updateTreeValidation={this.updateTreeValidation}
         availableDocuments={availableDocuments}
-        model={this.props.model}
         updateValidationForTreeNode={this.props.updateValidationForTreeNode}
         valid={this.props.valid}
         model={model}
@@ -122,27 +138,38 @@ class TreeRow extends React.Component {
   };
 
   render = () => {
-    const { classes } = this.props;
+    const { classes, menuItem } = this.props;
     return (
-      <Grid className={classes.treeRowRoot} justify="flex-end" container>
-        <Grid xs={1} item>
-          <DragHandle></DragHandle>
-        </Grid>
-        <Grid xs={2} item>
-          {this.renderMenuTitle()}
-        </Grid>
-        <Grid xs={9} container item>
-          <Grid xs={3} item>
-            {this.renderSettingsMenu()}
+      <>
+        {this.dynamicallyImportIconFonts()}
+        <Grid
+          alignItems="center"
+          className={classes.treeRowRoot}
+          justify="flex-end"
+          container
+        >
+          <Grid xs={1} item>
+            <DragHandle></DragHandle>
           </Grid>
-          <Grid xs={3} item>
-            {this.renderConnectionSelect()}
+          <Grid xs={1} item>
+            {this.getIcon(menuItem.icon)}
           </Grid>
-          <Grid xs={3} item>
-            {this.renderRemoveButton()}
+          <Grid xs={2} item>
+            {this.renderMenuTitle()}
+          </Grid>
+          <Grid xs={8} alignItems="center" container item>
+            <Grid xs={3} item>
+              {this.renderSettingsMenu()}
+            </Grid>
+            <Grid xs={4} item>
+              {this.renderConnectionSelect()}
+            </Grid>
+            <Grid xs={1} item>
+              {this.renderRemoveButton()}
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
+      </>
     );
   };
 }
