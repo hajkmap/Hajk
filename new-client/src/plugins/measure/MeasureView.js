@@ -7,6 +7,7 @@ import FormControl from "@material-ui/core/FormControl";
 import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 import { withSnackbar } from "notistack";
+import { Typography } from "@material-ui/core";
 
 const styles = theme => ({
   root: {
@@ -46,6 +47,14 @@ class MeasureView extends React.PureComponent {
     return (
       <>
         <div className={classes.row}>
+          <Typography variant="body1">
+            Vid ritning av sträckor och arealer är det möjligt att hålla ner
+            Shift-tangenten. Då kan man rita sträckan/arealen på fri hand.
+            <br />
+            <br />
+            För att avsluta en mätning, klicka igen på sista punkten eller tryck
+            på Esc-tangenten.
+          </Typography>
           <FormControl className={classes.formControl}>
             <InputLabel>Typ av mätning</InputLabel>
             <NativeSelect

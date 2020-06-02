@@ -110,9 +110,8 @@ $.fn.editable = function(component) {
 
       if (component.state.authActive) {
         node.parent().attr("data-visibleforgroups", input3.val());
-        node.parent().attr("data-infobox", input4.val());
       }
-
+      node.parent().attr("data-infobox", input4.val());
       node.parent().attr("data-visibleatstart", visible);
       if (visible) {
         node.parent().addClass("visible");
@@ -159,7 +158,7 @@ $.fn.editable = function(component) {
         `<input id="${id5}" type="text" placeholder="Ny länk"/><br />`
       ),
       input3 = $(`<input id="${id6}" type="text" /><br />`),
-      input4 = $(`<input id="${id7}" type="text" /><br /><br />`),
+      input4 = $(`<textarea id="${id7}" type="text" /><br /><br />`),
       expanded = $('<div class="expanded-at-start"></div>'),
       toggled = $('<div class="expanded-at-start"></div>'),
       visible = $('<div class=""></div>'),
@@ -209,9 +208,9 @@ $.fn.editable = function(component) {
 
     if (component.state.authActive) {
       visible.append(label5, input3);
-      visible.append(label6, input4);
     }
 
+    visible.append(label6, input4);
     editPreset.append(label4, checkbox4, input2);
 
     remove.css({ color: "red", marginRight: "4px" }).click(e => {
@@ -588,11 +587,11 @@ class Menu extends Component {
         .find("> ul > li.layer-node")
         .toArray()
         .map(node => {
+          let infobox = node.dataset.infobox ? node.dataset.infobox : "";
           if (that.state.authActive) {
             let visibleForGroups = node.dataset.visibleforgroups
               ? node.dataset.visibleforgroups.split(",")
               : [];
-            let infobox = node.dataset.infobox ? node.dataset.infobox : "";
             if (Array.isArray(visibleForGroups)) {
               visibleForGroups = visibleForGroups.map(
                 Function.prototype.call,
@@ -601,7 +600,6 @@ class Menu extends Component {
             } else {
               visibleForGroups = String.prototype.trim(visibleForGroups);
             }
-
             return {
               id: node.dataset.id,
               drawOrder: node.dataset.draworder ? node.dataset.draworder : 1000,
@@ -613,7 +611,8 @@ class Menu extends Component {
             return {
               id: node.dataset.id,
               drawOrder: node.dataset.draworder ? node.dataset.draworder : 1000,
-              visibleAtStart: node.dataset.visibleatstart
+              visibleAtStart: node.dataset.visibleatstart,
+              infobox: infobox || ""
             };
           }
         });
@@ -680,7 +679,8 @@ class Menu extends Component {
           ? settings.baselayers.push({
               id: root.dataset.id,
               visibleAtStart: root.dataset.visibleatstart,
-              drawOrder: 0
+              drawOrder: 0,
+              infobox: ""
             })
           : settings.groups.push(groupItem(root));
       }
@@ -939,11 +939,11 @@ class Menu extends Component {
             }
           }
           var className = visible ? "layer-node visible" : "layer-node";
+          let infobox = layer.infobox ? layer.infobox : "";
           if (that.state.authActive) {
             let visibleForGroups = layer.visibleForGroups
               ? layer.visibleForGroups
               : [];
-            let infobox = layer.infobox ? layer.infobox : "";
 
             leafs.push(
               <li
@@ -976,6 +976,7 @@ class Menu extends Component {
                 data-draworder={typeof layer === "object" ? layer.drawOrder : 0}
                 data-visibleatstart={visible}
                 data-type="layer"
+                data-infobox={infobox}
               >
                 <span className="layer-name">
                   {that.getLayerNameFromId(
@@ -1392,6 +1393,7 @@ class Menu extends Component {
                     <option value="toolbar">Drawer</option>
                     <option value="left">Widget left</option>
                     <option value="right">Widget right</option>
+                    <option value="control">Control button</option>
                   </select>
                   {/* <input
                     id="target"
