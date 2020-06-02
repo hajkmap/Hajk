@@ -2,7 +2,7 @@ import React from "react";
 
 import SearchTools from "./SearchTools";
 import SearchResultList from "./SearchResultList";
-import SearchFeatureList from "./SearchFeatureList";
+import SearchSettings from "./SearchSettings";
 
 import {
   IconButton,
@@ -110,11 +110,12 @@ const SearchBar = props => {
                       orientation="vertical"
                     />
                     <SearchTools {...props} />
+                    <SearchSettings {...props} />
                     <IconButton
                       className={classes.iconButton}
                       aria-label="clear"
                       onClick={props.handleOnClear}
-                      disabled={true}
+                      disabled={!props.clearButtonActive}
                     >
                       <ClearIcon />
                     </IconButton>
@@ -125,7 +126,6 @@ const SearchBar = props => {
           )}
         />
       </Paper>
-      {props.drawSource.length ? <SearchFeatureList /> : null}
       <Collapse in={props.drawActive}>
         <Alert
           severity="info"
