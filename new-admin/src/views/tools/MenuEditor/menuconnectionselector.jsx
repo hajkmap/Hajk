@@ -11,9 +11,9 @@ import ListItemText from "@material-ui/core/ListItemText";
 import FormControl from "@material-ui/core/FormControl";
 import Popover from "@material-ui/core/Popover";
 import TextField from "@material-ui/core/TextField";
-import SettingsIcon from "@material-ui/icons/Settings";
 import WarningIcon from "@material-ui/icons/Warning";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
+import BlockIcon from "@material-ui/icons/Block";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import { Typography } from "@material-ui/core";
@@ -101,12 +101,24 @@ class MenuConnectionSelector extends React.Component {
     this.setState({ connectionsMenuAnchorEl: null, open: false });
   };
 
+  getMenuConnectionTypeIcon = type => {
+    return type === MENU_CONNECTION_TYPES.link ? (
+      <LanguageIcon></LanguageIcon>
+    ) : type === MENU_CONNECTION_TYPES.mapLink ? (
+      <RoomIcon></RoomIcon>
+    ) : type === MENU_CONNECTION_TYPES.documentConnection ? (
+      <DescriptionIcon></DescriptionIcon>
+    ) : type === MENU_CONNECTION_TYPES.none ? (
+      <BlockIcon></BlockIcon>
+    ) : (
+      <BlockIcon></BlockIcon>
+    );
+  };
+
   renderConnectionMenuSelectOption = (value, index) => {
     return (
       <MenuItem key={index} value={value}>
-        <ListItemIcon>
-          <SettingsIcon></SettingsIcon>
-        </ListItemIcon>
+        <ListItemIcon>{this.getMenuConnectionTypeIcon(value)}</ListItemIcon>
         <Typography>{value}</Typography>
         {value !== MENU_CONNECTION_TYPES.none && (
           <ArrowRightIcon></ArrowRightIcon>
@@ -315,22 +327,28 @@ class MenuConnectionSelector extends React.Component {
     if (this.state.value === MENU_CONNECTION_TYPES.documentConnection) {
       return this.getRenderedSelectionText(
         menuItem.document,
-        <DescriptionIcon></DescriptionIcon>
+        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.documentConnection)
       );
     }
 
     if (this.state.value === MENU_CONNECTION_TYPES.none) {
-      return this.getRenderedSelectionText(NONE_TEXT);
+      return this.getRenderedSelectionText(
+        NONE_TEXT,
+        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.none)
+      );
     }
 
     if (this.state.value === MENU_CONNECTION_TYPES.link) {
-      return this.getRenderedSelectionText(WEBLINK_TEXT, <RoomIcon></RoomIcon>);
+      return this.getRenderedSelectionText(
+        WEBLINK_TEXT,
+        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.link)
+      );
     }
 
     if (this.state.value === MENU_CONNECTION_TYPES.mapLink) {
       return this.getRenderedSelectionText(
         MAP_TEXT,
-        <LanguageIcon></LanguageIcon>
+        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.mapLink)
       );
     }
 

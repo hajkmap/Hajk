@@ -56,10 +56,6 @@ class TreeRow extends React.Component {
     updateMenuItem(treeNodeId, { title: this.state.menuItemTitle });
   };
 
-  constructor(props) {
-    super(props);
-  }
-
   renderConnectionSelect = () => {
     const {
       model,

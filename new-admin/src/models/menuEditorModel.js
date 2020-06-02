@@ -53,14 +53,8 @@ var menuEditorModel = Model.extend({
   },
 
   addToTreeRoot: function(newTree, foundDragNode, foundDropNode, info) {
-    if (foundDragNode.parent) {
-      foundDragNode.parent.children.splice(
-        foundDragNode.parent.children.indexOf(foundDragNode),
-        1
-      );
-    } else {
-      newTree.splice(newTree.indexOf(foundDragNode), 1);
-    }
+    this.removeNodeFromParent(foundDragNode, newTree);
+    this.setParentOfNode(foundDragNode, foundDropNode.parent);
 
     if (info.node.dragOverGapBottom) {
       this.insertAfterDropNode(foundDropNode, foundDragNode, newTree);
@@ -185,7 +179,6 @@ var menuEditorModel = Model.extend({
 
   hasInvalidTreeNodes: function(treeNode) {
     if (!treeNode.title.props.valid) {
-      console.log("GERE");
       return true;
     } else {
       if (treeNode.children.length > 0) {

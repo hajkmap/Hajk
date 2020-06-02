@@ -6,7 +6,7 @@ import Grid from "@material-ui/core/Grid";
 import Modal from "@material-ui/core/Modal";
 import DragHandle from "@material-ui/icons/DragHandle";
 import TreeRow from "./treerow.jsx";
-import { withStyles, ThemeProvider } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
 
 import {
@@ -347,7 +347,7 @@ class ToolOptions extends Component {
 
   updateTreeValidation = tree => {
     tree.forEach(treeNode => {
-      if (treeNode.key != HEADER_KEY) {
+      if (treeNode.key !== HEADER_KEY) {
         this.updateValidation(treeNode);
       }
     });
@@ -424,7 +424,7 @@ class ToolOptions extends Component {
 
   getTreeWithoutHeader = tree => {
     return tree.filter(treeNode => {
-      return treeNode.key != HEADER_KEY;
+      return treeNode.key !== HEADER_KEY;
     });
   };
 
@@ -521,6 +521,7 @@ class ToolOptions extends Component {
                   <Grid xs={12} item>
                     <Tree
                       blockNode
+                      height="80vh"
                       switcherIcon={<></>}
                       onDrop={this.onDropNode}
                       expandedKeys={expandedKeys}

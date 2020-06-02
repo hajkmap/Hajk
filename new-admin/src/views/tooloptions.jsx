@@ -83,7 +83,6 @@ class ToolOptions extends Component {
   }
 
   getActiveTool(tool) {
-    console.log(tool, "tool");
     switch (tool) {
       case "anchor":
         return <Anchor parent={this} model={this.props.model} />;
@@ -151,13 +150,11 @@ class ToolOptions extends Component {
 
   getClassNamesForActive(tool) {
     var found = false;
-    console.log(this.props.model.get("toolConfig"), "?????");
     if (Array.isArray(this.props.model.get("toolConfig"))) {
       found =
         this.props.model.get("toolConfig").filter(t => t.type === tool).length >
         0;
     }
-    console.log(tool, "tool", found, "found");
     return found ? "fa fa-check-square-o" : "fa fa-square-o";
   }
 
@@ -188,7 +185,7 @@ class ToolOptions extends Component {
       routing: "Navigation",
       collector: "Tyck till",
       dummy: "Dummy plugin",
-      documenthandler: "MenyHANTERING"
+      documenthandler: "Menyhantering"
     };
 
     return (
