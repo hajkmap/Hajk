@@ -196,13 +196,7 @@ class DrawView extends React.PureComponent {
             </Button>
           </div>
           <div>
-            <Button
-              onClick={() => {
-                this.props.model.export(url => {
-                  document.location.href = url;
-                });
-              }}
-            >
+            <Button onClick={this.exportToKml}>
               <SaveAltIcon />
               &nbsp; Exportera ritobjekt
             </Button>
@@ -211,6 +205,22 @@ class DrawView extends React.PureComponent {
       );
     }
   }
+
+  exportToKml = () => {
+    this.props.model.export(url => {
+      // If admin selected to extract only the host from client's url, let's do it.
+      // Otherwise, fall back to the default behavior, which is to use the returned string as-is.
+      const finalUrl =
+        this.props.model.options?.useClientHost === true
+          ? window.location.protocol +
+            "//" +
+            window.location.host +
+            new URL(url).pathname
+          : url;
+
+      window.location.href = finalUrl;
+    });
+  };
 
   openUploadDialog = e => {
     this.setState({

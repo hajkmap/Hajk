@@ -67,6 +67,7 @@ class AppModel {
     );
     this.globalObserver = globalObserver;
     this.layersFromParams = [];
+    this.cqlFiltersFromParams = {};
     register(this.coordinateSystemLoader.getProj4());
   }
   /**
@@ -108,7 +109,9 @@ class AppModel {
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
       .filter(plugin => {
-        return ["toolbar", "left", "right"].includes(plugin.options.target);
+        return ["toolbar", "left", "right", "control"].includes(
+          plugin.options.target
+        );
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
     return r;
@@ -340,6 +343,7 @@ class AppModel {
             layerId => layerId === layer.id
           );
         }
+        layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
         this.addMapLayer(layer);
       });
 
@@ -428,6 +432,9 @@ class AppModel {
       b.clean !== "false" &&
       b.clean !== "0";
 
+    // f contains our CQL Filters
+    const f = b.f;
+
     // Merge query params to the map config from JSON
     let x = parseFloat(b.x),
       y = parseFloat(b.y),
@@ -454,6 +461,11 @@ class AppModel {
 
     if (l) {
       this.layersFromParams = l;
+    }
+
+    if (f) {
+      // Filters come as a URI encoded JSON object, so we must parse it first
+      this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
     }
 
     // If 'v' query param is specified, it looks like we will want to search on load
