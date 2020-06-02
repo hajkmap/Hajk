@@ -1,0 +1,147 @@
+{
+  "chapters": [
+    {
+      "header": "RIKSINTRESSEN",
+      "headerIdentifier": "riksintressen/RIKSINTRESSEN",
+      "html": "<p><br></p>\n<p><br></p>\n<figure><img data-caption=\"\" data-source=\"\" src=\"Upload/riksintressen_start.png\"/></figure>\n<p><br></p>\n<p>Ett allmänt intresse av nationell betydelse kallas riksintresse och definieras enligt 3 och 4 kapitel miljöbalken. Staten, genom berörda centrala sektorsmyndigheter, lämnar uppgifter till länsstyrelsen om de områden de anser är av riksintresse. De är särskilt värdefulla och betydelsefulla för hela landet och ska enligt miljöbalken skyddas mot åtgärder som påtagligt kan skada deras värden eller möjligheterna att använda dem för avsett ändamål.</p>",
+      "mapSettings": {
+        "target": "map",
+        "center": [140700, 6399400],
+        "title": "Översiktsplan Göteborg",
+        "projection": "EPSG:3007",
+        "zoom": 1,
+        "maxZoom": 15,
+        "minZoom": 5,
+        "resolutions": [
+          70.00022,
+          28.00009,
+          14.00004,
+          7.000022,
+          2.800009,
+          1.400004,
+          0.700002,
+          0.280001,
+          0.14,
+          0.07
+        ],
+        "origin": [0, 0],
+        "extent": [110000, 6365000, 185000, 6425000],
+        "constrainOnlyCenter": false,
+        "logo": "/assets/logo.png",
+        "geoserverLegendOptions": "",
+        "mapselector": false,
+        "mapcleaner": true,
+        "drawerVisible": false,
+        "drawerPermanent": false,
+        "colors": { "primaryColor": "#0076bc", "secondaryColor": "#ffffff" },
+        "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+        "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+      },
+      "chapters": [
+        {
+          "header": "RIKSINTRESSEN OCH ÖVERSIKTSPLANEN",
+          "html": "<p>Enligt plan- och bygglagen 2010:900 (PBL) ska översiktsplanen visa hur riksintressen tillgodoses och kommunen ska bedöma vilken påverkan eller eventuell skada på riksintressena som planens förslag kan medföra. Huruvida området är intressant för riket, avgörs slutligt i efterföljande prövningar av ändrad markanvändning som kan beröra respektive riksintresseanspråk.</p><br><p>Länsstyrelsens uppgift är att samordna de statliga verkens riksintresseanspråk och ge kommunen det aktuella planeringsunderlag som behövs för bedömningen. Vidare ska länsstyrelsen för statens del bevaka att riksintressena tillgodoses i planeringen på det sätt som lagen föreskriver. Om kommunen i översiktsplanen ger uttryck för en annan uppfattning än länsstyrelsen om tolkning och innebörd av ett speciellt riksintresse, uppmärksammas detta i länsstyrelsens granskningsyttrande över planen, och om kommunen vidhåller sin uppfattning även vid antagandet av planen, redovisas detta särskilt i planhandlingarna.</p><br><p>Om ett område är av riksintresse för flera oförenliga ändamål ska företräde ges åt det eller de ändamål som på lämpligaste sätt främjar en långsiktig hushållning av marken, vattnet och den fysiska miljön i övrigt. Behövs området för en anläggning för totalförsvaret ska försvarsintresset ges företräde (miljöbalken 3 kap. 10 §).</p>",
+          "mapSettings": {
+            "center": [135672.89145750582, 6403799.452920079],
+            "zoom": 5,
+            "extent": [
+              134572.4883135058,
+              6403102.950930079,
+              136773.29460150583,
+              6404495.954910079
+            ]
+          },
+          "chapters": [],
+          "expanded": true,
+          "layers": ["4"]
+        },
+        {
+          "header": "RIKSINTRESSEN 4 KAP MILJÖBALKEN",
+          "html": "<p>Högexploaterad kust - Göteborgs kust och skärgård</p><br><p>Enligt miljöbalken finns särskilda villkor för exploatering inom Göteborgs kust och skärgård. Fritidsbebyggelse får tillkomma endast i form av kompletteringar till befintlig bebyggelse. Om det finns särskilda skäl får dock annan fritidsbebyggelse komma till stånd, företrädesvis sådan som tillgodoser det rörliga friluftslivets behov eller avser enkla fritidshus i närheten av de stora tätortsregionerna. Anläggningar för vissa miljöstörande verksamheter får komma till stånd endast på platser där anläggningar av sådant slag redan finns. Bestämmelserna i kapitlet ska dock inte hindra utveckling av befintliga tätorter eller det lokala näringslivet eller hindra utförandet av anläggningar som behövs för totalförsvaret.</p><br><p>Översiktsplanen markerar långsiktigt bevarad markanvändning för i stort sett alla delar av kust- och skärgårdsområdet som inte är exploaterade. Naturreservat och andra förordnanden finns och planeras för stora områden. Stora delar av Göteborgs tätort samt Torslanda ligger inom riksintresseområdet. Stadsutvecklingen kommer att ske inom och i direkt anslutning till dessa.</p><br><p>Det är inte aktuellt att tillskapa nya områden för enskild fritidsbebyggelse i Göteborg. Sådana områden har därför inte föreslagits i översiktsplanen.</p><blockquote>Riksintressen enligt 4 kap Miljöbalken I miljöbalken 4 kap. finns särskilda bestämmelser för geografiskt utpekade områden som är beslutade av riksdagen. Dessa är med hänsyn till sina natur- och kulturvärden i sin helhet av riksintresse. Göteborgs kust och skärgård omfattas av sådana särskilda bestämmelser.</blockquote>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "RIKSINTRESSEN 3 KAP MILJÖBALKEN",
+          "html": "<p>Naturvård</p><br><p>Änggårdsbergen</p><p>Området är skyddat genom naturreservat.</p><br><p>Galterö inklusive Känsö</p><p>Ingen förändrad markanvändning föreslås i planen. Känsö har ett slags skydd som liknar naturreservat. Nybildning av naturreservat på båda öarna kan aktualiseras efter att militären lämnat området.</p><br><p>Nordre älvs estuarium</p><p>Området är skyddat genom naturreservat. Eventuell skada på riksintressets värden vid en framtida utbyggnad av bostäder och anläggningar i anslutande områden kommer att belysas i samband med fortsatt planering av dessa områden. Se vidare under Natura 2000.</p><br><p>Öxnäs</p><p>Ett förslag för naturreservat har arbetats fram. Förslaget är för närvarande överklagat. Områdesbestämmelser finns upprättade för den kulturhistoriskt värdefulla bebyggelsen.</p><br><p>Göta och Nordre älvs dalgångar</p><p>Den norra delen är skyddad genom naturreservat. För den södra delen gäller huvudsakligen oförändrad markanvändning, jordbruk. I översiktsplanen föreslås att ett område omedelbart väster om väg E6 kan prövas för verksamheter. Eventuell skada på riksintresset kan uppkomma genom att naturområdet blir påverkat av utsläpp och föroreningar från verksamheterna. Risken för påtaglig skada på naturvärdena ska behandlas i kommande planering. Ett område som planeringsreserv för framtida stadsutveckling finns markerad i Säve. Omfattning, innehåll och eventuell påverkan kommer att utredas i fortsatt planering om det skulle bli aktuellt.</p><br><p>Konflikt kan uppstå mellan riksintressena järnväg och naturvård om utredningsområde för ny sträckning av Bohusbanan realiseras. Detta ska uppmärksammas i samband med kommande järnvägsutredning.</p><br><p>Orremossen</p><p>Området ingår i Vättlefjälls naturreservat. Inga förändringar som kan påverka riksintresset föreslås.</p><br><p>Lärjeåns dalgång</p><p>Arbete med naturreservat pågår.</p><br><p>Säveån</p><p>Ett nytt verksamhetsområde föreslås vid Fjällbo i anslutning till befintligt. Vidare föreslås en kombiterminal vid Sävenäs. Risk för att påtaglig skada på riksintresset uppkommer föreligger i båda fallen. Hur eventuella skador på naturmiljön ska undvikas eller minimeras ska utredas och prövas i fortsatt detaljplanering och i miljökonsekvensbeskrivningar för projekt och för detaljplan. Se vidare text under avsnittet Natura 2000.</p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        }
+      ],
+      "expanded": true
+    }
+  ],
+  "map": "oversiktsplan"
+}

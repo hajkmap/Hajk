@@ -7,11 +7,7 @@ import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-const styles = theme => ({
-  loader: {
-    height: "100%"
-  }
-});
+const styles = theme => ({});
 
 class DocumentWindowBase extends React.PureComponent {
   state = {
@@ -99,16 +95,13 @@ class DocumentWindowBase extends React.PureComponent {
           />
         ) : (
           <Grid
+            style={{ height: "100%" }}
             className={classes.loader}
             alignItems="center"
             justify="center"
             container
           >
-            <CircularProgress
-              justify="center"
-              alignItems="center"
-              className={classes.loader}
-            />
+            <CircularProgress style={{ height: "100%" }} justify="center" />
           </Grid>
         )}
       </BaseWindowPlugin>
@@ -116,4 +109,4 @@ class DocumentWindowBase extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(DocumentWindowBase));
+export default withStyles(styles)(DocumentWindowBase);
