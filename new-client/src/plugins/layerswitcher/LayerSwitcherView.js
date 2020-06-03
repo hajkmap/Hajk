@@ -6,9 +6,8 @@ import { withStyles } from "@material-ui/core/styles";
 import { AppBar, Tab, Tabs } from "@material-ui/core";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
-import LayerGroup from "./components/LayerGroup";
+import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
-import LayersView from "./beta/LayersView";
 
 const styles = theme => ({
   windowContent: {
@@ -34,10 +33,11 @@ class LayersSwitcherView extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    this.options = props.options;
     this.state = {
       chapters: [],
       baseLayers: props.model.getBaseLayers(),
-      activeTab: 2
+      activeTab: 0
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", chapters => {
@@ -93,7 +93,7 @@ class LayersSwitcherView extends React.PureComponent {
           display: shouldRender === true ? "block" : "none"
         }}
       >
-        {this.props.options.groups.map((group, i) => {
+        {this.options.groups.map((group, i) => {
           return (
             <LayerGroup
               key={i}
@@ -119,7 +119,7 @@ class LayersSwitcherView extends React.PureComponent {
    */
   renderBreadCrumbs = () => {
     return (
-      this.props.options.showBreadcrumbs &&
+      this.options.showBreadcrumbs &&
       createPortal(
         <BreadCrumbs
           map={this.props.map}
@@ -149,31 +149,20 @@ class LayersSwitcherView extends React.PureComponent {
               value={this.state.activeTab}
               variant="fullWidth"
             >
+              <Tab label="Kartlager" />
               <Tab label="Bakgrund" />
-              <Tab label="Lager" />
-              <Tab label="Lager (beta)" />
             </Tabs>
           </AppBar>
           <div className={classes.tabContent}>
+            {this.renderLayerGroups(this.state.activeTab === 0)}
             <BackgroundSwitcher
-              display={this.state.activeTab === 0}
+              display={this.state.activeTab === 1}
               layers={this.state.baseLayers}
               layerMap={this.props.model.layerMap}
-              backgroundSwitcherBlack={
-                this.props.options.backgroundSwitcherBlack
-              }
-              backgroundSwitcherWhite={
-                this.props.options.backgroundSwitcherWhite
-              }
-              enableOSM={this.props.options.enableOSM}
+              backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+              backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+              enableOSM={this.options.enableOSM}
               map={this.props.map}
-            />
-            {this.renderLayerGroups(this.state.activeTab === 1)}
-            <LayersView
-              app={this.props.app}
-              groups={this.props.options.groups}
-              model={this.props.model}
-              display={this.state.activeTab === 2}
             />
           </div>
         </div>
