@@ -115,11 +115,6 @@ import GeoJSON from "ol/format/GeoJSON";
 const Search = props => {
   const searchModel = props.app.appModel.searchModel;
 
-  const [input, setInput] = useState("");
-
-  // Autocomplete state
-  const [options, setOptions] = useState([]);
-
   const [searchSources, setSearchSources] = useState(searchModel.getSources());
 
   // Settings to be sent to SearchModel
@@ -127,7 +122,6 @@ const Search = props => {
 
   // Layer to draw into (spatial search)
   const [drawSource, setDrawSource] = useState([]);
-
   const [results, setResults] = useState([]);
 
   // Set state for SearchTool.js
@@ -136,7 +130,6 @@ const Search = props => {
   // Layer to visualize results
   const resultsSource = useRef();
   const resultsLayer = useRef();
-
   const map = useRef(props.map);
 
   useEffect(() => {
@@ -148,32 +141,6 @@ const Search = props => {
 
     map.current.addLayer(resultsLayer.current);
   }, []);
-
-  // Triggered when typing
-  const handleOnInput = async event => {
-    setInput(event);
-
-    const { flatAutocompleteArray, errors } = await searchModel.getAutocomplete(
-      event
-    );
-
-    console.log(
-      "Got this back to populate autocomplete with: ",
-      flatAutocompleteArray
-    );
-
-    // It is possible to check if Search Model returned any errors
-    errors.length > 0 && console.error("Autocomplete error: ", errors);
-
-    setOptions(flatAutocompleteArray);
-  };
-
-  // Triggered when selecting an option from autocomplete list
-  const handleOnChange = async (event, value, reason) => {
-    const searchString = value?.autocompleteEntry || value;
-    setInput(searchString);
-    doSearch(searchString);
-  };
 
   function addFeaturesToResultsLayer(featureCollections) {
     resultsSource.current.clear();
@@ -235,9 +202,8 @@ const Search = props => {
     setResults([]);
   };
 
-  function handleClickOnSearch() {
-    //const searchString = document.getElementById("searchInputField").value;
-    doSearch(input);
+  function handleClickOnSearch(searchString) {
+    doSearch(searchString);
   }
 
   function handleSearchSettings(option) {
@@ -257,11 +223,8 @@ const Search = props => {
       <SearchBar
         {...props}
         resultsSource={resultsSource}
-        handleOnInput={e => handleOnInput(e.target.value)}
-        handleOnChange={handleOnChange}
         handleOnSearch={handleClickOnSearch}
         handleOnClear={handleOnClear}
-        autocompleteList={options}
         resultList={results}
         clearButtonActive={clearButtonActive}
         handleSearchSettings={handleSearchSettings}

@@ -184,12 +184,7 @@ export default function SearchSettings(props) {
                     )}
                     style={{ width: 500 }}
                     renderInput={params => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        label="Välj sökkälla"
-                        placeholder="Favorites"
-                      />
+                      <TextField {...params} variant="outlined" />
                     )}
                   />
                 </Grid>

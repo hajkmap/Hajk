@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import SearchTools from "./SearchTools";
 import SearchResultList from "./SearchResultList";
@@ -44,10 +44,51 @@ const SearchBar = props => {
   const classes = useStyles();
 
   const { menuButtonDisabled, onMenuClick } = props;
+  const searchModel = props.app.appModel.searchModel;
 
   const tooltipText = menuButtonDisabled
     ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
     : "Visa verktygspanelen";
+
+  // Autocomplete state
+  const [open, setOpen] = useState(false);
+  const [options, setOptions] = useState([]);
+  const loading = open && options.length === 0;
+  const [searchInput, setSearchInput] = useState("");
+
+  useEffect(() => {
+    //if (searchInput.length > 3) return undefined;
+
+    let active = true;
+
+    //if (!loading) {
+    //  return undefined;
+    //}
+
+    (async () => {
+      console.log("Getting Autocomplete for: ", searchInput);
+      const {
+        flatAutocompleteArray,
+        errors
+      } = await searchModel.getAutocomplete(searchInput);
+
+      console.log(
+        "Got this back to populate autocomplete with: ",
+        flatAutocompleteArray
+      );
+
+      // It is possible to check if Search Model returned any errors
+      errors.length > 0 && console.error("Autocomplete error: ", errors);
+
+      if (active) {
+        setOptions(flatAutocompleteArray);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [loading, searchModel]);
 
   return (
     <div>
@@ -57,9 +98,13 @@ const SearchBar = props => {
           freeSolo
           clearOnEscape
           style={{ width: 500 }}
-          options={props.autocompleteList}
-          onInput={props.handleOnInput}
-          onChange={props.handleOnChange}
+          options={options}
+          onInput={(event, value, reason) => {
+            setSearchInput(event.target.value);
+          }}
+          onChange={(event, value, reason) => {
+            props.handleOnSearch(value?.autocompleteEntry || value);
+          }}
           getOptionSelected={(option, value) =>
             option.autocompleteEntry === value.autocompleteEntry
           }
@@ -101,7 +146,9 @@ const SearchBar = props => {
                     <IconButton
                       className={classes.iconButton}
                       aria-label="search"
-                      onClick={props.handleOnSearch}
+                      onClick={() => {
+                        props.handleOnSearch(searchInput);
+                      }}
                     >
                       <SearchIcon />
                     </IconButton>
