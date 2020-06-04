@@ -5,7 +5,6 @@
  * @returns {Array} Returns array with MaterialUI Components - see getTagSpecificCallbacks to see the translation used
  * @memberof htmlToMaterialUiParser
  */
-
 export default (html, tagSpecificCallbacks) => {
   let generatedHtml = [];
   parseHtml(html, generatedHtml, tagSpecificCallbacks);
@@ -33,7 +32,10 @@ const getTagsWithoutEnding = () => {
  * @memberof htmlToMaterialUiParser
  */
 const parseHtml = (html, generatedHtml, tagSpecificCallbacks) => {
-  const { tagType, tagValue, tagEndIndex } = findStartTag(html);
+  const { tagType, tagValue, tagEndIndex } = findValidStartTag(
+    html,
+    tagSpecificCallbacks
+  );
   generatedHtml.push({
     tagType: tagType,
     text: [],
@@ -120,14 +122,20 @@ const extractFirstInnerTag = (tagType, tagValue, tagSpecificCallbacks) => {
 /**
  * Private help method that finds the start tag in the html text.
  * @param {string} html The html code.
+ * @param {Array} tagSpecificCallbacks An array of all tags that should be handled as React components.
  * @returns {object} Returns the tag type, tag value, the index of the first tag and the last index of the
  * first tag.
  *
  * @memberof htmlToMaterialUiParser
  */
-const findStartTag = html => {
-  const indexStart = html.indexOf("<");
-  let indexEnd = html.indexOf(">");
+const findValidStartTag = (html, tagSpecificCallbacks) => {
+  let {
+    tagType,
+    indexStart,
+    indexEnd,
+    possibleIndexEnd,
+    tagEndIndex
+  } = findStartTag(html, tagSpecificCallbacks);
 
   if (indexEnd < indexStart)
     return {
@@ -137,14 +145,6 @@ const findStartTag = html => {
       tagEndIndex: indexEnd
     };
 
-  let possibleIndexEnd = html.indexOf("/>");
-  if (indexEnd - 1 === possibleIndexEnd) indexEnd = html.indexOf(" ");
-  if (indexEnd === possibleIndexEnd) indexEnd = html.length;
-
-  let tagType = getTagType(html, indexStart, indexEnd);
-
-  let tagEndIndex = findEndTagIndex(html, tagType);
-  if (tagEndIndex === 1) tagEndIndex = possibleIndexEnd;
   if (tagType === null)
     return {
       tagType: tagType,
@@ -168,6 +168,41 @@ const findStartTag = html => {
 };
 
 /**
+ * Private help method that finds the first tag in a string.
+ * @param {string} html The html code.
+ * @param {Array} tagSpecificCallbacks An array of all tags that should be handled as React components.
+ */
+const findStartTag = (html, tagSpecificCallbacks) => {
+  const indexStart = html.indexOf("<");
+  let indexEnd = html.indexOf(">");
+
+  if (indexEnd < indexStart)
+    return {
+      foundTagType: null,
+      indexStart: indexStart,
+      indexEnd: indexEnd,
+      possibleIndexEnd: 0,
+      tagEndIndex: 0
+    };
+
+  let possibleIndexEnd = html.indexOf("/>");
+  if (indexEnd - 1 === possibleIndexEnd) indexEnd = html.indexOf(" ");
+  if (indexEnd === possibleIndexEnd) indexEnd = html.length;
+
+  let tagType = getTagType(html, indexStart, indexEnd);
+  let tagEndIndex = findEndTagIndex(html, tagType);
+  if (tagEndIndex === 1) tagEndIndex = possibleIndexEnd;
+
+  return {
+    tagType: tagType,
+    indexStart: indexStart,
+    indexEnd: indexEnd,
+    possibleIndexEnd: possibleIndexEnd,
+    tagEndIndex: tagEndIndex
+  };
+};
+
+/**
  * Private help method that extracts data from the first tag, i.e. will find out if there are any data
  * before the tag and/or data within the tag itself.
  * @param {string} html The part of the html that will be parsed.
@@ -180,10 +215,16 @@ const findStartTag = html => {
  */
 const extractDataFromFirstTag = (html, tagSpecificCallbacks) => {
   let firstTag = [];
-  const { textBeforeTag, pureTag } = getTextBeforeTag(html);
+  const { textBeforeTag, pureTag } = getTextBeforeTag(
+    html,
+    tagSpecificCallbacks
+  );
   addPossibleTextBeforeTag(firstTag, textBeforeTag);
 
-  const { tagType, tagValue, tagEndIndex } = findStartTag(pureTag);
+  const { tagType, tagValue, tagEndIndex } = findValidStartTag(
+    pureTag,
+    tagSpecificCallbacks
+  );
   const textAddedToTag = addPossibleTextToTag(
     firstTag,
     textBeforeTag,
@@ -192,12 +233,15 @@ const extractDataFromFirstTag = (html, tagSpecificCallbacks) => {
     tagSpecificCallbacks
   );
 
-  if (!textAddedToTag) addPossibleOnlyTextToParentTag(firstTag, pureTag);
-
+  if (!textAddedToTag)
+    addPossibleOnlyTextToParentTag(firstTag, pureTag, tagSpecificCallbacks);
   addPossibleTagTypeWithoutTextToParentTag(firstTag, tagType, pureTag);
 
   let restHtml = html.substr(textBeforeTag.length + tagEndIndex);
-  if (!isTagSpecific(tagType, tagSpecificCallbacks) || isTextATag(tagValue))
+  if (
+    !isTagSpecific(tagType, tagSpecificCallbacks) ||
+    isTextATag(tagValue, tagSpecificCallbacks)
+  )
     restHtml = tagValue;
   if (tagEndIndex === -1) restHtml = "";
 
@@ -270,16 +314,31 @@ const findEndTagIndex = (html, tagType) => {
 /**
  * Private help method that gets all text before a tag.
  * @param {string} html The html code that will be investigated.
+ * @param {Array} tagSpecificCallbacks An array of all tags that should be handled as React components.
  * @returns {object} Returns an object consists of the text before a tag and the
  * pure text of a tag including the tag itself.
  *
  * @memberof htmlToMaterialUiParser
  */
-const getTextBeforeTag = html => {
-  const { tagStartIndex } = findStartTag(html);
+const getTextBeforeTag = (html, tagSpecificCallbacks) => {
+  let { tagType, tagStartIndex, tagEndIndex } = findValidStartTag(
+    html,
+    tagSpecificCallbacks
+  );
+  let nonSpecificTagFound = false;
+  let firstTagEndIndex = tagEndIndex;
+  while (!isTagSpecific(tagType, tagSpecificCallbacks, true)) {
+    nonSpecificTagFound = true;
+    ({ tagType, tagStartIndex, tagEndIndex } = findValidStartTag(
+      html.substring(tagEndIndex),
+      tagSpecificCallbacks
+    ));
+  }
+  if (!nonSpecificTagFound) firstTagEndIndex = 0;
+
   return {
-    textBeforeTag: html.substring(0, tagStartIndex),
-    pureTag: html.substring(tagStartIndex)
+    textBeforeTag: html.substring(0, tagStartIndex + firstTagEndIndex),
+    pureTag: html.substring(tagStartIndex + firstTagEndIndex)
   };
 };
 
@@ -316,7 +375,8 @@ const addPossibleTextToTag = (
   tagValue,
   tagSpecificCallbacks
 ) => {
-  if (tagType === null /*&&*/ || isTextATag(tagValue)) return false;
+  if (tagType === null /*&&*/ || isTextATag(tagValue, tagSpecificCallbacks))
+    return false;
 
   if (textBeforeTag !== "" || tagValue !== "") {
     if (tagType === null || isTagSpecific(tagType, tagSpecificCallbacks)) {
@@ -330,12 +390,13 @@ const addPossibleTextToTag = (
 /**
  * Private help method that determines if a tag value contains a tag.
  * @param {string} tagValue The value of the tag.
+ * @param {Array} tagSpecificCallbacks The array of all tag type that should be parsed.
  * @returns {boolean} Returns true if the tagValue parameter contains a tag inside itself.
  *
  * @memberof htmlToMaterialUiParser
  */
-const isTextATag = tagValue => {
-  const { tagType } = findStartTag(tagValue);
+const isTextATag = (tagValue, tagSpecificCallbacks) => {
+  const { tagType } = findValidStartTag(tagValue, tagSpecificCallbacks);
   if (tagType) return true;
 
   return false;
@@ -345,12 +406,17 @@ const isTextATag = tagValue => {
  * Private help method
  * @param {object} firstTag The tag object that will be added to the generated html array.
  * @param {string} pureTag The value of a tag excluded the tag itself.
+ * @param {Array} tagSpecificCallbacks The array of all tag type that should be parsed.
  * @returns {boolean} Returns if the possible text was addded to ths first tag object.
  *
  * @memberof htmlToMaterialUiParser
  */
-const addPossibleOnlyTextToParentTag = (firstTag, pureTag) => {
-  if (isTextATag(pureTag)) return false;
+const addPossibleOnlyTextToParentTag = (
+  firstTag,
+  pureTag,
+  tagSpecificCallbacks
+) => {
+  if (isTextATag(pureTag, tagSpecificCallbacks)) return false;
 
   if (pureTag !== "") {
     firstTag.push({ tagType: null, text: pureTag });
@@ -364,13 +430,15 @@ const addPossibleOnlyTextToParentTag = (firstTag, pureTag) => {
  * @param {object} firstTag The first tag object that we push parsed html tag into.
  * @param {string} tagType The tag type.
  * @param {string} pureTag The pure tag without the surrounding parent tag.
+ * @param {Array} tagSpecificCallbacks The array of all tag type that should be parsed.
  */
 const addPossibleTagTypeWithoutTextToParentTag = (
   firstTag,
   tagType,
-  pureTag
+  pureTag,
+  tagSpecificCallbacks
 ) => {
-  if (firstTag.length === 0 && isTextATag(pureTag)) {
+  if (firstTag.length === 0 && isTextATag(pureTag, tagSpecificCallbacks)) {
     firstTag.push({ tagType: tagType, text: [] });
     return true;
   }
