@@ -110,8 +110,6 @@ import SearchBar from "./SearchBar";
 
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
-import { Stroke, Style, Circle, Fill } from "ol/style";
-import Draw from "ol/interaction/Draw";
 import GeoJSON from "ol/format/GeoJSON";
 
 const Search = props => {
@@ -124,49 +122,22 @@ const Search = props => {
 
   const [searchSources, setSearchSources] = useState(searchModel.getSources());
 
+  // Settings to be sent to SearchModel
+  const [searchSettings, setSearchSettings] = useState([]);
+
   // Layer to draw into (spatial search)
-  const [drawActive, setDrawActive] = useState(false);
-  const drawInteraction = useRef();
-  const drawSource = useRef();
-  const drawLayer = useRef();
+  const [drawSource, setDrawSource] = useState([]);
 
   const [results, setResults] = useState([]);
+
+  // Set state for SearchTool.js
+  const [clearButtonActive, setClearButtonActive] = useState(true);
 
   // Layer to visualize results
   const resultsSource = useRef();
   const resultsLayer = useRef();
 
   const map = useRef(props.map);
-
-  const drawStyle = useRef(
-    new Style({
-      stroke: new Stroke({
-        color: "rgba(0, 0, 0, 1)",
-        width: 4
-      }),
-      fill: new Fill({
-        color: "rgba(255, 214, 91, 0.2)"
-      }),
-      image: new Circle({
-        radius: 6,
-        stroke: new Stroke({
-          color: "rgba(0, 0, 0, 1)",
-          width: 2
-        })
-      })
-    })
-  );
-
-  useEffect(() => {
-    drawSource.current = new VectorSource({ wrapX: false });
-    drawLayer.current = new VectorLayer({
-      source: drawSource.current,
-      style: drawStyle.current
-    });
-
-    // Add layer that will be used to allow user draw on map - used for spatial search
-    map.current.addLayer(drawLayer.current);
-  }, []);
 
   useEffect(() => {
     resultsSource.current = new VectorSource({ wrapX: false });
@@ -179,11 +150,11 @@ const Search = props => {
   }, []);
 
   // Triggered when typing
-  const handleOnInput = async (event, value, reason) => {
-    setInput(event.target.value);
+  const handleOnInput = async event => {
+    setInput(event);
 
     const { flatAutocompleteArray, errors } = await searchModel.getAutocomplete(
-      event.target.value
+      event
     );
 
     console.log(
@@ -199,35 +170,9 @@ const Search = props => {
 
   // Triggered when selecting an option from autocomplete list
   const handleOnChange = async (event, value, reason) => {
-    console.log("Selected from list: ", value);
     const searchString = value?.autocompleteEntry || value;
-
     setInput(searchString);
     doSearch(searchString);
-  };
-
-  const toggleDraw = (active, type, freehand = false, drawEndCallback) => {
-    if (active) {
-      drawSource.current.clear();
-      drawInteraction.current = new Draw({
-        source: drawSource.current,
-        type: type,
-        freehand: freehand,
-        stopClick: true,
-        style: drawStyle.current
-      });
-      map.current.addInteraction(drawInteraction.current);
-
-      map.current.clicklock = true;
-      drawInteraction.current.on("drawend", () => {
-        drawSource.current.clear();
-      });
-    } else {
-      map.current.removeInteraction(drawInteraction.current);
-      map.current.clicklock = false;
-      drawSource.current.clear();
-    }
-    setDrawActive(active);
   };
 
   function addFeaturesToResultsLayer(featureCollections) {
@@ -241,6 +186,8 @@ const Search = props => {
     );
 
     features.map(f => resultsSource.current.addFeatures(f));
+
+    // Zoom to fit all features
     const currentExtent = resultsSource.current.getExtent();
 
     if (currentExtent.map(Number.isFinite).includes(false) === false) {
@@ -254,18 +201,24 @@ const Search = props => {
   async function doSearch(searchString) {
     const searchOptions = searchModel.getSearchOptions();
     // Apply our custom options based on user's selection
-    //searchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
-    searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
-    searchOptions["matchCase"] = false;
-    //searchOptions["wildcardAtStart"] = wildcardAtStart;
-    //searchOptions["wildcardAtEnd"] = wildcardAtEnd;
+    searchSettings.map(setting => {
+      searchOptions["activeSpatialFilter"] = setting.activeSpatialFilter; // "intersects" or "within"
+      searchOptions["matchCase"] = setting.matchCase;
+      searchOptions["wildcardAtEnd"] = setting.wildcardAtEnd;
+      searchOptions["wildcardAtStart"] = setting.wildcardAtStart;
+
+      return searchOptions;
+    });
+
+    if (drawSource.current) {
+      searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
+    }
 
     const { featureCollections, errors } = await searchModel.getResults(
       searchString,
       searchSources,
       searchOptions
     );
-    console.log("doSearch results: ", featureCollections);
 
     // It's possible to handle any errors in the UI by checking if Search Model returned any
     errors.length > 0 && console.error(errors);
@@ -276,27 +229,39 @@ const Search = props => {
   }
 
   const handleOnClear = () => {
-    searchModel.abort();
+    if (drawSource.current) {
+      drawSource.current.clear();
+    }
+    setResults([]);
   };
 
   function handleClickOnSearch() {
-    const searchString = document.getElementById("searchInputField").value;
-    doSearch(searchString);
+    //const searchString = document.getElementById("searchInputField").value;
+    doSearch(input);
+  }
+
+  function handleSearchSettings(option) {
+    setSearchSettings(option);
+  }
+
+  function handleDrawSource(source) {
+    setDrawSource(source);
   }
 
   return (
     <>
       <SearchBar
         {...props}
-        handleOnInput={handleOnInput}
+        resultsSource={resultsSource}
+        handleOnInput={e => handleOnInput(e.target.value)}
         handleOnChange={handleOnChange}
         handleOnSearch={handleClickOnSearch}
         handleOnClear={handleOnClear}
         autocompleteList={options}
-        toggleDraw={toggleDraw}
-        drawSource={drawSource}
-        drawActive={drawActive}
         resultList={results}
+        clearButtonActive={clearButtonActive}
+        handleSearchSettings={handleSearchSettings}
+        handleDrawSource={handleDrawSource}
       />
     </>
   );

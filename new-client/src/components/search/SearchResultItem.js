@@ -1,11 +1,17 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 
+import { ListItemIcon, Checkbox } from "@material-ui/core";
 import MuiListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import IconButton from "@material-ui/core/IconButton";
+import Typography from "@material-ui/core/Typography";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import {
+  extractPropertiesFromJson,
+  mergeFeaturePropsWithMarkdown
+} from "../../utils/FeaturePropsParsing";
 
 const ListItem = withStyles(theme => ({
   root: {
@@ -14,12 +20,45 @@ const ListItem = withStyles(theme => ({
   }
 }))(MuiListItem);
 
-const SearchResultItem = props => {
-  const displayFields = props.displayFields;
-  const renderRow = props.features.map(feature => {
+const getHtmlItemInfoBox = (feature, infoBox) => {
+  var properties = extractPropertiesFromJson(feature.properties);
+  feature.properties = properties;
+  return mergeFeaturePropsWithMarkdown(infoBox, feature.properties);
+};
+
+function SearchResultItem({
+  features,
+  source,
+  checkedItems,
+  handleCheckedToggle
+}) {
+  const displayFields = source.displayFields;
+  const infobox = source.infobox;
+  const renderRow = features.map(feature => {
     return (
-      <ListItem button key={feature.id}>
-        <ListItemText primary={feature.properties[displayFields]} />
+      <ListItem key={feature.id} onClick={handleCheckedToggle(feature.id)}>
+        <ListItemIcon>
+          <Checkbox
+            edge="start"
+            checked={checkedItems.indexOf(feature.id) !== -1}
+            tabIndex={-1}
+            disableRipple
+          />
+        </ListItemIcon>
+        <ListItemText
+          primary={feature.properties[displayFields]}
+          secondary={
+            <React.Fragment>
+              <Typography
+                component="span"
+                variant="body2"
+                color="textPrimary"
+                dangerouslySetInnerHTML={getHtmlItemInfoBox(feature, infobox)}
+              />
+            </React.Fragment>
+          }
+        />
+
         <ListItemSecondaryAction>
           <IconButton edge="end" aria-label="moreVert">
             <MoreVertIcon />
@@ -30,6 +69,6 @@ const SearchResultItem = props => {
   });
 
   return renderRow;
-};
+}
 
 export default SearchResultItem;

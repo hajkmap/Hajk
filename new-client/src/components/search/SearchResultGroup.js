@@ -10,6 +10,7 @@ import MuiExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import MuiPlaceIcon from "@material-ui/icons/Place";
+import Chip from "@material-ui/core/Chip";
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -20,6 +21,9 @@ const useStyles = makeStyles(theme => ({
   heading: {
     fontSize: theme.typography.pxToRem(15),
     fontWeight: theme.typography.fontWeightRegular
+  },
+  chip: {
+    marginLeft: 8
   }
 }));
 
@@ -70,12 +74,12 @@ const PlaceIcon = withStyles(theme => ({
   }
 }))(MuiPlaceIcon);
 
-const SearchResultGroup = props => {
+function SearchResultGroup({ resultList, checkedItems, handleCheckedToggle }) {
   const classes = useStyles();
 
-  return Object.entries(props.resultList).map(([key, value]) => {
-    const displayFields = value.source.displayFields;
+  return Object.entries(resultList).map(([key, value]) => {
     const features = value.value.features;
+    const source = value.source;
     const numberReturned = value.value.numberReturned;
 
     if (numberReturned) {
@@ -87,15 +91,23 @@ const SearchResultGroup = props => {
               aria-controls="panel1a-content"
               id={key}
             >
-              <PlaceIcon />
-              <Typography>{value.source.caption}</Typography>
-              <span>({numberReturned})</span>
+              <Typography>
+                <PlaceIcon />
+                {value.source.caption}
+              </Typography>
+              <Chip
+                label={numberReturned}
+                color="primary"
+                className={classes.chip}
+              />
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>
               <List dense className={classes.root}>
                 <SearchResultItem
                   features={features}
-                  displayFields={displayFields}
+                  source={source}
+                  checkedItems={checkedItems}
+                  handleCheckedToggle={handleCheckedToggle}
                 />
               </List>
             </ExpansionPanelDetails>
@@ -106,6 +118,6 @@ const SearchResultGroup = props => {
       return null;
     }
   });
-};
+}
 
 export default SearchResultGroup;
