@@ -23,14 +23,6 @@ const getTextField = (value, onChangeFunction, variant) => {
   );
 };
 
-//TODO - HARDCODED
-const iconFontElement = (
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/icon?family=Material+Icons"
-  />
-);
-
 const styles = () => ({
   treeRowRoot: {
     border: "1px solid rgba(153,164,161,0.5)",
@@ -44,7 +36,8 @@ class TreeRow extends React.Component {
   };
 
   dynamicallyImportIconFonts = () => {
-    return iconFontElement;
+    const { dynamicImportUrls } = this.props.options;
+    return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
   };
 
   getIcon = icon => {

@@ -79,6 +79,7 @@ class ToolOptions extends Component {
         overlayLogoUrl: tool.options.overlayLogoUrl,
         openOverlayButtonColor: tool.options.openOverlayButtonColor,
         showScrollButtonLimit: tool.options.showScrollButtonLimit,
+        dynamicImportUrls: tool.options.dynamicImportUrls,
         width: tool.options.width,
         height: tool.options.height,
         menuConfig: tool.options.menuConfig,
@@ -144,6 +145,7 @@ class ToolOptions extends Component {
         target: this.state.target,
         openOverlayButtonColor: this.state.openOverlayButtonColor,
         showScrollButtonLimit: this.state.showScrollButtonLimit,
+        dynamicImportUrls: this.state.dynamicImportUrls,
         iconLibraryLink: this.state.iconLibraryLink,
         width: this.state.width,
         height: this.state.height,
@@ -326,6 +328,7 @@ class ToolOptions extends Component {
         iconLibraryLink={this.state.iconLibraryLink}
         updateMenuItem={this.updateMenuItem}
         deleteMenuItem={this.deleteMenuItem}
+        options={this.state}
         model={this.menuEditorModel}
         availableDocuments={this.availableDocuments}
         menuItem={menuItem}

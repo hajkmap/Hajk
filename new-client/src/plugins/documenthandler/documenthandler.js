@@ -9,21 +9,6 @@ import Observer from "react-event-observer";
 import Hidden from "@material-ui/core/Hidden";
 import MapViewModel from "./MapViewModel";
 
-const iconFontElement = (
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/icon?family=Material+Icons"
-  />
-);
-
-const fontElement = (
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://fonts.googleapis.com/css?family=Open+Sans"
-  />
-);
-
 const OverlayMenuView = menuComponent(OverlayMenuViewPartialFunctionality);
 const BarMenuView = menuComponent(BarMenuViewPartialFunctionality);
 
@@ -41,16 +26,24 @@ class DocumentHandler extends React.PureComponent {
   };
 
   dynamicallyImportOpenSans = () => {
-    return fontElement;
+    const { dynamicImportUrls } = this.props.options;
+    return (
+      <link
+        rel="stylesheet"
+        type="text/css"
+        href={dynamicImportUrls.openSans}
+      />
+    );
   };
 
   dynamicallyImportIconFonts = () => {
-    return iconFontElement;
+    const { dynamicImportUrls } = this.props.options;
+    return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
   };
 
   constructor(props) {
     super(props);
-
+    console.log(props, "props");
     this.localObserver = Observer();
     this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,
