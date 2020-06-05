@@ -9,6 +9,7 @@ import { IconButton } from "@material-ui/core";
 import Icon from "@material-ui/core/Icon";
 import SettingsPopover from "./settingspopover.jsx";
 import MenuConnectionSelector from "./menuconnectionselector.jsx";
+import WarningModal from "./warningModal.jsx";
 
 const getTextField = (value, onChangeFunction, variant) => {
   return (
@@ -32,7 +33,8 @@ const styles = () => ({
 
 class TreeRow extends React.Component {
   state = {
-    menuItemTitle: this.props.menuItem.title
+    menuItemTitle: this.props.menuItem.title,
+    showWarning: false
   };
 
   dynamicallyImportIconFonts = () => {
@@ -72,12 +74,19 @@ class TreeRow extends React.Component {
     );
   };
 
+  showWarning = () => {
+    this.setState({ showWarning: true });
+  };
+
+  hideWarning = () => {
+    this.setState({ showWarning: false });
+  };
+
   renderRemoveButton = () => {
-    const { deleteMenuItem, treeNodeId } = this.props;
     return (
       <IconButton
         onClick={() => {
-          deleteMenuItem(treeNodeId);
+          this.showWarning();
         }}
       >
         <DeleteIcon></DeleteIcon>
@@ -96,10 +105,17 @@ class TreeRow extends React.Component {
   };
 
   renderSettingsMenu = () => {
-    const { settingsMenuAnchorEl } = this.state;
-    const { updateMenuItem, menuItem, treeNodeId } = this.props;
+    const { settingsMenuAnchorEl, showWarning } = this.state;
+    const { updateMenuItem, menuItem, treeNodeId, deleteMenuItem } = this.props;
     return (
       <>
+        <WarningModal
+          handleApproveClick={() => {
+            deleteMenuItem(treeNodeId);
+          }}
+          handleCancelClick={this.hideWarning}
+          open={showWarning}
+        ></WarningModal>
         <IconButton size="small" onClick={this.openSettingsMenu}>
           <SettingsIcon></SettingsIcon>
         </IconButton>
