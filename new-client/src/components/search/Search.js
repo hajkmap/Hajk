@@ -144,6 +144,13 @@ const Search = props => {
     });
 
     map.current.addLayer(resultsLayer.current);
+
+    map.current.on("click", function(evt) {
+      map.current.forEachFeatureAtPixel(evt.pixel, feature => {
+        console.log("Feature clicked", feature);
+        return feature;
+      });
+    });
   }, []);
 
   function addFeaturesToResultsLayer(featureCollections) {
