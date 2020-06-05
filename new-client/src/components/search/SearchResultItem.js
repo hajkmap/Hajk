@@ -27,48 +27,44 @@ const getHtmlItemInfoBox = (feature, infoBox) => {
 };
 
 function SearchResultItem({
-  features,
+  feature,
   source,
   checkedItems,
   handleCheckedToggle
 }) {
   const displayFields = source.displayFields;
   const infobox = source.infobox;
-  const renderRow = features.map(feature => {
-    return (
-      <ListItem key={feature.id} onClick={handleCheckedToggle(feature.id)}>
-        <ListItemIcon>
-          <Checkbox
-            edge="start"
-            checked={checkedItems.indexOf(feature.id) !== -1}
-            tabIndex={-1}
-            disableRipple
-          />
-        </ListItemIcon>
-        <ListItemText
-          primary={feature.properties[displayFields]}
-          secondary={
-            <React.Fragment>
-              <Typography
-                component="span"
-                variant="body2"
-                color="textPrimary"
-                dangerouslySetInnerHTML={getHtmlItemInfoBox(feature, infobox)}
-              />
-            </React.Fragment>
-          }
+  return (
+    <ListItem key={feature.id} onClick={handleCheckedToggle(feature.id)}>
+      <ListItemIcon>
+        <Checkbox
+          edge="start"
+          checked={checkedItems.indexOf(feature.id) !== -1}
+          tabIndex={-1}
+          disableRipple
         />
+      </ListItemIcon>
+      <ListItemText
+        primary={feature.properties[displayFields]}
+        secondary={
+          <React.Fragment>
+            <Typography
+              component="span"
+              variant="body2"
+              color="textPrimary"
+              dangerouslySetInnerHTML={getHtmlItemInfoBox(feature, infobox)}
+            />
+          </React.Fragment>
+        }
+      />
 
-        <ListItemSecondaryAction>
-          <IconButton edge="end" aria-label="moreVert">
-            <MoreVertIcon />
-          </IconButton>
-        </ListItemSecondaryAction>
-      </ListItem>
-    );
-  });
-
-  return renderRow;
+      <ListItemSecondaryAction>
+        <IconButton edge="end" aria-label="moreVert">
+          <MoreVertIcon />
+        </IconButton>
+      </ListItemSecondaryAction>
+    </ListItem>
+  );
 }
 
 export default SearchResultItem;

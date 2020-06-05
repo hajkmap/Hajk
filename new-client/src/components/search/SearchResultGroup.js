@@ -74,50 +74,52 @@ const PlaceIcon = withStyles(theme => ({
   }
 }))(MuiPlaceIcon);
 
-function SearchResultGroup({ resultList, checkedItems, handleCheckedToggle }) {
+function SearchResultGroup({
+  map,
+  featureCollection: { source, value },
+  resultsSource,
+  checkedItems,
+  handleCheckedToggle
+}) {
   const classes = useStyles();
 
-  return Object.entries(resultList).map(([key, value]) => {
-    const features = value.value.features;
-    const source = value.source;
-    const numberReturned = value.value.numberReturned;
+  const numberReturned = value.numberReturned;
 
-    if (numberReturned) {
-      return (
-        <div key={key}>
-          <ExpansionPanel>
-            <ExpansionPanelSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id={key}
-            >
-              <Typography>
-                <PlaceIcon />
-                {value.source.caption}
-              </Typography>
-              <Chip
-                label={numberReturned}
-                color="primary"
-                className={classes.chip}
+  if (numberReturned) {
+    return (
+      <ExpansionPanel>
+        <ExpansionPanelSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+        >
+          <Typography>
+            <PlaceIcon />
+            {source.caption}
+          </Typography>
+          <Chip
+            label={numberReturned}
+            color="primary"
+            className={classes.chip}
+          />
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
+          <List dense className={classes.root}>
+            {value.features.map(f => (
+              <SearchResultItem
+                key={f.id}
+                feature={f}
+                source={source}
+                checkedItems={checkedItems}
+                handleCheckedToggle={handleCheckedToggle}
               />
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
-              <List dense className={classes.root}>
-                <SearchResultItem
-                  features={features}
-                  source={source}
-                  checkedItems={checkedItems}
-                  handleCheckedToggle={handleCheckedToggle}
-                />
-              </List>
-            </ExpansionPanelDetails>
-          </ExpansionPanel>
-        </div>
-      );
-    } else {
-      return null;
-    }
-  });
+            ))}
+          </List>
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
+    );
+  } else {
+    return null;
+  }
 }
 
 export default SearchResultGroup;

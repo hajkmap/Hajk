@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import SearchTools from "./SearchTools";
 import SearchResultList from "./SearchResultList";
@@ -45,6 +45,7 @@ const SearchBar = props => {
 
   const { menuButtonDisabled, onMenuClick } = props;
   const searchModel = props.app.appModel.searchModel;
+  const map = useRef(props.map);
 
   const tooltipText = menuButtonDisabled
     ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
@@ -61,9 +62,9 @@ const SearchBar = props => {
 
     let active = true;
 
-    //if (!loading) {
-    //  return undefined;
-    //}
+    if (!loading) {
+      return undefined;
+    }
 
     (async () => {
       console.log("Getting Autocomplete for: ", searchInput);
@@ -90,6 +91,23 @@ const SearchBar = props => {
     };
   }, [loading, searchModel]);
 
+  useEffect(() => {
+    if (!open) {
+      setOptions([]);
+    }
+  }, [open]);
+
+  function handleOnInputChange(event, value, reason) {
+    setSearchInput(event.target.value);
+    setOpen(value.length >= 3);
+  }
+
+  function handleOnChange(event, value, reason) {
+    const searchInput = value?.autocompleteEntry || value;
+    setSearchInput(searchInput);
+    props.handleOnSearch(searchInput);
+  }
+
   return (
     <div>
       <Paper className={classes.root}>
@@ -99,12 +117,9 @@ const SearchBar = props => {
           clearOnEscape
           style={{ width: 500 }}
           options={options}
-          onInput={(event, value, reason) => {
-            setSearchInput(event.target.value);
-          }}
-          onChange={(event, value, reason) => {
-            props.handleOnSearch(value?.autocompleteEntry || value);
-          }}
+          loading={loading}
+          onInputChange={handleOnInputChange}
+          onChange={handleOnChange}
           getOptionSelected={(option, value) =>
             option.autocompleteEntry === value.autocompleteEntry
           }
@@ -147,6 +162,7 @@ const SearchBar = props => {
                       className={classes.iconButton}
                       aria-label="search"
                       onClick={() => {
+                        setOpen(false);
                         props.handleOnSearch(searchInput);
                       }}
                     >
@@ -192,7 +208,11 @@ const SearchBar = props => {
           Markeringsverktyg aktiverat!
         </Alert>
       </Collapse>
-      <SearchResultList {...props} />
+      <SearchResultList
+        map={map}
+        searchResults={props.searchResults}
+        resultsSource={props.resultsSource}
+      />
     </div>
   );
 };

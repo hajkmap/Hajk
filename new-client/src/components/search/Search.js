@@ -122,7 +122,11 @@ const Search = props => {
 
   // Layer to draw into (spatial search)
   const [drawSource, setDrawSource] = useState([]);
-  const [results, setResults] = useState([]);
+
+  const [searchResults, setSearchResults] = useState({
+    featureCollections: [],
+    errors: []
+  });
 
   // Set state for SearchTool.js
   const [clearButtonActive, setClearButtonActive] = useState(true);
@@ -190,7 +194,7 @@ const Search = props => {
     // It's possible to handle any errors in the UI by checking if Search Model returned any
     errors.length > 0 && console.error(errors);
 
-    setResults(featureCollections);
+    setSearchResults({ featureCollections, errors });
 
     addFeaturesToResultsLayer(featureCollections);
   }
@@ -199,7 +203,7 @@ const Search = props => {
     if (drawSource.current) {
       drawSource.current.clear();
     }
-    setResults([]);
+    setSearchResults([]);
   };
 
   function handleClickOnSearch(searchString) {
@@ -223,9 +227,9 @@ const Search = props => {
       <SearchBar
         {...props}
         resultsSource={resultsSource}
+        searchResults={searchResults}
         handleOnSearch={handleClickOnSearch}
         handleOnClear={handleOnClear}
-        resultList={results}
         clearButtonActive={clearButtonActive}
         handleSearchSettings={handleSearchSettings}
         handleDrawSource={handleDrawSource}
