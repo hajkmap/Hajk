@@ -428,9 +428,32 @@ class Page extends Component {
               );
             case "h6":
               return (
-                <Typography variant="h5" key={i}>
+                <Typography variant="h6" key={i}>
                   {this.renderFromJsonDom(child)}
                 </Typography>
+              );
+            case "a":
+              return (
+                <a key={i} href={child.attr["href"]} target="_blank">
+                  {this.renderFromJsonDom(child)}
+                </a>
+              );
+            case "ul":
+              return <ul key={i}>{this.renderFromJsonDom(child)}</ul>;
+            case "li":
+              return <li key={i}>{this.renderFromJsonDom(child)}</li>;
+            case "br":
+              return <br key={i} />;
+            case "img":
+              return (
+                <img
+                  key={i}
+                  src={child.attr["src"]}
+                  width={child.attr["width"]}
+                  height={child.attr["height"]}
+                >
+                  {this.renderFromJsonDom(child)}
+                </img>
               );
             default:
               return null;
