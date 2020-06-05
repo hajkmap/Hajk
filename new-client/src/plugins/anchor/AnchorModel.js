@@ -5,15 +5,9 @@ class AnchorModel {
     this.cqlFilters = {};
     this.map = settings.map;
     this.localObserver = settings.localObserver;
-    const update = e => {
-      setTimeout(() => {
-        if (!e.target.getAnimating() && !e.target.getInteracting()) {
-          this.localObserver.publish("mapUpdated", this.getAnchor());
-        }
-      }, 0);
-    };
-    this.map.getView().on("change:resolution", update);
-    this.map.getView().on("change:center", update);
+
+    this.map.getView().on("change", this.update);
+
     this.map
       .getLayers()
       .getArray()
@@ -26,7 +20,7 @@ class AnchorModel {
           this.localObserver.publish("mapUpdated", this.getAnchor());
         });
 
-        // Update anchor each time an underlaying Source changes in some way (could be new CQL params, for example).
+        // Update anchor each time an underlying Source changes in some way (could be new CQL params, for example).
         layer.getSource().on("change", ({ target }) => {
           if (typeof target.getParams !== "function") return;
           const cqlFilterForCurrentLayer = target.getParams()?.CQL_FILTER;
@@ -35,6 +29,12 @@ class AnchorModel {
         });
       });
   }
+
+  update = e => {
+    // If view is still animating, postpone updating Anchor
+    e.target.getAnimating() === false &&
+      this.localObserver.publish("mapUpdated", this.getAnchor());
+  };
 
   getMap() {
     return this.map;
