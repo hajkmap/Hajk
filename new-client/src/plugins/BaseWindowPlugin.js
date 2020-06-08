@@ -11,6 +11,7 @@ import {
 } from "@material-ui/core";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
+import PluginControlButton from "../components/PluginControlButton";
 
 const styles = theme => {
   return {};
@@ -139,6 +140,7 @@ class BaseWindowPlugin extends React.PureComponent {
           this.renderWidgetButton("left-column")}
         {this.props.options.target === "right" &&
           this.renderWidgetButton("right-column")}
+        {this.props.options.target === "control" && this.renderControlButton()}
       </>
     );
   }
@@ -180,6 +182,18 @@ class BaseWindowPlugin extends React.PureComponent {
         />
       </Hidden>,
       document.getElementById(id)
+    );
+  }
+
+  renderControlButton() {
+    return createPortal(
+      <PluginControlButton
+        icon={this.props.custom.icon}
+        onClick={this.handleButtonClick}
+        title={this.title}
+        abstract={this.description}
+      />,
+      document.getElementById("plugin-control-buttons")
     );
   }
 
