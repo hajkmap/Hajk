@@ -248,6 +248,10 @@ const Search = props => {
     setDrawSource(source);
   }
 
+  function handleSearchSources(source) {
+    setSearchSources(source);
+  }
+
   return (
     <>
       <SearchBar
@@ -262,6 +266,7 @@ const Search = props => {
         clearButtonActive={clearButtonActive}
         handleSearchSettings={handleSearchSettings}
         handleDrawSource={handleDrawSource}
+        handleSearchSources={handleSearchSources}
       />
     </>
   );
