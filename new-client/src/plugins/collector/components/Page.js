@@ -451,6 +451,7 @@ class Page extends Component {
                   src={child.attr["src"]}
                   width={child.attr["width"]}
                   height={child.attr["height"]}
+                  alt={child.attr["alt"]}
                 >
                   {this.renderFromJsonDom(child)}
                 </img>
