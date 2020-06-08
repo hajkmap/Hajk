@@ -434,7 +434,12 @@ class Page extends Component {
               );
             case "a":
               return (
-                <a key={i} href={child.attr["href"]} target="_blank">
+                <a
+                  key={i}
+                  href={child.attr["href"]}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
                   {this.renderFromJsonDom(child)}
                 </a>
               );
