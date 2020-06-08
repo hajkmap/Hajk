@@ -643,6 +643,22 @@ var SearchBarView = {
     ) : null;
   },
 
+
+  renderAlertBar: function () {
+    var valueBar = this.props.model.get("valueBar");
+
+    if (valueBar.length > 0) {
+      return (
+          <p className="alert alert-info" id="alertSearchbar">
+            Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på {" "}
+            <b>retur</b> för att forcera en sökning.
+          </p>
+      )
+    } else {
+      return (null)
+    }
+  },
+
   /**
    * Render the panel component.
    * @instance
@@ -650,8 +666,10 @@ var SearchBarView = {
    */
   render: function() {
     var valueBar = this.props.model.get("valueBar"),
-      showResults, //= this.props.model.shouldRenderResult(true),
+      showResults = false, //= this.props.model.shouldRenderResult(true),
       options = this.renderOptions();
+
+    var placeholder = this.props.model.get("placeholder");
 
     const Loading = (
       <div id="searchbar-loading-spinner">
@@ -670,13 +688,6 @@ var SearchBarView = {
     if (shouldRenderSearchResults) {
       showResults = true;
     }
-
-    const AlertSearchBar = (
-      <p className="alert alert-info" id="alertSearchbar">
-        Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på{" "}
-        <b>retur</b> för att forcera en sökning.
-      </p>
-    );
 
     const inputClassName =
       this.state.loading ||
@@ -711,7 +722,7 @@ var SearchBarView = {
             type="text"
             ref="searchInput"
             className={inputClassName}
-            placeholder="Sök i kartan..."
+            placeholder={placeholder}
             value={valueBar}
             onKeyDown={this.handleKeyDown}
             onChange={this.searchOnInput}
@@ -747,8 +758,8 @@ var SearchBarView = {
             ? Loading
             : shouldRenderSearchResults
             ? this.renderResults()
-            : AlertSearchBar
-          : null}
+            : this.renderAlertBar()
+          : this.renderAlertBar()}
       </div>
     );
   }
