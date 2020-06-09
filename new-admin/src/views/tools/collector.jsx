@@ -104,6 +104,7 @@ class ToolOptions extends Component {
         featureNS: tool.options.featureNS,
         showThankYou: tool.options.showThankYou,
         thankYou: tool.options.thankYou,
+        tyckTillIgen: tool.options.tyckTillIgen,
         form: tool.options.form || [],
         visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups || [],
@@ -197,6 +198,7 @@ class ToolOptions extends Component {
         abstract: this.state.abstract,
         featureNS: this.state.featureNS,
         showThankYou: this.state.showThankYou,
+        tyckTillIgen: this.state.tyckTillIgen,
         visibleAtStart: this.state.visibleAtStart,
         thankYou: this.state.thankYou,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -499,6 +501,26 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+          <div>
+            <input
+              id="tyckTillIgen"
+              name="tyckTillIgen"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.tyckTillIgen}
+            />
+            &nbsp;
+            <label htmlFor="tyckTillIgen">
+              Visa "Tyck Till Igen"{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="'Stäng' och 'Tyck till igen' knappar visas på thank you sidan. 'Stäng' knapp stänger tyck till fönstret och 'tyck till igen' knapp börjar en ny tyck till."
+              />
+            </label>
           </div>
           <div>
             <label htmlFor="featureNS">Redigeringstjänst</label>

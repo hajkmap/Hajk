@@ -573,8 +573,47 @@ class Page extends Component {
       </Button>
     );
 
+    const tyckTillIgenButton = (
+      <Button
+        variant="outlined"
+        color="primary"
+        className={classes.buttonRight}
+        onClick={() => {
+          this.props.model.observer.publish("abort");
+        }}
+      >
+        Tyck till igen!
+      </Button>
+    );
+
+    const closeButton = (
+      <Button
+        variant="outlined"
+        color="primary"
+        className={classes.buttonRight}
+        onClick={() => {
+          this.props.model.app.windows.forEach(window => {
+            if (window.type === "collector") {
+              window.closeWindow();
+            }
+          });
+        }}
+      >
+        Stäng
+      </Button>
+    );
+
     if (this.state.displayThankYou) {
-      return <div>{okButton}</div>;
+      if (this.props.options.tyckTillIgen) {
+        return (
+          <div>
+            {tyckTillIgenButton}
+            {closeButton}
+          </div>
+        );
+      } else {
+        return <div>{okButton}</div>;
+      }
     }
 
     if (numPages === 1) {
