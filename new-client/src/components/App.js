@@ -22,6 +22,8 @@ import MapSwitcher from "../controls/MapSwitcher";
 import Information from "../controls/Information";
 import PresetLinks from "../controls/PresetLinks";
 
+import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
+
 import {
   Backdrop,
   Divider,
@@ -35,6 +37,8 @@ import {
 import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import MenuIcon from "@material-ui/icons/Menu";
+import MapIcon from "@material-ui/icons/Map";
+import MenuBookIcon from "@material-ui/icons/MenuBook";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -171,6 +175,7 @@ class App extends React.PureComponent {
 
     this.state = {
       alert: false,
+      drawerButtons: [],
       loading: false,
       mapClickDataResult: {},
 
@@ -207,7 +212,23 @@ class App extends React.PureComponent {
       this.setState({
         tools: this.appModel.getPlugins()
       });
-      this.globalObserver.publish("core.appLoaded"); // Both Controls and Plugins can subscribe to this event and get things done
+
+      // Tell Drawer to add a button for the map tools
+      this.globalObserver.publish("core.addDrawerToggleButton", {
+        value: "plugins",
+        ButtonIcon: MapIcon,
+        caption: "Kartverktyg",
+        order: 2
+      });
+      this.globalObserver.publish("core.addDrawerToggleButton", {
+        value: "document",
+        ButtonIcon: MenuBookIcon,
+        caption: "Översiktsplan",
+        order: 1
+      });
+
+      // Tell everyone that we're done loading (in case someone listens)
+      this.globalObserver.publish("core.appLoaded");
     });
     this.bindHandlers();
   }
@@ -235,6 +256,11 @@ class App extends React.PureComponent {
       this.state.drawerVisible &&
         !this.state.drawerPermanent &&
         this.setState({ drawerVisible: false });
+    });
+
+    this.globalObserver.subscribe("core.addDrawerToggleButton", button => {
+      const newState = [...this.state.drawerButtons, button];
+      this.setState({ drawerButtons: newState });
     });
 
     this.appModel
@@ -473,6 +499,10 @@ class App extends React.PureComponent {
               id="header"
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
+              <DrawerToggleButtons
+                drawerButtons={this.state.drawerButtons}
+                globalObserver={this.globalObserver}
+              />
               {clean === false && this.renderStandaloneDrawerToggler()}
               {clean === false && this.renderSearchPlugin()}
             </header>

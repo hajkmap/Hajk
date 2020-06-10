@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Button from "@material-ui/core/Button";
+import BugReportIcon from "@material-ui/icons/BugReport";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
@@ -41,6 +42,13 @@ class DummyView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+
+    this.globalObserver.publish("core.addDrawerToggleButton", {
+      value: "dummy",
+      ButtonIcon: BugReportIcon,
+      caption: "Dummyverktyg",
+      order: 100
+    });
   }
 
   buttonClick = () => {
