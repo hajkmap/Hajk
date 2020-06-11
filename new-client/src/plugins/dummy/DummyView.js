@@ -47,15 +47,14 @@ class DummyView extends React.PureComponent {
       value: "dummy",
       ButtonIcon: BugReportIcon,
       caption: "Dummyverktyg",
-      order: 100
-    });
-
-    this.globalObserver.subscribe("core.drawerContent", v => {
-      if (v === "dummy") {
-        console.log("I got it");
-      }
+      order: 100,
+      renderDrawerContent: this.renderDrawerContent
     });
   }
+
+  renderDrawerContent = () => {
+    return <div>Hej Dummy!</div>;
+  };
 
   buttonClick = () => {
     // We have access to plugin's model:

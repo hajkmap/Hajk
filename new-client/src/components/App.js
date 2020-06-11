@@ -1,4 +1,5 @@
 import React from "react";
+
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import cslx from "clsx";
@@ -30,7 +31,8 @@ import {
   Drawer,
   Hidden,
   IconButton,
-  Tooltip
+  Tooltip,
+  Box
 } from "@material-ui/core";
 
 import LockIcon from "@material-ui/icons/Lock";
@@ -80,7 +82,7 @@ const styles = theme => {
       zIndex: theme.zIndex.appBar,
       height: theme.spacing(8),
       display: "flex",
-      justifyContent: "flex-start",
+      justifyContent: "space-between",
       alignItems: "flex-start",
       [theme.breakpoints.down("xs")]: {
         zIndex: 3
@@ -107,10 +109,10 @@ const styles = theme => {
       flex: 0,
       display: "flex",
       flexDirection: "column",
-      marginTop: theme.spacing(-8),
-      [theme.breakpoints.down("xs")]: {
-        marginTop: 0
-      }
+      // marginTop: theme.spacing(-8),
+      // [theme.breakpoints.down("xs")]: {
+      marginTop: 0
+      // }
     },
     footer: {
       zIndex: 3,
@@ -195,6 +197,7 @@ class App extends React.PureComponent {
           : (props.config.mapConfig.map.drawerVisible &&
               props.config.mapConfig.map.drawerPermanent) ||
             false,
+      activeDrawerContent: null,
       drawerMouseOverLock: false
     };
     this.globalObserver = new Observer();
@@ -216,13 +219,19 @@ class App extends React.PureComponent {
         value: "plugins",
         ButtonIcon: MapIcon,
         caption: "Kartverktyg",
-        order: 2
+        order: 2,
+        renderDrawerContent: function() {
+          return null;
+        }
       });
       this.globalObserver.publish("core.addDrawerToggleButton", {
         value: "document",
         ButtonIcon: MenuBookIcon,
         caption: "Översiktsplan",
-        order: 1
+        order: 1,
+        renderDrawerContent: function() {
+          return <div>Översiktsplan!</div>;
+        }
       });
 
       // Tell everyone that we're done loading (in case someone listens)
@@ -264,11 +273,10 @@ class App extends React.PureComponent {
     this.globalObserver.subscribe("core.drawerContent", v => {
       console.log("Drawer content changed to value: ", v);
       if (v !== null) {
-        console.log("Showing Drawer");
-        this.setState({ drawerVisible: true });
+        console.log("Showing Drawer", v);
+        this.setState({ drawerVisible: true, activeDrawerContent: v });
       } else {
         console.log("Hiding Drawer");
-        // this.setState({ drawerVisible: false });
         this.globalObserver.publish("core.hideDrawer");
       }
     });
@@ -355,7 +363,6 @@ class App extends React.PureComponent {
    * @memberof App
    */
   togglePermanent = e => {
-    console.log("In togglePermanent: ", e);
     this.setState({ drawerPermanent: !this.state.drawerPermanent }, () => {
       // Viewport size has changed, hence we must tell OL
       // to refresh canvas size.
@@ -419,6 +426,33 @@ class App extends React.PureComponent {
   isString(s) {
     return s instanceof String || typeof s === "string";
   }
+
+  renderAllDrawerContent = () => {
+    return (
+      <div id="drawer-content">
+        <Box
+          key="plugins"
+          display={
+            this.state.activeDrawerContent === "plugins" ? "unset" : "none"
+          }
+        >
+          <div id="plugin-buttons" />
+        </Box>
+        {this.state.drawerButtons.map(db => {
+          return (
+            <Box
+              key={db.value}
+              display={
+                this.state.activeDrawerContent === db.value ? "unset" : "none"
+              }
+            >
+              {db.renderDrawerContent()}
+            </Box>
+          );
+        })}
+      </div>
+    );
+  };
 
   render() {
     const { classes, config } = this.props;
@@ -586,7 +620,7 @@ class App extends React.PureComponent {
               </Hidden>
             </div>
             <Divider />
-            <div id="plugin-buttons" />
+            {this.renderAllDrawerContent()}
           </Drawer>
           <Backdrop
             open={this.state.drawerVisible && !this.state.drawerPermanent}

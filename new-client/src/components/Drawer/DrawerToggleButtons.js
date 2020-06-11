@@ -34,6 +34,12 @@ function DrawerToggleButtons({ drawerButtons, globalObserver }) {
     // let the outside world know that a button has been pressed.
     // App will handle changing context. v=null is valid too.
     globalObserver.publish("core.drawerContent", v);
+
+    // const currentButton = drawerButtons.find(b => b.value === v);
+    // console.log(
+    //   "currentButton: ",
+    //   typeof currentButton?.renderDrawerContent === "function"
+    // );
   };
 
   globalObserver.subscribe("core.hideDrawer", () => {
