@@ -20,7 +20,6 @@ import {
 } from "@material-ui/core";
 
 import ClearIcon from "@material-ui/icons/Clear";
-import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 
 const styles = theme => {
@@ -54,8 +53,6 @@ class Search extends React.PureComponent {
     app: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
-    menuButtonDisabled: PropTypes.bool.isRequired,
-    onMenuClick: PropTypes.func.isRequired,
     options: PropTypes.object.isRequired
   };
 
@@ -230,27 +227,11 @@ class Search extends React.PureComponent {
   };
 
   renderSearchBox() {
-    const { classes, onMenuClick, menuButtonDisabled } = this.props;
-
-    const tooltipText = menuButtonDisabled
-      ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
-      : "Visa verktygspanelen";
+    const { classes } = this.props;
 
     return (
       <div>
         <Paper className={classes.root}>
-          <Tooltip title={tooltipText}>
-            <span id="drawerToggler">
-              <IconButton
-                onClick={onMenuClick}
-                className={classes.iconButton}
-                disabled={menuButtonDisabled}
-                aria-label="menu"
-              >
-                <MenuIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
           <InputBase
             className={classes.input}
             placeholder={this.state.searchboxPlaceholder}

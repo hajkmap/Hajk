@@ -30,13 +30,11 @@ import {
   Drawer,
   Hidden,
   IconButton,
-  Tooltip,
-  Fab
+  Tooltip
 } from "@material-ui/core";
 
 import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
-import MenuIcon from "@material-ui/icons/Menu";
 import MapIcon from "@material-ui/icons/Map";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
 
@@ -253,9 +251,26 @@ class App extends React.PureComponent {
     });
 
     this.globalObserver.subscribe("core.hideDrawer", () => {
-      this.state.drawerVisible &&
-        !this.state.drawerPermanent &&
-        this.setState({ drawerVisible: false });
+      if (this.state.drawerPermanent) {
+        console.log("In hideDrawer, Drawer is permanent. Unpermannenting.");
+        this.togglePermanent();
+      } else {
+        this.state.drawerVisible &&
+          !this.state.drawerPermanent &&
+          this.setState({ drawerVisible: false });
+      }
+    });
+
+    this.globalObserver.subscribe("core.drawerContent", v => {
+      console.log("Drawer content changed to value: ", v);
+      if (v !== null) {
+        console.log("Showing Drawer");
+        this.setState({ drawerVisible: true });
+      } else {
+        console.log("Hiding Drawer");
+        // this.setState({ drawerVisible: false });
+        this.globalObserver.publish("core.hideDrawer");
+      }
     });
 
     this.globalObserver.subscribe("core.addDrawerToggleButton", button => {
@@ -332,17 +347,6 @@ class App extends React.PureComponent {
     );
   }
 
-  toggleDrawer = open => event => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-
-    this.setState({ drawerVisible: open });
-  };
-
   /**
    * Flip the @this.state.drawerPermanent switch, then preform some
    * more work to ensure the OpenLayers canvas has the correct
@@ -351,6 +355,7 @@ class App extends React.PureComponent {
    * @memberof App
    */
   togglePermanent = e => {
+    console.log("In togglePermanent: ", e);
     this.setState({ drawerPermanent: !this.state.drawerPermanent }, () => {
       // Viewport size has changed, hence we must tell OL
       // to refresh canvas size.
@@ -371,9 +376,9 @@ class App extends React.PureComponent {
       // that this.state.drawerPermanent===false, this means that we
       // have exited the permanent mode. In this case, we also
       // want to ensure that Drawer is hidden (otherwise we would
-      // just "unpermanent" the Drawer, but it would still be visible).
+      // just "un-permanent" the Drawer, but it would still be visible).
       this.state.drawerPermanent === false &&
-        this.setState({ drawerVisible: false });
+        this.globalObserver.publish("core.hideDrawer");
     });
   };
 
@@ -393,47 +398,11 @@ class App extends React.PureComponent {
           map={searchPlugin.map}
           app={searchPlugin.app}
           options={searchPlugin.options}
-          onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
-          menuButtonDisabled={this.state.drawerPermanent}
         />
       );
     } else {
       return null;
     }
-  }
-
-  /**
-   * In the case of a disabled Search plugin, we must
-   * ensure that the button that toggles Drawer is still visible.
-   * We do it by providing it as a standalone button.
-   *
-   * For the FAB to show, there are 2 conditions that must be met:
-   *  - There must be some plugins enabled in application, and
-   *  - Search plugin must be disabled
-   */
-  renderStandaloneDrawerToggler() {
-    const tooltipText = this.state.drawerPermanent
-      ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
-      : "Visa verktygspanelen";
-    return (
-      Object.keys(this.appModel.plugins).length > 0 &&
-      this.appModel.plugins.search === undefined &&
-      this.appModel.config.mapConfig.map.clean !== true && (
-        <Tooltip title={tooltipText}>
-          <span id="drawerToggler">
-            <Fab
-              onClick={this.toggleDrawer(!this.state.drawerVisible)}
-              color="primary"
-              size="medium"
-              disabled={this.state.drawerPermanent}
-              aria-label="menu"
-            >
-              <MenuIcon />
-            </Fab>
-          </span>
-        </Tooltip>
-      )
-    );
   }
 
   renderInformationPlugin() {
@@ -501,9 +470,9 @@ class App extends React.PureComponent {
             >
               <DrawerToggleButtons
                 drawerButtons={this.state.drawerButtons}
+                drawerPermanent={this.state.drawerPermanent}
                 globalObserver={this.globalObserver}
               />
-              {clean === false && this.renderStandaloneDrawerToggler()}
               {clean === false && this.renderSearchPlugin()}
             </header>
             <main className={classes.main}>
@@ -621,7 +590,10 @@ class App extends React.PureComponent {
           <Backdrop
             open={this.state.drawerVisible && !this.state.drawerPermanent}
             className={classes.backdrop}
-            onClick={this.toggleDrawer(!this.state.drawerVisible)}
+            onClick={e => {
+              console.log("Got an onClick on Backdrop", e);
+              this.globalObserver.publish("core.hideDrawer");
+            }}
           />
           <Introduction
             experimentalIntroductionEnabled={

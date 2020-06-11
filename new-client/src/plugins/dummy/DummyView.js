@@ -49,6 +49,12 @@ class DummyView extends React.PureComponent {
       caption: "Dummyverktyg",
       order: 100
     });
+
+    this.globalObserver.subscribe("core.drawerContent", v => {
+      if (v === "dummy") {
+        console.log("I got it");
+      }
+    });
   }
 
   buttonClick = () => {
