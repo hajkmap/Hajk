@@ -6,6 +6,9 @@ import Paper from "@material-ui/core/Paper";
 import CardMedia from "@material-ui/core/CardMedia";
 import CustomModal from "./CustomModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
+import TextArea from "./TextArea";
+import Container from "@material-ui/core/Container";
+
 import { Link } from "@material-ui/core";
 
 const styles = theme => {
@@ -232,9 +235,26 @@ class Contents extends React.PureComponent {
 
   getBlockQuoteComponents = tag => {
     var result = tag.text.map((element, index) => {
-      if (element.tagType === null) {
-        return <blockquote key={index}>{element.text}</blockquote>;
+      var text = element.text;
+      if (element.text.includes("data-text-section")) {
+        const blockQuote = this.parseStringToHtmlObject(
+          `<blockquote ${element.text}</blockquote>`,
+          "blockquote"
+        );
+        return (
+          <TextArea
+            key={index}
+            backgroundColor=""
+            dividerColor=""
+            text={blockQuote.textContent}
+          ></TextArea>
+        );
       }
+
+      if (element.tagType === null) {
+        return <blockquote key={index}>{text}</blockquote>;
+      }
+
       return (
         <React.Fragment key={index}>
           {element.renderCallback(element)}
@@ -253,8 +273,10 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getLinkComponent = aTag => {
+    console.log(aTag.text, "??");
     const aTagObject = this.parseStringToHtmlObject(`<a ${aTag.text}</a>`, "a");
     const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
+    console.log(attributes, "attrrr");
     const text = this.getTextLinkTextFromHtmlObject(aTagObject);
     const {
       mapLink,
