@@ -6,22 +6,20 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 
 import CloseIcon from "@material-ui/icons/Close";
-import { Paper } from "@material-ui/core";
+import { Paper, Hidden } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
     marginRight: theme.spacing(1)
   },
   icon: {
-    marginRight: theme.spacing(1)
+    [theme.breakpoints.up("md")]: {
+      marginRight: theme.spacing(1)
+    }
   }
 }));
 
-function DrawerToggleButtons({
-  drawerButtons,
-  drawerPermanent,
-  globalObserver
-}) {
+function DrawerToggleButtons({ drawerButtons, globalObserver }) {
   const classes = useStyles();
 
   const [activeButton, setActiveButton] = useState(null);
@@ -37,17 +35,6 @@ function DrawerToggleButtons({
     // App will handle changing context. v=null is valid too.
     globalObserver.publish("core.drawerContent", v);
   };
-
-  // globalObserver.subscribe("core.drawerContent", v => {
-  //   // If we're already up-to-date, ignore
-  //   if (v === activeButton) return;
-
-  //   // Else, something else than toggle button click
-  //   // caused drawerContent to be triggered. In that case,
-  //   // we must update state.activeButton value, so that
-  //   // it reflects the current situation.
-  //   setActiveButton(v);
-  // });
 
   globalObserver.subscribe("core.hideDrawer", () => {
     console.log(
@@ -69,7 +56,8 @@ function DrawerToggleButtons({
 
     return (
       <ToggleButton key={value} value={value}>
-        {icon} {caption}
+        {icon}
+        <Hidden smDown>{caption}</Hidden>
       </ToggleButton>
     );
   };

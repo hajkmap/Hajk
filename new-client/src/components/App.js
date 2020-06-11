@@ -468,11 +468,12 @@ class App extends React.PureComponent {
               id="header"
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
-              <DrawerToggleButtons
-                drawerButtons={this.state.drawerButtons}
-                drawerPermanent={this.state.drawerPermanent}
-                globalObserver={this.globalObserver}
-              />
+              {clean === false && (
+                <DrawerToggleButtons
+                  drawerButtons={this.state.drawerButtons}
+                  globalObserver={this.globalObserver}
+                />
+              )}
               {clean === false && this.renderSearchPlugin()}
             </header>
             <main className={classes.main}>
