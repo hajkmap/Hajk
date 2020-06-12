@@ -93,6 +93,10 @@ class SearchResultItem extends Component {
     var highlightedFeatures = this.props.highlightedFeatures;
     var indexOfHighlightedFeature = highlightedFeatures.indexOf(feature);
 
+    // If so configured, auto hide the search results list
+    this.props.model.options?.autoHideSearchResults &&
+      this.props.searchResultList.hide();
+
     if (indexOfHighlightedFeature > -1) {
       var newHighlightedFeaturesArray = [...highlightedFeatures];
       newHighlightedFeaturesArray.splice(indexOfHighlightedFeature, 1);

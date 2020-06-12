@@ -64,6 +64,7 @@ const defaultState = {
 
   polygonSearch: false,
   radiusSearch: false,
+  autoHideSearchResults: false,
   selectionSearch: false,
   // searchSettings: false, // Currently not implemented in client either, though stub exists
   tooltip: "Sök...",
@@ -117,6 +118,7 @@ class ToolOptions extends Component {
           polygonSearch: tool.options.polygonSearch,
           radiusSearch: tool.options.radiusSearch,
           selectionSearch: tool.options.selectionSearch,
+          autoHideSearchResults: tool.options.autoHideSearchResults,
           // searchSettings: tool.options.searchSettings,
           tooltip: tool.options.tooltip || this.state.tooltip,
           searchWithinButtonText:
@@ -252,6 +254,7 @@ class ToolOptions extends Component {
 
         polygonSearch: this.state.polygonSearch,
         radiusSearch: this.state.radiusSearch,
+        autoHideSearchResults: this.state.autoHideSearchResults,
         selectionSearch: this.state.selectionSearch,
         // searchSettings: this.state.searchSettings,
         tooltip: this.state.tooltip,
@@ -590,6 +593,22 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+          <div>
+            <input
+              id="autoHideSearchResults"
+              name="autoHideSearchResults"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.autoHideSearchResults}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="autoHideSearchResults">
+              Dölj listan med sökresultat automatiskt när användaren klickar på
+              ett sökresultat
+            </label>
           </div>
           {this.state.tree}
 
