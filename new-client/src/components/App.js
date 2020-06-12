@@ -27,18 +27,19 @@ import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
 import {
   Backdrop,
+  Box,
   Divider,
   Drawer,
+  Grid,
   Hidden,
   IconButton,
   Tooltip,
-  Box
+  Typography
 } from "@material-ui/core";
 
 import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import MapIcon from "@material-ui/icons/Map";
-import MenuBookIcon from "@material-ui/icons/MenuBook";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -123,16 +124,30 @@ const styles = theme => {
         marginLeft: theme.spacing(1)
       }
     },
-    drawerHeader: {
+    drawerBackground: {
       width: DRAWER_WIDTH,
+      backgroundColor: theme.palette.background.default
+    },
+    drawerHeader: {
       display: "flex",
       alignItems: "center",
       padding: theme.spacing(0, 2),
       ...theme.mixins.toolbar,
-      justifyContent: "space-between"
+      justifyContent: "space-between",
+      backgroundColor: theme.palette.background.paper
+    },
+    drawerContent: {
+      backgroundColor: theme.palette.background.paper
+    },
+    logoBox: {
+      padding: theme.spacing(1, 2)
     },
     logo: {
       maxHeight: 35
+    },
+    drawerGrid: {
+      padding: theme.spacing(0, 2),
+      backgroundColor: "#fff"
     },
     backdrop: {
       zIndex: theme.zIndex.drawer - 1 // Carefully selected to be above Window but below Drawer
@@ -219,23 +234,14 @@ class App extends React.PureComponent {
         tools: this.appModel.getPlugins()
       });
 
-      // Tell Drawer to add a button for the map tools
+      // Tell Drawer to add a toggle button for the map tools
       this.globalObserver.publish("core.addDrawerToggleButton", {
         value: "plugins",
         ButtonIcon: MapIcon,
         caption: "Kartverktyg",
         order: 2,
         renderDrawerContent: function() {
-          return null;
-        }
-      });
-      this.globalObserver.publish("core.addDrawerToggleButton", {
-        value: "document",
-        ButtonIcon: MenuBookIcon,
-        caption: "Översiktsplan",
-        order: 1,
-        renderDrawerContent: function() {
-          return <div>Översiktsplan!</div>;
+          return null; // Nothing specific should be rendered - this is a special case!
         }
       });
 
@@ -447,9 +453,73 @@ class App extends React.PureComponent {
     return s instanceof String || typeof s === "string";
   }
 
-  renderAllDrawerContent = () => {
+  renderDrawerHeader = () => {
+    const { classes, config } = this.props;
+    const caption = this.state.drawerButtons.find(
+      db => db.value === this.state.activeDrawerContent
+    )?.caption;
+
     return (
-      <div id="drawer-content">
+      <>
+        <Box className={classes.logoBox}>
+          <img
+            alt="Logo"
+            src={config.mapConfig.map.logo}
+            className={classes.logo}
+          />
+        </Box>
+        <Divider />
+        <Grid
+          className={classes.drawerGrid}
+          item
+          container
+          direction="row"
+          justify="space-between"
+          alignItems="center"
+        >
+          <Grid item>
+            <Typography variant="button">{caption}</Typography>
+          </Grid>
+          {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
+          <Grid item>
+            <Hidden smDown>
+              <Tooltip
+                title={
+                  (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
+                  " verktygspanelen"
+                }
+              >
+                <IconButton
+                  aria-label="pin"
+                  onClick={this.togglePermanent}
+                  onMouseEnter={this.handleMouseEnter}
+                  onMouseLeave={this.handleMouseLeave}
+                >
+                  {this.state.drawerPermanent ? (
+                    this.state.drawerMouseOverLock ? (
+                      <LockOpenIcon />
+                    ) : (
+                      <LockIcon />
+                    )
+                  ) : this.state.drawerMouseOverLock ? (
+                    <LockIcon />
+                  ) : (
+                    <LockOpenIcon />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Hidden>
+          </Grid>
+        </Grid>
+      </>
+    );
+  };
+
+  renderAllDrawerContent = () => {
+    const { classes } = this.props;
+
+    return (
+      <div id="drawer-content" className={classes.drawerContent}>
         <Box
           key="plugins"
           display={
@@ -604,42 +674,11 @@ class App extends React.PureComponent {
             // re-mounts it the next time, so we would re-rendering
             // our plugins all the time.
             variant="persistent"
+            classes={{
+              paper: classes.drawerBackground
+            }}
           >
-            <div className={classes.drawerHeader}>
-              <img
-                alt="Logo"
-                className={classes.logo}
-                src={config.mapConfig.map.logo}
-              />
-              {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
-              <Hidden smDown>
-                <Tooltip
-                  title={
-                    (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
-                    " verktygspanelen"
-                  }
-                >
-                  <IconButton
-                    aria-label="pin"
-                    onClick={this.togglePermanent}
-                    onMouseEnter={this.handleMouseEnter}
-                    onMouseLeave={this.handleMouseLeave}
-                  >
-                    {this.state.drawerPermanent ? (
-                      this.state.drawerMouseOverLock ? (
-                        <LockOpenIcon />
-                      ) : (
-                        <LockIcon />
-                      )
-                    ) : this.state.drawerMouseOverLock ? (
-                      <LockIcon />
-                    ) : (
-                      <LockOpenIcon />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              </Hidden>
-            </div>
+            {this.renderDrawerHeader()}
             <Divider />
             {this.renderAllDrawerContent()}
           </Drawer>
