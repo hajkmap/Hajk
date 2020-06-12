@@ -17,13 +17,9 @@ import Divider from "@material-ui/core/Divider";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/Clear";
-import Alert from "@material-ui/lab/Alert";
-import Collapse from "@material-ui/core/Collapse";
-import CloseIcon from "@material-ui/icons/Close";
 
 const useStyles = makeStyles(theme => ({
   root: {
-    padding: "2px 4px",
     display: "flex",
     alignItems: "center"
   },
@@ -37,6 +33,10 @@ const useStyles = makeStyles(theme => ({
   divider: {
     height: 28,
     margin: 4
+  },
+  textField: {
+    marginTop: 0,
+    marginBottom: 0
   }
 }));
 
@@ -97,16 +97,36 @@ const SearchBar = props => {
     }
   }, [open]);
 
-  function handleOnInputChange(event, value, reason) {
-    setSearchInput(event.target.value);
+  const handleOnInputChange = (event, value, reason) => {
     setOpen(value.length >= 3);
-  }
 
-  function handleOnChange(event, value, reason) {
-    const searchInput = value?.autocompleteEntry || value;
-    setSearchInput(searchInput);
+    setSearchInput(value); // Local input value
+    props.handleSearchInput(value); // Global input value
+  };
+
+  const handleOnChange = (event, value, reason) => {
+    const inputValue = value?.autocompleteEntry || value;
+    setOpen(value.length >= 3);
+
+    setSearchInput(value); // Local input value
+    props.handleSearchInput(value); // Global input value
+
+    // Do a search if value is selected from autocomplete
+    if (reason !== "input") {
+      props.handleOnSearch(inputValue);
+    }
+  };
+
+  function handleOnSearch() {
+    // Search and close the autocomplete suggestions list
+    setOpen(false);
     props.handleOnSearch(searchInput);
   }
+
+  const handleOnClear = () => {
+    setSearchInput("");
+    props.handleOnClear();
+  };
 
   return (
     <div>
@@ -115,7 +135,11 @@ const SearchBar = props => {
           id="searchInputField"
           freeSolo
           clearOnEscape
+          disableClearable
+          autoComplete
           style={{ width: 500 }}
+          disabled={props.searchActive === "draw"}
+          value={searchInput}
           options={options}
           loading={loading}
           onInputChange={handleOnInputChange}
@@ -136,10 +160,11 @@ const SearchBar = props => {
           renderInput={params => (
             <TextField
               {...params}
+              className={classes.textField}
               label={undefined}
               margin="normal"
               variant="outlined"
-              placeholder="Skriv eller välj bland förslagen nedan..."
+              placeholder="Sök i kartlager"
               InputProps={{
                 ...params.InputProps,
                 startAdornment: (
@@ -161,10 +186,7 @@ const SearchBar = props => {
                     <IconButton
                       className={classes.iconButton}
                       aria-label="search"
-                      onClick={() => {
-                        setOpen(false);
-                        props.handleOnSearch(searchInput);
-                      }}
+                      onClick={handleOnSearch}
                     >
                       <SearchIcon />
                     </IconButton>
@@ -172,16 +194,18 @@ const SearchBar = props => {
                       className={classes.divider}
                       orientation="vertical"
                     />
-                    <SearchTools {...props} />
+                    {props.searchActive ? (
+                      <IconButton
+                        className={classes.iconButton}
+                        aria-label="clear"
+                        onClick={handleOnClear}
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    ) : (
+                      <SearchTools {...props} />
+                    )}
                     <SearchSettings {...props} />
-                    <IconButton
-                      className={classes.iconButton}
-                      aria-label="clear"
-                      onClick={props.handleOnClear}
-                      disabled={!props.clearButtonActive}
-                    >
-                      <ClearIcon />
-                    </IconButton>
                   </>
                 )
               }}
@@ -189,25 +213,6 @@ const SearchBar = props => {
           )}
         />
       </Paper>
-      <Collapse in={props.drawActive}>
-        <Alert
-          severity="info"
-          action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={() => {
-                props.toggleDraw(false);
-              }}
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-          }
-        >
-          Markeringsverktyg aktiverat!
-        </Alert>
-      </Collapse>
       <SearchResultList
         map={map}
         searchResults={props.searchResults}

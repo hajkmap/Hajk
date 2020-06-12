@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { boundingExtent } from "ol/extent";
 import { Stroke, Style, Circle, Fill } from "ol/style";
@@ -47,6 +47,30 @@ function SearchResultList({
   const classes = useStyles();
 
   const [checkedItems, setCheckedItems] = useState([]);
+
+  useEffect(() => {
+    map.current.on("click", function(evt) {
+      map.current.forEachFeatureAtPixel(evt.pixel, feature => {
+        const featureId = feature.getId();
+        handleClickedItem(featureId);
+      });
+    });
+  });
+
+  const handleClickedItem = value => {
+    const currentIndex = checkedItems.indexOf(value);
+    const newChecked = [...checkedItems];
+
+    if (currentIndex === -1) {
+      newChecked.push(value);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+
+    setCheckedItems(newChecked); // Set state so our checkboxes are up-to-date
+    changeStyleOnCheckedItems(newChecked); // Set another OpenLayers Style so we can distinguish checked items
+    zoomToCheckedItems(newChecked); // Ensure we zoom out so all checked features fit
+  };
 
   const handleCheckedToggle = value => () => {
     const currentIndex = checkedItems.indexOf(value);

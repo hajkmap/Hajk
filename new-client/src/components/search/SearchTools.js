@@ -18,6 +18,8 @@ import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import { Paper } from "@material-ui/core";
 import { createPortal } from "react-dom";
 
+import GeoJSON from "ol/format/GeoJSON.js";
+
 import Dialog from "../Dialog.js";
 
 const SearchTools = props => {
@@ -25,10 +27,26 @@ const SearchTools = props => {
   const [settingsDialog, setSettingsDialog] = useState(false);
 
   // Draw options
-  const [drawActive, setDrawActive] = useState(false);
   const drawInteraction = useRef();
   const drawSource = useRef();
   const drawLayer = useRef();
+  const drawOptions = [
+    {
+      name: "Sök med objekt",
+      icon: <AddCircleOutlineIcon />,
+      type: "SELECTION"
+    },
+    {
+      name: "Sök med polygon",
+      icon: <EditIcon />,
+      type: "Polygon"
+    },
+    {
+      name: "Sök med radie",
+      icon: <RadioButtonUncheckedIcon />,
+      type: "Circle"
+    }
+  ];
   const map = useRef(props.map);
 
   const drawStyle = useRef(
@@ -69,20 +87,62 @@ const SearchTools = props => {
     setAnchorEl(null);
   };
 
-  const handleToggleDraw = () => {
-    setDrawActive(prevState => {
-      toggleDraw(!prevState);
-      return !prevState;
+  const toggleSelection = e => {
+    var view = map.current.getView();
+    var wmsLayers = map.current.getLayers();
+
+    map.current.clicklock = true;
+
+    map.current.on("singleclick", evt => {
+      wmsLayers.forEach(layer => {
+        //Found visible TileLayer
+        if (layer.get("visible") === true && layer.layersInfo) {
+          let subLayers = Object.values(layer.layersInfo);
+          let subLayersToQuery = subLayers
+            .filter(subLayer => {
+              return subLayer.queryable === true;
+            })
+            .map(queryableSubLayer => {
+              return queryableSubLayer.id;
+            });
+
+          if (evt.coordinate !== undefined) {
+            let url = layer
+              .getSource()
+              .getFeatureInfoUrl(
+                evt.coordinate,
+                view.getResolution(),
+                view.getProjection().getCode(),
+                {
+                  INFO_FORMAT: "application/json",
+                  QUERY_LAYERS: subLayersToQuery.join(",")
+                }
+              );
+
+            (async () => {
+              try {
+                let response = await fetch(url);
+                let data = await response.json(); //TODO: Error message when fetching json. It still works though.
+
+                let features = new GeoJSON().readFeatures(data);
+                if (features.length > 0) {
+                  drawSource.current.addFeatures(features);
+                }
+              } catch (error) {
+                console.error("Det gick inte att hämta json.", error);
+              }
+            })();
+          }
+        }
+      });
     });
-    handleClose();
+
+    drawSource.current.on("addfeature", () => {
+      props.handleDrawSource(drawSource);
+    });
   };
 
-  const toggleDraw = (
-    active,
-    type = "Polygon",
-    freehand = false,
-    drawEndCallback
-  ) => {
+  const toggleDraw = (active, type, freehand = false, drawEndCallback) => {
     if (active) {
       drawInteraction.current = new Draw({
         source: drawSource.current,
@@ -131,6 +191,17 @@ const SearchTools = props => {
     }
   }
 
+  const handleMenuItemClick = (event, index, option) => {
+    const type = option.type;
+    setAnchorEl(null);
+
+    if (type === "SELECTION") {
+      toggleSelection();
+    } else {
+      toggleDraw(true, type);
+    }
+  };
+
   return (
     <div>
       {renderSettingsDialog()}
@@ -138,6 +209,7 @@ const SearchTools = props => {
         aria-haspopup="true"
         aria-controls="lock-menu"
         onClick={handleOpenMenu}
+        disabled={props.searchActive === "input"}
       >
         <MoreHorizIcon />
       </IconButton>
@@ -152,38 +224,17 @@ const SearchTools = props => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          <MenuItem onClick={handleClose} disabled={true}>
-            <ListItemIcon>
-              <AddCircleOutlineIcon />
-            </ListItemIcon>
-            <Typography variant="inherit" noWrap>
-              Sök med objekt
-            </Typography>
-          </MenuItem>
-          <MenuItem onClick={handleToggleDraw}>
-            <ListItemIcon>
-              <EditIcon />
-            </ListItemIcon>
-            <Typography variant="inherit" noWrap>
-              Sök med polygon
-            </Typography>
-          </MenuItem>
-          <MenuItem onClick={handleClose} disabled={true}>
-            <ListItemIcon>
-              <RadioButtonUncheckedIcon />
-            </ListItemIcon>
-            <Typography variant="inherit" noWrap>
-              Sök med radie
-            </Typography>
-          </MenuItem>
-          <MenuItem onClick={handleClose} disabled={true}>
-            <ListItemIcon>
-              <AddCircleOutlineIcon />
-            </ListItemIcon>
-            <Typography variant="inherit" noWrap>
-              Sök i området
-            </Typography>
-          </MenuItem>
+          {drawOptions.map((option, index) => (
+            <MenuItem
+              key={index}
+              onClick={event => handleMenuItemClick(event, index, option)}
+            >
+              {option.icon ? <ListItemIcon>{option.icon}</ListItemIcon> : null}
+              <Typography variant="inherit" noWrap>
+                {option.name}
+              </Typography>
+            </MenuItem>
+          ))}
         </Menu>
       </Paper>
     </div>

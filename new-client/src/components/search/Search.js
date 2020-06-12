@@ -128,8 +128,10 @@ const Search = props => {
     errors: []
   });
 
-  // Set state for SearchTool.js
-  const [clearButtonActive, setClearButtonActive] = useState(true);
+  // Search value from input field
+  const [searchInput, setSearchInput] = useState("");
+
+  const [searchActive, setSearchActive] = useState("");
 
   // Layer to visualize results
   const resultsSource = useRef();
@@ -144,13 +146,6 @@ const Search = props => {
     });
 
     map.current.addLayer(resultsLayer.current);
-
-    map.current.on("click", function(evt) {
-      map.current.forEachFeatureAtPixel(evt.pixel, feature => {
-        console.log("Feature clicked", feature);
-        return feature;
-      });
-    });
   }, []);
 
   function addFeaturesToResultsLayer(featureCollections) {
@@ -178,6 +173,7 @@ const Search = props => {
 
   async function doSearch(searchString) {
     const searchOptions = searchModel.getSearchOptions();
+
     // Apply our custom options based on user's selection
     searchSettings.map(setting => {
       searchOptions["activeSpatialFilter"] = setting.activeSpatialFilter; // "intersects" or "within"
@@ -192,28 +188,47 @@ const Search = props => {
       searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
     }
 
-    const { featureCollections, errors } = await searchModel.getResults(
-      searchString,
-      searchSources,
-      searchOptions
-    );
+    if (searchString?.length || searchOptions["featuresToFilter"]) {
+      const { featureCollections, errors } = await searchModel.getResults(
+        searchString,
+        searchSources,
+        searchOptions
+      );
 
-    // It's possible to handle any errors in the UI by checking if Search Model returned any
-    errors.length > 0 && console.error(errors);
+      // It's possible to handle any errors in the UI by checking if Search Model returned any
+      errors.length > 0 && console.error(errors);
 
-    setSearchResults({ featureCollections, errors });
+      setSearchResults({ featureCollections, errors });
 
-    addFeaturesToResultsLayer(featureCollections);
+      addFeaturesToResultsLayer(featureCollections);
+    }
   }
 
   const handleOnClear = () => {
+    //Clear input, draw object, result list
+    setSearchInput("");
     if (drawSource.current) {
       drawSource.current.clear();
     }
-    setSearchResults([]);
+    if (resultsSource.current) {
+      resultsSource.current.clear();
+    }
+    setSearchResults({
+      featureCollections: [],
+      errors: []
+    });
+    setSearchActive("");
   };
 
-  function handleClickOnSearch(searchString) {
+  function handleSearchInput(searchString) {
+    setSearchInput(searchString);
+
+    if (searchString !== "") {
+      setSearchActive("input");
+    }
+  }
+
+  function handleOnSearch(searchString) {
     doSearch(searchString);
   }
 
@@ -222,6 +237,7 @@ const Search = props => {
   }
 
   function handleDrawSource(source) {
+    setSearchActive("draw");
     setDrawSource(source);
   }
 
@@ -235,9 +251,11 @@ const Search = props => {
         {...props}
         resultsSource={resultsSource}
         searchResults={searchResults}
-        handleOnSearch={handleClickOnSearch}
+        handleSearchInput={handleSearchInput}
+        searchInput={searchInput}
+        searchActive={searchActive}
+        handleOnSearch={handleOnSearch}
         handleOnClear={handleOnClear}
-        clearButtonActive={clearButtonActive}
         handleSearchSettings={handleSearchSettings}
         handleDrawSource={handleDrawSource}
         handleSearchSources={handleSearchSources}
