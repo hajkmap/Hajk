@@ -173,6 +173,11 @@ class App extends React.PureComponent {
           : false
         : null;
 
+    const activeDrawerContentFromLocalStorage =
+      window.localStorage.getItem("activeDrawerContent") !== null
+        ? window.localStorage.getItem("activeDrawerContent")
+        : null;
+
     this.state = {
       alert: false,
       drawerButtons: [],
@@ -197,7 +202,7 @@ class App extends React.PureComponent {
           : (props.config.mapConfig.map.drawerVisible &&
               props.config.mapConfig.map.drawerPermanent) ||
             false,
-      activeDrawerContent: null,
+      activeDrawerContent: activeDrawerContentFromLocalStorage,
       drawerMouseOverLock: false
     };
     this.globalObserver = new Observer();
@@ -240,9 +245,7 @@ class App extends React.PureComponent {
     this.bindHandlers();
   }
 
-  componentDidCatch(error) {
-    console.error(error);
-  }
+  componentDidCatch(error) {}
 
   bindHandlers() {
     this.globalObserver.subscribe("core.mapClick", mapClickDataResult => {
@@ -260,23 +263,40 @@ class App extends React.PureComponent {
     });
 
     this.globalObserver.subscribe("core.hideDrawer", () => {
+      // If Drawer is currently permanent,
+      // flip the permanent toggle. Please note that
+      // this will do some fixes, flip the state value
+      // and, finally, invoke this function (core.hideDrawer) again
+      // (but with new value for drawerPermanent this time!).
       if (this.state.drawerPermanent) {
-        console.log("In hideDrawer, Drawer is permanent. Unpermannenting.");
         this.togglePermanent();
       } else {
-        this.state.drawerVisible &&
-          !this.state.drawerPermanent &&
-          this.setState({ drawerVisible: false });
+        this.setState({ drawerVisible: false });
+
+        // Also, tell the Drawer Buttons Component to unset active button
+        this.globalObserver.publish("core.unsetActiveButton");
       }
     });
 
-    this.globalObserver.subscribe("core.drawerContent", v => {
-      console.log("Drawer content changed to value: ", v);
+    this.globalObserver.subscribe("core.onlyHideDrawerIfNeeded", () => {
+      // Invoked when user clicks any of the Plugin buttons in Drawer,
+      // this is needed as we don't want to toggle the Drawer in this
+      // case, but only hide it IF it's not permanent.
+      // This differs from the "normal" hideDrawer event, that will
+      // ensure that Drawer is hidden - no matter the permanent state -
+      // as it will first flip the drawerPermanent value (if needed), prior
+      // to closing.
+      if (this.state.drawerPermanent === false) {
+        this.setState({ drawerVisible: false });
+        // Also, tell the Drawer Buttons Component to unset active button
+        this.globalObserver.publish("core.unsetActiveButton");
+      }
+    });
+
+    this.globalObserver.subscribe("core.drawerContentChanged", v => {
       if (v !== null) {
-        console.log("Showing Drawer", v);
         this.setState({ drawerVisible: true, activeDrawerContent: v });
       } else {
-        console.log("Hiding Drawer");
         this.globalObserver.publish("core.hideDrawer");
       }
     });
@@ -505,6 +525,7 @@ class App extends React.PureComponent {
               {clean === false && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
+                  // drawerPermanent={this.state.drawerPermanent}
                   globalObserver={this.globalObserver}
                 />
               )}
@@ -626,7 +647,6 @@ class App extends React.PureComponent {
             open={this.state.drawerVisible && !this.state.drawerPermanent}
             className={classes.backdrop}
             onClick={e => {
-              console.log("Got an onClick on Backdrop", e);
               this.globalObserver.publish("core.hideDrawer");
             }}
           />

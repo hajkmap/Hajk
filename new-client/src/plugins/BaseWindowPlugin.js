@@ -71,7 +71,7 @@ class BaseWindowPlugin extends React.PureComponent {
       hideOtherPluginWindows: true,
       runCallback: true
     });
-    this.props.app.globalObserver.publish("core.hideDrawer");
+    this.props.app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
   };
 
   showWindow = opts => {
