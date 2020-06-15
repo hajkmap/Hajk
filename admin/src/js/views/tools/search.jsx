@@ -217,10 +217,13 @@ class ToolOptions extends Component {
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
         popupOffsetY: this.state.popupOffsetY,
         visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim),
-        layers: this.state.layers ? this.state.layers : [],
         placeholder: this.state.placeholder
       }
     };
+
+    if(this.state.layers && this.state.layers.length > 0){
+      tool["options"]["layers"] = this.state.layers;
+    }
 
     var existing = this.getTool();
 
