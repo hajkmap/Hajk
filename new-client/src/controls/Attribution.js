@@ -13,7 +13,13 @@ const styles = theme => {
         background: theme.palette.background.paper,
         boxShadow: theme.shadows[4],
         border: "1px solid rgba(255 ,255, 255, 0.5)",
-        borderRadius: "2px"
+        borderRadius: "2px",
+        height: "25px",
+        overflow: "scroll",
+        whiteSpace: "nowrap",
+        [theme.breakpoints.down("xs")]: {
+          maxWidth: "100px"
+        }
       },
       "& button": {
         cursor: "pointer",

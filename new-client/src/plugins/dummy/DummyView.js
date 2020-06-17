@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Button from "@material-ui/core/Button";
+import BugReportIcon from "@material-ui/icons/BugReport";
+import { Box, Typography } from "@material-ui/core";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
@@ -10,6 +12,10 @@ import Button from "@material-ui/core/Button";
 const styles = theme => ({
   buttonWithBottomMargin: {
     marginBottom: theme.spacing(2)
+  },
+  drawerContent: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2)
   }
 });
 
@@ -41,7 +47,29 @@ class DummyView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+
+    this.globalObserver.publish("core.addDrawerToggleButton", {
+      value: "dummy",
+      ButtonIcon: BugReportIcon,
+      caption: "Dummyverktyg",
+      order: 100,
+      renderDrawerContent: this.renderDrawerContent
+    });
   }
+
+  renderDrawerContent = () => {
+    const { classes } = this.props;
+    return (
+      <Box className={classes.drawerContent}>
+        <Typography variant="h6">Dummy</Typography>
+        <Typography variant="body1">
+          Dummy har anropat globalObserver och bett om att få lägga till en
+          knapp uppe i headern. När du trycker på knappen visas det här
+          innehållet i sidopanelen.
+        </Typography>
+      </Box>
+    );
+  };
 
   buttonClick = () => {
     // We have access to plugin's model:

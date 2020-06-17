@@ -33,14 +33,13 @@ class Introduction extends React.PureComponent {
 
   predefinedSteps = [
     {
-      element: "header",
+      element: "#map",
       intro:
-        "Välkommen till Hajk! <br /><br />Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!"
+        "<b>Välkommen till Hajk!</b> <br /><br />Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!"
     },
     {
-      element: "#drawerToggler",
-      intro:
-        "Med hjälp av den här knappen tar du fram verktygspanelen. Den innehåller användbara verktyg, så se till att bekanta dig med dess innehåll!"
+      element: "header > div:first-child",
+      intro: "Med hjälp av knappen här uppe tar du fram sidopanelen."
     },
     {
       element: "#searchbox",
@@ -64,7 +63,7 @@ class Introduction extends React.PureComponent {
     {
       element: "#left-column > div > button",
       intro:
-        "Ibland kan det finns så kallade Widget-knappar. De används för de mest använda verktygen och gör att du inte behöver öppna verktygspanelen för att nå verktyget. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!"
+        "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!"
     }
   ];
 
