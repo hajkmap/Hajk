@@ -20,7 +20,6 @@ import {
 } from "@material-ui/core";
 
 import ClearIcon from "@material-ui/icons/Clear";
-import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 
 const styles = theme => {
@@ -28,9 +27,20 @@ const styles = theme => {
     root: {
       display: "flex",
       alignItems: "center",
+      border: "1px solid rgba(0, 0, 0, 0.12)",
       minWidth: 200,
+      [theme.breakpoints.down("xs")]: {
+        minWidth: 100,
+        border: "none",
+        boxShadow: "none"
+      },
       [theme.breakpoints.up("sm")]: {
         maxWidth: 520
+      }
+    },
+    flexItemContainerForSearch: {
+      [theme.breakpoints.down("xs")]: {
+        flexGrow: 1
       }
     },
     input: {
@@ -54,8 +64,6 @@ class Search extends React.PureComponent {
     app: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
-    menuButtonDisabled: PropTypes.bool.isRequired,
-    onMenuClick: PropTypes.func.isRequired,
     options: PropTypes.object.isRequired
   };
 
@@ -230,27 +238,11 @@ class Search extends React.PureComponent {
   };
 
   renderSearchBox() {
-    const { classes, onMenuClick, menuButtonDisabled } = this.props;
-
-    const tooltipText = menuButtonDisabled
-      ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
-      : "Visa verktygspanelen";
+    const { classes } = this.props;
 
     return (
-      <div>
+      <div className={classes.flexItemContainerForSearch}>
         <Paper className={classes.root}>
-          <Tooltip title={tooltipText}>
-            <span id="drawerToggler">
-              <IconButton
-                onClick={onMenuClick}
-                className={classes.iconButton}
-                disabled={menuButtonDisabled}
-                aria-label="menu"
-              >
-                <MenuIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
           <InputBase
             className={classes.input}
             placeholder={this.state.searchboxPlaceholder}
