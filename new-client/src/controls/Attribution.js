@@ -17,7 +17,9 @@ const styles = theme => {
         height: "25px",
         overflow: "scroll",
         whiteSpace: "nowrap",
-        maxWidth: "100px"
+        [theme.breakpoints.down("xs")]: {
+          maxWidth: "100px"
+        }
       },
       "& button": {
         cursor: "pointer",
