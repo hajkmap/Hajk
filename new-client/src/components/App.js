@@ -105,22 +105,15 @@ const styles = theme => {
       flex: 1
     },
     rightColumn: {
-      marginTop: theme.spacing(-8),
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
-      flex: 0,
-      [theme.breakpoints.down("xs")]: {
-        marginTop: 0
-      }
+      flex: 0
     },
     controlsColumn: {
       flex: 0,
       display: "flex",
       flexDirection: "column",
-      // marginTop: theme.spacing(-8),
-      // [theme.breakpoints.down("xs")]: {
       marginTop: 0
-      // }
     },
     footer: {
       zIndex: 3,
