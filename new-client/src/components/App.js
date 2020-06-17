@@ -86,7 +86,14 @@ const styles = theme => {
       justifyContent: "space-between",
       alignItems: "flex-start",
       [theme.breakpoints.down("xs")]: {
-        zIndex: 3
+        zIndex: 3,
+        marginLeft: -theme.spacing(2),
+        marginRight: -theme.spacing(2),
+        marginTop: -theme.spacing(2),
+        marginBottom: theme.spacing(2),
+        height: theme.spacing(6),
+        boxShadow: theme.shadows[3],
+        backgroundColor: theme.palette.background.default
       }
     },
     main: {

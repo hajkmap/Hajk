@@ -10,11 +10,19 @@ import { Paper, Hidden } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
-    marginRight: theme.spacing(1)
+    marginRight: theme.spacing(1),
+    [theme.breakpoints.down("xs")]: {
+      boxShadow: "none"
+    }
   },
   icon: {
     [theme.breakpoints.up("md")]: {
       marginRight: theme.spacing(1)
+    }
+  },
+  grouped: {
+    [theme.breakpoints.down("xs")]: {
+      border: "none"
     }
   }
 }));
@@ -80,6 +88,7 @@ function DrawerToggleButtons({ drawerButtons, globalObserver }) {
         exclusive
         onChange={handleClickOnToggleButton}
         aria-label="Drawer content"
+        classes={{ grouped: classes.grouped }}
       >
         {drawerButtons.map(b => renderToggleButton(b))}
       </ToggleButtonGroup>

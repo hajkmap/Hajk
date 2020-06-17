@@ -29,8 +29,18 @@ const styles = theme => {
       alignItems: "center",
       border: "1px solid rgba(0, 0, 0, 0.12)",
       minWidth: 200,
+      [theme.breakpoints.down("xs")]: {
+        minWidth: 100,
+        border: "none",
+        boxShadow: "none"
+      },
       [theme.breakpoints.up("sm")]: {
         maxWidth: 520
+      }
+    },
+    flexItemContainerForSearch: {
+      [theme.breakpoints.down("xs")]: {
+        flexGrow: 1
       }
     },
     input: {
@@ -231,7 +241,7 @@ class Search extends React.PureComponent {
     const { classes } = this.props;
 
     return (
-      <div>
+      <div className={classes.flexItemContainerForSearch}>
         <Paper className={classes.root}>
           <InputBase
             className={classes.input}
