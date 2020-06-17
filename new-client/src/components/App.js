@@ -81,17 +81,19 @@ const styles = theme => {
     },
     header: {
       zIndex: theme.zIndex.appBar,
-      height: theme.spacing(8),
+      maxHeight: theme.spacing(8),
       display: "flex",
       justifyContent: "space-between",
       alignItems: "flex-start",
+      "& > *": {
+        marginBottom: theme.spacing(2)
+      },
       [theme.breakpoints.down("xs")]: {
         zIndex: 3,
         marginLeft: -theme.spacing(2),
         marginRight: -theme.spacing(2),
         marginTop: -theme.spacing(2),
-        marginBottom: theme.spacing(2),
-        height: theme.spacing(6),
+        maxHeight: theme.spacing(6),
         boxShadow: theme.shadows[3],
         backgroundColor: theme.palette.background.default
       }
@@ -113,7 +115,10 @@ const styles = theme => {
       flex: 0,
       display: "flex",
       flexDirection: "column",
-      marginTop: 0
+      marginTop: 0,
+      [theme.breakpoints.down("xs")]: {
+        marginTop: theme.spacing(2)
+      }
     },
     footer: {
       zIndex: 3,
@@ -230,23 +235,28 @@ class App extends React.PureComponent {
       .addLayers()
       .loadPlugins(this.props.activeTools);
     Promise.all(promises).then(() => {
-      this.setState({
-        tools: this.appModel.getPlugins()
-      });
+      this.setState(
+        {
+          tools: this.appModel.getPlugins()
+        },
+        () => {
+          // If there's at least one plugin that renders in the Drawer Map Tools List,
+          // tell the Drawer to add a toggle button for the map tools
+          this.appModel.getDrawerPlugins().length > 0 &&
+            this.globalObserver.publish("core.addDrawerToggleButton", {
+              value: "plugins",
+              ButtonIcon: MapIcon,
+              caption: "Kartverktyg",
+              order: 2,
+              renderDrawerContent: function() {
+                return null; // Nothing specific should be rendered - this is a special case!
+              }
+            });
 
-      // Tell Drawer to add a toggle button for the map tools
-      this.globalObserver.publish("core.addDrawerToggleButton", {
-        value: "plugins",
-        ButtonIcon: MapIcon,
-        caption: "Kartverktyg",
-        order: 2,
-        renderDrawerContent: function() {
-          return null; // Nothing specific should be rendered - this is a special case!
+          // Tell everyone that we're done loading (in case someone listens)
+          this.globalObserver.publish("core.appLoaded");
         }
-      });
-
-      // Tell everyone that we're done loading (in case someone listens)
-      this.globalObserver.publish("core.appLoaded");
+      );
     });
     this.bindHandlers();
   }

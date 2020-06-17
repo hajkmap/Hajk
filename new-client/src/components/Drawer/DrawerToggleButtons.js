@@ -82,17 +82,19 @@ function DrawerToggleButtons({ drawerButtons, globalObserver }) {
   };
 
   return (
-    <Paper className={classes.root}>
-      <ToggleButtonGroup
-        value={activeButton}
-        exclusive
-        onChange={handleClickOnToggleButton}
-        aria-label="Drawer content"
-        classes={{ grouped: classes.grouped }}
-      >
-        {drawerButtons.map(b => renderToggleButton(b))}
-      </ToggleButtonGroup>
-    </Paper>
+    drawerButtons.length > 0 && (
+      <Paper className={classes.root}>
+        <ToggleButtonGroup
+          value={activeButton}
+          exclusive
+          onChange={handleClickOnToggleButton}
+          aria-label="Drawer content"
+          classes={{ grouped: classes.grouped }}
+        >
+          {drawerButtons.map(b => renderToggleButton(b))}
+        </ToggleButtonGroup>
+      </Paper>
+    )
   );
 }
 
