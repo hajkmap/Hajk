@@ -577,6 +577,7 @@ namespace MapService.Components.MapExport
                             // pointSrc will contain the whole URI for some configs, so we need to detect this to prevent from adding the protocol and domain twice
                             try
                             {
+                                // This should be backwards compatible
                                 if (featureStyle.pointSrc.Substring(0, "http://".Length) == "http://" || featureStyle.pointSrc.Substring(0, "https://".Length) == "https://")
                                 {
                                     downloadUrl = featureStyle.pointSrc;
