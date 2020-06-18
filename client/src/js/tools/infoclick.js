@@ -427,7 +427,7 @@ var InfoClickModel = {
     properties = feature.getProperties();
     information = layerModel && layerModel.get('information') || '';
 
-    if (feature.infobox) {
+    if (feature.infobox && typeof feature.infobox === "string" && feature.infobox.length > 0) {
       information = feature.infobox;
       information = information.replace(/export:/g, '');
     }

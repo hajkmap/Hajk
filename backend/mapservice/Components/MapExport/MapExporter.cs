@@ -572,7 +572,21 @@ namespace MapService.Components.MapExport
                             
                             _log.DebugFormat("url: {0}", url);
                             WebClient wc = new WebClient();
-                            byte[] bytes = wc.DownloadData(protocol + url + "/" + featureStyle.pointSrc);                            
+                            string downloadUrl = protocol + url + "/" + featureStyle.pointSrc; // http://localhost:123/http://localhost:9000/assets...
+
+                            // pointSrc will contain the whole URI for some configs, so we need to detect this to prevent from adding the protocol and domain twice
+                            try
+                            {
+                                if (featureStyle.pointSrc.Substring(0, "http://".Length) == "http://" || featureStyle.pointSrc.Substring(0, "https://".Length) == "https://")
+                                {
+                                    downloadUrl = featureStyle.pointSrc;
+                                }
+                            } catch (Exception e)
+                            {
+
+                            }
+                            _log.DebugFormat("Try to download : {0}", downloadUrl);
+                            byte[] bytes = wc.DownloadData(downloadUrl);                            
                             style.Symbol = this.ImageFromBytes(bytes);                            
                         }
                         catch (Exception ex)
