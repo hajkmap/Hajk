@@ -20,8 +20,8 @@ const styles = theme => ({
     top: theme.spacing(2)
   },
   paper: {
-    maxHeight: "85%",
-    maxWidth: "100%",
+    maxHeight: "80%",
+    maxWidth: "90%",
     overflow: "auto",
     backgroundColor: "transparent",
     boxShadow: "none",
