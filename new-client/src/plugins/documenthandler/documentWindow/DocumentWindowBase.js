@@ -29,9 +29,15 @@ class DocumentWindowBase extends React.PureComponent {
   setActiveDocument = title => {
     return new Promise((resolve, reject) => {
       this.model.fetchJsonDocument(title, document => {
-        this.setState({ document: document }, () => {
-          resolve();
-        });
+        this.setState(
+          {
+            document: document,
+            activeColor: this.findReferringMenuItem(title).color
+          },
+          () => {
+            resolve();
+          }
+        );
       });
     });
   };
@@ -42,6 +48,27 @@ class DocumentWindowBase extends React.PureComponent {
 
   onMaximize = () => {
     this.setState({ documentWindowMaximized: true });
+  };
+
+  findMenuItem(menuItem, documentNameToFind) {
+    if (menuItem.document === documentNameToFind) {
+      return menuItem;
+    } else if (menuItem.children && menuItem.children.length > 0) {
+      var i;
+      var result = null;
+      for (i = 0; result == null && i < menuItem.children.length; i++) {
+        result = this.findMenuItem(menuItem.children[i], documentNameToFind);
+      }
+      return result;
+    }
+    return null;
+  }
+
+  findReferringMenuItem = documentNameToFind => {
+    const { options } = this.props;
+    return options.menuConfig.menu.find(rootItemToSearch => {
+      return this.findMenuItem(rootItemToSearch, documentNameToFind) != null;
+    });
   };
 
   showDocumentWindow = ({ documentName, headerIdentifier }) => {
@@ -78,6 +105,7 @@ class DocumentWindowBase extends React.PureComponent {
           description: "En kort beskrivning som visas i widgeten",
           height: options.height || "90vh",
           width: options.width || 600,
+          color: this.state.activeColor || "#ffffff",
           scrollable: false,
           onMinimize: this.onMinimize,
           onMaximize: this.onMaximize,
