@@ -1,16 +1,8 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
-import CardMedia from "@material-ui/core/CardMedia";
 import CloseIcon from "@material-ui/icons/Close";
 import Dialog from "@material-ui/core/Dialog";
-import Modal from "@material-ui/core/Modal";
-import Grid from "@material-ui/core/Grid";
-import Container from "@material-ui/core/Container";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import ModalImage from "react-modal-image";
-import { Lightbox } from "react-modal-image";
 import Paper from "@material-ui/core/Paper";
 
 const mapDiv = document.getElementById("map");
@@ -28,6 +20,7 @@ function PaperComponent(props) {
   return (
     <>
       <IconButton
+        onClick={props.onClose}
         style={{
           backgroundColor: "white",
           position: "absolute",
@@ -76,6 +69,7 @@ class ImagePopupModal extends React.PureComponent {
           PaperComponent={PaperComponent}
           PaperProps={{
             component: "img",
+            onClose: close,
             src: image,
             style: {
               maxHeight: "90%",
