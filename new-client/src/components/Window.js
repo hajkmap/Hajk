@@ -502,6 +502,7 @@ class Window extends React.PureComponent {
             onMaximize={this.maximize}
             onMinimize={this.minimize}
             mode={this.mode}
+            globalObserver={this.props.globalObserver}
           />
           <section
             className={clsx(
