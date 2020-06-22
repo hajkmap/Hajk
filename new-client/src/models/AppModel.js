@@ -117,6 +117,12 @@ class AppModel {
     return r;
   }
 
+  getDrawerPlugins() {
+    return this.getPlugins().filter(plugin => {
+      return ["toolbar"].includes(plugin.options.target);
+    });
+  }
+
   /**
    * Dynamically load plugins from the configured plugins folder.
    * Assumed that a folder exists with the same name as the requested plugin.
