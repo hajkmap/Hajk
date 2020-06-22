@@ -31,8 +31,9 @@ class DocumentWindowBase extends React.PureComponent {
       this.model.fetchJsonDocument(title, document => {
         this.setState(
           {
+            documentTitle: title,
             document: document,
-            activeColor: this.findReferringMenuItem(title).color
+            documentColor: this.findReferringMenuItem(title).color
           },
           () => {
             resolve();
@@ -92,7 +93,12 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   render() {
-    const { documentWindowMaximized, document } = this.state;
+    const {
+      documentWindowMaximized,
+      document,
+      documentTitle,
+      documentColor
+    } = this.state;
     const { options, classes } = this.props;
 
     return (
@@ -101,11 +107,11 @@ class DocumentWindowBase extends React.PureComponent {
         type="DocumentViewer"
         custom={{
           icon: <MenuBookIcon />,
-          title: options.windowTitle || "Documents",
+          title: documentTitle || options.windowTitle || "Documents",
           description: "En kort beskrivning som visas i widgeten",
           height: options.height || "90vh",
           width: options.width || 600,
-          color: this.state.activeColor || "#ffffff",
+          color: documentColor || "#ffffff",
           scrollable: false,
           onMinimize: this.onMinimize,
           onMaximize: this.onMaximize,
