@@ -11,27 +11,38 @@ const blurCss = "filter : blur(7px)";
 const styles = theme => ({
   closeButton: {
     position: "absolute",
-    right: theme.spacing(0.5),
-    top: theme.spacing(0.3)
+    backgroundColor: theme.palette.grey[50],
+    "&:hover": {
+      backgroundColor: theme.palette.grey[400]
+    },
+    zIndex: 100,
+    right: theme.spacing(2),
+    top: theme.spacing(2)
+  },
+  paper: {
+    maxHeight: "85%",
+    maxWidth: "100%",
+    overflow: "auto",
+    backgroundColor: "transparent",
+    boxShadow: "none",
+    objectFit: "contain"
   }
 });
 
-function PaperComponent(props) {
+const PaperComponent = withStyles(styles)(PaperComponentRaw);
+
+function PaperComponentRaw(props) {
+  const { classes, component, onClose, src } = props;
   return (
     <>
       <IconButton
-        onClick={props.onClose}
-        style={{
-          backgroundColor: "white",
-          position: "absolute",
-          top: 20,
-          right: 20,
-          zIndex: 100
-        }}
+        size="small"
+        onClick={onClose}
+        className={classes.closeButton}
       >
         <CloseIcon></CloseIcon>
       </IconButton>
-      <Paper {...props}></Paper>
+      <Paper component={component} src={src} className={classes.paper}></Paper>
     </>
   );
 }
@@ -55,11 +66,8 @@ class ImagePopupModal extends React.PureComponent {
   componentDidMount = () => {};
 
   render() {
-    const { open, close, classes, image, imageType } = this.props;
+    const { open, close, image } = this.props;
     open ? this.addMapBlur() : this.removeMapBlur();
-    if (image != null) {
-      console.log(imageType, "imageType");
-    }
 
     return (
       <>
@@ -70,15 +78,7 @@ class ImagePopupModal extends React.PureComponent {
           PaperProps={{
             component: "img",
             onClose: close,
-            src: image,
-            style: {
-              maxHeight: "90%",
-              maxWidth: "100%",
-              overflow: "auto",
-              backgroundColor: "transparent",
-              boxShadow: "none",
-              objectFit: "contain"
-            }
+            src: image
           }}
           open={open}
         ></Dialog>
