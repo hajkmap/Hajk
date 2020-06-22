@@ -488,6 +488,7 @@ class LayerGroupItem extends Component {
         <div className={classes.infoTextContainer}>
           <Typography variant="subtitle2">{infoTitle}</Typography>
           <Typography
+            variant="body2"
             dangerouslySetInnerHTML={{
               __html: infoText
             }}
@@ -521,9 +522,10 @@ class LayerGroupItem extends Component {
     if (infoOwner) {
       return (
         <div className={classes.infoTextContainer}>
-          <Typography>
-            <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
-          </Typography>
+          <Typography
+            variant="body2"
+            dangerouslySetInnerHTML={{ __html: infoOwner }}
+          ></Typography>
         </div>
       );
     } else {
