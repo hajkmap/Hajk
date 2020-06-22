@@ -589,9 +589,8 @@ class LayerGroupItem extends Component {
   };
 
   render() {
-    const { layer } = this.props;
+    const { classes, cqlFilterVisible, layer } = this.props;
     const { open, visible, visibleSubLayers } = this.state;
-    const { classes } = this.props;
 
     function getIcon() {
       if (visible) {
@@ -674,6 +673,7 @@ class LayerGroupItem extends Component {
           <div>
             <LayerSettings
               layer={layer}
+              cqlFilterVisible={cqlFilterVisible}
               observer={this.props.model.observer}
               toggled={this.state.toggleSettings}
               showOpacity={true}

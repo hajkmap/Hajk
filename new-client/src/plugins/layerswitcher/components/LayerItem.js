@@ -337,6 +337,8 @@ class LayerItem extends React.PureComponent {
     const { classes, layer, model, app, chapters } = this.props;
     const { visible } = this.state;
     const caption = layer.get("caption");
+    const cqlFilterVisible =
+      this.props.app.config.mapConfig.map?.cqlFilterVisible || false;
 
     if (!caption) {
       return null;
@@ -349,6 +351,7 @@ class LayerItem extends React.PureComponent {
           layer={layer}
           model={model}
           chapters={chapters}
+          cqlFilterVisible={cqlFilterVisible}
           onOpenChapter={chapter => {
             const informativeWindow = app.windows.find(
               window => window.type === "informative"
@@ -430,6 +433,7 @@ class LayerItem extends React.PureComponent {
             toggled={this.state.toggleSettings}
             showOpacity={true}
             showLegend={true}
+            cqlFilterVisible={cqlFilterVisible}
           />
         </div>
       </div>
