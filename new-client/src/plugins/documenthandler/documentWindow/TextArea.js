@@ -46,7 +46,7 @@ class TextArea extends React.PureComponent {
       <>
         <Grid className={classes.container} justify="center" container>
           <Grid
-            xs={8}
+            xs={12}
             className={classes.containerContent}
             style={{
               backgroundColor: backgroundColor
@@ -55,7 +55,7 @@ class TextArea extends React.PureComponent {
           >
             {this.renderDivider()}
             <Grid justify="center" container>
-              <Grid className={classes.typographyContainer} xs={8} item>
+              <Grid className={classes.typographyContainer} xs={12} item>
                 <Typography className={classes.typography}>{text}</Typography>
               </Grid>
             </Grid>

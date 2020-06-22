@@ -233,34 +233,42 @@ class Contents extends React.PureComponent {
     })?.dataValue;
   };
 
+  getTextArea = (text, index) => {
+    const blockQuote = this.parseStringToHtmlObject(
+      `<blockquote ${text}</blockquote>`,
+      "blockquote"
+    );
+    return (
+      <TextArea
+        key={index}
+        backgroundColor=""
+        dividerColor=""
+        text={blockQuote.textContent}
+      ></TextArea>
+    );
+  };
+
   getBlockQuoteComponents = tag => {
-    var result = tag.text.map((element, index) => {
-      var text = element.text;
-      if (element.text.includes("data-text-section")) {
-        const blockQuote = this.parseStringToHtmlObject(
-          `<blockquote ${element.text}</blockquote>`,
-          "blockquote"
-        );
+    if (!Array.isArray(tag.text) && tag.text.includes("data-text-section")) {
+      return this.getTextArea(tag.text);
+    } else {
+      var result = tag.text.map((element, index) => {
+        var text = element.text;
+        if (element.text.includes("data-text-section")) {
+          return this.getTextArea(element.text, index);
+        }
+
+        if (element.tagType === null) {
+          return <blockquote key={index}>{text}</blockquote>;
+        }
+
         return (
-          <TextArea
-            key={index}
-            backgroundColor=""
-            dividerColor=""
-            text={blockQuote.textContent}
-          ></TextArea>
+          <React.Fragment key={index}>
+            {element.renderCallback(element)}
+          </React.Fragment>
         );
-      }
-
-      if (element.tagType === null) {
-        return <blockquote key={index}>{text}</blockquote>;
-      }
-
-      return (
-        <React.Fragment key={index}>
-          {element.renderCallback(element)}
-        </React.Fragment>
-      );
-    });
+      });
+    }
 
     return result;
   };
