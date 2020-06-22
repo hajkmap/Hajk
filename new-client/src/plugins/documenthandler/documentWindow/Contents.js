@@ -2,9 +2,8 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import Paper from "@material-ui/core/Paper";
 import CardMedia from "@material-ui/core/CardMedia";
-import CustomModal from "./CustomModal";
+import ImagePopupModal from "./ImagePopupModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 import TextArea from "./TextArea";
 import Container from "@material-ui/core/Container";
@@ -19,15 +18,9 @@ const styles = theme => {
       width: "100%",
       objectFit: "contain"
     },
-    modalImage: {
-      width: "100%",
-      objectFit: "contain",
-      height: "fit-content"
-    },
     typography: {
       overflowWrap: "break-word"
     },
-
     chapter: {
       cursor: "text",
       marginTop: theme.spacing(4)
@@ -458,6 +451,7 @@ class Contents extends React.PureComponent {
   };
 
   closePopupModal = () => {
+    console.log("??");
     this.setState({ popupImage: null });
   };
 
@@ -466,21 +460,14 @@ class Contents extends React.PureComponent {
   };
 
   renderImageInModal = () => {
-    const { classes } = this.props;
     const { popupImage } = this.state;
 
     return (
-      <CustomModal
-        fullScreen={false}
+      <ImagePopupModal
+        open={popupImage == null ? false : true}
         close={this.closePopupModal}
-        open={popupImage ? true : false}
-      >
-        <CardMedia
-          component="img"
-          className={classes.modalImage}
-          image={popupImage}
-        />
-      </CustomModal>
+        image={popupImage}
+      ></ImagePopupModal>
     );
   };
 
