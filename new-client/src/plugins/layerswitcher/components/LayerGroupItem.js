@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import cslx from "clsx";
 import { Button, Tooltip, Typography } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import IconWarning from "@material-ui/icons/Warning";
@@ -70,6 +71,9 @@ const styles = theme => ({
     paddingBottom: "5px",
     marginLeft: "21px"
   },
+  layerGroupWithoutExpandArrow: {
+    marginLeft: "45px"
+  },
   layerGroupContainer: {
     marginTop: "0",
     marginBottom: "-5px"
@@ -118,7 +122,7 @@ const styles = theme => ({
 class LayerGroupItem extends Component {
   constructor(props) {
     super(props);
-    var layerInfo = props.layer.get("layerInfo");
+    const layerInfo = props.layer.get("layerInfo");
     this.state = {
       caption: layerInfo.caption,
       visible: props.layer.get("visible"),
@@ -142,6 +146,8 @@ class LayerGroupItem extends Component {
     };
     this.toggleSubLayerSettings = this.toggleSubLayerSettings.bind(this);
     this.renderSubLayer = this.renderSubLayer.bind(this);
+
+    this.hideExpandArrow = layerInfo?.hideExpandArrow === true ? true : false;
   }
   /**
    * Triggered when the component is successfully mounted into the DOM.
@@ -604,21 +610,27 @@ class LayerGroupItem extends Component {
       }
     }
     return (
-      <div className={classes.layerGroup}>
+      <div
+        className={cslx(classes.layerGroup, {
+          [classes.layerGroupWithoutExpandArrow]: this.hideExpandArrow === true
+        })}
+      >
         <div className={classes.layerGroupContainer}>
-          <div className={classes.arrowIcon}>
-            {open ? (
-              <ArrowDropDownIcon
-                className={classes.button}
-                onClick={() => this.toggle()}
-              />
-            ) : (
-              <ArrowRightIcon
-                className={classes.button}
-                onClick={() => this.toggle()}
-              />
-            )}
-          </div>
+          {this.hideExpandArrow === false && (
+            <div className={classes.arrowIcon}>
+              {open ? (
+                <ArrowDropDownIcon
+                  className={classes.button}
+                  onClick={() => this.toggle()}
+                />
+              ) : (
+                <ArrowRightIcon
+                  className={classes.button}
+                  onClick={() => this.toggle()}
+                />
+              )}
+            </div>
+          )}
           <div className={classes.layerGroupHeader}>
             <div className={classes.layerItemInfo}>
               <div
