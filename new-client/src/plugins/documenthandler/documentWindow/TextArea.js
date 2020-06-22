@@ -15,7 +15,7 @@ const styles = theme => {
       backgroundColor: "#eeeeee"
     },
     typographyContainer: {
-      padding: theme.spacing(2)
+      padding: theme.spacing(1)
     },
     divider: {
       backgroundColor: "#786aaf",
@@ -54,7 +54,7 @@ class TextArea extends React.PureComponent {
             item
           >
             {this.renderDivider()}
-            <Grid container>
+            <Grid justify="center" container>
               <Grid className={classes.typographyContainer} xs={12} item>
                 <Typography className={classes.typography}>{text}</Typography>
               </Grid>

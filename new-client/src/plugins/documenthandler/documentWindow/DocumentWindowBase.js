@@ -29,9 +29,16 @@ class DocumentWindowBase extends React.PureComponent {
   setActiveDocument = title => {
     return new Promise((resolve, reject) => {
       this.model.fetchJsonDocument(title, document => {
-        this.setState({ document: document }, () => {
-          resolve();
-        });
+        this.setState(
+          {
+            documentTitle: title,
+            document: document,
+            documentColor: this.findReferringMenuItem(title).color
+          },
+          () => {
+            resolve();
+          }
+        );
       });
     });
   };
@@ -42,6 +49,27 @@ class DocumentWindowBase extends React.PureComponent {
 
   onMaximize = () => {
     this.setState({ documentWindowMaximized: true });
+  };
+
+  findMenuItem(menuItem, documentNameToFind) {
+    if (menuItem.document === documentNameToFind) {
+      return menuItem;
+    } else if (menuItem.children && menuItem.children.length > 0) {
+      var i;
+      var result = null;
+      for (i = 0; result == null && i < menuItem.children.length; i++) {
+        result = this.findMenuItem(menuItem.children[i], documentNameToFind);
+      }
+      return result;
+    }
+    return null;
+  }
+
+  findReferringMenuItem = documentNameToFind => {
+    const { options } = this.props;
+    return options.menuConfig.menu.find(rootItemToSearch => {
+      return this.findMenuItem(rootItemToSearch, documentNameToFind) != null;
+    });
   };
 
   showDocumentWindow = ({ documentName, headerIdentifier }) => {
@@ -65,7 +93,12 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   render() {
-    const { documentWindowMaximized, document } = this.state;
+    const {
+      documentWindowMaximized,
+      document,
+      documentTitle,
+      documentColor
+    } = this.state;
     const { options, classes } = this.props;
 
     return (
@@ -74,10 +107,11 @@ class DocumentWindowBase extends React.PureComponent {
         type="DocumentViewer"
         custom={{
           icon: <MenuBookIcon />,
-          title: options.windowTitle || "Documents",
+          title: documentTitle || options.windowTitle || "Documents",
           description: "En kort beskrivning som visas i widgeten",
           height: options.height || "90vh",
           width: options.width || 600,
+          color: documentColor || "#ffffff",
           scrollable: false,
           onMinimize: this.onMinimize,
           onMaximize: this.onMaximize,
