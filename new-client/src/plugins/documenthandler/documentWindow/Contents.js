@@ -526,7 +526,7 @@ class Contents extends React.PureComponent {
         <Typography
           ref={chapter.scrollRef}
           className={classes.typography}
-          variant={chapter.parent ? "h2" : "h1"}
+          variant={chapter.parent ? "h3" : "h2"}
         >
           {chapter.header}
         </Typography>

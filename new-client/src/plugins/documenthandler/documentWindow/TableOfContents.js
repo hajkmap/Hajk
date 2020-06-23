@@ -4,21 +4,50 @@ import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { withTheme } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import Link from "@material-ui/core/Link";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+
 import Typography from "@material-ui/core/Typography";
 
 const styles = theme => {
   return {
-    tableOfContentsHeader: {
-      paddingLeft: 0,
-      paddingRight: 0
+    tableOfContents: {
+      borderTop: "solid",
+      borderBottom: "solid",
+      backgroundColor: theme.palette.grey[200]
     },
     selectableText: {
       userSelect: "text"
+    },
+    root: {
+      width: "100%",
+
+      maxWidth: 360,
+      backgroundColor: theme.palette.grey[200]
+    },
+    nested: {
+      paddingLeft: theme.spacing(4)
     }
   };
 };
+
+function NestedListItemRaw(props) {
+  return (
+    <ListItem
+      button
+      size="small"
+      onClick={props.onCLick}
+      style={{ paddingLeft: props.theme.spacing(props.level) }}
+    >
+      <ListItemText>{props.children}</ListItemText>
+    </ListItem>
+  );
+}
+
+const NestedListItem = withTheme(NestedListItemRaw);
 
 class TableOfContents extends React.PureComponent {
   state = {};
@@ -43,15 +72,21 @@ class TableOfContents extends React.PureComponent {
    * @memberof TableOfContents
    */
   renderChapters = activeDocument => {
+    const { classes } = this.props;
     let mainChapter = 0;
+    console.log(this.props, "props");
     return (
-      <>
+      <List
+        component="nav"
+        className={classes.root}
+        aria-labelledby="nested-list-subheader"
+      >
         {Array.isArray(activeDocument?.chapters)
           ? activeDocument.chapters.map(chapter =>
               this.renderSubChapters(chapter, 0, (++mainChapter).toString())
             )
           : null}
-      </>
+      </List>
     );
   };
 
@@ -59,6 +94,16 @@ class TableOfContents extends React.PureComponent {
     const { localObserver } = this.props;
     localObserver.publish("scroll-to", chapter);
   };
+
+  /*
+    <Link
+          href="#"
+          variant="h4"
+          underline="hover"
+          onClick={() => {
+            this.linkClick(chapter);
+          }}
+        >*/
 
   /**
    * Private help method that recursive renders all sub chapters of a chapter.
@@ -71,52 +116,46 @@ class TableOfContents extends React.PureComponent {
   renderSubChapters = (chapter, level, subChapterNumber) => {
     let newLevel = level + 1;
     let number = 0;
-    return (
-      <Grid container key={subChapterNumber}>
-        {level > 0 ? <Grid item xs={level}></Grid> : null}
-        <Grid item xs={12 - level}>
-          <Link
-            href="#"
-            variant="h4"
-            underline="hover"
-            onClick={() => {
-              this.linkClick(chapter);
-            }}
-          >
-            {subChapterNumber + " " + chapter.header}
-          </Link>
-        </Grid>
 
-        {Array.isArray(chapter.chapters)
-          ? chapter.chapters.map(subChapter =>
-              this.renderSubChapters(
-                subChapter,
-                newLevel,
-                subChapterNumber.concat("." + ++number)
+    return (
+      <>
+        <NestedListItem
+          chapter={chapter}
+          onCLick={() => {
+            this.linkClick(chapter);
+          }}
+          level={level}
+          button
+        >
+          {subChapterNumber + " " + chapter.header}
+        </NestedListItem>
+        <List component="div" disablePadding>
+          {Array.isArray(chapter.chapters)
+            ? chapter.chapters.map(subChapter =>
+                this.renderSubChapters(
+                  subChapter,
+                  newLevel,
+                  subChapterNumber.concat("." + ++number)
+                )
               )
-            )
-          : null}
-      </Grid>
+            : null}
+        </List>
+      </>
     );
   };
 
   render() {
-    const { classes, activeDocument } = this.props;
+    const { classes, activeDocument, documentColor } = this.props;
     return (
       <ExpansionPanel
+        square
         elevation={0}
         className={classes.tableOfContents}
+        style={{ borderColor: documentColor }}
         defaultExpanded={true}
       >
-        <ExpansionPanelSummary
-          expandIcon={<ExpandMoreIcon />}
-          className={classes.tableOfContentsHeader}
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-        >
-          <Typography className={classes.selectableText} variant="h1">
-            INNEHÅLL
-          </Typography>
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h2">Innehåll</Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <Grid container spacing={0}>
