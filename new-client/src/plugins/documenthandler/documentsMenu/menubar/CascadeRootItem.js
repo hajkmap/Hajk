@@ -1,23 +1,13 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import MenuItem from "@material-ui/core/MenuItem";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
 import CascadeMenu from "./CascadeMenu";
-import Grid from "@material-ui/core/Grid";
-import ArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
-import Typography from "@material-ui/core/Typography";
+import NestedListItem from "./NestedListItem";
 
-const styles = theme => ({
-  menuItem: {
-    maxHeight: theme.spacing(6),
-    minHeight: theme.spacing(6)
-  },
-  typography: {
-    maxHeight: "inherit",
-
-    margin: theme.spacing(1)
-  }
-});
+const styles = theme => ({});
 class MenuBarCascadeMenuItem extends React.PureComponent {
   static propTypes = {};
   static defaultProps = {};
@@ -33,56 +23,19 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
     this.ref = React.createRef();
   }
 
-  closeMenu = () => {
-    this.setState({
-      menuOpen: false
-    });
-  };
-
-  handleClick = e => {
-    this.setState({
-      anchorEl: e.currentTarget.parentNode,
-      menuOpen: !this.state.menuOpen
-    });
-  };
-
-  onCloseClick = () => {
-    this.setState({
-      menuOpen: false
-    });
-  };
-
   getButton = () => {
-    const { toggleHighlight, item, classes, getIcon } = this.props;
+    const { item, getIcon } = this.props;
 
     var icon = item.icon ? getIcon(item.icon) : null;
+    console.log(item.level, "level");
     return (
-      <Grid
-        style={{ backgroundColor: item.color }}
-        key={item.title}
-        ref={this.ref}
-        item
-        lg={icon && !item.title ? false : true}
-      >
-        <MenuItem
-          onClick={this.handleClick}
-          className={classes.menuItem}
-          onMouseEnter={toggleHighlight}
-          onMouseLeave={toggleHighlight}
-          aria-controls="simple-menu"
-          aria-haspopup="true"
-        >
-          {icon}
-          {item.title && (
-            <>
-              <Typography className={classes.typography} variant="button">
-                {item.title}
-              </Typography>
-              <ArrowDownIcon></ArrowDownIcon>
-            </>
-          )}
-        </MenuItem>
-      </Grid>
+      <NestedListItem
+        level={item.level}
+        role="button"
+        onClick={this.handleClick}
+        title={item.title}
+        icon={icon}
+      ></NestedListItem>
     );
   };
 
@@ -93,14 +46,8 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
       <>
         {this.getButton()}
         <CascadeMenu
-          width={this.ref.current != null ? this.ref.current.offsetWidth : 200}
           items={item.menu}
-          menuOpen={this.state.menuOpen}
-          onClose={this.onCloseClick}
-          anchorEl={this.state.anchorEl}
           localObserver={localObserver}
-          verticalAnchor="bottom"
-          horizontalAnchor="left"
         ></CascadeMenu>
       </>
     );

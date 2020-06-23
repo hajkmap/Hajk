@@ -2,13 +2,16 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Menu from "@material-ui/core/Menu";
-import SubMenuItem from "./SubMenuItem";
+import List from "@material-ui/core/List";
+
+import SubMenuItemPartialFunctionality from "./SubMenuItem";
 import menuItem from "../MenuItemHOC";
-import MenuBarItemPartialFunctionality from "./BarMenuItem";
+import PanelMenuListItemPartialFunctionality from "./PanelMenuListItem";
 import StrippedCascadeRootItemPartialFunctionality from "./CascadeRootItem";
 import Grid from "@material-ui/core/Grid";
 
-const BarMenuItem = menuItem(MenuBarItemPartialFunctionality);
+const SubMenuItem = menuItem(SubMenuItemPartialFunctionality);
+const PanelMenuListItem = menuItem(PanelMenuListItemPartialFunctionality);
 const CascadeRootItem = menuItem(StrippedCascadeRootItemPartialFunctionality);
 
 const styles = theme => ({
@@ -50,11 +53,11 @@ class CascadeMenu extends React.PureComponent {
     const { localObserver } = this.props;
 
     return (
-      <BarMenuItem
+      <PanelMenuListItem
         type={type}
         localObserver={localObserver}
         item={item}
-      ></BarMenuItem>
+      ></PanelMenuListItem>
     );
   };
 
@@ -82,40 +85,11 @@ class CascadeMenu extends React.PureComponent {
   };
 
   render() {
-    const {
-      anchorEl,
-      verticalAnchor,
-      horizontalAnchor,
-      items,
-      menuOpen,
-      onClose,
-      classes,
-      width
-    } = this.props;
+    const { items, classes, width } = this.props;
     console.log(width, "width");
     return (
       <>
-        <Menu
-          id="simple-menu"
-          classes={{ list: classes.noPadding }}
-          getContentAnchorEl={null}
-          anchorOrigin={{
-            vertical: verticalAnchor,
-            horizontal: horizontalAnchor
-          }}
-          anchorEl={anchorEl}
-          onClose={onClose}
-          open={menuOpen}
-        >
-          <Grid
-            style={{ width: width }}
-            className={classes.menu}
-            direction="column"
-            container
-          >
-            {items && this.renderMenuItems()}
-          </Grid>
-        </Menu>
+        <List id="simple-menu">{items && this.renderMenuItems()}</List>
       </>
     );
   }
