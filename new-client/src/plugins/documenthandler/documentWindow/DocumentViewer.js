@@ -104,7 +104,8 @@ class DocumentViewer extends React.PureComponent {
       activeDocument,
       localObserver,
       documentWindowMaximized,
-      model
+      model,
+      documentColor
     } = this.props;
 
     const { showScrollButton } = this.state;
@@ -124,8 +125,9 @@ class DocumentViewer extends React.PureComponent {
           className={classes.gridContainer}
           container
         >
-          <Grid item>
+          <Grid xs={12} item>
             <TableOfContents
+              documentColor={documentColor}
               localObserver={localObserver}
               activeDocument={activeDocument}
             />

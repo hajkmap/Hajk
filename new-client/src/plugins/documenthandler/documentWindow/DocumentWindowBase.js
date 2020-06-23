@@ -123,6 +123,7 @@ class DocumentWindowBase extends React.PureComponent {
       >
         {document != null ? (
           <DocumentViewer
+            documentColor={documentColor || "#ffffff"}
             documentWindowMaximized={documentWindowMaximized}
             activeDocument={document}
             {...this.props}
