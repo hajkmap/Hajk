@@ -1,41 +1,26 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import Grid from "@material-ui/core/Grid";
-import { Paper } from "@material-ui/core";
+import List from "@material-ui/core/List";
 import menuItem from "../MenuItemHOC";
-import BarMenuItemPartialFunctionality from "./BarMenuItem";
+import PanelMenuListItemPartialFunctionality from "./PanelMenuListItem";
 import CascadeRootItemPartialFunctionality from "./CascadeRootItem";
 
-const BarMenuItem = menuItem(BarMenuItemPartialFunctionality);
+const PanelMenuListItem = menuItem(PanelMenuListItemPartialFunctionality);
 const CascadeRootItem = menuItem(CascadeRootItemPartialFunctionality);
 
-const header = document.getElementById("header");
+const styles = theme => ({});
 
-const styles = theme => ({
-  root: {
-    display: "flex",
-    alignItems: "center",
-    marginLeft: theme.spacing(6)
-  }
-});
-
-class BarMenuView extends React.PureComponent {
-  static propTypes = {};
-  static defaultProps = {};
-
-  componentDidMount = () => {};
-
+class PanelMenuView extends React.PureComponent {
   getMenuItemType = (item, key, type) => {
     const { localObserver } = this.props;
     return (
-      <BarMenuItem
+      <PanelMenuListItem
         key={key}
         type={type}
         localObserver={localObserver}
         item={item}
-      ></BarMenuItem>
+      ></PanelMenuListItem>
     );
   };
 
@@ -62,11 +47,6 @@ class BarMenuView extends React.PureComponent {
     }
   };
 
-  getSubMenu = () => {
-    var subMenu = this.getMenuTree()[1];
-    return subMenu ? subMenu : null;
-  };
-
   getMenuTree = () => {
     var currentMenu = this.props.activeMenuSection[0];
     while (currentMenu && currentMenu.containingMenu && currentMenu.parent) {
@@ -76,20 +56,16 @@ class BarMenuView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     var menu = this.getMenuTree();
 
-    return ReactDOM.createPortal(
-      <Paper className={classes.root}>
-        <Grid wrap="nowrap" container>
-          {menu.map((item, index) => {
-            return this.getMenuItem(item, index);
-          })}
-        </Grid>
-      </Paper>,
-      header
+    return (
+      <List component="nav">
+        {menu.map((item, index) => {
+          return this.getMenuItem(item, index);
+        })}
+      </List>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(BarMenuView));
+export default withStyles(styles)(withSnackbar(PanelMenuView));

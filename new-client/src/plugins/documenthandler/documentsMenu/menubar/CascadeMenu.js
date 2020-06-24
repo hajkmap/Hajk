@@ -2,28 +2,22 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Menu from "@material-ui/core/Menu";
-import SubMenuItem from "./SubMenuItem";
+import List from "@material-ui/core/List";
+import Collapse from "@material-ui/core/Collapse";
+
+import SubMenuItemPartialFunctionality from "./SubMenuItem";
 import menuItem from "../MenuItemHOC";
-import MenuBarItemPartialFunctionality from "./BarMenuItem";
+import PanelMenuListItemPartialFunctionality from "./PanelMenuListItem";
 import StrippedCascadeRootItemPartialFunctionality from "./CascadeRootItem";
 import Grid from "@material-ui/core/Grid";
 
-const BarMenuItem = menuItem(MenuBarItemPartialFunctionality);
+const SubMenuItem = menuItem(SubMenuItemPartialFunctionality);
+const PanelMenuListItem = menuItem(PanelMenuListItemPartialFunctionality);
 const CascadeRootItem = menuItem(StrippedCascadeRootItemPartialFunctionality);
 
-const styles = theme => ({
-  noPadding: {
-    padding: 0
-  },
-  menu: {
-    minWidth: "179px"
-  }
-});
+const styles = theme => ({});
 
 class CascadeMenu extends React.PureComponent {
-  static propTypes = {};
-  static defaultProps = {};
-
   renderMenuItems = () => {
     const { items, localObserver } = this.props;
     return items.map(item => {
@@ -37,11 +31,7 @@ class CascadeMenu extends React.PureComponent {
           ></SubMenuItem>
         );
       } else {
-        return (
-          <Grid key={item.title} item>
-            {this.getMenuItem(item)}
-          </Grid>
-        );
+        return this.getMenuItem(item);
       }
     });
   };
@@ -50,11 +40,11 @@ class CascadeMenu extends React.PureComponent {
     const { localObserver } = this.props;
 
     return (
-      <BarMenuItem
+      <PanelMenuListItem
         type={type}
         localObserver={localObserver}
         item={item}
-      ></BarMenuItem>
+      ></PanelMenuListItem>
     );
   };
 
@@ -82,41 +72,11 @@ class CascadeMenu extends React.PureComponent {
   };
 
   render() {
-    const {
-      anchorEl,
-      verticalAnchor,
-      horizontalAnchor,
-      items,
-      menuOpen,
-      onClose,
-      classes,
-      width
-    } = this.props;
-    console.log(width, "width");
+    const { items } = this.props;
     return (
-      <>
-        <Menu
-          id="simple-menu"
-          classes={{ list: classes.noPadding }}
-          getContentAnchorEl={null}
-          anchorOrigin={{
-            vertical: verticalAnchor,
-            horizontal: horizontalAnchor
-          }}
-          anchorEl={anchorEl}
-          onClose={onClose}
-          open={menuOpen}
-        >
-          <Grid
-            style={{ width: width }}
-            className={classes.menu}
-            direction="column"
-            container
-          >
-            {items && this.renderMenuItems()}
-          </Grid>
-        </Menu>
-      </>
+      <Collapse in={this.props.open}>
+        <List disablePadding>{items && this.renderMenuItems()}</List>
+      </Collapse>
     );
   }
 }

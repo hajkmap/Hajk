@@ -14,7 +14,8 @@ const menuViewHoc = MenuComponent =>
         this.setParentAndContainingMenu(
           menuItem,
           this.props.options.menuConfig.menu,
-          undefined
+          undefined,
+          0
         );
       });
       this.bindSubscriptions();
@@ -29,13 +30,19 @@ const menuViewHoc = MenuComponent =>
       this.setState({ isOverlayMenuOpen: true });
     };
 
-    setParentAndContainingMenu(menuItem, containingMenu, parent) {
+    setParentAndContainingMenu(menuItem, containingMenu, parent, level) {
       menuItem.parent = parent;
+      menuItem.level = level;
       menuItem.containingMenu = containingMenu;
-
+      level = level + 1;
       if (menuItem.menu && menuItem.menu.length > 0) {
         menuItem.menu.forEach(subMenuItem => {
-          this.setParentAndContainingMenu(subMenuItem, menuItem.menu, menuItem);
+          this.setParentAndContainingMenu(
+            subMenuItem,
+            menuItem.menu,
+            menuItem,
+            level
+          );
         });
       }
     }
@@ -56,10 +63,6 @@ const menuViewHoc = MenuComponent =>
         }
         this.setState({ activeMenuSection: containingMenu });
       }
-    };
-
-    getSubMenu = item => {
-      return item.menu;
     };
 
     bindSubscriptions = () => {

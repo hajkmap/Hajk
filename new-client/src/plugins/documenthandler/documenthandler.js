@@ -1,16 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-import OverlayMenuViewPartialFunctionality from "./documentsMenu/overlaymenu/OverlayMenuView";
+import MenuBook from "@material-ui/icons/MenuBook";
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import menuComponent from "./documentsMenu/MenuViewHOC";
-import BarMenuViewPartialFunctionality from "./documentsMenu/menubar/BarMenuView";
+import PanelMenuViewPartialFunctionality from "./documentsMenu/menubar/PanelMenuView";
 import Observer from "react-event-observer";
-import Hidden from "@material-ui/core/Hidden";
 import MapViewModel from "./MapViewModel";
 
-const OverlayMenuView = menuComponent(OverlayMenuViewPartialFunctionality);
-const BarMenuView = menuComponent(BarMenuViewPartialFunctionality);
+const PanelMenuView = menuComponent(PanelMenuViewPartialFunctionality);
 
 class DocumentHandler extends React.PureComponent {
   state = {};
@@ -36,6 +34,17 @@ class DocumentHandler extends React.PureComponent {
     );
   };
 
+  renderDrawerContent = () => {
+    return (
+      <PanelMenuView
+        app={this.props.app}
+        model={this.model}
+        options={this.props.options}
+        localObserver={this.localObserver}
+      ></PanelMenuView>
+    );
+  };
+
   dynamicallyImportIconFonts = () => {
     const { dynamicImportUrls } = this.props.options;
     return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
@@ -43,7 +52,7 @@ class DocumentHandler extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    console.log(props, "props");
+
     this.localObserver = Observer();
     this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,
@@ -56,34 +65,21 @@ class DocumentHandler extends React.PureComponent {
       app: props.app,
       map: props.map
     });
-    this.getListOfDocuments(); //DEBUG
+    props.app.globalObserver.publish("core.addDrawerToggleButton", {
+      value: "menu",
+      ButtonIcon: MenuBook,
+      caption: "Meny",
+      order: 100,
+      renderDrawerContent: this.renderDrawerContent
+    });
   }
-
-  getListOfDocuments = () => {
-    this.model.listAllAvailableDocuments(list => {});
-  };
 
   render() {
     return (
       <>
         {this.dynamicallyImportOpenSans()}
         {this.dynamicallyImportIconFonts()}
-        <Hidden xlUp>
-          <OverlayMenuView
-            app={this.props.app}
-            model={this.model}
-            options={this.props.options}
-            localObserver={this.localObserver}
-          ></OverlayMenuView>
-        </Hidden>
-        <Hidden lgDown>
-          <BarMenuView
-            app={this.props.app}
-            model={this.model}
-            options={this.props.options}
-            localObserver={this.localObserver}
-          ></BarMenuView>
-        </Hidden>
+
         <DocumentWindowBase
           {...this.props}
           model={this.model}
