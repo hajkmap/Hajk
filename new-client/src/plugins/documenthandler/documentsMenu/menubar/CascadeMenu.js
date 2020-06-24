@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Menu from "@material-ui/core/Menu";
 import List from "@material-ui/core/List";
+import Collapse from "@material-ui/core/Collapse";
 
 import SubMenuItemPartialFunctionality from "./SubMenuItem";
 import menuItem from "../MenuItemHOC";
@@ -14,19 +15,9 @@ const SubMenuItem = menuItem(SubMenuItemPartialFunctionality);
 const PanelMenuListItem = menuItem(PanelMenuListItemPartialFunctionality);
 const CascadeRootItem = menuItem(StrippedCascadeRootItemPartialFunctionality);
 
-const styles = theme => ({
-  noPadding: {
-    padding: 0
-  },
-  menu: {
-    minWidth: "179px"
-  }
-});
+const styles = theme => ({});
 
 class CascadeMenu extends React.PureComponent {
-  static propTypes = {};
-  static defaultProps = {};
-
   renderMenuItems = () => {
     const { items, localObserver } = this.props;
     return items.map(item => {
@@ -40,11 +31,7 @@ class CascadeMenu extends React.PureComponent {
           ></SubMenuItem>
         );
       } else {
-        return (
-          <Grid key={item.title} item>
-            {this.getMenuItem(item)}
-          </Grid>
-        );
+        return this.getMenuItem(item);
       }
     });
   };
@@ -85,12 +72,11 @@ class CascadeMenu extends React.PureComponent {
   };
 
   render() {
-    const { items, classes, width } = this.props;
-    console.log(width, "width");
+    const { items } = this.props;
     return (
-      <>
-        <List id="simple-menu">{items && this.renderMenuItems()}</List>
-      </>
+      <Collapse in={this.props.open}>
+        <List disablePadding>{items && this.renderMenuItems()}</List>
+      </Collapse>
     );
   }
 }

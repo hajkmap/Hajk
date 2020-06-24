@@ -1,9 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
 import CascadeMenu from "./CascadeMenu";
 import NestedListItem from "./NestedListItem";
 
@@ -15,7 +12,8 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
   state = {
     anchorEl: null,
     menuOpen: false,
-    childWidth: 200
+    childWidth: 200,
+    showSubMenu: true
   };
 
   constructor() {
@@ -23,11 +21,14 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
     this.ref = React.createRef();
   }
 
+  handleClick = () => {
+    this.setState({ showSubMenu: !this.state.showSubMenu });
+  };
+
   getButton = () => {
     const { item, getIcon } = this.props;
 
     var icon = item.icon ? getIcon(item.icon) : null;
-    console.log(item.level, "level");
     return (
       <NestedListItem
         level={item.level}
@@ -35,6 +36,9 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
         onClick={this.handleClick}
         title={item.title}
         icon={icon}
+        showSubMenu={this.state.showSubMenu}
+        hasSubMenu="true"
+        borderColor={item.color}
       ></NestedListItem>
     );
   };
@@ -46,6 +50,7 @@ class MenuBarCascadeMenuItem extends React.PureComponent {
       <>
         {this.getButton()}
         <CascadeMenu
+          open={this.state.showSubMenu}
           items={item.menu}
           localObserver={localObserver}
         ></CascadeMenu>

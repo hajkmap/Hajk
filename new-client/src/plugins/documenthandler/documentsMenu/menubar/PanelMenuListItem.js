@@ -1,9 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
 import NestedListItem from "./NestedListItem";
 
 const styles = theme => ({});
@@ -23,6 +20,7 @@ class PanelMenuListItem extends React.PureComponent {
         title={item.title}
         level={item.level}
         onClick={handleMenuButtonClick}
+        borderColor={item.color}
       ></NestedListItem>
     );
   }

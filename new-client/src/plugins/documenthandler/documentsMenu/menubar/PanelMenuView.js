@@ -47,11 +47,6 @@ class PanelMenuView extends React.PureComponent {
     }
   };
 
-  getSubMenu = () => {
-    var subMenu = this.getMenuTree()[1];
-    return subMenu ? subMenu : null;
-  };
-
   getMenuTree = () => {
     var currentMenu = this.props.activeMenuSection[0];
     while (currentMenu && currentMenu.containingMenu && currentMenu.parent) {
@@ -64,7 +59,7 @@ class PanelMenuView extends React.PureComponent {
     var menu = this.getMenuTree();
 
     return (
-      <List>
+      <List component="nav">
         {menu.map((item, index) => {
           return this.getMenuItem(item, index);
         })}

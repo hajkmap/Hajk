@@ -47,6 +47,7 @@ class SubMenuItem extends React.PureComponent {
           title={item.title}
           onClick={this.handleItemClick}
           level={item.level}
+          borderColor={item.color}
         ></NestedListItem>
         <CascadeMenu
           localObserver={localObserver}

@@ -2,12 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
 import BugReportIcon from "@material-ui/icons/BugReport";
-
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import menuComponent from "./documentsMenu/MenuViewHOC";
 import PanelMenuViewPartialFunctionality from "./documentsMenu/menubar/PanelMenuView";
 import Observer from "react-event-observer";
-import Hidden from "@material-ui/core/Hidden";
 import MapViewModel from "./MapViewModel";
 
 const PanelMenuView = menuComponent(PanelMenuViewPartialFunctionality);
@@ -54,7 +52,7 @@ class DocumentHandler extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    console.log(props, "props");
+
     this.localObserver = Observer();
     this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,

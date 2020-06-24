@@ -65,10 +65,6 @@ const menuViewHoc = MenuComponent =>
       }
     };
 
-    getSubMenu = item => {
-      return item.menu;
-    };
-
     bindSubscriptions = () => {
       const { localObserver } = this.props;
       localObserver.subscribe("show-containing-menu", containingMenu => {
