@@ -6,7 +6,6 @@ import CardMedia from "@material-ui/core/CardMedia";
 import ImagePopupModal from "./ImagePopupModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 import TextArea from "./TextArea";
-import Container from "@material-ui/core/Container";
 
 import { Link } from "@material-ui/core";
 

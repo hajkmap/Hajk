@@ -1,6 +1,5 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
 import MenuBookIcon from "@material-ui/icons/MenuBook";

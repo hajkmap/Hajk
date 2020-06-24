@@ -6,15 +6,12 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 
-const styles = theme => ({
-  root: {}
-});
+const styles = theme => ({});
 
 class NestedListItem extends React.PureComponent {
   static defaultProps = { hasSubMenu: false, showSubMenu: false };
+
   render() {
-    console.log(this.props.hasSubMenu, "hasSubMenu");
-    console.log(this.props.showSubMenu, "this.props.showSubMenu");
     return (
       <ListItem
         divider
@@ -31,7 +28,7 @@ class NestedListItem extends React.PureComponent {
         ) : null}
         {this.props.title && <ListItemText>{this.props.title}</ListItemText>}
         {this.props.hasSubMenu &&
-          (this.props.showSubMenu ? <ExpandLess /> : <ExpandMore />)}
+          (this.props.expandedSubMenu ? <ExpandLess /> : <ExpandMore />)}
       </ListItem>
     );
   }

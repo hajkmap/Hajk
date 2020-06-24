@@ -3,12 +3,9 @@ import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
 import MenuBook from "@material-ui/icons/MenuBook";
 import DocumentHandlerModel from "./DocumentHandlerModel";
-import menuComponent from "./documentsMenu/MenuViewHOC";
-import PanelMenuViewPartialFunctionality from "./documentsMenu/menubar/PanelMenuView";
+import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
 import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
-
-const PanelMenuView = menuComponent(PanelMenuViewPartialFunctionality);
 
 class DocumentHandler extends React.PureComponent {
   state = {};
@@ -36,12 +33,12 @@ class DocumentHandler extends React.PureComponent {
 
   renderDrawerContent = () => {
     return (
-      <PanelMenuView
+      <PanelMenuContainerView
         app={this.props.app}
         model={this.model}
         options={this.props.options}
         localObserver={this.localObserver}
-      ></PanelMenuView>
+      ></PanelMenuContainerView>
     );
   };
 
