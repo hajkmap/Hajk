@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-import BugReportIcon from "@material-ui/icons/BugReport";
+import MenuBook from "@material-ui/icons/MenuBook";
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import menuComponent from "./documentsMenu/MenuViewHOC";
 import PanelMenuViewPartialFunctionality from "./documentsMenu/menubar/PanelMenuView";
@@ -66,9 +66,9 @@ class DocumentHandler extends React.PureComponent {
       map: props.map
     });
     props.app.globalObserver.publish("core.addDrawerToggleButton", {
-      value: "dummy",
-      ButtonIcon: BugReportIcon,
-      caption: "Dummyverktyg",
+      value: "menu",
+      ButtonIcon: MenuBook,
+      caption: "Meny",
       order: 100,
       renderDrawerContent: this.renderDrawerContent
     });
