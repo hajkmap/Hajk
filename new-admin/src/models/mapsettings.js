@@ -104,6 +104,7 @@ var menu = Model.extend({
   },
 
   updateMapConfig: function(config, callback) {
+    console.log(config);
     $.ajax({
       url: `${this.get("config").url_map_settings}?mapFile=${this.get(
         "mapFile"

@@ -142,12 +142,18 @@ $.fn.editable = function(component) {
       layerTools = $("<div></div>"),
       abort = $('<span class="btn btn-default">Avbryt</span>'),
       abort2 = $('<span class="btn btn-default">Avbryt</span>'),
-      label = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`),
-      label2 = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`),
-      label3 = $(`<label for="${id3}">Synlig vid start&nbsp;</label><br />`),
-      label4 = $(`<label for="${id4}">Redigera snabbval&nbsp;</label><br />`),
-      label5 = $(`<br /><label for="${id6}">Tillträde</label><br />`),
-      label6 = $(`<label for="${id7}">Infobox</label><br />`),
+      label = $(`<label for="${id}">&nbsp;Expanderad vid start&nbsp;</label>`),
+      label2 = $(`<label for="${id2}">&nbsp;Toggla alla-knapp&nbsp;</label>`),
+      label3 = $(
+        `<label for="${id3}">&nbsp;Synlig vid start&nbsp;</label><br />`
+      ),
+      label4 = $(
+        `<label for="${id4}">&nbsp;Redigera snabbval&nbsp;</label><br />`
+      ),
+      label5 = $(
+        `<br /><label for="${id6}">&nbsp;Tillträde&nbsp;</label><br />`
+      ),
+      label6 = $(`<label for="${id7}">&nbsp;Infobox&nbsp;</label><br />`),
       checkbox = $(`<input id="${id}" type="checkbox"/>`),
       checkbox2 = $(`<input id="${id2}" type="checkbox"/>`),
       checkbox3 = $(`<input id="${id3}" type="checkbox"/>`),
@@ -157,8 +163,8 @@ $.fn.editable = function(component) {
       input2 = $(
         `<input id="${id5}" type="text" placeholder="Ny länk"/><br />`
       ),
-      input3 = $(`<input id="${id6}" type="text" /><br />`),
-      input4 = $(`<textarea id="${id7}" type="text" /><br /><br />`),
+      input3 = $(`<input id="${id6}" type="text" />`),
+      input4 = $(`<textarea id="${id7}" type="text" />`),
       expanded = $('<div class="expanded-at-start"></div>'),
       toggled = $('<div class="expanded-at-start"></div>'),
       visible = $('<div class=""></div>'),
@@ -312,6 +318,7 @@ class Menu extends Component {
       maps: [],
       active: true,
       visibleAtStart: true,
+      cqlFilterVisible: false,
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       enableOSM: false,
@@ -561,6 +568,7 @@ class Menu extends Component {
       baselayers: [],
       active: this.state.active,
       visibleAtStart: this.state.visibleAtStart,
+      cqlFilterVisible: this.state.cqlFilterVisible,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,

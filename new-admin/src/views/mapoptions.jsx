@@ -66,6 +66,7 @@ class MapOptions extends Component {
         extent: config.extent,
         origin: config.origin,
         constrainOnlyCenter: config.constrainOnlyCenter,
+        cqlFilterVisible: config.cqlFilterVisible,
         constrainResolution: config.constrainResolution,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
@@ -108,6 +109,7 @@ class MapOptions extends Component {
       extent: mapConfig.extent,
       origin: mapConfig.origin,
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
+      cqlFilterVisible: mapConfig.cqlFilterVisible,
       constrainResolution: mapConfig.constrainResolution,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
@@ -237,6 +239,7 @@ class MapOptions extends Component {
         }
         break;
       case "constrainOnlyCenter":
+      case "cqlFilterVisible":
       case "constrainResolution":
       case "mapselector":
       case "mapcleaner":
@@ -282,6 +285,7 @@ class MapOptions extends Component {
         config.extent = this.getValue("extent");
         config.origin = this.getValue("origin");
         config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
+        config.cqlFilterVisible = this.getValue("cqlFilterVisible");
         config.constrainResolution = this.getValue("constrainResolution");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
@@ -565,6 +569,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Styr ol.Views 'constrainOnlyCenter'-parameter. Om sant kommer endast centrumkoordinaten att begränsas till extent."
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_cqlFilterVisible"
+                type="checkbox"
+                ref="input_cqlFilterVisible"
+                onChange={e => {
+                  this.setState({ cqlFilterVisible: e.target.checked });
+                }}
+                checked={this.state.cqlFilterVisible}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_cqlFilterVisible">
+                Visa CQL-filter för ingående lager i kartan{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styr om CQL-filtret ska synas under varje lager i kartan."
                 />
               </label>
             </div>
