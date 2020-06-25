@@ -46,6 +46,9 @@ var defaultState = {
     100000,
     250000
   ],
+  resolutions: [72, 96, 150, 200, 300],
+  paperFormats: ["A2", "A3", "A4"],
+  allowedPaperFormats:  ["A2", "A3", "A4"], // Paper formats supported
   proxyUrl: '',
   visibleForGroups: []
 };
@@ -143,6 +146,8 @@ class ToolOptions extends Component {
         base64Encode: this.state.base64Encode,
         autoScale: this.state.autoScale,
         scales: this.state.scales,
+        resolutions: this.state.resolutions,
+        paperFormats: this.state.paperFormats,
         proxyUrl: this.state.proxyUrl,
         instruction: this.state.instruction,
         visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
@@ -216,6 +221,44 @@ class ToolOptions extends Component {
     }
   }
 
+  addpaperFormat (e) {
+    var elements = this.refs.paperFormatForm.elements;
+    if(!this.state.allowedPaperFormats.includes(elements['paperFormat'].value)){
+      alert("Angivet format är stöds ej. Följande format stöds " + this.state.allowedPaperFormats.join(", "));
+      return;
+    }
+
+    if(this.state.paperFormats.includes(elements['paperFormat'].value)){
+      alert("Angivet format är redan tillagt");
+      return;
+    }
+
+    this.state.paperFormats.push(elements['paperFormat'].value);
+    this.setState({
+      paperFormats: this.state.paperFormats
+    });
+  }
+
+  removepaperFormat (paperFormat) {
+    this.state.paperFormats = this.state.paperFormats.filter(f => f !== paperFormat);
+    this.setState({
+      paperFormats: this.state.paperFormats
+    });
+  }
+
+  renderpaperFormat () {
+
+    return this.state.paperFormats.map((t, i) => (
+        <div key={i} className='inset-form'>
+          <div>
+            <span onClick={() => this.removepaperFormat(t)} className='btn btn-danger'>Ta bort</span>
+          </div>
+          <div><span>Pappersformat </span>: <span>{t}</span></div>
+        </div>
+    ));
+  }
+
+
   /**
    *
    */
@@ -287,6 +330,19 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               checked={this.state.autoScale} />&nbsp;
             <label htmlFor='autoScale-active'>autoScale av previewLayer för mobil aktiverad</label>
+          </div>
+          <div>
+            <div>paperFormat</div>
+            {this.renderpaperFormat()}
+          </div>
+          <div>
+            <form ref='paperFormatForm' onSubmit={(e) => { e.preventDefault(); this.addpaperFormat(e); }}>
+              <div>
+                <label>Pappersformat</label><input name='paperFormat' type='text' /><br/>
+                <label>Tillåtna format: {this.state.allowedPaperFormats.join(", ")}</label>
+              </div>
+              <button className='btn btn-success'>Lägg till</button>
+            </form>
           </div>
           <div>
             <label htmlFor='instruction'>Instruktion</label>
