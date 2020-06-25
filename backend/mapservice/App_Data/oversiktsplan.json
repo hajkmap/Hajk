@@ -635,8 +635,6 @@
       "type": "documenthandler",
       "options": {
         "target": "toolbar",
-        "overlayLogoUrl": "/logo-share.png",
-        "openOverlayButtonColor": "#ffffff",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
           "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
@@ -870,7 +868,7 @@
     "origin": [0.0, 0.0],
     "extent": [105000.0, 6355000.0, 185000.0, 6435000.0],
     "constrainOnlyCenter": true,
-    "logo": "/assets/logo.png",
+    "logo": "/logo.png",
     "geoserverLegendOptions": "",
     "mapselector": false,
     "mapcleaner": true,
