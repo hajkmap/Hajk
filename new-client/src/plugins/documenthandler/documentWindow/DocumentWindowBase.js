@@ -53,11 +53,11 @@ class DocumentWindowBase extends React.PureComponent {
   findMenuItem(menuItem, documentNameToFind) {
     if (menuItem.document === documentNameToFind) {
       return menuItem;
-    } else if (menuItem.children && menuItem.children.length > 0) {
+    } else if (menuItem.menu && menuItem.menu.length > 0) {
       var i;
       var result = null;
-      for (i = 0; result == null && i < menuItem.children.length; i++) {
-        result = this.findMenuItem(menuItem.children[i], documentNameToFind);
+      for (i = 0; result == null && i < menuItem.menu.length; i++) {
+        result = this.findMenuItem(menuItem.menu[i], documentNameToFind);
       }
       return result;
     }

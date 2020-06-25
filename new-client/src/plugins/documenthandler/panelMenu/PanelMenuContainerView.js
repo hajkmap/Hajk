@@ -30,7 +30,6 @@ class PanelMenuView extends React.PureComponent {
     });
 
     localObserver.subscribe("maplink-clicked", item => {
-      this.closeOverlayMenu();
       localObserver.publish("fly-to", item.maplink);
     });
   };
