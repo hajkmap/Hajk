@@ -65,7 +65,7 @@ class DocumentHandler extends React.PureComponent {
     props.app.globalObserver.publish("core.addDrawerToggleButton", {
       value: "menu",
       ButtonIcon: MenuBook,
-      caption: "Meny",
+      caption: "Översiktsplan",
       order: 100,
       renderDrawerContent: this.renderDrawerContent
     });

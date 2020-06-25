@@ -99,7 +99,7 @@ class DocumentWindowBase extends React.PureComponent {
       documentColor
     } = this.state;
     const { options, classes } = this.props;
-
+    console.log(documentTitle, "documentTile");
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -107,10 +107,10 @@ class DocumentWindowBase extends React.PureComponent {
         custom={{
           icon: <MenuBookIcon />,
           title: documentTitle || options.windowTitle || "Documents",
+          color: documentColor || "#ffffff",
           description: "En kort beskrivning som visas i widgeten",
           height: options.height || "90vh",
           width: options.width || 600,
-          color: documentColor || "#ffffff",
           scrollable: false,
           onMinimize: this.onMinimize,
           onMaximize: this.onMaximize,

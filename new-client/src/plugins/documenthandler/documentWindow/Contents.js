@@ -197,11 +197,14 @@ class Contents extends React.PureComponent {
       1: headerIdentifier,
       2: documentLink,
       3: externalLink
-    } = ["data-maplink", "data-header", "data-document", "data-link"].map(
-      attributeKey => {
-        return this.getValueFromAttribute(attributes, attributeKey);
-      }
-    );
+    } = [
+      "data-maplink",
+      "data-header-identifier",
+      "data-document",
+      "data-link"
+    ].map(attributeKey => {
+      return this.getValueFromAttribute(attributes, attributeKey);
+    });
 
     return { mapLink, headerIdentifier, documentLink, externalLink };
   };
