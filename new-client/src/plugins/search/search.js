@@ -244,6 +244,7 @@ class Search extends React.PureComponent {
       <div className={classes.flexItemContainerForSearch}>
         <Paper className={classes.root}>
           <InputBase
+            autoFocus={true}
             className={classes.input}
             placeholder={this.state.searchboxPlaceholder}
             inputProps={{

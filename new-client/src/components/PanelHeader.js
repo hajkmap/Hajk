@@ -69,6 +69,12 @@ class PanelHeader extends Component {
     title: propTypes.string.isRequired
   };
 
+  componentDidMount() {
+    this.props.globalObserver.subscribe("core.minimizeWindow", () => {
+      this.minimize();
+    });
+  }
+
   renderButtons() {
     const { classes } = this.props;
     return (

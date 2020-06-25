@@ -35,6 +35,7 @@ const styles = theme => ({
 class LayerSettings extends React.PureComponent {
   constructor(props) {
     super(props);
+
     const { layer } = props;
     var layerInfo = layer.get("layerInfo");
     this.state = {
@@ -112,7 +113,9 @@ class LayerSettings extends React.PureComponent {
           {this.props.layer.getProperties().filterable ? (
             <VectorFilter layer={this.props.layer} />
           ) : null}
-          <CQLFilter layer={this.props.layer} />
+          {this.props.cqlFilterVisible && (
+            <CQLFilter layer={this.props.layer} />
+          )}
         </div>
       </div>
     );

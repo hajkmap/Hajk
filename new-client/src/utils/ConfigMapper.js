@@ -144,7 +144,8 @@ export default class ConfigMapper {
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
-        infoOwner: args.infoOwner
+        infoOwner: args.infoOwner,
+        hideExpandArrow: args.hideExpandArrow
       }
     };
 
@@ -193,7 +194,8 @@ export default class ConfigMapper {
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
-        infoOwner: args.infoOwner
+        infoOwner: args.infoOwner,
+        hideExpandArrow: args.hideExpandArrow
       }
     };
     return config;
@@ -280,7 +282,8 @@ export default class ConfigMapper {
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
-        infoOwner: args.infoOwner
+        infoOwner: args.infoOwner,
+        hideExpandArrow: args.hideExpandArrow
       }
     };
 
@@ -329,7 +332,8 @@ export default class ConfigMapper {
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
-        infoOwner: args.infoOwner
+        infoOwner: args.infoOwner,
+        hideExpandArrow: args.hideExpandArrow
       }
     };
 
