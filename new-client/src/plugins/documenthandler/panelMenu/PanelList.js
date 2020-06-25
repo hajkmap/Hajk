@@ -4,12 +4,17 @@ import { withSnackbar } from "notistack";
 import List from "@material-ui/core/List";
 import PanelSubList from "./PanelSubList";
 import PanelMenuListItem from "./PanelMenuListItem";
+import PropTypes from "prop-types";
 
 const styles = theme => ({});
 
 class PanelList extends React.PureComponent {
-  state = {
-    open: false
+  state = {};
+
+  static propTypes = {
+    localObserver: PropTypes.object.isRequired,
+    globalObserver: PropTypes.object.isRequired,
+    menu: PropTypes.array.isRequired
   };
 
   handleMenuButtonClick = (type, item) => {
@@ -24,6 +29,7 @@ class PanelList extends React.PureComponent {
       <PanelMenuListItem
         type={type}
         onClick={() => {
+          //unecessary rerender but to much to keep it in separate component
           this.handleMenuButtonClick(type, item);
         }}
         localObserver={localObserver}

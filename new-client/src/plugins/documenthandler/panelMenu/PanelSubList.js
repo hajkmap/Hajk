@@ -9,7 +9,7 @@ const styles = theme => ({});
 
 class PanelMenuView extends React.PureComponent {
   state = {
-    open: false
+    open: this.props.item.expandedSubMenu || false
   };
 
   toggleCollapseSubMenu = () => {
@@ -26,7 +26,7 @@ class PanelMenuView extends React.PureComponent {
           onClick={this.toggleCollapseSubMenu}
           {...this.props}
         ></PanelMenuListItem>
-        <Collapse in={this.state.open} timeout="auto" unmountOnExit>
+        <Collapse in={this.state.open} timeout="auto">
           <PanelList {...this.props} menu={item.menu}></PanelList>
         </Collapse>
       </>
