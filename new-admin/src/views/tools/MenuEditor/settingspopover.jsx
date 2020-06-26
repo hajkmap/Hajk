@@ -7,6 +7,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { SketchPicker } from "react-color";
 import Link from "@material-ui/core/Link";
 import { ColorButtonGreen, ColorButtonRed } from "./custombuttons";
+import Checkbox from "@material-ui/core/Checkbox";
 
 const getPopoverMenuItemTitle = label => {
   return <Typography variant="h6">{label}: </Typography>;
@@ -34,7 +35,8 @@ const styles = theme => ({
 class SettingsPopover extends React.Component {
   state = {
     color: this.props.menuItem.color,
-    icon: this.props.menuItem.icon
+    icon: this.props.menuItem.icon,
+    expandedSubMenu: this.props.menuItem.expandedSubMenu
   };
 
   updateColorState = e => {
@@ -51,11 +53,32 @@ class SettingsPopover extends React.Component {
     });
   };
 
+  updateExpandedSubMenuState = () => {
+    this.setState({ expandedSubMenu: !this.state.expandedSubMenu });
+  };
+
   saveAndClosePopover = () => {
     const { closePopover, updateMenuItem, treeNodeId } = this.props;
     let objectWithKeyValuesToUpdate = this.state;
     updateMenuItem(treeNodeId, objectWithKeyValuesToUpdate);
     closePopover();
+  };
+
+  renderExpandedByStartOption = () => {
+    return (
+      <Grid alignItems="center" container>
+        <Grid item>
+          <Typography>Expanderad submeny vid start</Typography>
+        </Grid>
+        <Grid item>
+          <Checkbox
+            checked={this.state.expandedSubMenu}
+            onChange={this.updateExpandedSubMenuState}
+            inputProps={{ "aria-label": "primary checkbox" }}
+          />
+        </Grid>
+      </Grid>
+    );
   };
 
   handleColorPickerChange = color => {
@@ -73,6 +96,11 @@ class SettingsPopover extends React.Component {
         autoComplete="off"
       >
         <Grid spacing={2} container>
+          <Grid xs={12} item>
+            {this.props.menuItem.menu &&
+              this.props.menuItem.menu.length > 0 &&
+              this.renderExpandedByStartOption()}
+          </Grid>
           <Grid xs={12} item>
             {getPopoverMenuItemTitle("Ikon")}
             {getTextField(

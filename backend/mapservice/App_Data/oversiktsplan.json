@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.5",
   "projections": [
     {
@@ -634,6 +634,7 @@
     {
       "type": "documenthandler",
       "options": {
+        "title": "",
         "target": "toolbar",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
@@ -649,6 +650,7 @@
               "title": "",
               "document": "start",
               "color": "#ffffff",
+              "expandedSubMenu": true,
               "description": "",
               "icon": {
                 "materialUiIconName": "home",
@@ -662,6 +664,7 @@
               "title": "Utgångspunkter",
               "document": "utgangspunkter",
               "color": "#ffffff",
+              "expandedSubMenu": true,
               "description": "",
               "icon": {
                 "materialUiIconName": "",
@@ -675,6 +678,7 @@
               "title": "Utvecklingsstrategi",
               "document": "utvecklingsstrategi",
               "color": "#ffffff",
+              "expandedSubMenu": true,
               "icon": {
                 "materialUiIconName": "home",
                 "fontSize": "large"
@@ -687,6 +691,7 @@
               "title": "Geografiska inriktningar",
               "document": "geografiska_inriktningar",
               "color": "#ffffff",
+              "expandedSubMenu": true,
               "icon": {
                 "materialUiIconName": "home",
                 "fontSize": "large"
@@ -699,6 +704,7 @@
               "title": "Tematiska inriktningar",
               "document": "tematiska_inriktningar",
               "color": "#ffffff",
+              "expandedSubMenu": true,
               "icon": {
                 "materialUiIconName": "home",
                 "fontSize": "large"
@@ -711,6 +717,7 @@
               "title": "Riksintressen",
               "document": "riksintressen2",
               "color": "#ffffff",
+              "expandedSubMenu": true,
               "icon": {
                 "materialUiIconName": "home",
                 "fontSize": "large"
@@ -723,6 +730,7 @@
               "title": "Markanvändningskarta",
               "document": "",
               "color": "#ffffff",
+              "expandedSubMenu": true,
               "icon": {
                 "materialUiIconName": "home",
                 "fontSize": "large"
@@ -735,6 +743,7 @@
               "title": "Fördjupningar",
               "document": "",
               "color": "#ffffff",
+              "expandedSubMenu": false,
               "icon": {
                 "materialUiIconName": "home",
                 "fontSize": "large"
@@ -746,6 +755,7 @@
                   "title": "Centrala Göteborg",
                   "document": "centrala_goteborg",
                   "color": "#ffffff",
+                  "expandedSubMenu": true,
                   "icon": {
                     "materialUiIconName": "home",
                     "fontSize": "large"
@@ -758,6 +768,7 @@
                   "title": "Frölunda Högsbo",
                   "document": "frolunda_hogsbo",
                   "color": "#ffffff",
+                  "expandedSubMenu": true,
                   "icon": {
                     "materialUiIconName": "home",
                     "fontSize": "large"
@@ -770,6 +781,7 @@
                   "title": "Torsviken",
                   "document": "torsviken",
                   "color": "#ffffff",
+                  "expandedSubMenu": true,
                   "icon": {
                     "materialUiIconName": "home",
                     "fontSize": "large"
@@ -782,6 +794,7 @@
                   "title": "Södra skärgården",
                   "document": "sodra_skargarden",
                   "color": "#ffffff",
+                  "expandedSubMenu": true,
                   "icon": {
                     "materialUiIconName": "home",
                     "fontSize": "large"

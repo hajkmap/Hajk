@@ -228,6 +228,7 @@ var menuEditorModel = Model.extend({
   exportTreeAsMenuJson: function(tree, menuConfig) {
     this.removeHeaderTreeRow(tree);
     menuConfig.menu = this.createMenuFromTreeStructure([], tree);
+    console.log(menuConfig.menu, "menu");
     return menuConfig;
   },
 
