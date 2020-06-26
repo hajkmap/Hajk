@@ -33,6 +33,7 @@ var defaultState = {
   bothSynlig: false,
   enableViewTogglePopupInSnabbsok: true,
   selectionTools: true,
+  displayMultiAreaSelectButton: true,
   base64Encode: false,
   instruction: '',
   filterVisible: true,
@@ -79,6 +80,7 @@ class ToolOptions extends Component {
         bothSynlig: tool.options.bothSynlig,
         enableViewTogglePopupInSnabbsok: tool.options.enableViewTogglePopupInSnabbsok,
         selectionTools: tool.options.selectionTools,
+        displayMultiAreaSelectButton: tool.options.displayMultiAreaSelectButton || this.state.displayMultiAreaSelectButton,
         base64Encode: tool.options.base64Encode,
         instruction: tool.options.instruction,
         filterVisible: tool.options.filterVisible,
@@ -210,6 +212,7 @@ class ToolOptions extends Component {
         excelExportUrl: this.state.excelExportUrl,
         displayPopup: this.state.displayPopup,
         selectionTools: this.state.selectionTools,
+        displayMultiAreaSelectButton: this.state.displayMultiAreaSelectButton,
         base64Encode: this.state.base64Encode,
         instruction: this.state.instruction,
         filterVisible: this.state.filterVisible,
@@ -417,6 +420,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               checked={this.state.selectionTools} />&nbsp;
             <label htmlFor='selectionTools'>Verktyg för ytsökning</label>
+          </div>
+          <div>
+            <input
+              id='displayMultiAreaSelectButton'
+              name='displayMultiAreaSelectButton'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.displayMultiAreaSelectButton} />&nbsp;
+            <label htmlFor='selectionTools'>Aktivera markera flera område</label>
           </div>
           <div>
             <input

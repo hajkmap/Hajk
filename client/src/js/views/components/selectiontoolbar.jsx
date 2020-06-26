@@ -75,31 +75,48 @@ var SelectionPanelView = {
    */
   render: function() {
     var anchor = this.props.model.get("anchor");
+    const displayMultiAreaSelectButton = this.props.displayMultiAreaSelectButton;
+
+    const DrawSelectionButton = (
+      <button
+        onClick={() => this.activateTool("drawSelection")}
+        type="button"
+        className={this.getClassNames("drawSelection")}
+        title="Markera efter polygon"
+      >
+        <i className="fa iconmoon-yta icon" />
+      </button>
+    );
+
+    const MultiSelectButton = (
+      <button
+        onClick={() => this.activateTool("multiSelect")}
+        type="button"
+        className={this.getClassNames("multiSelect")}
+        title="Markera flera objekt"
+      >
+        <i className="fa fa-plus icon" />
+      </button>
+    );
 
     return (
       <div className="selection-toolbar">
         <div>Sök baserat på markering i kartan</div>
-        <div className="btn-group btn-group-lg">
-          <button
-            onClick={() => this.activateTool("drawSelection")}
-            type="button"
-            className={this.getClassNames("drawSelection")}
-            title="Markera efter polygon"
-          >
-            <i className="fa iconmoon-yta icon" />
-          </button>
-          <button
-            onClick={() => this.activateTool("multiSelect")}
-            type="button"
-            className={this.getClassNames("multiSelect")}
-            title="Markera flera objekt"
-          >
-            <i className="fa fa-plus icon" />
-          </button>
-        </div>
+
+        {displayMultiAreaSelectButton ? (
+          <div className="btn-group btn-group-lg">
+            {DrawSelectionButton}
+            {MultiSelectButton}
+          </div>
+        ) : (
+          <div className="btn-group btn-group-lg">
+            {DrawSelectionButton}
+          </div>
+        )}
+
         <div
           className="btn btn-link"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
             this.props.model.abort();
           }}

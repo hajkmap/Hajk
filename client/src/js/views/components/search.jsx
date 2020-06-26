@@ -420,7 +420,9 @@ var SearchView = {
     };
 
     var selectionToolbar = this.props.model.get('selectionTools')
-      ? <SelectionToolbar model={this.props.model.get('selectionModel')} />
+      ? <SelectionToolbar 
+          model={this.props.model.get('selectionModel')} 
+          displayMultiAreaSelectButton={this.props.model.get('displayMultiAreaSelectButton')}/>
       : null;
 
     return (
