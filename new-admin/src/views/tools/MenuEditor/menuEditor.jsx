@@ -435,6 +435,7 @@ class ToolOptions extends Component {
   };
 
   updateMenuItem = (treeNodeId, objectWithKeyValuesToUpdate) => {
+    console.log(objectWithKeyValuesToUpdate, "??");
     let newTreeState = [...this.state.tree];
     let treeNode = this.menuEditorModel.findInTree(newTreeState, treeNodeId);
     if (treeNode) {
