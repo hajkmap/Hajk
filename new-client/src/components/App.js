@@ -10,6 +10,7 @@ import AppModel from "./../models/AppModel.js";
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
 import Introduction from "./Introduction";
+import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
@@ -581,6 +582,14 @@ class App extends React.PureComponent {
         }}
       >
         <>
+          {this.props.config.appConfig?.announcements &&
+            Array.isArray(this.props.config.appConfig.announcements) &&
+            this.props.config.appConfig.announcements.length > 0 && (
+              <Announcement
+                announcements={this.props.config.appConfig.announcements}
+                currentMap={this.props.config.activeMap}
+              />
+            )}
           <CookieNotice
             globalObserver={this.globalObserver}
             defaultCookieNoticeMessage={defaultCookieNoticeMessage}
