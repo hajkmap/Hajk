@@ -74,7 +74,6 @@ class TableOfContents extends React.PureComponent {
   renderChapters = activeDocument => {
     const { classes } = this.props;
     let mainChapter = 0;
-    console.log(this.props, "props");
     return (
       <List
         component="nav"
@@ -118,7 +117,7 @@ class TableOfContents extends React.PureComponent {
     let number = 0;
 
     return (
-      <>
+      <React.Fragment key={chapter.header}>
         <NestedListItem
           chapter={chapter}
           onCLick={() => {
@@ -140,7 +139,7 @@ class TableOfContents extends React.PureComponent {
               )
             : null}
         </List>
-      </>
+      </React.Fragment>
     );
   };
 

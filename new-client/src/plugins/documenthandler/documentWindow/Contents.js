@@ -29,7 +29,8 @@ const styles = theme => {
 
 class Contents extends React.PureComponent {
   state = {
-    popupImage: null
+    popupImage: null,
+    activeContent: null
   };
 
   /**
@@ -105,17 +106,21 @@ class Contents extends React.PureComponent {
         subChapter.components = this.getMaterialUIComponentsForChapter(
           subChapter
         );
+        if (subChapter.chapters.length > 0) {
+          this.appendComponentsToChapter(subChapter);
+        }
       });
     }
     chapter.components = this.getMaterialUIComponentsForChapter(chapter);
-    return chapter;
   };
 
   appendParsedComponentsToDocument = () => {
     const { activeDocument } = this.props;
-    activeDocument.chapters.forEach((chapter, index) => {
-      activeDocument.chapters[index] = this.appendComponentsToChapter(chapter);
+    var content = { ...activeDocument };
+    content.chapters.forEach((chapter, index) => {
+      this.appendComponentsToChapter(chapter);
     });
+    this.setState({ activeContent: content });
   };
 
   /**
@@ -187,7 +192,7 @@ class Contents extends React.PureComponent {
     const { localObserver, model } = this.props;
     localObserver.publish(
       "scroll-to",
-      model.getHeaderRef(this.props.activeDocument, headerIdentifier)
+      model.getHeaderRef(this.activeContent, headerIdentifier)
     );
   };
 
@@ -276,10 +281,8 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getLinkComponent = aTag => {
-    console.log(aTag.text, "??");
     const aTagObject = this.parseStringToHtmlObject(`<a ${aTag.text}</a>`, "a");
     const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
-    console.log(attributes, "attrrr");
     const text = this.getTextLinkTextFromHtmlObject(aTagObject);
     const {
       mapLink,
@@ -452,8 +455,14 @@ class Contents extends React.PureComponent {
     });
   };
 
+  componentDidUpdate(nextProps) {
+    const { activeDocument } = this.props;
+    if (nextProps.activeDocument !== activeDocument) {
+      this.appendParsedComponentsToDocument();
+    }
+  }
+
   closePopupModal = () => {
-    console.log("??");
     this.setState({ popupImage: null });
   };
 
@@ -536,15 +545,21 @@ class Contents extends React.PureComponent {
     );
   };
 
-  render = () => {
-    const { activeDocument } = this.props;
+  componentDidMount = () => {
     this.appendParsedComponentsToDocument();
-    return (
-      <>
-        {this.renderImageInModal()}
-        {this.renderChapters(activeDocument.chapters)}
-      </>
-    );
+  };
+
+  render = () => {
+    if (this.state.activeContent) {
+      return (
+        <>
+          {this.renderImageInModal()}
+          {this.renderChapters(this.state.activeContent.chapters)}
+        </>
+      );
+    } else {
+      return null;
+    }
   };
 }
 

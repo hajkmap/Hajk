@@ -99,7 +99,7 @@ class DocumentWindowBase extends React.PureComponent {
       documentColor
     } = this.state;
     const { options, classes } = this.props;
-    console.log(documentTitle, "documentTile");
+
     return (
       <BaseWindowPlugin
         {...this.props}
