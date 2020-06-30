@@ -26,6 +26,10 @@ class CollectorModel {
     this.filty = false;
     this.saving = false;
     this.geometryName = "geom";
+    this.wkt =
+      typeof settings.options.wkt === "undefined"
+        ? false
+        : settings.options.wkt;
     this.serviceConfig = settings.options.serviceConfig;
     if (this.serviceConfig) {
       this.setFormValuesFromConfig();
@@ -359,7 +363,9 @@ class CollectorModel {
     });
 
     this.draw.on("drawend", event => {
-      this.vectorSource.clear();
+      if (!this.wkt) {
+        this.vectorSource.clear();
+      }
       event.feature.modification = "added";
     });
     this.map.addInteraction(this.draw);
