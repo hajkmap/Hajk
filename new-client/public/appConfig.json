@@ -7,13 +7,23 @@
   "defaultMap": "map_1",
   "experimentalIntroductionEnabled": true,
   "experimentalIntroductionSteps": [],
+  "experimentalLoggingUrl": "https://localhost:8080/ownLogger/add",
   "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
   "announcements": [
     {
       "id": 1,
-      "active": true,
-      "text": "This is a demo message from Hajk.",
+      "active": false,
+      "text": "We're currently experiencing some problems and are working hard on fixing them.",
       "showOnlyOnce": false,
+      "maps": "all",
+      "timeout": 5000,
+      "type": "warning"
+    },
+    {
+      "id": 2,
+      "active": true,
+      "text": "Welcome to Hajk!",
+      "showOnlyOnce": true,
       "maps": ["map_1"],
       "timeout": 3000,
       "startTime": "2020-06-29",
