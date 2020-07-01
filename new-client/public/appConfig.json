@@ -12,8 +12,17 @@
   "announcements": [
     {
       "id": 1,
+      "active": false,
+      "text": "We're currently experiencing some problems and are working hard on fixing them.",
+      "showOnlyOnce": false,
+      "maps": "all",
+      "timeout": 5000,
+      "type": "warning"
+    },
+    {
+      "id": 2,
       "active": true,
-      "text": "This demo message from Hajk will show only once.",
+      "text": "Welcome to Hajk!",
       "showOnlyOnce": true,
       "maps": ["map_1"],
       "timeout": 5000,
@@ -23,7 +32,7 @@
       "browsers": "all"
     },
     {
-      "id": 2,
+      "id": 3,
       "active": true,
       "text": "Your browser is not supported anymore. Please update to a modern browser.",
       "showOnlyOnce": false,
