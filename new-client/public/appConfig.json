@@ -7,6 +7,7 @@
   "defaultMap": "map_1",
   "experimentalIntroductionEnabled": true,
   "experimentalIntroductionSteps": [],
+  "experimentalLoggingUrl": "https://localhost:8080/ownLogger/add",
   "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
   "announcements": [
     {
