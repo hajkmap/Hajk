@@ -261,7 +261,42 @@ class App extends React.PureComponent {
       );
     });
     this.bindHandlers();
+
+    // If configured, log some user agent details
+    this.props.config.appConfig?.experimentalLoggingUrl &&
+      this.logUserAgentInfo();
   }
+
+  logUserAgentInfo = () => {
+    // Wrap in try, as URL constructor can throw an error,
+    // and we don't want the app to crash on this error, as
+    // it is non-critical for Hajk's functionality.
+    try {
+      const url = new URL(this.props.config.appConfig?.experimentalLoggingUrl);
+
+      const info = {
+        eventType: "appLoad",
+        map: this.props.config.activeMap,
+        timeOpened: new Date().getTime(),
+        browserName: navigator.appName,
+        browserEngine: navigator.product,
+        browserVersion1a: navigator.appVersion,
+        browserVersion1b: navigator.userAgent,
+        browserLanguage: navigator.language,
+        browserPlatform: navigator.platform,
+        screenWidth: window.screen.width,
+        screenHeight: window.screen.height,
+        scrColorDepth: window.screen.colorDepth,
+        scrPixelDepth: window.screen.pixelDepth,
+        devicePixelRatio: window.devicePixelRatio
+      };
+
+      // Now just do fetch to the proper API endpoint…
+      console.log(url, info);
+    } catch {
+      // Just ignore it…
+    }
+  };
 
   componentDidCatch(error) {}
 
