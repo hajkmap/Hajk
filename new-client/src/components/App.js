@@ -141,17 +141,20 @@ const styles = theme => {
       backgroundColor: theme.palette.background.paper
     },
     drawerContent: {
-      backgroundColor: theme.palette.background.paper
+      backgroundColor: theme.palette.background.paper,
+      overflow: "scroll"
     },
     logoBox: {
-      padding: theme.spacing(1, 2)
+      padding: theme.spacing(1, 2),
+      height: theme.spacing(6)
     },
     logo: {
-      maxHeight: 35
+      height: theme.spacing(4)
     },
     drawerGrid: {
       padding: theme.spacing(0, 2),
-      backgroundColor: "#fff"
+      backgroundColor: "#fff",
+      minHeight: theme.spacing(6)
     },
     backdrop: {
       zIndex: theme.zIndex.drawer - 1 // Carefully selected to be above Window but below Drawer
