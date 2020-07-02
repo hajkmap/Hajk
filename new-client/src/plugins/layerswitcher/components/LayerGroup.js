@@ -337,6 +337,7 @@ class LayerGroup extends React.PureComponent {
             <div className={classes.expansionPanel}>
               {this.state.layers.map((layer, i) => {
                 var mapLayer = this.model.layerMap[Number(layer.id)];
+
                 if (mapLayer) {
                   return (
                     <LayerItem

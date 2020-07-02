@@ -265,6 +265,7 @@ class LayerItem extends React.PureComponent {
         <div className={classes.infoTextContainer}>
           <Typography variant="subtitle2">{infoTitle}</Typography>
           <Typography
+            variant="body2"
             dangerouslySetInnerHTML={{
               __html: infoText
             }}
@@ -298,9 +299,10 @@ class LayerItem extends React.PureComponent {
     if (infoOwner) {
       return (
         <div className={classes.infoTextContainer}>
-          <Typography>
-            <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
-          </Typography>
+          <Typography
+            variant="body2"
+            dangerouslySetInnerHTML={{ __html: infoOwner }}
+          />
         </div>
       );
     } else {
@@ -337,6 +339,8 @@ class LayerItem extends React.PureComponent {
     const { classes, layer, model, app, chapters } = this.props;
     const { visible } = this.state;
     const caption = layer.get("caption");
+    const cqlFilterVisible =
+      this.props.app.config.mapConfig.map?.cqlFilterVisible || false;
 
     if (!caption) {
       return null;
@@ -349,6 +353,7 @@ class LayerItem extends React.PureComponent {
           layer={layer}
           model={model}
           chapters={chapters}
+          cqlFilterVisible={cqlFilterVisible}
           onOpenChapter={chapter => {
             const informativeWindow = app.windows.find(
               window => window.type === "informative"
@@ -430,6 +435,7 @@ class LayerItem extends React.PureComponent {
             toggled={this.state.toggleSettings}
             showOpacity={true}
             showLegend={true}
+            cqlFilterVisible={cqlFilterVisible}
           />
         </div>
       </div>
