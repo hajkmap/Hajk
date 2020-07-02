@@ -7,10 +7,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import FormGroup from "@material-ui/core/FormGroup";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
 import Switch from "@material-ui/core/Switch";
 import { IconButton } from "@material-ui/core";
 import Settings from "@material-ui/icons/Settings";
@@ -184,12 +180,7 @@ export default function SearchSettings(props) {
                     )}
                     style={{ width: 500 }}
                     renderInput={params => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        label="Välj sökkälla"
-                        placeholder="Favorites"
-                      />
+                      <TextField {...params} variant="outlined" />
                     )}
                   />
                 </Grid>

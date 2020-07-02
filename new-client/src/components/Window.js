@@ -219,7 +219,7 @@ class Window extends React.PureComponent {
 
     //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
     this.left = 16; // Make sure we respect padding
-    this.top = 16 + 62 + 50; // Respect padding + nasty hack to ensure that Window is placed below Search bar
+    this.top = 16 + 62; // Respect top padding + don't overlap Drawer Toggle buttons
     this.width = width || 400;
     this.height = height || 300;
 
@@ -233,15 +233,12 @@ class Window extends React.PureComponent {
         16 - // Reduce height with top margin
         16 - // Reduce height with bottom margin
         62 - // Reduce with space for Search bar
-        50 - // Reduce with space for Search results
         spaceForBreadcrumbs; // If Breadcrumbs are active, make space for them as well
     }
 
     // If Window renders on the right, there are some things that we need to compensate for
     if (position === "right") {
       this.left = parent.getBoundingClientRect().width - width - 16 - 56; // -16 to take care of usual right padding, -56 to not cover the Control buttons that are on the right
-      this.top = this.top - 62 - 50; // We won't overlap Search bar if Window is placed to the right, so don't take Search bar's height into account
-      this.height = this.height + 62 + 50; // Same as above
     }
 
     // Mobile screens are another special case: here our Window should take up max space available
@@ -505,6 +502,7 @@ class Window extends React.PureComponent {
             onMaximize={this.maximize}
             onMinimize={this.minimize}
             mode={this.mode}
+            globalObserver={this.props.globalObserver}
           />
           <section
             className={clsx(

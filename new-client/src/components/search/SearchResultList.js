@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { boundingExtent } from "ol/extent";
 import { Stroke, Style, Circle, Fill } from "ol/style";
@@ -39,13 +39,38 @@ const highlightedStyle = new Style({
   })
 });
 
-function SearchResultList(props) {
+function SearchResultList({
+  map,
+  searchResults: { featureCollections, errors },
+  resultsSource
+}) {
   const classes = useStyles();
 
-  const map = useRef(props.map);
-
   const [checkedItems, setCheckedItems] = useState([]);
-  const resultList = props.resultList;
+
+  useEffect(() => {
+    map.current.on("click", function(evt) {
+      map.current.forEachFeatureAtPixel(evt.pixel, feature => {
+        const featureId = feature.getId();
+        handleClickedItem(featureId);
+      });
+    });
+  });
+
+  const handleClickedItem = value => {
+    const currentIndex = checkedItems.indexOf(value);
+    const newChecked = [...checkedItems];
+
+    if (currentIndex === -1) {
+      newChecked.push(value);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+
+    setCheckedItems(newChecked); // Set state so our checkboxes are up-to-date
+    changeStyleOnCheckedItems(newChecked); // Set another OpenLayers Style so we can distinguish checked items
+    zoomToCheckedItems(newChecked); // Ensure we zoom out so all checked features fit
+  };
 
   const handleCheckedToggle = value => () => {
     const currentIndex = checkedItems.indexOf(value);
@@ -64,18 +89,18 @@ function SearchResultList(props) {
 
   const changeStyleOnCheckedItems = (items = checkedItems) => {
     // First unset style on ALL features (user might have UNCHECKED a feature)
-    props.resultsSource.current.getFeatures().map(f => f.setStyle(null));
+    resultsSource.current.getFeatures().map(f => f.setStyle(null));
 
     // Now, set the style only on currently selected features
     items.map(fid =>
-      props.resultsSource.current.getFeatureById(fid).setStyle(highlightedStyle)
+      resultsSource.current.getFeatureById(fid).setStyle(highlightedStyle)
     );
   };
 
   const zoomToCheckedItems = (items = checkedItems) => {
     // Try to grab extents for each of the selected items
     const extentsFromCheckedItems = items.map(fid =>
-      props.resultsSource.current
+      resultsSource.current
         .getFeatureById(fid)
         .getGeometry()
         .getExtent()
@@ -85,7 +110,7 @@ function SearchResultList(props) {
     // else create a boundary that will fit all selected items
     const extentToZoomTo =
       extentsFromCheckedItems.length < 1
-        ? props.resultsSource.current.getExtent()
+        ? resultsSource.current.getExtent()
         : boundingExtent(extentsFromCheckedItems);
 
     map.current.getView().fit(extentToZoomTo, {
@@ -94,20 +119,21 @@ function SearchResultList(props) {
     });
   };
 
-  if (resultList.length) {
-    return (
-      <Paper id="searchResultList" className={classes.root}>
+  return (
+    <Paper id="searchResultList" className={classes.root}>
+      {featureCollections.map(fc => (
         <SearchResultGroup
           id="searchResultGroup"
-          resultList={resultList}
+          key={fc.source.id}
+          map={map}
+          featureCollection={fc}
+          resultsSource={resultsSource}
           checkedItems={checkedItems}
           handleCheckedToggle={handleCheckedToggle}
         />
-      </Paper>
-    );
-  } else {
-    return null;
-  }
+      ))}
+    </Paper>
+  );
 }
 
 export default SearchResultList;

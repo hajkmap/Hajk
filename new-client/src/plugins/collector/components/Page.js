@@ -358,7 +358,7 @@ class Page extends Component {
             model={this.props.model}
             onChangeTool={() => {
               if (window.innerWidth < 600) {
-                this.props.model.observer.publish("minimizeWindow", true);
+                this.props.model.globalObserver.publish("core.minimizeWindow");
                 this.props.enqueueSnackbar(
                   "Klicka i kartan för att rita objekt"
                 );

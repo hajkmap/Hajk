@@ -115,11 +115,6 @@ import GeoJSON from "ol/format/GeoJSON";
 const Search = props => {
   const searchModel = props.app.appModel.searchModel;
 
-  const [input, setInput] = useState("");
-
-  // Autocomplete state
-  const [options, setOptions] = useState([]);
-
   const [searchSources, setSearchSources] = useState(searchModel.getSources());
 
   // Settings to be sent to SearchModel
@@ -128,15 +123,19 @@ const Search = props => {
   // Layer to draw into (spatial search)
   const [drawSource, setDrawSource] = useState([]);
 
-  const [results, setResults] = useState([]);
+  const [searchResults, setSearchResults] = useState({
+    featureCollections: [],
+    errors: []
+  });
 
-  // Set state for SearchTool.js
-  const [clearButtonActive, setClearButtonActive] = useState(true);
+  // Search value from input field
+  const [searchInput, setSearchInput] = useState("");
+
+  const [searchActive, setSearchActive] = useState("");
 
   // Layer to visualize results
   const resultsSource = useRef();
   const resultsLayer = useRef();
-
   const map = useRef(props.map);
 
   useEffect(() => {
@@ -148,32 +147,6 @@ const Search = props => {
 
     map.current.addLayer(resultsLayer.current);
   }, []);
-
-  // Triggered when typing
-  const handleOnInput = async event => {
-    setInput(event);
-
-    const { flatAutocompleteArray, errors } = await searchModel.getAutocomplete(
-      event
-    );
-
-    console.log(
-      "Got this back to populate autocomplete with: ",
-      flatAutocompleteArray
-    );
-
-    // It is possible to check if Search Model returned any errors
-    errors.length > 0 && console.error("Autocomplete error: ", errors);
-
-    setOptions(flatAutocompleteArray);
-  };
-
-  // Triggered when selecting an option from autocomplete list
-  const handleOnChange = async (event, value, reason) => {
-    const searchString = value?.autocompleteEntry || value;
-    setInput(searchString);
-    doSearch(searchString);
-  };
 
   function addFeaturesToResultsLayer(featureCollections) {
     resultsSource.current.clear();
@@ -200,6 +173,7 @@ const Search = props => {
 
   async function doSearch(searchString) {
     const searchOptions = searchModel.getSearchOptions();
+
     // Apply our custom options based on user's selection
     searchSettings.map(setting => {
       searchOptions["activeSpatialFilter"] = setting.activeSpatialFilter; // "intersects" or "within"
@@ -214,30 +188,48 @@ const Search = props => {
       searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
     }
 
-    const { featureCollections, errors } = await searchModel.getResults(
-      searchString,
-      searchSources,
-      searchOptions
-    );
+    if (searchString?.length || searchOptions["featuresToFilter"]) {
+      const { featureCollections, errors } = await searchModel.getResults(
+        searchString,
+        searchSources,
+        searchOptions
+      );
 
-    // It's possible to handle any errors in the UI by checking if Search Model returned any
-    errors.length > 0 && console.error(errors);
+      // It's possible to handle any errors in the UI by checking if Search Model returned any
+      errors.length > 0 && console.error(errors);
 
-    setResults(featureCollections);
+      setSearchResults({ featureCollections, errors });
 
-    addFeaturesToResultsLayer(featureCollections);
+      addFeaturesToResultsLayer(featureCollections);
+    }
   }
 
   const handleOnClear = () => {
+    //Clear input, draw object, result list
+    setSearchInput("");
     if (drawSource.current) {
       drawSource.current.clear();
     }
-    setResults([]);
+    if (resultsSource.current) {
+      resultsSource.current.clear();
+    }
+    setSearchResults({
+      featureCollections: [],
+      errors: []
+    });
+    setSearchActive("");
   };
 
-  function handleClickOnSearch() {
-    //const searchString = document.getElementById("searchInputField").value;
-    doSearch(input);
+  function handleSearchInput(searchString) {
+    setSearchInput(searchString);
+
+    if (searchString !== "") {
+      setSearchActive("input");
+    }
+  }
+
+  function handleOnSearch(searchString) {
+    doSearch(searchString);
   }
 
   function handleSearchSettings(option) {
@@ -245,6 +237,7 @@ const Search = props => {
   }
 
   function handleDrawSource(source) {
+    setSearchActive("draw");
     setDrawSource(source);
   }
 
@@ -257,13 +250,12 @@ const Search = props => {
       <SearchBar
         {...props}
         resultsSource={resultsSource}
-        handleOnInput={e => handleOnInput(e.target.value)}
-        handleOnChange={handleOnChange}
-        handleOnSearch={handleClickOnSearch}
+        searchResults={searchResults}
+        handleSearchInput={handleSearchInput}
+        searchInput={searchInput}
+        searchActive={searchActive}
+        handleOnSearch={handleOnSearch}
         handleOnClear={handleOnClear}
-        autocompleteList={options}
-        resultList={results}
-        clearButtonActive={clearButtonActive}
         handleSearchSettings={handleSearchSettings}
         handleDrawSource={handleDrawSource}
         handleSearchSources={handleSearchSources}

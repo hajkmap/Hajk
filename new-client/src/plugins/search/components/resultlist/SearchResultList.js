@@ -39,6 +39,11 @@ const styles = theme => {
       minWidth: 200,
       [theme.breakpoints.up("sm")]: {
         maxWidth: 520
+      },
+      [theme.breakpoints.down("xs")]: {
+        minWidth: "100%",
+        position: "absolute",
+        left: 0
       }
     }
   };

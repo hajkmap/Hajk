@@ -5,6 +5,7 @@ import Or from "ol/format/filter/Or";
 import And from "ol/format/filter/And";
 import Intersects from "ol/format/filter/Intersects";
 import Within from "ol/format/filter/Within";
+import { fromCircle } from "ol/geom/Polygon";
 
 import { arraySort } from "../utils/ArraySort";
 
@@ -281,11 +282,12 @@ class SearchModel {
         searchOptions.activeSpatialFilter === "within" ? Within : Intersects;
       // Next, loop through supplied features and create the desired filter
       spatialFilters = searchOptions.featuresToFilter.map(feature => {
-        return new activeSpatialFilter(
-          geometryName,
-          feature.getGeometry(),
-          srsName
-        );
+        // Convert circle feature to polygon
+        let geometry = feature.getGeometry();
+        if (geometry.getType() === "Circle") {
+          geometry = fromCircle(geometry);
+        }
+        return new activeSpatialFilter(geometryName, geometry, srsName);
       });
 
       // If one feature was supplied, we end up with one filter. Let's use it.
