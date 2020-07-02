@@ -109,11 +109,9 @@ const styles = theme => {
     },
     rightColumn: {
       paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
-      flex: 0
+      paddingRight: theme.spacing(2)
     },
     controlsColumn: {
-      flex: 0,
       display: "flex",
       flexDirection: "column",
       marginTop: 0,
