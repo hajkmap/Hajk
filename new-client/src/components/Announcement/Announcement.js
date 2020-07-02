@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { detect } from "detect-browser";
 
 import { useSnackbar } from "notistack";
 
@@ -19,6 +20,7 @@ import CloseIcon from "@material-ui/icons/Close";
         "timeout": null, // null or Numeric. Snackbar will auto hide after specified amount of millisecond, or be persistent (if null).
         "startTime": "2020-01-01", // DateTime. Earliest timestamp for this to be visible. Must be a string parsable by Date.parse().
         "stopTime": "2020-12-31", // DateTime. Last timestamp when this will be visible.
+        "browsers": ["ie"], // Array of browsers (see https://github.com/DamonOehlman/detect-browser for valid names)
         "type": "info" // String. See Notistack docs for allowed options, usually "default", "info", "warning", "success" and "error".
       }, {
         "id": 2, 
@@ -105,17 +107,32 @@ function Announcement({ announcements = [], currentMap }) {
     };
 
     /**
-     * If current map exists in the "maps" array for a given item, or if "maps" is a
-     * string with value "all", show this notification. Else, don't show it.
+     * If "maps" property exists and current map exists in the "maps" array
+     * or if "maps" is a string with value "all", show this notification.
+     * Else, don't show it.
      */
     const mapFilter = a => {
       // If "all" is specified, no filtering is needed
-      if (a.maps === "all") return true;
+      if (a?.maps === undefined || a.maps === "all") return true;
 
       // Else if an array is provided, check and see that current map exists in the array
       if (Array.isArray(a.maps)) return a.maps.includes(currentMap);
 
       // If anything else is provided, it is an invalid value. Just exit.
+      return false;
+    };
+
+    /**
+     * If "browsers" property exists and is an Array, return true only
+     * if current browsers is included in the array.
+     * If "browsers" is a string with value "all", or if it's undefined,
+     * return true too.
+     * For any other (invalid) value, return false.
+     */
+    const browserFilter = a => {
+      const browsers = a?.browsers;
+      if (browsers === undefined || browsers === "all") return true;
+      if (Array.isArray(browsers)) return browsers.includes(detect().name);
       return false;
     };
 
@@ -153,6 +170,7 @@ function Announcement({ announcements = [], currentMap }) {
     const filtered = announcements
       .filter(a => mapFilter(a)) // Show only announcements for the current map
       .filter(a => a.active === true) // Only active announcements
+      .filter(a => browserFilter(a)) // Show only for some browsers if admin said so
       .filter(a => timeFilter(a)) // Respect possible date/time restrictions
       .filter(a => localStorageFilter(a)); // Show only once if admin said so, by checking a local storage setting
 
