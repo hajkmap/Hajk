@@ -88,6 +88,14 @@ class Contents extends React.PureComponent {
       tagType: "figure",
       callback: this.getFigureComponents
     });
+    allowedHtmlTags.push({
+      tagType: "strong",
+      callback: this.getStrongTagTypographyComponents
+    });
+    allowedHtmlTags.push({
+      tagType: "u",
+      callback: this.getUTagTypographyComponents
+    });
     return allowedHtmlTags;
   };
 
@@ -401,24 +409,31 @@ class Contents extends React.PureComponent {
   getPtagTypographyComponents = pTag => {
     const { classes } = this.props;
 
-    return pTag.text.map((element, index) => {
-      if (element.tagType === null) {
-        return (
-          <Typography
-            key={index}
-            className={classes.typography}
-            variant="body1"
-          >
-            {element.text}
-          </Typography>
-        );
-      }
-      return (
-        <React.Fragment key={index}>
-          {element.renderCallback(element)}
-        </React.Fragment>
-      );
-    });
+    return (
+      <Typography className={classes.typography} variant="body1">
+        {pTag.text.map((element, index) => {
+          if (element.tagType === null) {
+            return element.text;
+          }
+          return (
+            <React.Fragment key={index}>
+              {element.renderCallback(element)}
+            </React.Fragment>
+          );
+        })}
+      </Typography>
+    );
+  };
+
+  getStrongTagTypographyComponents = strongTag => {
+    if (strongTag.renderCallback)
+      return <strong>{strongTag.renderCallback}</strong>;
+
+    return <strong>{strongTag.text}</strong>;
+  };
+
+  getUTagTypographyComponents = uTag => {
+    return <u>{uTag.text}</u>;
   };
 
   /**
