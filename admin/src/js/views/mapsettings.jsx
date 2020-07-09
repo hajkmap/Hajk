@@ -269,6 +269,7 @@ class Menu extends Component {
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       toggleAllButton: false,
+      infoHtml: false,
       panelTitle: "Kartlager",
       instruction: "",
       dropdownThemeMaps: false,
@@ -304,7 +305,9 @@ class Menu extends Component {
           backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherWhite,
           toggleAllButton: this.props.model.get("layerMenuConfig")
-            .toggleAllButton,
+              .toggleAllButton,
+          infoHtml: this.props.model.get("layerMenuConfig")
+              .infoHtml || false,
           panelTitle: this.props.model.get("layerMenuConfig").panelTitle || "Kartlager",
           instruction: this.props.model.get("layerMenuConfig").instruction,
           dropdownThemeMaps: this.props.model.get("layerMenuConfig")
@@ -508,6 +511,7 @@ class Menu extends Component {
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       toggleAllButton: this.state.toggleAllButton,
+      infoHtml: this.state.infoHtml,
       panelTitle: this.state.panelTitle,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -1381,20 +1385,40 @@ class Menu extends Component {
               <div className="row">
                 <div className="col-sm-1">
                   <input
-                    id="toggleAllButton"
-                    name="toggleAllButton"
-                    type="checkbox"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
-                    checked={this.state.toggleAllButton}
+                      id="toggleAllButton"
+                      name="toggleAllButton"
+                      type="checkbox"
+                      onChange={e => {
+                        this.handleInputChange(e);
+                      }}
+                      checked={this.state.toggleAllButton}
                   />&nbsp;
                 </div>
                 <label
-                  className="layer-menu-label-checkbox"
-                  htmlFor="toggleAllButton"
+                    className="layer-menu-label-checkbox"
+                    htmlFor="toggleAllButton"
                 >
                   Släck alla lager-knapp
+                </label>
+              </div>
+
+              <div className="row">
+                <div className="col-sm-1">
+                  <input
+                      id="infoHtml"
+                      name="infoHtml"
+                      type="checkbox"
+                      onChange={e => {
+                        this.handleInputChange(e);
+                      }}
+                      checked={this.state.infoHtml}
+                  />&nbsp;
+                </div>
+                <label
+                    className="layer-menu-label-checkbox"
+                    htmlFor="infoHtml"
+                >
+                  Tillåt HTML-kod i infobox
                 </label>
               </div>
 
