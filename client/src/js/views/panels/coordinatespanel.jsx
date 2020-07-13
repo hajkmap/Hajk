@@ -35,7 +35,7 @@ var CoordinatesList = React.createClass({
       dir: D < 0 ? lng ? 'W' : 'S' : lng ? 'E' : 'N',
       deg: Math.floor((D < 0 ? D = -D : D)),
       min: Math.floor((D * 60) % 60),
-      sec: ((D * 3600) % 60).toFixed(5)
+      sec: ((D * 3600) % 60).toFixed(this.props.model.get('formattedNumbers') ? 1 : 5)
     };
   },
 
@@ -62,19 +62,41 @@ var CoordinatesList = React.createClass({
   },
 
   getX: function (xyObject) {
-    return (
-      <span>
+    var numberOfgetX = Math.floor(xyObject.x);
+    valOfgetX = numberOfgetX.toString().match(/(\d+?)(?=(\d{3})+(?!\d)|$)/g);
+
+    if(this.props.model.get('formattedNumbers')){
+      return (
+          <span>
+        <strong>{ xyObject.xtitle }: </strong>  {valOfgetX[0] + " " + valOfgetX[1]}
+      </span>
+      );
+    }else{
+      return (
+          <span>
         <strong>{ xyObject.xtitle }: </strong> { xyObject.x.toFixed(2) } m
       </span>
-    );
+      );
+    }
   },
 
   getY: function (xyObject) {
-    return (
-      <span>
+    var numberOfgetY = Math.floor(xyObject.y);
+    valOfgetY = numberOfgetY.toString().match(/(\d+?)(?=(\d{3})+(?!\d)|$)/g);
+
+    if(this.props.model.get('formattedNumbers')){
+      return (
+          <span>
+        <strong>{ xyObject.ytitle }: </strong> {valOfgetY[0] + " " + valOfgetY[1] + " " +valOfgetY[2]}
+      </span>
+      );
+    }else{
+      return (
+          <span>
         <strong>{ xyObject.ytitle }: </strong> { xyObject.y.toFixed(2) } m
       </span>
-    );
+      );
+    }
   },
 
   processSphericalXY: function (xyObject) {
@@ -277,7 +299,7 @@ var CoordinatesPanelView = {
           <p>
             Välj en plats i kartan genom att flytta på siktet. <br />
           </p>
-          <CoordinatesList coordinates={coordinates} />
+          <CoordinatesList coordinates={coordinates} model={this.props.model} />
           {searchOnCoordinates}
         </div>
       </Panel>
