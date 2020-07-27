@@ -720,18 +720,17 @@ var SearchModel = {
       };
 
       var getAlias = (column, infobox) => {
-        var regExp = new RegExp(`{export:${column}( as .*)?}`),
+        var regExp = new RegExp(`{export:${column}( as [^}]+)?}`),
           result = regExp.exec(infobox);
 
         if (result && result[1]) {
           result[1] = result[1].replace(" as ", "");
         }
-
         return result && result[1] ? result[1] : column;
       };
 
       values = groups[group].map((hit) => {
-        if (typeof hit.aliasDict !== 'undefined' && hit.aliasDict !== null) {
+        if (typeof hit.aliasDict !== 'undefined' && hit.aliasDict !== null && Object.keys(hit.aliasDict).length > 0) {
           var attributes = hit.getProperties(),
             names = Object.keys(attributes),
             aliasKeys = Object.keys(hit.aliasDict);
@@ -749,7 +748,7 @@ var SearchModel = {
                 typeof attributes[name] === "number"
               );
             } else {
-              let regExp = new RegExp(`{export:${name}( as .*)?}`);
+              let regExp = new RegExp(`{export:${name}( as [^}]+)?}`);
               return regExp.test(hit.infobox);
             }
           });
@@ -761,13 +760,12 @@ var SearchModel = {
         }
 
         columns.forEach((column, i) => {
-          if (typeof hit.aliasDict !== "undefined" && hit.aliasDict !== null) {
+          if (typeof hit.aliasDict !== "undefined" && hit.aliasDict !== null && Object.keys(hit.aliasDict).length > 0) {
             aliases[i] = getAliasWithDict(column, hit.aliasDict);
           } else {
             aliases[i] = getAlias(column, hit.infobox);
           }
         });
-
           return columns.map(column => {
                   if (column == "nyckel") {
                       return Number(attributes[column]);
