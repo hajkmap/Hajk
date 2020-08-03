@@ -108,10 +108,21 @@ const recursiveParseSubTags = (
  * @memberof htmlToMaterialUiParser
  */
 const extractFirstInnerTag = (tagType, tagValue, tagSpecificCallbacks) => {
-  const { firstTag, restHtml, addTag } = extractDataFromFirstTag(
+  const { firstTag, restTags, restHtml, addTag } = extractDataFromFirstTag(
     tagValue,
     tagSpecificCallbacks
   );
+  if (restTags) {
+    const { tagType, tagValue } = findValidStartTag(
+      restTags,
+      tagSpecificCallbacks
+    );
+    firstTag[firstTag.length - 1].text.push({
+      tagType: tagType,
+      text: tagValue,
+      renderCallback: getTagSpecificCallback(tagType, tagSpecificCallbacks)
+    });
+  }
   return {
     text: firstTag,
     restHtml: restHtml,
@@ -238,15 +249,29 @@ const extractDataFromFirstTag = (html, tagSpecificCallbacks) => {
   addPossibleTagTypeWithoutTextToParentTag(firstTag, tagType, pureTag);
 
   let restHtml = html.substr(textBeforeTag.length + tagEndIndex);
-  if (
-    !isTagSpecific(tagType, tagSpecificCallbacks) ||
-    isTextATag(tagValue, tagSpecificCallbacks)
-  )
-    restHtml = tagValue;
+  // if (
+  //   !isTagSpecific(tagType, tagSpecificCallbacks) ||
+  //   isTextATag(tagValue, tagSpecificCallbacks)
+  // )
+  //   restHtml = tagValue;
   if (tagEndIndex === -1) restHtml = "";
+
+  let restTags = "";
+  if (
+    isTagSpecific(tagType, tagSpecificCallbacks) &&
+    isTextATag(tagValue, tagSpecificCallbacks)
+  ) {
+    firstTag.push({
+      tagType: tagType,
+      text: [],
+      renderCallback: getTagSpecificCallback(tagType, tagSpecificCallbacks)
+    });
+    restTags = tagValue;
+  }
 
   return {
     firstTag: firstTag,
+    restTags: restTags,
     restHtml: restHtml,
     addTag: isTagSpecific(tagType, tagSpecificCallbacks, true)
   };
