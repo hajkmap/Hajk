@@ -10,6 +10,7 @@ import AppModel from "./../models/AppModel.js";
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
 import Introduction from "./Introduction";
+import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
@@ -108,11 +109,9 @@ const styles = theme => {
     },
     rightColumn: {
       paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
-      flex: 0
+      paddingRight: theme.spacing(2)
     },
     controlsColumn: {
-      flex: 0,
       display: "flex",
       flexDirection: "column",
       marginTop: 0,
@@ -142,17 +141,20 @@ const styles = theme => {
       backgroundColor: theme.palette.background.paper
     },
     drawerContent: {
-      backgroundColor: theme.palette.background.paper
+      backgroundColor: theme.palette.background.paper,
+      overflow: "scroll"
     },
     logoBox: {
-      padding: theme.spacing(1, 2)
+      padding: theme.spacing(1, 2),
+      height: theme.spacing(6)
     },
     logo: {
-      maxHeight: 35
+      height: theme.spacing(4)
     },
     drawerGrid: {
       padding: theme.spacing(0, 2),
-      backgroundColor: "#fff"
+      backgroundColor: "#fff",
+      minHeight: theme.spacing(6)
     },
     backdrop: {
       zIndex: theme.zIndex.drawer - 1 // Carefully selected to be above Window but below Drawer
@@ -581,6 +583,14 @@ class App extends React.PureComponent {
         }}
       >
         <>
+          {this.props.config.appConfig?.announcements &&
+            Array.isArray(this.props.config.appConfig.announcements) &&
+            this.props.config.appConfig.announcements.length > 0 && (
+              <Announcement
+                announcements={this.props.config.appConfig.announcements}
+                currentMap={this.props.config.activeMap}
+              />
+            )}
           <CookieNotice
             globalObserver={this.globalObserver}
             defaultCookieNoticeMessage={defaultCookieNoticeMessage}
