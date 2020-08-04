@@ -49,8 +49,13 @@ class DocumentViewer extends React.PureComponent {
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
-    localObserver.subscribe("scroll-to", chapter => {
+
+    localObserver.subscribe("scroll-to-chapter", chapter => {
       chapter.scrollRef.current.scrollIntoView();
+    });
+
+    localObserver.subscribe("scroll-to-top", () => {
+      this.scrollToTop();
     });
   };
 

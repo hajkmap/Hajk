@@ -28,11 +28,14 @@ class DocumentWindowBase extends React.PureComponent {
   setActiveDocument = title => {
     return new Promise((resolve, reject) => {
       this.model.fetchJsonDocument(title, document => {
+        var referingMenuItem = this.findReferringMenuItem(title);
         this.setState(
-          {
-            documentTitle: title,
-            document: document,
-            documentColor: this.findReferringMenuItem(title).color
+          () => {
+            return {
+              documentTitle: title,
+              document: document,
+              documentColor: referingMenuItem ? referingMenuItem.color : null
+            };
           },
           () => {
             resolve();
@@ -71,24 +74,46 @@ class DocumentWindowBase extends React.PureComponent {
     });
   };
 
-  showDocumentWindow = ({ documentName, headerIdentifier }) => {
-    const { app, localObserver } = this.props;
+  showDocument = documentName => {
+    const { app } = this.props;
     app.globalObserver.publish("documentviewer.showWindow", {
       hideOtherPlugins: false
     });
-    this.setActiveDocument(documentName).then(() => {
-      if (headerIdentifier) {
-        localObserver.publish(
-          "scroll-to",
-          this.model.getHeaderRef(this.state.document, headerIdentifier)
-        );
-      }
-    });
+    return this.setActiveDocument(documentName);
+  };
+
+  scrollInDocument = headerIdentifier => {
+    const { localObserver } = this.props;
+    if (headerIdentifier) {
+      localObserver.publish(
+        "scroll-to-chapter",
+        this.model.getHeaderRef(this.state.document, headerIdentifier)
+      );
+    } else {
+      localObserver.publish(
+        "scroll-to-top",
+        this.model.getHeaderRef(this.state.document, headerIdentifier)
+      );
+    }
+  };
+
+  showHeaderInDocument = ({ documentName, headerIdentifier }) => {
+    if (documentName !== this.state.documentTitle) {
+      this.showDocument(documentName).then(() => {
+        this.scrollInDocument(headerIdentifier);
+      });
+    } else {
+      this.scrollInDocument(headerIdentifier);
+    }
   };
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
-    localObserver.subscribe("show-document-window", this.showDocumentWindow);
+    localObserver.subscribe(
+      "show-header-in-document",
+      this.showHeaderInDocument
+    );
+    localObserver.subscribe("show-document", this.showDocument);
   };
 
   render() {

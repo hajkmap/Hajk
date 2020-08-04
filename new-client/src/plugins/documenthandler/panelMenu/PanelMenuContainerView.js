@@ -20,9 +20,7 @@ class PanelMenuView extends React.PureComponent {
     const { localObserver } = this.props;
 
     localObserver.subscribe("document-clicked", item => {
-      localObserver.publish("show-document-window", {
-        documentName: item.document
-      });
+      localObserver.publish("show-document", item.document);
     });
 
     localObserver.subscribe("link-clicked", item => {

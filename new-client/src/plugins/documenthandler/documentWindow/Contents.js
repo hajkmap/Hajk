@@ -184,24 +184,12 @@ class Contents extends React.PureComponent {
     });
   };
 
-  getHeaderLinkForNonActiveDocument = (
-    aTagObject,
-    headerIdentifier,
-    documentLink
-  ) => {
+  getDocumentLink = (headerIdentifier, documentLink) => {
     const { localObserver } = this.props;
-    localObserver.publish("show-document-window", {
+    localObserver.publish("show-header-in-document", {
       documentName: documentLink,
       headerIdentifier: headerIdentifier
     });
-  };
-
-  getHeaderLinkForSameDocument = (aTagObject, headerIdentifier) => {
-    const { localObserver, model } = this.props;
-    localObserver.publish(
-      "scroll-to",
-      model.getHeaderRef(this.activeContent, headerIdentifier)
-    );
   };
 
   getLinkDataPerType = attributes => {
@@ -299,38 +287,18 @@ class Contents extends React.PureComponent {
       externalLink
     } = this.getLinkDataPerType(attributes);
 
-    if (headerIdentifier) {
-      if (documentLink) {
-        return (
-          <Link
-            onClick={() => {
-              this.getHeaderLinkForNonActiveDocument(
-                aTagObject,
-                headerIdentifier,
-                documentLink
-              );
-            }}
-          >
-            {text}
-          </Link>
-        );
-      } else {
-        return (
-          <Link
-            href="#"
-            underline="hover"
-            onClick={() => {
-              this.getHeaderLinkForSameDocument(
-                aTagObject,
-                headerIdentifier,
-                documentLink
-              );
-            }}
-          >
-            {text}
-          </Link>
-        );
-      }
+    if (documentLink) {
+      return (
+        <Link
+          href="#"
+          underline="hover"
+          onClick={() => {
+            this.getDocumentLink(headerIdentifier, documentLink);
+          }}
+        >
+          {text}
+        </Link>
+      );
     }
 
     if (mapLink) {
