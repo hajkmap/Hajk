@@ -163,7 +163,7 @@ class Contents extends React.PureComponent {
 
   getCustomLink = (htmlObject, clickHandler) => {
     return (
-      <Link href="#" variant="body2" onClick={clickHandler}>
+      <Link href="#" variant="body2" component="button" onClick={clickHandler}>
         {htmlObject.innerHTML}
       </Link>
     );
@@ -291,6 +291,7 @@ class Contents extends React.PureComponent {
       return (
         <Link
           href="#"
+          component="button"
           underline="hover"
           onClick={() => {
             this.getDocumentLink(headerIdentifier, documentLink);
@@ -332,37 +333,35 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getImgCardComponent = imgTag => {
+    const imgTagObject = this.parseStringToHtmlObject(
+      `<img ${imgTag.text}</img>`,
+      "img"
+    );
+    const attributes = this.getDataAttributesFromHtmlObject(imgTagObject);
+    const image = {
+      imageCaption: this.getValueFromAttribute(attributes, "data-caption"),
+      imageSource: this.getValueFromAttribute(attributes, "data-source"),
+      imageUrl: this.getValueFromAttribute(attributes, "src"),
+      altValue: this.getValueFromAttribute(attributes, "alt")
+    };
     const { classes } = this.props;
-    const indexOfCaption = imgTag.text.indexOf("data-caption=");
-    const indexOfSource = imgTag.text.indexOf("data-source=");
-    const indexOfSrcMaterial = imgTag.text.indexOf("src=");
-    const imageCaption = imgTag.text.substring(
-      indexOfCaption + 14,
-      indexOfSource - 2
-    );
-    const imageSource = imgTag.text.substring(
-      indexOfSource + 13,
-      indexOfSrcMaterial - 2
-    );
-    const imageUrl = imgTag.text.substring(
-      indexOfSrcMaterial + 5,
-      imgTag.text.length - 1
-    );
+
     return (
       <>
         <CardMedia
           onClick={() => {
-            this.showPopupModal(imageUrl);
+            this.showPopupModal(image);
           }}
+          alt={image.altValue}
           component="img"
           className={classes.documentImage}
-          image={imageUrl}
+          image={image.imageUrl}
         />
         <Typography className={classes.typography} variant="subtitle2">
-          {imageCaption}
+          {image.imageCaption}
         </Typography>
         <Typography className={classes.typography} variant="subtitle2">
-          {imageSource}
+          {image.imageSource}
         </Typography>
       </>
     );
@@ -449,8 +448,8 @@ class Contents extends React.PureComponent {
     this.setState({ popupImage: null });
   };
 
-  showPopupModal = imageSource => {
-    this.setState({ popupImage: imageSource });
+  showPopupModal = image => {
+    this.setState({ popupImage: image });
   };
 
   renderImageInModal = () => {
@@ -506,6 +505,15 @@ class Contents extends React.PureComponent {
     );
   };
 
+  getHeaderVariant = chapter => {
+    var headerSize = 2; //Chapters start with h2
+    while (chapter.parent) {
+      headerSize++;
+      chapter = chapter.parent;
+    }
+    return `h${headerSize}`;
+  };
+
   /**
    * Render the headline of a chapter.
    * @param {object} chapter The chapter to be rendered.
@@ -520,7 +528,7 @@ class Contents extends React.PureComponent {
         <Typography
           ref={chapter.scrollRef}
           className={classes.typography}
-          variant={chapter.parent ? "h3" : "h2"}
+          variant={this.getHeaderVariant(chapter)}
         >
           {chapter.header}
         </Typography>

@@ -32,7 +32,7 @@ const styles = theme => ({
 const PaperComponent = withStyles(styles)(PaperComponentRaw);
 
 function PaperComponentRaw(props) {
-  const { classes, component, onClose, src } = props;
+  const { classes, component, onClose, src, altValue } = props;
   return (
     <>
       <IconButton
@@ -42,7 +42,12 @@ function PaperComponentRaw(props) {
       >
         <CloseIcon></CloseIcon>
       </IconButton>
-      <Paper component={component} src={src} className={classes.paper}></Paper>
+      <Paper
+        alt={altValue}
+        component={component}
+        src={src}
+        className={classes.paper}
+      ></Paper>
     </>
   );
 }
@@ -78,7 +83,8 @@ class ImagePopupModal extends React.PureComponent {
           PaperProps={{
             component: "img",
             onClose: close,
-            src: image
+            src: image?.imageUrl,
+            altValue: image?.altValue
           }}
           open={open}
         ></Dialog>

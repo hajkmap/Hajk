@@ -75,11 +75,7 @@ class TableOfContents extends React.PureComponent {
     const { classes } = this.props;
     let mainChapter = 0;
     return (
-      <List
-        component="nav"
-        className={classes.root}
-        aria-labelledby="nested-list-subheader"
-      >
+      <List className={classes.root} aria-labelledby="nested-list-subheader">
         {Array.isArray(activeDocument?.chapters)
           ? activeDocument.chapters.map(chapter =>
               this.renderSubChapters(chapter, 0, (++mainChapter).toString())
@@ -93,16 +89,6 @@ class TableOfContents extends React.PureComponent {
     const { localObserver } = this.props;
     localObserver.publish("scroll-to-chapter", chapter);
   };
-
-  /*
-    <Link
-          href="#"
-          variant="h4"
-          underline="hover"
-          onClick={() => {
-            this.linkClick(chapter);
-          }}
-        >*/
 
   /**
    * Private help method that recursive renders all sub chapters of a chapter.
@@ -124,11 +110,10 @@ class TableOfContents extends React.PureComponent {
             this.linkClick(chapter);
           }}
           level={level}
-          button
         >
           {subChapterNumber + " " + chapter.header}
         </NestedListItem>
-        <List component="div" disablePadding>
+        <List disablePadding>
           {Array.isArray(chapter.chapters)
             ? chapter.chapters.map(subChapter =>
                 this.renderSubChapters(

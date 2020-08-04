@@ -6,6 +6,7 @@ import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import Contents from "./Contents";
+import { Typography } from "@material-ui/core";
 
 const styles = theme => ({
   gridContainer: {
@@ -91,6 +92,9 @@ class DocumentViewer extends React.PureComponent {
         aria-label="goto-top"
         onClick={this.scrollToTop}
       >
+        <Typography variant="srOnly">
+          Scrolla till toppen av dokumentet
+        </Typography>
         <NavigationIcon />
       </Fab>
     );
