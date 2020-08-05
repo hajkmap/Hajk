@@ -26,7 +26,12 @@ class PanelMenuView extends React.PureComponent {
           onClick={this.toggleCollapseSubMenu}
           {...this.props}
         ></PanelMenuListItem>
-        <Collapse in={this.state.open} timeout="auto">
+        <Collapse
+          aria-expanded={this.state.open}
+          id="submenu"
+          in={this.state.open}
+          timeout="auto"
+        >
           <PanelList {...this.props} menu={item.menu}></PanelList>
         </Collapse>
       </>

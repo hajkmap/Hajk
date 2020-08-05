@@ -138,10 +138,13 @@ class TableOfContents extends React.PureComponent {
         style={{ borderColor: documentColor }}
         defaultExpanded={true}
       >
-        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+        <ExpansionPanelSummary
+          aria-controls="expansion-panel-content"
+          expandIcon={<ExpandMoreIcon />}
+        >
           <Typography variant="h2">Innehåll</Typography>
         </ExpansionPanelSummary>
-        <ExpansionPanelDetails>
+        <ExpansionPanelDetails id="expansion-panel-content">
           <Grid container spacing={0}>
             {this.renderChapters(activeDocument)}
           </Grid>

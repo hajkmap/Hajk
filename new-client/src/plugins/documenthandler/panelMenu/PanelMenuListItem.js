@@ -68,6 +68,7 @@ class PanelMenuListItem extends React.PureComponent {
           divider
           button
           size="small"
+          aria-controls="submenu"
           onClick={onClick}
           className={classes.listItem}
           style={{
