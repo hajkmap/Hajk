@@ -15,7 +15,8 @@ const styles = theme => {
       height: "300px",
       cursor: "pointer",
       width: "100%",
-      objectFit: "contain"
+      objectFit: "contain",
+      objectPosition: "left"
     },
     typography: {
       overflowWrap: "break-word"
