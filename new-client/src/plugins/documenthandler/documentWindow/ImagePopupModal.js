@@ -83,7 +83,7 @@ class ImagePopupModal extends React.PureComponent {
           PaperProps={{
             component: "img",
             onClose: close,
-            src: image?.imageUrl,
+            src: image?.url,
             altValue: image?.altValue
           }}
           open={open}

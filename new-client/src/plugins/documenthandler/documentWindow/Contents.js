@@ -327,6 +327,14 @@ class Contents extends React.PureComponent {
     return result;
   };
 
+  isPopupAllowedForImage = imageAttributes => {
+    return imageAttributes
+      .map(attribute => {
+        return attribute.dataAttribute;
+      })
+      .includes("data-popup");
+  };
+
   /**
    * The render function for the img-tag.
    * @param {string} imgTag The img-tag.
@@ -339,30 +347,36 @@ class Contents extends React.PureComponent {
       "img"
     );
     const attributes = this.getDataAttributesFromHtmlObject(imgTagObject);
+
     const image = {
-      imageCaption: this.getValueFromAttribute(attributes, "data-caption"),
-      imageSource: this.getValueFromAttribute(attributes, "data-source"),
-      imageUrl: this.getValueFromAttribute(attributes, "src"),
+      caption: this.getValueFromAttribute(attributes, "data-caption"),
+      popup: this.isPopupAllowedForImage(attributes),
+      source: this.getValueFromAttribute(attributes, "data-source"),
+      url: this.getValueFromAttribute(attributes, "src"),
       altValue: this.getValueFromAttribute(attributes, "alt")
     };
     const { classes } = this.props;
 
+    var onClickCallback = image.popup
+      ? () => {
+          this.showPopupModal(image);
+        }
+      : null;
+
     return (
       <>
         <CardMedia
-          onClick={() => {
-            this.showPopupModal(image);
-          }}
+          onClick={onClickCallback}
           alt={image.altValue}
           component="img"
           className={classes.documentImage}
-          image={image.imageUrl}
+          image={image.url}
         />
         <Typography className={classes.typography} variant="subtitle2">
-          {image.imageCaption}
+          {image.caption}
         </Typography>
         <Typography className={classes.typography} variant="subtitle2">
-          {image.imageSource}
+          {image.source}
         </Typography>
       </>
     );
