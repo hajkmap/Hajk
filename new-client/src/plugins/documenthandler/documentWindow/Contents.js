@@ -5,6 +5,10 @@ import Typography from "@material-ui/core/Typography";
 import CardMedia from "@material-ui/core/CardMedia";
 import ImagePopupModal from "./ImagePopupModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
+import DescriptionIcon from "@material-ui/icons/Description";
+import MapIcon from "@material-ui/icons/Map";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+
 import TextArea from "./TextArea";
 
 import { Link } from "@material-ui/core";
@@ -20,6 +24,14 @@ const styles = theme => {
     },
     typography: {
       overflowWrap: "break-word"
+    },
+    linkIcon: {
+      fontSize: theme.typography.body1.fontSize,
+      marginRight: theme.spacing(0.5),
+      verticalAlign: "middle"
+    },
+    linkText: {
+      verticalAlign: "middle"
     },
     chapter: {
       cursor: "text",
@@ -163,17 +175,21 @@ class Contents extends React.PureComponent {
   };
 
   getCustomLink = (htmlObject, clickHandler) => {
+    const { classes } = this.props;
     return (
       <Link href="#" variant="body2" component="button" onClick={clickHandler}>
-        {htmlObject.innerHTML}
+        <MapIcon className={classes.linkIcon}></MapIcon>
+        <span className={classes.linkText}>{htmlObject.innerHTML}</span>
       </Link>
     );
   };
 
   getExternalLink = (aTagObject, externalLink) => {
+    const { classes } = this.props;
     return (
       <Link href={externalLink} target="_blank" rel="noopener" variant="body2">
-        {aTagObject.innerHTML}
+        <OpenInNewIcon className={classes.linkIcon}></OpenInNewIcon>
+        <span className={classes.linkText}>{aTagObject.innerHTML}</span>
       </Link>
     );
   };
@@ -278,6 +294,7 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getLinkComponent = aTag => {
+    const { classes } = this.props;
     const aTagObject = this.parseStringToHtmlObject(`<a ${aTag.text}</a>`, "a");
     const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
     const text = this.getTextLinkTextFromHtmlObject(aTagObject);
@@ -290,16 +307,20 @@ class Contents extends React.PureComponent {
 
     if (documentLink) {
       return (
-        <Link
-          href="#"
-          component="button"
-          underline="hover"
-          onClick={() => {
-            this.getDocumentLink(headerIdentifier, documentLink);
-          }}
-        >
-          {text}
-        </Link>
+        <>
+          <Link
+            href="#"
+            component="button"
+            underline="hover"
+            variant="body1"
+            onClick={() => {
+              this.getDocumentLink(headerIdentifier, documentLink);
+            }}
+          >
+            <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
+            <span className={classes.linkText}>{text}</span>
+          </Link>
+        </>
       );
     }
 
