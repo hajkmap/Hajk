@@ -643,7 +643,7 @@
         },
         "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
         "width": 600,
-        "height": "90vh",
+        "height": "85vh",
         "menuConfig": {
           "menu": [
             {
@@ -653,8 +653,9 @@
               "expandedSubMenu": true,
               "description": "",
               "icon": {
-                "materialUiIconName": "home",
-                "fontSize": "large"
+                "materialUiIconName": "homes",
+                "fontSize": "large",
+                "descriptiveText": "Gå till hemmassssssssss"
               },
               "maplink": " ",
               "link": "",
@@ -663,7 +664,7 @@
             {
               "title": "Utgångspunkter",
               "document": "utgangspunkter",
-              "color": "#ffffff",
+              "color": "#858585",
               "expandedSubMenu": true,
               "description": "",
               "icon": {
@@ -707,7 +708,8 @@
               "expandedSubMenu": true,
               "icon": {
                 "materialUiIconName": "home",
-                "fontSize": "large"
+                "fontSize": "large",
+                "descriptiveText": "VIKTIGT"
               },
               "maplink": "",
               "link": "",
