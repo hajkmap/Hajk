@@ -48,6 +48,10 @@ class Contents extends React.PureComponent {
     activeContent: null
   };
 
+  componentDidMount = () => {
+    this.appendParsedComponentsToDocument();
+  };
+
   /**
    * Private help method that adds all allowed html tags.
    *
@@ -165,25 +169,8 @@ class Contents extends React.PureComponent {
     return attributes;
   };
 
-  /**
-   * Private help method that extracts the text, i.e. the link text it selfs, from an a-tag.
-   * @param {object} htmlObject The a-tag.
-   * @returns {string} The link text in the a-tag.
-   *
-   * @memberof Contents
-   */
   getTextLinkTextFromHtmlObject = htmlObject => {
     return htmlObject.text;
-  };
-
-  getCustomLink = (htmlObject, clickHandler) => {
-    const { classes } = this.props;
-    return (
-      <Link href="#" variant="body2" component="button" onClick={clickHandler}>
-        <MapIcon className={classes.linkIcon}></MapIcon>
-        <span className={classes.linkText}>{htmlObject.innerHTML}</span>
-      </Link>
-    );
   };
 
   getExternalLink = (aTagObject, externalLink) => {
@@ -197,18 +184,43 @@ class Contents extends React.PureComponent {
   };
 
   getMapLink = (aTagObject, mapLink) => {
-    const { localObserver } = this.props;
-    return this.getCustomLink(aTagObject, () => {
-      localObserver.publish("fly-to", mapLink);
-    });
+    const { localObserver, classes } = this.props;
+    return (
+      <Link
+        href="#"
+        variant="body2"
+        component="button"
+        onClick={() => {
+          localObserver.publish("fly-to", mapLink);
+        }}
+      >
+        <MapIcon className={classes.linkIcon}></MapIcon>
+        <span className={classes.linkText}>{aTagObject.innerHTML}</span>
+      </Link>
+    );
   };
 
-  getDocumentLink = (headerIdentifier, documentLink) => {
-    const { localObserver } = this.props;
-    localObserver.publish("show-header-in-document", {
-      documentName: documentLink,
-      headerIdentifier: headerIdentifier
-    });
+  getDocumentLink = (headerIdentifier, documentLink, text) => {
+    const { localObserver, classes } = this.props;
+    return (
+      <>
+        <Link
+          href="#"
+          component="button"
+          underline="hover"
+          variant="body1"
+          onClick={() => {
+            localObserver.publish("show-header-in-document", {
+              documentName: documentLink,
+              headerIdentifier: headerIdentifier
+            });
+          }}
+        >
+          <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
+          <span className={classes.linkText}>{text}</span>
+        </Link>
+      </>
+    );
   };
 
   getLinkDataPerType = attributes => {
@@ -296,7 +308,6 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getLinkComponent = aTag => {
-    const { classes } = this.props;
     const aTagObject = this.parseStringToHtmlObject(`<a ${aTag.text}</a>`, "a");
     const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
     const text = this.getTextLinkTextFromHtmlObject(aTagObject);
@@ -308,22 +319,7 @@ class Contents extends React.PureComponent {
     } = this.getLinkDataPerType(attributes);
 
     if (documentLink) {
-      return (
-        <>
-          <Link
-            href="#"
-            component="button"
-            underline="hover"
-            variant="body1"
-            onClick={() => {
-              this.getDocumentLink(headerIdentifier, documentLink);
-            }}
-          >
-            <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
-            <span className={classes.linkText}>{text}</span>
-          </Link>
-        </>
-      );
+      return this.getDocumentLink(headerIdentifier, documentLink, text);
     }
 
     if (mapLink) {
@@ -409,6 +405,15 @@ class Contents extends React.PureComponent {
           }
           image={image.url}
         />
+        {this.getImageDescription(image)}
+      </>
+    );
+  };
+
+  getImageDescription = image => {
+    const { classes } = this.props;
+    return (
+      <>
         <Typography className={classes.typography} variant="subtitle2">
           {image.caption}
         </Typography>
@@ -586,10 +591,6 @@ class Contents extends React.PureComponent {
         </Typography>
       </>
     );
-  };
-
-  componentDidMount = () => {
-    this.appendParsedComponentsToDocument();
   };
 
   render = () => {

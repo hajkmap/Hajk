@@ -1,6 +1,5 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import Icon from "@material-ui/core/Icon";
 import { withTheme } from "@material-ui/core/styles";
 import ListItem from "@material-ui/core/ListItem";
@@ -8,8 +7,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import IconButton from "@material-ui/core/IconButton";
-
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 
@@ -46,15 +43,14 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   getListIcon = item => {
-    var icon = item.icon;
     return (
       <ListItemIcon>
         {//We render text for screen reader if no title is present
         !item.title && (
-          <Typography variant="srOnly">{icon.descriptiveText}</Typography>
+          <Typography variant="srOnly">{item.icon.descriptiveText}</Typography>
         )}
-        <Icon style={{ fontSize: icon.fontSize }}>
-          {icon.materialUiIconName}
+        <Icon style={{ fontSize: item.icon.fontSize }}>
+          {item.icon.materialUiIconName}
         </Icon>
       </ListItemIcon>
     );
@@ -85,4 +81,4 @@ class PanelMenuListItem extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(withSnackbar(PanelMenuListItem)));
+export default withStyles(styles)(withTheme(PanelMenuListItem));

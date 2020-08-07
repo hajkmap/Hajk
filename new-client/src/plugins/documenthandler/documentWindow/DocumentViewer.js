@@ -25,28 +25,24 @@ const styles = theme => ({
 
 class DocumentViewer extends React.PureComponent {
   state = {
-    showScrollButton: false,
-    refObject: {}
+    showScrollButton: false
   };
-
-  static propTypes = {};
-
-  static defaultProps = {};
 
   constructor(props) {
     super(props);
-    let showScrollButtonLimit = props.options.showScrollButtonLimit;
-    this.model = props.model;
-    this.localObserver = props.localObserver;
-    this.globalObserver = props.app.globalObserver;
+    this.scrollElementRef = React.createRef();
+    this.setScrollButtonLimit();
+    this.bindSubscriptions();
+  }
+
+  setScrollButtonLimit = () => {
+    const { options } = this.props;
+    let showScrollButtonLimit = options.showScrollButtonLimit;
     this.scrollLimit =
       showScrollButtonLimit != null && showScrollButtonLimit !== ""
         ? showScrollButtonLimit
         : 400;
-    this.scrollElementRef = React.createRef();
-
-    this.bindSubscriptions();
-  }
+  };
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;

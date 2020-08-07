@@ -53,9 +53,6 @@ function PaperComponentRaw(props) {
 }
 
 class ImagePopupModal extends React.PureComponent {
-  imageHeight = 0;
-  imageWidth = 0;
-
   removeMapBlur = () => {
     mapDiv.removeAttribute("style", blurCss);
   };

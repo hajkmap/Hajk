@@ -1,16 +1,10 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import List from "@material-ui/core/List";
 import PanelSubList from "./PanelSubList";
 import PanelMenuListItem from "./PanelMenuListItem";
 import PropTypes from "prop-types";
 
-const styles = theme => ({});
-
 class PanelList extends React.PureComponent {
-  state = {};
-
   static propTypes = {
     localObserver: PropTypes.object.isRequired,
     globalObserver: PropTypes.object.isRequired,
@@ -38,7 +32,7 @@ class PanelList extends React.PureComponent {
     );
   };
 
-  renderActionMenuItem = (item, reactKey) => {
+  renderActionMenuItem = item => {
     if (item.document) {
       return this.getMenuItemType(item, "document");
     } else if (item.link) {
@@ -79,4 +73,4 @@ class PanelList extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(PanelList));
+export default PanelList;

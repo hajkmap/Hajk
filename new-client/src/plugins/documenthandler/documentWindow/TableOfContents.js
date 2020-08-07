@@ -19,17 +19,10 @@ const styles = theme => {
       borderBottom: "solid",
       backgroundColor: theme.palette.grey[200]
     },
-    selectableText: {
-      userSelect: "text"
-    },
     root: {
       width: "100%",
-
       maxWidth: 360,
       backgroundColor: theme.palette.grey[200]
-    },
-    nested: {
-      paddingLeft: theme.spacing(4)
     }
   };
 };
@@ -50,21 +43,10 @@ function NestedListItemRaw(props) {
 const NestedListItem = withTheme(NestedListItemRaw);
 
 class TableOfContents extends React.PureComponent {
-  state = {};
-
-  static propTypes = {};
-
-  /**
-   * Constructor for the table of contents which renders from all chapters in the document.
-   * @param {object} document The document that holds all chapters.
-   *
-   * @memberof TableOfContents
-   */
-  constructor(props) {
-    super(props);
-    this.activeDocument = this.props.activeDocument;
-  }
-
+  linkClick = chapter => {
+    const { localObserver } = this.props;
+    localObserver.publish("scroll-to-chapter", chapter);
+  };
   /**
    * Render all chapters of the activeDocument.
    * @param {Array} activeDocument An array with all chapters of the activeDocument.
@@ -83,11 +65,6 @@ class TableOfContents extends React.PureComponent {
           : null}
       </List>
     );
-  };
-
-  linkClick = chapter => {
-    const { localObserver } = this.props;
-    localObserver.publish("scroll-to-chapter", chapter);
   };
 
   /**

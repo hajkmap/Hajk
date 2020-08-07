@@ -32,8 +32,6 @@ export default class MapViewModel {
 
   displayMap(mapSettings) {
     var visibleLayers = mapSettings.layers.split(",");
-    console.log(mapSettings, "mapSettings");
-
     const layers = this.map.getLayers().getArray();
 
     visibleLayers.forEach(arrays =>

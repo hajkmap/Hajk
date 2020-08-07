@@ -23,20 +23,7 @@ export default class DocumentHandlerModel {
       settings.app.config.appConfig.mapserviceBase;
   }
 
-  async listAllAvailableDocuments(callback) {
-    let response;
-    try {
-      response = await fetch(
-        `${this.mapServiceUrl}/informative/list`,
-        fetchConfig
-      );
-      const text = await response.text();
-      const document = await JSON.parse(text);
-      callback(document);
-    } catch (err) {}
-  }
-
-  async fetchJsonDocument(title, callback) {
+  async fetchJsonDocument(title) {
     let response;
     try {
       response = await fetch(
@@ -53,7 +40,7 @@ export default class DocumentHandlerModel {
         this.internalId = this.internalId + 1;
       });
 
-      callback(document);
+      return document;
     } catch (err) {}
   }
 

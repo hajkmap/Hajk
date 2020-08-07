@@ -1,11 +1,7 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import PanelMenuListItem from "./PanelMenuListItem";
 import PanelList from "./PanelList";
 import Collapse from "@material-ui/core/Collapse";
-
-const styles = theme => ({});
 
 class PanelMenuView extends React.PureComponent {
   state = {
@@ -39,4 +35,4 @@ class PanelMenuView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(PanelMenuView));
+export default PanelMenuView;

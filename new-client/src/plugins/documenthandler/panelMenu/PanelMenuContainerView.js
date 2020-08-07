@@ -1,9 +1,5 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import PanelList from "./PanelList";
-
-const styles = theme => ({});
 
 class PanelMenuView extends React.PureComponent {
   constructor(props) {
@@ -43,15 +39,15 @@ class PanelMenuView extends React.PureComponent {
   }
 
   render() {
-    const { localObserver } = this.props;
+    const { localObserver, app, options } = this.props;
     return (
       <PanelList
         localObserver={localObserver}
-        globalObserver={this.props.app.globalObserver}
-        menu={this.props.options.menuConfig.menu}
+        globalObserver={app.globalObserver}
+        menu={options.menuConfig.menu}
       ></PanelList>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(PanelMenuView));
+export default PanelMenuView;

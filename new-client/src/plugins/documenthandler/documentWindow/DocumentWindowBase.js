@@ -21,24 +21,25 @@ class DocumentWindowBase extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.model = this.props.model;
     this.bindSubscriptions();
   }
 
   setActiveDocument = title => {
+    const { model } = this.props;
     return new Promise((resolve, reject) => {
-      this.model.fetchJsonDocument(title, document => {
-        var referingMenuItem = this.findReferringMenuItem(title);
-        this.setState(
+      model.fetchJsonDocument(title).then(document => {
+        var referringMenuItem = this.findReferringMenuItem(title);
+        return this.setState(
           () => {
             return {
               documentTitle: title,
               document: document,
-              documentColor: referingMenuItem ? referingMenuItem.color : null
+              documentColor: referringMenuItem ? referringMenuItem.color : null
             };
           },
           () => {
-            resolve();
+            console.log(this.state, "state");
+            resolve(); //Ensure setState is run
           }
         );
       });
@@ -57,8 +58,8 @@ class DocumentWindowBase extends React.PureComponent {
     if (menuItem.document === documentNameToFind) {
       return menuItem;
     } else if (menuItem.menu && menuItem.menu.length > 0) {
-      var i;
-      var result = null;
+      var i,
+        result = null;
       for (i = 0; result == null && i < menuItem.menu.length; i++) {
         result = this.findMenuItem(menuItem.menu[i], documentNameToFind);
       }
@@ -83,16 +84,16 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   scrollInDocument = headerIdentifier => {
-    const { localObserver } = this.props;
+    const { localObserver, model } = this.props;
     if (headerIdentifier) {
       localObserver.publish(
         "scroll-to-chapter",
-        this.model.getHeaderRef(this.state.document, headerIdentifier)
+        model.getHeaderRef(this.state.document, headerIdentifier)
       );
     } else {
       localObserver.publish(
         "scroll-to-top",
-        this.model.getHeaderRef(this.state.document, headerIdentifier)
+        model.getHeaderRef(this.state.document, headerIdentifier)
       );
     }
   };
