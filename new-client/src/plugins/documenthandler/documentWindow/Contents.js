@@ -8,6 +8,7 @@ import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import clsx from "clsx";
 
 import TextArea from "./TextArea";
 
@@ -16,11 +17,12 @@ import { Link } from "@material-ui/core";
 const styles = theme => {
   return {
     documentImage: {
-      height: "300px",
       cursor: "pointer",
-      width: "100%",
       objectFit: "contain",
       objectPosition: "left"
+    },
+    naturalDocumentImageProportions: {
+      width: "100%"
     },
     typography: {
       overflowWrap: "break-word"
@@ -374,10 +376,12 @@ class Contents extends React.PureComponent {
       popup: this.isPopupAllowedForImage(attributes),
       source: this.getValueFromAttribute(attributes, "data-source"),
       url: this.getValueFromAttribute(attributes, "src"),
-      altValue: this.getValueFromAttribute(attributes, "alt")
+      altValue: this.getValueFromAttribute(attributes, "alt"),
+      height: this.getValueFromAttribute(attributes, "data-image-height"),
+      width: this.getValueFromAttribute(attributes, "data-image-width")
     };
     const { classes } = this.props;
-
+    var hasCustomProportions = image.height && image.width;
     var onClickCallback = image.popup
       ? () => {
           this.showPopupModal(image);
@@ -390,7 +394,19 @@ class Contents extends React.PureComponent {
           onClick={onClickCallback}
           alt={image.altValue}
           component="img"
-          className={classes.documentImage}
+          style={
+            hasCustomProportions
+              ? { height: image.height, width: image.width }
+              : null
+          }
+          className={
+            hasCustomProportions
+              ? classes.documentImage
+              : clsx(
+                  classes.documentImage,
+                  classes.naturalDocumentImageProportions
+                )
+          }
           image={image.url}
         />
         <Typography className={classes.typography} variant="subtitle2">
