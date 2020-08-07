@@ -53,6 +53,16 @@ class SettingsPopover extends React.Component {
     });
   };
 
+  updateDescriptiveIconText = e => {
+    let value = e.target.value;
+    this.setState(prevState => {
+      prevState.icon.descriptiveText = value;
+      return {
+        icon: prevState.icon
+      };
+    });
+  };
+
   updateExpandedSubMenuState = () => {
     this.setState({ expandedSubMenu: !this.state.expandedSubMenu });
   };
@@ -106,6 +116,16 @@ class SettingsPopover extends React.Component {
             {getTextField(
               this.state.icon.materialUiIconName,
               this.updateIconState,
+              "standard"
+            )}
+          </Grid>
+          <Grid xs={12} item>
+            {getPopoverMenuItemTitle(
+              "Beskrivande text för ikon (tillgänglighetsanpassning)"
+            )}
+            {getTextField(
+              this.state.icon.descriptiveText,
+              this.updateDescriptiveIconText,
               "standard"
             )}
           </Grid>
