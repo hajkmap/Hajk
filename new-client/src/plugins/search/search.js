@@ -182,12 +182,10 @@ class Search extends React.PureComponent {
     // and 2) the feature is selected and zoomed in.
 
     // First, expand the first group in search result list
-    document.querySelector(".MuiExpansionPanelSummary-content").click();
+    document.querySelector(".MuiAccordionSummary-content").click();
     // Next, click on the first element in the first group of results
     document
-      .querySelector(
-        ".MuiExpansionPanelDetails-root .MuiExpansionPanelSummary-content"
-      )
+      .querySelector(".MuiAccordionDetails-root .MuiAccordionSummary-content")
       .click();
   }
 
