@@ -38,10 +38,7 @@ export default class ConfigMapper {
           ? "LEGEND_OPTIONS=" + properties.mapConfig.map.geoserverLegendOptions
           : "";
 
-        // TODO: Make width and height of WMS legend graphics customizable via admin
-        const w = 30;
-        const h = 30;
-        legendUrl = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${w}&HEIGHT=${h}&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
+        legendUrl = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
       }
       // If there's a legend URL specified in admin, use it as is
       else {
