@@ -14,7 +14,7 @@ class PanelList extends React.PureComponent {
   handleMenuButtonClick = (type, item) => {
     const { localObserver, globalObserver } = this.props;
     localObserver.publish(`${type}-clicked`, item);
-    globalObserver.publish("core.hideDrawer");
+    globalObserver.publish("core.onlyHideDrawerIfNeeded");
   };
 
   getMenuItemType = (item, type) => {
