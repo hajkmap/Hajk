@@ -265,11 +265,21 @@ class Contents extends React.PureComponent {
       `<blockquote ${text}</blockquote>`,
       "blockquote"
     );
+    const attributes = this.getDataAttributesFromHtmlObject(blockQuote);
+    const borderColor = this.getValueFromAttribute(
+      attributes,
+      "data-border-color"
+    );
+    const backgroundColor = this.getValueFromAttribute(
+      attributes,
+      "data-background-color"
+    );
+
     return (
       <TextArea
         key={index}
-        backgroundColor=""
-        dividerColor=""
+        backgroundColor={backgroundColor}
+        dividerColor={borderColor}
         text={blockQuote.textContent}
       ></TextArea>
     );
