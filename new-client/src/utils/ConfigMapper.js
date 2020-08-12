@@ -19,7 +19,7 @@ export default class ConfigMapper {
         // First get index if we're dealing with array
         let getIndex =
           args.layersInfo !== null
-            ? args.layersInfo.findIndex(l => l.id === layer)
+            ? args.layersInfo.findIndex((l) => l.id === layer)
             : null;
         // Next, use that index to grab correct style and save its name for later use
         let style =
@@ -38,10 +38,7 @@ export default class ConfigMapper {
           ? "LEGEND_OPTIONS=" + properties.mapConfig.map.geoserverLegendOptions
           : "";
 
-        // TODO: Make width and height of WMS legend graphics customizable via admin
-        const w = 30;
-        const h = 30;
-        legendUrl = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${w}&HEIGHT=${h}&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
+        legendUrl = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
       }
       // If there's a legend URL specified in admin, use it as is
       else {
@@ -54,10 +51,10 @@ export default class ConfigMapper {
     }
 
     function getLegends() {
-      return args.layers.map(layer => {
+      return args.layers.map((layer) => {
         return {
           url: getLegendUrl(layer),
-          description: "Teckenförklaring"
+          description: "Teckenförklaring",
         };
       });
     }
@@ -94,7 +91,7 @@ export default class ConfigMapper {
       projection = new Projection({
         code: projCode,
         axisOrientation: "neu",
-        extent: properties.mapConfig.map.extent
+        extent: properties.mapConfig.map.extent,
       });
     }
 
@@ -135,8 +132,8 @@ export default class ConfigMapper {
           [srsOrCrs]: projection || "EPSG:3006",
           TILED: args.tiled,
           STYLES: Array.isArray(args.layersInfo)
-            ? args.layersInfo.map(l => l.style || "").join(",")
-            : null
+            ? args.layersInfo.map((l) => l.style || "").join(",")
+            : null,
         },
         layersInfo: mapLayersInfo(args.layersInfo, args.infobox),
         infoVisible: args.infoVisible || false,
@@ -145,8 +142,8 @@ export default class ConfigMapper {
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
-        hideExpandArrow: args.hideExpandArrow
-      }
+        hideExpandArrow: args.hideExpandArrow,
+      },
     };
 
     if (args.searchFields && args.searchFields[0]) {
@@ -158,7 +155,7 @@ export default class ConfigMapper {
         displayName: args.displayFields
           ? args.displayFields
           : args.searchFields[0] || "Sökträff",
-        srsName: properties.mapConfig.map.projection || "EPSG:3006"
+        srsName: properties.mapConfig.map.projection || "EPSG:3006",
       };
     }
 
@@ -195,8 +192,8 @@ export default class ConfigMapper {
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
-        hideExpandArrow: args.hideExpandArrow
-      }
+        hideExpandArrow: args.hideExpandArrow,
+      },
     };
     return config;
   }
@@ -214,8 +211,8 @@ export default class ConfigMapper {
         opacity: 1,
         queryable: args.queryable !== false,
         extent: args.extent,
-        projection: args.projection
-      }
+        projection: args.projection,
+      },
     };
 
     return config;
@@ -266,8 +263,8 @@ export default class ConfigMapper {
         legend: [
           {
             url: args.legend,
-            description: args.caption
-          }
+            description: args.caption,
+          },
         ],
         params: {
           service: "WFS",
@@ -275,7 +272,7 @@ export default class ConfigMapper {
           request: "GetFeature",
           typename: args.layer,
           srsname: args.projection,
-          bbox: ""
+          bbox: "",
         },
         infoVisible: args.infoVisible || false,
         infoTitle: args.infoTitle,
@@ -283,8 +280,8 @@ export default class ConfigMapper {
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
-        hideExpandArrow: args.hideExpandArrow
-      }
+        hideExpandArrow: args.hideExpandArrow,
+      },
     };
 
     return config;
@@ -319,13 +316,13 @@ export default class ConfigMapper {
         opacity: args.opacity,
         attribution: args.attribution,
         params: {
-          LAYERS: "show:" + args.layers.join(",")
+          LAYERS: "show:" + args.layers.join(","),
         },
         legend: [
           {
             url: getLegendUrl(args),
-            description: "Teckenförklaring"
-          }
+            description: "Teckenförklaring",
+          },
         ],
         infoVisible: args.infoVisible || false,
         infoTitle: args.infoTitle,
@@ -333,8 +330,8 @@ export default class ConfigMapper {
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
-        hideExpandArrow: args.hideExpandArrow
-      }
+        hideExpandArrow: args.hideExpandArrow,
+      },
     };
 
     return config;
