@@ -11,7 +11,8 @@ import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 
 const styles = theme => ({
-  listItem: { overflowWrap: "break-word" }
+  listItem: { overflowWrap: "break-word" },
+  collapseIconRoot: { minWidth: theme.spacing(4) }
 });
 
 class PanelMenuListItem extends React.PureComponent {
@@ -28,14 +29,14 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   getCollapseIcon = () => {
-    const { expandedSubMenu } = this.props;
+    const { expandedSubMenu, classes } = this.props;
     return expandedSubMenu ? (
-      <ListItemIcon>
+      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
         <Typography variant="srOnly">Minimera submeny</Typography>
         <ExpandLess />
       </ListItemIcon>
     ) : (
-      <ListItemIcon>
+      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
         <Typography variant="srOnly">Maximera submeny</Typography>
         <ExpandMore />
       </ListItemIcon>
@@ -45,8 +46,7 @@ class PanelMenuListItem extends React.PureComponent {
   getListIcon = item => {
     return (
       <ListItemIcon>
-        {//We render text for screen reader if no title is present
-        !item.title && (
+        {!item.title && (
           <Typography variant="srOnly">{item.icon.descriptiveText}</Typography>
         )}
         <Icon style={{ fontSize: item.icon.fontSize }}>
@@ -64,6 +64,7 @@ class PanelMenuListItem extends React.PureComponent {
           divider
           button
           size="small"
+          disableGutters
           aria-controls="submenu"
           onClick={onClick}
           className={classes.listItem}
