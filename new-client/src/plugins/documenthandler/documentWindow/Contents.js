@@ -8,6 +8,11 @@ import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import clsx from "clsx";
 
 import TextArea from "./TextArea";
@@ -35,6 +40,7 @@ const styles = theme => {
     linkText: {
       verticalAlign: "middle"
     },
+    root: { minWidth: "32px", color: "black" },
     chapter: {
       cursor: "text",
       marginTop: theme.spacing(4)
@@ -62,6 +68,18 @@ class Contents extends React.PureComponent {
     allowedHtmlTags.push({
       tagType: "br",
       callback: this.getBrtagTypographyComponent
+    });
+    allowedHtmlTags.push({
+      tagType: "ul",
+      callback: this.getULComponent
+    });
+    allowedHtmlTags.push({
+      tagType: "ol",
+      callback: this.getOLComponent
+    });
+    allowedHtmlTags.push({
+      tagType: "li",
+      callback: () => {}
     });
     allowedHtmlTags.push({
       tagType: "h1",
@@ -148,6 +166,43 @@ class Contents extends React.PureComponent {
       this.appendComponentsToChapter(chapter);
     });
     this.setState({ activeContent: content });
+  };
+
+  getULComponent = tag => {
+    const { classes } = this.props;
+    return (
+      <List component="nav">
+        {tag.text.map(listItem => {
+          return (
+            <ListItem>
+              <ListItemIcon classes={{ root: classes.root }}>
+                <FiberManualRecordIcon
+                  style={{ fontSize: "1em" }}
+                ></FiberManualRecordIcon>
+              </ListItemIcon>
+              <ListItemText primary={listItem.text}></ListItemText>
+            </ListItem>
+          );
+        })}
+      </List>
+    );
+  };
+
+  getOLComponent = tag => {
+    const { classes } = this.props;
+    return (
+      <List component="nav">
+        {tag.text.map((listItem, index) => {
+          return (
+            <ListItem>
+              <ListItemIcon classes={{ root: classes.root }}>{`${index +
+                1}.`}</ListItemIcon>
+              <ListItemText primary={listItem.text}></ListItemText>
+            </ListItem>
+          );
+        })}
+      </List>
+    );
   };
 
   /**
