@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
 import SearchResultItem from "./SearchResultItem";
 
 const styles = theme => ({
@@ -44,7 +44,7 @@ const styles = theme => ({
   expanded: {
     margin: 0
   },
-  expansionPanel: {
+  Accordion: {
     borderRadius: "0 !important",
     height: "30%",
     margin: "5px 0",
@@ -96,8 +96,8 @@ class SearchResultGroup extends Component {
 
     return (
       <div ref="panelElement">
-        <ExpansionPanel
-          className={classes.expansionPanel}
+        <Accordion
+          className={classes.Accordion}
           expanded={expanded}
           onChange={e => {
             setTimeout(() => {
@@ -106,7 +106,7 @@ class SearchResultGroup extends Component {
           }}
           TransitionProps={{ timeout: 200 }}
         >
-          <ExpansionPanelSummary
+          <AccordionSummary
             classes={{
               expanded: classes.expanded,
               content: classes.content
@@ -122,11 +122,11 @@ class SearchResultGroup extends Component {
                 {featureType.features.length}
               </span>
             </Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails className={classes.details}>
+          </AccordionSummary>
+          <AccordionDetails className={classes.details}>
             <div className={classes.resultGroup}>{items}</div>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
+          </AccordionDetails>
+        </Accordion>
       </div>
     );
   }

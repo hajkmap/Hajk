@@ -37,8 +37,6 @@ import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
 
-import "ol-ext/dist/ol-ext.css";
-
 const styles = theme => ({
   root: {
     display: "flex",
@@ -282,12 +280,12 @@ class PrintView extends React.PureComponent {
       image.setAttribute("crossOrigin", "anonymous"); //getting images from external domain
 
       // We must resolve the promise even if
-      image.onerror = function(err) {
+      image.onerror = function (err) {
         reject(err);
       };
 
       // When load succeeds
-      image.onload = function() {
+      image.onload = function () {
         const imgCanvas = document.createElement("canvas");
         imgCanvas.width = this.naturalWidth;
         imgCanvas.height = this.naturalHeight;

@@ -89,7 +89,9 @@ const styles = theme => ({
   layerGroupItem: {
     display: "flex"
   },
-  legend: {},
+  legendImage: {
+    maxWidth: "250px"
+  },
   slider: {
     padding: "30px",
     overflow: "hidden"
@@ -448,13 +450,13 @@ class LayerGroupItem extends Component {
             </div>
           </div>
         </div>
-        <div className={classes.legend}>
+        <div>
           {this.state.toggleSubLayerSettings[index] ? (
             <div>
               <img
-                max-width="250px"
                 alt="Teckenförklaring"
                 src={this.props.layer.layersInfo[subLayer].legend}
+                className={classes.legendImage}
               />
             </div>
           ) : null}
