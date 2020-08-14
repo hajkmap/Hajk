@@ -6,12 +6,12 @@ import CommentIcon from "@material-ui/icons/Comment";
 
 import { detect } from "detect-browser";
 
-const styles = theme => {
+const styles = (theme) => {
   return {};
 };
 
 class Suggest extends Component {
-  onClick = e => {
+  onClick = (e) => {
     const goOn = window.confirm("Nu kommer ditt mailprogram öppnas.");
     if (!goOn) return;
     let result = {};

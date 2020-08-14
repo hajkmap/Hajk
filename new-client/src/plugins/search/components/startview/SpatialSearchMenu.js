@@ -8,7 +8,7 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-  Typography
+  Typography,
 } from "@material-ui/core";
 
 import EditIcon from "@material-ui/icons/Edit";
@@ -16,16 +16,16 @@ import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex",
     flexWrap: "wrap",
-    borderLeft: "1px solid rgba(0, 0, 0, 0.42)"
+    borderLeft: "1px solid rgba(0, 0, 0, 0.42)",
   },
   divider: {
     height: 28,
-    margin: 4
-  }
+    margin: 4,
+  },
 });
 
 const POLYGON = "polygon";
@@ -34,24 +34,24 @@ const SELECTION = "selection";
 
 class SpatialSearchOptions extends React.Component {
   state = {
-    anchorEl: null
+    anchorEl: null,
   };
 
-  handleMenuItemClick = toolTypeActive => {
+  handleMenuItemClick = (toolTypeActive) => {
     this.props.onToolChanged(toolTypeActive);
     this.setState({
       anchorEl: null,
-      toolTypeActive: toolTypeActive
+      toolTypeActive: toolTypeActive,
     });
   };
 
-  handleDropdownClick = event => {
+  handleDropdownClick = (event) => {
     this.setState({
-      anchorEl: event.currentTarget
+      anchorEl: event.currentTarget,
     });
   };
 
-  handleClose = e => {
+  handleClose = (e) => {
     this.setState({ anchorEl: null });
   };
 
@@ -82,14 +82,14 @@ class SpatialSearchOptions extends React.Component {
         onClose={this.handleClose}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "center"
+          horizontal: "center",
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "center"
+          horizontal: "center",
         }}
       >
-        {menuItems.map(menuItem => {
+        {menuItems.map((menuItem) => {
           return menuItem;
         })}
       </Menu>
@@ -153,7 +153,7 @@ class SpatialSearchOptions extends React.Component {
 }
 
 SpatialSearchOptions.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(SpatialSearchOptions);

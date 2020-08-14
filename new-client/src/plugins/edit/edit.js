@@ -19,7 +19,7 @@ class Edit extends React.PureComponent {
       map: props.map,
       app: props.app,
       observer: this.localObserver,
-      options: props.options
+      options: props.options,
     });
   }
 
@@ -36,7 +36,7 @@ class Edit extends React.PureComponent {
           width: 400,
           top: undefined,
           left: undefined,
-          onWindowHide: this.onWindowHide
+          onWindowHide: this.onWindowHide,
         }}
       >
         <EditView

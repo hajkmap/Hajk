@@ -35,7 +35,7 @@ import {
   Hidden,
   IconButton,
   Tooltip,
-  Typography
+  Typography,
 } from "@material-ui/core";
 
 import LockIcon from "@material-ui/icons/Lock";
@@ -47,7 +47,7 @@ document.windows = [];
 
 const DRAWER_WIDTH = 250;
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     map: {
       zIndex: 1,
@@ -55,7 +55,7 @@ const styles = theme => {
       left: 0,
       right: 0,
       bottom: 0,
-      top: 0
+      top: 0,
     },
     flexBox: {
       position: "absolute",
@@ -66,19 +66,19 @@ const styles = theme => {
       padding: theme.spacing(2),
       display: "flex",
       flexDirection: "column",
-      pointerEvents: "none"
+      pointerEvents: "none",
     },
     windowsContainer: {
       position: "absolute",
       left: 0,
       right: 0,
       bottom: 0,
-      top: 0
+      top: 0,
     },
     pointerEventsOnChildren: {
       "& > *": {
-        pointerEvents: "auto"
-      }
+        pointerEvents: "auto",
+      },
     },
     header: {
       zIndex: theme.zIndex.appBar,
@@ -87,7 +87,7 @@ const styles = theme => {
       justifyContent: "space-between",
       alignItems: "flex-start",
       "& > *": {
-        marginBottom: theme.spacing(2)
+        marginBottom: theme.spacing(2),
       },
       [theme.breakpoints.down("xs")]: {
         zIndex: 3,
@@ -96,28 +96,28 @@ const styles = theme => {
         marginTop: -theme.spacing(2),
         maxHeight: theme.spacing(6),
         boxShadow: theme.shadows[3],
-        backgroundColor: theme.palette.background.default
-      }
+        backgroundColor: theme.palette.background.default,
+      },
     },
     main: {
       zIndex: 2,
       flex: 1,
-      display: "flex"
+      display: "flex",
     },
     leftColumn: {
-      flex: 1
+      flex: 1,
     },
     rightColumn: {
       paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2)
+      paddingRight: theme.spacing(2),
     },
     controlsColumn: {
       display: "flex",
       flexDirection: "column",
       marginTop: 0,
       [theme.breakpoints.down("xs")]: {
-        marginTop: theme.spacing(2)
-      }
+        marginTop: theme.spacing(2),
+      },
     },
     footer: {
       zIndex: 3,
@@ -125,12 +125,12 @@ const styles = theme => {
       justifyContent: "flex-end",
       height: 25,
       "& > *": {
-        marginLeft: theme.spacing(1)
-      }
+        marginLeft: theme.spacing(1),
+      },
     },
     drawerBackground: {
       width: DRAWER_WIDTH,
-      backgroundColor: theme.palette.background.default
+      backgroundColor: theme.palette.background.default,
     },
     drawerHeader: {
       display: "flex",
@@ -138,34 +138,34 @@ const styles = theme => {
       padding: theme.spacing(0, 2),
       ...theme.mixins.toolbar,
       justifyContent: "space-between",
-      backgroundColor: theme.palette.background.paper
+      backgroundColor: theme.palette.background.paper,
     },
     drawerContent: {
       backgroundColor: theme.palette.background.paper,
-      overflow: "auto"
+      overflow: "auto",
     },
     logoBox: {
       padding: theme.spacing(1, 2),
-      height: theme.spacing(6)
+      height: theme.spacing(6),
     },
     logo: {
-      height: theme.spacing(4)
+      height: theme.spacing(4),
     },
     drawerGrid: {
       padding: theme.spacing(0, 2),
       backgroundColor: "#fff",
-      minHeight: theme.spacing(6)
+      minHeight: theme.spacing(6),
     },
     backdrop: {
-      zIndex: theme.zIndex.drawer - 1 // Carefully selected to be above Window but below Drawer
+      zIndex: theme.zIndex.drawer - 1, // Carefully selected to be above Window but below Drawer
     },
     widgetItem: {
-      width: "220px"
+      width: "220px",
     },
     // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
     shiftedLeft: {
-      left: DRAWER_WIDTH
-    }
+      left: DRAWER_WIDTH,
+    },
   };
 };
 
@@ -182,7 +182,7 @@ class App extends React.PureComponent {
     /** CSS class declarations used in this component */
     classes: PropTypes.object.isRequired,
     /** Contains activeMap, layersConfig as well as objects that hold appConfig and mapConfig*/
-    config: PropTypes.object.isRequired
+    config: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -225,7 +225,7 @@ class App extends React.PureComponent {
               props.config.mapConfig.map.drawerPermanent) ||
             false,
       activeDrawerContent: activeDrawerContentFromLocalStorage,
-      drawerMouseOverLock: false
+      drawerMouseOverLock: false,
     };
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
@@ -239,7 +239,7 @@ class App extends React.PureComponent {
     Promise.all(promises).then(() => {
       this.setState(
         {
-          tools: this.appModel.getPlugins()
+          tools: this.appModel.getPlugins(),
         },
         () => {
           // If there's at least one plugin that renders in the Drawer Map Tools List,
@@ -252,7 +252,7 @@ class App extends React.PureComponent {
               order: 2,
               renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
-              }
+              },
             });
 
           // Tell everyone that we're done loading (in case someone listens)
@@ -266,17 +266,17 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
-    this.globalObserver.subscribe("core.mapClick", mapClickDataResult => {
+    this.globalObserver.subscribe("core.mapClick", (mapClickDataResult) => {
       this.appModel.highlight(false);
       this.setState({
-        mapClickDataResult: mapClickDataResult
+        mapClickDataResult: mapClickDataResult,
       });
     });
 
-    this.globalObserver.subscribe("core.alert", message => {
+    this.globalObserver.subscribe("core.alert", (message) => {
       this.setState({
         alert: true,
-        alertMessage: message
+        alertMessage: message,
       });
     });
 
@@ -311,7 +311,7 @@ class App extends React.PureComponent {
       }
     });
 
-    this.globalObserver.subscribe("core.drawerContentChanged", v => {
+    this.globalObserver.subscribe("core.drawerContentChanged", (v) => {
       if (v !== null) {
         this.setState({ drawerVisible: true, activeDrawerContent: v });
       } else {
@@ -319,7 +319,7 @@ class App extends React.PureComponent {
       }
     });
 
-    this.globalObserver.subscribe("core.addDrawerToggleButton", button => {
+    this.globalObserver.subscribe("core.addDrawerToggleButton", (button) => {
       const newState = [...this.state.drawerButtons, button];
       this.setState({ drawerButtons: newState });
     });
@@ -328,19 +328,19 @@ class App extends React.PureComponent {
       .getMap()
       .getLayers()
       .getArray()
-      .forEach(layer => {
-        layer.on("change:visible", evt => {
+      .forEach((layer) => {
+        layer.on("change:visible", (evt) => {
           let layer = evt.target;
           if (
             this.state.mapClickDataResult &&
             Array.isArray(this.state.mapClickDataResult.features)
           ) {
-            this.state.mapClickDataResult.features.forEach(feature => {
+            this.state.mapClickDataResult.features.forEach((feature) => {
               if (feature.layer === layer) {
                 let o = { ...this.state.mapClickDataResult };
-                o.features = o.features.filter(f => f !== feature);
+                o.features = o.features.filter((f) => f !== feature);
                 this.setState({
-                  mapClickDataResult: o
+                  mapClickDataResult: o,
                 });
               }
             });
@@ -351,7 +351,7 @@ class App extends React.PureComponent {
 
   renderInfoclickWindow() {
     const infoclickConfig = this.props.config.mapConfig.tools.find(
-      t => t.type === "infoclick"
+      (t) => t.type === "infoclick"
     );
 
     if (infoclickConfig === undefined) {
@@ -380,13 +380,13 @@ class App extends React.PureComponent {
         height={height || 300}
         features={features}
         map={this.appModel.getMap()}
-        onDisplay={feature => {
+        onDisplay={(feature) => {
           this.appModel.highlight(feature);
         }}
         onClose={() => {
           this.appModel.highlight(false);
           this.setState({
-            mapClickDataResult: undefined
+            mapClickDataResult: undefined,
           });
         }}
       />
@@ -400,7 +400,7 @@ class App extends React.PureComponent {
    *
    * @memberof App
    */
-  togglePermanent = e => {
+  togglePermanent = (e) => {
     this.setState({ drawerPermanent: !this.state.drawerPermanent }, () => {
       // Viewport size has changed, hence we must tell OL
       // to refresh canvas size.
@@ -427,11 +427,11 @@ class App extends React.PureComponent {
     });
   };
 
-  handleMouseEnter = e => {
+  handleMouseEnter = (e) => {
     this.setState({ drawerMouseOverLock: true });
   };
 
-  handleMouseLeave = e => {
+  handleMouseLeave = (e) => {
     this.setState({ drawerMouseOverLock: false });
   };
 
@@ -452,7 +452,7 @@ class App extends React.PureComponent {
 
   renderInformationPlugin() {
     const c = this.appModel.config.mapConfig.tools.find(
-      t => t.type === "information"
+      (t) => t.type === "information"
     );
 
     return (
@@ -468,7 +468,7 @@ class App extends React.PureComponent {
   renderDrawerHeader = () => {
     const { classes, config } = this.props;
     const caption = this.state.drawerButtons.find(
-      db => db.value === this.state.activeDrawerContent
+      (db) => db.value === this.state.activeDrawerContent
     )?.caption;
 
     return (
@@ -540,7 +540,7 @@ class App extends React.PureComponent {
         >
           <div id="plugin-buttons" />
         </Box>
-        {this.state.drawerButtons.map(db => {
+        {this.state.drawerButtons.map((db) => {
           return (
             <Box
               key={db.value}
@@ -579,7 +579,7 @@ class App extends React.PureComponent {
         maxSnack={3}
         anchorOrigin={{
           vertical: "top",
-          horizontal: "center"
+          horizontal: "center",
         }}
       >
         <>
@@ -605,7 +605,7 @@ class App extends React.PureComponent {
           <div
             id="appBox"
             className={cslx(classes.flexBox, {
-              [classes.shiftedLeft]: this.state.drawerPermanent
+              [classes.shiftedLeft]: this.state.drawerPermanent,
             })}
           >
             <header
@@ -669,7 +669,7 @@ class App extends React.PureComponent {
           <div
             id="map"
             className={cslx(classes.map, {
-              [classes.shiftedLeft]: this.state.drawerPermanent
+              [classes.shiftedLeft]: this.state.drawerPermanent,
             })}
           ></div>
           <div
@@ -678,7 +678,7 @@ class App extends React.PureComponent {
               classes.pointerEventsOnChildren,
               classes.windowsContainer,
               {
-                [classes.shiftedLeft]: this.state.drawerPermanent
+                [classes.shiftedLeft]: this.state.drawerPermanent,
               }
             )}
           >
@@ -695,7 +695,7 @@ class App extends React.PureComponent {
             // our plugins all the time.
             variant="persistent"
             classes={{
-              paper: classes.drawerBackground
+              paper: classes.drawerBackground,
             }}
           >
             {this.renderDrawerHeader()}
@@ -705,7 +705,7 @@ class App extends React.PureComponent {
           <Backdrop
             open={this.state.drawerVisible && !this.state.drawerPermanent}
             className={classes.backdrop}
-            onClick={e => {
+            onClick={(e) => {
               this.globalObserver.publish("core.hideDrawer");
             }}
           />

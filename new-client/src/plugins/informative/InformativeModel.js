@@ -1,5 +1,5 @@
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 class InformativeModel {
@@ -17,7 +17,7 @@ class InformativeModel {
     view.animate({
       zoom: zoom,
       center: location,
-      duration: duration
+      duration: duration,
     });
   }
 
@@ -28,28 +28,28 @@ class InformativeModel {
       .getLayers()
       .getArray()
       .filter(
-        l =>
+        (l) =>
           chapter.layers &&
-          chapter.layers.some(layer => layer === l.getProperties()["name"])
+          chapter.layers.some((layer) => layer === l.getProperties()["name"])
       );
 
-    layers.forEach(layer => {
+    layers.forEach((layer) => {
       if (
         layer.getProperties().layerInfo &&
         layer.getProperties().layerInfo["layerType"] !== "base"
       ) {
         if (layer.layersInfo) {
-          Object.values(layer.layersInfo).forEach(layerInfo => {
+          Object.values(layer.layersInfo).forEach((layerInfo) => {
             legendUrls.push({
               caption:
                 layerInfo.caption || layer.getProperties().layerInfo["caption"],
-              url: layerInfo.legend
+              url: layerInfo.legend,
             });
           });
         } else {
           legendUrls.push({
             caption: layer.getProperties().layerInfo.caption,
-            url: layer.getProperties().layerInfo.legend[0].url
+            url: layer.getProperties().layerInfo.legend[0].url,
           });
         }
       }
@@ -67,7 +67,7 @@ class InformativeModel {
       .getLayers()
       .getArray()
       .find(
-        l =>
+        (l) =>
           l.getProperties().layerInfo &&
           l.getProperties().layerInfo.layerType === "base" &&
           l.getVisible()
@@ -76,7 +76,7 @@ class InformativeModel {
     fetch(this.exportUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         data: JSON.stringify({
@@ -84,12 +84,12 @@ class InformativeModel {
           documentFile: documentFile,
           chapterHeader: chapter.header,
           chapterHtml: chapter.html,
-          baseMapId: baseLayer ? baseLayer.getProperties().name : ""
-        })
-      })
+          baseMapId: baseLayer ? baseLayer.getProperties().name : "",
+        }),
+      }),
     })
-      .then(rsp => {
-        rsp.text().then(url => {
+      .then((rsp) => {
+        rsp.text().then((url) => {
           callback(url);
         });
       })
@@ -102,14 +102,14 @@ class InformativeModel {
     var layers = this.olMap.getLayers().getArray();
     layers
       .filter(
-        layer =>
+        (layer) =>
           layer.getProperties()["layerInfo"] &&
           layer.getProperties()["layerInfo"]["layerType"] !== "base"
       )
-      .forEach(layer => {
+      .forEach((layer) => {
         if (
           visibleLayers.some(
-            visibleLayer => visibleLayer === layer.getProperties()["name"]
+            (visibleLayer) => visibleLayer === layer.getProperties()["name"]
           )
         ) {
           if (layer.layerType === "group") {
@@ -132,7 +132,7 @@ class InformativeModel {
   setParentChapter(chapter, parent) {
     chapter.parent = parent;
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
+      chapter.chapters.forEach((child) => {
         this.setParentChapter(child, chapter);
       });
     }
@@ -145,7 +145,7 @@ class InformativeModel {
       const text = await response.text();
       const data = await JSON.parse(text);
 
-      data.chapters.forEach(chapter => {
+      data.chapters.forEach((chapter) => {
         this.setParentChapter(chapter, undefined);
       });
       callback(data.chapters);
@@ -154,7 +154,7 @@ class InformativeModel {
       this.localObserver.publish("showSnackbar", {
         message:
           "Laddning av Informative-pluginet misslyckades. Pluginet verkar vara felaktigt konfigurerat. Var god kontakta systemadministratören.",
-        options: { variant: "error" }
+        options: { variant: "error" },
       });
       console.error(
         `Couldn't load data for Informative plugin. Make sure that the URL to mapservice is correctly configured.`

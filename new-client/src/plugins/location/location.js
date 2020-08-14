@@ -18,7 +18,7 @@ class Location extends React.PureComponent {
           height: 450,
           width: 430,
           top: undefined,
-          left: undefined
+          left: undefined,
         }}
       >
         <LocationView map={this.props.map} />

@@ -58,7 +58,7 @@ class CollectorModel {
         return 0;
       case "string":
         if (field.textType === "flerval") {
-          return field.values.map(f => ({ checked: false, value: f }));
+          return field.values.map((f) => ({ checked: false, value: f }));
         }
         return "";
       default:
@@ -77,7 +77,7 @@ class CollectorModel {
         featureType: ft,
         hasZ: false,
         version: "1.1.0", // or "1.0.0"
-        srsName: this.editSource.projection
+        srsName: this.editSource.projection,
       };
 
     return format.writeTransaction(
@@ -93,7 +93,7 @@ class CollectorModel {
       foundLayer = this.map
         .getLayers()
         .getArray()
-        .find(layer => {
+        .find((layer) => {
           var match = false;
           if (layer.getSource().getParams) {
             let params = layer.getSource().getParams();
@@ -140,23 +140,23 @@ class CollectorModel {
         body: payload,
         credentials: "same-origin",
         headers: {
-          "Content-Type": "text/xml"
-        }
+          "Content-Type": "text/xml",
+        },
       })
-        .then(response => {
+        .then((response) => {
           this.saving = false;
-          response.text().then(wfsResponseText => {
+          response.text().then((wfsResponseText) => {
             this.refreshLayer(src.layers[0]);
             this.vectorSource
               .getFeatures()
-              .filter(f => f.modification !== undefined)
-              .forEach(f => (f.modification = undefined));
+              .filter((f) => f.modification !== undefined)
+              .forEach((f) => (f.modification = undefined));
             done(this.parseWFSTresponse(wfsResponseText));
           });
         })
-        .catch(response => {
+        .catch((response) => {
           this.saving = false;
-          response.text().then(errorMessage => {
+          response.text().then((errorMessage) => {
             done(errorMessage);
           });
         });
@@ -166,11 +166,11 @@ class CollectorModel {
   save(done) {
     var inserts = this.vectorSource.getFeatures();
     const formValues = { ...this.formValues };
-    Object.keys(formValues).forEach(key => {
+    Object.keys(formValues).forEach((key) => {
       if (Array.isArray(formValues[key])) {
         formValues[key] = formValues[key]
-          .filter(v => v.checked)
-          .map(v => v.value)
+          .filter((v) => v.checked)
+          .map((v) => v.value)
           .join(", ");
       }
     });
@@ -190,43 +190,43 @@ class CollectorModel {
       new Style({
         stroke: new Stroke({
           color: "rgba(0, 255, 255, 1)",
-          width: 3
+          width: 3,
         }),
         fill: new Fill({
-          color: "rgba(0, 0, 0, 0.5)"
+          color: "rgba(0, 0, 0, 0.5)",
         }),
         image: new Circle({
           fill: new Fill({
-            color: "rgba(0, 0, 0, 0.5)"
+            color: "rgba(0, 0, 0, 0.5)",
           }),
           stroke: new Stroke({
             color: "rgba(0, 255, 255, 1)",
-            width: 2
+            width: 2,
           }),
-          radius: 3
-        })
+          radius: 3,
+        }),
       }),
       new Style({
         image: new RegularShape({
           fill: new Fill({
-            color: "rgba(0, 0, 0, 0.2)"
+            color: "rgba(0, 0, 0, 0.2)",
           }),
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 1)",
-            width: 2
+            width: 2,
           }),
           points: 4,
           radius: 8,
-          angle: Math.PI / 4
+          angle: Math.PI / 4,
         }),
-        geometry: feature => {
+        geometry: (feature) => {
           var coordinates =
             feature.getGeometry() instanceof Polygon
               ? feature.getGeometry().getCoordinates()[0]
               : feature.getGeometry().getCoordinates();
           return new MultiPoint(coordinates);
-        }
-      })
+        },
+      }),
     ];
   }
 
@@ -235,19 +235,19 @@ class CollectorModel {
       new Style({
         stroke: new Stroke({
           color: "rgba(255, 165, 20, 1)",
-          width: 3
+          width: 3,
         }),
         fill: new Fill({
-          color: "rgba(255, 165, 20, 0.5)"
+          color: "rgba(255, 165, 20, 0.5)",
         }),
         image: new Icon({
           scale: 1 / 2,
           anchor: [0.5, 1],
           anchorXUnits: "fraction",
           anchorYUnits: "fraction",
-          src: "marker_x2.png"
-        })
-      })
+          src: "marker_x2.png",
+        }),
+      }),
     ];
   }
 
@@ -256,22 +256,22 @@ class CollectorModel {
       new Style({
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0)",
-          width: 0
+          width: 0,
         }),
         fill: new Fill({
-          color: "rgba(1, 2, 3, 0)"
+          color: "rgba(1, 2, 3, 0)",
         }),
         image: new Circle({
           fill: new Fill({
-            color: "rgba(0, 0, 0, 0)"
+            color: "rgba(0, 0, 0, 0)",
           }),
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 0)",
-            width: 0
+            width: 0,
           }),
-          radius: 0
-        })
-      })
+          radius: 0,
+        }),
+      }),
     ];
   }
 
@@ -279,23 +279,23 @@ class CollectorModel {
     return [
       new Style({
         fill: new Fill({
-          color: "rgba(255, 255, 255, 0.5)"
+          color: "rgba(255, 255, 255, 0.5)",
         }),
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.5)",
-          width: 4
+          width: 4,
         }),
         image: new Circle({
           radius: 6,
           fill: new Fill({
-            color: "rgba(0, 0, 0, 0.5)"
+            color: "rgba(0, 0, 0, 0.5)",
           }),
           stroke: new Stroke({
             color: "rgba(255, 255, 255, 0.5)",
-            width: 2
-          })
-        })
-      })
+            width: 2,
+          }),
+        }),
+      }),
     ];
   }
 
@@ -304,10 +304,10 @@ class CollectorModel {
       .getLayers()
       .getArray()
       .filter(
-        layer => layer.getProperties().caption === this.editSource.caption
+        (layer) => layer.getProperties().caption === this.editSource.caption
       );
 
-    mapLayers.forEach(mapLayer => {
+    mapLayers.forEach((mapLayer) => {
       if (mapLayer.getSource) {
         let s = mapLayer.getSource();
         if (s.clear) {
@@ -330,12 +330,12 @@ class CollectorModel {
     this.filty = true;
     this.vectorSource = new VectorSource({
       strategy: strategyAll,
-      projection: this.source.projection
+      projection: this.source.projection,
     });
 
     this.layer = new Vector({
       source: this.vectorSource,
-      style: this.getVectorStyle()
+      style: this.getVectorStyle(),
     });
 
     if (this.layer) {
@@ -355,10 +355,10 @@ class CollectorModel {
       source: this.vectorSource,
       style: this.getSketchStyle(),
       type: geometryType,
-      geometryName: this.geometryName
+      geometryName: this.geometryName,
     });
 
-    this.draw.on("drawend", event => {
+    this.draw.on("drawend", (event) => {
       this.vectorSource.clear();
       event.feature.modification = "added";
     });
@@ -423,8 +423,8 @@ class CollectorModel {
   }
 
   getSources() {
-    return this.sources.filter(source => {
-      return this.activeServices.some(serviceId => serviceId === source.id);
+    return this.sources.filter((source) => {
+      return this.activeServices.some((serviceId) => serviceId === source.id);
     });
   }
 }

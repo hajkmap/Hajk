@@ -9,7 +9,7 @@ import Observer from "react-event-observer";
 
 class Coordinates extends React.PureComponent {
   state = {
-    transformedCoordinates: []
+    transformedCoordinates: [],
   };
 
   constructor(props) {
@@ -19,9 +19,9 @@ class Coordinates extends React.PureComponent {
 
     this.localObserver.subscribe(
       "setTransformedCoordinates",
-      transformedCoordinates => {
+      (transformedCoordinates) => {
         this.setState({
-          transformedCoordinates: transformedCoordinates
+          transformedCoordinates: transformedCoordinates,
         });
       }
     );
@@ -29,7 +29,7 @@ class Coordinates extends React.PureComponent {
     this.coordinatesModel = new CoordinatesModel({
       map: props.map,
       options: props.options,
-      localObserver: this.localObserver
+      localObserver: this.localObserver,
     });
   }
 
@@ -53,7 +53,7 @@ class Coordinates extends React.PureComponent {
           height: 300,
           width: 400,
           onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide
+          onWindowHide: this.onWindowHide,
         }}
       >
         <CoordinatesView

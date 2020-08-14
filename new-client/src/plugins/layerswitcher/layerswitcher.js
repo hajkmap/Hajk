@@ -12,7 +12,7 @@ export default class LayerSwitcher extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
-    options: propTypes.object.isRequired
+    options: propTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -23,7 +23,7 @@ export default class LayerSwitcher extends React.PureComponent {
     this.layerSwitcherModel = new LayerSwitcherModel({
       map: props.map,
       app: props.app,
-      observer: this.localObserver
+      observer: this.localObserver,
     });
   }
 
@@ -37,7 +37,7 @@ export default class LayerSwitcher extends React.PureComponent {
           title: "Visa",
           description: "Välj vad du vill se i kartan",
           height: "auto",
-          width: 400
+          width: 400,
         }}
       >
         <LayerSwitcherView

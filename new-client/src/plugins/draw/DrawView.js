@@ -19,28 +19,28 @@ import Symbology from "./components/Symbology.js";
 
 import "./draw.css";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120
+    minWidth: 120,
   },
   selectEmpty: {
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
   },
   row: {
-    marginBottom: "10px"
-  }
+    marginBottom: "10px",
+  },
 });
 
 class DrawView extends React.PureComponent {
   state = {
     shape: "LineString",
     drawMethod: "add",
-    displayText: false
+    displayText: false,
   };
 
   constructor(props) {
@@ -48,7 +48,7 @@ class DrawView extends React.PureComponent {
     this.model = this.props.model;
     this.app = this.props.app;
     this.localObserver = this.props.localObserver;
-    this.localObserver.subscribe("dialog", feature => {
+    this.localObserver.subscribe("dialog", (feature) => {
       this.setState({
         feature: feature,
         dialog: true,
@@ -57,12 +57,12 @@ class DrawView extends React.PureComponent {
         dialogButtonText: "OK",
         dialogAbortText: "Avbryt",
         dialogCloseCallback: this.onCloseTextDialog,
-        dialogAbortCallback: this.onAbortTextDialog
+        dialogAbortCallback: this.onAbortTextDialog,
       });
     });
   }
 
-  handleChange = name => event => {
+  handleChange = (name) => (event) => {
     this.setState({ [name]: event.target.value });
     if (name === "shape") {
       this.props.model.setType(event.target.value);
@@ -74,11 +74,11 @@ class DrawView extends React.PureComponent {
 
   onAbortTextDialog = () => {
     this.setState({
-      dialog: false
+      dialog: false,
     });
   };
 
-  onCloseTextDialog = text => {
+  onCloseTextDialog = (text) => {
     this.props.model.openDialog(false);
 
     const { feature } = this.state;
@@ -86,7 +86,7 @@ class DrawView extends React.PureComponent {
     feature.set("text", text);
     feature.setStyle(this.props.model.getStyle(feature));
     this.setState({
-      dialog: false
+      dialog: false,
     });
     this.props.model.redraw();
   };
@@ -102,7 +102,7 @@ class DrawView extends React.PureComponent {
             prompt: this.state.dialogPrompt,
             headerText: this.state.dialogHeaderText || "Ange text",
             buttonText: this.state.dialogButtonText || "OK",
-            abortText: this.state.dialogAbortText
+            abortText: this.state.dialogAbortText,
           }}
           open={this.state.dialog}
           onClose={this.state.dialogCloseCallback}
@@ -207,7 +207,7 @@ class DrawView extends React.PureComponent {
   }
 
   exportToKml = () => {
-    this.props.model.export(url => {
+    this.props.model.export((url) => {
       // If admin selected to extract only the host from client's url, let's do it.
       // Otherwise, fall back to the default behavior, which is to use the returned string as-is.
       const finalUrl =
@@ -222,20 +222,20 @@ class DrawView extends React.PureComponent {
     });
   };
 
-  openUploadDialog = e => {
+  openUploadDialog = (e) => {
     this.setState({
       dialog: true,
       dialogPrompt: false,
       dialogHeaderText: "Ladda upp innehåll",
       dialogText: this.renderImport(),
       dialogButtonText: "Avbryt",
-      dialogCloseCallback: this.onCloseUploadDialog
+      dialogCloseCallback: this.onCloseUploadDialog,
     });
   };
 
   onCloseUploadDialog = () => {
     this.setState({
-      dialog: false
+      dialog: false,
     });
     return;
   };
@@ -266,7 +266,7 @@ class DrawView extends React.PureComponent {
               var reader = new FileReader();
               reader.onload = () => {
                 this.onCloseUploadDialog();
-                this.props.model.import(reader.result, error => {
+                this.props.model.import(reader.result, (error) => {
                   console.error("Import error", error);
                 });
               };
@@ -300,7 +300,7 @@ class DrawView extends React.PureComponent {
                   checked={this.state.displayText}
                   onChange={() => {
                     this.setState({
-                      displayText: !this.state.displayText
+                      displayText: !this.state.displayText,
                     });
                     this.model.displayText = !this.model.displayText;
                     this.localObserver.publish("update");
@@ -337,7 +337,7 @@ class DrawView extends React.PureComponent {
 }
 
 DrawView.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(withSnackbar(DrawView));

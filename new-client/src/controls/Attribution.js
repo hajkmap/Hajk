@@ -2,12 +2,12 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { Attribution } from "ol/control";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     attributions: {
       "& .ol-control": {
         position: "static",
-        maxWidth: "none"
+        maxWidth: "none",
       },
       "& .ol-attribution": {
         background: theme.palette.background.paper,
@@ -18,15 +18,15 @@ const styles = theme => {
         overflow: "scroll",
         whiteSpace: "nowrap",
         [theme.breakpoints.down("xs")]: {
-          maxWidth: "100px"
-        }
+          maxWidth: "100px",
+        },
       },
       "& button": {
         cursor: "pointer",
         boxShadow: "none",
-        outline: "none"
-      }
-    }
+        outline: "none",
+      },
+    },
   };
 };
 
@@ -36,7 +36,7 @@ class AttributionControl extends React.PureComponent {
       const attributionControl = new Attribution({
         target: this.refs.attributions,
         tipLabel: "Visa/dölj copyrightinformation för kartdata",
-        label: "©"
+        label: "©",
       });
       this.props.map.addControl(attributionControl);
     }

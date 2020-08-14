@@ -52,7 +52,7 @@ function Announcement({ announcements = [], currentMap }) {
      * compare those to the current timestamp. Show only if the restrictions
      * are met.
      */
-    const timeFilter = a => {
+    const timeFilter = (a) => {
       const now = new Date().getTime();
       const startTime = Date.parse(a.startTime);
       const stopTime = Date.parse(a.stopTime);
@@ -82,7 +82,7 @@ function Announcement({ announcements = [], currentMap }) {
      * don't show it again. If it, on the other hand, is missing from the array,
      * show it _and_ add its ID to the array, so it won't show up again.
      */
-    const localStorageFilter = a => {
+    const localStorageFilter = (a) => {
       // If local storage flag is off, show this item.
       if (a.showOnlyOnce !== true) return true;
 
@@ -111,7 +111,7 @@ function Announcement({ announcements = [], currentMap }) {
      * or if "maps" is a string with value "all", show this notification.
      * Else, don't show it.
      */
-    const mapFilter = a => {
+    const mapFilter = (a) => {
       // If "all" is specified, no filtering is needed
       if (a?.maps === undefined || a.maps === "all") return true;
 
@@ -129,7 +129,7 @@ function Announcement({ announcements = [], currentMap }) {
      * return true too.
      * For any other (invalid) value, return false.
      */
-    const browserFilter = a => {
+    const browserFilter = (a) => {
       const browsers = a?.browsers;
       if (browsers === undefined || browsers === "all") return true;
       if (Array.isArray(browsers)) return browsers.includes(detect().name);
@@ -140,11 +140,11 @@ function Announcement({ announcements = [], currentMap }) {
      * Helper method: whatever is left in the announcements array after
      * all checks will be mapped to this render method.
      */
-    const renderSnackbar = f => {
+    const renderSnackbar = (f) => {
       if (!f?.text) return; // A text is required. If there's nothing to display, get out of here
 
       // Persistent snackbars will need an action that displays a close button.
-      const action = key => {
+      const action = (key) => {
         return (
           <IconButton
             size="small"
@@ -160,7 +160,7 @@ function Announcement({ announcements = [], currentMap }) {
       enqueueSnackbar(f?.text, {
         variant: f?.type || "default", // Allowed variants are "default", "info", "warning", "success" and "error"
         ...(Number.isFinite(f?.timeout) && { autoHideDuration: f?.timeout }), // If timeout is Numeric, auto hide
-        ...(!Number.isFinite(f?.timeout) && { persist: true, action }) // If timeout isn't Numeric, snackbar is persistent
+        ...(!Number.isFinite(f?.timeout) && { persist: true, action }), // If timeout isn't Numeric, snackbar is persistent
       });
     };
 
@@ -168,15 +168,15 @@ function Announcement({ announcements = [], currentMap }) {
     // Let's oop through all announcements and do some checks to filter out those
     // that should be displayed.
     const filtered = announcements
-      .filter(a => mapFilter(a)) // Show only announcements for the current map
-      .filter(a => a.active === true) // Only active announcements
-      .filter(a => browserFilter(a)) // Show only for some browsers if admin said so
-      .filter(a => timeFilter(a)) // Respect possible date/time restrictions
-      .filter(a => localStorageFilter(a)); // Show only once if admin said so, by checking a local storage setting
+      .filter((a) => mapFilter(a)) // Show only announcements for the current map
+      .filter((a) => a.active === true) // Only active announcements
+      .filter((a) => browserFilter(a)) // Show only for some browsers if admin said so
+      .filter((a) => timeFilter(a)) // Respect possible date/time restrictions
+      .filter((a) => localStorageFilter(a)); // Show only once if admin said so, by checking a local storage setting
 
     // Filtering is done, now let's invoke render for those
     // items that made it this far.
-    filtered.forEach(f => renderSnackbar(f));
+    filtered.forEach((f) => renderSnackbar(f));
   }, [announcements, currentMap, enqueueSnackbar, closeSnackbar]);
 
   // Finally, React's render _must_ return something…

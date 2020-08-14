@@ -16,55 +16,55 @@ class Introduction extends React.PureComponent {
     forceShow: false, // Used to force showing the Intro, overrides the LocalStorage value
     initialStep: 0,
     stepsEnabled: true,
-    steps: []
+    steps: [],
   };
 
   static propTypes = {
     experimentalIntroductionEnabled: PropTypes.bool.isRequired,
     experimentalIntroductionSteps: PropTypes.array,
-    globalObserver: PropTypes.object.isRequired
+    globalObserver: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
     experimentalIntroductionEnabled: false,
     experimentalIntroductionSteps: [],
-    globalObserver: {}
+    globalObserver: {},
   };
 
   predefinedSteps = [
     {
       element: "#map",
       intro:
-        "<b>Välkommen till Hajk!</b> <br /><br />Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!"
+        "<b>Välkommen till Hajk!</b> <br /><br />Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!",
     },
     {
       element: "header > div:first-child",
-      intro: "Med hjälp av knappen här uppe tar du fram sidopanelen."
+      intro: "Med hjälp av knappen här uppe tar du fram sidopanelen.",
     },
     {
       element: "#searchbox",
       intro:
-        "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt ställe i kartan."
+        "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt ställe i kartan.",
     },
     {
       element: "#spatialSearchMenu",
-      intro: "Under den här knappen hittar du fler avancerade sökalternativ."
+      intro: "Under den här knappen hittar du fler avancerade sökalternativ.",
     },
     {
       element: "#controls-column",
       intro:
-        "Längst ut i den högra delen av skärmen finns olika kontroller som du använder för att navigera i kartan."
+        "Längst ut i den högra delen av skärmen finns olika kontroller som du använder för att navigera i kartan.",
     },
     {
       element: '#windows-container > div[style*="display: block"]', // My favorite selector. Selects the first visible Window, so if there's a plugin Window open, we can add intro text to it.
       intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor."
+        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
       element: "#left-column > div > button",
       intro:
-        "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!"
-    }
+        "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!",
+    },
   ];
 
   constructor(props) {
@@ -86,7 +86,7 @@ class Introduction extends React.PureComponent {
           : this.predefinedSteps;
 
       const filteredSteps = steps.filter(
-        s => document.querySelector(s?.element) !== null
+        (s) => document.querySelector(s?.element) !== null
       );
       this.setState({ steps: filteredSteps });
     });
@@ -95,7 +95,7 @@ class Introduction extends React.PureComponent {
       this.setState({
         initialStep: 0,
         stepsEnabled: true,
-        forceShow: true
+        forceShow: true,
       });
     });
   }
@@ -123,14 +123,14 @@ class Introduction extends React.PureComponent {
           steps={steps}
           initialStep={initialStep}
           onExit={this.disableSteps}
-          ref={steps => (this.localSteps = steps)}
-          onBeforeChange={nextStepIndex => {
+          ref={(steps) => (this.localSteps = steps)}
+          onBeforeChange={(nextStepIndex) => {
             // Ensure that we always use the updated list of steps, necessary for dynamic elements
             if (nextStepIndex) {
               this.localSteps.updateStepElement(nextStepIndex);
             }
           }}
-          onAfterChange={nextStepIndex => {
+          onAfterChange={(nextStepIndex) => {
             // TODO: When https://github.com/HiDeoo/intro.js-react/issues/35 is solved, we can remove this nasty hack.
             // It should be easier to hide prev/next buttons, but this works for now.
             if (nextStepIndex === this.localSteps?.props.steps.length - 1) {
@@ -149,7 +149,7 @@ class Introduction extends React.PureComponent {
             nextLabel: "Nästa",
             prevLabel: "Föregående",
             skipLabel: "Hoppa över",
-            doneLabel: "Klart"
+            doneLabel: "Klart",
           }}
         />
       )
