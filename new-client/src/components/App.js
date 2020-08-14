@@ -267,7 +267,7 @@ class App extends React.PureComponent {
       this.logUserAgentInfo();
   }
 
-  logUserAgentInfo = () => {
+  logUserAgentInfo = async () => {
     // Wrap in try, as URL constructor can throw an error,
     // and we don't want the app to crash on this error, as
     // it is non-critical for Hajk's functionality.
@@ -288,11 +288,23 @@ class App extends React.PureComponent {
         screenHeight: window.screen.height,
         scrColorDepth: window.screen.colorDepth,
         scrPixelDepth: window.screen.pixelDepth,
-        devicePixelRatio: window.devicePixelRatio
+        devicePixelRatio: window.devicePixelRatio,
       };
 
-      // Now just do fetch to the proper API endpoint…
-      console.log(url, info);
+      const res = await fetch(url, {
+        headers: {
+          Pragma: "no-cache",
+          "Cache-Control": "no-cache",
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify(info),
+      });
+
+      const body = await res.text();
+
+      console.log("This body got logged:", body);
     } catch {
       // Just ignore it…
     }

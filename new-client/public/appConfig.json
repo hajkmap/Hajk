@@ -1,13 +1,13 @@
 {
   "appName": "Hajk",
   "version": "3.3.0",
-  "mapserviceBase": "http://localhost:55630",
+  "mapserviceBase": "https://interntestkarta.halmstad.se/mapservice",
   "proxy": "",
   "searchProxy": "",
-  "defaultMap": "map_1",
+  "defaultMap": "jw",
   "experimentalIntroductionEnabled": true,
   "experimentalIntroductionSteps": [],
-  "experimentalLoggingUrl": "https://localhost:8080/ownLogger/add",
+  "experimentalLoggingUrl": "http://localhost:8080/ownLogger/log",
   "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
   "announcements": [
     {
