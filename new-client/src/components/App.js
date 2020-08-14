@@ -142,7 +142,7 @@ const styles = theme => {
     },
     drawerContent: {
       backgroundColor: theme.palette.background.paper,
-      overflow: "scroll"
+      overflow: "auto"
     },
     logoBox: {
       padding: theme.spacing(1, 2),
@@ -250,7 +250,7 @@ class App extends React.PureComponent {
               ButtonIcon: MapIcon,
               caption: "Kartverktyg",
               order: 2,
-              renderDrawerContent: function() {
+              renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
               }
             });
