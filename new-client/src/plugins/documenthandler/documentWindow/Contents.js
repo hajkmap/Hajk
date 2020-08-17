@@ -4,7 +4,7 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import CardMedia from "@material-ui/core/CardMedia";
 import ImagePopupModal from "./ImagePopupModal";
-import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
+import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser2";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
@@ -127,11 +127,15 @@ class Contents extends React.PureComponent {
     });
     allowedHtmlTags.push({
       tagType: "strong",
-      callback: this.getStrongTagTypographyComponents
+      callback: () => {}
     });
     allowedHtmlTags.push({
       tagType: "u",
-      callback: this.getUTagTypographyComponents
+      callback: () => {}
+    });
+    allowedHtmlTags.push({
+      tagType: "em",
+      callback: () => {}
     });
     return allowedHtmlTags;
   };
@@ -168,11 +172,27 @@ class Contents extends React.PureComponent {
     this.setState({ activeContent: content });
   };
 
-  getULComponent = tag => {
+  getText = element => {
+    var el = element,
+      child = el.firstChild,
+      texts = [];
+
+    while (child) {
+      if (child.nodeType == 3) {
+        texts.push(child.data);
+      }
+      child = child.nextSibling;
+    }
+
+    return texts.join("");
+  };
+
+  getULComponent = ulComponent => {
     const { classes } = this.props;
+    var children = [...ulComponent.children];
     return (
       <List component="nav">
-        {tag.text.map(listItem => {
+        {children.map((listItem, index) => {
           return (
             <ListItem>
               <ListItemIcon classes={{ root: classes.root }}>
@@ -180,7 +200,7 @@ class Contents extends React.PureComponent {
                   style={{ fontSize: "1em" }}
                 ></FiberManualRecordIcon>
               </ListItemIcon>
-              <ListItemText primary={listItem.text}></ListItemText>
+              <ListItemText primary={listItem.textContent}></ListItemText>
             </ListItem>
           );
         })}
@@ -188,57 +208,38 @@ class Contents extends React.PureComponent {
     );
   };
 
-  getOLComponent = tag => {
+  getOLComponent = olComponent => {
     const { classes } = this.props;
+    var children = [...olComponent.children];
     return (
       <List component="nav">
-        {tag.text.map((listItem, index) => {
+        {children.map((listItem, index) => {
           return (
             <ListItem>
-              <ListItemIcon classes={{ root: classes.root }}>{`${index +
-                1}.`}</ListItemIcon>
-              <ListItemText primary={listItem.text}></ListItemText>
+              <ListItemIcon classes={{ root: classes.root }}>{}</ListItemIcon>
+              <ListItemText primary={listItem.textContent}></ListItemText>
             </ListItem>
           );
         })}
       </List>
     );
-  };
-
-  /**
-   * Helper method to extract attributes from html-element
-   * @param {Element} htmlObject Basic html-element.
-   * @returns {Object{dataAttribute : string, dataValue : string}} Returns name of attribute and its value ion key-value-pair
-   *
-   * @memberof Contents
-   */
-  getDataAttributesFromHtmlObject = htmlObject => {
-    let attributes = htmlObject
-      .getAttributeNames()
-      .map(function(attributeName) {
-        return {
-          dataAttribute: attributeName,
-          dataValue: htmlObject.getAttribute(attributeName)
-        };
-      });
-    return attributes;
   };
 
   getTextLinkTextFromHtmlObject = htmlObject => {
     return htmlObject.text;
   };
 
-  getExternalLink = (aTagObject, externalLink) => {
+  getExternalLink = (aTag, externalLink) => {
     const { classes } = this.props;
     return (
       <Link href={externalLink} target="_blank" rel="noopener" variant="body2">
         <OpenInNewIcon className={classes.linkIcon}></OpenInNewIcon>
-        <span className={classes.linkText}>{aTagObject.innerHTML}</span>
+        <span className={classes.linkText}>{aTag.textContent}</span>
       </Link>
     );
   };
 
-  getMapLink = (aTagObject, mapLink) => {
+  getMapLink = (aTag, mapLink) => {
     const { localObserver, classes } = this.props;
     return (
       <Link
@@ -250,7 +251,7 @@ class Contents extends React.PureComponent {
         }}
       >
         <MapIcon className={classes.linkIcon}></MapIcon>
-        <span className={classes.linkText}>{aTagObject.innerHTML}</span>
+        <span className={classes.linkText}>{aTag.textContent}</span>
       </Link>
     );
   };
@@ -290,79 +291,22 @@ class Contents extends React.PureComponent {
       "data-document",
       "data-link"
     ].map(attributeKey => {
-      return this.getValueFromAttribute(attributes, attributeKey);
+      return attributes.getNamedItem(attributeKey)?.value;
     });
 
     return { mapLink, headerIdentifier, documentLink, externalLink };
   };
 
-  parseStringToHtmlObject = (htmlString, type) => {
-    var mockedHtmlObject = document.createElement(type);
-    mockedHtmlObject.innerHTML = htmlString;
-    return mockedHtmlObject.firstChild;
-  };
-  /**
-   * Extracts value for a key-value-pair
-   * @param {Object} attributes object with key-value-pair of attributes.
-   * @param {String} dataKey key to extract value from
-   * @returns {String} Returns data value
-   *
-   * @memberof Contents
-   */
-  getValueFromAttribute = (attributes, dataKey) => {
-    return attributes.find(attribute => {
-      return attribute.dataAttribute === dataKey;
-    })?.dataValue;
-  };
-
-  getTextArea = (text, index) => {
-    const blockQuote = this.parseStringToHtmlObject(
-      `<blockquote ${text}</blockquote>`,
-      "blockquote"
-    );
-    const attributes = this.getDataAttributesFromHtmlObject(blockQuote);
-    const borderColor = this.getValueFromAttribute(
-      attributes,
-      "data-border-color"
-    );
-    const backgroundColor = this.getValueFromAttribute(
-      attributes,
-      "data-background-color"
-    );
-
-    return (
-      <TextArea
-        key={index}
-        backgroundColor={backgroundColor}
-        dividerColor={borderColor}
-        text={blockQuote.textContent}
-      ></TextArea>
-    );
+  getTextArea = tag => {
+    return <TextArea tagContent={tag}></TextArea>;
   };
 
   getBlockQuoteComponents = tag => {
-    if (!Array.isArray(tag.text) && tag.text.includes("data-text-section")) {
-      return this.getTextArea(tag.text);
+    if (tag.attributes.getNamedItem("data-text-section")) {
+      return this.getTextArea(tag);
     } else {
-      var result = tag.text.map((element, index) => {
-        var text = element.text;
-        if (element.text.includes("data-text-section")) {
-          return this.getTextArea(element.text, index);
-        }
-
-        if (element.tagType === null) {
-          return <blockquote key={index}>{text}</blockquote>;
-        }
-
-        return (
-          <React.Fragment key={index}>
-            {element.renderCallback(element)}
-          </React.Fragment>
-        );
-      });
+      return null;
     }
-
-    return result;
   };
 
   /**
@@ -373,50 +317,42 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getLinkComponent = aTag => {
-    const aTagObject = this.parseStringToHtmlObject(`<a ${aTag.text}</a>`, "a");
-    const attributes = this.getDataAttributesFromHtmlObject(aTagObject);
-    const text = this.getTextLinkTextFromHtmlObject(aTagObject);
     const {
       mapLink,
       headerIdentifier,
       documentLink,
       externalLink
-    } = this.getLinkDataPerType(attributes);
+    } = this.getLinkDataPerType(aTag.attributes);
 
     if (documentLink) {
-      return this.getDocumentLink(headerIdentifier, documentLink, text);
+      return this.getDocumentLink(
+        headerIdentifier,
+        documentLink,
+        aTag.textContent
+      );
     }
 
     if (mapLink) {
-      return this.getMapLink(aTagObject, mapLink);
+      return this.getMapLink(aTag, mapLink);
     }
 
     if (externalLink) {
-      return this.getExternalLink(aTagObject, externalLink);
+      return this.getExternalLink(aTag, externalLink);
     }
   };
 
   getFigureComponents = figureTag => {
-    var result = figureTag.text.map((element, index) => {
-      if (element.tagType === null) {
-        return null;
-      }
+    const children = [...figureTag.children];
+
+    return children.map((element, index) => {
       return (
-        <React.Fragment key={index}>
-          {element.renderCallback(element)}
-        </React.Fragment>
+        <React.Fragment key={index}>{element.callback(element)}</React.Fragment>
       );
     });
-
-    return result;
   };
 
-  isPopupAllowedForImage = imageAttributes => {
-    return imageAttributes
-      .map(attribute => {
-        return attribute.dataAttribute;
-      })
-      .includes("data-popup");
+  isPopupAllowedForImage = imgTag => {
+    return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
   };
 
   /**
@@ -426,20 +362,14 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   getImgCardComponent = imgTag => {
-    const imgTagObject = this.parseStringToHtmlObject(
-      `<img ${imgTag.text}</img>`,
-      "img"
-    );
-    const attributes = this.getDataAttributesFromHtmlObject(imgTagObject);
-
     const image = {
-      caption: this.getValueFromAttribute(attributes, "data-caption"),
-      popup: this.isPopupAllowedForImage(attributes),
-      source: this.getValueFromAttribute(attributes, "data-source"),
-      url: this.getValueFromAttribute(attributes, "src"),
-      altValue: this.getValueFromAttribute(attributes, "alt"),
-      height: this.getValueFromAttribute(attributes, "data-image-height"),
-      width: this.getValueFromAttribute(attributes, "data-image-width")
+      caption: imgTag.attributes.getNamedItem("data-caption")?.value,
+      popup: this.isPopupAllowedForImage(imgTag),
+      source: imgTag.attributes.getNamedItem("data-source")?.value,
+      url: imgTag.attributes.getNamedItem("src")?.value,
+      altValue: imgTag.attributes.getNamedItem("alt")?.value,
+      height: imgTag.attributes.getNamedItem("data-image-height")?.value,
+      width: imgTag.attributes.getNamedItem("data-image-width")?.value
     };
     const { classes } = this.props;
     var hasCustomProportions = image.height && image.width;
@@ -497,32 +427,21 @@ class Contents extends React.PureComponent {
    */
   getPtagTypographyComponents = pTag => {
     const { classes } = this.props;
+    const children = [...pTag.children];
 
     return (
       <Typography className={classes.typography} variant="body1">
-        {pTag.text.map((element, index) => {
-          if (element.tagType === null) {
-            return element.text;
-          }
-          return (
-            <React.Fragment key={index}>
-              {element.renderCallback(element)}
-            </React.Fragment>
-          );
-        })}
+        {this.getText(pTag)}
+        {children.length > 0 &&
+          children.map((element, index) => {
+            return (
+              <React.Fragment key={index}>
+                {element.callback(element)}
+              </React.Fragment>
+            );
+          })}
       </Typography>
     );
-  };
-
-  getStrongTagTypographyComponents = strongTag => {
-    if (strongTag.renderCallback)
-      return <strong>{strongTag.renderCallback}</strong>;
-
-    return <strong>{strongTag.text}</strong>;
-  };
-
-  getUTagTypographyComponents = uTag => {
-    return <u>{uTag.text}</u>;
   };
 
   /**
@@ -537,26 +456,22 @@ class Contents extends React.PureComponent {
 
   getHeadingTypographyComponents = tag => {
     const { classes } = this.props;
+    const children = [...tag.children];
 
-    return tag.text.map((element, index) => {
-      if (element.tagType === null) {
-        return (
-          <Typography
-            key={index}
-            className={classes.typography}
-            variant={tag.tagType}
-          >
-            {element.text}
-          </Typography>
-        );
-      }
-
-      return (
-        <React.Fragment key={index}>
-          {element.renderCallback(element)}
-        </React.Fragment>
-      );
-    });
+    return (
+      <>
+        <Typography className={classes.typography} variant={tag.tagType}>
+          {tag.textContent}
+        </Typography>
+        {children.map((element, index) => {
+          return (
+            <React.Fragment key={index}>
+              {element.callback(element)}
+            </React.Fragment>
+          );
+        })}
+      </>
+    );
   };
 
   componentDidUpdate(nextProps) {
