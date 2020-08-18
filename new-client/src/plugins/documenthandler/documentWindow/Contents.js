@@ -127,17 +127,51 @@ class Contents extends React.PureComponent {
     });
     allowedHtmlTags.push({
       tagType: "strong",
-      callback: () => {}
+      callback: this.getStrongTagTypographyComponents
     });
     allowedHtmlTags.push({
       tagType: "u",
-      callback: () => {}
+      callback: this.getUnderlineTagTypographyComponents
     });
     allowedHtmlTags.push({
       tagType: "em",
-      callback: () => {}
+      callback: this.getItalicTagTypographyComponents
     });
     return allowedHtmlTags;
+  };
+
+  getStrongTagTypographyComponents = strongTag => {
+    const children = [...strongTag.children];
+    var childContent = [];
+    var text = "";
+    if (children) {
+      children.forEach(child => {
+        childContent.push(`<strong>${this.renderChild(child)}</strong>`);
+      });
+    }
+    return `<strong>${strongTag.textContent}</strong>`;
+  };
+  getUnderlineTagTypographyComponents = uTag => {
+    const children = [...uTag.children];
+    var childContent = [];
+    var text = "";
+    if (children) {
+      children.forEach(child => {
+        childContent.push(`<u>${this.renderChild(child)}</u>`);
+      });
+    }
+    return `<u>${uTag.textContent}</u>`;
+  };
+  getItalicTagTypographyComponents = emTag => {
+    const children = [...emTag.children];
+    var childContent = [];
+    var text = "";
+    if (children) {
+      children.forEach(child => {
+        childContent.push(`<em>${this.renderChild(child)}</em>`);
+      });
+    }
+    return `<em>${emTag.textContent}</em>`;
   };
 
   getMaterialUIComponentsForChapter = chapter => {
@@ -172,20 +206,17 @@ class Contents extends React.PureComponent {
     this.setState({ activeContent: content });
   };
 
-  getText = element => {
-    var el = element,
-      child = el.firstChild,
-      texts = [];
-
-    while (child) {
-      if (child.nodeType == 3) {
-        texts.push(child.data);
-      }
-      child = child.nextSibling;
+  renderChild = child => {
+    if (child.nodeType == 3) {
+      return child.data;
     }
 
-    return texts.join("");
+    if (child.nodeType == 1) {
+      return child.callback(child);
+    }
   };
+
+  getText = element => {};
 
   getULComponent = ulComponent => {
     const { classes } = this.props;
@@ -428,18 +459,18 @@ class Contents extends React.PureComponent {
   getPtagTypographyComponents = pTag => {
     const { classes } = this.props;
     const children = [...pTag.children];
+    //const text = this.getText(pTag);
 
+    var result = children.map(child => {
+      return this.renderChild(child);
+    });
+
+    console.log(result, "result");
     return (
       <Typography className={classes.typography} variant="body1">
-        {this.getText(pTag)}
-        {children.length > 0 &&
-          children.map((element, index) => {
-            return (
-              <React.Fragment key={index}>
-                {element.callback(element)}
-              </React.Fragment>
-            );
-          })}
+        {result.map(res => {
+          return res;
+        })}
       </Typography>
     );
   };
