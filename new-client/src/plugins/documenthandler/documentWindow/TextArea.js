@@ -29,6 +29,21 @@ const styles = theme => {
 };
 
 class TextArea extends React.PureComponent {
+  extractBackgroundColorFromTag = tagContent => {
+    return this.getAttributeValue(
+      tagContent.attributes,
+      "data-background-color"
+    );
+  };
+
+  extractDividerColorFromTag = tagContent => {
+    return this.getAttributeValue(tagContent.attributes, "data-divider-color");
+  };
+
+  getAttributeValue = (attributes, dataAttributeToFind) => {
+    return attributes.getNamedItem(dataAttributeToFind).value;
+  };
+
   renderDivider = dividerColor => {
     const { classes } = this.props;
     return (
@@ -42,12 +57,9 @@ class TextArea extends React.PureComponent {
   render = () => {
     const { classes, tagContent } = this.props;
     const children = [...tagContent.children];
-    const backgroundColor = tagContent.attributes.getNamedItem(
-      "data-background-color"
-    ).value;
-    const dividerColor = tagContent.attributes.getNamedItem(
-      "data-divider-color"
-    ).value;
+    const backgroundColor = this.extractBackgroundColorFromTag(tagContent);
+    const dividerColor = this.extractDividerColorFromTag(tagContent);
+
     return (
       <>
         <Grid className={classes.container} justify="center" container>
