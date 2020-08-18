@@ -41,7 +41,7 @@ class TextArea extends React.PureComponent {
   };
 
   getAttributeValue = (attributes, dataAttributeToFind) => {
-    return attributes.getNamedItem(dataAttributeToFind).value;
+    return attributes.getNamedItem(dataAttributeToFind)?.value;
   };
 
   renderDivider = dividerColor => {
