@@ -15,7 +15,7 @@ const styles = (theme) => {
         border: "1px solid rgba(255 ,255, 255, 0.5)",
         borderRadius: "2px",
         height: "25px",
-        overflow: "scroll",
+        overflow: "auto",
         whiteSpace: "nowrap",
         [theme.breakpoints.down("xs")]: {
           maxWidth: "100px",
