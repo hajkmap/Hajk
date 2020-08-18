@@ -29,8 +29,8 @@ const styles = theme => {
 };
 
 class TextArea extends React.PureComponent {
-  renderDivider = () => {
-    const { dividerColor, classes } = this.props;
+  renderDivider = dividerColor => {
+    const { classes } = this.props;
     return (
       <Divider
         className={classes.divider}
@@ -40,9 +40,14 @@ class TextArea extends React.PureComponent {
   };
 
   render = () => {
-    const { classes, backgroundColor, tagContent } = this.props;
+    const { classes, tagContent } = this.props;
     const children = [...tagContent.children];
-
+    const backgroundColor = tagContent.attributes.getNamedItem(
+      "data-background-color"
+    ).value;
+    const dividerColor = tagContent.attributes.getNamedItem(
+      "data-divider-color"
+    ).value;
     return (
       <>
         <Grid className={classes.container} justify="center" container>
@@ -54,7 +59,7 @@ class TextArea extends React.PureComponent {
             }}
             item
           >
-            {this.renderDivider()}
+            {this.renderDivider(dividerColor)}
             <Grid justify="center" container>
               <Grid className={classes.typographyContainer} xs={12} item>
                 <Typography className={classes.typography}>
@@ -69,7 +74,7 @@ class TextArea extends React.PureComponent {
                 })}
               </Grid>
             </Grid>
-            {this.renderDivider()}
+            {this.renderDivider(dividerColor)}
           </Grid>
         </Grid>
       </>
