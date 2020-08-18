@@ -40,7 +40,8 @@ class TextArea extends React.PureComponent {
   };
 
   render = () => {
-    const { classes, text, backgroundColor } = this.props;
+    const { classes, backgroundColor, tagContent } = this.props;
+    const children = [...tagContent.children];
 
     return (
       <>
@@ -56,7 +57,16 @@ class TextArea extends React.PureComponent {
             {this.renderDivider()}
             <Grid justify="center" container>
               <Grid className={classes.typographyContainer} xs={12} item>
-                <Typography className={classes.typography}>{text}</Typography>
+                <Typography className={classes.typography}>
+                  {tagContent.textContent}
+                </Typography>
+                {children.map((element, index) => {
+                  return (
+                    <React.Fragment key={index}>
+                      {element.callback(element)}
+                    </React.Fragment>
+                  );
+                })}
               </Grid>
             </Grid>
             {this.renderDivider()}

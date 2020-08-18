@@ -1,8 +1,8 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { withTheme } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
@@ -108,25 +108,25 @@ class TableOfContents extends React.PureComponent {
   render() {
     const { classes, activeDocument, documentColor } = this.props;
     return (
-      <ExpansionPanel
+      <Accordion
         square
         elevation={0}
         className={classes.tableOfContents}
         style={{ borderColor: documentColor }}
         defaultExpanded={true}
       >
-        <ExpansionPanelSummary
+        <AccordionSummary
           aria-controls="expansion-panel-content"
           expandIcon={<ExpandMoreIcon />}
         >
           <Typography variant="h2">Innehåll</Typography>
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails id="expansion-panel-content">
+        </AccordionSummary>
+        <AccordionDetails id="expansion-panel-content">
           <Grid container spacing={0}>
             {this.renderChapters(activeDocument)}
           </Grid>
-        </ExpansionPanelDetails>
-      </ExpansionPanel>
+        </AccordionDetails>
+      </Accordion>
     );
   }
 }
