@@ -141,37 +141,37 @@ class Contents extends React.PureComponent {
   };
 
   getStrongTagTypographyComponents = strongTag => {
-    const children = [...strongTag.children];
-    var childContent = [];
-    var text = "";
-    if (children) {
+    const children = [...strongTag.childNodes];
+    var array = [];
+    if (children.length > 0) {
       children.forEach(child => {
-        childContent.push(`<strong>${this.renderChild(child)}</strong>`);
+        array.push(<strong>{this.renderChild(child)}</strong>);
       });
+      return array;
     }
-    return `<strong>${strongTag.textContent}</strong>`;
+    return [<strong>{strongTag.textContent}</strong>];
   };
   getUnderlineTagTypographyComponents = uTag => {
-    const children = [...uTag.children];
-    var childContent = [];
-    var text = "";
-    if (children) {
+    const children = [...uTag.childNodes];
+    var array = [];
+    if (children.length > 0) {
       children.forEach(child => {
-        childContent.push(`<u>${this.renderChild(child)}</u>`);
+        array.push(<u>{this.renderChild(child)}</u>);
       });
+      return array;
     }
-    return `<u>${uTag.textContent}</u>`;
+    return [<u>{uTag.textContent}</u>];
   };
   getItalicTagTypographyComponents = emTag => {
-    const children = [...emTag.children];
-    var childContent = [];
-    var text = "";
-    if (children) {
+    const children = [...emTag.childNodes];
+    var array = [];
+    if (children.length > 0) {
       children.forEach(child => {
-        childContent.push(`<em>${this.renderChild(child)}</em>`);
+        array.push(<em>{this.renderChild(child)}</em>);
       });
+      return array;
     }
-    return `<em>${emTag.textContent}</em>`;
+    return [<em>{emTag.textContent}</em>];
   };
 
   getMaterialUIComponentsForChapter = chapter => {
@@ -216,7 +216,20 @@ class Contents extends React.PureComponent {
     }
   };
 
-  getText = element => {};
+  getText = element => {
+    var el = element,
+      child = el.firstChild,
+      texts = [];
+
+    while (child) {
+      if (child.nodeType == 3) {
+        texts.push(child.data);
+      }
+      child = child.nextSibling;
+    }
+
+    return texts.join("");
+  };
 
   getULComponent = ulComponent => {
     const { classes } = this.props;
@@ -231,7 +244,9 @@ class Contents extends React.PureComponent {
                   style={{ fontSize: "1em" }}
                 ></FiberManualRecordIcon>
               </ListItemIcon>
-              <ListItemText primary={listItem.textContent}></ListItemText>
+              <ListItemText
+                primary={this.getFormattedComponentFromTag(listItem)}
+              ></ListItemText>
             </ListItem>
           );
         })}
@@ -248,7 +263,9 @@ class Contents extends React.PureComponent {
           return (
             <ListItem>
               <ListItemIcon classes={{ root: classes.root }}>{}</ListItemIcon>
-              <ListItemText primary={listItem.textContent}></ListItemText>
+              <ListItemText
+                primary={this.getFormattedComponentFromTag(listItem)}
+              ></ListItemText>
             </ListItem>
           );
         })}
@@ -450,6 +467,13 @@ class Contents extends React.PureComponent {
     );
   };
 
+  getFormattedComponentFromTag = tag => {
+    const childNodes = [...tag.childNodes];
+    return childNodes.map(child => {
+      return this.renderChild(child);
+    });
+  };
+
   /**
    * The render function for the p-tag.
    * @param {string} pTag The p-tag.
@@ -458,19 +482,9 @@ class Contents extends React.PureComponent {
    */
   getPtagTypographyComponents = pTag => {
     const { classes } = this.props;
-    const children = [...pTag.children];
-    //const text = this.getText(pTag);
-
-    var result = children.map(child => {
-      return this.renderChild(child);
-    });
-
-    console.log(result, "result");
     return (
       <Typography className={classes.typography} variant="body1">
-        {result.map(res => {
-          return res;
-        })}
+        {this.getFormattedComponentFromTag(pTag)}
       </Typography>
     );
   };
@@ -487,20 +501,14 @@ class Contents extends React.PureComponent {
 
   getHeadingTypographyComponents = tag => {
     const { classes } = this.props;
-    const children = [...tag.children];
-
     return (
       <>
-        <Typography className={classes.typography} variant={tag.tagType}>
-          {tag.textContent}
+        <Typography
+          className={classes.typography}
+          variant={tag.tagName.toLowerCase()}
+        >
+          {this.getFormattedComponentFromTag(tag)}
         </Typography>
-        {children.map((element, index) => {
-          return (
-            <React.Fragment key={index}>
-              {element.callback(element)}
-            </React.Fragment>
-          );
-        })}
       </>
     );
   };
