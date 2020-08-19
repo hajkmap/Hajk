@@ -26,6 +26,7 @@ export default class MapViewModel {
 
   bindSubscriptions = () => {
     this.localObserver.subscribe("fly-to", url => {
+      this.globalObserver.publish("core.minimizeWindow");
       this.displayMap(this.convertMapSettingsUrlToOlSettings(url));
     });
   };

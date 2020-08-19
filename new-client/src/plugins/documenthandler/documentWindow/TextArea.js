@@ -38,6 +38,7 @@ class TextArea extends React.PureComponent {
 
   render = () => {
     const { classes, textAreaContentArray, backgroundColor } = this.props;
+
     return (
       <>
         <Grid className={classes.container} justify="center" container>

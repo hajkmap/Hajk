@@ -151,8 +151,12 @@ class Contents extends React.PureComponent {
     const children = [...strongTag.childNodes];
     var array = [];
     if (children.length > 0) {
-      children.forEach(child => {
-        array.push(<strong>{this.renderChild(child)}</strong>);
+      children.forEach((child, index) => {
+        array.push(
+          <React.Fragment key={index}>
+            <strong>{this.renderChild(child)}</strong>
+          </React.Fragment>
+        );
       });
       return array;
     }
@@ -162,8 +166,12 @@ class Contents extends React.PureComponent {
     const children = [...uTag.childNodes];
     var array = [];
     if (children.length > 0) {
-      children.forEach(child => {
-        array.push(<u>{this.renderChild(child)}</u>);
+      children.forEach((child, index) => {
+        array.push(
+          <React.Fragment key={index}>
+            <u>{this.renderChild(child)}</u>
+          </React.Fragment>
+        );
       });
       return array;
     }
@@ -173,8 +181,12 @@ class Contents extends React.PureComponent {
     const children = [...emTag.childNodes];
     var array = [];
     if (children.length > 0) {
-      children.forEach(child => {
-        array.push(<em>{this.renderChild(child)}</em>);
+      children.forEach((child, index) => {
+        array.push(
+          <React.Fragment key={index}>
+            <em>{this.renderChild(child)}</em>
+          </React.Fragment>
+        );
       });
       return array;
     }
@@ -228,9 +240,9 @@ class Contents extends React.PureComponent {
     var children = [...ulComponent.children];
     return (
       <List component="nav">
-        {children.map(listItem => {
+        {children.map((listItem, index) => {
           return (
-            <ListItem>
+            <ListItem key={index}>
               <ListItemIcon classes={{ root: classes.listRoot }}>
                 <FiberManualRecordIcon
                   style={{ fontSize: "1em" }}
@@ -253,7 +265,7 @@ class Contents extends React.PureComponent {
       <List component="nav">
         {children.map((listItem, index) => {
           return (
-            <ListItem>
+            <ListItem key={index}>
               <ListItemText
                 classes={{ root: classes.listRoot }}
                 primary={`${index + 1}.`}
@@ -345,7 +357,9 @@ class Contents extends React.PureComponent {
   getTextArea = tag => {
     const children = [...tag.childNodes];
     var textAreaContentArray = children.map((element, index) => {
-      return this.renderChild(element);
+      return (
+        <React.Fragment key={index}>{this.renderChild(element)}</React.Fragment>
+      );
     });
 
     const backgroundColor = tag.attributes.getNamedItem("data-background-color")
@@ -490,8 +504,10 @@ class Contents extends React.PureComponent {
 
   getFormattedComponentFromTag = tag => {
     const childNodes = [...tag.childNodes];
-    return childNodes.map(child => {
-      return this.renderChild(child);
+    return childNodes.map((child, index) => {
+      return (
+        <React.Fragment key={index}>{this.renderChild(child)}</React.Fragment>
+      );
     });
   };
 
