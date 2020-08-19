@@ -1,7 +1,6 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { withStyles, withTheme } from "@material-ui/core/styles";
 import Icon from "@material-ui/core/Icon";
-import { withTheme } from "@material-ui/core/styles";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -12,6 +11,7 @@ import { Typography } from "@material-ui/core";
 
 const styles = theme => ({
   listItem: { overflowWrap: "break-word" },
+  listItemIcon: { minWidth: theme.spacing(4) },
   collapseIconRoot: { minWidth: theme.spacing(4) }
 });
 
@@ -44,8 +44,9 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   getListIcon = item => {
+    const { classes } = this.props;
     return (
-      <ListItemIcon>
+      <ListItemIcon className={classes.listItemIcon}>
         {!item.title && (
           <Typography variant="srOnly">{item.icon.descriptiveText}</Typography>
         )}
