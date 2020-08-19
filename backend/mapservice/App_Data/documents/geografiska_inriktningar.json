@@ -3,7 +3,7 @@
     {
       "header": "GEOGRAFISKA INRIKTNINGAR",
       "headerIdentifier": "geografiska_inriktningar/GEOGRAFISKA INRIKTNINGAR",
-      "html": "<p><br></p>\n<p><br></p>\n<figure><img data-caption=\"\" data-source=\"\" src=\"Upload/geografiska_inriktningar_start.png\"/></figure>\n<p><br></p>\n<p>De geografiska inriktningarna beskriver hur mark, vatten och bebyggelse ska användas, utvecklas och bevaras. De innehåller dels rekommendationer för de områden som redovisas på markanvändningskartan, dels fördjupade beskrivningar av lokala förutsättningar för stadens utvecklingsmöjligheter.</p>",
+      "html": "<p><br></p>\n<p><br></p>\n<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_start.png\"/></figure>\n<p><br></p>\n<p>De geografiska inriktningarna beskriver hur mark, vatten och bebyggelse ska användas, utvecklas och bevaras. De innehåller dels rekommendationer för de områden som redovisas på markanvändningskartan, dels fördjupade beskrivningar av lokala förutsättningar för stadens utvecklingsmöjligheter.</p>",
       "mapSettings": {
         "target": "map",
         "center": [140700, 6399400],
@@ -40,7 +40,7 @@
       "chapters": [
         {
           "header": "MARK- OCH VATTENANVÄNDNING",
-          "html": "<p>Rekommendationer för mark- och vattenområden i följande avsnitt ger vägledning för de olika områden som redovisas på markanvändningskartan. Rubrikerna i texten följer markanvändningskartans teckenförklaring och är uppdelade enligt kategorierna användning, utredningsområden samt hänsyn och värden.</p><br><p>Utöver de geografiska rekommendationerna, finns generella rekommendationer som gäller allmänt inom kommunen vid prövning av bygglov och förhandsbesked utanför detaljplan då detaljplaner upprättas. De grundas på kommunala ställningstaganden i olika beslut och på tillämpningar av lagstiftning och rekommendationer från andra myndigheter. Dessa rekommendationer finns redovisade i kapitlet Tematiska inriktningar.</p><br><figure><img data-caption=\"Markanvändningskarta (se bilaga)\" data-source=\"\" src=\"Upload/geografiska_inriktningar_1.png\"/></figure>",
+          "html": "<p>Rekommendationer för mark- och vattenområden i följande avsnitt ger vägledning för de olika områden som redovisas på markanvändningskartan. Rubrikerna i texten följer markanvändningskartans teckenförklaring och är uppdelade enligt kategorierna användning, utredningsområden samt hänsyn och värden.</p><br><p>Utöver de geografiska rekommendationerna, finns generella rekommendationer som gäller allmänt inom kommunen vid prövning av bygglov och förhandsbesked utanför detaljplan då detaljplaner upprättas. De grundas på kommunala ställningstaganden i olika beslut och på tillämpningar av lagstiftning och rekommendationer från andra myndigheter. Dessa rekommendationer finns redovisade i kapitlet Tematiska inriktningar.</p><br><figure><img data-caption=\"Markanvändningskarta (se bilaga)\" data-source=\"\" src=\"/geografiska_inriktningar_1.png\"/></figure>",
           "mapSettings": {
             "center": [135672.89145750582, 6403799.452920079],
             "zoom": 5,
@@ -57,7 +57,7 @@
         },
         {
           "header": "DELOMRÅDEN",
-          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"Upload/geografiska_inriktningar_2.png\"/></figure>",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_2.png\"/></figure>",
           "mapSettings": {
             "target": "map",
             "center": [140700, 6399400],
@@ -99,7 +99,7 @@
         },
         {
           "header": "ÖSTRA GÖTEBORG",
-          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"Upload/geografiska_inriktningar_3.png\"/></figure>",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_3.png\"/></figure>",
           "mapSettings": {
             "target": "map",
             "center": [140700, 6399400],
@@ -141,7 +141,7 @@
         },
         {
           "header": "ÖRGRYTE–HÄRLANDA",
-          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"Upload/geografiska_inriktningar_4.png\"/></figure>",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_4.png\"/></figure>",
           "mapSettings": {
             "target": "map",
             "center": [140700, 6399400],
@@ -183,7 +183,7 @@
         },
         {
           "header": "CENTRUM",
-          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"Upload/geografiska_inriktningar_5.png\"/></figure>",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_5.png\"/></figure>",
           "mapSettings": {
             "target": "map",
             "center": [140700, 6399400],
@@ -225,7 +225,7 @@
         },
         {
           "header": "MAJORNA-LINNÉ",
-          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"Upload/geografiska_inriktningar_6.png\"/></figure>",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_6.png\"/></figure>",
           "mapSettings": {
             "target": "map",
             "center": [140700, 6399400],
@@ -267,7 +267,7 @@
         },
         {
           "header": "LUNDBY",
-          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"Upload/geografiska_inriktningar_7.png\"/></figure>",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_7.png\"/></figure>",
           "mapSettings": {
             "target": "map",
             "center": [140700, 6399400],

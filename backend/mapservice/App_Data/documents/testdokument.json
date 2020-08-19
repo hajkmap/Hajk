@@ -3,7 +3,7 @@
     {
       "header": "TEMATISKA INRIKTNINGAR",
       "headerIdentifier": "tematiska_inriktningar/TEMATISKA INRIKTNINGAR",
-      "html": "<p>Detta är en testtext som ska kunna vara <em><strong>fet </strong></em></p>",
+      "html": "<a data-link=\"http://google.se\"><strong>Länk till Google</strong></a>",
       "mapSettings": {
         "target": "map",
         "center": [140700, 6399400],
