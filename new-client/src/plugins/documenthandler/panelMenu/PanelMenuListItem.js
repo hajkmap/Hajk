@@ -11,7 +11,7 @@ import { Typography } from "@material-ui/core";
 
 const styles = theme => ({
   listItem: { overflowWrap: "break-word" },
-  listItemIcon: { minWidth: theme.spacing(4) },
+  listItemIcon: { minWidth: theme.spacing(3) },
   collapseIconRoot: { minWidth: theme.spacing(4) }
 });
 
@@ -70,7 +70,7 @@ class PanelMenuListItem extends React.PureComponent {
           onClick={onClick}
           className={classes.listItem}
           style={{
-            paddingLeft: theme.spacing(1) + theme.spacing(item.level * 2),
+            paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
             borderLeft: `${theme.spacing(1)}px solid ${item.color}`
           }}
         >

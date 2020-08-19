@@ -31,6 +31,7 @@ function NestedListItemRaw(props) {
   return (
     <ListItem
       button
+      component="li"
       size="small"
       onClick={props.onCLick}
       style={{ paddingLeft: props.theme.spacing(props.level) }}

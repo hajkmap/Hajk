@@ -15,14 +15,16 @@ import ListItemText from "@material-ui/core/ListItemText";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import clsx from "clsx";
 import TextArea from "./TextArea";
-import { Link } from "@material-ui/core";
+import Link from "@material-ui/core/Link";
 
 const styles = theme => {
   return {
     documentImage: {
-      cursor: "pointer",
       objectFit: "contain",
       objectPosition: "left"
+    },
+    popupActivatedImage: {
+      cursor: "pointer"
     },
     naturalDocumentImageProportions: {
       width: "100%"
@@ -38,7 +40,11 @@ const styles = theme => {
     linkText: {
       verticalAlign: "middle"
     },
-    root: { maxWidth: theme.spacing(3), color: "black" },
+    listRoot: {
+      maxWidth: theme.spacing(3),
+      minWidth: theme.spacing(3),
+      color: "black"
+    },
     chapter: {
       cursor: "text",
       marginTop: theme.spacing(4)
@@ -83,12 +89,12 @@ class Contents extends React.PureComponent {
       callback: () => {}
     });
     allowedHtmlTags.push({
-      tagType: "h1",
-      callback: this.getHeadingTypographyComponents
-    });
-    allowedHtmlTags.push({
       tagType: "blockquote",
       callback: this.getBlockQuoteComponents
+    });
+    allowedHtmlTags.push({
+      tagType: "h1",
+      callback: this.getHeadingTypographyComponents
     });
     allowedHtmlTags.push({
       tagType: "h2",
@@ -222,10 +228,10 @@ class Contents extends React.PureComponent {
     var children = [...ulComponent.children];
     return (
       <List component="nav">
-        {children.map((listItem, index) => {
+        {children.map(listItem => {
           return (
             <ListItem>
-              <ListItemIcon classes={{ root: classes.root }}>
+              <ListItemIcon classes={{ root: classes.listRoot }}>
                 <FiberManualRecordIcon
                   style={{ fontSize: "1em" }}
                 ></FiberManualRecordIcon>
@@ -249,7 +255,7 @@ class Contents extends React.PureComponent {
           return (
             <ListItem>
               <ListItemText
-                classes={{ root: classes.root }}
+                classes={{ root: classes.listRoot }}
                 primary={`${index + 1}.`}
               ></ListItemText>
               <ListItemText
@@ -406,6 +412,26 @@ class Contents extends React.PureComponent {
     return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
   };
 
+  getImageStyle = image => {
+    const { classes } = this.props;
+    var className = image.popup
+      ? clsx(
+          classes.documentImage,
+          classes.naturalDocumentImageProportions,
+          classes.popupActivatedImage
+        )
+      : clsx(classes.documentImage, classes.naturalDocumentImageProportions);
+
+    if (image.height && image.width) {
+      if (image.popup) {
+        className = clsx(classes.documentImage, classes.popupActivatedImage);
+      } else {
+        className = clsx(classes.documentImage, classes.popupActivatedImage);
+      }
+    }
+    return className;
+  };
+
   /**
    * The render function for the img-tag.
    * @param {string} imgTag The img-tag.
@@ -422,8 +448,7 @@ class Contents extends React.PureComponent {
       height: imgTag.attributes.getNamedItem("data-image-height")?.value,
       width: imgTag.attributes.getNamedItem("data-image-width")?.value
     };
-    const { classes } = this.props;
-    var hasCustomProportions = image.height && image.width;
+
     var onClickCallback = image.popup
       ? () => {
           this.showPopupModal(image);
@@ -437,18 +462,11 @@ class Contents extends React.PureComponent {
           alt={image.altValue}
           component="img"
           style={
-            hasCustomProportions
+            image.height && image.width
               ? { height: image.height, width: image.width }
               : null
           }
-          className={
-            hasCustomProportions
-              ? classes.documentImage
-              : clsx(
-                  classes.documentImage,
-                  classes.naturalDocumentImageProportions
-                )
-          }
+          className={this.getImageStyle(image)}
           image={image.url}
         />
         {this.getImageDescription(image)}
@@ -498,7 +516,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof htmlToMaterialUiParser
    */
-  getBrtagTypographyComponent = brTag => {
+  getBrtagTypographyComponent = () => {
     return <br />;
   };
 
