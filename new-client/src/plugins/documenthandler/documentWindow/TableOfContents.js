@@ -88,7 +88,7 @@ class TableOfContents extends React.PureComponent {
           }}
           level={level}
         >
-          {subChapterNumber + " " + chapter.header}
+          {chapter.header}
         </NestedListItem>
         <List disablePadding>
           {Array.isArray(chapter.chapters)
