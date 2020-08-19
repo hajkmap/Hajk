@@ -4,7 +4,7 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import CardMedia from "@material-ui/core/CardMedia";
 import ImagePopupModal from "./ImagePopupModal";
-import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser2";
+import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
@@ -14,9 +14,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import clsx from "clsx";
-
 import TextArea from "./TextArea";
-
 import { Link } from "@material-ui/core";
 
 const styles = theme => {
@@ -40,13 +38,16 @@ const styles = theme => {
     linkText: {
       verticalAlign: "middle"
     },
-    root: { minWidth: "32px", color: "black" },
+    root: { maxWidth: theme.spacing(3), color: "black" },
     chapter: {
       cursor: "text",
       marginTop: theme.spacing(4)
     }
   };
 };
+
+const ELEMENT_NODE = 1;
+const TEXT_NODE = 3;
 
 class Contents extends React.PureComponent {
   state = {
@@ -185,7 +186,7 @@ class Contents extends React.PureComponent {
 
   appendComponentsToChapter = chapter => {
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach((subChapter, index) => {
+      chapter.chapters.forEach(subChapter => {
         subChapter.components = this.getMaterialUIComponentsForChapter(
           subChapter
         );
@@ -207,28 +208,13 @@ class Contents extends React.PureComponent {
   };
 
   renderChild = child => {
-    if (child.nodeType == 3) {
+    if (child.nodeType === TEXT_NODE) {
       return child.data;
     }
 
-    if (child.nodeType == 1) {
+    if (child.nodeType === ELEMENT_NODE) {
       return child.callback(child);
     }
-  };
-
-  getText = element => {
-    var el = element,
-      child = el.firstChild,
-      texts = [];
-
-    while (child) {
-      if (child.nodeType == 3) {
-        texts.push(child.data);
-      }
-      child = child.nextSibling;
-    }
-
-    return texts.join("");
   };
 
   getULComponent = ulComponent => {
@@ -262,7 +248,10 @@ class Contents extends React.PureComponent {
         {children.map((listItem, index) => {
           return (
             <ListItem>
-              <ListItemIcon classes={{ root: classes.root }}>{}</ListItemIcon>
+              <ListItemText
+                classes={{ root: classes.root }}
+                primary={`${index + 1}.`}
+              ></ListItemText>
               <ListItemText
                 primary={this.getFormattedComponentFromTag(listItem)}
               ></ListItemText>
@@ -273,16 +262,14 @@ class Contents extends React.PureComponent {
     );
   };
 
-  getTextLinkTextFromHtmlObject = htmlObject => {
-    return htmlObject.text;
-  };
-
   getExternalLink = (aTag, externalLink) => {
     const { classes } = this.props;
     return (
       <Link href={externalLink} target="_blank" rel="noopener" variant="body2">
         <OpenInNewIcon className={classes.linkIcon}></OpenInNewIcon>
-        <span className={classes.linkText}>{aTag.textContent}</span>
+        <span className={classes.linkText}>
+          {this.getFormattedComponentFromTag(aTag)}
+        </span>
       </Link>
     );
   };
@@ -299,12 +286,14 @@ class Contents extends React.PureComponent {
         }}
       >
         <MapIcon className={classes.linkIcon}></MapIcon>
-        <span className={classes.linkText}>{aTag.textContent}</span>
+        <span className={classes.linkText}>
+          {this.getFormattedComponentFromTag(aTag)}
+        </span>
       </Link>
     );
   };
 
-  getDocumentLink = (headerIdentifier, documentLink, text) => {
+  getDocumentLink = (headerIdentifier, documentLink, aTag) => {
     const { localObserver, classes } = this.props;
     return (
       <>
@@ -321,7 +310,9 @@ class Contents extends React.PureComponent {
           }}
         >
           <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
-          <span className={classes.linkText}>{text}</span>
+          <span className={classes.linkText}>
+            {this.getFormattedComponentFromTag(aTag)}
+          </span>
         </Link>
       </>
     );
@@ -346,7 +337,23 @@ class Contents extends React.PureComponent {
   };
 
   getTextArea = tag => {
-    return <TextArea tagContent={tag}></TextArea>;
+    const children = [...tag.childNodes];
+    var textAreaContentArray = children.map((element, index) => {
+      return this.renderChild(element);
+    });
+
+    const backgroundColor = tag.attributes.getNamedItem("data-background-color")
+      ?.value;
+    const dividerColor = tag.attributes.getNamedItem("data-divider-color")
+      ?.value;
+
+    return (
+      <TextArea
+        backgroundColor={backgroundColor}
+        dividerColor={dividerColor}
+        textAreaContentArray={textAreaContentArray}
+      ></TextArea>
+    );
   };
 
   getBlockQuoteComponents = tag => {
@@ -373,11 +380,7 @@ class Contents extends React.PureComponent {
     } = this.getLinkDataPerType(aTag.attributes);
 
     if (documentLink) {
-      return this.getDocumentLink(
-        headerIdentifier,
-        documentLink,
-        aTag.textContent
-      );
+      return this.getDocumentLink(headerIdentifier, documentLink, aTag);
     }
 
     if (mapLink) {

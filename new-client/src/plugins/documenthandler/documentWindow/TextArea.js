@@ -1,10 +1,7 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Divider from "@material-ui/core/Divider";
-
 import Grid from "@material-ui/core/Grid";
-
-import Typography from "@material-ui/core/Typography";
 
 const styles = theme => {
   return {
@@ -29,23 +26,8 @@ const styles = theme => {
 };
 
 class TextArea extends React.PureComponent {
-  extractBackgroundColorFromTag = tagContent => {
-    return this.getAttributeValue(
-      tagContent.attributes,
-      "data-background-color"
-    );
-  };
-
-  extractDividerColorFromTag = tagContent => {
-    return this.getAttributeValue(tagContent.attributes, "data-divider-color");
-  };
-
-  getAttributeValue = (attributes, dataAttributeToFind) => {
-    return attributes.getNamedItem(dataAttributeToFind)?.value;
-  };
-
-  renderDivider = dividerColor => {
-    const { classes } = this.props;
+  renderDivider = () => {
+    const { classes, dividerColor } = this.props;
     return (
       <Divider
         className={classes.divider}
@@ -55,11 +37,7 @@ class TextArea extends React.PureComponent {
   };
 
   render = () => {
-    const { classes, tagContent } = this.props;
-    const children = [...tagContent.children];
-    const backgroundColor = this.extractBackgroundColorFromTag(tagContent);
-    const dividerColor = this.extractDividerColorFromTag(tagContent);
-
+    const { classes, textAreaContentArray, backgroundColor } = this.props;
     return (
       <>
         <Grid className={classes.container} justify="center" container>
@@ -71,22 +49,13 @@ class TextArea extends React.PureComponent {
             }}
             item
           >
-            {this.renderDivider(dividerColor)}
+            {this.renderDivider()}
             <Grid justify="center" container>
               <Grid className={classes.typographyContainer} xs={12} item>
-                <Typography className={classes.typography}>
-                  {tagContent.textContent}
-                </Typography>
-                {children.map((element, index) => {
-                  return (
-                    <React.Fragment key={index}>
-                      {element.callback(element)}
-                    </React.Fragment>
-                  );
-                })}
+                {textAreaContentArray}
               </Grid>
             </Grid>
-            {this.renderDivider(dividerColor)}
+            {this.renderDivider()}
           </Grid>
         </Grid>
       </>
