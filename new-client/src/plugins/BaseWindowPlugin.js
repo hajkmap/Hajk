@@ -39,6 +39,7 @@ class BaseWindowPlugin extends React.PureComponent {
     // There will be defaults in props.custom, so that each plugin has own default title/description
     this.title = props.options.title || props.custom.title;
     this.description = props.options.description || props.custom.description;
+    this.color = props.options.color || props.custom.color;
 
     // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
     this.width = props.options.width || props.custom.width || 400;
@@ -116,6 +117,7 @@ class BaseWindowPlugin extends React.PureComponent {
         <Window
           globalObserver={this.props.app.globalObserver}
           title={this.title}
+          color={this.color}
           onClose={this.closeWindow}
           open={this.state.windowVisible}
           onResize={this.props.custom.onResize}
