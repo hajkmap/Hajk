@@ -17,6 +17,18 @@ import clsx from "clsx";
 import TextArea from "./TextArea";
 import Link from "@material-ui/core/Link";
 
+const getIconSizeFromFontSize = theme => {
+  var fontSizeBody = theme.typography.body1.fontSize;
+  var format = "rem";
+  if (fontSizeBody.search("px") > -1) {
+    format = "px";
+  }
+  console.log(format, "format");
+  var index = fontSizeBody.search(format);
+  var size = fontSizeBody.substring(0, index);
+  return `${size * 1.7}${format}`;
+};
+
 const styles = theme => {
   return {
     documentImage: {
@@ -33,7 +45,7 @@ const styles = theme => {
       overflowWrap: "break-word"
     },
     linkIcon: {
-      fontSize: theme.typography.body1.fontSize,
+      fontSize: getIconSizeFromFontSize(theme),
       marginRight: theme.spacing(0.5),
       verticalAlign: "middle"
     },

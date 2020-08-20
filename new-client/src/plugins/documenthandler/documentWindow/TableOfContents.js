@@ -34,7 +34,7 @@ function NestedListItemRaw(props) {
       component="li"
       size="small"
       onClick={props.onCLick}
-      style={{ paddingLeft: props.theme.spacing(props.level) }}
+      style={{ paddingLeft: props.theme.spacing(props.level * 3) }}
     >
       <ListItemText>{props.children}</ListItemText>
     </ListItem>
