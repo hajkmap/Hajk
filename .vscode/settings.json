@@ -1,4 +1,5 @@
 {
   "editor.formatOnSave": true,
-  "eslint.workingDirectories": ["./new-admin", "./new-client"]
+  "eslint.workingDirectories": ["./new-admin", "./new-client"],
+  "cSpell.words": ["koordinat"]
 }

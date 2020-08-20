@@ -62,6 +62,7 @@ class PanelHeader extends Component {
 
   static propTypes = {
     classes: propTypes.object.isRequired,
+    color: propTypes.string,
     mode: propTypes.oneOf(["window", "maximized", "minimized"]),
     onClose: propTypes.func.isRequired,
     onMaximize: propTypes.func.isRequired,
@@ -133,6 +134,7 @@ class PanelHeader extends Component {
             this.maximize(e);
           }
         }}
+        style={{ backgroundColor: this.props.color }}
       >
         <nav className={classes.iconsLeft}>
           {this.state.mode === "minimized" ? (
