@@ -36,7 +36,8 @@ class DocumentWindowBase extends React.PureComponent {
             return {
               documentTitle: title,
               document: document,
-              documentColor: referringMenuItem ? referringMenuItem.color : null
+              documentColor: referringMenuItem ? referringMenuItem.color : null,
+              showPrintWindow: false
             };
           },
           () => {

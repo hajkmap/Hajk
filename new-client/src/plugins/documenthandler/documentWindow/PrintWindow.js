@@ -8,7 +8,6 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import { borderTop } from "@material-ui/system";
 
 const styles = theme => ({
   headerContainer: {
@@ -34,12 +33,38 @@ class PrintWindow extends React.PureComponent {
     showPrintWindow: false,
     printText: false,
     printImages: false,
-    printMaps: false
+    printMaps: false,
+    documents: []
   };
 
   constructor(props) {
     super(props);
+    this.getAllDocuments();
   }
+
+  getAllDocuments = () => {
+    const { model, options } = this.props;
+    const filteredMenu = options.menuConfig.menu.filter(
+      item => item.document !== ""
+    );
+
+    return filteredMenu.map((item, id) => {
+      return new Promise((resolve, reject) => {
+        model.fetchJsonDocument(item.document).then(document => {
+          return this.setState(
+            () => {
+              return {
+                documents: [...this.state.documents, { document }]
+              };
+            },
+            () => {
+              resolve(); //Ensure setState is run
+            }
+          );
+        });
+      });
+    });
+  };
 
   renderCheckboxes() {
     return (
@@ -107,7 +132,8 @@ class PrintWindow extends React.PureComponent {
 
   render() {
     const { classes, togglePrintWindow, activeDocument } = this.props;
-    console.log("activeDocument: ", activeDocument);
+    const { documents } = this.state;
+    console.log("this.state: ", this.state);
 
     return (
       <>
