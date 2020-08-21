@@ -8,21 +8,21 @@ import Bookmarks from "@material-ui/icons/Bookmarks";
 
 import Dialog from "../components/Dialog.js";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     paper: {
-      marginBottom: theme.spacing(1)
+      marginBottom: theme.spacing(1),
     },
     button: {
-      minWidth: "unset"
-    }
+      minWidth: "unset",
+    },
   };
 };
 
 class Preset extends React.PureComponent {
   static propTypes = {
     classes: propTypes.object.isRequired,
-    appModel: propTypes.object.isRequired
+    appModel: propTypes.object.isRequired,
   };
 
   state = {
@@ -30,14 +30,14 @@ class Preset extends React.PureComponent {
     view: null,
     location: null,
     zoom: null,
-    layers: null
+    layers: null,
   };
 
   constructor(props) {
     super(props);
     this.type = "Preset"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.config = props.appModel.config.mapConfig.tools.find(
-      t => t.type === "preset"
+      (t) => t.type === "preset"
     );
 
     this.appModel = props.appModel;
@@ -53,7 +53,7 @@ class Preset extends React.PureComponent {
   }
 
   // Show dropdown menu, anchored to the element clicked
-  handleClick = event => {
+  handleClick = (event) => {
     this.setState({ anchorEl: event.currentTarget });
   };
 
@@ -77,7 +77,7 @@ class Preset extends React.PureComponent {
         this.setState({
           location: location,
           zoom: zoom,
-          layers: l
+          layers: l,
         });
         this.openDialog();
       } else {
@@ -87,7 +87,7 @@ class Preset extends React.PureComponent {
       this.props.enqueueSnackbar(
         "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
         {
-          variant: "warning"
+          variant: "warning",
         }
       );
       console.error(
@@ -106,7 +106,7 @@ class Preset extends React.PureComponent {
       menuItems.push(
         <MenuItem
           key={index}
-          onClick={event => this.handleItemClick(event, item)}
+          onClick={(event) => this.handleItemClick(event, item)}
         >
           {item.name}
         </MenuItem>
@@ -120,48 +120,48 @@ class Preset extends React.PureComponent {
     view.animate({
       center: location,
       zoom: zoom,
-      duration: duration
+      duration: duration,
     });
   }
 
   openDialog = () => {
     this.setState({
-      dialogOpen: true
+      dialogOpen: true,
     });
   };
 
   closeDialog = () => {
     var visibleLayers = this.state.layers.split(",");
     this.setState({
-      dialogOpen: false
+      dialogOpen: false,
     });
     this.displayMap(visibleLayers);
   };
 
   abortDialog = () => {
     this.setState({
-      dialogOpen: false
+      dialogOpen: false,
     });
   };
 
   displayMap(visibleLayers) {
     const layers = this.map.getLayers().getArray();
 
-    visibleLayers.forEach(arrays =>
+    visibleLayers.forEach((arrays) =>
       layers
         .filter(
-          layer =>
+          (layer) =>
             layer.getProperties()["layerInfo"] &&
             layer.getProperties()["layerInfo"]["layerType"] !== "base"
         )
-        .forEach(layer => {
+        .forEach((layer) => {
           if (layer.getProperties()["name"] === arrays) {
             this.globalObserver.publish("layerswitcher.showLayer", layer);
             layer.setVisible(true);
           }
           if (
             visibleLayers.some(
-              arrays => arrays === layer.getProperties()["name"]
+              (arrays) => arrays === layer.getProperties()["name"]
             )
           ) {
             if (layer.layerType === "group") {
@@ -189,7 +189,7 @@ class Preset extends React.PureComponent {
             text: "Alla lager i kartan kommer nu att släckas.",
             headerText: "Visa snabbval",
             buttonText: "OK",
-            abortText: "Avbryt"
+            abortText: "Avbryt",
           }}
           open={this.state.dialogOpen}
           onClose={this.closeDialog}

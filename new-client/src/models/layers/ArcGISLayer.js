@@ -22,7 +22,7 @@
 
 function toParamString(obj) {
   return Object.keys(obj)
-    .map(k => `${k}=${obj[k]}`)
+    .map((k) => `${k}=${obj[k]}`)
     .join("&");
 }
 
@@ -42,9 +42,9 @@ var ArcGISLayerProperties = {
     413888.8487813738,
     6581993.154569996,
     416840.2595669881,
-    6584784.713516495
+    6584784.713516495,
   ],
-  singleTile: false
+  singleTile: false,
 };
 
 /**
@@ -66,7 +66,7 @@ var ArcGISLayer = {
    */
   validInfo: true,
 
-  initialize: function() {
+  initialize: function () {
     LayerModel.prototype.initialize.call(this);
     var extent = this.get("extent");
     if (Array.isArray(extent)) {
@@ -86,8 +86,8 @@ var ArcGISLayer = {
         source: new ol.source.ImageArcGISRest({
           attributions: this.getAttributions(),
           url: this.get("url"),
-          params: this.get("params")
-        })
+          params: this.get("params"),
+        }),
       });
     } else {
       this.layer = new ol.layer.Tile({
@@ -99,20 +99,20 @@ var ArcGISLayer = {
         source: new ol.source.TileArcGISRest({
           attributions: this.getAttributions(),
           url: this.get("url"),
-          params: this.get("params")
-        })
+          params: this.get("params"),
+        }),
       });
     }
 
-    this.layer.getSource().on("tileloaderror", e => {
+    this.layer.getSource().on("tileloaderror", (e) => {
       this.tileLoadError();
     });
 
-    this.layer.getSource().on("tileloadend", e => {
+    this.layer.getSource().on("tileloadend", (e) => {
       this.tileLoadOk();
     });
 
-    this.layer.on("change:visible", e => {
+    this.layer.on("change:visible", (e) => {
       if (!this.get("visible")) {
         this.tileLoadOk();
       }
@@ -128,13 +128,13 @@ var ArcGISLayer = {
    * @param {object} data - response data from request
    * @param {function} callback
    */
-  parseFeatueInfoResponse: function(data, callback) {
+  parseFeatueInfoResponse: function (data, callback) {
     if (data && data.results && Array.isArray(data.results)) {
       if (data.results.length === 0) {
         callback();
       }
 
-      data.results.forEach(result => {
+      data.results.forEach((result) => {
         var features = new ol.format.EsriJSON().readFeatures(result);
         callback(features);
       });
@@ -149,11 +149,9 @@ var ArcGISLayer = {
    * @param {external:"ol.coordinate"} coordinate
    * @return {object} query params
    */
-  getQueryParams: function(coordinate) {
+  getQueryParams: function (coordinate) {
     var layers = this.get("params")["LAYERS"].replace("show", "visible"),
-      size = this.get("map")
-        .getMap()
-        .getSize(),
+      size = this.get("map").getMap().getSize(),
       extent = this.get("map")
         .getMap()
         .getView()
@@ -170,7 +168,7 @@ var ArcGISLayer = {
       mapExtent: extent,
       imageDisplay: imgd,
       returnGeometry: true,
-      f: "json"
+      f: "json",
     };
   },
 
@@ -180,7 +178,7 @@ var ArcGISLayer = {
    * @param {external:"ol.feature"} feature
    * @return {external:"ol.style"} style
    */
-  getFeatureInformation: function(params) {
+  getFeatureInformation: function (params) {
     var url = this.get("url");
     url += "/identify?";
     url += toParamString(this.getQueryParams(params.coordinate));
@@ -188,12 +186,12 @@ var ArcGISLayer = {
     $.ajax({
       url: url,
       dataType: "json",
-      success: data => {
+      success: (data) => {
         this.parseFeatueInfoResponse(data, params.success);
       },
-      error: rsp => {
+      error: (rsp) => {
         params.error();
-      }
+      },
     });
   },
 
@@ -201,7 +199,7 @@ var ArcGISLayer = {
    * Triggers when a tile fails to load.
    * @instance
    */
-  tileLoadError: function() {
+  tileLoadError: function () {
     this.set("status", "loaderror");
   },
 
@@ -209,9 +207,9 @@ var ArcGISLayer = {
    * Triggers when a tile loads.
    * @instance
    */
-  tileLoadOk: function() {
+  tileLoadOk: function () {
     this.set("status", "ok");
-  }
+  },
 };
 
 /**

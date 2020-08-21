@@ -15,7 +15,7 @@ class Routing extends React.PureComponent {
       map: props.map,
       app: props.app,
       options: props.options,
-      localObserver: this.localObserver
+      localObserver: this.localObserver,
     });
   }
 
@@ -29,7 +29,7 @@ class Routing extends React.PureComponent {
           title: "Navigation",
           description: "Hitta rätt väg till din destination",
           height: "auto",
-          width: 400
+          width: 400,
         }}
       >
         <RoutingView

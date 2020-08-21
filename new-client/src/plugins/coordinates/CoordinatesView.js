@@ -11,30 +11,30 @@ import TextField from "@material-ui/core/TextField";
 
 import { withSnackbar } from "notistack";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex",
     flexGrow: 1,
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   text: {
     "& .ol-mouse-position": {
       top: "unset",
       right: "unset",
-      position: "unset"
-    }
+      position: "unset",
+    },
   },
   table: {},
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
-    marginTop: theme.spacing(2)
-  }
+    marginTop: theme.spacing(2),
+  },
 });
 
 class CoordinatesView extends React.PureComponent {
   state = {
-    transformedCoordinates: []
+    transformedCoordinates: [],
   };
 
   constructor(props) {
@@ -45,9 +45,9 @@ class CoordinatesView extends React.PureComponent {
 
     this.localObserver.subscribe(
       "setTransformedCoordinates",
-      transformedCoordinates => {
+      (transformedCoordinates) => {
         this.setState({
-          transformedCoordinates: transformedCoordinates
+          transformedCoordinates: transformedCoordinates,
         });
       }
     );
@@ -66,8 +66,8 @@ class CoordinatesView extends React.PureComponent {
           persist: true,
           anchorOrigin: {
             vertical: "bottom",
-            horizontal: "center"
-          }
+            horizontal: "center",
+          },
         }
       );
     });

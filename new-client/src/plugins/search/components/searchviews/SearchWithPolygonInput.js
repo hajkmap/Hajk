@@ -22,7 +22,7 @@ import React from "react";
 
 class SearchWithPolygonInput extends React.PureComponent {
   state = {
-    polygonDrawn: false
+    polygonDrawn: false,
   };
   componentDidMount() {
     const { model, onSearchDone, localObserver } = this.props;
@@ -34,7 +34,7 @@ class SearchWithPolygonInput extends React.PureComponent {
       () => {
         this.setState({ polygonDrawn: true });
       },
-      featureCollections => {
+      (featureCollections) => {
         onSearchDone(featureCollections);
       }
     );

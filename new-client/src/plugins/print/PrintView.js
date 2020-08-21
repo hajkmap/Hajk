@@ -20,7 +20,7 @@ import {
   Popover,
   Tooltip,
   IconButton,
-  FormControlLabel
+  FormControlLabel,
 } from "@material-ui/core";
 import PaletteIcon from "@material-ui/icons/Palette";
 
@@ -37,18 +37,18 @@ import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 225
+    minWidth: 225,
   },
   mapTextColorLabel: {
-    margin: 0
-  }
+    margin: 0,
+  },
 });
 
 class PrintView extends React.PureComponent {
@@ -58,7 +58,7 @@ class PrintView extends React.PureComponent {
     localObserver: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
-    closeSnackbar: PropTypes.func.isRequired
+    closeSnackbar: PropTypes.func.isRequired,
   };
 
   static defaultProps = {};
@@ -71,7 +71,7 @@ class PrintView extends React.PureComponent {
     mapTitle: "", // User can set a title that will get printed on the map
     mapTextColor: "#ffffff", // Default color of text printed on the map
     printInProgress: false,
-    previewLayerVisible: false
+    previewLayerVisible: false,
   };
 
   previewLayer = null;
@@ -84,7 +84,7 @@ class PrintView extends React.PureComponent {
     a2: [594, 420],
     a3: [420, 297],
     a4: [297, 210],
-    a5: [210, 148]
+    a5: [210, 148],
   };
 
   // Default scales, used if none supplied in options
@@ -100,7 +100,7 @@ class PrintView extends React.PureComponent {
     50000,
     100000,
     200000,
-    500000
+    500000,
   ];
 
   // Default colors for color picker used to set text color (used in map title, scale, etc)
@@ -118,7 +118,7 @@ class PrintView extends React.PureComponent {
     "#B8E986",
     "#000000",
     "#4A4A4A",
-    "#9B9B9B"
+    "#9B9B9B",
   ];
 
   // Used to store some values that will be needed for resetting the map
@@ -133,7 +133,7 @@ class PrintView extends React.PureComponent {
    * @param {*} scale Number that will be prefixed with "1:"
    * @returns {string} Input parameter, prefixed by "1:" and with spaces as thousands separator, e.g "5000" -> "1:5 000".
    */
-  getUserFriendlyScale = scale => {
+  getUserFriendlyScale = (scale) => {
     return `1:${Number(scale).toLocaleString("sv-SE")}`;
   };
 
@@ -184,12 +184,12 @@ class PrintView extends React.PureComponent {
       style: new Style({
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.7)",
-          width: 2
+          width: 2,
         }),
         fill: new Fill({
-          color: "rgba(255, 145, 20, 0.4)"
-        })
-      })
+          color: "rgba(255, 145, 20, 0.4)",
+        }),
+      }),
     });
     this.map.addLayer(this.previewLayer);
   }
@@ -222,7 +222,7 @@ class PrintView extends React.PureComponent {
 
     const paper = {
       width: size.width * dpi,
-      height: size.height * dpi
+      height: size.height * dpi,
     };
 
     const center = this.previewFeature
@@ -239,11 +239,11 @@ class PrintView extends React.PureComponent {
           [center[0] - w, center[1] + y],
           [center[0] + w, center[1] + y],
           [center[0] + w, center[1] - y],
-          [center[0] - w, center[1] - y]
-        ]
+          [center[0] - w, center[1] - y],
+        ],
       ],
       feature = new Feature({
-        geometry: new Polygon(coords)
+        geometry: new Polygon(coords),
       });
 
     // Each time print settings change, we actually render a new preview feature,
@@ -254,7 +254,7 @@ class PrintView extends React.PureComponent {
     this.previewFeature = feature;
     this.previewLayer.getSource().addFeature(feature);
     this.translate = new Translate({
-      features: new Collection([feature])
+      features: new Collection([feature]),
     });
     this.map.addInteraction(this.translate);
   }
@@ -274,7 +274,7 @@ class PrintView extends React.PureComponent {
    * @param {*} url
    * @returns {Promise}
    */
-  getImageDataBlogFromUrl = url => {
+  getImageDataBlogFromUrl = (url) => {
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.setAttribute("crossOrigin", "anonymous"); //getting images from external domain
@@ -296,7 +296,7 @@ class PrintView extends React.PureComponent {
         resolve({
           data: imgCanvas.toDataURL("image/png"), // read data blob from canvas
           width: imgCanvas.width, // also return dimensions so we can use them later
-          height: imgCanvas.height
+          height: imgCanvas.height,
         });
       };
 
@@ -316,7 +316,7 @@ class PrintView extends React.PureComponent {
     const {
       data,
       width: sourceWidth,
-      height: sourceHeight
+      height: sourceHeight,
     } = await this.getImageDataBlogFromUrl(url);
 
     // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
@@ -326,7 +326,7 @@ class PrintView extends React.PureComponent {
     return { data, width, height };
   };
 
-  initiatePrint = e => {
+  initiatePrint = (e) => {
     // Print can be initiated by submitting the <form>. In that case, we must prevent default behavior.
     e.preventDefault();
     // Print starts, tell the user
@@ -335,7 +335,7 @@ class PrintView extends React.PureComponent {
       "Utskrift pågår – var god vänta…",
       {
         variant: "info",
-        persist: true
+        persist: true,
       }
     );
 
@@ -370,7 +370,7 @@ class PrintView extends React.PureComponent {
       originalCenter,
       originalResolution,
       scaleResolution,
-      snackbarKey
+      snackbarKey,
     };
 
     this.map.once("rendercomplete", async () => {
@@ -394,7 +394,7 @@ class PrintView extends React.PureComponent {
       const mapContext = mapCanvas.getContext("2d");
 
       // Each canvas element inside OpenLayer's viewport should get printed
-      document.querySelectorAll(".ol-viewport canvas").forEach(canvas => {
+      document.querySelectorAll(".ol-viewport canvas").forEach((canvas) => {
         if (canvas.width > 0) {
           const opacity = canvas.parentNode.style.opacity;
           mapContext.globalAlpha = opacity === "" ? 1 : Number(opacity);
@@ -419,7 +419,7 @@ class PrintView extends React.PureComponent {
         orientation,
         format,
         putOnlyUsedFonts: true,
-        compress: true
+        compress: true,
       });
 
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
@@ -431,7 +431,7 @@ class PrintView extends React.PureComponent {
           const {
             data: logoData,
             width: logoWidth,
-            height: logoHeight
+            height: logoHeight,
           } = await this.getImageForPdfFromUrl(
             this.options.logo,
             this.options.logoMaxWidth
@@ -481,7 +481,7 @@ class PrintView extends React.PureComponent {
       // Print done, hide messages
       this.props.closeSnackbar(snackbarKey);
       this.props.enqueueSnackbar("Din utskrift är klar!", {
-        variant: "success"
+        variant: "success",
       });
       this.setState({ printInProgress: false });
     });
@@ -525,7 +525,7 @@ class PrintView extends React.PureComponent {
     this.props.enqueueSnackbar(
       "Du avbröt utskriften – ingen data har sparats",
       {
-        variant: "warning"
+        variant: "warning",
       }
     );
     this.setState({ printInProgress: false });
@@ -536,21 +536,21 @@ class PrintView extends React.PureComponent {
    *
    * @param {Object} event
    */
-  handleChange = event => {
+  handleChange = (event) => {
     this.setState({
-      [event.target.name]: event.target.value
+      [event.target.name]: event.target.value,
     });
   };
 
-  toggleColorPicker = e => {
+  toggleColorPicker = (e) => {
     this.setState({ anchorEl: e.currentTarget });
   };
 
-  hideColorPicker = e => {
+  hideColorPicker = (e) => {
     this.setState({ anchorEl: null });
   };
 
-  handleMapTextColorChangeComplete = color => {
+  handleMapTextColorChangeComplete = (color) => {
     this.hideColorPicker();
     this.setState({ mapTextColor: color.hex });
   };
@@ -601,7 +601,7 @@ class PrintView extends React.PureComponent {
               onChange={this.handleChange}
               inputProps={{
                 name: "format",
-                id: "format"
+                id: "format",
               }}
             >
               <MenuItem value={"a2"}>A2</MenuItem>
@@ -617,7 +617,7 @@ class PrintView extends React.PureComponent {
               onChange={this.handleChange}
               inputProps={{
                 name: "orientation",
-                id: "orientation"
+                id: "orientation",
               }}
             >
               <MenuItem value={"landscape"}>Liggande</MenuItem>
@@ -631,7 +631,7 @@ class PrintView extends React.PureComponent {
               onChange={this.handleChange}
               inputProps={{
                 name: "resolution",
-                id: "resolution"
+                id: "resolution",
               }}
             >
               <MenuItem value={72}>72</MenuItem>
@@ -646,7 +646,7 @@ class PrintView extends React.PureComponent {
               onChange={this.handleChange}
               inputProps={{
                 name: "scale",
-                id: "scale"
+                id: "scale",
               }}
             >
               {this.options.scales.map((scale, i) => {
@@ -669,7 +669,7 @@ class PrintView extends React.PureComponent {
               variant="standard"
               inputProps={{
                 id: "mapTitle",
-                name: "mapTitle"
+                name: "mapTitle",
               }}
             />
           </FormControl>
@@ -684,7 +684,7 @@ class PrintView extends React.PureComponent {
                     onClick={this.toggleColorPicker}
                     style={{
                       backgroundColor: this.state.mapTextColor,
-                      marginRight: 4
+                      marginRight: 4,
                     }}
                     size="small"
                     edge="start"
@@ -704,11 +704,11 @@ class PrintView extends React.PureComponent {
             onClose={this.hideColorPicker}
             anchorOrigin={{
               vertical: "bottom",
-              horizontal: "center"
+              horizontal: "center",
             }}
             transformOrigin={{
               vertical: "top",
-              horizontal: "center"
+              horizontal: "center",
             }}
           >
             <ColorPicker

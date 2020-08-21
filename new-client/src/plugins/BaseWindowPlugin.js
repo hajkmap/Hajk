@@ -7,19 +7,19 @@ import {
   Hidden,
   ListItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
 } from "@material-ui/core";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
 
-const styles = theme => {
+const styles = (theme) => {
   return {};
 };
 
 class BaseWindowPlugin extends React.PureComponent {
   state = {
-    windowVisible: false
+    windowVisible: false,
   };
 
   static propTypes = {
@@ -30,7 +30,7 @@ class BaseWindowPlugin extends React.PureComponent {
     map: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
     theme: propTypes.object.isRequired,
-    type: propTypes.string.isRequired
+    type: propTypes.string.isRequired,
   };
 
   constructor(props) {
@@ -39,6 +39,7 @@ class BaseWindowPlugin extends React.PureComponent {
     // There will be defaults in props.custom, so that each plugin has own default title/description
     this.title = props.options.title || props.custom.title;
     this.description = props.options.description || props.custom.description;
+    this.color = props.options.color || props.custom.color;
 
     // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
     this.width = props.options.width || props.custom.width || 400;
@@ -53,7 +54,7 @@ class BaseWindowPlugin extends React.PureComponent {
     const eventName = `${this.type}.showWindow`;
     // Next, subscribe to that event, expect 'opts' array.
     // To find all places where this event is publish, search for 'globalObserver.publish("show'
-    props.app.globalObserver.subscribe(eventName, opts => {
+    props.app.globalObserver.subscribe(eventName, (opts) => {
       this.showWindow(opts);
     });
   }
@@ -62,19 +63,19 @@ class BaseWindowPlugin extends React.PureComponent {
     // visibleAtStart is false by default. Change to true only if option really is 'true'.
     this.props.options.visibleAtStart === true &&
       this.setState({
-        windowVisible: true
+        windowVisible: true,
       });
   }
 
-  handleButtonClick = e => {
+  handleButtonClick = (e) => {
     this.showWindow({
       hideOtherPluginWindows: true,
-      runCallback: true
+      runCallback: true,
     });
     this.props.app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
   };
 
-  showWindow = opts => {
+  showWindow = (opts) => {
     const hideOtherPluginWindows = opts.hideOtherPluginWindows || true,
       runCallback = opts.runCallback || true;
 
@@ -87,7 +88,7 @@ class BaseWindowPlugin extends React.PureComponent {
 
     this.setState(
       {
-        windowVisible: true
+        windowVisible: true,
       },
       () => {
         // If there's a callback defined in custom, run it
@@ -101,7 +102,7 @@ class BaseWindowPlugin extends React.PureComponent {
   closeWindow = () => {
     this.setState(
       {
-        windowVisible: false
+        windowVisible: false,
       },
       () => {
         typeof this.props.custom.onWindowHide === "function" &&
@@ -116,6 +117,7 @@ class BaseWindowPlugin extends React.PureComponent {
         <Window
           globalObserver={this.props.app.globalObserver}
           title={this.title}
+          color={this.color}
           onClose={this.closeWindow}
           open={this.state.windowVisible}
           onResize={this.props.custom.onResize}
@@ -130,7 +132,7 @@ class BaseWindowPlugin extends React.PureComponent {
           position={this.position}
           mode={mode}
           layerswitcherConfig={this.props.app.config.mapConfig.tools.find(
-            t => t.type === "layerswitcher"
+            (t) => t.type === "layerswitcher"
           )}
         >
           {this.props.children}

@@ -11,12 +11,12 @@ class AnchorModel {
     this.map
       .getLayers()
       .getArray()
-      .forEach(layer => {
+      .forEach((layer) => {
         // Grab an unique ID for each layer, we'll need this to save CQL filter value for each layer
         const layerId = layer.get("name");
 
         // Update anchor each time layer visibility changes (to reflect current visible layers)
-        layer.on("change:visible", event => {
+        layer.on("change:visible", (event) => {
           this.localObserver.publish("mapUpdated", this.getAnchor());
         });
 
@@ -30,7 +30,7 @@ class AnchorModel {
       });
   }
 
-  update = e => {
+  update = (e) => {
     // If view is still animating, postpone updating Anchor
     e.target.getAnimating() === false &&
       this.localObserver.publish("mapUpdated", this.getAnchor());
@@ -52,12 +52,12 @@ class AnchorModel {
       .getLayers()
       .getArray()
       .filter(
-        layer =>
+        (layer) =>
           layer.getVisible() &&
           layer.getProperties().name &&
           !Number.isNaN(parseInt(layer.getProperties().name))
       )
-      .map(layer => layer.getProperties().name)
+      .map((layer) => layer.getProperties().name)
       .join(",");
   }
 
@@ -69,7 +69,7 @@ class AnchorModel {
       z: this.map.getView().getZoom(),
       l: this.getVisibleLayers(),
       f: encodeURIComponent(JSON.stringify(this.cqlFilters)),
-      clean: this.getCleanUrl()
+      clean: this.getCleanUrl(),
     });
 
     // Split on "?" and get only the first segment. This prevents

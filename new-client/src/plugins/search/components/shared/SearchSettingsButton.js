@@ -5,24 +5,24 @@ import MoreVert from "@material-ui/icons/MoreVert";
 import Window from "../../../../components/Window.js";
 import SettingsMenu from "./SettingsMenu";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
-    zIndex: 1
-  }
+    zIndex: 1,
+  },
 });
 
 class SearchSettingsButton extends React.Component {
   state = {
-    open: false
+    open: false,
   };
 
-  handleClick = event => {
+  handleClick = (event) => {
     this.setState({
-      open: true
+      open: true,
     });
   };
 
-  close = e => {
+  close = (e) => {
     this.setState({ open: false });
   };
 

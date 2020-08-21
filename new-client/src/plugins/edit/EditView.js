@@ -7,16 +7,16 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import Typography from "@material-ui/core/Typography";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
-    display: "flex"
+    display: "flex",
   },
   formControl: {
-    margin: theme.spacing(3)
+    margin: theme.spacing(3),
   },
   group: {
-    margin: `${theme.spacing(1)}px 0`
-  }
+    margin: `${theme.spacing(1)}px 0`,
+  },
 });
 
 class EditView extends React.PureComponent {
@@ -27,19 +27,19 @@ class EditView extends React.PureComponent {
       enabled: false,
       checked: false,
       sources: props.model.getSources(),
-      selectedSource: undefined
+      selectedSource: undefined,
     };
   }
 
   componentDidMount() {
-    this.props.observer.subscribe("editFeature", attr => {
+    this.props.observer.subscribe("editFeature", (attr) => {
       this.setState({
         editFeature: this.props.model.editFeature,
-        editSource: this.props.model.editSource
+        editSource: this.props.model.editSource,
       });
     });
 
-    this.props.observer.subscribe("removeFeature", feature => {
+    this.props.observer.subscribe("removeFeature", (feature) => {
       //TODO: confirm
     });
   }
@@ -59,7 +59,7 @@ class EditView extends React.PureComponent {
     var changeActiveLayer = () => {
       this.setState({
         loading: true,
-        enabled: true
+        enabled: true,
       });
       this.props.model.setLayer(serviceId, clear);
     };
@@ -88,10 +88,10 @@ class EditView extends React.PureComponent {
               control={
                 <Radio
                   checked={source.id === this.state.selectedSource}
-                  onChange={e => {
+                  onChange={(e) => {
                     this.setLayer(e.target.value);
                     this.setState({
-                      selectedSource: e.target.value
+                      selectedSource: e.target.value,
                     });
                   }}
                   value={source.id}

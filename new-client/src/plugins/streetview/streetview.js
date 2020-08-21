@@ -9,7 +9,7 @@ import Observer from "react-event-observer";
 
 class StreetView extends React.PureComponent {
   state = {
-    displayPanorama: false
+    displayPanorama: false,
   };
 
   constructor(props) {
@@ -18,7 +18,7 @@ class StreetView extends React.PureComponent {
     this.localObserver = Observer();
     this.localObserver.subscribe("locationChanged", () => {
       this.setState({
-        displayPanorama: true
+        displayPanorama: true,
       });
     });
 
@@ -26,7 +26,7 @@ class StreetView extends React.PureComponent {
       map: props.map,
       app: props.app,
       localObserver: this.localObserver,
-      apiKey: props.options.apiKey
+      apiKey: props.options.apiKey,
     });
   }
 
@@ -57,7 +57,7 @@ class StreetView extends React.PureComponent {
           left: undefined,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
-          onResize: this.onResize
+          onResize: this.onResize,
         }}
       >
         <StreetViewView

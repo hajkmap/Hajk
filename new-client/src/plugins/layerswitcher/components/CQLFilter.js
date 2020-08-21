@@ -4,7 +4,7 @@ import {
   OutlinedInput,
   IconButton,
   InputAdornment,
-  Tooltip
+  Tooltip,
 } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 
@@ -33,7 +33,7 @@ const CQLFilter = ({ layer }) => {
         fullWidth
         placeholder="foo='bar' AND fii='baz'"
         value={cqlFilter}
-        onChange={e => setCqlFilter(e.target.value)}
+        onChange={(e) => setCqlFilter(e.target.value)}
         endAdornment={
           <InputAdornment position="end">
             <Tooltip title="Tryck för att ladda om lagret med angivet filter">

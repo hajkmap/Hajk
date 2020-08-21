@@ -6,7 +6,7 @@ import {
   Polygon,
   MultiPolygon,
   LineString,
-  MultiLineString
+  MultiLineString,
 } from "ol/geom.js";
 
 function componentToHex(c) {
@@ -28,7 +28,7 @@ function colorToArray(color, type) {
     res = reg
       .exec(color)[1]
       .split(",")
-      .map(a => parseFloat(a));
+      .map((a) => parseFloat(a));
     if (type === "rgb") {
       res.push(1);
     }
@@ -120,7 +120,7 @@ function toKmlString(str, type) {
           coordinates = coordinates
             .replace(/\)/g, "")
             .split(",")
-            .map(coordString => {
+            .map((coordString) => {
               var coords = coordString.split(" ");
               return coords[0] + " " + coords[1];
             });
@@ -193,7 +193,7 @@ function safeInject(string) {
 
 function filterProperties(template, properties) {
   var props = {};
-  Object.keys(properties).forEach(property => {
+  Object.keys(properties).forEach((property) => {
     var regExp = new RegExp(`{export:${property}}`);
     if (regExp.test(template)) {
       props[property] = properties[property];
@@ -203,7 +203,7 @@ function filterProperties(template, properties) {
 }
 
 export function transform(features, from, to) {
-  return features.map(feature => {
+  return features.map((feature) => {
     var c = feature.clone(),
       style = Array.isArray(feature.getStyle())
         ? feature.getStyle()[1]
@@ -283,7 +283,7 @@ export function createXML(features, name) {
         properties = filterProperties(feature.infobox, properties);
       }
 
-      Object.keys(properties).forEach(property => {
+      Object.keys(properties).forEach((property) => {
         if (
           typeof value === "string" ||
           typeof value === "number" ||

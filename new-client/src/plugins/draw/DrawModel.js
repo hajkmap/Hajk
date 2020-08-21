@@ -4,7 +4,7 @@ import {
   Stroke,
   Style,
   Text,
-  Icon
+  Icon,
 } from "ol/style.js";
 import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
@@ -28,7 +28,7 @@ class DrawModel {
     this.source = new VectorSource();
     this.vector = new VectorLayer({
       source: this.source,
-      name: "drawLayer"
+      name: "drawLayer",
     });
 
     this.map.addLayer(this.vector);
@@ -80,23 +80,23 @@ class DrawModel {
     this.sketchStyle = [
       new Style({
         fill: new Fill({
-          color: "rgba(255, 255, 255, 0.5)"
+          color: "rgba(255, 255, 255, 0.5)",
         }),
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.5)",
-          width: 4
+          width: 4,
         }),
         image: new CircleStyle({
           radius: 6,
           fill: new Fill({
-            color: "rgba(0, 0, 0, 0.5)"
+            color: "rgba(0, 0, 0, 0.5)",
           }),
           stroke: new Stroke({
             color: "rgba(255, 255, 255, 0.5)",
-            width: 2
-          })
-        })
-      })
+            width: 2,
+          }),
+        }),
+      }),
     ];
 
     this.localObserver.subscribe("update", () => {
@@ -106,23 +106,20 @@ class DrawModel {
 
   redraw() {
     this.vector.changed();
-    this.source.getFeatures().forEach(feature => {
+    this.source.getFeatures().forEach((feature) => {
       this.updateText(feature);
     });
   }
 
   updateText(feature) {
-    feature
-      .getStyle()[1]
-      .getText()
-      .setText(this.getLabelText(feature));
+    feature.getStyle()[1].getText().setText(this.getLabelText(feature));
   }
 
   getStyle = (feature, forcedProperties) => {
     var geometryName = feature.getGeometryName();
 
     function getLineDash() {
-      var scale = (a, f) => a.map(b => f * b),
+      var scale = (a, f) => a.map((b) => f * b),
         width = lookupWidth.call(this),
         style = lookupStyle.call(this),
         dash = [12, 7],
@@ -181,7 +178,7 @@ class DrawModel {
         : rgba.call(this);
 
       var fill = new Fill({
-        color: color
+        color: color,
       });
 
       return fill;
@@ -245,7 +242,7 @@ class DrawModel {
       var stroke = new Stroke({
         color: color,
         width: width,
-        lineDash: lineDash
+        lineDash: lineDash,
       });
 
       return stroke;
@@ -266,7 +263,7 @@ class DrawModel {
         anchor: [0.5, 1],
         anchorXUnits: "fraction",
         anchorYUnits: "fraction",
-        src: iconSrc
+        src: iconSrc,
       });
 
       var dot = new CircleStyle({
@@ -274,12 +271,12 @@ class DrawModel {
         fill: new Fill({
           color: forcedProperties
             ? forcedProperties.pointColor
-            : this.pointColor
+            : this.pointColor,
         }),
         stroke: new Stroke({
           color: "rgb(255, 255, 255)",
-          width: 2
-        })
+          width: 2,
+        }),
       });
 
       if (forcedProperties) {
@@ -326,13 +323,13 @@ class DrawModel {
           stroke: !this.fontStroke
             ? new Stroke({
                 color: this.fontBackColor,
-                width: 1
+                width: 1,
               })
             : null,
           offsetX: 0,
           offsetY: offsetY(),
           rotation: 0,
-          scale: 1.4
+          scale: 1.4,
         });
       } else {
         return new Text({
@@ -344,12 +341,12 @@ class DrawModel {
           overflow: true,
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 0.5)",
-            width: 3
+            width: 3,
           }),
           offsetX: 0,
           offsetY: -10,
           rotation: 0,
-          scale: 1
+          scale: 1,
         });
       }
     }
@@ -361,15 +358,15 @@ class DrawModel {
         stroke: new Stroke({
           color: "rgba(255, 255, 255, 0.5)",
           width:
-            type === "Polygon" ? this.polygonLineWidth + 2 : this.lineWidth + 2
-        })
+            type === "Polygon" ? this.polygonLineWidth + 2 : this.lineWidth + 2,
+        }),
       }),
       new Style({
         fill: getFill.call(this),
         stroke: getStroke.call(this),
         image: getImage.call(this),
-        text: getText.call(this)
-      })
+        text: getText.call(this),
+      }),
     ];
   };
 
@@ -378,22 +375,22 @@ class DrawModel {
     return [
       new Style({
         fill: new Fill({
-          color: "rgba(255, 255, 255, 0.3)"
+          color: "rgba(255, 255, 255, 0.3)",
         }),
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.5)",
-          width: 3
+          width: 3,
         }),
         image: displayLabel
           ? null
           : new CircleStyle({
               radius: 5,
               stroke: new Stroke({
-                color: "rgba(0, 0, 0, 0.7)"
+                color: "rgba(0, 0, 0, 0.7)",
               }),
               fill: new Fill({
-                color: "rgba(255, 255, 255, 0.2)"
-              })
+                color: "rgba(255, 255, 255, 0.2)",
+              }),
             }),
         text: new Text({
           textAlign: "center",
@@ -404,14 +401,14 @@ class DrawModel {
           overflow: true,
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 0.5)",
-            width: 3
+            width: 3,
           }),
           offsetX: 0,
           offsetY: 0,
           rotation: 0,
-          scale: 1
-        })
-      })
+          scale: 1,
+        }),
+      }),
     ];
   };
 
@@ -423,13 +420,13 @@ class DrawModel {
     this.drawTooltip.setPosition(undefined);
   };
 
-  handleDrawStart = e => {
+  handleDrawStart = (e) => {
     if (this.circleRadius > 0 && e.feature.getGeometryName() === "Circle") {
       e.feature.getGeometry().setRadius(this.circleRadius);
       this.draw.finishDrawing();
     }
 
-    e.feature.getGeometry().on("change", evt => {
+    e.feature.getGeometry().on("change", (evt) => {
       var toolTip = "",
         coord = undefined,
         pointerCoord;
@@ -461,7 +458,7 @@ class DrawModel {
     });
   };
 
-  handleDrawEnd = e => {
+  handleDrawEnd = (e) => {
     if (this.text) {
       this.localObserver.publish("dialog", e.feature);
     }
@@ -470,9 +467,9 @@ class DrawModel {
     e.feature.setStyle(this.getStyle(e.feature));
   };
 
-  removeSelected = e => {
+  removeSelected = (e) => {
     var first = true;
-    this.map.forEachFeatureAtPixel(e.pixel, feature => {
+    this.map.forEachFeatureAtPixel(e.pixel, (feature) => {
       if (feature.getProperties().user === true && first) {
         this.source.removeFeature(feature);
       }
@@ -485,7 +482,7 @@ class DrawModel {
       type = feature.getGeometry().getType(),
       newCoordinates = [];
     feature.setProperties({
-      user: true
+      user: true,
     });
 
     if (
@@ -493,14 +490,14 @@ class DrawModel {
       feature.getProperties().geometryType !== "Text"
     ) {
       feature.setProperties({
-        text: ""
+        text: "",
       });
     }
 
     if (type === "LineString") {
       coordinates.forEach((c, i) => {
         var pairs = [];
-        c.forEach(digit => {
+        c.forEach((digit) => {
           if (digit !== 0) {
             pairs.push(digit);
           }
@@ -513,7 +510,7 @@ class DrawModel {
       coordinates.forEach((polygon, i) => {
         polygon.forEach((vertex, j) => {
           var pairs = [];
-          vertex.forEach(digit => {
+          vertex.forEach((digit) => {
             if (digit !== 0) {
               pairs.push(digit);
             }
@@ -534,7 +531,7 @@ class DrawModel {
       feature.getProperties().style
     ) {
       feature.setProperties({
-        radius: JSON.parse(feature.getProperties().style).radius
+        radius: JSON.parse(feature.getProperties().style).radius,
       });
     }
   }
@@ -551,7 +548,7 @@ class DrawModel {
     }
 
     if (features.length > 0) {
-      features.forEach(feature => {
+      features.forEach((feature) => {
         this.tanslateImportedFeature(feature);
       });
 
@@ -565,12 +562,12 @@ class DrawModel {
     }
   };
 
-  export = callback => {
+  export = (callback) => {
     var features = this.source.getFeatures(),
       transformed = [],
       postData;
 
-    features.forEach(feature => {
+    features.forEach((feature) => {
       var c = feature.clone();
       var circleRadius = false;
       if (c.getGeometry() instanceof Circle) {
@@ -591,7 +588,7 @@ class DrawModel {
           geometryType:
             c.getGeometryName() === "geometry"
               ? c.getProperties().geometryType
-              : c.getGeometryName()
+              : c.getGeometryName(),
         });
       }
 
@@ -604,13 +601,13 @@ class DrawModel {
         method: "POST",
         credentials: "same-origin",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          data: postData
-        })
-      }).then(response => {
-        response.text().then(fileUrl => {
+          data: postData,
+        }),
+      }).then((response) => {
+        response.text().then((fileUrl) => {
           if (callback) {
             callback(fileUrl);
           }
@@ -628,7 +625,7 @@ class DrawModel {
       fillColor: "",
       strokeColor: "",
       strokeWidth: "",
-      strokeDash: ""
+      strokeDash: "",
     };
 
     obj.text = style.getText() ? style.getText().getText() : "";
@@ -643,10 +640,7 @@ class DrawModel {
     }
     obj.pointColor =
       style.getImage() instanceof CircleStyle
-        ? style
-            .getImage()
-            .getFill()
-            .getColor()
+        ? style.getImage().getFill().getColor()
         : "";
     obj.fillColor = style.getFill().getColor();
     obj.strokeColor = style.getStroke().getColor();
@@ -661,8 +655,8 @@ class DrawModel {
     this.addInteraction(type);
   }
 
-  editText = e => {
-    this.map.forEachFeatureAtPixel(e.pixel, feature => {
+  editText = (e) => {
+    this.map.forEachFeatureAtPixel(e.pixel, (feature) => {
       if (
         feature.getProperties().type &&
         feature.getProperties().type === "Text"
@@ -674,7 +668,7 @@ class DrawModel {
 
   setEditActive() {
     let features = new Collection();
-    this.source.getFeatures().forEach(feature => {
+    this.source.getFeatures().forEach((feature) => {
       features.push(feature);
     });
     this.edit = new Modify({ features: features });
@@ -729,7 +723,7 @@ class DrawModel {
       this.map.removeInteraction(this.move);
     }
     if (this.select) {
-      this.select.getFeatures().forEach(feature => {
+      this.select.getFeatures().forEach((feature) => {
         if (feature.get("_s")) {
           feature.setStyle(feature.get("_s"));
         }
@@ -748,7 +742,7 @@ class DrawModel {
       area = 0,
       position = {
         n: 0,
-        e: 0
+        e: 0,
       };
     geom = feature.getGeometry();
     type = geom.getType();
@@ -757,7 +751,7 @@ class DrawModel {
       case "Point":
         position = {
           n: Math.round(geom.getCoordinates()[1]),
-          e: Math.round(geom.getCoordinates()[0])
+          e: Math.round(geom.getCoordinates()[0]),
         };
         break;
       case "LineString":
@@ -782,7 +776,7 @@ class DrawModel {
       length: length,
       area: area,
       radius: radius,
-      position: position
+      position: position,
     });
   }
 
@@ -791,7 +785,7 @@ class DrawModel {
     feature.setProperties({
       type: "Text",
       user: true,
-      text: text
+      text: text,
     });
   }
 
@@ -859,7 +853,7 @@ class DrawModel {
     this.drawTooltip = new Overlay({
       element: this.drawTooltipElement,
       offset: [0, -15],
-      positioning: "bottom-center"
+      positioning: "bottom-center",
     });
     this.map.addOverlay(this.drawTooltip);
   }
@@ -914,7 +908,7 @@ class DrawModel {
         if (style[0] && style[0].getFill && style[0].getFill() === null) {
           style[0].setFill(
             new Fill({
-              color: [0, 0, 0, 0]
+              color: [0, 0, 0, 0],
             })
           );
         }
@@ -944,7 +938,7 @@ class DrawModel {
         }
       }
     });
-    return x.every(c => c) ? x : false;
+    return x.every((c) => c) ? x : false;
   }
 
   addInteraction() {
@@ -969,7 +963,7 @@ class DrawModel {
       type: type,
       style: this.createStyle(),
       geometryFunction: geometryFunction,
-      geometryName: geometryName
+      geometryName: geometryName,
     });
     this.draw.on("drawstart", this.handleDrawStart);
     this.draw.on("drawend", this.handleDrawEnd);

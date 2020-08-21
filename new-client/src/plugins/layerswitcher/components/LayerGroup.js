@@ -6,33 +6,33 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     width: "100%",
     display: "block",
-    padding: "0"
+    padding: "0",
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),
-    flexBasis: "100%"
+    flexBasis: "100%",
   },
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary
+    color: theme.palette.text.secondary,
   },
   disableTransition: {
     borderRadius: "0 !important",
-    boxShadow: "none"
+    boxShadow: "none",
   },
   panel: {
-    marginLeft: "21px"
+    marginLeft: "21px",
   },
   /*groupCheckbox: {
     marginRight: "5px"
@@ -40,30 +40,30 @@ const styles = theme => ({
   caption: {
     display: "flex",
     flexBasis: "100%",
-    borderBottom: "1px solid #ccc"
+    borderBottom: "1px solid #ccc",
   },
   panelSummary: {
     padding: "0px",
-    overflow: "hidden"
+    overflow: "hidden",
   },
   checkBoxIcon: {
     cursor: "pointer",
     float: "left",
     marginRight: "5px",
-    padding: "0"
+    padding: "0",
   },
   arrowIcon: {
-    float: "left"
+    float: "left",
   },
-  Accordion: {}
+  Accordion: {},
 });
 
 const StyledAccordionSummary = withStyles({
   root: {
     minHeight: 35,
     "&$expanded": {
-      minHeight: 35
-    }
+      minHeight: 35,
+    },
   },
   content: {
     transition: "inherit !important",
@@ -71,10 +71,10 @@ const StyledAccordionSummary = withStyles({
     marginBottom: "0",
     "&$expanded": {
       marginTop: "0",
-      marginBottom: "0"
-    }
+      marginBottom: "0",
+    },
   },
-  expanded: {}
+  expanded: {},
 })(AccordionSummary);
 
 class LayerGroup extends React.PureComponent {
@@ -85,12 +85,12 @@ class LayerGroup extends React.PureComponent {
     name: "",
     parent: "-1",
     toggled: false,
-    chapters: []
+    chapters: [],
   };
 
   static defaultProps = {
     child: false,
-    expanded: false
+    expanded: false,
   };
 
   static propTypes = {
@@ -101,7 +101,7 @@ class LayerGroup extends React.PureComponent {
     expanded: propTypes.bool.isRequired,
     group: propTypes.object.isRequired,
     handleChange: propTypes.func,
-    model: propTypes.object.isRequired
+    model: propTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -114,7 +114,7 @@ class LayerGroup extends React.PureComponent {
       .getMap()
       .getLayers()
       .getArray()
-      .forEach(layer => {
+      .forEach((layer) => {
         layer.on("change:visible", () => {
           //
           this.forceUpdate();
@@ -124,13 +124,13 @@ class LayerGroup extends React.PureComponent {
 
   componentDidMount() {
     this.setState({
-      ...this.props.group
+      ...this.props.group,
     });
   }
 
-  handleChange = panel => (event, expanded) => {
+  handleChange = (panel) => (event, expanded) => {
     this.setState({
-      expanded: expanded ? panel : false
+      expanded: expanded ? panel : false,
     });
   };
 
@@ -162,13 +162,10 @@ class LayerGroup extends React.PureComponent {
   };
 
   isToggled() {
-    var layers = this.props.app
-      .getMap()
-      .getLayers()
-      .getArray();
+    var layers = this.props.app.getMap().getLayers().getArray();
     const { group } = this.props;
-    return group.layers.some(layer => {
-      let foundMapLayer = layers.find(mapLayer => {
+    return group.layers.some((layer) => {
+      let foundMapLayer = layers.find((mapLayer) => {
         return mapLayer.get("name") === layer.id;
       });
       if (foundMapLayer && foundMapLayer.getVisible()) {
@@ -180,13 +177,10 @@ class LayerGroup extends React.PureComponent {
   }
 
   isSemiToggled() {
-    var layers = this.props.app
-      .getMap()
-      .getLayers()
-      .getArray();
+    var layers = this.props.app.getMap().getLayers().getArray();
     const { group } = this.props;
-    return group.layers.every(layer => {
-      let foundMapLayer = layers.find(mapLayer => {
+    return group.layers.every((layer) => {
+      let foundMapLayer = layers.find((mapLayer) => {
         return mapLayer.get("name") === layer.id;
       });
       if (foundMapLayer && foundMapLayer.getVisible()) {
@@ -206,10 +200,10 @@ class LayerGroup extends React.PureComponent {
   toggleGroups(visibility, groupsArray) {
     // Sometimes groupsArray is an array of objects:
     Array.isArray(groupsArray) &&
-      groupsArray.forEach(group => {
+      groupsArray.forEach((group) => {
         // First call this function on all groups that might be inside this group
         group.groups.length &&
-          group.groups.forEach(g => {
+          group.groups.forEach((g) => {
             this.toggleGroups(visibility, g);
           });
 
@@ -230,16 +224,13 @@ class LayerGroup extends React.PureComponent {
   }
 
   toggleLayers(visibility, layers) {
-    var mapLayers = this.props.app
-      .getMap()
-      .getLayers()
-      .getArray();
+    var mapLayers = this.props.app.getMap().getLayers().getArray();
 
     mapLayers
-      .filter(mapLayer => {
-        return layers.some(layer => layer.id === mapLayer.get("name"));
+      .filter((mapLayer) => {
+        return layers.some((layer) => layer.id === mapLayer.get("name"));
       })
-      .forEach(mapLayer => {
+      .forEach((mapLayer) => {
         if (mapLayer.layerType === "group") {
           if (visibility === true) {
             this.model.observer.publish("showLayer", mapLayer);
@@ -264,7 +255,7 @@ class LayerGroup extends React.PureComponent {
       return (
         <div
           className={classes.caption}
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             if (this.isToggled()) {
@@ -315,11 +306,11 @@ class LayerGroup extends React.PureComponent {
           className={classes.disableTransition}
           expanded={this.state.expanded}
           TransitionProps={{
-            timeout: 0
+            timeout: 0,
           }}
           onChange={() => {
             this.setState({
-              expanded: !this.state.expanded
+              expanded: !this.state.expanded,
             });
           }}
         >
@@ -346,9 +337,9 @@ class LayerGroup extends React.PureComponent {
                       model={this.props.model}
                       chapters={this.props.chapters}
                       app={this.props.app}
-                      onOpenChapter={chapter => {
+                      onOpenChapter={(chapter) => {
                         const informativeWindow = this.props.app.windows.find(
-                          window => window.type === "informative"
+                          (window) => window.type === "informative"
                         );
                         informativeWindow.props.custom.open(chapter);
                       }}

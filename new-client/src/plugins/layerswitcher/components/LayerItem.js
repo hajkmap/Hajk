@@ -13,29 +13,29 @@ import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink.js";
 
-const styles = theme => ({
+const styles = (theme) => ({
   button: {
-    opacity: "0"
+    opacity: "0",
   },
   caption: {
-    cursor: "pointer"
+    cursor: "pointer",
   },
   captionText: {
     top: "-6px",
     cursor: "pointer",
-    fontSize: theme.typography.pxToRem(15)
+    fontSize: theme.typography.pxToRem(15),
   },
   image: {},
   links: {
     padding: 0,
     margin: 0,
-    listStyle: "none"
+    listStyle: "none",
   },
   layerItem: {
     display: "flex",
     justifyContent: "space-between",
     marginTop: "0",
-    marginBottom: "-5px"
+    marginBottom: "-5px",
   },
   layerItemContainer: {
     background: "white",
@@ -43,41 +43,41 @@ const styles = theme => ({
     paddingTop: "5px",
     paddingBottom: "5px",
     borderBottom: "1px solid #CCC",
-    marginLeft: "45px"
+    marginLeft: "45px",
   },
   layerItemInfo: {
-    display: "flex"
+    display: "flex",
   },
   rightIcon: {
     marginLeft: theme.spacing(1),
-    fontSize: "16px"
+    fontSize: "16px",
   },
   layerInfo: {
     display: "flex",
     alignItems: "center",
     padding: "3px",
-    border: "1px solid #ccc"
+    border: "1px solid #ccc",
   },
   infoContainer: {},
   infoButton: {},
   infoTextContainer: {
-    margin: "10px 45px"
+    margin: "10px 45px",
   },
   settingsButton: {},
   layerButtons: {
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
   },
   layerButton: {
     cursor: "pointer",
     fontSize: "15pt",
-    width: "32px"
+    width: "32px",
   },
   checkBoxIcon: {
     cursor: "pointer",
     float: "left",
-    marginRight: "5px"
-  }
+    marginRight: "5px",
+  },
 });
 
 class LayerItem extends React.PureComponent {
@@ -101,7 +101,7 @@ class LayerItem extends React.PureComponent {
       infoExpanded: false,
       instruction: layerInfo.instruction,
       open: false,
-      toggleSettings: false
+      toggleSettings: false,
     };
   }
   /**
@@ -109,9 +109,9 @@ class LayerItem extends React.PureComponent {
    * @instance
    */
   componentDidMount() {
-    this.props.layer.on("change:visible", e => {
+    this.props.layer.on("change:visible", (e) => {
       this.setState({
-        visible: !e.oldValue
+        visible: !e.oldValue,
       });
     });
 
@@ -122,11 +122,11 @@ class LayerItem extends React.PureComponent {
     // consider that the layer has failed loading and want to inform the user.
     this.props.app.globalObserver.subscribe(
       "layerswitcher.wmsLayerLoadStatus",
-      d => {
+      (d) => {
         this.state.status !== "loaderror" &&
           this.state.name === d.id &&
           this.setState({
-            status: d.status
+            status: d.status,
           });
       }
     );
@@ -138,10 +138,10 @@ class LayerItem extends React.PureComponent {
    * "status" is "loaderror", and it should be reset if user unchecks layer).
    * @instance
    */
-  toggleVisible = layer => e => {
+  toggleVisible = (layer) => (e) => {
     const visible = !this.state.visible;
     this.setState({
-      visible
+      visible,
     });
     layer.setVisible(visible);
   };
@@ -187,7 +187,7 @@ class LayerItem extends React.PureComponent {
     );
   }
 
-  openInformative = chapter => e => {
+  openInformative = (chapter) => (e) => {
     this.props.onOpenChapter(chapter);
   };
 
@@ -196,13 +196,13 @@ class LayerItem extends React.PureComponent {
     if (Array.isArray(chapters)) {
       result = chapters.reduce((chaptersWithLayer, chapter) => {
         if (Array.isArray(chapter.layers)) {
-          if (chapter.layers.some(layerId => layerId === id)) {
+          if (chapter.layers.some((layerId) => layerId === id)) {
             chaptersWithLayer = [...chaptersWithLayer, chapter];
           }
           if (chapter.chapters.length > 0) {
             chaptersWithLayer = [
               ...chaptersWithLayer,
-              ...this.findChapters(id, chapter.chapters)
+              ...this.findChapters(id, chapter.chapters),
             ];
           }
         }
@@ -253,7 +253,7 @@ class LayerItem extends React.PureComponent {
 
   toggle() {
     this.setState({
-      open: !this.state.open
+      open: !this.state.open,
     });
   }
 
@@ -267,7 +267,7 @@ class LayerItem extends React.PureComponent {
           <Typography
             variant="body2"
             dangerouslySetInnerHTML={{
-              __html: infoText
+              __html: infoText,
             }}
           />
         </div>
@@ -325,13 +325,13 @@ class LayerItem extends React.PureComponent {
 
   toggleSettings() {
     this.setState({
-      toggleSettings: !this.state.toggleSettings
+      toggleSettings: !this.state.toggleSettings,
     });
   }
 
   toggleInfo() {
     this.setState({
-      infoVisible: !this.state.infoVisible
+      infoVisible: !this.state.infoVisible,
     });
   }
 
@@ -354,9 +354,9 @@ class LayerItem extends React.PureComponent {
           model={model}
           chapters={chapters}
           cqlFilterVisible={cqlFilterVisible}
-          onOpenChapter={chapter => {
+          onOpenChapter={(chapter) => {
             const informativeWindow = app.windows.find(
-              window => window.type === "informative"
+              (window) => window.type === "informative"
             );
             informativeWindow.props.custom.open(chapter);
           }}
@@ -404,7 +404,7 @@ class LayerItem extends React.PureComponent {
                         boxShadow: this.state.infoVisible
                           ? "rgb(204, 204, 204) 2px 3px 1px"
                           : "inherit",
-                        borderRadius: "100%"
+                        borderRadius: "100%",
                       }}
                     />
                   )}
