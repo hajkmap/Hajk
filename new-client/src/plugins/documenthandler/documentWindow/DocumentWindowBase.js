@@ -2,6 +2,7 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
+import PrintWindow from "./PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -110,10 +111,9 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   togglePrintWindow = () => {
-    console.log("toggling");
-    this.setState(prevState => ({
-      showPrintWindow: !prevState.showPrintWindow
-    }));
+    this.setState({
+      showPrintWindow: !this.state.showPrintWindow
+    });
   };
 
   bindSubscriptions = () => {
@@ -165,7 +165,11 @@ class DocumentWindowBase extends React.PureComponent {
               {...this.props}
             />
           ) : (
-            <div>Hej</div>
+            <PrintWindow
+              activeDocument={document}
+              togglePrintWindow={this.togglePrintWindow}
+              {...this.props}
+            />
           )
         ) : (
           <Grid

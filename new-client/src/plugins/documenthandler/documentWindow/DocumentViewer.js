@@ -116,7 +116,8 @@ class DocumentViewer extends React.PureComponent {
       localObserver,
       documentWindowMaximized,
       model,
-      documentColor
+      documentColor,
+      togglePrintWindow
     } = this.props;
 
     const { showScrollButton } = this.state;
@@ -147,7 +148,7 @@ class DocumentViewer extends React.PureComponent {
               variant="outlined"
               color="primary"
               startIcon={<PrintIcon />}
-              onClick={this.props.togglePrintWindow}
+              onClick={togglePrintWindow}
             >
               <Typography>Skapa PDF</Typography>
             </Button>
