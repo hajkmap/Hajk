@@ -12,7 +12,8 @@ class DocumentWindowBase extends React.PureComponent {
   state = {
     counter: 0,
     document: null,
-    documentWindowMaximized: true
+    documentWindowMaximized: true,
+    showPrintWindow: false
   };
 
   static propTypes = {};
@@ -108,6 +109,13 @@ class DocumentWindowBase extends React.PureComponent {
     }
   };
 
+  togglePrintWindow = () => {
+    console.log("toggling");
+    this.setState(prevState => ({
+      showPrintWindow: !prevState.showPrintWindow
+    }));
+  };
+
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe(
@@ -122,7 +130,8 @@ class DocumentWindowBase extends React.PureComponent {
       documentWindowMaximized,
       document,
       documentTitle,
-      documentColor
+      documentColor,
+      showPrintWindow
     } = this.state;
     const { options, classes } = this.props;
 
@@ -147,12 +156,17 @@ class DocumentWindowBase extends React.PureComponent {
         }}
       >
         {document != null ? (
-          <DocumentViewer
-            documentColor={documentColor || "#ffffff"}
-            documentWindowMaximized={documentWindowMaximized}
-            activeDocument={document}
-            {...this.props}
-          />
+          !showPrintWindow ? (
+            <DocumentViewer
+              documentColor={documentColor || "#ffffff"}
+              documentWindowMaximized={documentWindowMaximized}
+              activeDocument={document}
+              togglePrintWindow={this.togglePrintWindow}
+              {...this.props}
+            />
+          ) : (
+            <div>Hej</div>
+          )
         ) : (
           <Grid
             style={{ height: "100%" }}
