@@ -22,19 +22,19 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   form: {
     display: "flex",
     flexDirection: "column",
-    width: "fit-content"
+    width: "fit-content",
   },
   formControl: {
     marginTop: theme.spacing(2),
-    minWidth: 120
+    minWidth: 120,
   },
   formControlLabel: {
-    marginTop: theme.spacing(1)
-  }
+    marginTop: theme.spacing(1),
+  },
 }));
 
 export default function SearchSettings(props) {
@@ -59,8 +59,8 @@ export default function SearchSettings(props) {
       activeSpatialFilter: activeSpatialFilter,
       matchCase: matchCase,
       wildcardAtEnd: wildcardAtEnd,
-      wildcardAtStart: wildcardAtStart
-    }
+      wildcardAtStart: wildcardAtStart,
+    },
   ];
 
   const handleClickOpen = () => {
@@ -73,15 +73,15 @@ export default function SearchSettings(props) {
     props.handleSearchSettings(searchSettings);
   };
 
-  const handleWildcardAtStart = event => {
+  const handleWildcardAtStart = (event) => {
     setWildcardAtStart(event.target.checked);
   };
 
-  const handleWildcardAtEnd = event => {
+  const handleWildcardAtEnd = (event) => {
     setWildcardAtEnd(event.target.checked);
   };
 
-  const handleMatchCase = event => {
+  const handleMatchCase = (event) => {
     setMatchCase(event.target.checked);
   };
 
@@ -165,7 +165,7 @@ export default function SearchSettings(props) {
                     }}
                     options={searchModel.getSources()}
                     disableCloseOnSelect
-                    getOptionLabel={option => option.caption}
+                    getOptionLabel={(option) => option.caption}
                     renderOption={(option, { selected }) => (
                       <React.Fragment>
                         <Checkbox
@@ -179,7 +179,7 @@ export default function SearchSettings(props) {
                       </React.Fragment>
                     )}
                     style={{ width: 500 }}
-                    renderInput={params => (
+                    renderInput={(params) => (
                       <TextField {...params} variant="outlined" />
                     )}
                   />

@@ -10,14 +10,14 @@ import Typography from "@material-ui/core/Typography";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import {
   extractPropertiesFromJson,
-  mergeFeaturePropsWithMarkdown
+  mergeFeaturePropsWithMarkdown,
 } from "../../utils/FeaturePropsParsing";
 
-const ListItem = withStyles(theme => ({
+const ListItem = withStyles((theme) => ({
   root: {
     borderBottom: "1px solid rgba(0, 0, 0, .125)",
-    padding: theme.spacing(2)
-  }
+    padding: theme.spacing(2),
+  },
 }))(MuiListItem);
 
 const getHtmlItemInfoBox = (feature, infoBox) => {
@@ -30,7 +30,7 @@ function SearchResultItem({
   feature,
   source,
   checkedItems,
-  handleCheckedToggle
+  handleCheckedToggle,
 }) {
   const displayFields = source.displayFields;
   const infobox = source.infobox;

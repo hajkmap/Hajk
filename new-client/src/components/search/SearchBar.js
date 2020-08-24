@@ -9,7 +9,7 @@ import {
   Paper,
   TextField,
   Tooltip,
-  makeStyles
+  makeStyles,
 } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -18,29 +18,29 @@ import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/Clear";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
   },
   input: {
     marginLeft: theme.spacing(1),
-    flex: 1
+    flex: 1,
   },
   iconButton: {
-    padding: 10
+    padding: 10,
   },
   divider: {
     height: 28,
-    margin: 4
+    margin: 4,
   },
   textField: {
     marginTop: 0,
-    marginBottom: 0
-  }
+    marginBottom: 0,
+  },
 }));
 
-const SearchBar = props => {
+const SearchBar = (props) => {
   const classes = useStyles();
 
   const { menuButtonDisabled, onMenuClick } = props;
@@ -70,7 +70,7 @@ const SearchBar = props => {
       console.log("Getting Autocomplete for: ", searchInput);
       const {
         flatAutocompleteArray,
-        errors
+        errors,
       } = await searchModel.getAutocomplete(searchInput);
 
       console.log(
@@ -147,9 +147,9 @@ const SearchBar = props => {
           getOptionSelected={(option, value) =>
             option.autocompleteEntry === value.autocompleteEntry
           }
-          getOptionLabel={option => option?.autocompleteEntry || option}
-          groupBy={option => option.dataset}
-          renderOption={option => (
+          getOptionLabel={(option) => option?.autocompleteEntry || option}
+          groupBy={(option) => option.dataset}
+          renderOption={(option) => (
             <React.Fragment>
               <span>
                 {option.autocompleteEntry}
@@ -157,7 +157,7 @@ const SearchBar = props => {
               </span>
             </React.Fragment>
           )}
-          renderInput={params => (
+          renderInput={(params) => (
             <TextField
               {...params}
               className={classes.textField}
@@ -207,7 +207,7 @@ const SearchBar = props => {
                     )}
                     <SearchSettings {...props} />
                   </>
-                )
+                ),
               }}
             />
           )}

@@ -6,7 +6,7 @@ import {
   ListItemIcon,
   Checkbox,
   IconButton,
-  ListItemSecondaryAction
+  ListItemSecondaryAction,
 } from "@material-ui/core";
 
 import DetailsIcon from "@material-ui/icons/Details";
@@ -16,14 +16,14 @@ export default function SearchResultsDatasetFeature({
   source,
   checkedItems,
   handleCheckedToggle,
-  setSelectedFeatureAndSource
+  setSelectedFeatureAndSource,
 }) {
-  const showDetails = e => {
+  const showDetails = (e) => {
     const selectedFeatureAndSource = { feature, source };
     setSelectedFeatureAndSource(selectedFeatureAndSource);
   };
 
-  const texts = source.displayFields.map(df => feature.properties[df]);
+  const texts = source.displayFields.map((df) => feature.properties[df]);
 
   return (
     <ListItem key={feature.id} onClick={handleCheckedToggle(feature.id)}>

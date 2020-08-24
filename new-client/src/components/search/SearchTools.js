@@ -22,7 +22,7 @@ import GeoJSON from "ol/format/GeoJSON.js";
 
 import Dialog from "../Dialog.js";
 
-const SearchTools = props => {
+const SearchTools = (props) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [settingsDialog, setSettingsDialog] = useState(false);
 
@@ -34,18 +34,18 @@ const SearchTools = props => {
     {
       name: "Sök med objekt",
       icon: <AddCircleOutlineIcon />,
-      type: "SELECTION"
+      type: "SELECTION",
     },
     {
       name: "Sök med polygon",
       icon: <EditIcon />,
-      type: "Polygon"
+      type: "Polygon",
     },
     {
       name: "Sök med radie",
       icon: <RadioButtonUncheckedIcon />,
-      type: "Circle"
-    }
+      type: "Circle",
+    },
   ];
   const map = useRef(props.map);
 
@@ -53,18 +53,18 @@ const SearchTools = props => {
     new Style({
       stroke: new Stroke({
         color: "rgba(255, 214, 91, 0.6)",
-        width: 4
+        width: 4,
       }),
       fill: new Fill({
-        color: "rgba(255, 214, 91, 0.2)"
+        color: "rgba(255, 214, 91, 0.2)",
       }),
       image: new Circle({
         radius: 6,
         stroke: new Stroke({
           color: "rgba(255, 214, 91, 0.6)",
-          width: 2
-        })
-      })
+          width: 2,
+        }),
+      }),
     })
   );
 
@@ -72,14 +72,14 @@ const SearchTools = props => {
     drawSource.current = new VectorSource({ wrapX: false });
     drawLayer.current = new VectorLayer({
       source: drawSource.current,
-      style: drawStyle.current
+      style: drawStyle.current,
     });
 
     // Add layer that will be used to allow user draw on map - used for spatial search
     map.current.addLayer(drawLayer.current);
   }, []);
 
-  const handleOpenMenu = event => {
+  const handleOpenMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -87,22 +87,22 @@ const SearchTools = props => {
     setAnchorEl(null);
   };
 
-  const toggleSelection = e => {
+  const toggleSelection = (e) => {
     var view = map.current.getView();
     var wmsLayers = map.current.getLayers();
 
     map.current.clicklock = true;
 
-    map.current.on("singleclick", evt => {
-      wmsLayers.forEach(layer => {
+    map.current.on("singleclick", (evt) => {
+      wmsLayers.forEach((layer) => {
         //Found visible TileLayer
         if (layer.get("visible") === true && layer.layersInfo) {
           let subLayers = Object.values(layer.layersInfo);
           let subLayersToQuery = subLayers
-            .filter(subLayer => {
+            .filter((subLayer) => {
               return subLayer.queryable === true;
             })
-            .map(queryableSubLayer => {
+            .map((queryableSubLayer) => {
               return queryableSubLayer.id;
             });
 
@@ -115,7 +115,7 @@ const SearchTools = props => {
                 view.getProjection().getCode(),
                 {
                   INFO_FORMAT: "application/json",
-                  QUERY_LAYERS: subLayersToQuery.join(",")
+                  QUERY_LAYERS: subLayersToQuery.join(","),
                 }
               );
 
@@ -149,7 +149,7 @@ const SearchTools = props => {
         type: type,
         freehand: freehand,
         stopClick: true,
-        style: drawStyle.current
+        style: drawStyle.current,
       });
 
       map.current.clicklock = true;
@@ -177,7 +177,7 @@ const SearchTools = props => {
           options={{
             text: "Avancerade inställningar...",
             headerText: "Inställningar",
-            buttonText: "OK"
+            buttonText: "OK",
           }}
           open={settingsDialog}
           onClose={() => {
@@ -227,7 +227,7 @@ const SearchTools = props => {
           {drawOptions.map((option, index) => (
             <MenuItem
               key={index}
-              onClick={event => handleMenuItemClick(event, index, option)}
+              onClick={(event) => handleMenuItemClick(event, index, option)}
             >
               {option.icon ? <ListItemIcon>{option.icon}</ListItemIcon> : null}
               <Typography variant="inherit" noWrap>

@@ -11,7 +11,7 @@ import Draw from "ol/interaction/Draw.js";
 import {
   Tile as TileLayer,
   Image as ImageLayer,
-  Vector as VectorLayer
+  Vector as VectorLayer,
 } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill, Icon } from "ol/style";
@@ -35,7 +35,7 @@ class OldSearchModel {
   // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
   #options = {
     limit: 100,
-    extentLimit: null
+    extentLimit: null,
   };
   #sources = null;
   #map;
@@ -50,18 +50,18 @@ class OldSearchModel {
   #drawStyle = new Style({
     stroke: new Stroke({
       color: "rgba(255, 214, 91, 0.6)",
-      width: 4
+      width: 4,
     }),
     fill: new Fill({
-      color: "rgba(255, 214, 91, 0.2)"
+      color: "rgba(255, 214, 91, 0.2)",
     }),
     image: new Circle({
       radius: 6,
       stroke: new Stroke({
         color: "rgba(255, 214, 91, 0.6)",
-        width: 2
-      })
-    })
+        width: 2,
+      }),
+    }),
   });
 
   constructor(searchPluginOptions, map, app) {
@@ -79,7 +79,7 @@ class OldSearchModel {
 
     this.#vectorLayer = new VectorLayer({
       source: new VectorSource({}),
-      style: this.#getVectorLayerStyle()
+      style: this.#getVectorLayerStyle(),
     });
     this.#vectorLayer.set("type", "searchResultLayer");
     this.#vectorLayer.setZIndex(1);
@@ -87,7 +87,7 @@ class OldSearchModel {
     this.#drawSource = new VectorSource({ wrapX: false });
     this.#drawLayer = new VectorLayer({
       source: this.#drawSource,
-      style: this.#drawStyle
+      style: this.#drawStyle,
     });
 
     // Add layer that will hold highlighted search results
@@ -114,7 +114,7 @@ class OldSearchModel {
    * @returns {String} Comma-separated string of values according to selection and order in displayFields.
    */
   #mapDisplayFieldsInFeature = (featureProperties, displayFields) => {
-    return displayFields.map(df => featureProperties[df]).join(", ");
+    return displayFields.map((df) => featureProperties[df]).join(", ");
   };
 
   /**
@@ -129,8 +129,8 @@ class OldSearchModel {
     const featureCollections = await this.#getRawResults(searchString, options);
 
     // Generate an array with results, one per dataset (dataset = search source)
-    const resultsPerDataset = featureCollections.map(featureCollection => {
-      return featureCollection.features.map(feature => {
+    const resultsPerDataset = featureCollections.map((featureCollection) => {
+      return featureCollection.features.map((feature) => {
         const autocompleteEntry = this.#mapDisplayFieldsInFeature(
           feature.properties,
           featureCollection.source.displayFields
@@ -138,7 +138,7 @@ class OldSearchModel {
         const dataset = featureCollection.source.caption;
         return {
           dataset,
-          autocompleteEntry
+          autocompleteEntry,
         };
       });
     });
@@ -164,7 +164,7 @@ class OldSearchModel {
     this.#controllers = [];
 
     // Loop through all defined search sources
-    sources.forEach(source => {
+    sources.forEach((source) => {
       // Expect the Promise and an AbortController from each Source
       const { promise, controller } = this.#lookup(source, searchString);
 
@@ -176,9 +176,9 @@ class OldSearchModel {
     });
 
     await Promise.all(promises)
-      .then(async responses => {
-        await Promise.all(responses.map(result => result.json()))
-          .then(jsonResults => {
+      .then(async (responses) => {
+        await Promise.all(responses.map((result) => result.json()))
+          .then((jsonResults) => {
             // if (this.#timeout !== timeout) {
             //   return this.localObserver.publish("searchComplete");
             // }
@@ -186,7 +186,7 @@ class OldSearchModel {
               if (jsonResult.features.length > 0) {
                 arraySort({
                   array: jsonResult.features,
-                  index: this.options.sources[i].searchFields[0]
+                  index: this.options.sources[i].searchFields[0],
                 });
               }
               jsonResult.source = this.options.sources[i];
@@ -197,11 +197,11 @@ class OldSearchModel {
             rawResults = jsonResults;
             return rawResults;
           })
-          .catch(parseErrors => {
+          .catch((parseErrors) => {
             console.error("parseErrors: ", parseErrors);
           });
       })
-      .catch(responseErrors => {
+      .catch((responseErrors) => {
         console.error("responseErrors: ", responseErrors);
       });
 
@@ -211,7 +211,7 @@ class OldSearchModel {
 
   abort = () => {
     if (this.#controllers.length > 0) {
-      this.#controllers.forEach(controller => {
+      this.#controllers.forEach((controller) => {
         controller.abort();
         this.localObserver.publish("searchComplete");
       });
@@ -226,7 +226,7 @@ class OldSearchModel {
     return this.#options;
   };
 
-  setOptions = options => {
+  setOptions = (options) => {
     this.#options = deepMerge(this.#options, options);
   };
 
@@ -253,7 +253,7 @@ class OldSearchModel {
 
         this.#controllers.splice(0, this.#controllers.length);
 
-        this.options.sources.forEach(source => {
+        this.options.sources.forEach((source) => {
           const { promise, controller } = this.#lookup(source, searchInput);
           promises.push(promise);
           this.#controllers.push(controller);
@@ -262,9 +262,9 @@ class OldSearchModel {
         const timeout = this.#timeout;
 
         Promise.all(promises)
-          .then(responses => {
-            Promise.all(responses.map(result => result.json()))
-              .then(jsonResults => {
+          .then((responses) => {
+            Promise.all(responses.map((result) => result.json()))
+              .then((jsonResults) => {
                 if (this.#timeout !== timeout) {
                   return this.localObserver.publish("searchComplete");
                 }
@@ -272,7 +272,7 @@ class OldSearchModel {
                   if (jsonResult.features.length > 0) {
                     arraySort({
                       array: jsonResult.features,
-                      index: this.options.sources[i].searchFields[0]
+                      index: this.options.sources[i].searchFields[0],
                     });
                   }
                   jsonResult.source = this.options.sources[i];
@@ -282,9 +282,9 @@ class OldSearchModel {
                 }, 500);
                 if (callback) callback(jsonResults);
               })
-              .catch(parseErrors => {});
+              .catch((parseErrors) => {});
           })
-          .catch(responseErrors => {});
+          .catch((responseErrors) => {});
       }, 200);
     } else {
       this.#timeout = -1;
@@ -295,7 +295,7 @@ class OldSearchModel {
 
   abortSearches() {
     if (this.#controllers.length > 0) {
-      this.#controllers.forEach(controller => {
+      this.#controllers.forEach((controller) => {
         controller.abort();
         this.localObserver.publish("searchComplete");
       });
@@ -308,7 +308,7 @@ class OldSearchModel {
     this.#vectorLayer.getSource().addFeatures(features);
     this.#map.getView().fit(this.#vectorLayer.getSource().getExtent(), {
       size: this.#map.getSize(),
-      maxZoom: 7
+      maxZoom: 7,
     });
   }
 
@@ -316,12 +316,12 @@ class OldSearchModel {
     this.#clear();
     this.#vectorLayer.getSource().addFeature(feature);
     this.#map.getView().fit(feature.getGeometry(), this.#map.getSize());
-    this.#searchWithinArea(feature, true, featureCollections => {
-      var layerIds = featureCollections.map(featureCollection => {
+    this.#searchWithinArea(feature, true, (featureCollections) => {
+      var layerIds = featureCollections.map((featureCollection) => {
         return featureCollection.source.layerId;
       });
       this.#layerList = layerIds.reduce(this.#getLayerAsSource, []);
-      this.#layerList.forEach(layer => {
+      this.#layerList.forEach((layer) => {
         layer.setVisible(true);
       });
     });
@@ -336,7 +336,7 @@ class OldSearchModel {
   };
 
   clearLayerList() {
-    this.#layerList.forEach(layer => {
+    this.#layerList.forEach((layer) => {
       layer.setVisible(false);
     });
     this.#hideVisibleLayers();
@@ -367,11 +367,11 @@ class OldSearchModel {
 
   withinSearch = (radiusDrawn, searchDone) => {
     // FIXME: Used only in SearchWithRadiusInput
-    this.#toggleDraw(true, "Circle", true, e => {
+    this.#toggleDraw(true, "Circle", true, (e) => {
       radiusDrawn();
       // TODO: Change second parameter to FALSE in order to use global defined WFS search sources
-      this.#searchWithinArea(e.feature, true, featureCollections => {
-        let layerIds = featureCollections.map(featureCollection => {
+      this.#searchWithinArea(e.feature, true, (featureCollections) => {
+        let layerIds = featureCollections.map((featureCollection) => {
           return featureCollection.source.layerId;
         });
 
@@ -383,9 +383,9 @@ class OldSearchModel {
 
   polygonSearch = (polygonDrawn, searchDone) => {
     // FIXME: Used only in SpatialSearchMenu
-    this.#toggleDraw(true, "Polygon", false, e => {
+    this.#toggleDraw(true, "Polygon", false, (e) => {
       polygonDrawn();
-      this.#searchWithinArea(e.feature, false, featureCollections => {
+      this.#searchWithinArea(e.feature, false, (featureCollections) => {
         searchDone(featureCollections);
       });
     });
@@ -429,7 +429,7 @@ class OldSearchModel {
       src,
       strokeColor,
       strokeWidth,
-      fillColor
+      fillColor,
     } = this.options;
 
     const style = new Style({
@@ -439,9 +439,9 @@ class OldSearchModel {
           r: 244,
           g: 83,
           b: 63,
-          a: 1
+          a: 1,
         }),
-        width: strokeWidth || 4
+        width: strokeWidth || 4,
       }),
       // Polygons fill color
       fill: new Fill({
@@ -449,9 +449,9 @@ class OldSearchModel {
           r: 244,
           g: 83,
           b: 63,
-          a: 0.2
-        })
-      })
+          a: 0.2,
+        }),
+      }),
     });
 
     // Point style (either a marker image or fallback to a Circle)
@@ -462,7 +462,7 @@ class OldSearchModel {
         new Icon({
           anchor: [anchor[0] || 0.5, anchor[1] || 1],
           scale: scale || 0.15,
-          src: src
+          src: src,
         })
       );
     } else {
@@ -472,8 +472,8 @@ class OldSearchModel {
           radius: 6,
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 0.6)",
-            width: 2
-          })
+            width: 2,
+          }),
         })
       );
     }
@@ -503,7 +503,7 @@ class OldSearchModel {
       outputFormat: "JSON", //source.outputFormat,
       maxFeatures: this.options.maxFeatures || 100,
       geometryName: finalGeom,
-      filter: new Intersects(finalGeom, geometry, projCode)
+      filter: new Intersects(finalGeom, geometry, projCode),
     };
 
     const node = this.#wfsParser.writeGetFeature(options);
@@ -517,9 +517,9 @@ class OldSearchModel {
       signal: signal,
       method: "POST",
       headers: {
-        "Content-Type": "text/xml"
+        "Content-Type": "text/xml",
       },
-      body: xmlString
+      body: xmlString,
     };
 
     // source.url for layers CONTAINS proxy (if defined). If we don't remove
@@ -543,7 +543,7 @@ class OldSearchModel {
     var mapLayer = this.#map
       .getLayers()
       .getArray()
-      .find(l => l.get("name") === layerId);
+      .find((l) => l.get("name") === layerId);
 
     if (mapLayer) {
       mapLayer.layerId = layerId;
@@ -554,7 +554,7 @@ class OldSearchModel {
 
   #onSelectFeatures = (evt, selectionDone, callback) => {
     //Only handles single select and is restricted to polygon and multipolygon atm
-    handleClick(evt, evt.map, response => {
+    handleClick(evt, evt.map, (response) => {
       if (response.features.length > 0) {
         var geometryType = response.features[0].getGeometry().getType();
 
@@ -568,7 +568,7 @@ class OldSearchModel {
             this.#searchWithinArea(
               response.features[0],
               false,
-              featureCollections => {
+              (featureCollections) => {
                 callback(featureCollections);
               }
             );
@@ -584,7 +584,7 @@ class OldSearchModel {
 
   #activateSelectionClick = (selectionDone, callback) => {
     this.#map.clicklock = true;
-    this.#map.once("singleclick", e => {
+    this.#map.once("singleclick", (e) => {
       this.#onSelectFeatures(e, selectionDone, callback);
     });
   };
@@ -610,10 +610,7 @@ class OldSearchModel {
    * @param {*} callback Function to call when search is completed
    */
   #searchWithinArea = (feature, useTransformedWmsSource, callback) => {
-    const projCode = this.#map
-      .getView()
-      .getProjection()
-      .getCode();
+    const projCode = this.#map.getView().getProjection().getCode();
 
     var search = () => {
       let promises = [];
@@ -628,10 +625,10 @@ class OldSearchModel {
 
         searchSources = searchLayers
           .map(this.#mapDisplayLayerAsSearchLayer)
-          .filter(source => source.layers);
+          .filter((source) => source.layers);
       }
       this.#controllers.splice(0, this.#controllers.length);
-      searchSources.forEach(source => {
+      searchSources.forEach((source) => {
         const { promise, controller } = this.#mapSourceAsWFSPromise(
           feature,
           projCode,
@@ -643,9 +640,9 @@ class OldSearchModel {
 
       this.localObserver.publish("spatialSearchStarted");
       Promise.all(promises)
-        .then(responses => {
-          Promise.all(responses.map(result => result.json())).then(
-            jsonResults => {
+        .then((responses) => {
+          Promise.all(responses.map((result) => result.json())).then(
+            (jsonResults) => {
               var result = [];
               jsonResults.forEach((jsonResult, i) => {
                 if (jsonResult.totalFeatures > 0) {
@@ -666,9 +663,9 @@ class OldSearchModel {
     };
 
     if (feature.getGeometry().getType() === "Point") {
-      this.options.sources.forEach(source => {
+      this.options.sources.forEach((source) => {
         if (source.caption.toLowerCase() === "fastighet") {
-          this.#lookupEstate(source, feature, estates => {
+          this.#lookupEstate(source, feature, (estates) => {
             var olEstate = new GeoJSON().readFeatures(estates)[0];
             feature = olEstate;
             search();
@@ -680,14 +677,14 @@ class OldSearchModel {
     }
   };
 
-  #getHiddenLayers = layerIds => {
+  #getHiddenLayers = (layerIds) => {
     return this.#map
       .getLayers()
       .getArray()
-      .filter(layer => {
+      .filter((layer) => {
         var hidden = true;
         var props = layer.getProperties();
-        if (layerIds.some(id => id === props.name)) {
+        if (layerIds.some((id) => id === props.name)) {
           hidden = false;
         }
         if (
@@ -700,18 +697,18 @@ class OldSearchModel {
       });
   };
 
-  #showLayers = layerIds => {
+  #showLayers = (layerIds) => {
     this.visibleLayers = layerIds.reduce(this.#getLayerAsSource, []);
     this.hiddenLayers = this.#getHiddenLayers(layerIds);
 
-    this.hiddenLayers.forEach(layer => {
+    this.hiddenLayers.forEach((layer) => {
       if (layer.layerType === "group") {
         this.#app.globalObserver.publish("layerswitcher.hideLayer", layer);
       } else {
         layer.setVisible(false);
       }
     });
-    this.visibleLayers.forEach(layer => {
+    this.visibleLayers.forEach((layer) => {
       if (layer.layerType === "group") {
         this.#app.globalObserver.publish("layerswitcher.showLayer", layer);
       } else {
@@ -727,9 +724,9 @@ class OldSearchModel {
         type: type,
         freehand: freehand,
         stopClick: true,
-        style: this.#drawStyle
+        style: this.#drawStyle,
       });
-      this.draw.on("drawend", e => {
+      this.draw.on("drawend", (e) => {
         //this.clear();
         this.#map.removeInteraction(this.draw);
         setTimeout(() => {
@@ -754,7 +751,7 @@ class OldSearchModel {
     this.#map
       .getLayers()
       .getArray()
-      .forEach(layer => {
+      .forEach((layer) => {
         const props = layer.getProperties();
         if (props.layerInfo && props.layerInfo.layerType !== "base") {
           layer.setVisible(false);
@@ -762,7 +759,7 @@ class OldSearchModel {
       });
   };
 
-  #mapDisplayLayerAsSearchLayer = searchLayer => {
+  #mapDisplayLayerAsSearchLayer = (searchLayer) => {
     // Admin has the possibility to set some search options for WMS layers,
     // one of them is name of geometry field. If it exists, use it.
     const layerInfo = searchLayer.get("layerInfo");
@@ -797,7 +794,7 @@ class OldSearchModel {
           url: searchLayer.get("url"),
           layers: [searchLayer.get("featureType")],
           geometryName: geomNameFromWmsConfig,
-          layerId: searchLayer.layerId
+          layerId: searchLayer.layerId,
         };
         break;
       case "TILE":
@@ -806,7 +803,7 @@ class OldSearchModel {
           url: searchLayer.get("url").replace("wms", "wfs"),
           layers: layers,
           geometryName: geomNameFromWmsConfig,
-          layerId: searchLayer.layerId
+          layerId: searchLayer.layerId,
         };
         break;
       default:
@@ -816,10 +813,7 @@ class OldSearchModel {
   };
 
   #lookupEstate = (source, feature, callback) => {
-    const projCode = this.#map
-      .getView()
-      .getProjection()
-      .getCode();
+    const projCode = this.#map.getView().getProjection().getCode();
 
     const geometry = feature.getGeometry();
 
@@ -828,7 +822,7 @@ class OldSearchModel {
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
-      filter: new Intersects(source.geometryField, geometry, projCode)
+      filter: new Intersects(source.geometryField, geometry, projCode),
     };
 
     const node = this.#wfsParser.writeGetFeature(options);
@@ -839,14 +833,14 @@ class OldSearchModel {
       credentials: "same-origin",
       method: "POST",
       headers: {
-        "Content-Type": "text/xml"
+        "Content-Type": "text/xml",
       },
-      body: xmlString
+      body: xmlString,
     };
 
     fetch(this.#app.config.appConfig.searchProxy + source.url, request).then(
-      response => {
-        response.json().then(estate => {
+      (response) => {
+        response.json().then((estate) => {
           callback(estate);
         });
       }
@@ -854,21 +848,18 @@ class OldSearchModel {
   };
 
   #lookup = (source, searchInput) => {
-    const projCode = this.#map
-      .getView()
-      .getProjection()
-      .getCode();
+    const projCode = this.#map.getView().getProjection().getCode();
     let isLikeFilters = null;
 
     // If search string contains only numbers, let's do an EqualTo search
     if (/^\d+$/.test(searchInput.trim())) {
-      isLikeFilters = source.searchFields.map(searchField => {
+      isLikeFilters = source.searchFields.map((searchField) => {
         return new EqualTo(searchField, Number(searchInput));
       });
     }
     // Else, let's do a IsLike search
     else {
-      isLikeFilters = source.searchFields.map(searchField => {
+      isLikeFilters = source.searchFields.map((searchField) => {
         return new IsLike(
           searchField,
           searchInput + "*",
@@ -889,7 +880,7 @@ class OldSearchModel {
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
       maxFeatures: this.options.maxFeatures || 100,
-      filter: filter
+      filter: filter,
     };
 
     const node = this.#wfsParser.writeGetFeature(options);
@@ -903,9 +894,9 @@ class OldSearchModel {
       signal: signal,
       method: "POST",
       headers: {
-        "Content-Type": "text/xml"
+        "Content-Type": "text/xml",
       },
-      body: xmlString
+      body: xmlString,
     };
     const promise = fetch(
       this.#app.config.appConfig.searchProxy + source.url,

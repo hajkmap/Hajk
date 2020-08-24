@@ -11,29 +11,29 @@ import SearchResultsDataset from "./SearchResultsDataset";
 const highlightedStyle = new Style({
   stroke: new Stroke({
     color: [200, 0, 0, 0.7],
-    width: 4
+    width: 4,
   }),
   fill: new Fill({
-    color: [255, 0, 0, 0.1]
+    color: [255, 0, 0, 0.1],
   }),
   image: new Circle({
     radius: 6,
     stroke: new Stroke({
       color: [200, 0, 0, 0.7],
-      width: 4
-    })
-  })
+      width: 4,
+    }),
+  }),
 });
 
 export default function SearchResultsList({
   featureCollections,
   resultsSource,
   map,
-  setSelectedFeatureAndSource
+  setSelectedFeatureAndSource,
 }) {
   const [checkedItems, setCheckedItems] = useState([]);
 
-  const handleCheckedToggle = value => () => {
+  const handleCheckedToggle = (value) => () => {
     const currentIndex = checkedItems.indexOf(value);
     const newChecked = [...checkedItems];
 
@@ -50,21 +50,18 @@ export default function SearchResultsList({
 
   const changeStyleOnCheckedItems = (items = checkedItems) => {
     // First unset style on ALL features (user might have UNCHECKED a feature)
-    resultsSource.current.getFeatures().map(f => f.setStyle(null));
+    resultsSource.current.getFeatures().map((f) => f.setStyle(null));
 
     // Now, set the style only on currently selected features
-    items.map(fid =>
+    items.map((fid) =>
       resultsSource.current.getFeatureById(fid).setStyle(highlightedStyle)
     );
   };
 
   const zoomToCheckedItems = (items = checkedItems) => {
     // Try to grab extents for each of the selected items
-    const extentsFromCheckedItems = items.map(fid =>
-      resultsSource.current
-        .getFeatureById(fid)
-        .getGeometry()
-        .getExtent()
+    const extentsFromCheckedItems = items.map((fid) =>
+      resultsSource.current.getFeatureById(fid).getGeometry().getExtent()
     );
 
     // If there were no selected items, use extent for the OL source itself,
@@ -76,7 +73,7 @@ export default function SearchResultsList({
 
     map.current.getView().fit(extentToZoomTo, {
       size: map.current.getSize(),
-      maxZoom: 7
+      maxZoom: 7,
     });
   };
 
@@ -89,7 +86,7 @@ export default function SearchResultsList({
           <MoreHorizIcon />
         </IconButton>
       </Container>
-      {featureCollections.map(fc => (
+      {featureCollections.map((fc) => (
         <SearchResultsDataset
           key={fc.source.id}
           featureCollection={fc}

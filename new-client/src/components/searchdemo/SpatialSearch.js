@@ -7,7 +7,7 @@ import CheckIcon from "@material-ui/icons/BrushTwoTone";
 import Draw from "ol/interaction/Draw";
 import { Button } from "@material-ui/core";
 
-const SpatialSearch = props => {
+const SpatialSearch = (props) => {
   const [drawActive, setDrawActive] = useState(false);
   const drawInteraction = useRef();
   const drawSource = useRef();
@@ -19,18 +19,18 @@ const SpatialSearch = props => {
     new Style({
       stroke: new Stroke({
         color: "rgba(255, 214, 91, 0.6)",
-        width: 4
+        width: 4,
       }),
       fill: new Fill({
-        color: "rgba(255, 214, 91, 0.2)"
+        color: "rgba(255, 214, 91, 0.2)",
       }),
       image: new Circle({
         radius: 6,
         stroke: new Stroke({
           color: "rgba(255, 214, 91, 0.6)",
-          width: 2
-        })
-      })
+          width: 2,
+        }),
+      }),
     })
   );
 
@@ -39,7 +39,7 @@ const SpatialSearch = props => {
     drawSource.current = new VectorSource({ wrapX: false });
     drawLayer.current = new VectorLayer({
       source: drawSource.current,
-      style: drawStyle.current
+      style: drawStyle.current,
     });
 
     // Add layer that will be used to allow user draw on map - used for spatial search
@@ -59,7 +59,7 @@ const SpatialSearch = props => {
         type: type,
         freehand: freehand,
         stopClick: true,
-        style: drawStyle.current
+        style: drawStyle.current,
       });
 
       map.current.clicklock = true;
@@ -72,7 +72,7 @@ const SpatialSearch = props => {
   };
 
   const handleClickOnDrawToggle = () => {
-    setDrawActive(prevState => {
+    setDrawActive((prevState) => {
       toggleDraw(!prevState);
       return !prevState;
     });

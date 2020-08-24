@@ -7,7 +7,7 @@ import {
   ExpansionPanelSummary,
   ExpansionPanelDetails,
   Chip,
-  Tooltip
+  Tooltip,
 } from "@material-ui/core";
 
 import PlaceIcon from "@material-ui/icons/Place";
@@ -19,7 +19,7 @@ export default function SearchResultsDataset({
   featureCollection: { source, value },
   checkedItems,
   handleCheckedToggle,
-  setSelectedFeatureAndSource
+  setSelectedFeatureAndSource,
 }) {
   const numberOfResultsToDisplay =
     value.numberMatched > value.numberReturned
@@ -40,7 +40,7 @@ export default function SearchResultsDataset({
       </ExpansionPanelSummary>
       <ExpansionPanelDetails>
         <List>
-          {value.features.map(f => (
+          {value.features.map((f) => (
             <SearchResultsDatasetFeature
               key={f.id}
               feature={f}

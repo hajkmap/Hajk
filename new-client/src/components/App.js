@@ -158,10 +158,6 @@ const styles = (theme) => {
       backgroundColor: "#fff",
       minHeight: theme.spacing(6),
     },
-    drawerGrid: {
-      padding: theme.spacing(0, 2),
-      backgroundColor: "#fff",
-    },
     drawerLiveContent: {
       backgroundColor: "#fff",
     },

@@ -109,7 +109,7 @@ import React from "react";
 import SearchBar from "./SearchBar";
 // import SpatialSearch from "./SpatialSearch";
 
-const Search = props => {
+const Search = (props) => {
   return (
     <>
       <SearchBar {...props} />

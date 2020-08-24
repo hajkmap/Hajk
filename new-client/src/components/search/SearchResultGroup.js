@@ -14,17 +14,17 @@ import Chip from "@material-ui/core/Chip";
 
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    width: "100%"
+    width: "100%",
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),
-    fontWeight: theme.typography.fontWeightRegular
+    fontWeight: theme.typography.fontWeightRegular,
   },
   chip: {
-    marginLeft: 8
-  }
+    marginLeft: 8,
+  },
 }));
 
 const ExpansionPanel = withStyles({
@@ -32,16 +32,16 @@ const ExpansionPanel = withStyles({
     border: "1px solid rgba(0, 0, 0, .125)",
     boxShadow: "none",
     "&:not(:last-child)": {
-      borderBottom: 0
+      borderBottom: 0,
     },
     "&:before": {
-      display: "none"
+      display: "none",
     },
     "&$expanded": {
-      margin: "auto"
-    }
+      margin: "auto",
+    },
   },
-  expanded: {}
+  expanded: {},
 })(MuiExpansionPanel);
 
 const ExpansionPanelSummary = withStyles({
@@ -51,27 +51,27 @@ const ExpansionPanelSummary = withStyles({
     marginBottom: -1,
     minHeight: 56,
     "&$expanded": {
-      minHeight: 56
-    }
+      minHeight: 56,
+    },
   },
   content: {
     "&$expanded": {
-      margin: "12px 0"
-    }
+      margin: "12px 0",
+    },
   },
-  expanded: {}
+  expanded: {},
 })(MuiExpansionPanelSummary);
 
-const ExpansionPanelDetails = withStyles(theme => ({
+const ExpansionPanelDetails = withStyles((theme) => ({
   root: {
-    padding: theme.spacing(0)
-  }
+    padding: theme.spacing(0),
+  },
 }))(MuiExpansionPanelDetails);
 
-const PlaceIcon = withStyles(theme => ({
+const PlaceIcon = withStyles((theme) => ({
   root: {
-    marginRight: 8
-  }
+    marginRight: 8,
+  },
 }))(MuiPlaceIcon);
 
 function SearchResultGroup({
@@ -79,7 +79,7 @@ function SearchResultGroup({
   featureCollection: { source, value },
   resultsSource,
   checkedItems,
-  handleCheckedToggle
+  handleCheckedToggle,
 }) {
   const classes = useStyles();
 
@@ -104,7 +104,7 @@ function SearchResultGroup({
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <List dense className={classes.root}>
-            {value.features.map(f => (
+            {value.features.map((f) => (
               <SearchResultItem
                 key={f.id}
                 feature={f}

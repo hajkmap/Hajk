@@ -123,7 +123,7 @@ import {
   makeStyles,
   Checkbox,
   Popover,
-  Typography
+  Typography,
 } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -143,24 +143,24 @@ import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 
 import SearchResultsContainer from "./SearchResultsContainer";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   iconButtons: {
-    padding: 10
+    padding: 10,
   },
   collapseContainer: {
     position: "absolute",
     top: theme.spacing(1),
-    left: 440
+    left: 440,
   },
   searchContainer: {
-    position: "absolute"
+    position: "absolute",
   },
   searchCollapsed: {
-    left: -440
-  }
+    left: -440,
+  },
 }));
 
-const SearchBar = props => {
+const SearchBar = (props) => {
   const classes = useStyles();
 
   // Grab some stuff from props
@@ -194,7 +194,7 @@ const SearchBar = props => {
   // Holder for search results that will be sent to the Results component
   const [searchResults, setSearchResults] = useState({
     featureCollections: [],
-    errors: []
+    errors: [],
   });
 
   const map = useRef(props.map);
@@ -203,18 +203,18 @@ const SearchBar = props => {
     new Style({
       stroke: new Stroke({
         color: "rgba(255, 214, 91, 0.6)",
-        width: 4
+        width: 4,
       }),
       fill: new Fill({
-        color: "rgba(255, 214, 91, 0.2)"
+        color: "rgba(255, 214, 91, 0.2)",
       }),
       image: new Circle({
         radius: 6,
         stroke: new Stroke({
           color: "rgba(255, 214, 91, 0.6)",
-          width: 2
-        })
-      })
+          width: 2,
+        }),
+      }),
     })
   );
 
@@ -225,7 +225,7 @@ const SearchBar = props => {
 
   // For the Popover with Additional Search Options
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const handleClickOnMoreOptions = event => {
+  const handleClickOnMoreOptions = (event) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
@@ -238,7 +238,7 @@ const SearchBar = props => {
     drawSource.current = new VectorSource({ wrapX: false });
     drawLayer.current = new VectorLayer({
       source: drawSource.current,
-      style: drawStyle.current
+      style: drawStyle.current,
     });
 
     // Add layer that will be used to allow user draw on map - used for spatial search
@@ -248,7 +248,7 @@ const SearchBar = props => {
   useEffect(() => {
     resultsSource.current = new VectorSource({ wrapX: false });
     resultsLayer.current = new VectorLayer({
-      source: resultsSource.current
+      source: resultsSource.current,
       // style: drawStyle.current
     });
 
@@ -267,7 +267,7 @@ const SearchBar = props => {
         type: type,
         freehand: freehand,
         stopClick: true,
-        style: drawStyle.current
+        style: drawStyle.current,
       });
 
       map.current.clicklock = true;
@@ -280,7 +280,7 @@ const SearchBar = props => {
   };
 
   const handleClickOnDrawToggle = () => {
-    setDrawActive(prevState => {
+    setDrawActive((prevState) => {
       toggleDraw(!prevState);
       return !prevState;
     });
@@ -288,7 +288,7 @@ const SearchBar = props => {
 
   const handlePanelCollapse = () => {
     console.log(panelCollapsed);
-    setPanelCollapsed(prevState => {
+    setPanelCollapsed((prevState) => {
       return !prevState;
     });
   };
@@ -307,7 +307,7 @@ const SearchBar = props => {
       console.log("Getting Autocomplete for: ", searchString);
       const {
         flatAutocompleteArray,
-        errors
+        errors,
       } = await searchModel.getAutocomplete(searchString);
 
       console.log(
@@ -338,14 +338,14 @@ const SearchBar = props => {
     // Start with cleaning up
     resultsSource.current.clear();
 
-    const features = featureCollections.map(fc =>
-      fc.value.features.map(f => {
+    const features = featureCollections.map((fc) =>
+      fc.value.features.map((f) => {
         const geoJsonFeature = new GeoJSON().readFeature(f);
         return geoJsonFeature;
       })
     );
 
-    features.map(f => resultsSource.current.addFeatures(f));
+    features.map((f) => resultsSource.current.addFeatures(f));
 
     // Zoom to fit all features
     const currentExtent = resultsSource.current.getExtent();
@@ -353,7 +353,7 @@ const SearchBar = props => {
     if (currentExtent.map(Number.isFinite).includes(false) === false) {
       map.current.getView().fit(currentExtent, {
         size: map.current.getSize(),
-        maxZoom: 7
+        maxZoom: 7,
       });
     }
   }
@@ -422,7 +422,7 @@ const SearchBar = props => {
   return (
     <div
       className={cslx(classes.searchContainer, {
-        [classes.searchCollapsed]: panelCollapsed
+        [classes.searchCollapsed]: panelCollapsed,
       })}
     >
       <Paper className={classes.root}>
@@ -447,11 +447,11 @@ const SearchBar = props => {
           getOptionSelected={(option, value) =>
             option.autocompleteEntry === value.autocompleteEntry
           }
-          getOptionLabel={option => option?.autocompleteEntry || option}
-          groupBy={option => option.dataset}
+          getOptionLabel={(option) => option?.autocompleteEntry || option}
+          groupBy={(option) => option.dataset}
           options={options}
           loading={loading}
-          renderInput={params => (
+          renderInput={(params) => (
             <TextField
               {...params}
               label={undefined}
@@ -489,7 +489,7 @@ const SearchBar = props => {
                       <MoreHorizIcon />
                     </IconButton>
                   </>
-                )
+                ),
               }}
             />
           )}
@@ -501,11 +501,11 @@ const SearchBar = props => {
           onClose={handleClose}
           anchorOrigin={{
             vertical: "bottom",
-            horizontal: "center"
+            horizontal: "center",
           }}
           transformOrigin={{
             vertical: "top",
-            horizontal: "center"
+            horizontal: "center",
           }}
         >
           <Paper>
@@ -565,7 +565,7 @@ const SearchBar = props => {
           id="searchSources"
           options={searchModel.getSources()}
           disableCloseOnSelect
-          getOptionLabel={option => option.caption}
+          getOptionLabel={(option) => option.caption}
           renderOption={(option, { selected }) => (
             <>
               <Checkbox
@@ -578,7 +578,7 @@ const SearchBar = props => {
             </>
           )}
           style={{ width: 400 }}
-          renderInput={params => (
+          renderInput={(params) => (
             <TextField
               {...params}
               variant="outlined"

@@ -6,7 +6,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Typography
+  Typography,
 } from "@material-ui/core";
 
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
@@ -14,7 +14,7 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 export default function SearchResultsDetails({
   featureAndSource,
   showBackToResultsButton = true,
-  setSelectedFeatureAndSource
+  setSelectedFeatureAndSource,
 }) {
   const handleClick = () => {
     setSelectedFeatureAndSource(null);
@@ -33,7 +33,7 @@ export default function SearchResultsDetails({
         </Typography>
         <Table>
           <TableBody>
-            {Object.entries(featureAndSource.feature.properties).map(row => (
+            {Object.entries(featureAndSource.feature.properties).map((row) => (
               <TableRow key={row[0]}>
                 <TableCell>{row[0]}</TableCell>
                 <TableCell>{row[1]}</TableCell>

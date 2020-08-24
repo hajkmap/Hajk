@@ -112,7 +112,7 @@ import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 
-const Search = props => {
+const Search = (props) => {
   const searchModel = props.app.appModel.searchModel;
 
   const [searchSources, setSearchSources] = useState(searchModel.getSources());
@@ -125,7 +125,7 @@ const Search = props => {
 
   const [searchResults, setSearchResults] = useState({
     featureCollections: [],
-    errors: []
+    errors: [],
   });
 
   // Search value from input field
@@ -141,7 +141,7 @@ const Search = props => {
   useEffect(() => {
     resultsSource.current = new VectorSource({ wrapX: false });
     resultsLayer.current = new VectorLayer({
-      source: resultsSource.current
+      source: resultsSource.current,
       // style: drawStyle.current
     });
 
@@ -151,14 +151,14 @@ const Search = props => {
   function addFeaturesToResultsLayer(featureCollections) {
     resultsSource.current.clear();
 
-    const features = featureCollections.map(fc =>
-      fc.value.features.map(f => {
+    const features = featureCollections.map((fc) =>
+      fc.value.features.map((f) => {
         const geoJsonFeature = new GeoJSON().readFeature(f);
         return geoJsonFeature;
       })
     );
 
-    features.map(f => resultsSource.current.addFeatures(f));
+    features.map((f) => resultsSource.current.addFeatures(f));
 
     // Zoom to fit all features
     const currentExtent = resultsSource.current.getExtent();
@@ -166,7 +166,7 @@ const Search = props => {
     if (currentExtent.map(Number.isFinite).includes(false) === false) {
       map.current.getView().fit(currentExtent, {
         size: map.current.getSize(),
-        maxZoom: 7
+        maxZoom: 7,
       });
     }
   }
@@ -175,7 +175,7 @@ const Search = props => {
     const searchOptions = searchModel.getSearchOptions();
 
     // Apply our custom options based on user's selection
-    searchSettings.map(setting => {
+    searchSettings.map((setting) => {
       searchOptions["activeSpatialFilter"] = setting.activeSpatialFilter; // "intersects" or "within"
       searchOptions["matchCase"] = setting.matchCase;
       searchOptions["wildcardAtEnd"] = setting.wildcardAtEnd;
@@ -215,7 +215,7 @@ const Search = props => {
     }
     setSearchResults({
       featureCollections: [],
-      errors: []
+      errors: [],
     });
     setSearchActive("");
   };
