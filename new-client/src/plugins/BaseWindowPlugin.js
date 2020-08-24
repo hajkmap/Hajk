@@ -37,9 +37,13 @@ class BaseWindowPlugin extends React.PureComponent {
     super(props);
     this.type = props.type.toLowerCase() || undefined;
     // There will be defaults in props.custom, so that each plugin has own default title/description
-    this.title = props.options.title || props.custom.title;
     this.description = props.options.description || props.custom.description;
-    this.color = props.options.color || props.custom.color;
+
+    // Set initial state for title and color
+    this.state = {
+      title: props.options.title || props.custom.title,
+      color: props.options.color || props.custom.color
+    };
 
     // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
     this.width = props.options.width || props.custom.width || 400;
@@ -67,7 +71,14 @@ class BaseWindowPlugin extends React.PureComponent {
       });
   }
 
-  handleButtonClick = (e) => {
+  componentWillReceiveProps(props) {
+    this.setState({
+      title: props.custom.title,
+      color: props.custom.color
+    }); // Update state when props change
+  }
+
+  handleButtonClick = e => {
     this.showWindow({
       hideOtherPluginWindows: true,
       runCallback: true,
@@ -116,8 +127,8 @@ class BaseWindowPlugin extends React.PureComponent {
       <>
         <Window
           globalObserver={this.props.app.globalObserver}
-          title={this.title}
-          color={this.color}
+          title={this.state.title}
+          color={this.state.color}
           onClose={this.closeWindow}
           open={this.state.windowVisible}
           onResize={this.props.custom.onResize}
@@ -165,7 +176,7 @@ class BaseWindowPlugin extends React.PureComponent {
           onClick={this.handleButtonClick}
         >
           <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
-          <ListItemText primary={this.title} />
+          <ListItemText primary={this.state.title} />
         </ListItem>
       </Hidden>,
       document.getElementById("plugin-buttons")
@@ -179,7 +190,7 @@ class BaseWindowPlugin extends React.PureComponent {
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
-          title={this.title}
+          title={this.state.title}
           abstract={this.description}
         />
       </Hidden>,
