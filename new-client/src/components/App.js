@@ -605,7 +605,8 @@ class App extends React.PureComponent {
           <div
             id="appBox"
             className={cslx(classes.flexBox, {
-              [classes.shiftedLeft]: this.state.drawerPermanent,
+              [classes.shiftedLeft]:
+                this.state.drawerPermanent && clean === false,
             })}
           >
             <header
@@ -669,7 +670,8 @@ class App extends React.PureComponent {
           <div
             id="map"
             className={cslx(classes.map, {
-              [classes.shiftedLeft]: this.state.drawerPermanent,
+              [classes.shiftedLeft]:
+                this.state.drawerPermanent && clean === false,
             })}
           ></div>
           <div
@@ -678,7 +680,8 @@ class App extends React.PureComponent {
               classes.pointerEventsOnChildren,
               classes.windowsContainer,
               {
-                [classes.shiftedLeft]: this.state.drawerPermanent,
+                [classes.shiftedLeft]:
+                  this.state.drawerPermanent && clean === false,
               }
             )}
           >
@@ -687,28 +690,32 @@ class App extends React.PureComponent {
               plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
             />
           </div>
-          <Drawer
-            open={this.state.drawerVisible}
-            // NB: we can't simply toggle between permanent|temporary,
-            // as the temporary mode unmounts element from DOM and
-            // re-mounts it the next time, so we would re-rendering
-            // our plugins all the time.
-            variant="persistent"
-            classes={{
-              paper: classes.drawerBackground,
-            }}
-          >
-            {this.renderDrawerHeader()}
-            <Divider />
-            {this.renderAllDrawerContent()}
-          </Drawer>
-          <Backdrop
-            open={this.state.drawerVisible && !this.state.drawerPermanent}
-            className={classes.backdrop}
-            onClick={(e) => {
-              this.globalObserver.publish("core.hideDrawer");
-            }}
-          />
+          {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
+            <Drawer
+              open={this.state.drawerVisible}
+              // NB: we can't simply toggle between permanent|temporary,
+              // as the temporary mode unmounts element from DOM and
+              // re-mounts it the next time, so we would re-rendering
+              // our plugins all the time.
+              variant="persistent"
+              classes={{
+                paper: classes.drawerBackground,
+              }}
+            >
+              {this.renderDrawerHeader()}
+              <Divider />
+              {this.renderAllDrawerContent()}
+            </Drawer>
+          )}
+          {clean === false && (
+            <Backdrop
+              open={this.state.drawerVisible && !this.state.drawerPermanent}
+              className={classes.backdrop}
+              onClick={(e) => {
+                this.globalObserver.publish("core.hideDrawer");
+              }}
+            />
+          )}
           <Introduction
             experimentalIntroductionEnabled={
               this.appModel.config.appConfig.experimentalIntroductionEnabled
