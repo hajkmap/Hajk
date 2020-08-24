@@ -11,7 +11,7 @@ import Feature from "ol/Feature";
 import LayerInfo from "./LayerInfo.js";
 
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 let vectorLayerProperties = {
@@ -26,9 +26,9 @@ let vectorLayerProperties = {
     typename: "",
     outputFormat: "",
     srsname: "",
-    bbox: ""
+    bbox: "",
   },
-  showLabels: true
+  showLabels: true,
 };
 
 function createStyle(feature, forcedPointRadius) {
@@ -57,7 +57,7 @@ function createStyle(feature, forcedPointRadius) {
   feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
 
   function getLineDash() {
-    var scale = (a, f) => a.map(b => f * b),
+    var scale = (a, f) => a.map((b) => f * b),
       width = lineWidth,
       style = lineStyle,
       dash = [12, 7],
@@ -74,7 +74,7 @@ function createStyle(feature, forcedPointRadius) {
 
   function getFill() {
     return new Fill({
-      color: fillColor
+      color: fillColor,
     });
   }
 
@@ -85,15 +85,15 @@ function createStyle(feature, forcedPointRadius) {
       font: font,
       text: feature ? feature.getProperties()[labelAttribute] : "",
       fill: new Fill({
-        color: labelFillColor
+        color: labelFillColor,
       }),
       stroke: new Stroke({
         color: outlineColor,
-        width: outlineWidth
+        width: outlineWidth,
       }),
       offsetX: offsetX,
       offsetY: offsetY,
-      rotation: rotation
+      rotation: rotation,
     });
   }
 
@@ -107,7 +107,7 @@ function createStyle(feature, forcedPointRadius) {
       scale: 1,
       anchorXUnits: "pixels",
       anchorYUnits: "pixels",
-      anchor: [symbolXOffset, symbolYOffset]
+      anchor: [symbolXOffset, symbolYOffset],
     });
   }
 
@@ -115,7 +115,7 @@ function createStyle(feature, forcedPointRadius) {
     return new Circle({
       fill: getFill(),
       stroke: getStroke(),
-      radius: parseInt(pointSize, 10) || 4
+      radius: parseInt(pointSize, 10) || 4,
     });
   }
 
@@ -123,7 +123,7 @@ function createStyle(feature, forcedPointRadius) {
     return new Stroke({
       color: lineColor,
       width: lineWidth,
-      lineDash: getLineDash()
+      lineDash: getLineDash(),
     });
   }
 
@@ -131,7 +131,7 @@ function createStyle(feature, forcedPointRadius) {
     var obj = {
       fill: getFill(),
       image: getImage(),
-      stroke: getStroke()
+      stroke: getStroke(),
     };
     if (showLabels) {
       obj.text = getText();
@@ -146,7 +146,7 @@ class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
     config = {
       ...vectorLayerProperties,
-      ...config
+      ...config,
     };
     this.config = config;
     this.proxyUrl = proxyUrl;
@@ -157,7 +157,7 @@ class WFSVectorLayer {
     this.filterComparer = config.filterComparer;
 
     this.vectorSource = new VectorSource({
-      loader: extent => {
+      loader: (extent) => {
         if (config.dataFormat === "GeoJSON") {
           this.loadData(config.url, config.dataFormat.toLowerCase());
         } else {
@@ -166,11 +166,11 @@ class WFSVectorLayer {
           }
         }
       },
-      strategy: strategyAll
+      strategy: strategyAll,
     });
 
     if (config.legend[0].url === "") {
-      this.generateLegend(imageData => {
+      this.generateLegend((imageData) => {
         config.legend[0].url = imageData;
       });
     }
@@ -186,7 +186,7 @@ class WFSVectorLayer {
       renderMode: "image",
       style: this.getStyle.bind(this),
       source: this.vectorSource,
-      url: config.url
+      url: config.url,
     });
     if (config.dataFormat === "GeoJSON") {
       this.layer.featureType = "";
@@ -205,7 +205,7 @@ class WFSVectorLayer {
 
   reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
-      features.forEach(feature => {
+      features.forEach((feature) => {
         if (feature.getGeometry() && feature.getGeometry().getCoordinates) {
           let coords = feature.getGeometry().getCoordinates();
           try {
@@ -219,14 +219,14 @@ class WFSVectorLayer {
                 feature
                   .getGeometry()
                   .setCoordinates(
-                    coords.map(coord => transform(coord, from, to))
+                    coords.map((coord) => transform(coord, from, to))
                   );
                 break;
               case "Polygon":
                 feature
                   .getGeometry()
                   .setCoordinates([
-                    coords[0].map(coord => transform(coord, from, to))
+                    coords[0].map((coord) => transform(coord, from, to)),
                   ]);
                 break;
               default:
@@ -243,16 +243,13 @@ class WFSVectorLayer {
   addFeatures(data, format) {
     var features = [],
       parser,
-      to = this.map
-        .getView()
-        .getProjection()
-        .getCode(),
+      to = this.map.getView().getProjection().getCode(),
       from = this.config.projection;
 
     if (format === "wfs") {
       parser = new WFS({
         gmlFormat:
-          this.config.params.version === "1.0.0" ? new GML2() : undefined
+          this.config.params.version === "1.0.0" ? new GML2() : undefined,
       });
     }
 
@@ -272,7 +269,7 @@ class WFSVectorLayer {
       (this.filterAttribute && this.filterValue) ||
       (this.layer.get("filterValue") && this.layer.get("filterAttribute"))
     ) {
-      features = features.filter(feature => this.filter(feature));
+      features = features.filter((feature) => this.filter(feature));
     }
 
     this.vectorSource.addFeatures(features);
@@ -342,8 +339,8 @@ class WFSVectorLayer {
   loadData(url, format) {
     url = this.proxyUrl + url;
 
-    fetch(url, fetchConfig).then(response => {
-      response.text().then(features => {
+    fetch(url, fetchConfig).then((response) => {
+      response.text().then((features) => {
         this.addFeatures(features, format || "wfs");
       });
     });
@@ -351,8 +348,8 @@ class WFSVectorLayer {
 
   generateLegend(callback) {
     var url = this.proxyUrl + this.createUrl();
-    fetch(url, fetchConfig).then(response => {
-      response.text().then(gmlText => {
+    fetch(url, fetchConfig).then((response) => {
+      response.text().then((gmlText) => {
         const parser = new GML2();
         const features = parser.readFeatures(gmlText);
         const canvas = document.createElement("canvas");
@@ -362,7 +359,7 @@ class WFSVectorLayer {
         const pointRadius = 15;
 
         const vectorContext = toContext(canvas.getContext("2d"), {
-          size: [scale, scale]
+          size: [scale, scale],
         });
         const style = this.getStyle(pointRadius)[0];
         vectorContext.setStyle(style);
@@ -386,8 +383,8 @@ class WFSVectorLayer {
                   [scale * padding, scale - scale * padding],
                   [scale - scale * padding, scale - scale * padding],
                   [scale - scale * padding, scale * padding],
-                  [scale * padding, scale * padding]
-                ]
+                  [scale * padding, scale * padding],
+                ],
               ])
             );
             break;
@@ -396,7 +393,7 @@ class WFSVectorLayer {
             vectorContext.drawGeometry(
               new LineString([
                 [scale * padding, scale - scale * padding],
-                [scale - scale * padding, scale * padding]
+                [scale - scale * padding, scale * padding],
               ])
             );
             break;

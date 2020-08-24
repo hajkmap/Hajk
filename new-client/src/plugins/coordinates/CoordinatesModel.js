@@ -14,7 +14,7 @@ class CoordinatesModel {
     this.source = new VectorSource();
     this.vector = new Vector({
       source: this.source,
-      name: "coordinateLayer"
+      name: "coordinateLayer",
     });
 
     this.map.addLayer(this.vector);
@@ -22,16 +22,16 @@ class CoordinatesModel {
     this.transformedCoordinates = [];
   }
 
-  addMarker = coordinates => {
+  addMarker = (coordinates) => {
     let feature = new Feature({
-      geometry: new Point(coordinates)
+      geometry: new Point(coordinates),
     });
     let styleMarker = new Style({
       image: new Icon({
         anchor: [0.5, 1],
         scale: 0.15,
-        src: "marker.png"
-      })
+        src: "marker.png",
+      }),
     });
     feature.setStyle(styleMarker);
     this.vector.getSource().clear();
@@ -47,7 +47,7 @@ class CoordinatesModel {
     let transformations = this.transformations;
     this.activated = true;
 
-    this.map.on("singleclick", e => {
+    this.map.on("singleclick", (e) => {
       if (!this.activated) {
         return;
       }
@@ -82,8 +82,8 @@ class CoordinatesModel {
             xtitle: "Lng",
             ytitle: "Lat",
             inverseAxis: true,
-            coordinates: this.transform(this.coordinates, "EPSG:4326")
-          }
+            coordinates: this.transform(this.coordinates, "EPSG:4326"),
+          },
         ];
       }
 

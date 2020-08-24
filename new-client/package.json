@@ -37,6 +37,7 @@
     "@testing-library/user-event": "^12.1.1",
     "@types/react": "^16.9.46",
     "@types/react-dom": "^16.9.8",
+    "acorn": "^7.4.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
     "har-validator": "^5.1.5",
@@ -44,7 +45,7 @@
     "jsdoc": "^3.6.5",
     "prettier": "^2.0.5",
     "pretty-quick": "^2.0.1",
-    "react-scripts": "3.4.2",
+    "react-scripts": "^3.4.3",
     "typescript": "^3.9.7"
   },
   "dependencies": {
@@ -64,7 +65,6 @@
     "marked": "^1.1.1",
     "notistack": "^0.9.17",
     "ol": "^6.4.3",
-    "ol-ext": "^3.1.14",
     "proj4": "^2.6.2",
     "react": "^16.13.1",
     "react-app-polyfill": "^1.0.6",
@@ -72,7 +72,7 @@
     "react-dom": "^16.13.1",
     "react-event-observer": "^0.5.11",
     "react-horizontal-scrolling-menu": "^0.7.7",
-    "react-rnd": "^10.1.10",
+    "react-rnd": "^10.2.1",
     "recharts": "^1.8.5",
     "x2js": "^3.4.0"
   }

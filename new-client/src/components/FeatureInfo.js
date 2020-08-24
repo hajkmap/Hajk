@@ -7,7 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import marked from "marked";
 import {
   mergeFeaturePropsWithMarkdown,
-  extractPropertiesFromJson
+  extractPropertiesFromJson,
 } from "../utils/FeaturePropsParsing";
 import Diagram from "./Diagram";
 import HajkTable from "./Table";
@@ -18,49 +18,49 @@ import {
   TableCell,
   TableBody,
   ButtonGroup,
-  Button
+  Button,
 } from "@material-ui/core";
 
-const styles = theme => ({
+const styles = (theme) => ({
   windowSection: {
     display: "flex",
     flexFlow: "column",
-    height: "100%"
+    height: "100%",
   },
   featureList: {
     flex: 1,
     overflow: "auto",
     userSelect: "text",
     cursor: "auto",
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing(1),
   },
   fullWidthButton: {
     "&:hover": {
       background: theme.palette.primary.main,
       boxShadow: "none",
-      cursor: "default"
+      cursor: "default",
     },
-    width: "100%"
-  }
+    width: "100%",
+  },
 });
 
 class FeatureInfo extends React.PureComponent {
   state = {
     selectedIndex: 1,
-    visible: false
+    visible: false,
   };
 
   static propTypes = {
     classes: propTypes.object.isRequired,
     features: propTypes.array.isRequired,
-    onDisplay: propTypes.func.isRequired
+    onDisplay: propTypes.func.isRequired,
   };
 
   constructor(props) {
     super(props);
     marked.setOptions({
       sanitize: false,
-      xhtml: true
+      xhtml: true,
     });
   }
 
@@ -68,10 +68,10 @@ class FeatureInfo extends React.PureComponent {
     var left = document.getElementById("step-left");
     var right = document.getElementById("step-right");
     if (left && right) {
-      left.onclick = e => {
+      left.onclick = (e) => {
         this.changeSelectedIndex(-1);
       };
-      right.onclick = e => {
+      right.onclick = (e) => {
         this.changeSelectedIndex(1);
       };
     }
@@ -115,7 +115,7 @@ class FeatureInfo extends React.PureComponent {
     if (!eot) {
       this.setState(
         {
-          selectedIndex: this.state.selectedIndex + amount
+          selectedIndex: this.state.selectedIndex + amount,
         },
         () => {
           this.props.onDisplay(
@@ -132,12 +132,9 @@ class FeatureInfo extends React.PureComponent {
     shortcodes = shortcodes === null ? [] : shortcodes;
 
     if (shortcodes) {
-      shortcodes.forEach(code => {
+      shortcodes.forEach((code) => {
         str = str.replace(code, "");
-        var params = code
-          .replace("[", "")
-          .replace("]", "")
-          .split(" ");
+        var params = code.replace("[", "").replace("]", "").split(" ");
         var c = {};
 
         params.forEach((param, i) => {
@@ -152,7 +149,7 @@ class FeatureInfo extends React.PureComponent {
       });
       return {
         str: str,
-        codes: codes
+        codes: codes,
       };
     } else {
       return;
@@ -164,13 +161,13 @@ class FeatureInfo extends React.PureComponent {
 
     if (!features) return "";
 
-    const visibleStyle = currentIndex => {
+    const visibleStyle = (currentIndex) => {
       const displayValue =
         this.state.selectedIndex === currentIndex + 1 ? "flex" : "none";
       return {
         display: displayValue,
         flexFlow: "column",
-        height: "100%"
+        height: "100%",
       };
     };
 
@@ -212,7 +209,7 @@ class FeatureInfo extends React.PureComponent {
 
       //Problem with geojson returned from AGS - Missing id on feature - how to handle?
       if (feature.layer.layersInfo && feature.getId()) {
-        layer = Object.keys(feature.layer.layersInfo).find(id => {
+        layer = Object.keys(feature.layer.layersInfo).find((id) => {
           const fid = feature.getId().split(".")[0];
           const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
           return fid === layerId;

@@ -27,7 +27,7 @@ const parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
 
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 /**
@@ -48,12 +48,12 @@ function getTheme(config, customTheme) {
   const hardCodedDefaults = {
     palette: {
       primary: {
-        main: config.mapConfig.map.colors.primaryColor // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
+        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
       },
       secondary: {
-        main: config.mapConfig.map.colors.secondaryColor // secondary: { main: "#11cb5f" } // <- Or like this
-      }
-    }
+        main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
+      },
+    },
   };
 
   const mergedTheme = deepMerge(hardCodedDefaults, customTheme);
@@ -69,8 +69,8 @@ function getTheme(config, customTheme) {
  * as well as the default preferred map configuration's file name.
  */
 fetch("appConfig.json", fetchConfig)
-  .then(appConfigResponse => {
-    appConfigResponse.json().then(appConfig => {
+  .then((appConfigResponse) => {
+    appConfigResponse.json().then((appConfig) => {
       // Get default map's file name from appConfig
       let defaultMap = appConfig.defaultMap;
 
@@ -80,7 +80,7 @@ fetch("appConfig.json", fetchConfig)
       window.location.search
         .replace("?", "")
         .split("&")
-        .forEach(pair => {
+        .forEach((pair) => {
           if (pair !== "") {
             let keyValue = pair.split("=");
             if (keyValue[0] === "m") {
@@ -103,14 +103,14 @@ fetch("appConfig.json", fetchConfig)
         ),
         // Additionally, we fetch a custom theme that allows site admins to override
         // the default MUI theme without re-compiling the application.
-        fetch("customTheme.json", fetchConfig)
+        fetch("customTheme.json", fetchConfig),
       ])
         .then(
           ([layersConfigResponse, mapConfigResponse, customThemeResponse]) => {
             Promise.all([
               layersConfigResponse.json(),
               mapConfigResponse.json(),
-              customThemeResponse.json()
+              customThemeResponse.json(),
             ])
               .then(([layersConfig, mapConfig, customTheme]) => {
                 // The fetched files are decoded to Objects and placed in
@@ -119,12 +119,12 @@ fetch("appConfig.json", fetchConfig)
                   appConfig: appConfig,
                   layersConfig: layersConfig,
                   mapConfig: mapConfig,
-                  activeMap: defaultMap
+                  activeMap: defaultMap,
                 };
 
                 // Make sure that the current user is allowed to display the current map
                 const layerSwitcherConfig = config.mapConfig.tools.find(
-                  tool => tool.type === "layerswitcher"
+                  (tool) => tool.type === "layerswitcher"
                 );
                 if (layerSwitcherConfig === undefined) {
                   throw new Error(
@@ -151,7 +151,7 @@ fetch("appConfig.json", fetchConfig)
                   document.getElementById("root")
                 );
               })
-              .catch(err => {
+              .catch((err) => {
                 console.error("Parse error: ", err.message);
                 var errMsg = parseErrorMessage;
                 if (err.message.startsWith("noLayerSwitcher:")) {
@@ -170,7 +170,7 @@ fetch("appConfig.json", fetchConfig)
               });
           }
         )
-        .catch(err => {
+        .catch((err) => {
           console.error("Network error: ", err);
           ReactDOM.render(
             <div className="start-error">
@@ -184,7 +184,7 @@ fetch("appConfig.json", fetchConfig)
         });
     });
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Network error: ", err);
     ReactDOM.render(
       <div className="start-error">

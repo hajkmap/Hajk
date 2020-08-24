@@ -12,7 +12,7 @@ import {
   Polygon,
   MultiPoint,
   MultiLineString,
-  MultiPolygon
+  MultiPolygon,
 } from "ol/geom.js";
 import * as jsts from "jsts";
 
@@ -25,48 +25,48 @@ var selectedFeatures = [],
     id: "buffer",
     style: new Style({
       fill: new Fill({
-        color: "rgba(255, 255, 255, 0.5)"
+        color: "rgba(255, 255, 255, 0.5)",
       }),
       stroke: new Stroke({
         color: "rgba(75, 100, 115, 1.5)",
-        width: 4
+        width: 4,
       }),
       image: new Circle({
         radius: 6,
         fill: new Fill({
-          color: "rgba(255, 255, 255, 0.5)"
+          color: "rgba(255, 255, 255, 0.5)",
         }),
         stroke: new Stroke({
           color: "rgba(75, 100, 115, 1.5)",
-          width: 2
-        })
-      })
-    })
+          width: 2,
+        }),
+      }),
+    }),
   }),
   highlightStyle = new Style({
     fill: new Fill({
-      color: "rgba(126, 168, 231, 0.47)"
+      color: "rgba(126, 168, 231, 0.47)",
     }),
     stroke: new Stroke({
       color: "rgba(126, 168, 231, 1)",
-      width: 4
+      width: 4,
     }),
     image: new Circle({
       radius: 6,
       fill: new Fill({
-        color: "rgba(126, 168, 231, 0.47)"
+        color: "rgba(126, 168, 231, 0.47)",
       }),
       stroke: new Stroke({
         color: "rgba(126, 168, 231, 1)",
-        width: 1
-      })
-    })
+        width: 1,
+      }),
+    }),
   }),
   highlightSource = new VectorSource(),
   highlightLayer = new VectorLayer({
     source: highlightSource,
     id: "HighlightFeature",
-    style: highlightStyle
+    style: highlightStyle,
   });
 
 class BufferModel {
@@ -84,7 +84,7 @@ class BufferModel {
   setActive(active) {
     if (active === true) {
       this.select = new Select({
-        condition: click
+        condition: click,
       });
       this.map.clicklock = true;
       this.map.addInteraction(this.select);
@@ -105,11 +105,11 @@ class BufferModel {
       this.map.un("click", this.selectFeatures);
     }
   }
-  selectFeatures = e => {
+  selectFeatures = (e) => {
     var currentMap = this.getMap;
     var view = currentMap.getView();
     var wmsLayers = currentMap.getLayers();
-    wmsLayers.forEach(function(lyr) {
+    wmsLayers.forEach(function (lyr) {
       if (lyr.type === "VECTOR" && lyr.values_.name === "drawLayer") {
         if (lyr.getSource().getFeatures().length > 0) {
           var f = currentMap.getFeaturesAtPixel(e.pixel);
@@ -117,7 +117,7 @@ class BufferModel {
 
           if (features) {
             highlightSource.addFeatures(features);
-            highlightSource.getFeatures().forEach(feature => {
+            highlightSource.getFeatures().forEach((feature) => {
               feature.setStyle(highlightStyle);
             });
             selectedFeatures.push(highlightSource.getFeatures());
@@ -128,10 +128,10 @@ class BufferModel {
       if (lyr.get("visible") === true && lyr.layersInfo) {
         let subLayers = Object.values(lyr.layersInfo);
         let subLayersToQuery = subLayers
-          .filter(subLayer => {
+          .filter((subLayer) => {
             return subLayer.queryable === true;
           })
-          .map(queryableSubLayer => {
+          .map((queryableSubLayer) => {
             return queryableSubLayer.id;
           });
 
@@ -144,14 +144,14 @@ class BufferModel {
               view.getProjection().getCode(),
               {
                 INFO_FORMAT: "application/json",
-                QUERY_LAYERS: subLayersToQuery.join(",")
+                QUERY_LAYERS: subLayersToQuery.join(","),
               }
             );
           fetch(url)
-            .then(function(response) {
+            .then(function (response) {
               return response.json();
             })
-            .then(function(myJson) {
+            .then(function (myJson) {
               var features = new GeoJSON().readFeatures(myJson);
               if (features.length > 0) {
                 highlightSource.addFeatures(features);
@@ -182,7 +182,7 @@ class BufferModel {
     );
 
     if (selectedFeatures.length > 0) {
-      selectedFeatures.forEach(function(element, key) {
+      selectedFeatures.forEach(function (element, key) {
         var thisFeature = element[key];
 
         var olGeom = thisFeature.getGeometry();

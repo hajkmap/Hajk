@@ -17,7 +17,7 @@ const zIndexStart = 1000;
 //
 // TODO: Perhaps there's no need to disable drag at any time anymore, so this override could be removed?
 //
-Rnd.prototype.onDragStart = function(e, data) {
+Rnd.prototype.onDragStart = function (e, data) {
   if (this.state.disableDrag) {
     return false;
   }
@@ -85,12 +85,12 @@ Rnd.prototype.onDragStart = function(e, data) {
         offset.left / scale,
       bottom:
         top + (boundary.offsetHeight - this.resizable.size.height) - offset.top,
-      left: left - offset.left / scale
-    }
+      left: left - offset.left / scale,
+    },
   });
 };
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     window: {
       zIndex: zIndexStart + document.windows.length,
@@ -103,8 +103,8 @@ const styles = theme => {
       pointerEvents: "all",
       [theme.breakpoints.down("xs")]: {
         borderRadius: "0",
-        position: "fixed !important"
-      }
+        position: "fixed !important",
+      },
     },
     panelContent: {
       display: "flex",
@@ -114,18 +114,18 @@ const styles = theme => {
       bottom: 0,
       right: 0,
       flexDirection: "column",
-      userSelect: "none"
+      userSelect: "none",
     },
     content: {
       flex: "1",
       overflowY: "auto",
       padding: "10px",
-      cursor: "default !important"
+      cursor: "default !important",
     },
     nonScrollable: {
       overflowY: "hidden",
-      padding: "0px"
-    }
+      padding: "0px",
+    },
   };
 };
 
@@ -133,6 +133,7 @@ class Window extends React.PureComponent {
   static propTypes = {
     children: propTypes.object,
     classes: propTypes.object.isRequired,
+    color: propTypes.string,
     features: propTypes.array,
     globalObserver: propTypes.object.isRequired,
     height: propTypes.oneOfType([propTypes.number, propTypes.string])
@@ -146,14 +147,14 @@ class Window extends React.PureComponent {
     open: propTypes.bool.isRequired,
     position: propTypes.string.isRequired,
     title: propTypes.string.isRequired,
-    width: propTypes.number.isRequired
+    width: propTypes.number.isRequired,
   };
 
   static defaultProps = {
     draggingEnabled: true,
     resizingEnabled: true,
     allowMaximizedWindow: true,
-    scrollable: true
+    scrollable: true,
   };
 
   constructor(props) {
@@ -163,7 +164,7 @@ class Window extends React.PureComponent {
       left: 0,
       top: 0,
       width: 300,
-      height: 400
+      height: 400,
     };
 
     window.addEventListener("resize", () => {
@@ -184,9 +185,9 @@ class Window extends React.PureComponent {
       globalObserver.subscribe("core.drawerToggled", () => {
         this.updatePosition();
       });
-      globalObserver.subscribe("core.dialogOpen", open => {
+      globalObserver.subscribe("core.dialogOpen", (open) => {
         this.rnd.setState({
-          disableDrag: open
+          disableDrag: open,
         });
       });
     }
@@ -258,49 +259,49 @@ class Window extends React.PureComponent {
         top: this.top,
         width: this.width,
         height: this.height,
-        mode: this.mode
+        mode: this.mode,
       },
       () => {
         this.rnd.updatePosition({
           y: Math.round(this.top),
-          x: Math.round(this.left)
+          x: Math.round(this.left),
         });
       }
     );
   }
 
-  close = e => {
+  close = (e) => {
     const { onClose } = this.props;
     this.latestWidth = this.rnd.getSelfElement().clientWidth;
     if (onClose) onClose();
   };
 
-  fit = target => {
+  fit = (target) => {
     this.rnd.updatePosition({
       x: Math.round(target.getBoundingClientRect().left),
-      y: Math.round(target.getBoundingClientRect().top)
+      y: Math.round(target.getBoundingClientRect().top),
     });
     this.rnd.setState({
-      disableDrag: true
+      disableDrag: true,
     });
     this.setState({
       width: target.clientWidth,
-      height: target.clientHeight
+      height: target.clientHeight,
     });
     this.mode = "maximized";
   };
 
-  reset = target => {
+  reset = (target) => {
     this.rnd.updatePosition({
       y: Math.round(this.top),
-      x: Math.round(this.left)
+      x: Math.round(this.left),
     });
     this.rnd.setState({
-      disableDrag: false
+      disableDrag: false,
     });
     this.setState({
       width: this.width,
-      height: this.height
+      height: this.height,
     });
     this.mode = "window";
   };
@@ -316,31 +317,31 @@ class Window extends React.PureComponent {
     }
 
     this.rnd.updatePosition({
-      y: Math.round(this.top)
+      y: Math.round(this.top),
     });
     this.rnd.setState({
-      disableDrag: false
+      disableDrag: false,
     });
     this.setState({
-      height: this.height
+      height: this.height,
     });
     this.mode = "window";
   };
 
   moveToTop = () => {
     this.rnd.updatePosition({
-      y: 0
+      y: 0,
     });
   };
 
-  moveToBottom = target => {
+  moveToBottom = (target) => {
     this.rnd.updatePosition({
-      y: Math.round(window.innerHeight - 106)
+      y: Math.round(window.innerHeight - 106),
     });
     this.mode = "minimized";
   };
 
-  maximize = e => {
+  maximize = (e) => {
     const { onMaximize, allowMaximizedWindow } = this.props;
     if (getIsMobile()) {
       this.moveToTop();
@@ -364,7 +365,7 @@ class Window extends React.PureComponent {
     if (this.props.onResize) this.props.onResize();
   };
 
-  minimize = e => {
+  minimize = (e) => {
     const { onMinimize } = this.props;
     if (getIsMobile()) {
       this.moveToBottom();
@@ -381,7 +382,7 @@ class Window extends React.PureComponent {
       this.mode = "minimized";
       this.height = this.state.height;
       this.setState({
-        height: 0
+        height: 0,
       });
     }
     if (onMinimize) onMinimize();
@@ -402,11 +403,12 @@ class Window extends React.PureComponent {
     const {
       children,
       classes,
+      color,
       features,
       open,
       title,
       resizingEnabled,
-      draggingEnabled
+      draggingEnabled,
     } = this.props;
     const { left, top, width, height } = this.state;
 
@@ -438,15 +440,15 @@ class Window extends React.PureComponent {
 
     return (
       <Rnd
-        onMouseDown={e => {
+        onMouseDown={(e) => {
           this.bringToFront();
         }}
-        onMouseOver={e => e.stopPropagation()} // If this bubbles, we'll have Tooltip show up even when we're only on Window. FIXME: Not needed when we change the rendering order.
-        ref={c => {
+        onMouseOver={(e) => e.stopPropagation()} // If this bubbles, we'll have Tooltip show up even when we're only on Window. FIXME: Not needed when we change the rendering order.
+        ref={(c) => {
           this.rnd = c;
         }}
         style={{
-          display: open ? "block" : "none"
+          display: open ? "block" : "none",
         }}
         onDragStop={(e, d) => {
           const rect = this.rnd.getSelfElement().getClientRects()[0];
@@ -464,7 +466,7 @@ class Window extends React.PureComponent {
           }
           this.setState({
             width: ref.style.width,
-            height: ref.style.height
+            height: ref.style.height,
           });
           if (this.props.onResize) this.props.onResize();
         }}
@@ -479,26 +481,27 @@ class Window extends React.PureComponent {
           right: resizeRight,
           top: resizeTop,
           topLeft: resizeTopLeft,
-          topRight: resizeTopRight
+          topRight: resizeTopRight,
         }}
         className={classes.window}
         minWidth={200}
         minHeight={this.mode === "minimized" ? 42 : 200}
         size={{
           width: width,
-          height: height
+          height: height,
         }}
         default={{
           x: left,
           y: top,
           width: width,
-          height: height
+          height: height,
         }}
       >
         <div className={classes.panelContent}>
           <PanelHeader
             onClose={this.close}
             title={title}
+            color={color}
             onMaximize={this.maximize}
             onMinimize={this.minimize}
             mode={this.mode}

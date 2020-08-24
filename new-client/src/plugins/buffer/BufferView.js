@@ -13,13 +13,13 @@ import Tooltip from "@material-ui/core/Tooltip";
 //var dist_val;
 const listStyle3 = {
   background: "#f5f5f5",
-  backgroundColor: "#f5f5f5"
+  backgroundColor: "#f5f5f5",
 };
-const styles = theme => ({});
+const styles = (theme) => ({});
 
 class BufferView extends React.PureComponent {
   state = {
-    name: ""
+    name: "",
   };
   constructor(props) {
     // If you're not using some of properties defined below, remove them from your code.
@@ -30,18 +30,18 @@ class BufferView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
   }
-  clearBuffer = name => event => {
+  clearBuffer = (name) => (event) => {
     this.props.model.clearBuffer();
   };
 
-  clearSelection = name => event => {
+  clearSelection = (name) => (event) => {
     this.props.model.clearSelection();
   };
 
-  activateSelecting = name => event => {
+  activateSelecting = (name) => (event) => {
     this.props.model.activateSelecting(true);
   };
-  bufferFeatures = name => event => {
+  bufferFeatures = (name) => (event) => {
     var dist = document.querySelector("#distans").value;
     this.props.model.bufferFeatures(dist);
   };
@@ -131,7 +131,7 @@ class BufferView extends React.PureComponent {
 }
 
 BufferView.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(BufferView);
