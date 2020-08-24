@@ -17,7 +17,7 @@ import clsx from "clsx";
 import TextArea from "./TextArea";
 import Link from "@material-ui/core/Link";
 
-const getIconSizeFromFontSize = theme => {
+const getIconSizeFromFontSize = (theme) => {
   var fontSizeBody = theme.typography.body1.fontSize;
   var format = "rem";
   if (fontSizeBody.search("px") > -1) {
@@ -29,38 +29,40 @@ const getIconSizeFromFontSize = theme => {
   return `${size * 1.7}${format}`;
 };
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     documentImage: {
       objectFit: "contain",
-      objectPosition: "left"
+      objectPosition: "left",
     },
     popupActivatedImage: {
-      cursor: "pointer"
+      cursor: "pointer",
     },
     naturalDocumentImageProportions: {
-      width: "100%"
+      width: "100%",
+    },
+    linkButton: {
+      display: "flex",
+      textAlign: "left",
+      alignItems: "center",
     },
     typography: {
-      overflowWrap: "break-word"
+      overflowWrap: "break-word",
     },
     linkIcon: {
       fontSize: getIconSizeFromFontSize(theme),
       marginRight: theme.spacing(0.5),
-      verticalAlign: "middle"
-    },
-    linkText: {
-      verticalAlign: "middle"
+      verticalAlign: "middle",
     },
     listRoot: {
       maxWidth: theme.spacing(3),
       minWidth: theme.spacing(3),
-      color: "black"
+      color: "black",
     },
     chapter: {
       cursor: "text",
-      marginTop: theme.spacing(4)
-    }
+      marginTop: theme.spacing(4),
+    },
   };
 };
 
@@ -70,7 +72,7 @@ const TEXT_NODE = 3;
 class Contents extends React.PureComponent {
   state = {
     popupImage: null,
-    activeContent: null
+    activeContent: null,
   };
 
   componentDidMount = () => {
@@ -86,80 +88,80 @@ class Contents extends React.PureComponent {
     let allowedHtmlTags = [];
     allowedHtmlTags.push({
       tagType: "br",
-      callback: this.getBrtagTypographyComponent
+      callback: this.getBrtagTypographyComponent,
     });
     allowedHtmlTags.push({
       tagType: "ul",
-      callback: this.getULComponent
+      callback: this.getULComponent,
     });
     allowedHtmlTags.push({
       tagType: "ol",
-      callback: this.getOLComponent
+      callback: this.getOLComponent,
     });
     allowedHtmlTags.push({
       tagType: "li",
-      callback: () => {}
+      callback: () => {},
     });
     allowedHtmlTags.push({
       tagType: "blockquote",
-      callback: this.getBlockQuoteComponents
+      callback: this.getBlockQuoteComponents,
     });
     allowedHtmlTags.push({
       tagType: "h1",
-      callback: this.getHeadingTypographyComponents
+      callback: this.getHeadingTypographyComponents,
     });
     allowedHtmlTags.push({
       tagType: "h2",
-      callback: this.getHeadingTypographyComponents
+      callback: this.getHeadingTypographyComponents,
     });
     allowedHtmlTags.push({
       tagType: "h3",
-      callback: this.getHeadingTypographyComponents
+      callback: this.getHeadingTypographyComponents,
     });
     allowedHtmlTags.push({
       tagType: "h4",
-      callback: this.getHeadingTypographyComponents
+      callback: this.getHeadingTypographyComponents,
     });
     allowedHtmlTags.push({
       tagType: "h5",
-      callback: this.getHeadingTypographyComponents
+      callback: this.getHeadingTypographyComponents,
     });
     allowedHtmlTags.push({
       tagType: "h6",
-      callback: this.getHeadingTypographyComponents
+      callback: this.getHeadingTypographyComponents,
     });
     allowedHtmlTags.push({
       tagType: "a",
-      callback: this.getLinkComponent
+      callback: this.getLinkComponent,
     });
     allowedHtmlTags.push({
       tagType: "img",
-      callback: this.getImgCardComponent
+      callback: this.getImgCardComponent,
     });
     allowedHtmlTags.push({
       tagType: "p",
-      callback: this.getPtagTypographyComponents
+      callback: this.getPtagTypographyComponents,
     });
     allowedHtmlTags.push({
       tagType: "figure",
-      callback: this.getFigureComponents
+      callback: this.getFigureComponents,
     });
     allowedHtmlTags.push({
       tagType: "strong",
-      callback: this.getStrongTagTypographyComponents
+      callback: this.getStrongTagTypographyComponents,
     });
     allowedHtmlTags.push({
       tagType: "u",
-      callback: this.getUnderlineTagTypographyComponents
+      callback: this.getUnderlineTagTypographyComponents,
     });
     allowedHtmlTags.push({
       tagType: "em",
-      callback: this.getItalicTagTypographyComponents
+      callback: this.getItalicTagTypographyComponents,
     });
     return allowedHtmlTags;
   };
 
-  getStrongTagTypographyComponents = strongTag => {
+  getStrongTagTypographyComponents = (strongTag) => {
     const children = [...strongTag.childNodes];
     var array = [];
     if (children.length > 0) {
@@ -174,7 +176,7 @@ class Contents extends React.PureComponent {
     }
     return [<strong>{strongTag.textContent}</strong>];
   };
-  getUnderlineTagTypographyComponents = uTag => {
+  getUnderlineTagTypographyComponents = (uTag) => {
     const children = [...uTag.childNodes];
     var array = [];
     if (children.length > 0) {
@@ -189,7 +191,7 @@ class Contents extends React.PureComponent {
     }
     return [<u>{uTag.textContent}</u>];
   };
-  getItalicTagTypographyComponents = emTag => {
+  getItalicTagTypographyComponents = (emTag) => {
     const children = [...emTag.childNodes];
     var array = [];
     if (children.length > 0) {
@@ -205,7 +207,7 @@ class Contents extends React.PureComponent {
     return [<em>{emTag.textContent}</em>];
   };
 
-  getMaterialUIComponentsForChapter = chapter => {
+  getMaterialUIComponentsForChapter = (chapter) => {
     return htmlToMaterialUiParser(
       chapter.html,
       this.getTagSpecificCallbacks()
@@ -214,9 +216,9 @@ class Contents extends React.PureComponent {
     });
   };
 
-  appendComponentsToChapter = chapter => {
+  appendComponentsToChapter = (chapter) => {
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(subChapter => {
+      chapter.chapters.forEach((subChapter) => {
         subChapter.components = this.getMaterialUIComponentsForChapter(
           subChapter
         );
@@ -237,7 +239,7 @@ class Contents extends React.PureComponent {
     this.setState({ activeContent: content });
   };
 
-  renderChild = child => {
+  renderChild = (child) => {
     if (child.nodeType === TEXT_NODE) {
       return child.data;
     }
@@ -247,7 +249,7 @@ class Contents extends React.PureComponent {
     }
   };
 
-  getULComponent = ulComponent => {
+  getULComponent = (ulComponent) => {
     const { classes } = this.props;
     var children = [...ulComponent.children];
     return (
@@ -270,7 +272,7 @@ class Contents extends React.PureComponent {
     );
   };
 
-  getOLComponent = olComponent => {
+  getOLComponent = (olComponent) => {
     const { classes } = this.props;
     var children = [...olComponent.children];
     return (
@@ -295,11 +297,15 @@ class Contents extends React.PureComponent {
   getExternalLink = (aTag, externalLink) => {
     const { classes } = this.props;
     return (
-      <Link href={externalLink} target="_blank" rel="noopener" variant="body2">
+      <Link
+        href={externalLink}
+        target="_blank"
+        className={classes.linkButton}
+        rel="noopener"
+        variant="body2"
+      >
         <OpenInNewIcon className={classes.linkIcon}></OpenInNewIcon>
-        <span className={classes.linkText}>
-          {this.getFormattedComponentFromTag(aTag)}
-        </span>
+        {this.getFormattedComponentFromTag(aTag)}
       </Link>
     );
   };
@@ -311,14 +317,13 @@ class Contents extends React.PureComponent {
         href="#"
         variant="body2"
         component="button"
+        className={classes.linkButton}
         onClick={() => {
           localObserver.publish("fly-to", mapLink);
         }}
       >
         <MapIcon className={classes.linkIcon}></MapIcon>
-        <span className={classes.linkText}>
-          {this.getFormattedComponentFromTag(aTag)}
-        </span>
+        {this.getFormattedComponentFromTag(aTag)}
       </Link>
     );
   };
@@ -332,41 +337,40 @@ class Contents extends React.PureComponent {
           component="button"
           underline="hover"
           variant="body1"
+          className={classes.linkButton}
           onClick={() => {
             localObserver.publish("show-header-in-document", {
               documentName: documentLink,
-              headerIdentifier: headerIdentifier
+              headerIdentifier: headerIdentifier,
             });
           }}
         >
           <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
-          <span className={classes.linkText}>
-            {this.getFormattedComponentFromTag(aTag)}
-          </span>
+          {this.getFormattedComponentFromTag(aTag)}
         </Link>
       </>
     );
   };
 
-  getLinkDataPerType = attributes => {
+  getLinkDataPerType = (attributes) => {
     const {
       0: mapLink,
       1: headerIdentifier,
       2: documentLink,
-      3: externalLink
+      3: externalLink,
     } = [
       "data-maplink",
       "data-header-identifier",
       "data-document",
-      "data-link"
-    ].map(attributeKey => {
+      "data-link",
+    ].map((attributeKey) => {
       return attributes.getNamedItem(attributeKey)?.value;
     });
 
     return { mapLink, headerIdentifier, documentLink, externalLink };
   };
 
-  getTextArea = tag => {
+  getTextArea = (tag) => {
     const children = [...tag.childNodes];
     var textAreaContentArray = children.map((element, index) => {
       return (
@@ -388,7 +392,7 @@ class Contents extends React.PureComponent {
     );
   };
 
-  getBlockQuoteComponents = tag => {
+  getBlockQuoteComponents = (tag) => {
     if (tag.attributes.getNamedItem("data-text-section")) {
       return this.getTextArea(tag);
     } else {
@@ -403,12 +407,12 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  getLinkComponent = aTag => {
+  getLinkComponent = (aTag) => {
     const {
       mapLink,
       headerIdentifier,
       documentLink,
-      externalLink
+      externalLink,
     } = this.getLinkDataPerType(aTag.attributes);
 
     if (documentLink) {
@@ -424,7 +428,7 @@ class Contents extends React.PureComponent {
     }
   };
 
-  getFigureComponents = figureTag => {
+  getFigureComponents = (figureTag) => {
     const children = [...figureTag.children];
 
     return children.map((element, index) => {
@@ -434,11 +438,11 @@ class Contents extends React.PureComponent {
     });
   };
 
-  isPopupAllowedForImage = imgTag => {
+  isPopupAllowedForImage = (imgTag) => {
     return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
   };
 
-  getImageStyle = image => {
+  getImageStyle = (image) => {
     const { classes } = this.props;
     var className = image.popup
       ? clsx(
@@ -464,7 +468,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  getImgCardComponent = imgTag => {
+  getImgCardComponent = (imgTag) => {
     const image = {
       caption: imgTag.attributes.getNamedItem("data-caption")?.value,
       popup: this.isPopupAllowedForImage(imgTag),
@@ -472,7 +476,7 @@ class Contents extends React.PureComponent {
       url: imgTag.attributes.getNamedItem("src")?.value,
       altValue: imgTag.attributes.getNamedItem("alt")?.value,
       height: imgTag.attributes.getNamedItem("data-image-height")?.value,
-      width: imgTag.attributes.getNamedItem("data-image-width")?.value
+      width: imgTag.attributes.getNamedItem("data-image-width")?.value,
     };
 
     var onClickCallback = image.popup
@@ -500,7 +504,7 @@ class Contents extends React.PureComponent {
     );
   };
 
-  getImageDescription = image => {
+  getImageDescription = (image) => {
     const { classes } = this.props;
     return (
       <>
@@ -514,7 +518,7 @@ class Contents extends React.PureComponent {
     );
   };
 
-  getFormattedComponentFromTag = tag => {
+  getFormattedComponentFromTag = (tag) => {
     const childNodes = [...tag.childNodes];
     return childNodes.map((child, index) => {
       return (
@@ -529,7 +533,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  getPtagTypographyComponents = pTag => {
+  getPtagTypographyComponents = (pTag) => {
     const { classes } = this.props;
     return (
       <Typography className={classes.typography} variant="body1">
@@ -548,7 +552,7 @@ class Contents extends React.PureComponent {
     return <br />;
   };
 
-  getHeadingTypographyComponents = tag => {
+  getHeadingTypographyComponents = (tag) => {
     const { classes } = this.props;
     return (
       <>
@@ -573,7 +577,7 @@ class Contents extends React.PureComponent {
     this.setState({ popupImage: null });
   };
 
-  showPopupModal = image => {
+  showPopupModal = (image) => {
     this.setState({ popupImage: image });
   };
 
@@ -595,9 +599,9 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderChapters = chapters => {
+  renderChapters = (chapters) => {
     return Array.isArray(chapters)
-      ? chapters.map(chapter => this.renderChapter(chapter))
+      ? chapters.map((chapter) => this.renderChapter(chapter))
       : null;
   };
 
@@ -607,7 +611,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderChapter = chapter => {
+  renderChapter = (chapter) => {
     const { classes } = this.props;
     return (
       <Grid
@@ -624,13 +628,13 @@ class Contents extends React.PureComponent {
           {chapter.components}
         </Grid>
         {Array.isArray(chapter.chapters)
-          ? chapter.chapters.map(subChapter => this.renderChapter(subChapter))
+          ? chapter.chapters.map((subChapter) => this.renderChapter(subChapter))
           : null}
       </Grid>
     );
   };
 
-  getHeaderVariant = chapter => {
+  getHeaderVariant = (chapter) => {
     var headerSize = 2; //Chapters start with h2
     while (chapter.parent) {
       headerSize++;
@@ -645,7 +649,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderHeadline = chapter => {
+  renderHeadline = (chapter) => {
     const { classes } = this.props;
 
     return (
