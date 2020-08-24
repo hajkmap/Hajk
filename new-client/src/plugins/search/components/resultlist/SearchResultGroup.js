@@ -1,66 +1,66 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
 import SearchResultItem from "./SearchResultItem";
 
-const styles = theme => ({
+const styles = (theme) => ({
   resultGroup: {
-    width: "100%"
+    width: "100%",
   },
   heading: {
     padding: 0,
     paddingRight: "14px",
     color: theme.palette.primary.contrastText,
-    fontWeight: "500"
+    fontWeight: "500",
   },
   secondaryHeading: {
     fontSize: "10pt",
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.primary.contrastText,
     padding: "3px 6px 3px 6px",
-    borderRadius: "30%"
+    borderRadius: "30%",
   },
   details: {
     padding: "0px",
     background: "#efefef",
-    borderTop: "1px solid #ccc"
+    borderTop: "1px solid #ccc",
   },
   content: {
     "&$expanded": {
-      margin: "0px"
+      margin: "0px",
     },
-    margin: "0px"
+    margin: "0px",
   },
   groupRoot: {
     minHeight: "0px",
     padding: "5px",
     "&$expanded": {
-      minHeight: 0
-    }
+      minHeight: 0,
+    },
   },
   expanded: {
-    margin: 0
+    margin: 0,
   },
-  expansionPanel: {
+  Accordion: {
     borderRadius: "0 !important",
     height: "30%",
     margin: "5px 0",
-    backgroundColor: theme.palette.primary.main
-  }
+    backgroundColor: theme.palette.primary.main,
+  },
 });
 
 class SearchResultGroup extends Component {
   state = {
     selfExpanded: false,
-    expanded: false
+    expanded: false,
   };
 
-  toggle = e => {
+  toggle = (e) => {
     this.setState({
-      selfExpanded: !this.state.selfExpanded
+      selfExpanded: !this.state.selfExpanded,
     });
   };
 
@@ -96,20 +96,20 @@ class SearchResultGroup extends Component {
 
     return (
       <div ref="panelElement">
-        <ExpansionPanel
-          className={classes.expansionPanel}
+        <Accordion
+          className={classes.Accordion}
           expanded={expanded}
-          onChange={e => {
+          onChange={(e) => {
             setTimeout(() => {
               this.refs.panelElement.scrollIntoView();
             }, 100);
           }}
           TransitionProps={{ timeout: 200 }}
         >
-          <ExpansionPanelSummary
+          <AccordionSummary
             classes={{
               expanded: classes.expanded,
-              content: classes.content
+              content: classes.content,
             }}
             className={classes.groupRoot}
             ref={this.panelHeaderElement}
@@ -122,11 +122,11 @@ class SearchResultGroup extends Component {
                 {featureType.features.length}
               </span>
             </Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails className={classes.details}>
+          </AccordionSummary>
+          <AccordionDetails className={classes.details}>
             <div className={classes.resultGroup}>{items}</div>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
+          </AccordionDetails>
+        </Accordion>
       </div>
     );
   }

@@ -10,35 +10,35 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 
-const styles = theme => ({
+const styles = (theme) => ({
   container: {
     display: "flex",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
-    width: 200
+    width: 200,
   },
   dense: {
-    marginTop: 19
+    marginTop: 19,
   },
   menu: {
-    width: 200
-  }
+    width: 200,
+  },
 });
 
 class Dialog extends Component {
   state = {
     open: false,
-    text: ""
+    text: "",
   };
 
   static propTypes = {
     classes: propTypes.object.isRequired,
     onClose: propTypes.func.isRequired,
     open: propTypes.bool.isRequired,
-    options: propTypes.object.isRequired
+    options: propTypes.object.isRequired,
   };
 
   /*
@@ -58,34 +58,34 @@ class Dialog extends Component {
    */
   static getDerivedStateFromProps(props, state) {
     return {
-      open: props.open
+      open: props.open,
     };
   }
 
-  handleChange = name => event => {
+  handleChange = (name) => (event) => {
     this.setState({
-      [name]: event.target.value
+      [name]: event.target.value,
     });
   };
 
-  handleClose = e => {
+  handleClose = (e) => {
     e.stopPropagation();
     this.props.onClose(this.state.text);
   };
 
-  handleAbort = e => {
+  handleAbort = (e) => {
     e.stopPropagation();
     this.props.onAbort(this.state.text);
   };
 
-  handleDialogClick = e => {
+  handleDialogClick = (e) => {
     e.stopPropagation();
     return false;
   };
 
   getHtml(text) {
     return {
-      __html: text
+      __html: text,
     };
   }
 
@@ -110,7 +110,7 @@ class Dialog extends Component {
         className={classes.container}
         noValidate
         autoComplete="off"
-        onSubmit={e => {
+        onSubmit={(e) => {
           e.preventDefault();
           this.props.onClose(this.state.text);
           return false;

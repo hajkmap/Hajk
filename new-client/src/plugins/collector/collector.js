@@ -25,14 +25,15 @@ class Collector extends React.Component {
       globalObserver: this.app.globalObserver,
       options: {
         ...props.options,
-        serviceConfig: this.serviceConfig
-      }
+        serviceConfig: this.serviceConfig,
+      },
     });
   }
 
   getLayerConfigById(serviceId) {
     return this.app.config.layersConfig.find(
-      layerConfig => layerConfig.type === "edit" && layerConfig.id === serviceId
+      (layerConfig) =>
+        layerConfig.type === "edit" && layerConfig.id === serviceId
     );
   }
 
@@ -52,7 +53,7 @@ class Collector extends React.Component {
           description: "Vi vill veta vad du tycker!",
           height: 450,
           width: 430,
-          onWindowHide: this.onWindowHide
+          onWindowHide: this.onWindowHide,
         }}
       >
         <CollectorView

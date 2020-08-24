@@ -22,7 +22,7 @@ class Informative extends React.PureComponent {
       exportUrl: props.options.exportUrl,
       localObserver: this.localObserver,
       map: props.map,
-      url: props.options.serviceUrl + "/" + props.options.document
+      url: props.options.serviceUrl + "/" + props.options.document,
     });
   }
 
@@ -35,10 +35,10 @@ class Informative extends React.PureComponent {
    *
    * @memberof Informative
    */
-  open = chapter => {
+  open = (chapter) => {
     this.localObserver.publish("changeChapter", chapter);
     this.app.globalObserver.publish("informative.showWindow", {
-      hideOtherPlugins: false
+      hideOtherPlugins: false,
     });
   };
 
@@ -53,7 +53,7 @@ class Informative extends React.PureComponent {
           title: "Översiktsplan",
           description: "Läs mer om vad som planeras i kommunen",
           height: "auto",
-          width: 640
+          width: 640,
         }}
       >
         <InformativeView

@@ -9,20 +9,20 @@ import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 
-const styles = theme => ({
+const styles = (theme) => ({
   layerItemContainer: {
-    borderBottom: "1px solid #ccc"
+    borderBottom: "1px solid #ccc",
   },
   captionText: {
     position: "relative",
     top: "2px",
-    fontSize: theme.typography.pxToRem(15)
-  }
+    fontSize: theme.typography.pxToRem(15),
+  },
 });
 
 class BackgroundSwitcher extends React.PureComponent {
   state = {
-    selectedLayer: -1 // By default, select special case "white background"
+    selectedLayer: -1, // By default, select special case "white background"
   };
 
   osmLayer = undefined;
@@ -34,7 +34,7 @@ class BackgroundSwitcher extends React.PureComponent {
     classes: propTypes.object.isRequired,
     display: propTypes.bool.isRequired,
     layerMap: propTypes.object.isRequired,
-    layers: propTypes.array.isRequired
+    layers: propTypes.array.isRequired,
   };
 
   /**
@@ -43,21 +43,21 @@ class BackgroundSwitcher extends React.PureComponent {
    */
   componentDidMount() {
     const backgroundVisibleFromStart = this.props.layers.find(
-      layer => layer.visible
+      (layer) => layer.visible
     );
     backgroundVisibleFromStart &&
       this.setState({
-        selectedLayer: backgroundVisibleFromStart.name
+        selectedLayer: backgroundVisibleFromStart.name,
       });
 
     // Initiate our special case layer, OpenStreetMap
     const osmSource = new OSM({
-      reprojectionErrorThreshold: 5
+      reprojectionErrorThreshold: 5,
     });
     this.osmLayer = new TileLayer({
       visible: false,
       source: osmSource,
-      zIndex: -1
+      zIndex: -1,
     });
     this.props.map.addLayer(this.osmLayer);
   }
@@ -65,7 +65,7 @@ class BackgroundSwitcher extends React.PureComponent {
    * @summary Hides previously selected background and shows current selection.
    * @param {Object} e The event object, contains target's value
    */
-  onChange = e => {
+  onChange = (e) => {
     const selectedLayer = e.target.value;
 
     // Hide previously selected layers. The if > 0 is needed because we have our
@@ -92,7 +92,7 @@ class BackgroundSwitcher extends React.PureComponent {
 
     // Finally, store current selection in state
     this.setState({
-      selectedLayer
+      selectedLayer,
     });
   };
 
@@ -145,7 +145,7 @@ class BackgroundSwitcher extends React.PureComponent {
     const {
       backgroundSwitcherWhite,
       backgroundSwitcherBlack,
-      enableOSM
+      enableOSM,
     } = this.props;
     let radioButtons = [],
       defaults = [];
@@ -160,7 +160,7 @@ class BackgroundSwitcher extends React.PureComponent {
         this.renderRadioButton(
           {
             name: "-1",
-            caption: "Vit"
+            caption: "Vit",
           },
           -1
         )
@@ -171,7 +171,7 @@ class BackgroundSwitcher extends React.PureComponent {
         this.renderRadioButton(
           {
             name: "-2",
-            caption: "Svart"
+            caption: "Svart",
           },
           -2
         )
@@ -192,7 +192,7 @@ class BackgroundSwitcher extends React.PureComponent {
       ...defaults,
       ...this.props.layers.map((layerConfig, i) =>
         this.renderRadioButton(layerConfig, i)
-      )
+      ),
     ];
 
     return radioButtons;

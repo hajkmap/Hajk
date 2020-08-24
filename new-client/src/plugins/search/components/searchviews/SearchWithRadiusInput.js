@@ -24,7 +24,7 @@ import React from "react";
 
 class SearchWithRadiusInput extends React.PureComponent {
   state = {
-    radiusDrawn: false
+    radiusDrawn: false,
   };
 
   componentDidMount() {
@@ -37,7 +37,7 @@ class SearchWithRadiusInput extends React.PureComponent {
       () => {
         this.setState({ radiusDrawn: true });
       },
-      layerIds => {
+      (layerIds) => {
         if (layerIds.length > 0) {
           onSearchWithin(layerIds);
         }

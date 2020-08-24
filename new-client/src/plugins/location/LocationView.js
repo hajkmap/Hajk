@@ -22,7 +22,7 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import LinearProgress from "@material-ui/core/LinearProgress";
 
-const styles = theme => ({});
+const styles = (theme) => ({});
 
 class LocationView extends React.PureComponent {
   firstLoad = true; // used to determine if we want to center and zoom in to point (we want this only on first position change)
@@ -35,7 +35,7 @@ class LocationView extends React.PureComponent {
     altitude: undefined,
     altitudeAccuracy: undefined,
     heading: undefined,
-    speed: undefined
+    speed: undefined,
   };
 
   locationDetails = {
@@ -43,7 +43,7 @@ class LocationView extends React.PureComponent {
     altitude: { id: 1, label: "Höjd (m. ö. h.)" },
     altitudeAccuracy: { id: 2, label: "Höjdprecision (m)" },
     heading: { id: 3, label: "Riktning (rad)" },
-    speed: { id: 4, label: "Hastighet (m/s)" }
+    speed: { id: 4, label: "Hastighet (m/s)" },
   };
 
   componentDidMount() {
@@ -53,7 +53,7 @@ class LocationView extends React.PureComponent {
     this.source = new VectorSource({ wrapX: false });
     this.layer = new VectorLayer({
       source: this.source,
-      name: "geolocation-layer"
+      name: "geolocation-layer",
     });
     this.map.addLayer(this.layer);
 
@@ -65,22 +65,22 @@ class LocationView extends React.PureComponent {
         image: new CircleStyle({
           radius: 6,
           fill: new Fill({
-            color: "#3399CC"
+            color: "#3399CC",
           }),
           stroke: new Stroke({
             color: "#fff",
-            width: 2
-          })
-        })
+            width: 2,
+          }),
+        }),
       })
     );
 
     // Init geolocation layer where the point will be drawn to
     this.geolocation = new Geolocation({
       trackingOptions: {
-        enableHighAccuracy: true
+        enableHighAccuracy: true,
       },
-      projection: this.map.getView().getProjection()
+      projection: this.map.getView().getProjection(),
     });
 
     // Set up some event handlers for our Geolocation object
@@ -102,17 +102,17 @@ class LocationView extends React.PureComponent {
       altitude: this.geolocation.getAltitude(),
       altitudeAccuracy: this.geolocation.getAltitudeAccuracy(),
       heading: this.geolocation.getHeading(),
-      speed: this.geolocation.getSpeed()
+      speed: this.geolocation.getSpeed(),
     });
   };
 
-  handleGeolocationError = error => {
+  handleGeolocationError = (error) => {
     this.setState({ loading: false });
     console.log("error: ", error);
     this.props.enqueueSnackbar(
       `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
       {
-        variant: "error"
+        variant: "error",
       }
     );
   };
@@ -138,7 +138,7 @@ class LocationView extends React.PureComponent {
     }
   };
 
-  toggleTracking = event => {
+  toggleTracking = (event) => {
     this.setState({ track: event.target.checked });
     this.setState({ loading: event.target.checked });
     this.geolocation.setTracking(event.target.checked);
@@ -168,7 +168,7 @@ class LocationView extends React.PureComponent {
               </TableRow>
             </TableHead>
             <TableBody>
-              {Object.keys(this.locationDetails).map(row => {
+              {Object.keys(this.locationDetails).map((row) => {
                 let r = this.locationDetails[row];
                 return (
                   <TableRow key={r.id}>
@@ -211,7 +211,7 @@ class LocationView extends React.PureComponent {
 }
 
 LocationView.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(withSnackbar(LocationView));

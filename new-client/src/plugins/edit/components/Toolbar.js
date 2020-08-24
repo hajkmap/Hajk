@@ -9,49 +9,49 @@ import ZoomOutMapIcon from "@material-ui/icons/ZoomOutMap";
 import FormatShapesIcon from "@material-ui/icons/FormatShapes";
 import Typography from "@material-ui/core/Typography/Typography";
 
-const styles = theme => ({
+const styles = (theme) => ({
   button: {
     margin: theme.spacing(1),
-    width: "100px"
+    width: "100px",
   },
   leftIcon: {
-    marginRight: theme.spacing(1)
+    marginRight: theme.spacing(1),
   },
   rightIcon: {
-    marginLeft: theme.spacing(1)
+    marginLeft: theme.spacing(1),
   },
   iconSmall: {
-    fontSize: 20
+    fontSize: 20,
   },
   toolbar: {
     padding: "5px",
     borderRadius: "4px",
     boxShadow:
-      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
   },
-  toolbarRow: {}
+  toolbarRow: {},
 });
 
 class Toolbar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeTool: undefined
+      activeTool: undefined,
     };
     props.observer.subscribe("deactivate", () => {
       this.props.panel.setState({
         checked: false,
         enabled: false,
-        selectedSource: false
+        selectedSource: false,
       });
       this.setState({
-        activeTool: undefined
+        activeTool: undefined,
       });
     });
-    props.observer.subscribe("layerChanged", layer => {
+    props.observer.subscribe("layerChanged", (layer) => {
       this.setState(
         {
-          activeTool: undefined
+          activeTool: undefined,
         },
         () => {
           this.props.model.deactivateInteraction();
@@ -65,13 +65,13 @@ class Toolbar extends Component {
     if (geometryType && this.state.activeTool === geometryType.toLowerCase()) {
       model.deactivateInteraction();
       return this.setState({
-        activeTool: undefined
+        activeTool: undefined,
       });
     }
     if (this.state.activeTool === type) {
       model.deactivateInteraction();
       return this.setState({
-        activeTool: undefined
+        activeTool: undefined,
       });
     }
     model.deactivateInteraction();
@@ -178,7 +178,7 @@ class Toolbar extends Component {
     if (!this.props.model.editSource) {
       return;
     }
-    this.props.model.save(response => {
+    this.props.model.save((response) => {
       this.props.model.filty = false;
       this.props.model.refreshEditingLayer();
       this.props.app.globalObserver.publish(
@@ -193,10 +193,10 @@ class Toolbar extends Component {
     this.props.panel.setState({
       checked: false,
       enabled: false,
-      selectedSource: false
+      selectedSource: false,
     });
     this.setState({
-      activeTool: undefined
+      activeTool: undefined,
     });
   }
 
@@ -321,7 +321,7 @@ class Toolbar extends Component {
               variant="contained"
               color="primary"
               disabled={disabled}
-              onClick={e => {
+              onClick={(e) => {
                 this.onSaveClicked();
               }}
               type="button"
@@ -333,7 +333,7 @@ class Toolbar extends Component {
             <Button
               className={classes.button}
               disabled={disabled}
-              onClick={e => {
+              onClick={(e) => {
                 this.onCancelClicked();
               }}
               type="button"

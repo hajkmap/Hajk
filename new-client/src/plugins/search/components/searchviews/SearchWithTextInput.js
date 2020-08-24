@@ -5,36 +5,36 @@ import ClearIcon from "@material-ui/icons/Clear";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchButton from "../../components/shared/SearchButton";
 
-const styles = theme => ({
+const styles = (theme) => ({
   search: {
     borderRadius: theme.shape.borderRadius,
     flex: "auto",
-    display: "flex"
+    display: "flex",
   },
   inputRoot: {
-    width: "100%"
+    width: "100%",
   },
   inputInput: {
     padding: theme.spacing(1),
     left: "100%",
-    width: "100%"
+    width: "100%",
   },
   inputInputWide: {
     padding: theme.spacing(1),
     left: "100%",
     width: "100%",
     "&:focus": {
-      width: "100%"
-    }
+      width: "100%",
+    },
   },
   clearIcon: {
-    cursor: "pointer"
-  }
+    cursor: "pointer",
+  },
 });
 
 class SearchWithTextInput extends React.PureComponent {
   state = {
-    value: ""
+    value: "",
   };
 
   componentDidMount() {
@@ -46,7 +46,7 @@ class SearchWithTextInput extends React.PureComponent {
     super();
     props.model.observer.subscribe("clearInput", () => {
       this.setState({
-        value: ""
+        value: "",
       });
     });
   }
@@ -59,33 +59,33 @@ class SearchWithTextInput extends React.PureComponent {
       value,
       target,
       forceSearch,
-      resetToStartView
+      resetToStartView,
     } = this.props;
 
     return (
       <div className={classes.search}>
         <OutlinedInput
           autoComplete="off"
-          inputRef={input => {
+          inputRef={(input) => {
             this.input = input;
           }}
-          onChange={e => {
-            onChange(e.target.value, false, data => {
+          onChange={(e) => {
+            onChange(e.target.value, false, (data) => {
               if (data) {
                 onComplete(data);
               }
             });
             this.setState({
-              value: e.target.value
+              value: e.target.value,
             });
           }}
           autoFocus={true}
           value={value === "" ? value : this.state.value}
           placeholder={"Sök"}
-          onKeyPress={e => {
+          onKeyPress={(e) => {
             //keyCode deprecated so using e.key instead
             if (e.key === "Enter") {
-              forceSearch(e.target.value, true, data => {
+              forceSearch(e.target.value, true, (data) => {
                 onComplete(data);
               });
             }
@@ -93,7 +93,7 @@ class SearchWithTextInput extends React.PureComponent {
           classes={{
             root: classes.inputRoot,
             input:
-              target === "top" ? classes.inputInputWide : classes.inputInput
+              target === "top" ? classes.inputInputWide : classes.inputInput,
           }}
           endAdornment={
             <InputAdornment position="end">
@@ -108,7 +108,7 @@ class SearchWithTextInput extends React.PureComponent {
         />
         <SearchButton
           onClick={() => {
-            forceSearch(this.state.value, true, data => {
+            forceSearch(this.state.value, true, (data) => {
               onComplete(data);
             });
           }}

@@ -22,7 +22,7 @@ import React from "react";
 
 class SearchWithSelectionInput extends React.PureComponent {
   state = {
-    selectionDone: false
+    selectionDone: false,
   };
 
   componentDidMount() {

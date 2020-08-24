@@ -24,7 +24,7 @@ class Buffer extends React.PureComponent {
     this.BufferModel = new BufferModel({
       map: props.map,
       app: props.app,
-      localObserver: this.localObserver
+      localObserver: this.localObserver,
     });
   }
 
@@ -42,7 +42,7 @@ class Buffer extends React.PureComponent {
           top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide
+          onWindowHide: this.onWindowHide,
         }}
       >
         <BufferView

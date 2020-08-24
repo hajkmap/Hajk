@@ -19,7 +19,7 @@ class SearchModel {
     maxResultsPerDataset: 100, // how many results to get (at most), per dataset
     matchCase: false, // should search be case sensitive?
     wildcardAtStart: false, // should the search string start with the wildcard character?
-    wildcardAtEnd: true // should the search string be end with the wildcard character?
+    wildcardAtEnd: true, // should the search string be end with the wildcard character?
   };
 
   #componentOptions;
@@ -67,8 +67,8 @@ class SearchModel {
     // the required input of Material UI's Autocomplete component.
 
     // Let's generate an array with results, one per dataset (dataset = search source)
-    const resultsPerDataset = featureCollections.map(featureCollection => {
-      return featureCollection.value.features.map(feature => {
+    const resultsPerDataset = featureCollections.map((featureCollection) => {
+      return featureCollection.value.features.map((feature) => {
         // TODO: We should add another property in admin that'll decide which FIELD (and it should
         // be one (1) field only) should be used for Autocomplete.
         // There's a huge problem with the previous approach (mapping displayFields and using that
@@ -81,7 +81,7 @@ class SearchModel {
         const dataset = featureCollection.source.caption;
         return {
           dataset,
-          autocompleteEntry
+          autocompleteEntry,
         };
       });
     });
@@ -112,7 +112,7 @@ class SearchModel {
 
   abort = () => {
     if (this.#controllers.length > 0) {
-      this.#controllers.forEach(controller => {
+      this.#controllers.forEach((controller) => {
         controller.abort();
       });
     }
@@ -156,7 +156,7 @@ class SearchModel {
     this.#controllers = [];
 
     // Loop through all defined search sources
-    searchSources.forEach(searchSource => {
+    searchSources.forEach((searchSource) => {
       // Expect the Promise and an AbortController from each Source
       const { promise, controller } = this.#lookup(
         searchString,
@@ -177,7 +177,7 @@ class SearchModel {
     // fetchedResponses will be an array of Promises in object form.
     // Each object will have a "status" and a "value" property.
     const jsonResponses = await Promise.allSettled(
-      fetchResponses.map(fetchResponse => {
+      fetchResponses.map((fetchResponse) => {
         // We look at the status and filter out only those that fulfilled.
         if (fetchResponse.status === "rejected")
           Promise.reject("Could not fetch");
@@ -198,7 +198,7 @@ class SearchModel {
       if (r.status === "fulfilled") {
         r.source = searchSources[i];
         featureCollections.push(r);
-      } else if (r => r.status === "rejected") {
+      } else if ((r) => r.status === "rejected") {
         r.source = searchSources[i];
         errors.push(r);
       }
@@ -210,7 +210,7 @@ class SearchModel {
         // FIXME: Investigate if this sorting is really needed, and if so, if we can find some Unicode variant and not only for Swedish characters
         arraySort({
           array: featureCollection.value.features,
-          index: featureCollection.source.searchFields[0]
+          index: featureCollection.source.searchFields[0],
         });
       }
     });
@@ -223,10 +223,7 @@ class SearchModel {
   };
 
   #lookup = (searchString, searchSource, searchOptions) => {
-    const srsName = this.#map
-      .getView()
-      .getProjection()
-      .getCode();
+    const srsName = this.#map.getView().getProjection().getCode();
     const geometryName =
       searchSource.geometryField || searchSource.geometryName || "geom";
     const maxFeatures = searchOptions.maxResultsPerDataset;
@@ -237,7 +234,7 @@ class SearchModel {
     if (searchString?.length > 0) {
       // If search string contains only numbers, let's do an EqualTo search
       if (/^\d+$/.test(searchString.trim())) {
-        comparisonFilters = searchSource.searchFields.map(propertyName => {
+        comparisonFilters = searchSource.searchFields.map((propertyName) => {
           return new EqualTo(propertyName, Number(searchString));
         });
       }
@@ -252,7 +249,7 @@ class SearchModel {
         // defined (e.g. columns in the data table, such as "name" or "address").
         // Let's loop through the searchFields and create an IsLike filter
         // for each one of them (e.g. "name=bla", "address=bla").
-        comparisonFilters = searchSource.searchFields.map(propertyName => {
+        comparisonFilters = searchSource.searchFields.map((propertyName) => {
           return new IsLike(
             propertyName,
             pattern,
@@ -281,7 +278,7 @@ class SearchModel {
       const activeSpatialFilter =
         searchOptions.activeSpatialFilter === "within" ? Within : Intersects;
       // Next, loop through supplied features and create the desired filter
-      spatialFilters = searchOptions.featuresToFilter.map(feature => {
+      spatialFilters = searchOptions.featuresToFilter.map((feature) => {
         // Convert circle feature to polygon
         let geometry = feature.getGeometry();
         if (geometry.getType() === "Circle") {
@@ -316,7 +313,7 @@ class SearchModel {
       outputFormat: "JSON", //source.outputFormat,
       geometryName: geometryName,
       maxFeatures: maxFeatures,
-      filter: finalFilters
+      filter: finalFilters,
     };
 
     const node = this.#wfsParser.writeGetFeature(options);
@@ -330,9 +327,9 @@ class SearchModel {
       signal: signal,
       method: "POST",
       headers: {
-        "Content-Type": "text/xml"
+        "Content-Type": "text/xml",
       },
-      body: xmlString
+      body: xmlString,
     };
     const promise = fetch(
       this.#app.config.appConfig.searchProxy + searchSource.url,

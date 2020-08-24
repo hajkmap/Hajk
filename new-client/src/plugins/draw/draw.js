@@ -19,7 +19,7 @@ class Draw extends React.PureComponent {
       map: props.map,
       app: props.app,
       options: props.options,
-      localObserver: this.localObserver
+      localObserver: this.localObserver,
     });
   }
 
@@ -46,7 +46,7 @@ class Draw extends React.PureComponent {
           top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide
+          onWindowHide: this.onWindowHide,
         }}
       >
         <DrawView localObserver={this.localObserver} model={this.drawModel} />

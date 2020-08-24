@@ -5,7 +5,7 @@ function valueFromJson(str) {
   const jsonStart = /^\[|^\{(?!\{)/;
   const jsonEnds = {
     "[": /]$/,
-    "{": /}$/
+    "{": /}$/,
   };
   const start = str.match(jsonStart);
   const jsonLike = start && jsonEnds[start[0]].test(str);
@@ -25,7 +25,7 @@ function valueFromJson(str) {
 }
 
 export function extractPropertiesFromJson(properties) {
-  Object.keys(properties).forEach(property => {
+  Object.keys(properties).forEach((property) => {
     var jsonData = valueFromJson(properties[property]);
     if (jsonData) {
       delete properties[property];
@@ -38,12 +38,9 @@ export function extractPropertiesFromJson(properties) {
 export function mergeFeaturePropsWithMarkdown(markdown, properties) {
   markdown = markdown.replace(/export:/g, "");
   if (markdown && typeof markdown === "string") {
-    (markdown.match(/{(.*?)}/g) || []).forEach(property => {
+    (markdown.match(/{(.*?)}/g) || []).forEach((property) => {
       function lookup(o, s) {
-        s = s
-          .replace("{", "")
-          .replace("}", "")
-          .split(".");
+        s = s.replace("{", "").replace("}", "").split(".");
         switch (s.length) {
           case 1:
             return o[s[0]] || "";
@@ -60,6 +57,6 @@ export function mergeFeaturePropsWithMarkdown(markdown, properties) {
     });
   }
   return {
-    __html: marked(markdown)
+    __html: marked(markdown),
   };
 }

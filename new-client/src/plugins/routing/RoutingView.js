@@ -6,7 +6,7 @@ import {
   Step,
   StepLabel,
   StepContent,
-  ButtonGroup
+  ButtonGroup,
 } from "@material-ui/core";
 import { ToggleButtonGroup, ToggleButton } from "@material-ui/lab/";
 import DirectionsWalkIcon from "@material-ui/icons/DirectionsWalk";
@@ -19,10 +19,10 @@ import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import { withSnackbar } from "notistack";
 import clsx from "clsx";
 
-const styles = theme => ({
+const styles = (theme) => ({
   unifiedPadding: {
-    padding: theme.spacing(2)
-  }
+    padding: theme.spacing(2),
+  },
 });
 
 class RoutingView extends React.PureComponent {
@@ -30,7 +30,7 @@ class RoutingView extends React.PureComponent {
     activeStep: 0,
     startMode: undefined,
     endSelectionInProgress: false,
-    travelMode: undefined
+    travelMode: undefined,
   };
   selectStartSnackbar = undefined;
   selectEndSnackbar = undefined;
@@ -40,7 +40,7 @@ class RoutingView extends React.PureComponent {
 
     // Used to select the correct step in our Stepper.
     // Also used to close Snackbars when a given stop has completed.
-    props.localObserver.subscribe("doneWithStep", step => {
+    props.localObserver.subscribe("doneWithStep", (step) => {
       switch (step) {
         // Start selection completed. Close snackbar and let user select destination.
         case 1:
@@ -66,7 +66,7 @@ class RoutingView extends React.PureComponent {
       this.setState({ activeStep: step });
     });
 
-    props.localObserver.subscribe("startModeSelected", mode => {
+    props.localObserver.subscribe("startModeSelected", (mode) => {
       this.setState({ startMode: mode });
     });
 
@@ -74,7 +74,7 @@ class RoutingView extends React.PureComponent {
       this.props.enqueueSnackbar(
         "Välj start- och stoppunkt för att kunna navigera.",
         {
-          variant: "error"
+          variant: "error",
         }
       );
     });
@@ -83,7 +83,7 @@ class RoutingView extends React.PureComponent {
       this.props.enqueueSnackbar(
         "Kunde inte navigera. Kontakta systemadministratör och påtala att giltig licens för Google Maps API saknas.",
         {
-          variant: "error"
+          variant: "error",
         }
       );
     });
@@ -92,17 +92,17 @@ class RoutingView extends React.PureComponent {
       this.props.enqueueSnackbar(
         "Kunde inte hitta vägbeskrivning mellan valda punkter och för det valda transportslaget. Prova att byta färdsätt och sök igen.",
         {
-          variant: "warning"
+          variant: "warning",
         }
       );
     });
 
-    props.localObserver.subscribe("otherError", status => {
+    props.localObserver.subscribe("otherError", (status) => {
       console.error(status);
       this.props.enqueueSnackbar(
         "Ett fel har inträffat. Vänligen försök igen.",
         {
-          variant: "warning"
+          variant: "warning",
         }
       );
     });
@@ -135,7 +135,7 @@ class RoutingView extends React.PureComponent {
 
   handleClickOnEndSelection = () => {
     if (this.state.endSelectionInProgress !== true) {
-      this.setState({ endSelectionInProgress: true }, e => {
+      this.setState({ endSelectionInProgress: true }, (e) => {
         this.selectEndSnackbar = this.props.enqueueSnackbar(
           "Klicka i kartan för att välja din destination.",
           { variant: "info", persist: true }
@@ -234,7 +234,7 @@ class RoutingView extends React.PureComponent {
             this.setState({
               activeStep: 0,
               startMode: undefined,
-              travelMode: undefined
+              travelMode: undefined,
             });
             this.props.model.clearMap();
           }}

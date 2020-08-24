@@ -12,12 +12,12 @@ class Anchor extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
-    options: propTypes.object.isRequired
+    options: propTypes.object.isRequired,
   };
 
   // cleanUrl is lifted here so that it can be handled in both Model and View
   state = {
-    cleanUrl: false
+    cleanUrl: false,
   };
 
   constructor(props) {
@@ -31,7 +31,7 @@ class Anchor extends React.PureComponent {
       app: props.app,
       getCleanUrl: this.getCleanUrl,
       localObserver: this.localObserver,
-      map: props.map
+      map: props.map,
     });
   }
   /**
@@ -44,7 +44,7 @@ class Anchor extends React.PureComponent {
   };
 
   toggleCleanUrl = () => {
-    this.setState({ cleanUrl: !this.state.cleanUrl }, d => {
+    this.setState({ cleanUrl: !this.state.cleanUrl }, (d) => {
       this.localObserver.publish("mapUpdated", this.anchorModel.getAnchor());
     });
   };
@@ -61,7 +61,7 @@ class Anchor extends React.PureComponent {
           height: 230,
           width: 530,
           top: undefined,
-          left: undefined
+          left: undefined,
         }}
       >
         <AnchorView

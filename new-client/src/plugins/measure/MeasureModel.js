@@ -13,7 +13,7 @@ class MeasureModel {
     this.source = new VectorSource();
     this.vector = new VectorLayer({
       source: this.source,
-      style: this.createStyle
+      style: this.createStyle,
     });
     this.map.addLayer(this.vector);
     this.type = "LineString";
@@ -24,11 +24,11 @@ class MeasureModel {
     return [
       new Style({
         fill: new Fill({
-          color: "rgba(255, 255, 255, 0.3)"
+          color: "rgba(255, 255, 255, 0.3)",
         }),
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.5)",
-          width: 3
+          width: 3,
         }),
         text: new Text({
           textAlign: "center",
@@ -39,14 +39,14 @@ class MeasureModel {
           overflow: true,
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 0.5)",
-            width: 3
+            width: 3,
           }),
           offsetX: 0,
           offsetY: -10,
           rotation: 0,
-          scale: 1
-        })
-      })
+          scale: 1,
+        }),
+      }),
     ];
   };
 
@@ -55,8 +55,8 @@ class MeasureModel {
     this.measureTooltip.setPosition(undefined);
   };
 
-  handleDrawStart = e => {
-    e.feature.getGeometry().on("change", e => {
+  handleDrawStart = (e) => {
+    e.feature.getGeometry().on("change", (e) => {
       var toolTip = "",
         coord = undefined,
         pointerCoord;
@@ -82,7 +82,7 @@ class MeasureModel {
     });
   };
 
-  handleDrawEnd = e => {
+  handleDrawEnd = (e) => {
     this.setFeaturePropertiesFromGeometry(e.feature);
     this.measureTooltip.setPosition(undefined);
   };
@@ -111,7 +111,7 @@ class MeasureModel {
       area = 0,
       position = {
         n: 0,
-        e: 0
+        e: 0,
       };
     geom = feature.getGeometry();
     type = geom.getType();
@@ -119,7 +119,7 @@ class MeasureModel {
       case "Point":
         position = {
           n: Math.round(geom.getCoordinates()[1]),
-          e: Math.round(geom.getCoordinates()[0])
+          e: Math.round(geom.getCoordinates()[0]),
         };
         break;
       case "LineString":
@@ -143,7 +143,7 @@ class MeasureModel {
       length: length,
       area: area,
       radius: radius,
-      position: position
+      position: position,
     });
   }
 
@@ -209,7 +209,7 @@ class MeasureModel {
     this.measureTooltip = new Overlay({
       element: this.measureTooltipElement,
       offset: [0, -15],
-      positioning: "bottom-center"
+      positioning: "bottom-center",
     });
     this.map.addOverlay(this.measureTooltip);
   }
@@ -237,30 +237,30 @@ class MeasureModel {
       type: this.type,
       style: new Style({
         fill: new Fill({
-          color: "rgba(255, 255, 255, 0.2)"
+          color: "rgba(255, 255, 255, 0.2)",
         }),
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.5)",
           lineDash: [10, 10],
-          width: 2
+          width: 2,
         }),
         image: new CircleStyle({
           radius: 5,
           stroke: new Stroke({
-            color: "rgba(0, 0, 0, 0.7)"
+            color: "rgba(0, 0, 0, 0.7)",
           }),
           fill: new Fill({
-            color: "rgba(255, 255, 255, 0.2)"
-          })
-        })
-      })
+            color: "rgba(255, 255, 255, 0.2)",
+          }),
+        }),
+      }),
     });
     this.draw.on("drawstart", this.handleDrawStart);
     this.draw.on("drawend", this.handleDrawEnd);
     this.map.addInteraction(this.draw);
   }
 
-  eventHandler = event => {
+  eventHandler = (event) => {
     const key = event.key; // Or const {key} = event; in ES6+
     if (key === "Escape") {
       this.draw.finishDrawing();
