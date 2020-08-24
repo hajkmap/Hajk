@@ -437,17 +437,14 @@ class App extends React.PureComponent {
 
   renderSearchPlugin() {
     const searchPlugin = this.appModel.plugins.search;
-    if (searchPlugin) {
-      return (
-        <searchPlugin.component
-          map={searchPlugin.map}
-          app={searchPlugin.app}
-          options={searchPlugin.options}
-        />
-      );
-    } else {
-      return null;
-    }
+    // Renders the configured search plugin (if one is configured)
+    return searchPlugin ? (
+      <searchPlugin.component
+        map={searchPlugin.map}
+        app={searchPlugin.app}
+        options={searchPlugin.options}
+      />
+    ) : null;
   }
 
   renderInformationPlugin() {
@@ -616,11 +613,10 @@ class App extends React.PureComponent {
               {clean === false && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
-                  // drawerPermanent={this.state.drawerPermanent}
                   globalObserver={this.globalObserver}
                 />
               )}
-              {clean === false && this.renderSearchPlugin()}
+              {this.renderSearchPlugin()}
             </header>
             <main className={classes.main}>
               <div
