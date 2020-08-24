@@ -101,7 +101,7 @@
         {
           "header": "PLANERA FÖR EN ROBUST STAD",
           "headerIdentifier": "utvecklingsstrategi/PLANERA FÖR EN ROBUST STAD",
-          "html": "<p><a data-link=\"https://sv.wikipedia.org/wiki/G%C3%B6teborg\">Länk till Wikipedia (öppnas i nytt fönster)</a></p><br><p><a data-document=\"utgangspunkter\" data-header=\"utgangspunkter/HÅLLBAR UTVECKLING ÄR UTGÅNGSPUNKTEN\">Länk till en bit ner i dokumentet utgångspunkter</a></p><figure><img data-caption=\"\" data-source=\"\" src=\"/utvecklingsstrategi_3.png\"/></figure>",
+          "html": "<p><a data-link=\"https://sv.wikipedia.org/wiki/G%C3%B6teborg\">Länk till Wikipedia (öppnas i nytt fönster)</a></p><br><p><a data-document=\"utgangspunkter\" data-header-identifier=\"utgangspunkter/HÅLLBAR UTVECKLING ÄR UTGÅNGSPUNKTEN\">Länk till en bit ner i dokumentet utgångspunkter</a></p><figure><img data-caption=\"\" data-source=\"\" src=\"/utvecklingsstrategi_3.png\"/></figure>",
           "mapSettings": {
             "target": "map",
             "center": [140700, 6399400],
