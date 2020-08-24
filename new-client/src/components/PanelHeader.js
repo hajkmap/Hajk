@@ -10,7 +10,7 @@ import UpIcon from "@material-ui/icons/KeyboardArrowUp";
 import { getIsMobile } from "../utils/IsMobile.js";
 import { Typography } from "@material-ui/core";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     header: {
       padding: "5px 10px",
@@ -19,45 +19,45 @@ const styles = theme => {
       borderBottom: "1px solid #ccc",
       userSelect: "none",
       display: "flex",
-      justifyContent: "space-between"
+      justifyContent: "space-between",
     },
     title: {
-      color: theme.palette.primary.contrastText
+      color: theme.palette.primary.contrastText,
     },
     iconsLeft: {
       alignItems: "center",
       display: "none",
       "&>*": {
-        marginRight: "5px"
+        marginRight: "5px",
       },
       [theme.breakpoints.down("xs")]: {
-        display: "flex"
-      }
+        display: "flex",
+      },
     },
     iconsRight: {
       display: "flex",
       alignItems: "center",
       "&>*": {
-        marginLeft: "5px"
-      }
+        marginLeft: "5px",
+      },
     },
     icon: {
       cursor: "pointer",
       "&:hover": {
-        background: theme.palette.primary.light
-      }
+        background: theme.palette.primary.light,
+      },
     },
     windowControllers: {
       [theme.breakpoints.down("xs")]: {
-        display: "none"
-      }
-    }
+        display: "none",
+      },
+    },
   };
 };
 
 class PanelHeader extends Component {
   state = {
-    maximized: false
+    maximized: false,
   };
 
   static propTypes = {
@@ -67,7 +67,7 @@ class PanelHeader extends Component {
     onClose: propTypes.func.isRequired,
     onMaximize: propTypes.func.isRequired,
     onMinimize: propTypes.func.isRequired,
-    title: propTypes.string.isRequired
+    title: propTypes.string.isRequired,
   };
 
   componentDidMount() {
@@ -100,25 +100,25 @@ class PanelHeader extends Component {
     );
   }
 
-  maximize = e => {
+  maximize = (e) => {
     if (getIsMobile()) {
       if (e) {
         e.stopPropagation();
       }
       this.setState({
-        mode: "maximized"
+        mode: "maximized",
       });
       this.props.onMaximize();
     }
   };
 
-  minimize = e => {
+  minimize = (e) => {
     if (getIsMobile()) {
       if (e) {
         e.stopPropagation();
       }
       this.setState({
-        mode: "minimized"
+        mode: "minimized",
       });
       this.props.onMinimize();
     }
@@ -129,7 +129,7 @@ class PanelHeader extends Component {
     return (
       <header
         className={classes.header}
-        onMouseDown={e => {
+        onMouseDown={(e) => {
           if (e.target.tagName === "header") {
             this.maximize(e);
           }

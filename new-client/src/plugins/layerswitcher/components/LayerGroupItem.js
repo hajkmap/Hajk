@@ -15,108 +15,110 @@ import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink";
 
-const styles = theme => ({
+const styles = (theme) => ({
   button: {
-    cursor: "pointer"
+    cursor: "pointer",
   },
   caption: {
     display: "flex",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   captionText: {
     top: "-6px",
     cursor: "pointer",
-    fontSize: theme.typography.pxToRem(15)
+    fontSize: theme.typography.pxToRem(15),
   },
   image: {},
   links: {
     padding: 0,
     margin: 0,
-    listStyle: "none"
+    listStyle: "none",
   },
   layerItem: {
     justifyContent: "space-between",
     borderBottom: "1px solid #CCC",
-    margin: "5px 0"
+    margin: "5px 0",
   },
   layerItemContainer: {
     background: "white",
     borderTopRightRadius: "10px",
     boxShadow:
-      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
   },
   layerItemInfo: {
-    display: "flex"
+    display: "flex",
   },
   rightIcon: {
     marginLeft: theme.spacing(1),
-    fontSize: "16px"
+    fontSize: "16px",
   },
   layerInfo: {
     display: "flex",
     alignItems: "center",
     padding: "3px",
-    border: "1px solid #ccc"
+    border: "1px solid #ccc",
   },
   infoContainer: {},
   infoButton: {
-    cursor: "pointer"
+    cursor: "pointer",
   },
   infoTextContainer: {
-    margin: "10px 45px"
+    margin: "10px 45px",
   },
   layerGroup: {
     background: "white",
     paddingTop: "5px",
     paddingBottom: "5px",
-    marginLeft: "21px"
+    marginLeft: "21px",
   },
   layerGroupWithoutExpandArrow: {
-    marginLeft: "45px"
+    marginLeft: "45px",
   },
   layerGroupContainer: {
     marginTop: "0",
-    marginBottom: "-5px"
+    marginBottom: "-5px",
   },
   layerGroupHeader: {
     display: "flex",
     justifyContent: "space-between",
-    borderBottom: "1px solid #ccc"
+    borderBottom: "1px solid #ccc",
   },
   layerGroupLayers: {
-    marginLeft: "45px"
+    marginLeft: "45px",
   },
   layerGroupItem: {
-    display: "flex"
+    display: "flex",
   },
-  legend: {},
+  legendImage: {
+    maxWidth: "250px",
+  },
   slider: {
     padding: "30px",
-    overflow: "hidden"
+    overflow: "hidden",
   },
   settingsButton: {
-    cursor: "pointer"
+    cursor: "pointer",
   },
   subtitle2: {
-    fontWeight: 500
+    fontWeight: 500,
   },
   layerButtons: {
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
   },
   layerButton: {
     cursor: "pointer",
     fontSize: "15pt",
-    width: "32px"
+    width: "32px",
   },
   checkBoxIcon: {
     cursor: "pointer",
     float: "left",
-    marginRight: "5px"
+    marginRight: "5px",
   },
   arrowIcon: {
-    float: "left"
-  }
+    float: "left",
+  },
 });
 
 class LayerGroupItem extends Component {
@@ -142,7 +144,7 @@ class LayerGroupItem extends Component {
       open: false,
       opacityValue: 1,
       toggleSettings: false,
-      toggleSubLayerSettings: {}
+      toggleSubLayerSettings: {},
     };
     this.toggleSubLayerSettings = this.toggleSubLayerSettings.bind(this);
     this.renderSubLayer = this.renderSubLayer.bind(this);
@@ -166,11 +168,11 @@ class LayerGroupItem extends Component {
     // don't change it back to "ok": we'll get a response for each tile, so most of
     // the tiles might be "ok", but if only one of the tiles has "loaderror", we
     // consider that the layer has failed loading and want to inform the user.
-    model.globalObserver.subscribe("layerswitcher.wmsLayerLoadStatus", d => {
+    model.globalObserver.subscribe("layerswitcher.wmsLayerLoadStatus", (d) => {
       this.state.status !== "loaderror" &&
         this.state.name === d.id &&
         this.setState({
-          status: d.status
+          status: d.status,
         });
     });
   }
@@ -201,7 +203,7 @@ class LayerGroupItem extends Component {
     return src ? <img width="60" alt="legend" src={src} /> : null;
   }
 
-  openInformative = chapter => e => {
+  openInformative = (chapter) => (e) => {
     this.props.onOpenChapter(chapter);
   };
 
@@ -210,13 +212,13 @@ class LayerGroupItem extends Component {
     if (Array.isArray(chapters)) {
       result = chapters.reduce((chaptersWithLayer, chapter) => {
         if (Array.isArray(chapter.layers)) {
-          if (chapter.layers.some(layerId => layerId === id)) {
+          if (chapter.layers.some((layerId) => layerId === id)) {
             chaptersWithLayer = [...chaptersWithLayer, chapter];
           }
           if (chapter.chapters.length > 0) {
             chaptersWithLayer = [
               ...chaptersWithLayer,
-              ...this.findChapters(id, chapter.chapters)
+              ...this.findChapters(id, chapter.chapters),
             ];
           }
         }
@@ -265,23 +267,23 @@ class LayerGroupItem extends Component {
     }
   }
 
-  toggleVisible = layer => e => {
+  toggleVisible = (layer) => (e) => {
     var visible = !this.state.visible;
     this.setState({
-      visible: visible
+      visible: visible,
     });
     layer.setVisible(visible);
   };
 
   toggle() {
     this.setState({
-      open: !this.state.open
+      open: !this.state.open,
     });
   }
 
   toggleInfo() {
     this.setState({
-      infoVisible: !this.state.infoVisible
+      infoVisible: !this.state.infoVisible,
     });
   }
 
@@ -300,18 +302,18 @@ class LayerGroupItem extends Component {
     );
   }
 
-  setHidden = l => {
+  setHidden = (l) => {
     const { layer } = this.props;
     if (l === layer) {
       this.props.layer.getSource().updateParams({
         LAYERS: [this.props.layer.subLayers[0]],
-        CQL_FILTER: "EXCLUDE"
+        CQL_FILTER: "EXCLUDE",
       });
       setTimeout(() => {
         this.setState(
           {
             visible: false,
-            visibleSubLayers: []
+            visibleSubLayers: [],
           },
           () => {
             layer.setVisible(false);
@@ -321,7 +323,7 @@ class LayerGroupItem extends Component {
     }
   };
 
-  setVisible = l => {
+  setVisible = (l) => {
     const { layer } = this.props;
     if (l === layer) {
       layer.setVisible(true);
@@ -333,18 +335,18 @@ class LayerGroupItem extends Component {
         // Join them into a string that will be used to
         // reset STYLES param for the GET request.
         STYLES: Object.entries(this.props.layer.layersInfo)
-          .map(o => o[1])
-          .map(l => l.style)
-          .join()
+          .map((o) => o[1])
+          .map((l) => l.style)
+          .join(),
       });
       this.setState({
         visible: true,
-        visibleSubLayers: this.props.layer.subLayers
+        visibleSubLayers: this.props.layer.subLayers,
       });
     }
   };
 
-  toggleGroupVisible = layer => e => {
+  toggleGroupVisible = (layer) => (e) => {
     var visible = !this.state.visible;
     if (visible) {
       this.setVisible(layer);
@@ -353,10 +355,10 @@ class LayerGroupItem extends Component {
     }
   };
 
-  toggleLayerVisible = subLayer => e => {
+  toggleLayerVisible = (subLayer) => (e) => {
     var visibleSubLayers = [...this.state.visibleSubLayers],
       isVisible = visibleSubLayers.some(
-        visibleSubLayer => visibleSubLayer === subLayer
+        (visibleSubLayer) => visibleSubLayer === subLayer
       ),
       layerVisibility;
 
@@ -365,7 +367,7 @@ class LayerGroupItem extends Component {
 
     if (isVisible) {
       visibleSubLayers = visibleSubLayers.filter(
-        visibleSubLayer => visibleSubLayer !== subLayer
+        (visibleSubLayer) => visibleSubLayer !== subLayer
       );
     } else {
       visibleSubLayers.push(subLayer);
@@ -382,7 +384,7 @@ class LayerGroupItem extends Component {
     if (visibleSubLayers.length >= 1) {
       // Create an Array to be used as STYLES param, it should only contain selected sublayers' styles
       let visibleSubLayersStyles = [];
-      visibleSubLayers.forEach(subLayer => {
+      visibleSubLayers.forEach((subLayer) => {
         visibleSubLayersStyles.push(
           this.props.layer.layersInfo[subLayer].style
         );
@@ -391,12 +393,12 @@ class LayerGroupItem extends Component {
       this.props.layer.getSource().updateParams({
         LAYERS: visibleSubLayers,
         STYLES: visibleSubLayersStyles.join(),
-        CQL_FILTER: null
+        CQL_FILTER: null,
       });
       this.props.layer.setVisible(layerVisibility);
       this.setState({
         visible: layerVisibility,
-        visibleSubLayers: visibleSubLayers
+        visibleSubLayers: visibleSubLayers,
       });
     } else {
       this.setHidden(this.props.layer);
@@ -408,7 +410,7 @@ class LayerGroupItem extends Component {
     const { classes } = this.props;
 
     var visible = visibleSubLayers.some(
-      visibleSubLayer => visibleSubLayer === subLayer
+      (visibleSubLayer) => visibleSubLayer === subLayer
     );
     var toggleSettings = this.toggleSubLayerSettings.bind(this, index);
 
@@ -448,13 +450,13 @@ class LayerGroupItem extends Component {
             </div>
           </div>
         </div>
-        <div className={classes.legend}>
+        <div>
           {this.state.toggleSubLayerSettings[index] ? (
             <div>
               <img
-                max-width="250px"
                 alt="Teckenförklaring"
                 src={this.props.layer.layersInfo[subLayer].legend}
+                className={classes.legendImage}
               />
             </div>
           ) : null}
@@ -490,7 +492,7 @@ class LayerGroupItem extends Component {
           <Typography
             variant="body2"
             dangerouslySetInnerHTML={{
-              __html: infoText
+              __html: infoText,
             }}
           />
         </div>
@@ -550,7 +552,7 @@ class LayerGroupItem extends Component {
 
   toggleSettings() {
     this.setState({
-      toggleSettings: !this.state.toggleSettings
+      toggleSettings: !this.state.toggleSettings,
     });
   }
 
@@ -580,7 +582,7 @@ class LayerGroupItem extends Component {
                   boxShadow: this.state.infoVisible
                     ? "rgb(204, 204, 204) 2px 3px 1px"
                     : "inherit",
-                  borderRadius: "100%"
+                  borderRadius: "100%",
                 }}
               />
             )}
@@ -613,7 +615,7 @@ class LayerGroupItem extends Component {
     return (
       <div
         className={cslx(classes.layerGroup, {
-          [classes.layerGroupWithoutExpandArrow]: this.hideExpandArrow === true
+          [classes.layerGroupWithoutExpandArrow]: this.hideExpandArrow === true,
         })}
       >
         <div className={classes.layerGroupContainer}>

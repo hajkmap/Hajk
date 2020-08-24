@@ -13,7 +13,7 @@ class Export extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
-    options: propTypes.object.isRequired
+    options: propTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -25,7 +25,7 @@ class Export extends React.PureComponent {
       map: props.map,
       app: props.app,
       localObserver: this.localObserver,
-      options: props.options
+      options: props.options,
     });
   }
 
@@ -49,7 +49,7 @@ class Export extends React.PureComponent {
           height: 365,
           width: 315,
           onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide
+          onWindowHide: this.onWindowHide,
         }}
       >
         {/**

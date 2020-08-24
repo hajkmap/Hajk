@@ -9,14 +9,14 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { Vector as VectorLayer } from "ol/layer";
 
-const styles = theme => ({
+const styles = (theme) => ({
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120
+    minWidth: 120,
   },
   subtitle2: {
-    fontWeight: 500
-  }
+    fontWeight: 500,
+  },
 });
 
 class VectorFilter extends React.PureComponent {
@@ -26,7 +26,7 @@ class VectorFilter extends React.PureComponent {
       filterAttribute: props.layer.get("filterAttribute") || "",
       filterValue: props.layer.get("filterValue") || "",
       filterComparer: props.layer.get("filterComparer") || "",
-      layerProperties: []
+      layerProperties: [],
     };
     this.loadFeatureInfo();
   }
@@ -38,30 +38,30 @@ class VectorFilter extends React.PureComponent {
     fetch(
       url +
         `?request=describeFeatureType&outputFormat=application/json&typename=${featureType}`
-    ).then(response => {
-      response.json().then(featureInfo => {
+    ).then((response) => {
+      response.json().then((featureInfo) => {
         var featureTypeInfo = featureInfo.featureTypes.find(
-          type => type.typeName === featureType
+          (type) => type.typeName === featureType
         );
         if (featureTypeInfo && Array.isArray(featureTypeInfo.properties)) {
           var layerProperties = featureTypeInfo.properties
-            .filter(property => property.type !== "gml:Geometry")
-            .map(property => property.name);
+            .filter((property) => property.type !== "gml:Geometry")
+            .map((property) => property.name);
           this.setState({
-            layerProperties: layerProperties
+            layerProperties: layerProperties,
           });
         }
       });
     });
   };
 
-  handleChange = e => {
+  handleChange = (e) => {
     this.setState({
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  setFilter = e => {
+  setFilter = (e) => {
     const { filterAttribute, filterValue, filterComparer } = this.state;
     var vectorSource = this.props.layer.getSource();
     this.features = vectorSource.getFeatures();
@@ -71,7 +71,7 @@ class VectorFilter extends React.PureComponent {
     vectorSource.clear();
   };
 
-  resetFilter = e => {
+  resetFilter = (e) => {
     var vectorSource = this.props.layer.getSource();
     vectorSource.clear();
     this.props.layer.set("filterAttribute", undefined);
@@ -81,7 +81,7 @@ class VectorFilter extends React.PureComponent {
       this.setState({
         filterAttribute: "",
         filterValue: "",
-        filterComparer: ""
+        filterComparer: "",
       });
     }, 200);
   };
@@ -101,7 +101,7 @@ class VectorFilter extends React.PureComponent {
               onChange={this.handleChange}
               inputProps={{
                 name: "filterAttribute",
-                id: "attribute"
+                id: "attribute",
               }}
             >
               {this.state.layerProperties.map((property, i) => {
@@ -120,7 +120,7 @@ class VectorFilter extends React.PureComponent {
               onChange={this.handleChange}
               inputProps={{
                 name: "filterComparer",
-                id: "comparer"
+                id: "comparer",
               }}
             >
               <MenuItem value="gt">Större än</MenuItem>
@@ -136,7 +136,7 @@ class VectorFilter extends React.PureComponent {
               placeholder="Filtervärde"
               inputProps={{
                 name: "filterValue",
-                "aria-label": "Värde"
+                "aria-label": "Värde",
               }}
             />
           </FormControl>

@@ -3,10 +3,10 @@ import { withStyles } from "@material-ui/core/styles";
 import Page from "./Page.js";
 import Typography from "@material-ui/core/Typography/Typography";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     text: {
-      width: "100%"
+      width: "100%",
     },
     form: {},
     cross: {
@@ -20,46 +20,46 @@ const styles = theme => {
       "& i": {
         fontSize: "50px",
         marginLeft: "-27px",
-        marginTop: "9px"
-      }
+        marginTop: "9px",
+      },
     },
     crossButton: {
       marginTop: "10px",
       marginLeft: "-31px",
-      pointerEvents: "all"
+      pointerEvents: "all",
     },
     saveError: {
       color: "red",
       background: "rgb(255, 200, 200)",
       marginTop: "15px",
       borderRadius: "5px",
-      padding: "5px"
+      padding: "5px",
     },
     padded: {
-      padding: "20px 0"
+      padding: "20px 0",
     },
     button: {
-      justifyContent: "left"
+      justifyContent: "left",
     },
     buttonIcon: {
-      marginRight: "5px"
+      marginRight: "5px",
     },
     placeIconMap: {
       fontSize: "64px",
       position: "relative",
       right: "32px",
-      bottom: "28px"
+      bottom: "28px",
     },
     localFloristIcon: {
       color: "green",
-      fontSize: "64px"
+      fontSize: "64px",
     },
     thank: {
       fontSize: "2.8rem",
-      fontWeight: "500"
+      fontWeight: "500",
     },
     thankForm: {
-      textAlign: "center"
+      textAlign: "center",
     },
     anchorOriginBottomCenter: {
       bottom: "60px",
@@ -69,25 +69,25 @@ const styles = theme => {
         transform: "translateX(-50%)",
         borderRadius: "4px",
         overflow: "hidden",
-        minWidth: "391px"
+        minWidth: "391px",
       },
       [theme.breakpoints.down("xs")]: {
         width: "100%",
         minWidth: "inherit",
-        borderRadius: "0"
-      }
+        borderRadius: "0",
+      },
     },
     formControl: {
-      minWidth: 120
+      minWidth: 120,
     },
     page: {
       background: "blue",
-      height: "100%"
+      height: "100%",
     },
     errorText: {
       fontSize: "14pt",
-      color: "red"
-    }
+      color: "red",
+    },
   };
 };
 
@@ -101,7 +101,7 @@ class CollectorForm extends Component {
     form: [],
     displayPlace: false,
     activePage: 0,
-    direction: "right"
+    direction: "right",
   };
 
   constructor(props) {
@@ -109,7 +109,7 @@ class CollectorForm extends Component {
 
     this.state = {
       ...this.state,
-      form: props.form
+      form: props.form,
     };
 
     props.model.observer.subscribe("abort", () => {
@@ -122,11 +122,11 @@ class CollectorForm extends Component {
       // Just setting the flag to 0 will not reset the form if there is only one page.
       this.setState(
         {
-          activePage: -1
+          activePage: -1,
         },
         () => {
           this.setState({
-            activePage: 0
+            activePage: 0,
           });
         }
       );
@@ -136,14 +136,14 @@ class CollectorForm extends Component {
   componentDidMount() {
     if (!this.props.model.serviceConfig) {
       this.setState({
-        configurationError: true
+        configurationError: true,
       });
     }
   }
 
-  saveError = text => {
+  saveError = (text) => {
     this.setState({
-      saveError: text || saveErrorText
+      saveError: text || saveErrorText,
     });
   };
 
@@ -188,13 +188,13 @@ class CollectorForm extends Component {
                 onNextPage={() => {
                   this.setState({
                     activePage: activePage + 1,
-                    direction: "left"
+                    direction: "left",
                   });
                 }}
                 onPrevPage={() => {
                   this.setState({
                     activePage: activePage - 1,
-                    direction: "right"
+                    direction: "right",
                   });
                 }}
               ></Page>

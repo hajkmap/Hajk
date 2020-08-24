@@ -13,20 +13,20 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex",
     flexDirection: "column",
     flexWrap: "wrap",
     minHeight: "200px",
-    minWidth: "200px"
+    minWidth: "200px",
   },
   formControl: {
     margin: theme.spacing(1),
     flex: "auto",
     minWidth: 120,
-    maxWidth: 300
-  }
+    maxWidth: 300,
+  },
 });
 
 const ITEM_HEIGHT = 48;
@@ -35,28 +35,28 @@ const MenuProps = {
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250
-    }
-  }
+      width: 250,
+    },
+  },
 };
 
 const layers = ["Alla lager"];
 
 function getStyles(layer, that) {
   return {
-    fontWeight: that.state.layers.includes(layer) ? 5 : 4
+    fontWeight: that.state.layers.includes(layer) ? 5 : 4,
   };
 }
 
 class SettingsMenu extends React.Component {
   state = {
-    layers: []
+    layers: [],
   };
-  handleChange = event => {
+  handleChange = (event) => {
     this.setState({ layers: event.target.value });
   };
 
-  handleChangeMultiple = event => {
+  handleChangeMultiple = (event) => {
     const { options } = event.target;
     const value = [];
     for (let i = 0, l = options.length; i < l; i += 1) {
@@ -65,7 +65,7 @@ class SettingsMenu extends React.Component {
       }
     }
     this.setState({
-      layers: value
+      layers: value,
     });
   };
 
@@ -82,7 +82,7 @@ class SettingsMenu extends React.Component {
             input={<Input id="select-multiple" />}
             MenuProps={MenuProps}
           >
-            {layers.map(layer => (
+            {layers.map((layer) => (
               <MenuItem
                 key={layer}
                 value={layer}

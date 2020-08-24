@@ -7,26 +7,26 @@ import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120
+    minWidth: 120,
   },
   selectEmpty: {
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
   },
   row: {
-    marginBottom: "10px"
-  }
+    marginBottom: "10px",
+  },
 });
 
 class Symbology extends React.PureComponent {
   state = {
-    shape: "LineString"
+    shape: "LineString",
   };
 
   componentDidMount() {
@@ -58,11 +58,11 @@ class Symbology extends React.PureComponent {
       squareFillOpacity: model.squareFillOpacity,
       squareLineStyle: model.squareLineStyle,
       squareLineWidth: model.squareLineWidth,
-      pointSettings: model.pointSettings
+      pointSettings: model.pointSettings,
     });
   }
 
-  update = prop => e => {
+  update = (prop) => (e) => {
     var value = e.hex ? e.hex : e.target.value,
       state = {};
 

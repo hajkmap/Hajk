@@ -1,17 +1,17 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import GeoJSON from "ol/format/GeoJSON";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
 import KeyboardArrowDown from "@material-ui/icons/KeyboardArrowDown";
 import Button from "@material-ui/core/Button";
 import {
   extractPropertiesFromJson,
-  mergeFeaturePropsWithMarkdown
+  mergeFeaturePropsWithMarkdown,
 } from "../../../../utils/FeaturePropsParsing";
 
-const styles = theme => ({
+const styles = (theme) => ({
   item: {
     userSelect: "none",
     cursor: "pointer",
@@ -19,55 +19,55 @@ const styles = theme => ({
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
     borderRadius: "2px",
     background: "#f0efef",
-    margin: "0px"
+    margin: "0px",
   },
   button: {
-    padding: 0
+    padding: 0,
   },
 
   details: {
     padding: "0px",
     background: "#efefef",
-    borderTop: "1px solid #ccc"
+    borderTop: "1px solid #ccc",
   },
-  activeExpansionPanelSummary: {
+  activeAccordionSummary: {
     background: "#e1e1e1",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   activeExpandButton: {
-    color: "black"
+    color: "black",
   },
-  expansionPanelDetails: {
-    background: "white"
+  AccordionDetails: {
+    background: "white",
   },
 
   content: {
     "&$expanded": {
-      margin: "0px"
+      margin: "0px",
     },
-    margin: "0px"
+    margin: "0px",
   },
 
   featureMenu: {
     padding: "0px",
     "&:hover": {
-      backgroundColor: "transparent"
+      backgroundColor: "transparent",
     },
     "&:focus": {
-      backgroundColor: "transparent"
-    }
+      backgroundColor: "transparent",
+    },
   },
   expanded: {
-    margin: 0
-  }
+    margin: 0,
+  },
 });
 
 class SearchResultItem extends Component {
   state = {
-    expanded: false
+    expanded: false,
   };
 
-  highlightImpact = feature => e => {
+  highlightImpact = (feature) => (e) => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlightImpact(olFeature);
     if (window.innerWidth >= 1280) {
@@ -77,7 +77,7 @@ class SearchResultItem extends Component {
   };
 
   zoomToHighLightedFeatures = () => {
-    var features = this.props.highlightedFeatures.map(feature => {
+    var features = this.props.highlightedFeatures.map((feature) => {
       var geoJsonFeature = new GeoJSON().readFeatures(feature)[0];
       geoJsonFeature.infobox = feature.infobox;
       return geoJsonFeature;
@@ -89,7 +89,7 @@ class SearchResultItem extends Component {
   };
 
   //TODO - Break up into smaller functions
-  handleOnFeatureClick = feature => {
+  handleOnFeatureClick = (feature) => {
     var highlightedFeatures = this.props.highlightedFeatures;
     var indexOfHighlightedFeature = highlightedFeatures.indexOf(feature);
 
@@ -113,7 +113,7 @@ class SearchResultItem extends Component {
     }
   };
 
-  clear = e => {
+  clear = (e) => {
     this.props.model.clearLayerList();
     this.props.model.clearHighlight();
   };
@@ -130,14 +130,14 @@ class SearchResultItem extends Component {
       classes,
       displayFields,
       target,
-      searchWithinButtonText
+      searchWithinButtonText,
     } = this.props;
 
     const active = this.props.highlightedFeatures.includes(feature);
 
     const ExpandIconWrapper = ({ children }) => (
       <div
-        onClick={e => {
+        onClick={(e) => {
           e.stopPropagation();
           if (this.state.expanded) {
             this.setState({ expanded: false });
@@ -151,17 +151,17 @@ class SearchResultItem extends Component {
     );
 
     return (
-      <ExpansionPanel expanded={this.state.expanded} className={classes.item}>
-        <ExpansionPanelSummary
-          onClick={e => {
+      <Accordion expanded={this.state.expanded} className={classes.item}>
+        <AccordionSummary
+          onClick={(e) => {
             this.handleOnFeatureClick(feature);
           }}
           classes={{
             expandIcon: classes.featureMenu,
             expanded: classes.expanded,
-            content: classes.content
+            content: classes.content,
           }}
-          className={active ? classes.activeExpansionPanelSummary : null}
+          className={active ? classes.activeAccordionSummary : null}
           expandIcon={
             <ExpandIconWrapper>
               <KeyboardArrowDown
@@ -172,7 +172,9 @@ class SearchResultItem extends Component {
         >
           <div>
             <div>
-              {displayFields.map(field => feature.properties[field]).join(", ")}
+              {displayFields
+                .map((field) => feature.properties[field])
+                .join(", ")}
               {target === "center" && this.props.renderAffectButton ? (
                 <div>
                   <Button
@@ -185,16 +187,16 @@ class SearchResultItem extends Component {
               ) : null}
             </div>
           </div>
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+        </AccordionSummary>
+        <AccordionDetails className={classes.AccordionDetails}>
           <div
             dangerouslySetInnerHTML={this.getHtmlItemInfoBox(
               feature,
               feature.infobox
             )}
           />
-        </ExpansionPanelDetails>
-      </ExpansionPanel>
+        </AccordionDetails>
+      </Accordion>
     );
   }
 }

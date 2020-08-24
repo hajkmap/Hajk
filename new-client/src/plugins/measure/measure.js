@@ -27,7 +27,7 @@ class Measure extends React.PureComponent {
     this.model = new MeasureModel({
       map: props.map,
       app: props.app,
-      localObserver: this.localObserver
+      localObserver: this.localObserver,
     });
   }
 
@@ -53,7 +53,7 @@ class Measure extends React.PureComponent {
           top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide
+          onWindowHide: this.onWindowHide,
         }}
       >
         <MeasureView

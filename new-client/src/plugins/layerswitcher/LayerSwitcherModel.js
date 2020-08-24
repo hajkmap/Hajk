@@ -17,11 +17,11 @@ class LayerSwitcherModel {
       .getLayers()
       .getArray()
       .filter(
-        l =>
+        (l) =>
           l.getProperties().layerInfo &&
           l.getProperties().layerInfo.layerType === "base"
       )
-      .map(l => l.getProperties());
+      .map((l) => l.getProperties());
   }
 }
 

@@ -4,16 +4,16 @@ import { Button, Paper, Tooltip } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import { makeStyles } from "@material-ui/styles";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   button: {
-    minWidth: "unset"
-  }
+    minWidth: "unset",
+  },
 }));
 
-const RotateControl = React.memo(props => {
+const RotateControl = React.memo((props) => {
   if (!props.map) return;
 
   const classes = useStyles();
@@ -24,7 +24,7 @@ const RotateControl = React.memo(props => {
   // we want to read the new rotation and put in state.
   // The reason is that we don't want to show Rotate Control if
   // rotation already is 0 (north).
-  view.on("change:rotation", e => {
+  view.on("change:rotation", (e) => {
     setRotation(view.getRotation());
   });
 
@@ -40,7 +40,7 @@ const RotateControl = React.memo(props => {
         view.animate({
           rotation: 0,
           duration: duration,
-          easing: easeOut
+          easing: easeOut,
         });
       } else {
         view.setRotation(0);

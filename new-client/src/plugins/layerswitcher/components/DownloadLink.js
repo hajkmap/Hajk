@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 
-const useStyles = makeStyles(theme => ({}));
+const useStyles = makeStyles((theme) => ({}));
 /**
  * @summary Renders a Download button which on click downloads the current layer as KML
  *

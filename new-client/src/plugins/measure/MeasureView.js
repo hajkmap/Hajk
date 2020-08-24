@@ -9,21 +9,21 @@ import InputLabel from "@material-ui/core/InputLabel";
 import { withSnackbar } from "notistack";
 import { Typography } from "@material-ui/core";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120
+    minWidth: 120,
   },
   selectEmpty: {
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
   },
   row: {
-    marginBottom: theme.spacing(1)
-  }
+    marginBottom: theme.spacing(1),
+  },
 });
 
 class MeasureView extends React.PureComponent {
@@ -33,11 +33,11 @@ class MeasureView extends React.PureComponent {
     this.app = props.app;
     this.localObserver = props.localObserver;
     this.state = {
-      shape: this.model.getType()
+      shape: this.model.getType(),
     };
   }
 
-  handleChange = name => event => {
+  handleChange = (name) => (event) => {
     this.setState({ [name]: event.target.value });
     this.model.setType(event.target.value);
   };
@@ -80,7 +80,7 @@ class MeasureView extends React.PureComponent {
 }
 
 MeasureView.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(withSnackbar(MeasureView));

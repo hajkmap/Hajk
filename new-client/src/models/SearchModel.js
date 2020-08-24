@@ -9,7 +9,7 @@ import Draw from "ol/interaction/Draw.js";
 import {
   Tile as TileLayer,
   Image as ImageLayer,
-  Vector as VectorLayer
+  Vector as VectorLayer,
 } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill, Icon } from "ol/style";
@@ -20,18 +20,18 @@ import { handleClick } from "./Click.js";
 var drawStyle = new Style({
   stroke: new Stroke({
     color: "rgba(255, 214, 91, 0.6)",
-    width: 4
+    width: 4,
   }),
   fill: new Fill({
-    color: "rgba(255, 214, 91, 0.2)"
+    color: "rgba(255, 214, 91, 0.2)",
   }),
   image: new Circle({
     radius: 6,
     stroke: new Stroke({
       color: "rgba(255, 214, 91, 0.6)",
-      width: 2
-    })
-  })
+      width: 2,
+    }),
+  }),
 });
 
 class SearchModel {
@@ -56,14 +56,14 @@ class SearchModel {
 
     this.vectorLayer = new VectorLayer({
       source: new VectorSource({}),
-      style: this.getVectorLayerStyle()
+      style: this.getVectorLayerStyle(),
     });
     this.vectorLayer.set("type", "searchResultLayer");
 
     this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
       source: this.drawSource,
-      style: drawStyle
+      style: drawStyle,
     });
 
     this.olMap.addLayer(this.vectorLayer);
@@ -100,7 +100,7 @@ class SearchModel {
       src,
       strokeColor,
       strokeWidth,
-      fillColor
+      fillColor,
     } = this.options;
 
     const style = new Style({
@@ -110,9 +110,9 @@ class SearchModel {
           r: 244,
           g: 83,
           b: 63,
-          a: 1
+          a: 1,
         }),
-        width: strokeWidth || 4
+        width: strokeWidth || 4,
       }),
       // Polygons fill color
       fill: new Fill({
@@ -120,9 +120,9 @@ class SearchModel {
           r: 244,
           g: 83,
           b: 63,
-          a: 0.2
-        })
-      })
+          a: 0.2,
+        }),
+      }),
     });
 
     // Point style (either a marker image or fallback to a Circle)
@@ -133,7 +133,7 @@ class SearchModel {
         new Icon({
           anchor: [anchor[0] || 0.5, anchor[1] || 1],
           scale: scale || 0.15,
-          src: src
+          src: src,
         })
       );
     } else {
@@ -143,8 +143,8 @@ class SearchModel {
           radius: 6,
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 0.6)",
-            width: 2
-          })
+            width: 2,
+          }),
         })
       );
     }
@@ -174,7 +174,7 @@ class SearchModel {
       outputFormat: "JSON", //source.outputFormat,
       maxFeatures: this.options.maxFeatures || 100,
       geometryName: finalGeom,
-      filter: new Intersects(finalGeom, geometry, projCode)
+      filter: new Intersects(finalGeom, geometry, projCode),
     };
 
     const node = this.wfsParser.writeGetFeature(options);
@@ -188,9 +188,9 @@ class SearchModel {
       signal: signal,
       method: "POST",
       headers: {
-        "Content-Type": "text/xml"
+        "Content-Type": "text/xml",
       },
-      body: xmlString
+      body: xmlString,
     };
 
     // source.url for layers CONTAINS proxy (if defined). If we don't remove
@@ -214,7 +214,7 @@ class SearchModel {
     var mapLayer = this.olMap
       .getLayers()
       .getArray()
-      .find(l => l.get("name") === layerId);
+      .find((l) => l.get("name") === layerId);
 
     if (mapLayer) {
       mapLayer.layerId = layerId;
@@ -225,7 +225,7 @@ class SearchModel {
 
   //Only handles single select and is restricted to polygon and multipolygon atm
   onSelectFeatures = (evt, selectionDone, callback) => {
-    handleClick(evt, evt.map, response => {
+    handleClick(evt, evt.map, (response) => {
       if (response.features.length > 0) {
         var geometryType = response.features[0].getGeometry().getType();
 
@@ -239,7 +239,7 @@ class SearchModel {
             this.searchWithinArea(
               response.features[0],
               false,
-              featureCollections => {
+              (featureCollections) => {
                 callback(featureCollections);
               }
             );
@@ -255,7 +255,7 @@ class SearchModel {
 
   activateSelectionClick = (selectionDone, callback) => {
     this.olMap.clicklock = true;
-    this.olMap.once("singleclick", e => {
+    this.olMap.once("singleclick", (e) => {
       this.onSelectFeatures(e, selectionDone, callback);
     });
   };
@@ -281,10 +281,7 @@ class SearchModel {
    * @param {*} callback Function to call when search is completed
    */
   searchWithinArea = (feature, useTransformedWmsSource, callback) => {
-    const projCode = this.olMap
-      .getView()
-      .getProjection()
-      .getCode();
+    const projCode = this.olMap.getView().getProjection().getCode();
 
     var search = () => {
       let promises = [];
@@ -299,10 +296,10 @@ class SearchModel {
 
         searchSources = searchLayers
           .map(this.mapDisplayLayerAsSearchLayer)
-          .filter(source => source.layers);
+          .filter((source) => source.layers);
       }
       this.controllers.splice(0, this.controllers.length);
-      searchSources.forEach(source => {
+      searchSources.forEach((source) => {
         const { promise, controller } = this.mapSourceAsWFSPromise(
           feature,
           projCode,
@@ -314,9 +311,9 @@ class SearchModel {
 
       this.localObserver.publish("spatialSearchStarted");
       Promise.all(promises)
-        .then(responses => {
-          Promise.all(responses.map(result => result.json())).then(
-            jsonResults => {
+        .then((responses) => {
+          Promise.all(responses.map((result) => result.json())).then(
+            (jsonResults) => {
               var result = [];
               jsonResults.forEach((jsonResult, i) => {
                 if (jsonResult.totalFeatures > 0) {
@@ -337,9 +334,9 @@ class SearchModel {
     };
 
     if (feature.getGeometry().getType() === "Point") {
-      this.options.sources.forEach(source => {
+      this.options.sources.forEach((source) => {
         if (source.caption.toLowerCase() === "fastighet") {
-          this.lookupEstate(source, feature, estates => {
+          this.lookupEstate(source, feature, (estates) => {
             var olEstate = new GeoJSON().readFeatures(estates)[0];
             feature = olEstate;
             search();
@@ -355,7 +352,7 @@ class SearchModel {
 
   abortSearches() {
     if (this.controllers.length > 0) {
-      this.controllers.forEach(controller => {
+      this.controllers.forEach((controller) => {
         controller.abort();
         this.localObserver.publish("searchComplete");
       });
@@ -377,7 +374,7 @@ class SearchModel {
 
         this.controllers.splice(0, this.controllers.length);
 
-        this.options.sources.forEach(source => {
+        this.options.sources.forEach((source) => {
           const { promise, controller } = this.lookup(source, searchInput);
           promises.push(promise);
           this.controllers.push(controller);
@@ -386,9 +383,9 @@ class SearchModel {
         var timeout = this.timeout;
 
         Promise.all(promises)
-          .then(responses => {
-            Promise.all(responses.map(result => result.json()))
-              .then(jsonResults => {
+          .then((responses) => {
+            Promise.all(responses.map((result) => result.json()))
+              .then((jsonResults) => {
                 if (this.timeout !== timeout) {
                   return this.localObserver.publish("searchComplete");
                 }
@@ -396,7 +393,7 @@ class SearchModel {
                   if (jsonResult.features.length > 0) {
                     arraySort({
                       array: jsonResult.features,
-                      index: this.options.sources[i].searchFields[0]
+                      index: this.options.sources[i].searchFields[0],
                     });
                   }
                   jsonResult.source = this.options.sources[i];
@@ -406,9 +403,9 @@ class SearchModel {
                 }, 500);
                 if (callback) callback(jsonResults);
               })
-              .catch(parseErrors => {});
+              .catch((parseErrors) => {});
           })
-          .catch(responseErrors => {});
+          .catch((responseErrors) => {});
       }, 200);
     } else {
       this.timeout = -1;
@@ -426,10 +423,10 @@ class SearchModel {
     return this.olMap
       .getLayers()
       .getArray()
-      .filter(layer => {
+      .filter((layer) => {
         var hidden = true;
         var props = layer.getProperties();
-        if (layerIds.some(id => id === props.name)) {
+        if (layerIds.some((id) => id === props.name)) {
           hidden = false;
         }
         if (
@@ -442,18 +439,18 @@ class SearchModel {
       });
   }
 
-  showLayers = layerIds => {
+  showLayers = (layerIds) => {
     this.visibleLayers = layerIds.reduce(this.getLayerAsSource, []);
     this.hiddenLayers = this.getHiddenLayers(layerIds);
 
-    this.hiddenLayers.forEach(layer => {
+    this.hiddenLayers.forEach((layer) => {
       if (layer.layerType === "group") {
         this.globalObserver.publish("layerswitcher.hideLayer", layer);
       } else {
         layer.setVisible(false);
       }
     });
-    this.visibleLayers.forEach(layer => {
+    this.visibleLayers.forEach((layer) => {
       if (layer.layerType === "group") {
         this.globalObserver.publish("layerswitcher.showLayer", layer);
       } else {
@@ -478,11 +475,11 @@ class SearchModel {
   };
 
   withinSearch = (radiusDrawn, searchDone) => {
-    this.toggleDraw(true, "Circle", true, e => {
+    this.toggleDraw(true, "Circle", true, (e) => {
       radiusDrawn();
       // TODO: Change second parameter to FALSE in order to use global defined WFS search sources
-      this.searchWithinArea(e.feature, true, featureCollections => {
-        let layerIds = featureCollections.map(featureCollection => {
+      this.searchWithinArea(e.feature, true, (featureCollections) => {
+        let layerIds = featureCollections.map((featureCollection) => {
           return featureCollection.source.layerId;
         });
 
@@ -493,9 +490,9 @@ class SearchModel {
   };
 
   polygonSearch = (polygonDrawn, searchDone) => {
-    this.toggleDraw(true, "Polygon", false, e => {
+    this.toggleDraw(true, "Polygon", false, (e) => {
       polygonDrawn();
-      this.searchWithinArea(e.feature, false, featureCollections => {
+      this.searchWithinArea(e.feature, false, (featureCollections) => {
         searchDone(featureCollections);
       });
     });
@@ -508,9 +505,9 @@ class SearchModel {
         type: type,
         freehand: freehand,
         stopClick: true,
-        style: drawStyle
+        style: drawStyle,
       });
-      this.draw.on("drawend", e => {
+      this.draw.on("drawend", (e) => {
         //this.clear();
         this.olMap.removeInteraction(this.draw);
         setTimeout(() => {
@@ -535,7 +532,7 @@ class SearchModel {
     this.olMap
       .getLayers()
       .getArray()
-      .forEach(layer => {
+      .forEach((layer) => {
         var props = layer.getProperties();
         if (props.layerInfo && props.layerInfo.layerType !== "base") {
           layer.setVisible(false);
@@ -544,7 +541,7 @@ class SearchModel {
   }
 
   clearLayerList() {
-    this.layerList.forEach(layer => {
+    this.layerList.forEach((layer) => {
       layer.setVisible(false);
     });
     this.hideVisibleLayers();
@@ -565,7 +562,7 @@ class SearchModel {
     this.vectorLayer.getSource().addFeatures(features);
     this.olMap.getView().fit(this.vectorLayer.getSource().getExtent(), {
       size: this.olMap.getSize(),
-      maxZoom: 7
+      maxZoom: 7,
     });
   }
 
@@ -573,12 +570,12 @@ class SearchModel {
     this.clear();
     this.vectorLayer.getSource().addFeature(feature);
     this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());
-    this.searchWithinArea(feature, true, featureCollections => {
-      var layerIds = featureCollections.map(featureCollection => {
+    this.searchWithinArea(feature, true, (featureCollections) => {
+      var layerIds = featureCollections.map((featureCollection) => {
         return featureCollection.source.layerId;
       });
       this.layerList = layerIds.reduce(this.getLayerAsSource, []);
-      this.layerList.forEach(layer => {
+      this.layerList.forEach((layer) => {
         layer.setVisible(true);
       });
     });
@@ -619,7 +616,7 @@ class SearchModel {
           url: searchLayer.get("url"),
           layers: [searchLayer.get("featureType")],
           geometryName: geomNameFromWmsConfig,
-          layerId: searchLayer.layerId
+          layerId: searchLayer.layerId,
         };
         break;
       case "TILE":
@@ -628,7 +625,7 @@ class SearchModel {
           url: searchLayer.get("url").replace("wms", "wfs"),
           layers: layers,
           geometryName: geomNameFromWmsConfig,
-          layerId: searchLayer.layerId
+          layerId: searchLayer.layerId,
         };
         break;
       default:
@@ -638,10 +635,7 @@ class SearchModel {
   }
 
   lookupEstate(source, feature, callback) {
-    const projCode = this.olMap
-      .getView()
-      .getProjection()
-      .getCode();
+    const projCode = this.olMap.getView().getProjection().getCode();
 
     const geometry = feature.getGeometry();
 
@@ -650,7 +644,7 @@ class SearchModel {
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
-      filter: new Intersects(source.geometryField, geometry, projCode)
+      filter: new Intersects(source.geometryField, geometry, projCode),
     };
 
     const node = this.wfsParser.writeGetFeature(options);
@@ -661,14 +655,14 @@ class SearchModel {
       credentials: "same-origin",
       method: "POST",
       headers: {
-        "Content-Type": "text/xml"
+        "Content-Type": "text/xml",
       },
-      body: xmlString
+      body: xmlString,
     };
 
     fetch(this.app.config.appConfig.searchProxy + source.url, request).then(
-      response => {
-        response.json().then(estate => {
+      (response) => {
+        response.json().then((estate) => {
           callback(estate);
         });
       }
@@ -676,22 +670,19 @@ class SearchModel {
   }
 
   lookup(source, searchInput) {
-    const projCode = this.olMap
-      .getView()
-      .getProjection()
-      .getCode();
+    const projCode = this.olMap.getView().getProjection().getCode();
 
     let isLikeFilters = null;
 
     // If search string contains only numbers, let's do an EqualTo search
     if (/^\d+$/.test(searchInput.trim())) {
-      isLikeFilters = source.searchFields.map(searchField => {
+      isLikeFilters = source.searchFields.map((searchField) => {
         return new EqualTo(searchField, Number(searchInput));
       });
     }
     // Else, let's do a IsLike search
     else {
-      isLikeFilters = source.searchFields.map(searchField => {
+      isLikeFilters = source.searchFields.map((searchField) => {
         return new IsLike(
           searchField,
           searchInput + "*",
@@ -712,7 +703,7 @@ class SearchModel {
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
       maxFeatures: this.options.maxFeatures || 100,
-      filter: filter
+      filter: filter,
     };
 
     const node = this.wfsParser.writeGetFeature(options);
@@ -726,9 +717,9 @@ class SearchModel {
       signal: signal,
       method: "POST",
       headers: {
-        "Content-Type": "text/xml"
+        "Content-Type": "text/xml",
       },
-      body: xmlString
+      body: xmlString,
     };
     const promise = fetch(
       this.app.config.appConfig.searchProxy + source.url,

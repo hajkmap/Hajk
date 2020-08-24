@@ -9,21 +9,21 @@ import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import ScrollMenu from "react-horizontal-scrolling-menu";
 import "./BreadCrumbs.css";
 
-const styles = theme => ({
+const styles = (theme) => ({
   moreButton: {
     background: "white",
     padding: "6px",
     margin: "0px",
     borderRadius: "100%",
     "&:hover": {
-      cursor: "pointer"
-    }
+      cursor: "pointer",
+    },
   },
   breadExpand: {
     position: "fixed",
     right: 0,
     bottom: "-2px",
-    zIndex: 1000
+    zIndex: 1000,
   },
   breadCrumbs: {
     position: "fixed",
@@ -35,14 +35,14 @@ const styles = theme => ({
       overflow: "hidden",
       width: "269px",
       boxShadow:
-        "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+        "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
     },
     [theme.breakpoints.down("xs")]: {
       left: 0,
       bottom: 0,
       right: 0,
-      width: "auto"
-    }
+      width: "auto",
+    },
   },
   breadCrumbsHeader: {
     background: "white",
@@ -50,33 +50,33 @@ const styles = theme => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    borderBottom: "#ccc"
+    borderBottom: "#ccc",
   },
   breadCrumbsHeaderText: {
-    marginRight: "15px"
+    marginRight: "15px",
   },
   breadCrumbsContainer: {
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 2
+    zIndex: 2,
   },
   breadCrumbsContainerMobile: {
     maxHeight: "300px",
     overflow: "auto",
     margin: "10px",
     [theme.breakpoints.down("md")]: {
-      maxHeight: "236px"
+      maxHeight: "236px",
     },
     [theme.breakpoints.down("xs")]: {
-      maxHeight: "150px"
-    }
+      maxHeight: "150px",
+    },
   },
   overflow: {
     position: "absolute",
     right: 0,
-    bottom: "50px"
+    bottom: "50px",
   },
   arrowLeft: {
     background: "white",
@@ -84,7 +84,7 @@ const styles = theme => ({
     display: "flex",
     alignContent: "center",
     padding: "10px",
-    border: "1px solid #ccc"
+    border: "1px solid #ccc",
   },
   arrowRight: {
     background: "white",
@@ -92,8 +92,8 @@ const styles = theme => ({
     display: "flex",
     alignContent: "center",
     padding: "10px",
-    border: "1px solid #ccc"
-  }
+    border: "1px solid #ccc",
+  },
 });
 
 class BreadCrumbs extends Component {
@@ -101,42 +101,42 @@ class BreadCrumbs extends Component {
     super(props);
     this.state = {
       visibleLayers: [],
-      open: false
+      open: false,
     };
-    props.app.globalObserver.subscribe("informativeLoaded", chapters => {
+    props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       this.setState({
-        chapters: chapters
+        chapters: chapters,
       });
     });
     this.timer = 0;
   }
 
-  bindLayerEvents = visibleLayers => layer => {
+  bindLayerEvents = (visibleLayers) => (layer) => {
     if (layer.get("visible")) {
       visibleLayers.push(layer);
     }
 
     this.setState({
-      visibleLayers: visibleLayers
+      visibleLayers: visibleLayers,
     });
 
     this.addedLayerBuffer = [];
     this.removedLayerBuffer = [];
 
-    layer.on("change:visible", e => {
+    layer.on("change:visible", (e) => {
       let changedLayer = e.target;
       setTimeout(() => {
         var visibleLayers = [
           ...this.state.visibleLayers,
-          ...this.addedLayerBuffer
+          ...this.addedLayerBuffer,
         ];
-        visibleLayers = visibleLayers.filter(visibleLayer => {
+        visibleLayers = visibleLayers.filter((visibleLayer) => {
           return !this.removedLayerBuffer.some(
-            removedLayer => visibleLayer === removedLayer
+            (removedLayer) => visibleLayer === removedLayer
           );
         });
         this.setState({
-          visibleLayers: visibleLayers
+          visibleLayers: visibleLayers,
         });
         this.addedLayerBuffer = [];
         this.removedLayerBuffer = [];
@@ -144,7 +144,7 @@ class BreadCrumbs extends Component {
 
       if (this.props.model.clearing) {
         this.setState({
-          visibleLayers: []
+          visibleLayers: [],
         });
       } else {
         if (changedLayer.get("visible")) {
@@ -160,19 +160,19 @@ class BreadCrumbs extends Component {
     return this.props.map
       .getLayers()
       .getArray()
-      .filter(layer => {
+      .filter((layer) => {
         return layer.getVisible();
       });
   }
 
   clear = () => {
     this.state.visibleLayers
-      .filter(layer =>
+      .filter((layer) =>
         layer.getProperties().layerInfo
           ? layer.getProperties().layerInfo.layerType !== "base"
           : false
       )
-      .forEach(layer => {
+      .forEach((layer) => {
         layer.setVisible(false);
       });
   };
@@ -189,7 +189,7 @@ class BreadCrumbs extends Component {
 
   toggle = () => {
     this.setState({
-      open: !this.state.open
+      open: !this.state.open,
     });
   };
 
@@ -230,7 +230,7 @@ class BreadCrumbs extends Component {
                 information i kartan.
               </Typography>
             )}
-            {layers.map(layer => (
+            {layers.map((layer) => (
               <BreadCrumb
                 key={layer.get("caption") + Math.random()}
                 title={layer.get("caption")}
@@ -248,7 +248,7 @@ class BreadCrumbs extends Component {
     const { classes, app } = this.props;
     const { chapters } = this.state;
 
-    var breadCrumbs = layers.map(layer => (
+    var breadCrumbs = layers.map((layer) => (
       <BreadCrumb
         key={layer.get("caption") + Math.random()}
         title={layer.get("caption")}
@@ -276,7 +276,7 @@ class BreadCrumbs extends Component {
   render() {
     const { classes } = this.props;
     const isMobile = this.state.width < 600;
-    var layers = this.state.visibleLayers.filter(layer => {
+    var layers = this.state.visibleLayers.filter((layer) => {
       var isBreadCrumb = true;
       if (
         !layer.getProperties().layerInfo ||
