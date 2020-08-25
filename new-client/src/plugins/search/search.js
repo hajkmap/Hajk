@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import Observer from "react-event-observer";
 import { withStyles } from "@material-ui/core/styles";
+import clsx from "clsx";
 
 import SearchModel from "../../models/SearchModel";
 
@@ -49,6 +50,9 @@ const styles = (theme) => {
     },
     iconButton: {
       padding: 10,
+    },
+    hidden: {
+      display: "none",
     },
   };
 };
@@ -239,8 +243,17 @@ class Search extends React.PureComponent {
   renderSearchBox() {
     const { classes } = this.props;
 
+    // If clean mode is active hide the component using CSS.
+    // We can't just "return null" as we need to render it so we can access all functionality.
+    const clean = this.props.app.config.mapConfig.map.clean;
+
     return (
-      <div className={classes.flexItemContainerForSearch}>
+      <div
+        className={clsx(
+          classes.flexItemContainerForSearch,
+          clean === true ? classes.hidden : null
+        )}
+      >
         <Paper className={classes.root}>
           <InputBase
             autoFocus={true}
@@ -363,10 +376,7 @@ class Search extends React.PureComponent {
    * @memberof Search
    */
   render() {
-    // If clean===true, some components won't be rendered below
-    const clean = this.props.app.config.mapConfig.map.clean;
-
-    return clean === false && this.renderSearchBox();
+    return this.renderSearchBox();
   }
 }
 
