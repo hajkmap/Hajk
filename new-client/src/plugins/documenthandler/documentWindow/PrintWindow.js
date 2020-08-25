@@ -8,67 +8,44 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import PrintList from "./PrintList";
 
 const styles = theme => ({
-  headerContainer: {
-    backgroundColor: theme.palette.grey[200],
-    display: "flex",
-    justifyContent: "center",
-    padding: theme.spacing(2)
-  },
-  checkBoxContainer: {
-    padding: theme.spacing(2)
+  gridContainer: {
+    padding: theme.spacing(4),
+    width: "100%"
   },
   footerContainer: {
     position: "fixed",
-    bottom: theme.spacing(2),
-    display: "flex",
-    justifyContent: "center"
+    padding: theme.spacing(2),
+    maxWidth: "100%",
+    bottom: 0,
+    right: 0,
+    borderTop: "1px solid grey"
   }
 });
 
 class PrintWindow extends React.PureComponent {
   state = {
-    showScrollButton: false,
-    showPrintWindow: false,
     printText: false,
     printImages: false,
     printMaps: false,
-    documents: []
+    chapterInformation: this.props.model.getAllChapterInfo()
   };
 
-  constructor(props) {
-    super(props);
-    this.getAllDocuments();
-  }
-
-  getAllDocuments = () => {
-    const { model, options } = this.props;
-    const filteredMenu = options.menuConfig.menu.filter(
-      item => item.document !== ""
-    );
-
-    return filteredMenu.map((item, id) => {
-      return new Promise((resolve, reject) => {
-        model.fetchJsonDocument(item.document).then(document => {
-          return this.setState(
-            () => {
-              return {
-                documents: [...this.state.documents, { document }]
-              };
-            },
-            () => {
-              resolve(); //Ensure setState is run
-            }
-          );
-        });
+  handleCheckboxChange = (e, chapter) => {
+    e.stopPropagation();
+    chapter.chosenForPrint = !chapter.chosenForPrint;
+    if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
+      chapter.chapters.forEach(subChapter => {
+        subChapter.chosenForPrint = chapter.chosenForPrint;
       });
-    });
+    }
   };
 
   renderCheckboxes() {
     return (
-      <Grid container alignItems="center" spacing={1}>
+      <Grid container item alignItems="center" spacing={2}>
         <Grid item xs={12}>
           <Typography variant="h6">Innehåll</Typography>
         </Grid>
@@ -132,14 +109,18 @@ class PrintWindow extends React.PureComponent {
 
   render() {
     const { classes, togglePrintWindow, activeDocument } = this.props;
-    const { documents } = this.state;
     console.log("this.state: ", this.state);
 
     return (
       <>
-        <div className={classes.headerContainer}>
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs>
+        <Grid
+          spacing={2}
+          className={classes.gridContainer}
+          container
+          alignItems="center"
+        >
+          <Grid alignItems="center" alignContent="center" container item xs>
+            <Grid item xs={4}>
               <Button
                 color="primary"
                 startIcon={<ArrowBackIcon />}
@@ -148,26 +129,38 @@ class PrintWindow extends React.PureComponent {
                 <Typography justify="center">Tillbaka</Typography>
               </Button>
             </Grid>
-            <Grid item xs align="center">
-              <Typography variant="h6">Skapa PDF</Typography>
+
+            <Grid item xs={4}>
+              <Typography align="center" variant="h6">
+                Skapa PDF
+              </Typography>
             </Grid>
-            <Grid item xs></Grid>
+            <Grid item xs={4}></Grid>
           </Grid>
-        </div>
-        <div className={classes.checkBoxContainer}>
           {this.renderCheckboxes()}
-        </div>
-        <Grid
-          container
-          className={classes.footerContainer}
-          alignItems="center"
-          spacing={3}
-        >
+
+          <Grid
+            style={{
+              borderTop: "1px solid grey"
+            }}
+            xs={12}
+            container
+            item
+          >
+            <PrintList
+              chapters={this.state.chapterInformation}
+              activeDocument={activeDocument}
+            />
+          </Grid>
+        </Grid>
+        <Grid container className={classes.footerContainer}>
           <Grid
             item
-            align="center"
             xs={12}
-            style={{ borderTop: "1px solid grey" }}
+            container
+            alignContent="center"
+            alignItems="center"
+            justify="center"
           >
             <Button
               color="primary"
@@ -175,7 +168,12 @@ class PrintWindow extends React.PureComponent {
               startIcon={<OpenInNewIcon />}
               onClick={togglePrintWindow}
             >
-              <Typography justify="center">Skapa PDF-utskrift</Typography>
+              <Typography
+                style={{ marginRight: "20px", marginLeft: "20px" }}
+                justify="center"
+              >
+                Skapa PDF-utskrift
+              </Typography>
             </Button>
           </Grid>
         </Grid>

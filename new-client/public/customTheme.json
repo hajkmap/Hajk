@@ -1,7 +1,6 @@
 {
   "palette": {
     "primary": { "main": "#005799" },
-    "text": { "secondary": "white" },
     "secondary": {
       "dark": "#a51848",
       "light": "#eceded",

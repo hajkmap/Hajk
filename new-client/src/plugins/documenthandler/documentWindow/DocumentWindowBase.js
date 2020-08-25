@@ -14,7 +14,8 @@ class DocumentWindowBase extends React.PureComponent {
     counter: 0,
     document: null,
     documentWindowMaximized: true,
-    showPrintWindow: false
+    showPrintWindow: false,
+    chapters: []
   };
 
   static propTypes = {};
@@ -24,28 +25,45 @@ class DocumentWindowBase extends React.PureComponent {
   constructor(props) {
     super(props);
     this.bindSubscriptions();
+    this.getAllChapters();
+    props.model.getAllDocuments(props.options.menuConfig.menu);
   }
+
+  // setActiveDocument = title => {
+  //   console.log("model.allDocuments: ", this.props.model.allDocuments);
+  //   const { model } = this.props;
+  //   let dx = model.getDocuments(["Utgångspunkter"]);
+  //   console.log("dx", dx);
+  //   return new Promise((resolve, reject) => {
+  //     model.fetchJsonDocument(title).then(document => {
+  //       var referringMenuItem = this.findReferringMenuItem(title);
+  //       return this.setState(
+  //         () => {
+  //           return {
+  //             documentTitle: title,
+  //             document: document,
+  //             documentColor: referringMenuItem ? referringMenuItem.color : null,
+  //             showPrintWindow: false
+  //           };
+  //         },
+  //         () => {
+  //           console.log(this.state, "state");
+  //           resolve(); //Ensure setState is run
+  //         }
+  //       );
+  //     });
+  //   });
+  // };
 
   setActiveDocument = title => {
     const { model } = this.props;
-    return new Promise((resolve, reject) => {
-      model.fetchJsonDocument(title).then(document => {
-        var referringMenuItem = this.findReferringMenuItem(title);
-        return this.setState(
-          () => {
-            return {
-              documentTitle: title,
-              document: document,
-              documentColor: referringMenuItem ? referringMenuItem.color : null,
-              showPrintWindow: false
-            };
-          },
-          () => {
-            console.log(this.state, "state");
-            resolve(); //Ensure setState is run
-          }
-        );
-      });
+    let document = model.getDocuments([title])[0];
+    const referringMenuItem = this.findReferringMenuItem(title);
+    this.setState({
+      documentTitle: title,
+      document: document,
+      documentColor: referringMenuItem ? referringMenuItem.color : null,
+      showPrintWindow: false
     });
   };
 
@@ -126,13 +144,52 @@ class DocumentWindowBase extends React.PureComponent {
     localObserver.subscribe("show-document", this.showDocument);
   };
 
+  getAllChapters = () => {
+    const { model, options } = this.props;
+    const filteredMenu = options.menuConfig.menu.filter(
+      item => item.document !== ""
+    );
+
+    return filteredMenu.map((item, id) => {
+      return new Promise((resolve, reject) => {
+        model.fetchJsonDocument(item.document).then(item => {
+          if (item && item.chapters) {
+            let chapter = this.setChapterLevels(item.chapters[0], 0);
+            return this.setState(
+              () => {
+                return {
+                  chapters: [...this.state.chapters, chapter]
+                };
+              },
+              () => {
+                resolve(); //Ensure setState is run
+              }
+            );
+          }
+        });
+      });
+    });
+  };
+
+  setChapterLevels(chapter, level) {
+    chapter.level = level;
+    if (chapter.chapters && chapter.chapters.length > 0) {
+      level = level + 1;
+      chapter.chapters.forEach(subChapter => {
+        subChapter = this.setChapterLevels(subChapter, level);
+      });
+    }
+    return chapter;
+  }
+
   render() {
     const {
       documentWindowMaximized,
       document,
       documentTitle,
       documentColor,
-      showPrintWindow
+      showPrintWindow,
+      chapters
     } = this.state;
     const { options, classes } = this.props;
 
@@ -167,6 +224,7 @@ class DocumentWindowBase extends React.PureComponent {
             />
           ) : (
             <PrintWindow
+              chapters={chapters}
               activeDocument={document}
               togglePrintWindow={this.togglePrintWindow}
               {...this.props}
