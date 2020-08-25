@@ -45,6 +45,11 @@ class BaseWindowPlugin extends React.PureComponent {
       windowVisible: false, // Does not have anything to do with color or title, but must also be set initially
     };
 
+    // Title is a special case: we want to use the state.title and pass on to Window in order
+    // to update Window's title dynamically. At the same time, we want all other occurrences,
+    // e.g. Widget or Drawer button's label to remain the same.
+    this.title = props.options.title || props.custom.title || "Unnamed plugin";
+
     // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
     this.width = props.options.width || props.custom.width || 400;
     this.height = props.options.height || props.custom.height || "auto";
@@ -181,7 +186,7 @@ class BaseWindowPlugin extends React.PureComponent {
           onClick={this.handleButtonClick}
         >
           <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
-          <ListItemText primary={this.state.title} />
+          <ListItemText primary={this.title} />
         </ListItem>
       </Hidden>,
       document.getElementById("plugin-buttons")
@@ -195,7 +200,7 @@ class BaseWindowPlugin extends React.PureComponent {
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
-          title={this.state.title}
+          title={this.title}
           abstract={this.description}
         />
       </Hidden>,
@@ -208,7 +213,7 @@ class BaseWindowPlugin extends React.PureComponent {
       <PluginControlButton
         icon={this.props.custom.icon}
         onClick={this.handleButtonClick}
-        title={this.state.title}
+        title={this.title}
         abstract={this.description}
       />,
       document.getElementById("plugin-control-buttons")
