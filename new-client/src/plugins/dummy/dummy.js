@@ -25,7 +25,10 @@ import BugReportIcon from "@material-ui/icons/BugReport";
  */
 class Dummy extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
-  state = {};
+  state = {
+    title: "Dummy",
+    color: null,
+  };
 
   // propTypes and defaultProps are static properties, declared
   // as high as possible within the component code. They should
@@ -69,6 +72,19 @@ class Dummy extends React.PureComponent {
     });
   }
 
+  // Used to update title/color (or any other state variable…).
+  // Title and color are passed on to BaseWindowPlugin as props,
+  // and will result in updating the Window's color/title.
+  // Note that we put this method here, in dummy.js, and then pass
+  // it on to DummyView as a prop. It is then called in DummyView
+  // when user clicks a button. This is just made for illustrating
+  // the concept of passing on props to BaseWindowPlugin from a
+  // plugin's view.
+  updateCustomProp = (prop, value) => {
+    console.log(`Setting ${prop} to:`, value);
+    this.setState({ [prop]: value });
+  };
+
   /**
    * Render is now super-simplified compared to previous versions of Hajk3.
    *
@@ -88,7 +104,8 @@ class Dummy extends React.PureComponent {
         type="Dummy" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name
         custom={{
           icon: <BugReportIcon />, // Custom icon for this plugin
-          title: "Dummy", // Custom title (will be shown in Window's toolbar and on the Drawer/Widget button)
+          title: this.state.title, // By keeping title and color in Dummy's state we can pass on
+          color: this.state.color, // the changes to BaseWindowPlugin which will update internal state too.
           description: "En kort beskrivning som visas i widgeten", // Shown on Widget button
           height: 450, // Custom height/width etc | Use "auto" for automatic or leave undefined
           width: 400,
@@ -102,6 +119,7 @@ class Dummy extends React.PureComponent {
           model={this.dummyModel} // We can supply our model
           app={this.props.app} // Or even the whole App
           localObserver={this.localObserver} // And also the Observer, so that those 2 can talk through it
+          updateCustomProp={this.updateCustomProp}
         />
       </BaseWindowPlugin>
     );

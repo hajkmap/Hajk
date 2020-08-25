@@ -168,6 +168,17 @@ class DummyView extends React.PureComponent {
     });
   };
 
+  // Make it possible to programatically update Window's title/color
+  handleClickOnRandomTitle = () => {
+    // We use the updateCustomProp mehtod which is passed down from parent
+    // component as a prop to this View.
+    this.props.updateCustomProp("title", new Date().getTime().toString()); // Generate a timestamp
+    this.props.updateCustomProp(
+      "color",
+      "#" + ((Math.random() * 0xffffff) << 0).toString(16) // Generate a custom HEX color string
+    );
+  };
+
   render() {
     const { classes } = this.props;
     return (
@@ -209,6 +220,14 @@ class DummyView extends React.PureComponent {
           onClick={this.showIntroduction}
         >
           Show Hajk Introduction
+        </Button>
+        <Button
+          className={classes.buttonWithBottomMargin}
+          variant="contained"
+          fullWidth={true}
+          onClick={this.handleClickOnRandomTitle}
+        >
+          Set random title and color
         </Button>
       </>
     );
