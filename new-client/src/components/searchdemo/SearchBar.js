@@ -302,34 +302,42 @@ const SearchBar = (props) => {
     }
 
     (async () => {
-      console.log("Getting Autocomplete for: ", searchString);
-      const {
-        flatAutocompleteArray,
-        errors,
-      } = await searchModel.getAutocomplete(
-        searchString,
-        searchSources // This is a state variable!
-        // searchOptions // This is a dilemma: should we limit ourselves to wildcard
-        // settings etc? Or should Autocomplete return all results, even if they
-        // won't be returned by actuall search, due to the limitations
-      );
+      try {
+        console.log("Autocomplete search: ", searchString);
+        const {
+          flatAutocompleteArray,
+          errors,
+        } = await searchModel.getAutocomplete(
+          searchString,
+          searchSources // This is a state variable!
+          // searchOptions // This is a dilemma: should we limit ourselves to wildcard
+          // settings etc? Or should Autocomplete return all results, even if they
+          // won't be returned by actuall search, due to the limitations
+        );
 
-      console.log(
-        "Got this back to populate autocomplete with: ",
-        flatAutocompleteArray
-      );
+        console.log("Autocomplete result: ", flatAutocompleteArray);
 
-      // It is possible to check if Search Model returned any errors
-      errors.length > 0 && console.error("Autocomplete error: ", errors);
+        // It is possible to check if Search Model returned any errors
+        errors.length > 0 && console.error("Autocomplete error: ", errors);
 
-      if (active) {
-        setOptions(flatAutocompleteArray);
+        if (active) {
+          setOptions(flatAutocompleteArray);
+        }
+      } catch (error) {
+        // If we catch an error, display it to the user
+        // (preferably in a Snackbar instead of console).
+        console.error(error);
+
+        // Also, set "open" state variable to false, which
+        // abort the "loading" state of Autocomplete.
+        setOpen(false);
+      } finally {
+        // Regardless if we had an error or not, we're done.
+        return () => {
+          active = false;
+        };
       }
     })();
-
-    return () => {
-      active = false;
-    };
   }, [loading, searchModel, searchSources]);
 
   useEffect(() => {
