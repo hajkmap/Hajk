@@ -3,9 +3,9 @@ import React from "react";
 import {
   Typography,
   List,
-  ExpansionPanel,
-  ExpansionPanelSummary,
-  ExpansionPanelDetails,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   Chip,
   Tooltip,
 } from "@material-ui/core";
@@ -26,8 +26,8 @@ export default function SearchResultsDataset({
       ? `${value.numberReturned}+`
       : value.numberReturned;
   return (
-    <ExpansionPanel>
-      <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+    <Accordion>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography>
           <PlaceIcon />
           {source.caption}
@@ -37,8 +37,8 @@ export default function SearchResultsDataset({
         >
           <Chip label={numberOfResultsToDisplay} />
         </Tooltip>
-      </ExpansionPanelSummary>
-      <ExpansionPanelDetails>
+      </AccordionSummary>
+      <AccordionDetails>
         <List>
           {value.features.map((f) => (
             <SearchResultsDatasetFeature
@@ -51,7 +51,7 @@ export default function SearchResultsDataset({
             />
           ))}
         </List>
-      </ExpansionPanelDetails>
-    </ExpansionPanel>
+      </AccordionDetails>
+    </Accordion>
   );
 }

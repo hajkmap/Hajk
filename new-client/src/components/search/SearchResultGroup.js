@@ -4,9 +4,9 @@ import { withStyles } from "@material-ui/core/styles";
 import SearchResultItem from "./SearchResultItem";
 
 import List from "@material-ui/core/List";
-import MuiExpansionPanel from "@material-ui/core/ExpansionPanel";
-import MuiExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
-import MuiExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
+import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import MuiPlaceIcon from "@material-ui/icons/Place";
@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ExpansionPanel = withStyles({
+const Accordion = withStyles({
   root: {
     border: "1px solid rgba(0, 0, 0, .125)",
     boxShadow: "none",
@@ -42,9 +42,9 @@ const ExpansionPanel = withStyles({
     },
   },
   expanded: {},
-})(MuiExpansionPanel);
+})(MuiAccordion);
 
-const ExpansionPanelSummary = withStyles({
+const AccordionSummary = withStyles({
   root: {
     backgroundColor: "rgba(0, 0, 0, .03)",
     borderBottom: "1px solid rgba(0, 0, 0, .125)",
@@ -60,13 +60,13 @@ const ExpansionPanelSummary = withStyles({
     },
   },
   expanded: {},
-})(MuiExpansionPanelSummary);
+})(MuiAccordionSummary);
 
-const ExpansionPanelDetails = withStyles((theme) => ({
+const AccordionDetails = withStyles((theme) => ({
   root: {
     padding: theme.spacing(0),
   },
-}))(MuiExpansionPanelDetails);
+}))(MuiAccordionDetails);
 
 const PlaceIcon = withStyles((theme) => ({
   root: {
@@ -87,8 +87,8 @@ function SearchResultGroup({
 
   if (numberReturned) {
     return (
-      <ExpansionPanel>
-        <ExpansionPanelSummary
+      <Accordion>
+        <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
         >
@@ -101,8 +101,8 @@ function SearchResultGroup({
             color="primary"
             className={classes.chip}
           />
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails>
+        </AccordionSummary>
+        <AccordionDetails>
           <List dense className={classes.root}>
             {value.features.map((f) => (
               <SearchResultItem
@@ -114,8 +114,8 @@ function SearchResultGroup({
               />
             ))}
           </List>
-        </ExpansionPanelDetails>
-      </ExpansionPanel>
+        </AccordionDetails>
+      </Accordion>
     );
   } else {
     return null;
