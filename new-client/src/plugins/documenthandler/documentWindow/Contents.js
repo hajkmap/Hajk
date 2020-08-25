@@ -23,7 +23,6 @@ const getIconSizeFromFontSize = (theme) => {
   if (fontSizeBody.search("px") > -1) {
     format = "px";
   }
-  console.log(format, "format");
   var index = fontSizeBody.search(format);
   var size = fontSizeBody.substring(0, index);
   return `${size * 1.7}${format}`;

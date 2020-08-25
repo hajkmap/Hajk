@@ -6,13 +6,13 @@ import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-const styles = theme => ({});
+const styles = (theme) => ({});
 
 class DocumentWindowBase extends React.PureComponent {
   state = {
     counter: 0,
     document: null,
-    documentWindowMaximized: true
+    documentWindowMaximized: true,
   };
 
   static propTypes = {};
@@ -24,21 +24,20 @@ class DocumentWindowBase extends React.PureComponent {
     this.bindSubscriptions();
   }
 
-  setActiveDocument = title => {
+  setActiveDocument = (title) => {
     const { model } = this.props;
     return new Promise((resolve, reject) => {
-      model.fetchJsonDocument(title).then(document => {
+      model.fetchJsonDocument(title).then((document) => {
         var referringMenuItem = this.findReferringMenuItem(title);
         return this.setState(
           () => {
             return {
-              documentTitle: title,
+              documentTitle: referringMenuItem.title,
               document: document,
-              documentColor: referringMenuItem ? referringMenuItem.color : null
+              documentColor: referringMenuItem ? referringMenuItem.color : null,
             };
           },
           () => {
-            console.log(this.state, "state");
             resolve(); //Ensure setState is run
           }
         );
@@ -68,22 +67,27 @@ class DocumentWindowBase extends React.PureComponent {
     return null;
   }
 
-  findReferringMenuItem = documentNameToFind => {
+  findReferringMenuItem = (documentNameToFind) => {
     const { options } = this.props;
-    return options.menuConfig.menu.find(rootItemToSearch => {
-      return this.findMenuItem(rootItemToSearch, documentNameToFind) != null;
+    var foundMenuItem = null;
+    options.menuConfig.menu.forEach((rootItemToSearch) => {
+      var found = this.findMenuItem(rootItemToSearch, documentNameToFind);
+      if (found != null) {
+        foundMenuItem = found;
+      }
     });
+    return foundMenuItem;
   };
 
-  showDocument = documentName => {
+  showDocument = (documentName) => {
     const { app } = this.props;
     app.globalObserver.publish("documentviewer.showWindow", {
-      hideOtherPlugins: false
+      hideOtherPlugins: false,
     });
     return this.setActiveDocument(documentName);
   };
 
-  scrollInDocument = headerIdentifier => {
+  scrollInDocument = (headerIdentifier) => {
     const { localObserver, model } = this.props;
     if (headerIdentifier) {
       localObserver.publish(
@@ -122,10 +126,9 @@ class DocumentWindowBase extends React.PureComponent {
       documentWindowMaximized,
       document,
       documentTitle,
-      documentColor
+      documentColor,
     } = this.state;
     const { options, classes } = this.props;
-
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -143,7 +146,7 @@ class DocumentWindowBase extends React.PureComponent {
           onResize: this.onResize,
           draggingEnabled: false,
           resizingEnabled: false,
-          allowMaximizedWindow: false
+          allowMaximizedWindow: false,
         }}
       >
         {document != null ? (
