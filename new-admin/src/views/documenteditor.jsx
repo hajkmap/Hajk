@@ -50,10 +50,10 @@ class Chapter {
   constructor(settings) {
     settings = settings || {};
     this.header = settings.header || "";
+    this.headerIdentifier = settings.headerIdentifier || "";
     this.html = settings.html || "";
     this.keywords = settings.keywords || [];
     this.geoObjects = settings.geoObjects || [];
-    this.mapSettings = settings.mapSettings;
     this.chapters = [];
   }
 }
@@ -87,20 +87,11 @@ class DocumentEditor extends Component {
             },
             () => {
               this.props.model.loadMaps(maps => {
-                this.setState(
-                  {
-                    maps: maps,
-                    map: data.map,
-                    newDocumentMap: maps[0]
-                  },
-                  () => {
-                    this.props.model.loadMapSettings(data.map, settings => {
-                      this.setState({
-                        mapSettings: settings
-                      });
-                    });
-                  }
-                );
+                this.setState({
+                  maps: maps,
+                  map: data.map,
+                  newDocumentMap: maps[0]
+                });
               });
             }
           );
@@ -160,8 +151,7 @@ class DocumentEditor extends Component {
   addChapter(title) {
     this.state.data.chapters.push(
       new Chapter({
-        header: title,
-        mapSettings: this.state.mapSettings
+        header: title
       })
     );
     this.setState({
@@ -188,52 +178,6 @@ class DocumentEditor extends Component {
       modalStyle: {},
       okButtonText: "OK",
       modalConfirmCallback: () => {}
-    });
-  }
-
-  renderMapDialog(chapter) {
-    var mapState = {},
-      checkedLayers = [],
-      updateMapSettings = state => {
-        mapState = state;
-      },
-      updateLayersSettings = state => {
-        checkedLayers = state;
-      };
-
-    this.setState({
-      showModal: true,
-      showAbortButton: true,
-      modalContent: (
-        <Map
-          config={this.props.config}
-          map={this.state.map}
-          chapter={chapter}
-          mapSettings={this.state.mapSettings}
-          onMapUpdate={state => updateMapSettings(state)}
-          onLayersUpdate={state => updateLayersSettings(state)}
-        />
-      ),
-      modalConfirmCallback: () => {
-        this.hideModal();
-        chapter.mapSettings = {
-          center: mapState.center,
-          zoom: mapState.zoom,
-          extent: mapState.extent
-        };
-        chapter.layers = checkedLayers;
-      },
-      modalStyle: {
-        overlay: {},
-        content: {
-          left: "30px",
-          top: "30px",
-          right: "30px",
-          bottom: "30px",
-          width: "auto",
-          margin: 0
-        }
-      }
     });
   }
 
@@ -408,18 +352,6 @@ class DocumentEditor extends Component {
           <div className="document-chapter-header">
             <h1>{chapter.header}</h1>
           </div>
-          {/*
-          &nbsp;
-          <Button
-            variant="contained"
-            className="btn btn-default"
-            onClick={() => {
-              this.renderMapDialog(chapter);
-            }}
-          >
-            Kartinställningar
-          </Button>
-          */}
           <div className="document-menu-buttons">
             <Button
               variant="contained"
@@ -484,8 +416,7 @@ class DocumentEditor extends Component {
             onAddChapter={title => {
               chapter.chapters.push(
                 new Chapter({
-                  header: title,
-                  mapSettings: this.state.mapSettings
+                  header: title
                 })
               );
               this.forceUpdate();
