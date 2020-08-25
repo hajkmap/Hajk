@@ -119,7 +119,6 @@ import {
   IconButton,
   Paper,
   TextField,
-  Tooltip,
   makeStyles,
   Checkbox,
   Popover,
@@ -129,7 +128,6 @@ import {
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 
-import MenuIcon from "@material-ui/icons/Menu";
 import FormatSizeIcon from "@material-ui/icons/FormatSize";
 import SearchIcon from "@material-ui/icons/Search";
 import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
@@ -154,6 +152,7 @@ const useStyles = makeStyles((theme) => ({
   },
   searchContainer: {
     position: "absolute",
+    right: theme.spacing(2),
   },
   searchCollapsed: {
     left: -440,
@@ -164,7 +163,6 @@ const SearchBar = (props) => {
   const classes = useStyles();
 
   // Grab some stuff from props
-  const { menuButtonDisabled, onMenuClick } = props;
   const searchModel = props.app.appModel.searchModel;
 
   // Autocomplete state
@@ -308,7 +306,13 @@ const SearchBar = (props) => {
       const {
         flatAutocompleteArray,
         errors,
-      } = await searchModel.getAutocomplete(searchString);
+      } = await searchModel.getAutocomplete(
+        searchString,
+        searchSources // This is a state variable!
+        // searchOptions // This is a dilemma: should we limit ourselves to wildcard
+        // settings etc? Or should Autocomplete return all results, even if they
+        // won't be returned by actuall search, due to the limitations
+      );
 
       console.log(
         "Got this back to populate autocomplete with: ",
@@ -326,7 +330,7 @@ const SearchBar = (props) => {
     return () => {
       active = false;
     };
-  }, [loading, searchModel]);
+  }, [loading, searchModel, searchSources]);
 
   useEffect(() => {
     if (!open) {
@@ -359,30 +363,38 @@ const SearchBar = (props) => {
   }
 
   async function doSearch(searchString) {
-    // Grab existing search options from model
-    const searchOptions = searchModel.getSearchOptions();
+    // Wrap all calls to Search Model in a try/catch because
+    // Search Model may throw Errors which we should handle
+    // in the UI Component.
+    try {
+      // Grab existing search options from model
+      const searchOptions = searchModel.getSearchOptions();
+      console.log("doSearch searchOptions: ", searchOptions);
 
-    // Apply our custom options based on user's selection
-    searchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
-    searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
-    searchOptions["matchCase"] = matchCase;
-    searchOptions["wildcardAtStart"] = wildcardAtStart;
-    searchOptions["wildcardAtEnd"] = wildcardAtEnd;
+      // Apply our custom options based on user's selection
+      searchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
+      searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
+      searchOptions["matchCase"] = matchCase;
+      searchOptions["wildcardAtStart"] = wildcardAtStart;
+      searchOptions["wildcardAtEnd"] = wildcardAtEnd;
 
-    console.log("doSearch: ", searchString, searchSources, searchOptions);
-    const { featureCollections, errors } = await searchModel.getResults(
-      searchString,
-      searchSources, // this is a state variable!
-      searchOptions
-    );
-    console.log("doSearch results: ", featureCollections);
+      console.log("Searching:", searchString, searchSources, searchOptions);
+      const { featureCollections, errors } = await searchModel.getResults(
+        searchString,
+        searchSources, // this is a state variable!
+        searchOptions
+      );
+      console.log("Results: ", featureCollections);
 
-    // It's possible to handle any errors in the UI by checking if Search Model returned any
-    errors.length > 0 && console.error(errors);
+      // It's possible to handle any errors in the UI by checking if Search Model returned any
+      errors.length > 0 && console.error(errors);
 
-    setSearchResults({ featureCollections, errors });
+      setSearchResults({ featureCollections, errors });
 
-    addFeaturesToResultsLayer(featureCollections);
+      addFeaturesToResultsLayer(featureCollections);
+    } catch (err) {
+      console.error("Show a nice error message to user with info:", err);
+    }
   }
 
   function handleClickOnSearch() {
@@ -414,10 +426,6 @@ const SearchBar = (props) => {
     console.log("Current input value", value);
     setOpen(value.length >= 3);
   }
-
-  const tooltipText = menuButtonDisabled
-    ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
-    : "Visa verktygspanelen";
 
   return (
     <div
@@ -459,20 +467,6 @@ const SearchBar = (props) => {
               placeholder="Skriv eller välj bland förslagen nedan..."
               InputProps={{
                 ...params.InputProps,
-                startAdornment: (
-                  <Tooltip title={tooltipText}>
-                    <span id="drawerToggler">
-                      <IconButton
-                        onClick={onMenuClick}
-                        className={classes.iconButton}
-                        disabled={menuButtonDisabled}
-                        aria-label="menu"
-                      >
-                        <MenuIcon size={20} />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                ),
                 endAdornment: (
                   <>
                     {loading ? (
