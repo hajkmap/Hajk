@@ -1,0 +1,90 @@
+import React from "react";
+import { withStyles, withTheme } from "@material-ui/core/styles";
+import ListItem from "@material-ui/core/ListItem";
+import Checkbox from "@material-ui/core/Checkbox";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
+import PropTypes from "prop-types";
+import { Typography } from "@material-ui/core";
+
+const styles = theme => ({
+  listItem: { overflowWrap: "break-word" },
+  listItemIcon: { minWidth: theme.spacing(3) },
+  collapseIconRoot: { minWidth: theme.spacing(4) }
+});
+
+class PrintListItem extends React.PureComponent {
+  static propTypes = {
+    onClick: PropTypes.func.isRequired,
+    chapter: PropTypes.object.isRequired
+  };
+
+  getListTitle = () => {
+    const { chapter } = this.props;
+    return <ListItemText>{chapter.header}</ListItemText>;
+  };
+
+  getCollapseIcon = () => {
+    const { expandedSubMenu, classes } = this.props;
+    return expandedSubMenu ? (
+      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
+        <Typography variant="srOnly">Minimera submeny</Typography>
+        <ExpandLess />
+      </ListItemIcon>
+    ) : (
+      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
+        <Typography variant="srOnly">Maximera submeny</Typography>
+        <ExpandMore />
+      </ListItemIcon>
+    );
+  };
+
+  render() {
+    const {
+      chapter,
+      onClick,
+      classes,
+      theme,
+      hasSubChapters,
+      checked,
+      handleCheckboxChange
+    } = this.props;
+    return (
+      <>
+        <ListItem
+          divider
+          button
+          size="small"
+          disableGutters
+          onClick={onClick}
+          aria-controls="submenu"
+          className={classes.listItem}
+          style={{
+            paddingLeft: theme.spacing(1) + theme.spacing(chapter.level * 3),
+            borderLeft: `${theme.spacing(0.5)}px solid ${chapter.color}`
+          }}
+        >
+          <ListItemIcon>
+            <Checkbox
+              color="primary"
+              onChange={e => {
+                handleCheckboxChange(chapter);
+              }}
+              onClick={e => e.stopPropagation()}
+              edge="start"
+              checked={checked}
+              tabIndex={-1}
+              disableRipple
+            />
+          </ListItemIcon>
+          {chapter.header && this.getListTitle()}
+          {hasSubChapters && this.getCollapseIcon()}
+        </ListItem>
+      </>
+    );
+  }
+}
+
+export default withStyles(styles)(withTheme(PrintListItem));

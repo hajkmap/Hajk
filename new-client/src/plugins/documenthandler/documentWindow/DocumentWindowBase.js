@@ -2,6 +2,7 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
+import PrintWindow from "./PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -12,7 +13,9 @@ class DocumentWindowBase extends React.PureComponent {
   state = {
     counter: 0,
     document: null,
-    documentWindowMaximized: true
+    documentWindowMaximized: true,
+    showPrintWindow: false,
+    chapters: []
   };
 
   static propTypes = {};
@@ -22,27 +25,19 @@ class DocumentWindowBase extends React.PureComponent {
   constructor(props) {
     super(props);
     this.bindSubscriptions();
+    this.getAllChapters();
+    props.model.getAllDocuments(props.options.menuConfig.menu);
   }
 
   setActiveDocument = title => {
     const { model } = this.props;
-    return new Promise((resolve, reject) => {
-      model.fetchJsonDocument(title).then(document => {
-        var referringMenuItem = this.findReferringMenuItem(title);
-        return this.setState(
-          () => {
-            return {
-              documentTitle: title,
-              document: document,
-              documentColor: referringMenuItem ? referringMenuItem.color : null
-            };
-          },
-          () => {
-            console.log(this.state, "state");
-            resolve(); //Ensure setState is run
-          }
-        );
-      });
+    let document = model.getDocuments([title])[0];
+    const referringMenuItem = this.findReferringMenuItem(title);
+    this.setState({
+      documentTitle: title,
+      document: document,
+      documentColor: referringMenuItem ? referringMenuItem.color : null,
+      showPrintWindow: false
     });
   };
 
@@ -108,6 +103,12 @@ class DocumentWindowBase extends React.PureComponent {
     }
   };
 
+  togglePrintWindow = () => {
+    this.setState({
+      showPrintWindow: !this.state.showPrintWindow
+    });
+  };
+
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe(
@@ -117,12 +118,53 @@ class DocumentWindowBase extends React.PureComponent {
     localObserver.subscribe("show-document", this.showDocument);
   };
 
+  getAllChapters = () => {
+    const { model, options } = this.props;
+    const filteredMenu = options.menuConfig.menu.filter(
+      item => item.document !== ""
+    );
+
+    return filteredMenu.map((item, id) => {
+      return new Promise((resolve, reject) => {
+        model.fetchJsonDocument(item.document).then(item => {
+          if (item && item.chapters) {
+            let chapter = this.setChapterLevels(item.chapters[0], 0);
+            return this.setState(
+              () => {
+                return {
+                  chapters: [...this.state.chapters, chapter]
+                };
+              },
+              () => {
+                resolve(); //Ensure setState is run
+              }
+            );
+          }
+        });
+      });
+    });
+  };
+
+  setChapterLevels(chapter, level) {
+    chapter.level = level;
+    if (chapter.chapters && chapter.chapters.length > 0) {
+      level = level + 1;
+      chapter.chapters.forEach(subChapter => {
+        subChapter = this.setChapterLevels(subChapter, level);
+      });
+    }
+    return chapter;
+  }
+
   render() {
     const {
       documentWindowMaximized,
       document,
       documentTitle,
-      documentColor
+      documentColor,
+      showPrintWindow,
+      chapters,
+      localObserver
     } = this.state;
     const { options, classes } = this.props;
 
@@ -147,12 +189,23 @@ class DocumentWindowBase extends React.PureComponent {
         }}
       >
         {document != null ? (
-          <DocumentViewer
-            documentColor={documentColor || "#ffffff"}
-            documentWindowMaximized={documentWindowMaximized}
-            activeDocument={document}
-            {...this.props}
-          />
+          !showPrintWindow ? (
+            <DocumentViewer
+              documentColor={documentColor || "#ffffff"}
+              documentWindowMaximized={documentWindowMaximized}
+              activeDocument={document}
+              togglePrintWindow={this.togglePrintWindow}
+              {...this.props}
+            />
+          ) : (
+            <PrintWindow
+              chapters={chapters}
+              activeDocument={document}
+              togglePrintWindow={this.togglePrintWindow}
+              localObserver={localObserver}
+              {...this.props}
+            />
+          )
         ) : (
           <Grid
             style={{ height: "100%" }}

@@ -21,6 +21,106 @@ export default class DocumentHandlerModel {
     this.mapServiceUrl =
       settings.app.config.appConfig.proxy +
       settings.app.config.appConfig.mapserviceBase;
+    this.allDocuments = [];
+    this.chapterInfo = [];
+    this.chapterNumber = 0;
+  }
+
+  getAllDocuments(menu) {
+    if (this.allDocuments.length === 0) {
+      return menu.map((menuItem, id) => {
+        if (menuItem.document) {
+          this.getDocument(menuItem);
+        }
+        if (menuItem.menu) {
+          this.getAllDocuments(menuItem.menu);
+        }
+      });
+    }
+  }
+
+  getDocument(menuItem) {
+    return new Promise((resolve, reject) => {
+      this.fetchJsonDocument(menuItem.document).then(item => {
+        if (item) {
+          item.documentTitle = menuItem.document;
+          item.documentColor = menuItem.color;
+          this.allDocuments = [...this.allDocuments, item];
+        }
+      });
+    });
+  }
+
+  getDocuments(titles) {
+    let documents = [];
+    titles.forEach(title => {
+      let document = this.allDocuments.find(
+        document => document.documentTitle === title
+      );
+      documents = [...documents, document];
+    });
+    return documents;
+  }
+
+  getAllChapterInfo() {
+    if (this.chapterInfo.length === 0) {
+      this.allDocuments.forEach((document, index) => {
+        this.setChapterInfo(document.chapters[0], 0, document.documentColor);
+      });
+      this.mergeChapterInfo();
+    }
+
+    return this.chapterInfo;
+  }
+
+  setChapterInfo(chapter, level, color) {
+    let chapterInfo = {};
+    chapterInfo.id = ++this.chapterNumber;
+    chapterInfo.level = level;
+    chapterInfo.color = color;
+    chapterInfo.header = chapter.header;
+    chapterInfo.headerIdentifier = chapter.headerIdentifier;
+    chapterInfo.chosenForPrint = false;
+    chapterInfo.parent =
+      level !== 0 ? chapter.parent.headerIdentifier : undefined;
+
+    if (chapter.chapters && chapter.chapters.length > 0) {
+      chapterInfo.hasSubChapters = true;
+      this.chapterInfo = [...this.chapterInfo, chapterInfo];
+      level = level + 1;
+      chapter.chapters.forEach(subChapter => {
+        subChapter = this.setChapterInfo(subChapter, level, color);
+      });
+    } else {
+      chapterInfo.hasSubChapters = false;
+      this.chapterInfo = [...this.chapterInfo, chapterInfo];
+    }
+  }
+
+  mergeChapterInfo() {
+    this.chapterInfo.forEach(item => {
+      if (item.hasSubChapters) {
+        item.chapters = this.chapterInfo.filter(
+          chapterItem => chapterItem.parent === item.headerIdentifier
+        );
+        this.chapterInfo = this.chapterInfo.filter(
+          chapterItem => chapterItem.parent !== item.headerIdentifier
+        );
+      }
+    });
+  }
+
+  getChapterById(chapters, id) {
+    for (var i = 0; i < chapters.length; i++) {
+      if (chapters[i].id === id) {
+        return chapters[i];
+      } else if (chapters[i].chapters && chapters[i].chapters.length > 0) {
+        let foundSubChapter = this.getChapterById(chapters[i].chapters, id);
+        if (foundSubChapter) {
+          return foundSubChapter;
+        }
+      }
+    }
   }
 
   async fetchJsonDocument(title) {

@@ -7,6 +7,8 @@ import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import Contents from "./Contents";
 import { Typography } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import PrintIcon from "@material-ui/icons/Print";
 
 const styles = theme => ({
   gridContainer: {
@@ -20,12 +22,16 @@ const styles = theme => ({
     position: "fixed",
     bottom: theme.spacing(2),
     right: theme.spacing(3)
+  },
+  printButton: {
+    paddingBottom: theme.spacing(1)
   }
 });
 
 class DocumentViewer extends React.PureComponent {
   state = {
-    showScrollButton: false
+    showScrollButton: false,
+    showPrintWindow: false
   };
 
   constructor(props) {
@@ -110,7 +116,9 @@ class DocumentViewer extends React.PureComponent {
       localObserver,
       documentWindowMaximized,
       model,
-      documentColor
+      documentColor,
+      togglePrintWindow,
+      options
     } = this.props;
 
     const { showScrollButton } = this.state;
@@ -130,6 +138,24 @@ class DocumentViewer extends React.PureComponent {
           className={classes.gridContainer}
           container
         >
+          <Grid
+            xs={12}
+            container
+            item
+            justify="flex-end"
+            className={classes.printButton}
+          >
+            <Button
+              variant="outlined"
+              color="primary"
+              style={{ maxHeight: "35px" }}
+              startIcon={<PrintIcon />}
+              disabled={options.enablePrint ? !options.enablePrint : true}
+              onClick={togglePrintWindow}
+            >
+              <Typography>Skapa PDF</Typography>
+            </Button>
+          </Grid>
           <Grid xs={12} item>
             <TableOfContents
               documentColor={documentColor}
