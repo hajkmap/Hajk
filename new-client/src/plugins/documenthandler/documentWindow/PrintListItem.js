@@ -45,11 +45,11 @@ class PrintListItem extends React.PureComponent {
     const {
       chapter,
       onClick,
-      handleCheckboxChange,
       classes,
       theme,
+      hasSubChapters,
       checked,
-      hasSubChapters
+      handleCheckboxChange
     } = this.props;
     return (
       <>
@@ -62,13 +62,17 @@ class PrintListItem extends React.PureComponent {
           aria-controls="submenu"
           className={classes.listItem}
           style={{
-            paddingLeft: theme.spacing(1) + theme.spacing(chapter.level * 3)
+            paddingLeft: theme.spacing(1) + theme.spacing(chapter.level * 3),
+            borderLeft: `${theme.spacing(0.5)}px solid ${chapter.color}`
           }}
         >
           <ListItemIcon>
             <Checkbox
               color="primary"
-              onClick={handleCheckboxChange}
+              onChange={e => {
+                handleCheckboxChange(chapter);
+              }}
+              onClick={e => e.stopPropagation()}
               edge="start"
               checked={checked}
               tabIndex={-1}

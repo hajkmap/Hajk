@@ -3,7 +3,7 @@ import PrintListItem from "./PrintListItem";
 import PrintList from "./PrintList";
 import Collapse from "@material-ui/core/Collapse";
 
-class PrintSubList extends React.PureComponent {
+class PrintSubList extends React.Component {
   state = {
     open: false
   };
@@ -13,25 +13,23 @@ class PrintSubList extends React.PureComponent {
   };
 
   render() {
-    const { chapter, handleCheckboxChange, checked } = this.props;
+    const { chapter, checked } = this.props;
     return (
       <>
         <PrintListItem
           hasSubChapters
-          chapter={chapter}
           expandedSubChapter={this.state.open}
-          onClick={this.toggleCollapseSubMenu}
-          handleCheckboxChange={handleCheckboxChange}
           checked={checked}
+          onClick={this.toggleCollapseSubMenu}
           {...this.props}
         ></PrintListItem>
         <Collapse
           aria-expanded={this.state.open}
-          id="subchapter"
+          id="subchapters"
           in={this.state.open}
           timeout="auto"
         >
-          <PrintList chapters={chapter.chapters}></PrintList>
+          <PrintList {...this.props} chapters={chapter.chapters}></PrintList>
         </Collapse>
       </>
     );

@@ -30,18 +30,66 @@ class PrintWindow extends React.PureComponent {
     printText: false,
     printImages: false,
     printMaps: false,
-    chapterInformation: this.props.model.getAllChapterInfo()
+    allDocumentsToggled: false,
+    chapterInformation: this.setChapterInfo()
   };
 
-  handleCheckboxChange = (e, chapter) => {
-    e.stopPropagation();
-    chapter.chosenForPrint = !chapter.chosenForPrint;
+  handleCheckboxChange = chapter => {
+    const { model } = this.props;
+    let newChapterInformation = [...this.state.chapterInformation];
+
+    let toggledChapter = model.getChapterById(
+      newChapterInformation,
+      chapter.id
+    );
+    toggledChapter.chosenForPrint = !toggledChapter.chosenForPrint;
+    this.toggleSubChapters(toggledChapter, toggledChapter.chosenForPrint);
+
+    this.setState({
+      chapterInformation: newChapterInformation,
+      allDocumentsToggled: false
+    });
+  };
+
+  toggleSubChapters(chapter, checked) {
     if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
       chapter.chapters.forEach(subChapter => {
-        subChapter.chosenForPrint = chapter.chosenForPrint;
+        subChapter.chosenForPrint = checked;
+        this.toggleSubChapters(subChapter, checked);
       });
     }
+  }
+
+  setChapterInfo() {
+    const { activeDocument, model } = this.props;
+    let chapterInformation = model.getAllChapterInfo();
+
+    let topChapter = chapterInformation.find(
+      topChapter =>
+        topChapter.headerIdentifier ===
+        activeDocument.chapters[0].headerIdentifier
+    );
+
+    topChapter.chosenForPrint = true;
+    this.toggleSubChapters(topChapter, true);
+
+    return chapterInformation;
+  }
+
+  toggleAllDocuments = () => {
+    this.state.chapterInformation.forEach(chapter => {
+      chapter.chosenForPrint = !this.state.allDocumentsToggled;
+      this.toggleSubChapters(chapter, !this.state.allDocumentsToggled);
+    });
+
+    this.setState({
+      allDocumentsToggled: !this.state.allDocumentsToggled
+    });
   };
+
+  createPDF() {
+    console.log("Printing... Printing...");
+  }
 
   renderCheckboxes() {
     return (
@@ -108,8 +156,8 @@ class PrintWindow extends React.PureComponent {
   }
 
   render() {
-    const { classes, togglePrintWindow, activeDocument } = this.props;
-    console.log("this.state: ", this.state);
+    const { classes, togglePrintWindow, localObserver } = this.props;
+    const { chapterInformation } = this.state;
 
     return (
       <>
@@ -140,16 +188,36 @@ class PrintWindow extends React.PureComponent {
           {this.renderCheckboxes()}
 
           <Grid
+            xs={12}
             style={{
               borderTop: "1px solid grey"
             }}
-            xs={12}
             container
             item
           >
+            <Grid item xs={12}>
+              <Typography variant="h6">Dokument</Typography>
+            </Grid>
+            <Grid item align="center" xs={4}>
+              <FormControlLabel
+                value="Välj alla dokument"
+                control={
+                  <Checkbox
+                    color="primary"
+                    checked={this.state.allDocumentsToggled}
+                    onChange={this.toggleAllDocuments}
+                  />
+                }
+                label="Välj alla dokument"
+                labelPlacement="end"
+              />
+            </Grid>
+          </Grid>
+          <Grid xs={12} container item>
             <PrintList
-              chapters={this.state.chapterInformation}
-              activeDocument={activeDocument}
+              chapters={chapterInformation}
+              handleCheckboxChange={this.handleCheckboxChange}
+              localObserver={localObserver}
             />
           </Grid>
         </Grid>
@@ -166,7 +234,7 @@ class PrintWindow extends React.PureComponent {
               color="primary"
               variant="contained"
               startIcon={<OpenInNewIcon />}
-              onClick={togglePrintWindow}
+              onClick={this.createPDF}
             >
               <Typography
                 style={{ marginRight: "20px", marginLeft: "20px" }}

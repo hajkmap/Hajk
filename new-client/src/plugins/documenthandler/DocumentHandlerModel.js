@@ -23,6 +23,7 @@ export default class DocumentHandlerModel {
       settings.app.config.appConfig.mapserviceBase;
     this.allDocuments = [];
     this.chapterInfo = [];
+    this.chapterNumber = 0;
   }
 
   getAllDocuments(menu) {
@@ -63,8 +64,8 @@ export default class DocumentHandlerModel {
 
   getAllChapterInfo() {
     if (this.chapterInfo.length === 0) {
-      this.allDocuments.forEach(document => {
-        this.setChapterInfo(document.chapters[0], 0);
+      this.allDocuments.forEach((document, index) => {
+        this.setChapterInfo(document.chapters[0], 0, document.documentColor);
       });
       this.mergeChapterInfo();
     }
@@ -72,9 +73,11 @@ export default class DocumentHandlerModel {
     return this.chapterInfo;
   }
 
-  setChapterInfo(chapter, level) {
+  setChapterInfo(chapter, level, color) {
     let chapterInfo = {};
+    chapterInfo.id = ++this.chapterNumber;
     chapterInfo.level = level;
+    chapterInfo.color = color;
     chapterInfo.header = chapter.header;
     chapterInfo.headerIdentifier = chapter.headerIdentifier;
     chapterInfo.chosenForPrint = false;
@@ -86,7 +89,7 @@ export default class DocumentHandlerModel {
       this.chapterInfo = [...this.chapterInfo, chapterInfo];
       level = level + 1;
       chapter.chapters.forEach(subChapter => {
-        subChapter = this.setChapterInfo(subChapter, level);
+        subChapter = this.setChapterInfo(subChapter, level, color);
       });
     } else {
       chapterInfo.hasSubChapters = false;
@@ -105,6 +108,19 @@ export default class DocumentHandlerModel {
         );
       }
     });
+  }
+
+  getChapterById(chapters, id) {
+    for (var i = 0; i < chapters.length; i++) {
+      if (chapters[i].id === id) {
+        return chapters[i];
+      } else if (chapters[i].chapters && chapters[i].chapters.length > 0) {
+        let foundSubChapter = this.getChapterById(chapters[i].chapters, id);
+        if (foundSubChapter) {
+          return foundSubChapter;
+        }
+      }
+    }
   }
 
   async fetchJsonDocument(title) {

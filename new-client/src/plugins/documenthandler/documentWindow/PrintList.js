@@ -3,29 +3,32 @@ import List from "@material-ui/core/List";
 import PrintSubList from "./PrintSubList";
 import PrintListItem from "./PrintListItem";
 
-class PrintList extends React.PureComponent {
+class PrintList extends React.Component {
   handleListItemClick = (chapter, type) => {};
 
   renderPrintListItem = (chapter, type) => {
-    const { handleCheckboxChange } = this.props;
+    const { handleCheckboxChange, localObserver } = this.props;
     return (
       <PrintListItem
         type={type}
         chapter={chapter}
+        checked={chapter.chosenForPrint}
+        localObserver={localObserver}
         handleCheckboxChange={handleCheckboxChange}
         onClick={this.handleListItemClick}
-        checked={chapter.chosenForPrint}
       ></PrintListItem>
     );
   };
 
   renderSubMenu = chapter => {
-    const { handleCheckboxChange } = this.props;
+    const { handleCheckboxChange, localObserver } = this.props;
     return (
       <PrintSubList
         chapter={chapter}
-        handleCheckboxChange={handleCheckboxChange}
+        subChapters={chapter.chapters}
         checked={chapter.chosenForPrint}
+        handleCheckboxChange={handleCheckboxChange}
+        localObserver={localObserver}
       ></PrintSubList>
     );
   };
@@ -47,15 +50,13 @@ class PrintList extends React.PureComponent {
     return (
       <List style={{ width: "100%" }} disablePadding>
         {chapters.map((chapter, index) => {
-          if (chapter) {
-            return (
-              <React.Fragment key={index}>
-                {this.hasSubChapters(chapter)
-                  ? this.renderSubMenu(chapter)
-                  : this.renderPrintListItem(chapter, "document")}
-              </React.Fragment>
-            );
-          }
+          return (
+            <React.Fragment key={index}>
+              {this.hasSubChapters(chapter)
+                ? this.renderSubMenu(chapter)
+                : this.renderPrintListItem(chapter, "document")}
+            </React.Fragment>
+          );
         })}
       </List>
     );

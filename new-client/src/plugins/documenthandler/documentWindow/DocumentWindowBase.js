@@ -29,32 +29,6 @@ class DocumentWindowBase extends React.PureComponent {
     props.model.getAllDocuments(props.options.menuConfig.menu);
   }
 
-  // setActiveDocument = title => {
-  //   console.log("model.allDocuments: ", this.props.model.allDocuments);
-  //   const { model } = this.props;
-  //   let dx = model.getDocuments(["Utgångspunkter"]);
-  //   console.log("dx", dx);
-  //   return new Promise((resolve, reject) => {
-  //     model.fetchJsonDocument(title).then(document => {
-  //       var referringMenuItem = this.findReferringMenuItem(title);
-  //       return this.setState(
-  //         () => {
-  //           return {
-  //             documentTitle: title,
-  //             document: document,
-  //             documentColor: referringMenuItem ? referringMenuItem.color : null,
-  //             showPrintWindow: false
-  //           };
-  //         },
-  //         () => {
-  //           console.log(this.state, "state");
-  //           resolve(); //Ensure setState is run
-  //         }
-  //       );
-  //     });
-  //   });
-  // };
-
   setActiveDocument = title => {
     const { model } = this.props;
     let document = model.getDocuments([title])[0];
@@ -189,7 +163,8 @@ class DocumentWindowBase extends React.PureComponent {
       documentTitle,
       documentColor,
       showPrintWindow,
-      chapters
+      chapters,
+      localObserver
     } = this.state;
     const { options, classes } = this.props;
 
@@ -227,6 +202,7 @@ class DocumentWindowBase extends React.PureComponent {
               chapters={chapters}
               activeDocument={document}
               togglePrintWindow={this.togglePrintWindow}
+              localObserver={localObserver}
               {...this.props}
             />
           )
