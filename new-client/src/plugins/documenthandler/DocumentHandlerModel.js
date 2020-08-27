@@ -73,7 +73,17 @@ export default class DocumentHandlerModel {
     return this.chapterInfo;
   }
 
+  getParentIdentifier(chapter) {
+    if (chapter.parent) {
+      if (chapter.parent.headerIdentifier) {
+        return chapter.parent.headerIdentifier;
+      }
+      return this.getParentIdentifier(chapter.parent);
+    }
+  }
+
   setChapterInfo(chapter, level, color) {
+    let getParentIdentifier = this.getParentIdentifier(chapter);
     let chapterInfo = {};
     chapterInfo.id = ++this.chapterNumber;
     chapterInfo.level = level;
@@ -81,8 +91,7 @@ export default class DocumentHandlerModel {
     chapterInfo.header = chapter.header;
     chapterInfo.headerIdentifier = chapter.headerIdentifier;
     chapterInfo.chosenForPrint = false;
-    chapterInfo.parent =
-      level !== 0 ? chapter.parent.headerIdentifier : undefined;
+    chapterInfo.parent = getParentIdentifier;
 
     if (chapter.chapters && chapter.chapters.length > 0) {
       chapterInfo.hasSubChapters = true;
@@ -99,7 +108,7 @@ export default class DocumentHandlerModel {
 
   mergeChapterInfo() {
     this.chapterInfo.forEach(item => {
-      if (item.hasSubChapters) {
+      if (item.hasSubChapters && item.headerIdentifier) {
         item.chapters = this.chapterInfo.filter(
           chapterItem => chapterItem.parent === item.headerIdentifier
         );
