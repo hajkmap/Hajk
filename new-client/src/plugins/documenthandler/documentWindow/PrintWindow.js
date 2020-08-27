@@ -155,8 +155,43 @@ class PrintWindow extends React.PureComponent {
     );
   }
 
+  renderCreatePDFButton() {
+    const { classes } = this.props;
+    return (
+      <Grid container item className={classes.footerContainer}>
+        <Grid
+          item
+          xs={12}
+          container
+          alignContent="center"
+          alignItems="center"
+          justify="center"
+        >
+          <Button
+            color="primary"
+            variant="contained"
+            startIcon={<OpenInNewIcon />}
+            onClick={this.createPDF}
+          >
+            <Typography
+              style={{ marginRight: "20px", marginLeft: "20px" }}
+              justify="center"
+            >
+              Skapa PDF-utskrift
+            </Typography>
+          </Button>
+        </Grid>
+      </Grid>
+    );
+  }
+
   render() {
-    const { classes, togglePrintWindow, localObserver } = this.props;
+    const {
+      classes,
+      togglePrintWindow,
+      localObserver,
+      documentWindowMaximized
+    } = this.props;
     const { chapterInformation } = this.state;
 
     return (
@@ -220,30 +255,7 @@ class PrintWindow extends React.PureComponent {
               localObserver={localObserver}
             />
           </Grid>
-        </Grid>
-        <Grid container className={classes.footerContainer}>
-          <Grid
-            item
-            xs={12}
-            container
-            alignContent="center"
-            alignItems="center"
-            justify="center"
-          >
-            <Button
-              color="primary"
-              variant="contained"
-              startIcon={<OpenInNewIcon />}
-              onClick={this.createPDF}
-            >
-              <Typography
-                style={{ marginRight: "20px", marginLeft: "20px" }}
-                justify="center"
-              >
-                Skapa PDF-utskrift
-              </Typography>
-            </Button>
-          </Grid>
+          {documentWindowMaximized && this.renderCreatePDFButton()}
         </Grid>
       </>
     );

@@ -201,6 +201,7 @@ class DocumentWindowBase extends React.PureComponent {
             <PrintWindow
               chapters={chapters}
               activeDocument={document}
+              documentWindowMaximized={documentWindowMaximized}
               togglePrintWindow={this.togglePrintWindow}
               localObserver={localObserver}
               {...this.props}
