@@ -25,7 +25,7 @@ class DocumentWindowBase extends React.PureComponent {
   constructor(props) {
     super(props);
     this.bindSubscriptions();
-    this.getAllChapters();
+
     this.allDocumentsLoaded = props.model.getAllDocumentsContainedInMenu(
       props.options.menuConfig.menu.filter((menuItem) => {
         return menuItem.document || menuItem.menu.length > 0;
@@ -37,7 +37,6 @@ class DocumentWindowBase extends React.PureComponent {
     const { model } = this.props;
     this.allDocumentsLoaded.then(() => {
       let document = model.getDocuments([documentFileName])[0];
-      console.log(document, "docment");
       this.setState({
         documentTitle: document.documentTitle,
         document: document,
@@ -127,33 +126,6 @@ class DocumentWindowBase extends React.PureComponent {
       this.showHeaderInDocument
     );
     localObserver.subscribe("show-document", this.showDocument);
-  };
-
-  getAllChapters = () => {
-    const { model, options } = this.props;
-    const filteredMenu = options.menuConfig.menu.filter(
-      (item) => item.document !== ""
-    );
-
-    return filteredMenu.map((item, id) => {
-      return new Promise((resolve, reject) => {
-        model.fetchJsonDocument(item.document).then((item) => {
-          if (item && item.chapters) {
-            let chapter = this.setChapterLevels(item.chapters[0], 0);
-            return this.setState(
-              () => {
-                return {
-                  chapters: [...this.state.chapters, chapter],
-                };
-              },
-              () => {
-                resolve(); //Ensure setState is run
-              }
-            );
-          }
-        });
-      });
-    });
   };
 
   setChapterLevels(chapter, level) {
