@@ -27,9 +27,9 @@ const styles = (theme) => ({
 
 class PrintWindow extends React.PureComponent {
   state = {
-    printText: false,
-    printImages: false,
-    printMaps: false,
+    printText: true,
+    printImages: true,
+    printMaps: true,
     allDocumentsToggled: false,
     chapterInformation: this.setChapterInfo(),
   };

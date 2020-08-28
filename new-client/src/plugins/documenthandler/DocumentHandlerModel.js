@@ -26,41 +26,50 @@ export default class DocumentHandlerModel {
     this.chapterNumber = 0;
   }
 
-  getAllDocuments(menu) {
-    menu = menu.filter((menuItem) => {
-      return menuItem.document || menuItem.menu.length > 0;
-    });
-
-    new Promise((resolve, reject) => {
-      if (this.allDocuments.length === 0) {
-        resolve(
-          Promise.all(
-            menu.map((menuItem, id) => {
-              if (menuItem.menu.length > 0) {
-                return this.getAllDocuments(menuItem.menu);
-              } else {
-                return this.fetchJsonDocument(menuItem.document).then(
-                  (item) => {
-                    item.documentTitle = menuItem.document;
-                    item.documentColor = menuItem.color;
-                    this.allDocuments = [...this.allDocuments, item];
-                  }
-                );
-              }
-            })
-          )
+  getFlattenedMenu(menu) {
+    var flattenedMenu = [];
+    menu.forEach((menuItem) => {
+      if (menuItem.menu.length > 0) {
+        flattenedMenu = flattenedMenu.concat(
+          this.getFlattenedMenu(menuItem.menu)
         );
       } else {
+        flattenedMenu.push(menuItem);
+      }
+    });
+    return flattenedMenu;
+  }
+
+  getAllDocumentsContainedInMenu(menu) {
+    return new Promise((resolve, reject) => {
+      if (this.allDocuments.length > 0) {
         resolve(this.allDocuments);
       }
+      Promise.all(
+        this.getFlattenedMenu(menu).map((menuItem) => {
+          return this.fetchJsonDocument(menuItem.document).then((doc) => {
+            doc.documentColor = menuItem.color;
+            doc.documentFileName = menuItem.document;
+            doc.documentTitle = menuItem.title;
+            return doc;
+          });
+        })
+      )
+        .then((documents) => {
+          this.allDocuments = documents;
+          resolve(this.allDocuments);
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
 
-  getDocuments(titles) {
+  getDocuments(fileNames) {
     let documents = [];
-    titles.forEach((title) => {
+    fileNames.forEach((fileName) => {
       let document = this.allDocuments.find(
-        (document) => document.documentTitle === title
+        (document) => document.documentFileName === fileName
       );
       documents = [...documents, document];
     });
@@ -74,7 +83,6 @@ export default class DocumentHandlerModel {
       });
       this.mergeChapterInfo();
     }
-
     return this.chapterInfo;
   }
 
@@ -145,6 +153,9 @@ export default class DocumentHandlerModel {
         fetchConfig
       );
       const text = await response.text();
+      if (text === "File not found") {
+        throw new Error("File not found");
+      }
       const document = await JSON.parse(text);
       this.internalId = 0;
       document.chapters.forEach((chapter) => {
@@ -155,7 +166,9 @@ export default class DocumentHandlerModel {
       });
 
       return document;
-    } catch (err) {}
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   findChapter(chapter, headerIdentifierToFind) {

@@ -2,7 +2,7 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
-import PrintWindow from "./PrintWindow";
+import PrintWindow from "../printMenu/PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -26,18 +26,24 @@ class DocumentWindowBase extends React.PureComponent {
     super(props);
     this.bindSubscriptions();
     this.getAllChapters();
-    props.model.getAllDocuments(props.options.menuConfig.menu);
+    this.allDocumentsLoaded = props.model.getAllDocumentsContainedInMenu(
+      props.options.menuConfig.menu.filter((menuItem) => {
+        return menuItem.document || menuItem.menu.length > 0;
+      })
+    );
   }
 
-  setActiveDocument = (title) => {
+  setActiveDocument = (documentFileName) => {
     const { model } = this.props;
-    let document = model.getDocuments([title])[0];
-    const referringMenuItem = this.findReferringMenuItem(title);
-    this.setState({
-      documentTitle: referringMenuItem.title,
-      document: document,
-      documentColor: referringMenuItem ? referringMenuItem.color : null,
-      showPrintWindow: false,
+    this.allDocumentsLoaded.then(() => {
+      let document = model.getDocuments([documentFileName])[0];
+      console.log(document, "docment");
+      this.setState({
+        documentTitle: document.documentTitle,
+        document: document,
+        documentColor: document.documentColor ? document.documentColor : null,
+        showPrintWindow: false,
+      });
     });
   };
 
@@ -75,12 +81,12 @@ class DocumentWindowBase extends React.PureComponent {
     return foundMenuItem;
   };
 
-  showDocument = (documentName) => {
+  showDocument = (documentFileName) => {
     const { app } = this.props;
     app.globalObserver.publish("documentviewer.showWindow", {
       hideOtherPlugins: false,
     });
-    return this.setActiveDocument(documentName);
+    return this.setActiveDocument(documentFileName);
   };
 
   scrollInDocument = (headerIdentifier) => {
