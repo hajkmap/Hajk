@@ -27,30 +27,33 @@ export default class DocumentHandlerModel {
   }
 
   getAllDocuments(menu) {
-    if (this.allDocuments.length === 0) {
-      return Promise.all(
-        menu.map((menuItem, id) => {
-          this.getDocument(menuItem);
-          if (menuItem.menu) {
-            this.getAllDocuments(menuItem.menu);
-          }
-        })
-      );
-    }
-  }
+    menu = menu.filter((menuItem) => {
+      return menuItem.document || menuItem.menu.length > 0;
+    });
 
-  getDocument(menuItem) {
-    if (menuItem.document) {
-      return new Promise((resolve, reject) => {
-        this.fetchJsonDocument(menuItem.document).then((item) => {
-          if (item) {
-            item.documentTitle = menuItem.document;
-            item.documentColor = menuItem.color;
-            this.allDocuments = [...this.allDocuments, item];
-          }
-        });
-      });
-    }
+    new Promise((resolve, reject) => {
+      if (this.allDocuments.length === 0) {
+        resolve(
+          Promise.all(
+            menu.map((menuItem, id) => {
+              if (menuItem.menu.length > 0) {
+                return this.getAllDocuments(menuItem.menu);
+              } else {
+                return this.fetchJsonDocument(menuItem.document).then(
+                  (item) => {
+                    item.documentTitle = menuItem.document;
+                    item.documentColor = menuItem.color;
+                    this.allDocuments = [...this.allDocuments, item];
+                  }
+                );
+              }
+            })
+          )
+        );
+      } else {
+        resolve(this.allDocuments);
+      }
+    });
   }
 
   getDocuments(titles) {
