@@ -1,6 +1,6 @@
 // IE 11 starts here.
 // If you don't need IE 11, comment out those lines line.
-// Also, change 'browserlist' in package.json to exclude ie11.
+// Also, change 'browserslist' in package.json to exclude ie11.
 import "react-app-polyfill/ie11";
 import "react-app-polyfill/stable";
 import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
