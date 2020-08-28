@@ -40,7 +40,12 @@ function DrawerToggleButtons({ drawerButtons, globalObserver }) {
   );
 
   // Sort by the (optional) @order property prior rendering
-  drawerButtons = drawerButtons.sort((a, b) => a?.order > b?.order);
+  // Sort using minus (-) causes the correct behavior, as this will
+  // first implicitly convert the value to number.
+  // If we'd compare using less than (<), that would sort our values
+  // as UTF-16 strings, so we could get something like: 1, 1000, 2,
+  // instead of 1, 2, 1000 which is desired in this case.
+  drawerButtons = drawerButtons.sort((a, b) => a?.order - b?.order);
 
   // Subscribe only once, important that it's done inside useEffect!
   useEffect(() => {

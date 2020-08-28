@@ -255,7 +255,7 @@ class App extends React.PureComponent {
               value: "plugins",
               ButtonIcon: MapIcon,
               caption: "Kartverktyg",
-              order: 2,
+              order: 0,
               renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
               },
