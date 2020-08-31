@@ -190,23 +190,44 @@ var BackgroundSwitcherView = {
           infoIndex = i,
           infoExpanded = this.state.showInfo,
           infoVisible = layer.get('infoVisible');
-        return (
-          <li key={index}>
-            <input id={index} name='background' type='radio' checked={checked} onChange={(e) => this.setBackgroundLayer(layer)} />
-            <label htmlFor={index}>{layer.get('caption')}</label>
+        if(this.props.model.get("infoHtml")){
+          return (
+              <li key={index}>
+                <input id={index} name='background' type='radio' checked={checked} onChange={(e) => this.setBackgroundLayer(layer)} />
+                <label htmlFor={index}>{layer.get('caption')}</label>
 
-            <span className={infoVisible ? 'visible' : 'hidden'} onClick={(e) => this.toggleInfo(e, i)}>
+                <span className={infoVisible ? 'visible' : 'hidden'} onClick={(e) => this.toggleInfo(e, i)}>
               <InfoButton key={index} index={index} />
             </span>
 
-            <div className={infoExpanded === infoIndex ? 'dropdown' : 'hidden'}>
-              <p className='info-title'>{layer.get('infoTitle')}</p>
-              <p className='info-text'>{layer.get('infoText')}</p>
-              <a className='info-text' href={layer.get('infoUrl')} target='_blank'>{layer.get('infoUrl')}</a><br />
-              <i className='info-text'>{layer.get('infoOwner') ? 'Ägare: ' + layer.get('infoOwner') : ''}</i>
-            </div>
-          </li>
-        );
+                <div className={infoExpanded === infoIndex ? 'dropdown' : 'hidden'}>
+                  <p className="info-title" dangerouslySetInnerHTML={{__html: layer.get('infoTitle')}}></p>
+                  <p className="info-text" dangerouslySetInnerHTML={{__html: layer.get('infoText')}}></p>
+                  <p className="info-text" dangerouslySetInnerHTML={{__html: layer.get('infoUrl')}}></p>
+                  <p className="info-text" dangerouslySetInnerHTML={{__html: layer.get('infoOwner')}}></p>
+                </div>
+              </li>
+          );
+        }else {
+          return (
+              <li key={index}>
+                <input id={index} name='background' type='radio' checked={checked}
+                       onChange={(e) => this.setBackgroundLayer(layer)}/>
+                <label htmlFor={index}>{layer.get('caption')}</label>
+
+                <span className={infoVisible ? 'visible' : 'hidden'} onClick={(e) => this.toggleInfo(e, i)}>
+              <InfoButton key={index} index={index}/>
+            </span>
+
+                <div className={infoExpanded === infoIndex ? 'dropdown' : 'hidden'}>
+                  <p className='info-title'>{layer.get('infoTitle')}</p>
+                  <p className='info-text'>{layer.get('infoText')}</p>
+                  <a className='info-text' href={layer.get('infoUrl')} target='_blank'>{layer.get('infoUrl')}</a><br/>
+                  <i className='info-text'>{layer.get('infoOwner') ? 'Ägare: ' + layer.get('infoOwner') : ''}</i>
+                </div>
+              </li>
+          );
+        }
       })
     );
   },

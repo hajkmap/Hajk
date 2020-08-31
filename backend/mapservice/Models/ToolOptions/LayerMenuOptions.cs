@@ -43,6 +43,8 @@ namespace MapService.Models.ToolOptions
 
         public bool toggleAllButton { get; set; }
 
+        public bool infoHtml { get; set; }
+
         public bool dropdownThemeMaps { get; set; }
 
         public string themeMapHeaderCaption { get; set; }
