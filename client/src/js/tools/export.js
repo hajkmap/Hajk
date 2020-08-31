@@ -74,6 +74,8 @@ var ExportModelProperties = {
   autoScale: false,
   instruction: '',
   scales: [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000],
+  resolutions: [72, 96, 150, 200, 300],
+  paperFormats: ["A2", "A3", "A4"],
   layout: 1 // TODO: change to 1
 };
 
