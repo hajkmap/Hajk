@@ -36,19 +36,31 @@ export default class Tree extends Component {
 
   buildLayerItem (layer){
       if(this.props.type === "fir"){
-          return (
-              <div>
-              <input ref={layer.id + "_fnrField"} type='text' hidden='true' placeholder='fnrField' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
-              <input ref={layer.id + "_omradeField"} type='text' hidden='true' placeholder='omradeField' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
-              <input ref={layer.id} type='text' hidden='true' placeholder='Tillträde' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
-              </div>
-      );
+          if (this.props.authActive){
+              return (
+                  <div>
+                      <input ref={layer.id + "_fnrField"} type='text' hidden='true' placeholder='fnrField' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+                      <input ref={layer.id + "_omradeField"} type='text' hidden='true' placeholder='omradeField' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+                      <input ref={layer.id} type='text' hidden='true' placeholder='Tillträde' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+                  </div>
+              );
+          } else {
+              return (
+                  <div>
+                      <input ref={layer.id + "_fnrField"} type='text' hidden='true' placeholder='fnrField' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+                      <input ref={layer.id + "_omradeField"} type='text' hidden='true' placeholder='omradeField' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+                  </div>
+              );
+          }
+
       } else {
-          return (
-              <div>
-              <input ref={layer.id} type='text' hidden='true' placeholder='Tillträde' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
-              </div>
-          );
+          if(this.props.authActive){
+              return (
+                  <div>
+                      <input ref={layer.id} type='text' hidden='true' placeholder='Tillträde' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+                  </div>
+              );
+          }
       }
   }
 
