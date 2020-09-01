@@ -109,7 +109,7 @@ class AppModel {
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
       .filter((plugin) => {
-        return ["toolbar", "left", "right", "control"].includes(
+        return ["toolbar", "left", "right", "control", "hidden"].includes(
           plugin.options.target
         );
       })
@@ -412,6 +412,10 @@ class AppModel {
     }
   }
 
+  /**
+   * TODO: Obsolete, replaced by new app-wide solution using URL APIs, see #568.
+   * Ensure that this gets removed too.
+   */
   parseQueryParams() {
     var o = {};
     document.location.search
