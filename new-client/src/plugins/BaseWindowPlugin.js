@@ -175,22 +175,27 @@ class BaseWindowPlugin extends React.PureComponent {
    *
    * Those special conditions are small screens, were there's no screen
    * estate to render the Widget button in Map Overlay.
+   *
+   * There is another special case needed to be taken care of: the "hidden"
+   * value on target should not render any button at all, but still load the plugin.
    */
   renderDrawerButton() {
-    return createPortal(
-      <Hidden mdUp={this.props.options.target !== "toolbar"}>
-        <ListItem
-          button
-          divider={true}
-          selected={this.state.windowVisible}
-          onClick={this.handleButtonClick}
-        >
-          <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
-          <ListItemText primary={this.title} />
-        </ListItem>
-      </Hidden>,
-      document.getElementById("plugin-buttons")
-    );
+    return this.props.options.target === "hidden"
+      ? null
+      : createPortal(
+          <Hidden mdUp={this.props.options.target !== "toolbar"}>
+            <ListItem
+              button
+              divider={true}
+              selected={this.state.windowVisible}
+              onClick={this.handleButtonClick}
+            >
+              <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
+              <ListItemText primary={this.title} />
+            </ListItem>
+          </Hidden>,
+          document.getElementById("plugin-buttons")
+        );
   }
 
   renderWidgetButton(id) {
