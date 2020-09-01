@@ -635,7 +635,7 @@
       "type": "documenthandler",
       "options": {
         "title": "",
-        "target": "toolbar",
+        "target": "hidden",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
           "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
