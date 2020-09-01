@@ -85,6 +85,7 @@ class DocumentWindowBase extends React.PureComponent {
     app.globalObserver.publish("documentviewer.showWindow", {
       hideOtherPlugins: false,
     });
+    app.globalObserver.publish("core.maximizeWindow");
     return this.setActiveDocument(documentFileName);
   };
 
