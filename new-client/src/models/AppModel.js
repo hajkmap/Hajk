@@ -173,7 +173,7 @@ class AppModel {
    * @return {ol.Map} map
    */
   createMap() {
-    var config = this.translateConfig();
+    const config = this.translateConfig();
     map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
@@ -476,15 +476,6 @@ class AppModel {
     if (f) {
       // Filters come as a URI encoded JSON object, so we must parse it first
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
-    }
-
-    // If 'v' query param is specified, it looks like we will want to search on load
-    if (b.v !== undefined && b.v.length > 0) {
-      a.map.searchOnStart = {
-        v: this.returnStringOrUndefined(b.v), // Search Value (will NOT search on start if null)
-        s: this.returnStringOrUndefined(b.s), // Search Service (will search in all, if null)
-        t: this.returnStringOrUndefined(b.t), // Search Type (controls which search plugin is used, default search if null)
-      };
     }
 
     return a;
