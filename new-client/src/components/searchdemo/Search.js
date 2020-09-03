@@ -107,15 +107,49 @@
 // *https://www.registers.service.gov.uk/registers/country/use-the-api*
 import React from "react";
 import SearchBar from "./SearchBar";
-// import SpatialSearch from "./SpatialSearch";
+import { withStyles } from "@material-ui/core/styles";
 
-const Search = (props) => {
-  return (
-    <>
-      <SearchBar {...props} />
-      {/* <SpatialSearch {...props} /> */}
-    </>
-  );
-};
+const styles = (theme) => ({
+  search: {
+    borderRadius: theme.shape.borderRadius,
+    flex: "auto",
+    display: "flex",
+    height: "100%",
+  },
+  inputRoot: {
+    width: "100%",
+  },
+  inputInput: {
+    padding: theme.spacing(1),
+    left: "100%",
+    width: "100%",
+  },
+  inputInputWide: {
+    padding: theme.spacing(1),
+    left: "100%",
+    width: "100%",
+    "&:focus": {
+      width: "100%",
+    },
+  },
+});
 
-export default Search;
+class Search extends React.PureComponent {
+  render() {
+    const { classes, target } = this.props;
+
+    return (
+      <>
+        <SearchBar
+          classes={{
+            root: classes.inputRoot,
+            input:
+              target === "top" ? classes.inputInputWide : classes.inputInput,
+          }}
+          {...this.props}
+        />
+      </>
+    );
+  }
+}
+export default withStyles(styles)(Search);

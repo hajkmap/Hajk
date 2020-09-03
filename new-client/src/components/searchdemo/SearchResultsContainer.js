@@ -1,40 +1,60 @@
-import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import React from "react";
 import { Paper } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
+import Alert from "@material-ui/lab/Alert";
 
-import SearchResultsList from "./SearchResultsList";
+//import SearchResultsList from "./SearchResultsList";
 import SearchResultsDetails from "./SearchResultsDetails";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    position: "absolute",
-    width: 440,
-    height: "100%",
-    top: 0,
-    left: 0,
-    zIndex: -1,
-    paddingTop: 160,
+const styles = (theme) => ({
+  searchResultContainer: {
+    maxHeight: "calc(100vh - 380px)",
+    overflow: "auto",
+    display: "flex",
+    flexDirection: "column",
+    marginTop: "10px",
+    paddingBottom: "22px",
+    [theme.breakpoints.down("xs")]: {
+      maxHeight: "calc(100vh - 200px)",
+    },
   },
-}));
-export default function SearchResultsContainer({
-  searchResults: { featureCollections, errors },
-  resultsSource,
-  map,
-}) {
-  const classes = useStyles();
-  // Depending on how many results were returned we will display either:
-  // - the results list (>1 results), or
-  // - the results details (exactly 1 result), or
-  // - hide the results container (0 results)
-  const sumOfResults = featureCollections
-    .map((fc) => fc.value.totalFeatures)
-    .reduce((a, b) => a + b, 0);
+  searchResultTopBar: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: theme.spacing(1),
+  },
+  searchResultTopBarLeft: {
+    display: "flex",
+  },
+  hidden: {
+    display: "none",
+  },
+  // New styles
+  root: {
+    marginTop: 5,
+    minWidth: 200,
+    [theme.breakpoints.up("sm")]: {
+      maxWidth: 520,
+    },
+    [theme.breakpoints.down("xs")]: {
+      minWidth: "100%",
+      position: "absolute",
+      left: 0,
+    },
+  },
+});
 
-  const [selectedFeatureAndSource, setSelectedFeatureAndSource] = useState(
-    null
-  );
+class SearchResultsContainer extends React.PureComponent {
+  state = {
+    selectedFeatureAndSource: null,
+    sumOfResults: this.props.searchResults.featureCollections
+      .map((fc) => fc.value.totalFeatures)
+      .reduce((a, b) => a + b, 0),
+  };
 
-  const getTheSoleResult = () => {
+  getTheSoleResult = () => {
+    const { featureCollections } = this.props;
     // Check which OL collection (i.e. "dataset") has the result
     const datasetWithTheSoleResult = featureCollections.find(
       (fc) => fc.value.totalFeatures === 1
@@ -53,23 +73,37 @@ export default function SearchResultsContainer({
     }
   };
 
-  return sumOfResults === 0 ? null : (
-    <Paper className={classes.root}>
-      <SearchResultsDetails
-        featureAndSource={
-          sumOfResults === 1 ? getTheSoleResult() : selectedFeatureAndSource
-        }
-        setSelectedFeatureAndSource={setSelectedFeatureAndSource}
-        showBackToResultsButton={sumOfResults === 1 ? false : true}
-      />
-      {sumOfResults > 1 && (
-        <SearchResultsList
-          featureCollections={featureCollections}
-          resultsSource={resultsSource}
-          map={map}
-          setSelectedFeatureAndSource={setSelectedFeatureAndSource}
-        />
-      )}
-    </Paper>
-  );
+  setSelectedFeatureAndSource = () => {
+    console.log("hej");
+  };
+
+  render() {
+    const { classes, featureCollections, map, resultsSource } = this.props;
+    const { sumOfResults, selectedFeatureAndSource } = this.state;
+    console.log("sumofresultrs. ", sumOfResults);
+    return (
+      <>
+        {sumOfResults === 0 ? (
+          <Paper className={classes.root}>
+            <Alert severity="warning">Sökningen gav inget resultat.</Alert>
+          </Paper>
+        ) : (
+          <Paper className={classes.root}>
+            <SearchResultsDetails
+              featureAndSource={
+                sumOfResults === 1
+                  ? this.getTheSoleResult()
+                  : selectedFeatureAndSource
+              }
+              setSelectedFeatureAndSource={this.setSelectedFeatureAndSource}
+              showBackToResultsButton={sumOfResults === 1 ? false : true}
+              handleBackToResultClick={() => console.log("HEJ")}
+            />
+          </Paper>
+        )}
+      </>
+    );
+  }
 }
+
+export default withStyles(styles)(SearchResultsContainer);
