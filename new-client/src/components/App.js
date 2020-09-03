@@ -14,6 +14,8 @@ import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
+import Search from "./searchdemo/Search";
+
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
 import ScaleLine from "../controls/ScaleLine";
@@ -156,6 +158,9 @@ const styles = (theme) => {
       backgroundColor: "#fff",
       minHeight: theme.spacing(6),
     },
+    drawerLiveContent: {
+      backgroundColor: "#fff",
+    },
     backdrop: {
       zIndex: theme.zIndex.drawer - 1, // Carefully selected to be above Window but below Drawer
     },
@@ -234,6 +239,7 @@ class App extends React.PureComponent {
   componentDidMount() {
     var promises = this.appModel
       .createMap()
+      .addSearchModel()
       .addLayers()
       .loadPlugins(this.props.activeTools);
     Promise.all(promises).then(() => {
@@ -446,6 +452,7 @@ class App extends React.PureComponent {
     this.setState({ drawerMouseOverLock: false });
   };
 
+  // Method below renders the **old** Search plugin. See below for the current implementation.
   renderSearchPlugin() {
     const searchPlugin = this.appModel.plugins.search;
     // Renders the configured search plugin (if one is configured)
@@ -456,6 +463,21 @@ class App extends React.PureComponent {
         options={searchPlugin.options}
       />
     ) : null;
+  }
+
+  renderSearchComponent() {
+    // FIXME: We should get config from somewhere else now when Search is part of Core
+    if (this.appModel.plugins.search) {
+      return (
+        <Search
+          map={this.appModel.getMap()}
+          app={this}
+          options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
+        />
+      );
+    } else {
+      return null;
+    }
   }
 
   renderInformationPlugin() {
@@ -627,7 +649,7 @@ class App extends React.PureComponent {
                   globalObserver={this.globalObserver}
                 />
               )}
-              {this.renderSearchPlugin()}
+              {clean === false && this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div

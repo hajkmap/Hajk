@@ -1,712 +1,323 @@
-import { WFS, GeoJSON } from "ol/format";
+import { WFS } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
 import EqualTo from "ol/format/filter/EqualTo";
 import Or from "ol/format/filter/Or";
+import And from "ol/format/filter/And";
 import Intersects from "ol/format/filter/Intersects";
-import GeometryType from "ol/geom/GeometryType";
+import Within from "ol/format/filter/Within";
 import { fromCircle } from "ol/geom/Polygon";
-import Draw from "ol/interaction/Draw.js";
-import {
-  Tile as TileLayer,
-  Image as ImageLayer,
-  Vector as VectorLayer,
-} from "ol/layer";
-import VectorSource from "ol/source/Vector";
-import { Stroke, Style, Circle, Fill, Icon } from "ol/style";
 
-import { arraySort } from "../utils/ArraySort.js";
-import { handleClick } from "./Click.js";
-
-var drawStyle = new Style({
-  stroke: new Stroke({
-    color: "rgba(255, 214, 91, 0.6)",
-    width: 4,
-  }),
-  fill: new Fill({
-    color: "rgba(255, 214, 91, 0.2)",
-  }),
-  image: new Circle({
-    radius: 6,
-    stroke: new Stroke({
-      color: "rgba(255, 214, 91, 0.6)",
-      width: 2,
-    }),
-  }),
-});
+import { arraySort } from "../utils/ArraySort";
 
 class SearchModel {
-  layerList = [];
-  controllers = [];
+  // Public field declarations (why? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Defining_classes)
 
-  constructor(settings, map, app, observer) {
+  // Private fields (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Private_fields)
+  #searchOptions = {
+    activeSpatialFilter: "intersects", // Make it possible to control which filter is used
+    featuresToFilter: [], // features, who's geometries will be read and used to limit the search extent
+    maxResultsPerDataset: 100, // how many results to get (at most), per dataset
+    matchCase: false, // should search be case sensitive?
+    wildcardAtStart: false, // should the search string start with the wildcard character?
+    wildcardAtEnd: true, // should the search string be end with the wildcard character?
+  };
+
+  #componentOptions;
+  #searchSources;
+  #map;
+  #app;
+
+  #controllers = []; // Holder Array for Promises' AbortControllers
+  #wfsParser = new WFS();
+
+  constructor(searchPluginOptions, map, app) {
     // Validate
-    if (!settings || !map || !app || !observer) {
+    if (!searchPluginOptions || !map || !app) {
       throw new Error(
-        "One of the required parameters for SearchModel is missing. Here are the values."
+        "One of the required parameters for SearchModel is missing."
       );
     }
 
-    this.options = settings;
-    this.olMap = map;
-    this.app = app;
-    this.localObserver = observer;
-
-    this.wfsParser = new WFS();
-    this.globalObserver = app.globalObserver;
-
-    this.vectorLayer = new VectorLayer({
-      source: new VectorSource({}),
-      style: this.getVectorLayerStyle(),
-    });
-    this.vectorLayer.set("type", "searchResultLayer");
-
-    this.drawSource = new VectorSource({ wrapX: false });
-    this.drawLayer = new VectorLayer({
-      source: this.drawSource,
-      style: drawStyle,
-    });
-
-    this.olMap.addLayer(this.vectorLayer);
-    this.olMap.addLayer(this.drawLayer);
+    this.#componentOptions = searchPluginOptions; // FIXME: Options, currently from search plugin
+    this.#map = map; // The OpenLayers map instance
+    this.#app = app; // Supplies appConfig and globalObserver
+    this.#searchSources = this.#componentOptions.sources;
   }
 
   /**
-   * @summary Takes a RGBA Object as input and returns it as an Array
-   * formatted according to ol.Color. If no value is provided, the defaults
-   * are used.
+   * @summary Grab results for @param {String} searchString and prepare an array to be sent into the Autocomplete component.
    *
-   * @param {Object} obj
-   * @param {Array} [def={ r: 100, g: 100, b: 100, a: 0.7 }]
-   * @returns {Array} RGBA values formatted as an ol.Color Array
+   * @param {String} searchString The search string as typed in by the user.
+   * @param {Object} [options=null] Options to be sent with this request.
+   * @returns {Object} All matching results to be displayed in Autocomplete.
    */
-  convertRgbaColorObjectToArray = (
-    obj = {},
-    def = { r: 100, g: 100, b: 100, a: 0.7 }
+  getAutocomplete = async (
+    searchString,
+    searchSources = this.getSources(),
+    searchOptions = this.getSearchOptions()
   ) => {
-    const mergedObject = { ...def, ...obj };
-    return [mergedObject.r, mergedObject.g, mergedObject.b, mergedObject.a];
-  };
-
-  /**
-   * @summary Prepares and returnes an ol.Style object, used to
-   * style the search results layer.
-   *
-   * @returns {Object} ol.Style
-   */
-  getVectorLayerStyle = () => {
-    const {
-      anchor,
-      scale,
-      src,
-      strokeColor,
-      strokeWidth,
-      fillColor,
-    } = this.options;
-
-    const style = new Style({
-      // Polygons stroke color and width
-      stroke: new Stroke({
-        color: this.convertRgbaColorObjectToArray(strokeColor, {
-          r: 244,
-          g: 83,
-          b: 63,
-          a: 1,
-        }),
-        width: strokeWidth || 4,
-      }),
-      // Polygons fill color
-      fill: new Fill({
-        color: this.convertRgbaColorObjectToArray(fillColor, {
-          r: 244,
-          g: 83,
-          b: 63,
-          a: 0.2,
-        }),
-      }),
-    });
-
-    // Point style (either a marker image or fallback to a Circle)
-
-    if (src?.length > 0) {
-      // If marker image is provided, use it
-      style.setImage(
-        new Icon({
-          anchor: [anchor[0] || 0.5, anchor[1] || 1],
-          scale: scale || 0.15,
-          src: src,
-        })
-      );
-    } else {
-      // Else just draw a simple Circle as marker
-      style.setImage(
-        new Circle({
-          radius: 6,
-          stroke: new Stroke({
-            color: "rgba(0, 0, 0, 0.6)",
-            width: 2,
-          }),
-        })
-      );
-    }
-
-    return style;
-  };
-
-  mapSourceAsWFSPromise = (feature, projCode, source) => {
-    let geometry = feature.getGeometry();
-    if (geometry.getType() === "Circle") {
-      geometry = fromCircle(geometry);
-    }
-
-    /**
-     * This is really confusing, but depending on whether we
-     * searching using global WFS sources or by transforming
-     * mapconfig's WMS layers to search sources, we call the
-     * geom differently. So here's a hopefully bullet-proof
-     * way of ensuring we respect the geom from admin (if any)
-     * or fall back to default 'geom'
-     */
-    const finalGeom = source.geometryField || source.geometryName || "geom";
-
-    const options = {
-      featureTypes: source.layers,
-      srsName: projCode,
-      outputFormat: "JSON", //source.outputFormat,
-      maxFeatures: this.options.maxFeatures || 100,
-      geometryName: finalGeom,
-      filter: new Intersects(finalGeom, geometry, projCode),
-    };
-
-    const node = this.wfsParser.writeGetFeature(options);
-    const xmlSerializer = new XMLSerializer();
-    const xmlString = xmlSerializer.serializeToString(node);
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    const request = {
-      credentials: "same-origin",
-      signal: signal,
-      method: "POST",
-      headers: {
-        "Content-Type": "text/xml",
-      },
-      body: xmlString,
-    };
-
-    // source.url for layers CONTAINS proxy (if defined). If we don't remove
-    // it, our URL will have duplicate proxies, (searchProxy + proxy + url).
-    // TODO: Rewrite, maybe ensure that searchProxy is not needed (if we replace
-    // current util/proxy with something that works with POST, we can use just one
-    // proxy for all types of requests).
-    let urlWithoutProxy = source.url.replace(
-      this.app.config.appConfig.proxy,
-      ""
+    // Grab raw results from the common private function
+    const { featureCollections, errors } = await this.#getRawResults(
+      searchString,
+      searchSources,
+      searchOptions
     );
 
-    const promise = fetch(
-      this.app.config.appConfig.searchProxy + urlWithoutProxy,
-      request
+    // Next we must do some tricks to make the result of this function match
+    // the required input of Material UI's Autocomplete component.
+
+    // Let's generate an array with results, one per dataset (dataset = search source)
+    const resultsPerDataset = featureCollections.map((featureCollection) => {
+      return featureCollection.value.features.map((feature) => {
+        // TODO: We should add another property in admin that'll decide which FIELD (and it should
+        // be one (1) field only) should be used for Autocomplete.
+        // There's a huge problem with the previous approach (mapping displayFields and using that
+        // in Autocomplete) because __there will never be a match in on searchField if the search
+        // string consists of values that have been stitched together from multiple fields__!
+        const autocompleteEntry =
+          feature.properties[featureCollection.source.searchFields[0]];
+
+        // Let's provide a name for each dataset, so it can be displayed nicely to the user.
+        const dataset = featureCollection.source.caption;
+        return {
+          dataset,
+          autocompleteEntry,
+          source: "wfs",
+        };
+      });
+    });
+
+    // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
+    // however, we need just one Array, so let's flatten the results:
+    const flatAutocompleteArray = resultsPerDataset.reduce(
+      (a, b) => a.concat(b),
+      []
     );
-    return { promise, controller };
+
+    return { flatAutocompleteArray, errors };
   };
 
-  getLayerAsSource = (sourceList, layerId) => {
-    var mapLayer = this.olMap
-      .getLayers()
-      .getArray()
-      .find((l) => l.get("name") === layerId);
-
-    if (mapLayer) {
-      mapLayer.layerId = layerId;
-      sourceList = [mapLayer, ...sourceList];
-    }
-    return sourceList;
-  };
-
-  //Only handles single select and is restricted to polygon and multipolygon atm
-  onSelectFeatures = (evt, selectionDone, callback) => {
-    handleClick(evt, evt.map, (response) => {
-      if (response.features.length > 0) {
-        var geometryType = response.features[0].getGeometry().getType();
-
-        if (
-          geometryType === GeometryType.POLYGON ||
-          geometryType === GeometryType.MULTI_POLYGON
-        ) {
-          this.drawLayer.getSource().addFeatures(response.features);
-          if (response.features.length > 0) {
-            selectionDone();
-            this.searchWithinArea(
-              response.features[0],
-              false,
-              (featureCollections) => {
-                callback(featureCollections);
-              }
-            );
-          }
-        } else {
-          this.activateSelectionClick(selectionDone, callback);
-        }
-      } else {
-        this.activateSelectionClick(selectionDone, callback);
-      }
-    });
-  };
-
-  activateSelectionClick = (selectionDone, callback) => {
-    this.olMap.clicklock = true;
-    this.olMap.once("singleclick", (e) => {
-      this.onSelectFeatures(e, selectionDone, callback);
-    });
-  };
-
-  toggleSelectGeometriesForSpatialSearch = (
-    active,
-    selectionDone,
-    callback
+  getResults = async (
+    searchString,
+    searchSources = this.getSources(),
+    searchOptions = this.getSearchOptions()
   ) => {
-    if (active) {
-      this.activateSelectionClick(selectionDone, callback);
-    } else {
-      this.olMap.clicklock = false;
-      this.clearHighlight();
-    }
+    const { featureCollections, errors } = await this.#getRawResults(
+      searchString,
+      searchSources,
+      searchOptions
+    );
+
+    return { featureCollections, errors };
   };
 
-  /**
-   *
-   *
-   * @param {*} feature
-   * @param {boolean} useTransformedWmsSource If true, uses sources specified in Admin->Tools->Search in admin->"Visningstjänster för sök inom", instead of the global WFS sources (Admin->Söktjänster).
-   * @param {*} callback Function to call when search is completed
-   */
-  searchWithinArea = (feature, useTransformedWmsSource, callback) => {
-    const projCode = this.olMap.getView().getProjection().getCode();
-
-    var search = () => {
-      let promises = [];
-      let searchSources = this.options.sources;
-      this.abortSearches();
-
-      if (useTransformedWmsSource) {
-        const searchLayers = this.options.selectedSources.reduce(
-          this.getLayerAsSource,
-          []
-        );
-
-        searchSources = searchLayers
-          .map(this.mapDisplayLayerAsSearchLayer)
-          .filter((source) => source.layers);
-      }
-      this.controllers.splice(0, this.controllers.length);
-      searchSources.forEach((source) => {
-        const { promise, controller } = this.mapSourceAsWFSPromise(
-          feature,
-          projCode,
-          source
-        );
-        promises.push(promise);
-        this.controllers.push(controller);
-      });
-
-      this.localObserver.publish("spatialSearchStarted");
-      Promise.all(promises)
-        .then((responses) => {
-          Promise.all(responses.map((result) => result.json())).then(
-            (jsonResults) => {
-              var result = [];
-              jsonResults.forEach((jsonResult, i) => {
-                if (jsonResult.totalFeatures > 0) {
-                  jsonResult.source = searchSources[i];
-                  result.push(jsonResult);
-                }
-              });
-              setTimeout(() => {
-                this.localObserver.publish("searchComplete");
-              }, 500);
-              if (callback) {
-                callback(result);
-              }
-            }
-          );
-        })
-        .catch(() => {}); //Need to have a catch method to not get error in console when aborting through signal
-    };
-
-    if (feature.getGeometry().getType() === "Point") {
-      this.options.sources.forEach((source) => {
-        if (source.caption.toLowerCase() === "fastighet") {
-          this.lookupEstate(source, feature, (estates) => {
-            var olEstate = new GeoJSON().readFeatures(estates)[0];
-            feature = olEstate;
-            search();
-          });
-        }
-      });
-    } else {
-      search();
-    }
-  };
-
-  timeout = -1;
-
-  abortSearches() {
-    if (this.controllers.length > 0) {
-      this.controllers.forEach((controller) => {
+  abort = () => {
+    if (this.#controllers.length > 0) {
+      this.#controllers.forEach((controller) => {
         controller.abort();
-        this.localObserver.publish("searchComplete");
       });
     }
-    this.controllers.splice(0, this.controllers.length);
-  }
 
-  search = (searchInput, force, callback) => {
-    clearTimeout(this.timeout);
+    // Clean up our list of AbortControllers
+    this.#controllers = [];
+    return true;
+  };
 
-    this.clearRecentSpatialSearch();
-    //var autoExecution = searchInput.length > 3;
+  getSearchOptions = () => {
+    return this.#searchOptions;
+  };
 
-    if (/*autoExecution ||*/ force === true) {
-      this.abortSearches();
-      this.timeout = setTimeout(() => {
-        this.localObserver.publish("searchStarted");
-        var promises = [];
+  getSources = () => {
+    return this.#searchSources;
+  };
 
-        this.controllers.splice(0, this.controllers.length);
-
-        this.options.sources.forEach((source) => {
-          const { promise, controller } = this.lookup(source, searchInput);
-          promises.push(promise);
-          this.controllers.push(controller);
-        });
-
-        var timeout = this.timeout;
-
-        Promise.all(promises)
-          .then((responses) => {
-            Promise.all(responses.map((result) => result.json()))
-              .then((jsonResults) => {
-                if (this.timeout !== timeout) {
-                  return this.localObserver.publish("searchComplete");
-                }
-                jsonResults.forEach((jsonResult, i) => {
-                  if (jsonResult.features.length > 0) {
-                    arraySort({
-                      array: jsonResult.features,
-                      index: this.options.sources[i].searchFields[0],
-                    });
-                  }
-                  jsonResult.source = this.options.sources[i];
-                });
-                setTimeout(() => {
-                  this.localObserver.publish("searchComplete");
-                }, 500);
-                if (callback) callback(jsonResults);
-              })
-              .catch((parseErrors) => {});
-          })
-          .catch((responseErrors) => {});
-      }, 200);
-    } else {
-      this.timeout = -1;
-      this.clear();
-      callback(false);
+  #getRawResults = async (
+    searchString = "",
+    searchSources = this.getSources(),
+    searchOptions = null
+  ) => {
+    // If searchSources is explicitly provided as an empty Array, something's wrong. Abort.
+    if (Array.isArray(searchSources) && searchSources.length === 0) {
+      throw new Error("No search sources selected, aborting.");
     }
-  };
 
-  clear = () => {
-    this.clearHighlight();
-    this.drawSource.clear();
-  };
-
-  getHiddenLayers(layerIds) {
-    return this.olMap
-      .getLayers()
-      .getArray()
-      .filter((layer) => {
-        var hidden = true;
-        var props = layer.getProperties();
-        if (layerIds.some((id) => id === props.name)) {
-          hidden = false;
-        }
-        if (
-          (props.layerInfo && props.layerInfo.layerType === "base") ||
-          !props.layerInfo
-        ) {
-          hidden = false;
-        }
-        return hidden;
-      });
-  }
-
-  showLayers = (layerIds) => {
-    this.visibleLayers = layerIds.reduce(this.getLayerAsSource, []);
-    this.hiddenLayers = this.getHiddenLayers(layerIds);
-
-    this.hiddenLayers.forEach((layer) => {
-      if (layer.layerType === "group") {
-        this.globalObserver.publish("layerswitcher.hideLayer", layer);
-      } else {
-        layer.setVisible(false);
-      }
-    });
-    this.visibleLayers.forEach((layer) => {
-      if (layer.layerType === "group") {
-        this.globalObserver.publish("layerswitcher.showLayer", layer);
-      } else {
-        layer.setVisible(true);
-      }
-    });
-  };
-
-  clearRecentSpatialSearch = () => {
-    this.toggleDraw(false);
-    this.toggleSelectGeometriesForSpatialSearch(false);
-    this.clearHighlight();
-    this.clear();
-  };
-
-  selectionSearch = (selectionDone, searchDone) => {
-    this.toggleSelectGeometriesForSpatialSearch(
-      true,
-      selectionDone,
-      searchDone
-    );
-  };
-
-  withinSearch = (radiusDrawn, searchDone) => {
-    this.toggleDraw(true, "Circle", true, (e) => {
-      radiusDrawn();
-      // TODO: Change second parameter to FALSE in order to use global defined WFS search sources
-      this.searchWithinArea(e.feature, true, (featureCollections) => {
-        let layerIds = featureCollections.map((featureCollection) => {
-          return featureCollection.source.layerId;
-        });
-
-        this.showLayers(layerIds);
-        searchDone(layerIds);
-      });
-    });
-  };
-
-  polygonSearch = (polygonDrawn, searchDone) => {
-    this.toggleDraw(true, "Polygon", false, (e) => {
-      polygonDrawn();
-      this.searchWithinArea(e.feature, false, (featureCollections) => {
-        searchDone(featureCollections);
-      });
-    });
-  };
-
-  toggleDraw = (active, type, freehand, drawEndCallback) => {
-    if (active) {
-      this.draw = new Draw({
-        source: this.drawSource,
-        type: type,
-        freehand: freehand,
-        stopClick: true,
-        style: drawStyle,
-      });
-      this.draw.on("drawend", (e) => {
-        //this.clear();
-        this.olMap.removeInteraction(this.draw);
-        setTimeout(() => {
-          this.olMap.clicklock = false;
-        }, 1000);
-        if (drawEndCallback) {
-          drawEndCallback(e);
-        }
-      });
-      this.olMap.clicklock = true;
-      this.olMap.addInteraction(this.draw);
-    } else {
-      if (this.draw) {
-        this.clear();
-        this.olMap.removeInteraction(this.draw);
-      }
-      this.olMap.clicklock = false;
+    // If searchSources is something else than an Array, use the default search sources.
+    if (Array.isArray(searchSources) === false) {
+      console.warn("searchSources empty, resetting to default.", searchSources);
+      searchSources = this.getSources();
     }
-  };
 
-  hideVisibleLayers() {
-    this.olMap
-      .getLayers()
-      .getArray()
-      .forEach((layer) => {
-        var props = layer.getProperties();
-        if (props.layerInfo && props.layerInfo.layerType !== "base") {
-          layer.setVisible(false);
-        }
-      });
-  }
+    // Will hold our Promises, one for each search source
+    const promises = [];
 
-  clearLayerList() {
-    this.layerList.forEach((layer) => {
-      layer.setVisible(false);
-    });
-    this.hideVisibleLayers();
-  }
+    // Will hold the end results
+    let rawResults = null;
 
-  clearFeatureHighlight(feature) {
-    this.vectorLayer
-      .getSource()
-      .removeFeature(
-        this.vectorLayer.getSource().getFeatureById(feature.getId())
+    // Ensure that we've cleaned obsolete AbortControllers before we put new ones there
+    this.#controllers = [];
+
+    // Loop through all defined search sources
+    searchSources.forEach((searchSource) => {
+      // Expect the Promise and an AbortController from each Source
+      const { promise, controller } = this.#lookup(
+        searchString,
+        searchSource,
+        searchOptions
       );
-  }
-  clearHighlight() {
-    this.vectorLayer.getSource().clear();
-  }
 
-  highlightFeatures(features) {
-    this.vectorLayer.getSource().addFeatures(features);
-    this.olMap.getView().fit(this.vectorLayer.getSource().getExtent(), {
-      size: this.olMap.getSize(),
-      maxZoom: 7,
+      // Push promises to local Array so we can act when all Promises have resolved
+      promises.push(promise);
+
+      // Also, put AbortController to the global collection of controllers, so we can abort searches at any time
+      this.#controllers.push(controller);
     });
-  }
 
-  highlightImpact(feature) {
-    this.clear();
-    this.vectorLayer.getSource().addFeature(feature);
-    this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());
-    this.searchWithinArea(feature, true, (featureCollections) => {
-      var layerIds = featureCollections.map((featureCollection) => {
-        return featureCollection.source.layerId;
-      });
-      this.layerList = layerIds.reduce(this.getLayerAsSource, []);
-      this.layerList.forEach((layer) => {
-        layer.setVisible(true);
-      });
-    });
-  }
+    // Start fetching, allow both fulfilled and rejected Promises
+    const fetchResponses = await Promise.allSettled(promises);
 
-  mapDisplayLayerAsSearchLayer(searchLayer) {
-    // Admin has the possibility to set some search options for WMS layers,
-    // one of them is name of geometry field. If it exists, use it.
-    const layerInfo = searchLayer.get("layerInfo");
-    const geomNameFromWmsConfig =
-      typeof layerInfo === "object" &&
-      layerInfo !== null &&
-      layerInfo.hasOwnProperty("searchGeometryField")
-        ? layerInfo.searchGeometryField
-        : "geom";
+    // fetchedResponses will be an array of Promises in object form.
+    // Each object will have a "status" and a "value" property.
+    const jsonResponses = await Promise.allSettled(
+      fetchResponses.map((fetchResponse) => {
+        // We look at the status and filter out only those that fulfilled.
+        if (fetchResponse.status === "rejected")
+          Promise.reject("Could not fetch");
+        // The Fetch Promise might have fulfilled, but it doesn't mean the Response
+        // can be parsed with JSON (i.e. errors from GeoServer will arrive as XML),
+        // so we must be careful before invoking .json() on our Response's value.
+        if (typeof fetchResponse.value.json !== "function")
+          Promise.reject("Fetched result is not JSON");
+        // If Response can be parsed as JSON, return it.
+        return fetchResponse.value.json();
+      })
+    );
 
-    const type =
-      searchLayer instanceof VectorLayer
-        ? "VECTOR"
-        : searchLayer instanceof TileLayer || searchLayer instanceof ImageLayer
-        ? "TILE"
-        : undefined;
-    let source = {};
-    let layers;
-    const layerSource = searchLayer.getSource();
-    if (type === "TILE") {
-      if (searchLayer.layerType === "group") {
-        layers = searchLayer.subLayers;
-      } else {
-        layers = layerSource.getParams()["LAYERS"].split(",");
+    let featureCollections = [];
+    let errors = [];
+
+    jsonResponses.forEach((r, i) => {
+      if (r.status === "fulfilled") {
+        r.source = searchSources[i];
+        featureCollections.push(r);
+      } else if ((r) => r.status === "rejected") {
+        r.source = searchSources[i];
+        errors.push(r);
       }
-    }
+    });
 
-    switch (type) {
-      case "VECTOR":
-        source = {
-          type: type,
-          url: searchLayer.get("url"),
-          layers: [searchLayer.get("featureType")],
-          geometryName: geomNameFromWmsConfig,
-          layerId: searchLayer.layerId,
-        };
-        break;
-      case "TILE":
-        source = {
-          type: type,
-          url: searchLayer.get("url").replace("wms", "wfs"),
-          layers: layers,
-          geometryName: geomNameFromWmsConfig,
-          layerId: searchLayer.layerId,
-        };
-        break;
-      default:
-        break;
-    }
-    return source;
-  }
-
-  lookupEstate(source, feature, callback) {
-    const projCode = this.olMap.getView().getProjection().getCode();
-
-    const geometry = feature.getGeometry();
-
-    const options = {
-      featureTypes: source.layers,
-      srsName: projCode,
-      outputFormat: "JSON", //source.outputFormat,
-      geometryName: source.geometryField,
-      filter: new Intersects(source.geometryField, geometry, projCode),
-    };
-
-    const node = this.wfsParser.writeGetFeature(options);
-    const xmlSerializer = new XMLSerializer();
-    const xmlString = xmlSerializer.serializeToString(node);
-
-    const request = {
-      credentials: "same-origin",
-      method: "POST",
-      headers: {
-        "Content-Type": "text/xml",
-      },
-      body: xmlString,
-    };
-
-    fetch(this.app.config.appConfig.searchProxy + source.url, request).then(
-      (response) => {
-        response.json().then((estate) => {
-          callback(estate);
+    // Do some magic on our valid results
+    featureCollections.forEach((featureCollection, i) => {
+      if (featureCollection.value.features.length > 0) {
+        // FIXME: Investigate if this sorting is really needed, and if so, if we can find some Unicode variant and not only for Swedish characters
+        arraySort({
+          array: featureCollection.value.features,
+          index: featureCollection.source.searchFields[0],
         });
       }
-    );
-  }
+    });
 
-  lookup(source, searchInput) {
-    const projCode = this.olMap.getView().getProjection().getCode();
+    // Return an object with out results and errors
+    rawResults = { featureCollections, errors };
 
-    let isLikeFilters = null;
+    console.log("getRawResults() => ", rawResults);
+    return rawResults;
+  };
 
-    // If search string contains only numbers, let's do an EqualTo search
-    if (/^\d+$/.test(searchInput.trim())) {
-      isLikeFilters = source.searchFields.map((searchField) => {
-        return new EqualTo(searchField, Number(searchInput));
-      });
+  #lookup = (searchString, searchSource, searchOptions) => {
+    const srsName = this.#map.getView().getProjection().getCode();
+    const geometryName =
+      searchSource.geometryField || searchSource.geometryName || "geom";
+    const maxFeatures = searchOptions.maxResultsPerDataset;
+    let comparisonFilters = null;
+    let spatialFilters = null;
+    let finalFilters = null;
+
+    if (searchString?.length > 0) {
+      // If search string contains only numbers, let's do an EqualTo search
+      if (/^\d+$/.test(searchString.trim())) {
+        comparisonFilters = searchSource.searchFields.map((propertyName) => {
+          return new EqualTo(propertyName, Number(searchString));
+        });
+      }
+      // Else, let's do a IsLike search
+      else {
+        // Should the search string be surrounded by wildcard?
+        let pattern = searchString;
+        pattern = searchOptions.wildcardAtStart ? `*${pattern}` : pattern;
+        pattern = searchOptions.wildcardAtEnd ? `${pattern}*` : pattern;
+
+        // Each searchSource (e.g. WFS layer) will have its own searchFields
+        // defined (e.g. columns in the data table, such as "name" or "address").
+        // Let's loop through the searchFields and create an IsLike filter
+        // for each one of them (e.g. "name=bla", "address=bla").
+        comparisonFilters = searchSource.searchFields.map((propertyName) => {
+          return new IsLike(
+            propertyName,
+            pattern,
+            "*", // wildcard char
+            ".", // single char
+            "!", // escape char
+            searchOptions.matchCase // match case
+          );
+        });
+      }
+
+      // Depending on the searchSource configuration, we will now have 1 or more
+      // IsLike filters created. If we just have one, let's use it. But if we have
+      // many, we must combine them using an Or filter, so we tell the WFS to search
+      // where "name=bla OR address=bla OR etc...".
+      comparisonFilters =
+        comparisonFilters.length > 1
+          ? new Or(...comparisonFilters)
+          : comparisonFilters[0];
     }
-    // Else, let's do a IsLike search
-    else {
-      isLikeFilters = source.searchFields.map((searchField) => {
-        return new IsLike(
-          searchField,
-          searchInput + "*",
-          "*", // wild card
-          ".", // single char
-          "!", // escape char
-          false // match case
-        );
+
+    // If searchOptions contain any features, we should filter the results
+    // using those features.
+    if (searchOptions.featuresToFilter.length > 0) {
+      // First determine which spatial filter should be used:
+      const activeSpatialFilter =
+        searchOptions.activeSpatialFilter === "within" ? Within : Intersects;
+      // Next, loop through supplied features and create the desired filter
+      spatialFilters = searchOptions.featuresToFilter.map((feature) => {
+        // Convert circle feature to polygon
+        let geometry = feature.getGeometry();
+        if (geometry.getType() === "Circle") {
+          geometry = fromCircle(geometry);
+        }
+        return new activeSpatialFilter(geometryName, geometry, srsName);
       });
+
+      // If one feature was supplied, we end up with one filter. Let's use it.
+      // But if more features were supplied, we must combine them into an Or filter.
+      spatialFilters =
+        spatialFilters.length > 1
+          ? new Or(...spatialFilters)
+          : spatialFilters[0];
     }
 
-    var filter =
-      isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
+    // Finally, let's combine the text and spatial filters into
+    // one filter that will be sent with the request.
+    if (comparisonFilters !== null && spatialFilters !== null) {
+      // We have both text and spatial filters - let's combine them with an And filter.
+      finalFilters = new And(comparisonFilters, spatialFilters);
+    } else if (comparisonFilters !== null) {
+      finalFilters = comparisonFilters;
+    } else if (spatialFilters !== null) {
+      finalFilters = spatialFilters;
+    }
 
+    // Prepare the options for the upcoming request.
     const options = {
-      featureTypes: source.layers,
-      srsName: projCode,
+      featureTypes: searchSource.layers,
+      srsName: srsName,
       outputFormat: "JSON", //source.outputFormat,
-      geometryName: source.geometryField,
-      maxFeatures: this.options.maxFeatures || 100,
-      filter: filter,
+      geometryName: geometryName,
+      maxFeatures: maxFeatures,
+      filter: finalFilters,
     };
 
-    const node = this.wfsParser.writeGetFeature(options);
+    const node = this.#wfsParser.writeGetFeature(options);
     const xmlSerializer = new XMLSerializer();
     const xmlString = xmlSerializer.serializeToString(node);
     const controller = new AbortController();
@@ -722,12 +333,12 @@ class SearchModel {
       body: xmlString,
     };
     const promise = fetch(
-      this.app.config.appConfig.searchProxy + source.url,
+      this.#app.config.appConfig.searchProxy + searchSource.url,
       request
     );
 
     return { promise, controller };
-  }
+  };
 }
 
 export default SearchModel;
