@@ -44,59 +44,6 @@ class SearchModel {
     this.#searchSources = this.#componentOptions.sources;
   }
 
-  /**
-   * @summary Grab results for @param {String} searchString and prepare an array to be sent into the Autocomplete component.
-   *
-   * @param {String} searchString The search string as typed in by the user.
-   * @param {Object} [options=null] Options to be sent with this request.
-   * @returns {Object} All matching results to be displayed in Autocomplete.
-   */
-  getAutocomplete = async (
-    searchString,
-    searchSources = this.getSources(),
-    searchOptions = this.getSearchOptions()
-  ) => {
-    // Grab raw results from the common private function
-    const { featureCollections, errors } = await this.#getRawResults(
-      searchString,
-      searchSources,
-      searchOptions
-    );
-
-    // Next we must do some tricks to make the result of this function match
-    // the required input of Material UI's Autocomplete component.
-
-    // Let's generate an array with results, one per dataset (dataset = search source)
-    const resultsPerDataset = featureCollections.map((featureCollection) => {
-      return featureCollection.value.features.map((feature) => {
-        // TODO: We should add another property in admin that'll decide which FIELD (and it should
-        // be one (1) field only) should be used for Autocomplete.
-        // There's a huge problem with the previous approach (mapping displayFields and using that
-        // in Autocomplete) because __there will never be a match in on searchField if the search
-        // string consists of values that have been stitched together from multiple fields__!
-        const autocompleteEntry =
-          feature.properties[featureCollection.source.searchFields[0]];
-
-        // Let's provide a name for each dataset, so it can be displayed nicely to the user.
-        const dataset = featureCollection.source.caption;
-        return {
-          dataset,
-          autocompleteEntry,
-          source: "wfs",
-        };
-      });
-    });
-
-    // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
-    // however, we need just one Array, so let's flatten the results:
-    const flatAutocompleteArray = resultsPerDataset.reduce(
-      (a, b) => a.concat(b),
-      []
-    );
-
-    return { flatAutocompleteArray, errors };
-  };
-
   getResults = async (
     searchString,
     searchSources = this.getSources(),
@@ -198,9 +145,11 @@ class SearchModel {
     jsonResponses.forEach((r, i) => {
       if (r.status === "fulfilled") {
         r.source = searchSources[i];
+        r.origin = "WFS";
         featureCollections.push(r);
       } else if ((r) => r.status === "rejected") {
         r.source = searchSources[i];
+        r.origin = "WFS";
         errors.push(r);
       }
     });
