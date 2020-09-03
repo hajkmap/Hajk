@@ -699,19 +699,7 @@
               "link": "",
               "menu": []
             },
-            {
-              "title": "Riksintressen",
-              "document": "riksintressen2",
-              "color": "#8b572a",
-              "expandedSubMenu": true,
-              "icon": {
-                "materialUiIconName": "home",
-                "fontSize": "large"
-              },
-              "maplink": "",
-              "link": "",
-              "menu": []
-            },
+
             {
               "title": "Markanvändningskarta",
               "document": "",
