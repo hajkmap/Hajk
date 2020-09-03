@@ -74,6 +74,10 @@ class PanelHeader extends Component {
     this.props.globalObserver.subscribe("core.minimizeWindow", () => {
       this.minimize();
     });
+
+    this.props.globalObserver.subscribe("core.maximizeWindow", () => {
+      this.maximize();
+    });
   }
 
   renderButtons() {

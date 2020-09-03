@@ -132,7 +132,7 @@ fetch("appConfig.json", fetchOpts)
                   appConfig: appConfig,
                   layersConfig: layersConfig,
                   mapConfig: mapConfig,
-                  urlParams: Object.fromEntries(urlParams.entries()),
+                  urlParams,
                 };
 
                 // Make sure that the current user is allowed to display the current map
