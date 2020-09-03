@@ -29,6 +29,7 @@ import WithinIcon from "@material-ui/icons/Adjust";
 import IntersectsIcon from "@material-ui/icons/Toll";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import RoomIcon from "@material-ui/icons/Room";
+import DescriptionIcon from "@material-ui/icons/Description";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck";
@@ -70,17 +71,13 @@ var drawStyle = new Style({
 class SearchBar extends React.PureComponent {
   constructor(props) {
     super(props);
-
     this.map = props.map;
     this.searchModel = props.app.appModel.searchModel;
-
     this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
       source: this.drawSource,
       style: drawStyle,
     });
-
-    // Add layer that will be used to allow user draw on map - used for spatial search
     this.map.addLayer(this.drawLayer);
   }
 
@@ -101,7 +98,7 @@ class SearchBar extends React.PureComponent {
     moreOptionsId: undefined,
     moreOptionsOpen: false,
     selectSourcesOpen: false,
-    options: [],
+    autocompleteList: [],
     resultPanelCollapsed: false,
     showSearchResults: false,
   };
@@ -114,7 +111,6 @@ class SearchBar extends React.PureComponent {
    * @param {String} reason
    */
   handleOnChange = (event, value, reason) => {
-    console.log("HERE");
     let searchString = value?.autocompleteEntry || value || "";
     // "value" can be String (if freeSolo) or Object (if autocomplete entry selected)
     // We must ensure that we grab the string either way.
@@ -124,7 +120,6 @@ class SearchBar extends React.PureComponent {
         autoCompleteOpen: false,
       },
       () => {
-        console.log("searchString:; ", searchString);
         if (this.state.searchString.length >= 3) {
           this.doSearch();
         }
@@ -139,23 +134,21 @@ class SearchBar extends React.PureComponent {
    * @param {String} value
    * @param {String} reason
    */
-  handleOnInputChange = (event, value, reason) => {
-    console.log("Current input value", value);
-
-    const searchString = value;
+  handleOnInputChange = (event, searchString, reason) => {
     this.setState(
       {
-        autoCompleteOpen: value.length >= 3,
-        loading: value.length >= 3 && this.state.options.length === 0,
+        autoCompleteOpen: searchString.length >= 3,
+        loading:
+          searchString.length >= 3 && this.state.autocompleteList.length === 0,
         showSearchResults: false,
         searchString: searchString,
       },
       () => {
         if (this.state.searchString.length >= 3) {
-          this.getAutoCompleteOptions(this.state.searchString);
+          this.updateAutoCompleteList(this.state.searchString);
         } else {
           this.setState({
-            options: [],
+            autocompleteList: [],
           });
         }
       }
@@ -169,44 +162,68 @@ class SearchBar extends React.PureComponent {
   };
 
   handleClickOnSearch = () => {
-    this.doSearch(this.state.searchString);
+    this.doSearch();
   };
 
-  getAutoCompleteOptions = () => {
+  flattenAutoCompleteList = (searchResults) => {
+    const resultsPerDataset = searchResults.featureCollections.map(
+      (featureCollection) => {
+        return featureCollection.value.features.map((feature) => {
+          // TODO: We should add another property in admin that'll decide which FIELD (and it should
+          // be one (1) field only) should be used for Autocomplete.
+          // There's a huge problem with the previous approach (mapping displayFields and using that
+          // in Autocomplete) because __there will never be a match in on searchField if the search
+          // string consists of values that have been stitched together from multiple fields__!
+          const autocompleteEntry =
+            feature.properties[featureCollection.source.searchFields[0]];
+          // Let's provide a name for each dataset, so it can be displayed nicely to the user.
+          const dataset = featureCollection.source.caption;
+          const origin = featureCollection.origin;
+          return {
+            dataset,
+            autocompleteEntry,
+            origin: origin,
+          };
+        });
+      }
+    );
+
+    // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
+    // however, we need just one Array, so let's flatten the results:
+    const flatAutocompleteArray = resultsPerDataset.reduce(
+      (a, b) => a.concat(b),
+      []
+    );
+    return flatAutocompleteArray;
+  };
+
+  updateAutoCompleteList = () => {
     let { searchSources } = this.state;
     if (searchSources.length === 0) {
       searchSources = this.searchModel.getSources();
     }
 
+    let fetchOptions = this.getAutoCompleteFetchSettings();
     let active = true;
 
     (async () => {
       try {
-        console.log("Autocomplete search: ", this.state.searchString);
-        const {
-          flatAutocompleteArray,
-          errors,
-        } = await this.searchModel.getAutocomplete(
+        const searchResults = await this.searchModel.getResults(
           this.state.searchString,
-          searchSources // This is a state variable!
-          // searchOptions // This is a dilemma: should we limit ourselves to wildcard
-          // settings etc? Or should Autocomplete return all results, even if they
-          // won't be returned by actuall search, due to the limitations
+          searchSources, // this is a state variable!
+          fetchOptions
         );
-
-        console.log("Autocomplete result: ", flatAutocompleteArray);
-
         // It is possible to check if Search Model returned any errors
-        errors.length > 0 && console.error("Autocomplete error: ", errors);
+        searchResults.errors.length > 0 &&
+          console.error("Autocomplete error: ", searchResults.errors);
 
         this.setState({
-          options: flatAutocompleteArray,
-          loading: false,
+          autocompleteList: this.flattenAutoCompleteList(searchResults),
         });
       } catch (error) {
         // If we catch an error, display it to the user
         // (preferably in a Snackbar instead of console).
-        console.error(error);
+        console.error("Autocomplete error: ", error);
 
         // Also, set "open" state variable to false, which
         // abort the "loading" state of Autocomplete.
@@ -224,7 +241,11 @@ class SearchBar extends React.PureComponent {
     })();
   };
 
-  getSearchOptionsWithUserCustomization = (searchOptionsFromModel) => {
+  getSearchResultsFetchSettings = () => {
+    return this.getUserCustomFetchSettings(this.searchModel.getSearchOptions());
+  };
+
+  getUserCustomFetchSettings = (searchOptionsFromModel) => {
     const {
       activeSpatialFilter,
       matchCase,
@@ -232,7 +253,6 @@ class SearchBar extends React.PureComponent {
       wildcardAtStart,
     } = this.state;
     let customSearchOptions = { ...searchOptionsFromModel };
-    // Apply our custom options based on user's selection
     customSearchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
     customSearchOptions["featuresToFilter"] = this.drawSource.getFeatures();
     customSearchOptions["matchCase"] = matchCase;
@@ -241,37 +261,31 @@ class SearchBar extends React.PureComponent {
     return customSearchOptions;
   };
 
-  getSearchOptions = () => {
-    // Grab existing search options from model
-    const searchOptionsFromModel = this.searchModel.getSearchOptions();
-    return this.getSearchOptionsWithUserCustomization(searchOptionsFromModel);
+  getAutoCompleteFetchSettings = () => {
+    let fetchSettings = { ...this.searchModel.getSearchOptions() };
+    fetchSettings["maxResultsPerDataset"] = 5;
+    return fetchSettings;
+  };
+
+  hasEnoughCharsForSearch = (searchString) => {
+    return searchString < 3;
   };
 
   async doSearch() {
     // Wrap all calls to Search Model in a try/catch because
     // Search Model may throw Errors which we should handle
     // in the UI Component.
-    if (this.state.searchString < 3) {
+    let { searchString, searchSources } = this.state;
+    if (!this.hasEnoughCharsForSearch(searchString)) {
       return null;
     }
-    let { searchSources } = this.state;
-    if (searchSources.length === 0) {
-      searchSources = this.searchModel.getSources();
-    }
+
     try {
-      const searchOptions = this.getSearchOptions();
-      console.log(
-        "Searching:",
-        this.state.searchString,
-        searchSources,
-        searchOptions
-      );
       const searchResults = await this.searchModel.getResults(
-        this.state.searchString,
+        searchString,
         searchSources, // this is a state variable!
-        searchOptions
+        this.getSearchResultsFetchSettings()
       );
-      console.log("Results: ", searchResults);
 
       // It's possible to handle any errors in the UI by checking if Search Model returned any
       searchResults.errors.length > 0 && console.error(searchResults.errors);
@@ -287,7 +301,18 @@ class SearchBar extends React.PureComponent {
     }
   }
 
-  renderPopopover = () => {
+  getAutoCompleteResultIcon = (origin) => {
+    switch (origin) {
+      case "WFS":
+        return <RoomIcon color="disabled"></RoomIcon>;
+      case "DOCUMENT":
+        return <DescriptionIcon color="disabled"></DescriptionIcon>;
+      default:
+        return <RoomIcon color="disabled"></RoomIcon>;
+    }
+  };
+
+  renderPopover = () => {
     const {
       moreOptionsId,
       anchorEl,
@@ -396,7 +421,7 @@ class SearchBar extends React.PureComponent {
 
   renderAutoComplete = () => {
     const {
-      options,
+      autocompleteList,
       loading,
       moreOptionsId,
       autoCompleteOpen,
@@ -424,7 +449,8 @@ class SearchBar extends React.PureComponent {
         renderOption={(option) => {
           return (
             <>
-              <RoomIcon color="disabled"></RoomIcon>
+              {this.getAutoCompleteResultIcon(option.origin)}
+
               <Typography style={{ paddingRight: 8 }}>
                 {option.autocompleteEntry}
               </Typography>
@@ -435,8 +461,7 @@ class SearchBar extends React.PureComponent {
         getOptionLabel={(option) =>
           option?.autocompleteEntry + " " + option.dataset || option
         }
-        //groupBy={(option) => option.dataset}
-        options={options}
+        options={autocompleteList}
         loading={loading}
         renderInput={(params) => (
           <TextField
@@ -528,7 +553,7 @@ class SearchBar extends React.PureComponent {
         <Grid item>
           <Paper>
             {this.renderAutoComplete()}
-            {this.renderPopopover()}
+            {this.renderPopover()}
             {this.renderSelectSearchOptions()}
           </Paper>
         </Grid>
