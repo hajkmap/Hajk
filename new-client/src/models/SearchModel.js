@@ -82,6 +82,7 @@ class SearchModel {
         return {
           dataset,
           autocompleteEntry,
+          source: "wfs",
         };
       });
     });
