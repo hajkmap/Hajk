@@ -86,7 +86,7 @@ class SearchBar extends React.PureComponent {
     autoCompleteOptions: [],
     loading: false,
     wildcardAtStart: false,
-    wildcardAtEnd: false,
+    wildcardAtEnd: true,
     matchCase: false,
     activeSpatialFilter: "intersects",
     drawActive: false,
@@ -298,6 +298,8 @@ class SearchBar extends React.PureComponent {
       this.setState({
         searchResults,
         showSearchResults: true,
+        loading: false,
+        autoCompleteOpen: false,
       });
 
       //addFeaturesToResultsLayer(featureCollections);
@@ -547,7 +549,7 @@ class SearchBar extends React.PureComponent {
   render() {
     const { classes } = this.props;
     const { panelCollapsed, showSearchResults } = this.state;
-    console.log(showSearchResults, "showSearchresults: ");
+    console.log(this.state, "state: ");
     return (
       <Grid
         className={cslx(classes.searchContainer, {

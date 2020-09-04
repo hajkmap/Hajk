@@ -3,7 +3,7 @@ import { Paper } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import Alert from "@material-ui/lab/Alert";
 
-//import SearchResultsList from "./SearchResultsList";
+import SearchResultsList from "./SearchResultsList";
 import SearchResultsDetails from "./SearchResultsDetails";
 
 const styles = (theme) => ({
@@ -87,7 +87,7 @@ class SearchResultsContainer extends React.PureComponent {
           <Paper className={classes.root}>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
           </Paper>
-        ) : (
+        ) : sumOfResults === 1 ? (
           <Paper className={classes.root}>
             <SearchResultsDetails
               featureAndSource={
@@ -96,8 +96,22 @@ class SearchResultsContainer extends React.PureComponent {
                   : selectedFeatureAndSource
               }
               setSelectedFeatureAndSource={this.setSelectedFeatureAndSource}
-              showBackToResultsButton={sumOfResults === 1 ? false : true}
+              showBackToResultsButton={sumOfResults === 1 ? true : false}
               handleBackToResultClick={() => console.log("HEJ")}
+            />
+          </Paper>
+        ) : (
+          <Paper className={classes.root}>
+            <SearchResultsList
+              featureAndSource={
+                sumOfResults === 1
+                  ? this.getTheSoleResult()
+                  : selectedFeatureAndSource
+              }
+              featureCollections={featureCollections}
+              map={map}
+              resultsSource={resultsSource}
+              setSelectedFeatureAndSource={this.setSelectedFeatureAndSource}
             />
           </Paper>
         )}
