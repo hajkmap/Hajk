@@ -62,7 +62,7 @@ class SearchResultsDataset extends React.PureComponent {
             </Grid>
           </AccordionSummary>
           <AccordionDetails>
-            <List>
+            <List style={{ width: "100%" }}>
               {featureCollection.value.features.map((f) => (
                 <SearchResultsDatasetFeature
                   key={f.id}

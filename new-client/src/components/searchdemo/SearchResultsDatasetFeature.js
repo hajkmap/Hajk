@@ -1,5 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import Grid from "@material-ui/core/Grid";
 
 import {
   ListItem,
@@ -8,6 +9,13 @@ import {
   Checkbox,
   IconButton,
   ListItemSecondaryAction,
+} from "@material-ui/core";
+import {
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  Typography,
 } from "@material-ui/core";
 
 import DetailsIcon from "@material-ui/icons/Details";
@@ -32,24 +40,26 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     const { texts } = this.state;
     return (
       <ListItem key={feature.id} onClick={handleCheckedToggle(feature.id)}>
-        <ListItemIcon>
-          <Checkbox
-            edge="start"
-            checked={checkedItems.indexOf(feature.id) !== -1}
-            tabIndex={-1}
-            disableRipple
-          />
-        </ListItemIcon>
-        <ListItemText primary={texts.shift()} secondary={texts.join(", ")} />
-        <ListItemSecondaryAction>
-          <IconButton
-            onClick={this.showDetails}
-            edge="end"
-            aria-label="comments"
-          >
-            <DetailsIcon />
-          </IconButton>
-        </ListItemSecondaryAction>
+        <Grid container>
+          <Grid item xs={12}>
+            <ListItemText
+              primary={texts.shift()}
+              secondary={texts.join(", ")}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Table>
+              <TableBody>
+                {Object.entries(feature.properties).map((row) => (
+                  <TableRow key={row[0]}>
+                    <TableCell>{row[0]}</TableCell>
+                    <TableCell align="right">{row[1]}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Grid>
+        </Grid>
       </ListItem>
     );
   }
