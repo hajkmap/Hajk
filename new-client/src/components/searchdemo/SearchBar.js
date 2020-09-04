@@ -268,7 +268,7 @@ class SearchBar extends React.PureComponent {
   };
 
   hasEnoughCharsForSearch = (searchString) => {
-    return searchString < 3;
+    return searchString.length > 3;
   };
 
   async doSearch() {
@@ -276,6 +276,11 @@ class SearchBar extends React.PureComponent {
     // Search Model may throw Errors which we should handle
     // in the UI Component.
     let { searchString, searchSources } = this.state;
+
+    if (searchSources.length === 0) {
+      searchSources = this.searchModel.getSources();
+    }
+
     if (!this.hasEnoughCharsForSearch(searchString)) {
       return null;
     }
@@ -458,9 +463,7 @@ class SearchBar extends React.PureComponent {
             </>
           );
         }}
-        getOptionLabel={(option) =>
-          option?.autocompleteEntry + " " + option.dataset || option
-        }
+        getOptionLabel={(option) => option?.autocompleteEntry || option}
         options={autocompleteList}
         loading={loading}
         renderInput={(params) => (
@@ -544,6 +547,7 @@ class SearchBar extends React.PureComponent {
   render() {
     const { classes } = this.props;
     const { panelCollapsed, showSearchResults } = this.state;
+    console.log(showSearchResults, "showSearchresults: ");
     return (
       <Grid
         className={cslx(classes.searchContainer, {
