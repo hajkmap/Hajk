@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({}));
  * @param {Object} { index = 0, parent }
  * @returns {React.Component}
  */
-function DownloadLink({ index = 0, layer, appConfig }) {
+function DownloadLink({ index = 0, layer, enableDownloadLink = false }) {
   const layerName = Array.isArray(layer.subLayers)
     ? encodeURI(layer.subLayers[index])
     : null;
@@ -22,7 +22,7 @@ function DownloadLink({ index = 0, layer, appConfig }) {
     document.location = downloadUrl;
   };
 
-  return appConfig.experimentalDownloadLink
+  return enableDownloadLink
     ? layerName !== null && (
         <IconButton
           aria-label="download"
