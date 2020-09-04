@@ -86,7 +86,11 @@ class SearchResultsList extends React.PureComponent {
   };
 
   render() {
-    const { featureCollections, setSelectedFeatureAndSource } = this.props;
+    const {
+      featureCollections,
+      setSelectedFeatureAndSource,
+      sumOfResults,
+    } = this.props;
     const { checkedItems } = this.state;
     return (
       <>
@@ -101,6 +105,7 @@ class SearchResultsList extends React.PureComponent {
           <SearchResultsDataset
             key={fc.source.id}
             featureCollection={fc}
+            sumOfResults={sumOfResults}
             checkedItems={checkedItems}
             handleCheckedToggle={this.handleCheckedToggle}
             setSelectedFeatureAndSource={setSelectedFeatureAndSource}

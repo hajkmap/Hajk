@@ -26,7 +26,7 @@ class SearchResultsDataset extends React.PureComponent {
       this.props.featureCollection.value.numberReturned
         ? `${this.props.featureCollection.value.numberReturned}+`
         : this.props.featureCollection.value.numberReturned,
-    expanded: this.props.featureCollection.value.numberReturned === 1,
+    expanded: this.props.sumOfResults === 1,
   };
 
   renderResultsDataset = () => {

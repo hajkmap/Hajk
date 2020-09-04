@@ -32,6 +32,8 @@ const styles = (theme) => ({
   },
   // New styles
   root: {
+    maxHeight: "calc(100vh - 380px)",
+    overflow: "auto",
     marginTop: 5,
     minWidth: 200,
     [theme.breakpoints.up("sm")]: {
@@ -95,6 +97,7 @@ class SearchResultsContainer extends React.PureComponent {
                   ? this.getTheSoleResult()
                   : selectedFeatureAndSource
               }
+              sumOfResults={sumOfResults}
               featureCollections={featureCollections}
               map={map}
               resultsSource={resultsSource}
