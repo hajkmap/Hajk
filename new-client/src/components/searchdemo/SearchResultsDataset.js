@@ -26,19 +26,24 @@ class SearchResultsDataset extends React.PureComponent {
       this.props.featureCollection.value.numberReturned
         ? `${this.props.featureCollection.value.numberReturned}+`
         : this.props.featureCollection.value.numberReturned,
+    expanded: this.props.featureCollection.value.numberReturned === 1,
   };
 
-  render() {
+  renderResultsDataset = () => {
+    const { numberOfResultsToDisplay } = this.state;
     const {
       checkedItems,
       handleCheckedToggle,
       setSelectedFeatureAndSource,
       featureCollection,
     } = this.props;
-    const { numberOfResultsToDisplay } = this.state;
+
     return (
       <>
-        <Accordion>
+        <Accordion
+          expanded={this.state.expanded}
+          onChange={() => this.setState({ expanded: !this.state.expanded })}
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Grid container>
               <Grid item xs={4}>
@@ -73,6 +78,13 @@ class SearchResultsDataset extends React.PureComponent {
         </Accordion>
       </>
     );
+  };
+
+  render() {
+    const { featureCollection } = this.props;
+    return featureCollection.value.numberReturned > 0
+      ? this.renderResultsDataset()
+      : null;
   }
 }
 

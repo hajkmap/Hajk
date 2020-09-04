@@ -87,19 +87,6 @@ class SearchResultsContainer extends React.PureComponent {
           <Paper className={classes.root}>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
           </Paper>
-        ) : sumOfResults === 1 ? (
-          <Paper className={classes.root}>
-            <SearchResultsDetails
-              featureAndSource={
-                sumOfResults === 1
-                  ? this.getTheSoleResult()
-                  : selectedFeatureAndSource
-              }
-              setSelectedFeatureAndSource={this.setSelectedFeatureAndSource}
-              showBackToResultsButton={sumOfResults === 1 ? true : false}
-              handleBackToResultClick={() => console.log("HEJ")}
-            />
-          </Paper>
         ) : (
           <Paper className={classes.root}>
             <SearchResultsList
