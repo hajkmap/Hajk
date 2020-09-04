@@ -90,8 +90,10 @@ class SearchResultsList extends React.PureComponent {
       featureCollections,
       setSelectedFeatureAndSource,
       sumOfResults,
+      featureAndSource,
     } = this.props;
     const { checkedItems } = this.state;
+    console.log("featureAndSource", featureAndSource);
     return (
       <>
         <Grid container alignItems={"center"} justify={"center"}>

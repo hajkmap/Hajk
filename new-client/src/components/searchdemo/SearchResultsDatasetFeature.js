@@ -1,6 +1,7 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
+import MapIcon from "@material-ui/icons/Map";
 
 import {
   ListItem,
@@ -39,13 +40,21 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     const { feature, checkedItems, handleCheckedToggle } = this.props;
     const { texts } = this.state;
     return (
-      <ListItem key={feature.id} onClick={handleCheckedToggle(feature.id)}>
+      <ListItem key={feature.id}>
         <Grid container>
-          <Grid item xs={12}>
+          <Grid item xs={6}>
             <ListItemText
               primary={texts.shift()}
               secondary={texts.join(", ")}
             />
+          </Grid>
+          <Grid item xs={6}>
+            <IconButton
+              aria-label="show-in-map"
+              onClick={handleCheckedToggle(feature.id)}
+            >
+              <MapIcon />
+            </IconButton>
           </Grid>
           <Grid item xs={12}>
             <Table>

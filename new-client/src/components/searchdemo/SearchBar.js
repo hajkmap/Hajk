@@ -8,6 +8,7 @@ import Grid from "@material-ui/core/Grid";
 import { FormHelperText } from "@material-ui/core";
 
 import ClearIcon from "@material-ui/icons/Clear";
+import GeoJSON from "ol/format/GeoJSON";
 
 import {
   CircularProgress,
@@ -78,7 +79,12 @@ class SearchBar extends React.PureComponent {
       source: this.drawSource,
       style: drawStyle,
     });
+    this.resultsSource = new VectorSource({ wrapX: false });
+    this.resultsLayer = new VectorLayer({
+      source: this.resultsSource,
+    });
     this.map.addLayer(this.drawLayer);
+    this.map.addLayer(this.resultsLayer);
   }
 
   state = {
@@ -135,6 +141,7 @@ class SearchBar extends React.PureComponent {
    * @param {String} reason
    */
   handleOnInputChange = (event, searchString, reason) => {
+    this.resultsSource.clear();
     this.setState(
       {
         autoCompleteOpen: searchString.length >= 3,
@@ -302,11 +309,34 @@ class SearchBar extends React.PureComponent {
         autoCompleteOpen: false,
       });
 
-      //addFeaturesToResultsLayer(featureCollections);
+      this.addFeaturesToResultsLayer(searchResults.featureCollections);
     } catch (err) {
       console.error("Show a nice error message to user with info:", err);
     }
   }
+
+  addFeaturesToResultsLayer = (featureCollections) => {
+    this.resultsSource.clear();
+
+    const features = featureCollections.map((fc) =>
+      fc.value.features.map((f) => {
+        const geoJsonFeature = new GeoJSON().readFeature(f);
+        return geoJsonFeature;
+      })
+    );
+
+    features.map((f) => this.resultsSource.addFeatures(f));
+
+    // Zoom to fit all features
+    const currentExtent = this.resultsSource.getExtent();
+
+    if (currentExtent.map(Number.isFinite).includes(false) === false) {
+      this.map.getView().fit(currentExtent, {
+        size: this.map.getSize(),
+        maxZoom: 7,
+      });
+    }
+  };
 
   getAutoCompleteResultIcon = (origin) => {
     switch (origin) {
@@ -418,7 +448,7 @@ class SearchBar extends React.PureComponent {
     return (
       <SearchResultsContainer
         searchResults={searchResults}
-        resultsSource={this.drawSource}
+        resultsSource={this.resultsSource}
         featureCollections={searchResults.featureCollections}
         map={this.map}
         panelCollapsed={resultPanelCollapsed}
