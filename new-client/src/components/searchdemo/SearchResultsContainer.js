@@ -3,7 +3,7 @@ import { Paper } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import Alert from "@material-ui/lab/Alert";
 
-//import SearchResultsList from "./SearchResultsList";
+import SearchResultsList from "./SearchResultsList";
 import SearchResultsDetails from "./SearchResultsDetails";
 
 const styles = (theme) => ({
@@ -32,6 +32,8 @@ const styles = (theme) => ({
   },
   // New styles
   root: {
+    maxHeight: "calc(100vh - 380px)",
+    overflow: "auto",
     marginTop: 5,
     minWidth: 200,
     [theme.breakpoints.up("sm")]: {
@@ -80,7 +82,7 @@ class SearchResultsContainer extends React.PureComponent {
   render() {
     const { classes, featureCollections, map, resultsSource } = this.props;
     const { sumOfResults, selectedFeatureAndSource } = this.state;
-    console.log("sumofresultrs. ", sumOfResults);
+
     return (
       <>
         {sumOfResults === 0 ? (
@@ -89,15 +91,17 @@ class SearchResultsContainer extends React.PureComponent {
           </Paper>
         ) : (
           <Paper className={classes.root}>
-            <SearchResultsDetails
+            <SearchResultsList
               featureAndSource={
                 sumOfResults === 1
                   ? this.getTheSoleResult()
                   : selectedFeatureAndSource
               }
+              sumOfResults={sumOfResults}
+              featureCollections={featureCollections}
+              map={map}
+              resultsSource={resultsSource}
               setSelectedFeatureAndSource={this.setSelectedFeatureAndSource}
-              showBackToResultsButton={sumOfResults === 1 ? false : true}
-              handleBackToResultClick={() => console.log("HEJ")}
             />
           </Paper>
         )}
