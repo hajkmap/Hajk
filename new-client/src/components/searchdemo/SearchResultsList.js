@@ -79,8 +79,8 @@ class SearchResultsList extends React.PureComponent {
         ? this.props.resultsSource.getExtent()
         : boundingExtent(extentsFromCheckedItems);
 
-    this.props.app.map.current.getView().fit(extentToZoomTo, {
-      size: this.props.app.map.getSize(),
+    this.props.map.getView().fit(extentToZoomTo, {
+      size: this.props.map.getSize(),
       maxZoom: 7,
     });
   };
@@ -90,10 +90,8 @@ class SearchResultsList extends React.PureComponent {
       featureCollections,
       setSelectedFeatureAndSource,
       sumOfResults,
-      featureAndSource,
     } = this.props;
     const { checkedItems } = this.state;
-    console.log("featureAndSource", featureAndSource);
     return (
       <>
         <Grid container alignItems={"center"} justify={"center"}>

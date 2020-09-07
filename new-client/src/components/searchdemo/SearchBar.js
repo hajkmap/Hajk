@@ -328,14 +328,14 @@ class SearchBar extends React.PureComponent {
     features.map((f) => this.resultsSource.addFeatures(f));
 
     // Zoom to fit all features
-    const currentExtent = this.resultsSource.getExtent();
+    // const currentExtent = this.resultsSource.getExtent();
 
-    if (currentExtent.map(Number.isFinite).includes(false) === false) {
-      this.map.getView().fit(currentExtent, {
-        size: this.map.getSize(),
-        maxZoom: 7,
-      });
-    }
+    // if (currentExtent.map(Number.isFinite).includes(false) === false) {
+    //   this.map.getView().fit(currentExtent, {
+    //     size: this.map.getSize(),
+    //     maxZoom: 7,
+    //   });
+    // }
   };
 
   getAutoCompleteResultIcon = (origin) => {

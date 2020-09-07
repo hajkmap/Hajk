@@ -82,7 +82,7 @@ class SearchResultsContainer extends React.PureComponent {
   render() {
     const { classes, featureCollections, map, resultsSource } = this.props;
     const { sumOfResults, selectedFeatureAndSource } = this.state;
-    console.log("sumofresultrs. ", sumOfResults);
+
     return (
       <>
         {sumOfResults === 0 ? (
