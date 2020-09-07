@@ -293,34 +293,44 @@ class SearchBar extends React.PureComponent {
       return null;
     }
 
+    let promises = [];
+
     try {
-      searchResults = await this.searchModel.getResults(
+      const promise = this.searchModel.getResults(
         searchString,
         searchSources, // this is a state variable!
         this.getSearchResultsFetchSettings()
       );
+      promises.push(promise);
 
       this.props.searchImplementedPlugins.forEach((plugin) => {
         if (plugin.searchInterface.getResults) {
-          plugin.searchInterface.getResults(searchString).then((result) => {
-            searchResults.featureCollections.push(result);
-          });
+          promises.push(plugin.searchInterface.getResults(searchString));
         }
       });
 
-      console.log("searchResults: ", searchResults);
+      Promise.allSettled(promises).then((results) => {
+        results.forEach((result) => {
+          searchResults.featureCollections = searchResults.featureCollections.concat(
+            result.value.featureCollections
+          );
+          searchResults.errors = searchResults.errors.concat(
+            result.value.errors
+          );
+        });
 
-      // It's possible to handle any errors in the UI by checking if Search Model returned any
-      searchResults.errors.length > 0 && console.error(searchResults.errors);
+        // It's possible to handle any errors in the UI by checking if Search Model returned any
+        searchResults.errors.length > 0 && console.error(searchResults.errors);
 
-      this.setState({
-        searchResults,
-        showSearchResults: true,
-        loading: false,
-        autoCompleteOpen: false,
+        this.setState({
+          searchResults,
+          showSearchResults: true,
+          loading: false,
+          autoCompleteOpen: false,
+        });
+
+        this.addFeaturesToResultsLayer(searchResults.featureCollections);
       });
-
-      this.addFeaturesToResultsLayer(searchResults.featureCollections);
     } catch (err) {
       console.error("Show a nice error message to user with info:", err);
     }
@@ -590,7 +600,7 @@ class SearchBar extends React.PureComponent {
   render() {
     const { classes } = this.props;
     const { panelCollapsed, showSearchResults } = this.state;
-    console.log(this.state, "state: ");
+
     return (
       <Grid
         className={cslx(classes.searchContainer, {

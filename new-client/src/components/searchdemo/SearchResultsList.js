@@ -91,6 +91,10 @@ class SearchResultsList extends React.PureComponent {
       setSelectedFeatureAndSource,
       sumOfResults,
     } = this.props;
+    console.log("featureCollections: ", featureCollections);
+    featureCollections.map((fc) => {
+      console.log("fc", fc);
+    });
     const { checkedItems } = this.state;
     return (
       <>

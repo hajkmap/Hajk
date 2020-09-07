@@ -35,11 +35,16 @@ export default class DocumentSearch {
         totalFeatures: this.chaptersMatchSearch.length,
       },
       sources: this.getMatchDocumentsFromSearch(),
+      source: {
+        id: "999",
+        caption: "Documenthandler",
+        displayFields: ["header"],
+      },
       origin: "DOCUMENT",
     };
 
     return new Promise((resolve, reject) => {
-      resolve(featureCollection);
+      resolve({ featureCollections: [featureCollection], errors: [] });
     });
   };
 

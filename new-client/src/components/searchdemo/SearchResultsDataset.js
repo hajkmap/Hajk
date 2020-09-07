@@ -37,6 +37,7 @@ class SearchResultsDataset extends React.PureComponent {
       setSelectedFeatureAndSource,
       featureCollection,
     } = this.props;
+    console.log("featureCollectioN", featureCollection);
 
     return (
       <>
