@@ -286,6 +286,11 @@ class SearchBar extends React.PureComponent {
     }
 
     try {
+      this.props.searchImplementedPlugins.forEach((plugin) => {
+        plugin.searchInterface.getResults().then((result) => {
+          console.log(result, "result");
+        });
+      });
       const searchResults = await this.searchModel.getResults(
         searchString,
         searchSources, // this is a state variable!

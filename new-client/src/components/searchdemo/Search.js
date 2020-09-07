@@ -135,20 +135,46 @@ const styles = (theme) => ({
 });
 
 class Search extends React.PureComponent {
+  state = {
+    searchImplementedPlugins: [],
+    searchImplementedPluginsLoaded: false,
+  };
+
+  getSearchImplementedPlugins = () => {
+    const { app } = this.props;
+    return Object.values(app.appModel.plugins).filter((plugin) => {
+      return plugin.options.searchImplemented;
+    });
+  };
+
+  componentDidMount = () => {
+    const { app } = this.props;
+    app.globalObserver.subscribe("core.appLoaded", () => {
+      var searchImplementedPlugins = this.getSearchImplementedPlugins();
+      this.setState({
+        searchImplementedPlugins: searchImplementedPlugins,
+        searchImplementedPluginsLoaded: true,
+      });
+    });
+  };
+
   render() {
     const { classes, target } = this.props;
 
     return (
-      <>
-        <SearchBar
-          classes={{
-            root: classes.inputRoot,
-            input:
-              target === "top" ? classes.inputInputWide : classes.inputInput,
-          }}
-          {...this.props}
-        />
-      </>
+      this.state.searchImplementedPluginsLoaded && (
+        <>
+          <SearchBar
+            classes={{
+              root: classes.inputRoot,
+              input:
+                target === "top" ? classes.inputInputWide : classes.inputInput,
+            }}
+            searchImplementedPlugins={this.state.searchImplementedPlugins}
+            {...this.props}
+          />
+        </>
+      )
     );
   }
 }

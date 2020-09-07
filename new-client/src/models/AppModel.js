@@ -154,6 +154,7 @@ class AppModel {
                 map: map,
                 app: this,
                 type: plugin,
+                searchInterface: {},
                 sortOrder: sortOrder,
                 options: toolOptions,
                 component: module.default,
