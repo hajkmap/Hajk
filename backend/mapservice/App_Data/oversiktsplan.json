@@ -634,6 +634,7 @@
     {
       "type": "documenthandler",
       "options": {
+        "searchImplemented": true,
         "title": "",
         "target": "hidden",
         "showScrollButtonLimit": 400,

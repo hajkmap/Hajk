@@ -283,6 +283,7 @@ class SearchBar extends React.PureComponent {
     // Search Model may throw Errors which we should handle
     // in the UI Component.
     let { searchString, searchSources } = this.state;
+    let searchResults = { errors: [], featureCollections: [] };
 
     if (searchSources.length === 0) {
       searchSources = this.searchModel.getSources();
@@ -293,18 +294,21 @@ class SearchBar extends React.PureComponent {
     }
 
     try {
-      this.props.searchImplementedPlugins.forEach((plugin) => {
-        if (plugin.searchInterface.getResults) {
-          plugin.searchInterface.getResults().then((result) => {
-            console.log(result, "result");
-          });
-        }
-      });
-      const searchResults = await this.searchModel.getResults(
+      searchResults = await this.searchModel.getResults(
         searchString,
         searchSources, // this is a state variable!
         this.getSearchResultsFetchSettings()
       );
+
+      this.props.searchImplementedPlugins.forEach((plugin) => {
+        if (plugin.searchInterface.getResults) {
+          plugin.searchInterface.getResults(searchString).then((result) => {
+            searchResults.featureCollections.push(result);
+          });
+        }
+      });
+
+      console.log("searchResults: ", searchResults);
 
       // It's possible to handle any errors in the UI by checking if Search Model returned any
       searchResults.errors.length > 0 && console.error(searchResults.errors);

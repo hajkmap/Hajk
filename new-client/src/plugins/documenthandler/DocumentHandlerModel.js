@@ -1,4 +1,5 @@
 import React from "react";
+import DocumentSearch from "./DocumentSearch";
 
 /**
  * @summary  DocumentHandler model that doesn't do much.
@@ -24,6 +25,19 @@ export default class DocumentHandlerModel {
     this.allDocuments = [];
     this.chapterInfo = [];
     this.chapterNumber = 0;
+
+    const menuDocuments = this.getDocumentsFromMenus(settings.menu);
+    this.getAllDocumentsContainedInMenu(menuDocuments).then(() => {
+      settings.searchInterface.getResults = new DocumentSearch(
+        this.allDocuments
+      ).getResults;
+    });
+  }
+
+  getDocumentsFromMenus(menu) {
+    return menu.filter((menuItem) => {
+      return menuItem.document || menuItem.menu.length > 0;
+    });
   }
 
   getFlattenedMenu(menu) {
@@ -73,6 +87,7 @@ export default class DocumentHandlerModel {
       );
       documents = [...documents, document];
     });
+
     return documents;
   }
 
