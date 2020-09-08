@@ -35,6 +35,7 @@ class SearchResultsList extends React.PureComponent {
   };
 
   handleCheckedToggle = (value) => () => {
+    console.log("hejhej");
     const currentIndex = this.state.checkedItems.indexOf(value);
     const newChecked = [...this.state.checkedItems];
 
@@ -91,6 +92,10 @@ class SearchResultsList extends React.PureComponent {
       setSelectedFeatureAndSource,
       sumOfResults,
     } = this.props;
+    console.log("featureCollections: ", featureCollections);
+    featureCollections.map((fc) => {
+      console.log("fc", fc);
+    });
     const { checkedItems } = this.state;
     return (
       <>

@@ -82,6 +82,7 @@ class SearchBar extends React.PureComponent {
     this.resultsSource = new VectorSource({ wrapX: false });
     this.resultsLayer = new VectorLayer({
       source: this.resultsSource,
+      style: null,
     });
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
@@ -206,6 +207,8 @@ class SearchBar extends React.PureComponent {
 
   updateAutoCompleteList = () => {
     let { searchSources } = this.state;
+    let promises = [];
+    let searchResults = { errors: [], featureCollections: [] };
     if (searchSources.length === 0) {
       searchSources = this.searchModel.getSources();
     }
@@ -215,17 +218,38 @@ class SearchBar extends React.PureComponent {
 
     (async () => {
       try {
-        const searchResults = await this.searchModel.getResults(
+        const promise = this.searchModel.getResults(
           this.state.searchString,
           searchSources, // this is a state variable!
           fetchOptions
         );
-        // It is possible to check if Search Model returned any errors
-        searchResults.errors.length > 0 &&
-          console.error("Autocomplete error: ", searchResults.errors);
+        promises.push(promise);
 
-        this.setState({
-          autocompleteList: this.flattenAutoCompleteList(searchResults),
+        this.props.searchImplementedPlugins.forEach((plugin) => {
+          if (plugin.searchInterface.getResults) {
+            promises.push(
+              plugin.searchInterface.getResults(this.state.searchString)
+            );
+          }
+        });
+
+        Promise.allSettled(promises).then((results) => {
+          results.forEach((result) => {
+            searchResults.featureCollections = searchResults.featureCollections.concat(
+              result.value.featureCollections
+            );
+            searchResults.errors = searchResults.errors.concat(
+              result.value.errors
+            );
+          });
+
+          // It's possible to handle any errors in the UI by checking if Search Model returned any
+          searchResults.errors.length > 0 &&
+            console.error("Autocomplete error: ", searchResults.errors);
+
+          this.setState({
+            autocompleteList: this.flattenAutoCompleteList(searchResults),
+          });
         });
       } catch (error) {
         // If we catch an error, display it to the user
@@ -275,7 +299,7 @@ class SearchBar extends React.PureComponent {
   };
 
   hasEnoughCharsForSearch = (searchString) => {
-    return searchString.length > 3;
+    return searchString.length >= 3;
   };
 
   async doSearch() {
@@ -293,34 +317,44 @@ class SearchBar extends React.PureComponent {
       return null;
     }
 
+    let promises = [];
+
     try {
-      searchResults = await this.searchModel.getResults(
+      const promise = this.searchModel.getResults(
         searchString,
         searchSources, // this is a state variable!
         this.getSearchResultsFetchSettings()
       );
+      promises.push(promise);
 
       this.props.searchImplementedPlugins.forEach((plugin) => {
         if (plugin.searchInterface.getResults) {
-          plugin.searchInterface.getResults(searchString).then((result) => {
-            searchResults.featureCollections.push(result);
-          });
+          promises.push(plugin.searchInterface.getResults(searchString));
         }
       });
 
-      console.log("searchResults: ", searchResults);
+      Promise.allSettled(promises).then((results) => {
+        results.forEach((result) => {
+          searchResults.featureCollections = searchResults.featureCollections.concat(
+            result.value.featureCollections
+          );
+          searchResults.errors = searchResults.errors.concat(
+            result.value.errors
+          );
+        });
 
-      // It's possible to handle any errors in the UI by checking if Search Model returned any
-      searchResults.errors.length > 0 && console.error(searchResults.errors);
+        // It's possible to handle any errors in the UI by checking if Search Model returned any
+        searchResults.errors.length > 0 && console.error(searchResults.errors);
 
-      this.setState({
-        searchResults,
-        showSearchResults: true,
-        loading: false,
-        autoCompleteOpen: false,
+        this.setState({
+          searchResults,
+          showSearchResults: true,
+          loading: false,
+          autoCompleteOpen: false,
+        });
+
+        this.addFeaturesToResultsLayer(searchResults.featureCollections);
       });
-
-      this.addFeaturesToResultsLayer(searchResults.featureCollections);
     } catch (err) {
       console.error("Show a nice error message to user with info:", err);
     }
@@ -455,6 +489,7 @@ class SearchBar extends React.PureComponent {
 
   renderSearchResultList = () => {
     const { searchResults, resultPanelCollapsed } = this.state;
+    console.log("searchResults: ", searchResults);
 
     return (
       <SearchResultsContainer
@@ -486,7 +521,8 @@ class SearchBar extends React.PureComponent {
         }}
         clearOnEscape
         autoComplete
-        autoHighlight
+        value={searchString}
+        selectOnFocus
         open={autoCompleteOpen}
         disableClearable
         onChange={this.handleOnChange}
@@ -527,7 +563,10 @@ class SearchBar extends React.PureComponent {
                     <SearchIcon />
                   </IconButton>
                   {searchString.length > 0 ? (
-                    <IconButton size="small">
+                    <IconButton
+                      onClick={() => this.setState({ searchString: "" })}
+                      size="small"
+                    >
                       <ClearIcon />
                     </IconButton>
                   ) : (
@@ -590,7 +629,7 @@ class SearchBar extends React.PureComponent {
   render() {
     const { classes } = this.props;
     const { panelCollapsed, showSearchResults } = this.state;
-    console.log(this.state, "state: ");
+
     return (
       <Grid
         className={cslx(classes.searchContainer, {

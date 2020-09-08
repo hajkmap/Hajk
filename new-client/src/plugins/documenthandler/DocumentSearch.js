@@ -12,8 +12,9 @@ export default class DocumentSearch {
    * @memberof DocumentSearch
    */
   getResults = (searchString, searchOptions) => {
-    this.chaptersMatchSearch = [];
-    this.allDocuments.forEach((document) => {
+    let featureCollections = [];
+    this.allDocuments.forEach((document, index) => {
+      this.chaptersMatchSearch = [];
       document.chapters.forEach((chapter) => {
         this.keywordsMatchSearchString(
           document.documentTitle,
@@ -21,25 +22,33 @@ export default class DocumentSearch {
           searchString
         );
       });
+
+      const featureCollection = {
+        value: {
+          status: "fulfilled",
+          type: "FeatureCollection",
+          onClickName: "ducomenthandler-searchresult-clicked",
+          crs: { type: null, properties: { name: null } },
+          features: this.chaptersMatchSearch,
+          numberMatched: this.chaptersMatchSearch.length,
+          numberReturned: this.chaptersMatchSearch.length,
+          timeStamp: null,
+          totalFeatures: this.chaptersMatchSearch.length,
+        },
+        sources: this.getMatchDocumentsFromSearch(),
+        source: {
+          id: `${document.documentTitle}`,
+          caption: document.documentTitle,
+          displayFields: ["header"],
+          searchFields: ["header"],
+        },
+        origin: "DOCUMENT",
+      };
+      featureCollections.push(featureCollection);
     });
-    const featureCollection = {
-      status: "fulfilled",
-      value: {
-        type: "FeatureCollection",
-        onClickName: "",
-        crs: { type: null, properties: { name: null } },
-        features: this.chaptersMatchSearch,
-        numberMatched: this.chaptersMatchSearch.length,
-        numberReturned: this.chaptersMatchSearch.length,
-        timeStamp: null,
-        totalFeatures: this.chaptersMatchSearch.length,
-      },
-      sources: this.getMatchDocumentsFromSearch(),
-      origin: "DOCUMENT",
-    };
 
     return new Promise((resolve, reject) => {
-      resolve(featureCollection);
+      resolve({ featureCollections: featureCollections, errors: [] });
     });
   };
 
@@ -51,7 +60,7 @@ export default class DocumentSearch {
    *
    * @memberof DocumentSearch
    */
-  keywordsMatchSearchString = (documentTitle, chapter, searchString) => {
+  keywordsMatchSearchString = (documentTitle, chapter, searchString, index) => {
     if (
       chapter.hasOwnProperty("keywords") &&
       this.searchStringMatchKeywords(searchString, chapter.keywords)
@@ -59,6 +68,7 @@ export default class DocumentSearch {
       this.chaptersMatchSearch.push({
         type: "Feature",
         geometry: null,
+        id: `${documentTitle}${index}`,
         properties: {
           documentTitle: documentTitle,
           header: chapter.header,
@@ -67,8 +77,13 @@ export default class DocumentSearch {
       });
 
     if (chapter.hasOwnProperty("chapters"))
-      chapter.chapters.forEach((subChapter) => {
-        this.keywordsMatchSearchString(documentTitle, subChapter, searchString);
+      chapter.chapters.forEach((subChapter, index) => {
+        this.keywordsMatchSearchString(
+          documentTitle,
+          subChapter,
+          searchString,
+          index
+        );
       });
   };
 

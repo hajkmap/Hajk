@@ -37,6 +37,7 @@ class SearchResultsDataset extends React.PureComponent {
       setSelectedFeatureAndSource,
       featureCollection,
     } = this.props;
+    console.log("featureCollectioN", featureCollection);
 
     return (
       <>
@@ -46,13 +47,12 @@ class SearchResultsDataset extends React.PureComponent {
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Grid container>
-              <Grid item xs={4}>
+              <Grid item xs={6}>
                 <Typography>
                   <PlaceIcon /> {featureCollection.source.caption}
                 </Typography>
               </Grid>
-              <Grid item xs={4} />
-              <Grid item xs={4}>
+              <Grid item xs={6}>
                 <Tooltip
                   title={`Visar ${featureCollection.value.numberReturned} av ${featureCollection.value.numberMatched} resultat`}
                 >
