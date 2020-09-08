@@ -173,7 +173,7 @@ class SearchBar extends React.PureComponent {
     this.doSearch();
   };
 
-  flattenAutoCompleteList = (searchResults) => {
+  flattenAndSortAutoCompleteList = (searchResults) => {
     const resultsPerDataset = searchResults.featureCollections.map(
       (featureCollection) => {
         return featureCollection.value.features.map((feature) => {
@@ -195,14 +195,49 @@ class SearchBar extends React.PureComponent {
         });
       }
     );
-
     // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
     // however, we need just one Array, so let's flatten the results:
     const flatAutocompleteArray = resultsPerDataset.reduce(
       (a, b) => a.concat(b),
       []
     );
-    return flatAutocompleteArray;
+    return flatAutocompleteArray.sort((a, b) =>
+      a.autocompleteEntry.localeCompare(b.autocompleteEntry, "sv", {
+        numeric: true,
+      })
+    );
+  };
+
+  removeCollectionsWithoutFeatures = (searchResults) => {
+    for (let i = searchResults.featureCollections.length - 1; i >= 0; i--) {
+      if (searchResults.featureCollections[i].value.features.length === 0) {
+        searchResults.featureCollections.splice(i, 1);
+      }
+    }
+    return searchResults;
+  };
+
+  prepareAutoCompleteList = (searchResults) => {
+    const cleanedResults = this.removeCollectionsWithoutFeatures(searchResults);
+    let numSourcesWithResults = cleanedResults.featureCollections.length;
+    let numResults = 0;
+    cleanedResults.featureCollections.forEach((fc) => {
+      numResults += fc.value.features.length;
+    });
+
+    let spacesPerSource = Math.floor(numResults / numSourcesWithResults);
+
+    if (numResults <= 7) {
+      //All results can be shown
+      return this.flattenAndSortAutoCompleteList(cleanedResults);
+    } else {
+      cleanedResults.featureCollections.forEach((fc) => {
+        if (fc.value.features.length > spacesPerSource) {
+          fc.value.features.splice(spacesPerSource - 1);
+        }
+      });
+      return this.flattenAndSortAutoCompleteList(cleanedResults);
+    }
   };
 
   fetchResultsFromPlugins = () => {
