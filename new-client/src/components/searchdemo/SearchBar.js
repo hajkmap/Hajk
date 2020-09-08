@@ -205,9 +205,23 @@ class SearchBar extends React.PureComponent {
     return flatAutocompleteArray;
   };
 
+  fetchResultsFromPlugins = () => {
+    const { searchImplementedPlugins } = this.props;
+    const { searchString } = this.state;
+    if (searchImplementedPlugins && searchImplementedPlugins.length === 0) {
+      return [];
+    }
+    return searchImplementedPlugins.reduce((promises, plugin) => {
+      if (plugin.searchInterface.getResults) {
+        promises.push(plugin.searchInterface.getResults(searchString));
+        return promises;
+      }
+      return promises;
+    }, []);
+  };
+
   updateAutoCompleteList = () => {
     let { searchSources } = this.state;
-    let promises = [];
     let searchResults = { errors: [], featureCollections: [] };
     if (searchSources.length === 0) {
       searchSources = this.searchModel.getSources();
@@ -223,34 +237,27 @@ class SearchBar extends React.PureComponent {
           searchSources, // this is a state variable!
           fetchOptions
         );
-        promises.push(promise);
 
-        this.props.searchImplementedPlugins.forEach((plugin) => {
-          if (plugin.searchInterface.getResults) {
-            promises.push(
-              plugin.searchInterface.getResults(this.state.searchString)
-            );
+        Promise.allSettled([promise, ...this.fetchResultsFromPlugins()]).then(
+          (results) => {
+            results.forEach((result) => {
+              searchResults.featureCollections = searchResults.featureCollections.concat(
+                result.value.featureCollections
+              );
+              searchResults.errors = searchResults.errors.concat(
+                result.value.errors
+              );
+            });
+
+            // It's possible to handle any errors in the UI by checking if Search Model returned any
+            searchResults.errors.length > 0 &&
+              console.error("Autocomplete error: ", searchResults.errors);
+
+            this.setState({
+              autocompleteList: this.flattenAutoCompleteList(searchResults),
+            });
           }
-        });
-
-        Promise.allSettled(promises).then((results) => {
-          results.forEach((result) => {
-            searchResults.featureCollections = searchResults.featureCollections.concat(
-              result.value.featureCollections
-            );
-            searchResults.errors = searchResults.errors.concat(
-              result.value.errors
-            );
-          });
-
-          // It's possible to handle any errors in the UI by checking if Search Model returned any
-          searchResults.errors.length > 0 &&
-            console.error("Autocomplete error: ", searchResults.errors);
-
-          this.setState({
-            autocompleteList: this.flattenAutoCompleteList(searchResults),
-          });
-        });
+        );
       } catch (error) {
         // If we catch an error, display it to the user
         // (preferably in a Snackbar instead of console).
@@ -317,44 +324,38 @@ class SearchBar extends React.PureComponent {
       return null;
     }
 
-    let promises = [];
-
     try {
       const promise = this.searchModel.getResults(
         searchString,
         searchSources, // this is a state variable!
         this.getSearchResultsFetchSettings()
       );
-      promises.push(promise);
 
-      this.props.searchImplementedPlugins.forEach((plugin) => {
-        if (plugin.searchInterface.getResults) {
-          promises.push(plugin.searchInterface.getResults(searchString));
+      Promise.allSettled([promise, ...this.fetchResultsFromPlugins()]).then(
+        (results) => {
+          results.forEach((result) => {
+            searchResults.featureCollections = searchResults.featureCollections.concat(
+              result.value.featureCollections
+            );
+            searchResults.errors = searchResults.errors.concat(
+              result.value.errors
+            );
+          });
+
+          // It's possible to handle any errors in the UI by checking if Search Model returned any
+          searchResults.errors.length > 0 &&
+            console.error(searchResults.errors);
+
+          this.setState({
+            searchResults,
+            showSearchResults: true,
+            loading: false,
+            autoCompleteOpen: false,
+          });
+
+          this.addFeaturesToResultsLayer(searchResults.featureCollections);
         }
-      });
-
-      Promise.allSettled(promises).then((results) => {
-        results.forEach((result) => {
-          searchResults.featureCollections = searchResults.featureCollections.concat(
-            result.value.featureCollections
-          );
-          searchResults.errors = searchResults.errors.concat(
-            result.value.errors
-          );
-        });
-
-        // It's possible to handle any errors in the UI by checking if Search Model returned any
-        searchResults.errors.length > 0 && console.error(searchResults.errors);
-
-        this.setState({
-          searchResults,
-          showSearchResults: true,
-          loading: false,
-          autoCompleteOpen: false,
-        });
-
-        this.addFeaturesToResultsLayer(searchResults.featureCollections);
-      });
+      );
     } catch (err) {
       console.error("Show a nice error message to user with info:", err);
     }

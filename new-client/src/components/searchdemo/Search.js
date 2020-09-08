@@ -121,19 +121,33 @@ class Search extends React.PureComponent {
     searchImplementedPluginsLoaded: false,
   };
 
+  implementsSearchInterface = (plugin) => {
+    console.log(plugin.searchInterface.getResults, "??");
+    var hasGetResultsMethod = plugin.searchInterface.getResults;
+    if (!hasGetResultsMethod) {
+      console.warn(
+        plugin.type +
+          " has flag searchImplemented = true but has not implemented correct method in plugin to use search"
+      );
+    }
+    return hasGetResultsMethod;
+  };
+
   getSearchImplementedPlugins = () => {
     const { app } = this.props;
     return Object.values(app.appModel.plugins).filter((plugin) => {
-      return plugin.options.searchImplemented;
+      return (
+        plugin.options.searchImplemented &&
+        this.implementsSearchInterface(plugin)
+      );
     });
   };
 
   componentDidMount = () => {
     const { app } = this.props;
     app.globalObserver.subscribe("core.appLoaded", () => {
-      let searchImplementedPlugins = this.getSearchImplementedPlugins();
       this.setState({
-        searchImplementedPlugins: searchImplementedPlugins,
+        searchImplementedPlugins: this.getSearchImplementedPlugins(),
         searchImplementedPluginsLoaded: true,
       });
     });
