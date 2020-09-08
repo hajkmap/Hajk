@@ -32,22 +32,22 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     return (
       <ListItem key={feature.id}>
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <ListItemText
-              primary={texts.shift()}
+              primary={
+                <Button
+                  style={{ width: "100%" }}
+                  onClick={handleCheckedToggle(feature.id)}
+                >
+                  {" "}
+                  {texts.shift()}{" "}
+                </Button>
+              }
               secondary={texts.join(", ")}
             />
           </Grid>
-          <Grid item xs={6}>
-            <IconButton
-              aria-label="show-in-map"
-              onClick={handleCheckedToggle(feature.id)}
-            >
-              <MapIcon />
-            </IconButton>
-          </Grid>
           <Grid item xs={12}>
-            <Table>
+            <Table size={"small"} style={{ maxWidth: "100%" }}>
               <TableBody>
                 {Object.entries(feature.properties).map((row, index) => {
                   if (index >= 2) {
@@ -77,6 +77,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
           <Grid item xs={12}>
             <Button
               color="primary"
+              style={{ width: "100%" }}
               onClick={() =>
                 this.setState({
                   showAllInformation: !this.state.showAllInformation,

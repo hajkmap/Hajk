@@ -35,6 +35,7 @@ class SearchResultsList extends React.PureComponent {
   };
 
   handleCheckedToggle = (value) => () => {
+    console.log("hejhej");
     const currentIndex = this.state.checkedItems.indexOf(value);
     const newChecked = [...this.state.checkedItems];
 

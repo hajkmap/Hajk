@@ -39,6 +39,7 @@ export default class DocumentSearch {
         id: "999",
         caption: "Documenthandler",
         displayFields: ["header"],
+        searchFields: ["header"],
       },
       origin: "DOCUMENT",
     };
