@@ -131,7 +131,7 @@ class Search extends React.PureComponent {
   componentDidMount = () => {
     const { app } = this.props;
     app.globalObserver.subscribe("core.appLoaded", () => {
-      var searchImplementedPlugins = this.getSearchImplementedPlugins();
+      let searchImplementedPlugins = this.getSearchImplementedPlugins();
       this.setState({
         searchImplementedPlugins: searchImplementedPlugins,
         searchImplementedPluginsLoaded: true,

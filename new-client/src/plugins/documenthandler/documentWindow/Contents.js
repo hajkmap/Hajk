@@ -18,13 +18,13 @@ import TextArea from "./TextArea";
 import Link from "@material-ui/core/Link";
 
 const getIconSizeFromFontSize = (theme) => {
-  var fontSizeBody = theme.typography.body1.fontSize;
-  var format = "rem";
+  let fontSizeBody = theme.typography.body1.fontSize;
+  let format = "rem";
   if (fontSizeBody.search("px") > -1) {
     format = "px";
   }
-  var index = fontSizeBody.search(format);
-  var size = fontSizeBody.substring(0, index);
+  let index = fontSizeBody.search(format);
+  let size = fontSizeBody.substring(0, index);
   return `${size * 1.7}${format}`;
 };
 
@@ -162,7 +162,7 @@ class Contents extends React.PureComponent {
 
   getStrongTagTypographyComponents = (strongTag) => {
     const children = [...strongTag.childNodes];
-    var array = [];
+    let array = [];
     if (children.length > 0) {
       children.forEach((child, index) => {
         array.push(
@@ -177,7 +177,7 @@ class Contents extends React.PureComponent {
   };
   getUnderlineTagTypographyComponents = (uTag) => {
     const children = [...uTag.childNodes];
-    var array = [];
+    let array = [];
     if (children.length > 0) {
       children.forEach((child, index) => {
         array.push(
@@ -192,7 +192,7 @@ class Contents extends React.PureComponent {
   };
   getItalicTagTypographyComponents = (emTag) => {
     const children = [...emTag.childNodes];
-    var array = [];
+    let array = [];
     if (children.length > 0) {
       children.forEach((child, index) => {
         array.push(
@@ -231,7 +231,7 @@ class Contents extends React.PureComponent {
 
   appendParsedComponentsToDocument = () => {
     const { activeDocument } = this.props;
-    var content = { ...activeDocument };
+    let content = { ...activeDocument };
     content.chapters.forEach((chapter, index) => {
       this.appendComponentsToChapter(chapter);
     });
@@ -250,7 +250,7 @@ class Contents extends React.PureComponent {
 
   getULComponent = (ulComponent) => {
     const { classes } = this.props;
-    var children = [...ulComponent.children];
+    let children = [...ulComponent.children];
     return (
       <List component="nav">
         {children.map((listItem, index) => {
@@ -273,7 +273,7 @@ class Contents extends React.PureComponent {
 
   getOLComponent = (olComponent) => {
     const { classes } = this.props;
-    var children = [...olComponent.children];
+    let children = [...olComponent.children];
     return (
       <List component="nav">
         {children.map((listItem, index) => {
@@ -371,7 +371,7 @@ class Contents extends React.PureComponent {
 
   getTextArea = (tag) => {
     const children = [...tag.childNodes];
-    var textAreaContentArray = children.map((element, index) => {
+    let textAreaContentArray = children.map((element, index) => {
       return (
         <React.Fragment key={index}>{this.renderChild(element)}</React.Fragment>
       );
@@ -443,7 +443,7 @@ class Contents extends React.PureComponent {
 
   getImageStyle = (image) => {
     const { classes } = this.props;
-    var className = image.popup
+    let className = image.popup
       ? clsx(
           classes.documentImage,
           classes.naturalDocumentImageProportions,
@@ -478,7 +478,7 @@ class Contents extends React.PureComponent {
       width: imgTag.attributes.getNamedItem("data-image-width")?.value,
     };
 
-    var onClickCallback = image.popup
+    let onClickCallback = image.popup
       ? () => {
           this.showPopupModal(image);
         }
@@ -634,7 +634,7 @@ class Contents extends React.PureComponent {
   };
 
   getHeaderVariant = (chapter) => {
-    var headerSize = 2; //Chapters start with h2
+    let headerSize = 2; //Chapters start with h2
     while (chapter.parent) {
       headerSize++;
       chapter = chapter.parent;

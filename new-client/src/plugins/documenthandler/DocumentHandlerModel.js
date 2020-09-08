@@ -41,7 +41,7 @@ export default class DocumentHandlerModel {
   }
 
   getFlattenedMenu(menu) {
-    var flattenedMenu = [];
+    let flattenedMenu = [];
     menu.forEach((menuItem) => {
       if (menuItem.menu.length > 0) {
         flattenedMenu = flattenedMenu.concat(
@@ -148,7 +148,7 @@ export default class DocumentHandlerModel {
   }
 
   getChapterById(chapters, id) {
-    for (var i = 0; i < chapters.length; i++) {
+    for (let i = 0; i < chapters.length; i++) {
       if (chapters[i].id === id) {
         return chapters[i];
       } else if (chapters[i].chapters && chapters[i].chapters.length > 0) {
@@ -203,7 +203,7 @@ export default class DocumentHandlerModel {
    * @memberof DocumentHandlerModel
    */
   getHeaderRef = (activeDocument, headerIdentifierToFind) => {
-    var foundChapter;
+    let foundChapter;
     activeDocument.chapters.some((chapter) => {
       foundChapter = this.findChapter(chapter, headerIdentifierToFind);
       return foundChapter;

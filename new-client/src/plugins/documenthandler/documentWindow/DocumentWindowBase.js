@@ -58,7 +58,7 @@ class DocumentWindowBase extends React.PureComponent {
     if (menuItem.document === documentNameToFind) {
       return menuItem;
     } else if (menuItem.menu && menuItem.menu.length > 0) {
-      var i,
+      let i,
         result = null;
       for (i = 0; result == null && i < menuItem.menu.length; i++) {
         result = this.findMenuItem(menuItem.menu[i], documentNameToFind);
@@ -70,9 +70,9 @@ class DocumentWindowBase extends React.PureComponent {
 
   findReferringMenuItem = (documentNameToFind) => {
     const { options } = this.props;
-    var foundMenuItem = null;
+    let foundMenuItem = null;
     options.menuConfig.menu.forEach((rootItemToSearch) => {
-      var found = this.findMenuItem(rootItemToSearch, documentNameToFind);
+      let found = this.findMenuItem(rootItemToSearch, documentNameToFind);
       if (found != null) {
         foundMenuItem = found;
       }

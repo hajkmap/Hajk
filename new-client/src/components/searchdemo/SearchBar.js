@@ -52,7 +52,7 @@ const styles = (theme) => ({
   },
 });
 
-var drawStyle = new Style({
+let drawStyle = new Style({
   stroke: new Stroke({
     color: "rgba(255, 214, 91, 0.6)",
     width: 4,

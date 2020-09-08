@@ -10,7 +10,7 @@ import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 
 import SearchResultsDataset from "./SearchResultsDataset";
 
-var highlightedStyle = new Style({
+let highlightedStyle = new Style({
   stroke: new Stroke({
     color: [200, 0, 0, 0.7],
     width: 4,

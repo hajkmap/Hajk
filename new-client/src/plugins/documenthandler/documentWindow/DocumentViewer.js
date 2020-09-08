@@ -103,7 +103,7 @@ class DocumentViewer extends React.PureComponent {
   };
 
   selectAllText = () => {
-    var range = document.createRange();
+    let range = document.createRange();
     range.selectNode(this.scrollElementRef.current);
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);

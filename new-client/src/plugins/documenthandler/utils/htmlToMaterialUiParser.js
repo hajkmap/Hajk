@@ -6,21 +6,21 @@
  * @memberof htmlToMaterialUiParser
  */
 export default (html, tagSpecificCallbacks) => {
-  var parser = new DOMParser();
-  var htmlDoc = parser.parseFromString(html, "text/html");
+  let parser = new DOMParser();
+  let htmlDoc = parser.parseFromString(html, "text/html");
   for (const child of htmlDoc.body.children) {
     parseChild(child, tagSpecificCallbacks);
   }
 
-  var generatedHtml = [...htmlDoc.body.children];
-  return generatedHtml.map(tag => {
+  let generatedHtml = [...htmlDoc.body.children];
+  return generatedHtml.map((tag) => {
     if (tag.callback) return tag.callback(tag);
     return null;
   });
 };
 
 const parseChild = (child, tagSpecificCallbacks) => {
-  var callbackObject = tagSpecificCallbacks.find(object => {
+  let callbackObject = tagSpecificCallbacks.find((object) => {
     return object.tagType.toLowerCase() === child.tagName.toLowerCase();
   });
   child.callback = callbackObject.callback;
