@@ -432,7 +432,9 @@ class LayerGroupItem extends Component {
               <DownloadLink
                 index={index}
                 layer={this.props.layer}
-                appConfig={this.props.appConfig}
+                enableDownloadLink={
+                  this.props.app.config.mapConfig.map.enableDownloadLink
+                }
               />
             </div>
             <div className={classes.layerButton}>
