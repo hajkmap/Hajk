@@ -18,6 +18,7 @@
     {
       "type": "layerswitcher",
       "options": {
+        "enableOSM": false,
         "baselayers": [
           {
             "id": "1",
@@ -868,6 +869,7 @@
     ],
     "origin": [0.0, 0.0],
     "extent": [105000.0, 6355000.0, 185000.0, 6435000.0],
+
     "constrainOnlyCenter": true,
     "logo": "/logo.png",
     "geoserverLegendOptions": "",

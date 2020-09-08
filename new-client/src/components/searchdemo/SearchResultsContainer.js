@@ -4,7 +4,6 @@ import { withStyles } from "@material-ui/core/styles";
 import Alert from "@material-ui/lab/Alert";
 
 import SearchResultsList from "./SearchResultsList";
-import SearchResultsDetails from "./SearchResultsDetails";
 
 const styles = (theme) => ({
   searchResultContainer: {

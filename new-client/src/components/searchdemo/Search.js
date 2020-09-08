@@ -110,27 +110,8 @@ import SearchBar from "./SearchBar";
 import { withStyles } from "@material-ui/core/styles";
 
 const styles = (theme) => ({
-  search: {
-    borderRadius: theme.shape.borderRadius,
-    flex: "auto",
-    display: "flex",
-    height: "100%",
-  },
   inputRoot: {
     width: "100%",
-  },
-  inputInput: {
-    padding: theme.spacing(1),
-    left: "100%",
-    width: "100%",
-  },
-  inputInputWide: {
-    padding: theme.spacing(1),
-    left: "100%",
-    width: "100%",
-    "&:focus": {
-      width: "100%",
-    },
   },
 });
 

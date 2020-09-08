@@ -1,10 +1,9 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import MapIcon from "@material-ui/icons/Map";
 import Button from "@material-ui/core/Button";
 import cslx from "clsx";
-import { ListItem, ListItemText, IconButton } from "@material-ui/core";
+import { ListItem, ListItemText } from "@material-ui/core";
 import { Table, TableBody, TableRow, TableCell } from "@material-ui/core";
 
 const styles = (theme) => ({
