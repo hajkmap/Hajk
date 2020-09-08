@@ -489,6 +489,7 @@ class SearchBar extends React.PureComponent {
 
   renderSearchResultList = () => {
     const { searchResults, resultPanelCollapsed } = this.state;
+    console.log("searchResults: ", searchResults);
 
     return (
       <SearchResultsContainer
@@ -509,7 +510,6 @@ class SearchBar extends React.PureComponent {
       autoCompleteOpen,
       searchString,
     } = this.state;
-    console.log("autocompletelist: ", autocompleteList);
     const { classes } = this.props;
     return (
       <Autocomplete
@@ -522,7 +522,7 @@ class SearchBar extends React.PureComponent {
         clearOnEscape
         autoComplete
         value={searchString}
-        autoHighlight
+        selectOnFocus
         open={autoCompleteOpen}
         disableClearable
         onChange={this.handleOnChange}
