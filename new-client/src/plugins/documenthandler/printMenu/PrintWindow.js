@@ -9,6 +9,9 @@ import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import PrintList from "./PrintList";
+import PrintPreview from "./PrintPreview";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -32,6 +35,64 @@ class PrintWindow extends React.PureComponent {
     printMaps: true,
     allDocumentsToggled: false,
     chapterInformation: this.setChapterInfo(),
+    printContent: undefined,
+  };
+
+  componentDidMount = () => {
+    this.props.localObserver.subscribe(
+      "chapter-components-appended",
+      (renderedChapters) => {
+        this.setState(
+          {
+            printContent: renderedChapters,
+          },
+          () => {
+            this.printContents();
+          }
+        );
+      }
+    );
+  };
+
+  componentWillUnmount = () => {
+    this.props.localObserver.unsubscribe("chapter-components-appended");
+  };
+
+  printContents = () => {
+    const printContent = document.getElementById("printPreviewContent");
+
+    html2canvas(printContent, {}).then((canvas) => {
+      let pdf = new jsPDF("p", "pt", "a4");
+      let dY = 0;
+      let sWidth = Math.round((210 * 90) / 25.4);
+      let sHeight = 1120;
+      let dWidth = Math.round((210 * 90) / 25.4);
+      let dHeight = 1120;
+      for (var i = 0; i <= printContent.clientHeight / 1120; i++) {
+        let sY = 1120 * i;
+
+        let onePageCanvas = document.createElement("canvas");
+        onePageCanvas.width = Math.round((210 * 90) / 25.4);
+        onePageCanvas.height = 1120;
+
+        let ctx = onePageCanvas.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, onePageCanvas.width, onePageCanvas.height);
+
+        ctx.drawImage(canvas, 0, sY, sWidth, sHeight, 0, dY, dWidth, dHeight);
+        dY = 50;
+
+        //! If we're on anything other than the first page,
+        // add another page
+        if (i > 0) {
+          pdf.addPage(595, 842); //210" x 297" in pts
+        }
+        //! now we declare that we're working on that page
+        pdf.setPage(i + 1);
+        pdf.addImage(onePageCanvas, "JPG", 0, 0);
+      }
+      pdf.save("oversiktsplan.pdf");
+    });
   };
 
   handleCheckboxChange = (chapter) => {
@@ -87,9 +148,43 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  createPDF() {
-    console.log("Printing... Printing...");
-  }
+  removeChaptersNotSelected = (chapter) => {
+    if (chapter.chapters && chapter.chapters.length > 0) {
+      chapter.chapters.forEach((subChapter) => {
+        if (subChapter.chapters && subChapter.chapters.length > 0) {
+          return this.removeChaptersNotSelected(subChapter);
+        }
+        if (!subChapter.chosenForPrint) {
+          subChapter.html = "";
+          subChapter.header = "";
+        }
+      });
+    }
+    if (!chapter.chosenForPrint) {
+      chapter.html = "";
+      chapter.header = "";
+    }
+    return chapter;
+  };
+
+  getChaptersToPrint = () => {
+    let chaptersToPrint = JSON.parse(
+      JSON.stringify(this.state.chapterInformation)
+    );
+    chaptersToPrint.forEach((chapter) => {
+      chapter = this.removeChaptersNotSelected(chapter);
+    });
+
+    return chaptersToPrint;
+  };
+
+  createPDF = () => {
+    const chaptersToPrint = this.getChaptersToPrint();
+    this.props.localObserver.publish(
+      "append-chapter-components",
+      chaptersToPrint
+    );
+  };
 
   renderCheckboxes() {
     return (
@@ -185,6 +280,20 @@ class PrintWindow extends React.PureComponent {
     );
   }
 
+  renderPrintPreview = () => {
+    return (
+      <PrintPreview>
+        <Grid
+          style={{ padding: "50px", maxWidth: "100%" }}
+          id={"printPreviewContent"}
+          container
+        >
+          {this.state.printContent}
+        </Grid>
+      </PrintPreview>
+    );
+  };
+
   render() {
     const {
       classes,
@@ -193,7 +302,6 @@ class PrintWindow extends React.PureComponent {
       documentWindowMaximized,
     } = this.props;
     const { chapterInformation } = this.state;
-
     return (
       <>
         <Grid
@@ -257,6 +365,7 @@ class PrintWindow extends React.PureComponent {
           </Grid>
           {documentWindowMaximized && this.renderCreatePDFButton()}
         </Grid>
+        {this.state.printContent && this.renderPrintPreview()}
       </>
     );
   }

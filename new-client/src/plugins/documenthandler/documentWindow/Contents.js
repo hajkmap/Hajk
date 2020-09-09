@@ -76,6 +76,24 @@ class Contents extends React.PureComponent {
 
   componentDidMount = () => {
     this.appendParsedComponentsToDocument();
+    this.props.localObserver.unsubscribe("append-chapter-components");
+    this.props.localObserver.subscribe(
+      "append-chapter-components",
+      (chapters) => {
+        chapters.forEach((chapter) => {
+          this.appendComponentsToChapter(chapter);
+        });
+        let renderedChapters = this.renderChapters(chapters);
+        this.props.localObserver.publish(
+          "chapter-components-appended",
+          renderedChapters
+        );
+      }
+    );
+  };
+
+  componentWillUnmount = () => {
+    this.props.localObserver.unsubscribe("chapter-components-appended");
   };
 
   /**
@@ -216,12 +234,12 @@ class Contents extends React.PureComponent {
   };
 
   appendComponentsToChapter = (chapter) => {
-    if (chapter.chapters.length > 0) {
+    if (chapter.chapters && chapter.chapters.length > 0) {
       chapter.chapters.forEach((subChapter) => {
         subChapter.components = this.getMaterialUIComponentsForChapter(
           subChapter
         );
-        if (subChapter.chapters.length > 0) {
+        if (subChapter.chapters && subChapter.chapters.length > 0) {
           this.appendComponentsToChapter(subChapter);
         }
       });

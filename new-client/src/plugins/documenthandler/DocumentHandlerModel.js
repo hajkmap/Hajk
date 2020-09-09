@@ -230,6 +230,8 @@ export default class DocumentHandlerModel {
     let chapterInfo = {};
     chapterInfo.id = ++this.chapterNumber;
     chapterInfo.level = level;
+    chapterInfo.html = chapter.html;
+    chapterInfo.parent = chapter.parent;
     chapterInfo.color = color;
     chapterInfo.header = chapter.header;
     chapterInfo.headerIdentifier = chapter.headerIdentifier;
