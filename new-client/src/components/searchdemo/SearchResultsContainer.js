@@ -99,6 +99,7 @@ class SearchResultsContainer extends React.PureComponent {
               sumOfResults={sumOfResults}
               featureCollections={featureCollections}
               map={map}
+              app={this.props.app}
               resultsSource={resultsSource}
               setSelectedFeatureAndSource={this.setSelectedFeatureAndSource}
             />

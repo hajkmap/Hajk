@@ -289,7 +289,9 @@ class SearchBar extends React.PureComponent {
               console.error("Autocomplete error: ", searchResults.errors);
 
             this.setState({
-              autocompleteList: this.flattenAutoCompleteList(searchResults),
+              autocompleteList: this.flattenAndSortAutoCompleteList(
+                searchResults
+              ),
             });
           }
         );
@@ -525,11 +527,13 @@ class SearchBar extends React.PureComponent {
 
   renderSearchResultList = () => {
     const { searchResults, resultPanelCollapsed } = this.state;
+    const { app } = this.props;
     console.log("searchResults: ", searchResults);
 
     return (
       <SearchResultsContainer
         searchResults={searchResults}
+        app={app}
         resultsSource={this.resultsSource}
         featureCollections={searchResults.featureCollections}
         map={this.map}

@@ -35,7 +35,7 @@ class DocumentWindowBase extends React.PureComponent {
 
   setActiveDocument = (documentFileName) => {
     const { model } = this.props;
-    this.allDocumentsLoaded.then(() => {
+    return this.allDocumentsLoaded.then(() => {
       let document = model.getDocuments([documentFileName])[0];
       this.setState({
         documentTitle: document.documentTitle,
@@ -120,8 +120,21 @@ class DocumentWindowBase extends React.PureComponent {
     });
   };
 
+  bindListenForSearchResultClick = () => {
+    const { app } = this.props;
+    app.globalObserver.subscribe(
+      "documenthandler-searchresult-clicked",
+      (searchResultClick) => {
+        this.showHeaderInDocument({
+          documentName: searchResultClick.properties.documentFileName,
+          headerIdentifier: searchResultClick.properties.headerIdentifier,
+        });
+      }
+    );
+  };
   bindSubscriptions = () => {
     const { localObserver } = this.props;
+    this.bindListenForSearchResultClick();
     localObserver.subscribe(
       "show-header-in-document",
       this.showHeaderInDocument

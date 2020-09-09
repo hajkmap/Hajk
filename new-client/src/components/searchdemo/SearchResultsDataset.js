@@ -32,8 +32,7 @@ class SearchResultsDataset extends React.PureComponent {
   renderResultsDataset = () => {
     const { numberOfResultsToDisplay } = this.state;
     const {
-      checkedItems,
-      handleCheckedToggle,
+      handleOnResultClick,
       setSelectedFeatureAndSource,
       featureCollection,
     } = this.props;
@@ -68,8 +67,7 @@ class SearchResultsDataset extends React.PureComponent {
                   key={f.id}
                   feature={f}
                   source={featureCollection.source}
-                  checkedItems={checkedItems}
-                  handleCheckedToggle={handleCheckedToggle}
+                  handleOnResultClick={handleOnResultClick}
                   setSelectedFeatureAndSource={setSelectedFeatureAndSource}
                 />
               ))}

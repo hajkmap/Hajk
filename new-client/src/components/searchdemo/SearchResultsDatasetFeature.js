@@ -24,10 +24,10 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   render() {
-    const { feature, handleCheckedToggle, classes, source } = this.props;
+    const { feature, handleOnResultClick, classes, source } = this.props;
     const { showAllInformation } = this.state;
     let texts = source.displayFields.map((df) => feature.properties[df]);
-
+    console.log(feature, "feature");
     return (
       <ListItem key={feature.id}>
         <Grid container>
@@ -36,7 +36,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
               primary={
                 <Button
                   style={{ width: "100%" }}
-                  onClick={handleCheckedToggle(feature.id)}
+                  onClick={handleOnResultClick(feature)}
                 >
                   {" "}
                   {texts.shift()}{" "}

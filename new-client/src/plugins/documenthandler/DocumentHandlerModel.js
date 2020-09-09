@@ -47,18 +47,14 @@ export default class DocumentHandlerModel {
     this.allDocuments.forEach((document, index) => {
       this.chaptersMatchSearch = [];
       document.chapters.forEach((chapter) => {
-        this.keywordsMatchSearchString(
-          document.documentTitle,
-          chapter,
-          searchString
-        );
+        console.log(document, "document");
+        this.keywordsMatchSearchString(document, chapter, searchString);
       });
 
       const featureCollection = {
         value: {
           status: "fulfilled",
           type: "FeatureCollection",
-          onClickName: "ducomenthandler-searchresult-clicked",
           crs: { type: null, properties: { name: null } },
           features: this.chaptersMatchSearch,
           numberMatched: this.chaptersMatchSearch.length,
@@ -66,6 +62,7 @@ export default class DocumentHandlerModel {
           timeStamp: null,
           totalFeatures: this.chaptersMatchSearch.length,
         },
+
         sources: this.getMatchDocumentsFromSearch(),
         source: {
           id: `${document.documentTitle}`,
@@ -90,7 +87,7 @@ export default class DocumentHandlerModel {
    * @return {object} The chapters that match the search string.
    *
    */
-  keywordsMatchSearchString = (documentTitle, chapter, searchString, index) => {
+  keywordsMatchSearchString = (document, chapter, searchString, index) => {
     if (
       chapter.hasOwnProperty("keywords") &&
       this.searchStringMatchKeywords(searchString, chapter.keywords)
@@ -98,9 +95,11 @@ export default class DocumentHandlerModel {
       this.chaptersMatchSearch.push({
         type: "Feature",
         geometry: null,
-        id: `${documentTitle}${index}`,
+        onClickName: "documenthandler-searchresult-clicked",
+        id: `${document.documentTitle}${index}`,
         properties: {
-          documentTitle: documentTitle,
+          documentTitle: document.documentTitle,
+          documentFileName: document.documentFileName,
           header: chapter.header,
           headerIdentifier: chapter.headerIdentifier,
         },
@@ -109,7 +108,7 @@ export default class DocumentHandlerModel {
     if (chapter.hasOwnProperty("chapters"))
       chapter.chapters.forEach((subChapter, index) => {
         this.keywordsMatchSearchString(
-          documentTitle,
+          document,
           subChapter,
           searchString,
           index

@@ -34,18 +34,16 @@ class SearchResultsList extends React.PureComponent {
     checkedItems: [],
   };
 
-  handleCheckedToggle = (value) => () => {
-    console.log("hejhej");
-    const currentIndex = this.state.checkedItems.indexOf(value);
+  showClickResultInMap = (feature) => {
+    const currentIndex = this.state.checkedItems.indexOf(feature.id);
     const newChecked = [...this.state.checkedItems];
 
     if (currentIndex === -1) {
-      newChecked.push(value);
+      newChecked.push(feature.id);
     } else {
       newChecked.splice(currentIndex, 1);
     }
 
-    //this.setCheckedItems(newChecked); // Set state so our checkboxes are up-to-date
     this.setState(
       {
         checkedItems: newChecked,
@@ -55,6 +53,14 @@ class SearchResultsList extends React.PureComponent {
         this.zoomToCheckedItems(this.state.checkedItems); // Ensure we zoom out so all checked features fit
       }
     );
+  };
+
+  handleOnResultClick = (feature) => () => {
+    if (feature.onClickName) {
+      this.props.app.globalObserver.publish(feature.onClickName, feature);
+    } else {
+      this.showClickResultInMap(feature);
+    }
   };
 
   changeStyleOnCheckedItems = (items) => {
@@ -108,8 +114,7 @@ class SearchResultsList extends React.PureComponent {
             key={fc.source.id}
             featureCollection={fc}
             sumOfResults={sumOfResults}
-            checkedItems={checkedItems}
-            handleCheckedToggle={this.handleCheckedToggle}
+            handleOnResultClick={this.handleOnResultClick}
             setSelectedFeatureAndSource={setSelectedFeatureAndSource}
           />
         ))}
