@@ -350,6 +350,7 @@ class LayerItem extends React.PureComponent {
       return (
         <LayerGroupItem
           appConfig={app.config.appConfig}
+          mapConfig={app.config.mapConfig}
           layer={layer}
           model={model}
           chapters={chapters}
