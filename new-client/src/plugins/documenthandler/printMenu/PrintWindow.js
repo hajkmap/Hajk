@@ -12,6 +12,7 @@ import PrintList from "./PrintList";
 import PrintPreview from "./PrintPreview";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -36,6 +37,7 @@ class PrintWindow extends React.PureComponent {
     allDocumentsToggled: false,
     chapterInformation: this.setChapterInfo(),
     printContent: undefined,
+    pdfLoading: false,
   };
 
   componentDidMount = () => {
@@ -58,9 +60,27 @@ class PrintWindow extends React.PureComponent {
     this.props.localObserver.unsubscribe("chapter-components-appended");
   };
 
+  // test = (child) => {
+  //   if (child.clientHeight > 1120) {
+  //     [...child.children].forEach((subChild) => {
+  //       this.test(subChild);
+  //     });
+  //   } else {
+  //     //child.nextSibling
+  //     onePagePrintContent.push(child);
+  //   }
+  // };
+
   printContents = () => {
     const printContent = document.getElementById("printPreviewContent");
+    // console.log("printContent: ", printContent);
+    // console.log("printContent height: ", printContent.clientHeight);
 
+    // let allContent = printContent.children[0];
+    // [...printContent].forEach((child) => {
+    //   this.test(child);
+    // });
+    //this.test(printContent);
     html2canvas(printContent, {}).then((canvas) => {
       let pdf = new jsPDF("p", "pt", "a4");
       let dY = 0;
@@ -92,6 +112,7 @@ class PrintWindow extends React.PureComponent {
         pdf.addImage(onePageCanvas, "JPG", 0, 0);
       }
       pdf.save("oversiktsplan.pdf");
+      this.setState({ pdfLoading: false });
     });
   };
 
@@ -148,21 +169,59 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  removeChaptersNotSelected = (chapter) => {
+  removeTagsNotSelectedForPrint = (chapter) => {
+    const { printImages, printText } = this.state;
+    console.log("chapter: ", chapter);
+
+    let elementsToRemove = [];
+    const div = document.createElement("div");
+    div.innerHTML = chapter.html;
+
+    //A-tags should always be removed before printing
+    Array.from(div.getElementsByTagName("a")).forEach((element) => {
+      elementsToRemove.push(element);
+    });
+    if (!printImages) {
+      Array.from(div.getElementsByTagName("figure")).forEach((element) => {
+        elementsToRemove.push(element);
+      });
+    }
+    if (!printText) {
+      Array.from(div.querySelectorAll("p, h1, h2, h3, h4, h5, h6")).forEach(
+        (element) => {
+          elementsToRemove.push(element);
+        }
+      );
+      //chapter.header = "";
+    }
+
+    for (let i = 0; i < elementsToRemove.length; i++) {
+      elementsToRemove[i].parentNode.removeChild(elementsToRemove[i]);
+    }
+
+    chapter.html = div.innerHTML;
+    return chapter;
+  };
+
+  prepareChapterForPrint = (chapter) => {
     if (chapter.chapters && chapter.chapters.length > 0) {
       chapter.chapters.forEach((subChapter) => {
         if (subChapter.chapters && subChapter.chapters.length > 0) {
-          return this.removeChaptersNotSelected(subChapter);
+          return this.prepareChapterForPrint(subChapter);
         }
         if (!subChapter.chosenForPrint) {
           subChapter.html = "";
           subChapter.header = "";
+        } else {
+          subChapter = this.removeTagsNotSelectedForPrint(subChapter);
         }
       });
     }
     if (!chapter.chosenForPrint) {
       chapter.html = "";
       chapter.header = "";
+    } else {
+      chapter = this.removeTagsNotSelectedForPrint(chapter);
     }
     return chapter;
   };
@@ -172,13 +231,14 @@ class PrintWindow extends React.PureComponent {
       JSON.stringify(this.state.chapterInformation)
     );
     chaptersToPrint.forEach((chapter) => {
-      chapter = this.removeChaptersNotSelected(chapter);
+      chapter = this.prepareChapterForPrint(chapter);
     });
 
     return chaptersToPrint;
   };
 
   createPDF = () => {
+    this.setState({ pdfLoading: true });
     const chaptersToPrint = this.getChaptersToPrint();
     this.props.localObserver.publish(
       "append-chapter-components",
@@ -262,19 +322,23 @@ class PrintWindow extends React.PureComponent {
           alignItems="center"
           justify="center"
         >
-          <Button
-            color="primary"
-            variant="contained"
-            startIcon={<OpenInNewIcon />}
-            onClick={this.createPDF}
-          >
-            <Typography
-              style={{ marginRight: "20px", marginLeft: "20px" }}
-              justify="center"
+          {!this.state.pdfLoading ? (
+            <Button
+              color="primary"
+              variant="contained"
+              startIcon={<OpenInNewIcon />}
+              onClick={this.createPDF}
             >
-              Skapa PDF-utskrift
-            </Typography>
-          </Button>
+              <Typography
+                style={{ marginRight: "20px", marginLeft: "20px" }}
+                justify="center"
+              >
+                Skapa PDF-utskrift
+              </Typography>
+            </Button>
+          ) : (
+            <CircularProgress size={"2rem"} />
+          )}
         </Grid>
       </Grid>
     );
