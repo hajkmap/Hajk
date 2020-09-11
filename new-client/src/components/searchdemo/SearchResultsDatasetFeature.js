@@ -1,18 +1,14 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import cslx from "clsx";
-import Divider from "@material-ui/core/Divider";
-import { ListItem, ListItemText, Typography } from "@material-ui/core";
-import FormHelperText from "@material-ui/core/FormHelperText";
+import { Typography } from "@material-ui/core";
 import {
   Table,
   TableBody,
   TableRow,
   TableCell,
   TableHead,
-  TableSortLabel,
   TableContainer,
 } from "@material-ui/core";
 
@@ -71,7 +67,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   render() {
-    const { feature, handleOnResultClick, classes, source } = this.props;
+    const { feature, handleOnResultClick, classes } = this.props;
     const { showAllInformation } = this.state;
 
     return (
@@ -112,12 +108,10 @@ class SearchResultsDatasetFeature extends React.PureComponent {
                 );
               } else {
                 return (
-                  <>
-                    <TableRow key={row[0]}>
-                      {this.renderTableCell(row[0])}
-                      {this.renderTableCell(row[1], "right")}
-                    </TableRow>
-                  </>
+                  <TableRow key={row[0]}>
+                    {this.renderTableCell(row[0])}
+                    {this.renderTableCell(row[1], "right")}
+                  </TableRow>
                 );
               }
             })}

@@ -224,47 +224,44 @@ class Search extends React.PureComponent {
     );
   };
 
-  updateAutoCompleteList = () => {
+  getMergeResultsFromAllSources = (results) => {
+    return results.reduce(
+      (searchResults, result) => {
+        searchResults.featureCollections = searchResults.featureCollections.concat(
+          result.value.featureCollections
+        );
+        searchResults.errors = searchResults.errors.concat(result.value.errors);
+        return searchResults;
+      },
+      { errors: [], featureCollections: [] }
+    );
+  };
+
+  fetchResultFromSearchModel = async (fetchOptions) => {
     let { searchSources } = this.state;
-    let searchResults = { errors: [], featureCollections: [] };
+
     if (searchSources.length === 0) {
       searchSources = this.searchModel.getSources();
     }
 
-    let fetchOptions = this.getAutoCompleteFetchSettings();
     let active = true;
 
-    (async () => {
-      try {
-        const promise = this.searchModel.getResults(
-          this.state.searchString,
-          searchSources, // this is a state variable!
-          fetchOptions
-        );
+    const promise = this.searchModel.getResults(
+      this.state.searchString,
+      searchSources, // this is a state variable!
+      fetchOptions
+    );
 
-        Promise.allSettled([promise, ...this.fetchResultsFromPlugins()]).then(
-          (results) => {
-            results.forEach((result) => {
-              searchResults.featureCollections = searchResults.featureCollections.concat(
-                result.value.featureCollections
-              );
-              searchResults.errors = searchResults.errors.concat(
-                result.value.errors
-              );
-            });
-
-            // It's possible to handle any errors in the UI by checking if Search Model returned any
-            searchResults.errors.length > 0 &&
-              console.error("Autocomplete error: ", searchResults.errors);
-
-            this.setState({
-              autocompleteList: this.prepareAutoCompleteList(searchResults),
-            });
-          }
-        );
-      } catch (error) {
-        // If we catch an error, display it to the user
-        // (preferably in a Snackbar instead of console).
+    return Promise.allSettled([promise, ...this.fetchResultsFromPlugins()])
+      .then((results) => {
+        results = this.removeCollectionsWithoutFeatures(results);
+        let searchResults = this.getMergeResultsFromAllSources(results);
+        // It's possible to handle any errors in the UI by checking if Search Model returned any
+        searchResults.errors.length > 0 &&
+          console.error("Autocomplete error: ", searchResults.errors);
+        return searchResults;
+      })
+      .catch((error) => {
         console.error("Autocomplete error: ", error);
 
         // Also, set "open" state variable to false, which
@@ -274,13 +271,30 @@ class Search extends React.PureComponent {
             open: false,
           });
         }
-      } finally {
-        // Regardless if we had an error or not, we're done.
-        return () => {
-          active = false;
-        };
-      }
-    })();
+      });
+  };
+
+  async doSearch() {
+    let fetchOptions = this.getAutoCompleteFetchSettings();
+    let searchResults = await this.fetchResultFromSearchModel(fetchOptions);
+    this.setState({
+      searchResults,
+      showSearchResults: true,
+      loading: false,
+      autoCompleteOpen: false,
+    });
+
+    this.addFeaturesToResultsLayer(searchResults.featureCollections);
+  }
+
+  updateAutoCompleteList = async () => {
+    let fetchOptions = this.getAutoCompleteFetchSettings();
+    let autoCompleteResult = await this.fetchResultFromSearchModel(
+      fetchOptions
+    );
+    this.setState({
+      autocompleteList: this.prepareAutoCompleteList(autoCompleteResult),
+    });
   };
 
   fetchResultsFromPlugins = () => {
@@ -300,58 +314,6 @@ class Search extends React.PureComponent {
   hasEnoughCharsForSearch = (searchString) => {
     return searchString.length >= 3;
   };
-
-  async doSearch() {
-    // Wrap all calls to Search Model in a try/catch because
-    // Search Model may throw Errors which we should handle
-    // in the UI Component.
-    let { searchString, searchSources } = this.state;
-    let searchResults = { errors: [], featureCollections: [] };
-
-    if (searchSources.length === 0) {
-      searchSources = this.searchModel.getSources();
-    }
-
-    if (!this.hasEnoughCharsForSearch(searchString)) {
-      return null;
-    }
-
-    try {
-      const promise = this.searchModel.getResults(
-        searchString,
-        searchSources, // this is a state variable!
-        this.getSearchResultsFetchSettings()
-      );
-
-      Promise.allSettled([promise, ...this.fetchResultsFromPlugins()]).then(
-        (results) => {
-          results.forEach((result) => {
-            searchResults.featureCollections = searchResults.featureCollections.concat(
-              result.value.featureCollections
-            );
-            searchResults.errors = searchResults.errors.concat(
-              result.value.errors
-            );
-          });
-
-          // It's possible to handle any errors in the UI by checking if Search Model returned any
-          searchResults.errors.length > 0 &&
-            console.error(searchResults.errors);
-
-          this.setState({
-            searchResults,
-            showSearchResults: true,
-            loading: false,
-            autoCompleteOpen: false,
-          });
-
-          this.addFeaturesToResultsLayer(searchResults.featureCollections);
-        }
-      );
-    } catch (err) {
-      console.error("Show a nice error message to user with info:", err);
-    }
-  }
 
   addFeaturesToResultsLayer = (featureCollections) => {
     this.resultSource.clear();
@@ -380,20 +342,22 @@ class Search extends React.PureComponent {
     return this.getUserCustomFetchSettings(this.searchModel.getSearchOptions());
   };
 
-  removeCollectionsWithoutFeatures = (searchResults) => {
-    for (let i = searchResults.featureCollections.length - 1; i >= 0; i--) {
-      if (searchResults.featureCollections[i].value.features.length === 0) {
-        searchResults.featureCollections.splice(i, 1);
-      }
-    }
-    return searchResults;
+  removeCollectionsWithoutFeatures = (results) => {
+    return results.map((res) => {
+      var featureCollections = res.value.featureCollections.filter(
+        (featureCollection) => {
+          return featureCollection.value.features.length > 0;
+        }
+      );
+      res.value.featureCollections = featureCollections;
+      return res;
+    });
   };
 
   prepareAutoCompleteList = (searchResults) => {
-    const cleanedResults = this.removeCollectionsWithoutFeatures(searchResults);
-    let numSourcesWithResults = cleanedResults.featureCollections.length;
+    let numSourcesWithResults = searchResults.featureCollections.length;
     let numResults = 0;
-    cleanedResults.featureCollections.forEach((fc) => {
+    searchResults.featureCollections.forEach((fc) => {
       numResults += fc.value.features.length;
     });
 
@@ -401,14 +365,14 @@ class Search extends React.PureComponent {
 
     if (numResults <= 7) {
       //All results can be shown
-      return this.flattenAndSortAutoCompleteList(cleanedResults);
+      return this.flattenAndSortAutoCompleteList(searchResults);
     } else {
-      cleanedResults.featureCollections.forEach((fc) => {
+      searchResults.featureCollections.forEach((fc) => {
         if (fc.value.features.length > spacesPerSource) {
           fc.value.features.splice(spacesPerSource - 1);
         }
       });
-      return this.flattenAndSortAutoCompleteList(cleanedResults);
+      return this.flattenAndSortAutoCompleteList(searchResults);
     }
   };
 

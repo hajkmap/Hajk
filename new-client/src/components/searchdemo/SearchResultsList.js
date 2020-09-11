@@ -1,7 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import Divider from "@material-ui/core/Divider";
 import { boundingExtent } from "ol/extent";
 import { Stroke, Style, Circle, Fill } from "ol/style";
 
@@ -30,6 +29,10 @@ let highlightedStyle = new Style({
 const styles = (theme) => ({
   hide: {
     display: "none",
+  },
+  searchResultDatasetWrapper: {
+    paddingTop: "8px",
+    paddingBottom: "8px",
   },
 });
 
@@ -81,7 +84,6 @@ class SearchResultsList extends React.PureComponent {
 
   zoomToSelectedItems = (items) => {
     const { resultSource, map } = this.props;
-    console.log(resultSource, "?");
     const extentsFromSelectedItems = items.map((fid) =>
       resultSource.getFeatureById(fid).getGeometry().getExtent()
     );
@@ -97,6 +99,19 @@ class SearchResultsList extends React.PureComponent {
     });
   };
 
+  renderSearchResultListOptions = () => {
+    const { classes } = this.props;
+    return (
+      <Grid className={classes.hide} item>
+        <Button>Filtrera</Button>
+        <Button>Sortera</Button>
+        <IconButton>
+          <MoreHorizIcon />
+        </IconButton>
+      </Grid>
+    );
+  };
+
   render() {
     const {
       featureCollections,
@@ -104,31 +119,40 @@ class SearchResultsList extends React.PureComponent {
       sumOfResults,
       classes,
     } = this.props;
+    const featureCollectionsWithFeatures = featureCollections.filter(
+      (featureCollection) => {
+        return featureCollection.value.features.length > 0;
+      }
+    );
+
+    console.log(
+      featureCollectionsWithFeatures,
+      "featureCollectionWithFeatures"
+    );
 
     return (
       <Grid container alignItems={"center"} justify={"center"}>
-        <Grid item>
-          <Button className={classes.hide}>Filtrera</Button>
-          <Button className={classes.hide}>Sortera</Button>
-          <IconButton className={classes.hide}>
-            <MoreHorizIcon />
-          </IconButton>
-        </Grid>
+        {this.renderSearchResultListOptions()}
         <Grid container item>
-          {featureCollections.map(
-            (fc) =>
-              fc.value.numberReturned > 0 && (
-                <Grid xs={12} style={{ paddingTop: "8px" }} item>
-                  <SearchResultsDataset
-                    key={fc.source.id}
-                    featureCollection={fc}
-                    sumOfResults={sumOfResults}
-                    handleOnResultClick={this.handleOnResultClick}
-                    setSelectedFeatureAndSource={setSelectedFeatureAndSource}
-                  />
-                </Grid>
-              )
-          )}
+          {featureCollectionsWithFeatures.map((fc) => (
+            <Grid
+              key={fc.source.id}
+              xs={12}
+              className={
+                featureCollections.length !== 1 &&
+                fc &&
+                classes.searchResultDatasetWrapper
+              }
+              item
+            >
+              <SearchResultsDataset
+                featureCollection={fc}
+                sumOfResults={sumOfResults}
+                handleOnResultClick={this.handleOnResultClick}
+                setSelectedFeatureAndSource={setSelectedFeatureAndSource}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Grid>
     );

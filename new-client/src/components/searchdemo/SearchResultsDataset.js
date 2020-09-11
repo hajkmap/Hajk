@@ -5,13 +5,11 @@ import Divider from "@material-ui/core/Divider";
 
 import {
   Typography,
-  List,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   Chip,
   Tooltip,
-  StylesProvider,
 } from "@material-ui/core";
 
 import PlaceIcon from "@material-ui/icons/Place";
@@ -19,7 +17,16 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 
-const styles = (theme) => ({});
+const styles = (theme) => ({
+  searchResultSummary: {
+    backgroundColor: "#f2f2f2",
+    borderTop: "2px solid #dedede",
+    borderBottom: "2px solid #dedede",
+  },
+  accordion: {
+    boxShadow: "none",
+  },
+});
 
 class SearchResultsDataset extends React.PureComponent {
   state = {
@@ -43,11 +50,10 @@ class SearchResultsDataset extends React.PureComponent {
       <AccordionDetails>
         <Grid container>
           {featureCollection.value.features.map((f, index) => (
-            <Grid container item>
+            <Grid key={f.id} container item>
               <Grid item xs={1}></Grid>
               <Grid item xs={10}>
                 <SearchResultsDatasetFeature
-                  key={f.id}
                   feature={f}
                   source={featureCollection.source}
                   handleOnResultClick={handleOnResultClick}
@@ -68,18 +74,12 @@ class SearchResultsDataset extends React.PureComponent {
 
   renderDatasetSummary = () => {
     const { numberOfResultsToDisplay } = this.state;
-    const { featureCollection } = this.props;
+    const { featureCollection, classes } = this.props;
     const { numberReturned, numberMatched } = featureCollection.value;
     const toolTipTitle = `Visar ${numberReturned} av ${numberMatched} resultat`;
     return (
       <AccordionSummary
-        style={{
-          backgroundColor: "#f2f2f2",
-
-          borderTop: "2px solid #dedede",
-          borderBottom: "2px solid #dedede",
-        }}
-        square
+        className={classes.searchResultSummary}
         expandIcon={<ExpandMoreIcon />}
       >
         <Grid alignItems="center" container>
@@ -100,10 +100,11 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   renderResultsDataset = () => {
+    const { classes } = this.props;
     return (
       <>
         <Accordion
-          style={{ boxShadow: "none" }}
+          className={classes.accordion}
           square
           expanded={this.state.expanded}
           onChange={() => this.setState({ expanded: !this.state.expanded })}
