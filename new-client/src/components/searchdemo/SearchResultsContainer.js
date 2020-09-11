@@ -79,7 +79,7 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   render() {
-    const { classes, featureCollections, map, resultsSource } = this.props;
+    const { classes, featureCollections, map, resultSource } = this.props;
     const { sumOfResults, selectedFeatureAndSource } = this.state;
 
     return (
@@ -100,7 +100,7 @@ class SearchResultsContainer extends React.PureComponent {
               featureCollections={featureCollections}
               map={map}
               app={this.props.app}
-              resultsSource={resultsSource}
+              resultSource={resultSource}
               setSelectedFeatureAndSource={this.setSelectedFeatureAndSource}
             />
           </Paper>

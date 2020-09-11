@@ -1,113 +1,11 @@
-/**
- * BRIEF DESCRIPTION
- * =================
- *
- * --- SEARCH MODEL ---
- * App initiates the search model so it's available to the rest of the application,
- * probably exposed as "this.app.searchModel" from our plugin's perspective.
- *
- * The Search Model (this.app.searchModel) exposes the following methods:
- *  async doAutocompleteLookup(text)
- *  async doSearch([searchString string], [spatialFilter geom])
- *  abort() // both autocomplete and search, or separate abort methods for each of them?
- *
- * The Search Model reads the map config and sets up WFS search sources.
- *
- * Any search plugin (whether Hajk's standard or some other implementation) can use
- * Search Model in a following manner:
- *  - User starts typing. For each searchField.onChange-event our plugin
- *    calls "await this.app.searchModel.doAutocompleteLookup(searchField.value)".
- *  - When autocomplete results arrive they are handled and rendered properly, as
- *    desired by the given plugin. Please note that the autocomplete could also be
- *    skipped entirely.
- *  - Next user can do something that will mean that our plugin wants to invoke
- *    the actual search. (It could be that user clicks the search button, presses enter
- *    or clicks on a autocomplete item.) When this happens, our plugin calls
- *    "await this.app.searchModel.doSearch()" with proper parameters.
- *      - If we're just doing regular search, we supply the value of
- *        search field as parameter to doSearch().
- *      - If we want to limit the search spatially, we (somehow) read the geom
- *        and supply as a second parameter to doSearch().
- *      - If we want to search in visible layers only, we must be able to send
- *        that info to our search model too. Could be done by getting the list
- *        visible layers from our ol.Map, and supplying that array as an option
- *        to doSearch(). In that case, doSearch will filter search sources to
- *        only include those that are supplied in this array of visible layers.
- *  - No matter which of the above is used, calling "await this.app.searchModel.doSearch()"
- *    will always resolve into a Promise that contains some data: the search results. Those
- *    must be displayed for the user somehow. (It could also be that we want to do something
- *    more, such as zoom into the first result. But implementation of that functionality should
- *    be done in each specific search plugin.)
- *  - So at this step, we have got some results back to our plugin and those are ready
- *    to be displayed for the user. Our search plugin takes care of this by looping the
- *    resulting object, styling and formatting and finally rendering the results list.
- *  - It is up to the plugin as well to set up listeners for items in the results list. One
- *    common listener would be a click listener on each item that will zoom in to the
- *    clicked result.
- *  - Each search plugin should be able to abort any ongoing search. This is achieved by calling
- *    this.app.searchModel.abort() at any given time. It is, of course, up to the search plugin
- *    to implement necessary UI element (typically a button) that will abort ongoing searches.
- *  - Please note that clearing the search results is NOT something that the Search Model should
- *    care about. Instead it's entirely up to the implementing plugin to handle different user
- *    actions (and hiding the results list is such an action). **The Search Model must only care
- *    about supplying autocomplete, supplying search results and aborting those two.**
- *
- *
- * --- SEARCH COMPONENT ---
- *
- * App loads this Component if so configured by admin.
- *
- * Search Component enters the constructor phase.
- *
- * Listeners and event handlers are setup.
- *
- * Listeners:
- *  search.populateAutocomplete
- *  search.populateResultsList
- *  search.addFunctionality
- *
- * Event handlers:
- *  User types -> search.stringChanged
- *  User aborts search -> search.aborted
- *  ...
- *
- * --- PLUGIN WITH SEARCH FUNCTIONALITY ---
- *
- * Plugins are loaded by app. If plugin wants to expose
- * search functionality, add something or in some way take
- * care of search results, the following must be implemented
- * the plugin.
- *
- * Plugin subscribes to minimum these events:
- *  search.stringChanged
- *  search.aborted
- *
- * This way the plugin knows whether user types into search box
- * or cancels the search. From here, plugin can take care of whatever
- * it whishes to do with the current value of search field. The
- * normal thing would be that it reads the value, does some magic
- * and then gets some results back.
- *
- * In this case, the results must be sent back to Search in a
- * standardized manner. For this the plugin publishes this event:
- *  search.populateAutocomplete
- * if we have implemented autocomplete and have something to offer, or:
- *  search.populateResultsList
- * if user have pressed "search" and we want the actual results
- * and not only autocomplete values.
- *
- * The values sent back must be standardized. Perhaps something like this:
- * [{
- *  label: string
- *  geom: // whatever to mark/select in map
- * }, ...]
- */
-
-//
-// *https://www.registers.service.gov.uk/registers/country/use-the-api*
 import React from "react";
 import SearchBar from "./SearchBar";
+import GeoJSON from "ol/format/GeoJSON";
 import { withStyles } from "@material-ui/core/styles";
+import { options } from "marked";
+import { Vector as VectorLayer } from "ol/layer";
+import VectorSource from "ol/source/Vector";
+import { Stroke, Style, Circle, Fill } from "ol/style";
 
 const styles = (theme) => ({
   inputRoot: {
@@ -115,14 +13,59 @@ const styles = (theme) => ({
   },
 });
 
+let drawStyle = new Style({
+  stroke: new Stroke({
+    color: "rgba(255, 214, 91, 0.6)",
+    width: 4,
+  }),
+  fill: new Fill({
+    color: "rgba(255, 214, 91, 0.2)",
+  }),
+  image: new Circle({
+    radius: 6,
+    stroke: new Stroke({
+      color: "rgba(255, 214, 91, 0.6)",
+      width: 2,
+    }),
+  }),
+});
+
 class Search extends React.PureComponent {
   state = {
     searchImplementedPlugins: [],
     searchImplementedPluginsLoaded: false,
+    searchSources: [],
+    searchResults: { featureCollections: [], errors: [] },
+    autocompleteList: [],
+    searchString: "",
+    autoCompleteOpen: false,
+    loading: false,
+    searchOptions: {
+      wildcardAtStart: false,
+      wildcardAtEnd: false,
+      matchCase: false,
+      activeSpatialFilter: "intersects",
+    },
   };
 
+  constructor(props) {
+    super(props);
+    this.map = props.map;
+    this.searchModel = props.app.appModel.searchModel;
+    this.drawSource = new VectorSource({ wrapX: false });
+    this.drawLayer = new VectorLayer({
+      source: this.drawSource,
+      style: drawStyle,
+    });
+    this.resultSource = new VectorSource({ wrapX: false });
+    this.resultsLayer = new VectorLayer({
+      source: this.resultSource,
+    });
+    this.map.addLayer(this.drawLayer);
+    this.map.addLayer(this.resultsLayer);
+  }
+
   implementsSearchInterface = (plugin) => {
-    console.log(plugin.searchInterface.getResults, "??");
     var hasGetResultsMethod = plugin.searchInterface.getResults;
     if (!hasGetResultsMethod) {
       console.warn(
@@ -153,8 +96,350 @@ class Search extends React.PureComponent {
     });
   };
 
+  handleOnClear = () => {
+    //Clear input, draw object, result list
+    this.setState({
+      searchString: "",
+      searchActive: "",
+      searchResults: { featureCollections: [], errors: [] },
+    });
+
+    if (this.drawSource) {
+      this.drawSource.clear();
+    }
+    if (this.resultSource) {
+      this.resultSource.clear();
+    }
+  };
+
+  handleSearchInput = (event, value, reason) => {
+    let searchString = value?.autocompleteEntry || value || "";
+
+    if (searchString !== "") {
+      this.setState(
+        {
+          searchString: searchString,
+          searchActive: "input",
+        },
+        () => {
+          if (reason !== "input") {
+            this.doSearch();
+          }
+        }
+      );
+    } else {
+      this.setState({
+        searchString: searchString,
+      });
+    }
+  };
+
+  handleOnInputChange = (event, searchString, reason) => {
+    this.resultSource.clear();
+    this.setState(
+      {
+        autoCompleteOpen: searchString.length >= 3,
+        loading:
+          searchString.length >= 3 && this.state.autocompleteList.length === 0,
+        showSearchResults: false,
+        searchString: searchString,
+      },
+      () => {
+        if (this.state.searchString.length >= 3) {
+          this.updateAutoCompleteList(this.state.searchString);
+        } else {
+          this.setState({
+            autocompleteList: [],
+          });
+        }
+      }
+    );
+  };
+
+  updateSearchOptions = (searchOptions) => {
+    this.setState(searchOptions);
+  };
+
+  handleOnSearch = () => {
+    this.doSearch();
+  };
+
+  handleSearchSettings = (option) => {
+    this.setState({
+      searchSettings: options,
+    });
+  };
+
+  handleDrawSource = (source) => {
+    this.setState({
+      searchActive: "draw",
+      drawSource: source,
+    });
+  };
+
+  handleSearchSources = (sources) => {
+    this.setState({
+      searchSources: sources,
+    });
+  };
+
+  getAutoCompleteFetchSettings = () => {
+    let fetchSettings = { ...this.searchModel.getSearchOptions() };
+    fetchSettings["maxResultsPerDataset"] = 5;
+    return fetchSettings;
+  };
+
+  flattenAndSortAutoCompleteList = (searchResults) => {
+    const resultsPerDataset = searchResults.featureCollections.map(
+      (featureCollection) => {
+        return featureCollection.value.features.map((feature) => {
+          // TODO: We should add another property in admin that'll decide which FIELD (and it should
+          // be one (1) field only) should be used for Autocomplete.
+          // There's a huge problem with the previous approach (mapping displayFields and using that
+          // in Autocomplete) because __there will never be a match in on searchField if the search
+          // string consists of values that have been stitched together from multiple fields__!
+          const autocompleteEntry =
+            feature.properties[featureCollection.source.searchFields[0]];
+          // Let's provide a name for each dataset, so it can be displayed nicely to the user.
+          const dataset = featureCollection.source.caption;
+          const origin = featureCollection.origin;
+          return {
+            dataset,
+            autocompleteEntry,
+            origin: origin,
+          };
+        });
+      }
+    );
+    // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
+    // however, we need just one Array, so let's flatten the results:
+    const flatAutocompleteArray = resultsPerDataset.reduce(
+      (a, b) => a.concat(b),
+      []
+    );
+    return flatAutocompleteArray.sort((a, b) =>
+      a.autocompleteEntry.localeCompare(b.autocompleteEntry, "sv", {
+        numeric: true,
+      })
+    );
+  };
+
+  updateAutoCompleteList = () => {
+    let { searchSources } = this.state;
+    let searchResults = { errors: [], featureCollections: [] };
+    if (searchSources.length === 0) {
+      searchSources = this.searchModel.getSources();
+    }
+
+    let fetchOptions = this.getAutoCompleteFetchSettings();
+    let active = true;
+
+    (async () => {
+      try {
+        const promise = this.searchModel.getResults(
+          this.state.searchString,
+          searchSources, // this is a state variable!
+          fetchOptions
+        );
+
+        Promise.allSettled([promise, ...this.fetchResultsFromPlugins()]).then(
+          (results) => {
+            results.forEach((result) => {
+              searchResults.featureCollections = searchResults.featureCollections.concat(
+                result.value.featureCollections
+              );
+              searchResults.errors = searchResults.errors.concat(
+                result.value.errors
+              );
+            });
+
+            // It's possible to handle any errors in the UI by checking if Search Model returned any
+            searchResults.errors.length > 0 &&
+              console.error("Autocomplete error: ", searchResults.errors);
+
+            this.setState({
+              autocompleteList: this.prepareAutoCompleteList(searchResults),
+            });
+          }
+        );
+      } catch (error) {
+        // If we catch an error, display it to the user
+        // (preferably in a Snackbar instead of console).
+        console.error("Autocomplete error: ", error);
+
+        // Also, set "open" state variable to false, which
+        // abort the "loading" state of Autocomplete.
+        if (active) {
+          this.setState({
+            open: false,
+          });
+        }
+      } finally {
+        // Regardless if we had an error or not, we're done.
+        return () => {
+          active = false;
+        };
+      }
+    })();
+  };
+
+  fetchResultsFromPlugins = () => {
+    const { searchImplementedPlugins, searchString } = this.state;
+    if (searchImplementedPlugins && searchImplementedPlugins.length === 0) {
+      return [];
+    }
+    return searchImplementedPlugins.reduce((promises, plugin) => {
+      if (plugin.searchInterface.getResults) {
+        promises.push(plugin.searchInterface.getResults(searchString));
+        return promises;
+      }
+      return promises;
+    }, []);
+  };
+
+  hasEnoughCharsForSearch = (searchString) => {
+    return searchString.length >= 3;
+  };
+
+  async doSearch() {
+    // Wrap all calls to Search Model in a try/catch because
+    // Search Model may throw Errors which we should handle
+    // in the UI Component.
+    let { searchString, searchSources } = this.state;
+    let searchResults = { errors: [], featureCollections: [] };
+
+    if (searchSources.length === 0) {
+      searchSources = this.searchModel.getSources();
+    }
+
+    if (!this.hasEnoughCharsForSearch(searchString)) {
+      return null;
+    }
+
+    try {
+      const promise = this.searchModel.getResults(
+        searchString,
+        searchSources, // this is a state variable!
+        this.getSearchResultsFetchSettings()
+      );
+
+      Promise.allSettled([promise, ...this.fetchResultsFromPlugins()]).then(
+        (results) => {
+          results.forEach((result) => {
+            searchResults.featureCollections = searchResults.featureCollections.concat(
+              result.value.featureCollections
+            );
+            searchResults.errors = searchResults.errors.concat(
+              result.value.errors
+            );
+          });
+
+          // It's possible to handle any errors in the UI by checking if Search Model returned any
+          searchResults.errors.length > 0 &&
+            console.error(searchResults.errors);
+
+          this.setState({
+            searchResults,
+            showSearchResults: true,
+            loading: false,
+            autoCompleteOpen: false,
+          });
+
+          this.addFeaturesToResultsLayer(searchResults.featureCollections);
+        }
+      );
+    } catch (err) {
+      console.error("Show a nice error message to user with info:", err);
+    }
+  }
+
+  addFeaturesToResultsLayer = (featureCollections) => {
+    this.resultSource.clear();
+
+    const features = featureCollections.map((fc) =>
+      fc.value.features.map((f) => {
+        const geoJsonFeature = new GeoJSON().readFeature(f);
+        return geoJsonFeature;
+      })
+    );
+
+    features.map((f) => this.resultSource.addFeatures(f));
+
+    //Zoom to fit all features
+    const currentExtent = this.resultSource.getExtent();
+
+    if (currentExtent.map(Number.isFinite).includes(false) === false) {
+      this.map.getView().fit(currentExtent, {
+        size: this.map.getSize(),
+        maxZoom: 7,
+      });
+    }
+  };
+
+  getSearchResultsFetchSettings = () => {
+    return this.getUserCustomFetchSettings(this.searchModel.getSearchOptions());
+  };
+
+  removeCollectionsWithoutFeatures = (searchResults) => {
+    for (let i = searchResults.featureCollections.length - 1; i >= 0; i--) {
+      if (searchResults.featureCollections[i].value.features.length === 0) {
+        searchResults.featureCollections.splice(i, 1);
+      }
+    }
+    return searchResults;
+  };
+
+  prepareAutoCompleteList = (searchResults) => {
+    const cleanedResults = this.removeCollectionsWithoutFeatures(searchResults);
+    let numSourcesWithResults = cleanedResults.featureCollections.length;
+    let numResults = 0;
+    cleanedResults.featureCollections.forEach((fc) => {
+      numResults += fc.value.features.length;
+    });
+
+    let spacesPerSource = Math.floor(numResults / numSourcesWithResults);
+
+    if (numResults <= 7) {
+      //All results can be shown
+      return this.flattenAndSortAutoCompleteList(cleanedResults);
+    } else {
+      cleanedResults.featureCollections.forEach((fc) => {
+        if (fc.value.features.length > spacesPerSource) {
+          fc.value.features.splice(spacesPerSource - 1);
+        }
+      });
+      return this.flattenAndSortAutoCompleteList(cleanedResults);
+    }
+  };
+
+  getUserCustomFetchSettings = (searchOptionsFromModel) => {
+    const {
+      activeSpatialFilter,
+      matchCase,
+      wildcardAtEnd,
+      wildcardAtStart,
+    } = this.state.searchOptions;
+    let customSearchOptions = { ...searchOptionsFromModel };
+    customSearchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
+    customSearchOptions["featuresToFilter"] = this.drawSource.getFeatures();
+    customSearchOptions["matchCase"] = matchCase;
+    customSearchOptions["wildcardAtStart"] = wildcardAtStart;
+    customSearchOptions["wildcardAtEnd"] = wildcardAtEnd;
+    return customSearchOptions;
+  };
+
   render() {
     const { classes, target } = this.props;
+    const {
+      searchString,
+      searchActive,
+      searchResults,
+      autocompleteList,
+      autoCompleteOpen,
+      showSearchResults,
+      loading,
+      searchOptions,
+    } = this.state;
 
     return (
       this.state.searchImplementedPluginsLoaded && (
@@ -166,6 +451,24 @@ class Search extends React.PureComponent {
                 target === "top" ? classes.inputInputWide : classes.inputInput,
             }}
             searchImplementedPlugins={this.state.searchImplementedPlugins}
+            updateAutoCompleteList={this.updateAutoCompleteList}
+            resultSource={this.resultSource}
+            searchResults={searchResults}
+            handleSearchInput={this.handleSearchInput}
+            searchString={searchString}
+            searchActive={searchActive}
+            handleOnSearch={this.handleOnSearch}
+            autoCompleteOpen={autoCompleteOpen}
+            showSearchResults={showSearchResults}
+            handleOnInputChange={this.handleOnInputChange}
+            handleOnClear={this.handleOnClear}
+            autocompleteList={autocompleteList}
+            doSearch={this.doSearch.bind(this)}
+            searchModel={this.searchModel}
+            searchOptions={searchOptions}
+            updateSearchOptions={this.updateSearchOptions}
+            handleSearchSources={this.handleSearchSources}
+            loading={loading}
             {...this.props}
           />
         </>
