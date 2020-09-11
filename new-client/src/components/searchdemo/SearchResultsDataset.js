@@ -1,6 +1,7 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
+import Divider from "@material-ui/core/Divider";
 
 import {
   Typography,
@@ -10,6 +11,7 @@ import {
   AccordionDetails,
   Chip,
   Tooltip,
+  StylesProvider,
 } from "@material-ui/core";
 
 import PlaceIcon from "@material-ui/icons/Place";
@@ -29,40 +31,21 @@ class SearchResultsDataset extends React.PureComponent {
     expanded: this.props.sumOfResults === 1,
   };
 
-  renderResultsDataset = () => {
-    const { numberOfResultsToDisplay } = this.state;
+  renderDatasetDetails = () => {
     const {
+      featureCollection,
       handleOnResultClick,
       setSelectedFeatureAndSource,
-      featureCollection,
     } = this.props;
-    console.log("featureCollectioN", featureCollection);
-
+    const lastFeatureIndex = featureCollection.value.features.length;
+    console.log(lastFeatureIndex, "lastFeatureIndex");
     return (
-      <>
-        <Accordion
-          expanded={this.state.expanded}
-          onChange={() => this.setState({ expanded: !this.state.expanded })}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Grid container>
-              <Grid item xs={6}>
-                <Typography>
-                  <PlaceIcon /> {featureCollection.source.caption}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Tooltip
-                  title={`Visar ${featureCollection.value.numberReturned} av ${featureCollection.value.numberMatched} resultat`}
-                >
-                  <Chip label={numberOfResultsToDisplay} />
-                </Tooltip>
-              </Grid>
-            </Grid>
-          </AccordionSummary>
-          <AccordionDetails>
-            <List style={{ width: "100%" }}>
-              {featureCollection.value.features.map((f) => (
+      <AccordionDetails>
+        <Grid container>
+          {featureCollection.value.features.map((f, index) => (
+            <Grid container item>
+              <Grid item xs={1}></Grid>
+              <Grid item xs={10}>
                 <SearchResultsDatasetFeature
                   key={f.id}
                   feature={f}
@@ -70,9 +53,63 @@ class SearchResultsDataset extends React.PureComponent {
                   handleOnResultClick={handleOnResultClick}
                   setSelectedFeatureAndSource={setSelectedFeatureAndSource}
                 />
-              ))}
-            </List>
-          </AccordionDetails>
+              </Grid>
+              <Grid item xs={1}></Grid>
+
+              <Divider
+                style={{ backgroundColor: "#00000073", width: "100%" }}
+              ></Divider>
+            </Grid>
+          ))}
+        </Grid>
+      </AccordionDetails>
+    );
+  };
+
+  renderDatasetSummary = () => {
+    const { numberOfResultsToDisplay } = this.state;
+    const { featureCollection } = this.props;
+    const { numberReturned, numberMatched } = featureCollection.value;
+    const toolTipTitle = `Visar ${numberReturned} av ${numberMatched} resultat`;
+    return (
+      <AccordionSummary
+        style={{
+          backgroundColor: "#f2f2f2",
+
+          borderTop: "2px solid #dedede",
+          borderBottom: "2px solid #dedede",
+        }}
+        square
+        expandIcon={<ExpandMoreIcon />}
+      >
+        <Grid alignItems="center" container>
+          <Grid item xs={1}>
+            <PlaceIcon />
+          </Grid>
+          <Grid item xs={9}>
+            <Typography>{featureCollection.source.caption}</Typography>
+          </Grid>
+          <Grid item xs={2}>
+            <Tooltip title={toolTipTitle}>
+              <Chip label={numberOfResultsToDisplay} />
+            </Tooltip>
+          </Grid>
+        </Grid>
+      </AccordionSummary>
+    );
+  };
+
+  renderResultsDataset = () => {
+    return (
+      <>
+        <Accordion
+          style={{ boxShadow: "none" }}
+          square
+          expanded={this.state.expanded}
+          onChange={() => this.setState({ expanded: !this.state.expanded })}
+        >
+          {this.renderDatasetSummary()}
+          {this.renderDatasetDetails()}
         </Accordion>
       </>
     );

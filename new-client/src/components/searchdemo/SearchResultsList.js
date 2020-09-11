@@ -1,7 +1,7 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-
+import Divider from "@material-ui/core/Divider";
 import { boundingExtent } from "ol/extent";
 import { Stroke, Style, Circle, Fill } from "ol/style";
 
@@ -27,67 +27,71 @@ let highlightedStyle = new Style({
   }),
 });
 
-const styles = (theme) => ({});
+const styles = (theme) => ({
+  hide: {
+    display: "none",
+  },
+});
 
 class SearchResultsList extends React.PureComponent {
   state = {
-    checkedItems: [],
+    selectedItems: [],
   };
 
   showClickResultInMap = (feature) => {
-    const currentIndex = this.state.checkedItems.indexOf(feature.id);
-    const newChecked = [...this.state.checkedItems];
+    const currentIndex = this.state.selectedItems.indexOf(feature.id);
+    const selectedItems = [...this.state.selectedItems];
 
     if (currentIndex === -1) {
-      newChecked.push(feature.id);
+      selectedItems.push(feature.id);
     } else {
-      newChecked.splice(currentIndex, 1);
+      selectedItems.splice(currentIndex, 1);
     }
 
     this.setState(
       {
-        checkedItems: newChecked,
+        selectedItems: selectedItems,
       },
       () => {
-        this.changeStyleOnCheckedItems(this.state.checkedItems); // Set another OpenLayers Style so we can distinguish checked items
-        this.zoomToCheckedItems(this.state.checkedItems); // Ensure we zoom out so all checked features fit
+        this.changeStyleOnSelectedItems(this.state.selectedItems); // Set another OpenLayers Style so we can distinguish checked items
+        this.zoomToSelectedItems(this.state.selectedItems); // Ensure we zoom out so all checked features fit
       }
     );
   };
 
   handleOnResultClick = (feature) => () => {
+    const { app } = this.props;
     if (feature.onClickName) {
-      this.props.app.globalObserver.publish(feature.onClickName, feature);
+      app.globalObserver.publish(feature.onClickName, feature);
     } else {
       this.showClickResultInMap(feature);
     }
   };
 
-  changeStyleOnCheckedItems = (items) => {
+  changeStyleOnSelectedItems = (items) => {
+    const { resultsSource } = this.props;
     // First unset style on ALL features (user might have UNCHECKED a feature)
-    this.props.resultsSource.getFeatures().map((f) => f.setStyle(null));
+    resultsSource.getFeatures().map((f) => f.setStyle(null));
 
     // Now, set the style only on currently selected features
     items.map((fid) =>
-      this.props.resultsSource.getFeatureById(fid).setStyle(highlightedStyle)
+      resultsSource.getFeatureById(fid).setStyle(highlightedStyle)
     );
   };
 
-  zoomToCheckedItems = (items) => {
-    // Try to grab extents for each of the selected items
-    const extentsFromCheckedItems = items.map((fid) =>
-      this.props.resultsSource.getFeatureById(fid).getGeometry().getExtent()
+  zoomToSelectedItems = (items) => {
+    const { resultSource, map } = this.props;
+    const extentsFromSelectedItems = items.map((fid) =>
+      resultSource.getFeatureById(fid).getGeometry().getExtent()
     );
 
-    // If there were no selected items, use extent for the OL source itself,
-    // else create a boundary that will fit all selected items
     const extentToZoomTo =
-      extentsFromCheckedItems.length < 1
-        ? this.props.resultsSource.getExtent()
-        : boundingExtent(extentsFromCheckedItems);
+      extentsFromSelectedItems.length < 1
+        ? resultSource.getExtent()
+        : boundingExtent(extentsFromSelectedItems);
 
-    this.props.map.getView().fit(extentToZoomTo, {
-      size: this.props.map.getSize(),
+    map.getView().fit(extentToZoomTo, {
+      size: map.getSize(),
       maxZoom: 7,
     });
   };
@@ -97,28 +101,32 @@ class SearchResultsList extends React.PureComponent {
       featureCollections,
       setSelectedFeatureAndSource,
       sumOfResults,
+      classes,
     } = this.props;
 
-    const { checkedItems } = this.state;
     return (
-      <>
-        <Grid container alignItems={"center"} justify={"center"}>
-          <Button>Filtrera</Button>
-          <Button>Sortera</Button>
-          <IconButton>
+      <Grid container alignItems={"center"} justify={"center"}>
+        <Grid item>
+          <Button className={classes.hide}>Filtrera</Button>
+          <Button className={classes.hide}>Sortera</Button>
+          <IconButton className={classes.hide}>
             <MoreHorizIcon />
           </IconButton>
         </Grid>
-        {featureCollections.map((fc) => (
-          <SearchResultsDataset
-            key={fc.source.id}
-            featureCollection={fc}
-            sumOfResults={sumOfResults}
-            handleOnResultClick={this.handleOnResultClick}
-            setSelectedFeatureAndSource={setSelectedFeatureAndSource}
-          />
-        ))}
-      </>
+        <Grid container item>
+          {featureCollections.map((fc) => (
+            <Grid style={{ paddingTop: "8px" }} item>
+              <SearchResultsDataset
+                key={fc.source.id}
+                featureCollection={fc}
+                sumOfResults={sumOfResults}
+                handleOnResultClick={this.handleOnResultClick}
+                setSelectedFeatureAndSource={setSelectedFeatureAndSource}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      </Grid>
     );
   }
 }

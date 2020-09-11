@@ -67,7 +67,7 @@ export default class DocumentHandlerModel {
         source: {
           id: `${document.documentTitle}`,
           caption: document.documentTitle,
-          displayFields: ["header"],
+          displayFields: ["header", "geoids"],
           searchFields: ["header"],
         },
         origin: "DOCUMENT",
@@ -98,9 +98,11 @@ export default class DocumentHandlerModel {
         onClickName: "documenthandler-searchresult-clicked",
         id: `${document.documentTitle}${index}`,
         properties: {
+          header: chapter.header,
+          keywords: chapter.keywords,
+          geoids: chapter.geoids,
           documentTitle: document.documentTitle,
           documentFileName: document.documentFileName,
-          header: chapter.header,
           headerIdentifier: chapter.headerIdentifier,
         },
       });
