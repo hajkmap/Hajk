@@ -187,13 +187,13 @@ class SearchBar extends React.PureComponent {
 
   renderSearchResultList = () => {
     const { resultPanelCollapsed } = this.state;
-    const { searchResults, app, map, resultsSource } = this.props;
+    const { searchResults, app, map, resultSource } = this.props;
 
     return (
       <SearchResultsContainer
         searchResults={searchResults}
         app={app}
-        resultsSource={resultsSource}
+        resultSource={resultSource}
         featureCollections={searchResults.featureCollections}
         map={map}
         panelCollapsed={resultPanelCollapsed}

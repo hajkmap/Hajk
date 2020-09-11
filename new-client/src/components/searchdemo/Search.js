@@ -57,9 +57,9 @@ class Search extends React.PureComponent {
       source: this.drawSource,
       style: drawStyle,
     });
-    this.resultsSource = new VectorSource({ wrapX: false });
+    this.resultSource = new VectorSource({ wrapX: false });
     this.resultsLayer = new VectorLayer({
-      source: this.resultsSource,
+      source: this.resultSource,
     });
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
@@ -107,8 +107,8 @@ class Search extends React.PureComponent {
     if (this.drawSource) {
       this.drawSource.clear();
     }
-    if (this.resultsSource) {
-      this.resultsSource.clear();
+    if (this.resultSource) {
+      this.resultSource.clear();
     }
   };
 
@@ -135,7 +135,7 @@ class Search extends React.PureComponent {
   };
 
   handleOnInputChange = (event, searchString, reason) => {
-    this.resultsSource.clear();
+    this.resultSource.clear();
     this.setState(
       {
         autoCompleteOpen: searchString.length >= 3,
@@ -354,7 +354,7 @@ class Search extends React.PureComponent {
   }
 
   addFeaturesToResultsLayer = (featureCollections) => {
-    this.resultsSource.clear();
+    this.resultSource.clear();
 
     const features = featureCollections.map((fc) =>
       fc.value.features.map((f) => {
@@ -363,10 +363,10 @@ class Search extends React.PureComponent {
       })
     );
 
-    features.map((f) => this.resultsSource.addFeatures(f));
+    features.map((f) => this.resultSource.addFeatures(f));
 
     //Zoom to fit all features
-    const currentExtent = this.resultsSource.getExtent();
+    const currentExtent = this.resultSource.getExtent();
 
     if (currentExtent.map(Number.isFinite).includes(false) === false) {
       this.map.getView().fit(currentExtent, {
@@ -452,7 +452,7 @@ class Search extends React.PureComponent {
             }}
             searchImplementedPlugins={this.state.searchImplementedPlugins}
             updateAutoCompleteList={this.updateAutoCompleteList}
-            resultsSource={this.resultsSource}
+            resultSource={this.resultSource}
             searchResults={searchResults}
             handleSearchInput={this.handleSearchInput}
             searchString={searchString}

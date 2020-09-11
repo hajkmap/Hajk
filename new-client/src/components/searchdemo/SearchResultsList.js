@@ -69,18 +69,19 @@ class SearchResultsList extends React.PureComponent {
   };
 
   changeStyleOnSelectedItems = (items) => {
-    const { resultsSource } = this.props;
+    const { resultSource } = this.props;
     // First unset style on ALL features (user might have UNCHECKED a feature)
-    resultsSource.getFeatures().map((f) => f.setStyle(null));
+    resultSource.getFeatures().map((f) => f.setStyle(null));
 
     // Now, set the style only on currently selected features
     items.map((fid) =>
-      resultsSource.getFeatureById(fid).setStyle(highlightedStyle)
+      resultSource.getFeatureById(fid).setStyle(highlightedStyle)
     );
   };
 
   zoomToSelectedItems = (items) => {
     const { resultSource, map } = this.props;
+    console.log(resultSource, "?");
     const extentsFromSelectedItems = items.map((fid) =>
       resultSource.getFeatureById(fid).getGeometry().getExtent()
     );
@@ -114,17 +115,20 @@ class SearchResultsList extends React.PureComponent {
           </IconButton>
         </Grid>
         <Grid container item>
-          {featureCollections.map((fc) => (
-            <Grid style={{ paddingTop: "8px" }} item>
-              <SearchResultsDataset
-                key={fc.source.id}
-                featureCollection={fc}
-                sumOfResults={sumOfResults}
-                handleOnResultClick={this.handleOnResultClick}
-                setSelectedFeatureAndSource={setSelectedFeatureAndSource}
-              />
-            </Grid>
-          ))}
+          {featureCollections.map(
+            (fc) =>
+              fc.value.numberReturned > 0 && (
+                <Grid xs={12} style={{ paddingTop: "8px" }} item>
+                  <SearchResultsDataset
+                    key={fc.source.id}
+                    featureCollection={fc}
+                    sumOfResults={sumOfResults}
+                    handleOnResultClick={this.handleOnResultClick}
+                    setSelectedFeatureAndSource={setSelectedFeatureAndSource}
+                  />
+                </Grid>
+              )
+          )}
         </Grid>
       </Grid>
     );
