@@ -47,7 +47,6 @@ export default class DocumentHandlerModel {
     this.allDocuments.forEach((document, index) => {
       this.chaptersMatchSearch = [];
       document.chapters.forEach((chapter) => {
-        console.log(document, "document");
         this.keywordsMatchSearchString(document, chapter, searchString);
       });
 
