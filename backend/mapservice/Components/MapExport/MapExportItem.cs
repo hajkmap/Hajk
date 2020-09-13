@@ -20,6 +20,8 @@ namespace MapService.Components.MapExport
         public int resolution { get; set; }
         public int[] size { get; set; }
         public double[] bbox { get; set; }  
-        public string proxyUrl { get; set; }      
+        public string proxyUrl { get; set; }
+        public bool teckenforklaring { get; set; }
+        public string teckenforklaringplacement { get; set; }      
     }
 }
