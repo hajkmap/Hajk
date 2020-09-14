@@ -13,6 +13,25 @@ const styles = (theme) => ({
   },
 });
 
+var fill = new Fill({
+  color: "rgba(255,255,255,0.4)",
+});
+var stroke = new Stroke({
+  color: "#3399CC",
+  width: 1.25,
+});
+var defaultStyles = [
+  new Style({
+    image: new Circle({
+      fill: fill,
+      stroke: stroke,
+      radius: 5,
+    }),
+    fill: fill,
+    stroke: stroke,
+  }),
+];
+
 let drawStyle = new Style({
   stroke: new Stroke({
     color: "rgba(255, 214, 91, 0.6)",
@@ -60,6 +79,7 @@ class Search extends React.PureComponent {
     this.resultSource = new VectorSource({ wrapX: false });
     this.resultsLayer = new VectorLayer({
       source: this.resultSource,
+      style: props.options.showInMapOnSearch ? defaultStyles : null,
     });
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
@@ -248,7 +268,7 @@ class Search extends React.PureComponent {
 
     const promise = this.searchModel.getResults(
       this.state.searchString,
-      searchSources, // this is a state variable!
+      searchSources,
       fetchOptions
     );
 
@@ -275,6 +295,7 @@ class Search extends React.PureComponent {
   };
 
   async doSearch() {
+    const { options } = this.props;
     let fetchOptions = this.getAutoCompleteFetchSettings();
     let searchResults = await this.fetchResultFromSearchModel(fetchOptions);
     this.setState({
@@ -284,8 +305,28 @@ class Search extends React.PureComponent {
       autoCompleteOpen: false,
     });
 
-    this.addFeaturesToResultsLayer(searchResults.featureCollections);
+    let features = this.extractFeatureWithFromFeatureCollections(
+      searchResults.featureCollections
+    );
+
+    features = this.filterFeaturesWithGeometry(features);
+
+    this.addFeaturesToResultsLayer(features);
   }
+
+  filterFeaturesWithGeometry = (features) => {
+    return features.filter((feature) => {
+      return feature.geometry != null;
+    });
+  };
+
+  extractFeatureWithFromFeatureCollections = (featureCollections) => {
+    return featureCollections
+      .map((fc) => {
+        return fc.value.features;
+      })
+      .flat();
+  };
 
   updateAutoCompleteList = async () => {
     let fetchOptions = this.getAutoCompleteFetchSettings();
@@ -315,18 +356,7 @@ class Search extends React.PureComponent {
     return searchString.length >= 3;
   };
 
-  addFeaturesToResultsLayer = (featureCollections) => {
-    this.resultSource.clear();
-
-    const features = featureCollections.map((fc) =>
-      fc.value.features.map((f) => {
-        const geoJsonFeature = new GeoJSON().readFeature(f);
-        return geoJsonFeature;
-      })
-    );
-
-    features.map((f) => this.resultSource.addFeatures(f));
-
+  fitMapToSearchResult = () => {
     //Zoom to fit all features
     const currentExtent = this.resultSource.getExtent();
 
@@ -335,6 +365,20 @@ class Search extends React.PureComponent {
         size: this.map.getSize(),
         maxZoom: 7,
       });
+    }
+  };
+
+  addFeaturesToResultsLayer = (features) => {
+    const { options } = this.props;
+    this.resultSource.clear();
+    this.resultSource.addFeatures(
+      features.map((f) => {
+        return new GeoJSON().readFeature(f);
+      })
+    );
+
+    if (options.showInMapOnSearch) {
+      this.fitMapToSearchResult();
     }
   };
 
