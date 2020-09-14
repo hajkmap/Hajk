@@ -6,7 +6,7 @@ class PrintPreview extends React.Component {
     super(props);
     this.el = document.createElement("div");
     this.el.id = "printPreviewContent";
-    this.el.style.width = `${21}cm`;
+    this.el.style.width = `${210}mm`;
   }
 
   componentDidMount() {

@@ -42,7 +42,7 @@ class PrintWindow extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.printPages = [{ availableHeight: 1070, content: [] }];
+    this.printPages = [{ availableHeight: 950, content: [] }];
   }
 
   componentDidMount = () => {
@@ -69,39 +69,72 @@ class PrintWindow extends React.PureComponent {
     return this.printPages[this.printPages.length - 1].availableHeight;
   };
 
-  divideContentOnPages = (content) => {
-    const maxHeight = 900;
-    let availableHeight = this.getAvailableHeight();
-    let contentHeight = content.clientHeight;
+  checkIfTagIsTitle = (node) => {
+    let tagName = "";
+    if (node.hasChildNodes() && node.children.length === 1) {
+      tagName = node.children[0].tagName;
+    }
+    return ["H2", "H3"].includes(tagName);
+  };
 
-    if (contentHeight >= availableHeight && content.children.length > 0) {
-      [...content.children].forEach((child) => {
-        this.divideContentOnPages(child);
-      });
-    } else if (
-      contentHeight >= availableHeight &&
-      content.children.length === 0
-    ) {
-      this.printPages.push({
-        availableHeight: maxHeight - contentHeight,
-        content: [content],
-      });
+  contentFitsCurrentPage = (content) => {
+    let contentHeight = content.clientHeight;
+    let availableHeight = this.getAvailableHeight();
+    return contentHeight <= availableHeight;
+  };
+
+  addContentToNewPage = (content, maxHeight) => {
+    this.printPages.push({
+      availableHeight: maxHeight - content.clientHeight,
+      content: [content],
+    });
+  };
+
+  addContentToCurrentPage = (content) => {
+    this.printPages[this.printPages.length - 1].availableHeight -=
+      content.clientHeight;
+    this.printPages[this.printPages.length - 1].content.push(content);
+  };
+
+  divideContentOnPages = (content) => {
+    const maxHeight = 950;
+    if (this.checkIfTagIsTitle(content)) {
+      if (this.getAvailableHeight() >= 0.4 * maxHeight) {
+        this.addContentToCurrentPage(content, maxHeight);
+      } else {
+        this.addContentToNewPage(content, maxHeight);
+      }
+
+      if (content.children && content.children.length > 0) {
+        [...content.children].forEach((child) => {
+          this.divideContentOnPages(child);
+        });
+      }
     } else {
-      this.printPages[
-        this.printPages.length - 1
-      ].availableHeight -= contentHeight;
-      this.printPages[this.printPages.length - 1].content.push(content);
+      if (!this.contentFitsCurrentPage(content) && content.hasChildNodes()) {
+        [...content.children].forEach((child) => {
+          this.divideContentOnPages(child);
+        });
+      } else if (
+        !this.contentFitsCurrentPage(content) &&
+        !content.hasChildNodes()
+      ) {
+        this.addContentToNewPage(content, maxHeight);
+      } else {
+        this.addContentToCurrentPage(content, maxHeight);
+      }
     }
   };
 
   getCanvasFromContent = (page) => {
     let sWidth = Math.round((210 * 90) / 25.4);
-    let sHeight = 1120;
+    let sHeight = Math.round((297 * 90) / 25.4);
     let dWidth = Math.round((210 * 90) / 25.4);
-    let dHeight = 1120;
+    let dHeight = Math.round((297 * 90) / 25.4);
+    let pR = window.devicePixelRatio;
     let onePageDiv = document.createElement("div");
     document.body.appendChild(onePageDiv);
-    onePageDiv.style.width = `${21}cm`;
+    onePageDiv.style.width = `${210}mm`;
     onePageDiv.style.padding = "50px";
 
     page.content.forEach((child) => {
@@ -112,41 +145,66 @@ class PrintWindow extends React.PureComponent {
       html2canvas(onePageDiv, {}).then((canvas) => {
         let onePageCanvas = document.createElement("canvas");
         onePageCanvas.width = Math.round((210 * 90) / 25.4);
-        onePageCanvas.height = 1120;
+        onePageCanvas.height = Math.round((297 * 90) / 25.4);
 
         let ctx = onePageCanvas.getContext("2d");
         ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, onePageCanvas.width, onePageCanvas.height);
+        ctx.fillRect(0, 0, onePageCanvas.width * pR, onePageCanvas.height * pR);
 
-        ctx.drawImage(canvas, 0, 0, sWidth, sHeight, 0, 0, dWidth, dHeight);
+        ctx.drawImage(
+          canvas,
+          0,
+          0,
+          sWidth * pR,
+          sHeight * pR,
+          0,
+          0,
+          dWidth,
+          dHeight
+        );
         document.body.removeChild(onePageDiv);
         resolve(onePageCanvas);
       });
     });
   };
 
+  loadImage = (img) => {
+    return new Promise((resolve, reject) => {
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(img);
+    });
+  };
+
   printContents = () => {
     const printContent = document.getElementById("printPreviewContent");
-    this.printPages = [{ availableHeight: 1070, content: [] }];
-    this.divideContentOnPages(printContent);
-    let pdf = new jsPDF("p", "pt", "a4");
-    let promises = [];
 
-    this.printPages.forEach((page, index) => {
-      promises.push(this.getCanvasFromContent(page));
+    var allImages = [...printContent.getElementsByTagName("img")].map((img) => {
+      return this.loadImage(img);
     });
 
-    Promise.all(promises).then((canvases) => {
-      canvases.forEach((canvas, index) => {
-        if (index > 0) {
-          pdf.addPage(595, 842); //210" x 297" in pts
-        }
-        //! now we declare that we're working on that page
-        pdf.setPage(index + 1);
-        pdf.addImage(canvas, "JPG", 0, 0);
+    Promise.allSettled(allImages).then((imageArray) => {
+      this.printPages = [{ availableHeight: 950, content: [] }];
+      this.divideContentOnPages(printContent);
+
+      let pdf = new jsPDF("p", "pt", "a4");
+      let promises = [];
+
+      this.printPages.forEach((page, index) => {
+        promises.push(this.getCanvasFromContent(page));
       });
-      pdf.save("oversiktsplan.pdf");
-      this.setState({ pdfLoading: false, printContent: undefined });
+
+      Promise.all(promises).then((canvases) => {
+        canvases.forEach((canvas, index) => {
+          if (index > 0) {
+            pdf.addPage(); //210" x 297" in pts
+          }
+          //! now we declare that we're working on that page
+          pdf.setPage(index + 1);
+          pdf.addImage(canvas, "JPG", 0, 0);
+        });
+        pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
+        this.setState({ pdfLoading: false, printContent: undefined });
+      });
     });
   };
 
@@ -380,11 +438,7 @@ class PrintWindow extends React.PureComponent {
   renderPrintPreview = () => {
     return (
       <PrintPreview>
-        <Grid
-          style={{ padding: "50px", maxWidth: "100%" }}
-          id={"printPreviewContent"}
-          container
-        >
+        <Grid style={{ padding: "50px" }} id={"printPreviewContent"} container>
           {this.state.printContent}
         </Grid>
       </PrintPreview>
