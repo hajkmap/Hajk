@@ -79,7 +79,7 @@ class Search extends React.PureComponent {
     this.resultSource = new VectorSource({ wrapX: false });
     this.resultsLayer = new VectorLayer({
       source: this.resultSource,
-      style: props.options.showInMapOnSearch ? defaultStyles : null,
+      style: props.options.showInMapOnSearchResult ? defaultStyles : null,
     });
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
@@ -377,7 +377,7 @@ class Search extends React.PureComponent {
       })
     );
 
-    if (options.showInMapOnSearch) {
+    if (options.showInMapOnSearchResult) {
       this.fitMapToSearchResult();
     }
   };

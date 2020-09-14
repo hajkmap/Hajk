@@ -809,7 +809,7 @@
         "radiusSearch": true,
         "tooltip": "Sök...",
         "searchWithinButtonText": "Markera i kartan",
-        "showInMapOnSearch": true,
+        "showInMapOnSearchResult": true,
         "maxFeatures": 100,
         "selectedSources": [],
         "layers": [
