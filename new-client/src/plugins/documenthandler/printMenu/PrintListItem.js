@@ -27,14 +27,26 @@ class PrintListItem extends React.PureComponent {
   };
 
   getCollapseIcon = () => {
-    const { expandedSubMenu, classes } = this.props;
+    const { expandedSubMenu, classes, onClick } = this.props;
     return expandedSubMenu ? (
-      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
+      <ListItemIcon
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        classes={{ root: classes.collapseIconRoot }}
+      >
         <Typography variant="srOnly">Minimera submeny</Typography>
         <ExpandLess />
       </ListItemIcon>
     ) : (
-      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
+      <ListItemIcon
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        classes={{ root: classes.collapseIconRoot }}
+      >
         <Typography variant="srOnly">Maximera submeny</Typography>
         <ExpandMore />
       </ListItemIcon>
@@ -58,7 +70,7 @@ class PrintListItem extends React.PureComponent {
           button
           size="small"
           disableGutters
-          onClick={onClick}
+          onClick={(e) => handleCheckboxChange(chapter)}
           aria-controls="submenu"
           className={classes.listItem}
           style={{
