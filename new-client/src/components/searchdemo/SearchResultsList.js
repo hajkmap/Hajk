@@ -121,6 +121,7 @@ class SearchResultsList extends React.PureComponent {
       featureCollections,
       setSelectedFeatureAndSource,
       sumOfResults,
+      getOriginBasedIcon,
       classes
     } = this.props;
     const featureCollectionsWithFeatures = featureCollections.filter(
@@ -145,6 +146,7 @@ class SearchResultsList extends React.PureComponent {
             >
               <SearchResultsDataset
                 featureCollection={fc}
+                getOriginBasedIcon={getOriginBasedIcon}
                 sumOfResults={sumOfResults}
                 handleOnResultClick={this.handleOnResultClick}
                 setSelectedFeatureAndSource={setSelectedFeatureAndSource}

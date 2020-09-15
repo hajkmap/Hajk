@@ -100,7 +100,7 @@ class SearchBar extends React.PureComponent {
     this.props.updateSearchOptions(searchOptions);
   };
 
-  getAutoCompleteResultIcon = origin => {
+  getOriginBasedIcon = origin => {
     switch (origin) {
       case "WFS":
         return <RoomIcon color="disabled"></RoomIcon>;
@@ -220,6 +220,7 @@ class SearchBar extends React.PureComponent {
         searchResults={searchResults}
         app={app}
         resultSource={resultSource}
+        getOriginBasedIcon={this.getOriginBasedIcon}
         featureCollections={searchResults.featureCollections}
         map={map}
         panelCollapsed={resultPanelCollapsed}
@@ -258,7 +259,7 @@ class SearchBar extends React.PureComponent {
         renderOption={option => {
           return (
             <>
-              {this.getAutoCompleteResultIcon(option.origin)}
+              {this.getOriginBasedIcon(option.origin)}
 
               <Typography style={{ paddingRight: 8 }}>
                 {option.autocompleteEntry}
@@ -268,7 +269,7 @@ class SearchBar extends React.PureComponent {
           );
         }}
         getOptionLabel={option => option?.autocompleteEntry || option}
-        options={autocompleteList}
+        options={[2, 3, "hej", "blaaa", [2, 3, 4]]}
         loading={loading}
         renderInput={this.renderAutoCompleteInputField}
       />

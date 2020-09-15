@@ -73,7 +73,7 @@ class SearchResultsDataset extends React.PureComponent {
 
   renderDatasetSummary = () => {
     const { numberOfResultsToDisplay } = this.state;
-    const { featureCollection, classes } = this.props;
+    const { featureCollection, classes, getOriginBasedIcon } = this.props;
     const { numberReturned, numberMatched } = featureCollection.value;
     const toolTipTitle = `Visar ${numberReturned} av ${numberMatched} resultat`;
     return (
@@ -83,7 +83,7 @@ class SearchResultsDataset extends React.PureComponent {
       >
         <Grid alignItems="center" container>
           <Grid item xs={1}>
-            <PlaceIcon />
+            {getOriginBasedIcon(featureCollection.origin)}
           </Grid>
           <Grid item xs={9}>
             <Typography>{featureCollection.source.caption}</Typography>
