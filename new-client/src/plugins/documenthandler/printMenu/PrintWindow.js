@@ -10,6 +10,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import PrintList from "./PrintList";
 import PrintPreview from "./PrintPreview";
+import TableOfContents from "./TableOfContents";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -33,7 +34,7 @@ class PrintWindow extends React.PureComponent {
   state = {
     printText: true,
     printImages: true,
-    printMaps: true,
+    printMaps: false,
     allDocumentsToggled: false,
     chapterInformation: this.setChapterInfo(),
     printContent: undefined,
@@ -42,7 +43,7 @@ class PrintWindow extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.printPages = [{ availableHeight: 950, content: [] }];
+    this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
   }
 
   componentDidMount = () => {
@@ -83,8 +84,9 @@ class PrintWindow extends React.PureComponent {
     return contentHeight <= availableHeight;
   };
 
-  addContentToNewPage = (content, maxHeight) => {
+  addContentToNewPage = (content, maxHeight, type) => {
     this.printPages.push({
+      type: type,
       availableHeight: maxHeight - content.clientHeight,
       content: [content],
     });
@@ -96,30 +98,46 @@ class PrintWindow extends React.PureComponent {
     this.printPages[this.printPages.length - 1].content.push(content);
   };
 
-  divideContentOnPages = (content) => {
+  addNewPage = (type, maxHeight) => {
+    this.printPages.push({
+      type: type,
+      availableHeight: maxHeight,
+      content: [],
+    });
+  };
+
+  divideContentOnPages = (content, type) => {
     const maxHeight = 950;
     if (this.checkIfTagIsTitle(content)) {
       if (this.getAvailableHeight() >= 0.4 * maxHeight) {
         this.addContentToCurrentPage(content, maxHeight);
       } else {
-        this.addContentToNewPage(content, maxHeight);
+        this.addContentToNewPage(content, maxHeight, type);
       }
 
       if (content.children && content.children.length > 0) {
         [...content.children].forEach((child) => {
-          this.divideContentOnPages(child);
+          this.divideContentOnPages(child, type);
         });
       }
     } else {
-      if (!this.contentFitsCurrentPage(content) && content.hasChildNodes()) {
+      if (
+        !this.contentFitsCurrentPage(content) &&
+        content.children &&
+        content.children.length > 0 &&
+        !(type === "TOC" && content.tagName === "LI")
+      ) {
         [...content.children].forEach((child) => {
-          this.divideContentOnPages(child);
+          this.divideContentOnPages(child, type);
         });
       } else if (
-        !this.contentFitsCurrentPage(content) &&
-        !content.hasChildNodes()
+        (!this.contentFitsCurrentPage(content) &&
+          !(content.children && content.children.length > 0)) ||
+        (!this.contentFitsCurrentPage(content) &&
+          type === "TOC" &&
+          content.tagName === "LI")
       ) {
-        this.addContentToNewPage(content, maxHeight);
+        this.addContentToNewPage(content, maxHeight, type);
       } else {
         this.addContentToCurrentPage(content, maxHeight);
       }
@@ -141,30 +159,28 @@ class PrintWindow extends React.PureComponent {
       onePageDiv.appendChild(child);
     });
 
-    return new Promise((resolve, reject) => {
-      html2canvas(onePageDiv, {}).then((canvas) => {
-        let onePageCanvas = document.createElement("canvas");
-        onePageCanvas.width = Math.round((210 * 90) / 25.4);
-        onePageCanvas.height = Math.round((297 * 90) / 25.4);
+    return html2canvas(onePageDiv, {}).then((canvas) => {
+      let onePageCanvas = document.createElement("canvas");
+      onePageCanvas.width = Math.round((210 * 90) / 25.4);
+      onePageCanvas.height = Math.round((297 * 90) / 25.4);
 
-        let ctx = onePageCanvas.getContext("2d");
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, onePageCanvas.width * pR, onePageCanvas.height * pR);
+      let ctx = onePageCanvas.getContext("2d");
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, onePageCanvas.width * pR, onePageCanvas.height * pR);
 
-        ctx.drawImage(
-          canvas,
-          0,
-          0,
-          sWidth * pR,
-          sHeight * pR,
-          0,
-          0,
-          dWidth,
-          dHeight
-        );
-        document.body.removeChild(onePageDiv);
-        resolve(onePageCanvas);
-      });
+      ctx.drawImage(
+        canvas,
+        0,
+        0,
+        sWidth * pR,
+        sHeight * pR,
+        0,
+        0,
+        dWidth,
+        dHeight
+      );
+      document.body.removeChild(onePageDiv);
+      return onePageCanvas;
     });
   };
 
@@ -175,7 +191,38 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
+  addFooters = (pdf, numToc) => {
+    const pageCount = pdf.internal.getNumberOfPages();
+
+    pdf.setFont("helvetica", "italic");
+    pdf.setFontSize(8);
+    for (var i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      if (i === 1) {
+        pdf.text(
+          `Skapad: ${new Date().toLocaleString()}`,
+          pdf.internal.pageSize.width / 2,
+          pdf.internal.pageSize.height - 20,
+          {
+            align: "center",
+          }
+        );
+      } else if (i > numToc) {
+        pdf.text(
+          `Sida ${i - numToc} av ${pageCount - numToc}`,
+          pdf.internal.pageSize.width / 2,
+          pdf.internal.pageSize.height - 20,
+          {
+            align: "center",
+          }
+        );
+      }
+    }
+    return pdf;
+  };
+
   printContents = () => {
+    const tocElement = document.getElementById("printPreviewTOC");
     const printContent = document.getElementById("printPreviewContent");
 
     var allImages = [...printContent.getElementsByTagName("img")].map((img) => {
@@ -183,8 +230,11 @@ class PrintWindow extends React.PureComponent {
     });
 
     Promise.allSettled(allImages).then((imageArray) => {
-      this.printPages = [{ availableHeight: 950, content: [] }];
-      this.divideContentOnPages(printContent);
+      this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
+      this.divideContentOnPages(tocElement, "TOC");
+      this.addNewPage("CONTENT", 950);
+      this.divideContentOnPages(printContent, "CONTENT");
+      let numToc = this.printPages.filter((page) => page.type === "TOC").length;
 
       let pdf = new jsPDF("p", "pt", "a4");
       let promises = [];
@@ -196,12 +246,13 @@ class PrintWindow extends React.PureComponent {
       Promise.all(promises).then((canvases) => {
         canvases.forEach((canvas, index) => {
           if (index > 0) {
-            pdf.addPage(); //210" x 297" in pts
+            pdf.addPage();
           }
           //! now we declare that we're working on that page
           pdf.setPage(index + 1);
           pdf.addImage(canvas, "JPG", 0, 0);
         });
+        pdf = this.addFooters(pdf, numToc);
         pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
         this.setState({ pdfLoading: false, printContent: undefined });
       });
@@ -438,8 +489,13 @@ class PrintWindow extends React.PureComponent {
   renderPrintPreview = () => {
     return (
       <PrintPreview>
-        <Grid style={{ padding: "50px" }} id={"printPreviewContent"} container>
-          {this.state.printContent}
+        <Grid style={{ padding: "50px" }} container>
+          <Grid id={"printPreviewTOC"} item>
+            <TableOfContents chapters={this.state.chapterInformation} />
+          </Grid>
+          <Grid id={"printPreviewContent"} item>
+            {this.state.printContent}
+          </Grid>
         </Grid>
       </PrintPreview>
     );
@@ -461,7 +517,14 @@ class PrintWindow extends React.PureComponent {
           container
           alignItems="center"
         >
-          <Grid alignItems="center" alignContent="center" container item xs>
+          <Grid
+            alignItems="center"
+            alignContent="center"
+            justify={"center"}
+            container
+            item
+            xs
+          >
             <Grid item xs={4}>
               <Button
                 color="primary"
@@ -479,20 +542,15 @@ class PrintWindow extends React.PureComponent {
             </Grid>
             <Grid item xs={4}></Grid>
           </Grid>
-          {this.renderCheckboxes()}
 
-          <Grid
-            xs={12}
-            style={{
-              borderTop: "1px solid grey",
-            }}
-            container
-            item
-          >
-            <Grid item xs={12}>
+          <Grid xs={12} container alignItems={"center"} item>
+            <Grid item xs={6}>
               <Typography variant="h6">Dokument</Typography>
             </Grid>
-            <Grid item align="center" xs={4}>
+            <Grid item xs={6}>
+              <Typography variant="h6">Innehåll</Typography>
+            </Grid>
+            <Grid item xs={6}>
               <FormControlLabel
                 value="Välj alla dokument"
                 control={
@@ -503,6 +561,22 @@ class PrintWindow extends React.PureComponent {
                   />
                 }
                 label="Välj alla dokument"
+                labelPlacement="end"
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <FormControlLabel
+                value="Inkludera kartor"
+                control={
+                  <Checkbox
+                    color="primary"
+                    checked={this.state.printMaps}
+                    onChange={() =>
+                      this.setState({ printMaps: !this.state.printMaps })
+                    }
+                  />
+                }
+                label="Inkludera kartor"
                 labelPlacement="end"
               />
             </Grid>
