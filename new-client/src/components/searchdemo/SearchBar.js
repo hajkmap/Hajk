@@ -6,6 +6,7 @@ import { FormHelperText } from "@material-ui/core";
 import ClearIcon from "@material-ui/icons/Clear";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { withTheme } from "@material-ui/core/styles";
+import Hidden from "@material-ui/core/Hidden";
 import withWidth from "@material-ui/core/withWidth";
 
 import {
@@ -70,11 +71,6 @@ const CustomPopper = props => {
       placement="bottom-start"
     />
   );
-};
-
-const withMediaQuery = (...args) => Component => props => {
-  const mediaQuery = useMediaQuery(...args);
-  return <Component mediaQuery={mediaQuery} {...props} />;
 };
 
 class SearchBar extends React.PureComponent {
@@ -232,7 +228,6 @@ class SearchBar extends React.PureComponent {
   };
 
   renderAutoComplete = () => {
-    const { moreOptionsId } = this.state;
     const {
       autocompleteList,
       autoCompleteOpen,
@@ -275,41 +270,48 @@ class SearchBar extends React.PureComponent {
         getOptionLabel={option => option?.autocompleteEntry || option}
         options={autocompleteList}
         loading={loading}
-        renderInput={params => (
-          <TextField
-            {...params}
-            label={undefined}
-            variant="outlined"
-            placeholder="Sök..."
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {loading ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                  <IconButton size="small" onClick={this.handleClickOnSearch}>
-                    <SearchIcon />
-                  </IconButton>
-                  {searchString.length > 0 ? (
-                    <IconButton onClick={this.props.handleOnClear} size="small">
-                      <ClearIcon />
-                    </IconButton>
-                  ) : (
-                    <IconButton
-                      size="small"
-                      aria-describedby={moreOptionsId}
-                      onClick={this.handleClickOnMoreOptions}
-                    >
-                      <MoreHorizIcon />
-                    </IconButton>
-                  )}
-                </>
-              )
-            }}
-          />
-        )}
+        renderInput={this.renderAutoCompleteInputField}
+      />
+    );
+  };
+
+  renderAutoCompleteInputField = params => {
+    const { moreOptionsId } = this.state;
+    const { searchString, loading, width } = this.props;
+    const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
+
+    return (
+      <TextField
+        {...params}
+        label={undefined}
+        variant={width == "xs" ? "standard" : "outlined"}
+        placeholder="Sök..."
+        InputProps={{
+          ...params.InputProps,
+          ...disableUnderline,
+          endAdornment: (
+            <>
+              {loading ? <CircularProgress color="inherit" size={20} /> : null}
+              {params.InputProps.endAdornment}
+              <IconButton size="small" onClick={this.handleClickOnSearch}>
+                <SearchIcon />
+              </IconButton>
+              {searchString.length > 0 ? (
+                <IconButton onClick={this.props.handleOnClear} size="small">
+                  <ClearIcon />
+                </IconButton>
+              ) : (
+                <IconButton
+                  size="small"
+                  aria-describedby={moreOptionsId}
+                  onClick={this.handleClickOnMoreOptions}
+                >
+                  <MoreHorizIcon />
+                </IconButton>
+              )}
+            </>
+          )
+        }}
       />
     );
   };
@@ -354,7 +356,7 @@ class SearchBar extends React.PureComponent {
   };
 
   render() {
-    const { classes, showSearchResults } = this.props;
+    const { classes, showSearchResults, width } = this.props;
     const { panelCollapsed } = this.state;
 
     return (
@@ -364,16 +366,17 @@ class SearchBar extends React.PureComponent {
         })}
       >
         <Grid item>
-          <Paper>
+          <Paper elevation={width === "xs" ? 0 : 1}>
             {this.renderAutoComplete()}
             {this.renderPopover()}
             {this.renderSelectSearchOptions()}
           </Paper>
         </Grid>
+
         {showSearchResults && this.renderSearchResultList()}
       </Grid>
     );
   }
 }
 
-export default withStyles(styles)(withTheme(SearchBar));
+export default withStyles(styles)(withTheme(withWidth()(SearchBar)));

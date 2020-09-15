@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import { boundingExtent } from "ol/extent";
 import { Stroke, Style, Circle, Fill } from "ol/style";
+import cslx from "clsx";
 
 import { Button, IconButton } from "@material-ui/core";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
@@ -12,36 +13,36 @@ import SearchResultsDataset from "./SearchResultsDataset";
 let highlightedStyle = new Style({
   stroke: new Stroke({
     color: [200, 0, 0, 0.7],
-    width: 4,
+    width: 4
   }),
   fill: new Fill({
-    color: [255, 0, 0, 0.1],
+    color: [255, 0, 0, 0.1]
   }),
   image: new Circle({
     radius: 6,
     stroke: new Stroke({
       color: [200, 0, 0, 0.7],
-      width: 4,
-    }),
-  }),
+      width: 4
+    })
+  })
 });
 
-const styles = (theme) => ({
+const styles = theme => ({
   hide: {
-    display: "none",
+    display: "none"
   },
   searchResultDatasetWrapper: {
     paddingTop: "8px",
-    paddingBottom: "8px",
-  },
+    paddingBottom: "8px"
+  }
 });
 
 class SearchResultsList extends React.PureComponent {
   state = {
-    selectedItems: [],
+    selectedItems: []
   };
 
-  showClickResultInMap = (feature) => {
+  showClickResultInMap = feature => {
     const currentIndex = this.state.selectedItems.indexOf(feature.id);
     const selectedItems = [...this.state.selectedItems];
 
@@ -53,7 +54,7 @@ class SearchResultsList extends React.PureComponent {
 
     this.setState(
       {
-        selectedItems: selectedItems,
+        selectedItems: selectedItems
       },
       () => {
         this.changeStyleOnSelectedItems(this.state.selectedItems); // Set another OpenLayers Style so we can distinguish checked items
@@ -62,7 +63,7 @@ class SearchResultsList extends React.PureComponent {
     );
   };
 
-  handleOnResultClick = (feature) => () => {
+  handleOnResultClick = feature => () => {
     const { app } = this.props;
     if (feature.onClickName) {
       app.globalObserver.publish(feature.onClickName, feature);
@@ -71,21 +72,24 @@ class SearchResultsList extends React.PureComponent {
     }
   };
 
-  changeStyleOnSelectedItems = (items) => {
+  changeStyleOnSelectedItems = items => {
     const { resultSource } = this.props;
     // First unset style on ALL features (user might have UNCHECKED a feature)
-    resultSource.getFeatures().map((f) => f.setStyle(null));
+    resultSource.getFeatures().map(f => f.setStyle(null));
 
     // Now, set the style only on currently selected features
-    items.map((fid) =>
+    items.map(fid =>
       resultSource.getFeatureById(fid).setStyle(highlightedStyle)
     );
   };
 
-  zoomToSelectedItems = (items) => {
+  zoomToSelectedItems = items => {
     const { resultSource, map } = this.props;
-    const extentsFromSelectedItems = items.map((fid) =>
-      resultSource.getFeatureById(fid).getGeometry().getExtent()
+    const extentsFromSelectedItems = items.map(fid =>
+      resultSource
+        .getFeatureById(fid)
+        .getGeometry()
+        .getExtent()
     );
 
     const extentToZoomTo =
@@ -95,7 +99,7 @@ class SearchResultsList extends React.PureComponent {
 
     map.getView().fit(extentToZoomTo, {
       size: map.getSize(),
-      maxZoom: 7,
+      maxZoom: 7
     });
   };
 
@@ -117,32 +121,26 @@ class SearchResultsList extends React.PureComponent {
       featureCollections,
       setSelectedFeatureAndSource,
       sumOfResults,
-      classes,
+      classes
     } = this.props;
     const featureCollectionsWithFeatures = featureCollections.filter(
-      (featureCollection) => {
+      featureCollection => {
         return featureCollection.value.features.length > 0;
       }
-    );
-
-    console.log(
-      featureCollectionsWithFeatures,
-      "featureCollectionWithFeatures"
     );
 
     return (
       <Grid container alignItems={"center"} justify={"center"}>
         {this.renderSearchResultListOptions()}
         <Grid container item>
-          {featureCollectionsWithFeatures.map((fc) => (
+          {featureCollectionsWithFeatures.map(fc => (
             <Grid
               key={fc.source.id}
               xs={12}
-              className={
-                featureCollections.length !== 1 &&
-                fc &&
+              className={cslx(
+                featureCollections.length !== 1 && fc,
                 classes.searchResultDatasetWrapper
-              }
+              )}
               item
             >
               <SearchResultsDataset
