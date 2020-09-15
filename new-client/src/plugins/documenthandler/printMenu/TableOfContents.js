@@ -29,16 +29,15 @@ class TableOfContents extends React.PureComponent {
   };
 
   setTitlesAndLevels = (chapter) => {
-    if (chapter.chosenForPrint) {
-      this.titlesAndLevels.push({
-        title: chapter.header,
-        level: chapter.level,
+    this.titlesAndLevels.push({
+      title: chapter.header,
+      level: chapter.level,
+      chosenForPrint: chapter.chosenForPrint,
+    });
+    if (chapter.chapters) {
+      chapter.chapters.forEach((subChapter) => {
+        this.setTitlesAndLevels(subChapter);
       });
-      if (chapter.chapters) {
-        chapter.chapters.forEach((subChapter) => {
-          this.setTitlesAndLevels(subChapter);
-        });
-      }
     }
   };
 
@@ -52,8 +51,21 @@ class TableOfContents extends React.PureComponent {
         </Typography>
         <List style={{ width: "100%" }} disablePadding>
           {titlesAndLevels.map((chapter, index) => {
-            return (
+            return chapter.chosenForPrint ? (
               <ListItem
+                key={index}
+                style={{
+                  paddingLeft:
+                    theme.spacing(1) + theme.spacing(chapter.level * 3),
+                }}
+              >
+                <ListItemText>
+                  <Typography>{chapter.title}</Typography>
+                </ListItemText>
+              </ListItem>
+            ) : (
+              <ListItem
+                disabled
                 key={index}
                 style={{
                   paddingLeft:

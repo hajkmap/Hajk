@@ -124,14 +124,18 @@ class PrintWindow extends React.PureComponent {
       if (
         !this.contentFitsCurrentPage(content) &&
         content.children &&
-        content.children.length > 0
+        content.children.length > 0 &&
+        !(type === "TOC" && content.tagName === "LI")
       ) {
         [...content.children].forEach((child) => {
           this.divideContentOnPages(child, type);
         });
       } else if (
-        !this.contentFitsCurrentPage(content) &&
-        !(content.children && content.children.length > 0)
+        (!this.contentFitsCurrentPage(content) &&
+          !(content.children && content.children.length > 0)) ||
+        (!this.contentFitsCurrentPage(content) &&
+          type === "TOC" &&
+          content.tagName === "LI")
       ) {
         this.addContentToNewPage(content, maxHeight, type);
       } else {
@@ -194,7 +198,7 @@ class PrintWindow extends React.PureComponent {
     pdf.setFontSize(8);
     for (var i = 1; i <= pageCount; i++) {
       pdf.setPage(i);
-      if (i <= numToc) {
+      if (i === 1) {
         pdf.text(
           `Skapad: ${new Date().toLocaleString()}`,
           pdf.internal.pageSize.width / 2,
@@ -203,7 +207,7 @@ class PrintWindow extends React.PureComponent {
             align: "center",
           }
         );
-      } else {
+      } else if (i > numToc) {
         pdf.text(
           `Sida ${i - numToc} av ${pageCount - numToc}`,
           pdf.internal.pageSize.width / 2,
