@@ -1,9 +1,10 @@
 import React from "react";
 import { withStyles, withTheme } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import List from "@material-ui/core/List";
+import { Typography } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
 
 const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
@@ -45,21 +46,26 @@ class TableOfContents extends React.PureComponent {
     const { titlesAndLevels } = this.state;
     const { theme } = this.props;
     return (
-      <List style={{ width: "100%" }} disablePadding>
-        {titlesAndLevels.map((chapter, index) => {
-          return (
-            <ListItem
-              key={index}
-              style={{
-                paddingLeft:
-                  theme.spacing(1) + theme.spacing(chapter.level * 3),
-              }}
-            >
-              <ListItemText>{chapter.title}</ListItemText>
-            </ListItem>
-          );
-        })}
-      </List>
+      <Grid container>
+        <Typography variant="h2" gutterBottom={true}>
+          Innehållsförteckning
+        </Typography>
+        <List style={{ width: "100%" }} disablePadding>
+          {titlesAndLevels.map((chapter, index) => {
+            return (
+              <ListItem
+                key={index}
+                style={{
+                  paddingLeft:
+                    theme.spacing(1) + theme.spacing(chapter.level * 3),
+                }}
+              >
+                <ListItemText>{chapter.title}</ListItemText>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Grid>
     );
   }
 }

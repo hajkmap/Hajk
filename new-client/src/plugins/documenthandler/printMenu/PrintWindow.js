@@ -43,7 +43,7 @@ class PrintWindow extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.printPages = [{ availableHeight: 950, content: [] }];
+    this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
   }
 
   componentDidMount = () => {
@@ -84,31 +84,12 @@ class PrintWindow extends React.PureComponent {
     return contentHeight <= availableHeight;
   };
 
-  addContentToNewPage = (content, maxHeight) => {
-    //this.addNewPage("CONTENT", maxHeight);
-    //this.addContentToCurrentPage(content);
+  addContentToNewPage = (content, maxHeight, type) => {
     this.printPages.push({
+      type: type,
       availableHeight: maxHeight - content.clientHeight,
       content: [content],
     });
-  };
-
-  addNewPage = (type, maxHeight) => {
-    if (type === "TOC") {
-      let numTOCPages = this.printPages.filter((page) => page.type === "TOC")
-        .length;
-      this.printPages.splice(numTOCPages, 0, {
-        type: type,
-        availableHeight: maxHeight,
-        content: [],
-      });
-    } else {
-      this.printPages.push({
-        type: type,
-        availableHeight: maxHeight,
-        content: [],
-      });
-    }
   };
 
   addContentToCurrentPage = (content) => {
@@ -117,42 +98,42 @@ class PrintWindow extends React.PureComponent {
     this.printPages[this.printPages.length - 1].content.push(content);
   };
 
-  addTitleToTOC = (content) => {
-    let numTOCPages = this.printPages.filter((page) => page.type === "TOC")
-      .length;
-    if (
-      content.clientHeight <= this.printPages[numTOCPages - 1].availableHeight
-    ) {
-      this.printPages[numTOCPages - 1].availableHeight -= content.clientHeight;
-      this.printPages[numTOCPages - 1].content.push(content);
-    }
+  addNewPage = (type, maxHeight) => {
+    this.printPages.push({
+      type: type,
+      availableHeight: maxHeight,
+      content: [],
+    });
   };
 
-  divideContentOnPages = (content) => {
+  divideContentOnPages = (content, type) => {
     const maxHeight = 950;
     if (this.checkIfTagIsTitle(content)) {
-      //this.addTitleToTOC(content.children[0].cloneNode(true));
       if (this.getAvailableHeight() >= 0.4 * maxHeight) {
         this.addContentToCurrentPage(content, maxHeight);
       } else {
-        this.addContentToNewPage(content, maxHeight);
+        this.addContentToNewPage(content, maxHeight, type);
       }
 
       if (content.children && content.children.length > 0) {
         [...content.children].forEach((child) => {
-          this.divideContentOnPages(child);
+          this.divideContentOnPages(child, type);
         });
       }
     } else {
-      if (!this.contentFitsCurrentPage(content) && content.hasChildNodes()) {
+      if (
+        !this.contentFitsCurrentPage(content) &&
+        content.children &&
+        content.children.length > 0
+      ) {
         [...content.children].forEach((child) => {
-          this.divideContentOnPages(child);
+          this.divideContentOnPages(child, type);
         });
       } else if (
         !this.contentFitsCurrentPage(content) &&
-        !content.hasChildNodes()
+        !(content.children && content.children.length > 0)
       ) {
-        this.addContentToNewPage(content, maxHeight);
+        this.addContentToNewPage(content, maxHeight, type);
       } else {
         this.addContentToCurrentPage(content, maxHeight);
       }
@@ -206,34 +187,38 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  addFooters = (pdf) => {
+  addFooters = (pdf, numToc) => {
     const pageCount = pdf.internal.getNumberOfPages();
 
     pdf.setFont("helvetica", "italic");
     pdf.setFontSize(8);
     for (var i = 1; i <= pageCount; i++) {
       pdf.setPage(i);
-      pdf.text(
-        `Sida ${i} av ${pageCount}`,
-        pdf.internal.pageSize.width / 2,
-        pdf.internal.pageSize.height - 20,
-        {
-          align: "center",
-        }
-      );
-      pdf.text(
-        `Skapad: ${new Date().toLocaleString()}`,
-        pdf.internal.pageSize.width - 100,
-        pdf.internal.pageSize.height - 20,
-        {
-          align: "center",
-        }
-      );
+      if (i <= numToc) {
+        pdf.text(
+          `Skapad: ${new Date().toLocaleString()}`,
+          pdf.internal.pageSize.width / 2,
+          pdf.internal.pageSize.height - 20,
+          {
+            align: "center",
+          }
+        );
+      } else {
+        pdf.text(
+          `Sida ${i - numToc} av ${pageCount - numToc}`,
+          pdf.internal.pageSize.width / 2,
+          pdf.internal.pageSize.height - 20,
+          {
+            align: "center",
+          }
+        );
+      }
     }
     return pdf;
   };
 
   printContents = () => {
+    const tocElement = document.getElementById("printPreviewTOC");
     const printContent = document.getElementById("printPreviewContent");
 
     var allImages = [...printContent.getElementsByTagName("img")].map((img) => {
@@ -241,8 +226,11 @@ class PrintWindow extends React.PureComponent {
     });
 
     Promise.allSettled(allImages).then((imageArray) => {
-      this.printPages = [{ availableHeight: 950, content: [] }];
-      this.divideContentOnPages(printContent);
+      this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
+      this.divideContentOnPages(tocElement, "TOC");
+      this.addNewPage("CONTENT", 950);
+      this.divideContentOnPages(printContent, "CONTENT");
+      let numToc = this.printPages.filter((page) => page.type === "TOC").length;
 
       let pdf = new jsPDF("p", "pt", "a4");
       let promises = [];
@@ -254,13 +242,13 @@ class PrintWindow extends React.PureComponent {
       Promise.all(promises).then((canvases) => {
         canvases.forEach((canvas, index) => {
           if (index > 0) {
-            pdf.addPage(); //210" x 297" in pts
+            pdf.addPage();
           }
           //! now we declare that we're working on that page
           pdf.setPage(index + 1);
           pdf.addImage(canvas, "JPG", 0, 0);
         });
-        pdf = this.addFooters(pdf);
+        pdf = this.addFooters(pdf, numToc);
         pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
         this.setState({ pdfLoading: false, printContent: undefined });
       });
@@ -497,11 +485,13 @@ class PrintWindow extends React.PureComponent {
   renderPrintPreview = () => {
     return (
       <PrintPreview>
-        <Grid style={{ padding: "50px" }} id={"printPreviewContent"} container>
-          <Grid item>
+        <Grid style={{ padding: "50px" }} container>
+          <Grid id={"printPreviewTOC"} item>
             <TableOfContents chapters={this.state.chapterInformation} />
           </Grid>
-          <Grid item>{this.state.printContent}</Grid>
+          <Grid id={"printPreviewContent"} item>
+            {this.state.printContent}
+          </Grid>
         </Grid>
       </PrintPreview>
     );
