@@ -9,7 +9,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   Chip,
-  Tooltip,
+  Tooltip
 } from "@material-ui/core";
 
 import PlaceIcon from "@material-ui/icons/Place";
@@ -17,15 +17,15 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 
-const styles = (theme) => ({
+const styles = theme => ({
   searchResultSummary: {
     backgroundColor: "#f2f2f2",
     borderTop: "2px solid #dedede",
-    borderBottom: "2px solid #dedede",
+    borderBottom: "2px solid #dedede"
   },
   accordion: {
-    boxShadow: "none",
-  },
+    boxShadow: "none"
+  }
 });
 
 class SearchResultsDataset extends React.PureComponent {
@@ -35,17 +35,16 @@ class SearchResultsDataset extends React.PureComponent {
       this.props.featureCollection.value.numberReturned
         ? `${this.props.featureCollection.value.numberReturned}+`
         : this.props.featureCollection.value.numberReturned,
-    expanded: this.props.sumOfResults === 1,
+    expanded: this.props.sumOfResults === 1
   };
 
   renderDatasetDetails = () => {
     const {
       featureCollection,
       handleOnResultClick,
-      setSelectedFeatureAndSource,
+      setSelectedFeatureAndSource
     } = this.props;
-    const lastFeatureIndex = featureCollection.value.features.length;
-    console.log(lastFeatureIndex, "lastFeatureIndex");
+
     return (
       <AccordionDetails>
         <Grid container>
