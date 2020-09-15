@@ -5,60 +5,49 @@ import Alert from "@material-ui/lab/Alert";
 
 import SearchResultsList from "./SearchResultsList";
 
-const styles = (theme) => ({
-  searchResultContainer: {
-    maxHeight: "calc(100vh - 380px)",
-    overflow: "auto",
-    display: "flex",
-    flexDirection: "column",
-    marginTop: "10px",
-    paddingBottom: "22px",
-    [theme.breakpoints.down("xs")]: {
-      maxHeight: "calc(100vh - 200px)",
-    },
-  },
+const styles = theme => ({
   searchResultTopBar: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: theme.spacing(1),
+    padding: theme.spacing(1)
   },
   searchResultTopBarLeft: {
-    display: "flex",
+    display: "flex"
   },
   hidden: {
-    display: "none",
+    display: "none"
   },
   // New styles
   root: {
-    maxHeight: "calc(100vh - 380px)",
+    maxHeight: "calc(100vh - 20%)",
     overflow: "auto",
     marginTop: 5,
     minWidth: 200,
     [theme.breakpoints.up("sm")]: {
-      maxWidth: 520,
+      maxWidth: 520
     },
     [theme.breakpoints.down("xs")]: {
       minWidth: "100%",
       position: "absolute",
-      left: 0,
-    },
-  },
+      left: 0
+    }
+  }
 });
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
     selectedFeatureAndSource: null,
     sumOfResults: this.props.searchResults.featureCollections
-      .map((fc) => fc.value.totalFeatures)
-      .reduce((a, b) => a + b, 0),
+      .map(fc => fc.value.totalFeatures)
+      .reduce((a, b) => a + b, 0)
   };
 
   getTheSoleResult = () => {
     const { featureCollections } = this.props;
     // Check which OL collection (i.e. "dataset") has the result
     const datasetWithTheSoleResult = featureCollections.find(
-      (fc) => fc.value.totalFeatures === 1
+      fc => fc.value.totalFeatures === 1
     );
 
     if (datasetWithTheSoleResult === undefined) {
