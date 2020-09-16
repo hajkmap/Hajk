@@ -1,5 +1,10 @@
 import { Model } from "backbone";
 
+const $ = require("jquery");
+const jQuery = $;
+global.window.jQuery = jQuery;
+require("jquery-sortable");
+
 var documentEditor = Model.extend({
   setParentChapter: function setParentChapter(chapter, parent) {
     chapter.parent = parent;
@@ -99,6 +104,15 @@ var documentEditor = Model.extend({
     fetch(url, { credentials: "same-origin" }).then(response => {
       response.json().then(data => {
         callback(data.map);
+      });
+    });
+  },
+
+  listImages: function(callback) {
+    var url = this.get("config").list_images;
+    fetch(url, { credentials: "same-origin" }).then(response => {
+      response.json().then(data => {
+        callback(data);
       });
     });
   }

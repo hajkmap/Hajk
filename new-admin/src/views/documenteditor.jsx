@@ -5,7 +5,6 @@ import DocumentTextEditor from "./components/DocumentTextEditor.jsx";
 import DocumentChapter from "./components/DocumentChapter.jsx";
 import AddKeyword from "./components/AddKeyword.jsx";
 import AddGeoObject from "./components/AddGeoObject.jsx";
-import Map from "./components/Map.jsx";
 import Button from "@material-ui/core/Button";
 import DoneIcon from "@material-ui/icons/Done";
 import RemoveIcon from "@material-ui/icons/Remove";
@@ -70,7 +69,8 @@ class DocumentEditor extends Component {
       newHeaderIdentifier: "",
       documents: [],
       keywords: [],
-      geoObjects: []
+      geoObjects: [],
+      imageList: undefined
     };
     this.editors = [];
   }
@@ -107,9 +107,18 @@ class DocumentEditor extends Component {
     });
   }
 
+  loadImageList() {
+    this.props.model.listImages(data => {
+      this.setState({
+        imageList: data
+      });
+    });
+  }
+
   componentDidMount() {
     this.props.model.set("config", this.props.config);
     this.load();
+    this.loadImageList();
   }
 
   save() {
@@ -490,6 +499,7 @@ class DocumentEditor extends Component {
           onUpdate={html => {
             chapter.html = html;
           }}
+          imageList={this.state.imageList}
         />
         <div className="document-nested-chapter">
           {chapter.expanded

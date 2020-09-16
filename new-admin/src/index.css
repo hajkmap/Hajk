@@ -860,14 +860,29 @@ figure img {
 }
 
 .document-text-editor {
+  min-height: 60px;
   border: 1px solid rgb(218, 215, 215);
   margin: 20px;
   padding: 10px;
-  min-height: 60px;
 }
 
 .document-text-editor .btn {
   margin-bottom: 10px;
+}
+
+.document-text-editor p {
+  margin-bottom: 0;
+}
+
+.document-text-editor blockquote {
+  background-color: #eeeeee;
+  border-top: 2px solid #786aaf;
+  border-bottom: 2px solid #786aaf;
+  color: #666;
+  font-family: "Hoefler Text", "Georgia", serif;
+  font-style: italic;
+  margin: 16px 0;
+  padding: 10px 20px;
 }
 
 .document-nested-chapter {
@@ -912,7 +927,13 @@ figure img {
 }
 
 .document-editor-container {
-  font-family: "Helvetica", sans-serif;
+  background: #fff;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  padding: 15px;
+}
+
+.document-editor-wrapper {
   font-size: 14px;
   margin-bottom: 5px;
   height: 50px;
@@ -925,4 +946,44 @@ figure img {
 .document-editor-controls span {
   height: 40px;
   float: left;
+}
+
+.document-editor-modal {
+  position: absolute;
+  width: 500px;
+  min-height: 300px;
+  top: 30%;
+  left: 50%;
+  margin-left: -250px;
+}
+
+.document-link-input {
+  width: 100%;
+}
+
+.DocumentTextEditorContainer {
+  position: sticky;
+}
+
+.DocumentTextEditorContainer .RichEditor-blockquote {
+  background-color: #eeeeee;
+  border-top: 2px solid #786aaf;
+  border-bottom: 2px solid #786aaf;
+  color: #666;
+  font-family: "Hoefler Text", "Georgia", serif;
+  font-style: italic;
+  margin: 16px 0;
+  padding: 10px 20px;
+}
+
+.modal-body input {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.modal-body select {
+  width: 100%;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
 }

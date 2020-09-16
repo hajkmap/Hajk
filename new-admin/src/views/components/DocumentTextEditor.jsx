@@ -10,9 +10,10 @@ import {
 } from "draft-js";
 import { stateToHTML } from "draft-js-export-html";
 import { stateFromHTML } from "draft-js-import-html";
+import ImageButton from "./ImageButton.jsx";
+import AddLinkButton from "./AddLinkButton.jsx";
 import Button from "@material-ui/core/Button";
 import DoneIcon from "@material-ui/icons/DoneOutline";
-import AddIcon from "@material-ui/icons/Add";
 import CancelIcon from "@material-ui/icons/Cancel";
 import EditIcon from "@material-ui/icons/Edit";
 import { withStyles } from "@material-ui/core/styles";
@@ -20,7 +21,6 @@ import { red, green } from "@material-ui/core/colors";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
-import ImageIcon from "@material-ui/icons/Image";
 import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 
 const ColorButtonRed = withStyles(theme => ({
@@ -87,13 +87,36 @@ function getBlockStyle(block) {
 }
 
 const Image = props => {
-  return <img src={props.src} alt="external" />;
+  var imgSrc = props.src;
+  var imgWidth = props.width;
+  var imgHeight = props.height;
+  var dataCaption = props.dataCaption;
+  var dataSource = props.dataSource;
+  return (
+    <img
+      src={imgSrc}
+      alt="external"
+      width={imgWidth}
+      height={imgHeight}
+      data-caption={dataCaption}
+      data-source={dataSource}
+    />
+  );
 };
 
 const Media = props => {
   const entity = props.contentState.getEntity(props.block.getEntityAt(0));
-  const { src } = entity.getData();
-  let media = <Image src={src} />;
+  const { src, width, height, dataCaption, dataSource } = entity.getData();
+  let media = (
+    <Image
+      src={src}
+      alt="external"
+      width={width}
+      height={height}
+      dataCaption={dataCaption}
+      dataSource={dataSource}
+    />
+  );
   return media;
 };
 
@@ -165,70 +188,6 @@ const InlineStyleControls = props => {
   );
 };
 
-class ImageButton extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      url:
-        "https://www.kitchentreaty.com/wp-content/uploads/2017/05/vegan-vanilla-bean-waffles-image-660x430.jpg",
-      urlInputVisible: false
-    };
-  }
-
-  addImage() {
-    this.props.addImage(this.state.url);
-  }
-
-  urlChanged(e) {
-    this.setState({
-      url: e.target.value
-    });
-  }
-
-  renderUrlInput() {
-    var style = {
-      color: "black",
-      marginBottom: "5px"
-    };
-    if (this.state.urlInputVisible) {
-      return (
-        <div style={style}>
-          <input type="text" name="url" onChange={e => this.urlChanged(e)} />
-          &nbsp;
-          <ColorButtonGreen
-            variant="contained"
-            className="btn"
-            onClick={() => {
-              this.addImage();
-            }}
-            startIcon={<AddIcon />}
-          >
-            Lägg till
-          </ColorButtonGreen>
-        </div>
-      );
-    } else {
-      return null;
-    }
-  }
-
-  render() {
-    return (
-      <div className="document-editor-controls">
-        <StyleButton
-          label={<ImageIcon />}
-          onToggle={() => {
-            this.setState({
-              urlInputVisible: !this.state.urlInputVisible
-            });
-          }}
-        />
-        {this.renderUrlInput()}
-      </div>
-    );
-  }
-}
-
 class RichEditor extends Component {
   constructor(props) {
     super(props);
@@ -281,15 +240,45 @@ class RichEditor extends Component {
     );
   }
 
-  addImage(url) {
-    //const url = "https://www.kitchentreaty.com/wp-content/uploads/2017/05/vegan-vanilla-bean-waffles-image-660x430.jpg";
-
+  addImage(imgData) {
     const { editorState } = this.state;
     const contentState = editorState.getCurrentContent();
     const contentStateWithEntity = contentState.createEntity(
       "image",
       "IMMUTABLE",
-      { src: url }
+      {
+        src: imgData.url,
+        width: imgData.imageWidth,
+        height: imgData.imageHeight,
+        dataCaption: imgData.imageCaption,
+        dataSource: imgData.imageSource
+      }
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    const newEditorState = EditorState.set(editorState, {
+      currentContent: contentStateWithEntity
+    });
+    this.setState(
+      {
+        editorState: AtomicBlockUtils.insertAtomicBlock(
+          newEditorState,
+          entityKey,
+          " "
+        )
+      },
+      () => {
+        setTimeout(() => this.focus(), 0);
+      }
+    );
+  }
+
+  addLink(type, url) {
+    const { editorState } = this.state;
+    const contentState = editorState.getCurrentContent();
+    const contentStateWithEntity = contentState.createEntity(
+      "LINK",
+      "IMMUTABLE",
+      { url: url }
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.set(editorState, {
@@ -359,6 +348,10 @@ class RichEditor extends Component {
       let img = images[i];
       img.src = img.alt;
       img.alt = "";
+      img.width = "";
+      img.height = "";
+      img.dataCaption = "";
+      img.dataSource = "";
       let figure = document.createElement("figure");
       figure.innerHTML = img.outerHTML;
       img.parentNode.replaceChild(figure, img);
@@ -383,7 +376,8 @@ class RichEditor extends Component {
 
   render() {
     const { editorState } = this.state;
-    let className = "RichEditor-editor";
+
+    let className = "DocumentTextEditorContainer";
     var contentState = editorState.getCurrentContent();
     if (!contentState.hasText()) {
       if (
@@ -433,8 +427,8 @@ class RichEditor extends Component {
           >
             Avbryt
           </ColorButtonRed>
-          <div className="RichEditor-root">
-            <div className="document-editor-container">
+          <div className="document-editor-container">
+            <div className="document-editor-wrapper">
               <InlineStyleControls
                 editorState={editorState}
                 onToggle={this.toggleInlineStyle}
@@ -443,7 +437,11 @@ class RichEditor extends Component {
                 editorState={editorState}
                 onToggle={this.toggleBlockType}
               />
-              <ImageButton addImage={url => this.addImage(url)} />
+              <ImageButton
+                addImage={data => this.addImage(data)}
+                imageList={this.props.imageList}
+              />
+              <AddLinkButton addLink={url => this.addLink(url)} />
             </div>
             <div className={className} onClick={this.focus}>
               <Editor
