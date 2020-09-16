@@ -183,43 +183,43 @@ class SearchModel {
 
     if (searchString?.length > 0) {
       // If search string contains only numbers, let's do an EqualTo search
-      if (/^\d+$/.test(searchString.trim())) {
+      /* if (/^\d+$/.test(searchString.trim())) {
         comparisonFilters = searchSource.searchFields.map((propertyName) => {
           return new EqualTo(propertyName, Number(searchString));
         });
       }
       // Else, let's do a IsLike search
-      else {
-        // Should the search string be surrounded by wildcard?
-        let pattern = searchString;
-        pattern = searchOptions.wildcardAtStart ? `*${pattern}` : pattern;
-        pattern = searchOptions.wildcardAtEnd ? `${pattern}*` : pattern;
+      else {*/
+      // Should the search string be surrounded by wildcard?
+      let pattern = searchString;
+      pattern = searchOptions.wildcardAtStart ? `*${pattern}` : pattern;
+      pattern = searchOptions.wildcardAtEnd ? `${pattern}*` : pattern;
 
-        // Each searchSource (e.g. WFS layer) will have its own searchFields
-        // defined (e.g. columns in the data table, such as "name" or "address").
-        // Let's loop through the searchFields and create an IsLike filter
-        // for each one of them (e.g. "name=bla", "address=bla").
-        comparisonFilters = searchSource.searchFields.map((propertyName) => {
-          return new IsLike(
-            propertyName,
-            pattern,
-            "*", // wildcard char
-            ".", // single char
-            "!", // escape char
-            searchOptions.matchCase // match case
-          );
-        });
-      }
-
-      // Depending on the searchSource configuration, we will now have 1 or more
-      // IsLike filters created. If we just have one, let's use it. But if we have
-      // many, we must combine them using an Or filter, so we tell the WFS to search
-      // where "name=bla OR address=bla OR etc...".
-      comparisonFilters =
-        comparisonFilters.length > 1
-          ? new Or(...comparisonFilters)
-          : comparisonFilters[0];
+      // Each searchSource (e.g. WFS layer) will have its own searchFields
+      // defined (e.g. columns in the data table, such as "name" or "address").
+      // Let's loop through the searchFields and create an IsLike filter
+      // for each one of them (e.g. "name=bla", "address=bla").
+      comparisonFilters = searchSource.searchFields.map((propertyName) => {
+        return new IsLike(
+          propertyName,
+          pattern,
+          "*", // wildcard char
+          ".", // single char
+          "!", // escape char
+          searchOptions.matchCase // match case
+        );
+      });
     }
+
+    // Depending on the searchSource configuration, we will now have 1 or more
+    // IsLike filters created. If we just have one, let's use it. But if we have
+    // many, we must combine them using an Or filter, so we tell the WFS to search
+    // where "name=bla OR address=bla OR etc...".
+    comparisonFilters =
+      comparisonFilters.length > 1
+        ? new Or(...comparisonFilters)
+        : comparisonFilters[0];
+    //}
 
     // If searchOptions contain any features, we should filter the results
     // using those features.

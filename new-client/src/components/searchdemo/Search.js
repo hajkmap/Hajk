@@ -206,31 +206,53 @@ class Search extends React.PureComponent {
 
   getAutoCompleteFetchSettings = () => {
     let fetchSettings = { ...this.searchModel.getSearchOptions() };
+    console.log(fetchSettings, "fetchSettings");
     fetchSettings["maxResultsPerDataset"] = 5;
     return fetchSettings;
+  };
+
+  getPropertiesMatchedBySearchString = (featureCollection, feature) => {
+    return featureCollection.source.searchFields
+      .filter((searchField) => {
+        return RegExp(`^${this.state.searchString}\\W*`, "i").test(
+          feature.properties[searchField]
+        );
+      })
+      .map((searchField) => {
+        return feature.properties[searchField];
+      });
+  };
+
+  getAutoCompleteEntryFromMatchingProperties = (matchingProperties) => {
+    return matchingProperties.length == 1
+      ? matchingProperties[0]
+      : matchingProperties.join(", ");
   };
 
   flattenAndSortAutoCompleteList = (searchResults) => {
     const resultsPerDataset = searchResults.featureCollections.map(
       (featureCollection) => {
-        return featureCollection.value.features.map((feature) => {
-          // TODO: We should add another property in admin that'll decide which FIELD (and it should
-          // be one (1) field only) should be used for Autocomplete.
-          // There's a huge problem with the previous approach (mapping displayFields and using that
-          // in Autocomplete) because __there will never be a match in on searchField if the search
-          // string consists of values that have been stitched together from multiple fields__!
-          const autocompleteEntry =
-            feature.properties[featureCollection.source.searchFields[0]];
-          // Let's provide a name for each dataset, so it can be displayed nicely to the user.
-          const dataset = featureCollection.source.caption;
-          const origin = featureCollection.origin;
-
-          return {
-            dataset,
-            autocompleteEntry,
-            origin: origin,
-          };
-        });
+        let matchingProperties = [];
+        return featureCollection.value.features
+          .filter((feature) => {
+            matchingProperties = this.getPropertiesMatchedBySearchString(
+              featureCollection,
+              feature
+            );
+            return matchingProperties.length > 0;
+          })
+          .map(() => {
+            const dataset = featureCollection.source.caption;
+            const origin = featureCollection.origin;
+            const autocompleteEntry = this.getAutoCompleteEntryFromMatchingProperties(
+              matchingProperties
+            );
+            return {
+              dataset,
+              autocompleteEntry,
+              origin: origin,
+            };
+          });
       }
     );
     // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
