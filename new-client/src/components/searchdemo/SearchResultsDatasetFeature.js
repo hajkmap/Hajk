@@ -4,7 +4,7 @@ import Button from "@material-ui/core/Button";
 import cslx from "clsx";
 import {
   extractPropertiesFromJson,
-  mergeFeaturePropsWithMarkdown
+  mergeFeaturePropsWithMarkdown,
 } from "../../utils/FeaturePropsParsing";
 import { Typography } from "@material-ui/core";
 import {
@@ -13,36 +13,36 @@ import {
   TableRow,
   TableCell,
   TableHead,
-  TableContainer
+  TableContainer,
 } from "@material-ui/core";
 
-const styles = theme => ({
+const styles = (theme) => ({
   hidden: {
-    display: "none"
+    display: "none",
   },
   tableCell: {
     paddingLeft: 0,
-    wordBreak: "break-all"
+    wordBreak: "break-all",
   },
 
   customDetailsHtmlTypography: {
-    overflow: "hidden"
+    overflow: "hidden",
   },
   showMoreInformationButton: {
-    width: "100%"
+    width: "100%",
   },
 
   featureActionButton: {
-    paddingLeft: 0
-  }
+    paddingLeft: 0,
+  },
 });
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   state = {
-    showAllInformation: false
+    showAllInformation: false,
   };
 
-  showDetails = e => {
+  showDetails = (e) => {
     const { setSelectedFeatureAndSource, feature, source } = this.props;
     const selectedFeatureAndSource = { feature, source };
     setSelectedFeatureAndSource(selectedFeatureAndSource);
@@ -87,7 +87,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
 
   //temp1.offsetHeight / parseInt(window.getComputedStyle(temp1, null).getPropertyValue('line-height').slice(0,-2))
 
-  renderHiddenSection = htmlForInfoBox => {
+  renderHiddenSection = (htmlForInfoBox) => {
     const { classes } = this.props;
     const { showAllInformation } = this.state;
 
@@ -101,13 +101,13 @@ class SearchResultsDatasetFeature extends React.PureComponent {
         variant="body2"
         color="textPrimary"
         dangerouslySetInnerHTML={{
-          __html: htmlForInfoBox.__hiddenSectionHtml
+          __html: htmlForInfoBox.__hiddenSectionHtml,
         }}
       ></Typography>
     );
   };
 
-  renderVisibleSection = htmlForInfoBox => {
+  renderVisibleSection = (htmlForInfoBox) => {
     const { classes } = this.props;
 
     return (
@@ -117,7 +117,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
         variant="body2"
         color="textPrimary"
         dangerouslySetInnerHTML={{
-          __html: htmlForInfoBox.__visibleSectionHtml
+          __html: htmlForInfoBox.__visibleSectionHtml,
         }}
       ></Typography>
     );
@@ -188,10 +188,10 @@ class SearchResultsDatasetFeature extends React.PureComponent {
       <Button
         color="primary"
         className={classes.showMoreInformationButton}
-        onClick={e => {
+        onClick={(e) => {
           e.stopPropagation();
           this.setState({
-            showAllInformation: !this.state.showAllInformation
+            showAllInformation: !this.state.showAllInformation,
           });
         }}
       >

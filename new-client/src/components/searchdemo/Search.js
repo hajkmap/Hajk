@@ -7,46 +7,46 @@ import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill } from "ol/style";
 
-const styles = theme => ({
+const styles = (theme) => ({
   inputRoot: {
-    width: "100%"
-  }
+    width: "100%",
+  },
 });
 
 var fill = new Fill({
-  color: "rgba(255,255,255,0.4)"
+  color: "rgba(255,255,255,0.4)",
 });
 var stroke = new Stroke({
   color: "#3399CC",
-  width: 1.25
+  width: 1.25,
 });
 var defaultStyles = [
   new Style({
     image: new Circle({
       fill: fill,
       stroke: stroke,
-      radius: 5
+      radius: 5,
     }),
     fill: fill,
-    stroke: stroke
-  })
+    stroke: stroke,
+  }),
 ];
 
 let drawStyle = new Style({
   stroke: new Stroke({
     color: "rgba(255, 214, 91, 0.6)",
-    width: 4
+    width: 4,
   }),
   fill: new Fill({
-    color: "rgba(255, 214, 91, 0.2)"
+    color: "rgba(255, 214, 91, 0.2)",
   }),
   image: new Circle({
     radius: 6,
     stroke: new Stroke({
       color: "rgba(255, 214, 91, 0.6)",
-      width: 2
-    })
-  })
+      width: 2,
+    }),
+  }),
 });
 
 class Search extends React.PureComponent {
@@ -63,8 +63,8 @@ class Search extends React.PureComponent {
       wildcardAtStart: false,
       wildcardAtEnd: false,
       matchCase: false,
-      activeSpatialFilter: "intersects"
-    }
+      activeSpatialFilter: "intersects",
+    },
   };
 
   constructor(props) {
@@ -74,18 +74,18 @@ class Search extends React.PureComponent {
     this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
       source: this.drawSource,
-      style: drawStyle
+      style: drawStyle,
     });
     this.resultSource = new VectorSource({ wrapX: false });
     this.resultsLayer = new VectorLayer({
       source: this.resultSource,
-      style: props.options.showInMapOnSearchResult ? defaultStyles : null
+      style: props.options.showInMapOnSearchResult ? defaultStyles : null,
     });
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
   }
 
-  implementsSearchInterface = plugin => {
+  implementsSearchInterface = (plugin) => {
     var hasGetResultsMethod = plugin.searchInterface.getResults;
     if (!hasGetResultsMethod) {
       console.warn(
@@ -98,7 +98,7 @@ class Search extends React.PureComponent {
 
   getSearchImplementedPlugins = () => {
     const { app } = this.props;
-    return Object.values(app.appModel.plugins).filter(plugin => {
+    return Object.values(app.appModel.plugins).filter((plugin) => {
       return (
         plugin.options.searchImplemented &&
         this.implementsSearchInterface(plugin)
@@ -111,7 +111,7 @@ class Search extends React.PureComponent {
     app.globalObserver.subscribe("core.appLoaded", () => {
       this.setState({
         searchImplementedPlugins: this.getSearchImplementedPlugins(),
-        searchImplementedPluginsLoaded: true
+        searchImplementedPluginsLoaded: true,
       });
     });
   };
@@ -121,7 +121,7 @@ class Search extends React.PureComponent {
     this.setState({
       searchString: "",
       searchActive: "",
-      searchResults: { featureCollections: [], errors: [] }
+      searchResults: { featureCollections: [], errors: [] },
     });
 
     if (this.drawSource) {
@@ -140,7 +140,7 @@ class Search extends React.PureComponent {
       this.setState(
         {
           searchString: searchString,
-          searchActive: "input"
+          searchActive: "input",
         },
         () => {
           if (reason !== "input") {
@@ -150,7 +150,7 @@ class Search extends React.PureComponent {
       );
     } else {
       this.setState({
-        searchString: searchString
+        searchString: searchString,
       });
     }
   };
@@ -163,21 +163,21 @@ class Search extends React.PureComponent {
         loading:
           searchString.length >= 3 && this.state.autocompleteList.length === 0,
         showSearchResults: false,
-        searchString: searchString
+        searchString: searchString,
       },
       () => {
         if (this.state.searchString.length >= 3) {
           this.updateAutoCompleteList(this.state.searchString);
         } else {
           this.setState({
-            autocompleteList: []
+            autocompleteList: [],
           });
         }
       }
     );
   };
 
-  updateSearchOptions = searchOptions => {
+  updateSearchOptions = (searchOptions) => {
     this.setState(searchOptions);
   };
 
@@ -185,22 +185,22 @@ class Search extends React.PureComponent {
     this.doSearch();
   };
 
-  handleSearchSettings = option => {
+  handleSearchSettings = (option) => {
     this.setState({
-      searchSettings: options
+      searchSettings: options,
     });
   };
 
-  handleDrawSource = source => {
+  handleDrawSource = (source) => {
     this.setState({
       searchActive: "draw",
-      drawSource: source
+      drawSource: source,
     });
   };
 
-  handleSearchSources = sources => {
+  handleSearchSources = (sources) => {
     this.setState({
-      searchSources: sources
+      searchSources: sources,
     });
   };
 
@@ -210,10 +210,10 @@ class Search extends React.PureComponent {
     return fetchSettings;
   };
 
-  flattenAndSortAutoCompleteList = searchResults => {
+  flattenAndSortAutoCompleteList = (searchResults) => {
     const resultsPerDataset = searchResults.featureCollections.map(
-      featureCollection => {
-        return featureCollection.value.features.map(feature => {
+      (featureCollection) => {
+        return featureCollection.value.features.map((feature) => {
           // TODO: We should add another property in admin that'll decide which FIELD (and it should
           // be one (1) field only) should be used for Autocomplete.
           // There's a huge problem with the previous approach (mapping displayFields and using that
@@ -228,7 +228,7 @@ class Search extends React.PureComponent {
           return {
             dataset,
             autocompleteEntry,
-            origin: origin
+            origin: origin,
           };
         });
       }
@@ -241,12 +241,12 @@ class Search extends React.PureComponent {
     );
     return flatAutocompleteArray.sort((a, b) =>
       a.autocompleteEntry.localeCompare(b.autocompleteEntry, "sv", {
-        numeric: true
+        numeric: true,
       })
     );
   };
 
-  getMergeResultsFromAllSources = results => {
+  getMergeResultsFromAllSources = (results) => {
     return results.reduce(
       (searchResults, result) => {
         searchResults.featureCollections = searchResults.featureCollections.concat(
@@ -259,7 +259,7 @@ class Search extends React.PureComponent {
     );
   };
 
-  fetchResultFromSearchModel = async fetchOptions => {
+  fetchResultFromSearchModel = async (fetchOptions) => {
     let { searchSources } = this.state;
 
     if (searchSources.length === 0) {
@@ -275,7 +275,7 @@ class Search extends React.PureComponent {
     );
 
     return Promise.allSettled([promise, ...this.fetchResultsFromPlugins()])
-      .then(results => {
+      .then((results) => {
         results = this.removeCollectionsWithoutFeatures(results);
         let searchResults = this.getMergeResultsFromAllSources(results);
         // It's possible to handle any errors in the UI by checking if Search Model returned any
@@ -283,14 +283,14 @@ class Search extends React.PureComponent {
           console.error("Autocomplete error: ", searchResults.errors);
         return searchResults;
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Autocomplete error: ", error);
 
         // Also, set "open" state variable to false, which
         // abort the "loading" state of Autocomplete.
         if (active) {
           this.setState({
-            open: false
+            open: false,
           });
         }
       });
@@ -303,7 +303,7 @@ class Search extends React.PureComponent {
       searchResults,
       showSearchResults: true,
       loading: false,
-      autoCompleteOpen: false
+      autoCompleteOpen: false,
     });
 
     let features = this.extractFeatureWithFromFeatureCollections(
@@ -315,15 +315,15 @@ class Search extends React.PureComponent {
     this.addFeaturesToResultsLayer(features);
   }
 
-  filterFeaturesWithGeometry = features => {
-    return features.filter(feature => {
+  filterFeaturesWithGeometry = (features) => {
+    return features.filter((feature) => {
       return feature.geometry != null;
     });
   };
 
-  extractFeatureWithFromFeatureCollections = featureCollections => {
+  extractFeatureWithFromFeatureCollections = (featureCollections) => {
     return featureCollections
-      .map(fc => {
+      .map((fc) => {
         return fc.value.features;
       })
       .flat();
@@ -335,7 +335,7 @@ class Search extends React.PureComponent {
       fetchOptions
     );
     this.setState({
-      autocompleteList: this.prepareAutoCompleteList(autoCompleteResult)
+      autocompleteList: this.prepareAutoCompleteList(autoCompleteResult),
     });
   };
 
@@ -353,7 +353,7 @@ class Search extends React.PureComponent {
     }, []);
   };
 
-  hasEnoughCharsForSearch = searchString => {
+  hasEnoughCharsForSearch = (searchString) => {
     return searchString.length >= 3;
   };
 
@@ -364,16 +364,16 @@ class Search extends React.PureComponent {
     if (currentExtent.map(Number.isFinite).includes(false) === false) {
       this.map.getView().fit(currentExtent, {
         size: this.map.getSize(),
-        maxZoom: 7
+        maxZoom: 7,
       });
     }
   };
 
-  addFeaturesToResultsLayer = features => {
+  addFeaturesToResultsLayer = (features) => {
     const { options } = this.props;
     this.resultSource.clear();
     this.resultSource.addFeatures(
-      features.map(f => {
+      features.map((f) => {
         return new GeoJSON().readFeature(f);
       })
     );
@@ -387,10 +387,10 @@ class Search extends React.PureComponent {
     return this.getUserCustomFetchSettings(this.searchModel.getSearchOptions());
   };
 
-  removeCollectionsWithoutFeatures = results => {
-    return results.map(res => {
+  removeCollectionsWithoutFeatures = (results) => {
+    return results.map((res) => {
       var featureCollections = res.value.featureCollections.filter(
-        featureCollection => {
+        (featureCollection) => {
           return featureCollection.value.features.length > 0;
         }
       );
@@ -399,10 +399,10 @@ class Search extends React.PureComponent {
     });
   };
 
-  prepareAutoCompleteList = searchResults => {
+  prepareAutoCompleteList = (searchResults) => {
     let numSourcesWithResults = searchResults.featureCollections.length;
     let numResults = 0;
-    searchResults.featureCollections.forEach(fc => {
+    searchResults.featureCollections.forEach((fc) => {
       numResults += fc.value.features.length;
     });
 
@@ -412,7 +412,7 @@ class Search extends React.PureComponent {
       //All results can be shown
       return this.flattenAndSortAutoCompleteList(searchResults);
     } else {
-      searchResults.featureCollections.forEach(fc => {
+      searchResults.featureCollections.forEach((fc) => {
         if (fc.value.features.length > spacesPerSource) {
           fc.value.features.splice(spacesPerSource - 1);
         }
@@ -421,12 +421,12 @@ class Search extends React.PureComponent {
     }
   };
 
-  getUserCustomFetchSettings = searchOptionsFromModel => {
+  getUserCustomFetchSettings = (searchOptionsFromModel) => {
     const {
       activeSpatialFilter,
       matchCase,
       wildcardAtEnd,
-      wildcardAtStart
+      wildcardAtStart,
     } = this.state.searchOptions;
     let customSearchOptions = { ...searchOptionsFromModel };
     customSearchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
@@ -447,7 +447,7 @@ class Search extends React.PureComponent {
       autoCompleteOpen,
       showSearchResults,
       loading,
-      searchOptions
+      searchOptions,
     } = this.state;
 
     return (
@@ -457,7 +457,7 @@ class Search extends React.PureComponent {
             classes={{
               root: classes.inputRoot,
               input:
-                target === "top" ? classes.inputInputWide : classes.inputInput
+                target === "top" ? classes.inputInputWide : classes.inputInput,
             }}
             searchImplementedPlugins={this.state.searchImplementedPlugins}
             updateAutoCompleteList={this.updateAutoCompleteList}
