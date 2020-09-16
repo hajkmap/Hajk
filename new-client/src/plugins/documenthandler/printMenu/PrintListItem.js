@@ -9,16 +9,16 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 
-const styles = (theme) => ({
+const styles = theme => ({
   listItem: { overflowWrap: "break-word" },
   listItemIcon: { minWidth: theme.spacing(3) },
-  collapseIconRoot: { minWidth: theme.spacing(4) },
+  collapseIconRoot: { minWidth: theme.spacing(4) }
 });
 
 class PrintListItem extends React.PureComponent {
   static propTypes = {
     onClick: PropTypes.func.isRequired,
-    chapter: PropTypes.object.isRequired,
+    chapter: PropTypes.object.isRequired
   };
 
   getListTitle = () => {
@@ -30,7 +30,7 @@ class PrintListItem extends React.PureComponent {
     const { expandedSubMenu, classes, onClick } = this.props;
     return expandedSubMenu ? (
       <ListItemIcon
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation();
           onClick();
         }}
@@ -41,7 +41,7 @@ class PrintListItem extends React.PureComponent {
       </ListItemIcon>
     ) : (
       <ListItemIcon
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation();
           onClick();
         }}
@@ -56,12 +56,12 @@ class PrintListItem extends React.PureComponent {
   render() {
     const {
       chapter,
-      onClick,
+
       classes,
       theme,
       hasSubChapters,
       checked,
-      handleCheckboxChange,
+      handleCheckboxChange
     } = this.props;
     return (
       <>
@@ -70,21 +70,21 @@ class PrintListItem extends React.PureComponent {
           button
           size="small"
           disableGutters
-          onClick={(e) => handleCheckboxChange(chapter)}
+          onClick={e => handleCheckboxChange(chapter)}
           aria-controls="submenu"
           className={classes.listItem}
           style={{
             paddingLeft: theme.spacing(1) + theme.spacing(chapter.level * 3),
-            borderLeft: `${theme.spacing(0.5)}px solid ${chapter.color}`,
+            borderLeft: `${theme.spacing(0.5)}px solid ${chapter.color}`
           }}
         >
           <ListItemIcon>
             <Checkbox
               color="primary"
-              onChange={(e) => {
+              onChange={e => {
                 handleCheckboxChange(chapter);
               }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
               edge="start"
               checked={checked}
               tabIndex={-1}
