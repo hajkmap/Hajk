@@ -161,6 +161,10 @@ class PrintView extends React.PureComponent {
 
     this.options = props.options;
 
+    // Ensure we have a value for the crossOrigin parameter
+    this.options.crossOrigin =
+      props.app.config.mapConfig.map?.crossOrigin || "anonymous";
+
     // Add the preview layer to map (it doesn't contain any features yet!)
     this.addPreviewLayer();
 
