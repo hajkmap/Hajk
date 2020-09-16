@@ -269,7 +269,7 @@ class SearchBar extends React.PureComponent {
           );
         }}
         getOptionLabel={option => option?.autocompleteEntry || option}
-        options={[2, 3, "hej", "blaaa", [2, 3, 4]]}
+        options={autocompleteList}
         loading={loading}
         renderInput={this.renderAutoCompleteInputField}
       />

@@ -20,7 +20,7 @@ class DocumentHandler extends React.PureComponent {
     this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,
       globalObserver: props.app.globalObserver,
-      map: props.map,
+      map: props.map
     });
 
     this.model = new DocumentHandlerModel({
@@ -28,7 +28,7 @@ class DocumentHandler extends React.PureComponent {
       app: props.app,
       map: props.map,
       menu: props.options.menuConfig.menu,
-      searchInterface: props.searchInterface,
+      searchInterface: props.searchInterface
     });
 
     this.addDrawerToggleButton();
