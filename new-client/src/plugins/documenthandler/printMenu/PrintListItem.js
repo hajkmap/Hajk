@@ -56,7 +56,6 @@ class PrintListItem extends React.PureComponent {
   render() {
     const {
       chapter,
-      onClick,
       classes,
       theme,
       hasSubChapters,

@@ -6,7 +6,6 @@ import { FormHelperText } from "@material-ui/core";
 import ClearIcon from "@material-ui/icons/Clear";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { withTheme } from "@material-ui/core/styles";
-import withWidth from "@material-ui/core/withWidth";
 
 import {
   CircularProgress,
@@ -15,7 +14,7 @@ import {
   TextField,
   Checkbox,
   Popover,
-  Typography
+  Typography,
 } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -26,35 +25,35 @@ import SearchIcon from "@material-ui/icons/Search";
 import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
 import WithinIcon from "@material-ui/icons/Adjust";
 import IntersectsIcon from "@material-ui/icons/Toll";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import RoomIcon from "@material-ui/icons/Room";
 import DescriptionIcon from "@material-ui/icons/Description";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck";
 import SearchResultsContainer from "./SearchResultsContainer";
+import SearchTools from "./SearchTools";
 import { useTheme } from "@material-ui/core/styles";
 
-const styles = theme => ({
+const styles = (theme) => ({
   searchContainer: {
     width: 400,
-    height: theme.spacing(6)
+    height: theme.spacing(6),
   },
   searchCollapsed: {
-    left: -440
+    left: -440,
   },
 
   inputRoot: {
-    height: theme.spacing(6)
+    height: theme.spacing(6),
   },
   hidden: {
-    display: "none"
-  }
+    display: "none",
+  },
 });
 
 //Needed to make a CustomPopper with inlinestyling to be able to override width.. *
 //Popper.js didnt work as expected
-const CustomPopper = props => {
+const CustomPopper = (props) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
   const style = smallScreen ? { width: "100%" } : { width: 400 };
@@ -64,15 +63,15 @@ const CustomPopper = props => {
       style={style}
       popperOptions={{
         modifiers: {
-          computeStyle: { gpuAcceleration: false }
-        }
+          computeStyle: { gpuAcceleration: false },
+        },
       }}
       placement="bottom-start"
     />
   );
 };
 
-const withMediaQuery = (...args) => Component => props => {
+const withMediaQuery = (...args) => (Component) => (props) => {
   const mediaQuery = useMediaQuery(...args);
   return <Component mediaQuery={mediaQuery} {...props} />;
 };
@@ -85,17 +84,13 @@ class SearchBar extends React.PureComponent {
     moreOptionsId: undefined,
     moreOptionsOpen: false,
     selectSourcesOpen: false,
-    resultPanelCollapsed: false
+    resultPanelCollapsed: false,
   };
 
-  handleClickOnMoreOptions = event => {
+  handleClickOnMoreOptions = (event) => {
     this.setState({
-      anchorEl: event.currentTarget
+      anchorEl: event.currentTarget,
     });
-  };
-
-  handleClickOnSearch = () => {
-    this.props.doSearch();
   };
 
   updateSearchOptions = (name, value) => {
@@ -104,7 +99,7 @@ class SearchBar extends React.PureComponent {
     this.props.updateSearchOptions(searchOptions);
   };
 
-  getAutoCompleteResultIcon = origin => {
+  getAutoCompleteResultIcon = (origin) => {
     switch (origin) {
       case "WFS":
         return <RoomIcon color="disabled"></RoomIcon>;
@@ -120,7 +115,7 @@ class SearchBar extends React.PureComponent {
       moreOptionsId,
       anchorEl,
       drawActive,
-      selectSourcesOpen
+      selectSourcesOpen,
     } = this.state;
     const { searchOptions } = this.props;
     return (
@@ -131,11 +126,11 @@ class SearchBar extends React.PureComponent {
         onClose={() => this.setState({ anchorEl: null })}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "center"
+          horizontal: "center",
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "center"
+          horizontal: "center",
         }}
       >
         <Paper>
@@ -146,7 +141,7 @@ class SearchBar extends React.PureComponent {
             onChange={() =>
               this.setState({
                 selectSourcesOpen: !selectSourcesOpen,
-                anchorEl: undefined
+                anchorEl: undefined,
               })
             }
           >
@@ -232,13 +227,19 @@ class SearchBar extends React.PureComponent {
   };
 
   renderAutoComplete = () => {
-    const { moreOptionsId } = this.state;
     const {
       autocompleteList,
       autoCompleteOpen,
       searchString,
+      searchActive,
       classes,
-      loading
+      loading,
+      map,
+      handleDrawStart,
+      handleDrawEnd,
+      showSearchResults,
+      handleSearchBarKeyPress,
+      handleOnSearch,
     } = this.props;
     return (
       <Autocomplete
@@ -246,10 +247,11 @@ class SearchBar extends React.PureComponent {
         freeSolo
         size={"small"}
         classes={{
-          inputRoot: classes.inputRoot // class name, e.g. `classes-nesting-root-x`
+          inputRoot: classes.inputRoot, // class name, e.g. `classes-nesting-root-x`
         }}
         PopperComponent={CustomPopper}
         clearOnEscape
+        disabled={searchActive === "draw"}
         autoComplete
         value={searchString}
         selectOnFocus
@@ -260,7 +262,7 @@ class SearchBar extends React.PureComponent {
         getOptionSelected={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
-        renderOption={option => {
+        renderOption={(option) => {
           return (
             <>
               {this.getAutoCompleteResultIcon(option.origin)}
@@ -272,13 +274,14 @@ class SearchBar extends React.PureComponent {
             </>
           );
         }}
-        getOptionLabel={option => option?.autocompleteEntry || option}
+        getOptionLabel={(option) => option?.autocompleteEntry || option}
         options={autocompleteList}
         loading={loading}
-        renderInput={params => (
+        renderInput={(params) => (
           <TextField
             {...params}
             label={undefined}
+            onKeyPress={handleSearchBarKeyPress}
             variant="outlined"
             placeholder="Sök..."
             InputProps={{
@@ -289,24 +292,25 @@ class SearchBar extends React.PureComponent {
                     <CircularProgress color="inherit" size={20} />
                   ) : null}
                   {params.InputProps.endAdornment}
-                  <IconButton size="small" onClick={this.handleClickOnSearch}>
+                  <IconButton size="small" onClick={handleOnSearch}>
                     <SearchIcon />
                   </IconButton>
-                  {searchString.length > 0 ? (
+                  {searchString.length > 0 ||
+                  showSearchResults ||
+                  searchActive !== "" ? (
                     <IconButton onClick={this.props.handleOnClear} size="small">
                       <ClearIcon />
                     </IconButton>
                   ) : (
-                    <IconButton
-                      size="small"
-                      aria-describedby={moreOptionsId}
-                      onClick={this.handleClickOnMoreOptions}
-                    >
-                      <MoreHorizIcon />
-                    </IconButton>
+                    <SearchTools
+                      searchActive={searchActive}
+                      map={map}
+                      handleDrawStart={handleDrawStart}
+                      handleDrawEnd={handleDrawEnd}
+                    />
                   )}
                 </>
-              )
+              ),
             }}
           />
         )}
@@ -328,7 +332,7 @@ class SearchBar extends React.PureComponent {
         id="searchSources"
         options={searchModel.getSources()}
         disableCloseOnSelect
-        getOptionLabel={option => option.caption}
+        getOptionLabel={(option) => option.caption}
         renderOption={(option, { selected }) => (
           <>
             <Checkbox
@@ -341,7 +345,7 @@ class SearchBar extends React.PureComponent {
           </>
         )}
         style={{ width: 400 }}
-        renderInput={params => (
+        renderInput={(params) => (
           <TextField
             {...params}
             variant="outlined"
@@ -360,7 +364,7 @@ class SearchBar extends React.PureComponent {
     return (
       <Grid
         className={cslx(classes.searchContainer, {
-          [classes.searchCollapsed]: panelCollapsed
+          [classes.searchCollapsed]: panelCollapsed,
         })}
       >
         <Grid item>

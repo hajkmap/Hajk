@@ -57,6 +57,7 @@ class Search extends React.PureComponent {
     searchResults: { featureCollections: [], errors: [] },
     autocompleteList: [],
     searchString: "",
+    searchActive: "",
     autoCompleteOpen: false,
     loading: false,
     searchOptions: {
@@ -71,17 +72,11 @@ class Search extends React.PureComponent {
     super(props);
     this.map = props.map;
     this.searchModel = props.app.appModel.searchModel;
-    this.drawSource = new VectorSource({ wrapX: false });
-    this.drawLayer = new VectorLayer({
-      source: this.drawSource,
-      style: drawStyle,
-    });
     this.resultSource = new VectorSource({ wrapX: false });
     this.resultsLayer = new VectorLayer({
       source: this.resultSource,
       style: props.options.showInMapOnSearchResult ? defaultStyles : null,
     });
-    this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
   }
 
@@ -121,6 +116,7 @@ class Search extends React.PureComponent {
     this.setState({
       searchString: "",
       searchActive: "",
+      showSearchResults: false,
       searchResults: { featureCollections: [], errors: [] },
     });
 
@@ -156,6 +152,10 @@ class Search extends React.PureComponent {
 
   handleOnInputChange = (event, searchString, reason) => {
     this.resultSource.clear();
+    if (this.drawSource) {
+      this.drawSource.clear();
+    }
+
     this.setState(
       {
         autoCompleteOpen: searchString.length >= 3,
@@ -181,7 +181,10 @@ class Search extends React.PureComponent {
   };
 
   handleOnSearch = () => {
-    this.doSearch();
+    const { searchString } = this.state;
+    if (this.hasEnoughCharsForSearch(searchString)) {
+      this.doSearch();
+    }
   };
 
   handleSearchSettings = (option) => {
@@ -190,17 +193,30 @@ class Search extends React.PureComponent {
     });
   };
 
-  handleDrawSource = (source) => {
+  handleDrawStart = (source) => {
+    this.drawSource = source;
     this.setState({
       searchActive: "draw",
-      drawSource: source,
     });
+  };
+
+  handleDrawEnd = (source) => {
+    this.setState({
+      searchActive: "",
+    });
+    this.doSearch();
   };
 
   handleSearchSources = (sources) => {
     this.setState({
       searchSources: sources,
     });
+  };
+
+  handleSearchBarKeyPress = (event) => {
+    if (event.which === 13 || event.keyCode === 13) {
+      this.handleOnSearch();
+    }
   };
 
   getAutoCompleteFetchSettings = () => {
@@ -274,6 +290,7 @@ class Search extends React.PureComponent {
 
     return Promise.allSettled([promise, ...this.fetchResultsFromPlugins()])
       .then((results) => {
+        results = results.filter((result) => result.status !== "rejected");
         results = this.removeCollectionsWithoutFeatures(results);
         let searchResults = this.getMergeResultsFromAllSources(results);
         // It's possible to handle any errors in the UI by checking if Search Model returned any
@@ -295,8 +312,7 @@ class Search extends React.PureComponent {
   };
 
   async doSearch() {
-    const { options } = this.props;
-    let fetchOptions = this.getAutoCompleteFetchSettings();
+    let fetchOptions = this.getSearchResultsFetchSettings();
     let searchResults = await this.fetchResultFromSearchModel(fetchOptions);
     this.setState({
       searchResults,
@@ -429,7 +445,7 @@ class Search extends React.PureComponent {
     } = this.state.searchOptions;
     let customSearchOptions = { ...searchOptionsFromModel };
     customSearchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
-    customSearchOptions["featuresToFilter"] = this.drawSource.getFeatures();
+    customSearchOptions["featuresToFilter"] = this.drawSource?.getFeatures();
     customSearchOptions["matchCase"] = matchCase;
     customSearchOptions["wildcardAtStart"] = wildcardAtStart;
     customSearchOptions["wildcardAtEnd"] = wildcardAtEnd;
@@ -477,6 +493,9 @@ class Search extends React.PureComponent {
             updateSearchOptions={this.updateSearchOptions}
             handleSearchSources={this.handleSearchSources}
             loading={loading}
+            handleDrawStart={this.handleDrawStart}
+            handleDrawEnd={this.handleDrawEnd}
+            handleSearchBarKeyPress={this.handleSearchBarKeyPress}
             {...this.props}
           />
         </>
