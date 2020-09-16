@@ -79,8 +79,8 @@ class ToolOptions extends Component {
         proxyUrl: tool.options.proxyUrl,
         instruction: tool.options.instruction,
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : [],
-        resolutions: tool.options.resolutions ? tool.options.resolutions.sort((a, b) => a - b) : [],
-        paperFormats: tool.options.paperFormats ? tool.options.paperFormats.sort() : []
+        resolutions: tool.options.resolutions ? tool.options.resolutions.sort((a, b) => a - b) : this.state.allowedResolutions.slice(),
+        paperFormats: tool.options.paperFormats ? tool.options.paperFormats.sort() : this.state.allowedPaperFormats.slice()
       });
     } else {
       this.setState({
@@ -224,84 +224,58 @@ class ToolOptions extends Component {
     }
   }
 
-  addpaperFormat (e) {
-    var elements = this.refs.paperFormatForm.elements;
-    if(!this.state.allowedPaperFormats.includes(elements['paperFormat'].value)){
-      alert("Angivet format stöds ej. Följande format stöds " + this.state.allowedPaperFormats.join(", "));
-      return;
+  handlePaperFormatChanged (name){
+    if(this.state.paperFormats.includes(name)){
+      this.state.paperFormats = this.state.paperFormats.filter((value, idx, arr) => {return value !== name});
+    } else {
+      this.state.paperFormats.push(name);
     }
-
-    if(this.state.paperFormats.includes(elements['paperFormat'].value)){
-      alert("Angivet format är redan tillagt");
-      return;
-    }
-
-    this.state.paperFormats.push(elements['paperFormat'].value);
-    this.state.paperFormats.sort();
-    this.setState({
-      paperFormats: this.state.paperFormats
-    });
-  }
-
-  removepaperFormat (paperFormat) {
-    this.state.paperFormats = this.state.paperFormats.filter(f => f !== paperFormat);
-    this.setState({
-      paperFormats: this.state.paperFormats
-    });
+    this.state.paperFormats.sort((a, b) => a - b);
+    this.setState({"update": true}); // code to force it to render itself
   }
 
   renderpaperFormat () {
 
-    return this.state.paperFormats.map((t, i) => (
-        <div key={i} className='inset-form'>
-          <div>
-            <span onClick={() => this.removepaperFormat(t)} className='btn btn-danger'>Ta bort</span>
-          </div>
-          <div><span>Pappersformat </span>: <span>{t}</span></div>
-        </div>
-    ));
+    return this.state.allowedPaperFormats.map((t, i) =>
+        (
+            <div key={i} className='inset-form'>
+              <label htmlFor={t}>{t}</label>
+              <input
+                  name={t}
+                  type="checkbox"
+                  onChange={() => this.handlePaperFormatChanged(t)}
+                  checked={this.state.paperFormats.includes(t)} />
+            </div>
+        )
+    );
   }
 
-  addresolutions (e) {
-    var elements = this.refs.resolutionsForm.elements;
-    var res = parseInt(elements['resolutions'].value);
-    if(!this.state.allowedResolutions.includes(res)){
-      alert("Angivet upplösning stöds ej. Följande upplösningar stöds " + this.state.allowedResolutions.join(", "));
-      return;
+  handleResolutionChanged (name){
+    if(this.state.resolutions.includes(name)){
+      this.state.resolutions = this.state.resolutions.filter((value, idx, arr) => {return value !== name});
+    } else {
+      this.state.resolutions.push(name);
     }
-
-    if(this.state.resolutions.includes(res)){
-      alert("Angiven upplösning är redan tillagt");
-      return;
-    }
-
-    this.state.resolutions.push(res);
-    console.log(this.state.resolutions);
     this.state.resolutions.sort((a, b) => a - b);
-    this.setState({
-      resolutions: this.state.resolutions
-    });
-  }
-
-  removeresolutions (res) {
-    res = parseInt(res);
-    this.state.resolutions = this.state.resolutions.filter(f => f !== res);
-    this.setState({
-      resolutions: this.state.resolutions
-    });
+    this.setState({"update": true}); // code to force it to render itself
   }
 
   renderresolutions () {
 
-    return this.state.resolutions.map((t, i) => (
-        <div key={i} className='inset-form'>
-          <div>
-            <span onClick={() => this.removeresolutions(t)} className='btn btn-danger'>Ta bort</span>
+    return this.state.allowedResolutions.map((t, i) =>
+          (
+          <div key={i} className='inset-form'>
+            <label htmlFor={t}>{t}</label>
+            <input
+                name={t}
+                type="checkbox"
+                onChange={() => this.handleResolutionChanged(t)}
+                checked={this.state.resolutions.includes(t)} />
           </div>
-          <div><span>Upplösning </span>: <span>{t}</span></div>
-        </div>
-    ));
+          )
+    );
   }
+
 
 
   /**
@@ -377,30 +351,12 @@ class ToolOptions extends Component {
             <label htmlFor='autoScale-active'>autoScale av previewLayer för mobil aktiverad</label>
           </div>
           <div>
-            <div>paperFormat</div>
+            <div><b>Pappersstorlek:</b></div>
             {this.renderpaperFormat()}
           </div>
           <div>
-            <form ref='paperFormatForm' onSubmit={(e) => { e.preventDefault(); this.addpaperFormat(e); }}>
-              <div>
-                <label>Pappersformat</label><input name='paperFormat' type='text' /><br/>
-                <label>Tillåtna format: {this.state.allowedPaperFormats.join(", ")}</label>
-              </div>
-              <button className='btn btn-success'>Lägg till</button>
-            </form>
-          </div>
-          <div>
-            <div>Resolutions</div>
+            <div><b>Upplösningar:</b></div>
             {this.renderresolutions()}
-          </div>
-          <div>
-            <form ref='resolutionsForm' onSubmit={(e) => { e.preventDefault(); this.addresolutions(e); }}>
-              <div>
-                <label>Resolutions</label><input name='resolutions' type='text' /><br/>
-                <label>Tillåtna format: {this.state.allowedResolutions.join(", ")}</label>
-              </div>
-              <button className='btn btn-success'>Lägg till</button>
-            </form>
           </div>
           <div>
             <label htmlFor='instruction'>Instruktion</label>
