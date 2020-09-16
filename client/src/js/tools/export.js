@@ -345,12 +345,23 @@ var ExportModel = {
       /^\//.test(url)
         ? (window.location.protocol + '//' + window.location.host + url)
         : url;
-
     return this.get('olMap')
       .getLayers()
       .getArray()
       .filter(exportable)
       .map((layer, i) => {
+        console.log("layer", layer);
+        console.log("this", this);
+
+        // Gets the legend from the original configuration so it can be shown on the PDF in case the option has been enabled
+        var legend = "";
+        for(var i = 0; i < this.get("shell").get("layers").length; i++){
+          var layerConfig = this.get("shell").get("layers")[i];
+          if (layerConfig.id === layer.get("name")){
+            legend = layerConfig.legend;
+            break;
+          }
+        }
         return {
           url: layer.getSource().get('url'),
           layers: layer.getSource().getParams()["LAYERS"].split(','),
@@ -358,7 +369,9 @@ var ExportModel = {
           version: layer.getSource().getParams()["VERSION"],
           zIndex: i,
           workspacePrefix: null,
-          coordinateSystemId: this.get('olMap').getView().getProjection().getCode().split(':')[1]
+          coordinateSystemId: this.get('olMap').getView().getProjection().getCode().split(':')[1],
+          legend: legend,
+          caption: layer.get("caption")
         };
       });
   },
@@ -788,6 +801,8 @@ var ExportModel = {
     data.comments = options.comments;
     data.pdftitle = options.pdftitle;
     data.proxyUrl = this.get('proxyUrl');
+    data.teckenforklaring = options.teckenforklaring;
+    data.teckenforklaringplacement = options.teckenforklaringplacement;
 
     this.set('downloadingPdf', true);
     var dataString = '';
