@@ -17,8 +17,6 @@ using System.Web.Mvc;
 using PdfSharp;
 using Newtonsoft.Json;
 using log4net;
-using System.Net;
-using MapService.Models.Config;
 
 namespace MapService.Components
 {
@@ -387,14 +385,6 @@ namespace MapService.Components
                 int yWhiteSpace = (int)(page.Height.Point * yWhiteScale);
                 int yBottom = (int)(page.Height.Point - yWhiteSpace);
 
-                XPoint[] corners =
-                {
-                    new XPoint(xLeft, yWhiteSpace),
-                    new XPoint(xRight, yWhiteSpace),
-                    new XPoint(xLeft, yBottom),
-                    new XPoint(xRight, yBottom)
-                };
-
 
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
 
@@ -529,8 +519,6 @@ namespace MapService.Components
                 gfx.DrawString(sourceText, fontSource, brushSource, rectForText, mySource);
                 gfx.DrawRectangle(XPens.Transparent, rectForText);
 
-                this.drawLegend(document, gfx, exportItem, corners, fontName);
-
                 byte[] bytes;
 
                 using (MemoryStream ms = new MemoryStream())
@@ -543,86 +531,6 @@ namespace MapService.Components
             }
 
             return null;
-        }
-
-        private Image downloadLegend(string url)
-        {
-            WebClient client = new WebClient();
-            Stream stream = client.OpenRead(url);
-            return Image.FromStream(stream);
-        }
-
-        private void drawLegend(PdfDocument document, XGraphics gfx, MapExportItem exportItem, XPoint[] corners, string fontName)
-        {
-            // Draws a legend depending on the corners (some layout have whitespace around picture)
-            if (exportItem.teckenforklaring)
-            {
-                // Download each legend
-                Dictionary<string, Image> images = new Dictionary<string, Image>();
-                foreach (WMSInfo layer in exportItem.wmsLayers)
-                {
-                    if (layer.legend != null && layer.legend.Length > 0 && layer.caption != null && layer.caption.Length > 0)
-                    {
-                        // Just taking the first one in the layers list for each info
-                        try
-                        {
-                            images[layer.caption] = downloadLegend(layer.legend);
-                        } catch(Exception e)
-                        {
-                            _log.Error("Got error when attempting to download legend " + layer.legend + ". The error was " + e.ToString());
-                        }
-                    }
-                }
-                
-                if (exportItem.teckenforklaringplacement == "extra") // Add them to a new page
-                {
-                    PdfPage page = document.AddPage();
-                    page.Size = GetPageSize(exportItem);
-                    page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
-                    gfx = XGraphics.FromPdfPage(page);
-
-                    XPoint target = new XPoint(corners[1].X, corners[1].Y);
-                    bool left = true;
-                    double leftHeight = 0.0;
-
-                    foreach (KeyValuePair<string, Image> item in images)
-                    {
-                        using (MemoryStream ms = new MemoryStream())
-                        {
-                            item.Value.Save(ms, ImageFormat.Jpeg);
-                            XImage image = XImage.FromStream(ms);
-
-                            if (left)
-                            {
-                                gfx.DrawImage(image, new XPoint(corners[0].X + (corners[1].X - corners[0].X)/2 - item.Value.Width - 10, target.Y));
-                                XColor colorSource = XColors.Black;
-                                XFont fontSource = new XFont(fontName, 9, XFontStyle.Regular);
-                                XBrush brushSource = new XSolidBrush(colorSource);
-                                gfx.DrawString(item.Key, fontSource, brushSource, new XPoint(corners[0].X, target.Y + item.Value.Height / 2));
-                                leftHeight = item.Value.Height;
-                                left = !left;
-                            } else
-                            {
-                                target.X -= item.Value.Width;
-                                gfx.DrawImage(image, target);
-                                target.X += item.Value.Width;
-                                XColor colorSource = XColors.Black;
-                                XFont fontSource = new XFont(fontName, 9, XFontStyle.Regular);
-                                XBrush brushSource = new XSolidBrush(colorSource);
-                                gfx.DrawString(item.Key, fontSource, brushSource, new XPoint(corners[0].X + (corners[1].X - corners[0].X) / 2 + 10, target.Y + item.Value.Height / 2));
-                                leftHeight = item.Value.Height;
-                                left = !left;
-                                target.Y += Math.Max(item.Value.Height,leftHeight) + 5;
-                            }
-                        }
-                    }
-
-                    
-
-                    int a = 1;
-
-                }
-            }
         }
 
         private int GetDisplayLength(double unitLength, Dictionary<int, int> scaleBarLengths, int scale)

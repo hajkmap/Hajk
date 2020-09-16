@@ -109,6 +109,7 @@ namespace MapService.Controllers
                 {
                     return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
                 }
+                //return File(blob, "application/pdf", "kartutskrift.pdf");
             }
             catch (Exception e)
             {
