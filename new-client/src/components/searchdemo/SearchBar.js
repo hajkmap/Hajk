@@ -7,17 +7,6 @@ import ClearIcon from "@material-ui/icons/Clear";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { withTheme } from "@material-ui/core/styles";
 import withWidth from "@material-ui/core/withWidth";
-
-import {
-  CircularProgress,
-  IconButton,
-  Paper,
-  TextField,
-  Checkbox,
-  Popover,
-  Typography,
-} from "@material-ui/core";
-
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import Popper from "@material-ui/core/Popper";
@@ -34,6 +23,15 @@ import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck";
 import SearchResultsContainer from "./SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { useTheme } from "@material-ui/core/styles";
+import {
+  CircularProgress,
+  IconButton,
+  Paper,
+  TextField,
+  Checkbox,
+  Popover,
+  Typography,
+} from "@material-ui/core";
 
 const styles = (theme) => ({
   searchContainer: {
@@ -83,12 +81,6 @@ class SearchBar extends React.PureComponent {
     resultPanelCollapsed: false,
   };
 
-  handleClickOnMoreOptions = (event) => {
-    this.setState({
-      anchorEl: event.currentTarget,
-    });
-  };
-
   updateSearchOptions = (name, value) => {
     const { searchOptions } = this.props;
     searchOptions[name] = value;
@@ -105,6 +97,8 @@ class SearchBar extends React.PureComponent {
         return <RoomIcon color="disabled"></RoomIcon>;
     }
   };
+
+  s;
 
   renderPopover = () => {
     const {
@@ -279,9 +273,7 @@ class SearchBar extends React.PureComponent {
       searchString,
       loading,
       width,
-
       searchActive,
-
       map,
       app,
       showSearchResults,
@@ -290,10 +282,9 @@ class SearchBar extends React.PureComponent {
       searchSources,
       updateSearchOptions,
       searchModel,
-      handleSearchSources,
+      setSearchSources,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
-
     return (
       <TextField
         {...params}
@@ -321,7 +312,7 @@ class SearchBar extends React.PureComponent {
                 <SearchTools
                   map={map}
                   searchSources={searchSources}
-                  handleSearchSources={handleSearchSources}
+                  setSearchSources={setSearchSources}
                   app={app}
                   searchOptions={searchOptions}
                   searchTools={this.props.searchTools}
@@ -342,9 +333,7 @@ class SearchBar extends React.PureComponent {
     return (
       <Autocomplete
         className={cslx(selectSourcesOpen === false ? classes.hidden : null)}
-        onChange={(event, value, reason) =>
-          this.props.handleSearchSources(value)
-        }
+        onChange={(event, value, reason) => this.props.setSearchSources(value)}
         value={searchSources}
         multiple
         id="searchSources"

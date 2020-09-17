@@ -168,7 +168,7 @@ class SearchSettings extends React.PureComponent {
                   id="searchSources"
                   value={searchSources}
                   onChange={(event, value, reason) =>
-                    this.props.handleSearchSources(value)
+                    this.props.setSearchSources(value)
                   }
                   options={searchModel.getSources()}
                   disableCloseOnSelect

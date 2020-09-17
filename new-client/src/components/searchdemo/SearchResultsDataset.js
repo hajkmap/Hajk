@@ -2,7 +2,8 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Divider from "@material-ui/core/Divider";
-
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 import {
   Typography,
   Accordion,
@@ -11,11 +12,6 @@ import {
   Chip,
   Tooltip,
 } from "@material-ui/core";
-
-import PlaceIcon from "@material-ui/icons/Place";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-
-import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 
 const styles = (theme) => ({
   searchResultSummary: {
