@@ -6,7 +6,6 @@ import { FormHelperText } from "@material-ui/core";
 import ClearIcon from "@material-ui/icons/Clear";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { withTheme } from "@material-ui/core/styles";
-import Hidden from "@material-ui/core/Hidden";
 import withWidth from "@material-ui/core/withWidth";
 
 import {
@@ -27,13 +26,13 @@ import SearchIcon from "@material-ui/icons/Search";
 import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
 import WithinIcon from "@material-ui/icons/Adjust";
 import IntersectsIcon from "@material-ui/icons/Toll";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import RoomIcon from "@material-ui/icons/Room";
 import DescriptionIcon from "@material-ui/icons/Description";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck";
 import SearchResultsContainer from "./SearchResultsContainer";
+import SearchTools from "./SearchTools";
 import { useTheme } from "@material-ui/core/styles";
 
 const styles = (theme) => ({
@@ -88,10 +87,6 @@ class SearchBar extends React.PureComponent {
     this.setState({
       anchorEl: event.currentTarget,
     });
-  };
-
-  handleClickOnSearch = () => {
-    this.props.doSearch();
   };
 
   updateSearchOptions = (name, value) => {
@@ -213,11 +208,12 @@ class SearchBar extends React.PureComponent {
 
   renderSearchResultList = () => {
     const { resultPanelCollapsed } = this.state;
-    const { searchResults, app, map, resultSource } = this.props;
+    const { searchResults, app, map, resultSource, localObserver } = this.props;
 
     return (
       <SearchResultsContainer
         searchResults={searchResults}
+        localObserver={localObserver}
         app={app}
         resultSource={resultSource}
         getOriginBasedIcon={this.getOriginBasedIcon}
@@ -233,6 +229,7 @@ class SearchBar extends React.PureComponent {
       autocompleteList,
       autoCompleteOpen,
       searchString,
+      searchActive,
       classes,
       loading,
     } = this.props;
@@ -246,6 +243,7 @@ class SearchBar extends React.PureComponent {
         }}
         PopperComponent={CustomPopper}
         clearOnEscape
+        disabled={searchActive === "draw"}
         autoComplete
         value={searchString}
         selectOnFocus
@@ -277,15 +275,30 @@ class SearchBar extends React.PureComponent {
   };
 
   renderAutoCompleteInputField = (params) => {
-    const { moreOptionsId } = this.state;
-    const { searchString, loading, width } = this.props;
+    const {
+      searchString,
+      loading,
+      width,
+
+      searchActive,
+
+      map,
+      app,
+      showSearchResults,
+
+      searchOptions,
+      searchSources,
+      updateSearchOptions,
+      searchModel,
+      handleSearchSources,
+    } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
 
     return (
       <TextField
         {...params}
         label={undefined}
-        variant={width == "xs" ? "standard" : "outlined"}
+        variant={width === "xs" ? "standard" : "outlined"}
         placeholder="Sök..."
         InputProps={{
           ...params.InputProps,
@@ -297,18 +310,23 @@ class SearchBar extends React.PureComponent {
               <IconButton size="small" onClick={this.handleClickOnSearch}>
                 <SearchIcon />
               </IconButton>
-              {searchString.length > 0 ? (
+              {searchString.length > 0 ||
+              showSearchResults ||
+              searchActive !== "" ? (
                 <IconButton onClick={this.props.handleOnClear} size="small">
                   <ClearIcon />
                 </IconButton>
               ) : (
-                <IconButton
-                  size="small"
-                  aria-describedby={moreOptionsId}
-                  onClick={this.handleClickOnMoreOptions}
-                >
-                  <MoreHorizIcon />
-                </IconButton>
+                <SearchTools
+                  map={map}
+                  searchSources={searchSources}
+                  handleSearchSources={handleSearchSources}
+                  app={app}
+                  searchOptions={searchOptions}
+                  searchTools={this.props.searchTools}
+                  searchModel={searchModel}
+                  updateSearchOptions={updateSearchOptions}
+                />
               )}
             </>
           ),

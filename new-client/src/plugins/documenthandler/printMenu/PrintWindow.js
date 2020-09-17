@@ -180,7 +180,7 @@ class PrintWindow extends React.PureComponent {
         dHeight
       );
       document.body.removeChild(onePageDiv);
-      return onePageCanvas;
+      return onePageCanvas.toDataURL("image/png");
     });
   };
 
@@ -250,11 +250,20 @@ class PrintWindow extends React.PureComponent {
           }
           //! now we declare that we're working on that page
           pdf.setPage(index + 1);
-          pdf.addImage(canvas, "JPG", 0, 0);
+          pdf.addImage(canvas, "PNG", 0, 0);
         });
         pdf = this.addFooters(pdf, numToc);
-        pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
-        this.setState({ pdfLoading: false, printContent: undefined });
+        window.open(
+          pdf.output("bloburl", {
+            filename: `oversiktsplan-${new Date().toLocaleString()}.pdf`,
+          })
+        );
+        this.toggleAllDocuments(false);
+        this.setState({
+          pdfLoading: false,
+          printContent: undefined,
+          printMaps: false,
+        });
       });
     });
   };
@@ -301,14 +310,14 @@ class PrintWindow extends React.PureComponent {
     return chapterInformation;
   }
 
-  toggleAllDocuments = () => {
+  toggleAllDocuments = (toggled) => {
     this.state.chapterInformation.forEach((chapter) => {
-      chapter.chosenForPrint = !this.state.allDocumentsToggled;
-      this.toggleSubChapters(chapter, !this.state.allDocumentsToggled);
+      chapter.chosenForPrint = toggled;
+      this.toggleSubChapters(chapter, toggled);
     });
 
     this.setState({
-      allDocumentsToggled: !this.state.allDocumentsToggled,
+      allDocumentsToggled: toggled,
     });
   };
 
@@ -557,7 +566,9 @@ class PrintWindow extends React.PureComponent {
                   <Checkbox
                     color="primary"
                     checked={this.state.allDocumentsToggled}
-                    onChange={this.toggleAllDocuments}
+                    onChange={() =>
+                      this.toggleAllDocuments(!this.state.allDocumentsToggled)
+                    }
                   />
                 }
                 label="Välj alla dokument"

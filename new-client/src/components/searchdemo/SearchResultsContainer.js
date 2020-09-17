@@ -74,6 +74,7 @@ class SearchResultsContainer extends React.PureComponent {
       map,
       resultSource,
       getOriginBasedIcon,
+      localObserver,
     } = this.props;
     const { sumOfResults, selectedFeatureAndSource } = this.state;
 
@@ -86,6 +87,7 @@ class SearchResultsContainer extends React.PureComponent {
         ) : (
           <Paper className={classes.root}>
             <SearchResultsList
+              localObserver={localObserver}
               featureAndSource={
                 sumOfResults === 1
                   ? this.getTheSoleResult()
