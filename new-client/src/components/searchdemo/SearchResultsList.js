@@ -125,11 +125,6 @@ class SearchResultsList extends React.PureComponent {
       }
     );
 
-    console.log(
-      featureCollectionsWithFeatures,
-      "featureCollectionWithFeatures"
-    );
-
     return (
       <Grid container alignItems={"center"} justify={"center"}>
         {this.renderSearchResultListOptions()}

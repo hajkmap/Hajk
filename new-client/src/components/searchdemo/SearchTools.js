@@ -20,6 +20,7 @@ import { Paper } from "@material-ui/core";
 import { createPortal } from "react-dom";
 
 import Dialog from "../Dialog.js";
+import SearchSettings from "./SearchSettings";
 
 const styles = (theme) => ({});
 
@@ -32,7 +33,7 @@ class SearchTools extends React.PureComponent {
   constructor(props) {
     super(props);
     this.map = props.map;
-    this.drawOptions = [
+    this.searchTools = [
       {
         name: "Sök med polygon",
         icon: <EditIcon />,
@@ -47,6 +48,12 @@ class SearchTools extends React.PureComponent {
         name: "Sökinställningar",
         icon: <SettingsIcon />,
         type: "SETTINGS",
+      },
+      {
+        name: "HEjehje",
+        icon: <SettingsIcon />,
+        type: "EXTERNAL_PLUGIN",
+        searchFunctionalityClickBlablabla: "blabla",
       },
     ];
 
@@ -78,7 +85,7 @@ class SearchTools extends React.PureComponent {
 
   toggleSelection = () => {};
 
-  toggleDraw = (active, type, freehand = false, drawEndCallback) => {
+  toggleDraw = (active, type, freehand = false) => {
     const { map, handleDrawStart, handleDrawEnd } = this.props;
     if (active) {
       this.draw = new Draw({
@@ -106,6 +113,7 @@ class SearchTools extends React.PureComponent {
   };
 
   handleMenuItemClick = (event, index, option) => {
+    console.log("event: ", event);
     const type = option.type;
     this.setState({ anchorEl: undefined });
 
@@ -113,6 +121,8 @@ class SearchTools extends React.PureComponent {
       this.toggleSelection();
     } else if (type === "SETTINGS") {
       this.setState({ settingsDialog: true });
+    } else if (type === "EXTERNAL_PLUGIN") {
+      this.globalObserver.publish(option.searchFunctionalityClickBlablabla);
     } else {
       this.toggleDraw(true, type);
     }
@@ -120,12 +130,27 @@ class SearchTools extends React.PureComponent {
 
   renderSettingsDialog = () => {
     const { settingsDialog } = this.state;
+    const {
+      searchOptions,
+      searchSources,
+      updateSearchOptions,
+      searchModel,
+      handleSearchSources,
+    } = this.props;
     if (settingsDialog) {
       return createPortal(
         <Dialog
           options={{
-            text: "Avancerade inställningar...",
-            headerText: "Inställningar",
+            text: (
+              <SearchSettings
+                searchOptions={searchOptions}
+                searchSources={searchSources}
+                updateSearchOptions={updateSearchOptions}
+                handleSearchSources={handleSearchSources}
+                searchModel={searchModel}
+              />
+            ),
+            headerText: "Sökinställningar",
             buttonText: "OK",
           }}
           open={settingsDialog}
@@ -134,7 +159,7 @@ class SearchTools extends React.PureComponent {
               settingsDialog: false,
             });
           }}
-        />,
+        ></Dialog>,
         document.getElementById("windows-container")
       );
     } else {
@@ -144,7 +169,6 @@ class SearchTools extends React.PureComponent {
 
   render() {
     const { anchorEl } = this.state;
-
     return (
       <div>
         {this.renderSettingsDialog()}
@@ -175,7 +199,7 @@ class SearchTools extends React.PureComponent {
               })
             }
           >
-            {this.drawOptions.map((option, index) => (
+            {this.searchTools.map((option, index) => (
               <MenuItem
                 key={index}
                 onClick={(event) =>
@@ -185,6 +209,9 @@ class SearchTools extends React.PureComponent {
                 {option.icon ? (
                   <ListItemIcon>{option.icon}</ListItemIcon>
                 ) : null}
+                <Typography variant="srOnly" noWrap>
+                  {option.name}
+                </Typography>
                 <Typography variant="inherit" noWrap>
                   {option.name}
                 </Typography>

@@ -1,4 +1,5 @@
 import React from "react";
+import AcUnitIcon from "@material-ui/icons/AcUnit";
 
 /**
  * @summary  DocumentHandler model that doesn't do much.
@@ -34,6 +35,16 @@ export default class DocumentHandlerModel {
 
   implementSearchInterface = () => {
     this.settings.searchInterface.getResults = this.getResults;
+    this.settings.searchInterface.getFunctionality = this.getSearchFunctionality;
+  };
+
+  getSearchFunctionality = () => {
+    return {
+      name: "Dokumentverktyg",
+      icon: <AcUnitIcon />,
+      type: "EXTERNAL_PLUGIN",
+      searchFunctionalityClickName: "documenthandler-searchfunctionality-click",
+    };
   };
 
   /**

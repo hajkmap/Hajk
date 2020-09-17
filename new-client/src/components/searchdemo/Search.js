@@ -6,6 +6,7 @@ import { options } from "marked";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill } from "ol/style";
+import Draw from "ol/interaction/Draw";
 
 const styles = (theme) => ({
   inputRoot: {
@@ -62,9 +63,9 @@ class Search extends React.PureComponent {
     loading: false,
     searchOptions: {
       wildcardAtStart: false,
-      wildcardAtEnd: false,
+      wildcardAtEnd: true,
       matchCase: false,
-      activeSpatialFilter: "intersects",
+      activeSpatialFilter: "within",
     },
   };
 
@@ -81,14 +82,16 @@ class Search extends React.PureComponent {
   }
 
   implementsSearchInterface = (plugin) => {
-    var hasGetResultsMethod = plugin.searchInterface.getResults;
-    if (!hasGetResultsMethod) {
+    let hasGetResultsMethod = plugin.searchInterface.getResults;
+    let hasGetFunctionalityMethod = plugin.searchInterface.getFunctionality;
+    if (!hasGetResultsMethod || !hasGetFunctionalityMethod) {
       console.warn(
         plugin.type +
-          " has flag searchImplemented = true but has not implemented correct method in plugin to use search"
+          " has flag searchImplemented = true but has not implemented correct methods in plugin to use search"
       );
+      return false;
     }
-    return hasGetResultsMethod;
+    return true;
   };
 
   getSearchImplementedPlugins = () => {
@@ -111,8 +114,18 @@ class Search extends React.PureComponent {
     });
   };
 
+  removeDrawInteraction = () => {
+    let interactions = this.map.getInteractions();
+    for (var i = 0; i < interactions.getLength(); i++) {
+      let interaction = interactions.item(i);
+      if (interaction instanceof Draw) {
+        this.map.removeInteraction(interaction);
+        break;
+      }
+    }
+  };
+
   handleOnClear = () => {
-    //Clear input, draw object, result list
     this.setState({
       searchString: "",
       searchActive: "",
@@ -122,10 +135,12 @@ class Search extends React.PureComponent {
 
     if (this.drawSource) {
       this.drawSource.clear();
+      this.drawSource = undefined;
     }
     if (this.resultSource) {
       this.resultSource.clear();
     }
+    this.removeDrawInteraction();
   };
 
   handleSearchInput = (event, value, reason) => {
@@ -154,6 +169,7 @@ class Search extends React.PureComponent {
     this.resultSource.clear();
     if (this.drawSource) {
       this.drawSource.clear();
+      this.drawSource = undefined;
     }
 
     this.setState(
@@ -445,7 +461,8 @@ class Search extends React.PureComponent {
     } = this.state.searchOptions;
     let customSearchOptions = { ...searchOptionsFromModel };
     customSearchOptions["activeSpatialFilter"] = activeSpatialFilter; // "intersects" or "within"
-    customSearchOptions["featuresToFilter"] = this.drawSource?.getFeatures();
+    customSearchOptions["featuresToFilter"] =
+      this.drawSource?.getFeatures() || [];
     customSearchOptions["matchCase"] = matchCase;
     customSearchOptions["wildcardAtStart"] = wildcardAtStart;
     customSearchOptions["wildcardAtEnd"] = wildcardAtEnd;
@@ -463,6 +480,7 @@ class Search extends React.PureComponent {
       showSearchResults,
       loading,
       searchOptions,
+      searchSources,
     } = this.state;
 
     return (
@@ -493,6 +511,7 @@ class Search extends React.PureComponent {
             updateSearchOptions={this.updateSearchOptions}
             handleSearchSources={this.handleSearchSources}
             loading={loading}
+            searchSources={searchSources}
             handleDrawStart={this.handleDrawStart}
             handleDrawEnd={this.handleDrawEnd}
             handleSearchBarKeyPress={this.handleSearchBarKeyPress}

@@ -180,7 +180,7 @@ class PrintWindow extends React.PureComponent {
         dHeight
       );
       document.body.removeChild(onePageDiv);
-      return onePageCanvas;
+      return onePageCanvas.toDataURL("image/png");
     });
   };
 
@@ -250,7 +250,7 @@ class PrintWindow extends React.PureComponent {
           }
           //! now we declare that we're working on that page
           pdf.setPage(index + 1);
-          pdf.addImage(canvas, "JPG", 0, 0);
+          pdf.addImage(canvas, "PNG", 0, 0);
         });
         pdf = this.addFooters(pdf, numToc);
         window.open(

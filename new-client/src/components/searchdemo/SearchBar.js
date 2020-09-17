@@ -240,6 +240,11 @@ class SearchBar extends React.PureComponent {
       showSearchResults,
       handleSearchBarKeyPress,
       handleOnSearch,
+      searchOptions,
+      searchSources,
+      updateSearchOptions,
+      searchModel,
+      handleSearchSources,
     } = this.props;
     return (
       <Autocomplete
@@ -303,10 +308,14 @@ class SearchBar extends React.PureComponent {
                     </IconButton>
                   ) : (
                     <SearchTools
-                      searchActive={searchActive}
                       map={map}
+                      searchSources={searchSources}
+                      handleSearchSources={handleSearchSources}
+                      searchOptions={searchOptions}
                       handleDrawStart={handleDrawStart}
                       handleDrawEnd={handleDrawEnd}
+                      searchModel={searchModel}
+                      updateSearchOptions={updateSearchOptions}
                     />
                   )}
                 </>
