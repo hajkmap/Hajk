@@ -26,6 +26,7 @@ export default class DocumentHandlerModel {
     this.allDocuments = [];
     this.chaptersMatchSearch = [];
     this.chapterInfo = [];
+
     this.chapterNumber = 0;
     this.implementSearchInterface();
     this.getAllDocumentsContainedInMenu().then((allDocuments) => {
@@ -54,6 +55,7 @@ export default class DocumentHandlerModel {
    *
    */
   getResults = (searchString, searchOptions) => {
+    this.keywords = [];
     let featureCollections = [];
     this.allDocuments.forEach((document, index) => {
       this.chaptersMatchSearch = [];
@@ -78,7 +80,7 @@ export default class DocumentHandlerModel {
           id: `${document.documentTitle}`,
           caption: document.documentTitle,
           displayFields: ["header", "geoids"],
-          searchFields: ["header"],
+          searchFields: ["header", ...this.keywords],
         },
         origin: "DOCUMENT",
       };
@@ -101,31 +103,39 @@ export default class DocumentHandlerModel {
     if (
       chapter.hasOwnProperty("keywords") &&
       this.searchStringMatchKeywords(searchString, chapter.keywords)
-    )
-      this.chaptersMatchSearch.push({
+    ) {
+      let properties = {
+        header: chapter.header,
+        geoids: chapter.geoids,
+        documentTitle: document.documentTitle,
+        documentFileName: document.documentFileName,
+        headerIdentifier: chapter.headerIdentifier,
+      };
+
+      chapter.keywords.map((keyword, index) => {
+        this.keywords.push(`keyword${index}`);
+        return (properties[`keyword${index}`] = keyword);
+      });
+
+      let feature = {
         type: "Feature",
         geometry: null,
         onClickName: "documenthandler-searchresult-clicked",
         id: `${document.documentTitle}${index}`,
-        properties: {
-          header: chapter.header,
-          keywords: chapter.keywords,
-          geoids: chapter.geoids,
-          documentTitle: document.documentTitle,
-          documentFileName: document.documentFileName,
-          headerIdentifier: chapter.headerIdentifier,
-        },
-      });
+        properties: properties,
+      };
+      this.chaptersMatchSearch.push(feature);
 
-    if (chapter.hasOwnProperty("chapters"))
-      chapter.chapters.forEach((subChapter, index) => {
-        this.keywordsMatchSearchString(
-          document,
-          subChapter,
-          searchString,
-          index
-        );
-      });
+      if (chapter.hasOwnProperty("chapters"))
+        chapter.chapters.forEach((subChapter, index) => {
+          this.keywordsMatchSearchString(
+            document,
+            subChapter,
+            searchString,
+            index
+          );
+        });
+    }
   };
 
   /**
