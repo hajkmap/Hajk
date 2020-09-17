@@ -282,6 +282,7 @@ class SearchBar extends React.PureComponent {
       searchSources,
       updateSearchOptions,
       searchModel,
+      handleOnSearch,
       setSearchSources,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
@@ -299,7 +300,7 @@ class SearchBar extends React.PureComponent {
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}
               {params.InputProps.endAdornment}
-              <IconButton size="small" onClick={this.handleClickOnSearch}>
+              <IconButton size="small" onClick={handleOnSearch}>
                 <SearchIcon />
               </IconButton>
               {searchString.length > 0 ||

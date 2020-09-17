@@ -148,7 +148,8 @@ class Search extends React.PureComponent {
   };
 
   handleSearchInput = (event, value, reason) => {
-    let searchString = value?.autocompleteEntry || value || "";
+    let searchString = value?.autocompleteEntry.split(",")[0] || value || "";
+    console.log("reason: ", reason);
 
     if (searchString !== "") {
       this.setState(
@@ -157,9 +158,7 @@ class Search extends React.PureComponent {
           searchActive: "input",
         },
         () => {
-          if (reason !== "input") {
-            this.doSearch();
-          }
+          this.doSearch();
         }
       );
     } else {
@@ -175,8 +174,7 @@ class Search extends React.PureComponent {
     this.setState(
       {
         autoCompleteOpen: searchString.length >= 3,
-        loading:
-          searchString.length >= 3 && this.state.autocompleteList.length === 0,
+        loading: searchString.length >= 3,
         showSearchResults: false,
         searchString: searchString,
       },
@@ -220,41 +218,48 @@ class Search extends React.PureComponent {
     return fetchSettings;
   };
 
-  getPropertiesMatchedBySearchString = (featureCollection, feature) => {
-    return featureCollection.source.searchFields
-      .filter((searchField) => {
-        return RegExp(`^${this.state.searchString}\\W*`, "i").test(
-          feature.properties[searchField]
-        );
-      })
-      .map((searchField) => {
-        return feature.properties[searchField];
-      });
+  getMatchedSearchFields = (featureCollection, feature) => {
+    return featureCollection.source.searchFields.filter((searchField) => {
+      return RegExp(`^${this.state.searchString}\\W*`, "i").test(
+        feature.properties[searchField]
+      );
+    });
   };
 
-  getAutoCompleteEntryFromMatchingProperties = (matchingProperties) => {
-    return matchingProperties.length === 1
-      ? matchingProperties[0]
-      : matchingProperties.join(", ");
+  getAutoCompleteEntryFromMatchedSearchFields = (feature) => {
+    let autocompleteEntry = "";
+    feature.matchedSearchFields.map((sf, index) => {
+      if (index === feature.matchedSearchFields.length - 1) {
+        return (autocompleteEntry = autocompleteEntry.concat(
+          feature.properties[sf]
+        ));
+      } else {
+        return (autocompleteEntry = autocompleteEntry.concat(
+          `${feature.properties[sf]}, `
+        ));
+      }
+    });
+    return autocompleteEntry;
   };
 
   flattenAndSortAutoCompleteList = (searchResults) => {
     const resultsPerDataset = searchResults.featureCollections.map(
       (featureCollection) => {
-        let matchingProperties = [];
         return featureCollection.value.features
           .filter((feature) => {
-            matchingProperties = this.getPropertiesMatchedBySearchString(
+            let matchedSearchFields = this.getMatchedSearchFields(
               featureCollection,
               feature
             );
-            return matchingProperties.length > 0;
+            feature.matchedSearchFields = matchedSearchFields;
+
+            return matchedSearchFields.length > 0;
           })
-          .map(() => {
+          .map((feature) => {
             const dataset = featureCollection.source.caption;
             const origin = featureCollection.origin;
-            const autocompleteEntry = this.getAutoCompleteEntryFromMatchingProperties(
-              matchingProperties
+            const autocompleteEntry = this.getAutoCompleteEntryFromMatchedSearchFields(
+              feature
             );
             return {
               dataset,
@@ -328,6 +333,7 @@ class Search extends React.PureComponent {
   };
 
   async doSearch() {
+    this.setState({ loading: true });
     let fetchOptions = this.getSearchResultsFetchSettings();
     let searchResults = await this.fetchResultFromSearchModel(fetchOptions);
 
@@ -368,6 +374,7 @@ class Search extends React.PureComponent {
     );
     this.setState({
       autocompleteList: this.prepareAutoCompleteList(autoCompleteResult),
+      loading: false,
     });
   };
 
@@ -410,21 +417,32 @@ class Search extends React.PureComponent {
   };
 
   prepareAutoCompleteList = (searchResults) => {
+    console.log("searchREsults: ", searchResults);
+    let maxSlots = 7;
     let numSourcesWithResults = searchResults.featureCollections.length;
+    console.log("numSourcesWithResults: ", numSourcesWithResults);
     let numResults = 0;
     searchResults.featureCollections.forEach((fc) => {
       numResults += fc.value.features.length;
     });
+    console.log("numResults: ", numResults);
 
-    let spacesPerSource = Math.floor(numResults / numSourcesWithResults);
+    let spacesPerSource = Math.max(
+      1,
+      Math.min(
+        Math.floor(numResults / numSourcesWithResults),
+        Math.floor(maxSlots / numSourcesWithResults)
+      )
+    );
 
-    if (numResults <= 7) {
+    if (numResults <= maxSlots) {
       //All results can be shown
       return this.flattenAndSortAutoCompleteList(searchResults);
     } else {
       searchResults.featureCollections.forEach((fc) => {
+        console.log("fc.value.features", fc.value.features);
         if (fc.value.features.length > spacesPerSource) {
-          fc.value.features.splice(spacesPerSource - 1);
+          fc = fc.value.features.splice(spacesPerSource);
         }
       });
       return this.flattenAndSortAutoCompleteList(searchResults);
