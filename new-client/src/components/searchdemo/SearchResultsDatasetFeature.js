@@ -114,12 +114,11 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     } else {
       return Object.entries(feature.properties).map((row, index) => {
         return (
-          <TableBody>
+          <TableBody key={row[0]}>
             <TableRow
               className={cslx(
                 !showAllInformation && index >= 2 ? classes.hidden : null
               )}
-              key={row[0]}
             >
               {this.renderTableCell(row[0])}
               {this.renderTableCell(row[1], "right")}

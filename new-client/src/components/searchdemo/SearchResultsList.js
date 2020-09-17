@@ -1,30 +1,14 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import { boundingExtent } from "ol/extent";
+
 import { Stroke, Style, Circle, Fill } from "ol/style";
+import cslx from "clsx";
 
 import { Button, IconButton } from "@material-ui/core";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 
 import SearchResultsDataset from "./SearchResultsDataset";
-
-let highlightedStyle = new Style({
-  stroke: new Stroke({
-    color: [200, 0, 0, 0.7],
-    width: 4,
-  }),
-  fill: new Fill({
-    color: [255, 0, 0, 0.1],
-  }),
-  image: new Circle({
-    radius: 6,
-    stroke: new Stroke({
-      color: [200, 0, 0, 0.7],
-      width: 4,
-    }),
-  }),
-});
 
 const styles = (theme) => ({
   hide: {
@@ -42,6 +26,7 @@ class SearchResultsList extends React.PureComponent {
   };
 
   showClickResultInMap = (feature) => {
+    const { localObserver } = this.props;
     const currentIndex = this.state.selectedItems.indexOf(feature.id);
     const selectedItems = [...this.state.selectedItems];
 
@@ -56,8 +41,8 @@ class SearchResultsList extends React.PureComponent {
         selectedItems: selectedItems,
       },
       () => {
-        this.changeStyleOnSelectedItems(this.state.selectedItems); // Set another OpenLayers Style so we can distinguish checked items
-        this.zoomToSelectedItems(this.state.selectedItems); // Ensure we zoom out so all checked features fit
+        localObserver.publish("highlight-features", this.state.selectedItems);
+        localObserver.publish("zoom-to-features", this.state.selectedItems);
       }
     );
   };
@@ -69,34 +54,6 @@ class SearchResultsList extends React.PureComponent {
     } else {
       this.showClickResultInMap(feature);
     }
-  };
-
-  changeStyleOnSelectedItems = (items) => {
-    const { resultSource } = this.props;
-    // First unset style on ALL features (user might have UNCHECKED a feature)
-    resultSource.getFeatures().map((f) => f.setStyle(null));
-
-    // Now, set the style only on currently selected features
-    items.map((fid) =>
-      resultSource.getFeatureById(fid).setStyle(highlightedStyle)
-    );
-  };
-
-  zoomToSelectedItems = (items) => {
-    const { resultSource, map } = this.props;
-    const extentsFromSelectedItems = items.map((fid) =>
-      resultSource.getFeatureById(fid).getGeometry().getExtent()
-    );
-
-    const extentToZoomTo =
-      extentsFromSelectedItems.length < 1
-        ? resultSource.getExtent()
-        : boundingExtent(extentsFromSelectedItems);
-
-    map.getView().fit(extentToZoomTo, {
-      size: map.getSize(),
-      maxZoom: 7,
-    });
   };
 
   renderSearchResultListOptions = () => {
@@ -133,11 +90,10 @@ class SearchResultsList extends React.PureComponent {
             <Grid
               key={fc.source.id}
               xs={12}
-              className={
-                featureCollections.length !== 1 &&
-                fc &&
+              className={cslx(
+                featureCollections.length !== 1 && fc,
                 classes.searchResultDatasetWrapper
-              }
+              )}
               item
             >
               <SearchResultsDataset

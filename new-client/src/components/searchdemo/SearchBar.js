@@ -212,11 +212,12 @@ class SearchBar extends React.PureComponent {
 
   renderSearchResultList = () => {
     const { resultPanelCollapsed } = this.state;
-    const { searchResults, app, map, resultSource } = this.props;
+    const { searchResults, app, map, resultSource, localObserver } = this.props;
 
     return (
       <SearchResultsContainer
         searchResults={searchResults}
+        localObserver={localObserver}
         app={app}
         resultSource={resultSource}
         featureCollections={searchResults.featureCollections}
@@ -235,8 +236,7 @@ class SearchBar extends React.PureComponent {
       classes,
       loading,
       map,
-      handleDrawStart,
-      handleDrawEnd,
+      app,
       showSearchResults,
       handleSearchBarKeyPress,
       handleOnSearch,
@@ -311,9 +311,9 @@ class SearchBar extends React.PureComponent {
                       map={map}
                       searchSources={searchSources}
                       handleSearchSources={handleSearchSources}
+                      app={app}
                       searchOptions={searchOptions}
-                      handleDrawStart={handleDrawStart}
-                      handleDrawEnd={handleDrawEnd}
+                      searchTools={this.props.searchTools}
                       searchModel={searchModel}
                       updateSearchOptions={updateSearchOptions}
                     />

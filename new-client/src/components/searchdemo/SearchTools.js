@@ -12,9 +12,6 @@ import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import Typography from "@material-ui/core/Typography";
-import EditIcon from "@material-ui/icons/Edit";
-import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
-import SettingsIcon from "@material-ui/icons/Settings";
 
 import { Paper } from "@material-ui/core";
 import { createPortal } from "react-dom";
@@ -33,99 +30,17 @@ class SearchTools extends React.PureComponent {
   constructor(props) {
     super(props);
     this.map = props.map;
-    this.searchTools = [
-      {
-        name: "Sök med polygon",
-        icon: <EditIcon />,
-        type: "Polygon",
-      },
-      {
-        name: "Sök med radie",
-        icon: <RadioButtonUncheckedIcon />,
-        type: "Circle",
-      },
-      {
-        name: "Sökinställningar",
-        icon: <SettingsIcon />,
-        type: "SETTINGS",
-      },
-      {
-        name: "HEjehje",
-        icon: <SettingsIcon />,
-        type: "EXTERNAL_PLUGIN",
-        searchFunctionalityClickBlablabla: "blabla",
-      },
-    ];
-
-    this.drawSource = new VectorSource({ wrapX: false });
-    this.drawLayer = new VectorLayer({
-      source: this.drawSource,
-      style: this.drawStyle,
-    });
-
-    this.map.addLayer(this.drawLayer);
-
-    this.drawStyle = new Style({
-      stroke: new Stroke({
-        color: "rgba(255, 214, 91, 0.6)",
-        width: 4,
-      }),
-      fill: new Fill({
-        color: "rgba(255, 214, 91, 0.2)",
-      }),
-      image: new Circle({
-        radius: 6,
-        stroke: new Stroke({
-          color: "rgba(255, 214, 91, 0.6)",
-          width: 2,
-        }),
-      }),
-    });
   }
 
-  toggleSelection = () => {};
-
-  toggleDraw = (active, type, freehand = false) => {
-    const { map, handleDrawStart, handleDrawEnd } = this.props;
-    if (active) {
-      this.draw = new Draw({
-        source: this.drawSource,
-        type: type,
-        freehand: freehand,
-        stopClick: true,
-        style: this.drawStyle,
-      });
-
-      map.clicklock = true;
-      map.addInteraction(this.draw);
-      this.drawSource.clear();
-      handleDrawStart(this.drawSource);
-
-      this.drawSource.on("addfeature", () => {
-        map.removeInteraction(this.draw);
-        handleDrawEnd();
-      });
-    } else {
-      map.removeInteraction(this.draw);
-      map.clicklock = false;
-      this.drawSource.clear();
-    }
-  };
-
   handleMenuItemClick = (event, index, option) => {
-    console.log("event: ", event);
     const type = option.type;
-    this.setState({ anchorEl: undefined });
-
-    if (type === "SELECTION") {
-      this.toggleSelection();
-    } else if (type === "SETTINGS") {
+    if (type === "SETTINGS") {
       this.setState({ settingsDialog: true });
-    } else if (type === "EXTERNAL_PLUGIN") {
-      this.globalObserver.publish(option.searchFunctionalityClickBlablabla);
     } else {
-      this.toggleDraw(true, type);
+      this.props.app.globalObserver.publish(option["onClickEventName"], option);
     }
+
+    this.setState({ anchorEl: undefined });
   };
 
   renderSettingsDialog = () => {
@@ -199,7 +114,7 @@ class SearchTools extends React.PureComponent {
               })
             }
           >
-            {this.searchTools.map((option, index) => (
+            {this.props.searchTools.map((option, index) => (
               <MenuItem
                 key={index}
                 onClick={(event) =>
