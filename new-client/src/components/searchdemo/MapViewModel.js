@@ -69,18 +69,25 @@ class MapViewModel {
     this.bindSubscriptions();
   }
 
-  initMapLayers = () => {
-    this.resultSource = new VectorSource({ wrapX: false });
-    this.resultsLayer = new VectorLayer({
-      source: this.resultSource,
-      style: this.options.showInMapOnSearchResult ? defaultStyles : null,
-    });
-    this.drawSource = new VectorSource({ wrapX: false });
-    this.drawLayer = new VectorLayer({
-      source: this.drawSource,
-      style: drawStyle,
-    });
+  getNewVectorSource = () => {
+    return new VectorSource({ wrapX: false });
+  };
 
+  getNewVectorLayer = (source, style) => {
+    return new VectorLayer({
+      source: source,
+      style: style,
+    });
+  };
+
+  initMapLayers = () => {
+    this.resultSource = this.getNewVectorSource();
+    this.resultsLayer = this.getNewVectorLayer(
+      this.resultSource,
+      this.options.showInMapOnSearchResult ? defaultStyles : null
+    );
+    this.drawSource = this.getNewVectorSource();
+    this.drawLayer = this.getNewVectorLayer(this.drawSource, drawStyle);
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
   };
@@ -95,22 +102,24 @@ class MapViewModel {
       "highlight-features",
       this.highlightFeaturesInMap
     );
-    this.localObserver.subscribe("zoom-to-features", this.zoomToSelectedItems);
+    this.localObserver.subscribe("zoom-to-features", this.zoomToFeatureIds);
     this.app.globalObserver.subscribe("spatial-search", (options) => {
       this.toggleDraw(true, options.type);
     });
   };
 
   fitMapToSearchResult = () => {
-    //Zoom to fit all features
     const currentExtent = this.resultSource.getExtent();
-
     if (currentExtent.map(Number.isFinite).includes(false) === false) {
-      this.map.getView().fit(currentExtent, {
-        size: this.map.getSize(),
-        maxZoom: 7,
-      });
+      this.fitMapToExtent(currentExtent);
     }
+  };
+
+  fitMapToExtent = (extent) => {
+    this.map.getView().fit(extent, {
+      size: this.map.getSize(),
+      maxZoom: 7,
+    });
   };
 
   addFeaturesToResultsLayer = (features) => {
@@ -126,22 +135,24 @@ class MapViewModel {
     }
   };
 
-  highlightFeaturesInMap = (featureIds) => {
-    // First unset style on ALL features (user might have UNCHECKED a feature)
+  resetStyleForFeaturesInResultSource = () => {
     this.resultSource.getFeatures().map((f) => f.setStyle(null));
-    console.log(highlightedStyle, "highlightedStyle");
-    console.log(featureIds, "featureIds");
-    // Now, set the style only on currently selected features
+  };
+
+  highlightFeaturesInMap = (featureIds) => {
+    this.resetStyleForFeaturesInResultSource();
     featureIds.map((fid) =>
-      this.resultSource.getFeatureById(fid).setStyle(highlightedStyle)
+      this.getFeatureFromResultSourceById(fid).setStyle(highlightedStyle)
     );
   };
 
-  zoomToSelectedItems = (items) => {
-    console.log(items, "item");
+  getFeatureFromResultSourceById = (fid) => {
+    return this.resultSource.getFeatureById(fid);
+  };
 
-    const extentsFromSelectedItems = items.map((fid) =>
-      this.resultSource.getFeatureById(fid).getGeometry().getExtent()
+  zoomToFeatureIds = (featureIds) => {
+    const extentsFromSelectedItems = featureIds.map((fid) =>
+      this.getFeatureFromResultSourceById(fid).getGeometry().getExtent()
     );
 
     const extentToZoomTo =
@@ -149,10 +160,7 @@ class MapViewModel {
         ? this.resultSource.getExtent()
         : boundingExtent(extentsFromSelectedItems);
 
-    this.map.getView().fit(extentToZoomTo, {
-      size: this.map.getSize(),
-      maxZoom: 7,
-    });
+    this.fitMapToExtent(extentToZoomTo);
   };
 
   clearMap = () => {
