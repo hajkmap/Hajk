@@ -285,7 +285,7 @@ class SearchBar extends React.PureComponent {
       map,
       app,
       showSearchResults,
-
+      handleSearchBarKeyPress,
       searchOptions,
       searchSources,
       updateSearchOptions,
@@ -300,6 +300,7 @@ class SearchBar extends React.PureComponent {
         label={undefined}
         variant={width === "xs" ? "standard" : "outlined"}
         placeholder="Sök..."
+        onKeyPress={handleSearchBarKeyPress}
         InputProps={{
           ...params.InputProps,
           ...disableUnderline,

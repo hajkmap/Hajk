@@ -293,7 +293,9 @@ class Search extends React.PureComponent {
     }
 
     let active = true;
-
+    console.log(this.state.searchString, "this.state.searchString");
+    console.log(searchSources, "searchSources");
+    console.log(fetchOptions, "fetchOptions");
     const promise = this.searchModel.getResults(
       this.state.searchString,
       searchSources,
@@ -325,7 +327,9 @@ class Search extends React.PureComponent {
 
   async doSearch() {
     let fetchOptions = this.getSearchResultsFetchSettings();
+
     let searchResults = await this.fetchResultFromSearchModel(fetchOptions);
+    console.log(searchResults, "searchResults");
     this.setState({
       searchResults,
       showSearchResults: true,
