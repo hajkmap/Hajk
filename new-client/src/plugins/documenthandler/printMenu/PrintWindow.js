@@ -3,6 +3,11 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Grid from "@material-ui/core/Grid";
 import { Typography } from "@material-ui/core";
+import Container from "@material-ui/core/Container";
+import Box from "@material-ui/core/Box";
+import { sizing } from "@material-ui/system";
+import Divider from "@material-ui/core/Divider";
+
 import Button from "@material-ui/core/Button";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -19,13 +24,20 @@ const styles = (theme) => ({
   gridContainer: {
     padding: theme.spacing(4),
     width: "100%",
+    height: "80%",
+  },
+  middleSectionHeader: {
+    height: "10%",
+  },
+  middleSectionMain: {
+    height: "90%",
+    paddingTop: 10,
+    overflowY: "auto",
   },
   footerContainer: {
-    position: "fixed",
     padding: theme.spacing(2),
     maxWidth: "100%",
-    bottom: 0,
-    right: 0,
+
     borderTop: "1px solid grey",
   },
 });
@@ -519,90 +531,103 @@ class PrintWindow extends React.PureComponent {
     } = this.props;
     const { chapterInformation } = this.state;
     return (
-      <>
-        <Grid
-          spacing={2}
-          className={classes.gridContainer}
-          container
-          alignItems="center"
+      <Box boxSizing={"content-box"} height={"100%"}>
+        <Box
+          boxSizing={"content-box"}
+          paddingTop={3}
+          paddingLeft={3}
+          paddingRight={3}
         >
-          <Grid
-            alignItems="center"
-            alignContent="center"
-            justify={"center"}
-            container
-            item
-            xs
-          >
+          <Grid alignItems="center" container>
             <Grid item xs={4}>
               <Button
                 color="primary"
+                style={{ paddingLeft: 0 }}
                 startIcon={<ArrowBackIcon />}
                 onClick={togglePrintWindow}
               >
                 <Typography justify="center">Tillbaka</Typography>
               </Button>
             </Grid>
-
             <Grid item xs={4}>
               <Typography align="center" variant="h6">
                 Skapa PDF
               </Typography>
             </Grid>
-            <Grid item xs={4}></Grid>
           </Grid>
+          <Divider></Divider>
+        </Box>
+        <Box boxSizing={"content-box"} height={"70%"} padding={3}>
+          <Grid
+            className={classes.middleSectionHeader}
+            alignItems="center"
+            alignContent="center"
+            justify={"center"}
+            container
+            item
+          >
+            <Grid xs={6} item>
+              <Grid xs={12} item>
+                <Typography variant="h6">Dokument</Typography>
+              </Grid>
 
-          <Grid xs={12} container alignItems={"center"} item>
-            <Grid item xs={6}>
-              <Typography variant="h6">Dokument</Typography>
+              <Grid xs={12} item>
+                {" "}
+                <FormControlLabel
+                  value="Välj alla dokument"
+                  control={
+                    <Checkbox
+                      color="primary"
+                      checked={this.state.allDocumentsToggled}
+                      onChange={() =>
+                        this.toggleAllDocuments(!this.state.allDocumentsToggled)
+                      }
+                    />
+                  }
+                  label="Välj alla dokument"
+                  labelPlacement="end"
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <Typography variant="h6">Innehåll</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControlLabel
-                value="Välj alla dokument"
-                control={
-                  <Checkbox
-                    color="primary"
-                    checked={this.state.allDocumentsToggled}
-                    onChange={() =>
-                      this.toggleAllDocuments(!this.state.allDocumentsToggled)
-                    }
-                  />
-                }
-                label="Välj alla dokument"
-                labelPlacement="end"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <FormControlLabel
-                value="Inkludera kartor"
-                control={
-                  <Checkbox
-                    color="primary"
-                    checked={this.state.printMaps}
-                    onChange={() =>
-                      this.setState({ printMaps: !this.state.printMaps })
-                    }
-                  />
-                }
-                label="Inkludera kartor"
-                labelPlacement="end"
-              />
+            <Grid xs={6} item>
+              <Grid xs={12} item>
+                <Typography variant="h6">Innehåll</Typography>
+              </Grid>
+              <Grid xs={12} item>
+                {" "}
+                <FormControlLabel
+                  value="Inkludera kartor"
+                  control={
+                    <Checkbox
+                      color="primary"
+                      checked={this.state.printMaps}
+                      onChange={() =>
+                        this.setState({ printMaps: !this.state.printMaps })
+                      }
+                    />
+                  }
+                  label="Inkludera kartor"
+                  labelPlacement="end"
+                />
+              </Grid>
             </Grid>
           </Grid>
-          <Grid xs={12} container item>
+          <Grid className={classes.middleSectionMain} container>
             <PrintList
               chapters={chapterInformation}
               handleCheckboxChange={this.handleCheckboxChange}
               localObserver={localObserver}
             />
           </Grid>
-          {documentWindowMaximized && this.renderCreatePDFButton()}
-        </Grid>
-        {this.state.printContent && this.renderPrintPreview()}
-      </>
+        </Box>
+        <Box boxSizing={"content-box"} padding={3}>
+          <Grid container>
+            {this.state.printContent && this.renderPrintPreview()}
+
+            {documentWindowMaximized && this.renderCreatePDFButton()}
+          </Grid>
+        </Box>
+      </Box>
     );
   }
 }

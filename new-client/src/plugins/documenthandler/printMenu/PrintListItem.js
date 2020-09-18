@@ -77,7 +77,7 @@ class PrintListItem extends React.PureComponent {
             borderLeft: `${theme.spacing(0.5)}px solid ${chapter.color}`,
           }}
         >
-          <ListItemIcon>
+          <ListItemIcon className={classes.listItemIcon}>
             <Checkbox
               color="primary"
               onChange={(e) => {
