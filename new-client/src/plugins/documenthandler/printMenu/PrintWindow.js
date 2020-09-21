@@ -262,11 +262,7 @@ class PrintWindow extends React.PureComponent {
           pdf.addImage(canvas, "PNG", 0, 0);
         });
         pdf = this.addFooters(pdf, numToc);
-        window.open(
-          pdf.output("bloburl", {
-            filename: `oversiktsplan-${new Date().toLocaleString()}.pdf`,
-          })
-        );
+        pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
         this.toggleAllDocuments(false);
         this.setState({
           pdfLoading: false,
