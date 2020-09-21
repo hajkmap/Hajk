@@ -23,21 +23,18 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 const styles = (theme) => ({
   gridContainer: {
     padding: theme.spacing(4),
-    width: "100%",
-    height: "80%",
+    height: "100%",
   },
-  middleSectionHeader: {
-    height: "10%",
+  middleContainer: {
+    overflowX: "auto",
+    flexBasis: "100%",
+    marginTop: theme.spacing(2),
   },
-  middleSectionMain: {
-    height: "90%",
-    paddingTop: 10,
-    overflowY: "auto",
+  headerContainer: {
+    marginBottom: theme.spacing(2),
   },
   footerContainer: {
-    padding: theme.spacing(2),
-    maxWidth: "100%",
-
+    flexBasis: "10%",
     borderTop: "1px solid grey",
   },
 });
@@ -411,63 +408,65 @@ class PrintWindow extends React.PureComponent {
 
   renderCheckboxes() {
     return (
-      <Grid container item alignItems="center" spacing={2}>
-        <Grid item xs={12}>
-          <Typography variant="h6">Innehåll</Typography>
-        </Grid>
-        <Grid item xs align="center">
-          <FormControlLabel
-            value="Texter"
-            control={
-              <Checkbox
-                color="primary"
-                checked={this.state.printText}
-                onChange={() => {
-                  this.setState({
-                    printText: !this.state.printText,
-                  });
-                }}
-              />
-            }
-            label="Texter"
-            labelPlacement="end"
-          />
-        </Grid>
-        <Grid item xs align="center">
-          <FormControlLabel
-            value="Bilder"
-            control={
-              <Checkbox
-                color="primary"
-                checked={this.state.printImages}
-                onChange={() => {
-                  this.setState({
-                    printImages: !this.state.printImages,
-                  });
-                }}
-              />
-            }
-            label="Bilder"
-            labelPlacement="end"
-          />
-        </Grid>
-        <Grid item xs align="center">
-          <FormControlLabel
-            value="Kartor"
-            control={
-              <Checkbox
-                color="primary"
-                checked={this.state.printMaps}
-                onChange={() => {
-                  this.setState({
-                    printMaps: !this.state.printMaps,
-                  });
-                }}
-              />
-            }
-            label="Kartor"
-            labelPlacement="end"
-          />
+      <Grid container>
+        <Grid container item alignItems="center" spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="h6">Innehåll</Typography>
+          </Grid>
+          <Grid item xs align="center">
+            <FormControlLabel
+              value="Texter"
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={this.state.printText}
+                  onChange={() => {
+                    this.setState({
+                      printText: !this.state.printText,
+                    });
+                  }}
+                />
+              }
+              label="Texter"
+              labelPlacement="end"
+            />
+          </Grid>
+          <Grid item xs align="center">
+            <FormControlLabel
+              value="Bilder"
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={this.state.printImages}
+                  onChange={() => {
+                    this.setState({
+                      printImages: !this.state.printImages,
+                    });
+                  }}
+                />
+              }
+              label="Bilder"
+              labelPlacement="end"
+            />
+          </Grid>
+          <Grid item xs align="center">
+            <FormControlLabel
+              value="Kartor"
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={this.state.printMaps}
+                  onChange={() => {
+                    this.setState({
+                      printMaps: !this.state.printMaps,
+                    });
+                  }}
+                />
+              }
+              label="Kartor"
+              labelPlacement="end"
+            />
+          </Grid>
         </Grid>
       </Grid>
     );
@@ -476,33 +475,31 @@ class PrintWindow extends React.PureComponent {
   renderCreatePDFButton() {
     const { classes } = this.props;
     return (
-      <Grid container item className={classes.footerContainer}>
-        <Grid
-          item
-          xs={12}
-          container
-          alignContent="center"
-          alignItems="center"
-          justify="center"
-        >
-          {!this.state.pdfLoading ? (
-            <Button
-              color="primary"
-              variant="contained"
-              startIcon={<OpenInNewIcon />}
-              onClick={this.createPDF}
+      <Grid
+        item
+        className={classes.footerContainer}
+        container
+        alignContent="center"
+        alignItems="center"
+        justify="center"
+      >
+        {!this.state.pdfLoading ? (
+          <Button
+            color="primary"
+            variant="contained"
+            startIcon={<OpenInNewIcon />}
+            onClick={this.createPDF}
+          >
+            <Typography
+              style={{ marginRight: "20px", marginLeft: "20px" }}
+              justify="center"
             >
-              <Typography
-                style={{ marginRight: "20px", marginLeft: "20px" }}
-                justify="center"
-              >
-                Skapa PDF-utskrift
-              </Typography>
-            </Button>
-          ) : (
-            <CircularProgress size={"2rem"} />
-          )}
-        </Grid>
+              Skapa PDF-utskrift
+            </Typography>
+          </Button>
+        ) : (
+          <CircularProgress size={"2rem"} />
+        )}
       </Grid>
     );
   }
@@ -531,103 +528,95 @@ class PrintWindow extends React.PureComponent {
     } = this.props;
     const { chapterInformation } = this.state;
     return (
-      <Box boxSizing={"content-box"} height={"100%"}>
-        <Box
-          boxSizing={"content-box"}
-          paddingTop={3}
-          paddingLeft={3}
-          paddingRight={3}
+      <Grid
+        container
+        className={classes.gridContainer}
+        wrap="nowrap"
+        direction="column"
+      >
+        <Grid
+          className={classes.headerContainer}
+          alignItems="center"
+          item
+          container
         >
-          <Grid alignItems="center" container>
-            <Grid item xs={4}>
-              <Button
-                color="primary"
-                style={{ paddingLeft: 0 }}
-                startIcon={<ArrowBackIcon />}
-                onClick={togglePrintWindow}
-              >
-                <Typography justify="center">Tillbaka</Typography>
-              </Button>
-            </Grid>
-            <Grid item xs={4}>
-              <Typography align="center" variant="h6">
-                Skapa PDF
-              </Typography>
-            </Grid>
+          <Grid item xs={4}>
+            <Button
+              color="primary"
+              style={{ paddingLeft: 0 }}
+              startIcon={<ArrowBackIcon />}
+              onClick={togglePrintWindow}
+            >
+              <Typography justify="center">Tillbaka</Typography>
+            </Button>
           </Grid>
-          <Divider></Divider>
-        </Box>
-        <Box boxSizing={"content-box"} height={"70%"} padding={3}>
-          <Grid
-            className={classes.middleSectionHeader}
-            alignItems="center"
-            alignContent="center"
-            justify={"center"}
-            container
-            item
-          >
-            <Grid xs={6} item>
-              <Grid xs={12} item>
-                <Typography variant="h6">Dokument</Typography>
-              </Grid>
+          <Grid item xs={4}>
+            <Typography align="center" variant="h6">
+              Skapa PDF
+            </Typography>
+          </Grid>
+        </Grid>
+        <Divider></Divider>
 
-              <Grid xs={12} item>
-                {" "}
-                <FormControlLabel
-                  value="Välj alla dokument"
-                  control={
-                    <Checkbox
-                      color="primary"
-                      checked={this.state.allDocumentsToggled}
-                      onChange={() =>
-                        this.toggleAllDocuments(!this.state.allDocumentsToggled)
-                      }
-                    />
-                  }
-                  label="Välj alla dokument"
-                  labelPlacement="end"
-                />
-              </Grid>
+        <Grid container item>
+          <Grid xs={6} item>
+            <Grid xs={12} item>
+              <Typography variant="h6">Dokument</Typography>
             </Grid>
-            <Grid xs={6} item>
-              <Grid xs={12} item>
-                <Typography variant="h6">Innehåll</Typography>
-              </Grid>
-              <Grid xs={12} item>
-                {" "}
-                <FormControlLabel
-                  value="Inkludera kartor"
-                  control={
-                    <Checkbox
-                      color="primary"
-                      checked={this.state.printMaps}
-                      onChange={() =>
-                        this.setState({ printMaps: !this.state.printMaps })
-                      }
-                    />
-                  }
-                  label="Inkludera kartor"
-                  labelPlacement="end"
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid className={classes.middleSectionMain} container>
-            <PrintList
-              chapters={chapterInformation}
-              handleCheckboxChange={this.handleCheckboxChange}
-              localObserver={localObserver}
-            />
-          </Grid>
-        </Box>
-        <Box boxSizing={"content-box"} padding={3}>
-          <Grid container>
-            {this.state.printContent && this.renderPrintPreview()}
 
-            {documentWindowMaximized && this.renderCreatePDFButton()}
+            <Grid xs={12} item>
+              {" "}
+              <FormControlLabel
+                value="Välj alla dokument"
+                control={
+                  <Checkbox
+                    color="primary"
+                    checked={this.state.allDocumentsToggled}
+                    onChange={() =>
+                      this.toggleAllDocuments(!this.state.allDocumentsToggled)
+                    }
+                  />
+                }
+                label="Välj alla dokument"
+                labelPlacement="end"
+              />
+            </Grid>
           </Grid>
-        </Box>
-      </Box>
+          <Grid xs={6} item>
+            <Grid xs={12} item>
+              <Typography variant="h6">Innehåll</Typography>
+            </Grid>
+            <Grid xs={12} item>
+              {" "}
+              <FormControlLabel
+                value="Inkludera kartor"
+                control={
+                  <Checkbox
+                    color="primary"
+                    checked={this.state.printMaps}
+                    onChange={() =>
+                      this.setState({ printMaps: !this.state.printMaps })
+                    }
+                  />
+                }
+                label="Inkludera kartor"
+                labelPlacement="end"
+              />
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid className={classes.middleContainer} item container>
+          <PrintList
+            chapters={chapterInformation}
+            handleCheckboxChange={this.handleCheckboxChange}
+            localObserver={localObserver}
+          />
+        </Grid>
+
+        {this.state.printContent && this.renderPrintPreview()}
+
+        {documentWindowMaximized && this.renderCreatePDFButton()}
+      </Grid>
     );
   }
 }
