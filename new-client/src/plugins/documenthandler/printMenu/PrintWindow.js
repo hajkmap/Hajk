@@ -154,10 +154,10 @@ class PrintWindow extends React.PureComponent {
   };
 
   getCanvasFromContent = (page) => {
-    let sWidth = Math.round((210 * 90) / 25.4);
-    let sHeight = Math.round((297 * 90) / 25.4);
-    let dWidth = Math.round((210 * 90) / 25.4);
-    let dHeight = Math.round((297 * 90) / 25.4);
+    let sWidth = Math.round((210 * 96) / 25.4);
+    let sHeight = Math.round((297 * 96) / 25.4);
+    let dWidth = Math.round((210 * 96) / 25.4);
+    let dHeight = Math.round((297 * 96) / 25.4);
     let pR = window.devicePixelRatio;
     let onePageDiv = document.createElement("div");
     document.body.appendChild(onePageDiv);
@@ -168,14 +168,23 @@ class PrintWindow extends React.PureComponent {
       onePageDiv.appendChild(child);
     });
 
-    return html2canvas(onePageDiv, {}).then((canvas) => {
+    return html2canvas(onePageDiv, {
+      allowTaint: true,
+    }).then((canvas) => {
       let onePageCanvas = document.createElement("canvas");
-      onePageCanvas.width = Math.round((210 * 90) / 25.4);
-      onePageCanvas.height = Math.round((297 * 90) / 25.4);
+
+      onePageCanvas.width = Math.round((210 * 96) / 25.4);
+      onePageCanvas.height = Math.round((297 * 96) / 25.4);
 
       let ctx = onePageCanvas.getContext("2d");
+
       ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, onePageCanvas.width * pR, onePageCanvas.height * pR);
+      ctx.fillRect(
+        0,
+        0,
+        onePageCanvas.width + 200 * pR, //Just add 200px to fix edge-bug
+        onePageCanvas.height + 200 * pR //Just add 200px to fix edge-bug
+      );
 
       ctx.drawImage(
         canvas,
@@ -189,7 +198,7 @@ class PrintWindow extends React.PureComponent {
         dHeight
       );
       document.body.removeChild(onePageDiv);
-      return onePageCanvas.toDataURL("image/png");
+      return onePageCanvas;
     });
   };
 
@@ -245,7 +254,8 @@ class PrintWindow extends React.PureComponent {
       this.divideContentOnPages(printContent, "CONTENT");
       let numToc = this.printPages.filter((page) => page.type === "TOC").length;
 
-      let pdf = new jsPDF("p", "pt", "a4");
+      let pdf = new jsPDF("p", "pt");
+
       let promises = [];
 
       this.printPages.forEach((page, index) => {
