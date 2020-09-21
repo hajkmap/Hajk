@@ -90,8 +90,8 @@ const Image = props => {
   var imgSrc = props.src;
   var imgWidth = props.width;
   var imgHeight = props.height;
-  var dataCaption = props.dataCaption;
-  var dataSource = props.dataSource;
+  var dataCaption = props["data-caption"];
+  var dataSource = props["data-source"];
   return (
     <img
       src={imgSrc}
@@ -106,15 +106,19 @@ const Image = props => {
 
 const Media = props => {
   const entity = props.contentState.getEntity(props.block.getEntityAt(0));
-  const { src, width, height, dataCaption, dataSource } = entity.getData();
+  const { src, width, height } = entity.getData();
+  const data = entity.getData();
+  const dataCaption = data["data-caption"];
+  const dataSource = data["data-source"];
+
   let media = (
     <Image
       src={src}
-      alt="external"
       width={width}
       height={height}
-      dataCaption={dataCaption}
-      dataSource={dataSource}
+      data-caption={dataCaption}
+      data-source={dataSource}
+      testAttr="testar"
     />
   );
   return media;
@@ -250,8 +254,8 @@ class RichEditor extends Component {
         src: imgData.url,
         width: imgData.imageWidth,
         height: imgData.imageHeight,
-        dataCaption: imgData.imageCaption,
-        dataSource: imgData.imageSource
+        "data-caption": imgData.imageCaption,
+        "data-source": imgData.imageSource
       }
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
@@ -302,7 +306,34 @@ class RichEditor extends Component {
 
   getHtml() {
     const content = this.state.editorState.getCurrentContent();
-    return stateToHTML(content);
+
+    // Add custom attributes
+    let options = {
+      entityStyleFn: entity => {
+        const entityType = entity.get("type").toLowerCase()
+          ? entity.get("type").toLowerCase()
+          : null;
+        if (entityType === "image") {
+          const data = entity.getData();
+          const dataCaption = data["data-caption"];
+          const dataSource = data["data-source"];
+
+          return {
+            element: "img",
+            attributes: {
+              src: data.src,
+              width: data.width,
+              height: data.height,
+              "data-caption": dataCaption,
+              "data-source": dataSource
+            }
+          };
+        } else {
+          return null;
+        }
+      }
+    };
+    return stateToHTML(content, options);
   }
 
   toggleReadonly() {
@@ -350,8 +381,8 @@ class RichEditor extends Component {
       img.alt = "";
       img.width = "";
       img.height = "";
-      img.dataCaption = "";
-      img.dataSource = "";
+      img["data-caption"] = "";
+      img["data-source"] = "";
       let figure = document.createElement("figure");
       figure.innerHTML = img.outerHTML;
       img.parentNode.replaceChild(figure, img);
