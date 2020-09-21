@@ -29,15 +29,19 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   getCollapseIcon = () => {
-    const { expandedSubMenu, classes } = this.props;
+    const { expandedSubMenu, classes, item } = this.props;
     return expandedSubMenu ? (
       <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        <Typography variant="srOnly">Minimera submeny</Typography>
+        {!item.title && (
+          <Typography variant="srOnly">Minimera submeny</Typography>
+        )}
         <ExpandLess />
       </ListItemIcon>
     ) : (
       <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        <Typography variant="srOnly">Maximera submeny</Typography>
+        {!item.title && (
+          <Typography variant="srOnly">Maximera submeny</Typography>
+        )}
         <ExpandMore />
       </ListItemIcon>
     );

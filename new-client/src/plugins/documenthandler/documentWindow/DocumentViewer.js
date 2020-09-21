@@ -91,7 +91,6 @@ class DocumentViewer extends React.PureComponent {
         className={classes.scrollToTopButton}
         size="small"
         color="primary"
-        aria-label="goto-top"
         onClick={this.scrollToTop}
       >
         <Typography variant="srOnly">
