@@ -5,7 +5,7 @@ import Collapse from "@material-ui/core/Collapse";
 
 class PanelMenuView extends React.PureComponent {
   state = {
-    open: this.props.item.expandedSubMenu || false
+    open: this.props.item.expandedSubMenu || false,
   };
 
   toggleCollapseSubMenu = () => {
@@ -14,6 +14,7 @@ class PanelMenuView extends React.PureComponent {
 
   render() {
     const { item } = this.props;
+
     return (
       <>
         <PanelMenuListItem
@@ -24,7 +25,7 @@ class PanelMenuView extends React.PureComponent {
         ></PanelMenuListItem>
         <Collapse
           aria-expanded={this.state.open}
-          id="submenu"
+          id={item.id}
           in={this.state.open}
           timeout="auto"
         >
