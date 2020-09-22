@@ -3,18 +3,14 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Grid from "@material-ui/core/Grid";
 import { Typography } from "@material-ui/core";
-import Container from "@material-ui/core/Container";
-import Box from "@material-ui/core/Box";
-import { sizing } from "@material-ui/system";
+import ReactDOM from "react-dom";
 import Divider from "@material-ui/core/Divider";
-
 import Button from "@material-ui/core/Button";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import PrintList from "./PrintList";
-import PrintPreview from "./PrintPreview";
 import TableOfContents from "./TableOfContents";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -39,6 +35,9 @@ const styles = (theme) => ({
   },
 });
 
+const maxHeight = 950;
+const imageResizeRatio = 0.7;
+
 class PrintWindow extends React.PureComponent {
   state = {
     printText: true,
@@ -52,6 +51,7 @@ class PrintWindow extends React.PureComponent {
 
   constructor(props) {
     super(props);
+
     this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
   }
 
@@ -80,11 +80,11 @@ class PrintWindow extends React.PureComponent {
   };
 
   checkIfTagIsTitle = (node) => {
-    let tagName = "";
+    let tagName = node.tagName;
     if (node.hasChildNodes() && node.children.length === 1) {
-      tagName = node.children[0].tagName;
+      tagName = node.firstChild.tagName;
     }
-    return ["H2", "H3"].includes(tagName);
+    return ["H1", "H2", "H3", "H4", "H5"].includes(tagName);
   };
 
   contentFitsCurrentPage = (content) => {
@@ -115,40 +115,32 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  divideContentOnPages = (content, type) => {
-    const maxHeight = 950;
-    if (this.checkIfTagIsTitle(content)) {
-      if (this.getAvailableHeight() >= 0.4 * maxHeight) {
-        this.addContentToCurrentPage(content, maxHeight);
-      } else {
-        this.addContentToNewPage(content, maxHeight, type);
-      }
-
-      if (content.children && content.children.length > 0) {
-        [...content.children].forEach((child) => {
-          this.divideContentOnPages(child, type);
-        });
-      }
+  appendHeaderToPdf = (content, type) => {
+    if (this.getAvailableHeight() >= 0.4 * maxHeight) {
+      this.addContentToCurrentPage(content);
     } else {
-      if (
-        !this.contentFitsCurrentPage(content) &&
-        content.children &&
-        content.children.length > 0 &&
-        !(type === "TOC" && content.tagName === "LI")
-      ) {
-        [...content.children].forEach((child) => {
-          this.divideContentOnPages(child, type);
-        });
-      } else if (
-        (!this.contentFitsCurrentPage(content) &&
-          !(content.children && content.children.length > 0)) ||
-        (!this.contentFitsCurrentPage(content) &&
-          type === "TOC" &&
-          content.tagName === "LI")
-      ) {
-        this.addContentToNewPage(content, maxHeight, type);
+      this.addContentToNewPage(content, maxHeight, type);
+    }
+  };
+
+  isTocListElement = (type, content) => {
+    return type === "TOC" && content.tagName === "LI";
+  };
+
+  distributeContentOnPages = (content, type) => {
+    if (this.checkIfTagIsTitle(content)) {
+      this.appendHeaderToPdf(content, type);
+    } else {
+      if (this.contentFitsCurrentPage(content)) {
+        this.addContentToCurrentPage(content);
       } else {
-        this.addContentToCurrentPage(content, maxHeight);
+        if (!content.hasChildNodes() || this.isTocListElement(type, content)) {
+          this.addContentToNewPage(content, maxHeight, type);
+        } else {
+          [...content.children].forEach((child) => {
+            this.distributeContentOnPages(child, type);
+          });
+        }
       }
     }
   };
@@ -160,16 +152,21 @@ class PrintWindow extends React.PureComponent {
     let dHeight = Math.round((297 * 96) / 25.4);
     let pR = window.devicePixelRatio;
     let onePageDiv = document.createElement("div");
-    document.body.appendChild(onePageDiv);
+
+    onePageDiv.style.position = "absolute";
+    onePageDiv.style.left = "-10000px";
     onePageDiv.style.width = `${210}mm`;
     onePageDiv.style.padding = "50px";
+
+    document.body.appendChild(onePageDiv);
 
     page.content.forEach((child) => {
       onePageDiv.appendChild(child);
     });
 
     return html2canvas(onePageDiv, {
-      allowTaint: true,
+      allowTaint: false,
+      logging: false,
     }).then((canvas) => {
       let onePageCanvas = document.createElement("canvas");
 
@@ -202,9 +199,25 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
+  resizeImage = (img) => {
+    img.height = img.clientHeight * imageResizeRatio;
+    img.width = img.clientWidth * imageResizeRatio;
+  };
+
+  imageFitsOnePage = (img) => {
+    return img.clientHeight < maxHeight * 0.9;
+  };
+
   loadImage = (img) => {
     return new Promise((resolve, reject) => {
-      img.onload = () => resolve(img);
+      img.onload = () => {
+        if (this.imageFitsOnePage(img)) {
+          resolve(img);
+        } else {
+          this.resizeImage(img);
+          resolve(img);
+        }
+      };
       img.onerror = () => reject(img);
     });
   };
@@ -239,45 +252,80 @@ class PrintWindow extends React.PureComponent {
     return pdf;
   };
 
-  printContents = () => {
-    const tocElement = document.getElementById("printPreviewTOC");
-    const printContent = document.getElementById("printPreviewContent");
-
-    var allImages = [...printContent.getElementsByTagName("img")].map((img) => {
-      return this.loadImage(img);
-    });
-
-    Promise.allSettled(allImages).then((imageArray) => {
-      this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
-      this.divideContentOnPages(tocElement, "TOC");
-      this.addNewPage("CONTENT", 950);
-      this.divideContentOnPages(printContent, "CONTENT");
-      let numToc = this.printPages.filter((page) => page.type === "TOC").length;
-
-      let pdf = new jsPDF("p", "pt");
-
-      let promises = [];
-
-      this.printPages.forEach((page, index) => {
-        promises.push(this.getCanvasFromContent(page));
+  customRender = (element, container) => {
+    return new Promise((resolve) => {
+      ReactDOM.render(element, container, (e) => {
+        resolve();
       });
+    });
+  };
 
-      Promise.all(promises).then((canvases) => {
-        canvases.forEach((canvas, index) => {
-          if (index > 0) {
-            pdf.addPage();
-          }
-          //! now we declare that we're working on that page
-          pdf.setPage(index + 1);
-          pdf.addImage(canvas, "PNG", 0, 0);
+  createPrintElement = (id) => {
+    let div = document.createElement("div");
+    div.style = "position : absolute; left : -10000px; width : 210mm";
+    div.id = id;
+    return div;
+  };
+
+  renderToc = () => {
+    this.toc = this.createPrintElement("toc");
+    return this.customRender(
+      <TableOfContents chapters={this.state.chapterInformation} />,
+      this.toc
+    ).then(() => {
+      document.body.appendChild(this.toc);
+    });
+  };
+
+  renderContent = () => {
+    this.content = this.createPrintElement("content");
+    return this.customRender(this.state.printContent, this.content).then(() => {
+      document.body.appendChild(this.content);
+    });
+  };
+
+  areAllImagesLoaded = () => {
+    return Promise.allSettled(
+      [...this.content.getElementsByTagName("img")].map((img) => {
+        return this.loadImage(img);
+      })
+    );
+  };
+
+  printContents = () => {
+    Promise.all([this.renderToc(), this.renderContent()]).then(() => {
+      this.areAllImagesLoaded().then(() => {
+        this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
+        this.distributeContentOnPages(this.toc, "TOC");
+        this.addNewPage("CONTENT", 950);
+        this.distributeContentOnPages(this.content, "CONTENT");
+
+        let canvasPromises = this.printPages.map((page, index) => {
+          return this.getCanvasFromContent(page);
         });
-        pdf = this.addFooters(pdf, numToc);
-        pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
-        this.toggleAllDocuments(false);
-        this.setState({
-          pdfLoading: false,
-          printContent: undefined,
-          printMaps: false,
+
+        Promise.all(canvasPromises).then((canvases) => {
+          let pdf = new jsPDF("p", "pt");
+          let numToc = this.printPages.filter((page) => page.type === "TOC")
+            .length;
+          canvases.forEach((canvas, index) => {
+            if (index > 0) {
+              pdf.addPage();
+            }
+            //! now we declare that we're working on that page
+            pdf.setPage(index + 1);
+            pdf.addImage(canvas, "PNG", 0, 0);
+          });
+          pdf = this.addFooters(pdf, numToc);
+          pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
+          document.body.removeChild(this.toc);
+          document.body.removeChild(this.content);
+          this.toggleAllDocuments(false);
+          this.setState({
+            pdfLoading: false,
+            printContent: undefined,
+            printMaps: false,
+          });
         });
       });
     });
@@ -510,21 +558,6 @@ class PrintWindow extends React.PureComponent {
     );
   }
 
-  renderPrintPreview = () => {
-    return (
-      <PrintPreview>
-        <Grid style={{ padding: "50px" }} container>
-          <Grid id={"printPreviewTOC"} item>
-            <TableOfContents chapters={this.state.chapterInformation} />
-          </Grid>
-          <Grid id={"printPreviewContent"} item>
-            {this.state.printContent}
-          </Grid>
-        </Grid>
-      </PrintPreview>
-    );
-  };
-
   render() {
     const {
       classes,
@@ -618,8 +651,6 @@ class PrintWindow extends React.PureComponent {
             localObserver={localObserver}
           />
         </Grid>
-
-        {this.state.printContent && this.renderPrintPreview()}
 
         {documentWindowMaximized && this.renderCreatePDFButton()}
       </Grid>

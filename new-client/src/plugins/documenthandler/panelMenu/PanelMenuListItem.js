@@ -63,7 +63,7 @@ class PanelMenuListItem extends React.PureComponent {
 
   render() {
     const { onClick, item, hasSubMenu, classes, theme } = this.props;
-    console.log(item, "item");
+
     return (
       <>
         <ListItem
