@@ -20,7 +20,7 @@ class PrintSubList extends React.Component {
           hasSubChapters
           expandedSubChapter={this.state.open}
           checked={checked}
-          onClick={this.toggleCollapseSubMenu}
+          toggleSubmenu={this.toggleCollapseSubMenu}
           {...this.props}
         ></PrintListItem>
         <Collapse

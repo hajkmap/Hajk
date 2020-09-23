@@ -60,7 +60,9 @@ class PrintWindow extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
+    this.printPages = [
+      { type: "TOC", availableHeight: maxHeight, content: [] },
+    ];
   }
 
   componentDidMount = () => {
@@ -89,10 +91,6 @@ class PrintWindow extends React.PureComponent {
 
   checkIfTagIsTitle = (node) => {
     let tagName = node.tagName;
-    console.log("tagName: ", tagName);
-    // if (node.hasChildNodes() && node.children.length === 1) {
-    //   tagName = node.firstChild.tagName;
-    // }
     return ["H1", "H2", "H3", "H4", "H5"].includes(tagName);
   };
 

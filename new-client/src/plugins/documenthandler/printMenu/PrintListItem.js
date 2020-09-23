@@ -21,19 +21,33 @@ class PrintListItem extends React.PureComponent {
     chapter: PropTypes.object.isRequired,
   };
 
+  state = {
+    expandedSubMenu: false,
+  };
+
   getListTitle = () => {
     const { chapter } = this.props;
     return <ListItemText>{chapter.header}</ListItemText>;
   };
 
+  handleOnExpandIconClick = (e) => {
+    const { toggleSubmenu } = this.props;
+    e.stopPropagation();
+    if (toggleSubmenu) {
+      toggleSubmenu();
+    }
+    this.setState((prevState) => {
+      return { expandedSubMenu: !prevState.expandedSubMenu };
+    });
+  };
+
   getCollapseIcon = () => {
-    const { expandedSubMenu, classes, onClick } = this.props;
+    const { classes } = this.props;
+    const { expandedSubMenu } = this.state;
+
     return expandedSubMenu ? (
       <ListItemIcon
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
+        onClick={this.handleOnExpandIconClick}
         classes={{ root: classes.collapseIconRoot }}
       >
         <Typography variant="srOnly">Minimera submeny</Typography>
@@ -41,10 +55,7 @@ class PrintListItem extends React.PureComponent {
       </ListItemIcon>
     ) : (
       <ListItemIcon
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
+        onClick={this.handleOnExpandIconClick}
         classes={{ root: classes.collapseIconRoot }}
       >
         <Typography variant="srOnly">Maximera submeny</Typography>

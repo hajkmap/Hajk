@@ -4,8 +4,6 @@ import PrintSubList from "./PrintSubList";
 import PrintListItem from "./PrintListItem";
 
 class PrintList extends React.Component {
-  handleListItemClick = (chapter, type) => {};
-
   renderPrintListItem = (chapter, type) => {
     const { handleCheckboxChange, localObserver } = this.props;
     return (
@@ -15,7 +13,6 @@ class PrintList extends React.Component {
         checked={chapter.chosenForPrint}
         localObserver={localObserver}
         handleCheckboxChange={handleCheckboxChange}
-        onClick={this.handleListItemClick}
       ></PrintListItem>
     );
   };
