@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Grid from "@material-ui/core/Grid";
@@ -14,7 +15,14 @@ import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import CircularProgress from "@material-ui/core/CircularProgress";
+
+import {
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+} from "@material-ui/core";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -81,9 +89,10 @@ class PrintWindow extends React.PureComponent {
 
   checkIfTagIsTitle = (node) => {
     let tagName = node.tagName;
-    if (node.hasChildNodes() && node.children.length === 1) {
-      tagName = node.firstChild.tagName;
-    }
+    console.log("tagName: ", tagName);
+    // if (node.hasChildNodes() && node.children.length === 1) {
+    //   tagName = node.firstChild.tagName;
+    // }
     return ["H1", "H2", "H3", "H4", "H5"].includes(tagName);
   };
 
@@ -298,8 +307,11 @@ class PrintWindow extends React.PureComponent {
         this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
         this.distributeContentOnPages(this.toc, "TOC");
         this.addNewPage("CONTENT", 950);
-        this.distributeContentOnPages(this.content, "CONTENT");
+        this.content.children.forEach((child) => {
+          this.distributeContentOnPages(child, "CONTENT");
+        });
 
+        console.log("this.printPages: ", this.printPages);
         let canvasPromises = this.printPages.map((page, index) => {
           return this.getCanvasFromContent(page);
         });
@@ -318,8 +330,12 @@ class PrintWindow extends React.PureComponent {
           });
           pdf = this.addFooters(pdf, numToc);
           pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
+
           document.body.removeChild(this.toc);
-          document.body.removeChild(this.content);
+          if (document.body.contains(this.content)) {
+            document.body.removeChild(this.content);
+          }
+
           this.toggleAllDocuments(false);
           this.setState({
             pdfLoading: false,
@@ -451,13 +467,48 @@ class PrintWindow extends React.PureComponent {
     return chaptersToPrint;
   };
 
+  checkIfChaptersSelected = (chapter) => {
+    let subChapters = chapter.chapters;
+    if (chapter.chosenForPrint) {
+      return true;
+    } else if (subChapters && subChapters.length > 0) {
+      for (let i = 0; i < subChapters.length; i++) {
+        let subChapter = subChapters[i];
+        if (this.checkIfChaptersSelected(subChapter)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  isAnyChapterSelected = () => {
+    const { chapterInformation } = this.state;
+    for (let i = 0; i < chapterInformation.length; i++) {
+      if (this.checkIfChaptersSelected(chapterInformation[i])) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   createPDF = () => {
-    this.setState({ pdfLoading: true });
-    const chaptersToPrint = this.getChaptersToPrint();
-    this.props.localObserver.publish(
-      "append-chapter-components",
-      chaptersToPrint
-    );
+    if (!this.isAnyChapterSelected()) {
+      this.props.enqueueSnackbar(
+        "Du måste välja minst ett kapitel för att kunna skapa en PDF.",
+        {
+          variant: "warning",
+          persist: false,
+        }
+      );
+    } else {
+      this.setState({ pdfLoading: true });
+      const chaptersToPrint = this.getChaptersToPrint();
+      this.props.localObserver.publish(
+        "append-chapter-components",
+        chaptersToPrint
+      );
+    }
   };
 
   renderCheckboxes() {
@@ -537,26 +588,49 @@ class PrintWindow extends React.PureComponent {
         alignItems="center"
         justify="center"
       >
-        {!this.state.pdfLoading ? (
-          <Button
-            color="primary"
-            variant="contained"
-            startIcon={<OpenInNewIcon />}
-            onClick={this.createPDF}
+        <Button
+          color="primary"
+          variant="contained"
+          disabled={this.state.pdfLoading}
+          startIcon={<OpenInNewIcon />}
+          onClick={this.createPDF}
+        >
+          <Typography
+            style={{ marginRight: "20px", marginLeft: "20px" }}
+            justify="center"
           >
-            <Typography
-              style={{ marginRight: "20px", marginLeft: "20px" }}
-              justify="center"
-            >
-              Skapa PDF-utskrift
-            </Typography>
-          </Button>
-        ) : (
-          <CircularProgress size={"2rem"} />
-        )}
+            Skapa PDF-utskrift
+          </Typography>
+        </Button>
       </Grid>
     );
   }
+
+  renderLoadingDialog = () => {
+    return (
+      <>
+        {createPortal(
+          <Dialog
+            disableBackdropClick={true}
+            disableEscapeKeyDown={true}
+            open={this.state.pdfLoading}
+          >
+            <LinearProgress />
+            <DialogTitle>Din PDF skapas</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Det här kan ta en stund, speciellt om du har att skriva ut många
+                dokument.
+                <br />
+                <br />
+              </DialogContentText>
+            </DialogContent>
+          </Dialog>,
+          document.getElementById("root")
+        )}
+      </>
+    );
+  };
 
   render() {
     const {
@@ -653,6 +727,7 @@ class PrintWindow extends React.PureComponent {
         </Grid>
 
         {documentWindowMaximized && this.renderCreatePDFButton()}
+        {this.renderLoadingDialog()}
       </Grid>
     );
   }

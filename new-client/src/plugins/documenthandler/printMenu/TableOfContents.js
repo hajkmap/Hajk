@@ -46,7 +46,7 @@ class TableOfContents extends React.PureComponent {
     const { theme } = this.props;
     return (
       <Grid container>
-        <Typography variant="h2" gutterBottom={true}>
+        <Typography variant="h4" gutterBottom={true}>
           Innehållsförteckning
         </Typography>
         <List style={{ width: "100%" }} disablePadding>
@@ -54,18 +54,18 @@ class TableOfContents extends React.PureComponent {
             return chapter.chosenForPrint ? (
               <ListItem
                 key={index}
+                dense={true}
                 style={{
                   paddingLeft:
                     theme.spacing(1) + theme.spacing(chapter.level * 3),
                 }}
               >
-                <ListItemText>
-                  <Typography>{chapter.title}</Typography>
-                </ListItemText>
+                <ListItemText>{chapter.title}</ListItemText>
               </ListItem>
             ) : (
               <ListItem
                 disabled
+                dense={true}
                 key={index}
                 style={{
                   paddingLeft:

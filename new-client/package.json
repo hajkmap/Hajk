@@ -57,6 +57,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "abortcontroller-polyfill": "^1.5.0",
+    "allsettled-polyfill": "^1.0.4",
     "clsx": "^1.1.1",
     "detect-browser": "^5.1.1",
     "element-scroll-polyfill": "^1.0.1",
