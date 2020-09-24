@@ -87,21 +87,37 @@ function getBlockStyle(block) {
 }
 
 const Image = props => {
-  var imgSrc = props.src;
-  var imgWidth = props.width;
-  var imgHeight = props.height;
-  var dataCaption = props["data-caption"];
-  var dataSource = props["data-source"];
-  return (
-    <img
-      src={imgSrc}
-      alt="external"
-      width={imgWidth}
-      height={imgHeight}
-      data-caption={dataCaption}
-      data-source={dataSource}
-    />
-  );
+  const imgSrc = props.src;
+  const imgWidth = props.width;
+  const imgHeight = props.height;
+  const dataCaption = props["data-caption"];
+  const dataSource = props["data-source"];
+  const dataPopup = props["data-popup"];
+
+  if (dataPopup === true) {
+    return (
+      <img
+        src={imgSrc}
+        alt="external"
+        width={imgWidth}
+        height={imgHeight}
+        data-caption={dataCaption}
+        data-source={dataSource}
+        data-popup
+      />
+    );
+  } else {
+    return (
+      <img
+        src={imgSrc}
+        alt="external"
+        width={imgWidth}
+        height={imgHeight}
+        data-caption={dataCaption}
+        data-source={dataSource}
+      />
+    );
+  }
 };
 
 const Media = props => {
@@ -110,6 +126,7 @@ const Media = props => {
   const data = entity.getData();
   const dataCaption = data["data-caption"];
   const dataSource = data["data-source"];
+  const dataPopup = data["data-popup"];
 
   let media = (
     <Image
@@ -118,7 +135,7 @@ const Media = props => {
       height={height}
       data-caption={dataCaption}
       data-source={dataSource}
-      testAttr="testar"
+      data-popup={dataPopup}
     />
   );
   return media;
@@ -211,6 +228,7 @@ class RichEditor extends Component {
   }
 
   _handleKeyCommand(command, editorState) {
+    console.log("COMMAND", command);
     const newState = RichUtils.handleKeyCommand(editorState, command);
     if (newState) {
       this.onChange(newState);
@@ -255,7 +273,8 @@ class RichEditor extends Component {
         width: imgData.imageWidth,
         height: imgData.imageHeight,
         "data-caption": imgData.imageCaption,
-        "data-source": imgData.imageSource
+        "data-source": imgData.imageSource,
+        "data-popup": imgData.imagePopup
       }
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
@@ -277,6 +296,7 @@ class RichEditor extends Component {
   }
 
   addLink(type, url) {
+    console.log("ADD LINK", url);
     const { editorState } = this.state;
     const contentState = editorState.getCurrentContent();
     const contentStateWithEntity = contentState.createEntity(

@@ -52,7 +52,8 @@ class ImageButton extends Component {
       imageWidth: undefined,
       imageHeight: undefined,
       imageCaption: "",
-      imageSource: ""
+      imageSource: "",
+      imagePopup: false
     };
   }
 
@@ -65,7 +66,8 @@ class ImageButton extends Component {
       imageWidth: this.state.imageWidth,
       imageHeight: this.state.imageHeight,
       imageCaption: this.state.imageCaption,
-      imageSource: this.state.imageSource
+      imageSource: this.state.imageSource,
+      imagePopup: this.state.imagePopup
     };
     this.props.addImage(imgData);
   }
@@ -97,6 +99,12 @@ class ImageButton extends Component {
   imageSourceChanged(e) {
     this.setState({
       imageSource: e.target.value
+    });
+  }
+
+  imagePopupToggle(e) {
+    this.setState({
+      imagePopup: !this.state.imagePopup
     });
   }
 
@@ -188,6 +196,13 @@ class ImageButton extends Component {
               type="text"
               placeholder="Källa (Källa: xxxx, Fotograf: xxxx)"
               onChange={e => this.imageSourceChanged(e)}
+            />
+            <label className="form-check-label">Popup på/av</label>
+            <input
+              type="checkbox"
+              className="form-check-input"
+              checked={this.state.imagePopup}
+              onChange={() => this.imagePopupToggle()}
             />
             <input
               type="text"

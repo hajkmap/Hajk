@@ -35,7 +35,9 @@ class AddLinkButton extends Component {
       url: "something",
       linkMenuVisible: false,
       anchorEl: null,
-      documentLinkVisible: false
+      documentLinkVisible: false,
+      mapLinkVisible: false,
+      linkVisible: false
     };
   }
 
@@ -66,7 +68,9 @@ class AddLinkButton extends Component {
           onClick={() => {
             this.setState({
               linkMenuVisible: !this.state.linkMenuVisible,
-              documentLinkVisible: !this.state.documentLinkVisible
+              documentLinkVisible: !this.state.documentLinkVisible,
+              mapLinkVisible: false,
+              linkVisible: false
             });
           }}
         >
@@ -75,13 +79,31 @@ class AddLinkButton extends Component {
           </ListItemIcon>
           Dokumentlänk
         </MenuItem>
-        <MenuItem onClick={this.closeLinkMenu}>
+        <MenuItem
+          onClick={() => {
+            this.setState({
+              linkMenuVisible: !this.state.linkMenuVisible,
+              documentLinkVisible: false,
+              mapLinkVisible: !this.state.mapLinkVisible,
+              linkVisible: false
+            });
+          }}
+        >
           <ListItemIcon>
             <MapIcon />
           </ListItemIcon>
           Kartlänk
         </MenuItem>
-        <MenuItem onClick={this.closeLinkMenu}>
+        <MenuItem
+          onClick={() => {
+            this.setState({
+              linkMenuVisible: !this.state.linkMenuVisible,
+              documentLinkVisible: false,
+              mapLinkVisible: false,
+              linkVisible: !this.state.linkVisible
+            });
+          }}
+        >
           <ListItemIcon>
             <LinkIcon />
           </ListItemIcon>
@@ -191,6 +213,133 @@ class AddLinkButton extends Component {
     });
   }
 
+  renderAddMapLinkDialog() {
+    return (
+      <ReactModal
+        isOpen={this.state.mapLinkVisible}
+        onRequestClose={e => this.closeMapLinkDialog()}
+        className="modal document-editor-modal"
+        overlayClassName="Overlay"
+        appElement={document.getElementById("root")}
+      >
+        <div className="modal-content">
+          <div className="modal-header">
+            <DescriptionIcon />
+            <h5 className="modal-title">Kartlänk</h5>
+            <button
+              type="button"
+              className="close"
+              data-dismiss="modal"
+              aria-label="Close"
+              onClick={e => this.closeMapLinkDialog()}
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div className="modal-body">
+            <form noValidate autoComplete="off">
+              <TextField
+                className="map-link-input"
+                label="(Titel) <a>titel</a>"
+              />
+              <TextField className="document-link-input" label="(URL) " />
+            </form>
+          </div>
+          <div className="modal-footer">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                this.addLink();
+              }}
+            >
+              Infoga
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              data-dismiss="modal"
+              onClick={e => this.closeMapLinkDialog()}
+            >
+              Avbryt
+            </button>
+          </div>
+        </div>
+      </ReactModal>
+    );
+  }
+
+  closeMapLinkDialog() {
+    this.setState({
+      mapLinkVisible: false
+    });
+  }
+
+  renderAddLinkDialog() {
+    return (
+      <ReactModal
+        isOpen={this.state.linkVisible}
+        onRequestClose={e => this.closeLinkDialog()}
+        className="modal document-editor-modal"
+        overlayClassName="Overlay"
+        appElement={document.getElementById("root")}
+      >
+        <div className="modal-content">
+          <div className="modal-header">
+            <DescriptionIcon />
+            <h5 className="modal-title">Webblänk</h5>
+            <button
+              type="button"
+              className="close"
+              data-dismiss="modal"
+              aria-label="Close"
+              onClick={e => this.closeLinkDialog()}
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div className="modal-body">
+            <form noValidate autoComplete="off">
+              <TextField
+                className="map-link-input"
+                label="(Titel) <a>titel</a>"
+              />
+              <TextField
+                className="document-link-input"
+                label="(URL) data-document"
+              />
+            </form>
+          </div>
+          <div className="modal-footer">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                this.addLink();
+              }}
+            >
+              Infoga
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              data-dismiss="modal"
+              onClick={e => this.closeLinkDialog()}
+            >
+              Avbryt
+            </button>
+          </div>
+        </div>
+      </ReactModal>
+    );
+  }
+
+  closeLinkDialog() {
+    this.setState({
+      linkVisible: false
+    });
+  }
+
   render() {
     return (
       <div className="document-editor-controls">
@@ -205,6 +354,8 @@ class AddLinkButton extends Component {
         </LinkButton>
         {this.renderAddLinkMenu()}
         {this.renderAddDocumentLinkDialog()}
+        {this.renderAddMapLinkDialog()}
+        {this.renderAddLinkDialog()}
       </div>
     );
   }
