@@ -6,6 +6,7 @@
   "dependencies": {
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
+    "antd": "^4.1.4",
     "backbone": "^1.4.0",
     "draft-js": "^0.11.7",
     "draft-js-export-html": "^1.4.1",

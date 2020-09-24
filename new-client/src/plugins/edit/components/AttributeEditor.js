@@ -352,7 +352,9 @@ class AttributeEditor extends React.PureComponent {
 
         let checkboxes = field.values.map((val, i) => {
           var id = field.name + i,
-            item = value.find(item => item.name === val) || { checked: false };
+            item = value.find(item => item.name === val) || {
+              checked: false
+            };
 
           return (
             <FormControlLabel

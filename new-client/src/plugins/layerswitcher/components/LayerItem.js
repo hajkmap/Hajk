@@ -385,7 +385,9 @@ class LayerItem extends React.PureComponent {
           <div className={classes.layerButtons}>
             <DownloadLink
               layer={this.props.layer}
-              appConfig={this.props.app.config.appConfig}
+              enableDownloadLink={
+                this.props.app.config.mapConfig.map.enableDownloadLink
+              }
             />
             {this.renderStatus()}
             {!this.isInfoEmpty() && (

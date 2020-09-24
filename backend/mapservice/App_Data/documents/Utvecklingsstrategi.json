@@ -1,0 +1,191 @@
+{
+  "chapters": [
+    {
+      "header": "UTVECKLINGSSTRATEGI",
+      "headerIdentifier": "utvecklingsstrategi/UTVECKLINGSSTRATEGI",
+      "html": "<p><br></p>\n<p><br></p>\n<figure><img data-caption=\"\" data-source=\"\" src=\"/utvecklingsstrategi_start.png\"/></figure>\n<p><br></p>\n<p><a data-document=\"\" data-header=\"utvecklingsstrategi/PLANERA FÖR EN ROBUST STAD\">Scrolla till PLANERA FÖR EN ROBUST STAD</a>Utvecklingsstrategin anger kommunens övergripande inriktning avseende strukturer och utbyggnadsordning. För att uppnå stadens målbild ska Göteborgs stad planera för en nära, sammanhållen och robust stad genom att komplettera den redan byggda staden. Särskilt fokus ligger på innerstaden, mellanstaden och stadens tyngdpunkter. Härigenom får göteborgarna tillgång till stadens utbud och förutsättningar för mer jämlika livschanser.</p><br><p>Utvecklingsstrategin består av tre prioriterade strategier och en karta med områdesvisa inriktningar. De prioriterade strategierna kompletterar varandra och ska användas tillsammans. Strategikartan visar kommunens långsiktiga intentioner och prioriteringar och vilka områden och stråk som kommunen särskilt vill utveckla.</p>",
+      "mapSettings": {
+        "target": "map",
+        "center": [140700, 6399400],
+        "title": "Översiktsplan Göteborg",
+        "projection": "EPSG:3007",
+        "zoom": 1,
+        "maxZoom": 15,
+        "minZoom": 5,
+        "resolutions": [
+          70.00022,
+          28.00009,
+          14.00004,
+          7.000022,
+          2.800009,
+          1.400004,
+          0.700002,
+          0.280001,
+          0.14,
+          0.07
+        ],
+        "origin": [0, 0],
+        "extent": [110000, 6365000, 185000, 6425000],
+        "constrainOnlyCenter": false,
+        "logo": "/assets/logo.png",
+        "geoserverLegendOptions": "",
+        "mapselector": false,
+        "mapcleaner": true,
+        "drawerVisible": false,
+        "drawerPermanent": false,
+        "colors": { "primaryColor": "#0076bc", "secondaryColor": "#ffffff" },
+        "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+        "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+      },
+      "chapters": [
+        {
+          "header": "PLANERA FÖR EN NÄRA STAD",
+          "headerIdentifier": "utvecklingsstrategi/PLANERA FÖR EN NÄRA STAD",
+          "html": "<p>Närhet bidrar till att göteborgarna får tillgång till stadens utbud och skapar underlag för handel och verksamheter. En blandning av funktioner skapar närhet och ökar attraktiviteten både dagtid och kvällstid. Det ger förutsättningar för korta avstånd mellan arbetsplatser och bostäder. Behovet av att resa minskar och fler kan klara vardagen genom att gå, cykla och åka kollektivt.</p><br><p>Utveckla stadens tyngdpunkter</p><p>Göteborg ska gå mot en mer flerkärnig struktur med service, kultur och arbetsplatser på fler platser än i dagens centrum. Det ger förutsättningar för en bättre balans mellan olika stadsdelar och fler göteborgare får tillgång till stadens utbud på nära håll. Tyngdpunkterna har potential att få högre täthet av människor, bostäder och arbetsplatser.</p><br><p>Skapa fler gröna, tillgängliga offentliga rum</p><p>Det ska vara lätt för alla att ta sig till parker eller naturområden nära bostaden. De gröna offentliga rummen ska vara trygga och inkluderande. Det är särskilt viktigt för barn och unga att kunna vistas på platser utan att vara i sällskap av vuxna och utan att betala. Sammanhängande grönska främjar såväl friluftsliv som växt- och djurliv. Alléer eller enskilda träd i stadens gator skapar intressanta gaturum samt ger bättre mikroklimat och luftkvalitet.</p><br><p>Förtäta för att höja kvaliteter och hushålla med resurser</p><p>Fler invånare skapar bättre underlag för handel, service och kollektivtrafik.  Förtätning drar nytta av det som finns. Befintliga resurser och redan gjorda investeringar kan nyttjas effektivt. Förtätning kan dessutom generera högre markvärden som skapar en vilja att investera. Att förtäta kräver dock förståelse och kunskap om hur vardagslivet påverkas.</p><br><p>Blanda för en god balans mellan olika funktioner</p><p>En blandning av bostäder, arbetsplatser, service, aktiviteter och offentliga rum ska eftersträvas i både nya och befintliga områden. Blandning kan ske inom en stadsdel, ett kvarter eller en enskild byggnad. Genom att komplettera med det som saknas kan platser användas under större del av dygnet och attrahera människor med olika preferenser, förutsättningar och behov.</p><br><p>Tillåt stor variation av uttryck</p><p>Variation tillåts genom en blandning av äldre och nyare bebyggelse, högre och lägre hus, breda och smala gator och olika arkitektoniska uttryck. Stadsrummets största kvaliteter ska finnas i ögonhöjd. God arkitektur och olika typer av parker och natur i hela staden kan göra göteborgarna stolta över sin stad och stadsdel.</p><figure><img data-caption=\"\" data-source=\"\" src=\"/utvecklingsstrategi_1.png\"/></figure>",
+          "mapSettings": {
+            "center": [135672.89145750582, 6403799.452920079],
+            "zoom": 5,
+            "extent": [
+              134572.4883135058,
+              6403102.950930079,
+              136773.29460150583,
+              6404495.954910079
+            ]
+          },
+          "chapters": [],
+          "expanded": true,
+          "layers": ["4"]
+        },
+        {
+          "header": "PLANERA FÖR EN SAMMANHÅLLEN STAD",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/utvecklingsstrategi_2.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "PLANERA FÖR EN ROBUST STAD",
+          "headerIdentifier": "utvecklingsstrategi/PLANERA FÖR EN ROBUST STAD",
+          "html": "<p><a data-link=\"https://sv.wikipedia.org/wiki/G%C3%B6teborg\">Länk till Wikipedia (öppnas i nytt fönster)</a></p><br><p><a data-document=\"utgangspunkter\" data-header-identifier=\"utgangspunkter/HÅLLBAR UTVECKLING ÄR UTGÅNGSPUNKTEN\">Länk till en bit ner i dokumentet utgångspunkter</a></p><figure><img data-caption=\"\" data-source=\"\" src=\"/utvecklingsstrategi_3.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "STRATEGIKARTA",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/utvecklingsstrategi_4.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        }
+      ],
+      "expanded": true
+    }
+  ],
+  "map": "oversiktsplan"
+}

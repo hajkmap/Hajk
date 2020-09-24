@@ -59,7 +59,25 @@ export function mergeFeaturePropsWithMarkdown(markdown, properties) {
       markdown = markdown.replace(property, lookup(properties, property));
     });
   }
+
+  let domTree = new DOMParser().parseFromString(marked(markdown), "text/html");
+  let visibleSectionHtml = "";
+  let hiddenSectionHtml = "";
+  let sections = [...domTree.body.getElementsByTagName("section")];
+
+  sections.forEach(section => {
+    if (section.getAttributeNames().includes("data-visible")) {
+      visibleSectionHtml = section.innerHTML;
+    }
+
+    if (section.getAttributeNames().includes("data-hidden")) {
+      hiddenSectionHtml = section.innerHTML;
+    }
+  });
+
   return {
-    __html: marked(markdown)
+    __html: marked(markdown),
+    __visibleSectionHtml: marked(visibleSectionHtml),
+    __hiddenSectionHtml: marked(hiddenSectionHtml)
   };
 }

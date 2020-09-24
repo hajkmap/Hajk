@@ -1,0 +1,265 @@
+{
+  "chapters": [
+    {
+      "header": "TEMATISKA TILLÄGG",
+
+      "headerIdentifier": "{57427123-ef67-4f69-b72f-d5a737e41cc2}",
+
+      "html": "<p><br></p>\n<p><br></p><p>\n<a data-header=\"{57427123-ef67-4f69-b72f-d5a737e41cc1}\" data-document=\"oversiktsplan\">Länk till annat dokument</a></p><p>\n<a data-maplink=\"http://testservergbg.northeurope.cloudapp.azure.com/#?m=map_1&x=335585.3301946048&y=6405543.350980751&z=9&l=1,222&clean=false\">Zooma och tänd Aspen</a></p>\n<p><a data-link=\"https://sv.wikipedia.org/wiki/G%C3%B6teborg\">Länk till Wikipedia</a></p><p>\n<a data-document=\"\" data-header=\"{448d8260-c3ce-4eb0-a108-056b46955fe6}\">Scrolla till HÅLLBAR UTVECKLING ÄR UTGÅNGSPUNKTEN</a></p><figure> <img data-caption=\"Bildtext\" data-source=\"Fotograf Christin Nilsson\" src=\"https://q-cf.bstatic.com/images/hotel/max1024x768/148/148129906.jpg\"/></figure>\n<p><br></p>\n<p>Hållbar stadsutveckling är det övergripande målet för översiktsplanen. Därför är inriktningen i översiktsplanen att fortsätta planera och bygga Göteborg tätt, grönt och blandat.</p>\n<p>Idag bor över en halv miljon <a data-maplink=\"http://testservergbg.northeurope.cloudapp.azure.com:81/?m=map_1&x=335639.45603545714\n&y=6404483.428565005&z=8&l=1,222&clean=false\">Zooma till Aspen i Jonsered</a> invånare i Göteborg och varje år ökar stadens befolkning. Det är en utmaning att planera hållbart för att möta denna befolkningsutveckling, så att det kontinuerligt byggs tillräckligt med bostäder, kommunal service och mer kollektivtrafik. Det delade Göteborg, med stora skillnader i livsvillkor mellan stadsdelar och med starka barriärer i form av trafikleder, är en annan utmaning som översiktsplanen måste hantera. Den tredje stora utmaningen är klimatförändringarna och stadens alltför stora förbrukning av naturresurser.</p>\n<p><br></p>\n<p><br></p>\n<figure><img src=\"https://image.posterlounge.se/img/products/520000/517441/517441_poster_l.jpg\"/></figure>\n<p><br></p>\n<p><br></p>\n<p>Översiktsplanen tar sin utgångspunkt i dessa utmaningar och ska samtidigt svara mot lokala såväl som regionala, nationella och internationella mål om hållbarhet.</p>",
+
+      "mapSettings": {
+        "target": "map",
+
+        "center": [140700, 6399400],
+
+        "title": "Översiktsplan Göteborg",
+
+        "projection": "EPSG:3007",
+
+        "zoom": 1,
+
+        "maxZoom": 15,
+
+        "minZoom": 5,
+
+        "resolutions": [
+          70.00022,
+
+          28.00009,
+
+          14.00004,
+
+          7.000022,
+
+          2.800009,
+
+          1.400004,
+
+          0.700002,
+
+          0.280001,
+
+          0.14,
+
+          0.07
+        ],
+
+        "origin": [0, 0],
+
+        "extent": [110000, 6365000, 185000, 6425000],
+
+        "constrainOnlyCenter": false,
+
+        "logo": "/assets/logo.png",
+
+        "geoserverLegendOptions": "",
+
+        "mapselector": false,
+
+        "mapcleaner": true,
+
+        "drawerVisible": false,
+
+        "drawerPermanent": false,
+
+        "colors": { "primaryColor": "#0076bc", "secondaryColor": "#ffffff" },
+
+        "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+
+        "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+      },
+
+      "chapters": [
+        {
+          "header": "BAKGRUND",
+
+          "headerIdentifier": "{f43cdffe-bc2b-446a-af8b-fb71f1b20e98}",
+
+          "html": "<p>Göteborg är en stad med flera tydliga karaktärsdrag som tillsammans sätter en speciell prägel på staden. Det kuperade landskapet och näringar knutna till älven har tillsammans med gränsdragningar och olika sätt att planera och genomföra utbyggnadsetapper under olika skeden skapat ett karaktäristiskt mönster av små, avgränsade stadsdelar. Även om staden i många historiska skeden tagit stort intryck av rörelser i andra städer i Europa, är kombinationen av vilka internationella influenser som inspirerat unik. Den byggda miljön är idag en kombination av tidstypiska historiska lager, från 1600-talets fästningsstad till 1700-talets öppna handelsstad, som sedan övergick i industristad. Expansionen av hamn, varvs- och verkstadsindustri lade grunden till urbaniseringen. 1900-talets stora samhällsbygge påverkade Göteborg i stor grad och är bland annat synligt i våra yttre stadsdelar. Till detta tillkommer vår samtida utveckling med Göteborg som kunskapsstad och evenemangsstad, samt en stadsutveckling med fokus på att omvandla före detta hamnområden och förtäta inom den redan byggda staden.&nbsp;</p>\n<p>Idag bor drygt 564 000 invånare i Göteborg. Under 2000-talet har antalet invånare ökat med närmare 100 000 personer och folkmängden i Göteborg förväntas fortsätta att öka. Befolkningstillväxten har främst berott på en mer eller mindre kontinuerlig ökning av födelseöverskottet samt positiv nettoflyttning.&nbsp;</p>\n<blockquote>Göteborg förväntas ha cirka 700 000 invånare 2035 och cirka 800 000 invånare 2050.&nbsp;</blockquote>\n<p>Göteborg förväntas ha cirka 700 000 invånare 2035 och cirka 800 000 invånare 2050. Det innebär en befolkningsökning om 1-1,5 procent per år, högre procentuell ökning de första åren, lägre efter 2035. Den förväntade befolkningstillväxten är ett resultat av att skillnaden mellan antal in ‐ och utflyttade personer är fortsatt positiv och att antalet födda är fler än antalet avlidna. Befolkningen förväntas växa inom alla åldersgrupper. Sett i ett övergripande perspektiv förväntas dock inte befolkningens åldersstruktur att förändras i någon påtaglig utsträckning. En bedömning om förväntad befolkningstillväxt är alltid osäker, särskilt på längre sikt. Ökningen kan komma att förskjutas i tid – åt båda håll.&nbsp;</p>\n<blockquote>Göteborg fungerar som motor för hela regionen.</blockquote>\n<p>Göteborg fungerar som motor för hela regionen. Inom de närmaste 10–15 åren förväntas arbetsmarknadsregionen växa från dagens 1,17 miljoner till 1,75 miljoner invånare. Det ger förutsättningar för en mer robust ekonomi som inte är beroende av enskilda branscher och arbetsgivare. På sikt stärker det hela västsverige. En stark kärna är en förutsättning för att Göteborg och hela regionen ska fortsätta utvecklas i den riktningen. Vad som skapar tillväxt är en komplex fråga. Några förutsättningar som bedöms ha stor betydelse är folkmängd, befolkningens åldersstruktur, andel förvärvsarbetande och näringslivets branschstruktur. Tillgången till högutbildad arbetskraft är en viktig lokaliseringsfaktor för företag och väsentlig för att nå en positiv ekonomisk utveckling. Generellt har befolkningsrika regioner haft en avsevärt bättre ekonomisk utveckling än mindre regioner. Ju starkare den regionala kärnan är, desto bättre blir möjligheterna för tillväxt i orterna runt omkring.&nbsp;</p>\n<p>I dag pendlar varje dag 120 000 personer in till Göteborg och drygt 50 000 personer pendlar ut. På 20 års sikt förväntas antalet arbetstillfällen i staden öka med 120 000 och med 50 000 i arbetsmarknadsregionen. Det kommer medföra ytterligare in- och utpendling. Särskilt i Göteborgs centrala delar finns en utmaning att möta tillgänglighet ur ett regionalt perspektiv samtidigt som de lokala/ vardagsnära perspektiven behöver värnas.</p>",
+
+          "mapSettings": {
+            "center": [135672.89145750582, 6403799.452920079],
+
+            "zoom": 5,
+
+            "extent": [
+              134572.4883135058,
+
+              6403102.950930079,
+
+              136773.29460150583,
+
+              6404495.954910079
+            ]
+          },
+
+          "chapters": [],
+
+          "expanded": true,
+
+          "layers": ["4"]
+        },
+
+        {
+          "header": "UTMANINGAR",
+
+          "headerIdentifier": "{b51181b0-8b8b-4faa-98eb-5ed49018ef70}",
+
+          "html": "<p>Göteborg står inför flera stora samhällsutmaningar. Flera av dessa är globala utmaningar. Stadsutvecklingen är en del i dessa utmaningar men kan också vara en del av lösningen. Översiktsplanen behöver särskilt möta tre av dessa utmaningar.</p>\n<h3>Göteborg är en delad stad</h3>\n<p>Det finns stora skillnader i livsvillkor och hälsa i Göteborg. Ojämlikheten mellan stadens områden och grupper är tydlig och allvarlig. Grundläggande förutsättningar är att ha en trygg boendemiljö, att känna tillhörighet, en passande och ekonomiskt överkomlig bostad samt en närmiljö som är omhändertagen och välfungerande. Det är också grundläggande att ha tillgång till stadens resurser i form av service, arbetsplatser, kollektivtrafik, offentliga plaster och grönområden. Idag har inte alla invånare tillgång till dessa grundläggande förutsättningar, vilket påverkar hälsa, tillit, delaktighet och sammanhållning i staden.&nbsp;</p>\n<p>Den fysiska miljön vi lever och verkar i har stor betydelse för människors livsvillkor. I delar av Göteborg saknas ett tillräckligt lokalt utbud av offentlig och kommersiell service liksom välgestaltade och omhändertagna miljöer. Tillgång eller bristande tillgång till grundläggande service kan förstärka segregationsmönstren i staden. Detta får konsekvenser för både individer och för hela grupper. Det är en utmaning att säkerställa plats för rekreation och samspel för barn och unga genom tillgång till friytor och bra utemiljöer för lek och utevistelse vid bostäder, fritidshem, förskolor och grundskolor.&nbsp;</p>\n<blockquote>Läs mer - Jämlikhetsrapporten 2017: Skillnader i livsvillkor i Göteborg</blockquote>\n<p><br></p>\n<figure><img src=\"https://www.svtstatic.se/image/wide/992/16445634/1513867052?quality=70&amp;format=auto\"/></figure>\n<p><br></p>\n<p>Boendesegregation ökar i Göteborg. De geografiska skillnaderna vad gäller boendeform och kostnadsnivåer är tydliga och påverkar var grupper med olika socioekonomiska förutsättningar bor. I Göteborg, som i många andra större städer, råder bostadsbrist vilket innebär att alla inte har tillgång till en passande och ekonomiskt överkomlig bostad. En långvarig bostadsbrist påverkar många delar av samhället och kan i förlängningen också bromsa Göteborgs ekonomiska utveckling. Bostadsbrist kan dessutom kopplas till sämre hälsa i befolkningen, hemlöshet och till trångboddhet som är vanligt bland ekonomiskt utsatta barnfamiljer.&nbsp;</p>\n<p>Göteborg är också delad av barriärer. Många av stadens olika delar kringgärdade av fysiska och mentala barriärer vilka behöver överbryggas. Tillgängligheten till de gemensamma rummen är inte likvärdiga. En utmaning blir hur vi med hjälp av t ex kollektivtrafik eller placeringar av större samhälleliga institutioner binder samman staden och om staden kan länkas samman genom ny bebyggelse eller nya stråk.</p>\n<h3>Förbrukning av naturresurser och klimatpåverkan</h3>\n<p>Världens naturresurser förbrukas idag på ett ohållbart sätt och särskilt stort är problemet i den utvecklade delen av världen. Göteborg är inget undantag och stadens invånare bidrar till den utarmning av världens naturresurser som sker. Denna trend behöver vändas och staden behöver arbeta hårt för att bli mer hållbar. Stadens utveckling behöver ske på ett sätt som tar i anspråk minimalt av jordens resurser och som ger förutsättningar för stadens invånare att leva långsiktigt hållbart.&nbsp;</p>\n<p>En tydlig effekt av vår överkonsumtion är klimatpåverkan. Sedan 1990 har utsläppen inom stadens gränser minskat men ligger kvar på en ohållbart hög nivå. Det gäller också i ett konsumtionsperspektiv där göteborgarens samlade växthusgasutsläpp per capita idag uppskattas till 8 ton per år och skulle ur ett hållbarhetsperspektiv snabbt behöva minska till nära noll.&nbsp;</p>\n<p>Stadsutvecklingen är en viktig pusselbit för att nå ett samhälle där naturresurser förbrukas på ett långsiktigt sätt och klimatpåverkan är på en acceptabel nivå. Vi behöver bygga en samhällsstruktur och en stad som stödjer och möjliggör ett hållbart vardagsliv. Det handlar om att minska resursförbrukningen inom områden som energiförbrukning, transportsektorn och invånarnas konsumtion. Transportsektorn stod 2011 för ungefär en tredjedel av koldioxidutsläppen, så förändringar inom denna sektor spelar en viktig roll för att nå klimatmålen.&nbsp;</p>\n<p>Göteborg orsakar utsläpp av växthusgaser både lokalt och globalt och bidrar därmed till den pågående processen med klimatförändringar. Det får effekter såsom smältande glaciärisar och havsnivåhöjning, extrema vädersituationer och spridning av sjukdomar. Ett förändrat klimat kommer att påverka Göteborg på flera sätt. Det finns risk för att oväntade och extrema väderhändelser kommer att bli fler och mer frekventa i Göteborg. Staden måste anpassas för att bostäder och infrastruktur ska kunna stå emot klimatrelaterade utmaningar som till exempel extrem nederbörd, höga flöden, höjd havsnivå och extremt långvariga värmeperioder. De för staden största utmaningarna framåt är organisation och finansiering för dessa åtgärder.</p>\n<figure><img src=\"https://www.boktugg.se/wp-content/uploads/2019/01/Goteborg-sparvagn-iStock-495376272.jpg\"/></figure>\n<p><br></p>\n<h3>Göteborg växer</h3>\n<p>Göteborg behöver ta höjd för att staden ska kunna växa med ungefär 250 000 nya invånare fram till 2050. Det innebär att det behöver byggas ungefär 120 000 bostäder till 2050. Därutöver behöver även ett stort antal arbetstillfällen tillkomma. Att vara en växande storstad skapar möjligheter som inte alla kommuner kan glädjas åt och som vi inte ska ta för givna. Här finns till exempel universitet, operahus och stora sjukhus, unika värden som inte finns på andra platser i västsverige. Här koncentreras ett brett utbud av kompetenser, arbetstillfällen och aktiviteter som leder till en positiv regional utveckling. Befolkningstillväxten är samtidigt en utmaning då den skapar fortsatt efterfrågan på bostäder och samhällsservice av olika slag. Göteborg har dessutom en brist på både bostäder och samhällsservice sedan tidigare som behöver byggas ikapp. Nya lösningar behöver utvecklas parallellt med, och i takt med befolkningsökningen.&nbsp;</p>\n<p>Att Göteborg växer i både befolkning och arbetstillfällen gör att konkurrensen om marken ökar. När vi förtätar staden är det en utmaning att säkerställa tillräckligt utrymme för samhällsservice såsom exempelvis förskolor, skolor, teknisk försörjning och grönområden. Det kan också uppstå konflikt om att bevara natur- och kulturmiljöer samt mellan bostäder och störande verksamheter. Barns rörelsefrihet i närmiljön och i staden har begränsats under de senaste årtiondena och barns behov av friytor, såsom ytor på skol- och förskolegårdar, prioriteras ofta inte när vi förtätar staden. Även gröna miljöer tenderar idag att bortprioriteras trots att avsaknad av gröna miljöer i bostadsområden ökar risken för för tidig död.&nbsp;</p>\n<p>Den ökande befolkningen innebär ökade krav på tillgänglighet inom staden och i regionen. Människors mobilitet måste lösas på smarta, innovativa sätt för att staden ska kunna utvecklas på ett hållbart sätt. En tätare stad ger förutsättningar för ny yteffektiv och kapacitetsstark kollektivtrafik, som inte har varit möjlig i dagens relativt glesa Göteborg. Infrastrukturen måste dock utvecklas i takt med befolkningsökningen. Med dagens system för investeringar i infrastruktur finns risk för avsevärd eftersläpning. Det kan allvarligt minska tillgängligheten både inom staden och i regionen.</p>",
+
+          "mapSettings": {
+            "target": "map",
+
+            "center": [140700, 6399400],
+
+            "title": "Översiktsplan Göteborg",
+
+            "projection": "EPSG:3007",
+
+            "zoom": 1,
+
+            "maxZoom": 15,
+
+            "minZoom": 5,
+
+            "resolutions": [
+              70.00022,
+
+              28.00009,
+
+              14.00004,
+
+              7.000022,
+
+              2.800009,
+
+              1.400004,
+
+              0.700002,
+
+              0.280001,
+
+              0.14,
+
+              0.07
+            ],
+
+            "origin": [0, 0],
+
+            "extent": [110000, 6365000, 185000, 6425000],
+
+            "constrainOnlyCenter": false,
+
+            "logo": "/assets/logo.png",
+
+            "geoserverLegendOptions": "",
+
+            "mapselector": false,
+
+            "mapcleaner": true,
+
+            "drawerVisible": false,
+
+            "drawerPermanent": false,
+
+            "colors": {
+              "primaryColor": "#0076bc",
+
+              "secondaryColor": "#ffffff"
+            },
+
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+
+          "chapters": [],
+
+          "expanded": true
+        },
+
+        {
+          "header": "HÅLLBAR UTVECKLING ÄR UTGÅNGSPUNKTEN",
+
+          "headerIdentifier": "{448d8260-c3ce-4eb0-a108-056b46955fe6}",
+
+          "html": "<p>Översiktsplanen utgår från såväl stadens mål- och styrdokument som de mål, planer och program på regional och nationell nivå som har betydelse för en hållbar utveckling inom kommunen. Nedan redovisas ett urval av de viktigaste övergripande målen - internationella, regionala och lokala - som översiktsplanen behöver svara upp till.</p>\n<h3>Globala hållbarhetsmål</h3>\n<p>FN har antagit 17 globala mål och en agenda för att nå ekonomiskt, socialt och miljömässigt hållbar utveckling. Världens länder ska fram till år 2030 gå mot en hållbar, rättvis och jämlik framtid utan fattigdom och hunger. Samtliga mål är vägledande för en hållbar stadsutveckling för Göteborg. Särskilt relevant för översiktsplanen är mål 11 som innebär att städer och bosättningar ska vara inkluderande, säkra, motståndskraftiga och hållbara. Den nya urbana agendan som antogs av UN-Habitat 2015 är en konkretisering av mål 11 om hållbar stadsutveckling. För att lyckas behöver de globala hållbarhetsmålen och den nya urbana agendan genomföras på lokal nivå.</p>\n<figure><img src=\"https://www.svtstatic.se/image-cms/svtse/1570090660/svts/article23904339.svt/alternates/large/omslagsbild-oktober-mattiasdisby-jpg\"/></figure>\n<h3>Hållbar tillväxt och Göteborgsregionens strukturbild</h3>\n<p>Gemensamt har Göteborgsregionen (GR) kommit överens om att befolkningen ska öka med minst 10 000 invånare per år och att Göteborgs- regionen ska utvecklas till en stark och tydlig tillväxtregion i Europa. Den lokala arbetsmarknaden ska omfatta 1,75 miljoner invånare år 2030. Regionen ska utvecklas enligt den gemensamma strukturbilden med en stark och attraktiv regional kärna och längs tydliga stråk med ett flertal starka och attraktiva regiondelscentrum. Transportsystemet ska stödja strukturbilden genom kapacitetsstarka stråk med attraktiv kollektivtrafik. Minst 40 procent av resorna i Göteborgsregionen ska göras med kollektivtrafik år 2025. De gröna kilarna ska tas till vara och utvecklas för att stärka Göteborgsregionen som helhet.</p>\n<p><br></p>\n<figure></figure>\n<h3>Program för en jämlik stad</h3>\n<p>I Göteborgs program för en jämlik stad lyfts fyra målområden fram som tillsammans visar vad det samlade jämlikhetsarbetet i Göteborgs stad ska rikta in sig mot för att nå målet att Göteborg ska vara en jämlik stad. Ett av de fyra målområdena är att skapa hållbara och jämlika livsmiljöer. Inom detta målområde finns följande strategier: jämlik tillgång till stadens resurser, öka tillgången till bostäder, minska boendesegregation, skapa förutsättningar för en fungerande närmiljö samt öka delaktighet och inflytande i stadsutvecklingen.</p>\n<h3>Miljökvalitetsmål</h3>\n<p>Det svenska miljömålssystemet består av ett generationsmål, 16 miljökvalitetsmål med preciseringar och ett tjugotal etappmål. Generationsmålet visar riktningen för vad som måste göras inom en generation för att miljökvalitetsmålen ska nås. Ett av miljömålen – god bebyggd miljö - syftar till att uppnå hållbar utveckling i den byggda miljön genom att ekologiska, sociala och ekonomiska aspekter vägs in. Miljökvalitetsmålen har brutits ner till regionala miljömål av länsstyrelsen tillsammans med Västra Götalandsregionen (VGR) och på lokal nivå för Göteborgs stad. De lokala miljömålen har idag dålig måluppfyllelse och prognosen för att klara målen ser inte bra ut.&nbsp;</p>\n<p>Göteborgs miljöprogram för år 2013–2020 innehåller en handlingsplan med 189 åtgärder för att försöka nå de lokala miljömålen. Åtgärderna berör minskad klimatpåverkan, ökad andel hållbart resande, ökad resurshushållning, en sundare livsmiljö, främjad biologisk mångfald, tillgängliga och varierade parker och naturområden och Göteborgs stad som föregångare.</p>\n<h3>Klimatstrategiskt program</h3>\n<p>Göteborgs stads klimatstrategiska program innehåller nio strategimål om bland annat energikällor, avfall och utsläpp från transporter. Göteborgs stad ska vara föregångare och visa att det är möjligt att leva gott utan att bidra till negativ klimatpåverkan. Göteborgs stad har som mål att Gö teborg år 2050 har en hållbar och rättvis utsläppsnivå av växthusgaser. Koldioxidutsläpp från vägtransporter inom Göteborg ska minska med minst 80 procent till år 2030 jämfört med år 2010. Göteborgs stad verkar därför för att biltrafiken ska minska med 25 procent oavsett befolkningsökning.</p>\n<h3>Regionala planer för transportinfrastruktur</h3>\n<p>Genom ett regionalt handlingsprogram för hållbara transporter (VGR) ska en omställning till ett hållbart transportsystem med lösningar på kort och lång sikt, drivas fram. Transportsystemet ska utvecklas i hållbar riktning genom en fortsatt satsning på kollektivtrafik, cykel och regionala järnvägar. Godstransporter på väg och järnväg ska förbättras och effektiviseras via Göteborgs hamn. Det ska finnas snabba resmöjligheter via Landvetter flygplats och högklassiga förbindelser på väg och järnväg till Oslo, Köpenhamn och Stockholm. Målbild Tåg 2035, pekar ut att tågresandet i västsverige ska trefaldigas från år 2006. Västra Götalands huvudorter ska knytas samman och bättre förbindelser till regioncentrum i grannlänen ska skapas. Tåget ska fungera som ryggrad vid pendlingsresor in mot Göteborg.&nbsp;</p>\n<p>Göteborg, Mölndal och Partille har tillsammans med Västra Götalands- regionen tagit fram en målbild för stadstrafiken 2035 med syfte att öka kapaciteten i kollektivtrafiksystemet, kortare restider i stomnätet och bättre koppling mellan olika stadsdelar.</p>\n<h3>Övriga kommunala styrdokument</h3>\n<p>Göteborgs stads övergripande styrdokument är stadens budget. Andra viktiga styrdokument är exempelvis Kulturprogram, Program för biologisk mångfald och Näringslivsstrategiskt program. Hänvisningar till de mest relevanta styrdokumenten finns i anslutning till kapitlen om allmänna intressen/tematiska inriktningar.</p>\n<blockquote>Läs mer</blockquote>\n<blockquote>Hållbar tillväxt: Mål och strategier med fokus på regional struktur, Göteborgsregionen (GR), 2013</blockquote>\n<blockquote>Program för en jämlik stad 2018-2026, Göteborgs stad</blockquote>\n<blockquote>Klimatstrategiskt program, Göteborgs stad, 2014</blockquote>\n<blockquote>Göteborgs Stads miljöprogram 2013-2020 (aktualiserat 2018)</blockquote>\n<blockquote>Miljökvalitetsmål för Göteborg, reviderade 2018</blockquote>\n<blockquote>Västra Götalandsregionens program för hållbara transporter 2017-2020</blockquote>\n<blockquote>Målbild Koll2035: Kollektivtrafikprogram för stomnätet i Göteborg, Mölndal och Partille, Västra Götalandsregionen, 2018</blockquote>\n<blockquote>Målbild Tåg 2035, Västra Götalandsregionen, 2013</blockquote>",
+
+          "mapSettings": {
+            "target": "map",
+
+            "center": [140700, 6399400],
+
+            "title": "Översiktsplan Göteborg",
+
+            "projection": "EPSG:3007",
+
+            "zoom": 1,
+
+            "maxZoom": 15,
+
+            "minZoom": 5,
+
+            "resolutions": [
+              70.00022,
+
+              28.00009,
+
+              14.00004,
+
+              7.000022,
+
+              2.800009,
+
+              1.400004,
+
+              0.700002,
+
+              0.280001,
+
+              0.14,
+
+              0.07
+            ],
+
+            "origin": [0, 0],
+
+            "extent": [110000, 6365000, 185000, 6425000],
+
+            "constrainOnlyCenter": false,
+
+            "logo": "/assets/logo.png",
+
+            "geoserverLegendOptions": "",
+
+            "mapselector": false,
+
+            "mapcleaner": true,
+
+            "drawerVisible": false,
+
+            "drawerPermanent": false,
+
+            "colors": {
+              "primaryColor": "#0076bc",
+
+              "secondaryColor": "#ffffff"
+            },
+
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+
+          "chapters": [],
+
+          "expanded": true
+        }
+      ],
+
+      "expanded": true
+    }
+  ],
+
+  "map": "oversiktsplan"
+}

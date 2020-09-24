@@ -1,9 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Observer from "react-event-observer";
 import { withStyles } from "@material-ui/core/styles";
+import clsx from "clsx";
 
-import SearchModel from "../../models/SearchModel";
+import OldSearchModel from "./OldSearchModel";
 
 import SpatialSearchMenu from "./components/startview/SpatialSearchMenu.js";
 import SearchResultList from "./components/resultlist/SearchResultList.js";
@@ -49,6 +49,9 @@ const styles = theme => {
     },
     iconButton: {
       padding: 10
+    },
+    hidden: {
+      display: "none"
     }
   };
 };
@@ -93,76 +96,85 @@ class Search extends React.PureComponent {
     polygonSearch: this.props.options.polygonSearch
   };
 
-  localObserver = new Observer();
-  searchModel = new SearchModel(
-    this.props.options,
-    this.props.map,
-    this.props.app,
-    this.localObserver
-  );
+  addLocalSearchModel() {
+    const { app, map } = this.props;
+
+    const searchConfig = app.config.mapConfig.tools.find(
+      t => t.type === "search"
+    ).options;
+    this.searchModel = new OldSearchModel(searchConfig, map, app);
+  }
 
   componentDidMount() {
+    this.addLocalSearchModel();
     /**
      * When appLoaded is triggered, we want to look see if automatic
-     * search has been requested. If query param contains values for v,
-     * as well as s or t, it means that user wants to do a search on load.
-     * In that case, AppModel has already given us a searchOnStart object.
+     * search has been requested. If query param contains values for q,
+     * (and optionally s or t), it means that user wants to do a search on load.
+     * In that case we can get the URL params from the parsed object we got from index.js.
      *
-     * If searchOnStart exists, grab the value for v (the search value string),
-     * put the value in search box and do the search.
      *
-     * TODO: Limit WFS sources (if "s" query param is present, called "ds" below).
+     * TODO: Limit WFS sources (using the "s" query param).
      */
 
     this.props.app.globalObserver.subscribe("core.appLoaded", () => {
-      const { searchOnStart } = this.props.app.config.mapConfig.map;
-      // Hence this plugin (src/plugins/search) is the default Search plugin, act on both t="search" and t=undefined
+      // If any of the following URL params is specified, we will search on start:
+      //   * q: the search query string. The sole existence of this will trigger search.
+      //   * t: the type of search that should be used. undefined or "search" will trigger
+      //        this plugin. t opens up the possibility to initiate different search engines.
+      //   * s: (TODO: NOT IMPLEMENTED) the sources that will be used. Not yet implemented, but each plugin may have
+      //        its different sources, and we should be able to specify which source should be used.
+
+      // Grab the (already decoded) URL param values
+      const q = this.props.app.config.urlParams.get("q")?.trim(); // Use of "?." will return either a String or
+      const t = this.props.app.config.urlParams.get("t")?.trim(); // undefined (as opposed to null which would be the
+      // const s = this.props.app.config.urlParams.get("s")?.trim(); // return value of get() otherwise!).
+
+      // This search plugin is the default Search plugin and must act on both t="search" and t=undefined
       if (
-        searchOnStart?.t === undefined ||
-        searchOnStart?.t.toLowerCase() === this.type.toLowerCase()
+        q !== undefined && // If query string is supplied
+        q.length > 0 && // and not too short
+        (t === undefined || // and t is either not supplied
+          t.length <= 0 ||
+          t.toLowerCase() === this.type.toLowerCase()) // or equals to "search"
       ) {
-        const { v, s } = searchOnStart;
-
-        //eslint-disable-next-line
-        const { dv, ds } = {
-          dv: v && window.decodeURI(v),
-          ds: s && window.decodeURI(s)
-        };
-
-        // Put decoded search phrase into the search box
-        document.getElementById("searchbox").value = dv;
+        // Put the search phrase into the search box
+        document.getElementById("searchbox").value = q;
 
         // Invoke search for search phrase
-        this.searchModel.search(dv, true, d => {
+        this.searchModel.search(q, true, d => {
           this.resolve(d);
           this.selectFirstFeatureInResultsList();
         });
       }
     });
 
-    this.localObserver.subscribe("searchStarted", () => {
+    this.searchModel.localObserver.subscribe("searchStarted", () => {
       this.setState({
         loading: true,
         activeSearchView: TEXTSEARCH
       });
     });
 
-    this.localObserver.subscribe("spatialSearchStarted", () => {
+    this.searchModel.localObserver.subscribe("spatialSearchStarted", () => {
       this.setState({
         loading: true
       });
     });
 
-    this.localObserver.subscribe("searchToolChanged", placeholderText => {
-      this.setState({
-        result: false,
-        searchboxPlaceholder: placeholderText
-          ? placeholderText
-          : this.props.options.tooltip
-      });
-    });
+    this.searchModel.localObserver.subscribe(
+      "searchToolChanged",
+      placeholderText => {
+        this.setState({
+          result: false,
+          searchboxPlaceholder: placeholderText
+            ? placeholderText
+            : this.props.options.tooltip
+        });
+      }
+    );
 
-    this.localObserver.subscribe("searchComplete", () => {
+    this.searchModel.localObserver.subscribe("searchComplete", () => {
       this.setState({
         loading: false
       });
@@ -182,12 +194,10 @@ class Search extends React.PureComponent {
     // and 2) the feature is selected and zoomed in.
 
     // First, expand the first group in search result list
-    document.querySelector(".MuiExpansionPanelSummary-content").click();
+    document.querySelector(".MuiAccordionSummary-content").click();
     // Next, click on the first element in the first group of results
     document
-      .querySelector(
-        ".MuiExpansionPanelDetails-root .MuiExpansionPanelSummary-content"
-      )
+      .querySelector(".MuiAccordionDetails-root .MuiAccordionSummary-content")
       .click();
   }
 
@@ -211,8 +221,9 @@ class Search extends React.PureComponent {
   }
 
   doSearch(v) {
+    v = v.trim();
     if (v.length < 1) return null;
-    this.localObserver.publish("searchToolChanged");
+    this.searchModel.localObserver.publish("searchToolChanged");
     this.searchModel.search(v, true, d => {
       this.resolve(d);
     });
@@ -240,8 +251,17 @@ class Search extends React.PureComponent {
   renderSearchBox() {
     const { classes } = this.props;
 
+    // If clean mode is active hide the component using CSS.
+    // We can't just "return null" as we need to render it so we can access all functionality.
+    const clean = this.props.app.config.mapConfig.map.clean;
+
     return (
-      <div className={classes.flexItemContainerForSearch}>
+      <div
+        className={clsx(
+          classes.flexItemContainerForSearch,
+          clean === true ? classes.hidden : null
+        )}
+      >
         <Paper className={classes.root}>
           <InputBase
             autoFocus={true}
@@ -299,7 +319,7 @@ class Search extends React.PureComponent {
 
   resetToStartView() {
     document.getElementById("searchbox").value = "";
-    this.localObserver.publish("searchToolChanged");
+    this.searchModel.localObserver.publish("searchToolChanged");
     this.searchModel.abortSearches();
     this.searchModel.clearRecentSpatialSearch();
     this.setState({ activeSearchView: STARTVIEW });
@@ -314,7 +334,7 @@ class Search extends React.PureComponent {
             resetToStartView={() => {
               this.resetToStartView();
             }}
-            localObserver={this.localObserver}
+            localObserver={this.searchModel.localObserver}
             onSearchDone={featureCollections => {
               this.resolve(featureCollections);
             }}
@@ -323,7 +343,7 @@ class Search extends React.PureComponent {
       case RADIUS: {
         return (
           <SearchWithRadiusInput
-            localObserver={this.localObserver}
+            localObserver={this.searchModel.localObserver}
             resetToStartView={() => {
               this.resetToStartView();
             }}
@@ -340,7 +360,7 @@ class Search extends React.PureComponent {
       case SELECTION: {
         return (
           <SearchWithSelectionInput
-            localObserver={this.localObserver}
+            localObserver={this.searchModel.localObserver}
             resetToStartView={() => {
               this.resetToStartView();
             }}
@@ -364,10 +384,7 @@ class Search extends React.PureComponent {
    * @memberof Search
    */
   render() {
-    // If clean===true, some components won't be rendered below
-    const clean = this.props.app.config.mapConfig.map.clean;
-
-    return clean === false && this.renderSearchBox();
+    return this.renderSearchBox();
   }
 }
 

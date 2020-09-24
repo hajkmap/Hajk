@@ -18,10 +18,6 @@ const styles = theme => {
 };
 
 class BaseWindowPlugin extends React.PureComponent {
-  state = {
-    windowVisible: false
-  };
-
   static propTypes = {
     app: propTypes.object.isRequired,
     children: propTypes.object.isRequired,
@@ -35,10 +31,24 @@ class BaseWindowPlugin extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    // 'type' is basically a unique identifier for each plugin
     this.type = props.type.toLowerCase() || undefined;
+
     // There will be defaults in props.custom, so that each plugin has own default title/description
-    this.title = props.options.title || props.custom.title;
     this.description = props.options.description || props.custom.description;
+
+    // Title and Color are kept in state and not as class properties. Keeping them in state
+    // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
+    this.state = {
+      title: props.options.title || props.custom.title || "Unnamed plugin",
+      color: props.options.color || props.custom.color || null,
+      windowVisible: false // Does not have anything to do with color or title, but must also be set initially
+    };
+
+    // Title is a special case: we want to use the state.title and pass on to Window in order
+    // to update Window's title dynamically. At the same time, we want all other occurrences,
+    // e.g. Widget or Drawer button's label to remain the same.
+    this.title = props.options.title || props.custom.title || "Unnamed plugin";
 
     // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
     this.width = props.options.width || props.custom.width || 400;
@@ -58,12 +68,24 @@ class BaseWindowPlugin extends React.PureComponent {
     });
   }
 
+  // Runs on initial render.
   componentDidMount() {
     // visibleAtStart is false by default. Change to true only if option really is 'true'.
     this.props.options.visibleAtStart === true &&
       this.setState({
         windowVisible: true
       });
+  }
+
+  // Does not run on initial render, but runs on subsequential re-renders.
+  componentDidUpdate(prevProps) {
+    // Window's title and color can be updated on-the-flight, so we keep them
+    // in state and ensure that state is updated when new props arrive.
+    prevProps.custom.title !== this.props.custom.title &&
+      this.setState({ title: this.props.custom.title });
+
+    prevProps.custom.color !== this.props.custom.color &&
+      this.setState({ color: this.props.custom.color });
   }
 
   handleButtonClick = e => {
@@ -115,7 +137,8 @@ class BaseWindowPlugin extends React.PureComponent {
       <>
         <Window
           globalObserver={this.props.app.globalObserver}
-          title={this.title}
+          title={this.state.title}
+          color={this.state.color}
           onClose={this.closeWindow}
           open={this.state.windowVisible}
           onResize={this.props.custom.onResize}
@@ -152,22 +175,27 @@ class BaseWindowPlugin extends React.PureComponent {
    *
    * Those special conditions are small screens, were there's no screen
    * estate to render the Widget button in Map Overlay.
+   *
+   * There is another special case needed to be taken care of: the "hidden"
+   * value on target should not render any button at all, but still load the plugin.
    */
   renderDrawerButton() {
-    return createPortal(
-      <Hidden mdUp={this.props.options.target !== "toolbar"}>
-        <ListItem
-          button
-          divider={true}
-          selected={this.state.windowVisible}
-          onClick={this.handleButtonClick}
-        >
-          <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
-          <ListItemText primary={this.title} />
-        </ListItem>
-      </Hidden>,
-      document.getElementById("plugin-buttons")
-    );
+    return this.props.options.target === "hidden"
+      ? null
+      : createPortal(
+          <Hidden mdUp={this.props.options.target !== "toolbar"}>
+            <ListItem
+              button
+              divider={true}
+              selected={this.state.windowVisible}
+              onClick={this.handleButtonClick}
+            >
+              <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
+              <ListItemText primary={this.title} />
+            </ListItem>
+          </Hidden>,
+          document.getElementById("plugin-buttons")
+        );
   }
 
   renderWidgetButton(id) {

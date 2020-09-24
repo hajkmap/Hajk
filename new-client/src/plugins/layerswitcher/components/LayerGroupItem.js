@@ -89,7 +89,9 @@ const styles = theme => ({
   layerGroupItem: {
     display: "flex"
   },
-  legend: {},
+  legendImage: {
+    maxWidth: "250px"
+  },
   slider: {
     padding: "30px",
     overflow: "hidden"
@@ -430,7 +432,9 @@ class LayerGroupItem extends Component {
               <DownloadLink
                 index={index}
                 layer={this.props.layer}
-                appConfig={this.props.appConfig}
+                enableDownloadLink={
+                  this.props.app.config.mapConfig.map.enableDownloadLink
+                }
               />
             </div>
             <div className={classes.layerButton}>
@@ -448,13 +452,13 @@ class LayerGroupItem extends Component {
             </div>
           </div>
         </div>
-        <div className={classes.legend}>
+        <div>
           {this.state.toggleSubLayerSettings[index] ? (
             <div>
               <img
-                max-width="250px"
                 alt="Teckenförklaring"
                 src={this.props.layer.layersInfo[subLayer].legend}
+                className={classes.legendImage}
               />
             </div>
           ) : null}

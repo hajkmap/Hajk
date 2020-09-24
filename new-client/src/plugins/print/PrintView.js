@@ -37,8 +37,6 @@ import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
 
-import "ol-ext/dist/ol-ext.css";
-
 const styles = theme => ({
   root: {
     display: "flex",

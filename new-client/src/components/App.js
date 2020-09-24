@@ -14,6 +14,8 @@ import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
+import Search from "./searchdemo/Search";
+
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
 import ScaleLine from "../controls/ScaleLine";
@@ -109,11 +111,9 @@ const styles = theme => {
     },
     rightColumn: {
       paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
-      flex: 0
+      paddingRight: theme.spacing(2)
     },
     controlsColumn: {
-      flex: 0,
       display: "flex",
       flexDirection: "column",
       marginTop: 0,
@@ -143,16 +143,22 @@ const styles = theme => {
       backgroundColor: theme.palette.background.paper
     },
     drawerContent: {
-      backgroundColor: theme.palette.background.paper
+      backgroundColor: theme.palette.background.paper,
+      overflow: "auto"
     },
     logoBox: {
-      padding: theme.spacing(1, 2)
+      padding: theme.spacing(1, 2),
+      height: theme.spacing(6)
     },
     logo: {
-      maxHeight: 35
+      height: theme.spacing(4)
     },
     drawerGrid: {
       padding: theme.spacing(0, 2),
+      backgroundColor: "#fff",
+      minHeight: theme.spacing(6)
+    },
+    drawerLiveContent: {
       backgroundColor: "#fff"
     },
     backdrop: {
@@ -233,6 +239,7 @@ class App extends React.PureComponent {
   componentDidMount() {
     var promises = this.appModel
       .createMap()
+      .addSearchModel()
       .addLayers()
       .loadPlugins(this.props.activeTools);
     Promise.all(promises).then(() => {
@@ -248,7 +255,7 @@ class App extends React.PureComponent {
               value: "plugins",
               ButtonIcon: MapIcon,
               caption: "Kartverktyg",
-              order: 2,
+              order: 0,
               renderDrawerContent: function() {
                 return null; // Nothing specific should be rendered - this is a special case!
               }
@@ -265,10 +272,10 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
-    this.globalObserver.subscribe("core.mapClick", mapClickDataResult => {
+    this.globalObserver.subscribe("core.mapClick", results => {
       this.appModel.highlight(false);
       this.setState({
-        mapClickDataResult: mapClickDataResult
+        mapClickDataResult: results
       });
     });
 
@@ -323,72 +330,83 @@ class App extends React.PureComponent {
       this.setState({ drawerButtons: newState });
     });
 
-    this.appModel
-      .getMap()
-      .getLayers()
-      .getArray()
-      .forEach(layer => {
-        layer.on("change:visible", evt => {
-          let layer = evt.target;
-          if (
-            this.state.mapClickDataResult &&
-            Array.isArray(this.state.mapClickDataResult.features)
-          ) {
-            this.state.mapClickDataResult.features.forEach(feature => {
-              if (feature.layer === layer) {
-                let o = { ...this.state.mapClickDataResult };
-                o.features = o.features.filter(f => f !== feature);
-                this.setState({
-                  mapClickDataResult: o
-                });
-              }
-            });
-          }
-        });
-      });
+    /**
+     * TODO: Implement correctly a way to remove features from map click
+     * results when layer visibility is changed. The current implementation
+     * has problems with group layers: if we have a group layer and toggle
+     * its visibility, the features are not removed from infoclick window.
+     */
+    // this.appModel
+    //   .getMap()
+    //   .getLayers()
+    //   .getArray()
+    //   .forEach((layer) => {
+    //     layer.on("change:visible", (e) => {
+    //       const layer = e.target;
+    //       if (Array.isArray(this.state.mapClickDataResult.features)) {
+    //         this.state.mapClickDataResult.features.forEach((feature) => {
+    //           if (feature.layer === layer) {
+    //             const o = { ...this.state.mapClickDataResult };
+    //             o.features = o.features.filter((f) => f !== feature);
+    //             this.setState({
+    //               mapClickDataResult: o,
+    //             });
+    //           }
+    //         });
+    //       }
+    //     });
+    //   });
   }
 
   renderInfoclickWindow() {
-    const infoclickConfig = this.props.config.mapConfig.tools.find(
+    // Check if admin wants Infoclick to be active
+    const infoclickOptions = this.props.config.mapConfig.tools.find(
       t => t.type === "infoclick"
-    );
+    )?.options;
 
-    if (infoclickConfig === undefined) {
-      return null;
-    }
-
-    const open =
-      this.state.mapClickDataResult &&
-      this.state.mapClickDataResult.features &&
-      this.state.mapClickDataResult.features.length > 0
-        ? true
-        : false;
-    const features =
-      this.state.mapClickDataResult && this.state.mapClickDataResult.features;
-
-    const { title, position, width, height } = infoclickConfig.options;
+    // The 'open' prop, below, will control whether the Window is
+    // currently visible or not. The 'open' property itself
+    // depends on whether there are Features to display or not.
+    //
+    // That, in turn, depends on what's in the current state of 'mapClickDataResult'.
+    //
+    // It will be changed each time user clicks on map (as we have it registered
+    // like that in Click.js), so we can be confident that __after each user
+    // click we do have the most current results in our state__.
+    //
+    // Note however that which layers are included is controlled by
+    // __layer visibility at the time the click event happens!__
+    //
+    // As soon as user starts to show/hide layers __after__ the click, our
+    // 'mapClickDataResult' may contain results from hidden layers (or not
+    // contain results from layers activated after the click occurred).
+    //
+    // This may or may not be a bug (depending on how we see it), and may
+    // be fixed in the future.
 
     return (
-      <Window
-        globalObserver={this.globalObserver}
-        title={title || "Infoclick"}
-        open={open}
-        position={position || "right"}
-        mode="window"
-        width={width || 400}
-        height={height || 300}
-        features={features}
-        map={this.appModel.getMap()}
-        onDisplay={feature => {
-          this.appModel.highlight(feature);
-        }}
-        onClose={() => {
-          this.appModel.highlight(false);
-          this.setState({
-            mapClickDataResult: undefined
-          });
-        }}
-      />
+      infoclickOptions !== undefined && (
+        <Window
+          open={this.state.mapClickDataResult?.features?.length > 0} // Will show window only if there are any features to show
+          globalObserver={this.globalObserver}
+          title={infoclickOptions.title || "Infoclick"}
+          position={infoclickOptions.position || "right"}
+          mode="window"
+          width={infoclickOptions.width || 400}
+          height={infoclickOptions.height || 300}
+          features={this.state.mapClickDataResult?.features}
+          map={this.appModel.getMap()}
+          onDisplay={feature => {
+            this.appModel.highlight(feature);
+          }}
+          onClose={() => {
+            this.appModel.highlight(false);
+            this.setState({
+              mapClickDataResult: undefined
+            });
+          }}
+        />
+      )
     );
   }
 
@@ -434,14 +452,27 @@ class App extends React.PureComponent {
     this.setState({ drawerMouseOverLock: false });
   };
 
+  // Method below renders the **old** Search plugin. See below for the current implementation.
   renderSearchPlugin() {
     const searchPlugin = this.appModel.plugins.search;
-    if (searchPlugin) {
+    // Renders the configured search plugin (if one is configured)
+    return searchPlugin ? (
+      <searchPlugin.component
+        map={searchPlugin.map}
+        app={searchPlugin.app}
+        options={searchPlugin.options}
+      />
+    ) : null;
+  }
+
+  renderSearchComponent() {
+    // FIXME: We should get config from somewhere else now when Search is part of Core
+    if (this.appModel.plugins.search) {
       return (
-        <searchPlugin.component
-          map={searchPlugin.map}
-          app={searchPlugin.app}
-          options={searchPlugin.options}
+        <Search
+          map={this.appModel.getMap()}
+          app={this}
+          options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
         />
       );
     } else {
@@ -604,7 +635,8 @@ class App extends React.PureComponent {
           <div
             id="appBox"
             className={cslx(classes.flexBox, {
-              [classes.shiftedLeft]: this.state.drawerPermanent
+              [classes.shiftedLeft]:
+                this.state.drawerPermanent && clean === false
             })}
           >
             <header
@@ -614,11 +646,10 @@ class App extends React.PureComponent {
               {clean === false && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
-                  // drawerPermanent={this.state.drawerPermanent}
                   globalObserver={this.globalObserver}
                 />
               )}
-              {clean === false && this.renderSearchPlugin()}
+              {clean === false && this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div
@@ -668,7 +699,8 @@ class App extends React.PureComponent {
           <div
             id="map"
             className={cslx(classes.map, {
-              [classes.shiftedLeft]: this.state.drawerPermanent
+              [classes.shiftedLeft]:
+                this.state.drawerPermanent && clean === false
             })}
           ></div>
           <div
@@ -677,7 +709,8 @@ class App extends React.PureComponent {
               classes.pointerEventsOnChildren,
               classes.windowsContainer,
               {
-                [classes.shiftedLeft]: this.state.drawerPermanent
+                [classes.shiftedLeft]:
+                  this.state.drawerPermanent && clean === false
               }
             )}
           >
@@ -686,28 +719,32 @@ class App extends React.PureComponent {
               plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
             />
           </div>
-          <Drawer
-            open={this.state.drawerVisible}
-            // NB: we can't simply toggle between permanent|temporary,
-            // as the temporary mode unmounts element from DOM and
-            // re-mounts it the next time, so we would re-rendering
-            // our plugins all the time.
-            variant="persistent"
-            classes={{
-              paper: classes.drawerBackground
-            }}
-          >
-            {this.renderDrawerHeader()}
-            <Divider />
-            {this.renderAllDrawerContent()}
-          </Drawer>
-          <Backdrop
-            open={this.state.drawerVisible && !this.state.drawerPermanent}
-            className={classes.backdrop}
-            onClick={e => {
-              this.globalObserver.publish("core.hideDrawer");
-            }}
-          />
+          {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
+            <Drawer
+              open={this.state.drawerVisible}
+              // NB: we can't simply toggle between permanent|temporary,
+              // as the temporary mode unmounts element from DOM and
+              // re-mounts it the next time, so we would re-rendering
+              // our plugins all the time.
+              variant="persistent"
+              classes={{
+                paper: classes.drawerBackground
+              }}
+            >
+              {this.renderDrawerHeader()}
+              <Divider />
+              {this.renderAllDrawerContent()}
+            </Drawer>
+          )}
+          {clean === false && (
+            <Backdrop
+              open={this.state.drawerVisible && !this.state.drawerPermanent}
+              className={classes.backdrop}
+              onClick={e => {
+                this.globalObserver.publish("core.hideDrawer");
+              }}
+            />
+          )}
           <Introduction
             experimentalIntroductionEnabled={
               this.appModel.config.appConfig.experimentalIntroductionEnabled

@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import GeoJSON from "ol/format/GeoJSON";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
 import KeyboardArrowDown from "@material-ui/icons/KeyboardArrowDown";
 import Button from "@material-ui/core/Button";
 import {
@@ -30,14 +30,14 @@ const styles = theme => ({
     background: "#efefef",
     borderTop: "1px solid #ccc"
   },
-  activeExpansionPanelSummary: {
+  activeAccordionSummary: {
     background: "#e1e1e1",
     fontWeight: "bold"
   },
   activeExpandButton: {
     color: "black"
   },
-  expansionPanelDetails: {
+  AccordionDetails: {
     background: "white"
   },
 
@@ -151,8 +151,8 @@ class SearchResultItem extends Component {
     );
 
     return (
-      <ExpansionPanel expanded={this.state.expanded} className={classes.item}>
-        <ExpansionPanelSummary
+      <Accordion expanded={this.state.expanded} className={classes.item}>
+        <AccordionSummary
           onClick={e => {
             this.handleOnFeatureClick(feature);
           }}
@@ -161,7 +161,7 @@ class SearchResultItem extends Component {
             expanded: classes.expanded,
             content: classes.content
           }}
-          className={active ? classes.activeExpansionPanelSummary : null}
+          className={active ? classes.activeAccordionSummary : null}
           expandIcon={
             <ExpandIconWrapper>
               <KeyboardArrowDown
@@ -185,16 +185,16 @@ class SearchResultItem extends Component {
               ) : null}
             </div>
           </div>
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+        </AccordionSummary>
+        <AccordionDetails className={classes.AccordionDetails}>
           <div
             dangerouslySetInnerHTML={this.getHtmlItemInfoBox(
               feature,
               feature.infobox
             )}
           />
-        </ExpansionPanelDetails>
-      </ExpansionPanel>
+        </AccordionDetails>
+      </Accordion>
     );
   }
 }

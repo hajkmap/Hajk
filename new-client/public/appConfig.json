@@ -12,13 +12,22 @@
     {
       "id": 1,
       "active": true,
-      "text": "This is a demo message from Hajk.",
-      "showOnlyOnce": false,
+      "text": "This demo message from Hajk will show only once.",
+      "showOnlyOnce": true,
       "maps": ["map_1"],
-      "timeout": 3000,
+      "timeout": 5000,
       "startTime": "2020-06-29",
       "stopTime": "2099-12-31",
-      "type": "info"
+      "type": "info",
+      "browsers": "all"
+    },
+    {
+      "id": 2,
+      "active": true,
+      "text": "Your browser is not supported anymore. Please update to a modern browser.",
+      "showOnlyOnce": false,
+      "type": "warning",
+      "browsers": ["ie"]
     }
   ]
 }

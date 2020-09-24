@@ -133,6 +133,7 @@ class Window extends React.PureComponent {
   static propTypes = {
     children: propTypes.object,
     classes: propTypes.object.isRequired,
+    color: propTypes.string,
     features: propTypes.array,
     globalObserver: propTypes.object.isRequired,
     height: propTypes.oneOfType([propTypes.number, propTypes.string])
@@ -402,6 +403,7 @@ class Window extends React.PureComponent {
     const {
       children,
       classes,
+      color,
       features,
       open,
       title,
@@ -499,6 +501,7 @@ class Window extends React.PureComponent {
           <PanelHeader
             onClose={this.close}
             title={title}
+            color={color}
             onMaximize={this.maximize}
             onMinimize={this.minimize}
             mode={this.mode}

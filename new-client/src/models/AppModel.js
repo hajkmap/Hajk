@@ -1,3 +1,4 @@
+import SearchModel from "./SearchModel";
 import Plugin from "./Plugin.js";
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
@@ -109,7 +110,7 @@ class AppModel {
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
       .filter(plugin => {
-        return ["toolbar", "left", "right", "control"].includes(
+        return ["toolbar", "left", "right", "control", "hidden"].includes(
           plugin.options.target
         );
       })
@@ -153,6 +154,7 @@ class AppModel {
                 map: map,
                 app: this,
                 type: plugin,
+                searchInterface: {},
                 sortOrder: sortOrder,
                 options: toolOptions,
                 component: module.default
@@ -173,7 +175,7 @@ class AppModel {
    * @return {ol.Map} map
    */
   createMap() {
-    var config = this.translateConfig();
+    const config = this.translateConfig();
     map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
@@ -219,6 +221,16 @@ class AppModel {
 
   getMap() {
     return map;
+  }
+
+  addSearchModel() {
+    // TODO: Move configuration somewhere else, shouldn't be plugin-dependent.
+    const searchConfig = this.config.mapConfig.tools.find(
+      t => t.type === "search"
+    ).options;
+    this.searchModel = new SearchModel(searchConfig, this.getMap(), this);
+
+    return this;
   }
 
   clear() {
@@ -412,6 +424,10 @@ class AppModel {
     }
   }
 
+  /**
+   * TODO: Obsolete, replaced by new app-wide solution using URL APIs, see #568.
+   * Ensure that this gets removed too.
+   */
   parseQueryParams() {
     var o = {};
     document.location.search
@@ -472,15 +488,6 @@ class AppModel {
     if (f) {
       // Filters come as a URI encoded JSON object, so we must parse it first
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
-    }
-
-    // If 'v' query param is specified, it looks like we will want to search on load
-    if (b.v !== undefined && b.v.length > 0) {
-      a.map.searchOnStart = {
-        v: this.returnStringOrUndefined(b.v), // Search Value (will NOT search on start if null)
-        s: this.returnStringOrUndefined(b.s), // Search Service (will search in all, if null)
-        t: this.returnStringOrUndefined(b.t) // Search Type (controls which search plugin is used, default search if null)
-      };
     }
 
     return a;

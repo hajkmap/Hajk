@@ -67,6 +67,7 @@ class MapOptions extends Component {
         origin: config.origin,
         constrainOnlyCenter: config.constrainOnlyCenter,
         constrainResolution: config.constrainResolution,
+        enableDownloadLink: config.enableDownloadLink,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
         drawerVisible: config.drawerVisible,
@@ -109,6 +110,7 @@ class MapOptions extends Component {
       origin: mapConfig.origin,
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
       constrainResolution: mapConfig.constrainResolution,
+      enableDownloadLink: mapConfig.enableDownloadLink,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
       drawerVisible: mapConfig.drawerVisible,
@@ -238,6 +240,7 @@ class MapOptions extends Component {
         break;
       case "constrainOnlyCenter":
       case "constrainResolution":
+      case "enableDownloadLink":
       case "mapselector":
       case "mapcleaner":
       case "drawerVisible":
@@ -283,6 +286,7 @@ class MapOptions extends Component {
         config.origin = this.getValue("origin");
         config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
         config.constrainResolution = this.getValue("constrainResolution");
+        config.enableDownloadLink = this.getValue("enableDownloadLink");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
         config.drawerVisible = this.getValue("drawerVisible");
@@ -585,6 +589,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Styr ol.Views 'constrainResolution'-parameter. Om sant kommer det endast gå att zooma mellan satta resolutions"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_enableDownloadLink"
+                type="checkbox"
+                ref="input_enableDownloadLink"
+                onChange={e => {
+                  this.setState({ enableDownloadLink: e.target.checked });
+                }}
+                checked={this.state.enableDownloadLink}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_enableDownloadLink">
+                Tillåt nedladdning av WMS-lager{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt kommer en nedladdningsknapp att visas brevid varje lager i Lagerhanteraren."
                 />
               </label>
             </div>
