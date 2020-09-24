@@ -17,7 +17,6 @@ const styles = (theme) => ({
 
 class PrintListItem extends React.PureComponent {
   static propTypes = {
-    onClick: PropTypes.func.isRequired,
     chapter: PropTypes.object.isRequired,
   };
 

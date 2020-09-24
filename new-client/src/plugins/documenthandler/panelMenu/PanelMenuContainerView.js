@@ -20,7 +20,6 @@ class PanelMenuView extends React.PureComponent {
       this.setInternalId(menuItem);
       this.internalId = this.internalId + 1;
     });
-    console.log(props.options.menuConfig.menu, "menu");
 
     this.bindSubscriptions();
   }
