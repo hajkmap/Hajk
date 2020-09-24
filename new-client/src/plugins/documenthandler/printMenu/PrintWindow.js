@@ -333,10 +333,7 @@ class PrintWindow extends React.PureComponent {
       this.areAllImagesLoaded().then(() => {
         this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
         this.distributeContentOnPages(this.toc, "TOC");
-        //this.addNewPage("CONTENT", 950);
-
         this.content.children.forEach((child) => {
-          console.log(child.tagName, "tagName");
           this.distributeContentOnPages(child, "CONTENT");
         });
 
