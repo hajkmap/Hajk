@@ -89,12 +89,25 @@ class PrintWindow extends React.PureComponent {
     return this.printPages[this.printPages.length - 1].availableHeight;
   };
 
-  checkIfTagIsTitle = (node) => {
-    let tagName = node.tagName;
-    return ["H1", "H2", "H3", "H4", "H5"].includes(tagName);
+  checkIfContentIsHtag = () => {};
+
+  checkIfContentIsChapterTitle = (node) => {
+    return [...node.children].some((child) => {
+      return (
+        ["H1", "H2", "H3", "H4", "H5"].includes(child.tagName) &&
+        child.id === "chapter-header"
+      );
+    });
+  };
+
+  isContentHeaderTag = (content) => {
+    return ["H1", "H2", "H3", "H4", "H5"].includes(content.tagName);
   };
 
   contentFitsCurrentPage = (content) => {
+    if (this.isContentHeaderTag(content)) {
+      return this.getAvailableHeight() >= 0.4 * maxHeight;
+    }
     let contentHeight = content.clientHeight;
     let availableHeight = this.getAvailableHeight();
     return contentHeight <= availableHeight;
@@ -122,26 +135,42 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  appendHeaderToPdf = (content, type) => {
-    if (this.getAvailableHeight() >= 0.4 * maxHeight) {
-      this.addContentToCurrentPage(content);
-    } else {
-      this.addContentToNewPage(content, maxHeight, type);
-    }
-  };
-
   isTocListElement = (type, content) => {
     return type === "TOC" && content.tagName === "LI";
   };
 
+  hasChildren = (content) => {
+    return content.children && content.children.length > 0;
+  };
+
+  getDisplayType = (element) => {
+    var cStyle = element.currentStyle || window.getComputedStyle(element, "");
+    return cStyle.display;
+  };
+
+  isContentTextArea = (content) => {
+    return content.id === "text-area-content";
+  };
+
   distributeContentOnPages = (content, type) => {
-    if (this.checkIfTagIsTitle(content)) {
-      this.appendHeaderToPdf(content, type);
+    if (this.isContentTextArea(content)) {
+      if (this.contentFitsCurrentPage(content)) {
+        this.addContentToCurrentPage(content);
+      } else {
+        this.addContentToNewPage(content, maxHeight, type);
+      }
+    }
+
+    if (this.checkIfContentIsChapterTitle(content)) {
+      this.addContentToNewPage(content, maxHeight, type);
     } else {
       if (this.contentFitsCurrentPage(content)) {
         this.addContentToCurrentPage(content);
       } else {
-        if (!content.hasChildNodes() || this.isTocListElement(type, content)) {
+        if (
+          !this.hasChildren(content) ||
+          this.isTocListElement(type, content)
+        ) {
           this.addContentToNewPage(content, maxHeight, type);
         } else {
           [...content.children].forEach((child) => {
@@ -304,12 +333,13 @@ class PrintWindow extends React.PureComponent {
       this.areAllImagesLoaded().then(() => {
         this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
         this.distributeContentOnPages(this.toc, "TOC");
-        this.addNewPage("CONTENT", 950);
+        //this.addNewPage("CONTENT", 950);
+
         this.content.children.forEach((child) => {
+          console.log(child.tagName, "tagName");
           this.distributeContentOnPages(child, "CONTENT");
         });
 
-        console.log("this.printPages: ", this.printPages);
         let canvasPromises = this.printPages.map((page, index) => {
           return this.getCanvasFromContent(page);
         });
@@ -617,8 +647,8 @@ class PrintWindow extends React.PureComponent {
             <DialogTitle>Din PDF skapas</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                Det här kan ta en stund, speciellt om du har att skriva ut många
-                dokument.
+                Det här kan ta en stund, speciellt om du har valt att skriva ut
+                många dokument.
                 <br />
                 <br />
               </DialogContentText>
@@ -693,28 +723,7 @@ class PrintWindow extends React.PureComponent {
               />
             </Grid>
           </Grid>
-          <Grid xs={6} item>
-            <Grid xs={12} item>
-              <Typography variant="h6">Innehåll</Typography>
-            </Grid>
-            <Grid xs={12} item>
-              {" "}
-              <FormControlLabel
-                value="Inkludera kartor"
-                control={
-                  <Checkbox
-                    color="primary"
-                    checked={this.state.printMaps}
-                    onChange={() =>
-                      this.setState({ printMaps: !this.state.printMaps })
-                    }
-                  />
-                }
-                label="Inkludera kartor"
-                labelPlacement="end"
-              />
-            </Grid>
-          </Grid>
+          <Grid xs={6} item></Grid>
         </Grid>
         <Grid className={classes.middleContainer} item container>
           <PrintList
