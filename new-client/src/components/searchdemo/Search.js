@@ -148,8 +148,7 @@ class Search extends React.PureComponent {
   };
 
   handleSearchInput = (event, value, reason) => {
-    let searchString = value?.autocompleteEntry.split(",")[0] || value || "";
-    console.log("reason: ", reason);
+    let searchString = value?.autocompleteEntry || value || "";
 
     if (searchString !== "") {
       this.setState(
@@ -219,10 +218,16 @@ class Search extends React.PureComponent {
   };
 
   getMatchedSearchFields = (featureCollection, feature) => {
+    let wordsInTextField = this.state.searchString
+      .split(",")
+      .join(" ")
+      .split(" ");
     return featureCollection.source.searchFields.filter((searchField) => {
-      return RegExp(`^${this.state.searchString}\\W*`, "i").test(
-        feature.properties[searchField]
-      );
+      return wordsInTextField.map((word) => {
+        return RegExp(`^${word}\\W*`, "i").test(
+          feature.properties[searchField]
+        );
+      });
     });
   };
 
@@ -417,15 +422,12 @@ class Search extends React.PureComponent {
   };
 
   prepareAutoCompleteList = (searchResults) => {
-    console.log("searchREsults: ", searchResults);
     let maxSlots = 7;
     let numSourcesWithResults = searchResults.featureCollections.length;
-    console.log("numSourcesWithResults: ", numSourcesWithResults);
     let numResults = 0;
     searchResults.featureCollections.forEach((fc) => {
       numResults += fc.value.features.length;
     });
-    console.log("numResults: ", numResults);
 
     let spacesPerSource = Math.max(
       1,
@@ -440,7 +442,6 @@ class Search extends React.PureComponent {
       return this.flattenAndSortAutoCompleteList(searchResults);
     } else {
       searchResults.featureCollections.forEach((fc) => {
-        console.log("fc.value.features", fc.value.features);
         if (fc.value.features.length > spacesPerSource) {
           fc = fc.value.features.splice(spacesPerSource);
         }
