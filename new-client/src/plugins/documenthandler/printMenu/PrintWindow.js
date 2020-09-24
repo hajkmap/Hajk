@@ -92,12 +92,16 @@ class PrintWindow extends React.PureComponent {
   checkIfContentIsHtag = () => {};
 
   checkIfContentIsChapterTitle = (node) => {
-    return [...node.children].some((child) => {
-      return (
-        ["H1", "H2", "H3", "H4", "H5"].includes(child.tagName) &&
-        child.id === "chapter-header"
-      );
-    });
+    if (node.id === "chapter-header") {
+      return true;
+    } else {
+      return [...node.children].some((child) => {
+        return (
+          ["H1", "H2", "H3", "H4", "H5"].includes(child.tagName) &&
+          child.id === "chapter-header"
+        );
+      });
+    }
   };
 
   isContentHeaderTag = (content) => {
@@ -143,42 +147,72 @@ class PrintWindow extends React.PureComponent {
     return content.children && content.children.length > 0;
   };
 
-  getDisplayType = (element) => {
-    var cStyle = element.currentStyle || window.getComputedStyle(element, "");
-    return cStyle.display;
-  };
-
   isContentTextArea = (content) => {
     return content.id === "text-area-content";
   };
 
+  /**
+   * Distributes all content so page-breaks happens
+   * att suitable places. If content doesn't fit it is divided into
+   * smaller fractions e.g its children. (Happens recursively)
+   *
+   * Handle TextAreas as an element that cant be divided into
+   * smaller fractions
+   *
+   * Chapter titles is always appended to new page
+   *
+   * Special case for li-tags so that they keep their inline-prop (indentation)
+   * in Table Of Contents
+   *
+   * If contents fit the current page otherwise we add it to new page.
+   *
+   * Type is used to differentiate between TOC and CONTENT because
+   * footer is different for TOC and CONTENT
+   *
+   * @param {DOMNode} content
+   * @param {string} type Can be either TOC or CONTENT.
+   *
+   */
+
+  //if-else-chaos, sorry :)
   distributeContentOnPages = (content, type) => {
+    if (content.tagName === "BR") {
+      this.handleBrTags(content);
+    }
+
     if (this.isContentTextArea(content)) {
       if (this.contentFitsCurrentPage(content)) {
         this.addContentToCurrentPage(content);
       } else {
         this.addContentToNewPage(content, maxHeight, type);
       }
-    }
-
-    if (this.checkIfContentIsChapterTitle(content)) {
-      this.addContentToNewPage(content, maxHeight, type);
     } else {
-      if (this.contentFitsCurrentPage(content)) {
-        this.addContentToCurrentPage(content);
+      if (this.checkIfContentIsChapterTitle(content)) {
+        console.log(content, "content");
+        this.addContentToNewPage(content, maxHeight, type);
       } else {
-        if (
-          !this.hasChildren(content) ||
-          this.isTocListElement(type, content)
-        ) {
-          this.addContentToNewPage(content, maxHeight, type);
+        if (this.contentFitsCurrentPage(content)) {
+          this.addContentToCurrentPage(content);
         } else {
-          [...content.children].forEach((child) => {
-            this.distributeContentOnPages(child, type);
-          });
+          if (
+            !this.hasChildren(content) ||
+            this.isTocListElement(type, content)
+          ) {
+            this.addContentToNewPage(content, maxHeight, type);
+          } else {
+            [...content.children].forEach((child) => {
+              this.distributeContentOnPages(child, type);
+            });
+          }
         }
       }
     }
+  };
+
+  handleBrTags = (content) => {
+    let brHeight = window.getComputedStyle(content).lineHeight;
+    this.printPages[this.printPages.length - 1].availableHeight -=
+      brHeight.substr(0, brHeight.length - 2) * 1.2;
   };
 
   getCanvasFromContent = (page) => {
@@ -189,6 +223,7 @@ class PrintWindow extends React.PureComponent {
     let pR = window.devicePixelRatio;
     let onePageDiv = document.createElement("div");
 
+    //Moving div outside viewport - hack
     onePageDiv.style.position = "absolute";
     onePageDiv.style.left = "-10000px";
     onePageDiv.style.width = `${210}mm`;
@@ -328,6 +363,17 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
+  //Bug in html2canvas so we need to delay
+  delayCanvasCreate = (page, index) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        this.getCanvasFromContent(page).then((x) => {
+          resolve(x);
+        });
+      }, 500 * index + 1);
+    });
+  };
+
   printContents = () => {
     Promise.all([this.renderToc(), this.renderContent()]).then(() => {
       this.areAllImagesLoaded().then(() => {
@@ -338,7 +384,7 @@ class PrintWindow extends React.PureComponent {
         });
 
         let canvasPromises = this.printPages.map((page, index) => {
-          return this.getCanvasFromContent(page);
+          return this.delayCanvasCreate(page, index);
         });
 
         Promise.all(canvasPromises).then((canvases) => {
