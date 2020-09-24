@@ -3,8 +3,8 @@ class ExamplesDatabase {
     this._data = [];
     this._counter = 0;
 
-    this.insert('example 0');
-    this.insert('example 1');
+    this.insert("example 0");
+    this.insert("example 1");
   }
 
   all() {

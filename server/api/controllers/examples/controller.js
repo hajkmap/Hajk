@@ -1,4 +1,4 @@
-import ExamplesService from '../../services/examples.service';
+import ExamplesService from "../../services/examples.service";
 
 export class Controller {
   all(req, res) {

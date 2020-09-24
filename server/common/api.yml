@@ -24,19 +24,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Example'
+                  $ref: "#/components/schemas/Example"
         4XX:
           description: Example not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         5XX:
           description: Example not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
     post:
       tags:
         - Examples
@@ -46,7 +46,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExampleBody'
+              $ref: "#/components/schemas/ExampleBody"
         required: true
       responses:
         201:
@@ -54,19 +54,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Example'
+                $ref: "#/components/schemas/Example"
         4XX:
           description: Example not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         5XX:
           description: Example not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /examples/{id}:
     get:
       tags:
@@ -84,19 +84,60 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Example'
+                $ref: "#/components/schemas/Example"
         4XX:
           description: Example not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         5XX:
           description: Example not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
+  /config/layers:
+    get:
+      tags:
+        - Maps and layers
+      description: Lists all available layers
+      responses:
+        200:
+          description: All layers where fetch successfully
+          content: {}
+  /config/{map}:
+    get:
+      tags:
+        - Maps and layers
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map to fetch
+          required: true
+          schema:
+            type: string
+      description: Returns map config file
+      responses:
+        200:
+          description: Success
+          content: {}
+  /proxy/{query}:
+    get:
+      tags:
+        - Sokigo FB Proxy
+      parameters:
+        - name: query
+          in: path
+          description: The query to retrive
+          required: true
+          schema:
+            type: string
+      description: Proxy test
+      responses:
+        200:
+          description: Fetch all
+          content: {}
   /spec:
     get:
       tags:
