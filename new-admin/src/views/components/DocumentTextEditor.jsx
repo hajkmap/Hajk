@@ -7,6 +7,7 @@ import {
   Modifier,
   AtomicBlockUtils,
   getDefaultKeyBinding,
+  KeyBindingUtil,
 } from "draft-js";
 import { stateToHTML } from "draft-js-export-html";
 import { stateFromHTML } from "draft-js-import-html";
@@ -225,16 +226,11 @@ class RichEditor extends Component {
     this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this);
     this.toggleBlockType = this._toggleBlockType.bind(this);
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
+    this.handleReturn = this._handleReturn.bind(this);
   }
 
   _handleKeyCommand(command, editorState) {
-    let newState = RichUtils.handleKeyCommand(editorState, command);
-
-    if (command === "split-block") {
-      // Add soft break on Enter
-      newState = RichUtils.insertSoftNewline(editorState, command);
-    }
-
+    const newState = RichUtils.handleKeyCommand(editorState, command);
     if (newState) {
       this.onChange(newState);
       return true;
@@ -266,6 +262,17 @@ class RichEditor extends Component {
       RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
     );
   }
+
+  _handleReturn = (evt) => {
+    // Handle soft break on Shift+Enter
+    const blockType = RichUtils.getCurrentBlockType(this.state.editorState);
+    if (blockType !== "blockquote" || !KeyBindingUtil.isSoftNewlineEvent(evt)) {
+      return "not_handled";
+    }
+    const newState = RichUtils.insertSoftNewline(this.state.editorState);
+    this.onChange(newState);
+    return "handled";
+  };
 
   addImage(imgData) {
     const { editorState } = this.state;
@@ -502,6 +509,7 @@ class RichEditor extends Component {
                 editorState={editorState}
                 handlePastedText={this.handlePastedText}
                 handleKeyCommand={this.handleKeyCommand}
+                handleReturn={this.handleReturn}
                 keyBindingFn={this.mapKeyToEditorCommand}
                 onChange={this.onChange}
                 placeholder=""
