@@ -6,7 +6,7 @@ import {
   RichUtils,
   Modifier,
   AtomicBlockUtils,
-  getDefaultKeyBinding
+  getDefaultKeyBinding,
 } from "draft-js";
 import { stateToHTML } from "draft-js-export-html";
 import { stateFromHTML } from "draft-js-import-html";
@@ -23,30 +23,30 @@ import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
 import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 
-const ColorButtonRed = withStyles(theme => ({
+const ColorButtonRed = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(red[500]),
     backgroundColor: red[500],
     "&:hover": {
-      backgroundColor: red[700]
-    }
-  }
+      backgroundColor: red[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
 class StyleButton extends React.Component {
   constructor() {
     super();
-    this.onToggle = e => {
+    this.onToggle = (e) => {
       e.preventDefault();
       this.props.onToggle(this.props.style);
     };
@@ -70,7 +70,7 @@ function mediaBlockRenderer(block) {
   if (block.getType() === "atomic") {
     return {
       component: Media,
-      editable: false
+      editable: false,
     };
   }
 
@@ -86,7 +86,7 @@ function getBlockStyle(block) {
   }
 }
 
-const Image = props => {
+const Image = (props) => {
   const imgSrc = props.src;
   const imgWidth = props.width;
   const imgHeight = props.height;
@@ -120,7 +120,7 @@ const Image = props => {
   }
 };
 
-const Media = props => {
+const Media = (props) => {
   const entity = props.contentState.getEntity(props.block.getEntityAt(0));
   const { src, width, height } = entity.getData();
   const data = entity.getData();
@@ -146,8 +146,8 @@ const styleMap = {
     backgroundColor: "rgba(0, 0, 0, 0.05)",
     fontFamily: '"Inconsolata", "Menlo", "Consolas", monospace',
     fontSize: 16,
-    padding: 2
-  }
+    padding: 2,
+  },
 };
 
 const BLOCK_TYPES = [
@@ -159,16 +159,16 @@ const BLOCK_TYPES = [
   //{ label: "H6", style: "header-six" },
   { label: <FormatQuoteIcon />, style: "blockquote" },
   { label: "UL", style: "unordered-list-item" },
-  { label: "OL", style: "ordered-list-item" }
+  { label: "OL", style: "ordered-list-item" },
 ];
 
 var INLINE_STYLES = [
   { label: <FormatBoldIcon />, style: "BOLD" },
   { label: <FormatItalicIcon />, style: "ITALIC" },
-  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" }
+  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" },
 ];
 
-const BlockStyleControls = props => {
+const BlockStyleControls = (props) => {
   const { editorState } = props;
   const selection = editorState.getSelection();
   const blockType = editorState
@@ -178,7 +178,7 @@ const BlockStyleControls = props => {
 
   return (
     <div className="document-editor-controls">
-      {BLOCK_TYPES.map(type => (
+      {BLOCK_TYPES.map((type) => (
         <StyleButton
           key={type.style}
           active={type.style === blockType}
@@ -191,12 +191,12 @@ const BlockStyleControls = props => {
   );
 };
 
-const InlineStyleControls = props => {
+const InlineStyleControls = (props) => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
 
   return (
     <div className="document-editor-controls">
-      {INLINE_STYLES.map(type => (
+      {INLINE_STYLES.map((type) => (
         <StyleButton
           key={type.style}
           active={currentStyle.has(type.style)}
@@ -217,10 +217,10 @@ class RichEditor extends Component {
         stateFromHTML(this.props.html)
       ),
       readonly: true,
-      html: this.props.html
+      html: this.props.html,
     };
     this.focus = () => this.refs.editor.focus();
-    this.onChange = editorState => this.setState({ editorState });
+    this.onChange = (editorState) => this.setState({ editorState });
     this.handleKeyCommand = this._handleKeyCommand.bind(this);
     this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this);
     this.toggleBlockType = this._toggleBlockType.bind(this);
@@ -228,8 +228,13 @@ class RichEditor extends Component {
   }
 
   _handleKeyCommand(command, editorState) {
-    console.log("COMMAND", command);
-    const newState = RichUtils.handleKeyCommand(editorState, command);
+    let newState = RichUtils.handleKeyCommand(editorState, command);
+
+    if (command === "split-block") {
+      // Add soft break on Enter
+      newState = RichUtils.insertSoftNewline(editorState, command);
+    }
+
     if (newState) {
       this.onChange(newState);
       return true;
@@ -274,12 +279,12 @@ class RichEditor extends Component {
         height: imgData.imageHeight,
         "data-caption": imgData.imageCaption,
         "data-source": imgData.imageSource,
-        "data-popup": imgData.imagePopup
+        "data-popup": imgData.imagePopup,
       }
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.set(editorState, {
-      currentContent: contentStateWithEntity
+      currentContent: contentStateWithEntity,
     });
     this.setState(
       {
@@ -287,7 +292,7 @@ class RichEditor extends Component {
           newEditorState,
           entityKey,
           " "
-        )
+        ),
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -306,7 +311,7 @@ class RichEditor extends Component {
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.set(editorState, {
-      currentContent: contentStateWithEntity
+      currentContent: contentStateWithEntity,
     });
     this.setState(
       {
@@ -314,7 +319,7 @@ class RichEditor extends Component {
           newEditorState,
           entityKey,
           " "
-        )
+        ),
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -329,7 +334,7 @@ class RichEditor extends Component {
 
     // Add custom attributes
     let options = {
-      entityStyleFn: entity => {
+      entityStyleFn: (entity) => {
         const entityType = entity.get("type").toLowerCase()
           ? entity.get("type").toLowerCase()
           : null;
@@ -345,13 +350,13 @@ class RichEditor extends Component {
               width: data.width,
               height: data.height,
               "data-caption": dataCaption,
-              "data-source": dataSource
-            }
+              "data-source": dataSource,
+            },
           };
         } else {
           return null;
         }
-      }
+      },
     };
     return stateToHTML(content, options);
   }
@@ -360,19 +365,19 @@ class RichEditor extends Component {
     this.props.onUpdate(this.getHtml());
     this.setState({
       readonly: !this.state.readonly,
-      html: this.getHtml()
+      html: this.getHtml(),
     });
   }
 
   cancel() {
     this.setState({
-      readonly: !this.state.readonly
+      readonly: !this.state.readonly,
     });
   }
 
   createMarkup(html) {
     return {
-      __html: html
+      __html: html,
     };
   }
 
@@ -431,12 +436,7 @@ class RichEditor extends Component {
     let className = "DocumentTextEditorContainer";
     var contentState = editorState.getCurrentContent();
     if (!contentState.hasText()) {
-      if (
-        contentState
-          .getBlockMap()
-          .first()
-          .getType() !== "unstyled"
-      ) {
+      if (contentState.getBlockMap().first().getType() !== "unstyled") {
         className += " RichEditor-hidePlaceholder";
       }
     }
@@ -489,10 +489,10 @@ class RichEditor extends Component {
                 onToggle={this.toggleBlockType}
               />
               <ImageButton
-                addImage={data => this.addImage(data)}
+                addImage={(data) => this.addImage(data)}
                 imageList={this.props.imageList}
               />
-              <AddLinkButton addLink={url => this.addLink(url)} />
+              <AddLinkButton addLink={(url) => this.addLink(url)} />
             </div>
             <div className={className} onClick={this.focus}>
               <Editor
