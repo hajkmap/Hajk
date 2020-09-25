@@ -223,9 +223,9 @@ class Search extends React.PureComponent {
       .join(" ")
       .split(" ");
     return featureCollection.source.searchFields.filter((searchField) => {
-      return wordsInTextField.map((word) => {
+      return wordsInTextField.some((word) => {
         return RegExp(`^${word}\\W*`, "i").test(
-          feature.properties[searchField]
+          feature.properties[searchField] || ""
         );
       });
     });
