@@ -1,5 +1,6 @@
 import React from "react";
 import AcUnitIcon from "@material-ui/icons/AcUnit";
+import MatchSearch from "./MatchSearch";
 
 /**
  * @summary  DocumentHandler model that doesn't do much.
@@ -146,10 +147,13 @@ export default class DocumentHandlerModel {
    *
    */
   searchStringMatchKeywords = (searchString, keywords) => {
+    let matchSearch = new MatchSearch(0.8);
     let match = false;
     keywords.forEach((keyword) => {
-      if (keyword.toLowerCase() === searchString.toLowerCase()) match = true;
+      let compareResults = matchSearch.compare(searchString, keyword);
+      if (compareResults.searchResults.match) match = true;
     });
+
     return match;
   };
 
