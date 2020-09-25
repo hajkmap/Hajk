@@ -232,7 +232,7 @@ class SearchModel {
 
     for (let i = 0; i < wordsInTextField.length; i++) {
       let combination = wordsInTextField.slice(wordsInTextField.length - i);
-      combination.push(
+      combination.unshift(
         wordsInTextField
           .slice(0, wordsInTextField.length - i)
           .join()
@@ -264,11 +264,16 @@ class SearchModel {
     let comparisonFilters = null;
     let spatialFilters = null;
     let finalFilters = null;
+    let possibleSearchCombinations = [];
 
-    let possibleSearchCombinations = this.#getPossibleSearchCombinations(
-      searchString,
-      searchOptions
-    );
+    if (searchOptions.getPossibleCombinations) {
+      possibleSearchCombinations = this.#getPossibleSearchCombinations(
+        searchString,
+        searchOptions
+      );
+    } else {
+      possibleSearchCombinations.push(this.#splitAndTrimOnCommas(searchString));
+    }
 
     let searchFilters = possibleSearchCombinations.map((combination) => {
       return this.#getSearchFilters(combination, searchSource, searchOptions);
