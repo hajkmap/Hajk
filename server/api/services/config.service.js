@@ -14,6 +14,16 @@ class ConfigService {
       return error;
     }
   }
+
+  async getAvailableMaps() {
+    l.info(`${this.constructor.name}.getAvailableMaps()`);
+    const dir = path.join(process.cwd(), "App_Data");
+    const dirContents = await fs.promises.readdir(dir, { withFileTypes: true });
+    const availableMaps = dirContents
+      .filter((entry) => entry.isFile() && entry.name !== "layers.json")
+      .map((entry) => entry.name);
+    return [...availableMaps];
+  }
 }
 
 export default new ConfigService();

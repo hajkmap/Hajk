@@ -3,5 +3,9 @@ import controller from "./controller";
 
 export default express
   .Router()
-  .get("/layers", controller.layers)
-  .get("/:map", controller.byMap);
+  // First we put specified routes so we can catch them
+  .get("/layers", controller.layers) // Get all layers (from layers.json)
+  .get("/list", controller.list) // List all available maps
+
+  // If none of the above matched, let's assume the string is a param
+  .get("/:map", controller.byMap); // Get specific map config

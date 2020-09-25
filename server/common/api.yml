@@ -104,7 +104,16 @@ paths:
       description: Lists all available layers
       responses:
         200:
-          description: All layers where fetch successfully
+          description: All layers were fetched successfully
+          content: {}
+  /config/list:
+    get:
+      tags:
+        - Maps and layers
+      description: Lists all available map configs
+      responses:
+        200:
+          description: Available maps were fetched successfully
           content: {}
   /config/{map}:
     get:
@@ -145,6 +154,50 @@ paths:
       responses:
         200:
           description: Return the API specification
+          content: {}
+  /settings:
+    get:
+      tags:
+        - Map and layers settings
+      responses:
+        200:
+          description: Return all layers
+          content: {}
+  /settings/{layer}:
+    put:
+      tags:
+        - Map and layers settings
+      requestBody:
+        description: Layer to be added or updated
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExampleBody"
+        required: true
+      parameters:
+        - name: layer
+          in: path
+          description: The layer type of the example to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
+    get:
+      tags:
+        - Map and layers settings
+      parameters:
+        - name: layer
+          in: path
+          description: The layer type of the example to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the example with the specified id
           content: {}
 components:
   schemas:

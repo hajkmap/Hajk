@@ -1,7 +1,15 @@
 import ConfigService from "../../services/config.service";
-import l from "../../../common/logger";
+// import l from "../../../common/logger";
 
 export class Controller {
+  /**
+   * @summary Get a specific map config using the supplied
+   * request parameter "map" as map's name.
+   *
+   * @param {*} req
+   * @param {*} res
+   * @memberof Controller
+   */
   byMap(req, res) {
     ConfigService.getMapConfig(req.params.map).then((r) => {
       if (r) res.json(r);
@@ -9,10 +17,31 @@ export class Controller {
     });
   }
 
+  /**
+   * @summary Get the contents of the layers database
+   *
+   * @param {*} req
+   * @param {*} res
+   * @memberof Controller
+   */
   layers(req, res) {
     // Special case, essentially the same as above,
     // but uses hard-coded file name: "layers"
     ConfigService.getMapConfig("layers").then((r) => {
+      if (r) res.json(r);
+      else res.status(404).end();
+    });
+  }
+
+  /**
+   * @summary List all available map configs
+   *
+   * @param {*} req
+   * @param {*} res
+   * @memberof Controller
+   */
+  list(req, res) {
+    ConfigService.getAvailableMaps().then((r) => {
       if (r) res.json(r);
       else res.status(404).end();
     });
