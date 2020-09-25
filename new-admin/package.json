@@ -38,10 +38,12 @@
     "pretty-quick": "^1.11.1"
   },
   "browserslist": [
-    ">1% in SE",
+    ">0.5% in SE",
+    "last 2 versions",
+    "Firefox ESR",
     "not dead",
-    "not ie <= 10",
-    "not op_mini all"
+    "ie 11",
+    "last 100 edge versions"
   ],
   "husky": {
     "hooks": {
