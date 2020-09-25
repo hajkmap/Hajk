@@ -222,13 +222,25 @@ class Search extends React.PureComponent {
       .split(",")
       .join(" ")
       .split(" ");
-    return featureCollection.source.searchFields.filter((searchField) => {
-      return wordsInTextField.some((word) => {
+
+    let orderedSearchFields = [];
+
+    featureCollection.source.searchFields.forEach((searchField) => {
+      let searchFieldMatch = wordsInTextField.some((word) => {
         return RegExp(`^${word}\\W*`, "i").test(
           feature.properties[searchField] || ""
         );
       });
+
+      if (feature.properties[searchField]) {
+        if (searchFieldMatch) {
+          orderedSearchFields.unshift(searchField);
+        } else {
+          orderedSearchFields.push(searchField);
+        }
+      }
     });
+    return orderedSearchFields;
   };
 
   getAutoCompleteEntryFromMatchedSearchFields = (feature) => {

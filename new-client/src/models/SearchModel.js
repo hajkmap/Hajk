@@ -215,9 +215,20 @@ class SearchModel {
     }
   };
 
+  #getStringArray = (searchString) => {
+    let tempStringArray = this.#splitAndTrimOnCommas(searchString);
+    return tempStringArray.join(" ").split(" ");
+  };
+
+  #splitAndTrimOnCommas = (searchString) => {
+    return searchString.split(",").map((string) => {
+      return string.trim();
+    });
+  };
+
   #getPossibleSearchCombinations = (searchString, searchOptions) => {
     let possibleSearchCombinations = [];
-    let wordsInTextField = searchString.split(",").join(" ").split(" ");
+    let wordsInTextField = this.#getStringArray(searchString);
 
     for (let i = 0; i < wordsInTextField.length; i++) {
       let combination = wordsInTextField.slice(wordsInTextField.length - i);

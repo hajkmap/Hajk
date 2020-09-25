@@ -253,7 +253,10 @@ class SearchBar extends React.PureComponent {
             <>
               {this.getOriginBasedIcon(option.origin)}
 
-              <Typography style={{ paddingRight: 8 }}>
+              <Typography
+                noWrap={true}
+                style={{ paddingRight: 8, maxWidth: "60%" }}
+              >
                 {option.autocompleteEntry}
               </Typography>
               <FormHelperText>{option.dataset}</FormHelperText>
