@@ -221,11 +221,19 @@ class Search extends React.PureComponent {
     return fetchSettings;
   };
 
+  getStringArray = (searchString) => {
+    let tempStringArray = this.splitAndTrimOnCommas(searchString);
+    return tempStringArray.join(" ").split(" ");
+  };
+
+  splitAndTrimOnCommas = (searchString) => {
+    return searchString.split(",").map((string) => {
+      return string.trim();
+    });
+  };
+
   getMatchedSearchFields = (featureCollection, feature) => {
-    let wordsInTextField = this.state.searchString
-      .split(",")
-      .join(" ")
-      .split(" ");
+    let wordsInTextField = this.getStringArray(this.state.searchString);
 
     let orderedSearchFields = [];
 
@@ -526,6 +534,7 @@ class Search extends React.PureComponent {
             loading={loading}
             searchSources={searchSources}
             handleSearchBarKeyPress={this.handleSearchBarKeyPress}
+            getStringArray={this.getStringArray}
             {...this.props}
           />
         </>

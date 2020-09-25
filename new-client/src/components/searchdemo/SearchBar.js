@@ -98,6 +98,25 @@ class SearchBar extends React.PureComponent {
     }
   };
 
+  removeCommasAndSpaces = (string) => {
+    return string.replace(/,/g, "").replace(/ /g, "");
+  };
+
+  getNumCharsMatching = (searchString, autocompleteEntry) => {
+    const { getStringArray } = this.props;
+    const cleanedSS = this.removeCommasAndSpaces(searchString);
+    const cleanedACE = this.removeCommasAndSpaces(autocompleteEntry);
+    const numSearchWords = getStringArray(searchString).length;
+
+    if (
+      cleanedSS.toUpperCase() ===
+      cleanedACE.slice(0, cleanedSS.length).toUpperCase()
+    ) {
+      return cleanedSS.length + (numSearchWords - 1) * 2;
+    }
+    return 0;
+  };
+
   s;
 
   renderPopover = () => {
@@ -249,6 +268,10 @@ class SearchBar extends React.PureComponent {
           option.autocompleteEntry === value.autocompleteEntry
         }
         renderOption={(option) => {
+          let numCharsMatching = this.getNumCharsMatching(
+            searchString,
+            option.autocompleteEntry
+          );
           return (
             <>
               {this.getOriginBasedIcon(option.origin)}
@@ -257,7 +280,8 @@ class SearchBar extends React.PureComponent {
                 noWrap={true}
                 style={{ paddingRight: 8, maxWidth: "60%" }}
               >
-                {option.autocompleteEntry}
+                <b>{option.autocompleteEntry.slice(0, numCharsMatching)}</b>
+                {option.autocompleteEntry.slice(numCharsMatching)}
               </Typography>
               <FormHelperText>{option.dataset}</FormHelperText>
             </>
