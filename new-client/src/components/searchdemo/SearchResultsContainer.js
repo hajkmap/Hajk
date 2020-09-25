@@ -20,7 +20,7 @@ const styles = (theme) => ({
   },
   // New styles
   root: {
-    maxHeight: "calc(100vh - 20%)",
+    maxHeight: "80vh",
     overflow: "auto",
     marginTop: 5,
     minWidth: 200,

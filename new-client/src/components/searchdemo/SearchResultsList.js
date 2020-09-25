@@ -14,8 +14,8 @@ const styles = (theme) => ({
     display: "none",
   },
   searchResultDatasetWrapper: {
-    paddingTop: "8px",
-    paddingBottom: "8px",
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
   },
 });
 
@@ -85,7 +85,7 @@ class SearchResultsList extends React.PureComponent {
     return (
       <Grid container alignItems={"center"} justify={"center"}>
         {this.renderSearchResultListOptions()}
-        <Grid container item>
+        <Grid container direction="column" item>
           {featureCollectionsWithFeatures.map((fc) => (
             <Grid
               key={fc.source.id}

@@ -59,6 +59,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   getHtmlItemInfoBox = (feature, infoBox) => {
+    console.log(feature, "feature");
+    console.log(infoBox, "infoBox");
     var properties = extractPropertiesFromJson(feature.properties);
     feature.properties = properties;
     return mergeFeaturePropsWithMarkdown(infoBox, feature.properties);
@@ -147,6 +149,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     const { feature, source } = this.props;
 
     const htmlForInfoBox = this.getHtmlItemInfoBox(feature, source.infobox);
+
     return (
       <TableBody>
         {this.renderVisibleSection(htmlForInfoBox)}
@@ -157,24 +160,23 @@ class SearchResultsDatasetFeature extends React.PureComponent {
 
   shouldRenderCustomInfoBox = () => {
     const { source } = this.props;
-    return source.infobox && source.infobox !== "";
+    return (
+      source.infobox &&
+      source.infobox !== "" &&
+      source.infobox.search("<section data-visible>") !== -1
+    );
   };
 
   renderDetailsTitle = () => {
-    const { feature, handleOnResultClick, classes } = this.props;
+    const { classes } = this.props;
     return (
       <TableHead>
         <TableRow>
           <TableCell colSpan="6" variant="head" className={classes.tableCell}>
             {" "}
-            <Button
-              className={classes.featureActionButton}
-              onClick={handleOnResultClick(feature)}
-            >
-              <Typography align="left" variant="button">
-                {this.getFeatureTitle()}{" "}
-              </Typography>
-            </Button>
+            <Typography variant="subtitle1" align="left">
+              {this.getFeatureTitle()}{" "}
+            </Typography>
           </TableCell>
         </TableRow>
       </TableHead>

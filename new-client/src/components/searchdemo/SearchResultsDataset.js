@@ -22,6 +22,20 @@ const styles = (theme) => ({
   accordion: {
     boxShadow: "none",
   },
+
+  divider: {
+    backgroundColor: "#00000073",
+    width: "100%",
+  },
+  accordionDetails: {
+    padding: 0,
+  },
+  datasetDiv: {
+    cursor: "pointer",
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
+  },
 });
 
 class SearchResultsDataset extends React.PureComponent {
@@ -34,18 +48,31 @@ class SearchResultsDataset extends React.PureComponent {
     expanded: this.props.sumOfResults === 1,
   };
 
+  resultHasOnlyOneFeature = () => {
+    const { featureCollection } = this.props;
+    return featureCollection.value.features.length === 1;
+  };
+
   renderDatasetDetails = () => {
     const {
       featureCollection,
       handleOnResultClick,
       setSelectedFeatureAndSource,
+      classes,
     } = this.props;
 
     return (
-      <AccordionDetails>
+      <AccordionDetails className={classes.accordionDetails}>
         <Grid container>
           {featureCollection.value.features.map((f, index) => (
-            <Grid key={f.id} container item>
+            <Grid
+              role="button"
+              onClick={handleOnResultClick(f)}
+              key={f.id}
+              className={classes.datasetDiv}
+              container
+              item
+            >
               <Grid item xs={1}></Grid>
               <Grid item xs={10}>
                 <SearchResultsDatasetFeature
@@ -57,9 +84,9 @@ class SearchResultsDataset extends React.PureComponent {
               </Grid>
               <Grid item xs={1}></Grid>
 
-              <Divider
-                style={{ backgroundColor: "#00000073", width: "100%" }}
-              ></Divider>
+              {!this.resultHasOnlyOneFeature() && (
+                <Divider className={classes.divider}></Divider>
+              )}
             </Grid>
           ))}
         </Grid>
@@ -86,7 +113,7 @@ class SearchResultsDataset extends React.PureComponent {
           </Grid>
           <Grid item xs={2}>
             <Tooltip title={toolTipTitle}>
-              <Chip label={numberOfResultsToDisplay} />
+              <Chip color="primary" label={numberOfResultsToDisplay} />
             </Tooltip>
           </Grid>
         </Grid>
