@@ -344,7 +344,10 @@ class Search extends React.PureComponent {
       fetchOptions
     );
 
-    return Promise.allSettled([promise, ...this.fetchResultsFromPlugins()])
+    return Promise.allSettled([
+      promise,
+      ...this.fetchResultsFromPlugins(fetchOptions),
+    ])
       .then((results) => {
         results = results.filter((result) => result.status !== "rejected");
         results = this.removeCollectionsWithoutFeatures(results);
@@ -413,7 +416,7 @@ class Search extends React.PureComponent {
     });
   };
 
-  fetchResultsFromPlugins = () => {
+  fetchResultsFromPlugins = (fetchOptions) => {
     const { searchString } = this.state;
     if (
       this.searchImplementedPlugins &&
@@ -423,7 +426,9 @@ class Search extends React.PureComponent {
     }
     return this.searchImplementedPlugins.reduce((promises, plugin) => {
       if (plugin.searchInterface.getResults) {
-        promises.push(plugin.searchInterface.getResults(searchString));
+        promises.push(
+          plugin.searchInterface.getResults(searchString, fetchOptions)
+        );
         return promises;
       }
       return promises;
