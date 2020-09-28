@@ -276,6 +276,10 @@ class SearchModel {
         possibleSearchCombinations.push(
           this.#splitAndTrimOnCommas(searchString)
         );
+        possibleSearchCombinations = this.#addPotentialWildCards(
+          possibleSearchCombinations,
+          searchOptions
+        );
       }
 
       let searchFilters = possibleSearchCombinations.map((combination) => {
