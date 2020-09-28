@@ -71,7 +71,6 @@ class SearchResultsList extends React.PureComponent {
   render() {
     const {
       featureCollections,
-      setSelectedFeatureAndSource,
       sumOfResults,
       getOriginBasedIcon,
       classes,
@@ -101,7 +100,6 @@ class SearchResultsList extends React.PureComponent {
                 getOriginBasedIcon={getOriginBasedIcon}
                 sumOfResults={sumOfResults}
                 handleOnResultClick={this.handleOnResultClick}
-                setSelectedFeatureAndSource={setSelectedFeatureAndSource}
               />
             </Grid>
           ))}

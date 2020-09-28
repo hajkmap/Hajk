@@ -88,7 +88,7 @@ class Search extends React.PureComponent {
       this.setFeaturesToFilter([feature]);
       this.doSearch();
     });
-    this.localObserver.subscribe("on-draw-start", (feature) => {
+    this.localObserver.subscribe("on-draw-start", () => {
       this.setState({ searchActive: "draw" });
     });
   };
@@ -179,7 +179,7 @@ class Search extends React.PureComponent {
       },
       () => {
         if (this.state.searchString.length >= 3) {
-          this.updateAutoCompleteList(this.state.searchString);
+          this.updateAutocompleteList(this.state.searchString);
         } else {
           this.setState({
             autocompleteList: [],
@@ -193,7 +193,7 @@ class Search extends React.PureComponent {
     this.setState(searchOptions);
   };
 
-  handleOnSearch = () => {
+  handleOnClickOrKeyboardSearch = () => {
     if (this.hasEnoughCharsForSearch()) {
       this.doSearch();
     }
@@ -207,7 +207,7 @@ class Search extends React.PureComponent {
 
   handleSearchBarKeyPress = (event) => {
     if (event.which === 13 || event.keyCode === 13) {
-      this.handleOnSearch();
+      this.handleOnClickOrKeyboardSearch();
     }
   };
 
@@ -221,7 +221,7 @@ class Search extends React.PureComponent {
     return fetchSettings;
   };
 
-  getStringArray = (searchString) => {
+  getArrayWithSearchWords = (searchString) => {
     let tempStringArray = this.splitAndTrimOnCommas(searchString);
     return tempStringArray.join(" ").split(" ");
   };
@@ -232,10 +232,10 @@ class Search extends React.PureComponent {
     });
   };
 
-  sortSearchFields = (featureCollection, feature, wordsInTextField) => {
+  sortSearchFieldsOnFeature = (searchFields, feature, wordsInTextField) => {
     let orderedSearchFields = [];
 
-    featureCollection.source.searchFields.forEach((searchField) => {
+    searchFields.forEach((searchField) => {
       let searchFieldMatch = wordsInTextField.some((word) => {
         return RegExp(`^${word}\\W*`, "i").test(
           feature.properties[searchField] || ""
@@ -253,7 +253,7 @@ class Search extends React.PureComponent {
     return orderedSearchFields;
   };
 
-  getAutoCompleteEntryFromMatchedSearchFields = (feature) => {
+  getSortedAutocompleteEntry = (feature) => {
     let autocompleteEntry = "";
     feature.searchFieldOrder.map((sf, index) => {
       if (index === feature.searchFieldOrder.length - 1) {
@@ -273,9 +273,7 @@ class Search extends React.PureComponent {
     return featureCollection.value.features.map((feature) => {
       const dataset = featureCollection.source.caption;
       const origin = featureCollection.origin;
-      const autocompleteEntry = this.getAutoCompleteEntryFromMatchedSearchFields(
-        feature
-      );
+      const autocompleteEntry = this.getSortedAutocompleteEntry(feature);
       return {
         dataset,
         autocompleteEntry,
@@ -286,8 +284,8 @@ class Search extends React.PureComponent {
 
   sortSearchFieldsOnFeatures = (featureCollection, wordsInTextField) => {
     featureCollection.value.features.forEach((feature) => {
-      feature.searchFieldOrder = this.sortSearchFields(
-        featureCollection,
+      feature.searchFieldOrder = this.sortSearchFieldsOnFeature(
+        featureCollection.source.searchFields,
         feature,
         wordsInTextField
       );
@@ -295,7 +293,9 @@ class Search extends React.PureComponent {
   };
 
   flattenAndSortAutoCompleteList = (searchResults) => {
-    let wordsInTextField = this.getStringArray(this.state.searchString);
+    let wordsInTextField = this.getArrayWithSearchWords(
+      this.state.searchString
+    );
 
     const resultsPerDataset = searchResults.featureCollections.map(
       (featureCollection) => {
@@ -306,10 +306,11 @@ class Search extends React.PureComponent {
 
     // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
     // however, we need just one Array, so let's flatten the results:
-    const flatAutocompleteArray = resultsPerDataset.reduce(
-      (a, b) => a.concat(b),
-      []
-    );
+
+    return this.sortAutocompleteList(resultsPerDataset.flat());
+  };
+
+  sortAutocompleteList = (flatAutocompleteArray) => {
     return flatAutocompleteArray.sort((a, b) =>
       a.autocompleteEntry.localeCompare(b.autocompleteEntry, "sv", {
         numeric: true,
@@ -402,23 +403,27 @@ class Search extends React.PureComponent {
       .flat();
   };
 
-  updateAutoCompleteList = async () => {
+  updateAutocompleteList = async () => {
     let fetchOptions = this.getAutoCompleteFetchSettings();
     let autoCompleteResult = await this.fetchResultFromSearchModel(
       fetchOptions
     );
     this.setState({
-      autocompleteList: this.prepareAutoCompleteList(autoCompleteResult),
+      autocompleteList: this.prepareAutocompleteList(autoCompleteResult),
       loading: false,
     });
   };
 
-  fetchResultsFromPlugins = () => {
-    const { searchString } = this.state;
-    if (
+  anySearchImplementedPlugins = () => {
+    return (
       this.searchImplementedPlugins &&
       this.searchImplementedPlugins.length === 0
-    ) {
+    );
+  };
+
+  fetchResultsFromPlugins = () => {
+    const { searchString } = this.state;
+    if (this.anySearchImplementedPlugins()) {
       return [];
     }
     return this.searchImplementedPlugins.reduce((promises, plugin) => {
@@ -441,7 +446,7 @@ class Search extends React.PureComponent {
 
   removeCollectionsWithoutFeatures = (results) => {
     return results.map((res) => {
-      var featureCollections = res.value.featureCollections.filter(
+      let featureCollections = res.value.featureCollections.filter(
         (featureCollection) => {
           return featureCollection.value.features.length > 0;
         }
@@ -451,7 +456,7 @@ class Search extends React.PureComponent {
     });
   };
 
-  prepareAutoCompleteList = (searchResults) => {
+  prepareAutocompleteList = (searchResults) => {
     let maxSlots = 7;
     let numSourcesWithResults = searchResults.featureCollections.length;
     let numResults = 0;
@@ -526,7 +531,7 @@ class Search extends React.PureComponent {
             handleSearchInput={this.handleSearchInput}
             searchString={searchString}
             searchActive={searchActive}
-            handleOnSearch={this.handleOnSearch}
+            handleOnClickOrKeyboardSearch={this.handleOnClickOrKeyboardSearch}
             autoCompleteOpen={autoCompleteOpen}
             showSearchResults={showSearchResults}
             handleOnInputChange={this.handleOnInputChange}
@@ -540,7 +545,7 @@ class Search extends React.PureComponent {
             loading={loading}
             searchSources={searchSources}
             handleSearchBarKeyPress={this.handleSearchBarKeyPress}
-            getStringArray={this.getStringArray}
+            getArrayWithSearchWords={this.getArrayWithSearchWords}
             {...this.props}
           />
         </>

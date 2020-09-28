@@ -42,12 +42,6 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     showAllInformation: false,
   };
 
-  showDetails = (e) => {
-    const { setSelectedFeatureAndSource, feature, source } = this.props;
-    const selectedFeatureAndSource = { feature, source };
-    setSelectedFeatureAndSource(selectedFeatureAndSource);
-  };
-
   renderTableCell = (content, position) => {
     const { classes } = this.props;
     const textToRender = Array.isArray(content) ? content.join(", ") : content;

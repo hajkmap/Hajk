@@ -42,6 +42,11 @@ const styles = (theme) => ({
     left: -440,
   },
 
+  autocompleteTypography: {
+    paddingRight: 8,
+    maxWidth: "60%",
+  },
+
   inputRoot: {
     height: theme.spacing(6),
   },
@@ -102,15 +107,19 @@ class SearchBar extends React.PureComponent {
     return string.replace(/,/g, "").replace(/ /g, "");
   };
 
-  compareStrings = (string1, string2) => {
+  getAllOccurencesInString = (string1, string2) => {
     return [...string1.matchAll(new RegExp(string2, "gi"))].map((a) => a.index);
   };
 
-  highlightMatchedChars = (searchWordHighlights, autocompleteEntry) => {
-    if (searchWordHighlights.length > 0) {
-      let { index, length } = searchWordHighlights[
-        searchWordHighlights.length - 1
-      ];
+  //Highlights everything in autocompleteentry up until the last occurence of a match in string.
+  highlightMatchedChars = (highlightInformation, autocompleteEntry) => {
+    const countOfHighlightInformation = highlightInformation.length;
+    //We get last higligtInformation because we want to higlight everything up to last word that matches
+    const lastHighlightInformation =
+      highlightInformation[countOfHighlightInformation - 1];
+
+    if (countOfHighlightInformation > 0) {
+      let { index, length } = lastHighlightInformation;
       return (
         <>
           <strong>{autocompleteEntry.slice(0, index + length)}</strong>
@@ -121,12 +130,12 @@ class SearchBar extends React.PureComponent {
   };
 
   getHighlightedACE = (searchString, autocompleteEntry) => {
-    const { getStringArray } = this.props;
-    const stringArraySS = getStringArray(searchString);
-
-    let searchWordHighlights = stringArraySS
+    const { getArrayWithSearchWords, classes } = this.props;
+    const stringArraySS = getArrayWithSearchWords(searchString);
+    console.log(stringArraySS, "stringArraySS");
+    let highlightInformation = stringArraySS
       .map((searchWord) => {
-        return this.compareStrings(autocompleteEntry, searchWord).map(
+        return this.getAllOccurencesInString(autocompleteEntry, searchWord).map(
           (index) => {
             return {
               index: index,
@@ -138,8 +147,8 @@ class SearchBar extends React.PureComponent {
       .flat();
 
     return (
-      <Typography noWrap={true} style={{ paddingRight: 8, maxWidth: "60%" }}>
-        {this.highlightMatchedChars(searchWordHighlights, autocompleteEntry)}
+      <Typography noWrap={true} className={classes.autocompleteTypography}>
+        {this.highlightMatchedChars(highlightInformation, autocompleteEntry)}
       </Typography>
     );
   };
@@ -324,7 +333,7 @@ class SearchBar extends React.PureComponent {
       searchSources,
       updateSearchOptions,
       searchModel,
-      handleOnSearch,
+      handleOnClickOrKeyboardSearch,
       setSearchSources,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
@@ -342,7 +351,7 @@ class SearchBar extends React.PureComponent {
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}
               {params.InputProps.endAdornment}
-              <IconButton size="small" onClick={handleOnSearch}>
+              <IconButton size="small" onClick={handleOnClickOrKeyboardSearch}>
                 <SearchIcon />
               </IconButton>
               {searchString.length > 0 ||

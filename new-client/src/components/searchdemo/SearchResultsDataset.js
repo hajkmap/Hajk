@@ -57,7 +57,7 @@ class SearchResultsDataset extends React.PureComponent {
     const {
       featureCollection,
       handleOnResultClick,
-      setSelectedFeatureAndSource,
+
       classes,
     } = this.props;
 
@@ -79,7 +79,6 @@ class SearchResultsDataset extends React.PureComponent {
                   feature={f}
                   source={featureCollection.source}
                   handleOnResultClick={handleOnResultClick}
-                  setSelectedFeatureAndSource={setSelectedFeatureAndSource}
                 />
               </Grid>
               <Grid item xs={1}></Grid>

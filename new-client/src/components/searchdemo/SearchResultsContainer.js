@@ -53,18 +53,11 @@ class SearchResultsContainer extends React.PureComponent {
     if (datasetWithTheSoleResult === undefined) {
       return null;
     } else {
-      // Grab the first result from that dataset
       const feature = datasetWithTheSoleResult.value.features[0];
-
-      // Grab source
       const source = datasetWithTheSoleResult.source;
 
       return { feature, source };
     }
-  };
-
-  setSelectedFeatureAndSource = () => {
-    console.log("hej");
   };
 
   render() {
@@ -99,7 +92,6 @@ class SearchResultsContainer extends React.PureComponent {
               map={map}
               app={this.props.app}
               resultSource={resultSource}
-              setSelectedFeatureAndSource={this.setSelectedFeatureAndSource}
             />
           </Paper>
         )}
