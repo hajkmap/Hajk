@@ -266,21 +266,25 @@ class SearchModel {
     let finalFilters = null;
     let possibleSearchCombinations = [];
 
-    if (searchOptions.getPossibleCombinations) {
-      possibleSearchCombinations = this.#getPossibleSearchCombinations(
-        searchString,
-        searchOptions
-      );
-    } else {
-      possibleSearchCombinations.push(this.#splitAndTrimOnCommas(searchString));
+    if (searchString !== "") {
+      if (searchOptions.getPossibleCombinations) {
+        possibleSearchCombinations = this.#getPossibleSearchCombinations(
+          searchString,
+          searchOptions
+        );
+      } else {
+        possibleSearchCombinations.push(
+          this.#splitAndTrimOnCommas(searchString)
+        );
+      }
+
+      let searchFilters = possibleSearchCombinations.map((combination) => {
+        return this.#getSearchFilters(combination, searchSource, searchOptions);
+      });
+
+      comparisonFilters =
+        searchFilters.length > 1 ? new Or(...searchFilters) : searchFilters[0];
     }
-
-    let searchFilters = possibleSearchCombinations.map((combination) => {
-      return this.#getSearchFilters(combination, searchSource, searchOptions);
-    });
-
-    comparisonFilters =
-      searchFilters.length > 1 ? new Or(...searchFilters) : searchFilters[0];
 
     // If searchOptions contain any features, we should filter the results
     // using those features.
