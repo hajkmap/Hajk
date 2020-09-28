@@ -117,8 +117,6 @@ class SearchBar extends React.PureComponent {
     return 0;
   };
 
-  s;
-
   renderPopover = () => {
     const {
       moreOptionsId,
