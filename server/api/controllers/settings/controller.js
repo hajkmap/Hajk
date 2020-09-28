@@ -19,10 +19,16 @@ export class Controller {
   //   res.json(req.params.layer);
   // }
 
+  putLayerSwitcherSettings(req, res) {
+    SettingsService.updateLayerSwitcher(req.query.mapFile, req.body).then(
+      (r) => {
+        res.json(r);
+      }
+    );
+  }
+
   putLayerOfType(req, res) {
-    l.info(`Will put ${req.params.type}`);
     SettingsService.createOrUpdateLayer(req.params.type, req.body).then((r) => {
-      // l.debug(r);
       res.json(r);
     });
   }

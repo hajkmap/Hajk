@@ -163,6 +163,28 @@ paths:
         200:
           description: Return all layers
           content: {}
+  /settings/layermenu:
+    put:
+      tags:
+        - Map and layers settings
+      requestBody:
+        description: Settings for given map's LayerSwitcher component
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: mapFile
+          in: query
+          description: Name of the map who's LayerSwitcher config should be written
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
   /settings/{layer}:
     put:
       tags:
@@ -216,10 +238,12 @@ components:
 
     ExampleBody:
       title: example
-      required:
-        - name
+      # required:
+      #   - name
       type: object
       properties:
         name:
           type: string
           example: no_stress
+    LayerSwitcherBody:
+      title: LayerSwitcher body

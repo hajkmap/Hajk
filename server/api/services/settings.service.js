@@ -1,4 +1,3 @@
-import l from "../../common/logger";
 import fs from "fs";
 import path from "path";
 
@@ -35,23 +34,37 @@ class SettingsService {
     } catch (error) {
       return error;
     }
-    // Parse to JS Object "db"
-    // const db = {};
-    // if (db[type] === undefined)
-    //   return res.status(500).json(`${type} not found in layers database.`);
-    // res.json(req.body);
-    return {
-      [type]: "created",
-    };
+  }
 
-    // try {
-    //   const pathToFile = path.join(process.cwd(), "App_Data", `${map}.json`);
-    //   const text = await fs.promises.readFile(pathToFile, "utf-8");
-    //   const json = await JSON.parse(text);
-    //   return json;
-    // } catch (error) {
-    //   return error;
-    // }
+  async updateLayerSwitcher(mapFile, layerSwitcherConfig) {
+    try {
+      // Open file containing our store
+      const pathToFile = path.join(process.cwd(), "App_Data", mapFile);
+      const mapConfigFile = await fs.promises.readFile(pathToFile, "utf-8");
+
+      // Parse the file content so we get an object
+      const mapConfig = await JSON.parse(mapConfigFile);
+
+      // START: Fix because of buggy Admin, we want "true" -> true and "false" -> false.
+      const lsString = await JSON.stringify(layerSwitcherConfig)
+        .replace(/"true"/gi, true)
+        .replace(/"false"/gi, false);
+      const lscObject = await JSON.parse(lsString);
+      // END: Fix.
+
+      // Find the relevant portion in our map config file and
+      // replace with the object we got in request body.
+      mapConfig.tools.find(
+        (tool) => tool.type === "layerswitcher"
+      ).options = lscObject;
+
+      // Write, format with 2 spaces indentation
+      fs.writeFileSync(pathToFile, JSON.stringify(mapConfig, null, 2));
+
+      return { lscObject };
+    } catch (error) {
+      return error;
+    }
   }
 }
 
