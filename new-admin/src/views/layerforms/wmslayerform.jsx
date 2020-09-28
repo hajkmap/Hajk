@@ -65,6 +65,7 @@ const defaultState = {
   projection: "",
   infoFormat: "",
   style: [],
+  workspaceList: [],
 };
 
 const supportedProjections = [
@@ -544,9 +545,10 @@ class WMSLayerForm extends Component {
         }
       };
 
-      this.state.capabilities.Capability.Layer.Layer.forEach((layer) => {
-        recursivePushLayer(layer);
-      });
+      this.state.capabilities?.Capability?.Layer?.Layer &&
+        this.state.capabilities.Capability.Layer.Layer.forEach((layer) => {
+          recursivePushLayer(layer);
+        });
 
       return layers;
     } else {
@@ -618,10 +620,11 @@ class WMSLayerForm extends Component {
     });
 
     if (this.state.capabilities) {
-      this.state.capabilities.Capability.Layer.Layer.forEach((layer, i) => {
-        if (this.refs.hasOwnProperty(layer.Name))
-          this.refs[layer.Name].checked = false;
-      });
+      this.state.capabilities?.Capability?.Layer?.Layer &&
+        this.state.capabilities.Capability.Layer.Layer.forEach((layer, i) => {
+          if (this.refs.hasOwnProperty(layer.Name))
+            this.refs[layer.Name].checked = false;
+        });
     }
 
     var capabilitiesPromise = this.props.model.getAllWMSCapabilities(
@@ -948,6 +951,33 @@ class WMSLayerForm extends Component {
     return valid;
   }
 
+  getWorkspaces = async (url) => {
+    // console.log(url);
+    url = url.substring(0, url.lastIndexOf("/")) + "/rest/workspaces";
+    // console.log(url);
+    const res = await fetch(url);
+    // console.log(res);
+    const json = await res.json();
+    // console.log(json.workspaces.workspace);
+    //this.setState({ workspaceList: json.workspaces.workspace });
+    //console.log(this.state.workspaceList);
+    var sortedWorksapes = json.workspaces.workspace.sort(GetSortOrder("name")); //Pass the attribute to be sorted on
+    for (var item in this.state.workspaceList) {
+      console.log(this.state.workspaceList[item].name);
+    }
+    function GetSortOrder(prop) {
+      return function (a, b) {
+        if (a[prop] > b[prop]) {
+          return 1;
+        } else if (a[prop] < b[prop]) {
+          return -1;
+        }
+        return 0;
+      };
+    }
+    this.setState({ workspaceList: sortedWorksapes });
+  };
+
   render() {
     var loader = this.state.load ? (
       <i className="fa fa-refresh fa-spin" />
@@ -968,10 +998,20 @@ class WMSLayerForm extends Component {
           <label>Servertyp</label>
           <select
             className="control-fixed-width"
-            style={{ width: "50%" }}
             ref="input_serverType"
             value={this.state.serverType}
-            onChange={(e) => this.setState({ serverType: e.target.value })}
+            onChange={(e) => {
+              this.setState({ serverType: e.target.value });
+              if (
+                e.target.value === "geoserver"
+                  ? (document.getElementById(
+                      "availableWorkspaces"
+                    ).style.display = "unset")
+                  : (document.getElementById(
+                      "availableWorkspaces"
+                    ).style.display = "none")
+              );
+            }}
           >
             <option>geoserver</option>
             <option>mapserver</option>
@@ -991,21 +1031,74 @@ class WMSLayerForm extends Component {
             }}
             className={this.getValidationClass("url")}
           />
+          {this.state.serverType === "geoserver" ? (
+            <span
+              onClick={(e) => {
+                this.getWorkspaces(this.state.url);
+              }}
+              className="btn btn-default"
+            >
+              Hämta workspace
+            </span>
+          ) : (
+            <span
+              onClick={(e) => {
+                this.loadWMSCapabilities(e);
+              }}
+              className="btn btn-default"
+            >
+              Ladda {loader}
+            </span>
+          )}
+        </div>
+
+        <div id="availableWorkspaces">
+          <label>Välj workspace</label>
+          <select
+            className="control-fixed-width"
+            ref="input_workspaceName"
+            value={this.state.workspaceName}
+            onChange={(e) =>
+              this.setState({
+                url:
+                  this.state.url.substring(
+                    0,
+                    this.state.url.lastIndexOf("geoserver/") + 10
+                  ) + e.target.value,
+              })
+            }
+          >
+            <option key="wms" value="wms">
+              Alla
+            </option>
+            {this.state.workspaceList.map((workspace) => {
+              return (
+                <option
+                  key={workspace.name + "/wms"}
+                  value={workspace.name + "/wms"}
+                >
+                  {workspace.name}
+                </option>
+              );
+            })}
+          </select>
+          &nbsp;
           <span
             onClick={(e) => {
               this.loadWMSCapabilities(e);
             }}
             className="btn btn-default"
           >
-            Ladda {loader}
+            Hämta lager {loader}
           </span>
         </div>
+
         <div className="separator">Inställningar för request</div>
+
         <div>
           <label>Version</label>
           <select
             className="control-fixed-width"
-            style={{ width: "50%" }}
             ref="input_version"
             onChange={this.selectVersion.bind(this)}
             value={version}
@@ -1023,7 +1116,6 @@ class WMSLayerForm extends Component {
           <label>Bildformat</label>
           <select
             className="control-fixed-width"
-            style={{ width: "50%" }}
             ref="input_imageFormat"
             value={this.state.imageFormat}
             onChange={(e) => this.setState({ imageFormat: e.target.value })}
@@ -1035,7 +1127,6 @@ class WMSLayerForm extends Component {
           <label>Koordinatsystem</label>
           <select
             className="control-fixed-width"
-            style={{ width: "50%" }}
             ref="input_projection"
             value={this.state.projection !== null ? this.state.projection : ""}
             onChange={(e) => this.setState({ projection: e.target.value })}
@@ -1134,7 +1225,7 @@ class WMSLayerForm extends Component {
           <label>Infoklick-format</label>
           <select
             className="control-fixed-width"
-            style={{ width: "50%", dispaly: "in-line" }}
+            style={{ dispaly: "in-line" }}
             ref="input_infoFormat"
             value={infoFormat}
             onChange={(e) => this.setState({ infoFormat: e.target.value })}
