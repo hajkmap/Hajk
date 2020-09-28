@@ -232,9 +232,7 @@ class Search extends React.PureComponent {
     });
   };
 
-  getMatchedSearchFields = (featureCollection, feature) => {
-    let wordsInTextField = this.getStringArray(this.state.searchString);
-
+  sortSearchFields = (featureCollection, feature, wordsInTextField) => {
     let orderedSearchFields = [];
 
     featureCollection.source.searchFields.forEach((searchField) => {
@@ -257,8 +255,8 @@ class Search extends React.PureComponent {
 
   getAutoCompleteEntryFromMatchedSearchFields = (feature) => {
     let autocompleteEntry = "";
-    feature.matchedSearchFields.map((sf, index) => {
-      if (index === feature.matchedSearchFields.length - 1) {
+    feature.searchFieldOrder.map((sf, index) => {
+      if (index === feature.searchFieldOrder.length - 1) {
         return (autocompleteEntry = autocompleteEntry.concat(
           feature.properties[sf]
         ));
@@ -271,33 +269,41 @@ class Search extends React.PureComponent {
     return autocompleteEntry;
   };
 
+  getAutocompleteDataset = (featureCollection) => {
+    return featureCollection.value.features.map((feature) => {
+      const dataset = featureCollection.source.caption;
+      const origin = featureCollection.origin;
+      const autocompleteEntry = this.getAutoCompleteEntryFromMatchedSearchFields(
+        feature
+      );
+      return {
+        dataset,
+        autocompleteEntry,
+        origin: origin,
+      };
+    });
+  };
+
+  sortSearchFieldsOnFeatures = (featureCollection, wordsInTextField) => {
+    featureCollection.value.features.forEach((feature) => {
+      feature.searchFieldOrder = this.sortSearchFields(
+        featureCollection,
+        feature,
+        wordsInTextField
+      );
+    });
+  };
+
   flattenAndSortAutoCompleteList = (searchResults) => {
+    let wordsInTextField = this.getStringArray(this.state.searchString);
+
     const resultsPerDataset = searchResults.featureCollections.map(
       (featureCollection) => {
-        return featureCollection.value.features
-          .filter((feature) => {
-            let matchedSearchFields = this.getMatchedSearchFields(
-              featureCollection,
-              feature
-            );
-            feature.matchedSearchFields = matchedSearchFields;
-
-            return matchedSearchFields.length > 0;
-          })
-          .map((feature) => {
-            const dataset = featureCollection.source.caption;
-            const origin = featureCollection.origin;
-            const autocompleteEntry = this.getAutoCompleteEntryFromMatchedSearchFields(
-              feature
-            );
-            return {
-              dataset,
-              autocompleteEntry,
-              origin: origin,
-            };
-          });
+        this.sortSearchFieldsOnFeatures(featureCollection, wordsInTextField);
+        return this.getAutocompleteDataset(featureCollection);
       }
     );
+
     // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
     // however, we need just one Array, so let's flatten the results:
     const flatAutocompleteArray = resultsPerDataset.reduce(

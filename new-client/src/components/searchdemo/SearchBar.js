@@ -102,19 +102,46 @@ class SearchBar extends React.PureComponent {
     return string.replace(/,/g, "").replace(/ /g, "");
   };
 
-  getNumCharsMatching = (searchString, autocompleteEntry) => {
-    const { getStringArray } = this.props;
-    const cleanedSS = this.removeCommasAndSpaces(searchString);
-    const cleanedACE = this.removeCommasAndSpaces(autocompleteEntry);
-    const numSearchWords = getStringArray(searchString).length;
+  compareStrings = (string1, string2) => {
+    return [...string1.matchAll(new RegExp(string2, "gi"))].map((a) => a.index);
+  };
 
-    if (
-      cleanedSS.toUpperCase() ===
-      cleanedACE.slice(0, cleanedSS.length).toUpperCase()
-    ) {
-      return cleanedSS.length + (numSearchWords - 1) * 2;
+  highlightMatchedChars = (searchWordHighlights, autocompleteEntry) => {
+    if (searchWordHighlights.length > 0) {
+      let { index, length } = searchWordHighlights[
+        searchWordHighlights.length - 1
+      ];
+      return (
+        <>
+          <strong>{autocompleteEntry.slice(0, index + length)}</strong>
+          {autocompleteEntry.slice(index + length)}
+        </>
+      );
     }
-    return 0;
+  };
+
+  getHighlightedACE = (searchString, autocompleteEntry) => {
+    const { getStringArray } = this.props;
+    const stringArraySS = getStringArray(searchString);
+
+    let searchWordHighlights = stringArraySS
+      .map((searchWord) => {
+        return this.compareStrings(autocompleteEntry, searchWord).map(
+          (index) => {
+            return {
+              index: index,
+              length: searchWord.length,
+            };
+          }
+        );
+      })
+      .flat();
+
+    return (
+      <Typography noWrap={true} style={{ paddingRight: 8, maxWidth: "60%" }}>
+        {this.highlightMatchedChars(searchWordHighlights, autocompleteEntry)}
+      </Typography>
+    );
   };
 
   renderPopover = () => {
@@ -266,21 +293,11 @@ class SearchBar extends React.PureComponent {
           option.autocompleteEntry === value.autocompleteEntry
         }
         renderOption={(option) => {
-          let numCharsMatching = this.getNumCharsMatching(
-            searchString,
-            option.autocompleteEntry
-          );
           return (
             <>
               {this.getOriginBasedIcon(option.origin)}
+              {this.getHighlightedACE(searchString, option.autocompleteEntry)}
 
-              <Typography
-                noWrap={true}
-                style={{ paddingRight: 8, maxWidth: "60%" }}
-              >
-                <b>{option.autocompleteEntry.slice(0, numCharsMatching)}</b>
-                {option.autocompleteEntry.slice(numCharsMatching)}
-              </Typography>
               <FormHelperText>{option.dataset}</FormHelperText>
             </>
           );
