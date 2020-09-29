@@ -132,7 +132,6 @@ class SearchBar extends React.PureComponent {
   getHighlightedACE = (searchString, autocompleteEntry) => {
     const { getArrayWithSearchWords, classes } = this.props;
     const stringArraySS = getArrayWithSearchWords(searchString);
-    console.log(stringArraySS, "stringArraySS");
     let highlightInformation = stringArraySS
       .map((searchWord) => {
         return this.getAllOccurencesInString(autocompleteEntry, searchWord).map(
