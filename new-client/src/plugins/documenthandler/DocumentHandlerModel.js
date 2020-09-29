@@ -172,11 +172,7 @@ export default class DocumentHandlerModel {
       if (!this.arrayContainsString(this.keywords, `keyword${index}`, true)) {
         this.keywords.push(`keyword${index}`);
       }
-      if (
-        matchedKeywords.some((matchedKey) => {
-          return matchedKey.toLowerCase() === keyword.toLowerCase();
-        })
-      ) {
+      if (this.arrayContainsString(matchedKeywords, keyword, true)) {
         return (properties[`keyword${index}`] = keyword);
       } else {
         return (properties[`keyword${index}`] = "");
@@ -193,16 +189,16 @@ export default class DocumentHandlerModel {
   };
 
   chapterMatchSearchInput = (chapter, searchCombination) => {
-    let matchedKeyword = [];
+    let matchedKeywords = [];
     let match = searchCombination.every((word) => {
-      matchedKeyword = matchedKeyword.concat(
+      matchedKeywords = matchedKeywords.concat(
         this.searchStringMatchKeywords(word, chapter.keywords)
       );
-      return this.searchStringMatchKeywords(word, chapter.keywords).length > 0;
+      return matchedKeywords.length > 0;
     });
 
     if (match) {
-      return matchedKeyword;
+      return matchedKeywords;
     } else {
       return [];
     }
@@ -212,24 +208,15 @@ export default class DocumentHandlerModel {
     let possibleSearchCombinations = [];
 
     if (searchString !== "") {
-      if (searchOptions.getPossibleCombinations) {
-        possibleSearchCombinations = this.getPossibleSearchCombinations(
-          searchString,
-          searchOptions
-        );
-      } else {
-        possibleSearchCombinations.push(
-          this.splitAndTrimOnCommas(searchString)
-        );
-        possibleSearchCombinations = this.addPotentialWildCards(
-          possibleSearchCombinations,
-          searchOptions
-        );
-      }
+      possibleSearchCombinations.push(this.splitAndTrimOnCommas(searchString));
+      possibleSearchCombinations = this.addPotentialWildCards(
+        possibleSearchCombinations,
+        searchOptions
+      );
     }
 
     document.chapters.forEach((chapter) => {
-      possibleSearchCombinations.map((searchCombination, index) => {
+      possibleSearchCombinations.map((searchCombination) => {
         return this.getChaptersMatchingSearchCombination(
           document,
           chapter,

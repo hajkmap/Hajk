@@ -497,7 +497,7 @@ class Search extends React.PureComponent {
       activeSpatialFilter: activeSpatialFilter,
       featuresToFilter: this.featuresToFilter || [],
       matchCase: matchCase,
-      wildCardAtStart: wildcardAtStart,
+      wildcardAtStart: wildcardAtStart,
       wildcardAtEnd: wildcardAtEnd,
     };
   };
