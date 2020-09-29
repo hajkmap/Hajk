@@ -424,7 +424,7 @@ class Search extends React.PureComponent {
     );
   };
 
-  fetchResultsFromPlugins = () => {
+  fetchResultsFromPlugins = (fetchOptions) => {
     const { searchString } = this.state;
     if (this.anySearchImplementedPlugins()) {
       return [];
