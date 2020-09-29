@@ -128,6 +128,15 @@ export default class DocumentHandlerModel {
     });
   };
 
+  addHeaderToKeywords = (chapter) => {
+    if (chapter.keywords) {
+      chapter.keywords.push(chapter.header);
+    } else {
+      chapter.keywords = [chapter.header];
+    }
+    return chapter;
+  };
+
   getChaptersMatchingSearchCombination = (
     document,
     chapter,
@@ -142,11 +151,8 @@ export default class DocumentHandlerModel {
         );
       });
     }
-    if (chapter.keywords) {
-      chapter.keywords.push(chapter.header);
-    } else {
-      chapter.keywords = [chapter.header];
-    }
+    chapter = this.addHeaderToKeywords(chapter);
+
     let matchedKeywords = this.chapterMatchSearchInput(
       chapter,
       searchCombination
