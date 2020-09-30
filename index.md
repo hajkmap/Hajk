@@ -17,7 +17,17 @@ Syntax highlighted code block
 
 - Bulleted
 - List
-- **Hej och välkômmen te HAJK !!.** // Ingvar
+- **Hej och välkômmen te HAJK !!.**
+
+Vi är ett gäng kommuner m.fl i framför allt Västsverige som tagit fram en superbra och användbar GIS-webb baserad på Open source lösningen Openlayers.
+Aktiva kommuner är bl a Halmstad, Göteborg Kungsbacka,Uddevalla och Varberg.
+
+Några kartexempel:
+Halmstad - https://nykarta.halmstad.se/
+Kungsbacka - https://karta.kungsbacka.se
+Uddevalla - https://karta.uddevalla.se
+
+Kontakta oss om _din_ organisation är intresserad av att medverka :-)
 
 1. Numbered
 2. List
