@@ -11,21 +11,21 @@ Markdown is a lightweight and easy-to-use syntax for styling your writing. It in
 ```markdown
 Syntax highlighted code block
 
-# Header 1
+# Hej och välkômmen te HAJK !!
 ## Header 2
 ### Header 3
 
 - Bulleted
 - List
-- **Hej och välkômmen te HAJK !!.**
+- **.**
 
-Vi är ett gäng kommuner m.fl i framför allt Västsverige som tagit fram en superbra och användbar GIS-webb baserad på Open source lösningen Openlayers.
+Vi är ett gäng kommuner m.fl i framför allt Västsverige som tagit fram en superbra och användbar webb-GIS baserad på Open source lösningen Openlayers.
 Aktiva kommuner är bl a Halmstad, Göteborg Kungsbacka,Uddevalla och Varberg.
 
-Några kartexempel:
-[Halmstad https://nykarta.halmstad.se]
-[Kungsbacka https://karta.kungsbacka.se]
-[Uddevalla https://karta.uddevalla.se]
+Några goda kartexempel:
+1. [Halmstad](https://nykarta.halmstad.se/)
+2. [Kungsbacka](https://karta.kungsbacka.se/)
+3. [Uddevalla](https://karta.uddevalla.se/)
 
 Kontakta oss om _din_ organisation är intresserad av att medverka :-)
 
