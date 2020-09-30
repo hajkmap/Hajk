@@ -148,7 +148,7 @@ class MeasureModel {
   }
 
   formatLabel(type, value) {
-    var label;
+    let label;
 
     if (type === "point") {
       label = "Nord: " + value.n + " Öst: " + value.e;
@@ -163,36 +163,38 @@ class MeasureModel {
     }
 
     if (type === "circle") {
-      let prefix = " m";
-      let prefixSq = " m²";
-      if (value >= 1e3) {
-        prefix = " km";
-        value = value / 1e3;
+      let unit = " m";
+      let squareUnit = " m²";
+      if (value >= 1000) {
+        unit = " km";
+        value = value / 1000;
       }
       label =
         "R = " +
-        value +
-        prefix +
+        Number(value).toLocaleString() +
+        unit +
         " \nA = " +
-        Math.round(value * value * Math.PI * 1e3) / 1e3 +
-        prefixSq;
+        (Math.round(value * value * Math.PI * 1000) / 1000).toLocaleString() +
+        squareUnit;
     }
 
     if (type === "area") {
-      if (value > 10000) {
-        label = Math.round((value / 1000000) * 100) / 100 + " km²";
+      if (value > 100000) {
+        label =
+          Number(Math.round((value / 1000000) * 100) / 100).toLocaleString() +
+          " km²";
       } else {
-        label = Math.round(value * 100) / 100 + " m²";
+        label = Number(Math.round(value * 100) / 100).toLocaleString() + " m²";
       }
     }
 
     if (type === "length") {
-      let prefix = " m";
-      if (value >= 1e3) {
-        prefix = " km";
-        value = value / 1e3;
+      let unit = " m";
+      if (value >= 1000) {
+        unit = " km";
+        value = value / 1000;
       }
-      label = value + prefix;
+      label = Number(value).toLocaleString() + unit;
     }
 
     return label;
