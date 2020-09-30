@@ -52,7 +52,6 @@ class Search extends React.PureComponent {
     },
   };
 
-  searchTools = [];
   searchImplementedPlugins = [];
   featuresToFilter = [];
   localObserver = Observer();
@@ -93,45 +92,72 @@ class Search extends React.PureComponent {
     });
   };
 
-  implementsSearchInterface = (plugin) => {
-    const { getResults, getFunctionality } = plugin.searchInterface;
-    if (!getResults || !getFunctionality) {
-      console.warn(
-        plugin.type +
-          " has flag searchImplemented = true but has not implemented correct methods in plugin to use search"
-      );
-      return false;
-    }
-    return true;
-  };
-
-  getSearchImplementedPlugins = () => {
+  getPluginsConfToUseSearchInterface = () => {
     const { app } = this.props;
     return Object.values(app.appModel.plugins).filter((plugin) => {
       return (
         plugin.options.searchImplemented &&
-        this.implementsSearchInterface(plugin)
+        plugin.searchInterface.getSearchMethods
       );
     });
   };
 
-  getExternalSearchTools = () => {
-    return this.searchImplementedPlugins.map((searchImplementedPlugin) => {
+  tryBindSearchMethods = (plugins) => {
+    return plugins.map((plugin) => {
+      return plugin.searchInterface.getSearchMethods.then((methods) => {
+        plugin.searchInterface.getFunctionality = methods?.getFunctionality;
+        plugin.searchInterface.getResults = methods?.getResults;
+        return plugin;
+      });
+    });
+  };
+
+  pluginsHavingCorrectSearchMethods = (plugins) => {
+    return plugins.filter((plugin) => {
+      return (
+        plugin.searchInterface.getResults &&
+        plugin.searchInterface.getFunctionality
+      );
+    });
+  };
+
+  //For a plugin to use the searchInterface, following must be met
+  //Must have option searchImplemented = true in tool-config
+  //Must "inject" a method called getSearchMethods returning a promise on the object plugin.searchInterface
+  //The object searchInterface is put onto the plugin upon loading in App.js
+  //Promise must be resolved into object with two methods getResults and getFunctionality
+
+  getSearchImplementedPlugins = () => {
+    const pluginsConfToUseSearchInterface = this.getPluginsConfToUseSearchInterface();
+    const searchBindedPlugins = this.tryBindSearchMethods(
+      pluginsConfToUseSearchInterface
+    );
+    return Promise.all(searchBindedPlugins).then((plugins) => {
+      return this.pluginsHavingCorrectSearchMethods(plugins);
+    });
+  };
+
+  getExternalSearchTools = (searchImplementedSearchTools) => {
+    return searchImplementedSearchTools.map((searchImplementedPlugin) => {
       return searchImplementedPlugin.searchInterface.getFunctionality();
     });
   };
 
-  getSearchTools = () => {
-    return defaultSearchTools.concat(this.getExternalSearchTools());
+  getSearchTools = (searchImplementedSearchTools) => {
+    return defaultSearchTools.concat(
+      this.getExternalSearchTools(searchImplementedSearchTools)
+    );
   };
 
   componentDidMount = () => {
     const { app } = this.props;
     app.globalObserver.subscribe("core.appLoaded", () => {
-      this.searchImplementedPlugins = this.getSearchImplementedPlugins();
-      this.searchTools = this.getSearchTools();
-      this.setState({
-        searchImplementedPluginsLoaded: true,
+      this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
+        this.setState({
+          searchImplementedPluginsLoaded: true,
+          searchImplementedPlugins: searchImplementedPlugins,
+          searchTools: this.getSearchTools(searchImplementedPlugins),
+        });
       });
     });
   };
@@ -419,8 +445,8 @@ class Search extends React.PureComponent {
 
   anySearchImplementedPlugins = () => {
     return (
-      this.searchImplementedPlugins &&
-      this.searchImplementedPlugins.length === 0
+      this.state.searchImplementedPlugins &&
+      this.state.searchImplementedPlugins.length === 0
     );
   };
 
@@ -429,7 +455,7 @@ class Search extends React.PureComponent {
     if (this.anySearchImplementedPlugins()) {
       return [];
     }
-    return this.searchImplementedPlugins.reduce((promises, plugin) => {
+    return this.state.searchImplementedPlugins.reduce((promises, plugin) => {
       if (plugin.searchInterface.getResults) {
         promises.push(
           plugin.searchInterface.getResults(searchString, fetchOptions)
@@ -519,6 +545,7 @@ class Search extends React.PureComponent {
       loading,
       searchOptions,
       searchSources,
+      searchTools,
     } = this.state;
 
     return (
@@ -531,7 +558,7 @@ class Search extends React.PureComponent {
                 target === "top" ? classes.inputInputWide : classes.inputInput,
             }}
             localObserver={this.localObserver}
-            searchTools={this.searchTools}
+            searchTools={searchTools}
             searchResults={searchResults}
             handleSearchInput={this.handleSearchInput}
             searchString={searchString}

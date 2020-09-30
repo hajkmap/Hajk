@@ -22,27 +22,15 @@ class DocumentWindowBase extends React.PureComponent {
 
   static defaultProps = {};
 
-  constructor(props) {
-    super(props);
-    this.bindSubscriptions();
-
-    this.allDocumentsLoaded = props.model.getAllDocumentsContainedInMenu(
-      props.options.menuConfig.menu.filter((menuItem) => {
-        return menuItem.document || menuItem.menu.length > 0;
-      })
-    );
-  }
-
   setActiveDocument = (documentFileName) => {
     const { model } = this.props;
-    return this.allDocumentsLoaded.then(() => {
-      let document = model.getDocuments([documentFileName])[0];
-      this.setState({
-        documentTitle: document.documentTitle,
-        document: document,
-        documentColor: document.documentColor ? document.documentColor : null,
-        showPrintWindow: false,
-      });
+
+    let document = model.getDocuments([documentFileName])[0];
+    this.setState({
+      documentTitle: document.documentTitle,
+      document: document,
+      documentColor: document.documentColor ? document.documentColor : null,
+      showPrintWindow: false,
     });
   };
 
@@ -132,6 +120,7 @@ class DocumentWindowBase extends React.PureComponent {
       }
     );
   };
+
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     this.bindListenForSearchResultClick();
@@ -153,6 +142,19 @@ class DocumentWindowBase extends React.PureComponent {
     return chapter;
   }
 
+  isModelReady = () => {
+    const { model } = this.props;
+    return model;
+  };
+
+  componentDidUpdate = (prevProps, prevState) => {
+    if (prevProps.model !== this.props.model) {
+      if (this.isModelReady()) {
+        this.bindSubscriptions();
+      }
+    }
+  };
+
   render() {
     const {
       documentWindowMaximized,
@@ -164,6 +166,7 @@ class DocumentWindowBase extends React.PureComponent {
       localObserver,
     } = this.state;
     const { options, classes } = this.props;
+
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -184,7 +187,7 @@ class DocumentWindowBase extends React.PureComponent {
           allowMaximizedWindow: false,
         }}
       >
-        {document != null ? (
+        {document != null && this.isModelReady() ? (
           !showPrintWindow ? (
             <DocumentViewer
               documentColor={documentColor || "#ffffff"}

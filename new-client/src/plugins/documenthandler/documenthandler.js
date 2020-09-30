@@ -11,7 +11,11 @@ class DocumentHandler extends React.PureComponent {
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired
+    options: PropTypes.object.isRequired,
+  };
+
+  state = {
+    model: null,
   };
 
   constructor(props) {
@@ -20,18 +24,25 @@ class DocumentHandler extends React.PureComponent {
     this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,
       globalObserver: props.app.globalObserver,
-      map: props.map
-    });
-
-    this.model = new DocumentHandlerModel({
-      localObserver: this.localObserver,
-      app: props.app,
       map: props.map,
-      menu: props.options.menuConfig.menu,
-      searchInterface: props.searchInterface
     });
 
-    this.addDrawerToggleButton();
+    this.props.searchInterface.getSearchMethods = new Promise((resolve) => {
+      new DocumentHandlerModel({
+        localObserver: this.localObserver,
+        app: props.app,
+        map: props.map,
+        menu: props.options.menuConfig.menu,
+        resolveSearchInterface: resolve,
+      })
+        .init()
+        .then((loadedDocumentModel) => {
+          console.log(loadedDocumentModel, "loadedDocumentModel");
+          this.setState({ model: loadedDocumentModel });
+        });
+
+      this.addDrawerToggleButton();
+    });
   }
 
   dynamicallyImportOpenSans = () => {
@@ -69,7 +80,7 @@ class DocumentHandler extends React.PureComponent {
       ButtonIcon: MenuBook,
       caption: "Översiktsplan",
       order: 100,
-      renderDrawerContent: this.renderDrawerContent
+      renderDrawerContent: this.renderDrawerContent,
     });
   };
 
@@ -78,10 +89,9 @@ class DocumentHandler extends React.PureComponent {
       <>
         {this.dynamicallyImportOpenSans()}
         {this.dynamicallyImportIconFonts()}
-
         <DocumentWindowBase
           {...this.props}
-          model={this.model}
+          model={this.state.model}
           localObserver={this.localObserver}
         ></DocumentWindowBase>
       </>
