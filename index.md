@@ -23,9 +23,9 @@ Vi är ett gäng kommuner m.fl i framför allt Västsverige som tagit fram en su
 Aktiva kommuner är bl a Halmstad, Göteborg Kungsbacka,Uddevalla och Varberg.
 
 Några kartexempel:
-Halmstad - https://nykarta.halmstad.se/
-Kungsbacka - https://karta.kungsbacka.se
-Uddevalla - https://karta.uddevalla.se
+[Halmstad](https://nykarta.halmstad.se)
+[Kungsbacka](https://karta.kungsbacka.se)
+[Uddevalla](https://karta.uddevalla.se)
 
 Kontakta oss om _din_ organisation är intresserad av att medverka :-)
 
