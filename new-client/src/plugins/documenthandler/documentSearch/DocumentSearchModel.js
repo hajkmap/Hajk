@@ -2,19 +2,7 @@ import React from "react";
 import AcUnitIcon from "@material-ui/icons/AcUnit";
 import MatchSearch from "./MatchSearch";
 
-/**
- * @summary  DocumentHandler model that doesn't do much.
- * @description This model exposes only one method, getMap(),
- * so it does not do anything crucial. But you can see it
- * as an example of how a plugin can be separated in different
- * components.
- *
- * @class DocumentHandlerModel
- */
-
-export default class DocumentHandlerModel {
-  internalId = 0;
-
+export default class DocumentSearchModel {
   constructor(settings) {
     this.settings = settings;
     this.allDocuments = settings.allDocuments;
@@ -36,40 +24,73 @@ export default class DocumentHandlerModel {
     };
   };
 
-  createFeatureCollection = (document) => {
+  createFeatureCollection = (document, matchedFeatures) => {
     return {
       value: {
         status: "fulfilled",
         type: "FeatureCollection",
         crs: { type: null, properties: { name: null } },
-        features: this._matchedChapters,
-        numberMatched: this._matchedChapters.length,
-        numberReturned: this._matchedChapters.length,
+        features: matchedFeatures,
+        numberMatched: matchedFeatures.length,
+        numberReturned: matchedFeatures.length,
         timeStamp: null,
-        totalFeatures: this._matchedChapters.length,
+        totalFeatures: matchedFeatures.length,
       },
       source: {
         id: `${document.documentTitle}`,
         caption: document.documentTitle,
         displayFields: ["header"],
-        searchFields: [...this.keywords],
+        searchFields: [...this.searchFields],
       },
       origin: "DOCUMENT",
     };
   };
 
   getResults = (searchString, searchOptions) => {
-    this.keywords = [];
-    let featureCollections = [];
-    this.allDocuments.forEach((document) => {
-      this._matchedChapters = [];
-      this.lookup(document, searchString, searchOptions);
-      if (this._matchedChapters.length > 0) {
-        featureCollections.push(this.createFeatureCollection(document));
-      }
-    });
-
     return new Promise((resolve, reject) => {
+      let featureCollections = [];
+
+      if (searchString === "") {
+        resolve({ featureCollections: [], errors: [] });
+      }
+
+      let possibleSearchCombinations = this.getPossibleSearchCombinations(
+        searchOptions,
+        searchString
+      );
+
+      this.allDocuments.forEach((document) => {
+        this.searchFields = [];
+        document.chapters.forEach((chapter) => {
+          this.setChapterInformation(
+            document,
+            chapter,
+            possibleSearchCombinations
+          );
+        });
+
+        let matchedFeatures = [];
+
+        const traverseChapters = (chapters) => {
+          for (var i = 0; i < chapters.length; i++) {
+            if (this.hasSubChapters(chapters[i])) {
+              traverseChapters(chapters[i].chapters);
+            }
+            if (chapters[i].matchedSearchFields.length > 0) {
+              matchedFeatures.push(this.createFeatureFromChapter(chapters[i]));
+            }
+          }
+        };
+
+        traverseChapters(document.chapters);
+
+        if (matchedFeatures.length > 0) {
+          featureCollections.push(
+            this.createFeatureCollection(document, matchedFeatures)
+          );
+        }
+      });
+
       resolve({ featureCollections: featureCollections, errors: [] });
     });
   };
@@ -115,102 +136,115 @@ export default class DocumentHandlerModel {
     });
   };
 
-  addHeaderToKeywords = (chapter) => {
+  createSearchFields = (chapter) => {
+    chapter.searchFields = [];
     if (chapter.keywords) {
-      chapter.keywords.push(chapter.header);
-    } else {
-      chapter.keywords = [chapter.header];
+      chapter.searchFields = chapter.searchFields.concat(chapter.keywords);
     }
-    return chapter;
+    chapter.searchFields.push(chapter.header);
   };
 
-  getChaptersMatchingSearchCombination = (
-    document,
-    chapter,
-    searchCombination
-  ) => {
-    if (chapter.chapters && chapter.chapters.length > 0) {
+  hasSubChapters = (chapter) => {
+    return chapter.chapters && chapter.chapters.length > 0;
+  };
+
+  setChapterInformation = (document, chapter, searchCombinations) => {
+    if (this.hasSubChapters(chapter)) {
       chapter.chapters.forEach((subChapter) => {
-        this.getChaptersMatchingSearchCombination(
-          document,
-          subChapter,
-          searchCombination
-        );
+        this.setChapterInformation(document, subChapter, searchCombinations);
       });
     }
-    chapter = this.addHeaderToKeywords(chapter);
-
-    let matchedKeywords = this.chapterMatchSearchInput(
-      chapter,
-      searchCombination
-    );
-
-    if (matchedKeywords.length > 0) {
-      this._matchedChapters.push(
-        this.createFeatureFromChapter(document, chapter, matchedKeywords)
-      );
-    }
+    this.createSearchFields(chapter);
+    this.setDocumentProperties(chapter, document);
+    this.setMatchedKeywords(chapter, searchCombinations);
   };
 
-  createFeatureFromChapter = (document, chapter, matchedKeywords) => {
+  setDocumentProperties = (chapter, document) => {
+    chapter.documentTitle = document.documentTitle;
+    chapter.documentFileName = document.documentFileName;
+  };
+
+  createFeatureFromChapter = (chapter) => {
+    console.log(chapter, "chapter");
     let properties = {
       header: chapter.header,
       geoids: chapter.geoids,
       headerIdentifier: chapter.headerIdentifier,
-      documentTitle: document.documentTitle,
-      documentFileName: document.documentFileName,
+      documentTitle: chapter.documentTitle,
+      documentFileName: chapter.documentFileName,
     };
-
-    matchedKeywords.map((keyword, index) => {
-      if (!this.arrayContainsString(this.keywords, `keyword${index}`, true)) {
-        this.keywords.push(`keyword${index}`);
+    chapter.matchedSearchFields.map((searchField, index) => {
+      if (
+        !this.arrayContainsString(
+          this.searchFields,
+          `searchField${index}`,
+          true
+        )
+      ) {
+        this.searchFields.push(`searchField${index}`);
       }
-      if (this.arrayContainsString(matchedKeywords, keyword, true)) {
-        return (properties[`keyword${index}`] = keyword);
+      if (
+        this.arrayContainsString(chapter.matchedSearchFields, searchField, true)
+      ) {
+        return (properties[`searchField${index}`] = searchField);
       } else {
-        return (properties[`keyword${index}`] = "");
+        return (properties[`searchField${index}`] = "");
       }
     });
 
     return {
       type: "Feature",
       geometry: null,
-      id: `${document.documentTitle}${Math.floor(Math.random() * 1000)}`,
+      id: `${chapter.documentTitle}${Math.floor(Math.random() * 1000)}`,
       onClickName: "documenthandler-searchresult-clicked",
       properties: properties,
     };
   };
 
-  chapterMatchSearchInput = (chapter, searchCombination) => {
-    let matchedKeywords = [];
-    let match = searchCombination.every((word) => {
-      matchedKeywords = matchedKeywords.concat(
-        this.searchStringMatchKeywords(word, chapter.keywords)
-      );
-      return matchedKeywords.length > 0;
+  setMatchedKeywords = (chapter, searchCombinations) => {
+    let matchedSearchFields = [];
+    let match = searchCombinations.some((searchCombination) => {
+      let everyResult = searchCombination.every((word) => {
+        matchedSearchFields = matchedSearchFields.concat(
+          this.searchStringMatchSearchFields(word, chapter.searchFields)
+        );
+        return matchedSearchFields.length > 0;
+      });
+      console.log(everyResult, "everyResult");
+      return everyResult;
     });
 
     if (match) {
-      return matchedKeywords;
+      console.log(match, " match");
+      chapter.matchedSearchFields = matchedSearchFields;
     } else {
-      return [];
+      chapter.matchedSearchFields = [];
     }
   };
 
-  lookup = (document, searchString, searchOptions) => {
+  /* if (match) {
+        console.log(match, "match");
+        chapter.matchedSearchFields = chapter.matchedSearchFields.concat(
+          matchedSearchFields
+        );
+      } else {
+        chapter.matchedSearchFields = chapter.matchedSearchFields.concat([]);
+      }*/
+
+  getPossibleSearchCombinations = (searchOptions, searchString) => {
     let possibleSearchCombinations = [];
+    possibleSearchCombinations.push(this.splitAndTrimOnCommas(searchString));
+    possibleSearchCombinations = this.addPotentialWildCards(
+      possibleSearchCombinations,
+      searchOptions
+    );
+    return possibleSearchCombinations;
+  };
 
-    if (searchString !== "") {
-      possibleSearchCombinations.push(this.splitAndTrimOnCommas(searchString));
-      possibleSearchCombinations = this.addPotentialWildCards(
-        possibleSearchCombinations,
-        searchOptions
-      );
-    }
-
+  setMatchInformationForDocument = (document, possibleSearchCombinations) => {
     document.chapters.forEach((chapter) => {
-      possibleSearchCombinations.map((searchCombination) => {
-        return this.getChaptersMatchingSearchCombination(
+      possibleSearchCombinations.forEach((searchCombination) => {
+        this.setMatchedSearchFieldOnChapter(
           document,
           chapter,
           searchCombination
@@ -236,20 +270,21 @@ export default class DocumentHandlerModel {
    * @return Returns true if a match is found.
    *
    */
-  searchStringMatchKeywords = (searchString, keywords) => {
+  searchStringMatchSearchFields = (searchString, searchFields) => {
     let matchSearch = new MatchSearch(0.8);
-    let matchedKeywords = [];
-    keywords.forEach((keyword) => {
-      let compareResults = matchSearch.compare(searchString, keyword);
+    let matchedSearchFields = [];
+    searchFields.forEach((searchField) => {
+      let compareResults = matchSearch.compare(searchString, searchField);
+
       if (
         compareResults.searchResults.match &&
-        !this.arrayContainsString(matchedKeywords, keyword, true)
+        !this.arrayContainsString(matchedSearchFields, searchField, true)
       ) {
-        matchedKeywords.push(keyword);
+        matchedSearchFields.push(searchField);
       }
     });
 
-    return matchedKeywords;
+    return matchedSearchFields;
   };
 
   getDocumentsFromMenus(menu) {
