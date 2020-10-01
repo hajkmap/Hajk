@@ -108,7 +108,7 @@ class LocationView extends React.PureComponent {
 
   handleGeolocationError = (error) => {
     this.setState({ loading: false });
-    console.log("error: ", error);
+    console.error(error);
     this.props.enqueueSnackbar(
       `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
       {
