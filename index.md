@@ -1,7 +1,7 @@
 ## Hej och välkômmen te HAJK !!
 
 Vi är ett gäng kommuner m.fl i framför allt Västsverige som tagit fram en superbra och användbar webb-GIS baserad på Open source lösningen Openlayers.
-Aktiva kommuner är bl a Halmstad, Göteborg Kungsbacka,Uddevalla och Varberg.
+Aktiva kommuner är bl a Halmstad, Göteborg, Kungsbacka, Uddevalla och Varberg.
 
 Några goda kartexempel:
 1. [Halmstad](https://nykarta.halmstad.se/)
@@ -9,6 +9,11 @@ Några goda kartexempel:
 3. [Uddevalla](https://karta.uddevalla.se/)
 
 Kontakta någon av oss om _din_ organisation är intresserad av att medverka :-)
+
+
+
+
+
 
 
 You can use the [editor on GitHub](https://github.com/hajkmap/Hajk/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
