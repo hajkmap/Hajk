@@ -107,8 +107,22 @@ class SearchBar extends React.PureComponent {
     return string.replace(/,/g, "").replace(/ /g, "");
   };
 
-  getAllOccurencesInString = (string1, string2) => {
-    return [...string1.matchAll(new RegExp(string2, "gi"))].map((a) => a.index);
+  //Cant use string.prototype.matchAll because of Edge (Polyfill not working atm)
+  getMatches = (string, regex, index) => {
+    var matches = [];
+    var match = regex.exec(string);
+    while (match != null) {
+      matches.push(match);
+      match = regex.exec(string);
+    }
+    return matches;
+  };
+
+  getAllStartingIndexForOccurencesInString = (string1, string2) => {
+    return [...this.getMatches(string1, new RegExp(string2, "gi"), 1)].map(
+      (a) => a.index
+    );
+    //return [...string1.matchAll(new RegExp(string2, "gi"))].map((a) => a.index);
   };
 
   //Highlights everything in autocompleteentry up until the last occurence of a match in string.
@@ -134,14 +148,15 @@ class SearchBar extends React.PureComponent {
     const stringArraySS = getArrayWithSearchWords(searchString);
     let highlightInformation = stringArraySS
       .map((searchWord) => {
-        return this.getAllOccurencesInString(autocompleteEntry, searchWord).map(
-          (index) => {
-            return {
-              index: index,
-              length: searchWord.length,
-            };
-          }
-        );
+        return this.getAllStartingIndexForOccurencesInString(
+          autocompleteEntry,
+          searchWord
+        ).map((index) => {
+          return {
+            index: index,
+            length: searchWord.length,
+          };
+        });
       })
       .flat();
 
