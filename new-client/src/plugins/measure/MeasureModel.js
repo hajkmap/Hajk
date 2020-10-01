@@ -273,10 +273,12 @@ class MeasureModel {
     if (active && !this.active) {
       document.addEventListener("keydown", this.eventHandler);
       this.addInteraction();
+      this.map.clickLock.add("measure");
     }
     if (active === false) {
       document.removeEventListener("keydown", this.eventHandler);
       this.removeInteraction();
+      this.map.clickLock.delete("measure");
     }
     this.active = active;
   }

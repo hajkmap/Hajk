@@ -86,7 +86,8 @@ class BufferModel {
       this.select = new Select({
         condition: click,
       });
-      this.map.clicklock = true;
+      this.map.clickLock.add("buffer");
+
       this.map.addInteraction(this.select);
       if (highlight_added === false) {
         highlight_added = true;
@@ -101,7 +102,7 @@ class BufferModel {
       if (this.select) {
         this.map.removeInteraction(this.select);
       }
-      this.map.clicklock = false;
+      this.map.clickLock.delete("buffer");
       this.map.un("click", this.selectFeatures);
     }
   }

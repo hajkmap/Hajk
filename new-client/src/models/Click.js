@@ -163,6 +163,7 @@ export function handleClick(evt, map, callback) {
       map.forEachFeatureAtPixel(
         evt.pixel,
         (feature, layer) => {
+          console.log("layer: ", layer);
           if (
             layer.get("queryable") === true ||
             layer.get("type") === "searchResultLayer"
@@ -186,22 +187,25 @@ export function handleClick(evt, map, callback) {
 }
 
 export function bindMapClickEvent(map, callback) {
+  // We must use a custom "clickLock" mechanism, as opposed to the
+  // previous attempts (map.getInteraction().getArray() and looking
+  // for certain values in each Interaction's constructor.name).
+  //
+  // The previous method (checking prototype's name) was
+  // unreliable as Webpack uglifies the class names,
+  // hence the constructors we're comparing against
+  // don't have their usual names.
+  //
+  // Please see issue #591 for more info.
+  //
+  // Below we declare a Set that will hold values of plugins that
+  // want to de-active the click behavior for the moment.
+  map.clickLock = new Set();
+
+  // Bind the "singleclick" event of OL Map
   map.on("singleclick", (evt) => {
-    // If Draw, Modify or Snap interaction are currently active, ignore clicks
-    if (
-      map.clicklock ||
-      map
-        .getInteractions()
-        .getArray()
-        .filter((interaction) =>
-          ["Draw", "Snap", "Modify", "Select", "Translate"].includes(
-            interaction.constructor.name
-          )
-        ).length > 0
-    ) {
-      return;
-    } else {
-      handleClick(evt, map, callback);
-    }
+    // Handle click only if there no plugin wants to lock
+    // the click interaction currently
+    map.clickLock.size === 0 && handleClick(evt, map, callback);
   });
 }

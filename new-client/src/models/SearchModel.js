@@ -254,7 +254,7 @@ class SearchModel {
   };
 
   activateSelectionClick = (selectionDone, callback) => {
-    this.olMap.clicklock = true;
+    this.olMap.clickLock.add("search");
     this.olMap.once("singleclick", (e) => {
       this.onSelectFeatures(e, selectionDone, callback);
     });
@@ -268,7 +268,7 @@ class SearchModel {
     if (active) {
       this.activateSelectionClick(selectionDone, callback);
     } else {
-      this.olMap.clicklock = false;
+      this.olMap.clickLock.delete("search");
       this.clearHighlight();
     }
   };
@@ -511,20 +511,21 @@ class SearchModel {
         //this.clear();
         this.olMap.removeInteraction(this.draw);
         setTimeout(() => {
-          this.olMap.clicklock = false;
+          this.olMap.clickLock.delete("search");
         }, 1000);
         if (drawEndCallback) {
           drawEndCallback(e);
         }
       });
-      this.olMap.clicklock = true;
+      this.olMap.clickLock.add("search");
+
       this.olMap.addInteraction(this.draw);
     } else {
       if (this.draw) {
         this.clear();
         this.olMap.removeInteraction(this.draw);
       }
-      this.olMap.clicklock = false;
+      this.olMap.clickLock.delete("search");
     }
   };
 
