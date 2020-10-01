@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile, getIsMobile } from "../utils/IsMobile.js";
-import FeatureInfo from "./FeatureInfo.js";
+import FeatureInfoContainer from "./FeatureInfoContainer.js";
 import clsx from "clsx";
 
 const zIndexStart = 1000;
@@ -514,7 +514,7 @@ class Window extends React.PureComponent {
             )}
           >
             {features ? (
-              <FeatureInfo
+              <FeatureInfoContainer
                 features={this.props.features}
                 onDisplay={this.props.onDisplay}
                 key={

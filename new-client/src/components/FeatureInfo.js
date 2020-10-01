@@ -1,8 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Typography from "@material-ui/core/Typography";
 import marked from "marked";
 import {
@@ -17,8 +15,6 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  ButtonGroup,
-  Button,
 } from "@material-ui/core";
 
 const styles = (theme) => ({
@@ -45,15 +41,10 @@ const styles = (theme) => ({
 });
 
 class FeatureInfo extends React.PureComponent {
-  state = {
-    selectedIndex: 1,
-    visible: false,
-  };
+  state = {};
 
   static propTypes = {
     classes: propTypes.object.isRequired,
-    features: propTypes.array.isRequired,
-    onDisplay: propTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -64,18 +55,7 @@ class FeatureInfo extends React.PureComponent {
     });
   }
 
-  componentDidMount() {
-    var left = document.getElementById("step-left");
-    var right = document.getElementById("step-right");
-    if (left && right) {
-      left.onclick = (e) => {
-        this.changeSelectedIndex(-1);
-      };
-      right.onclick = (e) => {
-        this.changeSelectedIndex(1);
-      };
-    }
-  }
+  componentDidMount() {}
 
   renderFeaturesAsDefaultTable(data, caption) {
     // We can't use "i" for coloring every second row, as some rows
@@ -103,27 +83,6 @@ class FeatureInfo extends React.PureComponent {
         </Table>
       </TableContainer>
     );
-  }
-
-  changeSelectedIndex(amount) {
-    var eot = false;
-    if (amount > 0 && this.props.features.length === this.state.selectedIndex) {
-      eot = true;
-    } else if (amount < 0 && this.state.selectedIndex === 1) {
-      eot = true;
-    }
-    if (!eot) {
-      this.setState(
-        {
-          selectedIndex: this.state.selectedIndex + amount,
-        },
-        () => {
-          this.props.onDisplay(
-            this.props.features[this.state.selectedIndex - 1]
-          );
-        }
-      );
-    }
   }
 
   shortcode(str) {
@@ -156,123 +115,74 @@ class FeatureInfo extends React.PureComponent {
     }
   }
 
-  html(features) {
+  renderFeatureInformation(feature) {
     const { classes } = this.props;
+    const layerInfo = feature.layer.get("layerInfo");
 
-    if (!features) return "";
+    let markdown = layerInfo?.information;
+    let caption = layerInfo?.caption;
 
-    const visibleStyle = (currentIndex) => {
-      const displayValue =
-        this.state.selectedIndex === currentIndex + 1 ? "flex" : "none";
-      return {
-        display: displayValue,
-        flexFlow: "column",
-        height: "100%",
-      };
-    };
+    let layer,
+      shortcodes = [];
 
-    const toggler = features.length > 1 && (
-      <>
-        <ButtonGroup
-          aria-label="Browse through infoclick results"
-          color="primary"
-          size="small"
-          variant="contained"
-        >
-          <Button aria-label="Previous" id="step-left">
-            <ArrowLeftIcon />
-          </Button>
-          <Button
-            className={classes.fullWidthButton}
-            disableFocusRipple
-            disableTouchRipple
-            disableRipple
-          >
-            {this.state.selectedIndex} av {features.length}
-          </Button>
-          <Button aria-label="Next" id="step-right">
-            <ArrowRightIcon />
-          </Button>
-        </ButtonGroup>
-      </>
-    );
+    //Problem with geojson returned from AGS - Missing id on feature - how to handle?
+    if (feature.layer.layersInfo && feature.getId()) {
+      layer = Object.keys(feature.layer.layersInfo).find((id) => {
+        const fid = feature.getId().split(".")[0];
+        const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
+        return fid === layerId;
+      });
+    }
 
-    const featureList = features.map((feature, i) => {
-      if (i === 0) this.props.onDisplay(feature);
-      const layerInfo = feature.layer.get("layerInfo");
+    // Deal with layer groups that have a caption on sublayer. Layer groups will
+    // have a 'layersInfo' (NB pluralis on layerSInfo), and if it exists,
+    // let's overwrite the previously saved caption.
+    // Below I'm using the new optional chaining operator (
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining),
+    // which will return the new caption, if exists, or a falsy value. If falsy value is returned,
+    // just fall back to the previous value of caption.
+    caption = feature.layer?.layersInfo?.[layer]?.caption || caption;
 
-      let markdown = layerInfo?.information;
-      let caption = layerInfo?.caption;
+    // Same goes for infobox, I'm shortening the code significantly using the optional chaining.
+    // Features coming from search result have infobox set on Feature instead of Layer due to
+    // different features sharing same vector layer.
+    markdown =
+      feature?.infobox ||
+      feature.layer?.layersInfo?.[layer]?.infobox ||
+      markdown;
 
-      let layer,
-        shortcodes = [];
+    let properties = feature.getProperties();
+    properties = extractPropertiesFromJson(properties);
 
-      //Problem with geojson returned from AGS - Missing id on feature - how to handle?
-      if (feature.layer.layersInfo && feature.getId()) {
-        layer = Object.keys(feature.layer.layersInfo).find((id) => {
-          const fid = feature.getId().split(".")[0];
-          const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
-          return fid === layerId;
-        });
+    feature.setProperties(properties);
+
+    if (markdown) {
+      let transformed = this.shortcode(markdown);
+      if (transformed) {
+        shortcodes = transformed.codes;
+        markdown = transformed.str;
       }
-
-      // Deal with layer groups that have a caption on sublayer. Layer groups will
-      // have a 'layersInfo' (NB pluralis on layerSInfo), and if it exists,
-      // let's overwrite the previously saved caption.
-      // Below I'm using the new optional chaining operator (
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining),
-      // which will return the new caption, if exists, or a falsy value. If falsy value is returned,
-      // just fall back to the previous value of caption.
-      caption = feature.layer?.layersInfo?.[layer]?.caption || caption;
-
-      // Same goes for infobox, I'm shortening the code significantly using the optional chaining.
-      // Features coming from search result have infobox set on Feature instead of Layer due to
-      // different features sharing same vector layer.
-      markdown =
-        feature?.infobox ||
-        feature.layer?.layersInfo?.[layer]?.infobox ||
-        markdown;
-
-      let properties = feature.getProperties();
-      properties = extractPropertiesFromJson(properties);
-
-      feature.setProperties(properties);
-
-      if (markdown) {
-        let transformed = this.shortcode(markdown);
-        if (transformed) {
-          shortcodes = transformed.codes;
-          markdown = transformed.str;
-        }
-      }
-      const value = markdown
-        ? mergeFeaturePropsWithMarkdown(markdown, properties)
-        : this.renderFeaturesAsDefaultTable(properties, caption);
-
-      return (
-        <div key={i} style={visibleStyle(i)}>
-          <Typography variant="button" align="center" component="h6">
-            {caption}
-          </Typography>
-          {markdown ? (
-            <div
-              className={classes.textContent}
-              dangerouslySetInnerHTML={value}
-            />
-          ) : (
-            <div className={classes.textContent}>{value}</div>
-          )}
-
-          {shortcodes.length > 0 && this.renderShortcodes(shortcodes, feature)}
-        </div>
-      );
-    });
+    }
+    const value = markdown
+      ? mergeFeaturePropsWithMarkdown(markdown, properties)
+      : this.renderFeaturesAsDefaultTable(properties, caption);
 
     return (
-      <section className={classes.windowSection}>
-        {toggler}
-        <section className={classes.featureList}>{featureList}</section>
-      </section>
+      <div>
+        <Typography variant="button" align="center" component="h6">
+          {caption}
+        </Typography>
+        {markdown ? (
+          <div
+            className={classes.textContent}
+            dangerouslySetInnerHTML={value}
+          />
+        ) : (
+          <div className={classes.textContent}>{value}</div>
+        )}
+
+        {shortcodes.length > 0 && this.renderShortcodes(shortcodes, feature)}
+      </div>
     );
   }
 
@@ -294,8 +204,8 @@ class FeatureInfo extends React.PureComponent {
   }
 
   render() {
-    const { features } = this.props;
-    return this.html(features);
+    const { feature } = this.props;
+    return this.renderFeatureInformation(feature);
   }
 }
 
