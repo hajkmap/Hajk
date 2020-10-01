@@ -165,7 +165,6 @@ export default class DocumentSearchModel {
   };
 
   createFeatureFromChapter = (chapter) => {
-    console.log(chapter, "chapter");
     let properties = {
       header: chapter.header,
       geoids: chapter.geoids,
@@ -210,12 +209,11 @@ export default class DocumentSearchModel {
         );
         return matchedSearchFields.length > 0;
       });
-      console.log(everyResult, "everyResult");
+
       return everyResult;
     });
 
     if (match) {
-      console.log(match, " match");
       chapter.matchedSearchFields = matchedSearchFields;
     } else {
       chapter.matchedSearchFields = [];
