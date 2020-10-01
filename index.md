@@ -8,7 +8,7 @@ Några goda kartexempel:
 2. [Kungsbacka](https://karta.kungsbacka.se/)
 3. [Uddevalla](https://karta.uddevalla.se/)
 
-Kontakta oss om _din_ organisation är intresserad av att medverka :-)
+Kontakta någon av oss om _din_ organisation är intresserad av att medverka :-)
 
 
 You can use the [editor on GitHub](https://github.com/hajkmap/Hajk/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
@@ -22,7 +22,7 @@ Markdown is a lightweight and easy-to-use syntax for styling your writing. It in
 ```markdown
 Syntax highlighted code block
 
-# Hej och välkômmen te HAJK !!
+# Header 1
 ## Header 2
 ### Header 3
 
