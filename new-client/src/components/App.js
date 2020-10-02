@@ -14,7 +14,7 @@ import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
-import Search from "./searchdemo/Search";
+import Search from "./search/Search";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";

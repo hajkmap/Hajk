@@ -1,267 +1,588 @@
-/**
- * BRIEF DESCRIPTION
- * =================
- *
- * --- SEARCH MODEL ---
- * App initiates the search model so it's available to the rest of the application,
- * probably exposed as "this.app.searchModel" from our plugin's perspective.
- *
- * The Search Model (this.app.searchModel) exposes the following methods:
- *  async doAutocompleteLookup(text)
- *  async doSearch([searchString string], [spatialFilter geom])
- *  abort() // both autocomplete and search, or separate abort methods for each of them?
- *
- * The Search Model reads the map config and sets up WFS search sources.
- *
- * Any search plugin (whether Hajk's standard or some other implementation) can use
- * Search Model in a following manner:
- *  - User starts typing. For each searchField.onChange-event our plugin
- *    calls "await this.app.searchModel.doAutocompleteLookup(searchField.value)".
- *  - When autocomplete results arrive they are handled and rendered properly, as
- *    desired by the given plugin. Please note that the autocomplete could also be
- *    skipped entirely.
- *  - Next user can do something that will mean that our plugin wants to invoke
- *    the actual search. (It could be that user clicks the search button, presses enter
- *    or clicks on a autocomplete item.) When this happens, our plugin calls
- *    "await this.app.searchModel.doSearch()" with proper parameters.
- *      - If we're just doing regular search, we supply the value of
- *        search field as parameter to doSearch().
- *      - If we want to limit the search spatially, we (somehow) read the geom
- *        and supply as a second parameter to doSearch().
- *      - If we want to search in visible layers only, we must be able to send
- *        that info to our search model too. Could be done by getting the list
- *        visible layers from our ol.Map, and supplying that array as an option
- *        to doSearch(). In that case, doSearch will filter search sources to
- *        only include those that are supplied in this array of visible layers.
- *  - No matter which of the above is used, calling "await this.app.searchModel.doSearch()"
- *    will always resolve into a Promise that contains some data: the search results. Those
- *    must be displayed for the user somehow. (It could also be that we want to do something
- *    more, such as zoom into the first result. But implementation of that functionality should
- *    be done in each specific search plugin.)
- *  - So at this step, we have got some results back to our plugin and those are ready
- *    to be displayed for the user. Our search plugin takes care of this by looping the
- *    resulting object, styling and formatting and finally rendering the results list.
- *  - It is up to the plugin as well to set up listeners for items in the results list. One
- *    common listener would be a click listener on each item that will zoom in to the
- *    clicked result.
- *  - Each search plugin should be able to abort any ongoing search. This is achieved by calling
- *    this.app.searchModel.abort() at any given time. It is, of course, up to the search plugin
- *    to implement necessary UI element (typically a button) that will abort ongoing searches.
- *  - Please note that clearing the search results is NOT something that the Search Model should
- *    care about. Instead it's entirely up to the implementing plugin to handle different user
- *    actions (and hiding the results list is such an action). **The Search Model must only care
- *    about supplying autocomplete, supplying search results and aborting those two.**
- *
- *
- * --- SEARCH COMPONENT ---
- *
- * App loads this Component if so configured by admin.
- *
- * Search Component enters the constructor phase.
- *
- * Listeners and event handlers are setup.
- *
- * Listeners:
- *  search.populateAutocomplete
- *  search.populateResultsList
- *  search.addFunctionality
- *
- * Event handlers:
- *  User types -> search.stringChanged
- *  User aborts search -> search.aborted
- *  ...
- *
- * --- PLUGIN WITH SEARCH FUNCTIONALITY ---
- *
- * Plugins are loaded by app. If plugin wants to expose
- * search functionality, add something or in some way take
- * care of search results, the following must be implemented
- * the plugin.
- *
- * Plugin subscribes to minimum these events:
- *  search.stringChanged
- *  search.aborted
- *
- * This way the plugin knows whether user types into search box
- * or cancels the search. From here, plugin can take care of whatever
- * it whishes to do with the current value of search field. The
- * normal thing would be that it reads the value, does some magic
- * and then gets some results back.
- *
- * In this case, the results must be sent back to Search in a
- * standardized manner. For this the plugin publishes this event:
- *  search.populateAutocomplete
- * if we have implemented autocomplete and have something to offer, or:
- *  search.populateResultsList
- * if user have pressed "search" and we want the actual results
- * and not only autocomplete values.
- *
- * The values sent back must be standardized. Perhaps something like this:
- * [{
- *  label: string
- *  geom: // whatever to mark/select in map
- * }, ...]
- */
-
-//
-// *https://www.registers.service.gov.uk/registers/country/use-the-api*
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import SearchBar from "./SearchBar";
+import { withStyles } from "@material-ui/core/styles";
+import Observer from "react-event-observer";
+import EditIcon from "@material-ui/icons/Edit";
+import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
+import SettingsIcon from "@material-ui/icons/Settings";
+import MapViewModel from "./MapViewModel";
 
-import { Vector as VectorLayer } from "ol/layer";
-import VectorSource from "ol/source/Vector";
-import GeoJSON from "ol/format/GeoJSON";
+const styles = () => ({
+  inputRoot: {
+    width: "100%",
+  },
+});
 
-const Search = (props) => {
-  const searchModel = props.app.appModel.searchModel;
+const defaultSearchTools = [
+  {
+    name: "Sök med polygon",
+    icon: <EditIcon />,
+    type: "Polygon",
+    onClickEventName: "spatial-search",
+  },
+  {
+    name: "Sök med radie",
+    icon: <RadioButtonUncheckedIcon />,
+    type: "Circle",
+    onClickEventName: "spatial-search",
+  },
+  {
+    name: "Sökinställningar",
+    icon: <SettingsIcon />,
+    type: "SETTINGS",
+    onClickEventName: "",
+  },
+];
 
-  const [searchSources, setSearchSources] = useState(searchModel.getSources());
-
-  // Settings to be sent to SearchModel
-  const [searchSettings, setSearchSettings] = useState([]);
-
-  // Layer to draw into (spatial search)
-  const [drawSource, setDrawSource] = useState([]);
-
-  const [searchResults, setSearchResults] = useState({
-    featureCollections: [],
-    errors: [],
-  });
-
-  // Search value from input field
-  const [searchInput, setSearchInput] = useState("");
-
-  const [searchActive, setSearchActive] = useState("");
-
-  // Layer to visualize results
-  const resultsSource = useRef();
-  const resultsLayer = useRef();
-  const map = useRef(props.map);
-
-  useEffect(() => {
-    resultsSource.current = new VectorSource({ wrapX: false });
-    resultsLayer.current = new VectorLayer({
-      source: resultsSource.current,
-      // style: drawStyle.current
-    });
-
-    map.current.addLayer(resultsLayer.current);
-  }, []);
-
-  function addFeaturesToResultsLayer(featureCollections) {
-    resultsSource.current.clear();
-
-    const features = featureCollections.map((fc) =>
-      fc.value.features.map((f) => {
-        const geoJsonFeature = new GeoJSON().readFeature(f);
-        return geoJsonFeature;
-      })
-    );
-
-    features.map((f) => resultsSource.current.addFeatures(f));
-
-    // Zoom to fit all features
-    const currentExtent = resultsSource.current.getExtent();
-
-    if (currentExtent.map(Number.isFinite).includes(false) === false) {
-      map.current.getView().fit(currentExtent, {
-        size: map.current.getSize(),
-        maxZoom: 7,
-      });
-    }
-  }
-
-  async function doSearch(searchString) {
-    const searchOptions = searchModel.getSearchOptions();
-
-    // Apply our custom options based on user's selection
-    searchSettings.map((setting) => {
-      searchOptions["activeSpatialFilter"] = setting.activeSpatialFilter; // "intersects" or "within"
-      searchOptions["matchCase"] = setting.matchCase;
-      searchOptions["wildcardAtEnd"] = setting.wildcardAtEnd;
-      searchOptions["wildcardAtStart"] = setting.wildcardAtStart;
-
-      return searchOptions;
-    });
-
-    if (drawSource.current) {
-      searchOptions["featuresToFilter"] = drawSource.current.getFeatures();
-    }
-
-    if (searchString?.length || searchOptions["featuresToFilter"]) {
-      const { featureCollections, errors } = await searchModel.getResults(
-        searchString,
-        searchSources,
-        searchOptions
-      );
-
-      // It's possible to handle any errors in the UI by checking if Search Model returned any
-      errors.length > 0 && console.error(errors);
-
-      setSearchResults({ featureCollections, errors });
-
-      addFeaturesToResultsLayer(featureCollections);
-    }
-  }
-
-  const handleOnClear = () => {
-    //Clear input, draw object, result list
-    setSearchInput("");
-    if (drawSource.current) {
-      drawSource.current.clear();
-    }
-    if (resultsSource.current) {
-      resultsSource.current.clear();
-    }
-    setSearchResults({
-      featureCollections: [],
-      errors: [],
-    });
-    setSearchActive("");
+class Search extends React.PureComponent {
+  state = {
+    searchImplementedPluginsLoaded: false,
+    searchSources: [],
+    searchResults: { featureCollections: [], errors: [] },
+    autocompleteList: [],
+    searchString: "",
+    searchActive: "",
+    autoCompleteOpen: false,
+    loading: false,
+    searchOptions: {
+      wildcardAtStart: false,
+      wildcardAtEnd: true,
+      matchCase: false,
+      activeSpatialFilter: "within",
+    },
   };
 
-  function handleSearchInput(searchString) {
-    setSearchInput(searchString);
+  searchImplementedPlugins = [];
+  featuresToFilter = [];
+  localObserver = Observer();
+
+  constructor(props) {
+    super(props);
+    this.map = props.map;
+    this.searchModel = props.app.appModel.searchModel;
+    this.initMapViewModel();
+    this.bindSubscriptions();
+  }
+
+  initMapViewModel = () => {
+    const { app } = this.props;
+    this.mapViewModel = new MapViewModel({
+      options: this.props.options,
+      localObserver: this.localObserver,
+      map: this.map,
+      app: app,
+    });
+  };
+
+  resetFeaturesToFilter = () => {
+    this.featuresToFilter = [];
+  };
+
+  setFeaturesToFilter = (arrayOfFeatures) => {
+    this.featuresToFilter = arrayOfFeatures;
+  };
+
+  bindSubscriptions = () => {
+    this.localObserver.subscribe("on-draw-end", (feature) => {
+      this.setFeaturesToFilter([feature]);
+      this.doSearch();
+    });
+    this.localObserver.subscribe("on-draw-start", () => {
+      this.setState({ searchActive: "draw" });
+    });
+  };
+
+  getPluginsConfToUseSearchInterface = () => {
+    const { app } = this.props;
+    return Object.values(app.appModel.plugins).filter((plugin) => {
+      return (
+        plugin.options.searchImplemented &&
+        plugin.searchInterface.getSearchMethods
+      );
+    });
+  };
+
+  tryBindSearchMethods = (plugins) => {
+    return plugins.map((plugin) => {
+      return plugin.searchInterface.getSearchMethods.then((methods) => {
+        plugin.searchInterface.getFunctionality = methods?.getFunctionality;
+        plugin.searchInterface.getResults = methods?.getResults;
+        return plugin;
+      });
+    });
+  };
+
+  pluginsHavingCorrectSearchMethods = (plugins) => {
+    return plugins.filter((plugin) => {
+      return (
+        plugin.searchInterface.getResults &&
+        plugin.searchInterface.getFunctionality
+      );
+    });
+  };
+
+  //For a plugin to use the searchInterface, following must be met
+  //Must have option searchImplemented = true in tool-config
+  //Must "inject" a method called getSearchMethods returning a promise on the object plugin.searchInterface
+  //The object searchInterface is put onto the plugin upon loading in App.js
+  //Promise must be resolved into object with two methods getResults and getFunctionality
+
+  getSearchImplementedPlugins = () => {
+    const pluginsConfToUseSearchInterface = this.getPluginsConfToUseSearchInterface();
+    const searchBindedPlugins = this.tryBindSearchMethods(
+      pluginsConfToUseSearchInterface
+    );
+    return Promise.all(searchBindedPlugins).then((plugins) => {
+      return this.pluginsHavingCorrectSearchMethods(plugins);
+    });
+  };
+
+  getExternalSearchTools = (searchImplementedSearchTools) => {
+    return searchImplementedSearchTools.map((searchImplementedPlugin) => {
+      return searchImplementedPlugin.searchInterface.getFunctionality();
+    });
+  };
+
+  getSearchTools = (searchImplementedSearchTools) => {
+    return defaultSearchTools.concat(
+      this.getExternalSearchTools(searchImplementedSearchTools)
+    );
+  };
+
+  componentDidMount = () => {
+    const { app } = this.props;
+    app.globalObserver.subscribe("core.appLoaded", () => {
+      this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
+        this.setState({
+          searchImplementedPluginsLoaded: true,
+          searchImplementedPlugins: searchImplementedPlugins,
+          searchTools: this.getSearchTools(searchImplementedPlugins),
+        });
+      });
+    });
+  };
+
+  handleOnClear = () => {
+    this.setState({
+      searchString: "",
+      searchActive: "",
+      showSearchResults: false,
+      searchResults: { featureCollections: [], errors: [] },
+    });
+    this.resetFeaturesToFilter();
+    this.localObserver.publish("clear-search-results");
+  };
+
+  handleSearchInput = (event, value, reason) => {
+    let searchString = value?.autocompleteEntry || value || "";
 
     if (searchString !== "") {
-      setSearchActive("input");
+      this.setState(
+        {
+          searchString: searchString,
+          searchActive: "input",
+        },
+        () => {
+          this.doSearch();
+        }
+      );
+    } else {
+      this.setState({
+        searchString: searchString,
+      });
     }
+  };
+
+  handleOnAutompleteInputChange = (event, searchString, reason) => {
+    this.localObserver.publish("clear-search-results");
+
+    this.setState(
+      {
+        autoCompleteOpen: searchString.length >= 3,
+        loading: searchString.length >= 3,
+        showSearchResults: false,
+        searchString: searchString,
+      },
+      () => {
+        if (this.state.searchString.length >= 3) {
+          this.updateAutocompleteList(this.state.searchString);
+        } else {
+          this.setState({
+            autocompleteList: [],
+          });
+        }
+      }
+    );
+  };
+
+  updateSearchOptions = (searchOptions) => {
+    this.setState(searchOptions);
+  };
+
+  handleOnClickOrKeyboardSearch = () => {
+    if (this.hasEnoughCharsForSearch()) {
+      this.doSearch();
+    }
+  };
+
+  setSearchSources = (sources) => {
+    this.setState({
+      searchSources: sources,
+    });
+  };
+
+  handleSearchBarKeyPress = (event) => {
+    if (event.which === 13 || event.keyCode === 13) {
+      this.handleOnClickOrKeyboardSearch();
+    }
+  };
+
+  getAutoCompleteFetchSettings = () => {
+    let fetchSettings = { ...this.searchModel.getSearchOptions() };
+    fetchSettings = {
+      ...fetchSettings,
+      maxResultsPerDataset: 5,
+      getPossibleCombinations: true,
+    };
+    return fetchSettings;
+  };
+
+  getArrayWithSearchWords = (searchString) => {
+    let tempStringArray = this.splitAndTrimOnCommas(searchString);
+    return tempStringArray.join(" ").split(" ");
+  };
+
+  splitAndTrimOnCommas = (searchString) => {
+    return searchString.split(",").map((string) => {
+      return string.trim();
+    });
+  };
+
+  sortSearchFieldsOnFeature = (searchFields, feature, wordsInTextField) => {
+    let orderedSearchFields = [];
+
+    searchFields.forEach((searchField) => {
+      let searchFieldMatch = wordsInTextField.some((word) => {
+        return RegExp(`^${word}\\W*`, "i").test(
+          feature.properties[searchField] || ""
+        );
+      });
+
+      if (feature.properties[searchField]) {
+        if (searchFieldMatch) {
+          orderedSearchFields.unshift(searchField);
+        } else {
+          orderedSearchFields.push(searchField);
+        }
+      }
+    });
+    return orderedSearchFields;
+  };
+
+  getSortedAutocompleteEntry = (feature) => {
+    let autocompleteEntry = "";
+    feature.searchFieldOrder.map((sf, index) => {
+      if (index === feature.searchFieldOrder.length - 1) {
+        return (autocompleteEntry = autocompleteEntry.concat(
+          feature.properties[sf]
+        ));
+      } else {
+        return (autocompleteEntry = autocompleteEntry.concat(
+          `${feature.properties[sf]}, `
+        ));
+      }
+    });
+    return autocompleteEntry;
+  };
+
+  getAutocompleteDataset = (featureCollection) => {
+    return featureCollection.value.features.map((feature) => {
+      const dataset = featureCollection.source.caption;
+      const origin = featureCollection.origin;
+      const autocompleteEntry = this.getSortedAutocompleteEntry(feature);
+      return {
+        dataset,
+        autocompleteEntry,
+        origin: origin,
+      };
+    });
+  };
+
+  sortSearchFieldsOnFeatures = (featureCollection, wordsInTextField) => {
+    featureCollection.value.features.forEach((feature) => {
+      feature.searchFieldOrder = this.sortSearchFieldsOnFeature(
+        featureCollection.source.searchFields,
+        feature,
+        wordsInTextField
+      );
+    });
+  };
+
+  flattenAndSortAutoCompleteList = (searchResults) => {
+    let wordsInTextField = this.getArrayWithSearchWords(
+      this.state.searchString
+    );
+
+    const resultsPerDataset = searchResults.featureCollections.map(
+      (featureCollection) => {
+        this.sortSearchFieldsOnFeatures(featureCollection, wordsInTextField);
+        return this.getAutocompleteDataset(featureCollection);
+      }
+    );
+
+    // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
+    // however, we need just one Array, so let's flatten the results:
+
+    return this.sortAutocompleteList(resultsPerDataset.flat());
+  };
+
+  sortAutocompleteList = (flatAutocompleteArray) => {
+    return flatAutocompleteArray.sort((a, b) =>
+      a.autocompleteEntry.localeCompare(b.autocompleteEntry, "sv", {
+        numeric: true,
+      })
+    );
+  };
+
+  getMergeResultsFromAllSources = (results) => {
+    return results.reduce(
+      (searchResults, result) => {
+        searchResults.featureCollections = searchResults.featureCollections.concat(
+          result.value.featureCollections
+        );
+        searchResults.errors = searchResults.errors.concat(result.value.errors);
+        return searchResults;
+      },
+      { errors: [], featureCollections: [] }
+    );
+  };
+
+  fetchResultFromSearchModel = async (fetchOptions) => {
+    let { searchSources } = this.state;
+
+    if (searchSources.length === 0) {
+      searchSources = this.searchModel.getSources();
+    }
+
+    let active = true;
+    const promise = this.searchModel.getResults(
+      this.state.searchString,
+      searchSources,
+      fetchOptions
+    );
+
+    return Promise.allSettled([
+      promise,
+      ...this.fetchResultsFromPlugins(fetchOptions),
+    ])
+      .then((results) => {
+        results = results.filter((result) => result.status !== "rejected");
+        results = this.removeCollectionsWithoutFeatures(results);
+        let searchResults = this.getMergeResultsFromAllSources(results);
+        // It's possible to handle any errors in the UI by checking if Search Model returned any
+        searchResults.errors.length > 0 &&
+          console.error("Autocomplete error: ", searchResults.errors);
+        return searchResults;
+      })
+      .catch((error) => {
+        console.error("Autocomplete error: ", error);
+
+        // Also, set "open" state variable to false, which
+        // abort the "loading" state of Autocomplete.
+        if (active) {
+          this.setState({
+            open: false,
+          });
+        }
+      });
+  };
+
+  async doSearch() {
+    this.setState({ loading: true });
+    let fetchOptions = this.getSearchResultsFetchSettings();
+    let searchResults = await this.fetchResultFromSearchModel(fetchOptions);
+
+    this.setState({
+      searchResults,
+      showSearchResults: true,
+      loading: false,
+      autoCompleteOpen: false,
+    });
+
+    let features = this.extractFeatureWithFromFeatureCollections(
+      searchResults.featureCollections
+    );
+
+    features = this.filterFeaturesWithGeometry(features);
+
+    this.localObserver.publish("add-features-to-results-layer", features);
   }
 
-  function handleOnSearch(searchString) {
-    doSearch(searchString);
+  filterFeaturesWithGeometry = (features) => {
+    return features.filter((feature) => {
+      return feature.geometry != null;
+    });
+  };
+
+  extractFeatureWithFromFeatureCollections = (featureCollections) => {
+    return featureCollections
+      .map((fc) => {
+        return fc.value.features;
+      })
+      .flat();
+  };
+
+  updateAutocompleteList = async () => {
+    let fetchOptions = this.getAutoCompleteFetchSettings();
+    let autoCompleteResult = await this.fetchResultFromSearchModel(
+      fetchOptions
+    );
+    this.setState({
+      autocompleteList: this.prepareAutocompleteList(autoCompleteResult),
+      loading: false,
+    });
+  };
+
+  anySearchImplementedPlugins = () => {
+    return (
+      this.state.searchImplementedPlugins &&
+      this.state.searchImplementedPlugins.length === 0
+    );
+  };
+
+  fetchResultsFromPlugins = (fetchOptions) => {
+    const { searchString } = this.state;
+    if (this.anySearchImplementedPlugins()) {
+      return [];
+    }
+    return this.state.searchImplementedPlugins.reduce((promises, plugin) => {
+      if (plugin.searchInterface.getResults) {
+        promises.push(
+          plugin.searchInterface.getResults(searchString, fetchOptions)
+        );
+        return promises;
+      }
+      return promises;
+    }, []);
+  };
+
+  hasEnoughCharsForSearch = () => {
+    const { searchString } = this.state;
+    return searchString.length >= 3;
+  };
+
+  getSearchResultsFetchSettings = () => {
+    return this.getUserCustomFetchSettings(this.searchModel.getSearchOptions());
+  };
+
+  removeCollectionsWithoutFeatures = (results) => {
+    return results.map((res) => {
+      let featureCollections = res.value.featureCollections.filter(
+        (featureCollection) => {
+          return featureCollection.value.features.length > 0;
+        }
+      );
+      res.value.featureCollections = featureCollections;
+      return res;
+    });
+  };
+
+  prepareAutocompleteList = (searchResults) => {
+    let maxSlots = 7;
+    let numSourcesWithResults = searchResults.featureCollections.length;
+    let numResults = 0;
+    searchResults.featureCollections.forEach((fc) => {
+      numResults += fc.value.features.length;
+    });
+
+    let spacesPerSource = Math.max(
+      1,
+      Math.min(
+        Math.floor(numResults / numSourcesWithResults),
+        Math.floor(maxSlots / numSourcesWithResults)
+      )
+    );
+
+    if (numResults <= maxSlots) {
+      //All results can be shown
+      return this.flattenAndSortAutoCompleteList(searchResults);
+    } else {
+      searchResults.featureCollections.forEach((fc) => {
+        if (fc.value.features.length > spacesPerSource) {
+          fc = fc.value.features.splice(spacesPerSource);
+        }
+      });
+      return this.flattenAndSortAutoCompleteList(searchResults);
+    }
+  };
+
+  getUserCustomFetchSettings = (searchOptionsFromModel) => {
+    const {
+      activeSpatialFilter,
+      matchCase,
+      wildcardAtEnd,
+      wildcardAtStart,
+    } = this.state.searchOptions;
+    return {
+      ...searchOptionsFromModel,
+      activeSpatialFilter: activeSpatialFilter,
+      featuresToFilter: this.featuresToFilter || [],
+      matchCase: matchCase,
+      wildcardAtStart: wildcardAtStart,
+      wildcardAtEnd: wildcardAtEnd,
+    };
+  };
+
+  render() {
+    const { classes, target } = this.props;
+    const {
+      searchString,
+      searchActive,
+      searchResults,
+      autocompleteList,
+      autoCompleteOpen,
+      showSearchResults,
+      loading,
+      searchOptions,
+      searchSources,
+      searchTools,
+    } = this.state;
+
+    return (
+      this.state.searchImplementedPluginsLoaded && (
+        <>
+          <SearchBar
+            classes={{
+              root: classes.inputRoot,
+              input:
+                target === "top" ? classes.inputInputWide : classes.inputInput,
+            }}
+            localObserver={this.localObserver}
+            searchTools={searchTools}
+            searchResults={searchResults}
+            handleSearchInput={this.handleSearchInput}
+            searchString={searchString}
+            searchActive={searchActive}
+            handleOnClickOrKeyboardSearch={this.handleOnClickOrKeyboardSearch}
+            autoCompleteOpen={autoCompleteOpen}
+            showSearchResults={showSearchResults}
+            handleOnAutompleteInputChange={this.handleOnAutompleteInputChange}
+            handleOnClear={this.handleOnClear}
+            autocompleteList={autocompleteList}
+            doSearch={this.doSearch.bind(this)}
+            searchModel={this.searchModel}
+            searchOptions={searchOptions}
+            updateSearchOptions={this.updateSearchOptions}
+            setSearchSources={this.setSearchSources}
+            loading={loading}
+            searchSources={searchSources}
+            handleSearchBarKeyPress={this.handleSearchBarKeyPress}
+            getArrayWithSearchWords={this.getArrayWithSearchWords}
+            {...this.props}
+          />
+        </>
+      )
+    );
   }
-
-  function handleSearchSettings(option) {
-    setSearchSettings(option);
-  }
-
-  function handleDrawSource(source) {
-    setSearchActive("draw");
-    setDrawSource(source);
-  }
-
-  function handleSearchSources(source) {
-    setSearchSources(source);
-  }
-
-  return (
-    <>
-      <SearchBar
-        {...props}
-        resultsSource={resultsSource}
-        searchResults={searchResults}
-        handleSearchInput={handleSearchInput}
-        searchInput={searchInput}
-        searchActive={searchActive}
-        handleOnSearch={handleOnSearch}
-        handleOnClear={handleOnClear}
-        handleSearchSettings={handleSearchSettings}
-        handleDrawSource={handleDrawSource}
-        handleSearchSources={handleSearchSources}
-      />
-    </>
-  );
-};
-
-export default Search;
+}
+export default withStyles(styles)(Search);

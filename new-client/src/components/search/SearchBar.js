@@ -1,225 +1,455 @@
-import React, { useEffect, useRef, useState } from "react";
-
+import React from "react";
+import cslx from "clsx";
+import Grid from "@material-ui/core/Grid";
+import ClearIcon from "@material-ui/icons/Clear";
+import withWidth from "@material-ui/core/withWidth";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import FormatSizeIcon from "@material-ui/icons/FormatSize";
+import SearchIcon from "@material-ui/icons/Search";
+import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
+import WithinIcon from "@material-ui/icons/Adjust";
+import IntersectsIcon from "@material-ui/icons/Toll";
+import RoomIcon from "@material-ui/icons/Room";
+import DescriptionIcon from "@material-ui/icons/Description";
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck";
+import SearchResultsContainer from "./SearchResultsContainer";
 import SearchTools from "./SearchTools";
-import SearchResultList from "./SearchResultList";
-import SearchSettings from "./SearchSettings";
-
+import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
 import {
+  CircularProgress,
   IconButton,
   Paper,
   TextField,
-  Tooltip,
-  makeStyles
+  Checkbox,
+  Popover,
+  Typography,
+  FormHelperText,
+  useMediaQuery,
+  Popper,
 } from "@material-ui/core";
 
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import Divider from "@material-ui/core/Divider";
-import MenuIcon from "@material-ui/icons/Menu";
-import SearchIcon from "@material-ui/icons/Search";
-import ClearIcon from "@material-ui/icons/Clear";
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: "flex",
-    alignItems: "center"
+const styles = (theme) => ({
+  searchContainer: {
+    width: 400,
+    height: theme.spacing(6),
   },
-  input: {
-    marginLeft: theme.spacing(1),
-    flex: 1
+  searchCollapsed: {
+    left: -440,
   },
-  iconButton: {
-    padding: 10
+
+  autocompleteTypography: {
+    paddingRight: 8,
+    maxWidth: "60%",
   },
-  divider: {
-    height: 28,
-    margin: 4
+
+  inputRoot: {
+    height: theme.spacing(6),
   },
-  textField: {
-    marginTop: 0,
-    marginBottom: 0
-  }
-}));
+  hidden: {
+    display: "none",
+  },
+});
 
-const SearchBar = props => {
-  const classes = useStyles();
-
-  const { menuButtonDisabled, onMenuClick } = props;
-  const searchModel = props.app.appModel.searchModel;
-  const map = useRef(props.map);
-
-  const tooltipText = menuButtonDisabled
-    ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
-    : "Visa verktygspanelen";
-
-  // Autocomplete state
-  const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState([]);
-  const loading = open && options.length === 0;
-  const [searchInput, setSearchInput] = useState("");
-
-  useEffect(() => {
-    //if (searchInput.length > 3) return undefined;
-
-    let active = true;
-
-    if (!loading) {
-      return undefined;
-    }
-
-    (async () => {
-      console.log("Getting Autocomplete for: ", searchInput);
-      const {
-        flatAutocompleteArray,
-        errors
-      } = await searchModel.getAutocomplete(searchInput);
-
-      console.log(
-        "Got this back to populate autocomplete with: ",
-        flatAutocompleteArray
-      );
-
-      // It is possible to check if Search Model returned any errors
-      errors.length > 0 && console.error("Autocomplete error: ", errors);
-
-      if (active) {
-        setOptions(flatAutocompleteArray);
-      }
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [loading, searchInput, searchModel]);
-
-  useEffect(() => {
-    if (!open) {
-      setOptions([]);
-    }
-  }, [open]);
-
-  const handleOnInputChange = (event, value, reason) => {
-    setOpen(value.length >= 3);
-
-    setSearchInput(value); // Local input value
-    props.handleSearchInput(value); // Global input value
-  };
-
-  const handleOnChange = (event, value, reason) => {
-    const inputValue = value?.autocompleteEntry || value;
-    setOpen(value.length >= 3);
-
-    setSearchInput(value); // Local input value
-    props.handleSearchInput(value); // Global input value
-
-    // Do a search if value is selected from autocomplete
-    if (reason !== "input") {
-      props.handleOnSearch(inputValue);
-    }
-  };
-
-  function handleOnSearch() {
-    // Search and close the autocomplete suggestions list
-    setOpen(false);
-    props.handleOnSearch(searchInput);
-  }
-
-  const handleOnClear = () => {
-    setSearchInput("");
-    props.handleOnClear();
-  };
-
+//Needed to make a CustomPopper with inlinestyling to be able to override width.. *
+//Popper.js didnt work as expected
+const CustomPopper = (props) => {
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
+  const style = smallScreen ? { width: "100%" } : { width: 400 };
   return (
-    <div>
-      <Paper className={classes.root}>
-        <Autocomplete
-          id="searchInputField"
-          freeSolo
-          clearOnEscape
-          disableClearable
-          autoComplete
-          style={{ width: 500 }}
-          disabled={props.searchActive === "draw"}
-          value={searchInput}
-          options={options}
-          loading={loading}
-          onInputChange={handleOnInputChange}
-          onChange={handleOnChange}
-          getOptionSelected={(option, value) =>
-            option.autocompleteEntry === value.autocompleteEntry
-          }
-          getOptionLabel={option => option?.autocompleteEntry || option}
-          groupBy={option => option.dataset}
-          renderOption={option => (
-            <React.Fragment>
-              <span>
-                {option.autocompleteEntry}
-                <em>{"(" + option.dataset + ")"}</em>
-              </span>
-            </React.Fragment>
-          )}
-          renderInput={params => (
-            <TextField
-              {...params}
-              className={classes.textField}
-              label={undefined}
-              margin="normal"
-              variant="outlined"
-              placeholder="Sök i kartlager"
-              InputProps={{
-                ...params.InputProps,
-                startAdornment: (
-                  <Tooltip title={tooltipText}>
-                    <span id="drawerToggler">
-                      <IconButton
-                        className={classes.iconButton}
-                        aria-label="menu"
-                        onClick={onMenuClick}
-                        disabled={menuButtonDisabled}
-                      >
-                        <MenuIcon />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                ),
-                endAdornment: (
-                  <>
-                    <IconButton
-                      className={classes.iconButton}
-                      aria-label="search"
-                      onClick={handleOnSearch}
-                    >
-                      <SearchIcon />
-                    </IconButton>
-                    <Divider
-                      className={classes.divider}
-                      orientation="vertical"
-                    />
-                    {props.searchActive ? (
-                      <IconButton
-                        className={classes.iconButton}
-                        aria-label="clear"
-                        onClick={handleOnClear}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    ) : (
-                      <SearchTools {...props} />
-                    )}
-                    <SearchSettings {...props} />
-                  </>
-                )
-              }}
-            />
-          )}
-        />
-      </Paper>
-      <SearchResultList
-        map={map}
-        searchResults={props.searchResults}
-        resultsSource={props.resultsSource}
-      />
-    </div>
+    <Popper
+      {...props}
+      style={style}
+      popperOptions={{
+        modifiers: {
+          computeStyle: { gpuAcceleration: false },
+        },
+      }}
+      placement="bottom-start"
+    />
   );
 };
 
-export default SearchBar;
+class SearchBar extends React.PureComponent {
+  state = {
+    drawActive: false,
+    panelCollapsed: false,
+    anchorEl: undefined,
+    moreOptionsId: undefined,
+    moreOptionsOpen: false,
+    selectSourcesOpen: false,
+    resultPanelCollapsed: false,
+  };
+
+  updateSearchOptions = (name, value) => {
+    const { searchOptions } = this.props;
+    searchOptions[name] = value;
+    this.props.updateSearchOptions(searchOptions);
+  };
+
+  getOriginBasedIcon = (origin) => {
+    switch (origin) {
+      case "WFS":
+        return <RoomIcon color="disabled"></RoomIcon>;
+      case "DOCUMENT":
+        return <DescriptionIcon color="disabled"></DescriptionIcon>;
+      default:
+        return <RoomIcon color="disabled"></RoomIcon>;
+    }
+  };
+
+  removeCommasAndSpaces = (string) => {
+    return string.replace(/,/g, "").replace(/ /g, "");
+  };
+
+  //Cant use string.prototype.matchAll because of Edge (Polyfill not working atm)
+  getMatches = (string, regex, index) => {
+    var matches = [];
+    var match = regex.exec(string);
+    while (match != null) {
+      matches.push(match);
+      match = regex.exec(string);
+    }
+    return matches;
+  };
+
+  getAllStartingIndexForOccurencesInString = (string1, string2) => {
+    return [...this.getMatches(string1, new RegExp(string2, "gi"), 1)].map(
+      (a) => a.index
+    );
+    //return [...string1.matchAll(new RegExp(string2, "gi"))].map((a) => a.index);
+  };
+
+  //Highlights everything in autocompleteentry up until the last occurence of a match in string.
+  highlightMatchedChars = (highlightInformation, autocompleteEntry) => {
+    const countOfHighlightInformation = highlightInformation.length;
+    //We get last higligtInformation because we want to higlight everything up to last word that matches
+    const lastHighlightInformation =
+      highlightInformation[countOfHighlightInformation - 1];
+
+    if (countOfHighlightInformation > 0) {
+      let { index, length } = lastHighlightInformation;
+      return (
+        <>
+          <strong>{autocompleteEntry.slice(0, index + length)}</strong>
+          {autocompleteEntry.slice(index + length)}
+        </>
+      );
+    }
+  };
+
+  getHighlightedACE = (searchString, autocompleteEntry) => {
+    const { getArrayWithSearchWords, classes } = this.props;
+    const stringArraySS = getArrayWithSearchWords(searchString);
+    let highlightInformation = stringArraySS
+      .map((searchWord) => {
+        return this.getAllStartingIndexForOccurencesInString(
+          autocompleteEntry,
+          searchWord
+        ).map((index) => {
+          return {
+            index: index,
+            length: searchWord.length,
+          };
+        });
+      })
+      .flat();
+
+    return (
+      <Typography noWrap={true} className={classes.autocompleteTypography}>
+        {this.highlightMatchedChars(highlightInformation, autocompleteEntry)}
+      </Typography>
+    );
+  };
+
+  renderPopover = () => {
+    const {
+      moreOptionsId,
+      anchorEl,
+      drawActive,
+      selectSourcesOpen,
+    } = this.state;
+    const { searchOptions } = this.props;
+    return (
+      <Popover
+        id={moreOptionsId}
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={() => this.setState({ anchorEl: null })}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+      >
+        <Paper>
+          <Typography>Fler inställningar</Typography>
+          <ToggleButton
+            value="selectSourcesOpen"
+            selected={selectSourcesOpen}
+            onChange={() =>
+              this.setState({
+                selectSourcesOpen: !selectSourcesOpen,
+                anchorEl: undefined,
+              })
+            }
+          >
+            <PlaylistAddCheckIcon size="small" />
+          </ToggleButton>
+          <ToggleButton
+            value="wildcardAtStart"
+            selected={searchOptions.wildcardAtStart}
+            onChange={() =>
+              this.updateSearchOptions(
+                "wildcardAtStart",
+                !searchOptions.wildcardAtStart
+              )
+            }
+          >
+            *.
+          </ToggleButton>
+          <ToggleButton
+            value="wildcardAtEnd"
+            selected={searchOptions.wildcardAtEnd}
+            onChange={() =>
+              this.updateSearchOptions(
+                "wildcardAtEnd",
+                !searchOptions.wildcardAtEnd
+              )
+            }
+          >
+            .*
+          </ToggleButton>
+          <ToggleButton
+            value="matchCase"
+            selected={searchOptions.matchCase}
+            onChange={() =>
+              this.updateSearchOptions("matchCase", !searchOptions.matchCase)
+            }
+          >
+            <FormatSizeIcon />
+          </ToggleButton>
+          <ToggleButton
+            value="drawActive"
+            selected={drawActive}
+            onChange={this.handleClickOnDrawToggle}
+          >
+            <BrushTwoToneIcon />
+          </ToggleButton>
+          <ToggleButton
+            value="activeSpatialFilter"
+            selected={searchOptions.activeSpatialFilter === "intersects"}
+            onChange={() =>
+              this.updateSearchOptions(
+                "activeSpatialFilter",
+                searchOptions.activeSpatialFilter === "intersects"
+                  ? "within"
+                  : "intersects"
+              )
+            }
+          >
+            {searchOptions.activeSpatialFilter === "intersects" ? (
+              <IntersectsIcon />
+            ) : (
+              <WithinIcon />
+            )}
+          </ToggleButton>
+        </Paper>
+      </Popover>
+    );
+  };
+
+  renderSearchResultList = () => {
+    const { resultPanelCollapsed } = this.state;
+    const { searchResults, app, map, localObserver } = this.props;
+
+    return (
+      <SearchResultsContainer
+        searchResults={searchResults}
+        localObserver={localObserver}
+        app={app}
+        getOriginBasedIcon={this.getOriginBasedIcon}
+        featureCollections={searchResults.featureCollections}
+        map={map}
+        panelCollapsed={resultPanelCollapsed}
+      />
+    );
+  };
+
+  renderAutoComplete = () => {
+    const {
+      autocompleteList,
+      autoCompleteOpen,
+      searchString,
+      searchActive,
+      classes,
+      loading,
+      handleOnAutompleteInputChange,
+      handleSearchInput,
+    } = this.props;
+    return (
+      <Autocomplete
+        id="searchInputField"
+        freeSolo
+        size={"small"}
+        classes={{
+          inputRoot: classes.inputRoot, // class name, e.g. `classes-nesting-root-x`
+        }}
+        PopperComponent={CustomPopper}
+        clearOnEscape
+        disabled={searchActive === "draw"}
+        autoComplete
+        value={searchString}
+        selectOnFocus
+        open={autoCompleteOpen}
+        disableClearable
+        onChange={handleSearchInput}
+        onInputChange={handleOnAutompleteInputChange}
+        getOptionSelected={(option, value) =>
+          option.autocompleteEntry === value.autocompleteEntry
+        }
+        renderOption={(option) => {
+          return (
+            <>
+              {this.getOriginBasedIcon(option.origin)}
+              {this.getHighlightedACE(searchString, option.autocompleteEntry)}
+
+              <FormHelperText>{option.dataset}</FormHelperText>
+            </>
+          );
+        }}
+        getOptionLabel={(option) => option?.autocompleteEntry || option}
+        options={autocompleteList}
+        loading={loading}
+        renderInput={this.renderAutoCompleteInputField}
+      />
+    );
+  };
+
+  renderAutoCompleteInputField = (params) => {
+    const {
+      searchString,
+      loading,
+      width,
+      searchActive,
+      map,
+      app,
+      showSearchResults,
+      handleSearchBarKeyPress,
+      searchOptions,
+      searchSources,
+      updateSearchOptions,
+      searchModel,
+      handleOnClickOrKeyboardSearch,
+      setSearchSources,
+    } = this.props;
+    const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
+    return (
+      <TextField
+        {...params}
+        label={undefined}
+        variant={width === "xs" ? "standard" : "outlined"}
+        placeholder="Sök..."
+        onKeyPress={handleSearchBarKeyPress}
+        InputProps={{
+          ...params.InputProps,
+          ...disableUnderline,
+          endAdornment: (
+            <>
+              {loading ? <CircularProgress color="inherit" size={20} /> : null}
+              {params.InputProps.endAdornment}
+              <IconButton size="small" onClick={handleOnClickOrKeyboardSearch}>
+                <SearchIcon />
+              </IconButton>
+              {searchString.length > 0 ||
+              showSearchResults ||
+              searchActive !== "" ? (
+                <IconButton onClick={this.props.handleOnClear} size="small">
+                  <ClearIcon />
+                </IconButton>
+              ) : (
+                <SearchTools
+                  map={map}
+                  searchSources={searchSources}
+                  setSearchSources={setSearchSources}
+                  app={app}
+                  searchOptions={searchOptions}
+                  searchTools={this.props.searchTools}
+                  searchModel={searchModel}
+                  updateSearchOptions={updateSearchOptions}
+                />
+              )}
+            </>
+          ),
+        }}
+      />
+    );
+  };
+
+  renderSelectSearchOptions = () => {
+    const { selectSourcesOpen } = this.state;
+    const { classes, searchModel, searchSources } = this.props;
+    return (
+      <Autocomplete
+        className={cslx(selectSourcesOpen === false ? classes.hidden : null)}
+        onChange={(event, value, reason) => this.props.setSearchSources(value)}
+        value={searchSources}
+        multiple
+        id="searchSources"
+        options={searchModel.getSources()}
+        disableCloseOnSelect
+        getOptionLabel={(option) => option.caption}
+        renderOption={(option, { selected }) => (
+          <>
+            <Checkbox
+              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+              checkedIcon={<CheckBoxIcon fontSize="small" />}
+              style={{ marginRight: 8 }}
+              checked={selected}
+            />
+            {option.caption}
+          </>
+        )}
+        style={{ width: 400 }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="outlined"
+            // label="Sökkällor"
+            placeholder="Välj sökkälla"
+          />
+        )}
+      />
+    );
+  };
+
+  render() {
+    const { classes, showSearchResults, width } = this.props;
+    const { panelCollapsed } = this.state;
+
+    return (
+      <Grid
+        className={cslx(classes.searchContainer, {
+          [classes.searchCollapsed]: panelCollapsed,
+        })}
+      >
+        <Grid item>
+          <Paper elevation={width === "xs" ? 0 : 1}>
+            {this.renderAutoComplete()}
+            {this.renderPopover()}
+            {this.renderSelectSearchOptions()}
+          </Paper>
+        </Grid>
+        {showSearchResults && this.renderSearchResultList()}
+      </Grid>
+    );
+  }
+}
+
+export default withStyles(styles)(withTheme(withWidth()(SearchBar)));
