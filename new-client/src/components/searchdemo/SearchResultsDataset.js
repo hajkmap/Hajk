@@ -1,9 +1,6 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import Divider from "@material-ui/core/Divider";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
+import { withStyles } from "@material-ui/core/styles";
 import {
   Typography,
   Accordion,
@@ -11,26 +8,28 @@ import {
   AccordionDetails,
   Chip,
   Tooltip,
+  Divider,
+  Grid,
 } from "@material-ui/core";
+import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 
 const styles = (theme) => ({
-  searchResultSummary: {
+  datasetSummary: {
     backgroundColor: "#f2f2f2",
     borderTop: "2px solid #dedede",
     borderBottom: "2px solid #dedede",
   },
-  accordion: {
+  datasetContainer: {
     boxShadow: "none",
   },
-
   divider: {
     backgroundColor: "#00000073",
     width: "100%",
   },
-  accordionDetails: {
+  datasetDetailsContainer: {
     padding: 0,
   },
-  datasetDiv: {
+  datasetTable: {
     cursor: "pointer",
     "&:hover": {
       backgroundColor: theme.palette.action.hover,
@@ -54,22 +53,17 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   renderDatasetDetails = () => {
-    const {
-      featureCollection,
-      handleOnResultClick,
-
-      classes,
-    } = this.props;
+    const { featureCollection, handleOnResultClick, classes } = this.props;
 
     return (
-      <AccordionDetails className={classes.accordionDetails}>
+      <AccordionDetails className={classes.datasetDetailsContainer}>
         <Grid container>
-          {featureCollection.value.features.map((f, index) => (
+          {featureCollection.value.features.map((f) => (
             <Grid
               role="button"
               onClick={handleOnResultClick(f)}
               key={f.id}
-              className={classes.datasetDiv}
+              className={classes.datasetTable}
               container
               item
             >
@@ -100,7 +94,7 @@ class SearchResultsDataset extends React.PureComponent {
     const toolTipTitle = `Visar ${numberReturned} av ${numberMatched} resultat`;
     return (
       <AccordionSummary
-        className={classes.searchResultSummary}
+        className={classes.datasetSummary}
         expandIcon={<ExpandMoreIcon />}
       >
         <Grid alignItems="center" container>
@@ -125,7 +119,7 @@ class SearchResultsDataset extends React.PureComponent {
     return (
       <>
         <Accordion
-          className={classes.accordion}
+          className={classes.datasetContainer}
           square
           expanded={this.state.expanded}
           onChange={() => this.setState({ expanded: !this.state.expanded })}

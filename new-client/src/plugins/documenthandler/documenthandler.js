@@ -37,7 +37,6 @@ class DocumentHandler extends React.PureComponent {
       })
         .init()
         .then((loadedDocumentModel) => {
-          console.log(loadedDocumentModel, "loadedDocumentModel");
           this.setState({ model: loadedDocumentModel });
         });
 

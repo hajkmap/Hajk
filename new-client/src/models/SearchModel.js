@@ -114,7 +114,7 @@ class SearchModel {
       promises.push(promise);
 
       // Also, put AbortController to the global collection of controllers, so we can abort searches at any time
-      //  this.#controllers.push(controller);
+      this.#controllers.push(controller);
     });
 
     // Start fetching, allow both fulfilled and rejected Promises

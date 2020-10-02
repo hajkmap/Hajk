@@ -1,9 +1,7 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-
 import cslx from "clsx";
-
+import { withStyles } from "@material-ui/core/styles";
+import { Grid, withWidth } from "@material-ui/core";
 import SearchResultsDataset from "./SearchResultsDataset";
 
 const styles = (theme) => ({
@@ -34,7 +32,9 @@ class SearchResultsList extends React.PureComponent {
         selectedItems: selectedItems,
       },
       () => {
-        localObserver.publish("minimize-search-result-list");
+        if (this.props.width === "xs" || this.props.width === "sm") {
+          localObserver.publish("minimize-search-result-list");
+        }
         localObserver.publish("highlight-features", this.state.selectedItems);
         localObserver.publish("zoom-to-features", this.state.selectedItems);
       }
@@ -57,27 +57,27 @@ class SearchResultsList extends React.PureComponent {
       getOriginBasedIcon,
       classes,
     } = this.props;
-    const featureCollectionsWithFeatures = featureCollections.filter(
+    const featureCollectionsContainingFeatures = featureCollections.filter(
       (featureCollection) => {
         return featureCollection.value.features.length > 0;
       }
     );
 
     return (
-      <Grid container alignItems={"center"} justify={"center"}>
+      <Grid container alignItems="center" justify="center">
         <Grid container direction="column" item>
-          {featureCollectionsWithFeatures.map((fc) => (
+          {featureCollectionsContainingFeatures.map((featureCollection) => (
             <Grid
-              key={fc.source.id}
+              key={featureCollection.source.id}
               xs={12}
               className={cslx(
-                featureCollections.length !== 1 && fc,
+                featureCollections.length !== 1 && featureCollection,
                 classes.searchResultDatasetWrapper
               )}
               item
             >
               <SearchResultsDataset
-                featureCollection={fc}
+                featureCollection={featureCollection}
                 getOriginBasedIcon={getOriginBasedIcon}
                 sumOfResults={sumOfResults}
                 handleOnResultClick={this.handleOnResultClick}
@@ -90,4 +90,4 @@ class SearchResultsList extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchResultsList);
+export default withStyles(styles)(withWidth()(SearchResultsList));

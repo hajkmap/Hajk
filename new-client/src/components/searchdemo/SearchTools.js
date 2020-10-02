@@ -1,14 +1,15 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { createPortal } from "react-dom";
 import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import Typography from "@material-ui/core/Typography";
-
-import { Paper } from "@material-ui/core";
-import { createPortal } from "react-dom";
+import { withStyles } from "@material-ui/core/styles";
+import {
+  Paper,
+  Menu,
+  MenuItem,
+  Typography,
+  ListItemIcon,
+} from "@material-ui/core";
 
 import Dialog from "../Dialog.js";
 import SearchSettings from "./SearchSettings";
@@ -33,7 +34,6 @@ class SearchTools extends React.PureComponent {
     } else {
       this.props.app.globalObserver.publish(option["onClickEventName"], option);
     }
-
     this.setState({ anchorEl: undefined });
   };
 

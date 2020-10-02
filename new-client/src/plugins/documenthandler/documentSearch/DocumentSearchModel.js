@@ -244,7 +244,7 @@ export default class DocumentSearchModel {
         matchedSearchValues = matchedSearchValues.concat(
           this.searchStringMatchSearchFields(word, chapter.searchValues)
         );
-        console.log(matchedSearchValues, "matchedSearchValues");
+
         return matchedSearchValues.length > 0;
       });
 
@@ -257,15 +257,6 @@ export default class DocumentSearchModel {
       chapter.matchedSearchValues = [];
     }
   };
-
-  /* if (match) {
-        console.log(match, "match");
-        chapter.matchedSearchValues = chapter.matchedSearchValues.concat(
-          matchedSearchValues
-        );
-      } else {
-        chapter.matchedSearchValues = chapter.matchedSearchValues.concat([]);
-      }*/
 
   getPossibleSearchCombinations = (searchOptions, searchString) => {
     let possibleSearchCombinations = [];
@@ -310,7 +301,6 @@ export default class DocumentSearchModel {
     let matchSearch = new MatchSearch(0.8);
     let matchedSearchValues = [];
     searchFields.forEach((searchField) => {
-      console.log(searchField, "searchField");
       let compareResults = matchSearch.compare(searchString, searchField);
 
       if (

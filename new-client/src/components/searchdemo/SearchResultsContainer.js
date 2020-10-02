@@ -1,37 +1,34 @@
 import React from "react";
-import { Accordion, Paper, Typography } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
 import Alert from "@material-ui/lab/Alert";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
-
-import { Button } from "@material-ui/core";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-
 import SearchResultsList from "./SearchResultsList";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
+import {
+  Accordion,
+  Paper,
+  Typography,
+  Button,
+  AccordionDetails,
+  AccordionSummary,
+  Grid,
+} from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 
 const styles = (theme) => ({
-  searchResultTopBar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: theme.spacing(1),
-  },
-  searchResultTopBarLeft: {
-    display: "flex",
-  },
-
   hidden: {
     display: "none",
   },
-
   searchResultListWrapper: {
-    maxHeight: "75vh",
-    overflow: "auto",
+    [theme.breakpoints.down("xs")]: {
+      maxHeight: "80vh",
+      overflow: "auto",
+    },
+    [theme.breakpoints.up("sm")]: {
+      maxHeight: "70vh",
+      overflow: "auto",
+    },
   },
   expanded: {
     "&$expanded": {
@@ -42,8 +39,6 @@ const styles = (theme) => ({
   content: {
     margin: theme.spacing(0),
   },
-
-  // New styles
   root: {
     maxHeight: "80vh",
     minWidth: 200,
@@ -60,7 +55,6 @@ const styles = (theme) => ({
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
-    selectedFeatureAndSource: null,
     expanded: true,
     sumOfResults: this.props.searchResults.featureCollections
       .map((fc) => fc.value.totalFeatures)
@@ -68,27 +62,14 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   componentDidMount = () => {
+    this.bindSubscriptions();
+  };
+
+  bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe("minimize-search-result-list", () => {
       this.setState({ expanded: false });
     });
-  };
-
-  getTheSoleResult = () => {
-    const { featureCollections } = this.props;
-    // Check which OL collection (i.e. "dataset") has the result
-    const datasetWithTheSoleResult = featureCollections.find(
-      (fc) => fc.value.totalFeatures === 1
-    );
-
-    if (datasetWithTheSoleResult === undefined) {
-      return null;
-    } else {
-      const feature = datasetWithTheSoleResult.value.features[0];
-      const source = datasetWithTheSoleResult.source;
-
-      return { feature, source };
-    }
   };
 
   renderSearchResultListOptions = () => {
@@ -139,12 +120,11 @@ class SearchResultsContainer extends React.PureComponent {
     const {
       classes,
       featureCollections,
-      map,
-      resultSource,
+      app,
       getOriginBasedIcon,
       localObserver,
     } = this.props;
-    const { sumOfResults, selectedFeatureAndSource } = this.state;
+    const { sumOfResults } = this.state;
 
     return (
       <>
@@ -171,17 +151,10 @@ class SearchResultsContainer extends React.PureComponent {
               >
                 <SearchResultsList
                   localObserver={localObserver}
-                  featureAndSource={
-                    sumOfResults === 1
-                      ? this.getTheSoleResult()
-                      : selectedFeatureAndSource
-                  }
                   sumOfResults={sumOfResults}
                   getOriginBasedIcon={getOriginBasedIcon}
                   featureCollections={featureCollections}
-                  map={map}
-                  app={this.props.app}
-                  resultSource={resultSource}
+                  app={app}
                 />
               </AccordionDetails>
             </Accordion>

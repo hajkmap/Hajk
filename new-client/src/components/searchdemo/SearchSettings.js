@@ -1,32 +1,26 @@
-import { withStyles } from "@material-ui/core/styles";
-
 import React from "react";
-import FormGroup from "@material-ui/core/FormGroup";
-import Switch from "@material-ui/core/Switch";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import IntersectsIcon from "@material-ui/icons/Toll";
 import WithinIcon from "@material-ui/icons/Adjust";
-import Checkbox from "@material-ui/core/Checkbox";
-import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import Tooltip from "@material-ui/core/Tooltip";
+import { withStyles } from "@material-ui/core/styles";
+import {
+  Tooltip,
+  TextField,
+  Checkbox,
+  Typography,
+  Grid,
+  Switch,
+  FormGroup,
+} from "@material-ui/core";
 
 const styles = (theme) => ({
   form: {
     display: "flex",
     flexDirection: "column",
     minWidth: 300,
-  },
-  formControl: {
-    marginTop: theme.spacing(2),
-    minWidth: 300,
-  },
-  formControlLabel: {
-    marginTop: theme.spacing(1),
   },
   gridItem: {
     textAlign: "right",

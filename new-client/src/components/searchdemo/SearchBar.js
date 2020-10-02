@@ -1,15 +1,10 @@
 import React from "react";
 import cslx from "clsx";
-import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import { Accordion, FormHelperText } from "@material-ui/core";
 import ClearIcon from "@material-ui/icons/Clear";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
-import { withTheme } from "@material-ui/core/styles";
 import withWidth from "@material-ui/core/withWidth";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import ToggleButton from "@material-ui/lab/ToggleButton";
-import Popper from "@material-ui/core/Popper";
 import FormatSizeIcon from "@material-ui/icons/FormatSize";
 import SearchIcon from "@material-ui/icons/Search";
 import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
@@ -22,7 +17,7 @@ import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck";
 import SearchResultsContainer from "./SearchResultsContainer";
 import SearchTools from "./SearchTools";
-import { useTheme } from "@material-ui/core/styles";
+import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
 import {
   CircularProgress,
   IconButton,
@@ -31,6 +26,9 @@ import {
   Checkbox,
   Popover,
   Typography,
+  FormHelperText,
+  useMediaQuery,
+  Popper,
 } from "@material-ui/core";
 
 const styles = (theme) => ({
@@ -269,14 +267,13 @@ class SearchBar extends React.PureComponent {
 
   renderSearchResultList = () => {
     const { resultPanelCollapsed } = this.state;
-    const { searchResults, app, map, resultSource, localObserver } = this.props;
+    const { searchResults, app, map, localObserver } = this.props;
 
     return (
       <SearchResultsContainer
         searchResults={searchResults}
         localObserver={localObserver}
         app={app}
-        resultSource={resultSource}
         getOriginBasedIcon={this.getOriginBasedIcon}
         featureCollections={searchResults.featureCollections}
         map={map}
@@ -293,6 +290,8 @@ class SearchBar extends React.PureComponent {
       searchActive,
       classes,
       loading,
+      handleOnAutompleteInputChange,
+      handleSearchInput,
     } = this.props;
     return (
       <Autocomplete
@@ -310,8 +309,8 @@ class SearchBar extends React.PureComponent {
         selectOnFocus
         open={autoCompleteOpen}
         disableClearable
-        onChange={this.props.handleSearchInput}
-        onInputChange={this.props.handleOnInputChange}
+        onChange={handleSearchInput}
+        onInputChange={handleOnAutompleteInputChange}
         getOptionSelected={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
@@ -447,7 +446,6 @@ class SearchBar extends React.PureComponent {
             {this.renderSelectSearchOptions()}
           </Paper>
         </Grid>
-
         {showSearchResults && this.renderSearchResultList()}
       </Grid>
     );
