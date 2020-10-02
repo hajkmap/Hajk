@@ -7,11 +7,13 @@ import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
 import { Draw } from "ol/interaction";
 import X2JS from "x2js";
+import SnapHelper from "../../models/SnapHelper";
 
 class CollectorModel {
   constructor(settings) {
-    this.app = settings.options.app;
+    this.app = settings.app;
     this.map = settings.map;
+    this.snapHelper = new SnapHelper(this.map, this.app, "collector");
     this.observer = settings.observer;
     this.globalObserver = settings.globalObserver;
     this.activeServices = [settings.options.serviceId];
@@ -380,9 +382,11 @@ class CollectorModel {
       this.map.clickLock.add("collector");
       this.activateRemove();
     }
+    this.snapHelper.addSnapInteractionForEachVectorSource();
   }
 
   deactivateInteraction() {
+    this.snapHelper.removeAllSnapInteractions();
     if (this.select) {
       this.map.removeInteraction(this.select);
     }

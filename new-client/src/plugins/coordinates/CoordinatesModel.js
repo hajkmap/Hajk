@@ -3,12 +3,18 @@ import Feature from "ol/Feature";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Point from "ol/geom/Point.js";
-import { Style, Icon } from "ol/style";
+import Draw from "ol/interaction/Draw.js";
+import { Circle as CircleStyle, Fill, Stroke, Style, Icon } from "ol/style";
+import SnapHelper from "../../models/SnapHelper";
 
 class CoordinatesModel {
   constructor(settings) {
+    this.app = settings.app;
     this.map = settings.map;
     this.localObserver = settings.localObserver;
+    this.snapHelper = new SnapHelper(this.map, this.app, "coordinates");
+
+    this.coordinates = undefined;
     this.transformations = settings.options.transformations;
 
     this.source = new VectorSource();
@@ -16,17 +22,34 @@ class CoordinatesModel {
       source: this.source,
       name: "coordinateLayer",
     });
-
     this.map.addLayer(this.vector);
-    this.coordinates = undefined;
-    this.transformedCoordinates = [];
   }
 
+  activate() {
+    this.addInteraction();
+    this.localObserver.publish("showSnackbar");
+  }
+
+  deactivate() {
+    this.removeInteraction();
+    this.vector.getSource().clear();
+
+    this.localObserver.publish("hideSnackbar");
+    this.localObserver.publish("setTransformedCoordinates", []);
+  }
+
+  /**
+   * @summary Removes any previous markers and adds a new one to the given coordinates.
+   * @memberof CoordinatesModel
+   */
   addMarker = (coordinates) => {
-    let feature = new Feature({
+    // Prepare the feature
+    const feature = new Feature({
       geometry: new Point(coordinates),
     });
-    let styleMarker = new Style({
+
+    // Style it with a nice icon
+    const styleMarker = new Style({
       image: new Icon({
         anchor: [0.5, 1],
         scale: 0.15,
@@ -34,74 +57,103 @@ class CoordinatesModel {
       }),
     });
     feature.setStyle(styleMarker);
+
+    // Remove any previous markers
     this.vector.getSource().clear();
+
+    // Add the new marker
     this.source.addFeature(feature);
   };
 
   transform(coordinates, to) {
-    let from = this.map.getView().getProjection();
+    const from = this.map.getView().getProjection();
     return transform(coordinates, from, to);
   }
 
-  activate() {
-    let transformations = this.transformations;
-    this.activated = true;
+  /**
+   * @summary When draw has ended, get the coordinates for the point
+   * drawn and add a marker to those coordinates.
+   *
+   * @memberof CoordinatesModel
+   */
+  handleDrawEnd = (e) => {
+    // Grab coordinates from the Point that has been drawn
+    this.coordinates = e.feature.getGeometry().getCoordinates();
 
-    this.map.on("singleclick", (e) => {
-      if (!this.activated) {
-        return;
-      }
+    // Add a nice marker to those coordinates
+    this.addMarker(this.coordinates);
 
-      this.coordinates = e.coordinate;
-      this.addMarker(this.coordinates);
-      let transformedCoordinates;
+    let transformedCoordinates;
 
-      if (transformations.length) {
-        transformedCoordinates = transformations.map((transformation, i) => {
-          let container = {};
+    if (this.transformations.length > 0) {
+      // If there are defined transformations, loop through them
+      transformedCoordinates = this.transformations.map((transformation) => {
+        const container = {};
 
-          container.code = transformation.code || "";
-          container.default = transformation.default || false;
-          container.hint = transformation.hint || "";
-          container.title = transformation.title || "";
-          container.xtitle = transformation.xtitle || "";
-          container.ytitle = transformation.ytitle || "";
-          container.inverseAxis = transformation.inverseAxis || false;
-          container.coordinates =
-            this.transform(this.coordinates, transformation.code) || "";
+        container.code = transformation.code ?? "";
+        container.default = transformation.default ?? false;
+        container.hint = transformation.hint ?? "";
+        container.title = transformation.title ?? "";
+        container.xtitle = transformation.xtitle ?? "";
+        container.ytitle = transformation.ytitle ?? "";
+        container.inverseAxis = transformation.inverseAxis ?? false;
+        container.coordinates =
+          this.transform(this.coordinates, transformation.code) ?? "";
 
-          return container;
-        });
-      } else {
-        transformedCoordinates = [
-          {
-            code: "EPSG:4326",
-            default: false,
-            hint: "",
-            title: "WGS84",
-            xtitle: "Lng",
-            ytitle: "Lat",
-            inverseAxis: true,
-            coordinates: this.transform(this.coordinates, "EPSG:4326"),
-          },
-        ];
-      }
+        return container;
+      });
+    } else {
+      // If no transformations are defined, fall back to default WGS84
+      transformedCoordinates = [
+        {
+          code: "EPSG:4326",
+          default: false,
+          hint: "",
+          title: "WGS84",
+          xtitle: "Lng",
+          ytitle: "Lat",
+          inverseAxis: true,
+          coordinates: this.transform(this.coordinates, "EPSG:4326"),
+        },
+      ];
+    }
 
-      this.localObserver.publish(
-        "setTransformedCoordinates",
-        transformedCoordinates
-      );
+    // Notify the View of the new coordinates
+    this.localObserver.publish(
+      "setTransformedCoordinates",
+      transformedCoordinates
+    );
+  };
+
+  addInteraction() {
+    this.draw = new Draw({
+      source: this.source,
+      type: "Point",
+      style: new Style({
+        image: new CircleStyle({
+          radius: 5,
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 0.7)",
+          }),
+          fill: new Fill({
+            color: "rgba(255, 255, 255, 0.2)",
+          }),
+        }),
+      }),
     });
-    this.localObserver.publish("showSnackbar");
+    this.draw.on("drawend", this.handleDrawEnd);
+    this.map.addInteraction(this.draw);
+    this.map.clickLock.add("coordinates");
+
+    // Add snap interactions AFTER measure source has been added
+    // this will allow us to snap to the newly added source too
+    this.snapHelper.addSnapInteractionForEachVectorSource();
   }
 
-  deactivate() {
-    this.map.un("singleclick", this.addMarker);
-    this.vector.getSource().clear();
-
-    this.activated = false;
-    this.localObserver.publish("hideSnackbar");
-    this.localObserver.publish("setTransformedCoordinates", []);
+  removeInteraction() {
+    this.snapHelper.removeAllSnapInteractions();
+    this.map.removeInteraction(this.draw);
+    this.map.clickLock.delete("coordinates");
   }
 }
 

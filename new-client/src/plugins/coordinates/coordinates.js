@@ -28,6 +28,7 @@ class Coordinates extends React.PureComponent {
 
     this.coordinatesModel = new CoordinatesModel({
       map: props.map,
+      app: props.app,
       options: props.options,
       localObserver: this.localObserver,
     });

@@ -16,11 +16,13 @@ import { Modify, Translate, Select } from "ol/interaction.js";
 import Overlay from "ol/Overlay.js";
 import KML from "ol/format/KML.js";
 import { createXML } from "../../utils/KMLWriter.js";
+import SnapHelper from "../../models/SnapHelper.js";
 
 class DrawModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
+    this.snapHelper = new SnapHelper(this.map, this.app, "draw");
     this.options = settings.options;
     this.localObserver = settings.localObserver;
     this.globalObserver = settings.app.globalObserver;
@@ -974,9 +976,11 @@ class DrawModel {
     if (active && !this.active) {
       this.map.clickLock.add("draw");
       this.addInteraction();
+      this.snapHelper.addSnapInteractionForEachVectorSource();
     }
     if (active === false) {
       this.map.clickLock.delete("draw");
+      this.snapHelper.removeAllSnapInteractions();
       this.removeInteraction();
     }
     this.active = active;

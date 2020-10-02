@@ -3,6 +3,8 @@ import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
 import { LineString, Polygon } from "ol/geom.js";
 import Draw from "ol/interaction/Draw.js";
+import SnapHelper from "../../models/SnapHelper";
+
 import Overlay from "ol/Overlay";
 
 class MeasureModel {
@@ -18,6 +20,7 @@ class MeasureModel {
     this.map.addLayer(this.vector);
     this.type = "LineString";
     this.createMeasureTooltip();
+    this.snapHelper = new SnapHelper(this.map, this.app, "measure");
   }
 
   createStyle = (feature, resolution) => {
@@ -95,11 +98,6 @@ class MeasureModel {
 
   getType() {
     return this.type;
-  }
-
-  removeInteraction() {
-    this.measureTooltip.setPosition(undefined);
-    this.map.removeInteraction(this.draw);
   }
 
   setFeaturePropertiesFromGeometry(feature) {
@@ -260,6 +258,16 @@ class MeasureModel {
     this.draw.on("drawstart", this.handleDrawStart);
     this.draw.on("drawend", this.handleDrawEnd);
     this.map.addInteraction(this.draw);
+
+    // Add snap interactions AFTER measure source has been added
+    // this will allow us to snap to the newly added source too
+    this.snapHelper.addSnapInteractionForEachVectorSource();
+  }
+
+  removeInteraction() {
+    this.measureTooltip.setPosition(undefined);
+    this.snapHelper.removeAllSnapInteractions();
+    this.map.removeInteraction(this.draw);
   }
 
   eventHandler = (event) => {
