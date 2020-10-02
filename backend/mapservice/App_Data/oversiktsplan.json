@@ -638,6 +638,7 @@
         "searchImplemented": true,
         "title": "",
         "target": "hidden",
+        "enablePrint": true,
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
           "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
@@ -809,12 +810,27 @@
         "radiusSearch": true,
         "tooltip": "Sök...",
         "searchWithinButtonText": "Markera i kartan",
-        "showInMapOnSearchResult": false,
         "maxFeatures": 100,
         "selectedSources": [],
         "layers": [
           {
             "id": "101",
+            "visibleForGroups": []
+          },
+          {
+            "id": "102",
+            "visibleForGroups": []
+          },
+          {
+            "id": "103",
+            "visibleForGroups": []
+          },
+          {
+            "id": "104",
+            "visibleForGroups": []
+          },
+          {
+            "id": "105",
             "visibleForGroups": []
           }
         ],
@@ -870,7 +886,6 @@
     ],
     "origin": [0.0, 0.0],
     "extent": [105000.0, 6355000.0, 185000.0, 6435000.0],
-
     "constrainOnlyCenter": true,
     "logo": "/logo.png",
     "geoserverLegendOptions": "",

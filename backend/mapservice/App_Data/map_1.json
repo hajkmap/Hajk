@@ -330,7 +330,6 @@
                   "link": "http://goteborg.se",
                   "menu": []
                 },
-
                 {
                   "title": "Frölunda Högsbo",
                   "document": "",
@@ -406,7 +405,6 @@
                 }
               ]
             },
-
             {
               "title": "",
               "document": "",
@@ -476,33 +474,32 @@
     {
       "type": "search",
       "options": {
-        "target": "center",
-        "onMap": true,
-        "bothSynlig": true,
-        "enableViewTogglePopupInSnabbsok": true,
-        "toolbar": "bottom",
-        "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "selectionSearch": true,
-        "radiusSearch": true,
-        "polygonSearch": true,
-        "searchSettings": true,
-        "base64Encode": false,
-        "instruction": "",
-        "filterVisible": true,
         "anchor": [16, 32],
-        "imgSize": [32, 32],
+        "scale": 0.15,
+        "strokeColor": {
+          "r": 244,
+          "g": 83,
+          "b": 63,
+          "a": 1
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 244,
+          "g": 83,
+          "b": 63,
+          "a": 0.2
+        },
+        "showInMapOnSearchResult": true,
+        "polygonSearch": true,
+        "radiusSearch": true,
+        "selectionSearch": true,
         "tooltip": "Sök...",
         "searchWithinButtonText": "Markera i kartan",
-        "toolDescription": "<div>Sök innehåll i kartan</div>",
-        "popupOffsetY": 0,
-        "visibleForGroups": [],
+        "maxFeatures": 100,
+        "delayBeforeAutoSearch": 500,
+        "selectedSources": ["30", "27", "32", "34", "33", "14", "18"],
         "layers": [],
-        "selectedSources": ["30", "27", "32", "34", "33", "14", "18"]
+        "visibleForGroups": []
       },
       "index": 7
     },
@@ -600,6 +597,8 @@
     "origin": [0.0, 0.0],
     "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
     "constrainOnlyCenter": false,
+    "constrainResolution": false,
+    "enableDownloadLink": false,
     "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
     "geoserverLegendOptions": "",
     "mapselector": false,
