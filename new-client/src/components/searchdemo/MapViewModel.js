@@ -3,7 +3,7 @@ import { Stroke, Style, Circle, Fill } from "ol/style";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
-import { boundingExtent } from "ol/extent";
+import { extend, createEmpty, isEmpty } from "ol/extent";
 
 var fill = new Fill({
   color: "rgba(255,255,255,0.4)",
@@ -118,6 +118,7 @@ class MapViewModel {
   fitMapToExtent = (extent) => {
     this.map.getView().fit(extent, {
       size: this.map.getSize(),
+      padding: [20, 20, 20, 20],
       maxZoom: 7,
     });
   };
@@ -151,14 +152,18 @@ class MapViewModel {
   };
 
   zoomToFeatureIds = (featureIds) => {
-    const extentsFromSelectedItems = featureIds.map((fid) =>
-      this.getFeatureFromResultSourceById(fid).getGeometry().getExtent()
-    );
+    let extent = createEmpty();
 
-    const extentToZoomTo =
-      extentsFromSelectedItems.length < 1
-        ? this.resultSource.getExtent()
-        : boundingExtent(extentsFromSelectedItems);
+    //BoundingExtent-function gave wrong coordinates for some
+    featureIds.forEach((fid) =>
+      extend(
+        extent,
+        this.getFeatureFromResultSourceById(fid).getGeometry().getExtent()
+      )
+    );
+    const extentToZoomTo = isEmpty(extent)
+      ? this.resultSource.getExtent()
+      : extent;
 
     this.fitMapToExtent(extentToZoomTo);
   };
