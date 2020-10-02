@@ -2,7 +2,7 @@ import React from "react";
 import cslx from "clsx";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import { FormHelperText } from "@material-ui/core";
+import { Accordion, FormHelperText } from "@material-ui/core";
 import ClearIcon from "@material-ui/icons/Clear";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { withTheme } from "@material-ui/core/styles";
