@@ -5,14 +5,12 @@ import VectorSource from "ol/source/Vector";
 import Point from "ol/geom/Point.js";
 import Draw from "ol/interaction/Draw.js";
 import { Circle as CircleStyle, Fill, Stroke, Style, Icon } from "ol/style";
-import SnapHelper from "../../models/SnapHelper";
 
 class CoordinatesModel {
   constructor(settings) {
     this.app = settings.app;
     this.map = settings.map;
     this.localObserver = settings.localObserver;
-    this.snapHelper = new SnapHelper(this.map, this.app, "coordinates");
 
     this.coordinates = undefined;
     this.transformations = settings.options.transformations;
@@ -147,11 +145,11 @@ class CoordinatesModel {
 
     // Add snap interactions AFTER measure source has been added
     // this will allow us to snap to the newly added source too
-    this.snapHelper.addSnapInteractionForEachVectorSource();
+    this.map.snapHelper.add("coordinates");
   }
 
   removeInteraction() {
-    this.snapHelper.removeAllSnapInteractions();
+    this.map.snapHelper.delete("coordinates");
     this.map.removeInteraction(this.draw);
     this.map.clickLock.delete("coordinates");
   }

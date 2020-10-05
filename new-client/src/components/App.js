@@ -7,6 +7,7 @@ import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 
 import AppModel from "./../models/AppModel.js";
+
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
 import Introduction from "./Introduction";
@@ -350,6 +351,17 @@ class App extends React.PureComponent {
     //       }
     //     });
     //   });
+
+    // TODO: More plugins could use this - currently only SNap helper registers though
+    this.appModel
+      .getMap()
+      .getLayers()
+      .getArray()
+      .forEach((layer) => {
+        layer.on("change:visible", (e) => {
+          this.globalObserver.publish("core.layerVisibilityChanged", e);
+        });
+      });
   }
 
   renderInfoclickWindow() {

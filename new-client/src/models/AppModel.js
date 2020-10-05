@@ -28,6 +28,7 @@ import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style.js";
+import SnapHelper from "./SnapHelper";
 
 class AppModel {
   registerWindowPlugin(windowComponent) {
@@ -207,6 +208,9 @@ class AppModel {
     setTimeout(() => {
       this.map.updateSize();
     }, 0);
+
+    // Add Snap Helper to the Map
+    this.map.snapHelper = new SnapHelper(this);
 
     if (config.tools.some((tool) => tool.type === "infoclick")) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
