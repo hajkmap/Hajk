@@ -91,6 +91,9 @@ class SearchTools extends React.PureComponent {
             })
           }
         >
+          <Typography variant="srOnly">
+            Öppna dialog med fler inställningar
+          </Typography>
           <MoreVertIcon />
         </IconButton>
         <Paper>

@@ -238,7 +238,7 @@ class Search extends React.PureComponent {
   };
 
   getAutoCompleteFetchSettings = () => {
-    let fetchSettings = { ...this.searchModel.getSearchOptions() };
+    let fetchSettings = { ...this.searchModel.getSearchOptions() }; //Getting default-options when fetching auto
     fetchSettings = {
       ...fetchSettings,
       maxResultsPerDataset: 5,

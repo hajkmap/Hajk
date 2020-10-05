@@ -8,6 +8,7 @@ import {
   AccordionDetails,
   Chip,
   Tooltip,
+  Button,
   Divider,
   Grid,
 } from "@material-ui/core";
@@ -45,6 +46,7 @@ class SearchResultsDataset extends React.PureComponent {
         ? `${this.props.featureCollection.value.numberReturned}+`
         : this.props.featureCollection.value.numberReturned,
     expanded: this.props.sumOfResults === 1,
+    showAllInformation: false,
   };
 
   resultHasOnlyOneFeature = () => {
@@ -52,36 +54,64 @@ class SearchResultsDataset extends React.PureComponent {
     return featureCollection.value.features.length === 1;
   };
 
+  renderShowMoreInformationButton = () => {
+    const { showAllInformation } = this.state;
+    const { classes } = this.props;
+    return (
+      <Button
+        color="primary"
+        fullWidth
+        className={classes.showMoreInformationButton}
+        onClick={(e) => {
+          e.stopPropagation();
+          this.setState({
+            showAllInformation: !this.state.showAllInformation,
+          });
+        }}
+      >
+        {showAllInformation ? "Visa mindre" : "Visa mer"}
+      </Button>
+    );
+  };
+
   renderDatasetDetails = () => {
     const { featureCollection, handleOnResultClick, classes } = this.props;
+    const { showAllInformation } = this.state;
 
     return (
-      <AccordionDetails className={classes.datasetDetailsContainer}>
-        <Grid container>
-          {featureCollection.value.features.map((f) => (
-            <Grid
-              role="button"
-              onClick={handleOnResultClick(f)}
-              key={f.id}
-              className={classes.datasetTable}
-              container
-              item
-            >
-              <Grid item xs={1}></Grid>
-              <Grid item xs={10}>
-                <SearchResultsDatasetFeature
-                  feature={f}
-                  source={featureCollection.source}
-                  handleOnResultClick={handleOnResultClick}
-                />
-              </Grid>
-              <Grid item xs={1}></Grid>
-
-              {!this.resultHasOnlyOneFeature() && (
-                <Divider className={classes.divider}></Divider>
-              )}
-            </Grid>
-          ))}
+      <AccordionDetails
+        id={`search-result-dataset-details-${featureCollection.source.id}`}
+        className={classes.datasetDetailsContainer}
+      >
+        <Grid justify="center" container>
+          {this.state.expanded &&
+            featureCollection.value.features.map((f) => (
+              <React.Fragment key={f.id}>
+                <Grid
+                  role="button"
+                  onClick={handleOnResultClick(f)}
+                  className={classes.datasetTable}
+                  container
+                  item
+                >
+                  <Typography variant="srOnly">Aktivera sökresultat</Typography>
+                  <Grid item xs={1}></Grid>
+                  <Grid item xs={10}>
+                    <SearchResultsDatasetFeature
+                      feature={f}
+                      showAllInformation={showAllInformation}
+                      source={featureCollection.source}
+                      handleOnResultClick={handleOnResultClick}
+                    />
+                  </Grid>
+                  <Grid item xs={1}></Grid>
+                </Grid>
+                {this.renderShowMoreInformationButton()}
+                {!this.resultHasOnlyOneFeature() && (
+                  <Divider className={classes.divider}></Divider>
+                )}
+              </React.Fragment>
+            ))}
         </Grid>
       </AccordionDetails>
     );
@@ -94,6 +124,8 @@ class SearchResultsDataset extends React.PureComponent {
     const toolTipTitle = `Visar ${numberReturned} av ${numberMatched} resultat`;
     return (
       <AccordionSummary
+        id={`search-result-dataset-${featureCollection.source.id}`}
+        aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
         className={classes.datasetSummary}
         expandIcon={<ExpandMoreIcon />}
       >

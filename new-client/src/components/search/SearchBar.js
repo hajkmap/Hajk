@@ -4,17 +4,11 @@ import Grid from "@material-ui/core/Grid";
 import ClearIcon from "@material-ui/icons/Clear";
 import withWidth from "@material-ui/core/withWidth";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import FormatSizeIcon from "@material-ui/icons/FormatSize";
 import SearchIcon from "@material-ui/icons/Search";
-import BrushTwoToneIcon from "@material-ui/icons/BrushTwoTone";
-import WithinIcon from "@material-ui/icons/Adjust";
-import IntersectsIcon from "@material-ui/icons/Toll";
 import RoomIcon from "@material-ui/icons/Room";
 import DescriptionIcon from "@material-ui/icons/Description";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck";
 import SearchResultsContainer from "./SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
@@ -24,7 +18,6 @@ import {
   Paper,
   TextField,
   Checkbox,
-  Popover,
   Typography,
   FormHelperText,
   useMediaQuery,
@@ -77,7 +70,6 @@ class SearchBar extends React.PureComponent {
   state = {
     drawActive: false,
     panelCollapsed: false,
-    anchorEl: undefined,
     moreOptionsId: undefined,
     moreOptionsOpen: false,
     selectSourcesOpen: false,
@@ -165,106 +157,6 @@ class SearchBar extends React.PureComponent {
     );
   };
 
-  renderPopover = () => {
-    const {
-      moreOptionsId,
-      anchorEl,
-      drawActive,
-      selectSourcesOpen,
-    } = this.state;
-    const { searchOptions } = this.props;
-    return (
-      <Popover
-        id={moreOptionsId}
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={() => this.setState({ anchorEl: null })}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-      >
-        <Paper>
-          <Typography>Fler inställningar</Typography>
-          <ToggleButton
-            value="selectSourcesOpen"
-            selected={selectSourcesOpen}
-            onChange={() =>
-              this.setState({
-                selectSourcesOpen: !selectSourcesOpen,
-                anchorEl: undefined,
-              })
-            }
-          >
-            <PlaylistAddCheckIcon size="small" />
-          </ToggleButton>
-          <ToggleButton
-            value="wildcardAtStart"
-            selected={searchOptions.wildcardAtStart}
-            onChange={() =>
-              this.updateSearchOptions(
-                "wildcardAtStart",
-                !searchOptions.wildcardAtStart
-              )
-            }
-          >
-            *.
-          </ToggleButton>
-          <ToggleButton
-            value="wildcardAtEnd"
-            selected={searchOptions.wildcardAtEnd}
-            onChange={() =>
-              this.updateSearchOptions(
-                "wildcardAtEnd",
-                !searchOptions.wildcardAtEnd
-              )
-            }
-          >
-            .*
-          </ToggleButton>
-          <ToggleButton
-            value="matchCase"
-            selected={searchOptions.matchCase}
-            onChange={() =>
-              this.updateSearchOptions("matchCase", !searchOptions.matchCase)
-            }
-          >
-            <FormatSizeIcon />
-          </ToggleButton>
-          <ToggleButton
-            value="drawActive"
-            selected={drawActive}
-            onChange={this.handleClickOnDrawToggle}
-          >
-            <BrushTwoToneIcon />
-          </ToggleButton>
-          <ToggleButton
-            value="activeSpatialFilter"
-            selected={searchOptions.activeSpatialFilter === "intersects"}
-            onChange={() =>
-              this.updateSearchOptions(
-                "activeSpatialFilter",
-                searchOptions.activeSpatialFilter === "intersects"
-                  ? "within"
-                  : "intersects"
-              )
-            }
-          >
-            {searchOptions.activeSpatialFilter === "intersects" ? (
-              <IntersectsIcon />
-            ) : (
-              <WithinIcon />
-            )}
-          </ToggleButton>
-        </Paper>
-      </Popover>
-    );
-  };
-
   renderSearchResultList = () => {
     const { resultPanelCollapsed } = this.state;
     const { searchResults, app, map, localObserver } = this.props;
@@ -315,14 +207,16 @@ class SearchBar extends React.PureComponent {
           option.autocompleteEntry === value.autocompleteEntry
         }
         renderOption={(option) => {
-          return (
-            <>
-              {this.getOriginBasedIcon(option.origin)}
-              {this.getHighlightedACE(searchString, option.autocompleteEntry)}
+          if (searchString.length > 0) {
+            return (
+              <>
+                {this.getOriginBasedIcon(option.origin)}
+                {this.getHighlightedACE(searchString, option.autocompleteEntry)}
 
-              <FormHelperText>{option.dataset}</FormHelperText>
-            </>
-          );
+                <FormHelperText>{option.dataset}</FormHelperText>
+              </>
+            );
+          }
         }}
         getOptionLabel={(option) => option?.autocompleteEntry || option}
         options={autocompleteList}
@@ -340,6 +234,7 @@ class SearchBar extends React.PureComponent {
       searchActive,
       map,
       app,
+      handleOnClear,
       showSearchResults,
       handleSearchBarKeyPress,
       searchOptions,
@@ -365,12 +260,14 @@ class SearchBar extends React.PureComponent {
               {loading ? <CircularProgress color="inherit" size={20} /> : null}
               {params.InputProps.endAdornment}
               <IconButton size="small" onClick={handleOnClickOrKeyboardSearch}>
+                <Typography variant="srOnly">Exekvera sökning</Typography>
                 <SearchIcon />
               </IconButton>
               {searchString.length > 0 ||
               showSearchResults ||
               searchActive !== "" ? (
-                <IconButton onClick={this.props.handleOnClear} size="small">
+                <IconButton onClick={handleOnClear} size="small">
+                  <Typography variant="srOnly">Rensa sökfält</Typography>
                   <ClearIcon />
                 </IconButton>
               ) : (
@@ -442,7 +339,7 @@ class SearchBar extends React.PureComponent {
         <Grid item>
           <Paper elevation={width === "xs" ? 0 : 1}>
             {this.renderAutoComplete()}
-            {this.renderPopover()}
+
             {this.renderSelectSearchOptions()}
           </Paper>
         </Grid>

@@ -13,7 +13,6 @@ import {
   TableHead,
   TableContainer,
   Typography,
-  Button,
 } from "@material-ui/core";
 
 const styles = () => ({
@@ -33,9 +32,7 @@ const styles = () => ({
 });
 
 class SearchResultsDatasetFeature extends React.PureComponent {
-  state = {
-    showAllInformation: false,
-  };
+  state = {};
 
   renderTableCell = (content, position) => {
     const { classes } = this.props;
@@ -74,8 +71,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   renderHiddenSection = (__hiddenSectionHtml) => {
-    const { classes } = this.props;
-    const { showAllInformation } = this.state;
+    const { classes, showAllInformation } = this.props;
 
     return (
       <Typography
@@ -110,8 +106,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   renderDefaultInfoBoxTable = () => {
-    const { feature, classes } = this.props;
-    const { showAllInformation } = this.state;
+    const { feature, classes, showAllInformation } = this.props;
+
     return Object.entries(feature.properties).map((row, index) => {
       return (
         <TableBody key={index}>
@@ -167,36 +163,18 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     );
   };
 
-  renderShowMoreInformationButton = () => {
-    const { showAllInformation } = this.state;
-    const { classes } = this.props;
-    return (
-      <Button
-        color="primary"
-        className={classes.showMoreInformationButton}
-        onClick={(e) => {
-          e.stopPropagation();
-          this.setState({
-            showAllInformation: !this.state.showAllInformation,
-          });
-        }}
-      >
-        {showAllInformation ? "Visa mindre" : "Visa mer"}
-      </Button>
-    );
-  };
-
   render() {
     return (
-      <TableContainer>
-        <Table size={"small"}>
-          {this.renderDetailsTitle()}
-          {this.shouldRenderCustomInfoBox()
-            ? this.renderCustomInfoBoxTable()
-            : this.renderDefaultInfoBoxTable()}
-        </Table>
-        {this.renderShowMoreInformationButton()}
-      </TableContainer>
+      <>
+        <TableContainer>
+          <Table size={"small"}>
+            {this.renderDetailsTitle()}
+            {this.shouldRenderCustomInfoBox()
+              ? this.renderCustomInfoBoxTable()
+              : this.renderDefaultInfoBoxTable()}
+          </Table>
+        </TableContainer>
+      </>
     );
   }
 }
