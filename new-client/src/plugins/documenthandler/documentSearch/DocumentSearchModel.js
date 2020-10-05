@@ -27,6 +27,7 @@ export default class DocumentSearchModel {
 
   //Method called by searchComponent in core (Part of searchInterface)
   getResults = (searchString, searchOptions) => {
+    this.matchSearch = new MatchSearch(0.8);
     return this.getDocumentHandlerResults(searchString, searchOptions);
   };
 
@@ -298,10 +299,9 @@ export default class DocumentSearchModel {
    *
    */
   searchStringMatchSearchFields = (searchString, searchFields) => {
-    let matchSearch = new MatchSearch(0.8);
     let matchedSearchValues = [];
     searchFields.forEach((searchField) => {
-      let compareResults = matchSearch.compare(searchString, searchField);
+      let compareResults = this.matchSearch.compare(searchString, searchField);
 
       if (
         compareResults.searchResults.match &&
