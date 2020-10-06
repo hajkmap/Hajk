@@ -1,28 +1,15 @@
 import React from "react";
-import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  TextField,
-  Popover,
-  Tooltip,
-  IconButton,
-  FormControlLabel,
-} from "@material-ui/core";
-import PaletteIcon from "@material-ui/icons/Palette";
-import { TwitterPicker as ColorPicker } from "react-color";
+import PrintDialog from "./PrintDialog";
+import { AppBar, Tab, Tabs } from "@material-ui/core";
+import PrintIcon from "@material-ui/icons/Print";
+import SettingsIcon from "@material-ui/icons/Settings";
+import { Tooltip } from "@material-ui/core";
+
+import GeneralOptions from "./GeneralOptions";
+import AdvancedOptions from "./AdvancedOptions";
 
 const styles = (theme) => ({
   root: {
@@ -35,6 +22,15 @@ const styles = (theme) => ({
   },
   mapTextColorLabel: {
     margin: 0,
+  },
+  windowContent: {
+    margin: -10,
+  },
+  stickyAppBar: {
+    top: -10,
+  },
+  tabContent: {
+    padding: 10,
   },
 });
 
@@ -59,25 +55,8 @@ class PrintView extends React.PureComponent {
     mapTextColor: "#ffffff", // Default color of text printed on the map
     printInProgress: false,
     previewLayerVisible: false,
+    activeTab: 0,
   };
-
-  // Default colors for color picker used to set text color (used in map title, scale, etc)
-  mapTextAvailableColors = [
-    "#FFFFFF",
-    "#D0021B",
-    "#F5A623",
-    "#F8E71C",
-    "#8B572A",
-    "#7ED321",
-    "#417505",
-    "#9013FE",
-    "#4A90E2",
-    "#50E3C2",
-    "#B8E986",
-    "#000000",
-    "#4A4A4A",
-    "#9B9B9B",
-  ];
 
   snackbarKey = null;
 
@@ -168,32 +147,92 @@ class PrintView extends React.PureComponent {
     this.setState({ printInProgress: false });
   };
 
-  /**
-   * @summary Take care of handling state of our resolution and format dropdowns.
-   *
-   * @param {Object} event
-   */
   handleChange = (event) => {
     this.setState({
       [event.target.name]: event.target.value,
     });
   };
 
-  toggleColorPicker = (e) => {
-    this.setState({ anchorEl: e.currentTarget });
-  };
-
-  hideColorPicker = (e) => {
-    this.setState({ anchorEl: null });
-  };
-
-  handleMapTextColorChangeComplete = (color) => {
-    this.hideColorPicker();
+  setMapTextColor = (color) => {
     this.setState({ mapTextColor: color.hex });
   };
 
+  handleChangeTabs = (event, activeTab) => {
+    this.setState({ activeTab });
+  };
+
+  handleTabsMounted = (ref) => {
+    setTimeout(() => {
+      ref !== null && ref.updateIndicator();
+    }, 1);
+  };
+
+  renderGeneralOptions = () => {
+    const { scales } = this.props;
+    const {
+      scale,
+      format,
+      orientation,
+      resolution,
+      mapTitle,
+      mapTextColor,
+      printInProgress,
+    } = this.state;
+
+    return (
+      <GeneralOptions
+        scales={scales}
+        scale={scale}
+        format={format}
+        resolution={resolution}
+        orientation={orientation}
+        mapTitle={mapTitle}
+        mapTextColor={mapTextColor}
+        handleChange={(event) => {
+          this.handleChange(event);
+        }}
+        initiatePrint={this.initiatePrint}
+        model={this.model}
+        setMapTextColor={this.setMapTextColor}
+        printInProgress={printInProgress}
+      ></GeneralOptions>
+    );
+  };
+
+  renderAdvancedOptions = () => {
+    const { scales } = this.props;
+    const {
+      scale,
+      format,
+      orientation,
+      resolution,
+      mapTitle,
+      mapTextColor,
+      printInProgress,
+    } = this.state;
+
+    return (
+      <AdvancedOptions
+        scales={scales}
+        scale={scale}
+        format={format}
+        resolution={resolution}
+        orientation={orientation}
+        mapTitle={mapTitle}
+        mapTextColor={mapTextColor}
+        handleChange={(event) => {
+          this.handleChange(event);
+        }}
+        initiatePrint={this.initiatePrint}
+        model={this.model}
+        setMapTextColor={this.setMapTextColor}
+        printInProgress={printInProgress}
+      ></AdvancedOptions>
+    );
+  };
+
   render() {
-    const { classes, scales } = this.props;
+    const { classes } = this.props;
     const { previewLayerVisible, scale, format, orientation } = this.state;
 
     this.model.renderPreviewFeature(previewLayerVisible, {
@@ -204,173 +243,37 @@ class PrintView extends React.PureComponent {
 
     return (
       <>
-        {createPortal(
-          <Dialog
-            disableBackdropClick={true}
-            disableEscapeKeyDown={true}
-            open={this.state.printInProgress}
+        <div className={classes.windowContent}>
+          <AppBar
+            position="sticky"
+            color="default"
+            className={classes.stickyAppBar}
           >
-            <LinearProgress />
-            <DialogTitle>Din PDF skapas</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Det här kan ta en stund, speciellt om du har valt ett stort
-                format (A2-A3) och hög upplösning (>72 dpi). Men när allt är
-                klart kommer PDF-filen att laddas ner till din dator.
-                <br />
-                <br />
-                Om du inte vill vänta längre kan du avbryta utskriften genom att
-                trycka på knappen nedan.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button variant="contained" onClick={this.cancelPrint}>
-                Avbryt
-              </Button>
-            </DialogActions>
-          </Dialog>,
-          document.getElementById("root")
-        )}
-        <form
-          className={classes.root}
-          autoComplete="off"
-          onSubmit={this.initiatePrint}
-        >
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="format">Format</InputLabel>
-            <Select
-              value={this.state.format}
-              onChange={this.handleChange}
-              inputProps={{
-                name: "format",
-                id: "format",
-              }}
+            <Tabs
+              action={this.handleTabsMounted}
+              indicatorColor="primary"
+              onChange={this.handleChangeTabs}
+              textColor="primary"
+              value={this.state.activeTab}
+              variant="fullWidth"
             >
-              <MenuItem value={"a2"}>A2</MenuItem>
-              <MenuItem value={"a3"}>A3</MenuItem>
-              <MenuItem value={"a4"}>A4</MenuItem>
-              <MenuItem value={"a5"}>A5</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="orientation">Orientering</InputLabel>
-            <Select
-              value={this.state.orientation}
-              onChange={this.handleChange}
-              inputProps={{
-                name: "orientation",
-                id: "orientation",
-              }}
-            >
-              <MenuItem value={"landscape"}>Liggande</MenuItem>
-              <MenuItem value={"portrait"}>Stående</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="resolution">Upplösning (DPI)</InputLabel>
-            <Select
-              value={this.state.resolution}
-              onChange={this.handleChange}
-              inputProps={{
-                name: "resolution",
-                id: "resolution",
-              }}
-            >
-              <MenuItem value={72}>72</MenuItem>
-              <MenuItem value={150}>150</MenuItem>
-              <MenuItem value={300}>300</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="scale">Skala</InputLabel>
-            <Select
-              value={this.state.scale}
-              onChange={this.handleChange}
-              inputProps={{
-                name: "scale",
-                id: "scale",
-              }}
-            >
-              {scales.map((scale, i) => {
-                // Note: it is crucial to keep the scale value (in state) divided by 1000 from what is shown to user!
-                return (
-                  <MenuItem key={i} value={scale}>
-                    {this.model.getUserFriendlyScale(scale)}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-
-          <FormControl className={classes.formControl}>
-            <TextField
-              value={this.state.mapTitle}
-              onChange={this.handleChange}
-              label="Valfri titel"
-              placeholder="Kan lämnas tomt"
-              variant="standard"
-              inputProps={{
-                id: "mapTitle",
-                name: "mapTitle",
-              }}
-            />
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <Tooltip title="Textfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
-              <FormControlLabel
-                value="mapTextColor"
-                className={classes.mapTextColorLabel}
-                control={
-                  <IconButton
-                    id="mapTextColor"
-                    onClick={this.toggleColorPicker}
-                    style={{
-                      backgroundColor: this.state.mapTextColor,
-                      marginRight: 4,
-                    }}
-                    size="small"
-                    edge="start"
-                  >
-                    <PaletteIcon />
-                  </IconButton>
-                }
-                label="Textfärg"
-              />
-            </Tooltip>
-          </FormControl>
-
-          <Popover
-            id="color-picker-menu"
-            anchorEl={this.state.anchorEl}
-            open={Boolean(this.state.anchorEl)}
-            onClose={this.hideColorPicker}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "center",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
-          >
-            <ColorPicker
-              color={this.state.mapTextColor}
-              colors={this.mapTextAvailableColors}
-              onChangeComplete={this.handleMapTextColorChangeComplete}
-            />
-          </Popover>
-          <FormControl className={classes.formControl}>
-            <Button
-              variant="contained"
-              fullWidth={true}
-              color="primary"
-              onClick={this.initiatePrint}
-              disabled={this.state.printInProgress}
-            >
-              Skriv ut
-            </Button>
-          </FormControl>
-        </form>
+              <Tooltip title="Generella inställningar">
+                <Tab icon={<PrintIcon />} />
+              </Tooltip>
+              <Tooltip title="Avancerade inställningar">
+                <Tab icon={<SettingsIcon />} />
+              </Tooltip>
+            </Tabs>
+          </AppBar>
+          <div className={classes.tabContent}>
+            {this.state.activeTab === 0 && this.renderGeneralOptions()}
+            {this.state.activeTab === 1 && this.renderAdvancedOptions()}
+          </div>
+        </div>
+        <PrintDialog
+          open={this.state.printInProgress}
+          cancelPrint={this.cancelPrint}
+        />
       </>
     );
   }
