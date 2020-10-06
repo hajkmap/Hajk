@@ -517,6 +517,7 @@ class Window extends React.PureComponent {
               <FeatureInfoContainer
                 features={this.props.features}
                 onDisplay={this.props.onDisplay}
+                globalObserver={this.props.globalObserver}
                 key={
                   Array.isArray(this.props.features) &&
                   this.props.features.length > 0

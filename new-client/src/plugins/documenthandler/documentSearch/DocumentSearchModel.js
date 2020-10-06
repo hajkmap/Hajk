@@ -210,7 +210,7 @@ export default class DocumentSearchModel {
         );
         return matchedSearchFields.length > 0;
       });
-      console.log(everyResult, "everyResult");
+
       return everyResult;
     });
 

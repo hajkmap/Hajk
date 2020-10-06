@@ -7,6 +7,12 @@ import Grid from "@material-ui/core/Grid";
 import { ButtonGroup, Button } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import ReactHtmlParser, {
+  processNodes,
+  convertNodeToElement,
+  htmlparser2,
+} from "react-html-parser";
+
 import marked from "marked";
 import {
   mergeFeaturePropsWithMarkdown,
@@ -21,6 +27,7 @@ import {
   TableCell,
   TableBody,
 } from "@material-ui/core";
+import TouchRipple from "@material-ui/core/ButtonBase/TouchRipple";
 
 const styles = (theme) => ({
   windowSection: {
@@ -44,6 +51,77 @@ const styles = (theme) => ({
     width: "100%",
   },
 });
+
+class Value extends React.PureComponent {
+  state = {
+    html: null,
+  };
+
+  fetchExternal = (property) => {
+    return new Promise((resolve, reject) => {
+      if (this.props.globalObserver.getListeners("info-click").length === 0) {
+        resolve();
+      } else {
+        this.props.globalObserver.publish("info-click", {
+          payload: { type: property.type, props: property.props },
+          resolve: resolve,
+        });
+      }
+    });
+  };
+
+  componentDidMount() {
+    this.renderFeatureInformation().then((renderedHtml) => {
+      this.setState({ html: renderedHtml });
+    });
+  }
+
+  isChildTextOnly = (child) => {
+    return !child.props;
+  };
+
+  nodeHasSpecialAttribute = (child) => {
+    return child.props && child.props["data-maplink"]; //FIX FOR DOCUMENTS AS WELL
+  };
+
+  replaceByExternalElement = (child, element) => {
+    child = element;
+  };
+
+  hasChildren = (child) => {
+    return child.props.children && child.props.children.length > 0;
+  };
+
+  renderFeatureInformation = async () => {
+    const { value } = this.props;
+    const element = ReactHtmlParser(value.__html);
+
+    const traverse = async (children) => {
+      for (var i = 0; i < children.length; i++) {
+        if (this.isChildTextOnly(children[i])) {
+          continue;
+        }
+        if (this.nodeHasSpecialAttribute(children[i])) {
+          let externalElement = await this.fetchExternal(children[i]);
+          children[i] = externalElement;
+          continue;
+        }
+
+        if (this.hasChildren(children[i])) {
+          traverse(children[i].props.children);
+        }
+      }
+    };
+
+    await traverse(element[0].props.children);
+
+    return element;
+  };
+
+  render() {
+    return this.state.html;
+  }
+}
 
 class FeatureInfoContainer extends React.PureComponent {
   state = {
@@ -225,6 +303,7 @@ class FeatureInfoContainer extends React.PureComponent {
 
     let properties = feature.getProperties();
     properties = extractPropertiesFromJson(properties);
+    console.log(properties, "properties");
 
     feature.setProperties(properties);
 
@@ -235,35 +314,31 @@ class FeatureInfoContainer extends React.PureComponent {
         markdown = transformed.str;
       }
     }
+
+    this.setState({ loading: true });
+    console.log(properties, "properties");
+
     const value = markdown
       ? mergeFeaturePropsWithMarkdown(markdown, properties)
       : this.getFeaturesAsDefaultTable(properties, caption);
+    console.log(value, "value");
+    //this.fetchExternal(properties).then((properties) => {
+    this.setState(
+      {
+        value: value,
+        loading: false,
+        caption: caption,
+        shortcodes: shortcodes,
+        selectedIndex: newIndex,
+        markdown: markdown,
+      },
 
-    this.setState({ loading: true });
-    //FETCH SOMETHING ASYNC
-
-    this.FAKEASYNC(2000).then(() => {
-      //DONE FETCHING ASYNC
-      this.setState(
-        {
-          value: value,
-          loading: false,
-          caption: caption,
-          shortcodes: shortcodes,
-          selectedIndex: newIndex,
-          markdown: markdown,
-        },
-
-        () => {
-          this.showFeatureInMap();
-        }
-      );
-    });
+      () => {
+        this.showFeatureInMap();
+      }
+    );
+    //});
   }
-
-  FAKEASYNC = (ms) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
 
   renderShortcodes(shortcodes, feature) {
     return shortcodes.map((shortcode, i) => {
@@ -285,6 +360,7 @@ class FeatureInfoContainer extends React.PureComponent {
   render() {
     const { caption, value, shortcodes, markdown } = this.state;
     const { classes } = this.props;
+
     return (
       <Grid direction="column" container>
         <Grid item>{this.getToggler()}</Grid>
@@ -300,10 +376,10 @@ class FeatureInfoContainer extends React.PureComponent {
                   {caption}
                 </Typography>
                 {markdown ? (
-                  <div
-                    className={classes.textContent}
-                    dangerouslySetInnerHTML={value}
-                  />
+                  <Value
+                    globalObserver={this.props.globalObserver}
+                    value={value}
+                  ></Value>
                 ) : (
                   <div className={classes.textContent}>{value}</div>
                 )}

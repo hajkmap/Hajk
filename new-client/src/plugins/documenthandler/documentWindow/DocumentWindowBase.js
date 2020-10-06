@@ -5,7 +5,9 @@ import DocumentViewer from "./DocumentViewer";
 import PrintWindow from "../printMenu/PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
+import ContentComponentFactory from "../utils/ContentComponentFactory";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import ReactDOM from "react-dom";
 
 const styles = (theme) => ({});
 
@@ -109,7 +111,21 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   bindListenForSearchResultClick = () => {
-    const { app } = this.props;
+    const { app, contentComponentFactory } = this.props;
+    console.log("subscribing");
+    app.globalObserver.subscribe("info-click", (e) => {
+      console.log(e, "e");
+
+      var htmlObject = document.createElement(e.payload.type);
+      htmlObject.innerHTML = e.payload.props.children[0];
+      var att = document.createAttribute("data-maplink");
+      att.value = e.payload.props["data-maplink"]; // Set the value of the class attribute
+      htmlObject.setAttributeNode(att);
+      let link = contentComponentFactory.getLinkComponent(htmlObject);
+
+      e.resolve(link);
+    });
+
     app.globalObserver.subscribe(
       "documenthandler-searchresult-clicked",
       (searchResultClick) => {
