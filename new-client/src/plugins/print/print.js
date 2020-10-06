@@ -1,30 +1,37 @@
-// Generic imports – all plugins need these
 import React from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
-
-// Plugin-specific imports. Most plugins will need a Model, View and Observer
-// but make sure to only create and import whatever you need.
 import PrintModel from "./PrintModel";
 import PrintView from "./PrintView";
 import Observer from "react-event-observer";
-
-// All plugins will need to display an icon. Make sure to pick a relevant one from Material UI Icons.
 import PrintIcon from "@material-ui/icons/Print";
 
-/**
- * @summary Main class for the Dummy plugin.
- * @description The purpose of having a Dummy plugin is to exemplify
- * and document how plugins should be constructed in Hajk.
- * The plugins can also serve as a scaffold for other plugins: simply
- * copy the directory, rename it and all files within, and change logic
- * to create the plugin you want to.
- *
- * @class Dummy
- * @extends {React.PureComponent}
- */
 class Print extends React.PureComponent {
-  state = {};
+  // Paper dimensions: Array[width, height]
+  dims = {
+    a0: [1189, 841],
+    a1: [841, 594],
+    a2: [594, 420],
+    a3: [420, 297],
+    a4: [297, 210],
+    a5: [210, 148],
+  };
+
+  // Default scales, used if none supplied in options
+  scales = [
+    100,
+    250,
+    500,
+    1000,
+    2500,
+    5000,
+    10000,
+    25000,
+    50000,
+    100000,
+    200000,
+    500000,
+  ];
 
   static propTypes = {
     app: PropTypes.object.isRequired,
@@ -32,12 +39,23 @@ class Print extends React.PureComponent {
     options: PropTypes.object.isRequired,
   };
 
-  static defaultProps = {
-    options: {},
-  };
-
   constructor(props) {
     super(props);
+
+    // Prepare scales from admin options, fallback to default if needed
+    if (typeof props?.options?.scales === "string") {
+      props.options.scales = props.options.scales.replace(/\s/g, "").split(",");
+    }
+
+    // If no valid max logo width is supplied, use a hard-coded default
+    props.options.logoMaxWidth =
+      typeof props.options?.logoMaxWidth === "number"
+        ? props.options.logoMaxWidth
+        : 40;
+
+    // Ensure we have a value for the crossOrigin parameter
+    props.options.crossOrigin =
+      props.app.config.mapConfig.map?.crossOrigin || "anonymous";
 
     this.localObserver = Observer();
 
@@ -45,6 +63,10 @@ class Print extends React.PureComponent {
       localObserver: this.localObserver,
       app: props.app,
       map: props.map,
+      scales: props.options.scales,
+      dims: this.dims,
+      logoUrl: props.options.logo,
+      logoMaxWidth: props.options.logoMaxWidth,
     });
   }
 
@@ -75,8 +97,10 @@ class Print extends React.PureComponent {
           model={this.printModel}
           app={this.props.app}
           map={this.props.map}
-          options={this.props.options}
           localObserver={this.localObserver}
+          scales={this.props.options.scales}
+          visibleAtStart={this.props.options.visibleAtStart}
+          dims={this.dims}
         />
       </BaseWindowPlugin>
     );
