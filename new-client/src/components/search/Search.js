@@ -258,12 +258,16 @@ class Search extends React.PureComponent {
     });
   };
 
+  escapeRegExp = (string) => {
+    return string.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+  };
+
   sortSearchFieldsOnFeature = (searchFields, feature, wordsInTextField) => {
     let orderedSearchFields = [];
 
     searchFields.forEach((searchField) => {
       let searchFieldMatch = wordsInTextField.some((word) => {
-        return RegExp(`^${word}\\W*`, "i").test(
+        return RegExp(`^${this.escapeRegExp(word)}\\W*`, "i").test(
           feature.properties[searchField] || ""
         );
       });
@@ -526,6 +530,7 @@ class Search extends React.PureComponent {
     return {
       ...searchOptionsFromModel,
       activeSpatialFilter: activeSpatialFilter,
+      getPossibleCombinations: false,
       featuresToFilter: this.featuresToFilter || [],
       matchCase: matchCase,
       wildcardAtStart: wildcardAtStart,
@@ -557,6 +562,7 @@ class Search extends React.PureComponent {
               input:
                 target === "top" ? classes.inputInputWide : classes.inputInput,
             }}
+            escapeRegExp={this.escapeRegExp}
             localObserver={this.localObserver}
             searchTools={searchTools}
             searchResults={searchResults}

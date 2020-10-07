@@ -108,10 +108,14 @@ class SearchBar extends React.PureComponent {
     return matches;
   };
 
-  getAllStartingIndexForOccurencesInString = (string1, string2) => {
-    return [...this.getMatches(string1, new RegExp(string2, "gi"), 1)].map(
-      (a) => a.index
-    );
+  getAllStartingIndexForOccurencesInString = (toSearchFor, toSearchIn) => {
+    return [
+      ...this.getMatches(
+        toSearchFor,
+        new RegExp(this.props.escapeRegExp(toSearchIn), "gi"),
+        1
+      ),
+    ].map((a) => a.index);
     //return [...string1.matchAll(new RegExp(string2, "gi"))].map((a) => a.index);
   };
 

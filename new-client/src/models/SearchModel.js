@@ -8,6 +8,10 @@ import { fromCircle } from "ol/geom/Polygon";
 
 import { arraySort } from "../utils/ArraySort";
 
+const ESCAPE_CHAR = "!";
+const SINGLE_CHAR = ".";
+const WILDCARD_CHAR = "*";
+
 class SearchModel {
   // Public field declarations (why? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Defining_classes)
 
@@ -182,9 +186,9 @@ class SearchModel {
     return new IsLike(
       searchField,
       word,
-      "*", // wildcard char
-      ".", // single char
-      "!", // escape char
+      WILDCARD_CHAR, // wildcard char
+      SINGLE_CHAR, // single char
+      ESCAPE_CHAR, // escape char
       searchOptions.matchCase // match case
     );
   };
@@ -226,34 +230,36 @@ class SearchModel {
     });
   };
 
+  escapeSpecialChars = (string) => {
+    return string.replace(/[.*+\-?^${}()|[\]\\]/g, "!$&"); // $& means the whole matched string
+  };
+
   #getPossibleSearchCombinations = (searchString, searchOptions) => {
     let possibleSearchCombinations = [];
     let wordsInTextField = this.#getStringArray(searchString);
 
     for (let i = 0; i < wordsInTextField.length; i++) {
       let combination = wordsInTextField.slice(wordsInTextField.length - i);
-      combination.unshift(
-        wordsInTextField
-          .slice(0, wordsInTextField.length - i)
-          .join()
-          .replace(/,/g, " ")
-      );
+      let word = wordsInTextField
+        .slice(0, wordsInTextField.length - i)
+        .join()
+        .replace(/,/g, " ");
+
+      combination.unshift(word);
       possibleSearchCombinations.push(combination);
     }
-    return this.#addPotentialWildCards(
-      possibleSearchCombinations,
-      searchOptions
-    );
+
+    return possibleSearchCombinations;
   };
 
-  #addPotentialWildCards = (possibleSearchCombinations, searchOptions) => {
-    return possibleSearchCombinations.map((wordArray) => {
-      return wordArray.map((word) => {
-        word = searchOptions.wildcardAtStart ? `*${word}` : word;
-        word = searchOptions.wildcardAtEnd ? `${word}*` : word;
-        return word;
-      });
-    });
+  #addPotentialWildCards = (word, searchOptions) => {
+    word = searchOptions.wildcardAtStart ? `*${word}` : word;
+    word = searchOptions.wildcardAtEnd ? `${word}*` : word;
+    return word;
+  };
+
+  test = (word) => {
+    return this.escapeSpecialChars(word);
   };
 
   #lookup = (searchString, searchSource, searchOptions) => {
@@ -276,14 +282,22 @@ class SearchModel {
         possibleSearchCombinations.push(
           this.#splitAndTrimOnCommas(searchString)
         );
-        possibleSearchCombinations = this.#addPotentialWildCards(
-          possibleSearchCombinations,
-          searchOptions
-        );
       }
 
       let searchFilters = possibleSearchCombinations.map((combination) => {
-        return this.#getSearchFilters(combination, searchSource, searchOptions);
+        let searchWordsForCombination = combination.map((wordInCombination) => {
+          wordInCombination = this.escapeSpecialChars(wordInCombination);
+          wordInCombination = this.#addPotentialWildCards(
+            wordInCombination,
+            searchOptions
+          );
+          return wordInCombination;
+        });
+        return this.#getSearchFilters(
+          searchWordsForCombination,
+          searchSource,
+          searchOptions
+        );
       });
 
       comparisonFilters =
