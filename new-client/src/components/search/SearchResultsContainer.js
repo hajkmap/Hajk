@@ -22,11 +22,11 @@ const styles = (theme) => ({
   },
   searchResultListWrapper: {
     [theme.breakpoints.down("xs")]: {
-      maxHeight: "80vh",
+      maxHeight: "78vh",
       overflow: "auto",
     },
     [theme.breakpoints.up("sm")]: {
-      maxHeight: "70vh",
+      maxHeight: "82vh",
       overflow: "auto",
     },
   },
@@ -41,6 +41,7 @@ const styles = (theme) => ({
   },
   root: {
     maxHeight: "80vh",
+    overflow: "auto",
     minWidth: 200,
     [theme.breakpoints.up("sm")]: {
       maxWidth: 520,

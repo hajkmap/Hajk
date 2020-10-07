@@ -176,7 +176,7 @@ class DocumentWindowBase extends React.PureComponent {
           title: documentTitle || options.windowTitle || "Documents",
           color: documentColor || "#ffffff",
           description: "En kort beskrivning som visas i widgeten",
-          height: options.height || "90vh",
+          height: options.height || "auto",
           width: options.width || 600,
           scrollable: false,
           onMinimize: this.onMinimize,
