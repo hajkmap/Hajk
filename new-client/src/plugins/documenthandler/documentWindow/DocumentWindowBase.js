@@ -110,21 +110,45 @@ class DocumentWindowBase extends React.PureComponent {
     });
   };
 
-  bindListenForSearchResultClick = () => {
-    const { app, contentComponentFactory } = this.props;
-    console.log("subscribing");
-    app.globalObserver.subscribe("info-click", (e) => {
-      console.log(e, "e");
+  createHtmlObjectFromInfoClickEvent = () => {};
 
-      var htmlObject = document.createElement(e.payload.type);
-      htmlObject.innerHTML = e.payload.props.children[0];
-      var att = document.createAttribute("data-maplink");
-      att.value = e.payload.props["data-maplink"]; // Set the value of the class attribute
-      htmlObject.setAttributeNode(att);
-      let link = contentComponentFactory.getLinkComponent(htmlObject);
-
-      e.resolve(link);
+  canHandleInfoClickEvent = (infoClickEvent) => {
+    if (infoClickEvent.payload.type != "a") {
+      return false;
+    }
+    return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
+      return ["data-maplink", "data-document", "data-header"].includes(key);
     });
+  };
+
+  handleInfoClickRequest = (infoClickEvent) => {
+    const { contentComponentFactory } = this.props;
+
+    if (this.canHandleInfoClickEvent(infoClickEvent)) {
+      var htmlObject = document.createElement(infoClickEvent.payload.type);
+      htmlObject.innerHTML = infoClickEvent.payload.children[0];
+      Object.entries(infoClickEvent.payload.dataAttributes).forEach(
+        (dataAttributeEntry) => {
+          var att = document.createAttribute(dataAttributeEntry[0]);
+          att.value = dataAttributeEntry[1];
+          htmlObject.setAttributeNode(att);
+        }
+      );
+      console.log(htmlObject, "htmlObject");
+      let link = contentComponentFactory.getLinkComponent(htmlObject);
+      infoClickEvent.resolve(link);
+    } else {
+      infoClickEvent.resolve();
+    }
+  };
+
+  bindListenForSearchResultClick = () => {
+    const { app } = this.props;
+
+    app.globalObserver.subscribe(
+      "core.info-click",
+      this.handleInfoClickRequest
+    );
 
     app.globalObserver.subscribe(
       "documenthandler-searchresult-clicked",

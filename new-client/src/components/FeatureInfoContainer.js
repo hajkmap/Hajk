@@ -57,17 +57,42 @@ class Value extends React.PureComponent {
     html: null,
   };
 
+  unescapeString = (strng) => {
+    return strng.replace(/\\"/g, "");
+  };
+
+  createDataAttributesObjectFromEntriesArray = (entries) => {
+    return entries.reduce((acc, curr) => {
+      return { ...acc, ...{ [curr[0]]: this.unescapeString(curr[1]) } };
+    }, {});
+  };
+
+  extractDataAttributes = (props) => {
+    let entries = Object.entries(props).filter((entry) => {
+      return entry[0].search("data-") !== -1;
+    });
+
+    return this.createDataAttributesObjectFromEntriesArray(entries);
+  };
+
   fetchExternal = (property) => {
-    return new Promise((resolve, reject) => {
-      if (this.props.globalObserver.getListeners("info-click").length === 0) {
-        resolve();
-      } else {
-        this.props.globalObserver.publish("info-click", {
-          payload: { type: property.type, props: property.props },
+    if (
+      this.props.globalObserver.getListeners("core.info-click").length === 0
+    ) {
+      return null;
+    } else {
+      return new Promise((resolve, reject) => {
+        let dataAttributes = this.extractDataAttributes(property.props);
+        this.props.globalObserver.publish("core.info-click", {
+          payload: {
+            type: property.type,
+            children: property.props.children,
+            dataAttributes: dataAttributes,
+          },
           resolve: resolve,
         });
-      }
-    });
+      });
+    }
   };
 
   componentDidMount() {
@@ -81,11 +106,10 @@ class Value extends React.PureComponent {
   };
 
   nodeHasSpecialAttribute = (child) => {
-    return child.props && child.props["data-maplink"]; //FIX FOR DOCUMENTS AS WELL
-  };
-
-  replaceByExternalElement = (child, element) => {
-    child = element;
+    let hasSpecialAttribute = Object.keys(child.props).some((key) => {
+      return key.search("data-") > -1;
+    });
+    return child.props && hasSpecialAttribute;
   };
 
   hasChildren = (child) => {
@@ -94,28 +118,31 @@ class Value extends React.PureComponent {
 
   renderFeatureInformation = async () => {
     const { value } = this.props;
-    const element = ReactHtmlParser(value.__html);
+    const reactElementFromHtml = ReactHtmlParser(value.__html);
 
-    const traverse = async (children) => {
+    const injectIfExternalComponents = async (children) => {
       for (var i = 0; i < children.length; i++) {
         if (this.isChildTextOnly(children[i])) {
           continue;
         }
         if (this.nodeHasSpecialAttribute(children[i])) {
           let externalElement = await this.fetchExternal(children[i]);
-          children[i] = externalElement;
+          if (externalElement) {
+            children[i] = externalElement;
+          }
+
           continue;
         }
 
         if (this.hasChildren(children[i])) {
-          traverse(children[i].props.children);
+          injectIfExternalComponents(children[i].props.children);
         }
       }
     };
 
-    await traverse(element[0].props.children);
+    await injectIfExternalComponents(reactElementFromHtml[0].props.children);
 
-    return element;
+    return reactElementFromHtml;
   };
 
   render() {

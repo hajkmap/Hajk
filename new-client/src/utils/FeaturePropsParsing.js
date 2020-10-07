@@ -54,8 +54,6 @@ export function mergeFeaturePropsWithMarkdown(markdown, properties) {
   markdown = markdown.replace(/export:/g, "");
   if (markdown && typeof markdown === "string") {
     (markdown.match(/{(.*?)}/g) || []).forEach((property) => {
-      console.log(property, "property");
-      console.log(lookup(properties, property), "lookup(properties, property)");
       markdown = markdown.replace(property, lookup(properties, property));
     });
   }

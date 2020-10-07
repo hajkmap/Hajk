@@ -440,7 +440,7 @@ export default class ContentComponentFactory {
         variant="body2"
         component="button"
         onClick={() => {
-          console.log("CLICKING");
+          console.log(mapLink, "CLICKING");
           localObserver.publish("fly-to", mapLink);
         }}
       >
