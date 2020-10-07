@@ -7,11 +7,7 @@ import Grid from "@material-ui/core/Grid";
 import { ButtonGroup, Button } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import ReactHtmlParser, {
-  processNodes,
-  convertNodeToElement,
-  htmlparser2,
-} from "react-html-parser";
+import FeatureInfo from "./FeatureInfo";
 
 import marked from "marked";
 import {
@@ -27,7 +23,6 @@ import {
   TableCell,
   TableBody,
 } from "@material-ui/core";
-import TouchRipple from "@material-ui/core/ButtonBase/TouchRipple";
 
 const styles = (theme) => ({
   windowSection: {
@@ -51,104 +46,6 @@ const styles = (theme) => ({
     width: "100%",
   },
 });
-
-class Value extends React.PureComponent {
-  state = {
-    html: null,
-  };
-
-  unescapeString = (strng) => {
-    return strng.replace(/\\"/g, "");
-  };
-
-  createDataAttributesObjectFromEntriesArray = (entries) => {
-    return entries.reduce((acc, curr) => {
-      return { ...acc, ...{ [curr[0]]: this.unescapeString(curr[1]) } };
-    }, {});
-  };
-
-  extractDataAttributes = (props) => {
-    let entries = Object.entries(props).filter((entry) => {
-      return entry[0].search("data-") !== -1;
-    });
-
-    return this.createDataAttributesObjectFromEntriesArray(entries);
-  };
-
-  fetchExternal = (property) => {
-    if (
-      this.props.globalObserver.getListeners("core.info-click").length === 0
-    ) {
-      return null;
-    } else {
-      return new Promise((resolve, reject) => {
-        let dataAttributes = this.extractDataAttributes(property.props);
-        this.props.globalObserver.publish("core.info-click", {
-          payload: {
-            type: property.type,
-            children: property.props.children,
-            dataAttributes: dataAttributes,
-          },
-          resolve: resolve,
-        });
-      });
-    }
-  };
-
-  componentDidMount() {
-    this.renderFeatureInformation().then((renderedHtml) => {
-      this.setState({ html: renderedHtml });
-    });
-  }
-
-  isChildTextOnly = (child) => {
-    return !child.props;
-  };
-
-  nodeHasSpecialAttribute = (child) => {
-    let hasSpecialAttribute = Object.keys(child.props).some((key) => {
-      return key.search("data-") > -1;
-    });
-    return child.props && hasSpecialAttribute;
-  };
-
-  hasChildren = (child) => {
-    return child.props.children && child.props.children.length > 0;
-  };
-
-  renderFeatureInformation = async () => {
-    const { value } = this.props;
-    const reactElementFromHtml = ReactHtmlParser(value.__html);
-
-    const injectIfExternalComponents = async (children) => {
-      for (var i = 0; i < children.length; i++) {
-        if (this.isChildTextOnly(children[i])) {
-          continue;
-        }
-        if (this.nodeHasSpecialAttribute(children[i])) {
-          let externalElement = await this.fetchExternal(children[i]);
-          if (externalElement) {
-            children[i] = externalElement;
-          }
-
-          continue;
-        }
-
-        if (this.hasChildren(children[i])) {
-          injectIfExternalComponents(children[i].props.children);
-        }
-      }
-    };
-
-    await injectIfExternalComponents(reactElementFromHtml[0].props.children);
-
-    return reactElementFromHtml;
-  };
-
-  render() {
-    return this.state.html;
-  }
-}
 
 class FeatureInfoContainer extends React.PureComponent {
   state = {
@@ -330,8 +227,6 @@ class FeatureInfoContainer extends React.PureComponent {
 
     let properties = feature.getProperties();
     properties = extractPropertiesFromJson(properties);
-    console.log(properties, "properties");
-
     feature.setProperties(properties);
 
     if (markdown) {
@@ -348,8 +243,7 @@ class FeatureInfoContainer extends React.PureComponent {
     const value = markdown
       ? mergeFeaturePropsWithMarkdown(markdown, properties)
       : this.getFeaturesAsDefaultTable(properties, caption);
-    console.log(value, "value");
-    //this.fetchExternal(properties).then((properties) => {
+
     this.setState(
       {
         value: value,
@@ -364,7 +258,6 @@ class FeatureInfoContainer extends React.PureComponent {
         this.showFeatureInMap();
       }
     );
-    //});
   }
 
   renderShortcodes(shortcodes, feature) {
@@ -384,40 +277,44 @@ class FeatureInfoContainer extends React.PureComponent {
     });
   }
 
-  render() {
+  isReadyToShowInfo = () => {
+    const { caption, value, loading, shortcodes } = this.state;
+    return caption && !loading && value && shortcodes;
+  };
+
+  renderFeatureInformation = () => {
     const { caption, value, shortcodes, markdown } = this.state;
     const { classes } = this.props;
+    return (
+      <>
+        <Typography variant="button" align="center" component="h6">
+          {caption}
+        </Typography>
+        {markdown ? (
+          <FeatureInfo
+            globalObserver={this.props.globalObserver}
+            value={value}
+          ></FeatureInfo>
+        ) : (
+          <div className={classes.textContent}>{value}</div>
+        )}
 
+        {shortcodes.length > 0 &&
+          this.renderShortcodes(
+            shortcodes,
+            this.props.features[this.state.selectedIndex - 1]
+          )}
+      </>
+    );
+  };
+
+  render() {
     return (
       <Grid direction="column" container>
         <Grid item>{this.getToggler()}</Grid>
         <Grid item>
           {this.state.loading && <CircularProgress />}
-
-          {this.state.caption &&
-            !this.state.loading &&
-            this.state.value &&
-            this.state.shortcodes && (
-              <div>
-                <Typography variant="button" align="center" component="h6">
-                  {caption}
-                </Typography>
-                {markdown ? (
-                  <Value
-                    globalObserver={this.props.globalObserver}
-                    value={value}
-                  ></Value>
-                ) : (
-                  <div className={classes.textContent}>{value}</div>
-                )}
-
-                {shortcodes.length > 0 &&
-                  this.renderShortcodes(
-                    shortcodes,
-                    this.props.features[this.state.selectedIndex - 1]
-                  )}
-              </div>
-            )}
+          {this.isReadyToShowInfo() && this.renderFeatureInformation()}
         </Grid>
       </Grid>
     );

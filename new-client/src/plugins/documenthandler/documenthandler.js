@@ -23,7 +23,6 @@ class DocumentHandler extends React.PureComponent {
   constructor(props) {
     super(props);
     this.localObserver = Observer();
-    console.log(this.props, "pros");
     this.contentComponentFactory = new ContentComponentFactory({
       localObserver: this.localObserver,
       theme: this.props.theme,
@@ -44,7 +43,6 @@ class DocumentHandler extends React.PureComponent {
       })
         .init()
         .then((loadedDocumentModel) => {
-          console.log(loadedDocumentModel, "loadedDocumentModel");
           this.setState({ model: loadedDocumentModel });
         });
 

@@ -5,9 +5,7 @@ import DocumentViewer from "./DocumentViewer";
 import PrintWindow from "../printMenu/PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
-import ContentComponentFactory from "../utils/ContentComponentFactory";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import ReactDOM from "react-dom";
 
 const styles = (theme) => ({});
 
@@ -113,7 +111,7 @@ class DocumentWindowBase extends React.PureComponent {
   createHtmlObjectFromInfoClickEvent = () => {};
 
   canHandleInfoClickEvent = (infoClickEvent) => {
-    if (infoClickEvent.payload.type != "a") {
+    if (infoClickEvent.payload.type !== "a") {
       return false;
     }
     return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
@@ -134,7 +132,6 @@ class DocumentWindowBase extends React.PureComponent {
           htmlObject.setAttributeNode(att);
         }
       );
-      console.log(htmlObject, "htmlObject");
       let link = contentComponentFactory.getLinkComponent(htmlObject);
       infoClickEvent.resolve(link);
     } else {
