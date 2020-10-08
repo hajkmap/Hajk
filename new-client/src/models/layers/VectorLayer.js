@@ -2,19 +2,23 @@ import VectorSource from "ol/source/Vector";
 import { Vector as VectorLayer } from "ol/layer";
 import { WFS, GeoJSON } from "ol/format";
 import GML2 from "ol/format/GML";
-import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
-import { all as strategyAll } from "ol/loadingstrategy";
+// import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
+import { all as strategyAll, bbox as bboxStrategy } from "ol/loadingstrategy";
+
 import { transform } from "ol/proj";
-import { toContext } from "ol/render";
-import { Point, Polygon, LineString } from "ol/geom";
-import Feature from "ol/Feature";
+// import { toContext } from "ol/render";
+// import { Point, Polygon, LineString } from "ol/geom";
+// import Feature from "ol/Feature";
 import LayerInfo from "./LayerInfo.js";
+
+import { getPointResolution } from "ol/proj";
+import * as SLDReader from "@nieuwlandgeo/sldreader";
 
 const fetchConfig = {
   credentials: "same-origin",
 };
 
-let vectorLayerProperties = {
+const vectorLayerProperties = {
   url: "",
   featureId: "FID",
   serverType: "geoserver",
@@ -31,117 +35,118 @@ let vectorLayerProperties = {
   showLabels: true,
 };
 
-function createStyle(feature, forcedPointRadius) {
-  const icon = this.config.icon;
-  const fillColor = this.config.fillColor;
-  const lineColor = this.config.lineColor;
-  const lineStyle = this.config.lineStyle;
-  const lineWidth = this.config.lineWidth;
-  const symbolXOffset = this.config.symbolXOffset;
-  const symbolYOffset = this.config.symbolYOffset;
-  const rotation = 0.0;
-  const align = this.config.labelAlign;
-  const baseline = this.config.labelBaseline;
-  const size = this.config.labelSize;
-  const offsetX = this.config.labelOffsetX;
-  const offsetY = this.config.labelOffsetY;
-  const weight = this.config.labelWeight;
-  const font = weight + " " + size + " " + this.config.labelFont;
-  const labelFillColor = this.config.labelFillColor;
-  const outlineColor = this.config.labelOutlineColor;
-  const outlineWidth = this.config.labelOutlineWidth;
-  const labelAttribute = this.config.labelAttribute;
-  const showLabels = this.config.showLabels;
-  const pointSize = forcedPointRadius || this.config.pointSize;
+// function createStyle(feature, forcedPointRadius) {
+//   const icon = this.config.icon;
+//   const fillColor = this.config.fillColor;
+//   const lineColor = this.config.lineColor;
+//   const lineStyle = this.config.lineStyle;
+//   const lineWidth = this.config.lineWidth;
+//   const symbolXOffset = this.config.symbolXOffset;
+//   const symbolYOffset = this.config.symbolYOffset;
+//   const rotation = 0.0;
+//   const align = this.config.labelAlign;
+//   const baseline = this.config.labelBaseline;
+//   const size = this.config.labelSize;
+//   const offsetX = this.config.labelOffsetX;
+//   const offsetY = this.config.labelOffsetY;
+//   const weight = this.config.labelWeight;
+//   const font = weight + " " + size + " " + this.config.labelFont;
+//   const labelFillColor = this.config.labelFillColor;
+//   const outlineColor = this.config.labelOutlineColor;
+//   const outlineWidth = this.config.labelOutlineWidth;
+//   const labelAttribute = this.config.labelAttribute;
+//   const showLabels = this.config.showLabels;
+//   const pointSize = forcedPointRadius || this.config.pointSize;
 
-  feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
+//   feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
 
-  function getLineDash() {
-    var scale = (a, f) => a.map((b) => f * b),
-      width = lineWidth,
-      style = lineStyle,
-      dash = [12, 7],
-      dot = [2, 7];
-    switch (style) {
-      case "dash":
-        return width > 3 ? scale(dash, 2) : dash;
-      case "dot":
-        return width > 3 ? scale(dot, 2) : dot;
-      default:
-        return undefined;
-    }
-  }
+//   function getLineDash() {
+//     var scale = (a, f) => a.map((b) => f * b),
+//       width = lineWidth,
+//       style = lineStyle,
+//       dash = [12, 7],
+//       dot = [2, 7];
+//     switch (style) {
+//       case "dash":
+//         return width > 3 ? scale(dash, 2) : dash;
+//       case "dot":
+//         return width > 3 ? scale(dot, 2) : dot;
+//       default:
+//         return undefined;
+//     }
+//   }
 
-  function getFill() {
-    return new Fill({
-      color: fillColor,
-    });
-  }
+//   function getFill() {
+//     return new Fill({
+//       color: fillColor,
+//     });
+//   }
 
-  function getText() {
-    return new Text({
-      textAlign: align,
-      textBaseline: baseline,
-      font: font,
-      text: feature ? feature.getProperties()[labelAttribute] : "",
-      fill: new Fill({
-        color: labelFillColor,
-      }),
-      stroke: new Stroke({
-        color: outlineColor,
-        width: outlineWidth,
-      }),
-      offsetX: offsetX,
-      offsetY: offsetY,
-      rotation: rotation,
-    });
-  }
+//   function getText() {
+//     return new Text({
+//       textAlign: align,
+//       textBaseline: baseline,
+//       font: font,
+//       text: feature ? feature.getProperties()[labelAttribute] : "",
+//       fill: new Fill({
+//         color: labelFillColor,
+//       }),
+//       stroke: new Stroke({
+//         color: outlineColor,
+//         width: outlineWidth,
+//       }),
+//       offsetX: offsetX,
+//       offsetY: offsetY,
+//       rotation: rotation,
+//     });
+//   }
 
-  function getImage() {
-    return icon === "" ? getPoint() : getIcon();
-  }
+//   function getImage() {
+//     return icon === "" ? getPoint() : getIcon();
+//   }
 
-  function getIcon() {
-    return new Icon({
-      src: icon,
-      scale: 1,
-      anchorXUnits: "pixels",
-      anchorYUnits: "pixels",
-      anchor: [symbolXOffset, symbolYOffset],
-    });
-  }
+//   function getIcon() {
+//     return new Icon({
+//       src: icon,
+//       scale: 1,
+//       anchorXUnits: "pixels",
+//       anchorYUnits: "pixels",
+//       anchor: [symbolXOffset, symbolYOffset],
+//     });
+//   }
 
-  function getPoint() {
-    return new Circle({
-      fill: getFill(),
-      stroke: getStroke(),
-      radius: parseInt(pointSize, 10) || 4,
-    });
-  }
+//   function getPoint() {
+//     return new Circle({
+//       fill: getFill(),
+//       stroke: getStroke(),
+//       radius: parseInt(pointSize, 10) || 4,
+//     });
+//   }
 
-  function getStroke() {
-    return new Stroke({
-      color: lineColor,
-      width: lineWidth,
-      lineDash: getLineDash(),
-    });
-  }
+//   function getStroke() {
+//     return new Stroke({
+//       color: lineColor,
+//       width: lineWidth,
+//       lineDash: getLineDash(),
+//     });
+//   }
 
-  function getStyleObj() {
-    var obj = {
-      fill: getFill(),
-      image: getImage(),
-      stroke: getStroke(),
-    };
-    if (showLabels) {
-      obj.text = getText();
-    }
+//   function getStyleObj() {
+//     var obj = {
+//       fill: getFill(),
+//       image: getImage(),
+//       stroke: getStroke(),
+//     };
+//     if (showLabels) {
+//       obj.text = getText();
+//     }
 
-    return obj;
-  }
+//     return obj;
+//   }
 
-  return [new Style(getStyleObj())];
-}
+//   return [new Style(getStyleObj())];
+// }
+
 class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
     config = {
@@ -151,29 +156,29 @@ class WFSVectorLayer {
     this.config = config;
     this.proxyUrl = proxyUrl;
     this.map = map;
-    this.style = createStyle.apply(this);
+    // this.style = createStyle.apply(this);
     this.filterAttribute = config.filterAttribute;
     this.filterValue = config.filterValue;
     this.filterComparer = config.filterComparer;
 
     this.vectorSource = new VectorSource({
-      loader: (extent) => {
+      loader: (extent, resolution, projection) => {
         if (config.dataFormat === "GeoJSON") {
           this.loadData(config.url, config.dataFormat.toLowerCase());
         } else {
-          if (config.loadType === "ajax") {
-            this.loadData(this.createUrl(extent, true));
-          }
+          this.loadData(this.createUrl(extent, projection.getCode()));
         }
       },
-      strategy: strategyAll,
+      strategy:
+        this.config?.loadStrategy === "all" ? strategyAll : bboxStrategy,
     });
 
-    if (config.legend[0].url === "") {
-      this.generateLegend((imageData) => {
-        config.legend[0].url = imageData;
-      });
-    }
+    // if (config.legend[0].url === "") {
+    //   this.generateLegend((imageData) => {
+    //     config.legend[0].url = imageData;
+    //   });
+    // }
+
     this.layer = new VectorLayer({
       information: config.information,
       caption: config.caption,
@@ -184,24 +189,73 @@ class WFSVectorLayer {
       filterable: config.filterable,
       layerInfo: new LayerInfo(config),
       renderMode: "image",
-      style: this.getStyle.bind(this),
+      // style: this.getStyle.bind(this),
       source: this.vectorSource,
       url: config.url,
+      minZoom: config?.minZoom,
+      maxZoom: config?.maxZoom,
     });
+
+    console.log(
+      config?.minZoom,
+      config?.maxZoom,
+      config?.sldUrl,
+      config?.sldText
+    );
+
+    this.sldUrl = config?.sldUrl;
+    // ??      "https://geoserver1.halmstad.se/geoserver/rest/workspaces/bmf/styles/byggnader.sld";
+    this.sldText = config?.sldText;
+    this.sldStyle = config?.sldStyle ?? "Default Styler";
+
+    if (this.sldUrl !== undefined) {
+      fetch(this.sldUrl)
+        .then((response) => response.text())
+        .then((text) => this.applySldTextOnLayer(text));
+    } else if (this.sldText !== undefined) {
+      this.applySldTextOnLayer(this.sldText);
+    }
+
     if (config.dataFormat === "GeoJSON") {
       this.layer.featureType = "";
     } else {
       this.layer.featureType = config.params.typename.split(":")[1];
     }
     this.type = "vector";
+
+    console.log("WFSVectorLayer", this);
   }
 
-  getStyle(forcedPointRadius) {
-    if (forcedPointRadius) {
-      return createStyle.call(this, undefined, forcedPointRadius);
-    }
-    return this.style;
-  }
+  applySldTextOnLayer = (text) => {
+    const sldObject = SLDReader.Reader(text);
+    const sldLayer = SLDReader.getLayer(sldObject);
+    const style = SLDReader.getStyle(sldLayer, this.sldStyle);
+    const featureTypeStyle = style.featuretypestyles[0];
+
+    const viewProjection = this.map.getView().getProjection();
+    const olFunction = SLDReader.createOlStyleFunction(featureTypeStyle, {
+      // Use the convertResolution option to calculate a more accurate resolution.
+      convertResolution: (viewResolution) => {
+        const viewCenter = this.map.getView().getCenter();
+        return getPointResolution(viewProjection, viewResolution, viewCenter);
+      },
+      // If you use point icons with an ExternalGraphic, you have to use imageLoadCallback to
+      // to update the vector layer when an image finishes loading.
+      // If you do not do this, the image will only become visible after the next pan/zoom of the layer.
+      imageLoadedCallback: () => {
+        this.layer.changed();
+      },
+    });
+    console.log("olFunction: ", olFunction);
+    this.layer.setStyle(olFunction);
+  };
+
+  // getStyle(forcedPointRadius) {
+  //   if (forcedPointRadius) {
+  //     return createStyle.call(this, undefined, forcedPointRadius);
+  //   }
+  //   return this.style;
+  // }
 
   reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
@@ -275,21 +329,23 @@ class WFSVectorLayer {
     this.vectorSource.addFeatures(features);
   }
 
-  createUrl() {
-    var props = Object.keys(this.config.params);
-    var url = this.config.url + "?";
-    for (let i = 0; i < props.length; i++) {
-      let key = props[i];
-      let value = "";
+  createUrl(extent = [], projection = "") {
+    // Grab params needed for URL creation
+    const props = this.config.params;
 
-      if (key !== "bbox") {
-        value = this.config.params[key];
-        url += key + "=" + value;
-      }
-      if (i !== props.length - 1) {
-        url += "&";
-      }
-    }
+    // Get rid of bbox that comes from config
+    delete props.bbox;
+
+    // Turn params into URLSearchParams string
+    const usp = new URLSearchParams(props).toString();
+
+    // If extent doesn't contain Infinity values, append it to the URL
+    const bbox =
+      extent.length === 4 && extent.includes(Infinity) === false
+        ? `&bbox=${extent.join(",")},${projection}`
+        : "";
+
+    const url = this.config.url + "?" + usp + bbox;
     return url;
   }
 
@@ -336,74 +392,74 @@ class WFSVectorLayer {
     }
   }
 
-  loadData(url, format) {
+  loadData(url, format = "wfs") {
     url = this.proxyUrl + url;
 
     fetch(url, fetchConfig).then((response) => {
       response.text().then((features) => {
-        this.addFeatures(features, format || "wfs");
+        this.addFeatures(features, format);
       });
     });
   }
 
-  generateLegend(callback) {
-    var url = this.proxyUrl + this.createUrl();
-    fetch(url, fetchConfig).then((response) => {
-      response.text().then((gmlText) => {
-        const parser = new GML2();
-        const features = parser.readFeatures(gmlText);
-        const canvas = document.createElement("canvas");
+  // generateLegend(callback) {
+  //   var url = this.proxyUrl + this.createUrl();
+  //   fetch(url, fetchConfig).then((response) => {
+  //     response.text().then((gmlText) => {
+  //       const parser = new GML2();
+  //       const features = parser.readFeatures(gmlText);
+  //       const canvas = document.createElement("canvas");
 
-        const scale = 120;
-        const padding = 1 / 5;
-        const pointRadius = 15;
+  //       const scale = 120;
+  //       const padding = 1 / 5;
+  //       const pointRadius = 15;
 
-        const vectorContext = toContext(canvas.getContext("2d"), {
-          size: [scale, scale],
-        });
-        const style = this.getStyle(pointRadius)[0];
-        vectorContext.setStyle(style);
+  //       const vectorContext = toContext(canvas.getContext("2d"), {
+  //         size: [scale, scale],
+  //       });
+  //       const style = this.getStyle(pointRadius)[0];
+  //       vectorContext.setStyle(style);
 
-        var featureType = "Point";
-        if (features.length > 0) {
-          featureType = features[0].getGeometry().getType();
-        }
+  //       var featureType = "Point";
+  //       if (features.length > 0) {
+  //         featureType = features[0].getGeometry().getType();
+  //       }
 
-        switch (featureType) {
-          case "Point":
-          case "MultiPoint":
-            vectorContext.drawGeometry(new Point([scale / 2, scale / 2]));
-            break;
-          case "Polygon":
-          case "MultiPolygon":
-            vectorContext.drawGeometry(
-              new Polygon([
-                [
-                  [scale * padding, scale * padding],
-                  [scale * padding, scale - scale * padding],
-                  [scale - scale * padding, scale - scale * padding],
-                  [scale - scale * padding, scale * padding],
-                  [scale * padding, scale * padding],
-                ],
-              ])
-            );
-            break;
-          case "LineString":
-          case "MultiLineString":
-            vectorContext.drawGeometry(
-              new LineString([
-                [scale * padding, scale - scale * padding],
-                [scale - scale * padding, scale * padding],
-              ])
-            );
-            break;
-          default:
-            break;
-        }
-        callback(canvas.toDataURL());
-      });
-    });
-  }
+  //       switch (featureType) {
+  //         case "Point":
+  //         case "MultiPoint":
+  //           vectorContext.drawGeometry(new Point([scale / 2, scale / 2]));
+  //           break;
+  //         case "Polygon":
+  //         case "MultiPolygon":
+  //           vectorContext.drawGeometry(
+  //             new Polygon([
+  //               [
+  //                 [scale * padding, scale * padding],
+  //                 [scale * padding, scale - scale * padding],
+  //                 [scale - scale * padding, scale - scale * padding],
+  //                 [scale - scale * padding, scale * padding],
+  //                 [scale * padding, scale * padding],
+  //               ],
+  //             ])
+  //           );
+  //           break;
+  //         case "LineString":
+  //         case "MultiLineString":
+  //           vectorContext.drawGeometry(
+  //             new LineString([
+  //               [scale * padding, scale - scale * padding],
+  //               [scale - scale * padding, scale * padding],
+  //             ])
+  //           );
+  //           break;
+  //         default:
+  //           break;
+  //       }
+  //       callback(canvas.toDataURL());
+  //     });
+  //   });
+  // }
 }
 
 export default WFSVectorLayer;
