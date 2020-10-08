@@ -237,14 +237,26 @@ export default class DocumentSearchModel {
     };
   };
 
+  /**
+   * Sets matchedsearchvalues for each chapter
+   * If any (some-function) of the searchcombinations is hit, that is a match
+   * For a searchCombination to be a match must every (every-function) searchword in that combination
+   * find a match
+   * @param {chapter} chapter chapter.
+   * @param {array} searchCombinations array with arrays containing searchwords.
+   * @return Returns true if a match is found.
+   *
+   */
   setmatchedSearchValues = (chapter, searchCombinations) => {
     this.setSearchValuesForChapter(chapter);
-    let matchedSearchValues = [];
+    let allMatched = [];
     let match = searchCombinations.some((searchCombination) => {
       let everyResult = searchCombination.every((word) => {
-        matchedSearchValues = matchedSearchValues.concat(
-          this.searchStringMatchSearchFields(word, chapter.searchValues)
+        let matchedSearchValues = this.getMatchSearchValues(
+          word,
+          chapter.searchValues
         );
+        allMatched = allMatched.concat(matchedSearchValues);
 
         return matchedSearchValues.length > 0;
       });
@@ -253,7 +265,7 @@ export default class DocumentSearchModel {
     });
 
     if (match) {
-      chapter.matchedSearchValues = matchedSearchValues;
+      chapter.matchedSearchValues = allMatched;
     } else {
       chapter.matchedSearchValues = [];
     }
@@ -298,7 +310,7 @@ export default class DocumentSearchModel {
    * @return Returns true if a match is found.
    *
    */
-  searchStringMatchSearchFields = (searchString, searchFields) => {
+  getMatchSearchValues = (searchString, searchFields) => {
     let matchedSearchValues = [];
     searchFields.forEach((searchField) => {
       let compareResults = this.matchSearch.compare(searchString, searchField);

@@ -101,7 +101,8 @@ class SearchBar extends React.PureComponent {
   getMatches = (string, regex, index) => {
     var matches = [];
     var match = regex.exec(string);
-    while (match != null) {
+
+    while (match != null && match[0] !== "") {
       matches.push(match);
       match = regex.exec(string);
     }
@@ -116,7 +117,6 @@ class SearchBar extends React.PureComponent {
         1
       ),
     ].map((a) => a.index);
-    //return [...string1.matchAll(new RegExp(string2, "gi"))].map((a) => a.index);
   };
 
   //Highlights everything in autocompleteentry up until the last occurence of a match in string.
