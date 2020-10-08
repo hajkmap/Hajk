@@ -116,7 +116,7 @@ class SearchBar extends React.PureComponent {
         new RegExp(this.props.escapeRegExp(toSearchIn), "gi"),
         1
       ),
-    ].map((a) => a.index);
+    ].map((match) => match.index);
   };
 
   //Highlights everything in autocompleteentry up until the last occurence of a match in string.
