@@ -110,13 +110,10 @@ class SearchBar extends React.PureComponent {
   };
 
   getAllStartingIndexForOccurencesInString = (toSearchFor, toSearchIn) => {
-    return [
-      ...this.getMatches(
-        toSearchFor,
-        new RegExp(this.props.escapeRegExp(toSearchIn), "gi"),
-        1
-      ),
-    ].map((match) => match.index);
+    let regexp = new RegExp(this.props.escapeRegExp(toSearchIn), "gi");
+    let matches = this.getMatches(toSearchFor, regexp);
+    let matchedIndexes = matches.map((match) => match.index);
+    return matchedIndexes;
   };
 
   //Highlights everything in autocompleteentry up until the last occurence of a match in string.
