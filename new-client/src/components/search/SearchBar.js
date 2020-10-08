@@ -116,20 +116,33 @@ class SearchBar extends React.PureComponent {
     return matchedIndexes;
   };
 
+  getHighlightedAutoCompleteEntryElement = (
+    lastHighlightInformation,
+    autocompleteEntry
+  ) => {
+    let { index, length } = lastHighlightInformation;
+    return (
+      <>
+        <strong>{autocompleteEntry.slice(0, index + length)}</strong>
+        {autocompleteEntry.slice(index + length)}
+      </>
+    );
+  };
+
   //Highlights everything in autocompleteentry up until the last occurence of a match in string.
-  highlightMatchedChars = (highlightInformation, autocompleteEntry) => {
+  renderHighlightedAutocompleteEntry = (
+    highlightInformation,
+    autocompleteEntry
+  ) => {
     const countOfHighlightInformation = highlightInformation.length;
     //We get last higligtInformation because we want to higlight everything up to last word that matches
     const lastHighlightInformation =
       highlightInformation[countOfHighlightInformation - 1];
 
     if (countOfHighlightInformation > 0) {
-      let { index, length } = lastHighlightInformation;
-      return (
-        <>
-          <strong>{autocompleteEntry.slice(0, index + length)}</strong>
-          {autocompleteEntry.slice(index + length)}
-        </>
+      return this.getHighlightedAutoCompleteEntryElement(
+        lastHighlightInformation,
+        autocompleteEntry
       );
     }
   };
@@ -153,7 +166,10 @@ class SearchBar extends React.PureComponent {
 
     return (
       <Typography noWrap={true} className={classes.autocompleteTypography}>
-        {this.highlightMatchedChars(highlightInformation, autocompleteEntry)}
+        {this.renderHighlightedAutocompleteEntry(
+          highlightInformation,
+          autocompleteEntry
+        )}
       </Typography>
     );
   };
