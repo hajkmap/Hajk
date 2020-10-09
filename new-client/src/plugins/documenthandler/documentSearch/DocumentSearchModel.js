@@ -27,7 +27,7 @@ export default class DocumentSearchModel {
 
   //Method called by searchComponent in core (Part of searchInterface)
   getResults = (searchString, searchOptions) => {
-    this.matchSearch = new MatchSearch(0.8, searchOptions);
+    this.matchSearch = new MatchSearch(1.0, searchOptions);
     return this.getDocumentHandlerResults(searchString, searchOptions);
   };
 
