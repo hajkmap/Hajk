@@ -22,42 +22,27 @@ export default class MatchSearch {
       !this.searchOptions.matchCase
     );
 
-    searchString = this.removeWildcardsFromSearchString(
-      searchString,
-      this.searchOptions.wildcardAtStart,
-      this.searchOptions.wildcardAtEnd
-    );
+    let match = this.matchSearchStringAndKeyword(searchString, keyword);
 
-    keyword = this.shortenKeyword(
-      searchString,
-      keyword,
-      this.searchOptions.wildcardAtStart,
-      this.searchOptions.wildcardAtEnd
-    );
-
-    const percentageMatch = this.percentageMatchLowerCase(
-      searchString,
-      keyword
-    );
-    const match = this.calculateIfMatched(
-      searchString,
-      keyword,
-      percentageMatch,
-      this.searchOptions.wildcardAtStart,
-      this.searchOptions.wildcardAtEnd
-    );
     return {
       searchResults: {
         match: match,
-        details: {
-          percentageLimit: this.percentageLimit,
-          percentageMatch: percentageMatch,
-          matchCase: this.searchOptions.matchCase,
-          wildcardAtStart: this.searchOptions.wildcardAtStart,
-          wildcardAtEnd: this.searchOptions.wildcardAtEnd,
-        },
       },
     };
+  };
+
+  /**
+   * Find a match of the search string in the keyword.
+   * @param {string} searchString The search string.
+   * @param {string} keyword The keyword.
+   */
+  matchSearchStringAndKeyword = (searchString, keyword) => {
+    let escapeRegex = (keyword) =>
+      keyword.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+
+    return new RegExp(
+      "^" + searchString.split("*").map(escapeRegex).join(".*") + "$"
+    ).test(keyword);
   };
 
   /**
@@ -152,6 +137,7 @@ export default class MatchSearch {
     let matches = 0;
     for (let iSS = 0; iSS < searchString.length; iSS++) {
       let firstTimeInKeywordLoop = true;
+      let firstMatchIndex = -1;
       let up = true;
       let add = 0;
 
@@ -167,7 +153,9 @@ export default class MatchSearch {
         if (index >= keyword.length) break;
 
         if (this.letterMatch(keyword[index], searchString[iSS])) {
-          const divider = add + 1;
+          if (firstMatchIndex < 0) firstMatchIndex = add;
+          const divider =
+            firstMatchIndex < 0 ? add + 1 : add - firstMatchIndex + 1;
           matches += 1 / divider;
           break;
         }
