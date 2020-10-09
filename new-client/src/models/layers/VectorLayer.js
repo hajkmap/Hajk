@@ -192,27 +192,22 @@ class WFSVectorLayer {
       // style: this.getStyle.bind(this),
       source: this.vectorSource,
       url: config.url,
-      minZoom: config?.minZoom,
-      maxZoom: config?.maxZoom,
+      minZoom: config?.minZoom >= 0 ? config.minZoom : undefined,
+      maxZoom: config?.maxZoom >= 0 ? config.maxZoom : undefined,
     });
 
-    console.log(
-      config?.minZoom,
-      config?.maxZoom,
-      config?.sldUrl,
-      config?.sldText
-    );
-
     this.sldUrl = config?.sldUrl;
-    // ??      "https://geoserver1.halmstad.se/geoserver/rest/workspaces/bmf/styles/byggnader.sld";
     this.sldText = config?.sldText;
     this.sldStyle = config?.sldStyle ?? "Default Styler";
 
-    if (this.sldUrl !== undefined) {
+    if (typeof this.sldUrl === "string" && this.sldUrl.trim().length > 0) {
       fetch(this.sldUrl)
         .then((response) => response.text())
         .then((text) => this.applySldTextOnLayer(text));
-    } else if (this.sldText !== undefined) {
+    } else if (
+      typeof this.sldText === "string" &&
+      this.sldText.trim().length > 10
+    ) {
       this.applySldTextOnLayer(this.sldText);
     }
 
@@ -222,8 +217,6 @@ class WFSVectorLayer {
       this.layer.featureType = config.params.typename.split(":")[1];
     }
     this.type = "vector";
-
-    console.log("WFSVectorLayer", this);
   }
 
   applySldTextOnLayer = (text) => {
@@ -246,7 +239,6 @@ class WFSVectorLayer {
         this.layer.changed();
       },
     });
-    console.log("olFunction: ", olFunction);
     this.layer.setStyle(olFunction);
   };
 

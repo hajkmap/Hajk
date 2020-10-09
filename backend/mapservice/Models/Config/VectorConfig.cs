@@ -220,6 +220,16 @@ namespace MapService.Models.Config
 
         public double opacity { get; set; }
 
+        public int minZoom { get; set; }
+
+        public int maxZoom { get; set; }
+
+        public string sldUrl { get; set; }
+
+        public string sldText { get; set; }
+        
+        public string sldStyle { get; set; }
+
         public string infobox { get; set; }
 
         public bool queryable { get; set; }
