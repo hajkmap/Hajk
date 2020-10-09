@@ -116,7 +116,7 @@ const styles = (theme) => {
     controlsColumn: {
       display: "flex",
       flexDirection: "column",
-      marginTop: 0,
+      marginTop: theme.spacing(7),
       [theme.breakpoints.down("xs")]: {
         marginTop: theme.spacing(2),
       },

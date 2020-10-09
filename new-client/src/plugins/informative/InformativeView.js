@@ -52,7 +52,7 @@ const styles = (theme) => ({
     textDecoration: "underline",
   },
   content: {
-    userSelect: "all",
+    userSelect: "text",
     cursor: "auto",
     "& img": {
       maxWidth: "100%",

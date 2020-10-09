@@ -363,7 +363,7 @@ class CollectorModel {
       event.feature.modification = "added";
     });
     this.map.addInteraction(this.draw);
-    this.map.clicklock = true;
+    this.map.clickLock.add("collector");
   }
 
   activateInteraction(type, geometryType) {
@@ -377,7 +377,7 @@ class CollectorModel {
       this.activateModify();
     }
     if (type === "remove") {
-      this.map.clicklock = true;
+      this.map.clickLock.add("collector");
       this.activateRemove();
     }
   }
@@ -400,7 +400,8 @@ class CollectorModel {
     }
     if (this.remove) {
       this.remove = false;
-      this.map.clicklock = false;
+      this.map.clickLock.delete("collector");
+
       this.map.un("singleclick", this.removeSelected);
     }
   }
@@ -409,7 +410,8 @@ class CollectorModel {
     if (this.vectorSource) {
       this.vectorSource.clear();
     }
-    this.map.clicklock = false;
+    this.map.clickLock.delete("collector");
+
     this.deactivateInteraction();
     this.setFormValuesFromConfig();
     this.observer.publish("reset");

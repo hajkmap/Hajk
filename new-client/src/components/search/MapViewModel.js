@@ -195,7 +195,7 @@ class MapViewModel {
         style: drawStyle,
       });
 
-      this.map.clicklock = true;
+      this.map.clickLock.add("search");
       this.map.addInteraction(this.draw);
       this.drawSource.clear();
 
@@ -205,7 +205,8 @@ class MapViewModel {
       });
     } else {
       this.map.removeInteraction(this.draw);
-      this.map.clicklock = false;
+      this.map.clickLock.delete("search");
+
       this.drawSource.clear();
     }
   };

@@ -972,9 +972,11 @@ class DrawModel {
 
   setActive(active) {
     if (active && !this.active) {
+      this.map.clickLock.add("draw");
       this.addInteraction();
     }
     if (active === false) {
+      this.map.clickLock.delete("draw");
       this.removeInteraction();
     }
     this.active = active;
