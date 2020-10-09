@@ -274,10 +274,10 @@ export default class DocumentSearchModel {
   getPossibleSearchCombinations = (searchOptions, searchString) => {
     let possibleSearchCombinations = [];
     possibleSearchCombinations.push(this.splitAndTrimOnCommas(searchString));
-    possibleSearchCombinations = this.addPotentialWildCards(
-      possibleSearchCombinations,
-      searchOptions
-    );
+    // possibleSearchCombinations = this.addPotentialWildCards(
+    //   possibleSearchCombinations,
+    //   searchOptions
+    // );
     return possibleSearchCombinations;
   };
 

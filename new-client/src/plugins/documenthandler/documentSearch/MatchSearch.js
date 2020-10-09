@@ -22,7 +22,22 @@ export default class MatchSearch {
       !this.searchOptions.matchCase
     );
 
-    let match = this.matchSearchStringAndKeyword(searchString, keyword);
+    let regExp = new RegExp(`^${searchString}$`, "g");
+
+    if (this.searchOptions.wildcardAtStart && !this.searchOptions.wildcardAtEnd)
+      regExp = new RegExp(`.*${searchString}$`, "g");
+
+    if (!this.searchOptions.wildcardAtStart && this.searchOptions.wildcardAtEnd)
+      regExp = new RegExp(`^${searchString}.*`, "g");
+
+    if (
+      this.searchOptions.wildcardAtStart &&
+      this.searchOptions.wildcardAtStart
+    )
+      regExp = new RegExp(`${searchString}`, "g");
+
+    let match = regExp.test(keyword);
+    //let match = this.matchSearchStringAndKeyword(searchString, keyword);
 
     return {
       searchResults: {
