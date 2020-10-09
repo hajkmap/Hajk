@@ -19,7 +19,25 @@ export default class PrintModel {
     this.dims = settings.dims;
     this.logoUrl = settings.logoUrl;
     this.logoMaxWidth = settings.logoMaxWidth;
+    this.scales = settings.scales;
   }
+
+  scaleBarLengths = {
+    100: 2.5,
+    200: 5,
+    250: 10,
+    400: 20,
+    500: 25,
+    1000: 50,
+    2000: 75,
+    2500: 100,
+    5000: 250,
+    10000: 500,
+    25000: 1000,
+    50000: 2500,
+    100000: 5000,
+    200000: 10000,
+  };
 
   previewLayer = null;
   previewFeature = null;
@@ -179,6 +197,132 @@ export default class PrintModel {
     return { data, width, height };
   };
 
+  getPlacement = (placement, width, height, pdfWidth, pdfHeight) => {
+    const margin = 4;
+    let pdfPlacement = { x: 0, y: 0 };
+    if (placement === "topLeft") {
+      pdfPlacement.x = margin;
+      pdfPlacement.y = margin;
+    } else if (placement === "topRight") {
+      pdfPlacement.x = pdfWidth - width - margin;
+      pdfPlacement.y = margin;
+    } else if (placement === "bottomRight") {
+      pdfPlacement.x = pdfWidth - width - margin;
+      pdfPlacement.y = pdfHeight - height - margin;
+    } else {
+      pdfPlacement.x = margin;
+      pdfPlacement.y = pdfHeight - height - margin;
+    }
+    return pdfPlacement;
+  };
+
+  getFittingScaleBarLength = (scale) => {
+    const length = this.scaleBarLengths[scale];
+    if (length) {
+      return length;
+    } else {
+      if (scale < 250) {
+        return 5;
+      } else if (scale < 2500) {
+        return scale * 0.02;
+      } else {
+        return scale * 0.05;
+      }
+    }
+  };
+
+  getLengthText = (scaleBarLengthMeters) => {
+    let units = "m";
+    if (scaleBarLengthMeters > 1000) {
+      scaleBarLengthMeters /= 1000;
+      units = "km";
+    }
+    return `${Number(scaleBarLengthMeters).toLocaleString("sv-SE")} ${units}`;
+  };
+
+  drawScaleBar = (
+    pdf,
+    scaleBarPosition,
+    color,
+    scaleBarLength,
+    scale,
+    scaleBarLengthMeters
+  ) => {
+    const lengthText = this.getLengthText(scaleBarLengthMeters);
+    pdf.setFontSize(6);
+    pdf.setFontStyle("bold");
+    pdf.setTextColor(color);
+    pdf.text(
+      lengthText,
+      scaleBarPosition.x + scaleBarLength + 1,
+      scaleBarPosition.y + 3.7
+    );
+    pdf.text(
+      `Skala: ${this.getUserFriendlyScale(scale)}`,
+      scaleBarPosition.x,
+      scaleBarPosition.y + 1
+    );
+
+    pdf.setDrawColor(color);
+    pdf.line(
+      scaleBarPosition.x,
+      scaleBarPosition.y + 3,
+      scaleBarPosition.x + scaleBarLength,
+      scaleBarPosition.y + 3
+    );
+    pdf.line(
+      scaleBarPosition.x,
+      scaleBarPosition.y + 2,
+      scaleBarPosition.x,
+      scaleBarPosition.y + 4
+    );
+    pdf.line(
+      scaleBarPosition.x + scaleBarLength,
+      scaleBarPosition.y + 2,
+      scaleBarPosition.x + scaleBarLength,
+      scaleBarPosition.y + 4
+    );
+    pdf.line(
+      scaleBarPosition.x + scaleBarLength / 2,
+      scaleBarPosition.y + 2.5,
+      scaleBarPosition.x + scaleBarLength / 2,
+      scaleBarPosition.y + 3.5
+    );
+  };
+
+  addScaleBar = (
+    pdf,
+    color,
+    scale,
+    resolution,
+    scaleBarPlacement,
+    scaleResolution
+  ) => {
+    const millimetersPerInch = 25.4;
+    const pixelSize = millimetersPerInch / resolution / scaleResolution;
+    const scaleBarLengthMeters = this.getFittingScaleBarLength(scale);
+
+    const scaleBarLength = scaleBarLengthMeters * pixelSize;
+    const scaleBarHeight = 6;
+
+    const scaleBarPosition = this.getPlacement(
+      scaleBarPlacement,
+      scaleBarLength + 9,
+      scaleBarHeight,
+      pdf.internal.pageSize.width,
+      pdf.internal.pageSize.height
+    );
+
+    this.drawScaleBar(
+      pdf,
+      scaleBarPosition,
+      color,
+      scaleBarLength,
+      scale,
+      scaleBarLengthMeters
+    );
+  };
+
   print = (options) => {
     const format = options.format;
     const orientation = options.orientation;
@@ -260,23 +404,34 @@ export default class PrintModel {
         putOnlyUsedFonts: true,
         compress: true,
       });
+      let pdfWidth = pdf.internal.pageSize.width;
+      let pdfHeight = pdf.internal.pageSize.height;
 
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
 
       // If logo URL is provided, add the logo to the map
-      if (this.logoUrl.trim().length >= 5) {
+      if (options.includeLogo && this.logoUrl.trim().length >= 5) {
         try {
           const {
             data: logoData,
             width: logoWidth,
             height: logoHeight,
           } = await this.getImageForPdfFromUrl(this.logoUrl, this.logoMaxWidth);
+
+          let logoPlacement = this.getPlacement(
+            options.logoPlacement,
+            logoWidth,
+            logoHeight,
+            pdfWidth,
+            pdfHeight
+          );
+
           pdf.addImage(
             logoData,
             "PNG",
-            pdf.internal.pageSize.width - logoWidth - 6,
-            4,
+            logoPlacement.x,
+            logoPlacement.y,
             logoWidth,
             logoHeight
           );
@@ -286,15 +441,20 @@ export default class PrintModel {
         }
       }
 
-      // Add scale text
-      pdf.setFontStyle("bold");
-      pdf.setFontSize(8);
-      pdf.setTextColor(options.mapTextColor);
-      pdf.text(
-        `Skala: ${this.getUserFriendlyScale(options.scale)}`,
-        6,
-        pdf.internal.pageSize.height - 4
-      );
+      if (options.includeNorthArrow) {
+        //add north arrow
+      }
+
+      if (options.includeScaleBar) {
+        this.addScaleBar(
+          pdf,
+          options.mapTextColor,
+          options.scale,
+          options.resolution,
+          options.scaleBarPlacement,
+          scaleResolution
+        );
+      }
 
       // Add map title if user supplied one
       if (options.mapTitle.trim().length > 0) {

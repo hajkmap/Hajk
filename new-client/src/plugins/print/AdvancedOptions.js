@@ -10,7 +10,6 @@ import {
   TextField,
   Popover,
   Tooltip,
-  Switch,
   IconButton,
   FormControlLabel,
 } from "@material-ui/core";
@@ -23,8 +22,8 @@ const styles = (theme) => ({
     flexWrap: "wrap",
   },
   formControl: {
-    margin: theme.spacing(1),
     width: "100%",
+    margin: theme.spacing(1),
   },
   mapTextColorLabel: {
     margin: 0,
@@ -73,6 +72,41 @@ class AdvancedOptions extends React.PureComponent {
     this.props.setMapTextColor(color);
   };
 
+  renderPlacementSelect = (value, name, changeHandler, disabled) => {
+    return (
+      <Select
+        value={value}
+        onChange={changeHandler}
+        disabled={disabled}
+        inputProps={{
+          name: name,
+          id: name,
+        }}
+      >
+        <MenuItem value={"topLeft"}>Uppe till vänster</MenuItem>
+        <MenuItem value={"topRight"}>Uppe till höger</MenuItem>
+        <MenuItem value={"bottomRight"}>Nere till höger</MenuItem>
+        <MenuItem value={"bottomLeft"}>Nere till vänster</MenuItem>
+      </Select>
+    );
+  };
+
+  renderIncludeSelect = (value, name, changeHandler) => {
+    return (
+      <Select
+        value={value}
+        onChange={changeHandler}
+        inputProps={{
+          name: name,
+          id: name,
+        }}
+      >
+        <MenuItem value={true}>Ja</MenuItem>
+        <MenuItem value={false}>Nej</MenuItem>
+      </Select>
+    );
+  };
+
   render() {
     const {
       classes,
@@ -80,63 +114,148 @@ class AdvancedOptions extends React.PureComponent {
       handleChange,
       mapTextColor,
       mapTitle,
+      includeNorthArrow,
+      northArrowPlacement,
+      includeScaleBar,
+      scaleBarPlacement,
+      includeLogo,
+      logoPlacement,
     } = this.props;
     return (
       <>
-        <Grid container>
-          <FormControl className={classes.formControl}>
-            <TextField
-              value={mapTitle}
-              onChange={handleChange}
-              label="Valfri titel"
-              placeholder="Kan lämnas tomt"
-              variant="standard"
-              inputProps={{
-                id: "mapTitle",
-                name: "mapTitle",
-              }}
-            />
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="resolution">Upplösning (DPI)</InputLabel>
-            <Select
-              value={resolution}
-              onChange={handleChange}
-              inputProps={{
-                name: "resolution",
-                id: "resolution",
-              }}
-            >
-              <MenuItem value={72}>72</MenuItem>
-              <MenuItem value={150}>150</MenuItem>
-              <MenuItem value={300}>300</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl className={classes.formControl}>
-            <Tooltip title="Textfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
-              <FormControlLabel
-                value="mapTextColor"
-                className={classes.mapTextColorLabel}
-                control={
-                  <IconButton
-                    id="mapTextColor"
-                    onClick={this.toggleColorPicker}
-                    style={{
-                      backgroundColor: mapTextColor,
-                      marginRight: 4,
-                    }}
-                    edge="start"
-                    size="small"
-                  >
-                    <PaletteIcon />
-                  </IconButton>
-                }
-                label="Textfärg"
+        <Grid container className={classes.root}>
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <TextField
+                value={mapTitle}
+                fullWidth={true}
+                onChange={handleChange}
+                label="Valfri titel"
+                placeholder="Kan lämnas tomt"
+                variant="standard"
+                inputProps={{
+                  id: "mapTitle",
+                  name: "mapTitle",
+                }}
               />
-            </Tooltip>
-          </FormControl>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <Tooltip title="Textfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
+                <FormControlLabel
+                  value="mapTextColor"
+                  className={classes.mapTextColorLabel}
+                  control={
+                    <IconButton
+                      id="mapTextColor"
+                      onClick={this.toggleColorPicker}
+                      style={{
+                        backgroundColor: mapTextColor,
+                        marginRight: 4,
+                      }}
+                      edge="start"
+                      size="small"
+                    >
+                      <PaletteIcon />
+                    </IconButton>
+                  }
+                  label="Textfärg"
+                />
+              </Tooltip>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <InputLabel htmlFor="resolution">Upplösning (DPI)</InputLabel>
+              <Select
+                value={resolution}
+                onChange={handleChange}
+                inputProps={{
+                  name: "resolution",
+                  id: "resolution",
+                }}
+              >
+                <MenuItem value={72}>72</MenuItem>
+                <MenuItem value={150}>150</MenuItem>
+                <MenuItem value={300}>300</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
 
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <InputLabel htmlFor="includeNorthArrow">
+                Inkludera norrpil
+              </InputLabel>
+              {this.renderIncludeSelect(
+                includeNorthArrow,
+                "includeNorthArrow",
+                handleChange
+              )}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <InputLabel htmlFor="northArrowPlacement">
+                Placering av norrpil
+              </InputLabel>
+              {this.renderPlacementSelect(
+                northArrowPlacement,
+                "northArrowPlacement",
+                handleChange,
+                !includeNorthArrow
+              )}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <InputLabel htmlFor="includeScaleBar">
+                Inkludera skalstock
+              </InputLabel>
+              {this.renderIncludeSelect(
+                includeScaleBar,
+                "includeScaleBar",
+                handleChange
+              )}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <InputLabel htmlFor="scaleBarPlacement">
+                Placering av skalstock
+              </InputLabel>
+              {this.renderPlacementSelect(
+                scaleBarPlacement,
+                "scaleBarPlacement",
+                handleChange,
+                !includeScaleBar
+              )}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <InputLabel htmlFor="includeLogo">Inkludera logotyp</InputLabel>
+              {this.renderIncludeSelect(
+                includeLogo,
+                "includeLogo",
+                handleChange
+              )}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <InputLabel htmlFor="logoPlacement">
+                Placering av logotyp
+              </InputLabel>
+              {this.renderPlacementSelect(
+                logoPlacement,
+                "logoPlacement",
+                handleChange,
+                !includeLogo
+              )}
+            </FormControl>
+          </Grid>
           <Popover
             id="color-picker-menu"
             anchorEl={this.state.anchorEl}

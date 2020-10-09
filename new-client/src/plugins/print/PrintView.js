@@ -52,10 +52,16 @@ class PrintView extends React.PureComponent {
     resolution: 150, // 72, 150, 300,
     scale: 10000, // 10000 means scale of 1:10000
     mapTitle: "", // User can set a title that will get printed on the map
-    mapTextColor: "#ffffff", // Default color of text printed on the map
+    mapTextColor: "#000000", // Default color of text printed on the map
     printInProgress: false,
     previewLayerVisible: false,
     activeTab: 0,
+    includeNorthArrow: true,
+    northArrowPlacement: "topLeft",
+    includeScaleBar: true,
+    scaleBarPlacement: "bottomLeft",
+    includeLogo: false,
+    logoPlacement: "topRight",
   };
 
   snackbarKey = null;
@@ -122,8 +128,14 @@ class PrintView extends React.PureComponent {
       orientation: this.state.orientation,
       resolution: this.state.resolution,
       scale: this.state.scale,
-      mapTextColor: this.state.mapTextColor,
       mapTitle: this.state.mapTitle,
+      mapTextColor: this.state.mapTextColor,
+      includeLogo: this.state.includeLogo,
+      logoPlacement: this.state.logoPlacement,
+      includeScaleBar: this.state.includeScaleBar,
+      scaleBarPlacement: this.state.scaleBarPlacement,
+      includeNorthArrow: this.state.includeNorthArrow,
+      northArrowPlacement: this.state.northArrowPlacement,
     };
 
     this.model.print(printOptions);
@@ -209,6 +221,12 @@ class PrintView extends React.PureComponent {
       mapTitle,
       mapTextColor,
       printInProgress,
+      includeNorthArrow,
+      northArrowPlacement,
+      includeScaleBar,
+      scaleBarPlacement,
+      includeLogo,
+      logoPlacement,
     } = this.state;
 
     return (
@@ -227,6 +245,12 @@ class PrintView extends React.PureComponent {
         model={this.model}
         setMapTextColor={this.setMapTextColor}
         printInProgress={printInProgress}
+        includeNorthArrow={includeNorthArrow}
+        northArrowPlacement={northArrowPlacement}
+        includeScaleBar={includeScaleBar}
+        scaleBarPlacement={scaleBarPlacement}
+        includeLogo={includeLogo}
+        logoPlacement={logoPlacement}
       ></AdvancedOptions>
     );
   };
