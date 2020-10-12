@@ -51,6 +51,7 @@ export default class DocumentTextEditor extends React.Component {
       url: "",
       urlType: "",
       imageList: this.props.imageList,
+      documents: this.props.documents,
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -197,11 +198,11 @@ export default class DocumentTextEditor extends React.Component {
     };
 
     if (urlType === "urllink") {
-      data["data-link"] = true;
+      data["data-link"] = urlValue;
     } else if (urlType === "documentlink") {
-      data["data-document"] = true;
+      data["data-document"] = urlValue;
     } else if (urlType === "maplink") {
-      data["data-maplink"] = true;
+      data["data-maplink"] = urlValue;
     }
 
     const contentState = editorState.getCurrentContent();
@@ -421,7 +422,7 @@ export default class DocumentTextEditor extends React.Component {
   getUrlType(type) {
     switch (type) {
       case "urllink":
-        return "kartlänk";
+        return "webblänk";
       case "documentlink":
         return "dokumentlänk";
       case "maplink":
@@ -431,8 +432,39 @@ export default class DocumentTextEditor extends React.Component {
     }
   }
 
+  getUrlInput(type, documents) {
+    // Return input field for default URL or documents
+    if (type === "documentlink") {
+      return (
+        <select onChange={this.onURLChange} ref="link">
+          {documents
+            ? documents.map((document, i) => {
+                return (
+                  <option key={i} type="text" name="document" value={document}>
+                    {document}
+                  </option>
+                );
+              })
+            : null}
+        </select>
+      );
+    } else {
+      return (
+        <input
+          onChange={this.onURLChange}
+          ref="link"
+          style={styles.urlInput}
+          type="text"
+          value={this.state.urlValue || ""}
+          placeholder="Webblänk"
+          onKeyDown={this.onLinkInputKeyDown}
+        />
+      );
+    }
+  }
+
   render() {
-    const { editorState, imageList } = this.state;
+    const { editorState, imageList, documents } = this.state;
 
     let className = "RichEditor-editor";
     var contentState = editorState.getCurrentContent();
@@ -523,15 +555,7 @@ export default class DocumentTextEditor extends React.Component {
       urlInput = (
         <div style={styles.urlInputContainer}>
           <h1>Lägg till {this.getUrlType(this.state.urlType)}</h1>
-          <input
-            onChange={this.onURLChange}
-            ref="link"
-            style={styles.urlInput}
-            type="text"
-            value={this.state.urlValue || ""}
-            placeholder="Webblänk"
-            onKeyDown={this.onLinkInputKeyDown}
-          />
+          {this.getUrlInput(this.state.urlType, documents)}
           <input
             onChange={this.onTitleChange}
             ref="link"

@@ -502,6 +502,7 @@ class DocumentEditor extends Component {
             chapter.html = html;
           }}
           imageList={this.state.imageList}
+          documents={this.state.documents}
         />
         <div className="document-nested-chapter">
           {chapter.expanded

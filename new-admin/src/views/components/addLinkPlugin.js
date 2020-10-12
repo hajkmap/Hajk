@@ -22,7 +22,7 @@ export const Link = ({ contentState, entityKey, children }) => {
         rel="noopener noreferrer"
         target="_blank"
         data-header-identifier={titleId}
-        data-document
+        data-document={url}
       >
         {title}
       </a>
@@ -34,7 +34,7 @@ export const Link = ({ contentState, entityKey, children }) => {
         rel="noopener noreferrer"
         target="_blank"
         data-header-identifier={titleId}
-        data-link
+        data-link={url}
       >
         {title}
       </a>
@@ -46,7 +46,7 @@ export const Link = ({ contentState, entityKey, children }) => {
         rel="noopener noreferrer"
         target="_blank"
         data-header-identifier={titleId}
-        data-maplink
+        data-maplink={url}
       >
         {title}
       </a>
