@@ -1,5 +1,5 @@
 body {
-  margin: 20px;
+  padding: 20px;
   font-size: 12pt !important;
   color: #373d3f;
 }
@@ -977,7 +977,6 @@ figure img {
 }
 
 .modal-body input {
-  width: 100%;
   margin-top: 10px;
 }
 
@@ -986,4 +985,33 @@ figure img {
   border: 1px solid #ccc;
   padding: 5px;
   border-radius: 3px;
+}
+
+.image-editor-modal {
+  position: absolute;
+  min-height: 500px;
+  top: 20%;
+  left: 20%;
+  right: 20%;
+}
+
+.image-editor-settings {
+  width: 300px;
+  padding-right: 16px;
+  float: left;
+}
+
+.image-editor-settings input {
+  width: 100%;
+}
+
+.image-editor-preview {
+  min-height: 500px;
+  border-left: 1px solid #e9ecef;
+  padding-left: 16px;
+  float: left;
+}
+
+.DraftEditor-root figure {
+  width: 100%;
 }
