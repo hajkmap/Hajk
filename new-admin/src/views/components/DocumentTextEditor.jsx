@@ -547,7 +547,7 @@ export default class DocumentTextEditor extends React.Component {
             style={styles.urlInput}
             type="text"
             value={this.state.urlTitleId || ""}
-            placeholder="Rubrik på länk"
+            placeholder="data-header-identifier"
             onKeyDown={this.onLinkInputKeyDown}
           />
           <button onMouseDown={this.confirmLink}>OK</button>
