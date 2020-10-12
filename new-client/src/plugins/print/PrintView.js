@@ -52,7 +52,7 @@ class PrintView extends React.PureComponent {
     resolution: 150, // 72, 150, 300,
     scale: 10000, // 10000 means scale of 1:10000
     mapTitle: "", // User can set a title that will get printed on the map
-    mapTextColor: "#000000", // Default color of text printed on the map
+    mapTextColor: "#FFFFFF", // Default color of text printed on the map
     printInProgress: false,
     previewLayerVisible: false,
     activeTab: 0,
@@ -93,6 +93,12 @@ class PrintView extends React.PureComponent {
 
     this.localObserver.subscribe("error-loading-logo-image", () => {
       this.props.enqueueSnackbar("Logotypbilden kunde inte laddas in.", {
+        variant: "warning",
+      });
+    });
+
+    this.localObserver.subscribe("error-loading-arrow-image", () => {
+      this.props.enqueueSnackbar("Norrpilen kunde inte laddas in.", {
         variant: "warning",
       });
     });

@@ -20,6 +20,7 @@ export default class PrintModel {
     this.logoUrl = settings.logoUrl;
     this.logoMaxWidth = settings.logoMaxWidth;
     this.scales = settings.scales;
+    this.northArrowUrl = "http://localhost:3000/north_arrow2.png";
   }
 
   scaleBarLengths = {
@@ -198,7 +199,7 @@ export default class PrintModel {
   };
 
   getPlacement = (placement, width, height, pdfWidth, pdfHeight) => {
-    const margin = 4;
+    const margin = 6;
     let pdfPlacement = { x: 0, y: 0 };
     if (placement === "topLeft") {
       pdfPlacement.x = margin;
@@ -251,7 +252,7 @@ export default class PrintModel {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
     pdf.setFontSize(6);
     pdf.setFontStyle("bold");
-    pdf.setTextColor(color);
+    pdf.setTextColor("#000000"); //Set to color instead?
     pdf.text(
       lengthText,
       scaleBarPosition.x + scaleBarLength + 1,
@@ -263,7 +264,7 @@ export default class PrintModel {
       scaleBarPosition.y + 1
     );
 
-    pdf.setDrawColor(color);
+    pdf.setDrawColor("#000000"); //Set to color instead?
     pdf.line(
       scaleBarPosition.x,
       scaleBarPosition.y + 3,
@@ -441,8 +442,34 @@ export default class PrintModel {
         }
       }
 
-      if (options.includeNorthArrow) {
-        //add north arrow
+      if (options.includeNorthArrow && this.northArrowUrl.trim().length >= 5) {
+        try {
+          const {
+            data: arrowData,
+            width: arrowWidth,
+            height: arrowHeight,
+          } = await this.getImageForPdfFromUrl(this.northArrowUrl, 10);
+
+          let arrowPlacement = this.getPlacement(
+            options.northArrowPlacement,
+            arrowWidth,
+            arrowHeight,
+            pdfWidth,
+            pdfHeight
+          );
+
+          pdf.addImage(
+            arrowData,
+            "PNG",
+            arrowPlacement.x,
+            arrowPlacement.y,
+            arrowWidth,
+            arrowHeight
+          );
+        } catch (error) {
+          // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
+          this.localObserver.publish("error-loading-arrow-image");
+        }
       }
 
       if (options.includeScaleBar) {
@@ -459,7 +486,8 @@ export default class PrintModel {
       // Add map title if user supplied one
       if (options.mapTitle.trim().length > 0) {
         pdf.setFontSize(24);
-        pdf.text(options.mapTitle, 6, 12);
+        pdf.setTextColor(options.mapTextColor);
+        pdf.text(options.mapTitle, pdfWidth / 2, 12, { align: "center" });
       }
 
       // Finally, save the PDF, add a timestamp to filename
