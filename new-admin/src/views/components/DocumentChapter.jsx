@@ -6,47 +6,48 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import { withStyles } from "@material-ui/core/styles";
 import { green, blue } from "@material-ui/core/colors";
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 class DocumentChapter extends Component {
   constructor(props) {
     super(props);
     this.state = {
       title: "",
-      inputVisible: false
+      titleID: "",
+      inputVisible: false,
     };
   }
 
   toggleInputVisibility() {
     this.setState({
-      inputVisible: !this.state.inputVisible
+      inputVisible: !this.state.inputVisible,
     });
   }
 
   addChapter() {
     if (this.props.onAddChapter && this.state.title !== "") {
-      this.props.onAddChapter(this.state.title);
+      this.props.onAddChapter(this.state.title, this.state.titleID);
       this.cancel();
     } else {
       this.setState({
-        invalid: true
+        invalid: true,
       });
     }
   }
@@ -55,21 +56,22 @@ class DocumentChapter extends Component {
     this.setState({
       title: "",
       inputVisible: false,
-      invalid: false
+      invalid: false,
     });
   }
 
   setTitle(e) {
     this.setState({
       title: e.target.value,
-      invalid: e.target.value.length === 0
+      invalid: e.target.value.length === 0,
     });
   }
 
-  componentDidUpdate() {
-    if (this.refs.input) {
-      this.refs.input.focus();
-    }
+  setTitleID(e) {
+    this.setState({
+      titleID: e.target.value,
+      invalid: e.target.value.length === 0,
+    });
   }
 
   render() {
@@ -78,19 +80,29 @@ class DocumentChapter extends Component {
       return (
         <div style={{ display: "inline-block" }}>
           <input
-            placeholder="Ange rubrik"
+            placeholder="Ange rubrik *"
             value={this.state.title}
             type="text"
             name="chapter-title"
-            ref="input"
             style={style}
-            onKeyPress={e => {
+            onKeyPress={(e) => {
               if (e.key === "Enter") {
                 this.addChapter();
               }
             }}
-            onChange={e => {
+            onChange={(e) => {
               this.setTitle(e);
+            }}
+          />
+          &nbsp;
+          <input
+            placeholder="Ange ID"
+            value={this.state.titleID}
+            type="text"
+            name="chapter-id"
+            style={style}
+            onChange={(e) => {
+              this.setTitleID(e);
             }}
           />
           &nbsp;
