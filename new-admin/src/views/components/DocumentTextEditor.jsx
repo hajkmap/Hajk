@@ -1,38 +1,30 @@
 import React from "react";
-import { Component } from "react";
 import {
-  Editor,
   EditorState,
   RichUtils,
   Modifier,
   AtomicBlockUtils,
   getDefaultKeyBinding,
   KeyBindingUtil,
+  convertToRaw,
 } from "draft-js";
+import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
 import { stateFromHTML } from "draft-js-import-html";
-import ImageButton from "./ImageButton.jsx";
-import AddLinkButton from "./AddLinkButton.jsx";
 import Button from "@material-ui/core/Button";
 import DoneIcon from "@material-ui/icons/DoneOutline";
-import CancelIcon from "@material-ui/icons/Cancel";
-import EditIcon from "@material-ui/icons/Edit";
 import { withStyles } from "@material-ui/core/styles";
-import { red, green } from "@material-ui/core/colors";
+import { green } from "@material-ui/core/colors";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
 import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
+import ImageIcon from "@material-ui/icons/Image";
 
-const ColorButtonRed = withStyles((theme) => ({
-  root: {
-    color: theme.palette.getContrastText(red[500]),
-    backgroundColor: red[500],
-    "&:hover": {
-      backgroundColor: red[700],
-    },
-  },
-}))(Button);
+import addLinkPlugin from "./addLinkPlugin";
+import { mediaBlockRenderer } from "./addMediaPlugin";
+
+import StyleButton from "./StyleButton";
 
 const ColorButtonGreen = withStyles((theme) => ({
   root: {
@@ -44,198 +36,277 @@ const ColorButtonGreen = withStyles((theme) => ({
   },
 }))(Button);
 
-class StyleButton extends React.Component {
-  constructor() {
-    super();
-    this.onToggle = (e) => {
-      e.preventDefault();
-      this.props.onToggle(this.props.style);
-    };
-  }
+let readOnlyState = false;
 
-  render() {
-    let className = "RichEditor-styleButton";
-    if (this.props.active) {
-      className += " RichEditor-activeButton";
-    }
-
-    return (
-      <span className={className} onMouseDown={this.onToggle}>
-        {this.props.label}
-      </span>
-    );
-  }
-}
-
-function mediaBlockRenderer(block) {
-  if (block.getType() === "atomic") {
-    return {
-      component: Media,
-      editable: false,
-    };
-  }
-
-  return null;
-}
-
-function getBlockStyle(block) {
-  switch (block.getType()) {
-    case "blockquote":
-      return "RichEditor-blockquote";
-    default:
-      return null;
-  }
-}
-
-const Image = (props) => {
-  const imgSrc = props.src;
-  const imgWidth = props.width;
-  const imgHeight = props.height;
-  const dataCaption = props["data-caption"];
-  const dataSource = props["data-source"];
-  const dataPopup = props["data-popup"];
-
-  if (dataPopup === true) {
-    return (
-      <img
-        src={imgSrc}
-        alt="external"
-        width={imgWidth}
-        height={imgHeight}
-        data-caption={dataCaption}
-        data-source={dataSource}
-        data-popup
-      />
-    );
-  } else {
-    return (
-      <img
-        src={imgSrc}
-        alt="external"
-        width={imgWidth}
-        height={imgHeight}
-        data-caption={dataCaption}
-        data-source={dataSource}
-      />
-    );
-  }
-};
-
-const Media = (props) => {
-  const entity = props.contentState.getEntity(props.block.getEntityAt(0));
-  const { src, width, height } = entity.getData();
-  const data = entity.getData();
-  const dataCaption = data["data-caption"];
-  const dataSource = data["data-source"];
-  const dataPopup = data["data-popup"];
-
-  let media = (
-    <Image
-      src={src}
-      width={width}
-      height={height}
-      data-caption={dataCaption}
-      data-source={dataSource}
-      data-popup={dataPopup}
-    />
-  );
-  return media;
-};
-
-const styleMap = {
-  CODE: {
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    fontFamily: '"Inconsolata", "Menlo", "Consolas", monospace',
-    fontSize: 16,
-    padding: 2,
-  },
-};
-
-const BLOCK_TYPES = [
-  //{ label: "H1", style: "header-one" },
-  //{ label: "H2", style: "header-two" },
-  //{ label: "H3", style: "header-three" },
-  //{ label: "H4", style: "header-four" },
-  //{ label: "H5", style: "header-five" },
-  //{ label: "H6", style: "header-six" },
-  { label: <FormatQuoteIcon />, style: "blockquote" },
-  { label: "UL", style: "unordered-list-item" },
-  { label: "OL", style: "ordered-list-item" },
-];
-
-var INLINE_STYLES = [
-  { label: <FormatBoldIcon />, style: "BOLD" },
-  { label: <FormatItalicIcon />, style: "ITALIC" },
-  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" },
-];
-
-const BlockStyleControls = (props) => {
-  const { editorState } = props;
-  const selection = editorState.getSelection();
-  const blockType = editorState
-    .getCurrentContent()
-    .getBlockForKey(selection.getStartKey())
-    .getType();
-
-  return (
-    <div className="document-editor-controls">
-      {BLOCK_TYPES.map((type) => (
-        <StyleButton
-          key={type.style}
-          active={type.style === blockType}
-          label={type.label}
-          onToggle={props.onToggle}
-          style={type.style}
-        />
-      ))}
-    </div>
-  );
-};
-
-const InlineStyleControls = (props) => {
-  const currentStyle = props.editorState.getCurrentInlineStyle();
-
-  return (
-    <div className="document-editor-controls">
-      {INLINE_STYLES.map((type) => (
-        <StyleButton
-          key={type.style}
-          active={currentStyle.has(type.style)}
-          label={type.label}
-          onToggle={props.onToggle}
-          style={type.style}
-        />
-      ))}
-    </div>
-  );
-};
-
-class RichEditor extends Component {
+export default class DocumentTextEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       editorState: EditorState.createWithContent(
         stateFromHTML(this.props.html)
       ),
-      readonly: true,
       html: this.props.html,
+      showURLInput: false,
+      showLinkInput: false,
+      url: "",
+      urlType: "",
+      imageList: this.props.imageList,
     };
+    this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
+    this.logState = () => {
+      const content = this.state.editorState.getCurrentContent();
+      console.log(stateToHTML(content));
+      console.log(convertToRaw(content));
+    };
     this.onChange = (editorState) => this.setState({ editorState });
+    this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
+    this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
+    this.onWidthChange = (e) => this.setState({ mediaWidth: e.target.value });
+    this.onHeightChange = (e) => this.setState({ mediaHeight: e.target.value });
+    this.onDataCaptionChange = (e) =>
+      this.setState({ mediaCaption: e.target.value });
+    this.onDataSourceChange = (e) =>
+      this.setState({ mediaSource: e.target.value });
+    this.onDataPopupChange = (e) =>
+      this.setState({ mediaPopup: !this.state.mediaPopup });
+    this.onBlockBackgroundChange = (e) =>
+      this.setState({ blockBackground: e.target.value });
+    this.onBlockDividerChange = (e) =>
+      this.setState({ blockDivider: e.target.value });
+    this.addAudio = this._addAudio.bind(this);
+    this.addImage = this._addImage.bind(this);
+    this.addVideo = this._addVideo.bind(this);
+    this.addMapLink = this._addMapLink.bind(this);
+    this.addDocumentLink = this._addDocumentLink.bind(this);
+    this.addWebLink = this._addWebLink.bind(this);
+    this.closeURLInput = this._closeURLInput.bind(this);
+    this.closeLinkInput = this._closeLinkInput.bind(this);
+    this.confirmMedia = this._confirmMedia.bind(this);
+    this.confirmLink = this._confirmLink.bind(this);
     this.handleKeyCommand = this._handleKeyCommand.bind(this);
+    this.handlePastedText = this._handlePastedText.bind(this);
+    this.handleReturn = this._handleReturn.bind(this);
     this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this);
+    this.onURLInputKeyDown = this._onURLInputKeyDown.bind(this);
+    this.onLinkInputKeyDown = this._onLinkInputKeyDown.bind(this);
     this.toggleBlockType = this._toggleBlockType.bind(this);
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
-    this.handleReturn = this._handleReturn.bind(this);
   }
-
   _handleKeyCommand(command, editorState) {
     const newState = RichUtils.handleKeyCommand(editorState, command);
     if (newState) {
       this.onChange(newState);
-      return true;
+      return "handled";
     }
-    return false;
+    return "not-handled";
+  }
+  _toggleBlockType(blockType) {
+    this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType));
+  }
+  _toggleInlineStyle(inlineStyle) {
+    this.onChange(
+      RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
+    );
+  }
+  _confirmMedia(e) {
+    e.preventDefault();
+    const {
+      editorState,
+      urlValue,
+      urlType,
+      mediaWidth,
+      mediaHeight,
+      mediaCaption,
+      mediaSource,
+      mediaPopup,
+    } = this.state;
+    const contentState = editorState.getCurrentContent();
+
+    const contentStateWithEntity = contentState.createEntity(
+      urlType,
+      "IMMUTABLE",
+      {
+        src: urlValue,
+        width: mediaWidth,
+        height: mediaHeight,
+        "data-caption": mediaCaption,
+        "data-source": mediaSource,
+        "data-popup": mediaPopup,
+      }
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    const newEditorState = EditorState.push(
+      editorState,
+      contentStateWithEntity,
+      "create-entity"
+    );
+    this.setState(
+      {
+        editorState: AtomicBlockUtils.insertAtomicBlock(
+          newEditorState,
+          entityKey,
+          " "
+        ),
+        showURLInput: false,
+        showLinkInput: false,
+        urlValue: "",
+        mediaWidth: "",
+        mediaHeight: "",
+        mediaCaption: "",
+        mediaSource: "",
+        mediaPopup: false,
+      },
+      () => {
+        setTimeout(() => this.focus(), 0);
+      }
+    );
+  }
+  _onURLInputKeyDown(e) {
+    if (e.which === 13) {
+      this._confirmMedia(e);
+    }
+  }
+  _closeURLInput() {
+    this.setState(
+      {
+        showURLInput: false,
+        showLinkInput: false,
+        urlValue: "",
+        mediaWidth: "",
+        mediaHeight: "",
+        mediaCaption: "",
+        mediaSource: "",
+        mediaPopup: false,
+      },
+      () => {
+        setTimeout(() => this.focus(), 0);
+      }
+    );
+  }
+
+  _confirmLink(e) {
+    e.preventDefault();
+    const { editorState, urlValue, urlType, urlTitle } = this.state;
+    const contentState = editorState.getCurrentContent();
+    const contentStateWithEntity = contentState.createEntity(
+      "LINK",
+      "MUTABLE",
+      {
+        url: urlValue,
+        title: urlTitle,
+        type: urlType,
+        "data-document": true,
+      }
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    const newEditorState = EditorState.push(
+      editorState,
+      contentStateWithEntity,
+      "create-entity"
+    );
+    this.setState(
+      {
+        editorState: AtomicBlockUtils.insertAtomicBlock(
+          newEditorState,
+          entityKey,
+          " "
+        ),
+        showURLInput: false,
+        showLinkInput: false,
+        urlValue: "",
+        urlTitle: "",
+      },
+      () => {
+        setTimeout(() => this.focus(), 0);
+      }
+    );
+    return "handled";
+  }
+
+  _onLinkInputKeyDown(e) {
+    if (e.which === 13) {
+      this._confirmLink(e);
+    }
+  }
+  _closeLinkInput() {
+    this.setState(
+      {
+        showLinkInput: false,
+        urlValue: "",
+        urlTitle: "",
+      },
+      () => {
+        setTimeout(() => this.focus(), 0);
+      }
+    );
+  }
+
+  _handleReturn = (evt) => {
+    // Handle soft break on Shift+Enter
+    const blockType = RichUtils.getCurrentBlockType(this.state.editorState);
+    if (evt.shiftKey) {
+      this.setState({
+        editorState: RichUtils.insertSoftNewline(this.state.editorState),
+      });
+      return "handled";
+    }
+    if (blockType !== "blockquote" || !KeyBindingUtil.isSoftNewlineEvent(evt)) {
+      return "not_handled";
+    }
+    const newState = RichUtils.insertSoftNewline(this.state.editorState);
+    this.onChange(newState);
+    return "handled";
+  };
+  _promptForMedia(type) {
+    this.setState(
+      {
+        showURLInput: true,
+        showLinkInput: false,
+        urlValue: this.state.urlValue,
+        urlType: type,
+        mediaWidth: this.state.mediaWidth,
+        mediaHeight: this.state.mediaHeight,
+        mediaCaption: this.state.mediaCaption,
+        mediaSource: this.state.mediaSource,
+        mediaPopup: this.state.mediaPopup,
+      },
+      () => {
+        setTimeout(() => this.refs.url.focus(), 0);
+      }
+    );
+  }
+  _promptForLink(type) {
+    this.setState(
+      {
+        showURLInput: false,
+        showLinkInput: true,
+        urlValue: this.state.urlValue,
+        urlType: type,
+        urlTitle: "",
+      },
+      () => {
+        setTimeout(() => this.refs.link.focus(), 0);
+      }
+    );
+  }
+  _addAudio() {
+    this._promptForMedia("audio");
+  }
+  _addImage() {
+    this._promptForMedia("image");
+  }
+  _addVideo() {
+    this._promptForMedia("video");
+  }
+  _addMapLink() {
+    this._promptForLink("maplink");
+  }
+  _addDocumentLink() {
+    this._promptForLink("documentlink");
+  }
+  _addWebLink() {
+    this._promptForLink("urllink");
   }
 
   _mapKeyToEditorCommand(e) {
@@ -252,143 +323,7 @@ class RichEditor extends Component {
     }
     return getDefaultKeyBinding(e);
   }
-
-  _toggleBlockType(blockType) {
-    this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType));
-  }
-
-  _toggleInlineStyle(inlineStyle) {
-    this.onChange(
-      RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
-    );
-  }
-
-  _handleReturn = (evt) => {
-    // Handle soft break on Shift+Enter
-    const blockType = RichUtils.getCurrentBlockType(this.state.editorState);
-    if (blockType !== "blockquote" || !KeyBindingUtil.isSoftNewlineEvent(evt)) {
-      return "not_handled";
-    }
-    const newState = RichUtils.insertSoftNewline(this.state.editorState);
-    this.onChange(newState);
-    return "handled";
-  };
-
-  addImage(imgData) {
-    const { editorState } = this.state;
-    const contentState = editorState.getCurrentContent();
-    const contentStateWithEntity = contentState.createEntity(
-      "image",
-      "IMMUTABLE",
-      {
-        src: imgData.url,
-        width: imgData.imageWidth,
-        height: imgData.imageHeight,
-        "data-caption": imgData.imageCaption,
-        "data-source": imgData.imageSource,
-        "data-popup": imgData.imagePopup,
-      }
-    );
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    const newEditorState = EditorState.set(editorState, {
-      currentContent: contentStateWithEntity,
-    });
-    this.setState(
-      {
-        editorState: AtomicBlockUtils.insertAtomicBlock(
-          newEditorState,
-          entityKey,
-          " "
-        ),
-      },
-      () => {
-        setTimeout(() => this.focus(), 0);
-      }
-    );
-  }
-
-  addLink(type, url) {
-    console.log("ADD LINK", url);
-    const { editorState } = this.state;
-    const contentState = editorState.getCurrentContent();
-    const contentStateWithEntity = contentState.createEntity(
-      "LINK",
-      "IMMUTABLE",
-      { url: url }
-    );
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    const newEditorState = EditorState.set(editorState, {
-      currentContent: contentStateWithEntity,
-    });
-    this.setState(
-      {
-        editorState: AtomicBlockUtils.insertAtomicBlock(
-          newEditorState,
-          entityKey,
-          " "
-        ),
-      },
-      () => {
-        setTimeout(() => this.focus(), 0);
-      }
-    );
-  }
-
-  componentDidMount() {}
-
-  getHtml() {
-    const content = this.state.editorState.getCurrentContent();
-
-    // Add custom attributes
-    let options = {
-      entityStyleFn: (entity) => {
-        const entityType = entity.get("type").toLowerCase()
-          ? entity.get("type").toLowerCase()
-          : null;
-        if (entityType === "image") {
-          const data = entity.getData();
-          const dataCaption = data["data-caption"];
-          const dataSource = data["data-source"];
-
-          return {
-            element: "img",
-            attributes: {
-              src: data.src,
-              width: data.width,
-              height: data.height,
-              "data-caption": dataCaption,
-              "data-source": dataSource,
-            },
-          };
-        } else {
-          return null;
-        }
-      },
-    };
-    return stateToHTML(content, options);
-  }
-
-  toggleReadonly() {
-    this.props.onUpdate(this.getHtml());
-    this.setState({
-      readonly: !this.state.readonly,
-      html: this.getHtml(),
-    });
-  }
-
-  cancel() {
-    this.setState({
-      readonly: !this.state.readonly,
-    });
-  }
-
-  createMarkup(html) {
-    return {
-      __html: html,
-    };
-  }
-
-  handlePastedText = (text = "", html) => {
+  _handlePastedText = (text = "", html) => {
     // If clipboard contains unformatted text, the first parameter
     // is used, while the second is empty. In the code below, we
     // only take care for the second parameter. So to handle
@@ -415,6 +350,7 @@ class RichEditor extends Component {
       img.height = "";
       img["data-caption"] = "";
       img["data-source"] = "";
+      //img["data-popup"] = false;
       let figure = document.createElement("figure");
       figure.innerHTML = img.outerHTML;
       img.parentNode.replaceChild(figure, img);
@@ -437,91 +373,305 @@ class RichEditor extends Component {
     return true;
   };
 
-  render() {
-    const { editorState } = this.state;
+  createMarkup(html) {
+    return {
+      __html: html,
+    };
+  }
+  getHtml() {
+    const content = this.state.editorState.getCurrentContent();
 
-    let className = "DocumentTextEditorContainer";
+    // Add custom attributes
+    let options = {
+      blockStyleFn: (block) => {
+        if (block.get("type").toLowerCase() === "blockquote") {
+          return {
+            attributes: {
+              "data-text-section": "",
+            },
+          };
+        }
+      },
+    };
+    return stateToHTML(content, options);
+  }
+  applyChanges() {
+    console.log("Before saving", this.getHtml());
+    this.props.onUpdate(this.getHtml());
+    this.setState({
+      //readonly: !this.state.readonly,
+      html: this.getHtml(),
+    });
+  }
+
+  render() {
+    const { editorState, imageList } = this.state;
+
+    let className = "RichEditor-editor";
     var contentState = editorState.getCurrentContent();
     if (!contentState.hasText()) {
       if (contentState.getBlockMap().first().getType() !== "unstyled") {
         className += " RichEditor-hidePlaceholder";
       }
     }
-    if (!this.props.display) {
-      return null;
-    }
-    if (this.state.readonly) {
-      return (
-        <div className="document-text-editor">
-          <Button
-            variant="contained"
-            className="btn btn-default"
-            title="Redigera text"
-            onClick={() => this.toggleReadonly()}
-          >
-            <EditIcon />
-            <span>Redigera text</span>
-          </Button>
-          <div dangerouslySetInnerHTML={this.createMarkup(this.state.html)} />
+
+    let urlInput;
+    if (this.state.showURLInput) {
+      urlInput = (
+        <div style={styles.urlInputContainer}>
+          <h1>Lägg till media</h1>
+          <input
+            onChange={this.onURLChange}
+            ref="url"
+            style={styles.urlInput}
+            type="text"
+            value={this.state.urlValue || ""}
+            onKeyDown={this.onURLInputKeyDown}
+          />
+          <select onChange={this.onURLChange}>
+            {imageList
+              ? imageList.map((image, i) => {
+                  return (
+                    <option
+                      key={i}
+                      type="text"
+                      name="url"
+                      value={"../Upload/" + image}
+                    >
+                      {image}
+                    </option>
+                  );
+                })
+              : null}
+          </select>
+          <input
+            onChange={this.onWidthChange}
+            ref="width"
+            type="number"
+            value={this.state.mediaWidth || ""}
+            onKeyDown={this.onURLInputKeyDown}
+            placeholder="WIDTH"
+          />
+          <input
+            onChange={this.onHeightChange}
+            ref="height"
+            type="number"
+            value={this.state.mediaHeight || ""}
+            onKeyDown={this.onURLInputKeyDown}
+            placeholder="HEIGHT"
+          />
+          <input
+            onChange={this.onDataCaptionChange}
+            ref="data-caption"
+            type="text"
+            value={this.state.mediaCaption || ""}
+            onKeyDown={this.onURLInputKeyDown}
+            placeholder="DATA-CAPTION"
+          />
+          <input
+            onChange={this.onDataSourceChange}
+            ref="data-source"
+            type="text"
+            value={this.state.mediaSource || ""}
+            onKeyDown={this.onURLInputKeyDown}
+            placeholder="DATA-SOURCE"
+          />
+          <input
+            id="data-popup"
+            onChange={this.onDataPopupChange}
+            ref="data-popup"
+            type="checkbox"
+            value={this.state.mediaPopup || ""}
+            onKeyDown={this.onURLInputKeyDown}
+            placeholder="DATA-POPUP"
+          />
+          <label>Popup</label>
+          <button onMouseDown={this.confirmMedia}>OK</button>
+          <button onMouseDown={this.closeURLInput}>Avbryt</button>
         </div>
       );
-    } else {
-      return (
-        <div className="document-text-editor">
-          <ColorButtonGreen
-            variant="contained"
-            className="btn"
-            onClick={() => this.toggleReadonly()}
-            startIcon={<DoneIcon />}
-          >
-            Ok
-          </ColorButtonGreen>
-          &nbsp;
-          <ColorButtonRed
-            variant="contained"
-            className="btn btn-danger"
-            onClick={() => this.cancel()}
-            startIcon={<CancelIcon />}
-          >
-            Avbryt
-          </ColorButtonRed>
-          <div className="document-editor-container">
-            <div className="document-editor-wrapper">
-              <InlineStyleControls
-                editorState={editorState}
-                onToggle={this.toggleInlineStyle}
-              />
-              <BlockStyleControls
-                editorState={editorState}
-                onToggle={this.toggleBlockType}
-              />
-              <ImageButton
-                addImage={(data) => this.addImage(data)}
-                imageList={this.props.imageList}
-              />
-              <AddLinkButton addLink={(url) => this.addLink(url)} />
-            </div>
-            <div className={className} onClick={this.focus}>
-              <Editor
-                blockStyleFn={getBlockStyle}
-                customStyleMap={styleMap}
-                blockRendererFn={mediaBlockRenderer}
-                editorState={editorState}
-                handlePastedText={this.handlePastedText}
-                handleKeyCommand={this.handleKeyCommand}
-                handleReturn={this.handleReturn}
-                keyBindingFn={this.mapKeyToEditorCommand}
-                onChange={this.onChange}
-                placeholder=""
-                ref="editor"
-                spellCheck={true}
-              />
-            </div>
-          </div>
+    }
+
+    if (this.state.showLinkInput) {
+      urlInput = (
+        <div style={styles.urlInputContainer}>
+          <h1>Lägg till länk {this.state.urlType}</h1>
+          <input
+            onChange={this.onURLChange}
+            ref="link"
+            style={styles.urlInput}
+            type="text"
+            value={this.state.urlValue || ""}
+            placeholder="Webblänk"
+            onKeyDown={this.onLinkInputKeyDown}
+          />
+          <input
+            onChange={this.onTitleChange}
+            ref="link"
+            style={styles.urlInput}
+            type="text"
+            value={this.state.urlTitle || ""}
+            placeholder="Rubrik på länk"
+            onKeyDown={this.onLinkInputKeyDown}
+          />
+          <button onMouseDown={this.confirmLink}>OK</button>
+          <button onMouseDown={this.closeLinkInput}>Avbryt</button>
         </div>
       );
     }
+
+    return (
+      <div className="RichEditor-root" style={styles.root}>
+        <div style={styles.buttons}>
+          <InlineStyleControls
+            editorState={editorState}
+            onToggle={this.toggleInlineStyle}
+          />
+          <BlockStyleControls
+            editorState={editorState}
+            onToggle={this.toggleBlockType}
+          />
+          <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
+          <button onClick={this.addWebLink}>Webblänk</button>
+          <button onClick={this.addDocumentLink}>Dokumentlänk</button>
+          <button onClick={this.addMapLink}>Kartlänk</button>
+        </div>
+        {urlInput}
+        <ColorButtonGreen
+          variant="contained"
+          className="btn btn-primary"
+          title="Godkänn ändringar"
+          onClick={() => this.applyChanges()}
+          startIcon={<DoneIcon />}
+        >
+          <span>Godkänn ändringar</span>
+        </ColorButtonGreen>
+        <div className={className} style={styles.editor} onClick={this.focus}>
+          <Editor
+            blockRendererFn={mediaBlockRenderer}
+            blockStyleFn={getBlockStyle}
+            editorState={editorState}
+            handleKeyCommand={this.handleKeyCommand}
+            handlePastedText={this.handlePastedText}
+            handleReturn={this.handleReturn}
+            keyBindingFn={this.mapKeyToEditorCommand}
+            onChange={this.onChange}
+            placeholder="Lägg till text..."
+            ref="editor"
+            readOnly={readOnlyState}
+            plugins={this.plugins}
+          />
+        </div>
+        <input
+          onClick={this.logState}
+          style={styles.button}
+          type="button"
+          value="Log State"
+        />
+      </div>
+    );
   }
 }
 
-export default RichEditor;
+/* Block types */
+function getBlockStyle(block) {
+  switch (block.getType()) {
+    case "blockquote":
+      return "RichEditor-blockquote";
+    default:
+      return null;
+  }
+}
+
+const BLOCK_TYPES = [
+  { label: "H1", style: "header-one" },
+  { label: <FormatQuoteIcon />, style: "blockquote" },
+  { label: "UL", style: "unordered-list-item" },
+  { label: "OL", style: "ordered-list-item" },
+];
+const BlockStyleControls = (props) => {
+  const { editorState } = props;
+  const selection = editorState.getSelection();
+  const blockType = editorState
+    .getCurrentContent()
+    .getBlockForKey(selection.getStartKey())
+    .getType();
+
+  return (
+    <div className="document-editor-controls">
+      {BLOCK_TYPES.map((type) => (
+        <StyleButton
+          key={type.style}
+          active={type.style === blockType}
+          label={type.label}
+          onToggle={props.onToggle}
+          style={type.style}
+        />
+      ))}
+    </div>
+  );
+};
+
+/* Inline styles */
+const INLINE_STYLES = [
+  { label: <FormatBoldIcon />, style: "BOLD" },
+  { label: <FormatItalicIcon />, style: "ITALIC" },
+  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" },
+];
+const InlineStyleControls = (props) => {
+  const currentStyle = props.editorState.getCurrentInlineStyle();
+  return (
+    <div className="document-editor-controls">
+      {INLINE_STYLES.map((type) => (
+        <StyleButton
+          key={type.style}
+          active={currentStyle.has(type.style)}
+          label={type.label}
+          onToggle={props.onToggle}
+          style={type.style}
+        />
+      ))}
+    </div>
+  );
+};
+
+/* CSS styling */
+const styles = {
+  root: {
+    fontFamily: "'Georgia', serif",
+    padding: 20,
+    width: 1000,
+  },
+  buttons: {
+    marginBottom: 10,
+  },
+  urlInputContainer: {
+    marginBottom: 10,
+  },
+  urlInput: {
+    fontFamily: "'Georgia', serif",
+    marginRight: 10,
+    padding: 3,
+  },
+  editor: {
+    border: "1px solid #ccc",
+    cursor: "text",
+    minHeight: 80,
+    padding: 10,
+  },
+  button: {
+    marginTop: 10,
+    textAlign: "center",
+  },
+  media: {
+    whiteSpace: "initial",
+  },
+  paper: {
+    position: "absolute",
+    width: 400,
+    //backgroundColor: theme.palette.background.paper,
+    border: "2px solid #000",
+    //boxShadow: theme.shadows[5],
+    //padding: theme.spacing(2, 4, 3),
+  },
+};
