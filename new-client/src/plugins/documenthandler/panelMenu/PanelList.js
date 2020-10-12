@@ -8,7 +8,7 @@ class PanelList extends React.PureComponent {
   static propTypes = {
     localObserver: PropTypes.object.isRequired,
     globalObserver: PropTypes.object.isRequired,
-    menu: PropTypes.array.isRequired
+    menu: PropTypes.array.isRequired,
   };
 
   handleMenuButtonClick = (type, item) => {
@@ -32,7 +32,7 @@ class PanelList extends React.PureComponent {
     );
   };
 
-  renderActionMenuItem = item => {
+  renderActionMenuItem = (item) => {
     if (item.document) {
       return this.getMenuItemType(item, "document");
     } else if (item.link) {
@@ -46,7 +46,7 @@ class PanelList extends React.PureComponent {
     return <PanelSubList {...this.props} item={item}></PanelSubList>;
   };
 
-  hasSubMenu = item => {
+  hasSubMenu = (item) => {
     if (item.menu && item.menu.length > 0) {
       return true;
     } else {

@@ -7,7 +7,7 @@ import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-const styles = theme => ({});
+const styles = (theme) => ({});
 
 class DocumentWindowBase extends React.PureComponent {
   state = {
@@ -15,34 +15,22 @@ class DocumentWindowBase extends React.PureComponent {
     document: null,
     documentWindowMaximized: true,
     showPrintWindow: false,
-    chapters: []
+    chapters: [],
   };
 
   static propTypes = {};
 
   static defaultProps = {};
 
-  constructor(props) {
-    super(props);
-    this.bindSubscriptions();
-
-    this.allDocumentsLoaded = props.model.getAllDocumentsContainedInMenu(
-      props.options.menuConfig.menu.filter(menuItem => {
-        return menuItem.document || menuItem.menu.length > 0;
-      })
-    );
-  }
-
-  setActiveDocument = documentFileName => {
+  setActiveDocument = (documentFileName) => {
     const { model } = this.props;
-    return this.allDocumentsLoaded.then(() => {
-      let document = model.getDocuments([documentFileName])[0];
-      this.setState({
-        documentTitle: document.documentTitle,
-        document: document,
-        documentColor: document.documentColor ? document.documentColor : null,
-        showPrintWindow: false
-      });
+
+    let document = model.getDocuments([documentFileName])[0];
+    this.setState({
+      documentTitle: document.documentTitle,
+      document: document,
+      documentColor: document.documentColor ? document.documentColor : null,
+      showPrintWindow: false,
     });
   };
 
@@ -68,10 +56,10 @@ class DocumentWindowBase extends React.PureComponent {
     return null;
   }
 
-  findReferringMenuItem = documentNameToFind => {
+  findReferringMenuItem = (documentNameToFind) => {
     const { options } = this.props;
     let foundMenuItem = null;
-    options.menuConfig.menu.forEach(rootItemToSearch => {
+    options.menuConfig.menu.forEach((rootItemToSearch) => {
       let found = this.findMenuItem(rootItemToSearch, documentNameToFind);
       if (found != null) {
         foundMenuItem = found;
@@ -80,16 +68,16 @@ class DocumentWindowBase extends React.PureComponent {
     return foundMenuItem;
   };
 
-  showDocument = documentFileName => {
+  showDocument = (documentFileName) => {
     const { app } = this.props;
     app.globalObserver.publish("documentviewer.showWindow", {
-      hideOtherPlugins: false
+      hideOtherPlugins: false,
     });
     app.globalObserver.publish("core.maximizeWindow");
     return this.setActiveDocument(documentFileName);
   };
 
-  scrollInDocument = headerIdentifier => {
+  scrollInDocument = (headerIdentifier) => {
     const { localObserver, model } = this.props;
     if (headerIdentifier) {
       localObserver.publish(
@@ -116,7 +104,7 @@ class DocumentWindowBase extends React.PureComponent {
 
   togglePrintWindow = () => {
     this.setState({
-      showPrintWindow: !this.state.showPrintWindow
+      showPrintWindow: !this.state.showPrintWindow,
     });
   };
 
@@ -124,14 +112,15 @@ class DocumentWindowBase extends React.PureComponent {
     const { app } = this.props;
     app.globalObserver.subscribe(
       "documenthandler-searchresult-clicked",
-      searchResultClick => {
+      (searchResultClick) => {
         this.showHeaderInDocument({
           documentName: searchResultClick.properties.documentFileName,
-          headerIdentifier: searchResultClick.properties.headerIdentifier
+          headerIdentifier: searchResultClick.properties.headerIdentifier,
         });
       }
     );
   };
+
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     this.bindListenForSearchResultClick();
@@ -146,12 +135,25 @@ class DocumentWindowBase extends React.PureComponent {
     chapter.level = level;
     if (chapter.chapters && chapter.chapters.length > 0) {
       level = level + 1;
-      chapter.chapters.forEach(subChapter => {
+      chapter.chapters.forEach((subChapter) => {
         subChapter = this.setChapterLevels(subChapter, level);
       });
     }
     return chapter;
   }
+
+  isModelReady = () => {
+    const { model } = this.props;
+    return model;
+  };
+
+  componentDidUpdate = (prevProps, prevState) => {
+    if (prevProps.model !== this.props.model) {
+      if (this.isModelReady()) {
+        this.bindSubscriptions();
+      }
+    }
+  };
 
   render() {
     const {
@@ -161,9 +163,10 @@ class DocumentWindowBase extends React.PureComponent {
       documentColor,
       showPrintWindow,
       chapters,
-      localObserver
+      localObserver,
     } = this.state;
     const { options, classes } = this.props;
+
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -173,7 +176,7 @@ class DocumentWindowBase extends React.PureComponent {
           title: documentTitle || options.windowTitle || "Documents",
           color: documentColor || "#ffffff",
           description: "En kort beskrivning som visas i widgeten",
-          height: options.height || "90vh",
+          height: options.height || "auto",
           width: options.width || 600,
           scrollable: false,
           onMinimize: this.onMinimize,
@@ -181,10 +184,10 @@ class DocumentWindowBase extends React.PureComponent {
           onResize: this.onResize,
           draggingEnabled: false,
           resizingEnabled: false,
-          allowMaximizedWindow: false
+          allowMaximizedWindow: false,
         }}
       >
-        {document != null ? (
+        {document != null && this.isModelReady() ? (
           !showPrintWindow ? (
             <DocumentViewer
               documentColor={documentColor || "#ffffff"}

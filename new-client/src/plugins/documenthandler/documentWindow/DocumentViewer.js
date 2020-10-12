@@ -10,28 +10,28 @@ import { Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import PrintIcon from "@material-ui/icons/Print";
 
-const styles = theme => ({
+const styles = (theme) => ({
   gridContainer: {
     height: "100%",
     padding: theme.spacing(3),
     overflowY: "scroll",
     overflowX: "hidden",
-    userSelect: "text"
+    userSelect: "text",
   },
   scrollToTopButton: {
     position: "fixed",
     bottom: theme.spacing(2),
-    right: theme.spacing(3)
+    right: theme.spacing(3),
   },
   printButton: {
-    paddingBottom: theme.spacing(1)
-  }
+    paddingBottom: theme.spacing(1),
+  },
 });
 
 class DocumentViewer extends React.PureComponent {
   state = {
     showScrollButton: false,
-    showPrintWindow: false
+    showPrintWindow: false,
   };
 
   constructor(props) {
@@ -53,7 +53,7 @@ class DocumentViewer extends React.PureComponent {
   bindSubscriptions = () => {
     const { localObserver } = this.props;
 
-    localObserver.subscribe("scroll-to-chapter", chapter => {
+    localObserver.subscribe("scroll-to-chapter", (chapter) => {
       chapter.scrollRef.current.scrollIntoView();
     });
 
@@ -62,19 +62,19 @@ class DocumentViewer extends React.PureComponent {
     });
   };
 
-  onScroll = e => {
+  onScroll = (e) => {
     if (e.target.scrollTop > this.scrollLimit) {
       this.setState({
-        showScrollButton: true
+        showScrollButton: true,
       });
     } else {
       this.setState({
-        showScrollButton: false
+        showScrollButton: false,
       });
     }
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     if (prevProps.activeDocument !== this.props.activeDocument) {
       this.scrollToTop();
     }
@@ -117,7 +117,7 @@ class DocumentViewer extends React.PureComponent {
       model,
       documentColor,
       togglePrintWindow,
-      options
+      options,
     } = this.props;
 
     const { showScrollButton } = this.state;
@@ -125,7 +125,7 @@ class DocumentViewer extends React.PureComponent {
       <>
         <Grid
           tabIndex="0" //Focus grid to be able to use onKeyDown
-          onKeyDown={e => {
+          onKeyDown={(e) => {
             //If ctrl-a or command-a is pressed
             if ((e.ctrlKey || e.metaKey) && e.keyCode === 65) {
               this.selectAllText();

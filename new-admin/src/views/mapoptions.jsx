@@ -28,20 +28,20 @@ import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 var defaultState = {
   primaryColor: "#00F",
   secondaryColor: "#FF0",
-  validationErrors: []
+  validationErrors: [],
 };
 
 class MapOptions extends Component {
@@ -51,7 +51,7 @@ class MapOptions extends Component {
   }
 
   componentDidMount() {
-    this.props.model.on("change:mapConfig", e => {
+    this.props.model.on("change:mapConfig", (e) => {
       var config = this.props.model.get("mapConfig");
       this.setState({
         primaryColor: config.colors.primaryColor,
@@ -77,7 +77,8 @@ class MapOptions extends Component {
           ? config.geoserverLegendOptions
           : "",
         defaultCookieNoticeMessage: config.defaultCookieNoticeMessage,
-        defaultCookieNoticeUrl: config.defaultCookieNoticeUrl
+        defaultCookieNoticeUrl: config.defaultCookieNoticeUrl,
+        crossOrigin: config.crossOrigin,
       });
       this.validate();
     });
@@ -121,7 +122,8 @@ class MapOptions extends Component {
         : "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
       defaultCookieNoticeUrl: mapConfig.defaultCookieNoticeUrl
         ? mapConfig.defaultCookieNoticeUrl
-        : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+        : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+      crossOrigin: mapConfig.crossOrigin ? mapConfig.crossOrigin : "anonymous",
     });
   }
 
@@ -153,11 +155,11 @@ class MapOptions extends Component {
         "zoom",
         "maxZoom",
         "minZoom",
-        "center"
+        "center",
       ],
       validationErrors = [];
 
-    validationFields.forEach(field => {
+    validationFields.forEach((field) => {
       var valid = this.validateField(field, false);
       if (!valid) {
         validationErrors.push(field);
@@ -166,7 +168,7 @@ class MapOptions extends Component {
 
     this.setState(
       {
-        validationErrors: validationErrors
+        validationErrors: validationErrors,
       },
       () => {
         if (callback) {
@@ -256,13 +258,13 @@ class MapOptions extends Component {
     if (updateState !== false) {
       if (!valid) {
         this.setState({
-          validationErrors: [...this.state.validationErrors, fieldName]
+          validationErrors: [...this.state.validationErrors, fieldName],
         });
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(
-            v => v !== fieldName
-          )
+            (v) => v !== fieldName
+          ),
         });
       }
     }
@@ -272,7 +274,7 @@ class MapOptions extends Component {
 
   save() {
     var config = this.props.model.get("mapConfig");
-    this.validate(valid => {
+    this.validate((valid) => {
       if (valid) {
         config.title = this.getValue("title");
         config.projection = this.getValue("projection");
@@ -296,13 +298,14 @@ class MapOptions extends Component {
           "defaultCookieNoticeMessage"
         );
         config.defaultCookieNoticeUrl = this.getValue("defaultCookieNoticeUrl");
-        this.props.model.updateMapConfig(config, success => {
+        config.crossOrigin = this.getValue("crossOrigin");
+        this.props.model.updateMapConfig(config, (success) => {
           var msg = success
             ? "Uppdateringen lyckades."
             : "Uppdateringen misslyckades.";
           this.props.parent.setState({
             alert: true,
-            alertMessage: msg
+            alertMessage: msg,
           });
         });
       }
@@ -315,7 +318,7 @@ class MapOptions extends Component {
     }
     this.props.model.get("mapConfig").colors.primaryColor = color.hex;
     this.setState({
-      primaryColor: color.hex
+      primaryColor: color.hex,
     });
   }
 
@@ -325,12 +328,12 @@ class MapOptions extends Component {
     }
     this.props.model.get("mapConfig").colors.secondaryColor = color.hex;
     this.setState({
-      secondaryColor: color.hex
+      secondaryColor: color.hex,
     });
   }
 
   getValidationClass(inputName) {
-    return this.state.validationErrors.find(v => v === inputName)
+    return this.state.validationErrors.find((v) => v === inputName)
       ? "validation-error"
       : "";
   }
@@ -345,7 +348,7 @@ class MapOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => this.save(e)}
+              onClick={(e) => this.save(e)}
               startIcon={<SaveIcon />}
             >
               Spara
@@ -365,7 +368,7 @@ class MapOptions extends Component {
                 ref="input_title"
                 value={this.state.title}
                 className={this.getValidationClass("title")}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ title: e.target.value }, () =>
                     this.validateField("title")
                   );
@@ -389,7 +392,7 @@ class MapOptions extends Component {
                 ref="input_projection"
                 value={this.state.projection}
                 className={this.getValidationClass("projection")}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ projection: e.target.value }, () =>
                     this.validateField("projection")
                   );
@@ -413,7 +416,7 @@ class MapOptions extends Component {
                 className={
                   (this.getValidationClass("zoom"), "control-fixed-width")
                 }
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ zoom: e.target.value }, () =>
                     this.validateField("zoom")
                   );
@@ -437,7 +440,7 @@ class MapOptions extends Component {
                 className={
                   (this.getValidationClass("maxZoom"), "control-fixed-width")
                 }
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ maxZoom: e.target.value }, () =>
                     this.validateField("maxZoom")
                   );
@@ -461,7 +464,7 @@ class MapOptions extends Component {
                 className={
                   (this.getValidationClass("minZoom"), "control-fixed-width")
                 }
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ minZoom: e.target.value }, () =>
                     this.validateField("minZoom")
                   );
@@ -482,7 +485,7 @@ class MapOptions extends Component {
                 ref="input_center"
                 value={this.state.center}
                 className={this.getValidationClass("center")}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ center: e.target.value }, () =>
                     this.validateField("center")
                   );
@@ -503,7 +506,7 @@ class MapOptions extends Component {
                 ref="input_resolutions"
                 value={this.state.resolutions}
                 className={this.getValidationClass("resolutions")}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ resolutions: e.target.value }, () =>
                     this.validateField("resolutions")
                   );
@@ -524,7 +527,7 @@ class MapOptions extends Component {
                 ref="input_extent"
                 value={this.state.extent}
                 className={this.getValidationClass("extent")}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ extent: e.target.value }, () =>
                     this.validateField("extent")
                   );
@@ -545,7 +548,7 @@ class MapOptions extends Component {
                 ref="input_origin"
                 value={this.state.origin}
                 className={this.getValidationClass("origin")}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ origin: e.target.value }, () =>
                     this.validateField("origin")
                   );
@@ -557,7 +560,7 @@ class MapOptions extends Component {
                 id="input_constrainOnlyCenter"
                 type="checkbox"
                 ref="input_constrainOnlyCenter"
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ constrainOnlyCenter: e.target.checked });
                 }}
                 checked={this.state.constrainOnlyCenter}
@@ -577,7 +580,7 @@ class MapOptions extends Component {
                 id="input_constrainResolution"
                 type="checkbox"
                 ref="input_constrainResolution"
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ constrainResolution: e.target.checked });
                 }}
                 checked={this.state.constrainResolution}
@@ -597,7 +600,7 @@ class MapOptions extends Component {
                 id="input_enableDownloadLink"
                 type="checkbox"
                 ref="input_enableDownloadLink"
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ enableDownloadLink: e.target.checked });
                 }}
                 checked={this.state.enableDownloadLink}
@@ -627,7 +630,7 @@ class MapOptions extends Component {
                 ref="input_logo"
                 value={this.state.logo}
                 className={this.getValidationClass("logo")}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ logo: e.target.value }, () =>
                     this.validateField("logo")
                   );
@@ -654,7 +657,7 @@ class MapOptions extends Component {
                 ref="input_geoserverLegendOptions"
                 value={this.state.geoserverLegendOptions}
                 className={this.getValidationClass("geoserverLegendOptions")}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ geoserverLegendOptions: e.target.value });
                 }}
               />
@@ -675,7 +678,7 @@ class MapOptions extends Component {
                 className={this.getValidationClass(
                   "defaultCookieNoticeMessage"
                 )}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState(
                     { defaultCookieNoticeMessage: e.target.value },
                     () => this.validateField("defaultCookieNoticeMessage")
@@ -697,8 +700,27 @@ class MapOptions extends Component {
                 ref="input_defaultCookieNoticeUrl"
                 value={this.state.defaultCookieNoticeUrl}
                 className={this.getValidationClass("defaultCookieNoticeUrl")}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ defaultCookieNoticeUrl: e.target.value });
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Cross origin-parameter{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Ställer in vilket värde som används för 'crossOrigin'. Om osäker, används 'anonymous'. "
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_crossOrigin"
+                value={this.state.crossOrigin}
+                className={this.getValidationClass("crossOrigin")}
+                onChange={(e) => {
+                  this.setState({ crossOrigin: e.target.value });
                 }}
               />
             </div>
@@ -708,7 +730,7 @@ class MapOptions extends Component {
                 id="input_mapselector"
                 type="checkbox"
                 ref="input_mapselector"
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ mapselector: e.target.checked });
                 }}
                 checked={this.state.mapselector}
@@ -728,7 +750,7 @@ class MapOptions extends Component {
                 id="input_mapcleaner"
                 type="checkbox"
                 ref="input_mapcleaner"
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ mapcleaner: e.target.checked });
                 }}
                 checked={this.state.mapcleaner}
@@ -749,12 +771,12 @@ class MapOptions extends Component {
                 id="input_drawerVisible"
                 type="checkbox"
                 ref="input_drawerVisible"
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ drawerVisible: e.target.checked });
                   // If visible gets unchecked, ensure that permanent is unchecked too
                   if (e.target.checked === false) {
                     this.setState({
-                      drawerPermanent: false
+                      drawerPermanent: false,
                     });
                   }
                 }}
@@ -775,7 +797,7 @@ class MapOptions extends Component {
                 id="input_drawerPermanent"
                 type="checkbox"
                 ref="input_drawerPermanent"
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ drawerPermanent: e.target.checked });
                 }}
                 checked={this.state.drawerPermanent}
@@ -797,14 +819,14 @@ class MapOptions extends Component {
                 <div>Huvudfärg</div>
                 <SketchPicker
                   color={this.state.primaryColor}
-                  onChangeComplete={e => this.handlePrimaryColorComplete(e)}
+                  onChangeComplete={(e) => this.handlePrimaryColorComplete(e)}
                 />
               </span>
               <span className="pull-left" style={{ marginLeft: "10px" }}>
                 <div>Komplementfärg</div>
                 <SketchPicker
                   color={this.state.secondaryColor}
-                  onChangeComplete={e => this.handleSecondaryColorComplete(e)}
+                  onChangeComplete={(e) => this.handleSecondaryColorComplete(e)}
                 />
               </span>
             </div>
@@ -812,7 +834,7 @@ class MapOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => this.save(e)}
+              onClick={(e) => this.save(e)}
               startIcon={<SaveIcon />}
             >
               Spara

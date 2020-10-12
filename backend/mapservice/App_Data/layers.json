@@ -3081,6 +3081,50 @@
       "version": "1.1.1",
       "infoFormat": "application/geojson",
       "zIndex": null
+    },
+    {
+      "id": "102",
+      "caption": "Test",
+      "url": "http://testservergbg.northeurope.cloudapp.azure.com:8080/geoserver/wms",
+      "owner": "",
+      "date": "1602166539333",
+      "content": "",
+      "legend": "",
+      "projection": "EPSG:3006",
+      "layers": ["test:Test"],
+      "layersInfo": [
+        {
+          "id": "test:Test",
+          "caption": "",
+          "legend": "",
+          "infobox": "<p>Länk : {link}</p>",
+          "style": "",
+          "queryable": true
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "opacity": 1.0,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": "",
+      "version": "1.1.1",
+      "infoFormat": "application/json",
+      "zIndex": null
     }
   ],
   "wfslayers": [

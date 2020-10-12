@@ -30,11 +30,15 @@ namespace MapService.Components
     {
         public string header { get; set; }
         public string html { get; set; }
+        public string img_link { get; set; }
+        public string img_width { get; set; }
+        public string img_height { get; set; }
         public Chapter[] chapters { get; set; }
         public MapSettings mapSettings { get; set; }
         public string[] layers { get; set; }
         public string baseLayer { get; set; }
         public int startPage { get; set; }
+        public int number_page { get; set; }
         public int stopPage { get; set; }
     }
 
@@ -84,7 +88,7 @@ namespace MapService.Components
 
         private int totalChapters;
 
-        private string baseLayer = "31";
+        private string baseLayer = "";
 
         private List<int> printPages;
 
@@ -93,7 +97,6 @@ namespace MapService.Components
         private MapConfig mapConfig;
 
         private LayerSwitcherOptions layerSwitcherOptions;
-
         /// <summary>
         /// Initialize the document creator.
         /// The layerlist is loaded from file.
@@ -134,13 +137,15 @@ namespace MapService.Components
         /// <param name="chapters"></param>
         /// <param name="html"></param>
         private void AppendHtml(List<Chapter> chapters, ref StringBuilder html)
-        {           
+        {   
+            
             foreach (Chapter chapter in chapters)
             {
                 renderedChapters += 1;
                 html.Append("<h1>" + chapter.header + "</h1>");            
                 html.Append(chapter.html);
                 html.Append(this.AppendMap(chapter));
+                //html.Append("<div> <img style='width:"+chapter.img_width+ ";height=" + chapter.img_height + "' src='" + chapter.img_link+ "'></div>");
                 html.Append("<div style='page-break-after: always;'></div>");
 
                 if (chapter.chapters.Length > 0)
@@ -160,11 +165,14 @@ namespace MapService.Components
         /// <param name="html"></param>
         /// <param name="pageContents"></param>
         private void AppendHeader(List<Chapter> chapters, ref string html, Dictionary<int, string[]> pageContents)
-        {            
+        {
+            
             foreach (Chapter chapter in chapters)
             {                
                 bool found = false;
                 string foundPage = "";
+
+              
                 for (int i = 1; i < pageContents.Count + 1; i++)
                 {
                     if (found)
@@ -181,13 +189,13 @@ namespace MapService.Components
                                 break;
                             }
                             else
-                            {                
-                                if (pageLines[j].TrimEnd() == chapter.header.TrimEnd())
-                                {
+                            {
+                                if (chapter.header.TrimEnd() == pageLines[j])
+                                    {
                                     found = true;
-                                    foundPage = i.ToString();
-                                    chapter.startPage = i;
-                                }                                                                                        
+                                        foundPage = i.ToString();
+                                        chapter.startPage = i;
+                                    }                                                                                     
                             }
                         }
                     }
@@ -197,6 +205,7 @@ namespace MapService.Components
                     chapter.header + "</span><span style='float:right'>" +
                     foundPage + "</span></div></div>";
 
+                
                 if (chapter.chapters.Length > 0)
                 {                    
                     this.AppendHeader(chapter.chapters.ToList(), ref html, pageContents);
@@ -204,83 +213,17 @@ namespace MapService.Components
             };
         }
 
-        /// <summary>
-        /// Create map and append the document with an image.
-        /// </summary>
-        /// <param name="chapter"></param>
-        /// <returns>Path to created map image</returns>
         private string AppendMap(Chapter chapter)
         {
-            MapSettings mapSettings = chapter.mapSettings;                      
-            chapter.baseLayer = this.baseLayer;
-            string[] layers = chapter.layers;
-            if (layers != null && chapter.mapSettings.extent != null && layers.Length > 0)
-            {
-                if (chapter.baseLayer != null) {
-                    layers = (new string[] { chapter.baseLayer }).Union(chapter.layers).ToArray();
-                }
-                LayerConfig layerConfig = this.LookupLayers(layers);                
-                MapExportItem mapExportItem = new MapExportItem();                
-                int mapHeight = 500;
-                int mapWidth = (int)(mapHeight * ((1 + Math.Sqrt(5)) / 2));
-                mapExportItem.size = new int[] { mapWidth, mapHeight };
-                mapExportItem.resolution = 90;
-                double[] mapExtent = chapter.mapSettings.extent;                
-                mapExportItem.bbox = new double[] { mapExtent[0], mapExtent[2], mapExtent[1], mapExtent[3] };                                
-
-                mapExportItem.arcgisLayers = layerConfig.arcgislayers.Select(layer =>                    
-                    layer.AsInfo(layer.zIndex == null ? 0 : (int)layer.zIndex)
-                ).ToList();
-
-                mapExportItem.wmsLayers = layerConfig.wmslayers.Select(layer =>                                            
-                    layer.AsInfo(layer.zIndex == null ? 0 : (int)layer.zIndex)
-                ).ToList();
-
-                mapExportItem.vectorLayers = layerConfig.vectorlayers.Select(layer =>                    
-                    layer.AsInfo(layer.zIndex == null ? 0 : (int)layer.zIndex, new double[] { mapExtent[1], mapExtent[0], mapExtent[3], mapExtent[2] })
-                ).ToList();
-
-                try
-                {
-                    System.Drawing.Image i = MapImageCreator.GetImage(mapExportItem);
-                    string mapImageGuid = Guid.NewGuid().ToString();
-                    string path = String.Format("C:\\tmp\\{0}.png", mapImageGuid);
-                    i.Save(path, System.Drawing.Imaging.ImageFormat.Png);
-                    (new Task(() =>
-                    {
-                        Thread.Sleep(20000);
-                        File.Delete(path);
-                    })).Start();
-                    return string.Format("<div><img src='{0}'/></div>", path);
-                }
-                catch (Exception ex)
-                {
-                    return String.Empty;
-                }
-            }
-            else
-            {
-                return String.Empty;
-            }            
+                return string.Format("<div><img style='width:"+chapter.img_width+ ";height=" + chapter.img_height + "' src='" + chapter.img_link+ "'></div>");
         }
 
-        /// <summary>
-        /// Lookup layer
-        /// </summary>
-        /// <param name="layer"></param>
-        /// <param name="layers"></param>
-        /// <returns>Mathing layers</returns>
         private bool LayerLookup(ILayerConfig layer, string[] layers)
         {
             return layers.Any(layerId => layerId == layer.id);
         }
 
-        /// <summary>
-        /// Find layer in layerswitcher, recursively look through all groups.
-        /// </summary>
-        /// <param name="lookupLayer"></param>
-        /// <param name="groups"></param>
-        /// <returns>Found layer</returns>
+       
         private LayerOptions FindLayerInGroup(ILayerConfig lookupLayer, List<GroupOptions> groups)
         {            
             foreach (GroupOptions group in groups)
@@ -301,10 +244,7 @@ namespace MapService.Components
             return null;
         }
 
-        /// <summary>
-        /// Set the layer zIndex from the map config.
-        /// </summary>
-        /// <param name="layer"></param>
+       
         private void SetLayerZIndex(ILayerConfig layer)
         {
             LayerOptions foundLayer = this.layerSwitcherOptions.baselayers.ToList().Find(l => l.id == layer.id);
@@ -322,11 +262,6 @@ namespace MapService.Components
             }
         }
 
-        /// <summary>
-        /// Find layers in config with given ID.
-        /// </summary>
-        /// <param name="layers"></param>
-        /// <returns>Mathing layers</returns>
         private LayerConfig LookupLayers(string[] layers)
         {
             List<ArcGISConfig> ArcGISLayers = this.layers.arcgislayers
@@ -354,11 +289,6 @@ namespace MapService.Components
             };
         }
 
-        /// <summary>
-        /// Flatten a tree of chapters
-        /// </summary>
-        /// <param name="chapters"></param>
-        /// <param name="flattened"></param>
         private void FlattenChapters(Chapter[] chapters, ref List<Chapter> flattened)
         {
             foreach (Chapter chapter in chapters)
@@ -395,13 +325,6 @@ namespace MapService.Components
             document.Pages.RemoveAt(document.Pages.Count - 1);
         }
 
-        /// <summary>
-        /// Find pages to print.
-        /// This is based on from witch chapter the PDF is exported.
-        /// </summary>
-        /// <param name="header"></param>
-        /// <param name="html"></param>
-        /// <returns></returns>
         private void RemoveSurroundingPages(string header, string html, Chapter[] chapters, PdfSharp.Pdf.PdfDocument document)
         {
             for (int i = 0; i < chapters.Count(); i++)
@@ -463,12 +386,6 @@ namespace MapService.Components
             }
         }
 
-        /// <summary>
-        /// Compare a flat list with chapters and set the stop page for a chapter in the tree.
-        /// </summary>
-        /// <param name="chapters"></param>
-        /// <param name="flattened"></param>
-        /// <param name="counter"></param>
         private void SetChapterPages(Chapter[] chapters, List<Chapter> flattened, ref int counter)
         {
             foreach(Chapter chapter in chapters)
@@ -489,11 +406,6 @@ namespace MapService.Components
             }
         }
 
-        /// <summary>
-        /// Create PDF-document
-        /// </summary>
-        /// <param name="folder"></param>
-        /// <returns>Path to saved document</returns>
         public string Create(string folder, InformativeExport informativeExport)
         {
             this.documentFile = informativeExport.documentFile;
@@ -526,7 +438,7 @@ namespace MapService.Components
 
             html.AppendLine("<head>");
             html.AppendLine("<meta charset='UTF-8'>");
-            html.AppendLine("</head>");
+            html.AppendLine("<head><style>ul {list-style:none;padding:0;margin:0;}li {padding-left: 16px;}li::before {content: ' - ';padding-right: 8px;color: blue;}</style></head>");
             html.AppendLine("<body>");
             html.AppendLine("<style>");            
             html.AppendLine("body { font-family: arial; font-size: 13pt !important;}");
@@ -544,8 +456,8 @@ namespace MapService.Components
             htmlToPdf.Margins.Top = 15;
 
             htmlToPdf.PageFooterHtml = "<div style='text-align:center;'><span class='page'></span> </div>";
-            var pdfBytes1 = htmlToPdf.GeneratePdf(html.ToString());            
-
+            var pdfBytes1 = htmlToPdf.GeneratePdf(html.ToString());
+            
             //
             // Read the created document and match headers to create toc.
             // Headers must be unique
@@ -556,12 +468,12 @@ namespace MapService.Components
             Dictionary<int, string[]> pageContents = new Dictionary<int, string[]>();
             for (int j = 1; j <= reader.NumberOfPages; j++)
             {
-                string text = iTextSharp.text.pdf.parser.PdfTextExtractor.GetTextFromPage(reader, j);
+                string text = iTextSharp.text.pdf.parser.PdfTextExtractor.GetTextFromPage(reader, j);               
                 pageContents.Add(j, text.Split('\n'));
             }
             tocHtml += "<head>";
             tocHtml += "<meta charset='UTF-8'>";
-            tocHtml += "</head>";
+            tocHtml += "<head><style>ul {list-style:none;padding:0;margin:0;}li {padding-left: 16px;}li::before {content: ' - ';padding-right: 8px;color: blue;}</style></head>";
             tocHtml += "<body>";
             tocHtml += "<style>";
             tocHtml += "body { font-family: arial; font-size: 13pt !important;}";
@@ -570,11 +482,11 @@ namespace MapService.Components
             tocHtml += "<h1>Innehållsförteckning</h1>";
 
             this.AppendHeader(exportDocument.chapters.ToList(), ref tocHtml, pageContents);
-
             tocHtml += "</body>";
 
             htmlToPdf.PageFooterHtml = "";
             var pdfBytes2 = htmlToPdf.GeneratePdf(tocHtml.ToString());
+           
 
             MemoryStream stream1 = new MemoryStream(pdfBytes1);
             MemoryStream stream2 = new MemoryStream(pdfBytes2);

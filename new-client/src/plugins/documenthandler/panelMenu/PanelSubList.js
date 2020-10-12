@@ -5,7 +5,7 @@ import Collapse from "@material-ui/core/Collapse";
 
 class PanelMenuView extends React.PureComponent {
   state = {
-    open: this.props.item.expandedSubMenu || false
+    open: this.props.item.expandedSubMenu || false,
   };
 
   toggleCollapseSubMenu = () => {

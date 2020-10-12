@@ -8,23 +8,23 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import CloseIcon from "@material-ui/icons/Close";
 import { Paper, Hidden } from "@material-ui/core";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     marginRight: theme.spacing(1),
     [theme.breakpoints.down("xs")]: {
-      boxShadow: "none"
-    }
+      boxShadow: "none",
+    },
   },
   icon: {
     [theme.breakpoints.up("md")]: {
-      marginRight: theme.spacing(1)
-    }
+      marginRight: theme.spacing(1),
+    },
   },
   grouped: {
     [theme.breakpoints.down("xs")]: {
-      border: "none"
-    }
-  }
+      border: "none",
+    },
+  },
 }));
 
 function DrawerToggleButtons({ drawerButtons, globalObserver }) {
@@ -96,7 +96,7 @@ function DrawerToggleButtons({ drawerButtons, globalObserver }) {
           aria-label="Drawer content"
           classes={{ grouped: classes.grouped }}
         >
-          {drawerButtons.map(b => renderToggleButton(b))}
+          {drawerButtons.map((b) => renderToggleButton(b))}
         </ToggleButtonGroup>
       </Paper>
     )

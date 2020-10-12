@@ -14,14 +14,14 @@ import WMTS from "ol/source/WMTS";
 import TileArcGISRest from "ol/source/TileArcGISRest";
 import Collection from "ol/Collection";
 
-var toHex = function(str) {
+var toHex = function (str) {
   if (/^#/.test(str)) return str;
   var hex =
     "#" +
     str
       .match(/\d+(\.\d+)?/g)
       .splice(0, 3)
-      .map(i => {
+      .map((i) => {
         var v = parseInt(i, 10).toString(16);
         if (parseInt(i) < 16) {
           v = "0" + v;
@@ -32,7 +32,7 @@ var toHex = function(str) {
   return hex;
 };
 
-var toOpacity = function(str) {
+var toOpacity = function (str) {
   return parseFloat(str.match(/\d+(\.\d+)?/g).splice(3, 1)[0]);
 };
 
@@ -51,7 +51,7 @@ class ExportModel {
 
   validateScales(s) {
     if (typeof s == "string" && /(\d+)(,\s*\d+)*/.test(s)) {
-      return s.split(",").map(s => Number(s));
+      return s.split(",").map((s) => Number(s));
     } else {
       return [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000];
     }
@@ -64,12 +64,12 @@ class ExportModel {
       style: new Style({
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.7)",
-          width: 2
+          width: 2,
         }),
         fill: new Fill({
-          color: "rgba(255, 145, 20, 0.4)"
-        })
-      })
+          color: "rgba(255, 145, 20, 0.4)",
+        }),
+      }),
     });
     this.map.addLayer(this.previewLayer);
   }
@@ -85,9 +85,7 @@ class ExportModel {
   }
 
   getPreviewCenter() {
-    var extent = this.getPreviewFeature()
-      .getGeometry()
-      .getExtent();
+    var extent = this.getPreviewFeature().getGeometry().getExtent();
     return getCenter(extent);
   }
 
@@ -103,18 +101,18 @@ class ExportModel {
           [center[0] - w, center[1] + y],
           [center[0] + w, center[1] + y],
           [center[0] + w, center[1] - y],
-          [center[0] - w, center[1] - y]
-        ]
+          [center[0] - w, center[1] - y],
+        ],
       ],
       feature = new Feature({
-        geometry: new Polygon(coords)
+        geometry: new Polygon(coords),
       });
 
     this.removePreview();
     this.previewFeature = feature;
     this.previewLayer.getSource().addFeature(feature);
     this.translate = new Translate({
-      features: new Collection([feature])
+      features: new Collection([feature]),
     });
     this.map.addInteraction(this.translate);
   }
@@ -124,7 +122,7 @@ class ExportModel {
      * @summary Only allow export of layers according to some specific conditions.
      * @param {object} layer
      */
-    const exportable = layer =>
+    const exportable = (layer) =>
       (layer instanceof Tile || layer instanceof Image) &&
       (layer.getSource() instanceof TileWMS ||
         layer.getSource() instanceof ImageWMS) &&
@@ -138,10 +136,7 @@ class ExportModel {
         // Depending on type of LAYERS, either split the String or use Array directly.
         const layers =
           typeof layer.getSource().getParams().LAYERS === "string"
-            ? layer
-                .getSource()
-                .getParams()
-                .LAYERS.split(",")
+            ? layer.getSource().getParams().LAYERS.split(",")
             : layer.getSource().getParams().LAYERS;
         return {
           url: layer.getSource().get("url"),
@@ -152,7 +147,7 @@ class ExportModel {
             .getView()
             .getProjection()
             .getCode()
-            .split(":")[1]
+            .split(":")[1],
         };
       });
   }
@@ -221,10 +216,7 @@ class ExportModel {
         style.getText().getFont &&
         style.getText().getFont()
       ) {
-        fontSize = style
-          .getText()
-          .getFont()
-          .match(/\d+/)[0];
+        fontSize = style.getText().getFont().match(/\d+/)[0];
       }
 
       if (
@@ -233,30 +225,10 @@ class ExportModel {
         style.getText().getFill &&
         style.getText().getFill()
       ) {
-        if (
-          typeof style
-            .getText()
-            .getFill()
-            .getColor() === "string"
-        ) {
-          fontColor = style
-            .getText()
-            .getFill()
-            .getColor();
-        } else if (
-          Array.isArray(
-            style
-              .getText()
-              .getFill()
-              .getColor()
-          )
-        ) {
-          fontColor = olColorToHex(
-            style
-              .getText()
-              .getFill()
-              .getColor()
-          );
+        if (typeof style.getText().getFill().getColor() === "string") {
+          fontColor = style.getText().getFill().getColor();
+        } else if (Array.isArray(style.getText().getFill().getColor())) {
+          fontColor = olColorToHex(style.getText().getFill().getColor());
         }
       }
 
@@ -266,30 +238,10 @@ class ExportModel {
         style.getText().getStroke &&
         style.getText().getStroke()
       ) {
-        if (
-          typeof style
-            .getText()
-            .getFill()
-            .getColor() === "string"
-        ) {
-          fontBackColor = style
-            .getText()
-            .getStroke()
-            .getColor();
-        } else if (
-          Array.isArray(
-            style
-              .getText()
-              .getStroke()
-              .getColor()
-          )
-        ) {
-          fontBackColor = olColorToHex(
-            style
-              .getText()
-              .getStroke()
-              .getColor()
-          );
+        if (typeof style.getText().getFill().getColor() === "string") {
+          fontBackColor = style.getText().getStroke().getColor();
+        } else if (Array.isArray(style.getText().getStroke().getColor())) {
+          fontBackColor = olColorToHex(style.getText().getStroke().getColor());
         }
       }
 
@@ -339,12 +291,7 @@ class ExportModel {
         }
         if (style.getImage() instanceof Circle) {
           pointRadius = style.getImage().getRadius();
-          pointFillColor = toHex(
-            style
-              .getImage()
-              .getFill()
-              .getColor()
-          );
+          pointFillColor = toHex(style.getImage().getFill().getColor());
         }
       }
 
@@ -364,7 +311,7 @@ class ExportModel {
         labelOutlineWidth: labelOutlineWidth,
         fontSize: fontSize,
         fontColor: fontColor,
-        fontBackColor: fontBackColor
+        fontBackColor: fontBackColor,
       };
     }
 
@@ -408,15 +355,9 @@ class ExportModel {
           Array.isArray(feature.getStyle()) &&
           feature.getStyle()[1] &&
           feature.getStyle()[1].getText() &&
-          feature
-            .getStyle()[1]
-            .getText()
-            .getText()
+          feature.getStyle()[1].getText().getText()
         ) {
-          text = feature
-            .getStyle()[1]
-            .getText()
-            .getText();
+          text = feature.getStyle()[1].getText().getText();
         }
 
         if (
@@ -425,17 +366,14 @@ class ExportModel {
           feature.getStyle().getText &&
           feature.getStyle().getText()
         ) {
-          text = feature
-            .getStyle()
-            .getText()
-            .getText();
+          text = feature.getStyle().getText().getText();
         }
 
         return text;
       }
 
       return {
-        features: features.map(feature => {
+        features: features.map((feature) => {
           var type = feature.getGeometry().getType(),
             geom = feature.getGeometry(),
             holes = null,
@@ -461,12 +399,12 @@ class ExportModel {
             type: type,
             attributes: {
               text: getText(feature),
-              style: asObject(feature.getStyle())
+              style: asObject(feature.getStyle()),
             },
             coordinates: coords,
-            holes: holes
+            holes: holes,
           };
-        })
+        }),
       };
     }
 
@@ -482,29 +420,31 @@ class ExportModel {
     layers = this.map.getLayers().getArray();
 
     vectorLayers = layers.filter(
-      layer =>
+      (layer) =>
         layer instanceof Vector &&
         layer.getVisible() &&
         layer.get("name") !== "preview-layer"
     );
 
     vectorLayers = vectorLayers
-      .map(layer =>
+      .map((layer) =>
         translateVector(layer.getSource().getFeaturesInExtent(extent), layer)
       )
-      .filter(layer => layer.features.length > 0);
+      .filter((layer) => layer.features.length > 0);
     return vectorLayers;
   }
 
   findWMTS() {
     var layers = this.map.getLayers().getArray();
     return layers
-      .filter(layer => layer.getSource() instanceof WMTS && layer.getVisible())
-      .map(layer => {
+      .filter(
+        (layer) => layer.getSource() instanceof WMTS && layer.getVisible()
+      )
+      .map((layer) => {
         var s = layer.getSource();
         return {
           url: Array.isArray(s.getUrls()) ? s.getUrls()[0] : s.get("url"),
-          axisMode: "natural"
+          axisMode: "natural",
         };
       });
   }
@@ -536,8 +476,8 @@ class ExportModel {
           left: extent[0],
           bottom: extent[1],
           right: extent[2],
-          top: extent[3]
-        }
+          top: extent[3],
+        },
       };
     }
 
@@ -568,7 +508,7 @@ class ExportModel {
         vectorLayers: [],
         size: null,
         resolution: options.resolution,
-        bbox: null
+        bbox: null,
       };
 
     data.vectorLayers = this.findVector() || [];
@@ -578,7 +518,7 @@ class ExportModel {
 
     data.size = [
       parseInt(options.size.width * options.resolution),
-      parseInt(options.size.height * options.resolution)
+      parseInt(options.size.height * options.resolution),
     ];
 
     data.bbox = [left, right, bottom, top];
@@ -590,20 +530,20 @@ class ExportModel {
       method: "POST",
       credentials: "same-origin",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        data: JSON.stringify(data)
-      })
+        data: JSON.stringify(data),
+      }),
     })
-      .then(response => {
-        response.text().then(fileUrl => {
+      .then((response) => {
+        response.text().then((fileUrl) => {
           if (callback) {
             callback(fileUrl);
           }
         });
       })
-      .catch(error => {
+      .catch((error) => {
         alert("Det gick inte att exportera kartan. " + error);
         console.error(error);
       });

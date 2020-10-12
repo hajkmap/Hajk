@@ -27,7 +27,7 @@ class Dummy extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
     title: "Dummy",
-    color: null
+    color: null,
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -38,11 +38,11 @@ class Dummy extends React.PureComponent {
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired
+    options: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
-    options: {}
+    options: {},
   };
 
   constructor(props) {
@@ -58,7 +58,7 @@ class Dummy extends React.PureComponent {
     // Once created, the observer can subscribe to events with a distinct name. In this example
     // we subscribe to "dummyEvent" When "dummyEvent" is published (from somewhere else)
     // the callback below will be run, with "message" as an optional param.
-    this.localObserver.subscribe("dummyEvent", message => {
+    this.localObserver.subscribe("dummyEvent", (message) => {
       console.log(message);
     });
 
@@ -68,7 +68,7 @@ class Dummy extends React.PureComponent {
     this.dummyModel = new DummyModel({
       localObserver: this.localObserver,
       app: props.app,
-      map: props.map
+      map: props.map,
     });
   }
 
@@ -108,7 +108,7 @@ class Dummy extends React.PureComponent {
           color: this.state.color, // the changes to BaseWindowPlugin which will update internal state too.
           description: "En kort beskrivning som visas i widgeten", // Shown on Widget button
           height: 450, // Custom height/width etc | Use "auto" for automatic or leave undefined
-          width: 400
+          width: 400,
         }}
       >
         {/* This is the child object of BaseWindowPlugin. It will be displayed

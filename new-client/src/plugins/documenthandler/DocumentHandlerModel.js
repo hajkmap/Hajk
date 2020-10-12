@@ -1,5 +1,6 @@
 import React from "react";
-import AcUnitIcon from "@material-ui/icons/AcUnit";
+
+import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
 
 /**
  * @summary  DocumentHandler model that doesn't do much.
@@ -12,7 +13,7 @@ import AcUnitIcon from "@material-ui/icons/AcUnit";
  */
 
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 export default class DocumentHandlerModel {
@@ -26,157 +27,34 @@ export default class DocumentHandlerModel {
     this.allDocuments = [];
     this.chaptersMatchSearch = [];
     this.chapterInfo = [];
-
     this.chapterNumber = 0;
-    this.implementSearchInterface();
-    this.getAllDocumentsContainedInMenu().then(allDocuments => {
-      this.allDocuments = allDocuments;
-    });
   }
 
-  implementSearchInterface = () => {
-    this.settings.searchInterface.getResults = this.getResults;
-    this.settings.searchInterface.getFunctionality = this.getSearchFunctionality;
-  };
-
-  getSearchFunctionality = () => {
-    return {
-      name: "Dokumentverktyg",
-      icon: <AcUnitIcon />,
-      type: "EXTERNAL_PLUGIN",
-      searchFunctionalityClickName: "documenthandler-searchfunctionality-click"
-    };
-  };
-
-  /**
-   * Performs a search in all documents.
-   * @param {string} searchString The search string.
-   * @param {object} searchOptions The search options.
-   *
-   */
-  getResults = (searchString, searchOptions) => {
-    this.keywords = [];
-    let featureCollections = [];
-    this.allDocuments.forEach((document, index) => {
-      this.chaptersMatchSearch = [];
-      document.chapters.forEach(chapter => {
-        this.keywordsMatchSearchString(document, chapter, searchString);
-      });
-
-      const featureCollection = {
-        value: {
-          status: "fulfilled",
-          type: "FeatureCollection",
-          crs: { type: null, properties: { name: null } },
-          features: this.chaptersMatchSearch,
-          numberMatched: this.chaptersMatchSearch.length,
-          numberReturned: this.chaptersMatchSearch.length,
-          timeStamp: null,
-          totalFeatures: this.chaptersMatchSearch.length
-        },
-
-        sources: this.getMatchDocumentsFromSearch(),
-        source: {
-          id: `${document.documentTitle}`,
-          caption: document.documentTitle,
-          displayFields: ["header", "geoids"],
-          searchFields: ["header", ...this.keywords]
-        },
-        origin: "DOCUMENT"
-      };
-      featureCollections.push(featureCollection);
-    });
-
-    return new Promise((resolve, reject) => {
-      resolve({ featureCollections: featureCollections, errors: [] });
-    });
-  };
-
-  /**
-   * Checks if the any keywords will match the search string.
-   * @param {object} chapter The chapter to be examined.
-   * @param {string} searchString The search string.
-   * @return {object} The chapters that match the search string.
-   *
-   */
-  keywordsMatchSearchString = (document, chapter, searchString, index) => {
-    if (
-      chapter.hasOwnProperty("keywords") &&
-      this.searchStringMatchKeywords(searchString, chapter.keywords)
-    ) {
-      let properties = {
-        header: chapter.header,
-        geoids: chapter.geoids,
-        documentTitle: document.documentTitle,
-        documentFileName: document.documentFileName,
-        headerIdentifier: chapter.headerIdentifier
-      };
-
-      chapter.keywords.map((keyword, index) => {
-        this.keywords.push(`keyword${index}`);
-        return (properties[`keyword${index}`] = keyword);
-      });
-
-      let feature = {
-        type: "Feature",
-        geometry: null,
-        onClickName: "documenthandler-searchresult-clicked",
-        id: `${document.documentTitle}${index}`,
-        properties: properties
-      };
-      this.chaptersMatchSearch.push(feature);
-
-      if (chapter.hasOwnProperty("chapters"))
-        chapter.chapters.forEach((subChapter, index) => {
-          this.keywordsMatchSearchString(
-            document,
-            subChapter,
-            searchString,
-            index
-          );
+  init = () => {
+    return this.getAllDocumentsContainedInMenu()
+      .then((allDocuments) => {
+        this.allDocuments = allDocuments;
+        this.documentSearchmodel = new DocumentSearchModel({
+          allDocuments: allDocuments,
         });
-    }
-  };
-
-  /**
-   * Perform a search match between the search string and all keywords.
-   * @param {string} searchString The search string.
-   * @param {array} keywords The chapter's keywords.
-   * @return Returns true if a match is found.
-   *
-   */
-  searchStringMatchKeywords = (searchString, keywords) => {
-    let match = false;
-    keywords.forEach(keyword => {
-      if (keyword.toLowerCase() === searchString.toLowerCase()) match = true;
-    });
-    return match;
-  };
-
-  /**
-   * Gets all documents that are affected by the search match.
-   * @return {array} Returns an array with all documents affected by the search match.
-   */
-  getMatchDocumentsFromSearch = () => {
-    let uniqueDocumentNames = [];
-    this.chaptersMatchSearch.forEach(match => {
-      const documentTitle = match.properties.documentTitle;
-      if (!uniqueDocumentNames.includes(documentTitle))
-        uniqueDocumentNames.push(documentTitle);
-    });
-
-    return uniqueDocumentNames;
+        this.settings.resolveSearchInterface(
+          this.documentSearchmodel.implementSearchInterface()
+        );
+      })
+      .then(() => {
+        return this;
+      });
   };
 
   getDocumentsFromMenus(menu) {
-    return menu.filter(menuItem => {
+    return menu.filter((menuItem) => {
       return menuItem.document || menuItem.menu.length > 0;
     });
   }
 
   getFlattenedMenu(menu) {
     let flattenedMenu = [];
-    menu.forEach(menuItem => {
+    menu.forEach((menuItem) => {
       if (menuItem.menu.length > 0) {
         flattenedMenu = flattenedMenu.concat(
           this.getFlattenedMenu(menuItem.menu)
@@ -196,8 +74,8 @@ export default class DocumentHandlerModel {
       Promise.all(
         this.getFlattenedMenu(
           this.getDocumentsFromMenus(this.settings.menu)
-        ).map(menuItem => {
-          return this.fetchJsonDocument(menuItem.document).then(doc => {
+        ).map((menuItem) => {
+          return this.fetchJsonDocument(menuItem.document).then((doc) => {
             doc.documentColor = menuItem.color;
             doc.documentFileName = menuItem.document;
             doc.documentTitle = menuItem.title;
@@ -205,11 +83,10 @@ export default class DocumentHandlerModel {
           });
         })
       )
-        .then(documents => {
-          this.allDocuments = documents;
-          resolve();
+        .then((documents) => {
+          resolve(documents);
         })
-        .catch(err => {
+        .catch((err) => {
           reject(err);
         });
     });
@@ -217,9 +94,9 @@ export default class DocumentHandlerModel {
 
   getDocuments(fileNames) {
     let documents = [];
-    fileNames.forEach(fileName => {
+    fileNames.forEach((fileName) => {
       let document = this.allDocuments.find(
-        document => document.documentFileName === fileName
+        (document) => document.documentFileName === fileName
       );
       documents = [...documents, document];
     });
@@ -263,7 +140,7 @@ export default class DocumentHandlerModel {
       chapterInfo.hasSubChapters = true;
       this.chapterInfo = [...this.chapterInfo, chapterInfo];
       level = level + 1;
-      chapter.chapters.forEach(subChapter => {
+      chapter.chapters.forEach((subChapter) => {
         subChapter = this.setChapterInfo(subChapter, level, color);
       });
     } else {
@@ -273,13 +150,13 @@ export default class DocumentHandlerModel {
   }
 
   mergeChapterInfo() {
-    this.chapterInfo.forEach(item => {
+    this.chapterInfo.forEach((item) => {
       if (item.hasSubChapters && item.headerIdentifier) {
         item.chapters = this.chapterInfo.filter(
-          chapterItem => chapterItem.parent === item.headerIdentifier
+          (chapterItem) => chapterItem.parent === item.headerIdentifier
         );
         this.chapterInfo = this.chapterInfo.filter(
-          chapterItem => chapterItem.parent !== item.headerIdentifier
+          (chapterItem) => chapterItem.parent !== item.headerIdentifier
         );
       }
     });
@@ -311,7 +188,7 @@ export default class DocumentHandlerModel {
       }
       const document = await JSON.parse(text);
       this.internalId = 0;
-      document.chapters.forEach(chapter => {
+      document.chapters.forEach((chapter) => {
         this.setParentChapter(chapter, undefined);
         this.setInternalId(chapter);
         this.setScrollReferences(chapter);
@@ -329,7 +206,7 @@ export default class DocumentHandlerModel {
       return chapter;
     }
     if (chapter.chapters.length > 0) {
-      return chapter.chapters.find(child => {
+      return chapter.chapters.find((child) => {
         return this.findChapter(child, headerIdentifierToFind);
       });
     }
@@ -342,7 +219,7 @@ export default class DocumentHandlerModel {
    */
   getHeaderRef = (activeDocument, headerIdentifierToFind) => {
     let foundChapter;
-    activeDocument.chapters.some(chapter => {
+    activeDocument.chapters.some((chapter) => {
       foundChapter = this.findChapter(chapter, headerIdentifierToFind);
       return foundChapter;
     });
@@ -355,10 +232,10 @@ export default class DocumentHandlerModel {
    *
    * @memberof DocumentHandlerModel
    */
-  setScrollReferences = chapter => {
+  setScrollReferences = (chapter) => {
     chapter.scrollRef = React.createRef();
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
+      chapter.chapters.forEach((child) => {
         this.setScrollReferences(child);
       });
     }
@@ -367,7 +244,7 @@ export default class DocumentHandlerModel {
   setInternalId(chapter) {
     chapter.id = this.internalId;
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
+      chapter.chapters.forEach((child) => {
         this.internalId = this.internalId + 1;
         this.setInternalId(child);
       });
@@ -383,7 +260,7 @@ export default class DocumentHandlerModel {
   setParentChapter(chapter, parent) {
     chapter.parent = parent;
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
+      chapter.chapters.forEach((child) => {
         this.setParentChapter(child, chapter);
       });
     }

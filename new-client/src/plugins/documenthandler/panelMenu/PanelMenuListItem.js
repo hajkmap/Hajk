@@ -9,16 +9,16 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 
-const styles = theme => ({
+const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
   listItemIcon: { minWidth: theme.spacing(3) },
-  collapseIconRoot: { minWidth: theme.spacing(4) }
+  collapseIconRoot: { minWidth: theme.spacing(4) },
 });
 
 class PanelMenuListItem extends React.PureComponent {
   static propTypes = {
     onClick: PropTypes.func.isRequired,
-    item: PropTypes.object.isRequired
+    item: PropTypes.object.isRequired,
   };
 
   static defaultProps = { hasSubMenu: false };
@@ -47,7 +47,7 @@ class PanelMenuListItem extends React.PureComponent {
     );
   };
 
-  getListIcon = item => {
+  getListIcon = (item) => {
     const { classes } = this.props;
     return (
       <ListItemIcon className={classes.listItemIcon}>
@@ -76,7 +76,7 @@ class PanelMenuListItem extends React.PureComponent {
           className={classes.listItem}
           style={{
             paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
-            borderLeft: `${theme.spacing(1)}px solid ${item.color}`
+            borderLeft: `${theme.spacing(1)}px solid ${item.color}`,
           }}
         >
           {item.icon ? this.getListIcon(item) : null}

@@ -13,7 +13,7 @@ class MeasureModel {
     this.source = new VectorSource();
     this.vector = new VectorLayer({
       source: this.source,
-      style: this.createStyle
+      style: this.createStyle,
     });
     this.map.addLayer(this.vector);
     this.type = "LineString";
@@ -24,11 +24,11 @@ class MeasureModel {
     return [
       new Style({
         fill: new Fill({
-          color: "rgba(255, 255, 255, 0.3)"
+          color: "rgba(255, 255, 255, 0.3)",
         }),
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.5)",
-          width: 3
+          width: 3,
         }),
         text: new Text({
           textAlign: "center",
@@ -39,14 +39,14 @@ class MeasureModel {
           overflow: true,
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 0.5)",
-            width: 3
+            width: 3,
           }),
           offsetX: 0,
           offsetY: -10,
           rotation: 0,
-          scale: 1
-        })
-      })
+          scale: 1,
+        }),
+      }),
     ];
   };
 
@@ -55,8 +55,8 @@ class MeasureModel {
     this.measureTooltip.setPosition(undefined);
   };
 
-  handleDrawStart = e => {
-    e.feature.getGeometry().on("change", e => {
+  handleDrawStart = (e) => {
+    e.feature.getGeometry().on("change", (e) => {
       var toolTip = "",
         coord = undefined,
         pointerCoord;
@@ -82,7 +82,7 @@ class MeasureModel {
     });
   };
 
-  handleDrawEnd = e => {
+  handleDrawEnd = (e) => {
     this.setFeaturePropertiesFromGeometry(e.feature);
     this.measureTooltip.setPosition(undefined);
   };
@@ -111,7 +111,7 @@ class MeasureModel {
       area = 0,
       position = {
         n: 0,
-        e: 0
+        e: 0,
       };
     geom = feature.getGeometry();
     type = geom.getType();
@@ -119,7 +119,7 @@ class MeasureModel {
       case "Point":
         position = {
           n: Math.round(geom.getCoordinates()[1]),
-          e: Math.round(geom.getCoordinates()[0])
+          e: Math.round(geom.getCoordinates()[0]),
         };
         break;
       case "LineString":
@@ -143,12 +143,12 @@ class MeasureModel {
       length: length,
       area: area,
       radius: radius,
-      position: position
+      position: position,
     });
   }
 
   formatLabel(type, value) {
-    var label;
+    let label;
 
     if (type === "point") {
       label = "Nord: " + value.n + " Öst: " + value.e;
@@ -163,36 +163,38 @@ class MeasureModel {
     }
 
     if (type === "circle") {
-      let prefix = " m";
-      let prefixSq = " m²";
-      if (value >= 1e3) {
-        prefix = " km";
-        value = value / 1e3;
+      let unit = " m";
+      let squareUnit = " m²";
+      if (value >= 1000) {
+        unit = " km";
+        value = value / 1000;
       }
       label =
         "R = " +
-        value +
-        prefix +
+        Number(value).toLocaleString() +
+        unit +
         " \nA = " +
-        Math.round(value * value * Math.PI * 1e3) / 1e3 +
-        prefixSq;
+        (Math.round(value * value * Math.PI * 1000) / 1000).toLocaleString() +
+        squareUnit;
     }
 
     if (type === "area") {
-      if (value > 10000) {
-        label = Math.round((value / 1000000) * 100) / 100 + " km²";
+      if (value > 100000) {
+        label =
+          Number(Math.round((value / 1000000) * 100) / 100).toLocaleString() +
+          " km²";
       } else {
-        label = Math.round(value * 100) / 100 + " m²";
+        label = Number(Math.round(value * 100) / 100).toLocaleString() + " m²";
       }
     }
 
     if (type === "length") {
-      let prefix = " m";
-      if (value >= 1e3) {
-        prefix = " km";
-        value = value / 1e3;
+      let unit = " m";
+      if (value >= 1000) {
+        unit = " km";
+        value = value / 1000;
       }
-      label = value + prefix;
+      label = Number(value).toLocaleString() + unit;
     }
 
     return label;
@@ -209,7 +211,7 @@ class MeasureModel {
     this.measureTooltip = new Overlay({
       element: this.measureTooltipElement,
       offset: [0, -15],
-      positioning: "bottom-center"
+      positioning: "bottom-center",
     });
     this.map.addOverlay(this.measureTooltip);
   }
@@ -237,30 +239,30 @@ class MeasureModel {
       type: this.type,
       style: new Style({
         fill: new Fill({
-          color: "rgba(255, 255, 255, 0.2)"
+          color: "rgba(255, 255, 255, 0.2)",
         }),
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.5)",
           lineDash: [10, 10],
-          width: 2
+          width: 2,
         }),
         image: new CircleStyle({
           radius: 5,
           stroke: new Stroke({
-            color: "rgba(0, 0, 0, 0.7)"
+            color: "rgba(0, 0, 0, 0.7)",
           }),
           fill: new Fill({
-            color: "rgba(255, 255, 255, 0.2)"
-          })
-        })
-      })
+            color: "rgba(255, 255, 255, 0.2)",
+          }),
+        }),
+      }),
     });
     this.draw.on("drawstart", this.handleDrawStart);
     this.draw.on("drawend", this.handleDrawEnd);
     this.map.addInteraction(this.draw);
   }
 
-  eventHandler = event => {
+  eventHandler = (event) => {
     const key = event.key; // Or const {key} = event; in ES6+
     if (key === "Escape") {
       this.draw.finishDrawing();
@@ -271,10 +273,12 @@ class MeasureModel {
     if (active && !this.active) {
       document.addEventListener("keydown", this.eventHandler);
       this.addInteraction();
+      this.map.clickLock.add("measure");
     }
     if (active === false) {
       document.removeEventListener("keydown", this.eventHandler);
       this.removeInteraction();
+      this.map.clickLock.delete("measure");
     }
     this.active = active;
   }

@@ -9,20 +9,20 @@ import { Box, Typography } from "@material-ui/core";
 // Define JSS styles that will be used in this component.
 // Example below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
-const styles = theme => ({
+const styles = (theme) => ({
   buttonWithBottomMargin: {
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(2),
   },
   drawerContent: {
     paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2)
-  }
+    paddingRight: theme.spacing(2),
+  },
 });
 
 class DummyView extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
-    counter: 0
+    counter: 0,
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -35,7 +35,7 @@ class DummyView extends React.PureComponent {
     localObserver: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
-    closeSnackbar: PropTypes.func.isRequired
+    closeSnackbar: PropTypes.func.isRequired,
   };
 
   static defaultProps = {};
@@ -53,7 +53,7 @@ class DummyView extends React.PureComponent {
       ButtonIcon: BugReportIcon,
       caption: "Dummyverktyg",
       order: 100,
-      renderDrawerContent: this.renderDrawerContent
+      renderDrawerContent: this.renderDrawerContent,
     });
   }
 
@@ -125,8 +125,8 @@ class DummyView extends React.PureComponent {
     );
 
     // And we can of course access this component's state
-    this.setState(prevState => ({
-      counter: prevState.counter + 1
+    this.setState((prevState) => ({
+      counter: prevState.counter + 1,
     }));
   };
 
@@ -142,7 +142,7 @@ class DummyView extends React.PureComponent {
 
   // A more complicate snackbar example, this one with an action button and persistent snackbar
   showAdvancedSnackbar = () => {
-    const action = key => (
+    const action = (key) => (
       <>
         <Button
           onClick={() => {
@@ -164,7 +164,7 @@ class DummyView extends React.PureComponent {
     this.props.enqueueSnackbar("Oops, a message with error styling!", {
       variant: "error",
       persist: true,
-      action
+      action,
     });
   };
 

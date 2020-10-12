@@ -2,20 +2,20 @@ import React from "react";
 import { Button, Paper, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   button: {
-    minWidth: "unset"
-  }
+    minWidth: "unset",
+  },
 }));
 
 export default function PluginControlButton({
   icon,
   onClick,
   title,
-  abstract
+  abstract,
 }) {
   const classes = useStyles();
 

@@ -29,11 +29,11 @@ class Print extends React.PureComponent {
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired
+    options: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
-    options: {}
+    options: {},
   };
 
   constructor(props) {
@@ -44,7 +44,7 @@ class Print extends React.PureComponent {
     this.printModel = new PrintModel({
       localObserver: this.localObserver,
       app: props.app,
-      map: props.map
+      map: props.map,
     });
   }
 
@@ -68,7 +68,7 @@ class Print extends React.PureComponent {
           height: 500,
           width: 250,
           onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide
+          onWindowHide: this.onWindowHide,
         }}
       >
         <PrintView

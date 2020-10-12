@@ -17,71 +17,71 @@ import BreadCrumbs from "./components/BreadCrumbs.js";
 import Alert from "../../components/Alert.js";
 import { withSnackbar } from "notistack";
 
-const styles = theme => ({
+const styles = (theme) => ({
   rightIcon: {
     marginLeft: theme.spacing(1),
-    cursor: "pointer"
+    cursor: "pointer",
   },
   icon: {
-    marginRight: theme.spacing(1)
+    marginRight: theme.spacing(1),
   },
   chapter: {},
   toc: {
-    marginBottom: "10px"
+    marginBottom: "10px",
   },
   tocHeader: {
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
   },
   tocContainer: {
     borderBottom: "1px solid #ccc",
-    padding: "10px 0"
+    padding: "10px 0",
   },
   tocChapter: {
     display: "flex",
-    cursor: "pointer"
+    cursor: "pointer",
   },
   tocChapters: {
-    marginLeft: "10px"
+    marginLeft: "10px",
   },
   tocChapterExpander: {
     width: "30px",
-    height: "30px"
+    height: "30px",
   },
   tocChapterHeader: {
-    textDecoration: "underline"
+    textDecoration: "underline",
   },
   content: {
-    userSelect: "all",
+    userSelect: "text",
     cursor: "auto",
     "& img": {
-      maxWidth: "100%"
+      maxWidth: "100%",
     },
     "& figure": {
-      margin: 0
-    }
+      margin: 0,
+    },
   },
   layers: {
-    marginTop: "10px"
+    marginTop: "10px",
   },
   markup: {
     "& h1": {
-      lineHeight: "normal"
+      lineHeight: "normal",
     },
     "& h2": {
-      lineHeight: "normal"
+      lineHeight: "normal",
     },
     "& h3": {
-      lineHeight: "normal"
+      lineHeight: "normal",
     },
     "& h4": {
-      lineHeight: "normal"
+      lineHeight: "normal",
     },
     "& h5": {
-      lineHeight: "normal"
+      lineHeight: "normal",
     },
     "& h6": {
-      lineHeight: "normal"
+      lineHeight: "normal",
     },
     "& blockquote": {
       borderLeft: "5px solid #eee",
@@ -89,28 +89,28 @@ const styles = theme => ({
       fontFamily: "Hoefler Text, Georgia, serif",
       fontStyle: "italic",
       margin: "16px 0",
-      padding: "10px 20px"
-    }
+      padding: "10px 20px",
+    },
   },
   loader: {
     opacity: 1,
-    transition: "opacity 2s ease-in"
+    transition: "opacity 2s ease-in",
   },
   button: {
-    margin: theme.spacing(1)
+    margin: theme.spacing(1),
   },
   legend: {
     border: "1px solid #999",
     padding: theme.spacing(1),
     flexFlow: "row wrap",
     display: "flex",
-    borderRadius: "5px"
+    borderRadius: "5px",
   },
   legendItem: {
     margin: theme.spacing(1),
     fontWeight: 600,
-    textAlign: "center"
-  }
+    textAlign: "center",
+  },
 });
 
 const homeHeader = "";
@@ -130,13 +130,13 @@ class Informative extends React.PureComponent {
       chapters: [],
       chapter: {
         header: "",
-        html: "<span></span>"
-      }
+        html: "<span></span>",
+      },
     };
   }
 
   componentDidMount() {
-    this.props.parent.informativeModel.load(chapters => {
+    this.props.parent.informativeModel.load((chapters) => {
       this.toc = chapters;
       if (this.props.options.tocExpanded) {
         this.expandToc(this.toc);
@@ -145,19 +145,19 @@ class Informative extends React.PureComponent {
         chapters: chapters,
         chapter: {
           header: homeHeader,
-          html: homeHtml
-        }
+          html: homeHtml,
+        },
       };
       this.setState(state);
       this.props.app.globalObserver.publish("informativeLoaded", chapters);
     });
-    this.props.observer.subscribe("changeChapter", chapter => {
+    this.props.observer.subscribe("changeChapter", (chapter) => {
       if (chapter && chapter !== "home") {
         this.setState({
           chapters: chapter.chapters,
           chapter: chapter,
           displayLegend: false,
-          tocVisible: false
+          tocVisible: false,
         });
       }
       if (chapter === "home") {
@@ -165,15 +165,15 @@ class Informative extends React.PureComponent {
           chapters: this.toc,
           chapter: {
             header: homeHeader,
-            html: homeHtml
+            html: homeHtml,
           },
           tocVisible: false,
-          displayLegend: false
+          displayLegend: false,
         });
       }
     });
 
-    this.props.observer.subscribe("showSnackbar", params => {
+    this.props.observer.subscribe("showSnackbar", (params) => {
       const { message, options } = params;
       this.props.enqueueSnackbar(message, options);
     });
@@ -181,7 +181,7 @@ class Informative extends React.PureComponent {
 
   expandToc(chapters) {
     if (Array.isArray(chapters)) {
-      chapters.forEach(chapter => {
+      chapters.forEach((chapter) => {
         chapter.tocExpanded = true;
         if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
           this.expandToc(chapter.chapters);
@@ -190,13 +190,13 @@ class Informative extends React.PureComponent {
     }
   }
 
-  displayMap = (layers, mapSettings) => e => {
+  displayMap = (layers, mapSettings) => (e) => {
     this.props.parent.informativeModel.displayMap(layers, mapSettings);
     if (window.innerWidth < 600) {
       this.props.app.globalObserver.publish("core.minimizeWindow");
     }
     this.setState({
-      displayLegend: true
+      displayLegend: true,
     });
   };
 
@@ -256,7 +256,7 @@ class Informative extends React.PureComponent {
                   chapters: chapter.chapters,
                   chapter: chapter,
                   tocVisible: false,
-                  displayLegend: false
+                  displayLegend: false,
                 };
                 this.setState(state);
               }}
@@ -291,7 +291,7 @@ class Informative extends React.PureComponent {
 
   findParentInToc(lookupChapter, chapters, parent) {
     var foundParent = false;
-    chapters.forEach(chapter => {
+    chapters.forEach((chapter) => {
       if (chapter.chapters.length > 0 && !foundParent) {
         foundParent = this.findParentInToc(
           lookupChapter,
@@ -302,7 +302,7 @@ class Informative extends React.PureComponent {
       if (lookupChapter === chapter && !foundParent) {
         foundParent = {
           chapter: parent,
-          chapters: chapters
+          chapters: chapters,
         };
       }
     });
@@ -315,9 +315,9 @@ class Informative extends React.PureComponent {
       this.setState({
         chapter: parent.chapter || {
           header: homeHeader,
-          html: homeHtml
+          html: homeHtml,
         },
-        chapters: parent.chapters
+        chapters: parent.chapters,
       });
     }
   };
@@ -340,16 +340,16 @@ class Informative extends React.PureComponent {
 
   toggleToc = () => {
     this.setState({
-      tocVisible: !this.state.tocVisible
+      tocVisible: !this.state.tocVisible,
     });
   };
 
   print = () => {
     this.setState({
       loading: true,
-      url: false
+      url: false,
     });
-    this.props.parent.informativeModel.print(this.state.chapter, url => {
+    this.props.parent.informativeModel.print(this.state.chapter, (url) => {
       if (undefined !== this.props.options.exportRoot) {
         url = this.props.options.exportRoot + url;
       }
@@ -357,12 +357,12 @@ class Informative extends React.PureComponent {
         this.setState({
           loading: false,
           url: false,
-          alert: true
+          alert: true,
         });
       } else {
         this.setState({
           url: url,
-          loading: false
+          loading: false,
         });
       }
     });
@@ -370,7 +370,7 @@ class Informative extends React.PureComponent {
 
   toggleLegend = () => {
     this.setState({
-      displayLegend: !this.state.displayLegend
+      displayLegend: !this.state.displayLegend,
     });
   };
 
@@ -408,7 +408,7 @@ class Informative extends React.PureComponent {
               rel="noopener noreferrer"
               onClick={() => {
                 this.setState({
-                  url: ""
+                  url: "",
                 });
               }}
             >

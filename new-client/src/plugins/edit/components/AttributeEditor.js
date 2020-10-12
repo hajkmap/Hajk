@@ -9,33 +9,33 @@ import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 
-const styles = theme => ({
+const styles = (theme) => ({
   container: {
     display: "flex",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   textField: {
     marginLeft: 0,
     marginRight: 0,
-    width: "100%"
+    width: "100%",
   },
   dense: {
-    marginTop: 16
+    marginTop: 16,
   },
   menu: {
-    width: 200
+    width: 200,
   },
   formControl: {
     marginTop: "8px",
-    marginBottom: "8px"
+    marginBottom: "8px",
   },
   error: {
     color: "rgb(255, 50, 50)",
     backgroundColor: "rgb(255, 150, 150)",
     padding: "5px",
     border: "1px solid rgb(255, 50, 50)",
-    borderRadius: "4px"
-  }
+    borderRadius: "4px",
+  },
 });
 
 class AttributeEditor extends React.PureComponent {
@@ -43,13 +43,13 @@ class AttributeEditor extends React.PureComponent {
     super(props);
     this.state = {
       disabled: true,
-      formValues: {}
+      formValues: {},
     };
     this.formErrors = {};
   }
 
   componentDidMount() {
-    this.props.observer.subscribe("editFeature", attr => {
+    this.props.observer.subscribe("editFeature", (attr) => {
       var valueMap = {},
         feature = this.props.model.editFeature,
         source = this.props.model.editSource,
@@ -59,17 +59,17 @@ class AttributeEditor extends React.PureComponent {
       if (!feature || !source) return;
 
       props = feature.getProperties();
-      source.editableFields.forEach(field => {
+      source.editableFields.forEach((field) => {
         field.initialRender = true;
         if (field.textType === "flerval") {
-          valueMap[field.name] = field.values.map(value => {
+          valueMap[field.name] = field.values.map((value) => {
             return {
               name: value,
               checked:
                 typeof props[field.name] === "string"
-                  ? props[field.name].split(";").find(v => v === value) !==
+                  ? props[field.name].split(";").find((v) => v === value) !==
                     undefined
-                  : false
+                  : false,
             };
           });
         } else {
@@ -78,20 +78,20 @@ class AttributeEditor extends React.PureComponent {
       });
 
       this.setState({
-        formValues: valueMap
+        formValues: valueMap,
       });
     });
   }
 
   updateFeature(formValues) {
     var props = this.props.model.editFeature.getProperties();
-    Object.keys(this.state.formValues).forEach(key => {
+    Object.keys(this.state.formValues).forEach((key) => {
       var value = this.state.formValues[key];
       if (value === "") value = null;
       if (Array.isArray(value)) {
         value = value
-          .filter(v => v.checked)
-          .map(v => v.name)
+          .filter((v) => v.checked)
+          .map((v) => v.name)
           .join(";");
       }
       props[key] = value;
@@ -110,7 +110,7 @@ class AttributeEditor extends React.PureComponent {
     }
     this.setState(
       {
-        formValues: formValues
+        formValues: formValues,
       },
       () => {
         this.updateFeature();
@@ -130,7 +130,7 @@ class AttributeEditor extends React.PureComponent {
     }
     this.setState(
       {
-        formValues: formValues
+        formValues: formValues,
       },
       () => {
         this.updateFeature();
@@ -152,7 +152,7 @@ class AttributeEditor extends React.PureComponent {
     }
     this.setState(
       {
-        formValues: formValues
+        formValues: formValues,
       },
       () => {
         this.updateFeature();
@@ -165,7 +165,7 @@ class AttributeEditor extends React.PureComponent {
     formValues[name] = value;
     this.setState(
       {
-        formValues: formValues
+        formValues: formValues,
       },
       () => {
         this.updateFeature();
@@ -178,7 +178,7 @@ class AttributeEditor extends React.PureComponent {
     formValues[name] = value;
     this.setState(
       {
-        formValues: formValues
+        formValues: formValues,
       },
       () => {
         this.updateFeature();
@@ -191,7 +191,7 @@ class AttributeEditor extends React.PureComponent {
     formValues[name][index].checked = checked;
     this.setState(
       {
-        formValues: formValues
+        formValues: formValues,
       },
       () => {
         this.updateFeature();
@@ -205,7 +205,7 @@ class AttributeEditor extends React.PureComponent {
     this.updateFeature();
     this.setState(
       {
-        formValues: formValues
+        formValues: formValues,
       },
       () => {
         this.updateFeature();
@@ -265,7 +265,7 @@ class AttributeEditor extends React.PureComponent {
             margin="normal"
             variant="outlined"
             value={value}
-            onChange={e => {
+            onChange={(e) => {
               this.setChanged();
               this.checkInteger(field.name, e.target.value);
               field.initialRender = false;
@@ -281,7 +281,7 @@ class AttributeEditor extends React.PureComponent {
             margin="normal"
             variant="outlined"
             value={value}
-            onChange={e => {
+            onChange={(e) => {
               this.setChanged();
               this.checkNumber(field.name, e.target.value);
               field.initialRender = false;
@@ -298,13 +298,13 @@ class AttributeEditor extends React.PureComponent {
             margin="normal"
             variant="outlined"
             value={value}
-            onChange={e => {
+            onChange={(e) => {
               this.setChanged();
               this.checkDate(field.name, e.target.value);
               field.initialRender = false;
             }}
             InputLabelProps={{
-              shrink: true
+              shrink: true,
             }}
           />
         );
@@ -319,12 +319,12 @@ class AttributeEditor extends React.PureComponent {
               margin="normal"
               variant="outlined"
               value={value}
-              onChange={e => {
+              onChange={(e) => {
                 this.setChanged();
                 this.checkText(field.name, e.target.value);
                 field.initialRender = false;
               }}
-              onBlur={e => {
+              onBlur={(e) => {
                 this.setChanged();
                 if (field.textType === "url") {
                   this.checkUrl(field.name, e.target.value);
@@ -341,8 +341,8 @@ class AttributeEditor extends React.PureComponent {
           defaultValues = field.defaultValue.split(",");
         }
         if (field.initialRender) {
-          defaultValues.forEach(defaultValue => {
-            value.forEach(val => {
+          defaultValues.forEach((defaultValue) => {
+            value.forEach((val) => {
               if (defaultValue === val.name) {
                 val.checked = true;
               }
@@ -352,8 +352,8 @@ class AttributeEditor extends React.PureComponent {
 
         let checkboxes = field.values.map((val, i) => {
           var id = field.name + i,
-            item = value.find(item => item.name === val) || {
-              checked: false
+            item = value.find((item) => item.name === val) || {
+              checked: false,
             };
 
           return (
@@ -362,7 +362,7 @@ class AttributeEditor extends React.PureComponent {
               control={
                 <Checkbox
                   checked={item.checked}
-                  onChange={e => {
+                  onChange={(e) => {
                     this.setChanged();
                     this.checkMultiple(field.name, e.target.checked, val, i);
                     field.initialRender = false;
@@ -397,7 +397,7 @@ class AttributeEditor extends React.PureComponent {
               <NativeSelect
                 value={value}
                 input={<Input name={field.name} id={field.name} />}
-                onChange={e => {
+                onChange={(e) => {
                   this.setChanged();
                   this.checkSelect(field.name, e.target.value);
                   field.initialRender = false;

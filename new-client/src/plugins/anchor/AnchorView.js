@@ -12,20 +12,20 @@ import {
   InputAdornment,
   TextField,
   Tooltip,
-  Typography
+  Typography,
 } from "@material-ui/core";
 
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 
-const styles = theme => ({
+const styles = (theme) => ({
   margin: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   root: {
     "& input": {
-      fontFamily: "monospace"
-    }
-  }
+      fontFamily: "monospace",
+    },
+  },
 });
 
 class AnchorView extends React.PureComponent {
@@ -36,11 +36,11 @@ class AnchorView extends React.PureComponent {
     enqueueSnackbar: PropTypes.func.isRequired,
     localObserver: PropTypes.object.isRequired,
     model: PropTypes.object.isRequired,
-    toggleCleanUrl: PropTypes.func.isRequired
+    toggleCleanUrl: PropTypes.func.isRequired,
   };
 
   state = {
-    anchor: this.props.model.getAnchor()
+    anchor: this.props.model.getAnchor(),
   };
 
   constructor(props) {
@@ -50,19 +50,19 @@ class AnchorView extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.localObserver.subscribe("mapUpdated", anchor => {
+    this.localObserver.subscribe("mapUpdated", (anchor) => {
       this.setState({
-        anchor: anchor
+        anchor: anchor,
       });
     });
   }
 
-  handleClickOnCopyToClipboard = e => {
+  handleClickOnCopyToClipboard = (e) => {
     const input = document.getElementById("anchorUrl");
     input.select();
     document.execCommand("copy") &&
       this.props.enqueueSnackbar("Kopiering till urklipp lyckades!", {
-        variant: "info"
+        variant: "info",
       });
   };
 
@@ -92,7 +92,7 @@ class AnchorView extends React.PureComponent {
                   </Tooltip>
                 </InputAdornment>
               ),
-              readOnly: true
+              readOnly: true,
             }}
             value={this.state.anchor}
             variant="outlined"

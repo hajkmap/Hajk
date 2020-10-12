@@ -3,10 +3,10 @@ import { withStyles } from "@material-ui/core/styles";
 import CollectorForm from "./components/CollectorForm.js";
 import "./style.css";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     hidden: {
-      display: "none"
+      display: "none",
     },
     popup: {
       position: "absolute",
@@ -25,15 +25,15 @@ const styles = theme => {
         left: "10px",
         right: "10px",
         marginLeft: "auto",
-        width: "auto"
-      }
+        width: "auto",
+      },
     },
     right: {
-      float: "right"
+      float: "right",
     },
     left: {
-      float: "left"
-    }
+      float: "left",
+    },
   };
 };
 

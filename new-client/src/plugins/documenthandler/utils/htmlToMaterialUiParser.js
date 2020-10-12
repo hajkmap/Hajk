@@ -13,14 +13,14 @@ export default (html, tagSpecificCallbacks) => {
   }
 
   let generatedHtml = [...htmlDoc.body.children];
-  return generatedHtml.map(tag => {
+  return generatedHtml.map((tag) => {
     if (tag.callback) return tag.callback(tag);
     return null;
   });
 };
 
 const parseChild = (child, tagSpecificCallbacks) => {
-  let callbackObject = tagSpecificCallbacks.find(object => {
+  let callbackObject = tagSpecificCallbacks.find((object) => {
     return object.tagType.toLowerCase() === child.tagName.toLowerCase();
   });
   child.callback = callbackObject.callback;

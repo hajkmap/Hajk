@@ -5,7 +5,7 @@ class PanelMenuView extends React.PureComponent {
   setInternalId(menuItem) {
     menuItem.id = this.internalId;
     if (menuItem.menu.length > 0) {
-      menuItem.menu.forEach(child => {
+      menuItem.menu.forEach((child) => {
         this.internalId = this.internalId + 1;
         this.setInternalId(child);
       });
@@ -15,7 +15,7 @@ class PanelMenuView extends React.PureComponent {
     super(props);
 
     this.internalId = 0;
-    props.options.menuConfig.menu.forEach(menuItem => {
+    props.options.menuConfig.menu.forEach((menuItem) => {
       this.setMenuItemLevel(menuItem, 0);
       this.setInternalId(menuItem);
       this.internalId = this.internalId + 1;
@@ -27,15 +27,15 @@ class PanelMenuView extends React.PureComponent {
   bindSubscriptions = () => {
     const { localObserver } = this.props;
 
-    localObserver.subscribe("document-clicked", item => {
+    localObserver.subscribe("document-clicked", (item) => {
       localObserver.publish("show-document", item.document);
     });
 
-    localObserver.subscribe("link-clicked", item => {
+    localObserver.subscribe("link-clicked", (item) => {
       window.open(item.link, "_blank");
     });
 
-    localObserver.subscribe("maplink-clicked", item => {
+    localObserver.subscribe("maplink-clicked", (item) => {
       localObserver.publish("fly-to", item.maplink);
     });
   };
@@ -44,7 +44,7 @@ class PanelMenuView extends React.PureComponent {
     menuItem.level = level;
     level = level + 1;
     if (menuItem.menu && menuItem.menu.length > 0) {
-      menuItem.menu.forEach(subMenuItem => {
+      menuItem.menu.forEach((subMenuItem) => {
         this.setMenuItemLevel(subMenuItem, level);
       });
     }

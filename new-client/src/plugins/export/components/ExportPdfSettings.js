@@ -10,39 +10,39 @@ import {
   Input,
   InputLabel,
   NativeSelect,
-  LinearProgress
+  LinearProgress,
 } from "@material-ui/core";
 import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import PictureAsPdf from "@material-ui/icons/PictureAsPdf";
 
 import { getCenter } from "ol/extent.js";
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex",
     flexGrow: 1,
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120
+    minWidth: 120,
   },
   selectEmpty: {
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
   },
   loader: {
     opacity: 1,
-    transition: "opacity 2s ease-in"
+    transition: "opacity 2s ease-in",
   },
   icon: {
-    marginRight: theme.spacing(1)
-  }
+    marginRight: theme.spacing(1),
+  },
 });
 
 class ExportPdfSettings extends React.PureComponent {
   static propTypes = {
     classes: propTypes.object.isRequired,
     localObserver: propTypes.object.isRequired,
-    model: propTypes.object.isRequired
+    model: propTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -60,7 +60,7 @@ class ExportPdfSettings extends React.PureComponent {
         ? props.model.getPreviewCenter()
         : props.model.map.getView().getCenter(),
       loading: false,
-      previewLayerVisible: false
+      previewLayerVisible: false,
     };
 
     props.localObserver.subscribe("showPreviewLayer", () => {
@@ -75,27 +75,27 @@ class ExportPdfSettings extends React.PureComponent {
   }
 
   getPaperMeasures() {
-    var pageSize = format => {
+    var pageSize = (format) => {
       switch (format) {
         case "A4":
           return {
             width: this.getOrientation() === "L" ? 297 : 210,
-            height: this.getOrientation() === "L" ? 210 : 297
+            height: this.getOrientation() === "L" ? 210 : 297,
           };
         case "A3":
           return {
             width: this.getOrientation() === "L" ? 420 : 297,
-            height: this.getOrientation() === "L" ? 297 : 420
+            height: this.getOrientation() === "L" ? 297 : 420,
           };
         case "A2":
           return {
             width: this.getOrientation() === "L" ? 594 : 420,
-            height: this.getOrientation() === "L" ? 420 : 594
+            height: this.getOrientation() === "L" ? 420 : 594,
           };
         default: {
           return {
             width: 0,
-            height: 0
+            height: 0,
           };
         }
       }
@@ -106,7 +106,7 @@ class ExportPdfSettings extends React.PureComponent {
 
     return {
       width: width / 25.4,
-      height: height / 25.4
+      height: height / 25.4,
     };
   }
 
@@ -117,7 +117,7 @@ class ExportPdfSettings extends React.PureComponent {
       dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
     return {
       width: size.width * dpi,
-      height: size.height * dpi
+      height: size.height * dpi,
     };
   }
 
@@ -141,42 +141,42 @@ class ExportPdfSettings extends React.PureComponent {
     return this.state.selectFormat;
   }
 
-  setFormat = e => {
+  setFormat = (e) => {
     this.setState({
-      selectFormat: e.target.value
+      selectFormat: e.target.value,
     });
   };
 
-  setResolution = e => {
+  setResolution = (e) => {
     this.setState({
-      selectResolution: e.target.value
+      selectResolution: e.target.value,
     });
   };
 
-  setScale = e => {
+  setScale = (e) => {
     this.setState({
-      selectScale: e.target.value
+      selectScale: e.target.value,
     });
   };
 
-  setCenter = val => {
+  setCenter = (val) => {
     this.setState({
-      center: val
+      center: val,
     });
   };
 
-  setManualScale = e => {
+  setManualScale = (e) => {
     var v = e.target.value.startsWith("1:")
       ? e.target.value.split(":")[1]
       : e.target.value;
     this.setState({
-      manualScale: v
+      manualScale: v,
     });
   };
 
-  setOrientation = e => {
+  setOrientation = (e) => {
     this.setState({
-      selectOrientation: e.target.value
+      selectOrientation: e.target.value,
     });
   };
 
@@ -189,10 +189,7 @@ class ExportPdfSettings extends React.PureComponent {
       paper = this.getPreviewPaperMeasures(),
       center = this.props.model.getPreviewFeature()
         ? getCenter(
-            this.props.model
-              .getPreviewFeature()
-              .getGeometry()
-              .getExtent()
+            this.props.model.getPreviewFeature().getGeometry().getExtent()
           )
         : map.getView().getCenter();
 
@@ -241,22 +238,22 @@ class ExportPdfSettings extends React.PureComponent {
     }
   }
 
-  exportPDF = e => {
+  exportPDF = (e) => {
     this.setState({
       url: false,
-      loading: true
+      loading: true,
     });
     var options = {
       size: this.getPaperMeasures(),
       format: this.getFormat(),
       orientation: this.getOrientation(),
       scale: this.getScale(),
-      resolution: this.getResolution()
+      resolution: this.getResolution(),
     };
 
-    this.props.model.exportPDF(options, pdfUrl => {
+    this.props.model.exportPDF(options, (pdfUrl) => {
       let newState = {
-        loading: false
+        loading: false,
       };
 
       // Set URL in state only if respons ends with ".pdf"
@@ -266,7 +263,7 @@ class ExportPdfSettings extends React.PureComponent {
         this.props.enqueueSnackbar(
           "Utskriften kunde inte skapas. Prova med lägre upplösning, mindre område eller färre lager i kartan.",
           {
-            variant: "error"
+            variant: "error",
           }
         );
       }

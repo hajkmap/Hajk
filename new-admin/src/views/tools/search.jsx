@@ -28,14 +28,14 @@ import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 /**
@@ -61,7 +61,7 @@ const defaultState = {
   strokeColor: { r: 244, g: 83, b: 63, a: 1 },
   strokeWidth: 4,
   fillColor: { r: 244, g: 83, b: 63, a: 0.2 },
-
+  showInMapOnSearchResult: false,
   polygonSearch: false,
   radiusSearch: false,
   autoHideSearchResults: false,
@@ -77,7 +77,7 @@ const defaultState = {
   // Only local state, not used in save()
   validationErrors: [],
   searchableLayers: {},
-  tree: ""
+  tree: "",
 };
 
 class ToolOptions extends Component {
@@ -114,7 +114,7 @@ class ToolOptions extends Component {
           strokeColor: tool.options.strokeColor || this.state.strokeColor,
           strokeWidth: tool.options.strokeWidth || this.state.strokeWidth,
           fillColor: tool.options.fillColor || this.state.fillColor,
-
+          showInMapOnSearchResult: tool.options.showInMapOnSearchResult,
           polygonSearch: tool.options.polygonSearch,
           radiusSearch: tool.options.radiusSearch,
           selectionSearch: tool.options.selectionSearch,
@@ -135,7 +135,7 @@ class ToolOptions extends Component {
           layers: tool.options.layers ? tool.options.layers : [],
           visibleForGroups: tool.options.visibleForGroups
             ? tool.options.visibleForGroups
-            : []
+            : [],
         },
         () => {
           this.loadLayers();
@@ -144,7 +144,7 @@ class ToolOptions extends Component {
       );
     } else {
       this.setState({
-        active: false
+        active: false,
       });
     }
   }
@@ -186,16 +186,16 @@ class ToolOptions extends Component {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
     this.setState({
-      [name]: value
+      [name]: value,
     });
   }
 
   loadSearchableLayers() {
     this.props.model.getConfig(
       this.props.model.get("config").url_layers,
-      layers => {
+      (layers) => {
         this.setState({
-          searchableLayers: layers.wfslayers
+          searchableLayers: layers.wfslayers,
         });
 
         this.setState({
@@ -207,7 +207,7 @@ class ToolOptions extends Component {
               loadLayers={this.loadLayers}
               authActive={this.props.parent.props.parent.state.authActive}
             />
-          )
+          ),
         });
       }
     );
@@ -216,7 +216,7 @@ class ToolOptions extends Component {
   getTool() {
     return this.props.model
       .get("toolConfig")
-      .find(tool => tool.type === this.type);
+      .find((tool) => tool.type === this.type);
   }
 
   add(tool) {
@@ -227,12 +227,12 @@ class ToolOptions extends Component {
     this.props.model.set({
       toolConfig: this.props.model
         .get("toolConfig")
-        .filter(tool => tool.type !== this.type)
+        .filter((tool) => tool.type !== this.type),
     });
   }
 
   replace(tool) {
-    this.props.model.get("toolConfig").forEach(t => {
+    this.props.model.get("toolConfig").forEach((t) => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -251,7 +251,7 @@ class ToolOptions extends Component {
         strokeColor: this.state.strokeColor,
         strokeWidth: this.state.strokeWidth,
         fillColor: this.state.fillColor,
-
+        showInMapOnSearchResult: this.state.showInMapOnSearchResult,
         polygonSearch: this.state.polygonSearch,
         radiusSearch: this.state.radiusSearch,
         autoHideSearchResults: this.state.autoHideSearchResults,
@@ -268,8 +268,8 @@ class ToolOptions extends Component {
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
-        )
-      }
+        ),
+      },
     };
 
     var existing = this.getTool();
@@ -280,7 +280,7 @@ class ToolOptions extends Component {
         () => {
           this.props.parent.props.parent.setState({
             alert: true,
-            alertMessage: "Uppdateringen lyckades"
+            alertMessage: "Uppdateringen lyckades",
           });
         }
       );
@@ -297,7 +297,7 @@ class ToolOptions extends Component {
             this.remove();
             update.call(this);
             this.setState(defaultState);
-          }
+          },
         });
       } else {
         this.remove();
@@ -325,7 +325,7 @@ class ToolOptions extends Component {
     }
 
     this.setState({
-      visibleForGroups: value !== "" ? groups : []
+      visibleForGroups: value !== "" ? groups : [],
     });
   }
 
@@ -341,7 +341,7 @@ class ToolOptions extends Component {
               value={this.state.visibleForGroups}
               type="text"
               name="visibleForGroups"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleAuthGrpsChange(e);
               }}
             />
@@ -363,31 +363,31 @@ class ToolOptions extends Component {
       if (e.target.checked) {
         let toAdd = {
           id: layer.id.toString(),
-          visibleForGroups: []
+          visibleForGroups: [],
         };
         this.setState({
-          layers: [...this.state.layers, toAdd]
+          layers: [...this.state.layers, toAdd],
         });
       } else {
         let newArray = this.state.layers.filter(
-          o => o.id !== layer.id.toString()
+          (o) => o.id !== layer.id.toString()
         );
 
         this.setState({
-          layers: newArray
+          layers: newArray,
         });
       }
     }
     if (e.target.type.toLowerCase() === "text") {
-      let obj = this.state.layers.find(o => o.id === layer.id.toString());
+      let obj = this.state.layers.find((o) => o.id === layer.id.toString());
       let newArray = this.state.layers.filter(
-        o => o.id !== layer.id.toString()
+        (o) => o.id !== layer.id.toString()
       );
 
       // Skapar array och trimmar whitespace från start och slut av varje cell
       if (typeof obj !== "undefined") {
         obj.visibleForGroups = e.target.value.split(",");
-        obj.visibleForGroups = obj.visibleForGroups.map(el => el.trim());
+        obj.visibleForGroups = obj.visibleForGroups.map((el) => el.trim());
       }
 
       newArray.push(obj);
@@ -403,7 +403,7 @@ class ToolOptions extends Component {
       }
 
       this.setState({
-        layers: newArray
+        layers: newArray,
       });
     }
   }
@@ -437,33 +437,33 @@ class ToolOptions extends Component {
 
   loadSources = () => {
     var urlLayers = this.props.model.get("config").url_layers;
-    this.props.model.getConfig(urlLayers, layersConfig => {
+    this.props.model.getConfig(urlLayers, (layersConfig) => {
       var layers = this.flattern(
         this.props.model.get("layerMenuConfig").groups
       );
 
-      layers = layers.map(layer => {
+      layers = layers.map((layer) => {
         return {
           id: layer.id,
-          name: this.lookup(layer.id, layersConfig)
+          name: this.lookup(layer.id, layersConfig),
         };
       });
 
       this.setState({
-        sources: layers
+        sources: layers,
       });
     });
   };
 
-  selectedSourceChange = (id, checked) => e => {
+  selectedSourceChange = (id, checked) => (e) => {
     var selectedSources = checked
       ? this.state.selectedSources.filter(
-          selectedSource => selectedSource !== id
+          (selectedSource) => selectedSource !== id
         )
       : [id, ...this.state.selectedSources];
 
     this.setState({
-      selectedSources: selectedSources
+      selectedSources: selectedSources,
     });
   };
 
@@ -473,7 +473,9 @@ class ToolOptions extends Component {
       <ul>
         {sources.map((source, i) => {
           var id = "layer_" + source.id;
-          var checked = this.state.selectedSources.some(id => id === source.id);
+          var checked = this.state.selectedSources.some(
+            (id) => id === source.id
+          );
           return (
             <li key={i}>
               <input
@@ -514,7 +516,7 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 this.save();
               }}
@@ -528,7 +530,7 @@ class ToolOptions extends Component {
               id="active"
               name="active"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.active}
@@ -552,17 +554,7 @@ class ToolOptions extends Component {
             />
           </div> */}
           <div className="separator">Generella sökinställningar</div>
-          <div>
-            <label htmlFor="tooltip">Placeholdertext för sökrutan</label>
-            <input
-              value={this.state.tooltip}
-              type="text"
-              name="tooltip"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
+
           <div>
             <label htmlFor="maxFeatures">Max antal sökträffar</label>
             <input
@@ -572,7 +564,7 @@ class ToolOptions extends Component {
               step="10"
               name="maxFeatures"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -589,17 +581,32 @@ class ToolOptions extends Component {
               step="100"
               name="delayBeforeAutoSearch"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
           </div>
           <div>
             <input
+              value={this.state.showInMapOnSearchResult}
+              type="checkbox"
+              name="showInMapOnSearchResult"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.showInMapOnSearchResult}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="showInMapOnSearchResult">
+              Visa sökresultat i kartan vid sökning
+            </label>
+          </div>
+          <div>
+            <input
               id="autoHideSearchResults"
               name="autoHideSearchResults"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.autoHideSearchResults}
@@ -611,9 +618,7 @@ class ToolOptions extends Component {
             </label>
           </div>
           {this.state.tree}
-
           <div className="separator">Träffikon och markering</div>
-
           <div>
             <label htmlFor="src">
               URL till ikon för markering av träffar (punkter)
@@ -623,7 +628,7 @@ class ToolOptions extends Component {
               type="text"
               name="src"
               placeholder="URL till bild eller lämna tomt för grå punkt"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -639,7 +644,7 @@ class ToolOptions extends Component {
               step="0.1"
               name="anchorX"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -655,7 +660,7 @@ class ToolOptions extends Component {
               step="0.1"
               name="anchorY"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -675,7 +680,7 @@ class ToolOptions extends Component {
               max="10"
               name="scale"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -692,7 +697,7 @@ class ToolOptions extends Component {
               step="1"
               name="strokeWidth"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -707,9 +712,9 @@ class ToolOptions extends Component {
                   r: this.state.strokeColor.r,
                   g: this.state.strokeColor.g,
                   b: this.state.strokeColor.b,
-                  a: this.state.strokeColor.a
+                  a: this.state.strokeColor.a,
                 }}
-                onChangeComplete={color =>
+                onChangeComplete={(color) =>
                   this.handleColorChange("strokeColor", color)
                 }
               />
@@ -726,18 +731,16 @@ class ToolOptions extends Component {
                     r: this.state.fillColor.r,
                     g: this.state.fillColor.g,
                     b: this.state.fillColor.b,
-                    a: this.state.fillColor.a
+                    a: this.state.fillColor.a,
                   }}
-                  onChangeComplete={color =>
+                  onChangeComplete={(color) =>
                     this.handleColorChange("fillColor", color)
                   }
                 />
               </div>
             </span>
           </div>
-
           <div className="separator">Spatial sök</div>
-
           <div>
             <strong>
               <label>
@@ -756,7 +759,7 @@ class ToolOptions extends Component {
                 id="polygonSearch"
                 name="polygonSearch"
                 type="checkbox"
-                onChange={e => {
+                onChange={(e) => {
                   this.handleInputChange(e);
                 }}
                 checked={this.state.polygonSearch}
@@ -768,7 +771,7 @@ class ToolOptions extends Component {
                   id="radiusSearch"
                   name="radiusSearch"
                   type="checkbox"
-                  onChange={e => {
+                  onChange={(e) => {
                     this.handleInputChange(e);
                   }}
                   checked={this.state.radiusSearch}
@@ -783,7 +786,7 @@ class ToolOptions extends Component {
                   id="selectionSearch"
                   name="selectionSearch"
                   type="checkbox"
-                  onChange={e => {
+                  onChange={(e) => {
                     this.handleInputChange(e);
                   }}
                   checked={this.state.selectionSearch}
@@ -803,7 +806,7 @@ class ToolOptions extends Component {
               value={this.state.searchWithinButtonText}
               type="text"
               name="searchWithinButtonText"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -835,7 +838,6 @@ class ToolOptions extends Component {
               }}
             />
           </div> */}
-
           <div>
             <label htmlFor="searchLayers">
               Radiesök söker inom följande lager:
@@ -844,7 +846,6 @@ class ToolOptions extends Component {
               {this.renderSources(this.state.sources)}
             </div>
           </div>
-
           {this.renderVisibleForGroups()}
         </form>
       </div>

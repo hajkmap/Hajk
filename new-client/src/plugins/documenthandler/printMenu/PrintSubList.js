@@ -5,7 +5,7 @@ import Collapse from "@material-ui/core/Collapse";
 
 class PrintSubList extends React.Component {
   state = {
-    open: false
+    open: false,
   };
 
   toggleCollapseSubMenu = () => {

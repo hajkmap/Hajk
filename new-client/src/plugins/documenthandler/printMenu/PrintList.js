@@ -17,7 +17,7 @@ class PrintList extends React.Component {
     );
   };
 
-  renderSubMenu = chapter => {
+  renderSubMenu = (chapter) => {
     const { handleCheckboxChange, localObserver } = this.props;
     return (
       <PrintSubList
@@ -31,10 +31,10 @@ class PrintList extends React.Component {
   };
 
   getSubChapters = (chapters, headerIdentifier) => {
-    return chapters.filter(chapter => chapter.parent === headerIdentifier);
+    return chapters.filter((chapter) => chapter.parent === headerIdentifier);
   };
 
-  hasSubChapters = chapter => {
+  hasSubChapters = (chapter) => {
     if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
       return true;
     } else {

@@ -6,7 +6,7 @@ export default class MapViewModel {
     this.bindSubscriptions();
   }
 
-  convertMapSettingsUrlToOlSettings = inputUrl => {
+  convertMapSettingsUrlToOlSettings = (inputUrl) => {
     let url = inputUrl.toLowerCase();
     if (url.includes("x=") && url.includes("y=") && url.includes("z=")) {
       let url = inputUrl.split("&");
@@ -19,13 +19,13 @@ export default class MapViewModel {
       return {
         center: center,
         zoom: zoom,
-        layers: l
+        layers: l,
       };
     }
   };
 
   bindSubscriptions = () => {
-    this.localObserver.subscribe("fly-to", url => {
+    this.localObserver.subscribe("fly-to", (url) => {
       this.globalObserver.publish("core.minimizeWindow");
       this.displayMap(this.convertMapSettingsUrlToOlSettings(url));
     });
@@ -35,21 +35,21 @@ export default class MapViewModel {
     let visibleLayers = mapSettings.layers.split(",");
     const layers = this.map.getLayers().getArray();
 
-    visibleLayers.forEach(arrays =>
+    visibleLayers.forEach((arrays) =>
       layers
         .filter(
-          layer =>
+          (layer) =>
             layer.getProperties()["layerInfo"] &&
             layer.getProperties()["layerInfo"]["layerType"]
         )
-        .forEach(layer => {
+        .forEach((layer) => {
           if (layer.getProperties()["name"] === arrays) {
             this.globalObserver.publish("layerswitcher.showLayer", layer);
             layer.setVisible(true);
           }
           if (
             visibleLayers.some(
-              arrays => arrays === layer.getProperties()["name"]
+              (arrays) => arrays === layer.getProperties()["name"]
             )
           ) {
             if (layer.layerType === "group") {
@@ -74,7 +74,7 @@ export default class MapViewModel {
     view.animate({
       center: center,
       zoom: zoom,
-      duration: 1500
+      duration: 1500,
     });
   }
 }

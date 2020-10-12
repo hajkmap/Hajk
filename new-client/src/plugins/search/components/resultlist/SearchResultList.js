@@ -8,7 +8,7 @@ import Alert from "@material-ui/lab/Alert";
 import PlaceIcon from "@material-ui/icons/Place";
 import SearchResultGroup from "./SearchResultGroup.js";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     searchResultContainer: {
       maxHeight: "calc(100vh - 380px)",
@@ -18,52 +18,52 @@ const styles = theme => {
       marginTop: "10px",
       paddingBottom: "22px",
       [theme.breakpoints.down("xs")]: {
-        maxHeight: "calc(100vh - 200px)"
-      }
+        maxHeight: "calc(100vh - 200px)",
+      },
     },
     searchResultTopBar: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      padding: theme.spacing(1)
+      padding: theme.spacing(1),
     },
     searchResultTopBarLeft: {
-      display: "flex"
+      display: "flex",
     },
     hidden: {
-      display: "none"
+      display: "none",
     },
     // New styles
     root: {
       marginTop: 5,
       minWidth: 200,
       [theme.breakpoints.up("sm")]: {
-        maxWidth: 520
+        maxWidth: 520,
       },
       [theme.breakpoints.down("xs")]: {
         minWidth: "100%",
         position: "absolute",
-        left: 0
-      }
-    }
+        left: 0,
+      },
+    },
   };
 };
 
 class SearchResultList extends React.PureComponent {
   state = {
     minimized: false,
-    highlightedFeatures: []
+    highlightedFeatures: [],
   };
 
   hide() {
     this.setState({
-      minimized: true
+      minimized: true,
     });
   }
 
   toggle = () => {
     this.setState({
-      minimized: !this.state.minimized
+      minimized: !this.state.minimized,
     });
   };
 
@@ -93,7 +93,7 @@ class SearchResultList extends React.PureComponent {
     );
   }
 
-  getNumberOfResults = result => {
+  getNumberOfResults = (result) => {
     return result.reduce((accumulated, result) => {
       return accumulated + result.features.length;
     }, 0);
@@ -115,7 +115,7 @@ class SearchResultList extends React.PureComponent {
           </Alert>
         </Paper>
       );
-    } else if (result.every(r => r.features.length === 0)) {
+    } else if (result.every((r) => r.features.length === 0)) {
       return (
         <Paper className={classes.root}>
           <Alert severity="warning">Sökningen gav inget resultat.</Alert>

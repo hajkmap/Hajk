@@ -18,27 +18,27 @@ class RouteModel {
       WALKING: "Gå",
       DRIVING: "Kör",
       TRANSIT: "Kollektivtrafik",
-      BICYCLING: "Cykla"
+      BICYCLING: "Cykla",
     };
 
     this.position = {
       latitude: undefined,
       longitude: undefined,
       latitudeEnd: undefined,
-      longitudeEnd: undefined
+      longitudeEnd: undefined,
     };
     this.projection = settings.app.config.mapConfig.map.projection;
 
     loadGoogleMapsApi({
-      key: this.apiKey
-    }).then(googleMapApi => {
+      key: this.apiKey,
+    }).then((googleMapApi) => {
       this.googleMapsApi = googleMapApi;
     });
 
     this.initiateRoutingLayerInOpenLayersMap();
   }
 
-  setTravelMode = travelModeKey => {
+  setTravelMode = (travelModeKey) => {
     this.travelMode = this.googleMapsApi.DirectionsTravelMode.hasOwnProperty(
       travelModeKey
     )
@@ -48,15 +48,15 @@ class RouteModel {
     this.localObserver.publish("doneWithStep", 3);
   };
 
-  getCurrentPositionSuccess = pos => {
+  getCurrentPositionSuccess = (pos) => {
     this.position = {
       latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude
+      longitude: pos.coords.longitude,
     };
     this.setPosition();
   };
 
-  getCurrentPositionError = err => {
+  getCurrentPositionError = (err) => {
     console.error(err);
   };
 
@@ -106,48 +106,48 @@ class RouteModel {
   initiateRoutingLayerInOpenLayersMap() {
     this.style_start = new Style({
       image: new Icon({
-        src: this.generatePinIcon("#00a83b", "36")
-      })
+        src: this.generatePinIcon("#00a83b", "36"),
+      }),
     });
 
     this.style_end = new Style({
       image: new Icon({
-        src: this.generatePinIcon("#ff4747")
-      })
+        src: this.generatePinIcon("#ff4747"),
+      }),
     });
 
     this.style_route = new Style({
       image: new Icon({
-        src: this.generatePinIcon("#6e6e6e")
-      })
+        src: this.generatePinIcon("#6e6e6e"),
+      }),
     });
 
     this.style_route_normal = this.style_route;
 
     this.style_route_highlight = new Style({
       image: new Icon({
-        src: this.generatePinIcon("#47ff87")
-      })
+        src: this.generatePinIcon("#47ff87"),
+      }),
     });
 
     this.layer_drawing_style = new Style({
       fill: new Fill({
-        color: "rgba(255, 255, 255, 0.5)"
+        color: "rgba(255, 255, 255, 0.5)",
       }),
       stroke: new Stroke({
         color: "rgba(0, 0, 255, 0.5)",
-        width: 4
+        width: 4,
       }),
       image: new Circle({
         radius: 6,
         fill: new Fill({
-          color: "rgba(0, 0, 0, 0.5)"
+          color: "rgba(0, 0, 0, 0.5)",
         }),
         stroke: new Stroke({
           color: "rgba(255, 255, 255, 0.5)",
-          width: 2
-        })
-      })
+          width: 2,
+        }),
+      }),
     });
 
     var source_start = new Vector({});
@@ -161,7 +161,7 @@ class RouteModel {
         name: "routing",
         content: "Punkt",
         queryable: false,
-        style: this.style_start
+        style: this.style_start,
       });
 
       this.layer_end = new layerVector({
@@ -169,7 +169,7 @@ class RouteModel {
         name: "routing",
         content: "Punkt",
         queryable: false,
-        style: this.style_end
+        style: this.style_end,
       });
 
       this.layer_route = new layerVector({
@@ -177,7 +177,7 @@ class RouteModel {
         name: "routing",
         content: "Punkt",
         queryable: true,
-        style: this.style_route
+        style: this.style_route,
       });
 
       this.layer_drawing = new layerVector({
@@ -185,7 +185,7 @@ class RouteModel {
         name: "routing",
         content: "linje",
         queryable: false,
-        style: this.layer_drawing_style
+        style: this.layer_drawing_style,
       });
 
       this.olMap.addLayer(this.layer_start);
@@ -199,7 +199,7 @@ class RouteModel {
     this.olMap.once("singleclick", this.startPointSelection);
   };
 
-  startPointSelection = e => {
+  startPointSelection = (e) => {
     var startPoint = new Feature(); /* startPoint and point(below) must be the same l.134 */
     startPoint.setGeometry(new Point(e.coordinate));
     /* Convert Geometry to Coordinate */
@@ -229,7 +229,7 @@ class RouteModel {
     this.onEndKey = this.olMap.once("singleclick", this.endPointSelection);
   };
 
-  endPointSelection = e => {
+  endPointSelection = (e) => {
     var endPoint = new Feature();
     endPoint.setGeometry(new Point(e.coordinate));
 
@@ -272,9 +272,9 @@ class RouteModel {
       const rp = {
         origin: { lat: pos.latitude, lng: pos.longitude },
         destination: { lat: pos.latitudeEnd, lng: pos.longitudeEnd },
-        travelMode: this.travelMode
+        travelMode: this.travelMode,
       };
-      googleDirectionsService.route(rp, res => {
+      googleDirectionsService.route(rp, (res) => {
         switch (res.status) {
           case "REQUEST_DENIED":
             this.localObserver.publish("requestDenied");
@@ -296,7 +296,6 @@ class RouteModel {
   plotRoute(res, map, layer_route, layer_drawing) {
     layer_route.getSource().clear();
     var steps = res.routes[0].legs[0].steps;
-    // console.log("steps: ", steps);
     const routeDiv = document.createElement("div");
     const p = document.createElement("p");
     const ul = document.createElement("ol");
@@ -328,7 +327,7 @@ class RouteModel {
       var n = i + 1;
       var tmpFeature = new Feature({
         geometry: point,
-        info: steps[i].instructions
+        info: steps[i].instructions,
       });
       tmpFeature.number = "" + n;
       tmpFeature.setStyle(this.style_route);
@@ -355,14 +354,14 @@ class RouteModel {
       res.routes[0].overview_polyline,
       {
         dataProjection: "EPSG:4326",
-        featureProjection: this.projection
+        featureProjection: this.projection,
       }
     );
 
     layer_drawing.getSource().clear();
     var ft = new Feature({
       type: "routing",
-      geometry: routePath
+      geometry: routePath,
     });
     ft.setStyle(this.layer_drawing_style);
 
@@ -407,9 +406,7 @@ class RouteModel {
 
     var ft = new Feature({ type: "routing", geometry: routePath });
     ft.setStyle(this.style_route);
-    this.get("layer_drawing")
-      .getSource()
-      .addFeature(ft);
+    this.get("layer_drawing").getSource().addFeature(ft);
   }
 
   clearMap() {
@@ -425,7 +422,7 @@ class RouteModel {
       latitude: undefined,
       longitude: undefined,
       latitudeEnd: undefined,
-      longitudeEnd: undefined
+      longitudeEnd: undefined,
     };
   }
 }

@@ -1,26 +1,26 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 
-const styles = theme => ({
+const styles = (theme) => ({
   table: {
     borderCollapse: "collapse",
     borderColor: "black",
     margin: "10px",
     "& th": {
-      textAlign: "left"
+      textAlign: "left",
     },
     "& td": {
-      border: "1px solid #999"
+      border: "1px solid #999",
     },
     "& thead": {
-      borderBottom: "2px solid"
-    }
-  }
+      borderBottom: "2px solid",
+    },
+  },
 });
 
 class TableView extends React.PureComponent {
   state = {
-    data: false
+    data: false,
   };
 
   // TODO: Add propTypes
@@ -33,12 +33,9 @@ class TableView extends React.PureComponent {
 
   parse(str, properties) {
     if (str && typeof str === "string") {
-      (str.match(/{(.*?)}/g) || []).forEach(property => {
+      (str.match(/{(.*?)}/g) || []).forEach((property) => {
         function lookup(o, s) {
-          s = s
-            .replace("{", "")
-            .replace("}", "")
-            .split(".");
+          s = s.replace("{", "").replace("}", "").split(".");
           switch (s.length) {
             case 1:
               return o[s[0]] || "";
@@ -58,16 +55,16 @@ class TableView extends React.PureComponent {
   }
 
   load(url) {
-    fetch(url).then(response => {
-      response.json().then(rsp => {
-        const data = rsp.features.map(feature => {
+    fetch(url).then((response) => {
+      response.json().then((rsp) => {
+        const data = rsp.features.map((feature) => {
           return {
             date: feature.properties.datetime.split("T")[0],
-            value: feature.properties.value
+            value: feature.properties.value,
           };
         });
         this.setState({
-          data: data
+          data: data,
         });
       });
     });

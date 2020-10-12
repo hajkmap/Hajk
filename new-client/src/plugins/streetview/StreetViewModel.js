@@ -19,26 +19,27 @@ class StreetViewModel {
     this.location = undefined;
 
     loadGoogleMapsApi({
-      key: settings.apiKey
-    }).then(googleMapApi => {
+      key: settings.apiKey,
+    }).then((googleMapApi) => {
       this.googleMapsApi = googleMapApi;
     });
 
     this.streetViewMarkerLayer = new Vector({
       source: new VectorSource({}),
-      name: "streetViewMarkerLayer"
+      name: "streetViewMarkerLayer",
     });
     this.map.addLayer(this.streetViewMarkerLayer);
   }
 
   activate() {
-    this.map.clicklock = true;
+    this.map.clickLock.add("streetview");
+
     this.streetViewService = new this.googleMapsApi.StreetViewService();
     this.panorama = new this.googleMapsApi.StreetViewPanorama(
       document.getElementById("street-view-window")
     );
     document.querySelector(".ol-viewport").style.cursor = "crosshair";
-    this.map.on("singleclick", e => {
+    this.map.on("singleclick", (e) => {
       this.coordinate = e.coordinate;
       this.coord = transform(
         this.coordinate,
@@ -52,7 +53,7 @@ class StreetViewModel {
   }
 
   deactivate() {
-    this.map.clicklock = false;
+    this.map.clickLock.delete("streetview");
     document.querySelector(".ol-viewport").style.cursor = "default";
     this.map.un("singleclick", this.showLocation);
     this.activated = false;
@@ -62,7 +63,7 @@ class StreetViewModel {
     if (win) win.innerHTML = "";
   }
 
-  getIconStyle = rotation => {
+  getIconStyle = (rotation) => {
     function position(r) {
       const w = 49;
       var i = 1;
@@ -89,8 +90,8 @@ class StreetViewModel {
         anchorXUnits: "pixels",
         anchorYUnits: "pixels",
         opacity: 1,
-        src: imageBlob
-      })
+        src: imageBlob,
+      }),
     });
   };
 
@@ -133,7 +134,7 @@ class StreetViewModel {
 
   addMarker = (coordinate, rotation) => {
     var feature = new Feature({
-      geometry: new Point(coordinate)
+      geometry: new Point(coordinate),
     });
     feature.setStyle(this.getIconStyle(rotation));
     this.marker = feature;

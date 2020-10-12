@@ -5,29 +5,29 @@ import SearchIcon from "@material-ui/icons/Search";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SpatialSearchMenu from "./SpatialSearchMenu";
 
-const styles = theme => ({
+const styles = (theme) => ({
   search: {
     borderRadius: theme.shape.borderRadius,
     flex: "auto",
     display: "flex",
-    height: "100%"
+    height: "100%",
   },
   inputRoot: {
-    width: "100%"
+    width: "100%",
   },
   inputInput: {
     padding: theme.spacing(1),
     left: "100%",
-    width: "100%"
+    width: "100%",
   },
   inputInputWide: {
     padding: theme.spacing(1),
     left: "100%",
     width: "100%",
     "&:focus": {
-      width: "100%"
-    }
-  }
+      width: "100%",
+    },
+  },
 });
 
 class SearchBarStart extends React.PureComponent {
@@ -62,7 +62,7 @@ class SearchBarStart extends React.PureComponent {
           classes={{
             root: classes.inputRoot,
             input:
-              target === "top" ? classes.inputInputWide : classes.inputInput
+              target === "top" ? classes.inputInputWide : classes.inputInput,
           }}
           startAdornment={
             <InputAdornment position="start">

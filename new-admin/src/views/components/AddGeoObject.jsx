@@ -7,24 +7,24 @@ import { withStyles } from "@material-ui/core/styles";
 import { green, blue } from "@material-ui/core/colors";
 import RoomIcon from "@material-ui/icons/Room";
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 class AddGeoObject extends Component {
@@ -32,13 +32,13 @@ class AddGeoObject extends Component {
     super(props);
     this.state = {
       geoObject: "",
-      inputVisible: false
+      inputVisible: false,
     };
   }
 
   toggleInputVisibility() {
     this.setState({
-      inputVisible: !this.state.inputVisible
+      inputVisible: !this.state.inputVisible,
     });
   }
 
@@ -48,7 +48,7 @@ class AddGeoObject extends Component {
       this.cancel();
     } else {
       this.setState({
-        invalid: true
+        invalid: true,
       });
     }
   }
@@ -57,14 +57,14 @@ class AddGeoObject extends Component {
     this.setState({
       geoObject: "",
       inputVisible: false,
-      invalid: false
+      invalid: false,
     });
   }
 
   setGeoObject(e) {
     this.setState({
       geoObject: e.target.value,
-      invalid: e.target.value.length === 0
+      invalid: e.target.value.length === 0,
     });
   }
 
@@ -86,12 +86,12 @@ class AddGeoObject extends Component {
             name="geo-object-title"
             ref="input"
             style={style}
-            onKeyPress={e => {
+            onKeyPress={(e) => {
               if (e.key === "Enter") {
                 this.addGeoObject();
               }
             }}
-            onChange={e => {
+            onChange={(e) => {
               this.setGeoObject(e);
             }}
           />

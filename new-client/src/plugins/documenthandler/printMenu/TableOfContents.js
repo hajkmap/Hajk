@@ -6,13 +6,13 @@ import List from "@material-ui/core/List";
 import { Typography } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 
-const styles = theme => ({
-  listItem: { overflowWrap: "break-word" }
+const styles = (theme) => ({
+  listItem: { overflowWrap: "break-word" },
 });
 
 class TableOfContents extends React.PureComponent {
   state = {
-    titlesAndLevels: []
+    titlesAndLevels: [],
   };
 
   constructor(props) {
@@ -22,20 +22,20 @@ class TableOfContents extends React.PureComponent {
 
   componentDidMount = () => {
     const { chapters } = this.props;
-    chapters.forEach(chapter => {
+    chapters.forEach((chapter) => {
       this.setTitlesAndLevels(chapter);
     });
     this.setState({ titlesAndLevels: this.titlesAndLevels });
   };
 
-  setTitlesAndLevels = chapter => {
+  setTitlesAndLevels = (chapter) => {
     this.titlesAndLevels.push({
       title: chapter.header,
       level: chapter.level,
-      chosenForPrint: chapter.chosenForPrint
+      chosenForPrint: chapter.chosenForPrint,
     });
     if (chapter.chapters) {
-      chapter.chapters.forEach(subChapter => {
+      chapter.chapters.forEach((subChapter) => {
         this.setTitlesAndLevels(subChapter);
       });
     }
@@ -57,7 +57,7 @@ class TableOfContents extends React.PureComponent {
                 dense={true}
                 style={{
                   paddingLeft:
-                    theme.spacing(1) + theme.spacing(chapter.level * 3)
+                    theme.spacing(1) + theme.spacing(chapter.level * 3),
                 }}
               >
                 <ListItemText>{chapter.title}</ListItemText>
@@ -69,7 +69,7 @@ class TableOfContents extends React.PureComponent {
                 key={index}
                 style={{
                   paddingLeft:
-                    theme.spacing(1) + theme.spacing(chapter.level * 3)
+                    theme.spacing(1) + theme.spacing(chapter.level * 3),
                 }}
               >
                 <ListItemText>{chapter.title}</ListItemText>
