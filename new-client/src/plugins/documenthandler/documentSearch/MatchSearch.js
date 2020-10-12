@@ -4,8 +4,29 @@ export default class MatchSearch {
     this.searchOptions = searchOptions;
   }
 
+  getMatchRegexp = (searchString) => {
+    const { wildcardAtEnd, wildcardAtStart, matchCase } = this.searchOptions;
+    let regexpOptions = matchCase ? "g" : "gi";
+    if (wildcardAtStart && !wildcardAtEnd) {
+      return new RegExp(`.*${searchString}$`, regexpOptions);
+    }
+
+    if (!wildcardAtStart && wildcardAtEnd) {
+      return new RegExp(`^${searchString}.*`, regexpOptions);
+    }
+
+    if (wildcardAtStart && wildcardAtEnd) {
+      return new RegExp(`${searchString}`, regexpOptions);
+    }
+    return new RegExp(`^${searchString}$`, regexpOptions);
+  };
+
+  escapeSpecialChars = (string) => {
+    return string.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
+  };
+
   /**
-   * Makes a deep compare of a search string and a keyword.
+   * Compare searchString agains keyword to se if it matches
    * @param {string} searchString The search string.
    * @param {string} keyword The keyword.
    * @returns Returns an object of the compare results.
@@ -13,31 +34,8 @@ export default class MatchSearch {
    * @memberof MatchSearch
    */
   compare = (searchString, keyword) => {
-    searchString = this.transformStringToLowercase(
-      searchString,
-      !this.searchOptions.matchCase
-    );
-    keyword = this.transformStringToLowercase(
-      keyword,
-      !this.searchOptions.matchCase
-    );
-
-    let regExp = new RegExp(`^${searchString}$`, "g");
-
-    if (this.searchOptions.wildcardAtStart && !this.searchOptions.wildcardAtEnd)
-      regExp = new RegExp(`.*${searchString}$`, "g");
-
-    if (!this.searchOptions.wildcardAtStart && this.searchOptions.wildcardAtEnd)
-      regExp = new RegExp(`^${searchString}.*`, "g");
-
-    if (
-      this.searchOptions.wildcardAtStart &&
-      this.searchOptions.wildcardAtStart
-    )
-      regExp = new RegExp(`${searchString}`, "g");
-
-    let match = regExp.test(keyword);
-    //let match = this.matchSearchStringAndKeyword(searchString, keyword);
+    let toSearchIn = this.escapeSpecialChars(searchString);
+    let match = this.getMatchRegexp(toSearchIn).test(keyword);
 
     return {
       searchResults: {
@@ -53,7 +51,7 @@ export default class MatchSearch {
    */
   matchSearchStringAndKeyword = (searchString, keyword) => {
     let escapeRegex = (keyword) =>
-      keyword.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+      keyword.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
 
     return new RegExp(
       "^" + searchString.split("*").map(escapeRegex).join(".*") + "$"
