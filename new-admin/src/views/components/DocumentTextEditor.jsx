@@ -413,6 +413,19 @@ export default class DocumentTextEditor extends React.Component {
     });
   }
 
+  getUrlType(type) {
+    switch (type) {
+      case "urllink":
+        return "kartlänk";
+      case "documentlink":
+        return "dokumentlänk";
+      case "maplink":
+        return "kartlänk";
+      default:
+        return "länk";
+    }
+  }
+
   render() {
     const { editorState, imageList } = this.state;
 
@@ -504,7 +517,7 @@ export default class DocumentTextEditor extends React.Component {
     if (this.state.showLinkInput) {
       urlInput = (
         <div style={styles.urlInputContainer}>
-          <h1>Lägg till länk {this.state.urlType}</h1>
+          <h1>Lägg till {this.getUrlType(this.state.urlType)}</h1>
           <input
             onChange={this.onURLChange}
             ref="link"
