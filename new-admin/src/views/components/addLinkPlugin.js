@@ -1,5 +1,5 @@
 import React from "react";
-import { RichUtils, KeyBindingUtil, EditorState } from "draft-js";
+import { KeyBindingUtil } from "draft-js";
 
 export const LinkStrategy = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
@@ -11,41 +11,37 @@ export const LinkStrategy = (contentBlock, callback, contentState) => {
 };
 
 export const Link = ({ contentState, entityKey, children }) => {
-  const { url, title, type } = contentState.getEntity(entityKey).getData();
+  const { url, title } = contentState.getEntity(entityKey).getData();
 
   const entity = contentState.getEntity(entityKey);
   const data = entity.getData();
 
-  const dataCaption = data["data-document"];
-
   if (data["data-document"]) {
-    console.log("Document");
+    return (
+      <a href={url} rel="noopener noreferrer" target="_blank" data-document>
+        {title}
+      </a>
+    );
   } else if (data["data-link"]) {
-    console.log("URL");
+    return (
+      <a href={url} rel="noopener noreferrer" target="_blank" data-link>
+        {title}
+      </a>
+    );
   } else if (data["data-maplink"]) {
-    console.log("Maplink");
+    return (
+      <a href={url} rel="noopener noreferrer" target="_blank" data-maplink>
+        {title}
+      </a>
+    );
+  } else {
+    return (
+      <a href={url} rel="noopener noreferrer" target="_blank">
+        {title}
+      </a>
+    );
   }
-
-  return (
-    <a href={url} rel="noopener noreferrer" target="_blank" data-document>
-      {title}
-    </a>
-  );
 };
-
-const isUrl = (link) => {
-  if (!link) {
-    return false;
-  }
-
-  const expression = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm;
-  var regex = new RegExp(expression);
-
-  return link.match(regex);
-};
-
-const withHttps = (url) =>
-  !/^https?:\/\//i.test(url) ? `https://${url}` : url;
 
 export const addLinkPlugin = {
   keyBindingFn(event, { getEditorState }) {

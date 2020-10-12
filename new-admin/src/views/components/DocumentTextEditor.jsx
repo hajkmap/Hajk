@@ -188,16 +188,25 @@ export default class DocumentTextEditor extends React.Component {
   _confirmLink(e) {
     e.preventDefault();
     const { editorState, urlValue, urlType, urlTitle } = this.state;
+    const data = {
+      url: urlValue,
+      title: urlTitle,
+      type: urlType,
+    };
+
+    if (urlType === "urllink") {
+      data["data-link"] = true;
+    } else if (urlType === "documentlink") {
+      data["data-document"] = true;
+    } else if (urlType === "maplink") {
+      data["data-maplink"] = true;
+    }
+
     const contentState = editorState.getCurrentContent();
     const contentStateWithEntity = contentState.createEntity(
       "LINK",
       "MUTABLE",
-      {
-        url: urlValue,
-        title: urlTitle,
-        type: urlType,
-        "data-document": true,
-      }
+      data
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.push(
