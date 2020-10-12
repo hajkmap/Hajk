@@ -11,6 +11,7 @@
     "draft-js": "^0.11.7",
     "draft-js-export-html": "^1.4.1",
     "draft-js-import-html": "^1.4.1",
+    "draft-js-plugins-editor": "^3.0.0",
     "jquery": "^3.5.1",
     "jquery-sortable": "^0.9.13",
     "ol": "^5.3.3",
