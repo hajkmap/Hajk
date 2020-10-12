@@ -2,16 +2,12 @@ import VectorSource from "ol/source/Vector";
 import { Vector as VectorLayer } from "ol/layer";
 import { WFS, GeoJSON } from "ol/format";
 import GML2 from "ol/format/GML";
-// import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
 import { all as strategyAll, bbox as bboxStrategy } from "ol/loadingstrategy";
-
 import { transform } from "ol/proj";
-// import { toContext } from "ol/render";
-// import { Point, Polygon, LineString } from "ol/geom";
-// import Feature from "ol/Feature";
+import { getPointResolution } from "ol/proj";
+
 import LayerInfo from "./LayerInfo.js";
 
-import { getPointResolution } from "ol/proj";
 import * as SLDReader from "@nieuwlandgeo/sldreader";
 
 const fetchConfig = {
@@ -35,131 +31,23 @@ const vectorLayerProperties = {
   showLabels: true,
 };
 
-// function createStyle(feature, forcedPointRadius) {
-//   const icon = this.config.icon;
-//   const fillColor = this.config.fillColor;
-//   const lineColor = this.config.lineColor;
-//   const lineStyle = this.config.lineStyle;
-//   const lineWidth = this.config.lineWidth;
-//   const symbolXOffset = this.config.symbolXOffset;
-//   const symbolYOffset = this.config.symbolYOffset;
-//   const rotation = 0.0;
-//   const align = this.config.labelAlign;
-//   const baseline = this.config.labelBaseline;
-//   const size = this.config.labelSize;
-//   const offsetX = this.config.labelOffsetX;
-//   const offsetY = this.config.labelOffsetY;
-//   const weight = this.config.labelWeight;
-//   const font = weight + " " + size + " " + this.config.labelFont;
-//   const labelFillColor = this.config.labelFillColor;
-//   const outlineColor = this.config.labelOutlineColor;
-//   const outlineWidth = this.config.labelOutlineWidth;
-//   const labelAttribute = this.config.labelAttribute;
-//   const showLabels = this.config.showLabels;
-//   const pointSize = forcedPointRadius || this.config.pointSize;
-
-//   feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
-
-//   function getLineDash() {
-//     var scale = (a, f) => a.map((b) => f * b),
-//       width = lineWidth,
-//       style = lineStyle,
-//       dash = [12, 7],
-//       dot = [2, 7];
-//     switch (style) {
-//       case "dash":
-//         return width > 3 ? scale(dash, 2) : dash;
-//       case "dot":
-//         return width > 3 ? scale(dot, 2) : dot;
-//       default:
-//         return undefined;
-//     }
-//   }
-
-//   function getFill() {
-//     return new Fill({
-//       color: fillColor,
-//     });
-//   }
-
-//   function getText() {
-//     return new Text({
-//       textAlign: align,
-//       textBaseline: baseline,
-//       font: font,
-//       text: feature ? feature.getProperties()[labelAttribute] : "",
-//       fill: new Fill({
-//         color: labelFillColor,
-//       }),
-//       stroke: new Stroke({
-//         color: outlineColor,
-//         width: outlineWidth,
-//       }),
-//       offsetX: offsetX,
-//       offsetY: offsetY,
-//       rotation: rotation,
-//     });
-//   }
-
-//   function getImage() {
-//     return icon === "" ? getPoint() : getIcon();
-//   }
-
-//   function getIcon() {
-//     return new Icon({
-//       src: icon,
-//       scale: 1,
-//       anchorXUnits: "pixels",
-//       anchorYUnits: "pixels",
-//       anchor: [symbolXOffset, symbolYOffset],
-//     });
-//   }
-
-//   function getPoint() {
-//     return new Circle({
-//       fill: getFill(),
-//       stroke: getStroke(),
-//       radius: parseInt(pointSize, 10) || 4,
-//     });
-//   }
-
-//   function getStroke() {
-//     return new Stroke({
-//       color: lineColor,
-//       width: lineWidth,
-//       lineDash: getLineDash(),
-//     });
-//   }
-
-//   function getStyleObj() {
-//     var obj = {
-//       fill: getFill(),
-//       image: getImage(),
-//       stroke: getStroke(),
-//     };
-//     if (showLabels) {
-//       obj.text = getText();
-//     }
-
-//     return obj;
-//   }
-
-//   return [new Style(getStyleObj())];
-// }
-
 class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
-    config = {
+    this.config = {
       ...vectorLayerProperties,
       ...config,
     };
-    this.config = config;
     this.proxyUrl = proxyUrl;
     this.map = map;
-    // this.style = createStyle.apply(this);
+
+    this.type = "vector"; // We're dealing with a vector layer
+
+    this.allFeatures = [];
+
+    // Read the three filter properties from config to allow filter on load
     this.filterAttribute = config.filterAttribute;
-    this.filterValue = config.filterValue;
     this.filterComparer = config.filterComparer;
+    this.filterValue = config.filterValue;
 
     this.vectorSource = new VectorSource({
       loader: (extent, resolution, projection) => {
@@ -187,36 +75,37 @@ class WFSVectorLayer {
       opacity: config.opacity,
       queryable: config.queryable,
       filterable: config.filterable,
+      filterAttribute: config.filterAttribute,
+      filterComparer: config.filterComparer,
+      filterValue: config.filterValue,
       layerInfo: new LayerInfo(config),
       renderMode: "image",
-      // style: this.getStyle.bind(this),
       source: this.vectorSource,
       url: config.url,
+      featureType: config.params.typename.split(":")[1],
       minZoom: config?.minZoom >= 0 ? config.minZoom : undefined,
       maxZoom: config?.maxZoom >= 0 ? config.maxZoom : undefined,
     });
 
+    // Styling section starts here.
+    // First read some values from config
     this.sldUrl = config?.sldUrl;
     this.sldText = config?.sldText;
     this.sldStyle = config?.sldStyle ?? "Default Styler";
 
+    // Try fetching the URL, if specified, and style with the resulting SLD
     if (typeof this.sldUrl === "string" && this.sldUrl.trim().length > 0) {
       fetch(this.sldUrl)
         .then((response) => response.text())
         .then((text) => this.applySldTextOnLayer(text));
-    } else if (
+    }
+    // …else used supplied SLD text to style
+    else if (
       typeof this.sldText === "string" &&
       this.sldText.trim().length > 10
     ) {
       this.applySldTextOnLayer(this.sldText);
-    }
-
-    if (config.dataFormat === "GeoJSON") {
-      this.layer.featureType = "";
-    } else {
-      this.layer.featureType = config.params.typename.split(":")[1];
-    }
-    this.type = "vector";
+    } // …or just fall back to OpenLayer's default styling if no SLD/SLD URL was specified.
   }
 
   applySldTextOnLayer = (text) => {
@@ -241,13 +130,6 @@ class WFSVectorLayer {
     });
     this.layer.setStyle(olFunction);
   };
-
-  // getStyle(forcedPointRadius) {
-  //   if (forcedPointRadius) {
-  //     return createStyle.call(this, undefined, forcedPointRadius);
-  //   }
-  //   return this.style;
-  // }
 
   reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
@@ -286,11 +168,11 @@ class WFSVectorLayer {
     }
   }
 
-  addFeatures(data, format) {
-    var features = [],
-      parser,
-      to = this.map.getView().getProjection().getCode(),
-      from = this.config.projection;
+  getAllFeatures(data, format = "wfs") {
+    let features = [];
+    let parser = null;
+    const to = this.map.getView().getProjection().getCode();
+    const from = this.config.projection;
 
     if (format === "wfs") {
       parser = new WFS({
@@ -311,48 +193,36 @@ class WFSVectorLayer {
       this.reprojectFeatures(features, from, to);
     }
 
-    if (
-      (this.filterAttribute && this.filterValue) ||
-      (this.layer.get("filterValue") && this.layer.get("filterAttribute"))
-    ) {
-      features = features.filter((feature) => this.filter(feature));
+    return features;
+  }
+
+  /**
+   * @summary If filtering is activated, filter feature collection, f. Else return all features.
+   *
+   * @param {*} f Feature collection to be filtered.
+   * @returns
+   * @memberof WFSVectorLayer
+   */
+  getFilteredFeatures(f) {
+    if (this.layer.get("filterAttribute") && this.layer.get("filterValue")) {
+      return f.filter((feature) => this.filterMethod(feature));
+    } else {
+      return f;
     }
-
-    this.vectorSource.addFeatures(features);
   }
 
-  createUrl(extent = [], projection = "") {
-    // Grab params needed for URL creation
-    const props = this.config.params;
-
-    // Get rid of bbox that comes from config
-    delete props.bbox;
-
-    // Turn params into URLSearchParams string
-    const usp = new URLSearchParams(props).toString();
-
-    // If extent doesn't contain Infinity values, append it to the URL
-    const bbox =
-      extent.length === 4 && extent.includes(Infinity) === false
-        ? `&bbox=${extent.join(",")},${projection}`
-        : "";
-
-    const url = this.config.url + "?" + usp + bbox;
-    return url;
-  }
-
-  filterAttribute = "";
-
-  filterComparer = "not";
-
-  filterValue = "";
-
-  filter(feature) {
-    var filterAttribute =
-      this.layer.get("filterAttribute") || this.filterAttribute;
-    var filterValue = this.layer.get("filterValue") || this.filterValue;
-    var filterComparer =
-      this.layer.get("filterComparer") || this.filterComparer;
+  /**
+   * @summary A predicate method (returns either true of false), used to determine
+   * whether current feature should be included in the filtered result.
+   *
+   * @param {*} feature Feature to check.
+   * @returns {boolean}
+   * @memberof WFSVectorLayer
+   */
+  filterMethod(feature) {
+    const filterAttribute = this.layer.get("filterAttribute");
+    const filterValue = this.layer.get("filterValue");
+    const filterComparer = this.layer.get("filterComparer");
 
     switch (filterComparer) {
       case "gt":
@@ -384,15 +254,48 @@ class WFSVectorLayer {
     }
   }
 
+  createUrl(extent = [], projection = "") {
+    // Grab params needed for URL creation
+    const props = this.config.params;
+
+    // Get rid of bbox that comes from config
+    delete props.bbox;
+
+    // Turn params into URLSearchParams string
+    const usp = new URLSearchParams(props).toString();
+
+    // If extent doesn't contain Infinity values, append it to the URL
+    const bbox =
+      extent.length === 4 && extent.includes(Infinity) === false
+        ? `&bbox=${extent.join(",")},${projection}`
+        : "";
+
+    const url = this.config.url + "?" + usp + bbox;
+    return url;
+  }
+
   loadData(url, format = "wfs") {
     url = this.proxyUrl + url;
 
     fetch(url, fetchConfig).then((response) => {
       response.text().then((features) => {
-        this.addFeatures(features, format);
+        // Load all features (no filter active - only bbox limitation)
+        this.allFeatures = this.getAllFeatures(features, format);
+
+        // See if filtering is needed and populate the source with resulting features
+        this.vectorSource.addFeatures(
+          this.getFilteredFeatures(this.allFeatures)
+        );
       });
     });
   }
+
+  // getStyle(forcedPointRadius) {
+  //   if (forcedPointRadius) {
+  //     return createStyle.call(this, undefined, forcedPointRadius);
+  //   }
+  //   return this.style;
+  // }
 
   // generateLegend(callback) {
   //   var url = this.proxyUrl + this.createUrl();
