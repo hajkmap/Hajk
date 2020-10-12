@@ -23,6 +23,7 @@ import {
   TableCell,
   TableBody,
 } from "@material-ui/core";
+import { transform } from "ol/proj";
 
 const styles = (theme) => ({
   windowSection: {
@@ -228,9 +229,10 @@ class FeatureInfoContainer extends React.PureComponent {
     let properties = feature.getProperties();
     properties = extractPropertiesFromJson(properties);
     feature.setProperties(properties);
-
+    console.log(markdown, "markdown");
     if (markdown) {
       let transformed = this.shortcode(markdown);
+      console.log(transformed, "transformed");
       if (transformed) {
         shortcodes = transformed.codes;
         markdown = transformed.str;
@@ -243,7 +245,7 @@ class FeatureInfoContainer extends React.PureComponent {
     const value = markdown
       ? mergeFeaturePropsWithMarkdown(markdown, properties)
       : this.getFeaturesAsDefaultTable(properties, caption);
-
+    console.log(value, "value");
     this.setState(
       {
         value: value,

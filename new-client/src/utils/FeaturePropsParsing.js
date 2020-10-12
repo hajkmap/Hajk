@@ -35,17 +35,46 @@ export function extractPropertiesFromJson(properties) {
   return properties;
 }
 
+const getStringInformation = (s, isExternal) => {
+  if (isExternal) {
+    s = s.replace("{$$(", "").replace(")}", "").split(",");
+
+    return { propertyValues: s[1].split("."), renderedByPlugin: s[0] };
+  } else {
+    s = s.replace("{", "").replace("}", "").split(".");
+    return { propertyValues: s, renderedByPlugin: null };
+  }
+};
+
 const lookup = (o, s) => {
-  s = s.replace("{", "").replace("}", "").split(".");
-  switch (s.length) {
+  let propertyValue = "";
+  let isExternal = s.match(/\$\$((.*?)})/g);
+
+  const { propertyValues, renderedByPlugin } = getStringInformation(
+    s,
+    isExternal
+  );
+  console.log(propertyValues, "porpertyValues", renderedByPlugin, "renderedBy");
+  switch (propertyValues.length) {
     case 1:
-      return o[s[0]] || "";
+      propertyValue = o[propertyValues[0]] || "";
+      break;
     case 2:
-      return o[s[0]][s[1]] || "";
+      propertyValue = o[propertyValues[0]][propertyValues[1]] || "";
+      break;
     case 3:
-      return o[s[0]][s[1]][s[2]] || "";
+      propertyValue =
+        o[propertyValues[0]][propertyValues[1]][propertyValues[2]] || "";
+      break;
     default:
-      return "";
+      propertyValue = "";
+  }
+
+  if (isExternal) {
+    console.log(propertyValue, "propertyValue");
+    return `$$(${renderedByPlugin}|${propertyValue})`;
+  } else {
+    return propertyValue;
   }
 };
 

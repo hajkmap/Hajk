@@ -59,6 +59,7 @@ export default class FeatureInfo extends React.PureComponent {
   };
 
   nodeHasSpecialAttribute = (child) => {
+    console.log(child, "child");
     let hasSpecialAttribute = Object.keys(child.props).some((key) => {
       return key.search("data-") > -1;
     });
@@ -71,13 +72,20 @@ export default class FeatureInfo extends React.PureComponent {
 
   renderFeatureInformation = async () => {
     const { value } = this.props;
-    const reactElementFromHtml = ReactHtmlParser(value.__html);
+    const reactElementFromHtml = ReactHtmlParser(value.__html, {
+      transform: (node) => {
+        console.log(node, "node");
+      },
+    });
 
     const injectIfExternalComponents = async (children) => {
       for (var i = 0; i < children.length; i++) {
         if (this.isChildTextOnly(children[i])) {
           continue;
         }
+
+        console.log(children[i], "children[i]");
+
         if (this.nodeHasSpecialAttribute(children[i])) {
           let externalElement = await this.fetchExternal(children[i]);
           if (externalElement) {
@@ -92,7 +100,10 @@ export default class FeatureInfo extends React.PureComponent {
         }
       }
     };
-
+    console.log(
+      reactElementFromHtml[0].props.children,
+      "reactElementFromHtml[0].props.children"
+    );
     await injectIfExternalComponents(reactElementFromHtml[0].props.children);
 
     return reactElementFromHtml;
