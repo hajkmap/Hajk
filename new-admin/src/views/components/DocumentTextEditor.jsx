@@ -62,6 +62,7 @@ export default class DocumentTextEditor extends React.Component {
     this.onChange = (editorState) => this.setState({ editorState });
     this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
     this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
+    this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
     this.onWidthChange = (e) => this.setState({ mediaWidth: e.target.value });
     this.onHeightChange = (e) => this.setState({ mediaHeight: e.target.value });
     this.onDataCaptionChange = (e) =>
@@ -187,10 +188,11 @@ export default class DocumentTextEditor extends React.Component {
 
   _confirmLink(e) {
     e.preventDefault();
-    const { editorState, urlValue, urlType, urlTitle } = this.state;
+    const { editorState, urlValue, urlType, urlTitle, urlTitleId } = this.state;
     const data = {
       url: urlValue,
       title: urlTitle,
+      titleId: urlTitleId,
       type: urlType,
     };
 
@@ -225,6 +227,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         urlValue: "",
         urlTitle: "",
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -244,6 +247,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         urlValue: "",
         urlTitle: "",
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -293,6 +297,7 @@ export default class DocumentTextEditor extends React.Component {
         urlValue: this.state.urlValue,
         urlType: type,
         urlTitle: "",
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.refs.link.focus(), 0);
@@ -533,6 +538,15 @@ export default class DocumentTextEditor extends React.Component {
             style={styles.urlInput}
             type="text"
             value={this.state.urlTitle || ""}
+            placeholder="Rubrik på länk"
+            onKeyDown={this.onLinkInputKeyDown}
+          />
+          <input
+            onChange={this.onTitleIdChange}
+            ref="link"
+            style={styles.urlInput}
+            type="text"
+            value={this.state.urlTitleId || ""}
             placeholder="Rubrik på länk"
             onKeyDown={this.onLinkInputKeyDown}
           />

@@ -11,32 +11,54 @@ export const LinkStrategy = (contentBlock, callback, contentState) => {
 };
 
 export const Link = ({ contentState, entityKey, children }) => {
-  const { url, title } = contentState.getEntity(entityKey).getData();
-
+  const { url, title, titleId } = contentState.getEntity(entityKey).getData();
   const entity = contentState.getEntity(entityKey);
   const data = entity.getData();
 
   if (data["data-document"]) {
     return (
-      <a href={url} rel="noopener noreferrer" target="_blank" data-document>
+      <a
+        href={url}
+        rel="noopener noreferrer"
+        target="_blank"
+        data-header-identifier={titleId}
+        data-document
+      >
         {title}
       </a>
     );
   } else if (data["data-link"]) {
     return (
-      <a href={url} rel="noopener noreferrer" target="_blank" data-link>
+      <a
+        href={url}
+        rel="noopener noreferrer"
+        target="_blank"
+        data-header-identifier={titleId}
+        data-link
+      >
         {title}
       </a>
     );
   } else if (data["data-maplink"]) {
     return (
-      <a href={url} rel="noopener noreferrer" target="_blank" data-maplink>
+      <a
+        href={url}
+        rel="noopener noreferrer"
+        target="_blank"
+        data-header-identifier={titleId}
+        data-maplink
+      >
         {title}
       </a>
     );
   } else {
     return (
-      <a href={url} rel="noopener noreferrer" target="_blank">
+      <a
+        href={url}
+        rel="noopener noreferrer"
+        target="_blank"
+        data-header-identifier={titleId}
+      >
         {title}
       </a>
     );
