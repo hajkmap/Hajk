@@ -118,7 +118,7 @@ class WMSLayer {
         fetch(this.proxyUrl + url)
           .then((response) => {
             response.json().then((data) => {
-              const features = new GeoJSON().readFeatures(data);
+              var features = new GeoJSON().readFeatures(data);
               this.featureInformationCallback(features, this.getLayer());
             });
           })
