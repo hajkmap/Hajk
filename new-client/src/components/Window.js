@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile, getIsMobile } from "../utils/IsMobile.js";
-import FeatureInfoContainer from "./FeatureInfoContainer.js";
+import FeatureInfoContainer from "./FeatureInfo/FeatureInfoContainer.js";
 import clsx from "clsx";
 
 const zIndexStart = 1000;

@@ -1,6 +1,6 @@
 import React from "react";
 import cslx from "clsx";
-import FeaturePropsParsing from "../../utils/FeaturePropsParsing";
+import FeaturePropsParsing from "../../components/FeatureInfo/FeaturePropsParsing";
 import { withStyles } from "@material-ui/core/styles";
 import {
   Table,

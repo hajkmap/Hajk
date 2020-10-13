@@ -6,7 +6,7 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import KeyboardArrowDown from "@material-ui/icons/KeyboardArrowDown";
 import Button from "@material-ui/core/Button";
-import FeaturePropsParsing from "../../../../utils/FeaturePropsParsing";
+import FeaturePropsParsing from "../../../../components/FeatureInfo/FeaturePropsParsing";
 
 const styles = (theme) => ({
   item: {

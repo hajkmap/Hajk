@@ -3,45 +3,29 @@ import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import Grid from "@material-ui/core/Grid";
-import { ButtonGroup, Button } from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import FeatureInfo from "./FeatureInfo";
-
-import marked from "marked";
-import FeaturePropsParsing from "../utils/FeaturePropsParsing";
-import Diagram from "./Diagram";
-import HajkTable from "./Table";
+import FeaturePropsParsing from "./FeaturePropsParsing";
+import Diagram from "../Diagram";
+import HajkTable from "../Table";
 import {
   Table,
   TableContainer,
+  CircularProgress,
   TableRow,
   TableCell,
   TableBody,
+  ButtonGroup,
+  Button,
+  Typography,
+  Grid,
 } from "@material-ui/core";
-import { transform } from "ol/proj";
 
 const styles = (theme) => ({
-  windowSection: {
+  stepButton: {
+    width: "20%",
+  },
+  buttonGroup: {
     display: "flex",
-    flexFlow: "column",
-    height: "100%",
-  },
-  featureList: {
-    flex: 1,
-    overflow: "auto",
-    userSelect: "text",
-    cursor: "auto",
-    marginTop: theme.spacing(1),
-  },
-  fullWidthButton: {
-    "&:hover": {
-      background: theme.palette.primary.main,
-      boxShadow: "none",
-      cursor: "default",
-    },
-    width: "100%",
+    justifyContent: "space-between",
   },
 });
 
@@ -58,13 +42,8 @@ class FeatureInfoContainer extends React.PureComponent {
 
   constructor(props) {
     super(props);
-
     this.featurePropsParsing = new FeaturePropsParsing({
       globalObserver: props.globalObserver,
-    });
-    marked.setOptions({
-      sanitize: false,
-      xhtml: true,
     });
   }
 
@@ -92,10 +71,11 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   getStepButton = (onClickFunction, icon, disabled) => {
+    const { classes } = this.props;
     return (
       <Button
         disabled={disabled}
-        style={{ width: "20%" }}
+        className={classes.stepButton}
         onClick={onClickFunction}
         aria-label="Previous"
         id="step-left"
@@ -106,12 +86,12 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   getToggler = () => {
-    const { features } = this.props;
+    const { features, classes } = this.props;
     return (
       <>
         <ButtonGroup
           fullWidth
-          style={{ display: "flex", justifyContent: "space-between" }}
+          className={classes.buttonGroup}
           aria-label="Browse through infoclick results"
           color="primary"
           size="small"
@@ -190,11 +170,16 @@ class FeatureInfoContainer extends React.PureComponent {
     }
   }
 
+  getFeatureProperties = (feature) => {
+    let properties = feature.getProperties();
+    properties = this.featurePropsParsing.extractPropertiesFromJson(properties);
+    feature.setProperties(properties);
+    return properties;
+  };
+
   async setNewFeatureInformation(newIndex) {
     let feature = this.props.features[newIndex];
-
     const layerInfo = feature.layer.get("layerInfo");
-
     let markdown = layerInfo?.information;
     let caption = layerInfo?.caption;
 
@@ -227,13 +212,8 @@ class FeatureInfoContainer extends React.PureComponent {
       feature.layer?.layersInfo?.[layer]?.infobox ||
       markdown;
 
-    let properties = feature.getProperties();
-    properties = this.featurePropsParsing.extractPropertiesFromJson(properties);
-    feature.setProperties(properties);
-    console.log(markdown, "markdown");
     if (markdown) {
       let transformed = this.shortcode(markdown);
-      console.log(transformed, "transformed");
       if (transformed) {
         shortcodes = transformed.codes;
         markdown = transformed.str;
@@ -241,15 +221,9 @@ class FeatureInfoContainer extends React.PureComponent {
     }
 
     this.setState({ loading: true });
-    let value = null;
-    if (markdown) {
-      value = await this.featurePropsParsing.mergeFeaturePropsWithMarkdown(
-        markdown,
-        properties
-      );
-    } else {
-      value = this.getFeaturesAsDefaultTable(properties, caption);
-    }
+
+    let properties = this.getFeatureProperties(feature);
+    const value = await this.getValue(markdown, properties, caption);
 
     this.setState(
       {
@@ -260,12 +234,22 @@ class FeatureInfoContainer extends React.PureComponent {
         selectedIndex: newIndex,
         markdown: markdown,
       },
-
       () => {
         this.showFeatureInMap();
       }
     );
   }
+
+  getValue = async (markdown, properties, caption) => {
+    if (markdown) {
+      return await this.featurePropsParsing.mergeFeaturePropsWithMarkdown(
+        markdown,
+        properties
+      );
+    } else {
+      return this.getFeaturesAsDefaultTable(properties, caption);
+    }
+  };
 
   renderShortcodes(shortcodes, feature) {
     return shortcodes.map((shortcode, i) => {
@@ -298,7 +282,10 @@ class FeatureInfoContainer extends React.PureComponent {
           {caption}
         </Typography>
         {markdown ? (
-          value.__html
+          value.featureInfo.map((element, index) => {
+            console.log(element, "eelemt");
+            return <React.Fragment key={index}>{element}</React.Fragment>;
+          })
         ) : (
           <div className={classes.textContent}>{value}</div>
         )}

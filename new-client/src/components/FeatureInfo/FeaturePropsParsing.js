@@ -84,7 +84,7 @@ export default class FeaturePropsParsing {
       this.globalObserver.getListeners(`core.info-click-${externalEvent}`)
         .length > 0
     )
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         let dataAttributes = this.#extractDataAttributes(property.props);
         //Let subscription resolve the promise
         this.globalObserver.publish(`core.info-click-${externalEvent}`, {
@@ -148,48 +148,50 @@ export default class FeaturePropsParsing {
     return reactElementFromHtml;
   };
 
-  #getStringInformation = (s, isExternal) => {
+  #getAttributePlaceholderInformation = (attributePlaceholder, isExternal) => {
     if (isExternal) {
-      let attributeInformation = s
-        .replace("{", "")
-        .replace("}", "")
-        .split("@@");
-      let propertyValues = attributeInformation[0].split(".");
+      let attributeInformation = attributePlaceholder.split("@@");
+      let placeholder = attributeInformation[0].split(".");
+      let pluginToUseForRenderAttribute = attributeInformation[1];
       return {
-        propertyValues: propertyValues,
-        renderedByPlugin: attributeInformation[1],
+        placeholder: placeholder,
+        renderWithPlugin: pluginToUseForRenderAttribute,
       };
-    } else {
-      s = s.replace("{", "").replace("}", "").split(".");
-      return { propertyValues: s, renderedByPlugin: null };
     }
+    return {
+      placeholder: attributePlaceholder.split("."),
+      renderWithPlugin: null,
+    };
   };
 
-  #lookup = (o, s) => {
+  #lookup = (properties, attributePlaceholder, isExternal) => {
     let propertyValue = "";
-    let isExternal = this.#isMarkupForExternalElement(s);
-    const { propertyValues, renderedByPlugin } = this.#getStringInformation(
-      s,
+
+    const {
+      placeholder,
+      renderWithPlugin,
+    } = this.#getAttributePlaceholderInformation(
+      attributePlaceholder,
       isExternal
     );
 
-    switch (propertyValues.length) {
+    switch (placeholder.length) {
       case 1:
-        propertyValue = o[propertyValues[0]] || "";
+        propertyValue = properties[placeholder[0]] || "";
         break;
       case 2:
-        propertyValue = o[propertyValues[0]][propertyValues[1]] || "";
+        propertyValue = properties[placeholder[0]][placeholder[1]] || "";
         break;
       case 3:
         propertyValue =
-          o[propertyValues[0]][propertyValues[1]][propertyValues[2]] || "";
+          properties[placeholder[0]][placeholder[1]][placeholder[2]] || "";
         break;
       default:
         propertyValue = "";
     }
 
     if (isExternal) {
-      return `${propertyValue}@@${renderedByPlugin}`;
+      return `${propertyValue}@@${renderWithPlugin}`;
     } else {
       return propertyValue;
     }
@@ -199,21 +201,33 @@ export default class FeaturePropsParsing {
     markdown = markdown.replace(/export:/g, "");
     if (markdown && typeof markdown === "string") {
       (markdown.match(/{(.*?)}/g) || []).forEach((property) => {
+        let propertyIsExternal = this.#isMarkupForExternalElement(property);
+        let attributePlaceholder = property.replace("{", "").replace("}", "");
         markdown = markdown.replace(
           property,
-          this.#lookup(properties, property)
+          this.#lookup(properties, attributePlaceholder, propertyIsExternal)
         );
       });
     }
-
-    let domTree = new DOMParser().parseFromString(
-      marked(markdown),
-      "text/html"
+    markdown = `<div id="wrapper">${markdown}</div>`;
+    let html = marked(markdown);
+    const { visibleSectionHtml, hiddenSectionHtml } = this.getHtmlSections(
+      html
     );
+
+    let renderedHtml = await this.#renderHtmlAsReactComponents(html);
+    return {
+      featureInfo: renderedHtml,
+      __visibleSectionHtml: visibleSectionHtml,
+      __hiddenSectionHtml: hiddenSectionHtml,
+    };
+  };
+
+  getHtmlSections = (html) => {
+    let domTree = new DOMParser().parseFromString(html, "text/html");
+    const sections = [...domTree.body.getElementsByTagName("section")];
     let visibleSectionHtml = "";
     let hiddenSectionHtml = "";
-    let sections = [...domTree.body.getElementsByTagName("section")];
-
     sections.forEach((section) => {
       if (section.getAttributeNames().includes("data-visible")) {
         visibleSectionHtml = section.innerHTML;
@@ -223,15 +237,9 @@ export default class FeaturePropsParsing {
         hiddenSectionHtml = section.innerHTML;
       }
     });
-
-    let renderedHtml = await this.#renderHtmlAsReactComponents(
-      marked(markdown)
-    );
-
     return {
-      __html: renderedHtml,
-      __visibleSectionHtml: marked(visibleSectionHtml),
-      __hiddenSectionHtml: marked(hiddenSectionHtml),
+      visibleSectionHtml: marked(visibleSectionHtml),
+      hiddenSectionHtml: marked(hiddenSectionHtml),
     };
   };
 }
