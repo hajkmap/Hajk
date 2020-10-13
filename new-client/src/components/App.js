@@ -599,11 +599,13 @@ class App extends React.PureComponent {
                 currentMap={this.props.config.activeMap}
               />
             )}
-          <CookieNotice
-            globalObserver={this.globalObserver}
-            defaultCookieNoticeMessage={defaultCookieNoticeMessage}
-            defaultCookieNoticeUrl={defaultCookieNoticeUrl}
-          />
+          {clean === false && (
+            <CookieNotice
+              globalObserver={this.globalObserver}
+              defaultCookieNoticeMessage={defaultCookieNoticeMessage}
+              defaultCookieNoticeUrl={defaultCookieNoticeUrl}
+            />
+          )}
           <Alert
             open={this.state.alert}
             message={this.state.alertMessage}
@@ -723,15 +725,17 @@ class App extends React.PureComponent {
               }}
             />
           )}
-          <Introduction
-            experimentalIntroductionEnabled={
-              this.appModel.config.appConfig.experimentalIntroductionEnabled
-            }
-            experimentalIntroductionSteps={
-              this.appModel.config.appConfig.experimentalIntroductionSteps
-            }
-            globalObserver={this.globalObserver}
-          />
+          {clean === false && (
+            <Introduction
+              experimentalIntroductionEnabled={
+                this.appModel.config.appConfig.experimentalIntroductionEnabled
+              }
+              experimentalIntroductionSteps={
+                this.appModel.config.appConfig.experimentalIntroductionSteps
+              }
+              globalObserver={this.globalObserver}
+            />
+          )}
         </>
       </SnackbarProvider>
     );
