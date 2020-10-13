@@ -57,6 +57,7 @@ class VectorLayerForm extends React.Component {
     sldUrl: "",
     sldText: "",
     sldStyle: "Default Styler",
+    attribution: "",
     symbolXOffset: 0,
     symbolYOffset: 0,
     labelAlign: "center",
@@ -139,6 +140,7 @@ class VectorLayerForm extends React.Component {
       sldUrl: this.getValue("sldUrl"),
       sldText: this.getValue("sldText"),
       sldStyle: this.getValue("sldStyle"),
+      attribution: this.getValue("attribution"),
       symbolXOffset: this.getValue("symbolXOffset"),
       symbolYOffset: this.getValue("symbolYOffset"),
       queryable: this.getValue("queryable"),
@@ -730,6 +732,19 @@ class VectorLayerForm extends React.Component {
               const v = e.target.value;
               this.setState({ sldStyle: v });
             }}
+          />
+        </div>
+        <div>
+          <label>Upphovsrätt</label>
+          <input
+            type="text"
+            ref="input_attribution"
+            onChange={(e) => {
+              this.setState({ attribution: e.target.value });
+              this.validateField("attribution", e);
+            }}
+            value={this.state.attribution}
+            className={this.getValidationClass("attribution")}
           />
         </div>
         <div>

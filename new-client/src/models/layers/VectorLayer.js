@@ -1,14 +1,14 @@
 import VectorSource from "ol/source/Vector";
-import { Vector as VectorLayer } from "ol/layer";
-import { WFS, GeoJSON } from "ol/format";
-import GML2 from "ol/format/GML";
+import VectorLayer from "ol/layer/Vector";
+import GeoJSON from "ol/format/GeoJSON";
+import GML2 from "ol/format/GML2";
+import WFS from "ol/format/WFS";
 import { all as strategyAll, bbox as bboxStrategy } from "ol/loadingstrategy";
-import { transform } from "ol/proj";
-import { getPointResolution } from "ol/proj";
-
-import LayerInfo from "./LayerInfo.js";
+import { getPointResolution, transform } from "ol/proj";
 
 import * as SLDReader from "@nieuwlandgeo/sldreader";
+
+import LayerInfo from "./LayerInfo.js";
 
 const fetchConfig = {
   credentials: "same-origin",
@@ -50,6 +50,7 @@ class WFSVectorLayer {
     this.filterValue = config.filterValue;
 
     this.vectorSource = new VectorSource({
+      attributions: config.attribution,
       loader: (extent, resolution, projection) => {
         if (config.dataFormat === "GeoJSON") {
           this.loadData(config.url, config.dataFormat.toLowerCase());

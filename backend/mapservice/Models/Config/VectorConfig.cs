@@ -229,6 +229,8 @@ namespace MapService.Models.Config
         public string sldText { get; set; }
         
         public string sldStyle { get; set; }
+        
+        public string attribution { get; set; }
 
         public string infobox { get; set; }
 
