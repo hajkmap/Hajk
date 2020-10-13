@@ -24,13 +24,17 @@ class DocumentWindowBase extends React.PureComponent {
 
   setActiveDocument = (documentFileName) => {
     const { model } = this.props;
-
-    let document = model.getDocuments([documentFileName])[0];
-    this.setState({
-      documentTitle: document.documentTitle,
-      document: document,
-      documentColor: document.documentColor ? document.documentColor : null,
-      showPrintWindow: false,
+    return new Promise((resolve, reject) => {
+      let document = model.getDocuments([documentFileName])[0];
+      this.setState(
+        {
+          documentTitle: document.documentTitle,
+          document: document,
+          documentColor: document.documentColor ? document.documentColor : null,
+          showPrintWindow: false,
+        },
+        resolve
+      );
     });
   };
 
@@ -213,7 +217,7 @@ class DocumentWindowBase extends React.PureComponent {
           title: documentTitle || options.windowTitle || "Documents",
           color: documentColor || "#ffffff",
           description: "En kort beskrivning som visas i widgeten",
-          height: options.height || "90vh",
+          height: options.height || "auto",
           width: options.width || 600,
           scrollable: false,
           onMinimize: this.onMinimize,

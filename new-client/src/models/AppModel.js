@@ -30,8 +30,6 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style.js";
 
-var map;
-
 class AppModel {
   registerWindowPlugin(windowComponent) {
     this.windows.push(windowComponent);
@@ -59,6 +57,7 @@ class AppModel {
    * @param Observer observer
    */
   constructor(config, globalObserver) {
+    this.map = undefined;
     this.windows = [];
     this.plugins = {};
     this.activeTool = undefined;
@@ -151,7 +150,7 @@ class AppModel {
           if (Object.keys(toolConfig).length > 0) {
             this.addPlugin(
               new Plugin({
-                map: map,
+                map: this.map,
                 app: this,
                 type: plugin,
                 searchInterface: {},
@@ -176,7 +175,7 @@ class AppModel {
    */
   createMap() {
     const config = this.translateConfig();
-    map = new Map({
+    this.map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
         // new Rotate({ target: document.getElementById("controls-column") }),
@@ -208,11 +207,11 @@ class AppModel {
       }),
     });
     setTimeout(() => {
-      map.updateSize();
+      this.map.updateSize();
     }, 0);
 
     if (config.tools.some((tool) => tool.type === "infoclick")) {
-      bindMapClickEvent(map, (mapClickDataResult) => {
+      bindMapClickEvent(this.map, (mapClickDataResult) => {
         this.globalObserver.publish("core.mapClick", mapClickDataResult);
       });
     }
@@ -220,7 +219,7 @@ class AppModel {
   }
 
   getMap() {
-    return map;
+    return this.map;
   }
 
   addSearchModel() {
@@ -236,7 +235,7 @@ class AppModel {
   clear() {
     this.clearing = true;
     this.highlight(false);
-    map
+    this.map
       .getLayers()
       .getArray()
       .forEach((layer) => {
@@ -268,25 +267,25 @@ class AppModel {
           this.config.appConfig.proxy,
           this.globalObserver
         );
-        map.addLayer(layerItem.layer);
+        this.map.addLayer(layerItem.layer);
         break;
       case "wmts":
         layerConfig = configMapper.mapWMTSConfig(layer, this.config);
         layerItem = new WMTSLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
-          map
+          this.map
         );
-        map.addLayer(layerItem.layer);
+        this.map.addLayer(layerItem.layer);
         break;
       case "vector":
         layerConfig = configMapper.mapVectorConfig(layer);
         layerItem = new WFSVectorLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
-          map
+          this.map
         );
-        map.addLayer(layerItem.layer);
+        this.map.addLayer(layerItem.layer);
         break;
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);
@@ -404,7 +403,7 @@ class AppModel {
         }),
       }),
     });
-    map.addLayer(this.highlightLayer);
+    this.map.addLayer(this.highlightLayer);
   }
 
   getCenter(e) {
@@ -418,7 +417,7 @@ class AppModel {
         this.highlightSource.addFeature(feature);
         if (window.innerWidth < 600) {
           let geom = feature.getGeometry();
-          map.getView().setCenter(this.getCenter(geom.getExtent()));
+          this.map.getView().setCenter(this.getCenter(geom.getExtent()));
         }
       }
     }

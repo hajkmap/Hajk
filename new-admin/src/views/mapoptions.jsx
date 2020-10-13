@@ -78,6 +78,7 @@ class MapOptions extends Component {
           : "",
         defaultCookieNoticeMessage: config.defaultCookieNoticeMessage,
         defaultCookieNoticeUrl: config.defaultCookieNoticeUrl,
+        crossOrigin: config.crossOrigin,
       });
       this.validate();
     });
@@ -122,6 +123,7 @@ class MapOptions extends Component {
       defaultCookieNoticeUrl: mapConfig.defaultCookieNoticeUrl
         ? mapConfig.defaultCookieNoticeUrl
         : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+      crossOrigin: mapConfig.crossOrigin ? mapConfig.crossOrigin : "anonymous",
     });
   }
 
@@ -296,6 +298,7 @@ class MapOptions extends Component {
           "defaultCookieNoticeMessage"
         );
         config.defaultCookieNoticeUrl = this.getValue("defaultCookieNoticeUrl");
+        config.crossOrigin = this.getValue("crossOrigin");
         this.props.model.updateMapConfig(config, (success) => {
           var msg = success
             ? "Uppdateringen lyckades."
@@ -699,6 +702,25 @@ class MapOptions extends Component {
                 className={this.getValidationClass("defaultCookieNoticeUrl")}
                 onChange={(e) => {
                   this.setState({ defaultCookieNoticeUrl: e.target.value });
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Cross origin-parameter{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Ställer in vilket värde som används för 'crossOrigin'. Om osäker, används 'anonymous'. "
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_crossOrigin"
+                value={this.state.crossOrigin}
+                className={this.getValidationClass("crossOrigin")}
+                onChange={(e) => {
+                  this.setState({ crossOrigin: e.target.value });
                 }}
               />
             </div>

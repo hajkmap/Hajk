@@ -296,7 +296,6 @@ class RouteModel {
   plotRoute(res, map, layer_route, layer_drawing) {
     layer_route.getSource().clear();
     var steps = res.routes[0].legs[0].steps;
-    // console.log("steps: ", steps);
     const routeDiv = document.createElement("div");
     const p = document.createElement("p");
     const ul = document.createElement("ol");

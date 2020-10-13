@@ -1,10 +1,32 @@
 export default class MatchSearch {
-  constructor(percentageLimit) {
+  constructor(percentageLimit, searchOptions) {
     this.percentageLimit = percentageLimit;
+    this.searchOptions = searchOptions;
   }
 
+  getMatchRegexp = (searchString) => {
+    const { wildcardAtEnd, wildcardAtStart, matchCase } = this.searchOptions;
+    let regexpOptions = matchCase ? "g" : "gi";
+    if (wildcardAtStart && !wildcardAtEnd) {
+      return new RegExp(`.*${searchString}$`, regexpOptions);
+    }
+
+    if (!wildcardAtStart && wildcardAtEnd) {
+      return new RegExp(`^${searchString}.*`, regexpOptions);
+    }
+
+    if (wildcardAtStart && wildcardAtEnd) {
+      return new RegExp(`${searchString}`, regexpOptions);
+    }
+    return new RegExp(`^${searchString}$`, regexpOptions);
+  };
+
+  escapeSpecialChars = (string) => {
+    return string.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
+  };
+
   /**
-   * Makes a deep compare of a search string and a keyword.
+   * Compare searchString agains keyword to se if it matches
    * @param {string} searchString The search string.
    * @param {string} keyword The keyword.
    * @returns Returns an object of the compare results.
@@ -12,61 +34,110 @@ export default class MatchSearch {
    * @memberof MatchSearch
    */
   compare = (searchString, keyword) => {
-    const exactMatchLowerCase = this.exactMatchLowerCase(searchString, keyword);
-    const lengthMatchLowerCase = this.lengthMatchLowerCase(
-      searchString,
-      keyword
-    );
-    const percentageMatchLowerCase = this.percentageMatchLowerCase(
-      searchString,
-      keyword
-    );
-    const match =
-      exactMatchLowerCase ||
-      lengthMatchLowerCase ||
-      percentageMatchLowerCase >= this.percentageLimit;
+    let toSearchIn = this.escapeSpecialChars(searchString);
+    let match = this.getMatchRegexp(toSearchIn).test(keyword);
+
     return {
       searchResults: {
         match: match,
-        details: {
-          exactMatchLowerCase: exactMatchLowerCase,
-          lengthMatchLowerCase: lengthMatchLowerCase,
-          percentageMatchLowerCase: percentageMatchLowerCase,
-        },
       },
     };
   };
 
   /**
-   * Performs an exact match independent of upper- or lower cases.
+   * Find a match of the search string in the keyword.
    * @param {string} searchString The search string.
    * @param {string} keyword The keyword.
-   * @returns Returns true of a match is found.
    */
-  exactMatchLowerCase = (searchString, keyword) => {
-    return keyword.toLowerCase() === searchString.toLowerCase();
+  matchSearchStringAndKeyword = (searchString, keyword) => {
+    let escapeRegex = (keyword) =>
+      keyword.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
+
+    return new RegExp(
+      "^" + searchString.split("*").map(escapeRegex).join(".*") + "$"
+    ).test(keyword);
   };
 
   /**
-   * Performs an exact match, using only the length of the search string, independent of upper- or lower cases.
-   * @param {string} searchString The search string.
-   * @param {string} keyword The keyword.
-   * @returns Returns true of a match is found.
+   * Transforms a string to lower case if given argument tells it to do so.
+   * @param {string} string The string that might be transformed to lowercase.
+   * @param {bool} transformToLowerCase Specifies if the string should be transformed to lowercase.
+   *
+   * @memberof MatchSearch
    */
-  lengthMatchLowerCase = (searchString, keyword) => {
-    keyword = this.shortenKeyword(searchString, keyword);
-    return this.exactMatchLowerCase(searchString, keyword);
+  transformStringToLowercase = (string, transformToLowerCase) => {
+    if (transformToLowerCase) return string.toLowerCase();
+    return string;
   };
 
   /**
-   * Help method that shortens the keyword to the same length of the search string if possible.
+   * Removes the star (*) character from the search string, we don't need it in document search.
+   * @param {string} searchString The search string.
+   * @param {bool} wildcardAtStart A wildcard, i.e. a star (*), is in the first position.
+   * @param {bool} wildcardAtEnd A wildcard, i.e. a star (*), is in the last position.
+   *
+   * @memberof MatchSearch
+   */
+  removeWildcardsFromSearchString = (
+    searchString,
+    wildcardAtStart,
+    wildcardAtEnd
+  ) => {
+    if (wildcardAtStart)
+      searchString = searchString.substring(1, searchString.length);
+
+    if (wildcardAtEnd)
+      searchString = searchString.substring(0, searchString.length - 1);
+
+    return searchString;
+  };
+
+  /**
+   * Shortens the keyword to that it matches the length of the search string.
    * @param {string} searchString The search string.
    * @param {string} keyword The keyword.
-   * @returns A keyword that matches the length of the search string or is shorter.
+   * @param {bool} wildcardAtStart Specifies if the wildcard should be at the start of the search string.
+   * @param {bool} wildcardAtEnd Specifies if the wildcard should be at the end of the search string.
    */
-  shortenKeyword = (searchString, keyword) => {
+  shortenKeyword = (searchString, keyword, wildcardAtStart, wildcardAtEnd) => {
+    if (wildcardAtEnd)
+      keyword = this.#shortenKeywordFromStart(searchString, keyword);
+
+    if (wildcardAtStart)
+      keyword = this.#shortenKeywordFromEnd(searchString, keyword);
+
+    return keyword;
+  };
+
+  /**
+   * Shortens the keyword byt cutting of characters from the start, to match the length of the search string.
+   * @param {string} searchString The search string.
+   * @param {string} keyword The keyword.
+   */
+  #shortenKeywordFromStart = (searchString, keyword) => {
+    const cutPosition = 0;
+    return this.#shortenKeywordCut(searchString, keyword, cutPosition);
+  };
+
+  /**
+   * Shortens the keyword byt cutting of characters from the end, to match the length of the search string.
+   * @param {string} searchString The search string.
+   * @param {string} keyword The keyword.
+   */
+  #shortenKeywordFromEnd = (searchString, keyword) => {
+    const cutPosition = keyword.length - searchString.length;
+    return this.#shortenKeywordCut(searchString, keyword, cutPosition);
+  };
+
+  /**
+   * Cuts the keyword at a position to match the length of the search string.
+   * @param {string} searchString The search string.
+   * @param {string} keyword The keyword.
+   * @param {int} cutPosition The position of the cut.
+   */
+  #shortenKeywordCut = (searchString, keyword, cutPosition) => {
     if (keyword.length > searchString.length)
-      keyword = keyword.substr(0, searchString.length);
+      keyword = keyword.substr(cutPosition, searchString.length);
     return keyword;
   };
 
@@ -76,34 +147,29 @@ export default class MatchSearch {
    * @param {string} keyword The keyword.
    */
   percentageMatchLowerCase = (searchString, keyword) => {
-    // keyword = this.shortenKeyword(searchString, keyword);
-    // let matches = 0;
-    // for (var i = 0; i < keyword.length; i++)
-    //   if (this.letterMatch(keyword[i], searchString[i])) matches++;
-
-    // if (matches === 0) return 0.0;
-    // return keyword.length / matches;
-
     let matches = 0;
     for (let iSS = 0; iSS < searchString.length; iSS++) {
-      let first = true;
+      let firstTimeInKeywordLoop = true;
+      let firstMatchIndex = -1;
       let up = true;
       let add = 0;
 
       for (let iK = 0; iK < keyword.length; iK++) {
         let index = iSS;
 
-        if (!first && up) add++;
-        if (!first && up) index += add;
-        if (!first && !up && index - add >= 0) index -= add;
-        if (!first && !up && index - add < 0) index += add;
-        first = false;
+        if (!firstTimeInKeywordLoop && up) add++;
+        if (!firstTimeInKeywordLoop && up) index += add;
+        if (!firstTimeInKeywordLoop && !up && index - add >= 0) index -= add;
+        if (!firstTimeInKeywordLoop && !up && index - add < 0) index += add;
+        firstTimeInKeywordLoop = false;
 
         if (index >= keyword.length) break;
 
         if (this.letterMatch(keyword[index], searchString[iSS])) {
-          const divider = add + 1;
-          matches += 1 / (divider * divider);
+          if (firstMatchIndex < 0) firstMatchIndex = add;
+          const divider =
+            firstMatchIndex < 0 ? add + 1 : add - firstMatchIndex + 1;
+          matches += 1 / divider;
           break;
         }
       }
@@ -119,6 +185,69 @@ export default class MatchSearch {
    * @param {character} searchStringLetter A letter from the search string.
    */
   letterMatch = (keywordLetter, searchStringLetter) => {
-    return keywordLetter.toLowerCase() === searchStringLetter.toLowerCase();
+    return keywordLetter === searchStringLetter;
+  };
+
+  /**
+   * Calculates if there is a match or not.
+   * @param {string} searchString The search string.
+   * @param {string} keyword The keyword.
+   * @param {double} percentageMatch The similarity percentage of the match.
+   * @param {bool} wildcardAtStart States if there is a wildcard at the start.
+   * @param {bool} wildcardAtEnd States if there is a wildcard at the end.
+   */
+  calculateIfMatched = (
+    searchString,
+    keyword,
+    percentageMatch,
+    wildcardAtStart,
+    wildcardAtEnd
+  ) => {
+    if (
+      !this.#matchNoWildcards(
+        searchString,
+        keyword,
+        wildcardAtStart,
+        wildcardAtEnd
+      )
+    )
+      return false;
+
+    if (!this.#matchPercentage(percentageMatch)) return false;
+
+    return true;
+  };
+
+  /**
+   * Checks if there are no wildcards and that the search string and the keywords match exactly in length.
+   * @param {string} searchString The search string
+   * @param {string} keyword The keyword.
+   * @param {bool} wildcardAtStart States if there is a wildcard at the start.
+   * @param {bool} wildcardAtEnd States if there is a wildcard at the end.
+   */
+  #matchNoWildcards = (
+    searchString,
+    keyword,
+    wildcardAtStart,
+    wildcardAtEnd
+  ) => {
+    if (
+      !wildcardAtStart &&
+      !wildcardAtEnd &&
+      searchString.length !== keyword.length
+    )
+      return false;
+
+    return true;
+  };
+
+  /**
+   * Checks if the similarity in percentage is enough.
+   * @param {double} percentageMatch The similarity percentage of the match.
+   */
+  #matchPercentage = (percentageMatch) => {
+    if (percentageMatch < this.percentageLimit) return false;
+
+    return true;
   };
 }

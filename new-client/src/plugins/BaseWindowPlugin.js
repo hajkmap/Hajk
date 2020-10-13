@@ -100,6 +100,9 @@ class BaseWindowPlugin extends React.PureComponent {
     const hideOtherPluginWindows = opts.hideOtherPluginWindows || true,
       runCallback = opts.runCallback || true;
 
+    // Let the App know which tool is currently active
+    this.props.app.activeTool = this.type;
+
     // Don't continue if visibility hasn't changed
     if (this.state.windowVisible === true) {
       return null;
@@ -121,6 +124,11 @@ class BaseWindowPlugin extends React.PureComponent {
   };
 
   closeWindow = () => {
+    // If closeWindow was initiated by the tool that is currently
+    // active, we should unset the activeTool property
+    if (this.type === this.props.app.activeTool)
+      this.props.app.activeTool = undefined;
+
     this.setState(
       {
         windowVisible: false,

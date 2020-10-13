@@ -1,12 +1,10 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
 import cslx from "clsx";
 import {
   extractPropertiesFromJson,
   mergeFeaturePropsWithMarkdown,
 } from "../../utils/FeaturePropsParsing";
-import { Typography } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 import {
   Table,
   TableBody,
@@ -14,9 +12,10 @@ import {
   TableCell,
   TableHead,
   TableContainer,
+  Typography,
 } from "@material-ui/core";
 
-const styles = (theme) => ({
+const styles = () => ({
   hidden: {
     display: "none",
   },
@@ -24,23 +23,16 @@ const styles = (theme) => ({
     paddingLeft: 0,
     wordBreak: "break-all",
   },
-
   customDetailsHtmlTypography: {
     overflow: "hidden",
   },
   showMoreInformationButton: {
     width: "100%",
   },
-
-  featureActionButton: {
-    paddingLeft: 0,
-  },
 });
 
 class SearchResultsDatasetFeature extends React.PureComponent {
-  state = {
-    showAllInformation: false,
-  };
+  state = {};
 
   renderTableCell = (content, position) => {
     const { classes } = this.props;
@@ -53,10 +45,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   getHtmlItemInfoBox = (feature, infoBox) => {
-    console.log(feature, "feature");
-    console.log(infoBox, "infoBox");
-    var properties = extractPropertiesFromJson(feature.properties);
-    feature.properties = properties;
+    feature.properties = extractPropertiesFromJson(feature.properties);
     return mergeFeaturePropsWithMarkdown(infoBox, feature.properties);
   };
 
@@ -81,11 +70,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     }, "");
   };
 
-  //temp1.offsetHeight / parseInt(window.getComputedStyle(temp1, null).getPropertyValue('line-height').slice(0,-2))
-
-  renderHiddenSection = (htmlForInfoBox) => {
-    const { classes } = this.props;
-    const { showAllInformation } = this.state;
+  renderHiddenSection = (__hiddenSectionHtml) => {
+    const { classes, showAllInformation } = this.props;
 
     return (
       <Typography
@@ -97,13 +83,13 @@ class SearchResultsDatasetFeature extends React.PureComponent {
         variant="body2"
         color="textPrimary"
         dangerouslySetInnerHTML={{
-          __html: htmlForInfoBox.__hiddenSectionHtml,
+          __html: __hiddenSectionHtml,
         }}
       ></Typography>
     );
   };
 
-  renderVisibleSection = (htmlForInfoBox) => {
+  renderVisibleSection = (__visibleSectionHtml) => {
     const { classes } = this.props;
 
     return (
@@ -113,15 +99,15 @@ class SearchResultsDatasetFeature extends React.PureComponent {
         variant="body2"
         color="textPrimary"
         dangerouslySetInnerHTML={{
-          __html: htmlForInfoBox.__visibleSectionHtml,
+          __html: __visibleSectionHtml,
         }}
       ></Typography>
     );
   };
 
   renderDefaultInfoBoxTable = () => {
-    const { feature, classes } = this.props;
-    const { showAllInformation } = this.state;
+    const { feature, classes, showAllInformation } = this.props;
+
     return Object.entries(feature.properties).map((row, index) => {
       return (
         <TableBody key={index}>
@@ -141,13 +127,14 @@ class SearchResultsDatasetFeature extends React.PureComponent {
 
   renderCustomInfoBoxTable = () => {
     const { feature, source } = this.props;
-
-    const htmlForInfoBox = this.getHtmlItemInfoBox(feature, source.infobox);
-
+    const {
+      __visibleSectionHtml,
+      __hiddenSectionHtml,
+    } = this.getHtmlItemInfoBox(feature, source.infobox);
     return (
       <TableBody>
-        {this.renderVisibleSection(htmlForInfoBox)}
-        {this.renderHiddenSection(htmlForInfoBox)}
+        {this.renderVisibleSection(__visibleSectionHtml)}
+        {this.renderHiddenSection(__hiddenSectionHtml)}
       </TableBody>
     );
   };
@@ -167,9 +154,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
       <TableHead>
         <TableRow>
           <TableCell colSpan="6" variant="head" className={classes.tableCell}>
-            {" "}
             <Typography variant="subtitle1" align="left">
-              {this.getFeatureTitle()}{" "}
+              {this.getFeatureTitle()}
             </Typography>
           </TableCell>
         </TableRow>
@@ -177,36 +163,18 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     );
   };
 
-  renderShowMoreInformationButton = () => {
-    const { showAllInformation } = this.state;
-    const { classes } = this.props;
-    return (
-      <Button
-        color="primary"
-        className={classes.showMoreInformationButton}
-        onClick={(e) => {
-          e.stopPropagation();
-          this.setState({
-            showAllInformation: !this.state.showAllInformation,
-          });
-        }}
-      >
-        {showAllInformation ? "Visa mindre" : "Visa mer"}
-      </Button>
-    );
-  };
-
   render() {
     return (
-      <TableContainer>
-        <Table size={"small"}>
-          {this.renderDetailsTitle()}
-          {this.shouldRenderCustomInfoBox()
-            ? this.renderCustomInfoBoxTable()
-            : this.renderDefaultInfoBoxTable()}
-        </Table>
-        {this.renderShowMoreInformationButton()}
-      </TableContainer>
+      <>
+        <TableContainer>
+          <Table size={"small"}>
+            {this.renderDetailsTitle()}
+            {this.shouldRenderCustomInfoBox()
+              ? this.renderCustomInfoBoxTable()
+              : this.renderDefaultInfoBoxTable()}
+          </Table>
+        </TableContainer>
+      </>
     );
   }
 }

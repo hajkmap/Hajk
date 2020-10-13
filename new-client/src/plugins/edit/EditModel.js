@@ -474,7 +474,7 @@ class EditModel {
     });
     this.map.addInteraction(this.draw);
     this.map.addInteraction(this.snap);
-    this.map.clicklock = true;
+    this.map.clickLock.add("edit");
   }
 
   activateRemove() {
@@ -500,7 +500,7 @@ class EditModel {
       this.activateModify();
     }
     if (type === "remove") {
-      this.map.clicklock = true;
+      this.map.clickLock.add("edit");
       this.activateRemove();
     }
   }
@@ -536,7 +536,7 @@ class EditModel {
     }
     if (this.remove) {
       this.remove = false;
-      this.map.clicklock = false;
+      this.map.clickLock.delete("edit");
       this.map.un("singleclick", this.removeSelected);
     }
   }
@@ -547,7 +547,8 @@ class EditModel {
     this.removeFeature = undefined;
     this.removalToolMode = "off";
     this.filty = false;
-    this.map.clicklock = false;
+    this.map.clickLock.delete("edit");
+
     if (this.layer) {
       this.map.removeLayer(this.layer);
       this.layer = undefined;
