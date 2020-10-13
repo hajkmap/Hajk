@@ -10,10 +10,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import FeatureInfo from "./FeatureInfo";
 
 import marked from "marked";
-import {
-  mergeFeaturePropsWithMarkdown,
-  extractPropertiesFromJson,
-} from "../utils/FeaturePropsParsing";
+import FeaturePropsParsing from "../utils/FeaturePropsParsing";
 import Diagram from "./Diagram";
 import HajkTable from "./Table";
 import {
@@ -61,6 +58,10 @@ class FeatureInfoContainer extends React.PureComponent {
 
   constructor(props) {
     super(props);
+
+    this.featurePropsParsing = new FeaturePropsParsing({
+      globalObserver: props.globalObserver,
+    });
     marked.setOptions({
       sanitize: false,
       xhtml: true,
@@ -189,7 +190,7 @@ class FeatureInfoContainer extends React.PureComponent {
     }
   }
 
-  setNewFeatureInformation(newIndex) {
+  async setNewFeatureInformation(newIndex) {
     let feature = this.props.features[newIndex];
 
     const layerInfo = feature.layer.get("layerInfo");
@@ -227,7 +228,7 @@ class FeatureInfoContainer extends React.PureComponent {
       markdown;
 
     let properties = feature.getProperties();
-    properties = extractPropertiesFromJson(properties);
+    properties = this.featurePropsParsing.extractPropertiesFromJson(properties);
     feature.setProperties(properties);
     console.log(markdown, "markdown");
     if (markdown) {
@@ -240,12 +241,16 @@ class FeatureInfoContainer extends React.PureComponent {
     }
 
     this.setState({ loading: true });
-    console.log(properties, "properties");
+    let value = null;
+    if (markdown) {
+      value = await this.featurePropsParsing.mergeFeaturePropsWithMarkdown(
+        markdown,
+        properties
+      );
+    } else {
+      value = this.getFeaturesAsDefaultTable(properties, caption);
+    }
 
-    const value = markdown
-      ? mergeFeaturePropsWithMarkdown(markdown, properties)
-      : this.getFeaturesAsDefaultTable(properties, caption);
-    console.log(value, "value");
     this.setState(
       {
         value: value,
@@ -293,10 +298,7 @@ class FeatureInfoContainer extends React.PureComponent {
           {caption}
         </Typography>
         {markdown ? (
-          <FeatureInfo
-            globalObserver={this.props.globalObserver}
-            value={value}
-          ></FeatureInfo>
+          value.__html
         ) : (
           <div className={classes.textContent}>{value}</div>
         )}

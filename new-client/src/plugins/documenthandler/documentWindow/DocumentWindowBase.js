@@ -147,7 +147,7 @@ class DocumentWindowBase extends React.PureComponent {
     const { app } = this.props;
 
     app.globalObserver.subscribe(
-      "core.info-click",
+      "core.info-click-documenthandler",
       this.handleInfoClickRequest
     );
 

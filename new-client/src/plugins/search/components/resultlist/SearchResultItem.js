@@ -6,10 +6,7 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import KeyboardArrowDown from "@material-ui/icons/KeyboardArrowDown";
 import Button from "@material-ui/core/Button";
-import {
-  extractPropertiesFromJson,
-  mergeFeaturePropsWithMarkdown,
-} from "../../../../utils/FeaturePropsParsing";
+import FeaturePropsParsing from "../../../../utils/FeaturePropsParsing";
 
 const styles = (theme) => ({
   item: {
@@ -67,6 +64,11 @@ class SearchResultItem extends Component {
     expanded: false,
   };
 
+  constructor(props) {
+    super(props);
+    this.featurePropsParsing = new FeaturePropsParsing();
+  }
+
   highlightImpact = (feature) => (e) => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlightImpact(olFeature);
@@ -119,9 +121,14 @@ class SearchResultItem extends Component {
   };
 
   getHtmlItemInfoBox = (feature, infoBox) => {
-    var properties = extractPropertiesFromJson(feature.properties);
+    var properties = this.featurePropsParsing.extractPropertiesFromJson(
+      feature.properties
+    );
     feature.properties = properties;
-    return mergeFeaturePropsWithMarkdown(infoBox, feature.properties);
+    return this.featurePropsParsing.mergeFeaturePropsWithMarkdown(
+      infoBox,
+      feature.properties
+    );
   };
 
   render() {

@@ -1,9 +1,6 @@
 import React from "react";
 import cslx from "clsx";
-import {
-  extractPropertiesFromJson,
-  mergeFeaturePropsWithMarkdown,
-} from "../../utils/FeaturePropsParsing";
+import FeaturePropsParsing from "../../utils/FeaturePropsParsing";
 import { withStyles } from "@material-ui/core/styles";
 import {
   Table,
@@ -34,6 +31,11 @@ const styles = () => ({
 class SearchResultsDatasetFeature extends React.PureComponent {
   state = {};
 
+  constructor(props) {
+    super(props);
+    this.featurePropsParsing = new FeaturePropsParsing();
+  }
+
   renderTableCell = (content, position) => {
     const { classes } = this.props;
     const textToRender = Array.isArray(content) ? content.join(", ") : content;
@@ -45,8 +47,13 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   getHtmlItemInfoBox = (feature, infoBox) => {
-    feature.properties = extractPropertiesFromJson(feature.properties);
-    return mergeFeaturePropsWithMarkdown(infoBox, feature.properties);
+    feature.properties = this.featurePropsParsing.extractPropertiesFromJson(
+      feature.properties
+    );
+    return this.featurePropsParsing.mergeFeaturePropsWithMarkdown(
+      infoBox,
+      feature.properties
+    );
   };
 
   getFeatureTitle = () => {
