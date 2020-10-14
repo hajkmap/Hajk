@@ -103,16 +103,24 @@ class FeatureInfoContainer extends React.PureComponent {
           size="small"
           variant="contained"
         >
-          {this.getStepButton(
-            this.stepLeft,
-            <ArrowLeftIcon />,
-            this.state.selectedIndex - 1 < 0
-          )}
-          {this.getStepButton(
-            this.stepRight,
-            <ArrowRightIcon />,
-            this.state.selectedIndex + 1 >= features.length
-          )}
+          <Button
+            disabled={this.state.selectedIndex - 1 < 0}
+            className={classes.stepButton}
+            onClick={this.stepLeft}
+            aria-label="previous"
+            id="step-left"
+          >
+            <ArrowLeftIcon />
+          </Button>
+          <Button
+            disabled={this.state.selectedIndex + 1 >= features.length}
+            className={classes.stepButton}
+            onClick={this.stepRight}
+            aria-label="next"
+            id="step-right"
+          >
+            <ArrowRightIcon />
+          </Button>
         </ButtonGroup>
       </>
     );
