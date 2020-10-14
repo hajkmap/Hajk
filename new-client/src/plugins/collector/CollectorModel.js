@@ -10,7 +10,7 @@ import X2JS from "x2js";
 
 class CollectorModel {
   constructor(settings) {
-    this.app = settings.options.app;
+    this.app = settings.app;
     this.map = settings.map;
     this.observer = settings.observer;
     this.globalObserver = settings.globalObserver;
@@ -380,9 +380,11 @@ class CollectorModel {
       this.map.clickLock.add("collector");
       this.activateRemove();
     }
+    this.map.snapHelper.add("collector");
   }
 
   deactivateInteraction() {
+    this.map.snapHelper.delete("collector");
     if (this.select) {
       this.map.removeInteraction(this.select);
     }

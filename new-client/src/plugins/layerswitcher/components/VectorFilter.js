@@ -31,24 +31,27 @@ class VectorFilter extends React.PureComponent {
     this.loadFeatureInfo();
   }
 
+  /**
+   * @summary Prepare entries for dropdown, will contain possible values for filterAttribute.
+   *
+   * @memberof VectorFilter
+   */
   loadFeatureInfo = () => {
-    const { layer } = this.props;
-    const url = layer.getProperties().url;
-    const featureType = layer.getProperties().featureType;
+    const { url, featureType } = this.props.layer.getProperties();
     fetch(
       url +
         `?request=describeFeatureType&outputFormat=application/json&typename=${featureType}`
     ).then((response) => {
       response.json().then((featureInfo) => {
-        var featureTypeInfo = featureInfo.featureTypes.find(
+        const featureTypeInfo = featureInfo.featureTypes.find(
           (type) => type.typeName === featureType
         );
         if (featureTypeInfo && Array.isArray(featureTypeInfo.properties)) {
-          var layerProperties = featureTypeInfo.properties
+          const layerProperties = featureTypeInfo.properties
             .filter((property) => property.type !== "gml:Geometry")
             .map((property) => property.name);
           this.setState({
-            layerProperties: layerProperties,
+            layerProperties,
           });
         }
       });
@@ -61,36 +64,46 @@ class VectorFilter extends React.PureComponent {
     });
   };
 
+  /**
+   * @summary Reads filter options from state, applies them on layer and refreshes the source.
+   *
+   * @memberof VectorFilter
+   */
   setFilter = (e) => {
-    const { filterAttribute, filterValue, filterComparer } = this.state;
-    var vectorSource = this.props.layer.getSource();
-    this.features = vectorSource.getFeatures();
-    this.props.layer.set("filterAttribute", filterAttribute);
-    this.props.layer.set("filterValue", filterValue);
-    this.props.layer.set("filterComparer", filterComparer);
-    vectorSource.clear();
+    this.props.layer.set("filterAttribute", this.state.filterAttribute);
+    this.props.layer.set("filterComparer", this.state.filterComparer);
+    this.props.layer.set("filterValue", this.state.filterValue);
+
+    this.props.layer.getSource().refresh();
   };
 
+  /**
+   * @ Resets the UI to no filter and reloads the source
+   *
+   * @memberof VectorFilter
+   */
   resetFilter = (e) => {
-    var vectorSource = this.props.layer.getSource();
-    vectorSource.clear();
-    this.props.layer.set("filterAttribute", undefined);
-    this.props.layer.set("filterValue", undefined);
-    this.props.layer.set("filterComparer", undefined);
-    setTimeout(() => {
-      this.setState({
-        filterAttribute: "",
-        filterValue: "",
-        filterComparer: "",
-      });
-    }, 200);
+    // Reset the UI
+    this.setState({
+      filterAttribute: "",
+      filterValue: "",
+      filterComparer: "",
+    });
+
+    // Reset filter options on layer
+    this.props.layer.set("filterAttribute", "");
+    this.props.layer.set("filterComparer", "");
+    this.props.layer.set("filterValue", "");
+
+    // Refresh source
+    this.props.layer.getSource().refresh();
   };
 
   render() {
     const { layer, classes } = this.props;
     if (layer instanceof VectorLayer) {
       return (
-        <div>
+        <>
           <Typography className={classes.subtitle2} variant="subtitle2">
             Filtrera innehåll baserat på attribut
           </Typography>
@@ -140,18 +153,12 @@ class VectorFilter extends React.PureComponent {
               }}
             />
           </FormControl>
-          <div>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={this.setFilter}
-            >
-              Aktivera
-            </Button>
-            &nbsp;
-            <Button onClick={this.resetFilter}>Återställ</Button>
-          </div>
-        </div>
+
+          <Button variant="contained" color="primary" onClick={this.setFilter}>
+            Aktivera
+          </Button>
+          <Button onClick={this.resetFilter}>Återställ</Button>
+        </>
       );
     } else {
       return null;

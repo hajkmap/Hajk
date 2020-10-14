@@ -3,6 +3,7 @@ import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
 import { LineString, Polygon } from "ol/geom.js";
 import Draw from "ol/interaction/Draw.js";
+
 import Overlay from "ol/Overlay";
 
 class MeasureModel {
@@ -95,11 +96,6 @@ class MeasureModel {
 
   getType() {
     return this.type;
-  }
-
-  removeInteraction() {
-    this.measureTooltip.setPosition(undefined);
-    this.map.removeInteraction(this.draw);
   }
 
   setFeaturePropertiesFromGeometry(feature) {
@@ -260,6 +256,16 @@ class MeasureModel {
     this.draw.on("drawstart", this.handleDrawStart);
     this.draw.on("drawend", this.handleDrawEnd);
     this.map.addInteraction(this.draw);
+
+    // Add snap interactions AFTER measure source has been added
+    // this will allow us to snap to the newly added source too
+    this.map.snapHelper.add("measure");
+  }
+
+  removeInteraction() {
+    this.measureTooltip.setPosition(undefined);
+    this.map.snapHelper.delete("measure");
+    this.map.removeInteraction(this.draw);
   }
 
   eventHandler = (event) => {
