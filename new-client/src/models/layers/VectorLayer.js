@@ -17,8 +17,6 @@ const fetchConfig = {
 
 const vectorLayerProperties = {
   url: "",
-  featureId: "FID",
-  serverType: "geoserver",
   params: {
     service: "WFS",
     version: "1.1.0",

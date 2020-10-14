@@ -22,62 +22,44 @@
 
 import React from "react";
 import $ from "jquery";
-import { SketchPicker } from "react-color";
 
 class VectorLayerForm extends React.Component {
   state = {
-    layerType: "Vector",
-    load: false,
-    imageLoad: false,
-    validationErrors: [],
     addedLayers: [],
-    id: "",
+    attribution: "",
     caption: "",
     content: "",
+    dataFormat: "WFS",
     date: "Fylls i per automatik",
-    infobox: "",
-    legend: "",
-    url: "", // https://geoserver1.halmstad.se/geoserver/rest/workspaces/bmf/styles/byggnader.sld || https://geoserver1.halmstad.se/geoserver/rest/workspaces/webbkarta/styles/fastighetsytor.sld
-    queryable: true,
-    filterable: false,
     drawOrder: 1,
     filterAttribute: "",
-    filterValue: "",
     filterComparer: "eq",
-    pointSize: 6,
-    lineColor: "rgba(0, 0, 0, 0.5)",
-    lineWidth: "3",
-    lineStyle: "solid",
-    fillColor: "rgba(255, 255, 255, 0.5)",
-    projection: "",
-    layer: "",
-    opacity: 1,
-    minZoom: -1,
-    maxZoom: -1,
-    sldUrl: "",
-    sldText: "",
-    sldStyle: "Default Styler",
-    attribution: "",
-    symbolXOffset: 0,
-    symbolYOffset: 0,
-    labelAlign: "center",
-    labelBaseline: "alphabetic",
-    labelSize: "12px",
-    labelOffsetX: 0,
-    labelOffsetY: 0,
-    labelWeight: "normal",
-    labelFont: "Arial",
-    labelFillColor: "#000000",
-    labelOutlineColor: "#FFFFFF",
-    labelOutlineWidth: 3,
-    labelAttribute: "Name",
-    showLabels: false,
-    infoVisible: false,
-    infoTitle: "",
+    filterValue: "",
+    filterable: false,
+    id: "",
+    imageLoad: false,
+    infoOwner: "",
     infoText: "",
+    infoTitle: "",
     infoUrl: "",
     infoUrlText: "",
-    infoOwner: "",
+    infoVisible: false,
+    infobox: "",
+    layer: "",
+    layerType: "Vector",
+    legend: "",
+    load: false,
+    maxZoom: -1,
+    minZoom: -1,
+    opacity: 1,
+    projection: "",
+    queryable: true,
+    sldStyle: "Default Styler",
+    sldText: "",
+    sldUrl: "",
+    url: "",
+    validationErrors: [],
+    version: "1.1.0",
   };
 
   componentDidMount() {
@@ -116,64 +98,42 @@ class VectorLayerForm extends React.Component {
 
   getLayer() {
     return {
-      type: this.state.layerType,
-      dataFormat: this.getValue("dataFormat"),
-      id: this.state.id,
+      attribution: this.getValue("attribution"),
       caption: this.getValue("caption"),
-      url: this.getValue("url"),
-      date: this.getValue("date"),
       content: this.getValue("content"),
-      legend: this.getValue("legend"),
-      filterValue: this.getValue("filterValue"),
+      dataFormat: this.getValue("dataFormat"),
+      date: this.getValue("date"),
       filterAttribute: this.getValue("filterAttribute"),
       filterComparer: this.getValue("filterComparer"),
-      pointSize: this.getValue("pointSize"),
-      lineStyle: this.getValue("lineStyle"),
-      lineColor: this.getValue("lineColor"),
-      lineWidth: this.getValue("lineWidth"),
-      fillColor: this.getValue("fillColor"),
-      projection: this.getValue("projection"),
-      layer: this.state.addedLayers[0],
-      opacity: this.getValue("opacity"),
-      minZoom: this.getValue("minZoom"),
-      maxZoom: this.getValue("maxZoom"),
-      sldUrl: this.getValue("sldUrl"),
-      sldText: this.getValue("sldText"),
-      sldStyle: this.getValue("sldStyle"),
-      attribution: this.getValue("attribution"),
-      symbolXOffset: this.getValue("symbolXOffset"),
-      symbolYOffset: this.getValue("symbolYOffset"),
-      queryable: this.getValue("queryable"),
+      filterValue: this.getValue("filterValue"),
       filterable: this.getValue("filterable"),
-      infobox: this.getValue("infobox"),
-      showLabels: this.getValue("showLabels"),
-      labelAlign: this.getValue("labelAlign"),
-      labelBaseline: this.getValue("labelBaseline"),
-      labelSize: this.getValue("labelSize"),
-      labelOffsetX: this.getValue("labelOffsetX"),
-      labelOffsetY: this.getValue("labelOffsetY"),
-      labelWeight: this.getValue("labelWeight"),
-      labelFont: this.getValue("labelFont"),
-      labelFillColor: this.getValue("labelFillColor"),
-      labelOutlineColor: this.getValue("labelOutlineColor"),
-      labelOutlineWidth: this.getValue("labelOutlineWidth"),
-      labelAttribute: this.getValue("labelAttribute"),
-      infoVisible: this.getValue("infoVisible"),
-      infoTitle: this.getValue("infoTitle"),
+      id: this.state.id,
+      infoOwner: this.getValue("infoOwner"),
       infoText: this.getValue("infoText"),
+      infoTitle: this.getValue("infoTitle"),
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
-      infoOwner: this.getValue("infoOwner"),
+      infoVisible: this.getValue("infoVisible"),
+      infobox: this.getValue("infobox"),
+      layer: this.state.addedLayers[0],
+      legend: this.getValue("legend"),
+      maxZoom: this.getValue("maxZoom"),
+      minZoom: this.getValue("minZoom"),
+      opacity: this.getValue("opacity"),
+      projection: this.getValue("projection"),
+      queryable: this.getValue("queryable"),
+      sldStyle: this.getValue("sldStyle"),
+      sldText: this.getValue("sldText"),
+      sldUrl: this.getValue("sldUrl"),
+      url: this.getValue("url"),
+      type: this.state.layerType,
+      version: this.getValue("version"),
     };
   }
 
   getValue(fieldName) {
     function create_date() {
       return new Date().getTime();
-    }
-
-    function rgba_to_string(c) {
-      return typeof c === "string" ? c : `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
     }
 
     const input = this.refs["input_" + fieldName];
@@ -186,13 +146,6 @@ class VectorLayerForm extends React.Component {
     if (fieldName === "date") value = create_date();
     if (fieldName === "queryable") value = input.checked;
     if (fieldName === "filterable") value = input.checked;
-    if (fieldName === "showLabels") value = input.checked;
-    if (fieldName === "fillColor") value = rgba_to_string(this.state.fillColor);
-    if (fieldName === "lineColor") value = rgba_to_string(this.state.lineColor);
-    if (fieldName === "labelFillColor")
-      value = rgba_to_string(this.state.labelFillColor);
-    if (fieldName === "labelOutlineColor")
-      value = rgba_to_string(this.state.labelOutlineColor);
     if (fieldName === "infoVisible") value = input.checked;
 
     return value;
@@ -246,8 +199,6 @@ class VectorLayerForm extends React.Component {
           valid = false;
         }
         break;
-      case "symbolXOffset":
-      case "symbolYOffset":
       case "opacity":
       case "minZoom":
       case "maxZoom":
@@ -345,12 +296,6 @@ class VectorLayerForm extends React.Component {
     });
   }
 
-  setPointSize(e) {
-    this.setState({
-      pointSize: e.target.value,
-    });
-  }
-
   setFilterAttribute(e) {
     this.setState({
       filterAttribute: e.target.value,
@@ -366,60 +311,6 @@ class VectorLayerForm extends React.Component {
   setFilterComparer(e) {
     this.setState({
       filterComparer: e.target.value,
-    });
-  }
-
-  setLineStyle(e) {
-    this.setState({
-      lineStyle: e.target.value,
-    });
-  }
-
-  setLineColor(color) {
-    this.setState({
-      lineColor: color,
-    });
-  }
-
-  setFillColor(color) {
-    this.setState({
-      fillColor: color,
-    });
-  }
-
-  setLabelAlign(e) {
-    this.setState({
-      labelAlign: e.target.value,
-    });
-  }
-
-  setLabelBaseline(e) {
-    this.setState({
-      labelBaseline: e.target.value,
-    });
-  }
-
-  setLabelWeight(e) {
-    this.setState({
-      labelWeight: e.target.value,
-    });
-  }
-
-  setLabelFont(e) {
-    this.setState({
-      labelFont: e.target.value,
-    });
-  }
-
-  setLabelFillColor(color) {
-    this.setState({
-      labelFillColor: color,
-    });
-  }
-
-  setLabelOutlineColor(color) {
-    this.setState({
-      labelOutlineColor: color,
     });
   }
 
@@ -542,7 +433,13 @@ class VectorLayerForm extends React.Component {
         <legend>Vektorlager</legend>
         <div className="separator">Anslutning</div>
         <div>
-          <label>Dataformat*</label>
+          <label>
+            Dataformat (
+            <abbr title="Styr 'outputFormat'. 'WFS' efterfrågar 'GML2' eller 'GML3' (se nästa). 'GeoJSON' efterfrågar 'application/json'.">
+              ?
+            </abbr>
+            )
+          </label>
           <select
             ref="input_dataFormat"
             value={this.state.dataFormat}
@@ -558,7 +455,39 @@ class VectorLayerForm extends React.Component {
           </select>
         </div>
         <div>
-          <label>Url*</label>
+          <label>
+            WFS-version (
+            <abbr title="Styr 'outputFormat' om WFS är valt. 1.0.0 ger GML2. 1.1.0 och 2.0.0 ger GML3.">
+              ?
+            </abbr>
+            )
+          </label>
+          <select
+            ref="input_version"
+            value={this.state.version}
+            className="control-fixed-width"
+            onChange={(e) => {
+              this.setState({
+                version: e.target.value,
+              });
+            }}
+          >
+            {["1.0.0", "1.1.0", "2.0.0"].map((v, i) => {
+              return (
+                <option key={i} value={v}>
+                  {v}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+        <div>
+          <label>
+            URL{" "}
+            <abbr title="URL till WFS endpoint, ex: 'https://geoserver.example.com/geoserver/wfs'.">
+              ?
+            </abbr>
+          </label>
           <input
             type="text"
             ref="input_url"
@@ -735,7 +664,13 @@ class VectorLayerForm extends React.Component {
           />
         </div>
         <div>
-          <label>Upphovsrätt</label>
+          <label>
+            Upphovsrätt (
+            <abbr title="Styr OpenLayers 'attributions' för lagret, visas i kartan.">
+              ?
+            </abbr>
+            )
+          </label>
           <input
             type="text"
             ref="input_attribution"
@@ -780,10 +715,15 @@ class VectorLayerForm extends React.Component {
             checked={this.state.filterable}
           />
           &nbsp;
-          <label htmlFor="filterable">Filterbar</label>
+          <label htmlFor="filterable">
+            Tillåt användaren att filtrera features{" "}
+            <abbr title="Ger användaren möjlighet att via Lagerhanteraren styra vilka features som visas.">
+              ?
+            </abbr>
+          </label>
         </div>
         <div>
-          <label>Filterattribut</label>
+          <label>Filterattribut vid start</label>
           <input
             type="text"
             ref="input_filterAttribute"
@@ -794,7 +734,7 @@ class VectorLayerForm extends React.Component {
           />
         </div>
         <div>
-          <label>Filterjämförare</label>
+          <label>Filterjämförare vid start</label>
           <select
             ref="input_filterComparer"
             value={this.state.filterComparer}
@@ -812,7 +752,7 @@ class VectorLayerForm extends React.Component {
           </select>
         </div>
         <div>
-          <label>Filtervärde</label>
+          <label>Filtervärde vid start</label>
           <input
             type="text"
             ref="input_filterValue"
@@ -841,256 +781,6 @@ class VectorLayerForm extends React.Component {
             className="btn btn-default"
           >
             Välj fil {imageLoader}
-          </span>
-        </div>
-        <div>
-          <label>Ikonförskjutning X</label>
-          <input
-            type="text"
-            ref="input_symbolXOffset"
-            value={this.state.symbolXOffset}
-            className={this.getValidationClass("symbolXOffset")}
-            onChange={(e) => {
-              const v = e.target.value;
-              this.setState({ symbolXOffset: v }, () =>
-                this.validateField("symbolXOffset")
-              );
-            }}
-          />
-        </div>
-        <div>
-          <label>Ikonförskjutning Y</label>
-          <input
-            type="text"
-            ref="input_symbolYOffset"
-            value={this.state.symbolYOffset}
-            className={this.getValidationClass("symbolYOffset")}
-            onChange={(e) => {
-              const v = e.target.value;
-              this.setState({ symbolYOffset: v }, () =>
-                this.validateField("symbolYOffset")
-              );
-            }}
-          />
-        </div>
-        <div>
-          <label>Ikonstorlek</label>
-          <select
-            ref="input_pointSize"
-            value={this.state.pointSize}
-            className="control-fixed-width"
-            onChange={(e) => {
-              this.setPointSize(e);
-            }}
-          >
-            <option value="4">Liten</option>
-            <option value="8">Medium</option>
-            <option value="16">Stor</option>
-            <option value="32">Större</option>
-            <option value="64">Störst</option>
-          </select>
-        </div>
-        <div>
-          <label>Linjetjocklek</label>
-          <select
-            ref="input_lineWidth"
-            value={this.state.lineWidth}
-            className="control-fixed-width"
-            onChange={(e) => {
-              this.setLineWidth(e);
-            }}
-          >
-            <option value="1">Tunn</option>
-            <option value="3">Normal</option>
-            <option value="5">Tjock</option>
-            <option value="8">Tjockare</option>
-          </select>
-        </div>
-        <div>
-          <label>Linjestil</label>
-          <select
-            ref="input_lineStyle"
-            value={this.state.lineStyle}
-            className="control-fixed-width"
-            onChange={(e) => {
-              this.setLineStyle(e);
-            }}
-          >
-            <option value="solid">Heldragen</option>
-            <option value="dash">Streckad</option>
-            <option value="dot">Punktad</option>
-          </select>
-        </div>
-        <div className="clearfix">
-          <span className="pull-left">
-            <label>Fyllnadsfärg</label>
-            <br />
-            <SketchPicker
-              color={this.state.fillColor}
-              onChangeComplete={(color) => this.setFillColor(color.rgb)}
-            />
-          </span>
-          <span className="pull-left" style={{ marginLeft: "10px" }}>
-            <label>Linjefärg</label>
-            <br />
-            <SketchPicker
-              color={this.state.lineColor}
-              onChangeComplete={(color) => this.setLineColor(color.rgb)}
-            />
-          </span>
-        </div>
-        <div className="separator">Inställningar för etiketter</div>
-        <div>
-          <input
-            type="checkbox"
-            ref="input_showLabels"
-            id="showLabels"
-            onChange={(e) => {
-              this.setState({ showLabels: e.target.checked });
-            }}
-            checked={this.state.showLabels}
-          />
-          &nbsp;
-          <label htmlFor="showLabels">Visa etikett</label>
-        </div>
-        <div>
-          <label>Attribut för text</label>
-          <input
-            type="text"
-            ref="input_labelAttribute"
-            value={this.state.labelAttribute}
-            onChange={(e) => {
-              this.setState({ labelAttribute: e.target.value });
-            }}
-          />
-        </div>
-        <div>
-          <label>Textjustering</label>
-          <select
-            ref="input_labelAlign"
-            value={this.state.labelAlign}
-            className="control-fixed-width"
-            onChange={(e) => {
-              this.setLabelAlign(e);
-            }}
-          >
-            <option value="center">Centrerad</option>
-            <option value="left">Vänster</option>
-            <option value="right">Höger</option>
-            <option value="start">Start</option>
-          </select>
-        </div>
-        <div>
-          <label>Baslinje</label>
-          <select
-            ref="input_labelBaseline"
-            value={this.state.labelBaseline}
-            className="control-fixed-width"
-            onChange={(e) => {
-              this.setLabelBaseline(e);
-            }}
-          >
-            <option value="bottom">Nederkant</option>
-            <option value="top">Överkant</option>
-            <option value="middle">Mitten</option>
-            <option value="hanging">Hängande</option>
-            <option value="alphabetic">Alfabetisk</option>
-            <option value="ideographic">Ideografisk (för symboler)</option>
-          </select>
-        </div>
-        <div>
-          <label>Textstorlek</label>
-          <input
-            type="text"
-            ref="input_labelSize"
-            value={this.state.labelSize}
-            onChange={(e) => {
-              this.setState({ labelSize: e.target.value });
-            }}
-          />
-        </div>
-        <div>
-          <label>Textförskjutning X</label>
-          <input
-            type="text"
-            ref="input_labelOffsetX"
-            value={this.state.labelOffsetX}
-            onChange={(e) => {
-              this.setState({ labelOffsetX: e.target.value });
-            }}
-          />
-        </div>
-        <div>
-          <label>Textförskjutning Y</label>
-          <input
-            type="text"
-            ref="input_labelOffsetY"
-            value={this.state.labelOffsetY}
-            onChange={(e) => {
-              this.setState({ labelOffsetY: e.target.value });
-            }}
-          />
-        </div>
-        <div>
-          <label>Texttjocklek</label>
-          <select
-            ref="input_labelWeight"
-            value={this.state.labelWeight}
-            className="control-fixed-width"
-            onChange={(e) => {
-              this.setLabelWeight(e);
-            }}
-          >
-            <option value="normal">Normal</option>
-            <option value="bold">Fet</option>
-          </select>
-        </div>
-        <div>
-          <label>Teckensnitt</label>
-          <select
-            ref="input_labelFont"
-            value={this.state.labelFont}
-            className="control-fixed-width"
-            onChange={(e) => {
-              this.setLabelFont(e);
-            }}
-          >
-            <option value="Arial">Arial</option>
-            <option value="Courier New">Courier New</option>
-            <option value="Quattrocento">Quattrocento</option>
-            <option value="Verdana">Verdana</option>
-          </select>
-        </div>
-        <div className="separator">Etikettfärger</div>
-        <div>
-          <label>Kantlinjebredd (text)</label>
-          <input
-            type="number"
-            min="0"
-            ref="input_labelOutlineWidth"
-            value={this.state.labelOutlineWidth}
-            className="control-fixed-width"
-            onChange={(e) => {
-              this.setState({ labelOutlineWidth: e.target.value });
-            }}
-          />
-        </div>
-        <div className="clearfix">
-          <span className="pull-left">
-            <label>Fyllnadsfärg (text)</label>
-            <br />
-            <SketchPicker
-              color={this.state.labelFillColor}
-              onChangeComplete={(color) => this.setLabelFillColor(color.rgb)}
-            />
-          </span>
-          <span className="pull-left" style={{ marginLeft: "10px" }}>
-            <label>Kantlinjefärg (text)</label>
-            <br />
-            <SketchPicker
-              color={this.state.labelOutlineColor}
-              onChangeComplete={(color) => this.setLabelOutlineColor(color.rgb)}
-            />
           </span>
         </div>
 
