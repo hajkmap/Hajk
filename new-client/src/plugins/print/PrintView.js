@@ -56,12 +56,13 @@ class PrintView extends React.PureComponent {
     printInProgress: false,
     previewLayerVisible: false,
     activeTab: 0,
-    includeNorthArrow: true,
-    northArrowPlacement: "topLeft",
-    includeScaleBar: true,
-    scaleBarPlacement: "bottomLeft",
-    includeLogo: false,
-    logoPlacement: "topRight",
+    includeNorthArrow: this.props.options.includeNorthArrow || false,
+    northArrowPlacement: this.props.options.northArrowPlacement || "topLeft",
+    includeScaleBar: this.props.options.includeScaleBar || true,
+    scaleBarPlacement: this.props.options.scaleBarPlacement || "bottomLeft",
+    includeLogo: this.props.options.includeLogo || true,
+    logoPlacement: this.props.options.logoPlacement || "topRight",
+    saveAsType: "PDF",
   };
 
   snackbarKey = null;
@@ -142,6 +143,7 @@ class PrintView extends React.PureComponent {
       scaleBarPlacement: this.state.scaleBarPlacement,
       includeNorthArrow: this.state.includeNorthArrow,
       northArrowPlacement: this.state.northArrowPlacement,
+      saveAsType: this.state.saveAsType,
     };
 
     this.model.print(printOptions);
@@ -195,6 +197,7 @@ class PrintView extends React.PureComponent {
       mapTitle,
       mapTextColor,
       printInProgress,
+      saveAsType,
     } = this.state;
 
     return (
@@ -213,6 +216,7 @@ class PrintView extends React.PureComponent {
         model={this.model}
         setMapTextColor={this.setMapTextColor}
         printInProgress={printInProgress}
+        saveAsType={saveAsType}
       ></GeneralOptions>
     );
   };

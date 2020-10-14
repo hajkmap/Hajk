@@ -10,6 +10,7 @@ import Feature from "ol/Feature.js";
 import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
+import { saveAs } from "file-saver";
 
 export default class PrintModel {
   constructor(settings) {
@@ -18,9 +19,9 @@ export default class PrintModel {
     this.localObserver = settings.localObserver;
     this.dims = settings.dims;
     this.logoUrl = settings.logoUrl;
+    this.northArrowUrl = settings.northArrowUrl;
     this.logoMaxWidth = settings.logoMaxWidth;
     this.scales = settings.scales;
-    this.northArrowUrl = "http://localhost:3000/north_arrow2.png";
   }
 
   scaleBarLengths = {
@@ -405,14 +406,13 @@ export default class PrintModel {
         putOnlyUsedFonts: true,
         compress: true,
       });
-      let pdfWidth = pdf.internal.pageSize.width;
-      let pdfHeight = pdf.internal.pageSize.height;
 
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
 
       // If logo URL is provided, add the logo to the map
       if (options.includeLogo && this.logoUrl.trim().length >= 5) {
+        const pxPMm = options.resolution / 25.4;
         try {
           const {
             data: logoData,
@@ -424,8 +424,8 @@ export default class PrintModel {
             options.logoPlacement,
             logoWidth,
             logoHeight,
-            pdfWidth,
-            pdfHeight
+            dim[0],
+            dim[1]
           );
 
           pdf.addImage(
@@ -436,6 +436,18 @@ export default class PrintModel {
             logoWidth,
             logoHeight
           );
+
+          let img = new Image();
+          img.onload = () => {
+            mapContext.drawImage(
+              img,
+              logoPlacement.x * pxPMm,
+              logoPlacement.y * pxPMm,
+              logoWidth * pxPMm,
+              logoHeight * pxPMm
+            );
+          };
+          img.src = logoData;
         } catch (error) {
           // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
           this.localObserver.publish("error-loading-logo-image");
@@ -443,6 +455,7 @@ export default class PrintModel {
       }
 
       if (options.includeNorthArrow && this.northArrowUrl.trim().length >= 5) {
+        const pxPMm = options.resolution / 25.4;
         try {
           const {
             data: arrowData,
@@ -454,8 +467,8 @@ export default class PrintModel {
             options.northArrowPlacement,
             arrowWidth,
             arrowHeight,
-            pdfWidth,
-            pdfHeight
+            dim[0],
+            dim[1]
           );
 
           pdf.addImage(
@@ -466,7 +479,15 @@ export default class PrintModel {
             arrowWidth,
             arrowHeight
           );
+
+          let img2 = new Image();
+          img2.onload = () => {
+            console.log("looaadd", pxPMm);
+            mapContext.drawImage(img2, 0, 0);
+          };
+          img2.src = arrowData;
         } catch (error) {
+          console.log("error: ", error);
           // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
           this.localObserver.publish("error-loading-arrow-image");
         }
@@ -487,11 +508,20 @@ export default class PrintModel {
       if (options.mapTitle.trim().length > 0) {
         pdf.setFontSize(24);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.mapTitle, pdfWidth / 2, 12, { align: "center" });
+        pdf.text(options.mapTitle, dim[0] / 2, 12, { align: "center" });
       }
 
-      // Finally, save the PDF, add a timestamp to filename
-      pdf.save(`Hajk - ${new Date().toLocaleString()}.pdf`);
+      // Finally, save the PDF pr PNG, add a timestamp to filename
+      if (options.saveAsType === "PDF") {
+        pdf.save(`Hajk - ${new Date().toLocaleString()}.pdf`);
+        // let buffer = pdf.output("arraybuffer");
+        // let blob = new Blob([buffer]);
+        // saveAs(blob, `Hajk - ${new Date().toLocaleString()}.jpg`);
+      } else {
+        mapCanvas.toBlob((blob) => {
+          saveAs(blob, `Hajk - ${new Date().toLocaleString()}.png`);
+        });
+      }
 
       this.localObserver.publish("print-completed");
 

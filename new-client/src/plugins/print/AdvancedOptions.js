@@ -11,7 +11,7 @@ import {
   Popover,
   Tooltip,
   IconButton,
-  FormControlLabel,
+  InputAdornment,
 } from "@material-ui/core";
 import PaletteIcon from "@material-ui/icons/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
@@ -24,6 +24,7 @@ const styles = (theme) => ({
   formControl: {
     width: "100%",
     margin: theme.spacing(1),
+    display: "flex",
   },
   mapTextColorLabel: {
     margin: 0,
@@ -133,36 +134,29 @@ class AdvancedOptions extends React.PureComponent {
                 label="Valfri titel"
                 placeholder="Kan lämnas tomt"
                 variant="standard"
-                inputProps={{
+                InputProps={{
                   id: "mapTitle",
                   name: "mapTitle",
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Tooltip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
+                        <IconButton
+                          id="mapTextColor"
+                          onClick={this.toggleColorPicker}
+                          style={{
+                            backgroundColor: mapTextColor,
+                            marginRight: 4,
+                          }}
+                          edge="start"
+                          size="small"
+                        >
+                          <PaletteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </InputAdornment>
+                  ),
                 }}
               />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} className={classes.formControl}>
-            <FormControl fullWidth={true}>
-              <Tooltip title="Textfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
-                <FormControlLabel
-                  value="mapTextColor"
-                  className={classes.mapTextColorLabel}
-                  control={
-                    <IconButton
-                      id="mapTextColor"
-                      onClick={this.toggleColorPicker}
-                      style={{
-                        backgroundColor: mapTextColor,
-                        marginRight: 4,
-                      }}
-                      edge="start"
-                      size="small"
-                    >
-                      <PaletteIcon />
-                    </IconButton>
-                  }
-                  label="Textfärg"
-                />
-              </Tooltip>
             </FormControl>
           </Grid>
           <Grid item xs={12} className={classes.formControl}>
@@ -182,79 +176,78 @@ class AdvancedOptions extends React.PureComponent {
               </Select>
             </FormControl>
           </Grid>
-
           <Grid item xs={12} className={classes.formControl}>
-            <FormControl fullWidth={true}>
-              <InputLabel htmlFor="includeNorthArrow">
-                Inkludera norrpil
-              </InputLabel>
-              {this.renderIncludeSelect(
-                includeNorthArrow,
-                "includeNorthArrow",
-                handleChange
-              )}
-            </FormControl>
+            <Grid item xs={6} style={{ paddingRight: 10 }}>
+              <FormControl fullWidth={true}>
+                <InputLabel htmlFor="includeNorthArrow">
+                  Inkludera norrpil
+                </InputLabel>
+                {this.renderIncludeSelect(
+                  includeNorthArrow,
+                  "includeNorthArrow",
+                  handleChange
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth={true}>
+                <InputLabel htmlFor="northArrowPlacement">Placering</InputLabel>
+                {this.renderPlacementSelect(
+                  northArrowPlacement,
+                  "northArrowPlacement",
+                  handleChange,
+                  !includeNorthArrow
+                )}
+              </FormControl>
+            </Grid>
           </Grid>
           <Grid item xs={12} className={classes.formControl}>
-            <FormControl fullWidth={true}>
-              <InputLabel htmlFor="northArrowPlacement">
-                Placering av norrpil
-              </InputLabel>
-              {this.renderPlacementSelect(
-                northArrowPlacement,
-                "northArrowPlacement",
-                handleChange,
-                !includeNorthArrow
-              )}
-            </FormControl>
+            <Grid item xs={6} style={{ paddingRight: 10 }}>
+              <FormControl fullWidth={true}>
+                <InputLabel htmlFor="includeScaleBar">
+                  Inkludera skalstock
+                </InputLabel>
+                {this.renderIncludeSelect(
+                  includeScaleBar,
+                  "includeScaleBar",
+                  handleChange
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth={true}>
+                <InputLabel htmlFor="scaleBarPlacement">Placering</InputLabel>
+                {this.renderPlacementSelect(
+                  scaleBarPlacement,
+                  "scaleBarPlacement",
+                  handleChange,
+                  !includeScaleBar
+                )}
+              </FormControl>
+            </Grid>
           </Grid>
           <Grid item xs={12} className={classes.formControl}>
-            <FormControl fullWidth={true}>
-              <InputLabel htmlFor="includeScaleBar">
-                Inkludera skalstock
-              </InputLabel>
-              {this.renderIncludeSelect(
-                includeScaleBar,
-                "includeScaleBar",
-                handleChange
-              )}
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} className={classes.formControl}>
-            <FormControl fullWidth={true}>
-              <InputLabel htmlFor="scaleBarPlacement">
-                Placering av skalstock
-              </InputLabel>
-              {this.renderPlacementSelect(
-                scaleBarPlacement,
-                "scaleBarPlacement",
-                handleChange,
-                !includeScaleBar
-              )}
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} className={classes.formControl}>
-            <FormControl fullWidth={true}>
-              <InputLabel htmlFor="includeLogo">Inkludera logotyp</InputLabel>
-              {this.renderIncludeSelect(
-                includeLogo,
-                "includeLogo",
-                handleChange
-              )}
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} className={classes.formControl}>
-            <FormControl fullWidth={true}>
-              <InputLabel htmlFor="logoPlacement">
-                Placering av logotyp
-              </InputLabel>
-              {this.renderPlacementSelect(
-                logoPlacement,
-                "logoPlacement",
-                handleChange,
-                !includeLogo
-              )}
-            </FormControl>
+            <Grid item xs={6} style={{ paddingRight: 10 }}>
+              <FormControl fullWidth={true}>
+                <InputLabel htmlFor="includeLogo">Inkludera logotyp</InputLabel>
+                {this.renderIncludeSelect(
+                  includeLogo,
+                  "includeLogo",
+                  handleChange
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth={true}>
+                <InputLabel htmlFor="logoPlacement">Placering</InputLabel>
+                {this.renderPlacementSelect(
+                  logoPlacement,
+                  "logoPlacement",
+                  handleChange,
+                  !includeLogo
+                )}
+              </FormControl>
+            </Grid>
           </Grid>
           <Popover
             id="color-picker-menu"
