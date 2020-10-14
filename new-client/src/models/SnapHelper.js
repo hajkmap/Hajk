@@ -2,8 +2,6 @@ import Snap from "ol/interaction/Snap";
 
 export default class SnapHelper {
   constructor(app) {
-    console.log("SnapHelper initiated ");
-
     this.map = app.map;
     this.globalObserver = app.globalObserver;
 
@@ -84,8 +82,6 @@ export default class SnapHelper {
     )
       return;
 
-    console.log("Vector source, updating!", e.target.getSource());
-
     // Switch the pending flag to true, this will avoid multiple invokations
     this.updatePending = true;
 
@@ -100,7 +96,6 @@ export default class SnapHelper {
   };
 
   #addSnapToAllVectorSources = () => {
-    console.log(this.map.getInteractions().getArray().length, "Add pre ");
     const vectorSources = this.map
       .getLayers() // Get layers
       .getArray() // as arrays
@@ -118,14 +113,10 @@ export default class SnapHelper {
       // And save each interaction into a local stack (so we can remove them later)
       this.snapInteractions.push(snap);
     });
-
-    console.log(this.map.getInteractions().getArray().length, "Add post ");
   };
 
   #removeAllSnapInteractions = () => {
     if (this.snapInteractions.length === 0) return;
-
-    console.log(this.map.getInteractions().getArray().length, "Remove pre ");
 
     // Loop through the local stack of snap interactions
     for (const i of this.snapInteractions) {
@@ -135,7 +126,5 @@ export default class SnapHelper {
 
     // Important: purge the local stack!
     this.snapInteractions = [];
-
-    console.log(this.map.getInteractions().getArray().length, "Remove post ");
   };
 }
