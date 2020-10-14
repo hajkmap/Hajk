@@ -2,6 +2,7 @@ import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import GML2 from "ol/format/GML2";
+import GML3 from "ol/format/GML3";
 import WFS from "ol/format/WFS";
 import { all as strategyAll, bbox as bboxStrategy } from "ol/loadingstrategy";
 import { getPointResolution, transform } from "ol/proj";
@@ -18,13 +19,12 @@ const vectorLayerProperties = {
   url: "",
   featureId: "FID",
   serverType: "geoserver",
-  dataFormat: "WFS",
   params: {
-    service: "",
-    version: "",
-    request: "",
+    service: "WFS",
+    version: "1.1.0",
+    request: "GetFeature",
     typename: "",
-    outputFormat: "",
+    outputFormat: "GML3",
     srsname: "",
     bbox: "",
   },
@@ -50,16 +50,17 @@ class WFSVectorLayer {
     this.filterValue = config.filterValue;
 
     this.vectorSource = new VectorSource({
+      // Ensure we display copyright attributions
       attributions: config.attribution,
+      // Loader function makes "url" and "format" parameters ignored as it
+      // provides an own loading procedure. "strategy" is still respected, see below.
       loader: (extent, resolution, projection) => {
-        if (config.dataFormat === "GeoJSON") {
-          this.loadData(config.url, config.dataFormat.toLowerCase());
-        } else {
-          this.loadData(this.createUrl(extent, projection.getCode()));
-        }
+        this.loadData(this.createUrl(extent, projection.getCode()));
       },
+      // The loading strategy to use. By default the BBox strategy is used,
+      // loading features based on the view's extent and resolution.
       strategy:
-        this.config?.loadStrategy === "all" ? strategyAll : bboxStrategy,
+        this.config?.loadingStrategy === "all" ? strategyAll : bboxStrategy,
     });
 
     // if (config.legend[0].url === "") {
@@ -169,20 +170,24 @@ class WFSVectorLayer {
     }
   }
 
-  getAllFeatures(data, format = "wfs") {
+  getAllFeatures(data) {
     let features = [];
     let parser = null;
     const to = this.map.getView().getProjection().getCode();
     const from = this.config.projection;
+    const outputFormat = this.config.params.outputFormat;
 
-    if (format === "wfs") {
+    if (outputFormat.startsWith("GML")) {
+      // If output format starts with GML, create a GML parser.
+      // For WFS version 1.0.0 the GML2 parser should be used,
+      // else GML3.
       parser = new WFS({
         gmlFormat:
-          this.config.params.version === "1.0.0" ? new GML2() : undefined,
+          this.config.params.version === "1.0.0" ? new GML2() : new GML3(),
       });
     }
 
-    if (format === "geojson") {
+    if (outputFormat === "application/json") {
       parser = new GeoJSON();
     }
 
@@ -275,13 +280,13 @@ class WFSVectorLayer {
     return url;
   }
 
-  loadData(url, format = "wfs") {
+  loadData(url) {
     url = this.proxyUrl + url;
 
     fetch(url, fetchConfig).then((response) => {
       response.text().then((features) => {
         // Load all features (no filter active - only bbox limitation)
-        this.allFeatures = this.getAllFeatures(features, format);
+        this.allFeatures = this.getAllFeatures(features);
 
         // See if filtering is needed and populate the source with resulting features
         this.vectorSource.addFeatures(
