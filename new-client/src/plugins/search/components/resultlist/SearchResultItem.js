@@ -66,7 +66,10 @@ class SearchResultItem extends Component {
 
   constructor(props) {
     super(props);
-    this.featurePropsParsing = new FeaturePropsParsing();
+
+    this.featurePropsParsing = new FeaturePropsParsing({
+      globalObserver: props.app.globalObserver,
+    });
   }
 
   highlightImpact = (feature) => (e) => {

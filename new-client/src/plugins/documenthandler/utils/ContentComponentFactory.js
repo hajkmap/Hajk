@@ -317,6 +317,7 @@ export default class ContentComponentFactory {
     return (
       <Link
         href={externalLink}
+        key="external-link"
         target="_blank"
         style={{
           display: "flex",
@@ -362,6 +363,7 @@ export default class ContentComponentFactory {
       <>
         <Link
           href="#"
+          key="document-link"
           component="button"
           underline="hover"
           variant="body1"
@@ -436,11 +438,11 @@ export default class ContentComponentFactory {
     const { localObserver } = this.settings;
     return (
       <Link
+        key="map-link"
         href="#"
         variant="body2"
         component="button"
         onClick={() => {
-          console.log(mapLink, "CLICKING");
           localObserver.publish("fly-to", mapLink);
         }}
       >

@@ -437,7 +437,6 @@ class Window extends React.PureComponent {
     }
 
     this.bringToFront();
-
     return (
       <Rnd
         onMouseDown={(e) => {
@@ -513,7 +512,7 @@ class Window extends React.PureComponent {
               this.props.scrollable ? null : classes.nonScrollable
             )}
           >
-            {features ? (
+            {features && features.length > 0 ? (
               <FeatureInfoContainer
                 features={this.props.features}
                 onDisplay={this.props.onDisplay}

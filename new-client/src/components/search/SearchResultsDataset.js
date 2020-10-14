@@ -75,7 +75,7 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   renderDatasetDetails = () => {
-    const { featureCollection, handleOnResultClick, classes } = this.props;
+    const { featureCollection, handleOnResultClick, classes, app } = this.props;
     const { showAllInformation } = this.state;
 
     return (
@@ -99,6 +99,7 @@ class SearchResultsDataset extends React.PureComponent {
                   <Grid item xs={10}>
                     <SearchResultsDatasetFeature
                       feature={f}
+                      app={app}
                       showAllInformation={showAllInformation}
                       source={featureCollection.source}
                       handleOnResultClick={handleOnResultClick}

@@ -27,6 +27,12 @@ const styles = (theme) => ({
     display: "flex",
     justifyContent: "space-between",
   },
+  infoContainer: {
+    height: "100%",
+  },
+  featureInfoContainer: {
+    flex: "auto",
+  },
 });
 
 class FeatureInfoContainer extends React.PureComponent {
@@ -48,7 +54,7 @@ class FeatureInfoContainer extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.setNewFeatureInformation(0);
+    this.updateFeatureInformation(0);
   }
 
   showFeatureInMap = () => {
@@ -58,7 +64,7 @@ class FeatureInfoContainer extends React.PureComponent {
   stepLeft = () => {
     if (this.state.selectedIndex - 1 > -1) {
       let newIndex = this.state.selectedIndex - 1;
-      this.setNewFeatureInformation(newIndex);
+      this.updateFeatureInformation(newIndex);
     }
   };
 
@@ -66,7 +72,7 @@ class FeatureInfoContainer extends React.PureComponent {
     const { features } = this.props;
     if (this.state.selectedIndex + 1 < features.length) {
       let newIndex = this.state.selectedIndex + 1;
-      this.setNewFeatureInformation(newIndex);
+      this.updateFeatureInformation(newIndex);
     }
   };
 
@@ -170,6 +176,25 @@ class FeatureInfoContainer extends React.PureComponent {
     }
   }
 
+  getMarkdownFromLocalInfoBox = (feature, layer, markdown) => {
+    // Same goes for infobox, I'm shortening the code significantly using the optional chaining.
+    // Features coming from search result have infobox set on Feature instead of Layer due to
+    // different features sharing same vector layer.
+    return (
+      feature?.infobox ||
+      feature.layer?.layersInfo?.[layer]?.infobox ||
+      markdown
+    );
+  };
+
+  getAGSCompatibleLayer = (feature) => {
+    return Object.keys(feature.layer.layersInfo).find((id) => {
+      const fid = feature.getId().split(".")[0];
+      const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
+      return fid === layerId;
+    });
+  };
+
   getFeatureProperties = (feature) => {
     let properties = feature.getProperties();
     properties = this.featurePropsParsing.extractPropertiesFromJson(properties);
@@ -177,22 +202,18 @@ class FeatureInfoContainer extends React.PureComponent {
     return properties;
   };
 
-  async setNewFeatureInformation(newIndex) {
+  async updateFeatureInformation(newIndex) {
     let feature = this.props.features[newIndex];
     const layerInfo = feature.layer.get("layerInfo");
-    let markdown = layerInfo?.information;
-    let caption = layerInfo?.caption;
 
-    let layer,
+    let markdown = layerInfo?.information,
+      caption = layerInfo?.caption,
+      layer,
       shortcodes = [];
 
     //Problem with geojson returned from AGS - Missing id on feature - how to handle?
     if (feature.layer.layersInfo && feature.getId()) {
-      layer = Object.keys(feature.layer.layersInfo).find((id) => {
-        const fid = feature.getId().split(".")[0];
-        const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
-        return fid === layerId;
-      });
+      layer = this.getAGSCompatibleLayer(feature);
     }
 
     // Deal with layer groups that have a caption on sublayer. Layer groups will
@@ -203,14 +224,7 @@ class FeatureInfoContainer extends React.PureComponent {
     // which will return the new caption, if exists, or a falsy value. If falsy value is returned,
     // just fall back to the previous value of caption.
     caption = feature.layer?.layersInfo?.[layer]?.caption || caption;
-
-    // Same goes for infobox, I'm shortening the code significantly using the optional chaining.
-    // Features coming from search result have infobox set on Feature instead of Layer due to
-    // different features sharing same vector layer.
-    markdown =
-      feature?.infobox ||
-      feature.layer?.layersInfo?.[layer]?.infobox ||
-      markdown;
+    markdown = this.getMarkdownFromLocalInfoBox(feature, layer, markdown);
 
     if (markdown) {
       let transformed = this.shortcode(markdown);
@@ -275,19 +289,18 @@ class FeatureInfoContainer extends React.PureComponent {
 
   renderFeatureInformation = () => {
     const { caption, value, shortcodes, markdown } = this.state;
-    const { classes } = this.props;
+
     return (
-      <>
+      <Grid style={{ width: "100%" }} item>
         <Typography variant="button" align="center" component="h6">
           {caption}
         </Typography>
         {markdown ? (
-          value.featureInfo.map((element, index) => {
-            console.log(element, "eelemt");
+          value.map((element, index) => {
             return <React.Fragment key={index}>{element}</React.Fragment>;
           })
         ) : (
-          <div className={classes.textContent}>{value}</div>
+          <React.Fragment>{value}</React.Fragment>
         )}
 
         {shortcodes.length > 0 &&
@@ -295,17 +308,28 @@ class FeatureInfoContainer extends React.PureComponent {
             shortcodes,
             this.props.features[this.state.selectedIndex - 1]
           )}
-      </>
+      </Grid>
     );
   };
 
   render() {
+    const { classes } = this.props;
+    const featureInfoLoaded = this.isReadyToShowInfo();
     return (
-      <Grid direction="column" container>
+      <Grid className={classes.infoContainer} direction="column" container>
         <Grid item>{this.getToggler()}</Grid>
-        <Grid item>
-          {this.state.loading && <CircularProgress />}
-          {this.isReadyToShowInfo() && this.renderFeatureInformation()}
+        <Grid
+          justify="center"
+          alignContent={featureInfoLoaded ? "flex-start" : "center"}
+          className={classes.featureInfoContainer}
+          item
+          container
+        >
+          {featureInfoLoaded ? (
+            this.renderFeatureInformation()
+          ) : (
+            <CircularProgress />
+          )}
         </Grid>
       </Grid>
     );

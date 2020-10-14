@@ -34,20 +34,22 @@ export default class FeaturePropsParsing {
     return child && !child.props;
   };
 
-  #nodeShouldBeFetchedExternal = (nextSibling) => {
-    if (
+  #nodeShouldBeFetchedExternally = (nextSibling) => {
+    return (
       this.#isChildTextOnly(nextSibling) &&
       this.#isMarkupForExternalElement(nextSibling)
-    ) {
-      return true;
-    }
-    return false;
+    );
   };
 
   #hasChildren = (child) => {
     return child.props.children && child.props.children.length > 0;
   };
 
+  /**
+   * Converts a JSON-string of properties into a properties object
+   * @param {str} properties
+   * @returns {object}
+   */
   extractPropertiesFromJson = (properties) => {
     Object.keys(properties).forEach((property) => {
       var jsonData = this.#valueFromJson(properties[property]);
@@ -133,7 +135,7 @@ export default class FeaturePropsParsing {
         }
         if (
           this.#arrayHasMoreChildren(children, index) &&
-          this.#nodeShouldBeFetchedExternal(children[index + 1])
+          this.#nodeShouldBeFetchedExternally(children[index + 1])
         ) {
           this.#exchangeChildForExternalComponent(child, children, index);
 
@@ -164,7 +166,11 @@ export default class FeaturePropsParsing {
     };
   };
 
-  #lookup = (properties, attributePlaceholder, isExternal) => {
+  #getPropertyForPlaceholder = (
+    properties,
+    attributePlaceholder,
+    isExternal
+  ) => {
     let propertyValue = "";
 
     const {
@@ -197,6 +203,14 @@ export default class FeaturePropsParsing {
     }
   };
 
+  /**
+   * Used markdown and matches it to the properties.
+   * The markdown is used as a template and we inject the correct properties
+   * at specified placeholders. The method is returning featureInformation as React elements
+   *
+   * @param {str} properties
+   * @returns {object}
+   */
   mergeFeaturePropsWithMarkdown = async (markdown, properties) => {
     markdown = markdown.replace(/export:/g, "");
     if (markdown && typeof markdown === "string") {
@@ -205,41 +219,16 @@ export default class FeaturePropsParsing {
         let attributePlaceholder = property.replace("{", "").replace("}", "");
         markdown = markdown.replace(
           property,
-          this.#lookup(properties, attributePlaceholder, propertyIsExternal)
+          this.#getPropertyForPlaceholder(
+            properties,
+            attributePlaceholder,
+            propertyIsExternal
+          )
         );
       });
     }
-    markdown = `<div id="wrapper">${markdown}</div>`;
-    let html = marked(markdown);
-    const { visibleSectionHtml, hiddenSectionHtml } = this.getHtmlSections(
-      html
-    );
 
-    let renderedHtml = await this.#renderHtmlAsReactComponents(html);
-    return {
-      featureInfo: renderedHtml,
-      __visibleSectionHtml: visibleSectionHtml,
-      __hiddenSectionHtml: hiddenSectionHtml,
-    };
-  };
-
-  getHtmlSections = (html) => {
-    let domTree = new DOMParser().parseFromString(html, "text/html");
-    const sections = [...domTree.body.getElementsByTagName("section")];
-    let visibleSectionHtml = "";
-    let hiddenSectionHtml = "";
-    sections.forEach((section) => {
-      if (section.getAttributeNames().includes("data-visible")) {
-        visibleSectionHtml = section.innerHTML;
-      }
-
-      if (section.getAttributeNames().includes("data-hidden")) {
-        hiddenSectionHtml = section.innerHTML;
-      }
-    });
-    return {
-      visibleSectionHtml: marked(visibleSectionHtml),
-      hiddenSectionHtml: marked(hiddenSectionHtml),
-    };
+    let html = marked(`<div id="wrapper">${markdown}</div>`);
+    return await this.#renderHtmlAsReactComponents(html);
   };
 }
