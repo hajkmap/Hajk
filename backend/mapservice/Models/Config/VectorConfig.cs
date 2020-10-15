@@ -61,39 +61,6 @@ namespace MapService.Models.Config
 
     public class VectorConfig : ILayerConfig
     {        
-        public FeatureInfo AsInfo(int zIndex, double[] extent)
-        {
-            FeatureInfo featureInfo = new FeatureInfo();            
-            int coordinateSystemId = int.Parse(this.projection.Split(':')[1]);
-            List<Components.MapExport.Feature> features = this.Load(this.url, coordinateSystemId, extent);
-            featureInfo.features = features;
-            features.ForEach(feature =>
-            {
-                Style style = new Style();
-                style.fillColor = new Colores().fromRGBA(this.fillColor).hex;
-                style.fillOpacity = new Colores().fromRGBA(this.fillColor).opacity;
-                style.strokeColor = new Colores().fromRGBA(this.lineColor).hex;
-                style.strokeOpacity = new Colores().fromRGBA(this.lineColor).opacity;
-                style.strokeWidth = double.Parse(this.lineWidth);
-                style.strokeLinecap = "round";
-                style.strokeDashstyle = this.lineStyle;
-                style.pointRadius = double.Parse(this.pointSize);
-                style.pointFillColor = new Colores().fromRGBA(this.fillColor).hex;
-                style.pointSrc = this.legend;
-                style.labelAlign = "cm";
-                style.labelOutlineColor = new Colores().fromRGBA(this.labelOutlineColor).hex;
-                style.labelOutlineWidth = this.labelOutlineWidth;
-                style.fontSize = this.labelSize.Replace("px", "");
-                style.fontColor = new Colores().fromRGBA(this.labelFillColor).hex;
-                style.fontBackColor = null;
-                feature.attributes = new Metadata();             
-                feature.attributes.style = style;
-                if (feature.properties.Keys.FirstOrDefault(k => k == this.labelAttribute) != null)
-                    feature.attributes.text = feature.properties[this.labelAttribute];
-            });
-            return featureInfo;
-        }
-
         public List<Components.MapExport.Feature> Load(string url, int srs, double[] extent)
         {
             List<Components.MapExport.Feature> features = new List<Components.MapExport.Feature>();

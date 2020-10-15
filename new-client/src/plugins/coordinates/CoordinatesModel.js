@@ -89,6 +89,7 @@ class CoordinatesModel {
         const container = {};
 
         container.code = transformation.code ?? "";
+        container.precision = transformation.precision ?? 3;
         container.default = transformation.default ?? false;
         container.hint = transformation.hint ?? "";
         container.title = transformation.title ?? "";
@@ -105,6 +106,7 @@ class CoordinatesModel {
       transformedCoordinates = [
         {
           code: "EPSG:4326",
+          precision: 3,
           default: false,
           hint: "",
           title: "WGS84",
@@ -114,6 +116,16 @@ class CoordinatesModel {
           coordinates: this.transform(this.coordinates, "EPSG:4326"),
         },
       ];
+    }
+
+    // Limit decimals to 3 by default
+    for (const [i, v] of transformedCoordinates.entries()) {
+      transformedCoordinates[i].coordinates[0] = v.coordinates[0].toFixed(
+        v.precision
+      );
+      transformedCoordinates[i].coordinates[1] = v.coordinates[1].toFixed(
+        v.precision
+      );
     }
 
     // Notify the View of the new coordinates
