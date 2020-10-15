@@ -199,25 +199,49 @@ export default class PrintModel {
     return { data, width, height };
   };
 
-  getPlacement = (placement, width, height, pdfWidth, pdfHeight) => {
+  /**
+   * @summary Returns an object stating the x and y position
+   * @description Helper function that takes some content and calculates where it should be placed on the canvas
+   *
+   * @param {*} placement chosen placement on the canvas
+   * @param {*} contentWidth
+   * @param {*} contentHeight
+   * @param {*} pdfWidth
+   * @param {*} pdfHeight
+   * @returns {Object} x-axis and y-axis placement in mm
+   */
+  getPlacement = (
+    placement,
+    contentWidth,
+    contentHeight,
+    pdfWidth,
+    pdfHeight
+  ) => {
     const margin = 6;
     let pdfPlacement = { x: 0, y: 0 };
     if (placement === "topLeft") {
       pdfPlacement.x = margin;
       pdfPlacement.y = margin;
     } else if (placement === "topRight") {
-      pdfPlacement.x = pdfWidth - width - margin;
+      pdfPlacement.x = pdfWidth - contentWidth - margin;
       pdfPlacement.y = margin;
     } else if (placement === "bottomRight") {
-      pdfPlacement.x = pdfWidth - width - margin;
-      pdfPlacement.y = pdfHeight - height - margin;
+      pdfPlacement.x = pdfWidth - contentWidth - margin;
+      pdfPlacement.y = pdfHeight - contentHeight - margin;
     } else {
       pdfPlacement.x = margin;
-      pdfPlacement.y = pdfHeight - height - margin;
+      pdfPlacement.y = pdfHeight - contentHeight - margin;
     }
     return pdfPlacement;
   };
 
+  /**
+   * @summary Returns fitting scale bar length depending on the scale
+   * @description Helper function that returns a fitting number of meters for the supplied scale.
+   *
+   * @param {*} scale
+   * @returns {Float} Fitting number of meters for current scale.
+   */
   getFittingScaleBarLength = (scale) => {
     const length = this.scaleBarLengths[scale];
     if (length) {
@@ -233,6 +257,7 @@ export default class PrintModel {
     }
   };
 
+  //Formats the text for the scale bar
   getLengthText = (scaleBarLengthMeters) => {
     let units = "m";
     if (scaleBarLengthMeters > 1000) {
@@ -513,10 +538,8 @@ export default class PrintModel {
 
       // Finally, save the PDF pr PNG, add a timestamp to filename
       if (options.saveAsType === "PDF") {
+        console.log("pdf: ", pdf);
         pdf.save(`Hajk - ${new Date().toLocaleString()}.pdf`);
-        // let buffer = pdf.output("arraybuffer");
-        // let blob = new Blob([buffer]);
-        // saveAs(blob, `Hajk - ${new Date().toLocaleString()}.jpg`);
       } else {
         mapCanvas.toBlob((blob) => {
           saveAs(blob, `Hajk - ${new Date().toLocaleString()}.png`);
