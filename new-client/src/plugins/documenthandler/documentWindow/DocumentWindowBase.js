@@ -72,6 +72,10 @@ class DocumentWindowBase extends React.PureComponent {
     return foundMenuItem;
   };
 
+  shouldShowDocumentOnStart = () => {
+    return this.props.options.documentOnStart ? true : false;
+  };
+
   showDocument = (documentFileName) => {
     const { app } = this.props;
     app.globalObserver.publish("documentviewer.showWindow", {
@@ -189,9 +193,18 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   componentDidUpdate = (prevProps, prevState) => {
+    const { localObserver } = this.props;
+
     if (prevProps.model !== this.props.model) {
       if (this.isModelReady()) {
         this.bindSubscriptions();
+
+        if (this.shouldShowDocumentOnStart()) {
+          localObserver.publish(
+            "show-document",
+            this.props.options.documentOnStart
+          );
+        }
       }
     }
   };
