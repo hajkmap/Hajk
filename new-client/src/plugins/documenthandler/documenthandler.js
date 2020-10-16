@@ -101,7 +101,6 @@ class DocumentHandler extends React.PureComponent {
   };
 
   onWindowHide = () => {
-    console.log("onWidnwoHide");
     this.localObserver.publish("set-active-document", {
       documentName: null,
       headerIdentifier: null,

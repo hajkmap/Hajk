@@ -11,6 +11,15 @@ class PanelMenuView extends React.PureComponent {
       });
     }
   }
+
+  setParentMenuItem(menuItem, parent) {
+    menuItem.parent = parent;
+    if (menuItem.menu.length > 0) {
+      menuItem.menu.forEach((child) => {
+        this.setParentMenuItem(child, menuItem);
+      });
+    }
+  }
   constructor(props) {
     super(props);
 
@@ -18,6 +27,7 @@ class PanelMenuView extends React.PureComponent {
     props.options.menuConfig.menu.forEach((menuItem) => {
       this.setMenuItemLevel(menuItem, 0);
       this.setInternalId(menuItem);
+      this.setParentMenuItem(menuItem, undefined);
       this.internalId = this.internalId + 1;
     });
 
@@ -55,7 +65,7 @@ class PanelMenuView extends React.PureComponent {
 
   render() {
     const { localObserver, app, options } = this.props;
-    console.log(this.props, "props");
+
     return (
       <PanelList
         localObserver={localObserver}

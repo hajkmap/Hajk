@@ -1,12 +1,14 @@
 import React from "react";
 import { withStyles, withTheme } from "@material-ui/core/styles";
+import clsx from "clsx";
 import Icon from "@material-ui/core/Icon";
 import ListItem from "@material-ui/core/ListItem";
+import Collapse from "@material-ui/core/Collapse";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ExpandLess from "@material-ui/icons/ExpandLess";
+import PanelList from "./PanelList";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 
 const styles = (theme) => ({
@@ -16,36 +18,67 @@ const styles = (theme) => ({
 });
 
 class PanelMenuListItem extends React.PureComponent {
-  static propTypes = {
-    onClick: PropTypes.func.isRequired,
-    item: PropTypes.object.isRequired,
+  state = {
+    selected: false,
+    openSubMenu: false,
+    colorActive: false,
+  };
+
+  hasActiveSiblings = (documentName) => {
+    const { item } = this.props;
+    return (
+      item.parent && this.hasActiveSubmenuItem(item.parent.menu, documentName)
+    );
+  };
+
+  isActiveDocument = (documentName) => {
+    const { item } = this.props;
+    return documentName === item.document;
+  };
+
+  isColorActive = (documentName) => {
+    const { item } = this.props;
+    return (
+      this.isActiveDocument(documentName) ||
+      this.hasActiveSubmenuItem(item.menu, documentName) ||
+      this.hasActiveSiblings(documentName)
+    );
+  };
+
+  makeListItemSelected = ({ documentName }) => {
+    const { item } = this.props;
+
+    let openSubMenu =
+      this.hasSubMenu(item) &&
+      this.hasActiveSubmenuItem(item.menu, documentName)
+        ? true
+        : this.state.openSubMenu;
+
+    this.setState({
+      selected: documentName === item.document,
+      openSubMenu: openSubMenu,
+      colorActive: this.isColorActive(documentName),
+    });
+  };
+
+  bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("set-active-document", this.makeListItemSelected);
   };
 
   constructor(props) {
     super(props);
-    //Couldnt send state from documenthandler because panelview is not rendered in documenthandlers
-    //render method
-    props.localObserver.subscribe("set-active-document", ({ documentName }) => {
-      this.setState({ selected: documentName === props.item.document });
-      console.log(this.hasSubMenu(this.props.item.menu, documentName, "???"));
+    this.bindSubscriptions();
+  }
+
+  hasActiveSubmenuItem = (menu, documentName) => {
+    return menu.some((item) => {
+      if (this.hasSubMenu(item)) {
+        return this.hasActiveSubmenuItem(item.menu, documentName);
+      }
+      return documentName === item.document;
     });
-  }
-
-  hasSubMenu(menu, documentName) {
-    if (documentName === this.props.item.document) {
-      return true;
-    } else {
-      return menu.find((item) => {
-        return this.hasSubMenu(item.menu);
-      });
-    }
-  }
-
-  state = {
-    selected: false,
   };
-
-  static defaultProps = { hasSubMenu: false };
 
   getListTitle = () => {
     const { item } = this.props;
@@ -53,8 +86,8 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   getCollapseIcon = () => {
-    const { expandedSubMenu, classes, item } = this.props;
-    return expandedSubMenu ? (
+    const { classes, item } = this.props;
+    return this.state.openSubMenu ? (
       <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
         {!item.title && (
           <Typography variant="srOnly">Minimera submeny</Typography>
@@ -85,9 +118,45 @@ class PanelMenuListItem extends React.PureComponent {
     );
   };
 
+  hasSubMenu = (item) => {
+    if (item.menu && item.menu.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  handleMenuButtonClick = (type, item) => {
+    const { localObserver, globalObserver } = this.props;
+    localObserver.publish(`${type}-clicked`, item);
+    if (type !== "submenu") {
+      globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    } else {
+      this.setState({
+        openSubMenu: !this.state.openSubMenu,
+      });
+    }
+  };
+
   render() {
-    const { onClick, item, hasSubMenu, classes, theme } = this.props;
-    console.log(item, "item");
+    const {
+      item,
+      classes,
+      theme,
+      type,
+      localObserver,
+      globalObserver,
+    } = this.props;
+    const hasSubmenu = this.hasSubMenu(item);
+    let style = this.state.colorActive
+      ? {
+          paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
+          borderLeft: `${theme.spacing(1)}px solid ${item.color}`,
+        }
+      : {
+          paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
+        };
+
     const { selected } = this.state;
     return (
       <>
@@ -97,18 +166,31 @@ class PanelMenuListItem extends React.PureComponent {
           button
           size="small"
           disableGutters
-          aria-controls={hasSubMenu ? `${item.id}` : null}
-          onClick={onClick}
-          className={classes.listItem}
-          style={{
-            paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
-            borderLeft: `${theme.spacing(1)}px solid ${item.color}`,
+          aria-controls={hasSubmenu ? `${item.id}` : null}
+          onClick={() => {
+            this.handleMenuButtonClick(type, item);
           }}
+          className={classes.listItem}
+          style={style}
         >
           {item.icon ? this.getListIcon(item) : null}
           {item.title && this.getListTitle()}
-          {hasSubMenu && this.getCollapseIcon()}
+          {hasSubmenu && this.getCollapseIcon()}
         </ListItem>
+        {hasSubmenu && (
+          <Collapse
+            aria-expanded={this.state.openSubMenu}
+            id={item.id}
+            in={this.state.openSubMenu}
+            timeout="auto"
+          >
+            <PanelList
+              localObserver={localObserver}
+              globalObserver={globalObserver}
+              menu={item.menu}
+            ></PanelList>
+          </Collapse>
+        )}
       </>
     );
   }
