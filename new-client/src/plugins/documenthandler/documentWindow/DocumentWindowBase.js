@@ -112,8 +112,45 @@ class DocumentWindowBase extends React.PureComponent {
     });
   };
 
+  createHtmlObjectFromInfoClickEvent = () => {};
+
+  canHandleInfoClickEvent = (infoClickEvent) => {
+    if (infoClickEvent.payload.type !== "a") {
+      return false;
+    }
+    return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
+      return ["data-maplink", "data-document", "data-header"].includes(key);
+    });
+  };
+
+  handleInfoClickRequest = (infoClickEvent) => {
+    const { contentComponentFactory } = this.props;
+
+    if (this.canHandleInfoClickEvent(infoClickEvent)) {
+      var htmlObject = document.createElement(infoClickEvent.payload.type);
+      htmlObject.innerHTML = infoClickEvent.payload.children[0];
+      Object.entries(infoClickEvent.payload.dataAttributes).forEach(
+        (dataAttributeEntry) => {
+          var att = document.createAttribute(dataAttributeEntry[0]);
+          att.value = dataAttributeEntry[1];
+          htmlObject.setAttributeNode(att);
+        }
+      );
+      let link = contentComponentFactory.getLinkComponent(htmlObject);
+      infoClickEvent.resolve(link);
+    } else {
+      infoClickEvent.resolve();
+    }
+  };
+
   bindListenForSearchResultClick = () => {
     const { app } = this.props;
+
+    app.globalObserver.subscribe(
+      "core.info-click-documenthandler",
+      this.handleInfoClickRequest
+    );
+
     app.globalObserver.subscribe(
       "documenthandler-searchresult-clicked",
       (searchResultClick) => {

@@ -113,6 +113,7 @@ class DocumentViewer extends React.PureComponent {
       classes,
       activeDocument,
       localObserver,
+      contentComponentFactory,
       documentWindowMaximized,
       model,
       documentColor,
@@ -165,6 +166,7 @@ class DocumentViewer extends React.PureComponent {
           <Grid container item>
             <Contents
               model={model}
+              contentComponentFactory={contentComponentFactory}
               localObserver={localObserver}
               activeDocument={activeDocument}
             />

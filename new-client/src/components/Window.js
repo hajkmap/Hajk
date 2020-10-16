@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile, getIsMobile } from "../utils/IsMobile.js";
-import FeatureInfo from "./FeatureInfo.js";
+import FeatureInfoContainer from "./FeatureInfo/FeatureInfoContainer.js";
 import clsx from "clsx";
 
 const zIndexStart = 1000;
@@ -437,7 +437,6 @@ class Window extends React.PureComponent {
     }
 
     this.bringToFront();
-
     return (
       <Rnd
         onMouseDown={(e) => {
@@ -513,10 +512,11 @@ class Window extends React.PureComponent {
               this.props.scrollable ? null : classes.nonScrollable
             )}
           >
-            {features ? (
-              <FeatureInfo
+            {features && features.length > 0 ? (
+              <FeatureInfoContainer
                 features={this.props.features}
                 onDisplay={this.props.onDisplay}
+                globalObserver={this.props.globalObserver}
                 key={
                   Array.isArray(this.props.features) &&
                   this.props.features.length > 0
