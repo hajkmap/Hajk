@@ -15,6 +15,12 @@ class DocumentHandler extends React.PureComponent {
   };
 
   state = {
+    document: null,
+    documentWindowMaximized: true,
+    showPrintWindow: false,
+    chapters: [],
+    documentTitle: "",
+    documentColor: null,
     model: null,
   };
 
@@ -62,9 +68,11 @@ class DocumentHandler extends React.PureComponent {
 
   renderDrawerContent = () => {
     const { app, model, options } = this.props;
+    console.log(this.state.document, "docs");
     return (
       <PanelMenuContainerView
         app={app}
+        document={this.state.document}
         model={model}
         options={options}
         localObserver={this.localObserver}
@@ -83,13 +91,80 @@ class DocumentHandler extends React.PureComponent {
     });
   };
 
+  showDocument = (documentFileName) => {
+    const { app } = this.props;
+    app.globalObserver.publish("documentviewer.showWindow", {
+      hideOtherPlugins: false,
+    });
+    app.globalObserver.publish("core.maximizeWindow");
+    return this.setActiveDocument(documentFileName);
+  };
+
+  onWindowHide = () => {
+    console.log("onWidnwoHide");
+    this.localObserver.publish("set-active-document", {
+      documentName: null,
+      headerIdentifier: null,
+    });
+    return;
+  };
+
+  onMinimize = () => {
+    this.setState({ documentWindowMaximized: false });
+  };
+
+  onMaximize = () => {
+    this.setState({ documentWindowMaximized: true });
+  };
+
+  setActiveDocument = (documentFileName) => {
+    return new Promise((resolve, reject) => {
+      let document = null;
+      if (documentFileName) {
+        document = this.state.model.getDocuments([documentFileName])[0];
+      }
+
+      this.setState(
+        {
+          documentTitle: document?.documentTitle
+            ? document.documentTitle
+            : null,
+          document: document,
+          documentColor: document?.documentColor
+            ? document.documentColor
+            : null,
+          showPrintWindow: false,
+        },
+        resolve
+      );
+    });
+  };
+
+  togglePrintWindow = () => {
+    this.setState({
+      showPrintWindow: !this.state.showPrintWindow,
+    });
+  };
+
   render() {
+    console.log("rerender");
     return (
       <>
         {this.dynamicallyImportOpenSans()}
         {this.dynamicallyImportIconFonts()}
         <DocumentWindowBase
           {...this.props}
+          onMinimize={this.onMinimize}
+          showDocument={this.showDocument}
+          onMaximize={this.onMaximize}
+          onWindowHide={this.onWindowHide}
+          togglePrintWindow={this.togglePrintWindow}
+          document={this.state.document}
+          documentColor={this.state.documentColor}
+          documentWindowMaximized={this.state.documentWindowMaximized}
+          showPrintWindow={this.state.showPrintWindow}
+          chapters={this.state.chapters}
+          documentTitle={this.state.documentTitle}
           model={this.state.model}
           localObserver={this.localObserver}
         ></DocumentWindowBase>

@@ -356,7 +356,7 @@ class Contents extends React.PureComponent {
           variant="body1"
           className={classes.linkButton}
           onClick={() => {
-            localObserver.publish("show-header-in-document", {
+            localObserver.publish("set-active-document", {
               documentName: documentLink,
               headerIdentifier: headerIdentifier,
             });

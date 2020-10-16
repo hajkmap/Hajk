@@ -21,6 +21,30 @@ class PanelMenuListItem extends React.PureComponent {
     item: PropTypes.object.isRequired,
   };
 
+  constructor(props) {
+    super(props);
+    //Couldnt send state from documenthandler because panelview is not rendered in documenthandlers
+    //render method
+    props.localObserver.subscribe("set-active-document", ({ documentName }) => {
+      this.setState({ selected: documentName === props.item.document });
+      console.log(this.hasSubMenu(this.props.item.menu, documentName, "???"));
+    });
+  }
+
+  hasSubMenu(menu, documentName) {
+    if (documentName === this.props.item.document) {
+      return true;
+    } else {
+      return menu.find((item) => {
+        return this.hasSubMenu(item.menu);
+      });
+    }
+  }
+
+  state = {
+    selected: false,
+  };
+
   static defaultProps = { hasSubMenu: false };
 
   getListTitle = () => {
@@ -63,11 +87,13 @@ class PanelMenuListItem extends React.PureComponent {
 
   render() {
     const { onClick, item, hasSubMenu, classes, theme } = this.props;
-
+    console.log(item, "item");
+    const { selected } = this.state;
     return (
       <>
         <ListItem
           divider
+          selected={selected}
           button
           size="small"
           disableGutters

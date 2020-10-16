@@ -10,41 +10,9 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 const styles = (theme) => ({});
 
 class DocumentWindowBase extends React.PureComponent {
-  state = {
-    counter: 0,
-    document: null,
-    documentWindowMaximized: true,
-    showPrintWindow: false,
-    chapters: [],
-  };
-
   static propTypes = {};
 
   static defaultProps = {};
-
-  setActiveDocument = (documentFileName) => {
-    const { model } = this.props;
-    return new Promise((resolve, reject) => {
-      let document = model.getDocuments([documentFileName])[0];
-      this.setState(
-        {
-          documentTitle: document.documentTitle,
-          document: document,
-          documentColor: document.documentColor ? document.documentColor : null,
-          showPrintWindow: false,
-        },
-        resolve
-      );
-    });
-  };
-
-  onMinimize = () => {
-    this.setState({ documentWindowMaximized: false });
-  };
-
-  onMaximize = () => {
-    this.setState({ documentWindowMaximized: true });
-  };
 
   findMenuItem(menuItem, documentNameToFind) {
     if (menuItem.document === documentNameToFind) {
@@ -72,52 +40,40 @@ class DocumentWindowBase extends React.PureComponent {
     return foundMenuItem;
   };
 
-  showDocument = (documentFileName) => {
-    const { app } = this.props;
-    app.globalObserver.publish("documentviewer.showWindow", {
-      hideOtherPlugins: false,
-    });
-    app.globalObserver.publish("core.maximizeWindow");
-    return this.setActiveDocument(documentFileName);
-  };
-
   scrollInDocument = (headerIdentifier) => {
     const { localObserver, model } = this.props;
+
     if (headerIdentifier) {
       localObserver.publish(
         "scroll-to-chapter",
-        model.getHeaderRef(this.state.document, headerIdentifier)
+        model.getHeaderRef(this.props.document, headerIdentifier)
       );
     } else {
       localObserver.publish(
         "scroll-to-top",
-        model.getHeaderRef(this.state.document, headerIdentifier)
+        model.getHeaderRef(this.props.document, headerIdentifier)
       );
     }
   };
 
   showHeaderInDocument = ({ documentName, headerIdentifier }) => {
-    if (documentName !== this.state.documentTitle) {
-      this.showDocument(documentName).then(() => {
+    if (documentName) {
+      if (documentName !== this.props.documentTitle) {
+        this.props.showDocument(documentName).then(() => {
+          this.scrollInDocument(headerIdentifier);
+        });
+      } else {
         this.scrollInDocument(headerIdentifier);
-      });
-    } else {
-      this.scrollInDocument(headerIdentifier);
+      }
     }
   };
 
-  togglePrintWindow = () => {
-    this.setState({
-      showPrintWindow: !this.state.showPrintWindow,
-    });
-  };
-
   bindListenForSearchResultClick = () => {
-    const { app } = this.props;
+    const { app, localObserver } = this.props;
     app.globalObserver.subscribe(
       "documenthandler-searchresult-clicked",
       (searchResultClick) => {
-        this.showHeaderInDocument({
+        localObserver.publish("set-active-document", {
           documentName: searchResultClick.properties.documentFileName,
           headerIdentifier: searchResultClick.properties.headerIdentifier,
         });
@@ -128,11 +84,7 @@ class DocumentWindowBase extends React.PureComponent {
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     this.bindListenForSearchResultClick();
-    localObserver.subscribe(
-      "show-header-in-document",
-      this.showHeaderInDocument
-    );
-    localObserver.subscribe("show-document", this.showDocument);
+    localObserver.subscribe("set-active-document", this.showHeaderInDocument);
   };
 
   setChapterLevels(chapter, level) {
@@ -161,16 +113,21 @@ class DocumentWindowBase extends React.PureComponent {
 
   render() {
     const {
+      options,
+      chapters,
+      localObserver,
+      classes,
       documentWindowMaximized,
       document,
       documentTitle,
+      togglePrintWindow,
+      onWindowHide,
       documentColor,
       showPrintWindow,
-      chapters,
-      localObserver,
-    } = this.state;
-    const { options, classes } = this.props;
-
+      onMinimize,
+      onMaximize,
+    } = this.props;
+    console.log(documentTitle, "documetnTitle");
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -183,9 +140,9 @@ class DocumentWindowBase extends React.PureComponent {
           height: options.height || "auto",
           width: options.width || 600,
           scrollable: false,
-          onMinimize: this.onMinimize,
-          onMaximize: this.onMaximize,
-          onResize: this.onResize,
+          onMinimize: onMinimize,
+          onMaximize: onMaximize,
+          onWindowHide: onWindowHide,
           draggingEnabled: false,
           resizingEnabled: false,
           allowMaximizedWindow: false,
@@ -205,7 +162,7 @@ class DocumentWindowBase extends React.PureComponent {
               chapters={chapters}
               activeDocument={document}
               documentWindowMaximized={documentWindowMaximized}
-              togglePrintWindow={this.togglePrintWindow}
+              togglePrintWindow={togglePrintWindow}
               localObserver={localObserver}
               {...this.props}
             />
