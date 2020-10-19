@@ -59,5 +59,7 @@ namespace MapService.Models
         public string defaultCookieNoticeUrl { get; set; }
         
         public string crossOrigin { get; set; }
+
+        public bool showCookieNotice { get; set; }
     }
 }
