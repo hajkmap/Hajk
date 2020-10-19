@@ -2,8 +2,7 @@ import React, { Component } from "react";
 import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import CloseIcon from "@material-ui/icons/Close";
-import MaximizeIcon from "@material-ui/icons/WebAsset";
-import ResetIcon from "@material-ui/icons/CancelPresentation";
+import MaximizeIcon from "@material-ui/icons/Maximize";
 import MinimizeIcon from "@material-ui/icons/Minimize";
 import DownIcon from "@material-ui/icons/KeyboardArrowDown";
 import UpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -11,18 +10,14 @@ import { getIsMobile } from "../utils/IsMobile.js";
 import { Typography } from "@material-ui/core";
 
 const styles = (theme) => {
+  console.log("theme: ", theme);
   return {
     header: {
-      padding: "5px 10px",
-      background: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText,
-      borderBottom: "1px solid #ccc",
+      padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
+      borderBottom: `4px solid ${theme.palette.primary.main}`,
       userSelect: "none",
       display: "flex",
       justifyContent: "space-between",
-    },
-    title: {
-      color: theme.palette.primary.contrastText,
     },
     iconsLeft: {
       alignItems: "center",
@@ -44,7 +39,7 @@ const styles = (theme) => {
     icon: {
       cursor: "pointer",
       "&:hover": {
-        background: theme.palette.primary.light,
+        background: theme.palette.action.hover,
       },
     },
     windowControllers: {
@@ -84,18 +79,14 @@ class PanelHeader extends Component {
     const { classes } = this.props;
     return (
       <>
-        <MinimizeIcon
-          onClick={this.props.onMinimize}
-          className={`${classes.icon} ${classes.windowControllers}`}
-        />
-        {this.props.mode === "maximized" ? (
-          <ResetIcon
+        {this.props.mode === "minimized" ? (
+          <MaximizeIcon
             onClick={this.props.onMaximize}
             className={`${classes.icon} ${classes.windowControllers}`}
           />
         ) : (
-          <MaximizeIcon
-            onClick={this.props.onMaximize}
+          <MinimizeIcon
+            onClick={this.props.onMinimize}
             className={`${classes.icon} ${classes.windowControllers}`}
           />
         )}
@@ -138,7 +129,7 @@ class PanelHeader extends Component {
             this.maximize(e);
           }
         }}
-        style={{ backgroundColor: this.props.color }}
+        style={{ borderColor: this.props.color }}
       >
         <nav className={classes.iconsLeft}>
           {this.state.mode === "minimized" ? (
@@ -147,12 +138,7 @@ class PanelHeader extends Component {
             <DownIcon onClick={this.minimize} className={classes.icon} />
           )}
         </nav>
-        <Typography
-          variant="h6"
-          align="left"
-          noWrap={true}
-          className={classes.title}
-        >
+        <Typography variant="button" align="left" noWrap={true}>
           {this.props.title}
         </Typography>
         <nav className={classes.iconsRight}>{this.renderButtons()}</nav>

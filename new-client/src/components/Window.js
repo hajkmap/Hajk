@@ -95,10 +95,9 @@ const styles = (theme) => {
     window: {
       zIndex: zIndexStart + document.windows.length,
       position: "absolute",
-      background: "white",
-      boxShadow:
-        "2px 2px 2px rgba(0, 0, 0, 0.4), 0px 0px 4px rgba(0, 0, 0, 0.4)",
-      borderRadius: "5px",
+      background: theme.palette.background.paper,
+      boxShadow: theme.shadows[24],
+      borderRadius: theme.shape.borderRadius,
       overflow: "hidden",
       pointerEvents: "all",
       [theme.breakpoints.down("xs")]: {
