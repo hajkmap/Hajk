@@ -19,10 +19,18 @@ class PanelMenuView extends React.PureComponent {
     } else {
       newExpandedState.splice(indexOfItemId);
     }
-    this.setState({ expandedIndex: newExpandedState });
+    this.setState({
+      expandedIndex: newExpandedState,
+    });
   };
 
   setActiveMenuItems = (documentName, item) => {
+    if (!documentName) {
+      this.setState({
+        selectedIndex: null,
+        coloredIndex: [],
+      });
+    }
     if (documentName === item.document) {
       this.setState({
         selectedIndex: item.id,
@@ -102,7 +110,7 @@ class PanelMenuView extends React.PureComponent {
   };
 
   #getAllAncestors = (item) => {
-    const ancestors = [];
+    const ancestors = [item];
     let parent = item.parent;
     while (parent) {
       ancestors.push(parent);
@@ -128,13 +136,10 @@ class PanelMenuView extends React.PureComponent {
   };
 
   #getItemIdsToColor = (item) => {
-    if (item.parent) {
-      const ancestors = this.#getAllAncestors(item);
-      const ancestorIds = this.#extractIdsFromItems(ancestors);
-      const subMenuIds = this.#getAncestorsSubItemsIds(ancestors);
-      return [...ancestorIds, ...subMenuIds];
-    }
-    return [item.id];
+    const ancestors = this.#getAllAncestors(item);
+    const ancestorIds = this.#extractIdsFromItems(ancestors);
+    const subMenuIds = this.#getAncestorsSubItemsIds(ancestors);
+    return [...ancestorIds, ...subMenuIds];
   };
 
   render() {

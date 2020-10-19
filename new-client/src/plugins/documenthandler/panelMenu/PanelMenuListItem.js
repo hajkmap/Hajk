@@ -107,7 +107,7 @@ class PanelMenuListItem extends React.PureComponent {
     return this.#isColored()
       ? {
           paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
-          borderLeft: `${theme.spacing(1)}px solid ${item.color}`,
+          borderLeft: `${theme.spacing(0.5)}px solid ${item.color}`,
         }
       : {
           paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
