@@ -581,6 +581,10 @@ class App extends React.PureComponent {
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
+    const showCookieNotice =
+      config.mapConfig.map.showCookieNotice !== undefined
+        ? config.mapConfig.map.showCookieNotice
+        : true;
 
     const defaultCookieNoticeMessage = this.isString(
       this.props.config.mapConfig.map.defaultCookieNoticeMessage
@@ -611,7 +615,7 @@ class App extends React.PureComponent {
                 currentMap={this.props.config.activeMap}
               />
             )}
-          {clean === false && (
+          {clean === false && showCookieNotice && (
             <CookieNotice
               globalObserver={this.globalObserver}
               defaultCookieNoticeMessage={defaultCookieNoticeMessage}
