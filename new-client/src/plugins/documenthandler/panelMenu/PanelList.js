@@ -3,13 +3,17 @@ import List from "@material-ui/core/List";
 import PanelMenuListItem from "./PanelMenuListItem";
 
 class PanelList extends React.PureComponent {
-  static propTypes = {};
-
   getMenuItemType = (item, type) => {
     const { localObserver, globalObserver } = this.props;
+
     return (
       <PanelMenuListItem
+        setActiveMenuItems={this.props.setActiveMenuItems}
+        selectedIndex={this.props.selectedIndex}
+        expandedIndex={this.props.expandedIndex}
+        handleExpandClick={this.props.handleExpandClick}
         type={type}
+        coloredIndex={this.props.coloredIndex}
         handleMenuButtonClick={this.handleMenuButtonClick}
         localObserver={localObserver}
         globalObserver={globalObserver}
@@ -18,7 +22,7 @@ class PanelList extends React.PureComponent {
     );
   };
 
-  renderMenuItem = (item) => {
+  #renderMenuItem = (item) => {
     if (item.menu.length > 0) {
       return this.getMenuItemType(item, "submenu");
     } else if (item.document) {
@@ -34,10 +38,10 @@ class PanelList extends React.PureComponent {
     const { menu } = this.props;
     return (
       <List disablePadding component="nav">
-        {menu.map((item, index) => {
+        {menu.map((item) => {
           return (
-            <React.Fragment key={index}>
-              {this.renderMenuItem(item, index)}
+            <React.Fragment key={item.id}>
+              {this.#renderMenuItem(item, item.id)}
             </React.Fragment>
           );
         })}
