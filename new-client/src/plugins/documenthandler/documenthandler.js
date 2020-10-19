@@ -74,7 +74,7 @@ class DocumentHandler extends React.PureComponent {
 
   renderDrawerContent = () => {
     const { app, model, options } = this.props;
-    console.log(this.state.document, "docs");
+
     return (
       <PanelMenuContainerView
         app={app}
@@ -152,7 +152,6 @@ class DocumentHandler extends React.PureComponent {
   };
 
   render() {
-    console.log("rerender");
     return (
       <>
         {this.dynamicallyImportOpenSans()}

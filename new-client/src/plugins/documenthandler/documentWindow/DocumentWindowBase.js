@@ -40,6 +40,19 @@ class DocumentWindowBase extends React.PureComponent {
     return foundMenuItem;
   };
 
+  shouldShowDocumentOnStart = () => {
+    return this.props.options.documentOnStart ? true : false;
+  };
+
+  showDocument = (documentFileName) => {
+    const { app } = this.props;
+    app.globalObserver.publish("documentviewer.showWindow", {
+      hideOtherPlugins: false,
+    });
+    app.globalObserver.publish("core.maximizeWindow");
+    return this.setActiveDocument(documentFileName);
+  };
+
   scrollInDocument = (headerIdentifier) => {
     const { localObserver, model } = this.props;
 
@@ -137,9 +150,18 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   componentDidUpdate = (prevProps, prevState) => {
+    const { localObserver } = this.props;
+
     if (prevProps.model !== this.props.model) {
       if (this.isModelReady()) {
         this.bindSubscriptions();
+
+        if (this.shouldShowDocumentOnStart()) {
+          localObserver.publish("set-active-document", {
+            documentName: this.props.options.documentOnStart,
+            headerIdentifier: null,
+          });
+        }
       }
     }
   };
@@ -160,7 +182,6 @@ class DocumentWindowBase extends React.PureComponent {
       onMinimize,
       onMaximize,
     } = this.props;
-    console.log(documentTitle, "documetnTitle");
     return (
       <BaseWindowPlugin
         {...this.props}

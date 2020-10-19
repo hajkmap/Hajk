@@ -368,7 +368,7 @@ export default class ContentComponentFactory {
           underline="hover"
           variant="body1"
           onClick={() => {
-            localObserver.publish("show-header-in-document", {
+            localObserver.publish("set-active-document", {
               documentName: documentLink,
               headerIdentifier: headerIdentifier,
             });

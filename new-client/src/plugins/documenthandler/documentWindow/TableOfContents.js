@@ -12,18 +12,18 @@ import ListItemText from "@material-ui/core/ListItemText";
 
 import Typography from "@material-ui/core/Typography";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     tableOfContents: {
       borderTop: "solid",
       borderBottom: "solid",
-      backgroundColor: theme.palette.grey[200]
+      backgroundColor: theme.palette.grey[200],
     },
     root: {
       width: "100%",
       maxWidth: 360,
-      backgroundColor: theme.palette.grey[200]
-    }
+      backgroundColor: theme.palette.grey[200],
+    },
   };
 };
 
@@ -44,7 +44,7 @@ function NestedListItemRaw(props) {
 const NestedListItem = withTheme(NestedListItemRaw);
 
 class TableOfContents extends React.PureComponent {
-  linkClick = chapter => {
+  linkClick = (chapter) => {
     const { localObserver } = this.props;
     localObserver.publish("scroll-to-chapter", chapter);
   };
@@ -54,13 +54,13 @@ class TableOfContents extends React.PureComponent {
    *
    * @memberof TableOfContents
    */
-  renderChapters = activeDocument => {
+  renderChapters = (activeDocument) => {
     const { classes } = this.props;
     let mainChapter = 0;
     return (
       <List className={classes.root} aria-labelledby="nested-list-subheader">
         {Array.isArray(activeDocument?.chapters)
-          ? activeDocument.chapters.map(chapter =>
+          ? activeDocument.chapters.map((chapter) =>
               this.renderSubChapters(chapter, 0, (++mainChapter).toString())
             )
           : null}
@@ -93,7 +93,7 @@ class TableOfContents extends React.PureComponent {
         </NestedListItem>
         <List disablePadding>
           {Array.isArray(chapter.chapters)
-            ? chapter.chapters.map(subChapter =>
+            ? chapter.chapters.map((subChapter) =>
                 this.renderSubChapters(
                   subChapter,
                   newLevel,
