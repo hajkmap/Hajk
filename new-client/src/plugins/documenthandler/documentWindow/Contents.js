@@ -5,6 +5,19 @@ import Typography from "@material-ui/core/Typography";
 
 import ImagePopupModal from "./ImagePopupModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
+import {
+  Paragraph,
+  ULComponent,
+  OLComponent,
+  Link,
+  Figure,
+  Heading,
+  Strong,
+  Italic,
+  Underline,
+  Img,
+  BlockQuote,
+} from "../utils/ContentComponentFactory";
 
 const styles = (theme) => {
   return {
@@ -60,11 +73,13 @@ class Contents extends React.PureComponent {
     });
     allowedHtmlTags.push({
       tagType: "ul",
-      callback: this.props.contentComponentFactory.getULComponent,
+      callback: (e) => {
+        return <ULComponent ulComponent={e}></ULComponent>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "ol",
-      callback: this.props.contentComponentFactory.getOLComponent,
+      callback: () => <OLComponent></OLComponent>,
     });
     allowedHtmlTags.push({
       tagType: "li",
@@ -72,68 +87,87 @@ class Contents extends React.PureComponent {
     });
     allowedHtmlTags.push({
       tagType: "blockquote",
-      callback: this.props.contentComponentFactory.getBlockQuoteComponents,
+      callback: () => {
+        return <BlockQuote></BlockQuote>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "h1",
-      callback: this.props.contentComponentFactory
-        .getHeadingTypographyComponents,
+      callback: () => {
+        return <Heading></Heading>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "h2",
-      callback: this.props.contentComponentFactory
-        .getHeadingTypographyComponents,
+      callback: () => {
+        return <Heading></Heading>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "h3",
-      callback: this.props.contentComponentFactory
-        .getHeadingTypographyComponents,
+      callback: () => {
+        return <Heading></Heading>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "h4",
-      callback: this.props.contentComponentFactory
-        .getHeadingTypographyComponents,
+      callback: () => {
+        return <Heading></Heading>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "h5",
-      callback: this.props.contentComponentFactory
-        .getHeadingTypographyComponents,
+      callback: () => {
+        return <Heading></Heading>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "h6",
-      callback: this.props.contentComponentFactory
-        .getHeadingTypographyComponents,
+      callback: () => {
+        return <Heading></Heading>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "a",
-      callback: this.props.contentComponentFactory.getLinkComponent,
+      callback: () => {
+        return <Link></Link>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "img",
-      callback: this.props.contentComponentFactory.getImgCardComponent,
+      callback: () => {
+        return <Img></Img>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "p",
-      callback: this.props.contentComponentFactory.getPtagTypographyComponents,
+      callback: (e) => {
+        return <Paragraph pTag={e}></Paragraph>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "figure",
-      callback: this.props.contentComponentFactory.getFigureComponents,
+      callback: () => {
+        return <Figure></Figure>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "strong",
-      callback: this.props.contentComponentFactory
-        .getStrongTagTypographyComponents,
+      callback: () => {
+        return <Strong></Strong>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "u",
-      callback: this.props.contentComponentFactory
-        .getUnderlineTagTypographyComponents,
+      callback: () => {
+        return <Underline></Underline>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "em",
-      callback: this.props.contentComponentFactory
-        .getItalicTagTypographyComponents,
+      callback: () => {
+        return <Italic></Italic>;
+      },
     });
     return allowedHtmlTags;
   };

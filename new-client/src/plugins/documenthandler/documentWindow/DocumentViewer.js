@@ -13,7 +13,10 @@ import PrintIcon from "@material-ui/icons/Print";
 const styles = (theme) => ({
   gridContainer: {
     height: "100%",
-    padding: theme.spacing(3),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
     overflowY: "scroll",
     overflowX: "hidden",
     userSelect: "text",
