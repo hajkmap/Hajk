@@ -64,7 +64,7 @@ class GeneralOptions extends React.PureComponent {
       handleChange,
       model,
       printInProgress,
-      saveAsType,
+      // saveAsType,
     } = this.props;
     return (
       <>
@@ -120,7 +120,7 @@ class GeneralOptions extends React.PureComponent {
               })}
             </Select>
           </FormControl>
-          <FormControl className={classes.formControl}>
+          {/* <FormControl className={classes.formControl}>
             <InputLabel htmlFor="orientation">Spara som</InputLabel>
             <Select
               value={saveAsType}
@@ -133,7 +133,7 @@ class GeneralOptions extends React.PureComponent {
               <MenuItem value={"PDF"}>PDF</MenuItem>
               <MenuItem value={"PNG"}>PNG</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
           <FormControl className={classes.printButton}>
             <Button
               variant="contained"

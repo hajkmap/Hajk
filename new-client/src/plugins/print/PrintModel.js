@@ -18,8 +18,8 @@ export default class PrintModel {
     this.app = settings.app;
     this.localObserver = settings.localObserver;
     this.dims = settings.dims;
-    this.logoUrl = settings.logoUrl;
-    this.northArrowUrl = settings.northArrowUrl;
+    this.logoUrl = settings.logoUrl ?? "";
+    this.northArrowUrl = settings.northArrowUrl ?? "";
     this.logoMaxWidth = settings.logoMaxWidth;
     this.scales = settings.scales;
   }
@@ -467,7 +467,6 @@ export default class PrintModel {
       }
 
       if (options.includeNorthArrow && this.northArrowUrl.trim().length >= 5) {
-        const pxPMm = options.resolution / 25.4;
         try {
           const {
             data: arrowData,
@@ -475,7 +474,7 @@ export default class PrintModel {
             height: arrowHeight,
           } = await this.getImageForPdfFromUrl(this.northArrowUrl, 10);
 
-          let arrowPlacement = this.getPlacement(
+          const arrowPlacement = this.getPlacement(
             options.northArrowPlacement,
             arrowWidth,
             arrowHeight,
