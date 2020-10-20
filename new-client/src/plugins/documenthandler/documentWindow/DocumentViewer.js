@@ -26,6 +26,9 @@ const styles = (theme) => ({
     bottom: theme.spacing(2),
     right: theme.spacing(3),
   },
+  toc: {
+    marginBottom: theme.spacing(1),
+  },
   printButton: {
     paddingBottom: theme.spacing(1),
   },
@@ -158,7 +161,7 @@ class DocumentViewer extends React.PureComponent {
               <Typography>Skapa PDF</Typography>
             </Button>
           </Grid>
-          <Grid xs={12} item>
+          <Grid className={classes.toc} xs={12} item>
             <TableOfContents
               documentColor={documentColor}
               localObserver={localObserver}

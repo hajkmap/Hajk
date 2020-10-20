@@ -123,7 +123,17 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   bindListenForSearchResultClick = () => {
-    const { app } = this.props;
+    const { app, localObserver } = this.props;
+
+    app.globalObserver.subscribe(
+      "documenthandler-searchresult-clicked",
+      (searchResultClick) => {
+        localObserver.publish("set-active-document", {
+          documentName: searchResultClick.properties.documentFileName,
+          headerIdentifier: searchResultClick.properties.headerIdentifier,
+        });
+      }
+    );
 
     app.globalObserver.subscribe(
       "core.info-click-documenthandler",

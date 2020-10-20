@@ -1,27 +1,26 @@
 import React from "react";
-import Link from "@material-ui/core/Link";
 import MapIcon from "@material-ui/icons/Map";
 import DescriptionIcon from "@material-ui/icons/Description";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import clsx from "clsx";
-import Button from "@material-ui/core/Button";
-
-import Typography from "@material-ui/core/Typography";
 import TextArea from "../documentWindow/TextArea";
-import CardMedia from "@material-ui/core/CardMedia";
 import { makeStyles } from "@material-ui/core/styles";
+import {
+  Button,
+  Typography,
+  CardMedia,
+  ListItemIcon,
+  ListItem,
+  List,
+  ListItemText,
+} from "@material-ui/core";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
 
 const useStyles = makeStyles((theme) => ({
   documentImage: {
-    marginBottom: theme.spacing(0.5),
     objectFit: "contain",
     objectPosition: "left",
   },
@@ -60,6 +59,16 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.info.main,
   },
 }));
+
+const renderChild = (child) => {
+  if (child.nodeType === TEXT_NODE) {
+    return child.data;
+  }
+
+  if (child.nodeType === ELEMENT_NODE) {
+    return child.callback(child);
+  }
+};
 
 const getFormattedComponentFromTag = (tag) => {
   const childNodes = [...tag.childNodes];
@@ -134,7 +143,6 @@ export const OLComponent = ({ olComponent }) => {
 
 export const Heading = ({ headingTag }) => {
   const classes = useStyles();
-
   return (
     <>
       <Typography
@@ -147,26 +155,28 @@ export const Heading = ({ headingTag }) => {
   );
 };
 
-const getTextArea = (tag) => {
-  const children = [...tag.childNodes];
-  let textAreaContentArray = children.map((element, index) => {
-    return <React.Fragment key={index}>{renderChild(element)}</React.Fragment>;
-  });
-
-  const backgroundColor = tag.attributes.getNamedItem("data-background-color")
-    ?.value;
-  const dividerColor = tag.attributes.getNamedItem("data-divider-color")?.value;
-
-  return (
-    <TextArea
-      backgroundColor={backgroundColor}
-      dividerColor={dividerColor}
-      textAreaContentArray={textAreaContentArray}
-    ></TextArea>
-  );
-};
-
 export const BlockQuote = ({ blockQuoteTag }) => {
+  const getTextArea = (tag) => {
+    const children = [...tag.childNodes];
+    let textAreaContentArray = children.map((element, index) => {
+      return (
+        <React.Fragment key={index}>{renderChild(element)}</React.Fragment>
+      );
+    });
+
+    const backgroundColor = tag.attributes.getNamedItem("data-background-color")
+      ?.value;
+    const dividerColor = tag.attributes.getNamedItem("data-divider-color")
+      ?.value;
+
+    return (
+      <TextArea
+        backgroundColor={backgroundColor}
+        dividerColor={dividerColor}
+        textAreaContentArray={textAreaContentArray}
+      ></TextArea>
+    );
+  };
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
     return getTextArea(blockQuoteTag);
   } else {
@@ -183,29 +193,6 @@ export const Figure = ({ figureTag }) => {
   });
 };
 
-const isPopupAllowedForImage = (imgTag) => {
-  return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
-};
-
-const getImageStyle = (image, classes) => {
-  let className = image.popup
-    ? clsx(
-        classes.documentImage,
-        classes.naturalDocumentImageProportions,
-        classes.popupActivatedImage
-      )
-    : clsx(classes.documentImage, classes.naturalDocumentImageProportions);
-
-  if (image.height && image.width) {
-    if (image.popup) {
-      className = clsx(classes.documentImage, classes.popupActivatedImage);
-    } else {
-      className = clsx(classes.documentImage, classes.popupActivatedImage);
-    }
-  }
-  return className;
-};
-
 /**
  * The render function for the img-tag.
  * @param {string} imgTag The img-tag.
@@ -214,6 +201,40 @@ const getImageStyle = (image, classes) => {
  */
 export const Img = ({ imgTag, localObserver }) => {
   const classes = useStyles();
+
+  const isPopupAllowedForImage = (imgTag) => {
+    return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
+  };
+
+  const getImageStyle = (image) => {
+    let className = image.popup
+      ? clsx(
+          classes.documentImage,
+          classes.naturalDocumentImageProportions,
+          classes.popupActivatedImage
+        )
+      : clsx(classes.documentImage, classes.naturalDocumentImageProportions);
+
+    if (image.height && image.width) {
+      if (image.popup) {
+        className = clsx(classes.documentImage, classes.popupActivatedImage);
+      } else {
+        className = clsx(classes.documentImage, classes.popupActivatedImage);
+      }
+    }
+    return className;
+  };
+
+  const getImageDescription = (image) => {
+    return (
+      <>
+        <Typography variant="subtitle2">{image.caption}</Typography>
+        <Typography className={classes.imageText} variant="subtitle2">
+          {image.source}
+        </Typography>
+      </>
+    );
+  };
   const image = {
     caption: imgTag.attributes.getNamedItem("data-caption")?.value,
     popup: isPopupAllowedForImage(imgTag),
@@ -241,21 +262,10 @@ export const Img = ({ imgTag, localObserver }) => {
             ? { height: image.height, width: image.width }
             : null
         }
-        className={getImageStyle(image, classes)}
+        className={getImageStyle(image)}
         image={image.url}
       />
-      {getImageDescription(image, classes)}
-    </>
-  );
-};
-
-const getImageDescription = (image, classes) => {
-  return (
-    <>
-      <Typography className={classes.imageText} variant="subtitle2">
-        {image.caption}
-      </Typography>
-      <Typography variant="subtitle2">{image.source}</Typography>
+      {getImageDescription(image)}
     </>
   );
 };
@@ -316,24 +326,6 @@ export const LineBreak = () => {
   return <br />;
 };
 
-const getLinkDataPerType = (attributes) => {
-  const {
-    0: mapLink,
-    1: headerIdentifier,
-    2: documentLink,
-    3: externalLink,
-  } = [
-    "data-maplink",
-    "data-header-identifier",
-    "data-document",
-    "data-link",
-  ].map((attributeKey) => {
-    return attributes.getNamedItem(attributeKey)?.value;
-  });
-
-  return { mapLink, headerIdentifier, documentLink, externalLink };
-};
-
 /**
  * Callback used to render different link-components from a-elements
  * @param {Element} aTag a-element.
@@ -343,6 +335,24 @@ const getLinkDataPerType = (attributes) => {
  */
 export const CustomLink = ({ aTag, localObserver }) => {
   const classes = useStyles();
+
+  const getLinkDataPerType = (attributes) => {
+    const {
+      0: mapLink,
+      1: headerIdentifier,
+      2: documentLink,
+      3: externalLink,
+    } = [
+      "data-maplink",
+      "data-header-identifier",
+      "data-document",
+      "data-link",
+    ].map((attributeKey) => {
+      return attributes.getNamedItem(attributeKey)?.value;
+    });
+
+    return { mapLink, headerIdentifier, documentLink, externalLink };
+  };
 
   const getExternalLink = (externalLink) => {
     return (
@@ -426,14 +436,4 @@ export const CustomLink = ({ aTag, localObserver }) => {
   }
 
   return null;
-};
-
-const renderChild = (child) => {
-  if (child.nodeType === TEXT_NODE) {
-    return child.data;
-  }
-
-  if (child.nodeType === ELEMENT_NODE) {
-    return child.callback(child);
-  }
 };
