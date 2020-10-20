@@ -18,8 +18,13 @@ import { green } from "@material-ui/core/colors";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
+import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
+import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 import ImageIcon from "@material-ui/icons/Image";
+import DescriptionIcon from "@material-ui/icons/Description";
+import MapIcon from "@material-ui/icons/Map";
+import LinkIcon from "@material-ui/icons/Link";
 
 import addLinkPlugin from "./addLinkPlugin";
 import { mediaBlockRenderer } from "./addMediaPlugin";
@@ -36,8 +41,6 @@ const ColorButtonGreen = withStyles((theme) => ({
   },
 }))(Button);
 
-let readOnlyState = false;
-
 export default class DocumentTextEditor extends React.Component {
   constructor(props) {
     super(props);
@@ -52,6 +55,7 @@ export default class DocumentTextEditor extends React.Component {
       urlType: "",
       imageList: this.props.imageList,
       documents: this.props.documents,
+      isReadOnly: false,
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -130,8 +134,8 @@ export default class DocumentTextEditor extends React.Component {
       "IMMUTABLE",
       {
         src: urlValue,
-        width: mediaWidth,
-        height: mediaHeight,
+        "data-image-width": mediaWidth,
+        "data-image-height": mediaHeight,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
         "data-popup": mediaPopup,
@@ -363,6 +367,8 @@ export default class DocumentTextEditor extends React.Component {
       img.alt = "";
       img.width = "";
       img.height = "";
+      img["data-image-width"] = "";
+      img["data-image-height"] = "";
       img["data-caption"] = "";
       img["data-source"] = "";
       //img["data-popup"] = false;
@@ -463,6 +469,13 @@ export default class DocumentTextEditor extends React.Component {
     }
   }
 
+  onReadOnly = () => {
+    const { isReadOnly } = this.state;
+    this.setState({
+      isReadOnly: !isReadOnly,
+    });
+  };
+
   render() {
     const { editorState, imageList, documents } = this.state;
 
@@ -505,19 +518,19 @@ export default class DocumentTextEditor extends React.Component {
           </select>
           <input
             onChange={this.onWidthChange}
-            ref="width"
+            ref="data-image-width"
             type="number"
             value={this.state.mediaWidth || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="WIDTH"
+            placeholder="data-image-width"
           />
           <input
             onChange={this.onHeightChange}
-            ref="height"
+            ref="data-image-height"
             type="number"
             value={this.state.mediaHeight || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="HEIGHT"
+            placeholder="data-image-height"
           />
           <input
             onChange={this.onDataCaptionChange}
@@ -525,7 +538,7 @@ export default class DocumentTextEditor extends React.Component {
             type="text"
             value={this.state.mediaCaption || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="DATA-CAPTION"
+            placeholder="data-caption"
           />
           <input
             onChange={this.onDataSourceChange}
@@ -533,7 +546,7 @@ export default class DocumentTextEditor extends React.Component {
             type="text"
             value={this.state.mediaSource || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="DATA-SOURCE"
+            placeholder="data-source"
           />
           <input
             id="data-popup"
@@ -542,7 +555,7 @@ export default class DocumentTextEditor extends React.Component {
             type="checkbox"
             value={this.state.mediaPopup || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="DATA-POPUP"
+            placeholder="data-popup"
           />
           <label>Popup</label>
           <button onMouseDown={this.confirmMedia}>OK</button>
@@ -583,18 +596,23 @@ export default class DocumentTextEditor extends React.Component {
     return (
       <div className="RichEditor-root" style={styles.root}>
         <div style={styles.buttons}>
-          <InlineStyleControls
-            editorState={editorState}
-            onToggle={this.toggleInlineStyle}
-          />
-          <BlockStyleControls
-            editorState={editorState}
-            onToggle={this.toggleBlockType}
-          />
-          <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
-          <button onClick={this.addWebLink}>Webblänk</button>
-          <button onClick={this.addDocumentLink}>Dokumentlänk</button>
-          <button onClick={this.addMapLink}>Kartlänk</button>
+          <div className="document-editor-controls">
+            <InlineStyleControls
+              editorState={editorState}
+              onToggle={this.toggleInlineStyle}
+            />
+            <BlockStyleControls
+              editorState={editorState}
+              onToggle={this.toggleBlockType}
+            />
+            <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
+            <StyleButton label={<LinkIcon />} onToggle={this.addWebLink} />
+            <StyleButton
+              label={<DescriptionIcon />}
+              onToggle={this.addDocumentLink}
+            />
+            <StyleButton label={<MapIcon />} onToggle={this.addMapLink} />
+          </div>
         </div>
         {urlInput}
         <ColorButtonGreen
@@ -606,6 +624,9 @@ export default class DocumentTextEditor extends React.Component {
         >
           <span>Godkänn ändringar</span>
         </ColorButtonGreen>
+        <button onMouseDown={this.onReadOnly} style={{ marginBottom: 5 }}>
+          Read Only Mode
+        </button>
         <div className={className} style={styles.editor} onClick={this.focus}>
           <Editor
             blockRendererFn={mediaBlockRenderer}
@@ -618,7 +639,7 @@ export default class DocumentTextEditor extends React.Component {
             onChange={this.onChange}
             placeholder="Lägg till text..."
             ref="editor"
-            readOnly={readOnlyState}
+            readOnly={this.state.isReadOnly}
             plugins={this.plugins}
           />
         </div>
@@ -646,9 +667,10 @@ function getBlockStyle(block) {
 const BLOCK_TYPES = [
   { label: "H1", style: "header-one" },
   { label: <FormatQuoteIcon />, style: "blockquote" },
-  { label: "UL", style: "unordered-list-item" },
-  { label: "OL", style: "ordered-list-item" },
+  { label: <FormatListBulletedIcon />, style: "unordered-list-item" },
+  { label: <FormatListNumberedIcon />, style: "ordered-list-item" },
 ];
+
 const BlockStyleControls = (props) => {
   const { editorState } = props;
   const selection = editorState.getSelection();
@@ -703,6 +725,7 @@ const styles = {
     width: 1000,
   },
   buttons: {
+    height: 50,
     marginBottom: 10,
   },
   urlInputContainer: {

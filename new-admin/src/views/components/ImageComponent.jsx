@@ -1,11 +1,24 @@
 import React, { useState } from "react";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
+import TextField from "@material-ui/core/TextField";
+import Grid from "@material-ui/core/Grid";
+import LanguageIcon from "@material-ui/icons/Language";
+import ArrowRightAltIcon from "@material-ui/icons/ArrowRightAlt";
+import HeightIcon from "@material-ui/icons/Height";
+import SubtitlesIcon from "@material-ui/icons/Subtitles";
+import LinkIcon from "@material-ui/icons/Link";
+
+export const ReadOnly = () => {
+  return false;
+};
 
 const ImageComponent = (props) => {
   const classes = useStyles();
+
   const [open, setOpen] = useState(false);
   const [width, setWidth] = useState("");
+  const [height, setHeight] = useState("");
 
   const handleOpen = (e) => {
     e.preventDefault();
@@ -19,32 +32,72 @@ const ImageComponent = (props) => {
 
   const body = (
     <div className={classes.paper}>
-      <h2 id="image-modal-title">Redigerar bild</h2>
-      <p id="image-modal-description">Inställningar för: {props.src}</p>
-      <input type="text" value={props.src} placeholder="URL" />
-      <input
-        type="text"
-        value={props["data-image-width"]}
-        placeholder="data-image-width"
-        onChange={(e) => setWidth(e.target.value)}
-      />
-      <input
-        type="text"
-        value={props["data-image-height"]}
-        placeholder="data-image-height"
-      />
-      <input
-        type="text"
-        value={props["data-caption"]}
-        placeholder="data-caption"
-      />
-      <input
-        type="text"
-        value={props["data-source"]}
-        placeholder="data-source"
-      />
-      <input type="checkbox" id="data-popup" value={props["data-popup"]} />
-      <label for="data-popup">Popup</label>
+      <form className={classes.form}>
+        <h2 id="image-modal-title">Redigera bild</h2>
+        <div className={classes.margin}>
+          <Grid container spacing={1} alignItems="flex-end">
+            <Grid item>
+              <LanguageIcon />
+            </Grid>
+            <Grid item>
+              <TextField id="image-url" value={props.src} label="URL" />
+            </Grid>
+          </Grid>
+          <Grid container spacing={1} alignItems="flex-end">
+            <Grid item>
+              <ArrowRightAltIcon />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="image-width"
+                value={props.width}
+                onChange={(e) => setWidth(e.target.value)}
+                label="data-image-width"
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={1} alignItems="flex-end">
+            <Grid item>
+              <HeightIcon />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="image-height"
+                value={props.height}
+                onChange={(e) => setWidth(e.target.value)}
+                label="data-image-height"
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={1} alignItems="flex-end">
+            <Grid item>
+              <SubtitlesIcon />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="image-caption"
+                value={props["data-caption"]}
+                label="data-caption"
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={1} alignItems="flex-end">
+            <Grid item>
+              <LinkIcon />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="image-source"
+                value={props["data-source"]}
+                label="data-source"
+              />
+            </Grid>
+          </Grid>
+        </div>
+
+        <input type="checkbox" id="image-popup" value={props["data-popup"]} />
+        <label>Popup</label>
+      </form>
     </div>
   );
 
@@ -66,11 +119,11 @@ const ImageComponent = (props) => {
       <div className={classes.imgContainer}>
         <img
           src={props.src}
-          width={props["data-image-width"]}
-          height={props["data-image-height"]}
+          width={props.width}
+          height={props.height}
           alt={props["data-caption"]}
-          data-image-width={props["data-image-width"]}
-          data-image-height={props["data-image-height"]}
+          data-image-width={props.width}
+          data-image-height={props.height}
           data-caption={props["data-caption"]}
           data-source={props["data-source"]}
           data-popup
@@ -92,11 +145,11 @@ const ImageComponent = (props) => {
       <div className={classes.imgContainer}>
         <img
           src={props.src}
-          width={props["data-image-width"]}
-          height={props["data-image-height"]}
+          width={props.width}
+          height={props.height}
           alt={props["data-caption"]}
-          data-image-width={props["data-image-width"]}
-          data-image-height={props["data-image-height"]}
+          data-image-width={props.width}
+          data-image-height={props.height}
           data-caption={props["data-caption"]}
           data-source={props["data-source"]}
         />
@@ -125,6 +178,9 @@ const useStyles = makeStyles((theme) => ({
   buttons: {
     marginBottom: 10,
   },
+  margin: {
+    margin: theme.spacing(1),
+  },
   urlInputContainer: {
     marginBottom: 10,
   },
@@ -149,16 +205,18 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     position: "absolute",
     width: 400,
+    top: "20%",
+    left: "30%",
+    padding: "1rem",
+    backgroundColor: theme.palette.background.paper,
     border: "2px solid #000",
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
   },
   imgContainer: {
     position: "relative",
     width: "100%",
     maxWidth: 400,
-    "& > img": {
-      width: "100%",
-      height: "auto",
-    },
     "& > .btn": {
       position: "absolute",
       top: "50%",
@@ -177,6 +235,13 @@ const useStyles = makeStyles((theme) => ({
     "& > .btn:hover": {
       backgroundColor: "black",
     },
+  },
+  form: {
+    /*padding: "1rem",
+    marginTop: "2rem",
+    marginRight: "auto",
+    marginLeft: "auto",
+    maxWidth: "remy(380px)",*/
   },
 }));
 
