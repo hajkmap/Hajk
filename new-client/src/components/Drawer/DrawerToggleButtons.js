@@ -15,6 +15,9 @@ const useStyles = makeStyles((theme) => ({
       boxShadow: "none",
     },
   },
+  button: {
+    border: 0,
+  },
   icon: {
     [theme.breakpoints.up("md")]: {
       marginRight: theme.spacing(1),
@@ -79,7 +82,7 @@ function DrawerToggleButtons({ drawerButtons, globalObserver }) {
 
     // Caption should be hidden on small screens
     return (
-      <ToggleButton key={value} value={value}>
+      <ToggleButton key={value} value={value} className={classes.button}>
         {icon}
         <Hidden smDown>{caption}</Hidden>
       </ToggleButton>

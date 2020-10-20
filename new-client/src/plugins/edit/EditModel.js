@@ -4,7 +4,7 @@ import { MultiPoint, Polygon } from "ol/geom";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
-import { Select, Modify, Draw, Translate, Snap } from "ol/interaction";
+import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
 
@@ -450,12 +450,8 @@ class EditModel {
     this.modify = new Modify({
       features: this.select.getFeatures(),
     });
-    this.snap = new Snap({
-      source: this.vectorSource,
-    });
     this.map.addInteraction(this.select);
     this.map.addInteraction(this.modify);
-    this.map.addInteraction(this.snap);
   }
 
   activateAdd(geometryType) {
@@ -465,15 +461,11 @@ class EditModel {
       type: geometryType,
       geometryName: this.geometryName,
     });
-    this.snap = new Snap({
-      source: this.vectorSource,
-    });
     this.draw.on("drawend", (event) => {
       event.feature.modification = "added";
       this.editAttributes(event.feature);
     });
     this.map.addInteraction(this.draw);
-    this.map.addInteraction(this.snap);
     this.map.clickLock.add("edit");
   }
 
@@ -503,6 +495,9 @@ class EditModel {
       this.map.clickLock.add("edit");
       this.activateRemove();
     }
+
+    // Add snap after all interactions have been added
+    this.map.snapHelper.add("measure");
   }
 
   removeSelected = (e) => {
@@ -519,6 +514,10 @@ class EditModel {
   };
 
   deactivateInteraction() {
+    // First remove the snap interaction
+    this.map.snapHelper.delete("measure");
+
+    // Next, remove correct map interaction
     if (this.select) {
       this.map.removeInteraction(this.select);
     }
@@ -530,9 +529,6 @@ class EditModel {
     }
     if (this.move) {
       this.map.removeInteraction(this.move);
-    }
-    if (this.snap) {
-      this.map.removeInteraction(this.snap);
     }
     if (this.remove) {
       this.remove = false;

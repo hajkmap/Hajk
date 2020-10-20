@@ -673,6 +673,7 @@ class DrawModel {
     });
     this.edit = new Modify({ features: features });
     this.map.addInteraction(this.edit);
+    this.map.snapHelper.add("draw");
   }
 
   setMoveActive() {
@@ -680,6 +681,7 @@ class DrawModel {
     this.move = new Translate({ features: this.select.getFeatures() });
     this.map.addInteraction(this.move);
     this.map.addInteraction(this.select);
+    this.map.snapHelper.add("draw");
   }
 
   setDrawMethod(method) {
@@ -714,12 +716,15 @@ class DrawModel {
     this.map.un("singleclick", this.removeSelected);
     this.map.un("singleclick", this.editText);
     if (this.draw) {
+      this.map.snapHelper.delete("draw");
       this.map.removeInteraction(this.draw);
     }
     if (this.edit) {
+      this.map.snapHelper.delete("draw");
       this.map.removeInteraction(this.edit);
     }
     if (this.move) {
+      this.map.snapHelper.delete("draw");
       this.map.removeInteraction(this.move);
     }
     if (this.select) {
@@ -729,6 +734,7 @@ class DrawModel {
         }
       });
 
+      this.map.snapHelper.delete("draw");
       this.map.removeInteraction(this.select);
     }
   }
@@ -968,6 +974,7 @@ class DrawModel {
     this.draw.on("drawstart", this.handleDrawStart);
     this.draw.on("drawend", this.handleDrawEnd);
     this.map.addInteraction(this.draw);
+    this.map.snapHelper.add("draw");
   }
 
   setActive(active) {
@@ -976,8 +983,8 @@ class DrawModel {
       this.addInteraction();
     }
     if (active === false) {
-      this.map.clickLock.delete("draw");
       this.removeInteraction();
+      this.map.clickLock.delete("draw");
     }
     this.active = active;
   }
