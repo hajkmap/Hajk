@@ -5,84 +5,12 @@ import Typography from "@material-ui/core/Typography/Typography";
 
 const styles = (theme) => {
   return {
-    text: {
-      width: "100%",
-    },
-    form: {},
-    cross: {
-      position: "fixed",
-      left: "50%",
-      top: "50%",
-      color: theme.palette.primary.main,
-      textShadow: "2px 2px rgba(0, 0, 0, 0.5)",
-      userSelect: "none",
-      pointerEvents: "none",
-      "& i": {
-        fontSize: "50px",
-        marginLeft: "-27px",
-        marginTop: "9px",
-      },
-    },
-    crossButton: {
-      marginTop: "10px",
-      marginLeft: "-31px",
-      pointerEvents: "all",
-    },
     saveError: {
       color: "red",
       background: "rgb(255, 200, 200)",
       marginTop: "15px",
       borderRadius: "5px",
       padding: "5px",
-    },
-    padded: {
-      padding: "20px 0",
-    },
-    button: {
-      justifyContent: "left",
-    },
-    buttonIcon: {
-      marginRight: "5px",
-    },
-    placeIconMap: {
-      fontSize: "64px",
-      position: "relative",
-      right: "32px",
-      bottom: "28px",
-    },
-    localFloristIcon: {
-      color: "green",
-      fontSize: "64px",
-    },
-    thank: {
-      fontSize: "2.8rem",
-      fontWeight: "500",
-    },
-    thankForm: {
-      textAlign: "center",
-    },
-    anchorOriginBottomCenter: {
-      bottom: "60px",
-      [theme.breakpoints.up("xs")]: {
-        left: "50%",
-        right: "auto",
-        transform: "translateX(-50%)",
-        borderRadius: "4px",
-        overflow: "hidden",
-        minWidth: "391px",
-      },
-      [theme.breakpoints.down("xs")]: {
-        width: "100%",
-        minWidth: "inherit",
-        borderRadius: "0",
-      },
-    },
-    formControl: {
-      minWidth: 120,
-    },
-    page: {
-      background: "blue",
-      height: "100%",
     },
     errorText: {
       fontSize: "14pt",
