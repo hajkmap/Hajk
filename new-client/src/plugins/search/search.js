@@ -28,7 +28,6 @@ const styles = (theme) => {
     root: {
       display: "flex",
       alignItems: "center",
-      border: "1px solid rgba(0, 0, 0, 0.12)",
       minWidth: 200,
       [theme.breakpoints.down("xs")]: {
         minWidth: 100,
