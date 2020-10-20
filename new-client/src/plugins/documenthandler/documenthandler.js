@@ -6,7 +6,6 @@ import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
 import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
-import ContentComponentFactory from "./utils/ContentComponentFactory";
 import { withTheme } from "@material-ui/core/styles";
 
 class DocumentHandler extends React.PureComponent {
@@ -29,10 +28,7 @@ class DocumentHandler extends React.PureComponent {
   constructor(props) {
     super(props);
     this.localObserver = Observer();
-    this.contentComponentFactory = new ContentComponentFactory({
-      localObserver: this.localObserver,
-      theme: this.props.theme,
-    });
+
     this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,
       globalObserver: props.app.globalObserver,
@@ -158,7 +154,6 @@ class DocumentHandler extends React.PureComponent {
         {this.dynamicallyImportIconFonts()}
         <DocumentWindowBase
           {...this.props}
-          contentComponentFactory={this.contentComponentFactory}
           onMinimize={this.onMinimize}
           showDocument={this.showDocument}
           onMaximize={this.onMaximize}

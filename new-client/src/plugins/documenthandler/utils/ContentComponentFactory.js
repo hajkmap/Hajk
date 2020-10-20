@@ -9,26 +9,57 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import clsx from "clsx";
+import Button from "@material-ui/core/Button";
+
 import Typography from "@material-ui/core/Typography";
 import TextArea from "../documentWindow/TextArea";
 import CardMedia from "@material-ui/core/CardMedia";
-import { styled } from "@material-ui/core/styles";
-import { withStyles, makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
 
-const useStyles = makeStyles({
-  root: {
-    background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
-    border: 0,
-    borderRadius: 3,
-    boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .3)",
-    color: "white",
-    height: 48,
-    padding: "0 30px",
+const useStyles = makeStyles((theme) => ({
+  documentImage: {
+    marginBottom: theme.spacing(0.5),
+    objectFit: "contain",
+    objectPosition: "left",
   },
-});
+  popupActivatedImage: {
+    marginBottom: theme.spacing(1),
+    cursor: "pointer",
+  },
+  naturalDocumentImageProportions: {
+    marginTop: theme.spacing(1),
+    width: "100%",
+  },
+  imageText: {
+    marginBottom: theme.spacing(1),
+  },
+
+  linkIcon: {
+    fontSize: getIconSizeFromFontSize(theme.typography.body1.fontSize),
+    marginRight: theme.spacing(1),
+    verticalAlign: "middle",
+  },
+  typography: {
+    overflowWrap: "break-word",
+    marginBottom: theme.spacing(1),
+  },
+  ulIcon: {
+    fontSize: "1rem",
+  },
+  listRoot: {
+    color: "black",
+  },
+  startIcon: {
+    marginRight: 0,
+  },
+  linkButton: {
+    padding: 0,
+    color: theme.palette.info.main,
+  },
+}));
 
 const getFormattedComponentFromTag = (tag) => {
   const childNodes = [...tag.childNodes];
@@ -37,8 +68,7 @@ const getFormattedComponentFromTag = (tag) => {
   });
 };
 
-const getIconSizeFromFontSize = (theme) => {
-  let fontSizeBody = theme.typography.body1.fontSize;
+const getIconSizeFromFontSize = (fontSizeBody) => {
   let format = "rem";
   if (fontSizeBody.search("px") > -1) {
     format = "px";
@@ -48,40 +78,10 @@ const getIconSizeFromFontSize = (theme) => {
   return `${size * 1.7}${format}`;
 };
 
-const styles = {
-  documentImage: {
-    objectFit: "contain",
-    objectPosition: "left",
-  },
-  popupActivatedImage: {
-    cursor: "pointer",
-  },
-  naturalDocumentImageProportions: {
-    width: "100%",
-  },
-
-  typography: {
-    overflowWrap: "break-word",
-    marginTop: 8,
-    marginBot: 20,
-  },
-
-  listRoot: {
-    // maxWidth: theme.spacing(3),
-    // minWidth: theme.spacing(3),
-    color: "black",
-  },
-  chapter: {
-    cursor: "text",
-    // marginTop: theme.spacing(4),
-  },
-};
-
 export const Paragraph = ({ pTag }) => {
   const classes = useStyles();
-  console.log(classes, "classes");
   return (
-    <Typography className={clsx(styles.typography)} variant="body1">
+    <Typography className={classes.typography} variant="body1">
       {getFormattedComponentFromTag(pTag)}
     </Typography>
   );
@@ -89,14 +89,15 @@ export const Paragraph = ({ pTag }) => {
 
 export const ULComponent = ({ ulComponent }) => {
   let children = [...ulComponent.children];
+  const classes = useStyles();
   return (
     <List component="nav">
       {children.map((listItem, index) => {
         return (
           <ListItem key={index}>
-            <ListItemIcon styles={{ root: clsx(styles.listRoot) }}>
+            <ListItemIcon styles={{ root: classes.listRoot }}>
               <FiberManualRecordIcon
-                style={{ fontSize: "1em" }}
+                className={classes.ulIcon}
               ></FiberManualRecordIcon>
             </ListItemIcon>
             <ListItemText
@@ -109,15 +110,16 @@ export const ULComponent = ({ ulComponent }) => {
   );
 };
 
-export const OLComponent = (olComponent) => {
+export const OLComponent = ({ olComponent }) => {
   let children = [...olComponent.children];
+  const classes = useStyles();
   return (
     <List component="nav">
       {children.map((listItem, index) => {
         return (
           <ListItem key={index}>
             <ListItemText
-              styles={{ root: clsx(styles.listRoot) }}
+              styles={{ root: classes.listRoot }}
               primary={`${index + 1}.`}
             ></ListItemText>
             <ListItemText
@@ -130,14 +132,16 @@ export const OLComponent = (olComponent) => {
   );
 };
 
-export const Heading = (tag) => {
+export const Heading = ({ headingTag }) => {
+  const classes = useStyles();
+
   return (
     <>
       <Typography
-        className={clsx(styles.typography)}
-        variant={tag.tagName.toLowerCase()}
+        className={classes.typography}
+        variant={headingTag.tagName.toLowerCase()}
       >
-        {getFormattedComponentFromTag(tag)}
+        {getFormattedComponentFromTag(headingTag)}
       </Typography>
     </>
   );
@@ -162,17 +166,16 @@ const getTextArea = (tag) => {
   );
 };
 
-export const BlockQuote = (tag) => {
-  if (tag.attributes.getNamedItem("data-text-section")) {
-    return getTextArea(tag);
+export const BlockQuote = ({ blockQuoteTag }) => {
+  if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
+    return getTextArea(blockQuoteTag);
   } else {
     return null;
   }
 };
 
-export const Figure = (figureTag) => {
+export const Figure = ({ figureTag }) => {
   const children = [...figureTag.children];
-
   return children.map((element, index) => {
     return (
       <React.Fragment key={index}>{element.callback(element)}</React.Fragment>
@@ -184,20 +187,20 @@ const isPopupAllowedForImage = (imgTag) => {
   return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
 };
 
-const getImageStyle = (image) => {
+const getImageStyle = (image, classes) => {
   let className = image.popup
     ? clsx(
-        styles.documentImage,
-        styles.naturalDocumentImageProportions,
-        styles.popupActivatedImage
+        classes.documentImage,
+        classes.naturalDocumentImageProportions,
+        classes.popupActivatedImage
       )
-    : clsx(styles.documentImage, styles.naturalDocumentImageProportions);
+    : clsx(classes.documentImage, classes.naturalDocumentImageProportions);
 
   if (image.height && image.width) {
     if (image.popup) {
-      className = clsx(styles.documentImage, styles.popupActivatedImage);
+      className = clsx(classes.documentImage, classes.popupActivatedImage);
     } else {
-      className = clsx(styles.documentImage, styles.popupActivatedImage);
+      className = clsx(classes.documentImage, classes.popupActivatedImage);
     }
   }
   return className;
@@ -209,7 +212,8 @@ const getImageStyle = (image) => {
  *
  * @memberof Contents
  */
-export const Img = (imgTag) => {
+export const Img = ({ imgTag, localObserver }) => {
+  const classes = useStyles();
   const image = {
     caption: imgTag.attributes.getNamedItem("data-caption")?.value,
     popup: isPopupAllowedForImage(imgTag),
@@ -222,8 +226,7 @@ export const Img = (imgTag) => {
 
   let onClickCallback = image.popup
     ? () => {
-        console.log("sdasdas");
-        settings.localObserver.publish("image-popup", image);
+        localObserver.publish("image-popup", image);
       }
     : null;
 
@@ -238,23 +241,21 @@ export const Img = (imgTag) => {
             ? { height: image.height, width: image.width }
             : null
         }
-        className={getImageStyle(image)}
+        className={getImageStyle(image, classes)}
         image={image.url}
       />
-      {getImageDescription(image)}
+      {getImageDescription(image, classes)}
     </>
   );
 };
 
-const getImageDescription = (image) => {
+const getImageDescription = (image, classes) => {
   return (
     <>
-      <Typography className={clsx(styles.typography)} variant="subtitle2">
+      <Typography className={classes.imageText} variant="subtitle2">
         {image.caption}
       </Typography>
-      <Typography className={clsx(styles.typography)} variant="subtitle2">
-        {image.source}
-      </Typography>
+      <Typography variant="subtitle2">{image.source}</Typography>
     </>
   );
 };
@@ -311,34 +312,8 @@ export const Italic = (emTag) => {
  *
  * @memberof htmlToMaterialUiParser
  */
-const getBrtagTypographyComponent = () => {
+export const LineBreak = () => {
   return <br />;
-};
-
-const getExternalLink = (aTag, externalLink) => {
-  return (
-    <Link
-      href={externalLink}
-      key="external-link"
-      target="_blank"
-      style={{
-        display: "flex",
-        textAlign: "left",
-        alignItems: "center",
-      }}
-      rel="noopener"
-      variant="body2"
-    >
-      <OpenInNewIcon
-        style={{
-          fontSize: getIconSizeFromFontSize(settings.theme),
-          marginRight: settings.theme.spacing(0.5),
-          verticalAlign: "middle",
-        }}
-      ></OpenInNewIcon>
-      {getFormattedComponentFromTag(aTag)}
-    </Link>
-  );
 };
 
 const getLinkDataPerType = (attributes) => {
@@ -359,36 +334,6 @@ const getLinkDataPerType = (attributes) => {
   return { mapLink, headerIdentifier, documentLink, externalLink };
 };
 
-const getDocumentLink = (headerIdentifier, documentLink, aTag) => {
-  const { localObserver } = settings;
-  return (
-    <>
-      <Link
-        href="#"
-        key="document-link"
-        component="button"
-        underline="hover"
-        variant="body1"
-        onClick={() => {
-          localObserver.publish("set-active-document", {
-            documentName: documentLink,
-            headerIdentifier: headerIdentifier,
-          });
-        }}
-      >
-        <DescriptionIcon
-          style={{
-            fontSize: getIconSizeFromFontSize(settings.theme),
-            marginRight: settings.theme.spacing(0.5),
-            verticalAlign: "middle",
-          }}
-        ></DescriptionIcon>
-        {getFormattedComponentFromTag(aTag)}
-      </Link>
-    </>
-  );
-};
-
 /**
  * Callback used to render different link-components from a-elements
  * @param {Element} aTag a-element.
@@ -396,7 +341,71 @@ const getDocumentLink = (headerIdentifier, documentLink, aTag) => {
  *
  * @memberof Contents
  */
-const Link = (aTag) => {
+export const CustomLink = ({ aTag, localObserver }) => {
+  const classes = useStyles();
+
+  const getExternalLink = (externalLink) => {
+    return (
+      <Button
+        color="default"
+        startIcon={<OpenInNewIcon className={classes.linkIcon}></OpenInNewIcon>}
+        classes={{ startIcon: classes.startIcon }}
+        target="_blank"
+        component="a"
+        className={classes.linkButton}
+        key="external-link"
+        href={externalLink}
+      >
+        {getFormattedComponentFromTag(aTag)}
+      </Button>
+    );
+  };
+  const getMapLink = (aTag, mapLink) => {
+    return (
+      <Button
+        color="default"
+        className={classes.linkButton}
+        startIcon={<MapIcon className={classes.linkIcon}></MapIcon>}
+        classes={{ startIcon: classes.startIcon }}
+        target="_blank"
+        href={externalLink}
+        key="map-link"
+        component="button"
+        onClick={() => {
+          localObserver.publish("fly-to", mapLink);
+        }}
+      >
+        {getFormattedComponentFromTag(aTag)}
+      </Button>
+    );
+  };
+  const getDocumentLink = (headerIdentifier, documentLink) => {
+    return (
+      <Button
+        color="default"
+        className={classes.linkButton}
+        startIcon={
+          <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
+        }
+        style={{ padding: 0 }}
+        classes={{ startIcon: classes.startIcon }}
+        href="#"
+        key="document-link"
+        component="button"
+        underline="hover"
+        onClick={() => {
+          console.log("ONCLICK");
+          localObserver.publish("set-active-document", {
+            documentName: documentLink,
+            headerIdentifier: headerIdentifier,
+          });
+        }}
+      >
+        {getFormattedComponentFromTag(aTag)}
+      </Button>
+    );
+  };
+
   const {
     mapLink,
     headerIdentifier,
@@ -405,16 +414,18 @@ const Link = (aTag) => {
   } = getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {
-    return getDocumentLink(headerIdentifier, documentLink, aTag);
+    return getDocumentLink(headerIdentifier, documentLink);
   }
 
   if (mapLink) {
-    return getMapLink(aTag, mapLink);
+    return getMapLink(aTag, mapLink, localObserver);
   }
 
   if (externalLink) {
-    return getExternalLink(aTag, externalLink);
+    return getExternalLink(externalLink);
   }
+
+  return null;
 };
 
 const renderChild = (child) => {
@@ -426,35 +437,3 @@ const renderChild = (child) => {
     return child.callback(child);
   }
 };
-
-const getMapLink = (aTag, mapLink) => {
-  const { localObserver } = settings;
-  return (
-    <Link
-      key="map-link"
-      href="#"
-      variant="body2"
-      component="button"
-      onClick={() => {
-        localObserver.publish("fly-to", mapLink);
-      }}
-    >
-      <MapIcon
-        style={{
-          fontSize: getIconSizeFromFontSize(settings.theme),
-          marginRight: settings.theme.spacing(0.5),
-          verticalAlign: "middle",
-        }}
-      ></MapIcon>
-      {getFormattedComponentFromTag(aTag)}
-    </Link>
-  );
-};
-
-class ContentComponentFactory {
-  constructor(settings) {
-    settings = settings;
-  }
-}
-
-export default ContentComponentFactory;

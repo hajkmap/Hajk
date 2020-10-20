@@ -6,6 +6,7 @@ import PrintWindow from "../printMenu/PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { CustomLink } from "../utils/ContentComponentFactory";
 
 const styles = (theme) => ({});
 
@@ -99,8 +100,6 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   handleInfoClickRequest = (infoClickEvent) => {
-    const { contentComponentFactory } = this.props;
-
     if (this.canHandleInfoClickEvent(infoClickEvent)) {
       var htmlObject = document.createElement(infoClickEvent.payload.type);
       htmlObject.innerHTML = infoClickEvent.payload.children[0];
@@ -111,7 +110,12 @@ class DocumentWindowBase extends React.PureComponent {
           htmlObject.setAttributeNode(att);
         }
       );
-      let link = contentComponentFactory.getLinkComponent(htmlObject);
+      let link = (
+        <CustomLink
+          localObserver={this.props.localObserver}
+          aTag={htmlObject}
+        ></CustomLink>
+      );
       infoClickEvent.resolve(link);
     } else {
       infoClickEvent.resolve();

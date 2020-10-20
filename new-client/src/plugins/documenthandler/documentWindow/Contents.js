@@ -9,7 +9,7 @@ import {
   Paragraph,
   ULComponent,
   OLComponent,
-  Link,
+  CustomLink,
   Figure,
   Heading,
   Strong,
@@ -17,6 +17,7 @@ import {
   Underline,
   Img,
   BlockQuote,
+  LineBreak,
 } from "../utils/ContentComponentFactory";
 
 const styles = (theme) => {
@@ -26,7 +27,6 @@ const styles = (theme) => {
     },
     chapter: {
       cursor: "text",
-      marginTop: theme.spacing(4),
     },
   };
 };
@@ -60,6 +60,15 @@ class Contents extends React.PureComponent {
     this.props.localObserver.unsubscribe("chapter-components-appended");
   };
 
+  getCustomLink = (e) => {
+    return (
+      <CustomLink
+        aTag={e}
+        localObserver={this.props.localObserver}
+      ></CustomLink>
+    );
+  };
+
   /**
    * Private help method that adds all allowed html tags.
    *
@@ -69,7 +78,9 @@ class Contents extends React.PureComponent {
     let allowedHtmlTags = [];
     allowedHtmlTags.push({
       tagType: "br",
-      callback: this.props.contentComponentFactory.getBrtagTypographyComponent,
+      callback: () => {
+        return <LineBreak></LineBreak>;
+      },
     });
     allowedHtmlTags.push({
       tagType: "ul",
@@ -79,7 +90,7 @@ class Contents extends React.PureComponent {
     });
     allowedHtmlTags.push({
       tagType: "ol",
-      callback: () => <OLComponent></OLComponent>,
+      callback: (e) => <OLComponent olComponent={e}></OLComponent>,
     });
     allowedHtmlTags.push({
       tagType: "li",
@@ -87,56 +98,54 @@ class Contents extends React.PureComponent {
     });
     allowedHtmlTags.push({
       tagType: "blockquote",
-      callback: () => {
-        return <BlockQuote></BlockQuote>;
+      callback: (e) => {
+        return <BlockQuote blockQuoteTag={e}></BlockQuote>;
       },
     });
     allowedHtmlTags.push({
       tagType: "h1",
-      callback: () => {
-        return <Heading></Heading>;
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
       },
     });
     allowedHtmlTags.push({
       tagType: "h2",
-      callback: () => {
-        return <Heading></Heading>;
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
       },
     });
     allowedHtmlTags.push({
       tagType: "h3",
-      callback: () => {
-        return <Heading></Heading>;
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
       },
     });
     allowedHtmlTags.push({
       tagType: "h4",
-      callback: () => {
-        return <Heading></Heading>;
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
       },
     });
     allowedHtmlTags.push({
       tagType: "h5",
-      callback: () => {
-        return <Heading></Heading>;
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
       },
     });
     allowedHtmlTags.push({
       tagType: "h6",
-      callback: () => {
-        return <Heading></Heading>;
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
       },
     });
     allowedHtmlTags.push({
       tagType: "a",
-      callback: () => {
-        return <Link></Link>;
-      },
+      callback: this.getCustomLink.bind(this),
     });
     allowedHtmlTags.push({
       tagType: "img",
-      callback: () => {
-        return <Img></Img>;
+      callback: (e) => {
+        return <Img imgTag={e} localObserver={this.props.localObserver}></Img>;
       },
     });
     allowedHtmlTags.push({
@@ -147,8 +156,8 @@ class Contents extends React.PureComponent {
     });
     allowedHtmlTags.push({
       tagType: "figure",
-      callback: () => {
-        return <Figure></Figure>;
+      callback: (e) => {
+        return <Figure figureTag={e}></Figure>;
       },
     });
     allowedHtmlTags.push({
