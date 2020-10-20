@@ -152,7 +152,7 @@ class Window extends React.PureComponent {
   static defaultProps = {
     draggingEnabled: true,
     resizingEnabled: true,
-    allowMaximizedWindow: true,
+    allowMaximizedWindow: false,
     scrollable: true,
   };
 
@@ -167,7 +167,7 @@ class Window extends React.PureComponent {
     };
 
     window.addEventListener("resize", () => {
-      if (this.mode === "maximized") {
+      if (this.state.mode === "maximized") {
         this.fit(document.getElementById("windows-container"));
       } else {
         this.updatePosition();
@@ -250,7 +250,6 @@ class Window extends React.PureComponent {
     }
 
     this.left = this.left !== undefined ? this.left : 16;
-    this.mode = "window";
 
     this.setState(
       {
@@ -258,7 +257,7 @@ class Window extends React.PureComponent {
         top: this.top,
         width: this.width,
         height: this.height,
-        mode: this.mode,
+        mode: "window",
       },
       () => {
         this.rnd.updatePosition({
@@ -286,11 +285,11 @@ class Window extends React.PureComponent {
     this.setState({
       width: target.clientWidth,
       height: target.clientHeight,
+      mode: "maximized",
     });
-    this.mode = "maximized";
   };
 
-  reset = (target) => {
+  reset = () => {
     this.rnd.updatePosition({
       y: Math.round(this.top),
       x: Math.round(this.left),
@@ -301,8 +300,8 @@ class Window extends React.PureComponent {
     this.setState({
       width: this.width,
       height: this.height,
+      mode: "window",
     });
-    this.mode = "window";
   };
 
   enlarge = () => {
@@ -323,69 +322,56 @@ class Window extends React.PureComponent {
     });
     this.setState({
       height: this.height,
-    });
-    this.mode = "window";
-  };
-
-  moveToTop = () => {
-    this.rnd.updatePosition({
-      y: 0,
+      mode: "window",
     });
   };
 
-  moveToBottom = (target) => {
-    this.rnd.updatePosition({
-      y: Math.round(window.innerHeight - 106),
-    });
-    this.mode = "minimized";
+  maximize = () => {
+    const { onMaximize, onResize, allowMaximizedWindow } = this.props;
+
+    getIsMobile() && this.rnd.updatePosition({ y: 0 });
+
+    switch (this.state.mode) {
+      case "minimized":
+        // Enlarge back to "window" mode
+        this.enlarge();
+        break;
+      case "window":
+        // If already in "window" mode, fill the viewport
+        allowMaximizedWindow &&
+          this.fit(document.getElementById("windows-container"));
+        break;
+      case "maximized":
+        // If already "maximized" mode, switch back to "window"
+        this.reset(document.getElementById("windows-container"));
+        break;
+      default:
+        break;
+    }
+
+    // Run callbacks
+    typeof onMaximize === "function" && onMaximize();
+    typeof onResize === "function" && onResize();
   };
 
-  maximize = (e) => {
-    const { onMaximize, allowMaximizedWindow } = this.props;
-    if (getIsMobile()) {
-      this.moveToTop();
-    } else {
-      switch (this.mode) {
-        case "minimized":
-          this.enlarge();
-          break;
-        case "window":
-          allowMaximizedWindow &&
-            this.fit(document.getElementById("windows-container"));
-          break;
-        case "maximized":
-          this.reset(document.getElementById("windows-container"));
-          break;
-        default:
-          break;
-      }
-    }
-    if (onMaximize) onMaximize();
-    if (this.props.onResize) this.props.onResize();
-  };
+  minimize = () => {
+    const { onMinimize, onResize } = this.props;
 
-  minimize = (e) => {
-    const { onMinimize } = this.props;
-    if (getIsMobile()) {
-      this.moveToBottom();
-    }
-    if (this.mode === "minimized") {
-      return;
-    }
-    if (this.mode === "maximized") {
-      this.reset(document.getElementById("windows-container"));
-    }
-    if (getIsMobile()) {
-      this.moveToBottom();
-    } else {
-      this.mode = "minimized";
-      this.height = this.state.height;
-      this.setState({
-        height: 0,
+    getIsMobile() &&
+      this.rnd.updatePosition({
+        y: Math.round(window.innerHeight - 42),
       });
-    }
-    if (onMinimize) onMinimize();
-    if (this.props.onResize) this.props.onResize();
+
+    // Don't matter the current mode – just collapse
+    this.height = this.state.height;
+    this.setState({
+      height: 0,
+      mode: "minimized",
+    });
+
+    // Run callbacks
+    typeof onMinimize === "function" && onMinimize();
+    typeof onResize === "function" && onResize();
   };
 
   bringToFront() {
@@ -408,6 +394,7 @@ class Window extends React.PureComponent {
       title,
       resizingEnabled,
       draggingEnabled,
+      allowMaximizedWindow,
     } = this.props;
     const { left, top, width, height } = this.state;
 
@@ -423,10 +410,10 @@ class Window extends React.PureComponent {
     if (isMobile) {
       resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTopLeft = resizeTopRight = resizeLeft = false;
     } else {
-      if (this.mode === "maximized") {
+      if (this.state.mode === "maximized") {
         resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
       }
-      if (this.mode === "minimized") {
+      if (this.state.mode === "minimized") {
         resizeBottom = resizeBottomLeft = resizeBottomRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
       }
 
@@ -460,7 +447,7 @@ class Window extends React.PureComponent {
         }}
         onResizeStop={(e, direction, ref, delta, position) => {
           this.width = ref.style.width;
-          if (this.mode !== "minimized") {
+          if (this.state.mode !== "minimized") {
             this.height = ref.style.height;
           }
           this.setState({
@@ -484,7 +471,7 @@ class Window extends React.PureComponent {
         }}
         className={classes.window}
         minWidth={200}
-        minHeight={this.mode === "minimized" ? 42 : 200}
+        minHeight={this.state.mode === "minimized" ? 42 : 200}
         size={{
           width: width,
           height: height,
@@ -498,13 +485,14 @@ class Window extends React.PureComponent {
       >
         <div className={classes.panelContent}>
           <PanelHeader
-            onClose={this.close}
-            title={title}
+            allowMaximizedWindow={allowMaximizedWindow}
             color={color}
+            globalObserver={this.props.globalObserver}
+            onClose={this.close}
             onMaximize={this.maximize}
             onMinimize={this.minimize}
-            mode={this.mode}
-            globalObserver={this.props.globalObserver}
+            mode={this.state.mode}
+            title={title}
           />
           <section
             className={clsx(

@@ -2,15 +2,12 @@ import React, { Component } from "react";
 import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import CloseIcon from "@material-ui/icons/Close";
-import MaximizeIcon from "@material-ui/icons/Maximize";
-import MinimizeIcon from "@material-ui/icons/Minimize";
-import DownIcon from "@material-ui/icons/KeyboardArrowDown";
-import UpIcon from "@material-ui/icons/KeyboardArrowUp";
-import { getIsMobile } from "../utils/IsMobile.js";
-import { Typography } from "@material-ui/core";
+import FullscreenIcon from "@material-ui/icons/Fullscreen";
+import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
+import AspectRatioIcon from "@material-ui/icons/AspectRatio";
+import { Hidden, Typography } from "@material-ui/core";
 
 const styles = (theme) => {
-  console.log("theme: ", theme);
   return {
     header: {
       padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
@@ -18,22 +15,13 @@ const styles = (theme) => {
       userSelect: "none",
       display: "flex",
       justifyContent: "space-between",
+      minHeight: 46,
     },
-    iconsLeft: {
-      alignItems: "center",
-      display: "none",
-      "&>*": {
-        marginRight: "5px",
-      },
-      [theme.breakpoints.down("xs")]: {
-        display: "flex",
-      },
-    },
-    iconsRight: {
+    icons: {
       display: "flex",
       alignItems: "center",
       "&>*": {
-        marginLeft: "5px",
+        marginLeft: theme.spacing(1),
       },
     },
     icon: {
@@ -42,20 +30,12 @@ const styles = (theme) => {
         background: theme.palette.action.hover,
       },
     },
-    windowControllers: {
-      [theme.breakpoints.down("xs")]: {
-        display: "none",
-      },
-    },
   };
 };
 
 class PanelHeader extends Component {
-  state = {
-    maximized: false,
-  };
-
   static propTypes = {
+    allowMaximizedWindow: propTypes.bool.isRequired,
     classes: propTypes.object.isRequired,
     color: propTypes.string,
     mode: propTypes.oneOf(["window", "maximized", "minimized"]),
@@ -65,83 +45,40 @@ class PanelHeader extends Component {
     title: propTypes.string.isRequired,
   };
 
-  componentDidMount() {
-    this.props.globalObserver.subscribe("core.minimizeWindow", () => {
-      this.minimize();
-    });
-
-    this.props.globalObserver.subscribe("core.maximizeWindow", () => {
-      this.maximize();
-    });
-  }
-
-  renderButtons() {
-    const { classes } = this.props;
-    return (
-      <>
-        {this.props.mode === "minimized" ? (
-          <MaximizeIcon
-            onClick={this.props.onMaximize}
-            className={`${classes.icon} ${classes.windowControllers}`}
-          />
-        ) : (
-          <MinimizeIcon
-            onClick={this.props.onMinimize}
-            className={`${classes.icon} ${classes.windowControllers}`}
-          />
-        )}
-        <CloseIcon onClick={this.props.onClose} className={classes.icon} />
-      </>
-    );
-  }
-
-  maximize = (e) => {
-    if (getIsMobile()) {
-      if (e) {
-        e.stopPropagation();
-      }
-      this.setState({
-        mode: "maximized",
-      });
-      this.props.onMaximize();
-    }
-  };
-
-  minimize = (e) => {
-    if (getIsMobile()) {
-      if (e) {
-        e.stopPropagation();
-      }
-      this.setState({
-        mode: "minimized",
-      });
-      this.props.onMinimize();
-    }
-  };
-
   render() {
-    const { classes } = this.props;
+    const { allowMaximizedWindow, classes, mode } = this.props;
     return (
       <header
         className={classes.header}
-        onMouseDown={(e) => {
-          if (e.target.tagName === "header") {
-            this.maximize(e);
-          }
-        }}
-        style={{ borderColor: this.props.color }}
+        style={{ borderColor: this.props.color }} // Allow for dynamic override of accent border color
       >
-        <nav className={classes.iconsLeft}>
-          {this.state.mode === "minimized" ? (
-            <UpIcon onClick={this.maximize} className={classes.icon} />
-          ) : (
-            <DownIcon onClick={this.minimize} className={classes.icon} />
-          )}
-        </nav>
         <Typography variant="button" align="left" noWrap={true}>
           {this.props.title}
         </Typography>
-        <nav className={classes.iconsRight}>{this.renderButtons()}</nav>
+        <nav className={classes.icons}>
+          {mode !== "maximized" && // If window isn't in fit screen mode currently…
+            (mode === "minimized" ? ( // … but it's minimized…
+              <FullscreenIcon // …render the maximize icon.
+                onClick={this.props.onMaximize}
+                className={classes.icon}
+              />
+            ) : (
+              // If it's already in "window" mode though, render the minimize icon.
+              <FullscreenExitIcon
+                onClick={this.props.onMinimize}
+                className={classes.icon}
+              />
+            ))}
+          <Hidden xsDown>
+            {allowMaximizedWindow && ( // If we're not on mobile and config allows fit-to-screen…
+              <AspectRatioIcon // … render the action button. Note: it will remain the same…
+                onClick={this.props.onMaximize} // for both "maximized" and "window" modes.
+                className={classes.icon}
+              />
+            )}
+          </Hidden>
+          <CloseIcon onClick={this.props.onClose} className={classes.icon} />
+        </nav>
       </header>
     );
   }
