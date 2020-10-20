@@ -9,42 +9,66 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import clsx from "clsx";
+import Button from "@material-ui/core/Button";
+
 import Typography from "@material-ui/core/Typography";
 import TextArea from "../documentWindow/TextArea";
 import CardMedia from "@material-ui/core/CardMedia";
-
-const styles = {
-  documentImage: {
-    objectFit: "contain",
-    objectPosition: "left",
-  },
-  popupActivatedImage: {
-    cursor: "pointer",
-  },
-  naturalDocumentImageProportions: {
-    width: "100%",
-  },
-
-  typography: {
-    overflowWrap: "break-word",
-  },
-
-  listRoot: {
-    // maxWidth: theme.spacing(3),
-    // minWidth: theme.spacing(3),
-    color: "black",
-  },
-  chapter: {
-    cursor: "text",
-    // marginTop: theme.spacing(4),
-  },
-};
+import { makeStyles } from "@material-ui/core/styles";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
 
-const getIconSizeFromFontSize = (theme) => {
-  let fontSizeBody = theme.typography.body1.fontSize;
+const useStyles = makeStyles((theme) => ({
+  documentImage: {
+    marginBottom: theme.spacing(0.5),
+    objectFit: "contain",
+    objectPosition: "left",
+  },
+  popupActivatedImage: {
+    marginBottom: theme.spacing(1),
+    cursor: "pointer",
+  },
+  naturalDocumentImageProportions: {
+    marginTop: theme.spacing(1),
+    width: "100%",
+  },
+  imageText: {
+    marginBottom: theme.spacing(1),
+  },
+
+  linkIcon: {
+    fontSize: getIconSizeFromFontSize(theme.typography.body1.fontSize),
+    marginRight: theme.spacing(1),
+    verticalAlign: "middle",
+  },
+  typography: {
+    overflowWrap: "break-word",
+    marginBottom: theme.spacing(1),
+  },
+  ulIcon: {
+    fontSize: "1rem",
+  },
+  listRoot: {
+    color: "black",
+  },
+  startIcon: {
+    marginRight: 0,
+  },
+  linkButton: {
+    padding: 0,
+    color: theme.palette.info.main,
+  },
+}));
+
+const getFormattedComponentFromTag = (tag) => {
+  const childNodes = [...tag.childNodes];
+  return childNodes.map((child, index) => {
+    return <React.Fragment key={index}>{renderChild(child)}</React.Fragment>;
+  });
+};
+
+const getIconSizeFromFontSize = (fontSizeBody) => {
   let format = "rem";
   if (fontSizeBody.search("px") > -1) {
     format = "px";
@@ -54,407 +78,362 @@ const getIconSizeFromFontSize = (theme) => {
   return `${size * 1.7}${format}`;
 };
 
-export default class ContentComponentFactory {
-  constructor(settings) {
-    this.settings = settings;
-  }
+export const Paragraph = ({ pTag }) => {
+  const classes = useStyles();
+  return (
+    <Typography className={classes.typography} variant="body1">
+      {getFormattedComponentFromTag(pTag)}
+    </Typography>
+  );
+};
 
-  getULComponent = (ulComponent) => {
-    let children = [...ulComponent.children];
-    return (
-      <List component="nav">
-        {children.map((listItem, index) => {
-          return (
-            <ListItem key={index}>
-              <ListItemIcon styles={{ root: clsx(styles.listRoot) }}>
-                <FiberManualRecordIcon
-                  style={{ fontSize: "1em" }}
-                ></FiberManualRecordIcon>
-              </ListItemIcon>
-              <ListItemText
-                primary={this.getFormattedComponentFromTag(listItem)}
-              ></ListItemText>
-            </ListItem>
-          );
-        })}
-      </List>
-    );
-  };
-
-  getOLComponent = (olComponent) => {
-    let children = [...olComponent.children];
-    return (
-      <List component="nav">
-        {children.map((listItem, index) => {
-          return (
-            <ListItem key={index}>
-              <ListItemText
-                styles={{ root: clsx(styles.listRoot) }}
-                primary={`${index + 1}.`}
-              ></ListItemText>
-              <ListItemText
-                primary={this.getFormattedComponentFromTag(listItem)}
-              ></ListItemText>
-            </ListItem>
-          );
-        })}
-      </List>
-    );
-  };
-
-  getTextArea = (tag) => {
-    const children = [...tag.childNodes];
-    let textAreaContentArray = children.map((element, index) => {
-      return (
-        <React.Fragment key={index}>{this.renderChild(element)}</React.Fragment>
-      );
-    });
-
-    const backgroundColor = tag.attributes.getNamedItem("data-background-color")
-      ?.value;
-    const dividerColor = tag.attributes.getNamedItem("data-divider-color")
-      ?.value;
-
-    return (
-      <TextArea
-        backgroundColor={backgroundColor}
-        dividerColor={dividerColor}
-        textAreaContentArray={textAreaContentArray}
-      ></TextArea>
-    );
-  };
-
-  getBlockQuoteComponents = (tag) => {
-    if (tag.attributes.getNamedItem("data-text-section")) {
-      return this.getTextArea(tag);
-    } else {
-      return null;
-    }
-  };
-
-  getFigureComponents = (figureTag) => {
-    const children = [...figureTag.children];
-
-    return children.map((element, index) => {
-      return (
-        <React.Fragment key={index}>{element.callback(element)}</React.Fragment>
-      );
-    });
-  };
-
-  isPopupAllowedForImage = (imgTag) => {
-    return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
-  };
-
-  getImageStyle = (image) => {
-    let className = image.popup
-      ? clsx(
-          styles.documentImage,
-          styles.naturalDocumentImageProportions,
-          styles.popupActivatedImage
-        )
-      : clsx(styles.documentImage, styles.naturalDocumentImageProportions);
-
-    if (image.height && image.width) {
-      if (image.popup) {
-        className = clsx(styles.documentImage, styles.popupActivatedImage);
-      } else {
-        className = clsx(styles.documentImage, styles.popupActivatedImage);
-      }
-    }
-    return className;
-  };
-
-  /**
-   * The render function for the img-tag.
-   * @param {string} imgTag The img-tag.
-   *
-   * @memberof Contents
-   */
-  getImgCardComponent = (imgTag) => {
-    const image = {
-      caption: imgTag.attributes.getNamedItem("data-caption")?.value,
-      popup: this.isPopupAllowedForImage(imgTag),
-      source: imgTag.attributes.getNamedItem("data-source")?.value,
-      url: imgTag.attributes.getNamedItem("src")?.value,
-      altValue: imgTag.attributes.getNamedItem("alt")?.value,
-      height: imgTag.attributes.getNamedItem("data-image-height")?.value,
-      width: imgTag.attributes.getNamedItem("data-image-width")?.value,
-    };
-
-    let onClickCallback = image.popup
-      ? () => {
-          console.log("sdasdas");
-          this.settings.localObserver.publish("image-popup", image);
-        }
-      : null;
-
-    return (
-      <>
-        <CardMedia
-          onClick={onClickCallback}
-          alt={image.altValue}
-          component="img"
-          style={
-            image.height && image.width
-              ? { height: image.height, width: image.width }
-              : null
-          }
-          className={this.getImageStyle(image)}
-          image={image.url}
-        />
-        {this.getImageDescription(image)}
-      </>
-    );
-  };
-
-  getImageDescription = (image) => {
-    return (
-      <>
-        <Typography className={clsx(styles.typography)} variant="subtitle2">
-          {image.caption}
-        </Typography>
-        <Typography className={clsx(styles.typography)} variant="subtitle2">
-          {image.source}
-        </Typography>
-      </>
-    );
-  };
-
-  getFormattedComponentFromTag = (tag) => {
-    const childNodes = [...tag.childNodes];
-    return childNodes.map((child, index) => {
-      return (
-        <React.Fragment key={index}>{this.renderChild(child)}</React.Fragment>
-      );
-    });
-  };
-
-  /**
-   * The render function for the p-tag.
-   * @param {string} pTag The p-tag.
-   *
-   * @memberof Contents
-   */
-  getPtagTypographyComponents = (pTag) => {
-    return (
-      <Typography className={clsx(styles.typography)} variant="body1">
-        {this.getFormattedComponentFromTag(pTag)}
-      </Typography>
-    );
-  };
-
-  getStrongTagTypographyComponents = (strongTag) => {
-    const children = [...strongTag.childNodes];
-    let array = [];
-    if (children.length > 0) {
-      children.forEach((child, index) => {
-        array.push(
-          <React.Fragment key={index}>
-            <strong>{this.renderChild(child)}</strong>
-          </React.Fragment>
+export const ULComponent = ({ ulComponent }) => {
+  let children = [...ulComponent.children];
+  const classes = useStyles();
+  return (
+    <List component="nav">
+      {children.map((listItem, index) => {
+        return (
+          <ListItem key={index}>
+            <ListItemIcon styles={{ root: classes.listRoot }}>
+              <FiberManualRecordIcon
+                className={classes.ulIcon}
+              ></FiberManualRecordIcon>
+            </ListItemIcon>
+            <ListItemText
+              primary={getFormattedComponentFromTag(listItem)}
+            ></ListItemText>
+          </ListItem>
         );
-      });
-      return array;
-    }
-    return [<strong>{strongTag.textContent}</strong>];
-  };
-  getUnderlineTagTypographyComponents = (uTag) => {
-    const children = [...uTag.childNodes];
-    let array = [];
-    if (children.length > 0) {
-      children.forEach((child, index) => {
-        array.push(
-          <React.Fragment key={index}>
-            <u>{this.renderChild(child)}</u>
-          </React.Fragment>
+      })}
+    </List>
+  );
+};
+
+export const OLComponent = ({ olComponent }) => {
+  let children = [...olComponent.children];
+  const classes = useStyles();
+  return (
+    <List component="nav">
+      {children.map((listItem, index) => {
+        return (
+          <ListItem key={index}>
+            <ListItemText
+              styles={{ root: classes.listRoot }}
+              primary={`${index + 1}.`}
+            ></ListItemText>
+            <ListItemText
+              primary={getFormattedComponentFromTag(listItem)}
+            ></ListItemText>
+          </ListItem>
         );
-      });
-      return array;
-    }
-    return [<u>{uTag.textContent}</u>];
-  };
-  getItalicTagTypographyComponents = (emTag) => {
-    const children = [...emTag.childNodes];
-    let array = [];
-    if (children.length > 0) {
-      children.forEach((child, index) => {
-        array.push(
-          <React.Fragment key={index}>
-            <em>{this.renderChild(child)}</em>
-          </React.Fragment>
-        );
-      });
-      return array;
-    }
-    return [<em>{emTag.textContent}</em>];
-  };
+      })}
+    </List>
+  );
+};
 
-  /**
-   * The render function for the br-tag.
-   * @param {string} brTag The br-tag.
-   *
-   * @memberof htmlToMaterialUiParser
-   */
-  getBrtagTypographyComponent = () => {
-    return <br />;
-  };
+export const Heading = ({ headingTag }) => {
+  const classes = useStyles();
 
-  getHeadingTypographyComponents = (tag) => {
-    return (
-      <>
-        <Typography
-          className={clsx(styles.typography)}
-          variant={tag.tagName.toLowerCase()}
-        >
-          {this.getFormattedComponentFromTag(tag)}
-        </Typography>
-      </>
-    );
-  };
-
-  getExternalLink = (aTag, externalLink) => {
-    return (
-      <Link
-        href={externalLink}
-        key="external-link"
-        target="_blank"
-        style={{
-          display: "flex",
-          textAlign: "left",
-          alignItems: "center",
-        }}
-        rel="noopener"
-        variant="body2"
+  return (
+    <>
+      <Typography
+        className={classes.typography}
+        variant={headingTag.tagName.toLowerCase()}
       >
-        <OpenInNewIcon
-          style={{
-            fontSize: getIconSizeFromFontSize(this.settings.theme),
-            marginRight: this.settings.theme.spacing(0.5),
-            verticalAlign: "middle",
-          }}
-        ></OpenInNewIcon>
-        {this.getFormattedComponentFromTag(aTag)}
-      </Link>
-    );
-  };
+        {getFormattedComponentFromTag(headingTag)}
+      </Typography>
+    </>
+  );
+};
 
-  getLinkDataPerType = (attributes) => {
-    const {
-      0: mapLink,
-      1: headerIdentifier,
-      2: documentLink,
-      3: externalLink,
-    } = [
-      "data-maplink",
-      "data-header-identifier",
-      "data-document",
-      "data-link",
-    ].map((attributeKey) => {
-      return attributes.getNamedItem(attributeKey)?.value;
-    });
+const getTextArea = (tag) => {
+  const children = [...tag.childNodes];
+  let textAreaContentArray = children.map((element, index) => {
+    return <React.Fragment key={index}>{renderChild(element)}</React.Fragment>;
+  });
 
-    return { mapLink, headerIdentifier, documentLink, externalLink };
-  };
+  const backgroundColor = tag.attributes.getNamedItem("data-background-color")
+    ?.value;
+  const dividerColor = tag.attributes.getNamedItem("data-divider-color")?.value;
 
-  getDocumentLink = (headerIdentifier, documentLink, aTag) => {
-    const { localObserver } = this.settings;
+  return (
+    <TextArea
+      backgroundColor={backgroundColor}
+      dividerColor={dividerColor}
+      textAreaContentArray={textAreaContentArray}
+    ></TextArea>
+  );
+};
+
+export const BlockQuote = ({ blockQuoteTag }) => {
+  if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
+    return getTextArea(blockQuoteTag);
+  } else {
+    return null;
+  }
+};
+
+export const Figure = ({ figureTag }) => {
+  const children = [...figureTag.children];
+  return children.map((element, index) => {
     return (
-      <>
-        <Link
-          href="#"
-          key="document-link"
-          component="button"
-          underline="hover"
-          variant="body1"
-          onClick={() => {
-            localObserver.publish("set-active-document", {
-              documentName: documentLink,
-              headerIdentifier: headerIdentifier,
-            });
-          }}
-        >
-          <DescriptionIcon
-            style={{
-              fontSize: getIconSizeFromFontSize(this.settings.theme),
-              marginRight: this.settings.theme.spacing(0.5),
-              verticalAlign: "middle",
-            }}
-          ></DescriptionIcon>
-          {this.getFormattedComponentFromTag(aTag)}
-        </Link>
-      </>
+      <React.Fragment key={index}>{element.callback(element)}</React.Fragment>
     );
+  });
+};
+
+const isPopupAllowedForImage = (imgTag) => {
+  return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
+};
+
+const getImageStyle = (image, classes) => {
+  let className = image.popup
+    ? clsx(
+        classes.documentImage,
+        classes.naturalDocumentImageProportions,
+        classes.popupActivatedImage
+      )
+    : clsx(classes.documentImage, classes.naturalDocumentImageProportions);
+
+  if (image.height && image.width) {
+    if (image.popup) {
+      className = clsx(classes.documentImage, classes.popupActivatedImage);
+    } else {
+      className = clsx(classes.documentImage, classes.popupActivatedImage);
+    }
+  }
+  return className;
+};
+
+/**
+ * The render function for the img-tag.
+ * @param {string} imgTag The img-tag.
+ *
+ * @memberof Contents
+ */
+export const Img = ({ imgTag, localObserver }) => {
+  const classes = useStyles();
+  const image = {
+    caption: imgTag.attributes.getNamedItem("data-caption")?.value,
+    popup: isPopupAllowedForImage(imgTag),
+    source: imgTag.attributes.getNamedItem("data-source")?.value,
+    url: imgTag.attributes.getNamedItem("src")?.value,
+    altValue: imgTag.attributes.getNamedItem("alt")?.value,
+    height: imgTag.attributes.getNamedItem("data-image-height")?.value,
+    width: imgTag.attributes.getNamedItem("data-image-width")?.value,
   };
 
-  /**
-   * Callback used to render different link-components from a-elements
-   * @param {Element} aTag a-element.
-   * @returns {<Link>} Returns materialUI component <Link>
-   *
-   * @memberof Contents
-   */
-  getLinkComponent = (aTag) => {
-    const {
-      mapLink,
-      headerIdentifier,
-      documentLink,
-      externalLink,
-    } = this.getLinkDataPerType(aTag.attributes);
+  let onClickCallback = image.popup
+    ? () => {
+        localObserver.publish("image-popup", image);
+      }
+    : null;
 
-    if (documentLink) {
-      return this.getDocumentLink(headerIdentifier, documentLink, aTag);
-    }
+  return (
+    <>
+      <CardMedia
+        onClick={onClickCallback}
+        alt={image.altValue}
+        component="img"
+        style={
+          image.height && image.width
+            ? { height: image.height, width: image.width }
+            : null
+        }
+        className={getImageStyle(image, classes)}
+        image={image.url}
+      />
+      {getImageDescription(image, classes)}
+    </>
+  );
+};
 
-    if (mapLink) {
-      return this.getMapLink(aTag, mapLink);
-    }
+const getImageDescription = (image, classes) => {
+  return (
+    <>
+      <Typography className={classes.imageText} variant="subtitle2">
+        {image.caption}
+      </Typography>
+      <Typography variant="subtitle2">{image.source}</Typography>
+    </>
+  );
+};
 
-    if (externalLink) {
-      return this.getExternalLink(aTag, externalLink);
-    }
-  };
-
-  getFormattedComponentFromTag = (tag) => {
-    const childNodes = [...tag.childNodes];
-    return childNodes.map((child, index) => {
-      return (
-        <React.Fragment key={index}>{this.renderChild(child)}</React.Fragment>
+export const Strong = (strongTag) => {
+  const children = [...strongTag.childNodes];
+  let array = [];
+  if (children.length > 0) {
+    children.forEach((child, index) => {
+      array.push(
+        <React.Fragment key={index}>
+          <strong>{renderChild(child)}</strong>
+        </React.Fragment>
       );
     });
-  };
+    return array;
+  }
+  return [<strong>{strongTag.textContent}</strong>];
+};
+export const Underline = (uTag) => {
+  const children = [...uTag.childNodes];
+  let array = [];
+  if (children.length > 0) {
+    children.forEach((child, index) => {
+      array.push(
+        <React.Fragment key={index}>
+          <u>{renderChild(child)}</u>
+        </React.Fragment>
+      );
+    });
+    return array;
+  }
+  return [<u>{uTag.textContent}</u>];
+};
+export const Italic = (emTag) => {
+  const children = [...emTag.childNodes];
+  let array = [];
+  if (children.length > 0) {
+    children.forEach((child, index) => {
+      array.push(
+        <React.Fragment key={index}>
+          <em>{renderChild(child)}</em>
+        </React.Fragment>
+      );
+    });
+    return array;
+  }
+  return [<em>{emTag.textContent}</em>];
+};
 
-  renderChild = (child) => {
-    if (child.nodeType === TEXT_NODE) {
-      return child.data;
-    }
+/**
+ * The render function for the br-tag.
+ * @param {string} brTag The br-tag.
+ *
+ * @memberof htmlToMaterialUiParser
+ */
+export const LineBreak = () => {
+  return <br />;
+};
 
-    if (child.nodeType === ELEMENT_NODE) {
-      return child.callback(child);
-    }
-  };
+const getLinkDataPerType = (attributes) => {
+  const {
+    0: mapLink,
+    1: headerIdentifier,
+    2: documentLink,
+    3: externalLink,
+  } = [
+    "data-maplink",
+    "data-header-identifier",
+    "data-document",
+    "data-link",
+  ].map((attributeKey) => {
+    return attributes.getNamedItem(attributeKey)?.value;
+  });
 
-  getMapLink = (aTag, mapLink) => {
-    const { localObserver } = this.settings;
+  return { mapLink, headerIdentifier, documentLink, externalLink };
+};
+
+/**
+ * Callback used to render different link-components from a-elements
+ * @param {Element} aTag a-element.
+ * @returns {<Link>} Returns materialUI component <Link>
+ *
+ * @memberof Contents
+ */
+export const CustomLink = ({ aTag, localObserver }) => {
+  const classes = useStyles();
+
+  const getExternalLink = (externalLink) => {
     return (
-      <Link
+      <Button
+        color="default"
+        startIcon={<OpenInNewIcon className={classes.linkIcon}></OpenInNewIcon>}
+        classes={{ startIcon: classes.startIcon }}
+        target="_blank"
+        component="a"
+        className={classes.linkButton}
+        key="external-link"
+        href={externalLink}
+      >
+        {getFormattedComponentFromTag(aTag)}
+      </Button>
+    );
+  };
+  const getMapLink = (aTag, mapLink) => {
+    return (
+      <Button
+        color="default"
+        className={classes.linkButton}
+        startIcon={<MapIcon className={classes.linkIcon}></MapIcon>}
+        classes={{ startIcon: classes.startIcon }}
+        target="_blank"
+        href={externalLink}
         key="map-link"
-        href="#"
-        variant="body2"
         component="button"
         onClick={() => {
           localObserver.publish("fly-to", mapLink);
         }}
       >
-        <MapIcon
-          style={{
-            fontSize: getIconSizeFromFontSize(this.settings.theme),
-            marginRight: this.settings.theme.spacing(0.5),
-            verticalAlign: "middle",
-          }}
-        ></MapIcon>
-        {this.getFormattedComponentFromTag(aTag)}
-      </Link>
+        {getFormattedComponentFromTag(aTag)}
+      </Button>
     );
   };
-}
+  const getDocumentLink = (headerIdentifier, documentLink) => {
+    return (
+      <Button
+        color="default"
+        className={classes.linkButton}
+        startIcon={
+          <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
+        }
+        style={{ padding: 0 }}
+        classes={{ startIcon: classes.startIcon }}
+        href="#"
+        key="document-link"
+        component="button"
+        underline="hover"
+        onClick={() => {
+          console.log("ONCLICK");
+          localObserver.publish("set-active-document", {
+            documentName: documentLink,
+            headerIdentifier: headerIdentifier,
+          });
+        }}
+      >
+        {getFormattedComponentFromTag(aTag)}
+      </Button>
+    );
+  };
+
+  const {
+    mapLink,
+    headerIdentifier,
+    documentLink,
+    externalLink,
+  } = getLinkDataPerType(aTag.attributes);
+
+  if (documentLink) {
+    return getDocumentLink(headerIdentifier, documentLink);
+  }
+
+  if (mapLink) {
+    return getMapLink(aTag, mapLink, localObserver);
+  }
+
+  if (externalLink) {
+    return getExternalLink(externalLink);
+  }
+
+  return null;
+};
+
+const renderChild = (child) => {
+  if (child.nodeType === TEXT_NODE) {
+    return child.data;
+  }
+
+  if (child.nodeType === ELEMENT_NODE) {
+    return child.callback(child);
+  }
+};
