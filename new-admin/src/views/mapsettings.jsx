@@ -1693,13 +1693,21 @@ class Menu extends Component {
   createMap() {
     var name = this.refs.mapName.value;
     if (!/[^0-9a-zA-Z_]/.test(name) && name.trim().length > 0) {
-      this.props.model.createMap(name, () => {
-        this.setState({
-          content: "mapsettings",
-          alert: true,
-          alertMessage: "En ny karta skapades utan problem.",
-        });
-        this.load("maps");
+      this.props.model.createMap(name, (d, s) => {
+        if (s === "success") {
+          this.setState({
+            content: "mapsettings",
+            alert: true,
+            alertMessage: "En ny karta skapades utan problem.",
+          });
+          this.load("maps");
+        } else {
+          this.setState({
+            alert: true,
+            alertMessage: "Karta kunde INTE skapas.",
+          });
+          console.error(d);
+        }
       });
     } else {
       this.setState({
