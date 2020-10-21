@@ -193,7 +193,7 @@ var KirSearchView = {
               var element = $(kmlImport);
               element.toggle();
               this.setState({ importKMLActive: false });
-              this.props.model.get("firSelectionModel")(undefined);
+              this.props.model.get("firSelectionModel").setActiveTool(undefined);
               if(!$('#slackaBufferSokomrade').is(":checked")) {
                   $('#slackaBufferSokomrade').click();
               }
