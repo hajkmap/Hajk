@@ -12,8 +12,8 @@ export class Controller {
    */
   byMap(req, res) {
     ConfigService.getMapConfig(req.params.map).then((r) => {
-      if (r) res.json(r);
-      else res.status(404).end();
+      if (r.error) res.status(500).send(r.error.message);
+      else res.json(r);
     });
   }
 
@@ -28,8 +28,8 @@ export class Controller {
     // Special case, essentially the same as above,
     // but uses hard-coded file name: "layers"
     ConfigService.getMapConfig("layers").then((r) => {
-      if (r) res.json(r);
-      else res.status(404).end();
+      if (r.error) res.status(500).send(r.error.message);
+      else res.json(r);
     });
   }
 
@@ -42,8 +42,8 @@ export class Controller {
    */
   list(req, res) {
     ConfigService.getAvailableMaps().then((r) => {
-      if (r) res.json(r);
-      else res.status(404).end();
+      if (r.error) res.status(500).send(r.error.message);
+      else res.json(r);
     });
   }
 
@@ -51,7 +51,7 @@ export class Controller {
   // each map's setting. This mock only lists all maps in dir.
   userSpecificMaps(req, res) {
     ConfigService.getAvailableMaps().then((r) => {
-      if (r) {
+      if (r && !r.error) {
         let rr = [];
         for (let entry of r) {
           rr.push({
@@ -60,8 +60,12 @@ export class Controller {
           });
         }
         res.json(rr);
-      } else res.status(404).end();
+      } else res.status(500).send(r.error.message);
     });
+  }
+
+  createNewMap(req, res) {
+    res.status(501).end();
   }
 }
 export default new Controller();

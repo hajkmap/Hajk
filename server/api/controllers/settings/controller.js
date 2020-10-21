@@ -3,34 +3,35 @@ import l from "../../../common/logger";
 import SettingsService from "../../services/settings.service";
 
 export class Controller {
-  // all(req, res) {
-  //   ExamplesService.all().then((r) => res.json(r));
-  // }
-
-  // byId(req, res) {
-  //   ExamplesService.byId(req.params.id).then((r) => {
-  //     if (r) res.json(r);
-  //     else res.status(404).end();
-  //   });
-  // }
-
-  // getLayer(req, res) {
-  //   l.info("Get " + req.params.layer);
-  //   res.json(req.params.layer);
-  // }
-
-  putLayerSwitcherSettings(req, res) {
-    SettingsService.updateLayerSwitcher(req.query.mapFile, req.body).then(
+  putSettingsToMapFile(req, res) {
+    SettingsService.updateMapFile(req.query.mapFile, req.body, req.url).then(
       (r) => {
-        res.json(r);
+        // If r contains mapConfig, update has succeeded
+        if (r.mapConfig) res.status(200).json(r.mapConfig);
+        // If r contains message, it looks like we got back an error object
+        else if (r.message) res.status(500).send(r.message);
+        // Else, we have no idea what we got, but it can't be good…
+        else res.status(500).send(r);
       }
     );
   }
 
   putLayerOfType(req, res) {
     SettingsService.createOrUpdateLayer(req.params.type, req.body).then((r) => {
-      res.json(r);
+      // r.status will be either 200 (layer updated) or 201 (layer created)
+      if (r.newLayer) res.status(r.status).json(r.newLayer);
+      // If r contains message, it looks like we got back an error object
+      else if (r.message) res.status(500).send(r.message);
+      else res.status(500).send(r);
     });
+  }
+
+  deleteLayerFromStore(req, res) {
+    SettingsService.deleteLayer(req.params.type, req.params.layerId).then(
+      (r) => {
+        res.json(r);
+      }
+    );
   }
 }
 export default new Controller();

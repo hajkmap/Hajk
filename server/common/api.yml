@@ -97,6 +97,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/load/{name}:
+    get:
+      tags:
+        - Documents
+      parameters:
+        - name: name
+          in: path
+          description: Name of the document to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the JSON file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Example"
+        4XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /config/layers:
     get:
       tags:
@@ -127,6 +157,22 @@ paths:
           schema:
             type: string
       description: Returns map config file
+      responses:
+        200:
+          description: Success
+          content: {}
+  /config/create/{name}:
+    get:
+      tags:
+        - Maps and layers
+      parameters:
+        - name: name
+          in: path
+          description: File name of the new map config
+          required: true
+          schema:
+            type: string
+      description: Creates a new map config with the given file name
       responses:
         200:
           description: Success
@@ -185,7 +231,72 @@ paths:
         204:
           description: All good
           content: {}
+  /settings/mapsettings:
+    put:
+      tags:
+        - Map and layers settings
+      requestBody:
+        description: Settings for given map's LayerSwitcher component
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: mapFile
+          in: query
+          description: Name of the map who's LayerSwitcher config should be written
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
+  /settings/toolsettings:
+    put:
+      tags:
+        - Map and layers settings
+      requestBody:
+        description: Settings for given map's LayerSwitcher component
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: mapFile
+          in: query
+          description: Name of the map who's LayerSwitcher config should be written
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
   /settings/{layer}:
+    post:
+      tags:
+        - Map and layers settings
+      requestBody:
+        description: Layer to be added or updated
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExampleBody"
+        required: true
+      parameters:
+        - name: layer
+          in: path
+          description: The layer type of the example to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
     put:
       tags:
         - Map and layers settings
@@ -220,6 +331,27 @@ paths:
       responses:
         200:
           description: Return the example with the specified id
+          content: {}
+  /settings/{type}/{layerId}:
+    delete:
+      tags:
+        - Map and layers settings
+      parameters:
+        - name: type
+          in: path
+          description: The kind of layer to delete
+          required: true
+          schema:
+            type: string
+        - name: layerId
+          in: path
+          description: The ID of layer to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Layer deleted successfully
           content: {}
 components:
   schemas:

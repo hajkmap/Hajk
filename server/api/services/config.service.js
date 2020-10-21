@@ -20,28 +20,34 @@ class ConfigService {
       const json = await JSON.parse(text);
       return json;
     } catch (error) {
-      return error;
+      return { error };
     }
   }
 
   async getAvailableMaps() {
     l.info(`${this.constructor.name}.getAvailableMaps()`);
-    const dir = path.join(process.cwd(), "App_Data");
-    // List dir contents, the second parameter will ensure we get Dirent objects
-    const dirContents = await fs.promises.readdir(dir, { withFileTypes: true });
-    const availableMaps = dirContents
-      .filter(
-        (entry) =>
-          // Filter out only files (we're not interessted in directories).
-          entry.isFile() &&
-          // Filter out the special case, layers.json file.
-          entry.name !== "layers.json" &&
-          // Only JSON files
-          entry.name.endsWith(".json")
-      )
-      // Create an array using name of each Dirent object, remove file extension
-      .map((entry) => entry.name.replace(".json", ""));
-    return availableMaps;
+    try {
+      const dir = path.join(process.cwd(), "App_Data");
+      // List dir contents, the second parameter will ensure we get Dirent objects
+      const dirContents = await fs.promises.readdir(dir, {
+        withFileTypes: true,
+      });
+      const availableMaps = dirContents
+        .filter(
+          (entry) =>
+            // Filter out only files (we're not interessted in directories).
+            entry.isFile() &&
+            // Filter out the special case, layers.json file.
+            entry.name !== "layers.json" &&
+            // Only JSON files
+            entry.name.endsWith(".json")
+        )
+        // Create an array using name of each Dirent object, remove file extension
+        .map((entry) => entry.name.replace(".json", ""));
+      return availableMaps;
+    } catch (error) {
+      return { error };
+    }
   }
 }
 
