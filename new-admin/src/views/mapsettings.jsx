@@ -600,7 +600,9 @@ class Menu extends Component {
             }
             return {
               id: node.dataset.id,
-              drawOrder: node.dataset.draworder ? node.dataset.draworder : 1000,
+              drawOrder: node.dataset.draworder
+                ? parseInt(node.dataset.draworder)
+                : 1000,
               visibleAtStart: checkIfTrue(node.dataset.visibleatstart),
               visibleForGroups: visibleForGroups || [],
               infobox: infobox || "",
@@ -608,7 +610,9 @@ class Menu extends Component {
           } else {
             return {
               id: node.dataset.id,
-              drawOrder: node.dataset.draworder ? node.dataset.draworder : 1000,
+              drawOrder: node.dataset.draworder
+                ? parseInt(node.dataset.draworder)
+                : 1000,
               visibleAtStart: checkIfTrue(node.dataset.visibleatstart),
               infobox: infobox || "",
             };
@@ -701,6 +705,7 @@ class Menu extends Component {
       });
       j--;
     });
+    console.log("result: ", result);
     return result;
   }
 
