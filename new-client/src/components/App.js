@@ -255,6 +255,7 @@ class App extends React.PureComponent {
               value: "plugins",
               ButtonIcon: MapIcon,
               caption: "Kartverktyg",
+              drawerTitle: "Kartverktyg",
               order: 0,
               renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
@@ -497,9 +498,9 @@ class App extends React.PureComponent {
 
   renderDrawerHeader = () => {
     const { classes, config } = this.props;
-    const caption = this.state.drawerButtons.find(
+    const drawerTitle = this.state.drawerButtons.find(
       (db) => db.value === this.state.activeDrawerContent
-    )?.caption;
+    )?.drawerTitle;
 
     return (
       <>
@@ -520,7 +521,7 @@ class App extends React.PureComponent {
           alignItems="center"
         >
           <Grid item>
-            <Typography variant="button">{caption}</Typography>
+            <Typography variant="button">{drawerTitle}</Typography>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>

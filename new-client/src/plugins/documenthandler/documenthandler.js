@@ -92,6 +92,7 @@ class DocumentHandler extends React.PureComponent {
       value: "menu",
       ButtonIcon: MenuBook,
       caption: "Översiktsplan",
+      drawerTitle: "Översiktsplan",
       order: 100,
       renderDrawerContent: this.renderDrawerContent,
     });
