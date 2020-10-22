@@ -17,6 +17,14 @@ export class Controller {
     });
   }
 
+  exportMapConfig(req, res, next) {
+    ConfigService.exportMapConfig(
+      req.params.map,
+      req.params.format,
+      next
+    ).then((r) => res.send(r));
+  }
+
   /**
    * @summary Get the contents of the layers database
    *

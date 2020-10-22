@@ -161,6 +161,28 @@ paths:
         200:
           description: Success
           content: {}
+  /config/export/{map}/{format}:
+    get:
+      tags:
+        - Maps and layers
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map to fetch
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: path
+          description: Name of the map to fetch
+          required: true
+          schema:
+            type: string
+      description: Exports the map's layers in a human-readable format
+      responses:
+        200:
+          description: Success
+          content: {}
   /config/create/{name}:
     get:
       tags:

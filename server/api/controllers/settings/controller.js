@@ -29,7 +29,7 @@ export class Controller {
   deleteLayerFromStore(req, res) {
     SettingsService.deleteLayer(req.params.type, req.params.layerId).then(
       (r) => {
-        res.json(r);
+        res.status(501).send(r); // Not Implemented
       }
     );
   }
