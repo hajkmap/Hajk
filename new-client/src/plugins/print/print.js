@@ -61,13 +61,9 @@ class Print extends React.PureComponent {
 
     this.printModel = new PrintModel({
       localObserver: this.localObserver,
-      app: props.app,
       map: props.map,
-      scales: props.options.scales,
+      options: props.options,
       dims: this.dims,
-      logoUrl: props.options.logo,
-      northArrowUrl: props.options.northArrow,
-      logoMaxWidth: props.options.logoMaxWidth,
     });
   }
 
@@ -88,7 +84,7 @@ class Print extends React.PureComponent {
           icon: <PrintIcon />,
           title: "Skriv ut",
           description: "Skapa en PDF av kartan",
-          height: 500,
+          height: 550,
           width: 350,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
@@ -96,9 +92,7 @@ class Print extends React.PureComponent {
       >
         <PrintView
           model={this.printModel}
-          app={this.props.app}
           options={this.props.options}
-          map={this.props.map}
           localObserver={this.localObserver}
           scales={this.props.options.scales}
           visibleAtStart={this.props.options.visibleAtStart}
