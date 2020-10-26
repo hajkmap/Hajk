@@ -134,7 +134,7 @@ class Stops extends React.PureComponent {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipality: municipality.name,
+      municipality: municipality.gid,
       selectedFormType: "",
       searchCallback: this.clearSearchInputAndButtons
     });
