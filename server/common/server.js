@@ -46,7 +46,7 @@ export default class ExpressServer {
 
   listen(port = process.env.PORT) {
     const welcome = (p) => () =>
-      console.info("Up and running on http://localhost:" + p);
+      console.info("Hajk backend is up and running on http://localhost:" + p);
 
     oas(app, this.routes)
       .then(() => {

@@ -3,7 +3,7 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 export default function sokigoFBProxy(err, req, res, next) {
   return createProxyMiddleware({
     target: process.env.FB_SERVICE_BASE_URL,
-    logLevel: "info",
+    logLevel: process.env.LOG_LEVEL,
     pathRewrite: (originalPath, req) => {
       // Remove the portion that shouldn't be there when we proxy the request
       // and split the remaining string on "?" to separate any query params
