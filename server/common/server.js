@@ -1,10 +1,11 @@
 import Express from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
 import * as path from "path";
 import * as bodyParser from "body-parser";
 import * as http from "http";
 import * as os from "os";
 import cookieParser from "cookie-parser";
+
+import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
 
 import helmet from "helmet";
 import cors from "cors";
@@ -28,34 +29,7 @@ export default class ExpressServer {
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
       })
     );
-
-    app.use(
-      "/api/v1/proxy",
-      createProxyMiddleware({
-        target: process.env.FB_SERVICE_BASE_URL,
-        logLevel: "info",
-        pathRewrite: (originalPath, req) => {
-          l.info(req, "Request");
-          l.info(originalPath, "Pre");
-          // Remove the portion that shouldn't be there when we proxy the request
-          // and split the remaining string on "?" to separate any query params
-          let segments = originalPath.replace("/api/v1/proxy", "").split("?");
-
-          // The path part is the first segment, prior "?"
-          const path = segments[0];
-          let query = `?Database=${process.env.FB_SERVICE_DB}&User=${process.env.FB_SERVICE_USER}&Password=${process.env.FB_SERVICE_PASS}`;
-
-          // If there was another segment, it was the query string that we should preserve
-          query = segments[1] ? query + "&" + segments[1] : query;
-
-          l.info(path + query, "Post");
-          return path + query;
-        },
-        onError: (err, req, res) => {
-          l.error(err, req, res);
-        },
-      })
-    );
+    app.use("/api/v1/proxy", sokigoFBProxy());
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(
       bodyParser.urlencoded({
