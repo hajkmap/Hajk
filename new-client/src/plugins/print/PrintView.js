@@ -6,38 +6,37 @@ import PrintDialog from "./PrintDialog";
 import { AppBar, Tab, Tabs } from "@material-ui/core";
 import PrintIcon from "@material-ui/icons/Print";
 import SettingsIcon from "@material-ui/icons/Settings";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip, Button } from "@material-ui/core";
 
 import GeneralOptions from "./GeneralOptions";
 import AdvancedOptions from "./AdvancedOptions";
 
 const styles = (theme) => ({
   root: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 225,
-  },
-  mapTextColorLabel: {
-    margin: 0,
-  },
-  windowContent: {
     margin: -10,
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
   },
   stickyAppBar: {
     top: -10,
   },
   tabContent: {
-    padding: 10,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    padding: theme.spacing(1),
+    width: "100%",
+    height: "100%",
+  },
+  printButtonContainer: {
+    padding: theme.spacing(1),
   },
 });
 
 class PrintView extends React.PureComponent {
   static propTypes = {
     model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
@@ -56,11 +55,11 @@ class PrintView extends React.PureComponent {
     printInProgress: false,
     previewLayerVisible: false,
     activeTab: 0,
-    includeNorthArrow: this.props.options.includeNorthArrow || false,
+    includeNorthArrow: this.props.options.includeNorthArrow ?? false,
     northArrowPlacement: this.props.options.northArrowPlacement || "topLeft",
-    includeScaleBar: this.props.options.includeScaleBar || true,
+    includeScaleBar: this.props.options.includeScaleBar ?? true,
     scaleBarPlacement: this.props.options.scaleBarPlacement || "bottomLeft",
-    includeLogo: this.props.options.includeLogo || true,
+    includeLogo: this.props.options.includeLogo ?? true,
     logoPlacement: this.props.options.logoPlacement || "topRight",
     saveAsType: "PDF",
   };
@@ -74,8 +73,6 @@ class PrintView extends React.PureComponent {
     super(props);
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
-    this.map = this.props.map;
     this.dims = this.props.dims;
 
     // Add the preview layer to map (it doesn't contain any features yet!)
@@ -189,16 +186,7 @@ class PrintView extends React.PureComponent {
 
   renderGeneralOptions = () => {
     const { scales } = this.props;
-    const {
-      scale,
-      format,
-      orientation,
-      resolution,
-      mapTitle,
-      mapTextColor,
-      printInProgress,
-      saveAsType,
-    } = this.state;
+    const { scale, format, orientation, resolution, saveAsType } = this.state;
 
     return (
       <GeneralOptions
@@ -207,30 +195,20 @@ class PrintView extends React.PureComponent {
         format={format}
         resolution={resolution}
         orientation={orientation}
-        mapTitle={mapTitle}
-        mapTextColor={mapTextColor}
         handleChange={(event) => {
           this.handleChange(event);
         }}
-        initiatePrint={this.initiatePrint}
         model={this.model}
-        setMapTextColor={this.setMapTextColor}
-        printInProgress={printInProgress}
         saveAsType={saveAsType}
       ></GeneralOptions>
     );
   };
 
   renderAdvancedOptions = () => {
-    const { scales } = this.props;
     const {
-      scale,
-      format,
-      orientation,
       resolution,
       mapTitle,
       mapTextColor,
-      printInProgress,
       includeNorthArrow,
       northArrowPlacement,
       includeScaleBar,
@@ -241,20 +219,13 @@ class PrintView extends React.PureComponent {
 
     return (
       <AdvancedOptions
-        scales={scales}
-        scale={scale}
-        format={format}
         resolution={resolution}
-        orientation={orientation}
         mapTitle={mapTitle}
         mapTextColor={mapTextColor}
         handleChange={(event) => {
           this.handleChange(event);
         }}
-        initiatePrint={this.initiatePrint}
-        model={this.model}
         setMapTextColor={this.setMapTextColor}
-        printInProgress={printInProgress}
         includeNorthArrow={includeNorthArrow}
         northArrowPlacement={northArrowPlacement}
         includeScaleBar={includeScaleBar}
@@ -277,7 +248,7 @@ class PrintView extends React.PureComponent {
 
     return (
       <>
-        <div className={classes.windowContent}>
+        <div className={classes.root}>
           <AppBar
             position="sticky"
             color="default"
@@ -302,6 +273,17 @@ class PrintView extends React.PureComponent {
           <div className={classes.tabContent}>
             {this.state.activeTab === 0 && this.renderGeneralOptions()}
             {this.state.activeTab === 1 && this.renderAdvancedOptions()}
+            <div className={classes.printButtonContainer}>
+              <Button
+                variant="contained"
+                fullWidth={true}
+                color="primary"
+                onClick={this.initiatePrint}
+                disabled={this.state.printInProgress}
+              >
+                Skriv ut
+              </Button>
+            </div>
           </div>
         </div>
         <PrintDialog

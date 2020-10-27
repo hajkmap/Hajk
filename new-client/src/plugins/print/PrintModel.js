@@ -15,13 +15,12 @@ import { saveAs } from "file-saver";
 export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
-    this.app = settings.app;
-    this.localObserver = settings.localObserver;
     this.dims = settings.dims;
-    this.logoUrl = settings.logoUrl ?? "";
-    this.northArrowUrl = settings.northArrowUrl ?? "";
-    this.logoMaxWidth = settings.logoMaxWidth;
-    this.scales = settings.scales;
+    this.logoUrl = settings.options.logo ?? "";
+    this.northArrowUrl = settings.options.northArrow ?? "";
+    this.logoMaxWidth = settings.options.logoMaxWidth;
+    this.scales = settings.options.scales;
+    this.localObserver = settings.localObserver;
   }
 
   scaleBarLengths = {
@@ -278,7 +277,7 @@ export default class PrintModel {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
     pdf.setFontSize(6);
     pdf.setFontStyle("bold");
-    pdf.setTextColor("#000000"); //Set to color instead?
+    pdf.setTextColor(color);
     pdf.text(
       lengthText,
       scaleBarPosition.x + scaleBarLength + 1,
@@ -290,7 +289,7 @@ export default class PrintModel {
       scaleBarPosition.y + 1
     );
 
-    pdf.setDrawColor("#000000"); //Set to color instead?
+    pdf.setDrawColor(color);
     pdf.line(
       scaleBarPosition.x,
       scaleBarPosition.y + 3,

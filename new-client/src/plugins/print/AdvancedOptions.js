@@ -26,15 +26,6 @@ const styles = (theme) => ({
     margin: theme.spacing(1),
     display: "flex",
   },
-  mapTextColorLabel: {
-    margin: 0,
-  },
-  printButton: {
-    position: "fixed",
-    bottom: theme.spacing(1),
-    margin: theme.spacing(1),
-    width: "90%",
-  },
 });
 
 class AdvancedOptions extends React.PureComponent {

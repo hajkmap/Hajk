@@ -2,13 +2,7 @@ import React from "react";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-} from "@material-ui/core";
+import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 
 const styles = (theme) => ({
   root: {
@@ -18,9 +12,6 @@ const styles = (theme) => ({
   formControl: {
     margin: theme.spacing(1),
     width: "100%",
-  },
-  mapTextColorLabel: {
-    margin: 0,
   },
   printButton: {
     position: "fixed",
@@ -60,10 +51,8 @@ class GeneralOptions extends React.PureComponent {
       format,
       scale,
       scales,
-      initiatePrint,
       handleChange,
       model,
-      printInProgress,
       // saveAsType,
     } = this.props;
     return (
@@ -134,17 +123,6 @@ class GeneralOptions extends React.PureComponent {
               <MenuItem value={"PNG"}>PNG</MenuItem>
             </Select>
           </FormControl> */}
-          <FormControl className={classes.printButton}>
-            <Button
-              variant="contained"
-              fullWidth={true}
-              color="primary"
-              onClick={initiatePrint}
-              disabled={printInProgress}
-            >
-              Skriv ut
-            </Button>
-          </FormControl>
         </Grid>
       </>
     );
