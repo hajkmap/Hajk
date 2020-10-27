@@ -4,14 +4,27 @@ import ConfigService from "./config.service";
 const crypto = require("crypto");
 
 class SettingsService {
+  /**
+   * @summary Helper that returns a unique ID, used e.g. to
+   * generate an ID when new layers are created.
+   *
+   * @returns {string} uniqueId
+   * @memberof SettingsService
+   */
   generateId() {
     return crypto.randomBytes(16).toString("hex");
   }
 
+  getFullPathToFile(file) {
+    return path.join(process.cwd(), "App_Data", file);
+  }
+
   async readFileAsJson(file) {
     // Open file containing our store
-    const pathToFile = path.join(process.cwd(), "App_Data", file);
-    const text = await fs.promises.readFile(pathToFile, "utf-8");
+    const text = await fs.promises.readFile(
+      this.getFullPathToFile(file),
+      "utf-8"
+    );
     // Parse the file content so we get an object
     const json = await JSON.parse(text);
     return json;
@@ -27,12 +40,8 @@ class SettingsService {
       // but the incoming request to PUT is in singular. We must fix it below:
       type = type + "s";
 
-      // Open file containing our store
-      const pathToFile = path.join(process.cwd(), "App_Data", "layers.json");
-      const text = await fs.promises.readFile(pathToFile, "utf-8");
-
       // Parse the file content so we get an object
-      const layersStore = await JSON.parse(text);
+      const layersStore = await this.readFileAsJson("layers.json");
 
       // Store contains multiple layer types (wmslayers, wfslayers, etc).
       // We're only interested in one type.
@@ -66,7 +75,10 @@ class SettingsService {
       layersStore[type] = layersTypeWithChanges;
 
       // Stringify using 2 spaces as indentation and write to file
-      fs.writeFileSync(pathToFile, JSON.stringify(layersStore, null, 2));
+      fs.writeFileSync(
+        this.getFullPathToFile("layers.json"),
+        JSON.stringify(layersStore, null, 2)
+      );
       return {
         status,
         newLayer,
@@ -115,12 +127,9 @@ class SettingsService {
       if (!Array.isArray(validUrl))
         throw new Error(`Invalid URL request: ${reqUrl}`);
       const portion = validUrl[0];
-      // Open file containing our store
-      const pathToFile = path.join(process.cwd(), "App_Data", mapFile);
-      const mapConfigFile = await fs.promises.readFile(pathToFile, "utf-8");
 
       // Parse the file content so we get an object
-      const mapConfig = await JSON.parse(mapConfigFile);
+      const mapConfig = await this.readFileAsJson(mapFile);
 
       // START: Fix because of buggy Admin, we want "true" -> true and "false" -> false.
       const lsString = await JSON.stringify(incomingConfig)
@@ -148,7 +157,10 @@ class SettingsService {
       }
 
       // Write, format with 2 spaces indentation
-      fs.writeFileSync(pathToFile, JSON.stringify(mapConfig, null, 2));
+      fs.writeFileSync(
+        this.getFullPathToFile(mapFile),
+        JSON.stringify(mapConfig, null, 2)
+      );
 
       return { mapConfig };
     } catch (error) {

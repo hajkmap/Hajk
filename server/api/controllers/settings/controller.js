@@ -1,5 +1,3 @@
-// import ExamplesService from "../../services/examples.service";
-import l from "../../../common/logger";
 import SettingsService from "../../services/settings.service";
 
 export class Controller {

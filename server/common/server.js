@@ -2,7 +2,6 @@ import Express from "express";
 import * as path from "path";
 import * as bodyParser from "body-parser";
 import * as http from "http";
-import * as os from "os";
 import cookieParser from "cookie-parser";
 
 import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
@@ -11,8 +10,6 @@ import helmet from "helmet";
 import cors from "cors";
 
 import oas from "./oas";
-
-import l from "./logger";
 
 const app = new Express();
 const exit = process.exit;
@@ -49,18 +46,14 @@ export default class ExpressServer {
 
   listen(port = process.env.PORT) {
     const welcome = (p) => () =>
-      l.info(
-        `up and running in ${
-          process.env.NODE_ENV || "development"
-        } @: ${os.hostname()} on port: ${p}}`
-      );
+      console.info("Up and running on http://localhost:" + p);
 
     oas(app, this.routes)
       .then(() => {
         http.createServer(app).listen(port, welcome(port));
       })
       .catch((e) => {
-        l.error(e);
+        console.error(e);
         exit(1);
       });
 

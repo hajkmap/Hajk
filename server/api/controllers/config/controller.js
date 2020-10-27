@@ -1,5 +1,4 @@
 import ConfigService from "../../services/config.service";
-// import l from "../../../common/logger";
 
 export class Controller {
   /**

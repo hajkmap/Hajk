@@ -1,10 +1,8 @@
-import l from "../../common/logger";
 import fs from "fs";
 import path from "path";
 
 class ConfigService {
   constructor() {
-    l.info("Initiating ConfigService");
     // TODO: As reading files is expansive, we can read all
     // JSON files on init and keep then in-memory. Subsequent
     // reads will be served from this in-memory store.
@@ -13,7 +11,6 @@ class ConfigService {
     // re-reads from FS into our in-memory store.
   }
   async getMapConfig(map) {
-    l.info(`${this.constructor.name}.getMapConfig(${map})`);
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `${map}.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -25,7 +22,6 @@ class ConfigService {
   }
 
   async exportMapConfig(map = "layers", format = "json", next) {
-    l.info(`${this.constructor.name}.getMapConfig(${map})`);
     // Obtain layers definition as JSON. It will be needed
     // both if we want to grab all available layers or
     // describe a specific map config.
@@ -103,7 +99,6 @@ class ConfigService {
   }
 
   async getAvailableMaps() {
-    l.info(`${this.constructor.name}.getAvailableMaps()`);
     try {
       const dir = path.join(process.cwd(), "App_Data");
       // List dir contents, the second parameter will ensure we get Dirent objects
