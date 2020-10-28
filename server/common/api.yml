@@ -114,13 +114,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Example"
-        4XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/DocumentBody"
         5XX:
           description: Example not found
           content:
@@ -137,15 +131,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Example"
-        4XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/DocumentsList"
         5XX:
-          description: Example not found
+          description: Internal server error
           content:
             application/json:
               schema:
@@ -411,8 +399,38 @@ components:
           example: example 3
     Error:
       type: object
-      additionalProperties: true
-
+      properties:
+        errno:
+          type: integer
+          example: -2
+        code:
+          type: string
+          example: ENOENT
+    DocumentBody:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            type: object
+            properties:
+              header:
+                type: string
+              html:
+                type: string
+              expanded:
+                type: boolean
+              mapSettings:
+                type: object
+              chapters:
+                type: array
+                items:
+                  type: object
+    DocumentsList:
+      type: array
+      items:
+        type: string
+      example: ["doc_1", "doc_2", "doc_3"]
     ExampleBody:
       title: example
       # required:

@@ -2,6 +2,13 @@ import fs from "fs";
 import path from "path";
 
 class InformativeService {
+  /**
+   * @summary Lists contents of a document as JSON
+   *
+   * @param {*} file
+   * @returns {object} JSON representation of document
+   * @memberof InformativeService
+   */
   async getByName(file) {
     try {
       file += ".json";
@@ -12,10 +19,16 @@ class InformativeService {
       const json = await JSON.parse(text);
       return json;
     } catch (error) {
-      return error;
+      return { error };
     }
   }
 
+  /**
+   * @summary Lists all available documents
+   *
+   * @returns {array} Names of files as array of strings
+   * @memberof InformativeService
+   */
   async getAvailableDocuments() {
     try {
       const dir = path.join(process.cwd(), "App_Data", "documents");
