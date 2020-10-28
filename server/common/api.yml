@@ -127,6 +127,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/list:
+    get:
+      tags:
+        - Documents
+      responses:
+        200:
+          description: Return all available documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Example"
+        4XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /config/layers:
     get:
       tags:

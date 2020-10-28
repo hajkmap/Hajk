@@ -8,5 +8,12 @@ export class Controller {
       else res.status(404).end();
     });
   }
+
+  list(req, res) {
+    InformativeService.getAvailableDocuments().then((r) => {
+      if (r) res.json(r);
+      else res.status(404).end();
+    });
+  }
 }
 export default new Controller();

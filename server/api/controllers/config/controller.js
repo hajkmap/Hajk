@@ -16,6 +16,18 @@ export class Controller {
     });
   }
 
+  /**
+   * @summary Returns a list of all available layers in specified (often human-readable) format.
+   *
+   * @description Sometimes it's useful for admins to get a list of a map's contents and make it
+   * available for users in some format (be it JSON, XML, Excel). This endpoint can be used as-is
+   * or by implementing a feature in the client UI, so users themselves can request a description
+   * of a map's contents from e.g. LayerSwitcher.
+   * @param {*} req
+   * @param {*} res
+   * @param {*} next
+   * @memberof Controller
+   */
   exportMapConfig(req, res, next) {
     ConfigService.exportMapConfig(
       req.params.map,

@@ -4,7 +4,7 @@ import controller from "./controller";
 export default express
   .Router()
   // First we handle _specific_ routes, so we can catch them…
-  .get("/export/:map/:format", controller.exportMapConfig) // Get all layers (from layers.json)
+  .get("/export/:map/:format", controller.exportMapConfig) // Describe all available layers in a human-readable format
   .get("/layers", controller.layers) // Get all layers (from layers.json)
   .get("/list", controller.list) // List all available maps
   .get("/userspecificmaps", controller.userSpecificMaps) // MapSwitcher component uses this to determine which maps should be visible
