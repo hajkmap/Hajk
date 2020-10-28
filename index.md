@@ -1,6 +1,6 @@
-## Hej och välkômmen te HAJK !!
+## Hajkmap
 
-Vi är ett gäng kommuner m.fl i framför allt Västsverige som tagit fram en superbra och användbar webb-GIS baserad på Open source lösningen Openlayers.
+Vi är ett antal kommuner m.fl i framför allt Västsverige som tagit fram en bra och användbar webbGIS-karta baserad på Open source lösningen Openlayers.
 Aktiva kommuner är bl a Halmstad, Göteborg, Kungsbacka, Uddevalla och Varberg.
 
 Några goda kartexempel:
