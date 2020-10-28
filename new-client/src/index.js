@@ -55,6 +55,9 @@ function getTheme(config, customTheme) {
         main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
       },
     },
+    shape: {
+      borderRadius: 2,
+    },
   };
 
   const mergedTheme = deepMerge(hardCodedDefaults, customTheme);

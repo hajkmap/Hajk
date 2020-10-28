@@ -134,7 +134,6 @@ class SpatialSearchOptions extends React.Component {
               aria-label="MoreHoriz"
               aria-owns={open ? "menu" : undefined}
               aria-haspopup="true"
-              color="primary"
               className={classes.iconButton}
               onClick={this.handleDropdownClick}
               id="spatialSearchMenu"

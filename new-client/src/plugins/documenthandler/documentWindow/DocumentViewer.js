@@ -13,7 +13,10 @@ import PrintIcon from "@material-ui/icons/Print";
 const styles = (theme) => ({
   gridContainer: {
     height: "100%",
-    padding: theme.spacing(3),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
     overflowY: "scroll",
     overflowX: "hidden",
     userSelect: "text",
@@ -22,6 +25,9 @@ const styles = (theme) => ({
     position: "fixed",
     bottom: theme.spacing(2),
     right: theme.spacing(3),
+  },
+  toc: {
+    marginBottom: theme.spacing(1),
   },
   printButton: {
     paddingBottom: theme.spacing(1),
@@ -155,7 +161,7 @@ class DocumentViewer extends React.PureComponent {
               <Typography>Skapa PDF</Typography>
             </Button>
           </Grid>
-          <Grid xs={12} item>
+          <Grid className={classes.toc} xs={12} item>
             <TableOfContents
               documentColor={documentColor}
               localObserver={localObserver}

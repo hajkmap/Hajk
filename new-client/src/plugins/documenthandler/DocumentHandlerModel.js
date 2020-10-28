@@ -46,24 +46,16 @@ export default class DocumentHandlerModel {
       });
   };
 
-  getDocumentsFromMenus(menu) {
-    return menu.filter((menuItem) => {
-      return menuItem.document || menuItem.menu.length > 0;
-    });
-  }
-
-  getFlattenedMenu(menu) {
-    let flattenedMenu = [];
+  flattenMenu(menu) {
+    let menuItems = [];
     menu.forEach((menuItem) => {
       if (menuItem.menu.length > 0) {
-        flattenedMenu = flattenedMenu.concat(
-          this.getFlattenedMenu(menuItem.menu)
-        );
+        menuItems = menuItems.concat(this.flattenMenu(menuItem.menu));
       } else {
-        flattenedMenu.push(menuItem);
+        menuItems.push(menuItem);
       }
     });
-    return flattenedMenu;
+    return menuItems;
   }
 
   getAllDocumentsContainedInMenu() {
@@ -71,10 +63,15 @@ export default class DocumentHandlerModel {
       if (this.allDocuments.length > 0) {
         resolve(this.allDocuments);
       }
+
+      const menuItemsWithDocumentConnetion = this.flattenMenu(
+        this.settings.menu
+      ).filter((menuItem) => {
+        return menuItem.document;
+      });
+
       Promise.all(
-        this.getFlattenedMenu(
-          this.getDocumentsFromMenus(this.settings.menu)
-        ).map((menuItem) => {
+        menuItemsWithDocumentConnetion.map((menuItem) => {
           return this.fetchJsonDocument(menuItem.document).then((doc) => {
             doc.documentColor = menuItem.color;
             doc.documentFileName = menuItem.document;

@@ -6,17 +6,13 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import KeyboardArrowDown from "@material-ui/icons/KeyboardArrowDown";
 import Button from "@material-ui/core/Button";
-import {
-  extractPropertiesFromJson,
-  mergeFeaturePropsWithMarkdown,
-} from "../../../../utils/FeaturePropsParsing";
+import FeaturePropsParsing from "../../../../components/FeatureInfo/FeaturePropsParsing";
 
 const styles = (theme) => ({
   item: {
     userSelect: "none",
     cursor: "pointer",
-    boxShadow:
-      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
+
     borderRadius: "2px",
     background: "#f0efef",
     margin: "0px",
@@ -66,6 +62,14 @@ class SearchResultItem extends Component {
   state = {
     expanded: false,
   };
+
+  constructor(props) {
+    super(props);
+
+    this.featurePropsParsing = new FeaturePropsParsing({
+      globalObserver: props.app.globalObserver,
+    });
+  }
 
   highlightImpact = (feature) => (e) => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
@@ -119,9 +123,14 @@ class SearchResultItem extends Component {
   };
 
   getHtmlItemInfoBox = (feature, infoBox) => {
-    var properties = extractPropertiesFromJson(feature.properties);
+    var properties = this.featurePropsParsing.extractPropertiesFromJson(
+      feature.properties
+    );
     feature.properties = properties;
-    return mergeFeaturePropsWithMarkdown(infoBox, feature.properties);
+    return this.featurePropsParsing.mergeFeaturePropsWithMarkdown(
+      infoBox,
+      feature.properties
+    );
   };
 
   render() {

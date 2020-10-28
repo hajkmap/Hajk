@@ -79,6 +79,10 @@ class MapOptions extends Component {
         defaultCookieNoticeMessage: config.defaultCookieNoticeMessage,
         defaultCookieNoticeUrl: config.defaultCookieNoticeUrl,
         crossOrigin: config.crossOrigin,
+        showCookieNotice:
+          config.showCookieNotice !== undefined
+            ? config.showCookieNotice
+            : true,
       });
       this.validate();
     });
@@ -124,6 +128,10 @@ class MapOptions extends Component {
         ? mapConfig.defaultCookieNoticeUrl
         : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
       crossOrigin: mapConfig.crossOrigin ? mapConfig.crossOrigin : "anonymous",
+      showCookieNotice:
+        mapConfig.showCookieNotice !== undefined
+          ? mapConfig.showCookieNotice
+          : true,
     });
   }
 
@@ -299,6 +307,7 @@ class MapOptions extends Component {
         );
         config.defaultCookieNoticeUrl = this.getValue("defaultCookieNoticeUrl");
         config.crossOrigin = this.getValue("crossOrigin");
+        config.showCookieNotice = this.getValue("showCookieNotice");
         this.props.model.updateMapConfig(config, (success) => {
           var msg = success
             ? "Uppdateringen lyckades."
@@ -663,6 +672,26 @@ class MapOptions extends Component {
               />
             </div>
             <div>
+              <input
+                id="input_showCookieNotice"
+                type="checkbox"
+                ref="input_showCookieNotice"
+                onChange={(e) => {
+                  this.setState({ showCookieNotice: e.target.checked });
+                }}
+                checked={this.state.showCookieNotice}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_showCookieNotice">
+                Visa cookies-meddelande{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer ett meddelande angående hantering av cookies visas för nya användare."
+                />
+              </label>
+            </div>
+            <div>
               <label>
                 Cookies-meddelande{" "}
                 <i
@@ -673,6 +702,7 @@ class MapOptions extends Component {
               </label>
               <textarea
                 type="text"
+                disabled={!this.state.showCookieNotice}
                 ref="input_defaultCookieNoticeMessage"
                 value={this.state.defaultCookieNoticeMessage}
                 className={this.getValidationClass(
@@ -698,6 +728,7 @@ class MapOptions extends Component {
               <input
                 type="text"
                 ref="input_defaultCookieNoticeUrl"
+                disabled={!this.state.showCookieNotice}
                 value={this.state.defaultCookieNoticeUrl}
                 className={this.getValidationClass("defaultCookieNoticeUrl")}
                 onChange={(e) => {
@@ -717,6 +748,7 @@ class MapOptions extends Component {
               <input
                 type="text"
                 ref="input_crossOrigin"
+                disabled={!this.state.showCookieNotice}
                 value={this.state.crossOrigin}
                 className={this.getValidationClass("crossOrigin")}
                 onChange={(e) => {

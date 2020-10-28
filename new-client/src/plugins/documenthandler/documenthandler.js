@@ -6,6 +6,7 @@ import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
 import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
+import { withTheme } from "@material-ui/core/styles";
 
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
@@ -15,12 +16,19 @@ class DocumentHandler extends React.PureComponent {
   };
 
   state = {
+    document: null,
+    documentWindowMaximized: true,
+    showPrintWindow: false,
+    chapters: [],
+    documentTitle: "",
+    documentColor: null,
     model: null,
   };
 
   constructor(props) {
     super(props);
     this.localObserver = Observer();
+
     this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,
       globalObserver: props.app.globalObserver,
@@ -62,9 +70,11 @@ class DocumentHandler extends React.PureComponent {
 
   renderDrawerContent = () => {
     const { app, model, options } = this.props;
+
     return (
       <PanelMenuContainerView
         app={app}
+        document={this.state.document}
         model={model}
         options={options}
         localObserver={this.localObserver}
@@ -83,6 +93,60 @@ class DocumentHandler extends React.PureComponent {
     });
   };
 
+  showDocument = (documentFileName) => {
+    const { app } = this.props;
+    app.globalObserver.publish("documentviewer.showWindow", {
+      hideOtherPlugins: false,
+    });
+    app.globalObserver.publish("core.maximizeWindow");
+    return this.setActiveDocument(documentFileName);
+  };
+
+  onWindowHide = () => {
+    this.localObserver.publish("set-active-document", {
+      documentName: null,
+      headerIdentifier: null,
+    });
+    return;
+  };
+
+  onMinimize = () => {
+    this.setState({ documentWindowMaximized: false });
+  };
+
+  onMaximize = () => {
+    this.setState({ documentWindowMaximized: true });
+  };
+
+  setActiveDocument = (documentFileName) => {
+    return new Promise((resolve, reject) => {
+      let document = null;
+      if (documentFileName) {
+        document = this.state.model.getDocuments([documentFileName])[0];
+      }
+
+      this.setState(
+        {
+          documentTitle: document?.documentTitle
+            ? document.documentTitle
+            : null,
+          document: document,
+          documentColor: document?.documentColor
+            ? document.documentColor
+            : null,
+          showPrintWindow: false,
+        },
+        resolve
+      );
+    });
+  };
+
+  togglePrintWindow = () => {
+    this.setState({
+      showPrintWindow: !this.state.showPrintWindow,
+    });
+  };
+
   render() {
     return (
       <>
@@ -90,6 +154,17 @@ class DocumentHandler extends React.PureComponent {
         {this.dynamicallyImportIconFonts()}
         <DocumentWindowBase
           {...this.props}
+          onMinimize={this.onMinimize}
+          showDocument={this.showDocument}
+          onMaximize={this.onMaximize}
+          onWindowHide={this.onWindowHide}
+          togglePrintWindow={this.togglePrintWindow}
+          document={this.state.document}
+          documentColor={this.state.documentColor}
+          documentWindowMaximized={this.state.documentWindowMaximized}
+          showPrintWindow={this.state.showPrintWindow}
+          chapters={this.state.chapters}
+          documentTitle={this.state.documentTitle}
           model={this.state.model}
           localObserver={this.localObserver}
         ></DocumentWindowBase>
@@ -97,4 +172,4 @@ class DocumentHandler extends React.PureComponent {
     );
   }
 }
-export default DocumentHandler;
+export default withTheme(DocumentHandler);

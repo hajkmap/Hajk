@@ -259,7 +259,7 @@ class Search extends React.PureComponent {
   };
 
   escapeRegExp = (string) => {
-    return string.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
   };
 
   sortSearchFieldsOnFeature = (searchFields, feature, wordsInTextField) => {
