@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: hajk-backend
   description: Hajk backend
@@ -6,10 +6,18 @@ info:
 servers:
   - url: /api/v1
 tags:
-  - name: Examples
-    description: Simple example endpoints
+  - name: Maps and layers
+    description: Operations for retriving contents from the layers and maps database
+  - name: Map and layers settings
+    description: Preform CRUD operations on layers and map configurations
+  - name: Documents
+    description: Operations available for the "Documents API", used mainly by the Informative plugin
+  - name: Sokigo FB Proxy
+    description: Proxy specified in working with Sokigo's FB API
   - name: Specification
-    description: The swagger API specification
+    description: The OpenAPI specification
+  - name: Examples
+    description: Simple example endpoint
 paths:
   /examples:
     get:
@@ -142,7 +150,7 @@ paths:
     get:
       tags:
         - Maps and layers
-      description: Lists all available layers
+      description: List available layers
       responses:
         200:
           description: All layers were fetched successfully
@@ -151,7 +159,7 @@ paths:
     get:
       tags:
         - Maps and layers
-      description: Lists all available map configs
+      description: List available map configurations
       responses:
         200:
           description: Available maps were fetched successfully
@@ -167,7 +175,7 @@ paths:
           required: true
           schema:
             type: string
-      description: Returns map config file
+      description: Fetch contents of a map configuration
       responses:
         200:
           description: Success
@@ -205,7 +213,7 @@ paths:
           required: true
           schema:
             type: string
-      description: Creates a new map config with the given file name
+      description: Create a new map configuration
       responses:
         200:
           description: Success
@@ -217,14 +225,14 @@ paths:
       parameters:
         - name: query
           in: path
-          description: The query to retrive
+          description: The query to be proxied
           required: true
           schema:
             type: string
-      description: Proxy test
+      description: Proxy the specified query to Sokigo's FB API
       responses:
         200:
-          description: Fetch all
+          description: Result will vary depending on response from the API
           content: {}
   /spec:
     get:
@@ -233,14 +241,6 @@ paths:
       responses:
         200:
           description: Return the API specification
-          content: {}
-  /settings:
-    get:
-      tags:
-        - Map and layers settings
-      responses:
-        200:
-          description: Return all layers
           content: {}
   /settings/layermenu:
     put:
