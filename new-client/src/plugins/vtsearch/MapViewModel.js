@@ -63,6 +63,14 @@ export default class MapViewModel {
     this.localObserver.subscribe("hide-all-layers", () => {
       this.hideAllLayers();
     });
+
+    this.localObserver.subscribe("close-all-vt-searchLayer", () => {
+      this.map.getLayers().forEach(layer => {
+        if (layer.get("type") === "vt-search-result-layer")
+          this.map.removeLayer(layer);
+      });
+    });
+
     this.localObserver.subscribe("toggle-visibility", searchResultID => {
       this.toggleLayerVisibility(searchResultID);
     });

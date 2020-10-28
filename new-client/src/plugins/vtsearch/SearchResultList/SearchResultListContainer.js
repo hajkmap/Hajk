@@ -202,6 +202,7 @@ class SearchResultListContainer extends React.Component {
 
     localObserver.subscribe("search-result-list-close", () => {
       localObserver.publish("hide-all-layers");
+      localObserver.publish("close-all-vt-searchLayer");
       localObserver.publish("clear-highlight");
       localObserver.publish("resize-map", 0);
       this.searchResults.length = 0;
