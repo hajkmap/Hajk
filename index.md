@@ -7,6 +7,7 @@ Några goda kartexempel:
 1. [Halmstad](https://nykarta.halmstad.se/)
 2. [Kungsbacka](https://karta.kungsbacka.se/)
 3. [Uddevalla](https://karta.uddevalla.se/)
+4. [Varberg](https://karta.varberg.se/)
 
 Kontakta någon av oss om _din_ organisation är intresserad av att medverka :-)
 
