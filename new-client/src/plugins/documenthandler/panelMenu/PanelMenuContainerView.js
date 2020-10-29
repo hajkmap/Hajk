@@ -21,6 +21,7 @@ class PanelMenuView extends React.PureComponent {
     }
     this.setState({
       expandedIndex: newExpandedState,
+      coloredIndex: this.#getItemIdsToColor(item),
     });
   };
 
@@ -103,6 +104,7 @@ class PanelMenuView extends React.PureComponent {
     const shoudBeExpanded = this.#extractIdsFromItems(
       this.#getAllAncestors(item)
     );
+
     const currentlyNoExpanded = shoudBeExpanded.filter(() => {
       return this.state.expandedIndex.indexOf(item.id) === -1;
     });
@@ -110,7 +112,7 @@ class PanelMenuView extends React.PureComponent {
   };
 
   #getAllAncestors = (item) => {
-    const ancestors = [item];
+    const ancestors = [];
     let parent = item.parent;
     while (parent) {
       ancestors.push(parent);
@@ -125,21 +127,40 @@ class PanelMenuView extends React.PureComponent {
     });
   };
 
-  #getAncestorsSubItemsIds = (ancestors) => {
-    return ancestors
-      .map((ancestor) => {
-        return ancestor.menu.map((item) => {
-          return item.id;
-        });
-      })
-      .flat();
+  #getAllSubMenuIds = (menu) => {
+    let itemIds = [];
+    menu.forEach((menuItem) => {
+      if (menuItem.menu.length > 0) {
+        itemIds.push(menuItem.id);
+        itemIds = itemIds.concat(this.#getAllSubMenuIds(menuItem.menu));
+      } else {
+        itemIds.push(menuItem.id);
+      }
+    });
+    return itemIds;
   };
 
   #getItemIdsToColor = (item) => {
-    const ancestors = this.#getAllAncestors(item);
+    const ancestors = [item, ...this.#getAllAncestors(item)];
     const ancestorIds = this.#extractIdsFromItems(ancestors);
-    const subMenuIds = this.#getAncestorsSubItemsIds(ancestors);
-    return [...ancestorIds, ...subMenuIds];
+    const allSubMenuItemIds = ancestors.reduce((acc, ancestor) => {
+      acc = acc.concat(this.#getAllSubMenuIds(ancestor.menu));
+      return acc;
+    }, []);
+    const topAncestor = ancestors.find((ancestor) => {
+      return ancestor.parent === undefined;
+    });
+    const isTopAncestor = topAncestor.id === item.id;
+    const allIds = [...ancestorIds, ...allSubMenuItemIds];
+    const isExpanded = this.state.expandedIndex.some((id) => {
+      return ancestorIds.indexOf(id) > -1;
+    });
+
+    if (isExpanded && isTopAncestor) {
+      return [];
+    }
+
+    return allIds;
   };
 
   render() {
