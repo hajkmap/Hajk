@@ -88,6 +88,7 @@ var manager = Model.extend({
         data: {
           f: 'json'
         },
+        xhrFields: { withCredentials: true },
         success: (rsp) => {
           var legends = []
           ,   addedLayers = state.addedLayers.map(layer => layer.id);
@@ -169,6 +170,7 @@ var manager = Model.extend({
         request: 'describeFeatureType',
         typename: layer
       },
+      xhrFields: { withCredentials: true },
       success: data => {
         var parser = new X2JS()
         ,   xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data)
@@ -268,12 +270,14 @@ var manager = Model.extend({
         service: 'WFS',
         request: 'GetCapabilities'
       },
+      xhrFields: { withCredentials: true },
       success: data => {
         var response = this.parseWFSCapabilitesTypes(data);
         if (/MapServer\/WFSServer$/.test(url)) {
           url = url.replace('/services/', '/rest/services/').replace('WFSServer', 'legend?f=pjson');
           $.ajax(this.prepareProxyUrl(url), {
             dataType: "json",
+            xhrFields: { withCredentials: true },
             success: (legend) => {
               if (legend && legend.layers && legend.layers[0]) {
                 if (legend.layers[0].legend[0]) {
@@ -307,6 +311,7 @@ var manager = Model.extend({
       data: {
         f: 'json'
       },
+      xhrFields: { withCredentials: true },
       success: data => {
         callback(data);
       }
@@ -320,6 +325,7 @@ var manager = Model.extend({
       data: {
         f: "json"
       },
+      xhrFields: { withCredentials: true },
       success: data => {
         callback(data);
       },
@@ -357,7 +363,8 @@ var manager = Model.extend({
             service: 'WMS',
             request: 'GetCapabilities',
             version
-          }
+          },
+          xhrFields: { withCredentials: true }
         })
       )
     });
@@ -393,6 +400,7 @@ var manager = Model.extend({
         service: 'WMS',
         request: 'GetCapabilities',
       },
+      xhrFields: { withCredentials: true },
       success: data => {
         var response = (new format.WMSCapabilities()).read(data);
         callback(response);

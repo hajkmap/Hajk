@@ -100,6 +100,7 @@ var search = Model.extend({
         request: 'describeFeatureType',
         typename: layer
       },
+      xhrFields: { withCredentials: true },
       success: data => {
         var parser = new X2JS(),
           xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data),
@@ -136,6 +137,7 @@ var search = Model.extend({
         service: 'WFS',
         request: 'GetCapabilities'
       },
+      xhrFields: { withCredentials: true },
       success: data => {
         var response = this.parseWFSCapabilitesTypes(data);
         callback(response);

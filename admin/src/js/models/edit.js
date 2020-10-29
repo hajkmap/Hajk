@@ -102,6 +102,7 @@ var edit = Model.extend({
         outputFormat: 'application/json',
         typename: layer
       },
+      xhrFields: { withCredentials: true },
       success: data => {
         if (data.featureTypes && data.featureTypes[0]) {
           callback(data.featureTypes[0].properties);
@@ -129,6 +130,7 @@ var edit = Model.extend({
         service: 'WFS',
         request: 'GetCapabilities'
       },
+      xhrFields: { withCredentials: true },
       success: data => {
         var response = this.parseWFSCapabilitesTypes(data);
         callback(response);
