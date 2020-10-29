@@ -143,10 +143,11 @@ class MapOptions extends Component {
       value = input.checked;
     }
 
-    if (fieldName === "center") value = value.split(",");
-    if (fieldName === "resolutions") value = value.split(",");
-    if (fieldName === "extent") value = value.split(",");
-    if (fieldName === "origin") value = value.split(",");
+    if (["zoom", "maxZoom", "minZoom"].includes(fieldName))
+      value = parseInt(value);
+    if (["origin", "extent", "center", "resolutions"].includes(fieldName))
+      value = value.split(",").map((v) => parseFloat(v));
+
     if (fieldName === "title") {
       if (value === "") {
         value = this.props.model.get("mapFile");

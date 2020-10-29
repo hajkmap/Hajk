@@ -7,6 +7,11 @@ import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
 import "allsettled-polyfill";
 // IE 11 ends here.
 
+// iOS 12 and other older touch devices need this polyfill to
+// support OpenLayers map interactions through Pointer Events API.
+// See: https://github.com/hajkmap/Hajk/issues/606
+import "elm-pep";
+
 import "ol/ol.css";
 import "./custom-ol.css";
 

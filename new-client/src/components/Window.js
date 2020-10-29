@@ -395,6 +395,7 @@ class Window extends React.PureComponent {
       resizingEnabled,
       draggingEnabled,
       allowMaximizedWindow,
+      customPanelHeaderButtons,
     } = this.props;
     const { left, top, width, height } = this.state;
 
@@ -486,6 +487,7 @@ class Window extends React.PureComponent {
           <PanelHeader
             allowMaximizedWindow={allowMaximizedWindow}
             color={color}
+            customHeaderButtons={customPanelHeaderButtons}
             globalObserver={this.props.globalObserver}
             onClose={this.close}
             onMaximize={this.maximize}

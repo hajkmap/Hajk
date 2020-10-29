@@ -107,6 +107,13 @@ class Dummy extends React.PureComponent {
           title: this.state.title, // By keeping title and color in Dummy's state we can pass on
           color: this.state.color, // the changes to BaseWindowPlugin which will update internal state too.
           description: "En kort beskrivning som visas i widgeten", // Shown on Widget button
+          customPanelHeaderButtons: [
+            {
+              //Add extra buttons to window-header with a specified onClickCallback
+              icon: <BugReportIcon />,
+              onClickCallback: () => {},
+            },
+          ],
           height: 450, // Custom height/width etc | Use "auto" for automatic or leave undefined
           width: 400,
         }}
