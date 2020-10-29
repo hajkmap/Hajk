@@ -8,7 +8,6 @@ import TableOfContents from "./TableOfContents";
 import Contents from "./Contents";
 import { Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-import PrintIcon from "@material-ui/icons/Print";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -143,24 +142,6 @@ class DocumentViewer extends React.PureComponent {
           className={classes.gridContainer}
           container
         >
-          <Grid
-            xs={12}
-            container
-            item
-            justify="flex-end"
-            className={classes.printButton}
-          >
-            <Button
-              variant="outlined"
-              color="primary"
-              style={{ maxHeight: "35px" }}
-              startIcon={<PrintIcon />}
-              disabled={options.enablePrint ? !options.enablePrint : true}
-              onClick={togglePrintWindow}
-            >
-              <Typography>Skapa PDF</Typography>
-            </Button>
-          </Grid>
           <Grid className={classes.toc} xs={12} item>
             <TableOfContents
               documentColor={documentColor}
