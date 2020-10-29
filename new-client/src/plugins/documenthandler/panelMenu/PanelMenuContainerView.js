@@ -25,12 +25,27 @@ class PanelMenuView extends React.PureComponent {
     });
   };
 
+  isTopLevelMenuItemColored = () => {
+    const { options } = this.props;
+    return options.menuConfig.menu.some((item) => {
+      return (
+        item.menu.length === 0 && this.state.coloredIndex.indexOf(item.id) > -1
+      );
+    });
+  };
+
   setActiveMenuItems = (documentName, item) => {
     if (!documentName) {
-      this.setState({
-        selectedIndex: null,
-        coloredIndex: [],
-      });
+      if (this.isTopLevelMenuItemColored()) {
+        this.setState({
+          selectedIndex: null,
+          coloredIndex: [],
+        });
+      } else {
+        this.setState({
+          selectedIndex: null,
+        });
+      }
     }
     if (documentName === item.document) {
       this.setState({
