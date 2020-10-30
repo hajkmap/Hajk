@@ -1,4 +1,5 @@
 import Express from "express";
+
 import * as path from "path";
 import * as bodyParser from "body-parser";
 import * as http from "http";
@@ -8,6 +9,7 @@ import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
 
 import helmet from "helmet";
 import cors from "cors";
+import compression from "compression";
 
 import oas from "./oas";
 
@@ -26,6 +28,7 @@ export default class ExpressServer {
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
       })
     );
+    app.use(compression());
 
     // Don't enable FB Proxy if necessary env variable isn't sat
     if (process.env.FB_SERVICE_BASE_URL !== undefined)
