@@ -26,7 +26,14 @@ export default class ExpressServer {
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
       })
     );
-    app.use("/api/v1/proxy", sokigoFBProxy());
+
+    // Don't enable FB Proxy if necessary env variable isn't sat
+    if (process.env.FB_SERVICE_BASE_URL !== undefined)
+      app.use("/api/v1/proxy", sokigoFBProxy());
+    else
+      console.info(
+        "Sokigo FB Proxy not enabled due to missing settings, see your .env file."
+      );
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(
       bodyParser.urlencoded({
