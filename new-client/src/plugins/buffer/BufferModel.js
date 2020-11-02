@@ -16,7 +16,7 @@ import {
 } from "ol/geom.js";
 import * as jsts from "jsts";
 
-var selectedFeatures = [],
+let selectedFeatures = [],
   layer_added = false,
   highlight_added = false,
   bufferSource = new VectorSource(),
@@ -73,13 +73,6 @@ class BufferModel {
   constructor(settings) {
     this.map = settings.map;
   }
-  get getMap() {
-    return this.setMap();
-  }
-
-  setMap() {
-    return this.map;
-  }
 
   setActive(active) {
     if (active === true) {
@@ -106,15 +99,12 @@ class BufferModel {
       this.map.un("click", this.selectFeatures);
     }
   }
+
   selectFeatures = (e) => {
-    var currentMap = this.getMap;
-    var view = currentMap.getView();
-    var wmsLayers = currentMap.getLayers();
-    wmsLayers.forEach(function (lyr) {
-      if (lyr.type === "VECTOR" && lyr.values_.name === "drawLayer") {
-        if (lyr.getSource().getFeatures().length > 0) {
-          var f = currentMap.getFeaturesAtPixel(e.pixel);
-          var features = f;
+    this.map.getLayers().forEach((layer) => {
+      if (layer.get("name") === "drawLayer") {
+        if (layer.getSource().getFeatures().length > 0) {
+          const features = this.map.getFeaturesAtPixel(e.pixel);
 
           if (features) {
             highlightSource.addFeatures(features);
@@ -126,8 +116,8 @@ class BufferModel {
         }
       }
 
-      if (lyr.get("visible") === true && lyr.layersInfo) {
-        let subLayers = Object.values(lyr.layersInfo);
+      if (layer.get("visible") === true && layer.layersInfo) {
+        let subLayers = Object.values(layer.layersInfo);
         let subLayersToQuery = subLayers
           .filter((subLayer) => {
             return subLayer.queryable === true;
@@ -137,7 +127,9 @@ class BufferModel {
           });
 
         if (e.coordinate !== undefined) {
-          let url = lyr
+          const view = this.map.getView();
+
+          const url = layer
             .getSource()
             .getFeatureInfoUrl(
               e.coordinate,

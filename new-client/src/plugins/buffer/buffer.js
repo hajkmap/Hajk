@@ -23,8 +23,6 @@ class Buffer extends React.PureComponent {
 
     this.BufferModel = new BufferModel({
       map: props.map,
-      app: props.app,
-      localObserver: this.localObserver,
     });
   }
 
