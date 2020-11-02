@@ -17,7 +17,7 @@ const styles = (theme) => {};
 
 class PrintDialog extends React.PureComponent {
   render() {
-    const { cancelPrint, open } = this.props;
+    const { cancelPrint, open, saveAsType } = this.props;
     return createPortal(
       <Dialog
         disableBackdropClick={true}
@@ -25,12 +25,12 @@ class PrintDialog extends React.PureComponent {
         open={open}
       >
         <LinearProgress />
-        <DialogTitle>Din PDF skapas</DialogTitle>
+        <DialogTitle>Din {`${saveAsType}`} skapas</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Det här kan ta en stund, speciellt om du har valt ett stort format
-            (A2-A3) och hög upplösning (>72 dpi). Men när allt är klart kommer
-            PDF-filen att laddas ner till din dator.
+            (A2-A3) och hög upplösning (>72 dpi). Men när allt är klart kommer{" "}
+            {`${saveAsType}`}-filen att laddas ner till din dator.
             <br />
             <br />
             Om du inte vill vänta längre kan du avbryta utskriften genom att

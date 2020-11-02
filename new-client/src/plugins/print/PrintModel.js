@@ -2,6 +2,8 @@ import { delay } from "../../utils/Delay";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
 import * as jsPDF from "jspdf";
+import * as PDFjs from "pdfjs-dist";
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 
 import Vector from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
@@ -513,23 +515,22 @@ export default class PrintModel {
         pdf.text(options.mapTitle, dim[0] / 2, 12, { align: "center" });
       }
 
-      // Finally, save the PDF pr PNG, add a timestamp to filename
-      if (options.saveAsType === "PDF") {
-        pdf.save(`Hajk - ${new Date().toLocaleString()}.pdf`);
-      } else {
-        mapCanvas.toBlob((blob) => {
-          //Only prints the map, no logo etc.
-          saveAs(blob, `Hajk - ${new Date().toLocaleString()}.png`);
+      // Finally, save the PDF (or PNG)
+      this.saveToFile(pdf, width, options.saveAsType)
+        .then(() => {
+          this.localObserver.publish("print-completed");
+        })
+        .catch((error) => {
+          console.warn(error);
+          this.localObserver.publish("print-failed-to-save");
+        })
+        .finally(() => {
+          // Reset map to how it was before print
+          this.previewLayer.setVisible(true);
+          this.map.setSize(size);
+          this.map.getView().setResolution(originalResolution);
+          this.map.getView().setCenter(originalCenter);
         });
-      }
-
-      this.localObserver.publish("print-completed");
-
-      // Reset map to how it was before print
-      this.previewLayer.setVisible(true);
-      this.map.setSize(size);
-      this.map.getView().setResolution(originalResolution);
-      this.map.getView().setCenter(originalCenter);
     });
 
     // Set print size, resolution and center.
@@ -548,6 +549,49 @@ export default class PrintModel {
     this.map.setSize(printSize);
     this.map.getView().setCenter(printCenter);
     this.map.getView().setResolution(scaleResolution);
+  };
+
+  saveToFile = (pdf, width, type) => {
+    const fileName = `Hajk - ${new Date().toLocaleString()}`;
+    return new Promise((resolve, reject) => {
+      try {
+        if (type === "PDF") {
+          pdf.save(`${fileName}.pdf`);
+          resolve();
+        } else {
+          const ab = pdf.output("arraybuffer");
+          PDFjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+          PDFjs.getDocument({ data: ab }).promise.then((pdf) => {
+            pdf.getPage(1).then((page) => {
+              let canvas = document.createElement("canvas");
+              let ctx = canvas.getContext("2d");
+
+              //Scale viewport to match current resolution
+              const viewport = page.getViewport({ scale: 1 });
+              const scale = width / viewport.width;
+              const scaledViewport = page.getViewport({ scale: scale });
+
+              const renderContext = {
+                canvasContext: ctx,
+                viewport: scaledViewport,
+              };
+
+              canvas.height = scaledViewport.height;
+              canvas.width = scaledViewport.width;
+
+              page.render(renderContext).promise.then(() => {
+                canvas.toBlob((blob) => {
+                  saveAs(blob, `${fileName}.png`);
+                  resolve();
+                });
+              });
+            });
+          });
+        }
+      } catch (error) {
+        reject(`Failed to save file... ${error}`);
+      }
+    });
   };
 
   cancelPrint = () => {
