@@ -20,6 +20,7 @@ const styles = (theme) => ({
     overflowY: "scroll",
     overflowX: "hidden",
     userSelect: "text",
+    outline: "none",
   },
   scrollToTopButton: {
     position: "fixed",
