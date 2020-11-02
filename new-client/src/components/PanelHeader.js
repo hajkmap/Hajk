@@ -45,6 +45,25 @@ class PanelHeader extends Component {
     title: propTypes.string.isRequired,
   };
 
+  renderCustomHeaderButtons = () => {
+    const { customHeaderButtons, classes } = this.props;
+    return customHeaderButtons.map((buttonInfo, index) => {
+      const HeaderActionIcon = buttonInfo.icon.type;
+      return (
+        <HeaderActionIcon
+          onClick={buttonInfo.onClickCallback}
+          className={classes.icon}
+          key={index}
+        />
+      );
+    });
+  };
+
+  shouldRenderCustomHeaderButtons = () => {
+    const { customHeaderButtons } = this.props;
+    return customHeaderButtons && customHeaderButtons.length > 0;
+  };
+
   render() {
     const { allowMaximizedWindow, classes, mode } = this.props;
     return (
@@ -56,6 +75,8 @@ class PanelHeader extends Component {
           {this.props.title}
         </Typography>
         <nav className={classes.icons}>
+          {this.shouldRenderCustomHeaderButtons() &&
+            this.renderCustomHeaderButtons()}
           {mode !== "maximized" && // If window isn't in fit screen mode currently…
             (mode === "minimized" ? ( // … but it's minimized…
               <FullscreenIcon // …render the maximize icon.

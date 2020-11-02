@@ -153,6 +153,7 @@ class BaseWindowPlugin extends React.PureComponent {
           onMaximize={this.props.custom.onMaximize}
           onMinimize={this.props.custom.onMinimize}
           draggingEnabled={this.props.custom.draggingEnabled}
+          customPanelHeaderButtons={this.props.custom.customPanelHeaderButtons}
           resizingEnabled={this.props.custom.resizingEnabled}
           scrollable={this.props.custom.scrollable}
           allowMaximizedWindow={this.props.custom.allowMaximizedWindow}
