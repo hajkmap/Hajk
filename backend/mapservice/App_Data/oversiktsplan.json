@@ -654,6 +654,12 @@
       "options": {
         "searchImplemented": true,
         "title": "",
+        "tableOfContent": {
+          "expanded": false,
+          "chapterLevelsToShow": 1,
+          "title": "Innehåll i detta dokument"
+        },
+        "enablePrint": true,
         "documentOnStart": "utgangspunkter",
         "target": "hidden",
         "showScrollButtonLimit": 400,
