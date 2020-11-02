@@ -14,6 +14,7 @@ const styles = (theme) => ({
     overflowY: "scroll",
     overflowX: "hidden",
     userSelect: "text",
+    outline: "none",
   },
   contentContainer: {
     paddingBottom: theme.spacing(1),

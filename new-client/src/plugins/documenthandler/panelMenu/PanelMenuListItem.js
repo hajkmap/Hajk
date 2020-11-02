@@ -111,6 +111,9 @@ class PanelMenuListItem extends React.PureComponent {
         }
       : {
           paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
+          borderLeft: `${theme.spacing(0.5)}px solid ${
+            theme.palette.background.paper
+          }`,
         };
   };
 
