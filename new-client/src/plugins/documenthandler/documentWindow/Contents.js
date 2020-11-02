@@ -162,20 +162,20 @@ class Contents extends React.PureComponent {
     });
     allowedHtmlTags.push({
       tagType: "strong",
-      callback: () => {
-        return <Strong></Strong>;
+      callback: (e) => {
+        return <Strong strongTag={e}></Strong>;
       },
     });
     allowedHtmlTags.push({
       tagType: "u",
-      callback: () => {
-        return <Underline></Underline>;
+      callback: (e) => {
+        return <Underline uTag={e}></Underline>;
       },
     });
     allowedHtmlTags.push({
       tagType: "em",
-      callback: () => {
-        return <Italic></Italic>;
+      callback: (e) => {
+        return <Italic emTag={e}></Italic>;
       },
     });
     return allowedHtmlTags;
@@ -225,7 +225,6 @@ class Contents extends React.PureComponent {
   };
 
   showPopupModal = (image) => {
-    console.log(image, "image");
     this.setState({ popupImage: image });
   };
 
