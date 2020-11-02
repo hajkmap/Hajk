@@ -71,7 +71,7 @@ class Lines extends React.PureComponent {
       this.setState({
         municipalities: result.length > 0 ? result : []
       });
-      this.model.fetchAllPossibleTransportModeTypeName().then(result => {
+      this.model.fetchAllPossibleTransportModeTypeNames().then(result => {
         this.setState({
           trafficTransports: result.length > 0 ? result : []
         });

@@ -665,7 +665,7 @@ export default class SearchModel {
     if (!searchText) return null;
 
     // Build up the url with cql.
-    let url = this.geoServer.lineNumberAndPublicLineNumber.url;
+    let url = this.geoServer.lineNumberAndPublicLineNumbers.url;
     let cql = "&CQL_FILTER=";
     cql = cql + `LineNumber like '${searchText}%'`;
     cql = this.encodeCqlForGeoServer(cql);
@@ -700,7 +700,7 @@ export default class SearchModel {
     if (!searchText) return null;
 
     // Build up the url with cql.
-    let url = this.geoServer.lineNumberAndPublicLineNumber.url;
+    let url = this.geoServer.lineNumberAndPublicLineNumbers.url;
     let cql = "&CQL_FILTER=";
     cql = cql + `PublicLineNumber like '${searchText}%'`;
     cql = this.encodeCqlForGeoServer(cql);
@@ -735,7 +735,7 @@ export default class SearchModel {
     if (!searchText) return null;
 
     // Build up the url with cql.
-    let url = this.geoServer.stopAreaNameAndStopAreaNumber.url;
+    let url = this.geoServer.stopAreaNameAndNumbers.url;
     let cql = "&CQL_FILTER=";
 
     const isStopAreaNumber = this.containsOnlyNumbers(searchText);
@@ -816,7 +816,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  fetchAllPossibleTransportModeTypeName(addEmptyTransportMode = true) {
+  fetchAllPossibleTransportModeTypeNames(addEmptyTransportMode = true) {
     this.localObserver.publish("transportModeTypeNames-result-begin", {
       label: this.geoServer.transportModeTypeNames.searchLabel
     });
