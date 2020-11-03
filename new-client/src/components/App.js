@@ -694,6 +694,7 @@ class App extends React.PureComponent {
           </div>
           <div
             id="map"
+            draggable="true"
             className={cslx(classes.map, {
               [classes.shiftedLeft]:
                 this.state.drawerPermanent && clean === false,

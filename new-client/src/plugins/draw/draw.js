@@ -15,6 +15,7 @@ class Draw extends React.PureComponent {
     super(props);
 
     this.localObserver = Observer();
+    this.globalObserver = props.app.globalObserver;
     this.drawModel = new DrawModel({
       map: props.map,
       app: props.app,
@@ -49,7 +50,11 @@ class Draw extends React.PureComponent {
           onWindowHide: this.onWindowHide,
         }}
       >
-        <DrawView localObserver={this.localObserver} model={this.drawModel} />
+        <DrawView
+          localObserver={this.localObserver}
+          globalObserver={this.globalObserver}
+          model={this.drawModel}
+        />
       </BaseWindowPlugin>
     );
   }
