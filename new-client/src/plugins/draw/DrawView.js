@@ -46,8 +46,8 @@ class DrawView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.model = this.props.model;
-    this.app = this.props.app;
     this.localObserver = this.props.localObserver;
+    this.globalObserver = this.props.globalObserver;
     this.localObserver.subscribe("dialog", (feature) => {
       this.setState({
         feature: feature,
@@ -60,7 +60,60 @@ class DrawView extends React.PureComponent {
         dialogAbortCallback: this.onAbortTextDialog,
       });
     });
+    this.addMapDropListeners();
   }
+
+  addMapDropListeners = () => {
+    const mapDiv = document.getElementById("map");
+    ["drop", "dragover", "dragend", "dragleave"].forEach((eventName) => {
+      mapDiv.addEventListener(
+        eventName,
+        this.preventDefaultDropBehavior,
+        false
+      );
+    });
+    mapDiv.addEventListener("drop", this.handleDrop, false);
+  };
+
+  handleDrop = (e) => {
+    try {
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const fileType = file.type ? file.type : file.name.split(".").pop();
+        //Not sure about filetype for kml... Qgis- and Hajk-generated kml:s does not contain any information about type.
+        //The application/vnd... is a guess.
+        if (
+          fileType === "kml" ||
+          fileType === "application/vnd.google-earth.kml+xml"
+        ) {
+          this.globalObserver.publish("draw.showWindow", {
+            hideOtherPlugins: false,
+          });
+          this.addDroppedKmlToMap(file);
+        }
+      }
+    } catch (error) {
+      console.error(`Error importing dropped file: ${error}`);
+    }
+  };
+
+  addDroppedKmlToMap = (file) => {
+    const { model } = this.props;
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      model.import(reader.result, (error) => {
+        throw error;
+      });
+    };
+
+    reader.readAsText(file);
+  };
+
+  preventDefaultDropBehavior = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
 
   handleChange = (name) => (event) => {
     this.setState({ [name]: event.target.value });
