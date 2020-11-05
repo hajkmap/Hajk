@@ -1,28 +1,28 @@
 import React from "react";
 import { KeyBindingUtil } from "draft-js";
 
-export const LinkStrategy = (contentBlock, callback, contentState) => {
+const LinkStrategy = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
     const entity = character.getEntity();
     return (
-      entity !== null && contentState.getEntity(entity).getType() === "LINK"
+      entity !== null &&
+      contentState.getEntity(entity).getType().toLowerCase() === "link"
     );
   }, callback);
 };
 
-export const Link = ({ contentState, entityKey, children }) => {
-  const { url, title, titleId } = contentState.getEntity(entityKey).getData();
-  const entity = contentState.getEntity(entityKey);
+const Link = (props) => {
+  const entity = props.contentState.getEntity(props.entityKey);
   const data = entity.getData();
+  const title = props.decoratedText;
 
   if (data["data-document"]) {
     return (
       <a
-        href={url}
+        data-document={data["data-document"]}
+        data-header-identifier={data["data-header-identifier"]}
         rel="noopener noreferrer"
         target="_blank"
-        data-header-identifier={titleId}
-        data-document={url}
       >
         {title}
       </a>
@@ -30,11 +30,9 @@ export const Link = ({ contentState, entityKey, children }) => {
   } else if (data["data-link"]) {
     return (
       <a
-        href={url}
-        rel="noopener noreferrer"
-        target="_blank"
-        data-header-identifier={titleId}
-        data-link={url}
+        data-link={data["data-link"]}
+        data-header-identifier={data["data-header-identifier"]}
+        data-title={data.title}
       >
         {title}
       </a>
@@ -42,11 +40,10 @@ export const Link = ({ contentState, entityKey, children }) => {
   } else if (data["data-maplink"]) {
     return (
       <a
-        href={url}
+        data-maplink={data["data-maplink"]}
+        data-header-identifier={data["data-header-identifier"]}
         rel="noopener noreferrer"
         target="_blank"
-        data-header-identifier={titleId}
-        data-maplink={url}
       >
         {title}
       </a>
@@ -54,10 +51,9 @@ export const Link = ({ contentState, entityKey, children }) => {
   } else {
     return (
       <a
-        href={url}
+        data-header-identifier={data["data-header-identifier"]}
         rel="noopener noreferrer"
         target="_blank"
-        data-header-identifier={titleId}
       >
         {title}
       </a>
