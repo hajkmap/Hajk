@@ -874,7 +874,7 @@ figure img {
   margin-bottom: 0;
 }
 
-.document-text-editor blockquote {
+.document-blockquote {
   background-color: #eeeeee;
   border-top: 2px solid #786aaf;
   border-bottom: 2px solid #786aaf;
@@ -882,7 +882,7 @@ figure img {
   font-family: "Hoefler Text", "Georgia", serif;
   font-style: italic;
   margin: 16px 0;
-  padding: 10px 20px;
+  padding: 8px;
 }
 
 .document-nested-chapter {
@@ -944,8 +944,11 @@ figure img {
 }
 
 .document-editor-controls span {
+  width: 40px;
   height: 40px;
   float: left;
+  text-align: center;
+  border-radius: 4px;
 }
 
 .document-editor-modal {
@@ -1012,6 +1015,18 @@ figure img {
   float: left;
 }
 
+.DraftEditor-root {
+  font-size: 0.875rem;
+  font-family: "Open Sans", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  margin-bottom: 0.5em;
+}
+
 .DraftEditor-root figure {
   width: 100%;
+}
+
+.DraftEditor-root a {
+  color: #0076bc !important;
 }
