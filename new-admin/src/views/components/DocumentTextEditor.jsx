@@ -134,8 +134,8 @@ export default class DocumentTextEditor extends React.Component {
       "IMMUTABLE",
       {
         src: urlValue,
-        "data-image-width": mediaWidth,
-        "data-image-height": mediaHeight,
+        "data-image-width": mediaWidth ? mediaWidth + "px" : null,
+        "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
         "data-popup": mediaPopup,
@@ -196,14 +196,13 @@ export default class DocumentTextEditor extends React.Component {
     const { editorState, urlValue, urlType, urlTitle, urlTitleId } = this.state;
     const data = {
       url: urlValue,
-      title: urlTitle,
-      titleId: urlTitleId,
       type: urlType,
     };
 
     if (urlType === "urllink") {
       data["data-link"] = urlValue;
     } else if (urlType === "documentlink") {
+      data["data-header-identifier"] = urlTitleId;
       data["data-document"] = urlValue;
     } else if (urlType === "maplink") {
       data["data-maplink"] = urlValue;
@@ -226,7 +225,7 @@ export default class DocumentTextEditor extends React.Component {
         editorState: AtomicBlockUtils.insertAtomicBlock(
           newEditorState,
           entityKey,
-          " "
+          urlTitle
         ),
         showURLInput: false,
         showLinkInput: false,
@@ -272,9 +271,6 @@ export default class DocumentTextEditor extends React.Component {
     if (blockType !== "blockquote" || !KeyBindingUtil.isSoftNewlineEvent(evt)) {
       return "not_handled";
     }
-    const newState = RichUtils.insertSoftNewline(this.state.editorState);
-    this.onChange(newState);
-    return "handled";
   };
   _promptForMedia(type) {
     this.setState(
@@ -371,7 +367,6 @@ export default class DocumentTextEditor extends React.Component {
       img["data-image-height"] = "";
       img["data-caption"] = "";
       img["data-source"] = "";
-      //img["data-popup"] = false;
       let figure = document.createElement("figure");
       figure.innerHTML = img.outerHTML;
       img.parentNode.replaceChild(figure, img);
@@ -399,29 +394,47 @@ export default class DocumentTextEditor extends React.Component {
       __html: html,
     };
   }
+
   getHtml() {
     const content = this.state.editorState.getCurrentContent();
 
-    // Add custom attributes
-    let options = {
-      blockStyleFn: (block) => {
-        if (block.get("type").toLowerCase() === "blockquote") {
-          return {
-            attributes: {
-              "data-text-section": "",
-            },
-          };
-        }
-      },
+    const blockStyleFn = (block) => {
+      const blockType = block.getType().toLowerCase();
+
+      if (blockType === "blockquote") {
+        return {
+          attributes: {
+            "data-divider-color": "",
+            "data-background-color": "",
+            "data-text-section": "",
+          },
+        };
+      }
+    };
+
+    const entityStyleFn = (entity) => {
+      const entityType = entity.getType().toUpperCase();
+      if (entityType === "LINK") {
+        // Add styling here
+      }
+      if (entityType === "IMAGE") {
+        // Add styling here
+      }
+    };
+
+    const options = {
+      blockStyleFn,
+      entityStyleFn,
     };
     return stateToHTML(content, options);
   }
+
   applyChanges() {
-    console.log("Before saving", this.getHtml());
-    this.props.onUpdate(this.getHtml());
+    var htmlString = this.getHtml();
+    this.props.onUpdate(htmlString);
     this.setState({
       //readonly: !this.state.readonly,
-      html: this.getHtml(),
+      html: htmlString,
     });
   }
 
@@ -469,7 +482,24 @@ export default class DocumentTextEditor extends React.Component {
     }
   }
 
-  onReadOnly = () => {
+  getUrlId(type) {
+    // Return input field for default URL or documents
+    if (type === "documentlink") {
+      return (
+        <input
+          onChange={this.onTitleIdChange}
+          ref="url"
+          style={styles.urlInput}
+          type="text"
+          value={this.state.urlTitleId || ""}
+          placeholder="data-header-identifier"
+          onKeyDown={this.onLinkInputKeyDown}
+        />
+      );
+    }
+  }
+
+  toggleReadOnly = () => {
     const { isReadOnly } = this.state;
     this.setState({
       isReadOnly: !isReadOnly,
@@ -491,7 +521,7 @@ export default class DocumentTextEditor extends React.Component {
     if (this.state.showURLInput) {
       urlInput = (
         <div style={styles.urlInputContainer}>
-          <h1>Lägg till media</h1>
+          <h1>Lägg till bild</h1>
           <input
             onChange={this.onURLChange}
             ref="url"
@@ -571,22 +601,14 @@ export default class DocumentTextEditor extends React.Component {
           {this.getUrlInput(this.state.urlType, documents)}
           <input
             onChange={this.onTitleChange}
-            ref="link"
+            ref="url"
             style={styles.urlInput}
             type="text"
             value={this.state.urlTitle || ""}
             placeholder="Rubrik på länk"
             onKeyDown={this.onLinkInputKeyDown}
           />
-          <input
-            onChange={this.onTitleIdChange}
-            ref="link"
-            style={styles.urlInput}
-            type="text"
-            value={this.state.urlTitleId || ""}
-            placeholder="data-header-identifier"
-            onKeyDown={this.onLinkInputKeyDown}
-          />
+          {this.getUrlId(this.state.urlType)}
           <button onMouseDown={this.confirmLink}>OK</button>
           <button onMouseDown={this.closeLinkInput}>Avbryt</button>
         </div>
@@ -624,13 +646,14 @@ export default class DocumentTextEditor extends React.Component {
         >
           <span>Godkänn ändringar</span>
         </ColorButtonGreen>
-        <button onMouseDown={this.onReadOnly} style={{ marginBottom: 5 }}>
+        <button onMouseDown={this.toggleReadOnly} style={{ marginBottom: 5 }}>
           Read Only Mode
         </button>
         <div className={className} style={styles.editor} onClick={this.focus}>
           <Editor
-            blockRendererFn={mediaBlockRenderer}
             blockStyleFn={getBlockStyle}
+            blockRendererFn={mediaBlockRenderer}
+            toggleReadOnly={"aaaaooooouuuuu"}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             handlePastedText={this.handlePastedText}
@@ -658,14 +681,14 @@ export default class DocumentTextEditor extends React.Component {
 function getBlockStyle(block) {
   switch (block.getType()) {
     case "blockquote":
-      return "RichEditor-blockquote";
+      return "document-blockquote";
     default:
       return null;
   }
 }
 
 const BLOCK_TYPES = [
-  { label: "H1", style: "header-one" },
+  //{ label: "H1", style: "header-one" },
   { label: <FormatQuoteIcon />, style: "blockquote" },
   { label: <FormatListBulletedIcon />, style: "unordered-list-item" },
   { label: <FormatListNumberedIcon />, style: "ordered-list-item" },
@@ -752,9 +775,6 @@ const styles = {
   paper: {
     position: "absolute",
     width: 400,
-    //backgroundColor: theme.palette.background.paper,
     border: "2px solid #000",
-    //boxShadow: theme.shadows[5],
-    //padding: theme.spacing(2, 4, 3),
   },
 };
