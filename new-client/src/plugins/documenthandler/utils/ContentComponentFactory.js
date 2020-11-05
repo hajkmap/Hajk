@@ -34,12 +34,18 @@ const useStyles = makeStyles((theme) => ({
   },
   imageText: {
     marginBottom: theme.spacing(1),
+    fontStyle: "italic",
   },
-
+  imageCaption: {
+    fontStyle: "italic",
+  },
   linkIcon: {
     fontSize: getIconSizeFromFontSize(theme.typography.body1.fontSize),
     marginRight: theme.spacing(1),
     verticalAlign: "middle",
+  },
+  heading: {
+    marginBottom: theme.spacing(1),
   },
   typography: {
     overflowWrap: "break-word",
@@ -146,7 +152,7 @@ export const Heading = ({ headingTag }) => {
   return (
     <>
       <Typography
-        className={classes.typography}
+        className={classes.heading}
         variant={headingTag.tagName.toLowerCase()}
       >
         {getFormattedComponentFromTag(headingTag)}
@@ -228,8 +234,10 @@ export const Img = ({ imgTag, localObserver }) => {
   const getImageDescription = (image) => {
     return (
       <>
-        <Typography variant="subtitle2">{image.caption}</Typography>
-        <Typography className={classes.imageText} variant="subtitle2">
+        <Typography variant="subtitle2" className={classes.imageCaption}>
+          {image.caption}
+        </Typography>
+        <Typography variant="subtitle2" className={classes.imageText}>
           {image.source}
         </Typography>
       </>
@@ -270,7 +278,7 @@ export const Img = ({ imgTag, localObserver }) => {
   );
 };
 
-export const Strong = (strongTag) => {
+export const Strong = ({ strongTag }) => {
   const children = [...strongTag.childNodes];
   let array = [];
   if (children.length > 0) {
@@ -285,7 +293,7 @@ export const Strong = (strongTag) => {
   }
   return [<strong>{strongTag.textContent}</strong>];
 };
-export const Underline = (uTag) => {
+export const Underline = ({ uTag }) => {
   const children = [...uTag.childNodes];
   let array = [];
   if (children.length > 0) {
@@ -300,7 +308,7 @@ export const Underline = (uTag) => {
   }
   return [<u>{uTag.textContent}</u>];
 };
-export const Italic = (emTag) => {
+export const Italic = ({ emTag }) => {
   const children = [...emTag.childNodes];
   let array = [];
   if (children.length > 0) {

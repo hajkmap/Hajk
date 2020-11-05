@@ -7,19 +7,19 @@ import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import Contents from "./Contents";
 import { Typography } from "@material-ui/core";
-import Button from "@material-ui/core/Button";
-import PrintIcon from "@material-ui/icons/Print";
 
 const styles = (theme) => ({
   gridContainer: {
     height: "100%",
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
     overflowY: "scroll",
     overflowX: "hidden",
     userSelect: "text",
+    outline: "none",
+  },
+  contentContainer: {
+    paddingBottom: theme.spacing(1),
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
   },
   scrollToTopButton: {
     position: "fixed",
@@ -27,7 +27,7 @@ const styles = (theme) => ({
     right: theme.spacing(3),
   },
   toc: {
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(2),
   },
   printButton: {
     paddingBottom: theme.spacing(1),
@@ -42,6 +42,7 @@ class DocumentViewer extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    console.log(props, "props");
     this.scrollElementRef = React.createRef();
     this.setScrollButtonLimit();
     this.bindSubscriptions();
@@ -121,9 +122,8 @@ class DocumentViewer extends React.PureComponent {
       localObserver,
       documentWindowMaximized,
       model,
-      documentColor,
-      togglePrintWindow,
       options,
+      documentColor,
     } = this.props;
 
     const { showScrollButton } = this.state;
@@ -143,32 +143,17 @@ class DocumentViewer extends React.PureComponent {
           className={classes.gridContainer}
           container
         >
-          <Grid
-            xs={12}
-            container
-            item
-            justify="flex-end"
-            className={classes.printButton}
-          >
-            <Button
-              variant="outlined"
-              color="primary"
-              style={{ maxHeight: "35px" }}
-              startIcon={<PrintIcon />}
-              disabled={options.enablePrint ? !options.enablePrint : true}
-              onClick={togglePrintWindow}
-            >
-              <Typography>Skapa PDF</Typography>
-            </Button>
-          </Grid>
           <Grid className={classes.toc} xs={12} item>
             <TableOfContents
               documentColor={documentColor}
               localObserver={localObserver}
               activeDocument={activeDocument}
+              expanded={options.tableOfContent.expanded}
+              title={options.tableOfContent.title}
+              chapterLevelsToShow={options.tableOfContent.chapterLevelsToShow}
             />
           </Grid>
-          <Grid container item>
+          <Grid className={classes.contentContainer} container item>
             <Contents
               model={model}
               localObserver={localObserver}

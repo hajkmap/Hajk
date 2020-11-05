@@ -1,26 +1,30 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { withTheme } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-
-import Typography from "@material-ui/core/Typography";
+import {
+  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+  Collapse,
+} from "@material-ui/core";
 
 const styles = (theme) => {
   return {
     tableOfContents: {
-      borderTop: "solid",
-      borderBottom: "solid",
       backgroundColor: theme.palette.grey[200],
+      cursor: "pointer",
+      paddingLeft: theme.spacing(2),
+      paddingRight: theme.spacing(2),
+      paddingTop: theme.spacing(1),
+      paddingBottom: theme.spacing(1),
     },
     root: {
       width: "100%",
+      padding: theme.spacing(0),
       maxWidth: 360,
       backgroundColor: theme.palette.grey[200],
     },
@@ -33,8 +37,13 @@ function NestedListItemRaw(props) {
       button
       component="li"
       size="small"
+      dense
       onClick={props.onCLick}
-      style={{ paddingLeft: props.theme.spacing(props.level * 3) }}
+      style={{
+        paddingTop: 0,
+        paddingBottom: 0,
+        paddingLeft: props.theme.spacing(props.level * 3),
+      }}
     >
       <ListItemText>{props.children}</ListItemText>
     </ListItem>
@@ -44,6 +53,16 @@ function NestedListItemRaw(props) {
 const NestedListItem = withTheme(NestedListItemRaw);
 
 class TableOfContents extends React.PureComponent {
+  state = {
+    expanded: this.props.expanded,
+  };
+
+  static defaultProps = {
+    expanded: true,
+    chapterLevelsToShow: 100,
+    title: "Innehåll",
+  };
+
   linkClick = (chapter) => {
     const { localObserver } = this.props;
     localObserver.publish("scroll-to-chapter", chapter);
@@ -68,6 +87,11 @@ class TableOfContents extends React.PureComponent {
     );
   };
 
+  showSubChapter = (level) => {
+    const { chapterLevelsToShow } = this.props;
+    return level <= chapterLevelsToShow;
+  };
+
   /**
    * Private help method that recursive renders all sub chapters of a chapter.
    * @param {object} chapter A chapter with all it's sub chapters that will be rendered.
@@ -77,6 +101,9 @@ class TableOfContents extends React.PureComponent {
    * @memberof TableOfContents
    */
   renderSubChapters = (chapter, level, subChapterNumber) => {
+    if (!this.showSubChapter(level)) {
+      return null;
+    }
     let newLevel = level + 1;
     let number = 0;
 
@@ -106,28 +133,46 @@ class TableOfContents extends React.PureComponent {
     );
   };
 
+  toggleCollapse = (e) => {
+    this.setState({
+      expanded: !this.state.expanded,
+    });
+  };
+
   render() {
-    const { classes, activeDocument, documentColor } = this.props;
+    const { classes, activeDocument, title } = this.props;
+    const { expanded } = this.state;
     return (
-      <Accordion
-        square
-        elevation={0}
+      <Grid
+        role="button"
+        onClick={this.toggleCollapse}
         className={classes.tableOfContents}
-        style={{ borderColor: documentColor }}
-        defaultExpanded={true}
+        container
       >
-        <AccordionSummary
-          aria-controls="expansion-panel-content"
-          expandIcon={<ExpandMoreIcon />}
+        <Grid
+          xs={12}
+          alignItems="center"
+          justify="space-between"
+          container
+          item
         >
-          <Typography variant="h2">Innehåll</Typography>
-        </AccordionSummary>
-        <AccordionDetails id="expansion-panel-content">
+          <Grid item>
+            <Typography variant="h2">{title}</Typography>
+          </Grid>
+          <Grid item>
+            {expanded ? (
+              <ExpandLessIcon></ExpandLessIcon>
+            ) : (
+              <ExpandMoreIcon></ExpandMoreIcon>
+            )}
+          </Grid>
+        </Grid>
+        <Collapse in={expanded} id="expansion-panel-content">
           <Grid container spacing={0}>
             {this.renderChapters(activeDocument)}
           </Grid>
-        </AccordionDetails>
-      </Accordion>
+        </Collapse>
+      </Grid>
     );
   }
 }
