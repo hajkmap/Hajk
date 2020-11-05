@@ -126,7 +126,7 @@ class BufferView extends React.PureComponent {
               this.forceUpdate();
             }}
           >
-            <ClearIcon /> Rensa valda objekt
+            <ClearIcon /> Rensa
           </Button>
         </Grid>
       )
