@@ -661,6 +661,8 @@
         },
         "enablePrint": true,
         "documentOnStart": "utgangspunkter",
+        "drawerTitle": "Översiktsplan",
+        "drawerButtonTitle": "Meny",
         "target": "hidden",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
