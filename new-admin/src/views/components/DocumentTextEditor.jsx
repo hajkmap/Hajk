@@ -24,7 +24,7 @@ import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 import ImageIcon from "@material-ui/icons/Image";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
-import LinkIcon from "@material-ui/icons/Link";
+import LaunchIcon from "@material-ui/icons/Launch";
 
 import addLinkPlugin from "./addLinkPlugin";
 import { mediaBlockRenderer } from "./addMediaPlugin";
@@ -38,6 +38,8 @@ const ColorButtonGreen = withStyles((theme) => ({
     "&:hover": {
       backgroundColor: green[700],
     },
+    marginRight: "28px",
+    float: "left",
   },
 }))(Button);
 
@@ -414,6 +416,7 @@ export default class DocumentTextEditor extends React.Component {
 
     const entityStyleFn = (entity) => {
       const entityType = entity.getType().toUpperCase();
+      console.log("ent", entityType);
       if (entityType === "LINK") {
         // Add styling here
       }
@@ -509,19 +512,19 @@ export default class DocumentTextEditor extends React.Component {
   render() {
     const { editorState, imageList, documents } = this.state;
 
-    let className = "RichEditor-editor";
+    let editorContainer = styles.editor;
     var contentState = editorState.getCurrentContent();
-    if (!contentState.hasText()) {
+    /*if (!contentState.hasText()) {
       if (contentState.getBlockMap().first().getType() !== "unstyled") {
-        className += " RichEditor-hidePlaceholder";
+        editorContainer = " RichEditor-hidePlaceholder";
       }
-    }
+    }*/
 
     let urlInput;
     if (this.state.showURLInput) {
       urlInput = (
         <div style={styles.urlInputContainer}>
-          <h1>Lägg till bild</h1>
+          <span>Lägg till bild</span>
           <input
             onChange={this.onURLChange}
             ref="url"
@@ -616,9 +619,16 @@ export default class DocumentTextEditor extends React.Component {
     }
 
     return (
-      <div className="RichEditor-root" style={styles.root}>
-        <div style={styles.buttons}>
-          <div className="document-editor-controls">
+      <div style={styles.root}>
+        <div style={styles.buttonContainer}>
+          <div style={styles.buttons}>
+            <ColorButtonGreen
+              variant="contained"
+              className="btn btn-primary"
+              title="Godkänn ändringar"
+              onClick={() => this.applyChanges()}
+              startIcon={<DoneIcon />}
+            />
             <InlineStyleControls
               editorState={editorState}
               onToggle={this.toggleInlineStyle}
@@ -628,7 +638,7 @@ export default class DocumentTextEditor extends React.Component {
               onToggle={this.toggleBlockType}
             />
             <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
-            <StyleButton label={<LinkIcon />} onToggle={this.addWebLink} />
+            <StyleButton label={<LaunchIcon />} onToggle={this.addWebLink} />
             <StyleButton
               label={<DescriptionIcon />}
               onToggle={this.addDocumentLink}
@@ -637,23 +647,12 @@ export default class DocumentTextEditor extends React.Component {
           </div>
         </div>
         {urlInput}
-        <ColorButtonGreen
-          variant="contained"
-          className="btn btn-primary"
-          title="Godkänn ändringar"
-          onClick={() => this.applyChanges()}
-          startIcon={<DoneIcon />}
-        >
-          <span>Godkänn ändringar</span>
-        </ColorButtonGreen>
-        <button onMouseDown={this.toggleReadOnly} style={{ marginBottom: 5 }}>
-          Read Only Mode
-        </button>
-        <div className={className} style={styles.editor} onClick={this.focus}>
+        <div style={editorContainer} onClick={this.focus}>
           <Editor
+            style={styles.editor}
             blockStyleFn={getBlockStyle}
             blockRendererFn={mediaBlockRenderer}
-            toggleReadOnly={"aaaaooooouuuuu"}
+            toggleReadOnly={false}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             handlePastedText={this.handlePastedText}
@@ -672,6 +671,9 @@ export default class DocumentTextEditor extends React.Component {
           type="button"
           value="Log State"
         />
+        <button onMouseDown={this.toggleReadOnly} style={{ marginBottom: 5 }}>
+          Read Only Mode
+        </button>
       </div>
     );
   }
@@ -703,7 +705,7 @@ const BlockStyleControls = (props) => {
     .getType();
 
   return (
-    <div className="document-editor-controls">
+    <div style={styles.buttons}>
       {BLOCK_TYPES.map((type) => (
         <StyleButton
           key={type.style}
@@ -726,7 +728,7 @@ const INLINE_STYLES = [
 const InlineStyleControls = (props) => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
   return (
-    <div className="document-editor-controls">
+    <div style={styles.buttons}>
       {INLINE_STYLES.map((type) => (
         <StyleButton
           key={type.style}
@@ -744,12 +746,16 @@ const InlineStyleControls = (props) => {
 const styles = {
   root: {
     fontFamily: "'Georgia', serif",
-    padding: 20,
     width: 1000,
+    border: "1px solid #ddd",
+  },
+  buttonContainer: {
+    height: 40,
+    borderBottom: "1px solid #ddd",
   },
   buttons: {
-    height: 50,
-    marginBottom: 10,
+    borderRight: "1px solid #ccc",
+    float: "left",
   },
   urlInputContainer: {
     marginBottom: 10,
@@ -759,11 +765,15 @@ const styles = {
     marginRight: 10,
     padding: 3,
   },
-  editor: {
+  editorContainer: {
     border: "1px solid #ccc",
     cursor: "text",
     minHeight: 80,
-    padding: 10,
+    fontSize: 16,
+  },
+  editor: {
+    backgroundColor: "#fff",
+    padding: "18px",
   },
   button: {
     marginTop: 10,

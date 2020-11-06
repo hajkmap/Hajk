@@ -1,5 +1,8 @@
 import React from "react";
 import { KeyBindingUtil } from "draft-js";
+import DescriptionIcon from "@material-ui/icons/Description";
+import MapIcon from "@material-ui/icons/Map";
+import LaunchIcon from "@material-ui/icons/Launch";
 
 const LinkStrategy = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
@@ -24,7 +27,7 @@ const Link = (props) => {
         rel="noopener noreferrer"
         target="_blank"
       >
-        {title}
+        <DescriptionIcon /> {title}
       </a>
     );
   } else if (data["data-link"]) {
@@ -34,7 +37,7 @@ const Link = (props) => {
         data-header-identifier={data["data-header-identifier"]}
         data-title={data.title}
       >
-        {title}
+        <LaunchIcon /> {title}
       </a>
     );
   } else if (data["data-maplink"]) {
@@ -45,7 +48,7 @@ const Link = (props) => {
         rel="noopener noreferrer"
         target="_blank"
       >
-        {title}
+        <MapIcon /> {title}
       </a>
     );
   } else {
