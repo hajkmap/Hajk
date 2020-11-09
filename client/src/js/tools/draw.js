@@ -501,6 +501,7 @@ var DrawModel = {
       geometryName = 'Box';
       geometryFunction = ol.interaction.Draw.createBox();
       this.set('circleRadius', undefined);
+      this.setCircleRadius('');
     } else {
       geometryName = type;
     }
