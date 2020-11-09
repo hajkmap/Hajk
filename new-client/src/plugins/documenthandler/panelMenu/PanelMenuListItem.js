@@ -19,6 +19,7 @@ const styles = (theme) => ({
 class PanelMenuListItem extends React.PureComponent {
   constructor(props) {
     super(props);
+    this.state = { hovered: false };
     this.#bindSubscriptions();
   }
 
@@ -102,18 +103,25 @@ class PanelMenuListItem extends React.PureComponent {
     return coloredIndex.indexOf(item.id) > -1;
   };
 
+  #toggleHovered = () => {
+    this.setState({ hovered: !this.state.hovered });
+  };
+
   #getMenuItemStyle = () => {
     const { theme, item } = this.props;
+
+    const borderLeftColor = this.state.hovered
+      ? theme.palette.action.hover
+      : theme.palette.background.paper;
+
     return this.#isColored()
       ? {
           paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
-          borderLeft: `${theme.spacing(0.5)}px solid ${item.color}`,
+          borderLeft: `${theme.spacing(1)}px solid ${item.color}`,
         }
       : {
           paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
-          borderLeft: `${theme.spacing(0.5)}px solid ${
-            theme.palette.background.paper
-          }`,
+          borderLeft: `${theme.spacing(1)}px solid ${borderLeftColor}`,
         };
   };
 
@@ -132,6 +140,8 @@ class PanelMenuListItem extends React.PureComponent {
           onClick={() => {
             this.#handleMenuButtonClick(type, item);
           }}
+          onMouseEnter={this.#toggleHovered}
+          onMouseLeave={this.#toggleHovered}
           className={classes.listItem}
           style={this.#getMenuItemStyle()}
         >
