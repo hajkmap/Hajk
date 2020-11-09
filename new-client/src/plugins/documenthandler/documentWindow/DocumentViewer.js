@@ -10,8 +10,8 @@ import { Typography } from "@material-ui/core";
 
 const styles = (theme) => ({
   gridContainer: {
-    height: "100%",
-    overflowY: "scroll",
+    maxHeight: "100%",
+    overflowY: "auto",
     overflowX: "hidden",
     userSelect: "text",
     outline: "none",
