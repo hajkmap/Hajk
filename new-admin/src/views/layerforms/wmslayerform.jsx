@@ -657,7 +657,6 @@ class WMSLayerForm extends Component {
         );
       })
       .catch((err) => {
-        console.error(err);
         if (this.props.parentView) {
           this.props.parentView.setState({
             alert: true,
@@ -819,7 +818,7 @@ class WMSLayerForm extends Component {
   }
 
   getLayer() {
-    return {
+    const o = {
       type: this.state.layerType,
       id: this.state.id,
       caption: this.getValue("caption"),
@@ -828,15 +827,19 @@ class WMSLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
+      projection: this.getValue("projection"),
       layers: this.getValue("layers"),
       layersInfo: this.getValue("layersInfo"),
+      searchFields: this.getValue("searchFields"),
+      displayFields: this.getValue("displayFields"),
+      visibleAtStart: this.getValue("visibleAtStart"),
+      tiled: this.getValue("tiled"),
+      opacity: this.getValue("opacity"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
-      opacity: this.getValue("opacity"),
-      tiled: this.getValue("tiled"),
-      drawOrder: this.getValue("drawOrder"),
       attribution: this.getValue("attribution"),
+      // drawOrder: this.getValue("drawOrder"),
       searchUrl: this.getValue("searchUrl"),
       searchPropertyName: this.getValue("searchPropertyName"),
       searchDisplayName: this.getValue("searchDisplayName"),
@@ -848,17 +851,19 @@ class WMSLayerForm extends Component {
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
-      solpopup: this.getValue("solpopup"),
+      // solpopup: this.getValue("solpopup"),
       version: this.state.version,
-      projection: this.getValue("projection"),
       infoFormat: this.getValue("infoFormat"),
-      style: this.getValue("style"),
+      // style: this.getValue("style"),
+
+      zIndex: this.getValue("zIndex"),
     };
+    return o;
   }
 
   getValue(fieldName) {
     function create_date() {
-      return new Date().getTime();
+      return new Date().getTime().toString();
     }
 
     function format_layers(layers) {
@@ -871,8 +876,8 @@ class WMSLayerForm extends Component {
       }));
     }
 
-    var input = this.refs["input_" + fieldName],
-      value = input ? input.value : "";
+    const input = this.refs["input_" + fieldName];
+    let value = input ? input.value : "";
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
@@ -881,6 +886,12 @@ class WMSLayerForm extends Component {
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
     if (fieldName === "infoVisible") value = input.checked;
+    // if (fieldName === "drawOrder") value = 1000;
+    if (fieldName === "visibleAtStart") value = Boolean(value);
+    if (fieldName === "searchFields") value = value || null;
+    if (fieldName === "displayFields") value = value || null;
+    if (fieldName === "zIndex") value = value || null;
+    if (fieldName === "opacity") value = parseFloat(Number(value).toFixed(2));
 
     return value;
   }
@@ -952,19 +963,17 @@ class WMSLayerForm extends Component {
   }
 
   getWorkspaces = async (url) => {
-    // console.log(url);
+    //
     url = url.substring(0, url.lastIndexOf("/")) + "/rest/workspaces";
-    // console.log(url);
+    //
     const res = await fetch(url);
-    // console.log(res);
+    //
     const json = await res.json();
-    // console.log(json.workspaces.workspace);
+    //
     //this.setState({ workspaceList: json.workspaces.workspace });
-    //console.log(this.state.workspaceList);
+    //
     var sortedWorksapes = json.workspaces.workspace.sort(GetSortOrder("name")); //Pass the attribute to be sorted on
-    for (var item in this.state.workspaceList) {
-      console.log(this.state.workspaceList[item].name);
-    }
+
     function GetSortOrder(prop) {
       return function (a, b) {
         if (a[prop] > b[prop]) {

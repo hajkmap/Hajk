@@ -7,6 +7,7 @@ import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Grid from "@material-ui/core/Grid";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { CustomLink } from "../utils/ContentComponentFactory";
+import PrintIcon from "@material-ui/icons/Print";
 
 const styles = (theme) => ({});
 
@@ -123,7 +124,17 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   bindListenForSearchResultClick = () => {
-    const { app } = this.props;
+    const { app, localObserver } = this.props;
+
+    app.globalObserver.subscribe(
+      "documenthandler-searchresult-clicked",
+      (searchResultClick) => {
+        localObserver.publish("set-active-document", {
+          documentName: searchResultClick.properties.documentFileName,
+          headerIdentifier: searchResultClick.properties.headerIdentifier,
+        });
+      }
+    );
 
     app.globalObserver.subscribe(
       "core.info-click-documenthandler",
@@ -186,6 +197,16 @@ class DocumentWindowBase extends React.PureComponent {
       onMinimize,
       onMaximize,
     } = this.props;
+
+    const customHeaderButtons = options.enablePrint
+      ? [
+          {
+            icon: <PrintIcon />,
+            onClickCallback: togglePrintWindow,
+          },
+        ]
+      : [];
+
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -194,6 +215,7 @@ class DocumentWindowBase extends React.PureComponent {
           icon: <MenuBookIcon />,
           title: documentTitle || options.windowTitle || "Documents",
           color: documentColor || "#ffffff",
+          customPanelHeaderButtons: customHeaderButtons,
           description: "En kort beskrivning som visas i widgeten",
           height: options.height || "auto",
           width: options.width || 600,

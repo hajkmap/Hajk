@@ -14,13 +14,12 @@ const styles = (theme) => {
     typographyContainer: {
       padding: theme.spacing(1),
     },
+    container: {
+      marginBottom: theme.spacing(1),
+    },
     divider: {
       backgroundColor: "#786aaf",
       height: "2px",
-    },
-    container: {
-      paddingTop: theme.spacing(2),
-      paddingBottom: theme.spacing(2),
     },
   };
 };

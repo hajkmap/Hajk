@@ -654,11 +654,22 @@
       "options": {
         "searchImplemented": true,
         "title": "",
+
         "defaultDocumentColorSettings": {
           "textAreaBackgroundColor": "#ccc",
           "textAreaDividerColor": "#6A0DAD"
         },
+
+        "tableOfContent": {
+          "expanded": false,
+          "chapterLevelsToShow": 1,
+          "title": "Innehåll i detta dokument"
+        },
+        "enablePrint": true,
+
         "documentOnStart": "utgangspunkter",
+        "drawerTitle": "Översiktsplan",
+        "drawerButtonTitle": "Meny",
         "target": "hidden",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {

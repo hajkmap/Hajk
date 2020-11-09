@@ -50,7 +50,7 @@ const defaultState = {
   infoText: "",
   infoUrl: "",
   infoUrlText: "",
-  infoOwner: ""
+  infoOwner: "",
 };
 
 /**
@@ -62,7 +62,7 @@ class ArcGISLayerForm extends Component {
     this.setState(defaultState);
     this.props.model.on("change:legend", () => {
       this.setState({
-        legend: this.props.model.get("legend")
+        legend: this.props.model.get("legend"),
       });
       this.validateField("legend");
     });
@@ -86,9 +86,9 @@ class ArcGISLayerForm extends Component {
             ...this.state.addedLayers,
             {
               id: layer.id,
-              name: layer.name
-            }
-          ]
+              name: layer.name,
+            },
+          ],
         },
         () => {
           this.validateField("layers");
@@ -98,8 +98,8 @@ class ArcGISLayerForm extends Component {
       this.setState(
         {
           addedLayers: this.state.addedLayers.filter(
-            addedLayer => !this.layerEqualityCompare(addedLayer, layer)
-          )
+            (addedLayer) => !this.layerEqualityCompare(addedLayer, layer)
+          ),
         },
         () => {
           this.validateField("layers");
@@ -109,9 +109,9 @@ class ArcGISLayerForm extends Component {
 
     setTimeout(() => {
       if (this.state.legend === "" || /^data/.test(this.state.legend)) {
-        this.props.model.getLegend(this.state, legend => {
+        this.props.model.getLegend(this.state, (legend) => {
           this.setState({
-            legend: legend
+            legend: legend,
           });
         });
       }
@@ -119,12 +119,16 @@ class ArcGISLayerForm extends Component {
   }
 
   describeLayer(layer) {
-    this.props.model.getArcGISLayerDescription(this.state.url, layer, info => {
-      this.props.parent.setState({
-        layerProperties: info.fields,
-        layerPropertiesLayer: layer.name + "_" + layer.id
-      });
-    });
+    this.props.model.getArcGISLayerDescription(
+      this.state.url,
+      layer,
+      (info) => {
+        this.props.parent.setState({
+          layerProperties: info.fields,
+          layerPropertiesLayer: layer.name + "_" + layer.id,
+        });
+      }
+    );
   }
 
   getLayer() {
@@ -149,17 +153,17 @@ class ArcGISLayerForm extends Component {
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
-      infoOwner: this.getValue("infoOwner")
+      infoOwner: this.getValue("infoOwner"),
     };
   }
 
   getValue(fieldName) {
     function create_date() {
-      return new Date().getTime();
+      return new Date().getTime().toString();
     }
 
     function format_layers(layers) {
-      return layers.map(layer => layer.id.toString());
+      return layers.map((layer) => layer.id.toString());
     }
 
     var input = this.refs["input_" + fieldName],
@@ -179,7 +183,7 @@ class ArcGISLayerForm extends Component {
     var validationFields = ["url", "caption", "projection", "extent", "layers"];
     var errors = [];
 
-    validationFields.forEach(field => {
+    validationFields.forEach((field) => {
       var valid = this.validateField(field, false, false);
       if (!valid) {
         errors.push(field);
@@ -187,7 +191,7 @@ class ArcGISLayerForm extends Component {
     });
 
     this.setState({
-      validationErrors: errors
+      validationErrors: errors,
     });
 
     return errors.length === 0;
@@ -247,13 +251,13 @@ class ArcGISLayerForm extends Component {
     if (updateState !== false) {
       if (!valid) {
         this.setState({
-          validationErrors: [...this.state.validationErrors, fieldName]
+          validationErrors: [...this.state.validationErrors, fieldName],
         });
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(
-            v => v !== fieldName
-          )
+            (v) => v !== fieldName
+          ),
         });
       }
     }
@@ -262,7 +266,7 @@ class ArcGISLayerForm extends Component {
   }
 
   getValidationClass(inputName) {
-    return this.state.validationErrors.find(v => v === inputName)
+    return this.state.validationErrors.find((v) => v === inputName)
       ? "validation-error"
       : "";
   }
@@ -272,55 +276,55 @@ class ArcGISLayerForm extends Component {
   }
 
   loadWMSCapabilities(callback) {
-    this.props.model.getArcGISCapabilities(this.state.url, data => {
+    this.props.model.getArcGISCapabilities(this.state.url, (data) => {
       if (data && !data.error) {
         var extent = [
           data.fullExtent.xmin,
           data.fullExtent.ymin,
           data.fullExtent.xmax,
-          data.fullExtent.ymax
+          data.fullExtent.ymax,
         ];
 
         this.setState({
           layers: data.layers,
           extent: extent.join(","),
-          projection: "EPSG:" + data.fullExtent.spatialReference.wkid
+          projection: "EPSG:" + data.fullExtent.spatialReference.wkid,
         });
 
         if (callback && callback.call) callback(data);
       } else {
         this.props.parent.setState({
           alert: true,
-          alertMessage: "Det gick inte att ladda data från vald Url."
+          alertMessage: "Det gick inte att ladda data från vald Url.",
         });
       }
     });
   }
 
   loadLayers(layer, callback) {
-    this.loadWMSCapabilities(data => {
-      var addedLayers = data.layers.filter(dataLayer =>
-        layer.layers.find(id => id === dataLayer.id.toString())
+    this.loadWMSCapabilities((data) => {
+      var addedLayers = data.layers.filter((dataLayer) =>
+        layer.layers.find((id) => id === dataLayer.id.toString())
       );
 
-      addedLayers = addedLayers.map(l => {
+      addedLayers = addedLayers.map((l) => {
         return {
           id: l.id,
-          name: l.name
+          name: l.name,
         };
       });
 
       this.setState({
-        addedLayers: addedLayers
+        addedLayers: addedLayers,
       });
 
-      Object.keys(this.refs).forEach(element => {
+      Object.keys(this.refs).forEach((element) => {
         if (this.refs[element].dataset.type === "arcgis-layer") {
           this.refs[element].checked = false;
         }
       });
 
-      this.state.addedLayers.forEach(layer => {
+      this.state.addedLayers.forEach((layer) => {
         this.refs[layer.name + "_" + layer.id].checked = true;
       });
 
@@ -336,7 +340,7 @@ class ArcGISLayerForm extends Component {
     if (this.state && this.state.layers) {
       var layers = [];
 
-      var append = layer => {
+      var append = (layer) => {
         var classNames =
           this.props.parent.state.layerPropertiesLayer ===
           layer.name + "_" + layer.id
@@ -352,10 +356,10 @@ class ArcGISLayerForm extends Component {
               id={"layer" + i}
               type="checkbox"
               data-type="arcgis-layer"
-              checked={this.state.addedLayers.find(addedLayer =>
+              checked={this.state.addedLayers.find((addedLayer) =>
                 this.layerEqualityCompare(addedLayer, layer)
               )}
-              onChange={e => {
+              onChange={(e) => {
                 this.appendLayer(e.target.checked, layer);
               }}
             />
@@ -365,13 +369,13 @@ class ArcGISLayerForm extends Component {
             </label>
             <i
               className={classNames}
-              onClick={e => this.describeLayer(layer)}
+              onClick={(e) => this.describeLayer(layer)}
             />
           </li>
         );
       };
 
-      this.state.layers.forEach(layer => {
+      this.state.layers.forEach((layer) => {
         layers.push(append(layer));
       });
 
@@ -428,13 +432,13 @@ class ArcGISLayerForm extends Component {
             ref="input_url"
             value={this.state.url}
             className={this.getValidationClass("url")}
-            onChange={e => {
+            onChange={(e) => {
               const v = e.target.value;
               this.setState({ url: v }, () => this.validateField("url", v));
             }}
           />
           <span
-            onClick={e => {
+            onClick={(e) => {
               this.loadWMSCapabilities(e);
             }}
             className="btn btn-default"
@@ -450,7 +454,7 @@ class ArcGISLayerForm extends Component {
             ref="input_projection"
             value={this.state.projection}
             className={this.getValidationClass("projection")}
-            onChange={e => {
+            onChange={(e) => {
               const v = e.target.value;
               this.setState({ projection: v }, () =>
                 this.validateField("projection", v)
@@ -465,7 +469,7 @@ class ArcGISLayerForm extends Component {
             ref="input_extent"
             value={this.state.extent}
             className={this.getValidationClass("extent")}
-            onChange={e => {
+            onChange={(e) => {
               const v = e.target.value;
               this.setState({ extent: v }, () =>
                 this.validateField("extent", v)
@@ -477,7 +481,7 @@ class ArcGISLayerForm extends Component {
           <input
             type="checkbox"
             ref="input_singleTile"
-            onChange={e => {
+            onChange={(e) => {
               this.setState({ singleTile: e.target.checked });
             }}
             checked={this.state.singleTile}
@@ -509,7 +513,7 @@ class ArcGISLayerForm extends Component {
             ref="input_caption"
             value={this.state.caption}
             className={this.getValidationClass("caption")}
-            onChange={e => {
+            onChange={(e) => {
               const v = e.target.value;
               this.setState({ caption: v }, () =>
                 this.validateField("caption", v)
@@ -522,7 +526,7 @@ class ArcGISLayerForm extends Component {
           <textarea
             ref="input_infobox"
             value={this.state.infobox}
-            onChange={e => this.setState({ infobox: e.target.value })}
+            onChange={(e) => this.setState({ infobox: e.target.value })}
           />
         </div>
         <div>
@@ -531,10 +535,10 @@ class ArcGISLayerForm extends Component {
             type="text"
             ref="input_legend"
             value={this.state.legend}
-            onChange={e => this.setState({ legend: e.target.value })}
+            onChange={(e) => this.setState({ legend: e.target.value })}
           />
           <span
-            onClick={e => {
+            onClick={(e) => {
               this.loadLegendImage(e);
             }}
             className="btn btn-default"
@@ -555,7 +559,7 @@ class ArcGISLayerForm extends Component {
             className={
               (this.getValidationClass("opacity"), "control-fixed-width")
             }
-            onChange={e => {
+            onChange={(e) => {
               const v = e.target.value;
               this.setState({ opacity: v }, () =>
                 this.validateField("opacity", v)
@@ -567,7 +571,7 @@ class ArcGISLayerForm extends Component {
           <input
             type="checkbox"
             ref="input_queryable"
-            onChange={e => {
+            onChange={(e) => {
               this.setState({ queryable: e.target.checked });
             }}
             checked={this.state.queryable}
@@ -582,7 +586,7 @@ class ArcGISLayerForm extends Component {
             type="text"
             ref="input_content"
             value={this.state.content}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({ content: e.target.value });
             }}
           />
@@ -598,7 +602,7 @@ class ArcGISLayerForm extends Component {
           <input
             type="text"
             ref="input_attribution"
-            onChange={e => {
+            onChange={(e) => {
               const v = e.target.value;
               this.setState({ attribution: v }, () =>
                 this.validateField("attribution", v)
@@ -614,7 +618,7 @@ class ArcGISLayerForm extends Component {
               type="checkbox"
               ref="input_infoVisible"
               id="info-document"
-              onChange={e => {
+              onChange={(e) => {
                 this.setState({ infoVisible: e.target.checked });
               }}
               checked={this.state.infoVisible}
@@ -627,7 +631,7 @@ class ArcGISLayerForm extends Component {
             <input
               type="text"
               ref="input_infoTitle"
-              onChange={e => {
+              onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoTitle: v }, () =>
                   this.validateField("infoTitle", v)
@@ -642,7 +646,7 @@ class ArcGISLayerForm extends Component {
             <textarea
               type="text"
               ref="input_infoText"
-              onChange={e => {
+              onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoText: v }, () =>
                   this.validateField("infoText", v)
@@ -657,7 +661,7 @@ class ArcGISLayerForm extends Component {
             <input
               type="text"
               ref="input_infoUrl"
-              onChange={e => {
+              onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoUrl: v }, () =>
                   this.validateField("infoUrl", v)
@@ -672,7 +676,7 @@ class ArcGISLayerForm extends Component {
             <input
               type="text"
               ref="input_infoUrlText"
-              onChange={e => {
+              onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoUrlText: v }, () =>
                   this.validateField("infoUrlText", v)
@@ -687,7 +691,7 @@ class ArcGISLayerForm extends Component {
             <input
               type="text"
               ref="input_infoOwner"
-              onChange={e => {
+              onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoOwner: v }, () =>
                   this.validateField("infoOwner", v)

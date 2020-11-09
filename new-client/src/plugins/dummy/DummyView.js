@@ -52,6 +52,7 @@ class DummyView extends React.PureComponent {
       value: "dummy",
       ButtonIcon: BugReportIcon,
       caption: "Dummyverktyg",
+      drawerTitle: "Dummyverktyg",
       order: 100,
       renderDrawerContent: this.renderDrawerContent,
     });

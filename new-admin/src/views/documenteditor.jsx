@@ -360,7 +360,9 @@ class DocumentEditor extends Component {
       <div key={Math.random() * 1e8} className="document-chapter">
         <div className="document-menu">
           <div className="document-chapter-header">
-            <h1>{chapter.header}</h1>
+            <span>
+              <b>{chapter.header}</b>
+            </span>
           </div>
           <div className="document-menu-buttons">
             <Button
@@ -502,6 +504,7 @@ class DocumentEditor extends Component {
             chapter.html = html;
           }}
           imageList={this.state.imageList}
+          documents={this.state.documents}
         />
         <div className="document-nested-chapter">
           {chapter.expanded

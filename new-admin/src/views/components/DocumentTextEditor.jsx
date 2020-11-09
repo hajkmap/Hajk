@@ -18,8 +18,13 @@ import { green } from "@material-ui/core/colors";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
+import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
+import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 import ImageIcon from "@material-ui/icons/Image";
+import DescriptionIcon from "@material-ui/icons/Description";
+import MapIcon from "@material-ui/icons/Map";
+import LaunchIcon from "@material-ui/icons/Launch";
 
 import addLinkPlugin from "./addLinkPlugin";
 import { mediaBlockRenderer } from "./addMediaPlugin";
@@ -33,10 +38,10 @@ const ColorButtonGreen = withStyles((theme) => ({
     "&:hover": {
       backgroundColor: green[700],
     },
+    marginRight: "28px",
+    float: "left",
   },
 }))(Button);
-
-let readOnlyState = false;
 
 export default class DocumentTextEditor extends React.Component {
   constructor(props) {
@@ -51,6 +56,8 @@ export default class DocumentTextEditor extends React.Component {
       url: "",
       urlType: "",
       imageList: this.props.imageList,
+      documents: this.props.documents,
+      isReadOnly: false,
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -62,6 +69,7 @@ export default class DocumentTextEditor extends React.Component {
     this.onChange = (editorState) => this.setState({ editorState });
     this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
     this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
+    this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
     this.onWidthChange = (e) => this.setState({ mediaWidth: e.target.value });
     this.onHeightChange = (e) => this.setState({ mediaHeight: e.target.value });
     this.onDataCaptionChange = (e) =>
@@ -128,8 +136,8 @@ export default class DocumentTextEditor extends React.Component {
       "IMMUTABLE",
       {
         src: urlValue,
-        width: mediaWidth,
-        height: mediaHeight,
+        "data-image-width": mediaWidth ? mediaWidth + "px" : null,
+        "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
         "data-popup": mediaPopup,
@@ -187,17 +195,26 @@ export default class DocumentTextEditor extends React.Component {
 
   _confirmLink(e) {
     e.preventDefault();
-    const { editorState, urlValue, urlType, urlTitle } = this.state;
+    const { editorState, urlValue, urlType, urlTitle, urlTitleId } = this.state;
+    const data = {
+      url: urlValue,
+      type: urlType,
+    };
+
+    if (urlType === "urllink") {
+      data["data-link"] = urlValue;
+    } else if (urlType === "documentlink") {
+      data["data-header-identifier"] = urlTitleId;
+      data["data-document"] = urlValue;
+    } else if (urlType === "maplink") {
+      data["data-maplink"] = urlValue;
+    }
+
     const contentState = editorState.getCurrentContent();
     const contentStateWithEntity = contentState.createEntity(
       "LINK",
       "MUTABLE",
-      {
-        url: urlValue,
-        title: urlTitle,
-        type: urlType,
-        "data-document": true,
-      }
+      data
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.push(
@@ -210,12 +227,13 @@ export default class DocumentTextEditor extends React.Component {
         editorState: AtomicBlockUtils.insertAtomicBlock(
           newEditorState,
           entityKey,
-          " "
+          urlTitle
         ),
         showURLInput: false,
         showLinkInput: false,
         urlValue: "",
         urlTitle: "",
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -235,6 +253,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         urlValue: "",
         urlTitle: "",
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -254,9 +273,6 @@ export default class DocumentTextEditor extends React.Component {
     if (blockType !== "blockquote" || !KeyBindingUtil.isSoftNewlineEvent(evt)) {
       return "not_handled";
     }
-    const newState = RichUtils.insertSoftNewline(this.state.editorState);
-    this.onChange(newState);
-    return "handled";
   };
   _promptForMedia(type) {
     this.setState(
@@ -284,6 +300,7 @@ export default class DocumentTextEditor extends React.Component {
         urlValue: this.state.urlValue,
         urlType: type,
         urlTitle: "",
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.refs.link.focus(), 0);
@@ -348,9 +365,10 @@ export default class DocumentTextEditor extends React.Component {
       img.alt = "";
       img.width = "";
       img.height = "";
+      img["data-image-width"] = "";
+      img["data-image-height"] = "";
       img["data-caption"] = "";
       img["data-source"] = "";
-      //img["data-popup"] = false;
       let figure = document.createElement("figure");
       figure.innerHTML = img.outerHTML;
       img.parentNode.replaceChild(figure, img);
@@ -378,48 +396,135 @@ export default class DocumentTextEditor extends React.Component {
       __html: html,
     };
   }
+
   getHtml() {
     const content = this.state.editorState.getCurrentContent();
 
-    // Add custom attributes
-    let options = {
-      blockStyleFn: (block) => {
-        if (block.get("type").toLowerCase() === "blockquote") {
-          return {
-            attributes: {
-              "data-text-section": "",
-            },
-          };
-        }
-      },
+    const blockStyleFn = (block) => {
+      const blockType = block.getType().toLowerCase();
+
+      if (blockType === "blockquote") {
+        return {
+          attributes: {
+            "data-divider-color": "",
+            "data-background-color": "",
+            "data-text-section": "",
+          },
+        };
+      }
+    };
+
+    const entityStyleFn = (entity) => {
+      const entityType = entity.getType().toUpperCase();
+      console.log("ent", entityType);
+      if (entityType === "LINK") {
+        // Add styling here
+      }
+      if (entityType === "IMAGE") {
+        // Add styling here
+      }
+    };
+
+    const options = {
+      blockStyleFn,
+      entityStyleFn,
     };
     return stateToHTML(content, options);
   }
+
   applyChanges() {
-    console.log("Before saving", this.getHtml());
-    this.props.onUpdate(this.getHtml());
+    var htmlString = this.getHtml();
+    this.props.onUpdate(htmlString);
     this.setState({
       //readonly: !this.state.readonly,
-      html: this.getHtml(),
+      html: htmlString,
     });
   }
 
-  render() {
-    const { editorState, imageList } = this.state;
-
-    let className = "RichEditor-editor";
-    var contentState = editorState.getCurrentContent();
-    if (!contentState.hasText()) {
-      if (contentState.getBlockMap().first().getType() !== "unstyled") {
-        className += " RichEditor-hidePlaceholder";
-      }
+  getUrlType(type) {
+    switch (type) {
+      case "urllink":
+        return "webblänk";
+      case "documentlink":
+        return "dokumentlänk";
+      case "maplink":
+        return "kartlänk";
+      default:
+        return "länk";
     }
+  }
+
+  getUrlInput(type, documents) {
+    // Return input field for default URL or documents
+    if (type === "documentlink") {
+      return (
+        <select onChange={this.onURLChange} ref="link">
+          {documents
+            ? documents.map((document, i) => {
+                return (
+                  <option key={i} type="text" name="document" value={document}>
+                    {document}
+                  </option>
+                );
+              })
+            : null}
+        </select>
+      );
+    } else {
+      return (
+        <input
+          onChange={this.onURLChange}
+          ref="link"
+          style={styles.urlInput}
+          type="text"
+          value={this.state.urlValue || ""}
+          placeholder="Webblänk"
+          onKeyDown={this.onLinkInputKeyDown}
+        />
+      );
+    }
+  }
+
+  getUrlId(type) {
+    // Return input field for default URL or documents
+    if (type === "documentlink") {
+      return (
+        <input
+          onChange={this.onTitleIdChange}
+          ref="url"
+          style={styles.urlInput}
+          type="text"
+          value={this.state.urlTitleId || ""}
+          placeholder="data-header-identifier"
+          onKeyDown={this.onLinkInputKeyDown}
+        />
+      );
+    }
+  }
+
+  toggleReadOnly = () => {
+    const { isReadOnly } = this.state;
+    this.setState({
+      isReadOnly: !isReadOnly,
+    });
+  };
+
+  render() {
+    const { editorState, imageList, documents } = this.state;
+
+    let editorContainer = styles.editor;
+    var contentState = editorState.getCurrentContent();
+    /*if (!contentState.hasText()) {
+      if (contentState.getBlockMap().first().getType() !== "unstyled") {
+        editorContainer = " RichEditor-hidePlaceholder";
+      }
+    }*/
 
     let urlInput;
     if (this.state.showURLInput) {
       urlInput = (
         <div style={styles.urlInputContainer}>
-          <h1>Lägg till media</h1>
+          <span>Lägg till bild</span>
           <input
             onChange={this.onURLChange}
             ref="url"
@@ -446,19 +551,19 @@ export default class DocumentTextEditor extends React.Component {
           </select>
           <input
             onChange={this.onWidthChange}
-            ref="width"
+            ref="data-image-width"
             type="number"
             value={this.state.mediaWidth || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="WIDTH"
+            placeholder="data-image-width"
           />
           <input
             onChange={this.onHeightChange}
-            ref="height"
+            ref="data-image-height"
             type="number"
             value={this.state.mediaHeight || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="HEIGHT"
+            placeholder="data-image-height"
           />
           <input
             onChange={this.onDataCaptionChange}
@@ -466,7 +571,7 @@ export default class DocumentTextEditor extends React.Component {
             type="text"
             value={this.state.mediaCaption || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="DATA-CAPTION"
+            placeholder="data-caption"
           />
           <input
             onChange={this.onDataSourceChange}
@@ -474,7 +579,7 @@ export default class DocumentTextEditor extends React.Component {
             type="text"
             value={this.state.mediaSource || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="DATA-SOURCE"
+            placeholder="data-source"
           />
           <input
             id="data-popup"
@@ -483,7 +588,7 @@ export default class DocumentTextEditor extends React.Component {
             type="checkbox"
             value={this.state.mediaPopup || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="DATA-POPUP"
+            placeholder="data-popup"
           />
           <label>Popup</label>
           <button onMouseDown={this.confirmMedia}>OK</button>
@@ -495,25 +600,18 @@ export default class DocumentTextEditor extends React.Component {
     if (this.state.showLinkInput) {
       urlInput = (
         <div style={styles.urlInputContainer}>
-          <h1>Lägg till länk {this.state.urlType}</h1>
-          <input
-            onChange={this.onURLChange}
-            ref="link"
-            style={styles.urlInput}
-            type="text"
-            value={this.state.urlValue || ""}
-            placeholder="Webblänk"
-            onKeyDown={this.onLinkInputKeyDown}
-          />
+          <h1>Lägg till {this.getUrlType(this.state.urlType)}</h1>
+          {this.getUrlInput(this.state.urlType, documents)}
           <input
             onChange={this.onTitleChange}
-            ref="link"
+            ref="url"
             style={styles.urlInput}
             type="text"
             value={this.state.urlTitle || ""}
             placeholder="Rubrik på länk"
             onKeyDown={this.onLinkInputKeyDown}
           />
+          {this.getUrlId(this.state.urlType)}
           <button onMouseDown={this.confirmLink}>OK</button>
           <button onMouseDown={this.closeLinkInput}>Avbryt</button>
         </div>
@@ -521,35 +619,40 @@ export default class DocumentTextEditor extends React.Component {
     }
 
     return (
-      <div className="RichEditor-root" style={styles.root}>
-        <div style={styles.buttons}>
-          <InlineStyleControls
-            editorState={editorState}
-            onToggle={this.toggleInlineStyle}
-          />
-          <BlockStyleControls
-            editorState={editorState}
-            onToggle={this.toggleBlockType}
-          />
-          <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
-          <button onClick={this.addWebLink}>Webblänk</button>
-          <button onClick={this.addDocumentLink}>Dokumentlänk</button>
-          <button onClick={this.addMapLink}>Kartlänk</button>
+      <div style={styles.root}>
+        <div style={styles.buttonContainer}>
+          <div style={styles.buttons}>
+            <ColorButtonGreen
+              variant="contained"
+              className="btn btn-primary"
+              title="Godkänn ändringar"
+              onClick={() => this.applyChanges()}
+              startIcon={<DoneIcon />}
+            />
+            <InlineStyleControls
+              editorState={editorState}
+              onToggle={this.toggleInlineStyle}
+            />
+            <BlockStyleControls
+              editorState={editorState}
+              onToggle={this.toggleBlockType}
+            />
+            <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
+            <StyleButton label={<LaunchIcon />} onToggle={this.addWebLink} />
+            <StyleButton
+              label={<DescriptionIcon />}
+              onToggle={this.addDocumentLink}
+            />
+            <StyleButton label={<MapIcon />} onToggle={this.addMapLink} />
+          </div>
         </div>
         {urlInput}
-        <ColorButtonGreen
-          variant="contained"
-          className="btn btn-primary"
-          title="Godkänn ändringar"
-          onClick={() => this.applyChanges()}
-          startIcon={<DoneIcon />}
-        >
-          <span>Godkänn ändringar</span>
-        </ColorButtonGreen>
-        <div className={className} style={styles.editor} onClick={this.focus}>
+        <div style={editorContainer} onClick={this.focus}>
           <Editor
-            blockRendererFn={mediaBlockRenderer}
+            style={styles.editor}
             blockStyleFn={getBlockStyle}
+            blockRendererFn={mediaBlockRenderer}
+            toggleReadOnly={false}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             handlePastedText={this.handlePastedText}
@@ -558,7 +661,7 @@ export default class DocumentTextEditor extends React.Component {
             onChange={this.onChange}
             placeholder="Lägg till text..."
             ref="editor"
-            readOnly={readOnlyState}
+            readOnly={this.state.isReadOnly}
             plugins={this.plugins}
           />
         </div>
@@ -568,6 +671,9 @@ export default class DocumentTextEditor extends React.Component {
           type="button"
           value="Log State"
         />
+        <button onMouseDown={this.toggleReadOnly} style={{ marginBottom: 5 }}>
+          Read Only Mode
+        </button>
       </div>
     );
   }
@@ -577,18 +683,19 @@ export default class DocumentTextEditor extends React.Component {
 function getBlockStyle(block) {
   switch (block.getType()) {
     case "blockquote":
-      return "RichEditor-blockquote";
+      return "document-blockquote";
     default:
       return null;
   }
 }
 
 const BLOCK_TYPES = [
-  { label: "H1", style: "header-one" },
+  //{ label: "H1", style: "header-one" },
   { label: <FormatQuoteIcon />, style: "blockquote" },
-  { label: "UL", style: "unordered-list-item" },
-  { label: "OL", style: "ordered-list-item" },
+  { label: <FormatListBulletedIcon />, style: "unordered-list-item" },
+  { label: <FormatListNumberedIcon />, style: "ordered-list-item" },
 ];
+
 const BlockStyleControls = (props) => {
   const { editorState } = props;
   const selection = editorState.getSelection();
@@ -598,7 +705,7 @@ const BlockStyleControls = (props) => {
     .getType();
 
   return (
-    <div className="document-editor-controls">
+    <div style={styles.buttons}>
       {BLOCK_TYPES.map((type) => (
         <StyleButton
           key={type.style}
@@ -621,7 +728,7 @@ const INLINE_STYLES = [
 const InlineStyleControls = (props) => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
   return (
-    <div className="document-editor-controls">
+    <div style={styles.buttons}>
       {INLINE_STYLES.map((type) => (
         <StyleButton
           key={type.style}
@@ -639,11 +746,16 @@ const InlineStyleControls = (props) => {
 const styles = {
   root: {
     fontFamily: "'Georgia', serif",
-    padding: 20,
     width: 1000,
+    border: "1px solid #ddd",
+  },
+  buttonContainer: {
+    height: 40,
+    borderBottom: "1px solid #ddd",
   },
   buttons: {
-    marginBottom: 10,
+    borderRight: "1px solid #ccc",
+    float: "left",
   },
   urlInputContainer: {
     marginBottom: 10,
@@ -653,11 +765,15 @@ const styles = {
     marginRight: 10,
     padding: 3,
   },
-  editor: {
+  editorContainer: {
     border: "1px solid #ccc",
     cursor: "text",
     minHeight: 80,
-    padding: 10,
+    fontSize: 16,
+  },
+  editor: {
+    backgroundColor: "#fff",
+    padding: "18px",
   },
   button: {
     marginTop: 10,
@@ -669,9 +785,6 @@ const styles = {
   paper: {
     position: "absolute",
     width: 400,
-    //backgroundColor: theme.palette.background.paper,
     border: "2px solid #000",
-    //boxShadow: theme.shadows[5],
-    //padding: theme.spacing(2, 4, 3),
   },
 };

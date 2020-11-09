@@ -1,27 +1,18 @@
 import React from "react";
-import Link from "@material-ui/core/Link";
 import MapIcon from "@material-ui/icons/Map";
 import DescriptionIcon from "@material-ui/icons/Description";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import clsx from "clsx";
-import Button from "@material-ui/core/Button";
-
-import Typography from "@material-ui/core/Typography";
+import Box from "@material-ui/core/Box";
 import TextArea from "../documentWindow/TextArea";
-import CardMedia from "@material-ui/core/CardMedia";
 import { makeStyles } from "@material-ui/core/styles";
+import { Button, Typography, CardMedia, List } from "@material-ui/core";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
 
 const useStyles = makeStyles((theme) => ({
   documentImage: {
-    marginBottom: theme.spacing(0.5),
     objectFit: "contain",
     objectPosition: "left",
   },
@@ -35,47 +26,61 @@ const useStyles = makeStyles((theme) => ({
   },
   imageText: {
     marginBottom: theme.spacing(1),
+    fontStyle: "italic",
   },
-
+  imageInformationWrapper: {
+    marginBottom: theme.spacing(1),
+  },
+  imageCaption: {
+    fontStyle: "italic",
+  },
+  startIcon: {
+    marginLeft: theme.spacing(0),
+  },
   linkIcon: {
-    fontSize: getIconSizeFromFontSize(theme.typography.body1.fontSize),
-    marginRight: theme.spacing(1),
     verticalAlign: "middle",
+  },
+  heading: {
+    marginBottom: theme.spacing(1),
   },
   typography: {
     overflowWrap: "break-word",
     marginBottom: theme.spacing(1),
   },
-  ulIcon: {
-    fontSize: "1rem",
+  ulList: {
+    listStyle: "initial",
+    listStylePosition: "inside",
+    padding: theme.spacing(0),
+    marginBottom: theme.spacing(1),
   },
-  listRoot: {
-    color: "black",
-  },
-  startIcon: {
-    marginRight: 0,
+  olList: {
+    listStyle: "decimal",
+    listStylePosition: "inside",
+    padding: theme.spacing(0),
+    marginBottom: theme.spacing(1),
   },
   linkButton: {
-    padding: 0,
+    padding: theme.spacing(0),
+    marginBottom: theme.spacing(1),
     color: theme.palette.info.main,
   },
 }));
+
+const renderChild = (child) => {
+  if (child.nodeType === TEXT_NODE) {
+    return child.data;
+  }
+
+  if (child.nodeType === ELEMENT_NODE) {
+    return child.callback(child);
+  }
+};
 
 const getFormattedComponentFromTag = (tag) => {
   const childNodes = [...tag.childNodes];
   return childNodes.map((child, index) => {
     return <React.Fragment key={index}>{renderChild(child)}</React.Fragment>;
   });
-};
-
-const getIconSizeFromFontSize = (fontSizeBody) => {
-  let format = "rem";
-  if (fontSizeBody.search("px") > -1) {
-    format = "px";
-  }
-  let index = fontSizeBody.search(format);
-  let size = fontSizeBody.substring(0, index);
-  return `${size * 1.7}${format}`;
 };
 
 export const Paragraph = ({ pTag }) => {
@@ -91,20 +96,9 @@ export const ULComponent = ({ ulComponent }) => {
   let children = [...ulComponent.children];
   const classes = useStyles();
   return (
-    <List component="nav">
+    <List className={classes.ulList} component="ul">
       {children.map((listItem, index) => {
-        return (
-          <ListItem key={index}>
-            <ListItemIcon styles={{ root: classes.listRoot }}>
-              <FiberManualRecordIcon
-                className={classes.ulIcon}
-              ></FiberManualRecordIcon>
-            </ListItemIcon>
-            <ListItemText
-              primary={getFormattedComponentFromTag(listItem)}
-            ></ListItemText>
-          </ListItem>
-        );
+        return <li key={index}>{getFormattedComponentFromTag(listItem)}</li>;
       })}
     </List>
   );
@@ -114,19 +108,9 @@ export const OLComponent = ({ olComponent }) => {
   let children = [...olComponent.children];
   const classes = useStyles();
   return (
-    <List component="nav">
+    <List className={classes.olList} component="ol">
       {children.map((listItem, index) => {
-        return (
-          <ListItem key={index}>
-            <ListItemText
-              styles={{ root: classes.listRoot }}
-              primary={`${index + 1}.`}
-            ></ListItemText>
-            <ListItemText
-              primary={getFormattedComponentFromTag(listItem)}
-            ></ListItemText>
-          </ListItem>
-        );
+        return <li key={index}>{getFormattedComponentFromTag(listItem)}</li>;
       })}
     </List>
   );
@@ -134,11 +118,10 @@ export const OLComponent = ({ olComponent }) => {
 
 export const Heading = ({ headingTag }) => {
   const classes = useStyles();
-
   return (
     <>
       <Typography
-        className={classes.typography}
+        className={classes.heading}
         variant={headingTag.tagName.toLowerCase()}
       >
         {getFormattedComponentFromTag(headingTag)}
@@ -160,15 +143,15 @@ const getTextArea = (tag, defaultColors) => {
   const dividerColor =
     tag.attributes.getNamedItem("data-divider-color")?.value ||
     defaultColors?.textAreaDividerColor;
-
-  return (
-    <TextArea
-      backgroundColor={backgroundColor}
-      dividerColor={dividerColor}
-      textAreaContentArray={textAreaContentArray}
-    ></TextArea>
-  );
-};
+  
+    return (
+      <TextArea
+        backgroundColor={backgroundColor}
+        dividerColor={dividerColor}
+        textAreaContentArray={textAreaContentArray}
+      ></TextArea>
+    );
+  };
 
 export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
@@ -187,29 +170,6 @@ export const Figure = ({ figureTag }) => {
   });
 };
 
-const isPopupAllowedForImage = (imgTag) => {
-  return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
-};
-
-const getImageStyle = (image, classes) => {
-  let className = image.popup
-    ? clsx(
-        classes.documentImage,
-        classes.naturalDocumentImageProportions,
-        classes.popupActivatedImage
-      )
-    : clsx(classes.documentImage, classes.naturalDocumentImageProportions);
-
-  if (image.height && image.width) {
-    if (image.popup) {
-      className = clsx(classes.documentImage, classes.popupActivatedImage);
-    } else {
-      className = clsx(classes.documentImage, classes.popupActivatedImage);
-    }
-  }
-  return className;
-};
-
 /**
  * The render function for the img-tag.
  * @param {string} imgTag The img-tag.
@@ -218,6 +178,46 @@ const getImageStyle = (image, classes) => {
  */
 export const Img = ({ imgTag, localObserver }) => {
   const classes = useStyles();
+
+  const isPopupAllowedForImage = (imgTag) => {
+    return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
+  };
+
+  const getImageStyle = (image) => {
+    let className = image.popup
+      ? clsx(
+          classes.documentImage,
+          classes.naturalDocumentImageProportions,
+          classes.popupActivatedImage
+        )
+      : clsx(classes.documentImage, classes.naturalDocumentImageProportions);
+
+    if (image.height && image.width) {
+      if (image.popup) {
+        className = clsx(classes.documentImage, classes.popupActivatedImage);
+      } else {
+        className = clsx(classes.documentImage, classes.popupActivatedImage);
+      }
+    }
+    return className;
+  };
+
+  const getImageDescription = (image) => {
+    return (
+      <Box className={classes.imageInformationWrapper}>
+        {image.caption && (
+          <Typography variant="subtitle2" className={classes.imageCaption}>
+            {image.caption}
+          </Typography>
+        )}
+        {image.source && (
+          <Typography variant="subtitle2" className={classes.imageText}>
+            {image.source}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
   const image = {
     caption: imgTag.attributes.getNamedItem("data-caption")?.value,
     popup: isPopupAllowedForImage(imgTag),
@@ -245,26 +245,15 @@ export const Img = ({ imgTag, localObserver }) => {
             ? { height: image.height, width: image.width }
             : null
         }
-        className={getImageStyle(image, classes)}
+        className={getImageStyle(image)}
         image={image.url}
       />
-      {getImageDescription(image, classes)}
+      {getImageDescription(image)}
     </>
   );
 };
 
-const getImageDescription = (image, classes) => {
-  return (
-    <>
-      <Typography className={classes.imageText} variant="subtitle2">
-        {image.caption}
-      </Typography>
-      <Typography variant="subtitle2">{image.source}</Typography>
-    </>
-  );
-};
-
-export const Strong = (strongTag) => {
+export const Strong = ({ strongTag }) => {
   const children = [...strongTag.childNodes];
   let array = [];
   if (children.length > 0) {
@@ -279,7 +268,7 @@ export const Strong = (strongTag) => {
   }
   return [<strong>{strongTag.textContent}</strong>];
 };
-export const Underline = (uTag) => {
+export const Underline = ({ uTag }) => {
   const children = [...uTag.childNodes];
   let array = [];
   if (children.length > 0) {
@@ -294,7 +283,7 @@ export const Underline = (uTag) => {
   }
   return [<u>{uTag.textContent}</u>];
 };
-export const Italic = (emTag) => {
+export const Italic = ({ emTag }) => {
   const children = [...emTag.childNodes];
   let array = [];
   if (children.length > 0) {
@@ -320,24 +309,6 @@ export const LineBreak = () => {
   return <br />;
 };
 
-const getLinkDataPerType = (attributes) => {
-  const {
-    0: mapLink,
-    1: headerIdentifier,
-    2: documentLink,
-    3: externalLink,
-  } = [
-    "data-maplink",
-    "data-header-identifier",
-    "data-document",
-    "data-link",
-  ].map((attributeKey) => {
-    return attributes.getNamedItem(attributeKey)?.value;
-  });
-
-  return { mapLink, headerIdentifier, documentLink, externalLink };
-};
-
 /**
  * Callback used to render different link-components from a-elements
  * @param {Element} aTag a-element.
@@ -347,6 +318,24 @@ const getLinkDataPerType = (attributes) => {
  */
 export const CustomLink = ({ aTag, localObserver }) => {
   const classes = useStyles();
+
+  const getLinkDataPerType = (attributes) => {
+    const {
+      0: mapLink,
+      1: headerIdentifier,
+      2: documentLink,
+      3: externalLink,
+    } = [
+      "data-maplink",
+      "data-header-identifier",
+      "data-document",
+      "data-link",
+    ].map((attributeKey) => {
+      return attributes.getNamedItem(attributeKey)?.value;
+    });
+
+    return { mapLink, headerIdentifier, documentLink, externalLink };
+  };
 
   const getExternalLink = (externalLink) => {
     return (
@@ -429,14 +418,4 @@ export const CustomLink = ({ aTag, localObserver }) => {
   }
 
   return null;
-};
-
-const renderChild = (child) => {
-  if (child.nodeType === TEXT_NODE) {
-    return child.data;
-  }
-
-  if (child.nodeType === ELEMENT_NODE) {
-    return child.callback(child);
-  }
 };

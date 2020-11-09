@@ -1,51 +1,68 @@
 import React from "react";
-import { RichUtils, KeyBindingUtil, EditorState } from "draft-js";
+import { KeyBindingUtil } from "draft-js";
+import DescriptionIcon from "@material-ui/icons/Description";
+import MapIcon from "@material-ui/icons/Map";
+import LaunchIcon from "@material-ui/icons/Launch";
 
-export const LinkStrategy = (contentBlock, callback, contentState) => {
+const LinkStrategy = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
     const entity = character.getEntity();
     return (
-      entity !== null && contentState.getEntity(entity).getType() === "LINK"
+      entity !== null &&
+      contentState.getEntity(entity).getType().toLowerCase() === "link"
     );
   }, callback);
 };
 
-export const Link = ({ contentState, entityKey, children }) => {
-  const { url, title, type } = contentState.getEntity(entityKey).getData();
-
-  const entity = contentState.getEntity(entityKey);
+const Link = (props) => {
+  const entity = props.contentState.getEntity(props.entityKey);
   const data = entity.getData();
-
-  const dataCaption = data["data-document"];
+  const title = props.decoratedText;
 
   if (data["data-document"]) {
-    console.log("Document");
+    return (
+      <a
+        data-document={data["data-document"]}
+        data-header-identifier={data["data-header-identifier"]}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <DescriptionIcon /> {title}
+      </a>
+    );
   } else if (data["data-link"]) {
-    console.log("URL");
+    return (
+      <a
+        data-link={data["data-link"]}
+        data-header-identifier={data["data-header-identifier"]}
+        data-title={data.title}
+      >
+        <LaunchIcon /> {title}
+      </a>
+    );
   } else if (data["data-maplink"]) {
-    console.log("Maplink");
+    return (
+      <a
+        data-maplink={data["data-maplink"]}
+        data-header-identifier={data["data-header-identifier"]}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <MapIcon /> {title}
+      </a>
+    );
+  } else {
+    return (
+      <a
+        data-header-identifier={data["data-header-identifier"]}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        {title}
+      </a>
+    );
   }
-
-  return (
-    <a href={url} rel="noopener noreferrer" target="_blank" data-document>
-      {title}
-    </a>
-  );
 };
-
-const isUrl = (link) => {
-  if (!link) {
-    return false;
-  }
-
-  const expression = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm;
-  var regex = new RegExp(expression);
-
-  return link.match(regex);
-};
-
-const withHttps = (url) =>
-  !/^https?:\/\//i.test(url) ? `https://${url}` : url;
 
 export const addLinkPlugin = {
   keyBindingFn(event, { getEditorState }) {

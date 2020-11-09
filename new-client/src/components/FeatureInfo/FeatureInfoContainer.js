@@ -13,25 +13,32 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  ButtonGroup,
   Button,
   Typography,
   Grid,
 } from "@material-ui/core";
 
 const styles = (theme) => ({
-  stepButton: {
-    width: "20%",
-  },
-  buttonGroup: {
-    display: "flex",
-    justifyContent: "space-between",
+  toggler: {
+    backgroundColor: theme.palette.primary.main,
   },
   infoContainer: {
     height: "100%",
   },
+  typography: {
+    textAlign: "center",
+  },
+  columnValue: {
+    wordBreak: "break-all",
+  },
+  columnKey: {
+    verticalAlign: "top",
+  },
   featureInfoContainer: {
     flex: "auto",
+  },
+  featureInfo: {
+    width: "100%",
   },
 });
 
@@ -76,57 +83,50 @@ class FeatureInfoContainer extends React.PureComponent {
     }
   };
 
-  getStepButton = (onClickFunction, icon, disabled) => {
-    const { classes } = this.props;
-    return (
-      <Button
-        disabled={disabled}
-        className={classes.stepButton}
-        onClick={onClickFunction}
-        aria-label="Previous"
-        id="step-left"
-      >
-        {icon}
-      </Button>
-    );
-  };
-
   getToggler = () => {
     const { features, classes } = this.props;
     return (
-      <>
-        <ButtonGroup
-          fullWidth
-          className={classes.buttonGroup}
-          aria-label="Browse through infoclick results"
-          color="primary"
-          size="small"
-          variant="contained"
-        >
+      <Grid
+        alignItems="center"
+        justify="space-between"
+        className={classes.toggler}
+        container
+      >
+        <Grid item>
           <Button
+            fullWidth
+            variant="outlined"
             disabled={this.state.selectedIndex - 1 < 0}
-            className={classes.stepButton}
             onClick={this.stepLeft}
             aria-label="previous"
             id="step-left"
           >
             <ArrowLeftIcon />
           </Button>
+        </Grid>
+        <Grid item>
+          <Typography className={classes.typography}>
+            {this.state.selectedIndex + 1} av {features.length}
+          </Typography>
+        </Grid>
+        <Grid item>
           <Button
+            fullWidth
+            variant="outlined"
             disabled={this.state.selectedIndex + 1 >= features.length}
-            className={classes.stepButton}
             onClick={this.stepRight}
             aria-label="next"
             id="step-right"
           >
             <ArrowRightIcon />
           </Button>
-        </ButtonGroup>
-      </>
+        </Grid>
+      </Grid>
     );
   };
 
   getFeaturesAsDefaultTable(data, caption) {
+    const { classes } = this.props;
     // We can't use "i" for coloring every second row, as some rows
     // will be removed (Objects are not printed), so there's a need
     // for a separate counter of rows that actually get printed.
@@ -136,8 +136,10 @@ class FeatureInfoContainer extends React.PureComponent {
         ++j;
         return (
           <TableRow key={i} selected={j % 2 === 0}>
-            <TableCell variant="head">{key}</TableCell>
-            <TableCell>{data[key]}</TableCell>
+            <TableCell className={classes.columnKey} variant="head">
+              {key}
+            </TableCell>
+            <TableCell className={classes.columnValue}>{data[key]}</TableCell>
           </TableRow>
         );
       } else {
@@ -297,9 +299,10 @@ class FeatureInfoContainer extends React.PureComponent {
 
   renderFeatureInformation = () => {
     const { caption, value, shortcodes, markdown } = this.state;
+    const { classes } = this.props;
 
     return (
-      <Grid style={{ width: "100%" }} item>
+      <Grid className={classes.featureInfo} item>
         <Typography variant="button" align="center" component="h6">
           {caption}
         </Typography>
@@ -324,8 +327,14 @@ class FeatureInfoContainer extends React.PureComponent {
     const { classes } = this.props;
     const featureInfoLoaded = this.isReadyToShowInfo();
     return (
-      <Grid className={classes.infoContainer} direction="column" container>
-        <Grid item>{this.getToggler()}</Grid>
+      <Grid
+        alignContent="flex-start"
+        className={classes.infoContainer}
+        container
+      >
+        <Grid xs={12} item>
+          {this.getToggler()}
+        </Grid>
         <Grid
           justify="center"
           alignContent={featureInfoLoaded ? "flex-start" : "center"}

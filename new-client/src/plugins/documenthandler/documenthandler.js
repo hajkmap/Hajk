@@ -83,11 +83,12 @@ class DocumentHandler extends React.PureComponent {
   };
 
   addDrawerToggleButton = () => {
-    const { app } = this.props;
+    const { app, options } = this.props;
     app.globalObserver.publish("core.addDrawerToggleButton", {
       value: "menu",
       ButtonIcon: MenuBook,
-      caption: "Översiktsplan",
+      caption: options.drawerButtonTitle || "Meny",
+      drawerTitle: options.drawerTitle || "Översiktsplan",
       order: 100,
       renderDrawerContent: this.renderDrawerContent,
     });
