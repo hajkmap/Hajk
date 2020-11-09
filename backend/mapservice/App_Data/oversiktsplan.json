@@ -654,6 +654,10 @@
       "options": {
         "searchImplemented": true,
         "title": "",
+        "defaultDocumentColorSettings": {
+          "textAreaBackgroundColor": "#ccc",
+          "textAreaDividerColor": "#6A0DAD"
+        },
         "documentOnStart": "utgangspunkter",
         "target": "hidden",
         "showScrollButtonLimit": 400,
