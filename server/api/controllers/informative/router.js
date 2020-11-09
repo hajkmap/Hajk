@@ -3,5 +3,9 @@ import controller from "./controller";
 
 export default express
   .Router()
+  .post("/create", controller.create)
   .get("/load/:name", controller.getByName)
-  .get("/list", controller.list);
+  .post("/save/:name", controller.saveByName)
+  .delete("/delete/:name", controller.deleteByName)
+  .get("/list", controller.list)
+  .get("/list/:name", controller.list); // FIXME: For now, the name paramter is ignored - should list only documents connected to specified map

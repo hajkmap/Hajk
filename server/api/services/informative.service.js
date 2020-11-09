@@ -24,6 +24,93 @@ class InformativeService {
   }
 
   /**
+   * @summary Create a new, empty documents file, link it to specified map config.
+   *
+   * @param {*} documentName File name to be created
+   * @param {*} mapName Name of map config that this document file will be linked to
+   * @returns
+   * @memberof InformativeService
+   */
+  async create(documentName, mapName) {
+    try {
+      // Add desired file extension to our file's name…
+      documentName += ".json";
+
+      // …and create a new path to that file.
+      const pathToFile = path.join(
+        process.cwd(),
+        "App_Data/documents",
+        documentName
+      );
+
+      // Prepare the contents of our new documents file
+      const json = {
+        chapters: [], // No chapters
+        map: mapName, // Link this document to the desired map config
+      };
+
+      // Transform JSON object to string using 2 spaces indentation
+      const jsonString = JSON.stringify(json, null, 2);
+
+      // Write to file using the sync version (I was getting problems with the
+      // promise version, for some reason file writing hasn't finished before
+      // the next /list request got out, which led to problems).
+      fs.writeFileSync(pathToFile, jsonString);
+
+      return json;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
+   * @summary Replace contents of the specified documents file with the incoming body.
+   *
+   * @param {*} file Name of the document to be replaced (without file extension)
+   * @param {*} body Content that will entirely replace the existing content of file
+   * @returns
+   * @memberof InformativeService
+   */
+  async saveByName(file, body) {
+    try {
+      file += ".json";
+      // Prepare the path to our file
+      const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+
+      // Simple way to verify we've got valid JSON: try parsing it.
+      const json = JSON.parse(body);
+
+      // If parsing was successful, convert back to string,
+      // using 2 spaces as indentation
+      const jsonString = JSON.stringify(json, null, 2);
+
+      // Write to file
+      await fs.promises.writeFile(pathToFile, jsonString);
+
+      // Return the parsed JSON object
+      return jsonString;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async deleteByName(file) {
+    try {
+      file += ".json";
+      // Prepare the path to our file
+      const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+
+      // Just drop the specified file…
+      fs.unlinkSync(pathToFile);
+
+      // Return an empty JSON object
+      return {};
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
    * @summary Lists all available documents
    *
    * @returns {array} Names of files as array of strings
