@@ -22,10 +22,12 @@ const styles = (theme) => {
       paddingTop: theme.spacing(1),
       paddingBottom: theme.spacing(1),
     },
+    collapseContainer: {
+      width: "100%",
+    },
     root: {
       width: "100%",
       padding: theme.spacing(0),
-      maxWidth: 360,
       backgroundColor: theme.palette.grey[200],
     },
   };
@@ -167,7 +169,11 @@ class TableOfContents extends React.PureComponent {
             )}
           </Grid>
         </Grid>
-        <Collapse in={expanded} id="expansion-panel-content">
+        <Collapse
+          className={classes.collapseContainer}
+          in={expanded}
+          id="expansion-panel-content"
+        >
           <Grid container spacing={0}>
             {this.renderChapters(activeDocument)}
           </Grid>
