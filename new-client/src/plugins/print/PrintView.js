@@ -89,6 +89,17 @@ class PrintView extends React.PureComponent {
       this.setState({ printInProgress: false });
     });
 
+    props.localObserver.subscribe("print-failed-to-save", () => {
+      this.props.closeSnackbar(this.snackbarKey);
+      this.props.enqueueSnackbar(
+        "Utskriften gick inte att spara, kontakta systemadministratören.",
+        {
+          variant: "error",
+        }
+      );
+      this.setState({ printInProgress: false });
+    });
+
     this.localObserver.subscribe("error-loading-logo-image", () => {
       this.props.enqueueSnackbar("Logotypbilden kunde inte laddas in.", {
         variant: "warning",
@@ -238,7 +249,15 @@ class PrintView extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { previewLayerVisible, scale, format, orientation } = this.state;
+    const {
+      previewLayerVisible,
+      scale,
+      format,
+      orientation,
+      printInProgress,
+      saveAsType,
+      activeTab,
+    } = this.state;
 
     this.model.renderPreviewFeature(previewLayerVisible, {
       scale: scale,
@@ -259,7 +278,7 @@ class PrintView extends React.PureComponent {
               indicatorColor="primary"
               onChange={this.handleChangeTabs}
               textColor="primary"
-              value={this.state.activeTab}
+              value={activeTab}
               variant="fullWidth"
             >
               <Tooltip title="Generella inställningar">
@@ -271,15 +290,15 @@ class PrintView extends React.PureComponent {
             </Tabs>
           </AppBar>
           <div className={classes.tabContent}>
-            {this.state.activeTab === 0 && this.renderGeneralOptions()}
-            {this.state.activeTab === 1 && this.renderAdvancedOptions()}
+            {activeTab === 0 && this.renderGeneralOptions()}
+            {activeTab === 1 && this.renderAdvancedOptions()}
             <div className={classes.printButtonContainer}>
               <Button
                 variant="contained"
                 fullWidth={true}
                 color="primary"
                 onClick={this.initiatePrint}
-                disabled={this.state.printInProgress}
+                disabled={printInProgress}
               >
                 Skriv ut
               </Button>
@@ -287,7 +306,8 @@ class PrintView extends React.PureComponent {
           </div>
         </div>
         <PrintDialog
-          open={this.state.printInProgress}
+          open={printInProgress}
+          saveAsType={saveAsType}
           cancelPrint={this.cancelPrint}
         />
       </>
