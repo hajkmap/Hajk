@@ -835,10 +835,8 @@ figure img {
 
 .document-chapter-header {
   float: left;
-  font-size: 24pt;
   margin: 0;
   margin-bottom: 5px;
-  min-width: 500px;
   cursor: pointer;
 }
 
