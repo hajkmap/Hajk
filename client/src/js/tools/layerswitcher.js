@@ -101,8 +101,8 @@ var LayerSwitcherModel = {
     HAJK2.configFile = configurationName;
     HAJK2.configTitle = configurationTitle;
     HAJK2.start({
-      configPath: '/mapservice/config/' + configurationName,
-      layersPath: '/mapservice/config/layers'
+      configPath: location.href.substring(0, location.href.lastIndexOf("/")) + '/mapservice/config/' + configurationName,
+      layersPath: location.href.substring(0, location.href.lastIndexOf("/")) + '/mapservice/config/layers'
     }, function (status, message) {
       if (!status) {
         document.write(message);
@@ -112,7 +112,7 @@ var LayerSwitcherModel = {
 
   loadThemeMaps: function (callback) {
     $.ajax({
-      url: '/mapservice/config/userspecificmaps',
+      url: location.href.substring(0, location.href.lastIndexOf("/")) + '/mapservice/config/userspecificmaps',
       method: 'GET',
       contentType: 'application/json',
       success: (data) => {
