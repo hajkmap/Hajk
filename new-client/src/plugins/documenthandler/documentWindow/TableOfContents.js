@@ -59,7 +59,6 @@ class TableOfContents extends React.PureComponent {
 
   static defaultProps = {
     expanded: true,
-    chapterLevelsToShow: 100,
     title: "Innehåll",
   };
 
@@ -88,8 +87,8 @@ class TableOfContents extends React.PureComponent {
   };
 
   showSubChapter = (level) => {
-    const { chapterLevelsToShow } = this.props;
-    return level <= chapterLevelsToShow;
+    const { activeDocument } = this.props;
+    return level < (activeDocument?.tableOfContents?.chapterLevelToShow || 100);
   };
 
   /**
