@@ -560,11 +560,6 @@ class Page extends Component {
       </Button>
     );
 
-    var okButtonText = "Stäng";
-    if (this.props.options.collectAgain) {
-      okButtonText = "Tyck till igen!";
-    }
-
     const okButton = (
       <Button
         variant="outlined"
@@ -574,7 +569,7 @@ class Page extends Component {
           this.props.model.observer.publish("abort");
         }}
       >
-        {okButtonText}
+        {this.props.options.collectAgain ? "Tyck till igen" : "Stäng"}
       </Button>
     );
 
