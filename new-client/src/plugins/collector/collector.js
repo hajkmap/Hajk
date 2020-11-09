@@ -28,7 +28,6 @@ class Collector extends React.Component {
         serviceConfig: this.serviceConfig
       }
     });
-// Remove line
   }
 
   getLayerConfigById(serviceId) {

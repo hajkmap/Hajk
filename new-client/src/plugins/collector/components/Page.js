@@ -17,36 +17,36 @@ import Slide from "@material-ui/core/Slide";
 import Toolbar from "./Toolbar.js";
 import { withSnackbar } from "notistack";
 
-const styles = (theme) => ({
+const styles = theme => ({
   button: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   buttonLeft: {
     float: "left",
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   buttonRight: {
     float: "right",
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   input: {
-    display: "none",
+    display: "none"
   },
   page: {
-    height: "100%",
+    height: "100%"
   },
   textField: {
-    minWidth: "60%",
+    minWidth: "60%"
   },
   pageContent: {
     height: "calc(100% - 60px)",
     overflowX: "hidden",
-    borderBottom: "1px solid #ccc",
+    borderBottom: "1px solid #ccc"
   },
   pageContentInner: {
-    paddingBottom: "10px",
+    paddingBottom: "10px"
   },
-  buttons: {},
+  buttons: {}
 });
 
 class Page extends Component {
@@ -56,7 +56,7 @@ class Page extends Component {
       var json = Parser.html2json(props.page.text);
       this.state = {
         json: json,
-        displayThankYou: false,
+        displayThankYou: false
       };
       this.formErrors = {};
     }
@@ -182,7 +182,7 @@ class Page extends Component {
             className={classes.textField}
             margin="normal"
             value={value}
-            onChange={(e) => {
+            onChange={e => {
               this.checkInteger(field.name, e.target.value);
               field.initialRender = false;
             }}
@@ -196,7 +196,7 @@ class Page extends Component {
             className={classes.textField}
             margin="normal"
             value={value}
-            onChange={(e) => {
+            onChange={e => {
               this.checkNumber(field.name, e.target.value);
               field.initialRender = false;
             }}
@@ -211,12 +211,12 @@ class Page extends Component {
             type="datetime-local"
             margin="normal"
             value={value}
-            onChange={(e) => {
+            onChange={e => {
               this.checkDate(field.name, e.target.value);
               field.initialRender = false;
             }}
             InputLabelProps={{
-              shrink: true,
+              shrink: true
             }}
           />
         );
@@ -231,11 +231,11 @@ class Page extends Component {
               className={classes.textField}
               margin="normal"
               value={value}
-              onChange={(e) => {
+              onChange={e => {
                 this.checkText(field.name, e.target.value);
                 field.initialRender = false;
               }}
-              onBlur={(e) => {
+              onBlur={e => {
                 if (field.textType === "url") {
                   this.checkUrl(field.name, e.target.value);
                 }
@@ -251,8 +251,8 @@ class Page extends Component {
           defaultValues = field.defaultValue.split(",");
         }
         if (field.initialRender) {
-          defaultValues.forEach((defaultValue) => {
-            value.forEach((val) => {
+          defaultValues.forEach(defaultValue => {
+            value.forEach(val => {
               if (defaultValue === val.value) {
                 val.checked = true;
               }
@@ -263,8 +263,8 @@ class Page extends Component {
         let checkboxes = field.values.map((val, i) => {
           var id = field.name + i,
             item = (Array.isArray(value) &&
-              value.find((item) => item.value === val)) || {
-              checked: false,
+              value.find(item => item.value === val)) || {
+              checked: false
             };
 
           return (
@@ -273,7 +273,7 @@ class Page extends Component {
               control={
                 <Checkbox
                   checked={item.checked}
-                  onChange={(e) => {
+                  onChange={e => {
                     this.checkMultiple(field.name, e.target.checked, val, i);
                     field.initialRender = false;
                   }}
@@ -324,7 +324,7 @@ class Page extends Component {
               <NativeSelect
                 value={value}
                 input={<Input name={field.name} id={field.name} />}
-                onChange={(e) => {
+                onChange={e => {
                   this.checkSelect(field.name, e.target.value);
                   field.initialRender = false;
                 }}
@@ -343,7 +343,7 @@ class Page extends Component {
 
   getFieldConfig(fieldName) {
     return this.props.serviceConfig.editableFields.find(
-      (field) => field.name === fieldName
+      field => field.name === fieldName
     );
   }
 
@@ -477,7 +477,7 @@ class Page extends Component {
 
   save = () => {
     this.props.model.save(
-      (r) => {
+      r => {
         if (
           r &&
           r.TransactionResponse &&
@@ -488,12 +488,12 @@ class Page extends Component {
           if (Number(ins) > 0) {
             if (this.props.options.showThankYou) {
               this.setState({
-                displayThankYou: true,
+                displayThankYou: true
               });
             } else {
               this.setState(
                 {
-                  displayThankYou: true,
+                  displayThankYou: true
                 },
                 () => {
                   this.props.model.observer.publish("abort");
@@ -507,7 +507,7 @@ class Page extends Component {
           this.saveError();
         }
       },
-      (error) => {
+      error => {
         this.saveError();
       }
     );
@@ -560,6 +560,11 @@ class Page extends Component {
       </Button>
     );
 
+    var okButtonText = "Stäng";
+    if (this.props.options.collectAgain) {
+      okButtonText = "Tyck till igen!";
+    }
+
     const okButton = (
       <Button
         variant="outlined"
@@ -569,20 +574,7 @@ class Page extends Component {
           this.props.model.observer.publish("abort");
         }}
       >
-        Stäng
-      </Button>
-    );
-
-    const collectAgainButton = (
-      <Button
-        variant="outlined"
-        color="primary"
-        className={classes.buttonRight}
-        onClick={() => {
-          this.props.model.observer.publish("abort");
-        }}
-      >
-        Tyck till igen!
+        {okButtonText}
       </Button>
     );
 
@@ -592,7 +584,7 @@ class Page extends Component {
         color="primary"
         className={classes.buttonRight}
         onClick={() => {
-          this.props.model.app.windows.forEach((window) => {
+          this.props.model.app.windows.forEach(window => {
             if (window.type === "collector") {
               window.closeWindow();
             }
@@ -607,7 +599,7 @@ class Page extends Component {
       if (this.props.options.collectAgain) {
         return (
           <div>
-            {collectAgainButton}
+            {okButton}
             {closeButton}
           </div>
         );
@@ -644,7 +636,7 @@ class Page extends Component {
 
   createMarkup = () => {
     return {
-      __html: this.props.options.thankYou,
+      __html: this.props.options.thankYou
     };
   };
 
