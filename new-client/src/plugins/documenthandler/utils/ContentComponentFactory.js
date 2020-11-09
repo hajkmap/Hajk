@@ -130,20 +130,20 @@ export const Heading = ({ headingTag }) => {
   );
 };
 
-export const BlockQuote = ({ blockQuoteTag }) => {
-  const getTextArea = (tag) => {
-    const children = [...tag.childNodes];
-    let textAreaContentArray = children.map((element, index) => {
-      return (
-        <React.Fragment key={index}>{renderChild(element)}</React.Fragment>
-      );
-    });
+const getTextArea = (tag, defaultColors) => {
+  const children = [...tag.childNodes];
+  let textAreaContentArray = children.map((element, index) => {
+    return <React.Fragment key={index}>{renderChild(element)}</React.Fragment>;
+  });
 
-    const backgroundColor = tag.attributes.getNamedItem("data-background-color")
-      ?.value;
-    const dividerColor = tag.attributes.getNamedItem("data-divider-color")
-      ?.value;
+  const backgroundColor =
+    tag.attributes.getNamedItem("data-background-color")?.value ||
+    defaultColors?.textAreaBackgroundColor;
 
+  const dividerColor =
+    tag.attributes.getNamedItem("data-divider-color")?.value ||
+    defaultColors?.textAreaDividerColor;
+  
     return (
       <TextArea
         backgroundColor={backgroundColor}
@@ -152,8 +152,10 @@ export const BlockQuote = ({ blockQuoteTag }) => {
       ></TextArea>
     );
   };
+
+export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
-    return getTextArea(blockQuoteTag);
+    return getTextArea(blockQuoteTag, defaultColors);
   } else {
     return null;
   }
@@ -385,7 +387,6 @@ export const CustomLink = ({ aTag, localObserver }) => {
         component="button"
         underline="hover"
         onClick={() => {
-          console.log("ONCLICK");
           localObserver.publish("set-active-document", {
             documentName: documentLink,
             headerIdentifier: headerIdentifier,

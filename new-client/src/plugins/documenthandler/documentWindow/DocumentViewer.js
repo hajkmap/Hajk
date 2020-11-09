@@ -154,6 +154,7 @@ class DocumentViewer extends React.PureComponent {
           </Grid>
           <Grid className={classes.contentContainer} container item>
             <Contents
+              options={options}
               model={model}
               localObserver={localObserver}
               activeDocument={activeDocument}

@@ -99,7 +99,12 @@ class Contents extends React.PureComponent {
     allowedHtmlTags.push({
       tagType: "blockquote",
       callback: (e) => {
-        return <BlockQuote blockQuoteTag={e}></BlockQuote>;
+        return (
+          <BlockQuote
+            blockQuoteTag={e}
+            defaultColors={this.props.options.defaultDocumentColorSettings}
+          ></BlockQuote>
+        );
       },
     });
     allowedHtmlTags.push({
