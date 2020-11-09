@@ -29,9 +29,11 @@ export const mediaBlockRenderer = (block, { getEditorState }) => {
 
 const Image = ({ block, contentState }) => {
   const entity = contentState.getEntity(block.getEntityAt(0));
-  const { src, width, height } = entity.getData();
+  const { src } = entity.getData();
   const type = entity.getType().toLowerCase();
   const data = entity.getData();
+  const width = data["data-image-width"];
+  const height = data["data-image-height"];
   const dataCaption = data["data-caption"];
   const dataSource = data["data-source"];
   const dataPopup = data["data-popup"];
@@ -52,7 +54,10 @@ const Image = ({ block, contentState }) => {
 
 const Video = ({ block, contentState }) => {
   const entity = contentState.getEntity(block.getEntityAt(0));
-  const { src, width, height } = entity.getData();
+  const { src } = entity.getData();
+  const data = entity.getData();
+  const width = data["data-image-width"];
+  const height = data["data-image-height"];
 
   if (!!src) {
     return <iframe src={src} width={width} height={height} />;
