@@ -89,8 +89,8 @@ class TableOfContents extends React.PureComponent {
   };
 
   showSubChapter = (level) => {
-    const { activeDocument } = this.props;
-    return level < (activeDocument?.tableOfContents?.chapterLevelToShow || 100);
+    const { chapterLevelsToShow } = this.props;
+    return level < chapterLevelsToShow;
   };
 
   /**
@@ -134,19 +134,19 @@ class TableOfContents extends React.PureComponent {
     );
   };
 
-  toggleCollapse = (e) => {
-    this.setState({
-      expanded: !this.state.expanded,
-    });
-  };
-
   render() {
-    const { classes, activeDocument, title } = this.props;
-    const { expanded } = this.state;
+    const {
+      classes,
+      activeDocument,
+      title,
+      expanded,
+      toggleCollapse,
+    } = this.props;
+
     return (
       <Grid
         role="button"
-        onClick={this.toggleCollapse}
+        onClick={toggleCollapse}
         className={classes.tableOfContents}
         container
       >

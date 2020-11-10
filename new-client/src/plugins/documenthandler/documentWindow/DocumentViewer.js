@@ -38,14 +38,30 @@ const styles = (theme) => ({
   },
 });
 
+const expandedTocOnStart = (props) => {
+  const { activeDocument, options } = props;
+  const mapConfigSetting = options?.tableOfContent?.expanded;
+  const documentSetting = activeDocument?.tableOfContents?.expanded;
+  if (documentSetting || documentSetting === false) {
+    return documentSetting;
+  }
+  if (mapConfigSetting || mapConfigSetting === false) {
+    return mapConfigSetting;
+  }
+  return true;
+};
+
 class DocumentViewer extends React.PureComponent {
   state = {
     showScrollButton: false,
     showPrintWindow: false,
+    expandedTableOfContents: expandedTocOnStart(this.props),
   };
 
   constructor(props) {
     super(props);
+    console.log(this.state, "state");
+
     this.scrollElementRef = React.createRef();
     this.setScrollButtonLimit();
     this.bindSubscriptions();
@@ -118,6 +134,77 @@ class DocumentViewer extends React.PureComponent {
     window.getSelection().addRange(range);
   };
 
+  toggleCollapse = (e) => {
+    this.setState({
+      expandedTableOfContents: !this.state.expandedTableOfContents,
+    });
+  };
+
+  getTocTitle = () => {
+    const { activeDocument, options } = this.props;
+    const documentSettingTitle = activeDocument?.tableOfContents?.title;
+    const mapConfigSettingTitle = options?.tableOfContent?.title;
+
+    if (documentSettingTitle || documentSettingTitle === false) {
+      return documentSettingTitle;
+    }
+    if (mapConfigSettingTitle || mapConfigSettingTitle === false) {
+      return mapConfigSettingTitle;
+    }
+    return "Innehållsförteckning";
+  };
+
+  getChapterLevelsToShowInToc = () => {
+    const { activeDocument, options } = this.props;
+
+    const documentSettingLevels =
+      activeDocument?.tableOfContents?.chapterLevelsToShow;
+    const mapConfigSettingLevels = options?.tableOfContent?.chapterLevelsToShow;
+
+    if (documentSettingLevels) {
+      return documentSettingLevels;
+    }
+    if (mapConfigSettingLevels) {
+      return mapConfigSettingLevels;
+    }
+
+    return 100;
+  };
+
+  getShouldShowTableOfContents = () => {
+    const { activeDocument, options } = this.props;
+
+    const documentSetting = activeDocument?.tableOfContents?.active;
+    const mapConfigSetting = options?.tableOfContent?.active;
+
+    if (documentSetting || documentSetting === false) {
+      return documentSetting;
+    }
+    if (mapConfigSetting || mapConfigSetting === false) {
+      return mapConfigSetting;
+    }
+    return true;
+  };
+
+  getTableOfContents = () => {
+    const { expandedTableOfContents } = this.state;
+    const { activeDocument, localObserver, documentColor } = this.props;
+
+    const title = this.getTocTitle();
+    const chapterLevelsToShow = this.getChapterLevelsToShowInToc();
+    return (
+      <TableOfContents
+        documentColor={documentColor}
+        localObserver={localObserver}
+        toggleCollapse={this.toggleCollapse}
+        activeDocument={activeDocument}
+        expanded={expandedTableOfContents}
+        title={title}
+        chapterLevelsToShow={chapterLevelsToShow}
+      />
+    );
+  };
+
   render() {
     const {
       classes,
@@ -126,15 +213,10 @@ class DocumentViewer extends React.PureComponent {
       documentWindowMaximized,
       model,
       options,
-      documentColor,
     } = this.props;
 
-    const showTableOfContents =
-      activeDocument?.tableOfContents?.active !== undefined
-        ? activeDocument.tableOfContents.active
-        : true;
-
     const { showScrollButton } = this.state;
+    const showTableOfContents = this.getShouldShowTableOfContents();
     return (
       <>
         <Grid
@@ -153,14 +235,7 @@ class DocumentViewer extends React.PureComponent {
         >
           {showTableOfContents && (
             <Grid className={classes.toc} xs={12} item>
-              <TableOfContents
-                documentColor={documentColor}
-                localObserver={localObserver}
-                activeDocument={activeDocument}
-                expanded={options.tableOfContent.expanded}
-                title={options.tableOfContent.title}
-                chapterLevelsToShow={options.tableOfContent.chapterLevelsToShow}
-              />
+              {this.getTableOfContents()}
             </Grid>
           )}
 
