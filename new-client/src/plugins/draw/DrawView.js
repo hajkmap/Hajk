@@ -48,6 +48,7 @@ class DrawView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.globalObserver;
+    this.snackbarKey = null;
     this.localObserver.subscribe("dialog", (feature) => {
       this.setState({
         feature: feature,
@@ -65,14 +66,23 @@ class DrawView extends React.PureComponent {
 
   addMapDropListeners = () => {
     const mapDiv = document.getElementById("map");
-    ["drop", "dragover", "dragend", "dragleave"].forEach((eventName) => {
-      mapDiv.addEventListener(
-        eventName,
-        this.preventDefaultDropBehavior,
-        false
-      );
-    });
+    ["drop", "dragover", "dragend", "dragleave", "dragenter"].forEach(
+      (eventName) => {
+        mapDiv.addEventListener(
+          eventName,
+          this.preventDefaultDropBehavior,
+          false
+        );
+      }
+    );
+    mapDiv.addEventListener("dragenter", this.handleDragEnter, false);
     mapDiv.addEventListener("drop", this.handleDrop, false);
+  };
+
+  handleDragEnter = () => {
+    this.snackbarKey = this.props.enqueueSnackbar(
+      "Släpp en KML-fil i kartan för att importera!"
+    );
   };
 
   handleDrop = (e) => {
@@ -93,7 +103,10 @@ class DrawView extends React.PureComponent {
         }
       }
     } catch (error) {
-      console.error(`Error importing dropped file: ${error}`);
+      this.props.enqueueSnackbar("KML-filen kunde inte importeras.", {
+        variant: "error",
+      });
+      console.error(`Error importing KML-file... ${error}`);
     }
   };
 
@@ -103,11 +116,23 @@ class DrawView extends React.PureComponent {
 
     reader.onload = () => {
       model.import(reader.result, (error) => {
-        throw error;
+        this.handleImportError(error);
       });
+      this.props.closeSnackbar(this.snackbarKey);
+      this.snackbarKey = null;
     };
 
     reader.readAsText(file);
+  };
+
+  handleImportError = (error) => {
+    if (error === "no-features-found") {
+      this.props.enqueueSnackbar("Inga ritobjekt hittades i KML-filen.", {
+        variant: "warning",
+      });
+    } else {
+      throw error;
+    }
   };
 
   preventDefaultDropBehavior = (e) => {
@@ -304,7 +329,11 @@ class DrawView extends React.PureComponent {
               reader.onload = () => {
                 this.onCloseUploadDialog();
                 this.props.model.import(reader.result, (error) => {
-                  console.error("Import error", error);
+                  try {
+                    this.handleImportError(error);
+                  } catch (error) {
+                    console.error(`Error importing KML-file... ${error}`);
+                  }
                 });
               };
               if (file) {
