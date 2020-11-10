@@ -307,6 +307,44 @@ paths:
         200:
           description: Success
           content: {}
+  /config/delete/{name}:
+    get:
+      tags:
+        - Maps and layers
+      parameters:
+        - name: name
+          in: path
+          description: Name of the map to be deleted
+          required: true
+          schema:
+            type: string
+      description: Delete an existing map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+  /config/duplicate/{nameFrom}/{nameTo}:
+    put:
+      tags:
+        - Maps and layers
+      parameters:
+        - name: nameFrom
+          in: path
+          description: Name of the map to be duplicated
+          required: true
+          schema:
+            type: string
+        - name: nameTo
+          in: path
+          description: Name of the new map (the duplicate)
+          required: true
+          schema:
+            type: string
+      description: Create a new map configuration by duplicating an existing one
+      responses:
+        200:
+          description: Success
+          content: {}
   /proxy/{query}:
     get:
       tags:

@@ -84,7 +84,26 @@ export class Controller {
   }
 
   createNewMap(req, res) {
-    res.status(501).end();
+    ConfigService.createNewMap(req.params.name).then((r) => {
+      if (r.error) res.status(500).send(r.error.message);
+      else res.json(r);
+    });
+  }
+
+  duplicateMap(req, res) {
+    ConfigService.duplicateMap(req.params.nameFrom, req.params.nameTo).then(
+      (r) => {
+        if (r.error) res.status(500).send(r.error.message);
+        else res.json(r);
+      }
+    );
+  }
+
+  deleteMap(req, res) {
+    ConfigService.deleteMap(req.params.name).then((r) => {
+      if (r.error) res.status(500).send(r.error.message);
+      else res.json(r);
+    });
   }
 }
 export default new Controller();

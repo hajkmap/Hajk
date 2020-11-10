@@ -10,6 +10,14 @@ class ConfigService {
     // have a global bus (using EventEmitter?), so we can trigger
     // re-reads from FS into our in-memory store.
   }
+
+  /**
+   * @summary Get contents of a map configuration as JSON object
+   *
+   * @param {*} map Name of the map configuration
+   * @returns Map config contents in JSON
+   * @memberof ConfigService
+   */
   async getMapConfig(map) {
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `${map}.json`);
@@ -21,6 +29,17 @@ class ConfigService {
     }
   }
 
+  /**
+   * @summary Export baselayers, groups, and layers from a map configuration
+   * to the specified format (currently only JSON is supported, future options
+   * could include e.g. XLSX).
+   *
+   * @param {string} [map="layers"] Name of the map to be explained
+   * @param {string} [format="json"] Desired output format
+   * @param {*} next Callback, contain error object
+   * @returns Human-friendly description of layers used in the specified map
+   * @memberof ConfigService
+   */
   async exportMapConfig(map = "layers", format = "json", next) {
     // Obtain layers definition as JSON. It will be needed
     // both if we want to grab all available layers or
@@ -98,6 +117,12 @@ class ConfigService {
     next(Error(`Output format ${format} is not implemented.`));
   }
 
+  /**
+   * @summary List all available map configurations files
+   *
+   * @returns
+   * @memberof ConfigService
+   */
   async getAvailableMaps() {
     try {
       const dir = path.join(process.cwd(), "App_Data");
@@ -118,6 +143,68 @@ class ConfigService {
         // Create an array using name of each Dirent object, remove file extension
         .map((entry) => entry.name.replace(".json", ""));
       return availableMaps;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
+   * @summary Duplicate a specified map
+   *
+   * @param {*} src Map to be duplicated
+   * @param {*} dest Name of the new map, the duplicate
+   * @returns
+   * @memberof ConfigService
+   */
+  async duplicateMap(src, dest) {
+    try {
+      let srcPath = null;
+
+      if (src.endsWith(".template")) {
+        // If src ends with ".template", don't add the .json file extension,
+        // and look inside /templates directory.
+        srcPath = path.join(process.cwd(), "App_Data", "templates", src);
+      } else {
+        // Else it's a regular JSON file, add the extension and look in App_Data only
+        srcPath = path.join(process.cwd(), "App_Data", src + ".json");
+      }
+
+      // Destination will always need the extension added
+      const destPath = path.join(process.cwd(), "App_Data", dest + ".json");
+
+      // Copy!
+      await fs.promises.copyFile(srcPath, destPath);
+      // Sending a valid object will turn it into JSON which in turn will return
+      // status 200 and that empty object. I know it's not the best way and we
+      // should be more explicit about successful returns than just an empty object…
+      return {};
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
+   * @summary Create a new map, using supplied name, but duplicating the default map template
+   *
+   * @param {*} name Name given to the new map
+   * @memberof ConfigService
+   */
+  async createNewMap(name) {
+    return this.duplicateMap("map.template", name);
+  }
+
+  /**
+   * @summary Delete a map configuration
+   *
+   * @param {*} name Map configuration to be deleted
+   * @memberof ConfigService
+   */
+  async deleteMap(name) {
+    try {
+      // Prepare path
+      const filePath = path.join(process.cwd(), "App_Data", name + ".json");
+      await fs.promises.unlink(filePath);
+      return {};
     } catch (error) {
       return { error };
     }
