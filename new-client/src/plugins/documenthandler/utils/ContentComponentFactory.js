@@ -43,6 +43,10 @@ const useStyles = makeStyles((theme) => ({
   heading: {
     marginBottom: theme.spacing(1),
   },
+  media: {
+    width: "auto",
+    maxWidth: "100%",
+  },
   typography: {
     overflowWrap: "break-word",
     marginBottom: theme.spacing(1),
@@ -52,6 +56,9 @@ const useStyles = makeStyles((theme) => ({
     listStylePosition: "inside",
     padding: theme.spacing(0),
     marginBottom: theme.spacing(1),
+  },
+  listItemMargin: {
+    marginLeft: theme.spacing(1),
   },
   olList: {
     listStyle: "decimal",
@@ -110,7 +117,13 @@ export const OLComponent = ({ olComponent }) => {
   return (
     <List className={classes.olList} component="ol">
       {children.map((listItem, index) => {
-        return <li key={index}>{getFormattedComponentFromTag(listItem)}</li>;
+        return (
+          <li key={index}>
+            <span className={classes.listItemMargin}>
+              {getFormattedComponentFromTag(listItem)}
+            </span>
+          </li>
+        );
       })}
     </List>
   );
@@ -143,15 +156,15 @@ const getTextArea = (tag, defaultColors) => {
   const dividerColor =
     tag.attributes.getNamedItem("data-divider-color")?.value ||
     defaultColors?.textAreaDividerColor;
-  
-    return (
-      <TextArea
-        backgroundColor={backgroundColor}
-        dividerColor={dividerColor}
-        textAreaContentArray={textAreaContentArray}
-      ></TextArea>
-    );
-  };
+
+  return (
+    <TextArea
+      backgroundColor={backgroundColor}
+      dividerColor={dividerColor}
+      textAreaContentArray={textAreaContentArray}
+    ></TextArea>
+  );
+};
 
 export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
@@ -239,6 +252,7 @@ export const Img = ({ imgTag, localObserver }) => {
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue}
+        classes={{ media: classes.media }}
         component="img"
         style={
           image.height && image.width
