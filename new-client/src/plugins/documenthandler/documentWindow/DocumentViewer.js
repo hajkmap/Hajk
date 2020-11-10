@@ -5,6 +5,7 @@ import Fab from "@material-ui/core/Fab";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
+import clsx from "clsx";
 import Contents from "./Contents";
 import { Typography } from "@material-ui/core";
 
@@ -20,6 +21,9 @@ const styles = (theme) => ({
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
+  },
+  margin: {
+    marginTop: theme.spacing(2),
   },
   scrollToTopButton: {
     position: "fixed",
@@ -125,6 +129,11 @@ class DocumentViewer extends React.PureComponent {
       documentColor,
     } = this.props;
 
+    const showTableOfContents =
+      activeDocument?.tableOfContents?.active !== undefined
+        ? activeDocument.tableOfContents.active
+        : true;
+
     const { showScrollButton } = this.state;
     return (
       <>
@@ -142,17 +151,28 @@ class DocumentViewer extends React.PureComponent {
           className={classes.gridContainer}
           container
         >
-          <Grid className={classes.toc} xs={12} item>
-            <TableOfContents
-              documentColor={documentColor}
-              localObserver={localObserver}
-              activeDocument={activeDocument}
-              expanded={options.tableOfContent.expanded}
-              title={options.tableOfContent.title}
-              chapterLevelsToShow={options.tableOfContent.chapterLevelsToShow}
-            />
-          </Grid>
-          <Grid className={classes.contentContainer} container item>
+          {showTableOfContents && (
+            <Grid className={classes.toc} xs={12} item>
+              <TableOfContents
+                documentColor={documentColor}
+                localObserver={localObserver}
+                activeDocument={activeDocument}
+                expanded={options.tableOfContent.expanded}
+                title={options.tableOfContent.title}
+                chapterLevelsToShow={options.tableOfContent.chapterLevelsToShow}
+              />
+            </Grid>
+          )}
+
+          <Grid
+            className={clsx(
+              showTableOfContents
+                ? classes.contentContainer
+                : [classes.contentContainer, classes.margin]
+            )}
+            container
+            item
+          >
             <Contents
               options={options}
               model={model}
