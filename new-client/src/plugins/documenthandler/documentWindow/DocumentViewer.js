@@ -40,7 +40,7 @@ const styles = (theme) => ({
 
 const expandedTocOnStart = (props) => {
   const { activeDocument, options } = props;
-  const mapConfigSetting = options?.tableOfContent?.expanded;
+  const mapConfigSetting = options?.tableOfContents?.expanded;
   const documentSetting = activeDocument?.tableOfContents?.expanded;
   if (documentSetting || documentSetting === false) {
     return documentSetting;
@@ -143,7 +143,7 @@ class DocumentViewer extends React.PureComponent {
   getTocTitle = () => {
     const { activeDocument, options } = this.props;
     const documentSettingTitle = activeDocument?.tableOfContents?.title;
-    const mapConfigSettingTitle = options?.tableOfContent?.title;
+    const mapConfigSettingTitle = options?.tableOfContents?.title;
 
     if (documentSettingTitle || documentSettingTitle === false) {
       return documentSettingTitle;
@@ -159,7 +159,8 @@ class DocumentViewer extends React.PureComponent {
 
     const documentSettingLevels =
       activeDocument?.tableOfContents?.chapterLevelsToShow;
-    const mapConfigSettingLevels = options?.tableOfContent?.chapterLevelsToShow;
+    const mapConfigSettingLevels =
+      options?.tableOfContents?.chapterLevelsToShow;
 
     if (documentSettingLevels) {
       return documentSettingLevels;
@@ -175,7 +176,7 @@ class DocumentViewer extends React.PureComponent {
     const { activeDocument, options } = this.props;
 
     const documentSetting = activeDocument?.tableOfContents?.active;
-    const mapConfigSetting = options?.tableOfContent?.active;
+    const mapConfigSetting = options?.tableOfContents?.active;
 
     if (documentSetting || documentSetting === false) {
       return documentSetting;
