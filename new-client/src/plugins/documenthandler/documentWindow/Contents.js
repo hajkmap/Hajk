@@ -65,6 +65,7 @@ class Contents extends React.PureComponent {
       <CustomLink
         aTag={e}
         localObserver={this.props.localObserver}
+        bottomMargin
       ></CustomLink>
     );
   };

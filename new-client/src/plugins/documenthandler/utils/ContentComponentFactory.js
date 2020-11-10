@@ -66,9 +66,11 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0),
     marginBottom: theme.spacing(1),
   },
+  bottomMargin: {
+    marginBottom: theme.spacing(1),
+  },
   linkButton: {
     padding: theme.spacing(0),
-    marginBottom: theme.spacing(1),
     color: theme.palette.info.main,
   },
 }));
@@ -330,7 +332,7 @@ export const LineBreak = () => {
  *
  * @memberof Contents
  */
-export const CustomLink = ({ aTag, localObserver }) => {
+export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   const classes = useStyles();
 
   const getLinkDataPerType = (attributes) => {
@@ -359,7 +361,11 @@ export const CustomLink = ({ aTag, localObserver }) => {
         classes={{ startIcon: classes.startIcon }}
         target="_blank"
         component="a"
-        className={classes.linkButton}
+        className={clsx(
+          bottomMargin
+            ? [classes.bottomMargin, classes.linkButton]
+            : classes.linkButton
+        )}
         key="external-link"
         href={externalLink}
       >
@@ -371,7 +377,11 @@ export const CustomLink = ({ aTag, localObserver }) => {
     return (
       <Button
         color="default"
-        className={classes.linkButton}
+        className={clsx(
+          bottomMargin
+            ? [classes.bottomMargin, classes.linkButton]
+            : classes.linkButton
+        )}
         startIcon={<MapIcon className={classes.linkIcon}></MapIcon>}
         classes={{ startIcon: classes.startIcon }}
         target="_blank"
@@ -390,7 +400,11 @@ export const CustomLink = ({ aTag, localObserver }) => {
     return (
       <Button
         color="default"
-        className={classes.linkButton}
+        className={clsx(
+          bottomMargin
+            ? [classes.bottomMargin, classes.linkButton]
+            : classes.linkButton
+        )}
         startIcon={
           <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
         }

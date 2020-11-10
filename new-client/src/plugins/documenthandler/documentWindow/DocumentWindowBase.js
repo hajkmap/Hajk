@@ -115,6 +115,7 @@ class DocumentWindowBase extends React.PureComponent {
         <CustomLink
           localObserver={this.props.localObserver}
           aTag={htmlObject}
+          bottomMargin={false}
         ></CustomLink>
       );
       infoClickEvent.resolve(link);
