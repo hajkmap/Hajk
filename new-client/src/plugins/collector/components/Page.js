@@ -579,7 +579,7 @@ class Page extends Component {
         color="primary"
         className={classes.buttonRight}
         onClick={() => {
-          this.props.model.app.windows.forEach(window => {
+          this.props.model.app.windows.forEach((window) => {
             if (window.type === "collector") {
               window.closeWindow();
             }
