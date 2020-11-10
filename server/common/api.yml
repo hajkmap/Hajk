@@ -16,95 +16,7 @@ tags:
     description: Proxy specified in working with Sokigo's FB API
   - name: Specification
     description: The OpenAPI specification
-  - name: Examples
-    description: Simple example endpoint
 paths:
-  /examples:
-    get:
-      tags:
-        - Examples
-      description: Fetch all examples
-      responses:
-        200:
-          description: Return the example with the specified id
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Example"
-        4XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        5XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-    post:
-      tags:
-        - Examples
-      description: Create a new example
-      requestBody:
-        description: an example
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ExampleBody"
-        required: true
-      responses:
-        201:
-          description: Return the example with the specified id
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Example"
-        4XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        5XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /examples/{id}:
-    get:
-      tags:
-        - Examples
-      parameters:
-        - name: id
-          in: path
-          description: The id of the example to retrieve
-          required: true
-          schema:
-            type: integer
-      responses:
-        200:
-          description: Return the example with the specified id
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Example"
-        4XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        5XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
   /informative/load/{name}:
     get:
       tags:
@@ -131,6 +43,23 @@ paths:
                 $ref: "#/components/schemas/Error"
   /informative/create:
     post:
+      deprecated: true
+      tags:
+        - Documents
+      responses:
+        200:
+          description: Create a document connected to a specified map (OBSOLETE)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
       tags:
         - Documents
       responses:
@@ -189,6 +118,30 @@ paths:
                 $ref: "#/components/schemas/Error"
   /informative/save/{name}:
     post:
+      deprecated: true
+      tags:
+        - Documents
+      parameters:
+        - name: name
+          in: path
+          description: Document to be saved
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the saved document's body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
       tags:
         - Documents
       parameters:
@@ -293,6 +246,22 @@ paths:
           content: {}
   /config/create/{name}:
     get:
+      deprecated: true
+      tags:
+        - Maps and layers
+      parameters:
+        - name: name
+          in: path
+          description: File name of the new map config
+          required: true
+          schema:
+            type: string
+      description: Create a new map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+    put:
       tags:
         - Maps and layers
       parameters:
@@ -309,6 +278,22 @@ paths:
           content: {}
   /config/delete/{name}:
     get:
+      deprecated: true
+      tags:
+        - Maps and layers
+      parameters:
+        - name: name
+          in: path
+          description: Name of the map to be deleted
+          required: true
+          schema:
+            type: string
+      description: Delete an existing map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+    delete:
       tags:
         - Maps and layers
       parameters:
@@ -435,21 +420,22 @@ paths:
         204:
           description: All good
           content: {}
-  /settings/{layer}:
+  /settings/{layerType}:
     post:
       tags:
         - Map and layers settings
+      description: Add a new layer of specified type
       requestBody:
-        description: Layer to be added or updated
+        description: Content of the layer to be added
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/ExampleBody"
         required: true
       parameters:
-        - name: layer
+        - name: layerType
           in: path
-          description: The layer type of the example to retrieve
+          description: The type of layer that will be added
           required: true
           schema:
             type: string
@@ -460,6 +446,7 @@ paths:
     put:
       tags:
         - Map and layers settings
+      description: Replace a specific layer with supplied content
       requestBody:
         description: Layer to be added or updated
         content:
@@ -468,29 +455,15 @@ paths:
               $ref: "#/components/schemas/ExampleBody"
         required: true
       parameters:
-        - name: layer
+        - name: layerType
           in: path
-          description: The layer type of the example to retrieve
+          description: The type of layer that will be updated
           required: true
           schema:
             type: string
       responses:
         204:
           description: All good
-          content: {}
-    get:
-      tags:
-        - Map and layers settings
-      parameters:
-        - name: layer
-          in: path
-          description: The layer type of the example to retrieve
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Return the example with the specified id
           content: {}
   /settings/{type}/{layerId}:
     delete:

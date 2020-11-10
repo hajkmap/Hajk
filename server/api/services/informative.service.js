@@ -52,10 +52,8 @@ class InformativeService {
       // Transform JSON object to string using 2 spaces indentation
       const jsonString = JSON.stringify(json, null, 2);
 
-      // Write to file using the sync version (I was getting problems with the
-      // promise version, for some reason file writing hasn't finished before
-      // the next /list request got out, which led to problems).
-      fs.writeFileSync(pathToFile, jsonString);
+      // Write to file
+      await fs.promises.writeFile(pathToFile, jsonString);
 
       return json;
     } catch (error) {
@@ -101,7 +99,7 @@ class InformativeService {
       const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
 
       // Just drop the specified file…
-      fs.unlinkSync(pathToFile);
+      await fs.promises.unlink(pathToFile);
 
       // Return an empty JSON object
       return {};

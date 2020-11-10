@@ -9,9 +9,7 @@ export default express
   .put("/layermenu", controller.putSettingsToMapFile)
   .put("/mapsettings", controller.putSettingsToMapFile)
   .put("/toolsettings", controller.putSettingsToMapFile)
-  // We use the same controller method for both layer
-  // creation (POST) and updates (PUT).
-  .post("/:type", controller.putLayerOfType)
-  .put("/:type", controller.putLayerOfType)
+  .post("/:type", controller.putLayerOfType) // Will add new each time it's called
+  .put("/:type", controller.putLayerOfType) // Will overwrite existing and the result is idempotent
   // Handle layer removal
   .delete("/:type/:layerId", controller.deleteLayerFromStore);

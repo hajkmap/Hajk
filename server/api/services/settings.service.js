@@ -75,7 +75,7 @@ class SettingsService {
       layersStore[type] = layersTypeWithChanges;
 
       // Stringify using 2 spaces as indentation and write to file
-      fs.writeFileSync(
+      fs.promises.writeFile(
         this.getFullPathToFile("layers.json"),
         JSON.stringify(layersStore, null, 2)
       );
@@ -157,7 +157,7 @@ class SettingsService {
       }
 
       // Write, format with 2 spaces indentation
-      fs.writeFileSync(
+      await fs.promises.writeFile(
         this.getFullPathToFile(mapFile),
         JSON.stringify(mapConfig, null, 2)
       );
