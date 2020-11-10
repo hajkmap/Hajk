@@ -32,7 +32,7 @@ export default class ExpressServer {
 
     // Don't enable FB Proxy if necessary env variable isn't sat
     if (process.env.FB_SERVICE_BASE_URL !== undefined)
-      app.use("/api/v1/proxy", sokigoFBProxy());
+      app.use("/api/v1/fbproxy", sokigoFBProxy());
     else
       console.info(
         "Sokigo FB Proxy not enabled due to missing settings, see your .env file."

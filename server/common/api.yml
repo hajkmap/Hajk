@@ -330,7 +330,7 @@ paths:
         200:
           description: Success
           content: {}
-  /proxy/{query}:
+  /fbproxy/{query}:
     get:
       tags:
         - Sokigo FB Proxy
