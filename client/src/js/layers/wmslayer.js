@@ -156,6 +156,7 @@ var WmsLayer = {
 
         var request = $.ajax({
           url: HAJK2.searchProxy + url,
+          xhrFields: { withCredentials: true },
           success: (data) => {
             var features = new ol.format.GeoJSON().readFeatures(data);
             this.featureInformationCallback(features, this.getLayer());
