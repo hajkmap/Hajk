@@ -69,17 +69,9 @@ export class Controller {
   // FIXME: Make a real implementation that actually respects
   // each map's setting. This mock only lists all maps in dir.
   userSpecificMaps(req, res) {
-    ConfigService.getAvailableMaps().then((r) => {
-      if (r && !r.error) {
-        let rr = [];
-        for (let entry of r) {
-          rr.push({
-            mapConfigurationName: entry,
-            mapConfigurationTitle: entry,
-          });
-        }
-        res.json(rr);
-      } else res.status(500).send(r.error.message);
+    ConfigService.getUserSpecificMaps().then((r) => {
+      if (r.error) res.status(500).send(r.error.message);
+      else res.json(r);
     });
   }
 

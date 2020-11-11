@@ -330,6 +330,15 @@ paths:
         200:
           description: Success
           content: {}
+  /config/userspecificmaps:
+    get:
+      tags:
+        - Maps and layers
+      description: Get a list of maps that will be available in the MapSwitcher dropdown
+      responses:
+        200:
+          description: Success
+          content: {}
   /fbproxy/{query}:
     get:
       tags:

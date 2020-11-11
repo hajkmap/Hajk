@@ -148,6 +148,39 @@ class ConfigService {
     }
   }
 
+  async getUserSpecificMaps() {
+    try {
+      // Prepare our return array
+      const output = [];
+
+      // Grab all map configs
+      const availableMaps = await this.getAvailableMaps();
+
+      // Open each of these map configs to see if it wants to be exposed
+      // in MapSwitcher, and to see what name it whishes to have
+      for (const map of availableMaps) {
+        // Open map config and parse it to a JSON object
+        const mapConfig = await this.getMapConfig(map);
+
+        // The relevant settings will be found in LayerSwitcher config
+        const lsConfig = mapConfig.tools.find(
+          (t) => t.type === "layerswitcher"
+        );
+
+        // If map config says so, push the current map into the return object
+        if (lsConfig?.options.dropdownThemeMaps === true) {
+          output.push({
+            mapConfigurationName: map,
+            mapConfigurationTitle: lsConfig.options.themeMapHeaderCaption,
+          });
+        }
+      }
+      return output;
+    } catch (error) {
+      return { error };
+    }
+  }
+
   /**
    * @summary Duplicate a specified map
    *
