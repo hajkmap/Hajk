@@ -14,6 +14,8 @@ import NoteAddIcon from "@material-ui/icons/NoteAdd";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
 import Chip from "@material-ui/core/Chip";
+import Switch from "@material-ui/core/Switch";
+import TextField from "@material-ui/core/TextField";
 
 const ColorButtonRed = withStyles((theme) => ({
   root: {
@@ -528,6 +530,7 @@ class DocumentEditor extends Component {
           <p>
             Detta dokument tillhör följande karta: <b>{this.state.data.map}</b>
           </p>
+          {this.renderTableOfContentsInput()}
           {this.state.data.chapters.map((chapter, index) =>
             this.renderChapter(this.state.data.chapters, chapter, index)
           )}
@@ -681,6 +684,84 @@ class DocumentEditor extends Component {
         }
       },
     });
+  }
+
+  renderTableOfContentsInput() {
+    if (this.state.data.tableOfContents) {
+      const expanded = this.state.data.tableOfContents.expanded
+        ? this.state.data.tableOfContents.expanded
+        : false;
+      const active = this.state.data.tableOfContents.active
+        ? this.state.data.tableOfContents.active
+        : false;
+      const chapterLevels = this.state.data.tableOfContents.chapterLevelsToShow
+        ? this.state.data.tableOfContents.chapterLevelsToShow
+        : null;
+      const title = this.state.data.tableOfContents.title
+        ? this.state.data.tableOfContents.title
+        : "";
+
+      return (
+        <div className="margined">
+          <h3>Innehållsförteckning</h3>
+          <div>
+            <b>Aktiverad:</b>
+            <Switch
+              defaultChecked={active}
+              onChange={(e) =>
+                (this.state.data.tableOfContents.active = e.target.checked)
+              }
+              color="primary"
+              name="tableOfContents"
+              inputProps={{ "aria-label": "secondary checkbox" }}
+            />
+          </div>
+          <div>
+            <b>Expanderad:</b>
+            <Switch
+              defaultChecked={expanded}
+              onChange={(e) =>
+                (this.state.data.tableOfContents.expanded = e.target.checked)
+              }
+              color="primary"
+              name="tableOfContentsExpanded"
+              inputProps={{ "aria-label": "secondary checkbox" }}
+            />
+          </div>
+          <div>
+            <b>Nivåer:</b>
+            <TextField
+              id="tableOfContentsChapters"
+              type="number"
+              defaultValue={chapterLevels}
+              onChange={(e) =>
+                (this.state.data.tableOfContents.chapterLevelsToShow = parseInt(
+                  e.target.value
+                ))
+              }
+            />
+          </div>
+          <div>
+            <b>Titel:</b>
+            <TextField
+              id="tableOfContentsTitle"
+              type="text"
+              defaultValue={title}
+              onChange={(e) =>
+                (this.state.data.tableOfContents.title = e.target.value)
+              }
+            />
+          </div>
+        </div>
+      );
+    } else {
+      this.state.data.tableOfContents = {
+        expanded: true,
+        active: true,
+        chapterLevelsToShow: 100,
+        title: "Innehållsförteckning",
+      };
+    }
   }
 
   render() {
