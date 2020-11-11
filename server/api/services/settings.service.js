@@ -47,7 +47,7 @@ class SettingsService {
       // We're only interested in one type.
       const layersType = layersStore[type];
       if (layersType === undefined) {
-        throw `Layer type "${type}" not found in layers database.`;
+        throw new Error(`Layer type "${type}" not found in layers database.`);
       }
 
       // This method is called both on PUT (update existing) and
@@ -75,7 +75,7 @@ class SettingsService {
       layersStore[type] = layersTypeWithChanges;
 
       // Stringify using 2 spaces as indentation and write to file
-      fs.promises.writeFile(
+      await fs.promises.writeFile(
         this.getFullPathToFile("layers.json"),
         JSON.stringify(layersStore, null, 2)
       );
@@ -89,31 +89,117 @@ class SettingsService {
   }
 
   async deleteLayer(type, layerId) {
-    const mapConfigs = await ConfigService.getAvailableMaps();
+    try {
+      // Deleting a layer is a two-step operation:
+      // 1) check in all map configs if specified ID was used, and remove entry if found
+      // 2) remove the specified layer (by ID) from layers store (layers.json)
 
-    for (const file of mapConfigs) {
-      await this.removeLayerIdFromFile(type, layerId, file);
+      // Step 1: get all map config files
+      const mapConfigs = await ConfigService.getAvailableMaps();
+
+      // Loop all existing map config files…
+      for (const file of mapConfigs) {
+        // …and invoke the remove layer function
+        await this.removeLayerIdFromFile(layerId, file);
+      }
+
+      // Step 2: remove entry from layers store
+      // Buggy admin legacy: layer types are in pluralis in layers.json,
+      // but the incoming request is singular. We must fix it below:
+      type = type + "s";
+
+      // Parse the file content so we get an object
+      const layersStore = await this.readFileAsJson("layers.json");
+
+      // Store contains multiple layer types (wmslayers, wfslayers, etc).
+      // We're only interested in one type.
+      const layersType = layersStore[type];
+      if (layersType === undefined) {
+        throw new Error(`Layer type "${type}" not found in layers database`);
+      }
+
+      const id = layersType.findIndex((l) => l.id === layerId);
+      if (id !== -1) {
+        layersType.splice(id, 1); // Remove one element, starting at the found ID. Will modify existing array
+
+        // Put back our modified array of objects to the layers store
+        layersStore[type] = layersType;
+
+        // Stringify using 2 spaces of indentation and write to file
+        await fs.promises.writeFile(
+          this.getFullPathToFile("layers.json"),
+          JSON.stringify(layersStore, null, 2)
+        );
+
+        // On success, return the new contents of the store (without the deleted layer)
+        return layersType;
+      } else {
+        throw new Error(
+          `Layer with id ${layerId} not found in ${type} in global layers store`
+        );
+      }
+    } catch (error) {
+      return { error };
     }
-
-    // Open layers JSON
-    // Remove type.layerId
-    // List contents of directory
-    // for
-    return "ok";
   }
 
-  async removeLayerIdFromFile(type, layerId, file) {
-    const json = await this.readFileAsJson(file + ".json");
-    let options = json.tools.find((t) => t.type === "layerswitcher").options;
+  async removeLayerIdFromFile(layerId, file) {
+    // Helper function: will be used with .map() to recursively traverse our groups/layers tree.
+    // Please note that spliceByLayerId makes use of the "modified" flag, defined outside it.
+    const spliceByLayerId = (group) => {
+      // First see if we find the ID we're looking for in layers array of current group
+      const index =
+        group.layers && group.layers.findIndex((l) => l.id === layerId);
 
-    // Flag, will be set to true if we .pop anything from the array anywhere
+      // If group.layers doesn't exist, index will be undefined.
+      // If layerId wasn't found, index will be -1.
+      if (index !== undefined && index !== -1) {
+        // If we got this far, remove the entry at specified index from the layers array
+        group.layers.splice(index, 1);
+
+        // Set modified flag, so we really do save the file later on
+        modified = true;
+      }
+
+      if (group.groups) {
+        group.groups = group.groups.map(spliceByLayerId);
+      }
+
+      return group;
+    };
+
+    // This flag will be set spliceByLayerId only if changes have been made to the
+    // current file. This way we only write to filesystem if it's necessary.
     let modified = false;
 
-    // TODO: Recursive loop options.baselayers and options.groups for o=>o.id===layerId, .pop if found
+    // Read file contents into JSON
+    const json = await this.readFileAsJson(file + ".json");
 
-    // Write changes if needed
-    if (modified) {
-      // fs.writeFileSync("App_Data/"+file+".json", JSON.stringify(json, null, 2));
+    // Find index of LayerSwitcher in map's tools
+    const lsIndex = json.tools.findIndex((t) => t.type === "layerswitcher");
+
+    // Put options to an object - this will be the main object we'll work on here
+    const options = json.tools[lsIndex].options;
+
+    // Check in groups, recursively
+    options.groups = options.groups.map(spliceByLayerId);
+
+    // Check in baselayers, a bit of a special case as options.baselayers already
+    // contains the elements (without neither .layers nor .groups properties, as
+    // expected by spliceByLayerId). Hence we wrap .baselayers in a temporary .layers property.
+    options.baselayers = spliceByLayerId({ layers: options.baselayers }).layers;
+
+    // If any of the above resulted in modified file, write the changes
+    if (modified === true) {
+      // Use the found index of LayerSwitcher to entirely replace
+      // the "options" property on that object
+      json.tools[lsIndex].options = options;
+
+      // Write changes to file
+      await fs.promises.writeFile(
+        "App_Data/" + file + ".json",
+        JSON.stringify(json, null, 2)
+      );
     }
   }
 

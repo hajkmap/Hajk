@@ -27,7 +27,8 @@ export class Controller {
   deleteLayerFromStore(req, res) {
     SettingsService.deleteLayer(req.params.type, req.params.layerId).then(
       (r) => {
-        res.status(501).send(r); // Not Implemented
+        if (r && !r.error) res.json(r);
+        else res.status(500).send(r.error.message);
       }
     );
   }

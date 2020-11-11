@@ -133,7 +133,7 @@ class ConfigService {
       const availableMaps = dirContents
         .filter(
           (entry) =>
-            // Filter out only files (we're not interessted in directories).
+            // Filter out only files (we're not interested in directories).
             entry.isFile() &&
             // Filter out the special case, layers.json file.
             entry.name !== "layers.json" &&
