@@ -211,7 +211,7 @@ export const Img = ({ imgTag, localObserver }) => {
       if (image.popup) {
         className = clsx(classes.documentImage, classes.popupActivatedImage);
       } else {
-        className = clsx(classes.documentImage, classes.popupActivatedImage);
+        className = clsx(classes.documentImage);
       }
     }
     return className;
