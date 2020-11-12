@@ -674,7 +674,6 @@
           "title": ""
         },
         "enablePrint": true,
-
         "documentOnStart": "utgangspunkter",
         "drawerTitle": "Översiktsplan",
         "drawerButtonTitle": "Meny",
@@ -812,18 +811,6 @@
                   ]
                 }
               ]
-            },
-            {
-              "title": "TobbeTestar",
-              "document": "TOBBETESTAR",
-              "color": "",
-              "icon": {
-                "materialUiIconName": "",
-                "fontSize": "large"
-              },
-              "maplink": "",
-              "link": "",
-              "menu": []
             }
           ]
         }
