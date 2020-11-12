@@ -28,6 +28,7 @@ import LaunchIcon from "@material-ui/icons/Launch";
 
 import addLinkPlugin from "./addLinkPlugin";
 import { mediaBlockRenderer } from "./addMediaPlugin";
+import { ReadOnly } from "./addMediaPlugin";
 
 import StyleButton from "./StyleButton";
 
@@ -57,7 +58,7 @@ export default class DocumentTextEditor extends React.Component {
       urlType: "",
       imageList: this.props.imageList,
       documents: this.props.documents,
-      isReadOnly: false,
+      readOnly: false,
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -143,6 +144,7 @@ export default class DocumentTextEditor extends React.Component {
         "data-popup": mediaPopup,
       }
     );
+
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.push(
       editorState,
@@ -416,7 +418,6 @@ export default class DocumentTextEditor extends React.Component {
 
     const entityStyleFn = (entity) => {
       const entityType = entity.getType().toUpperCase();
-      console.log("ent", entityType);
       if (entityType === "LINK") {
         // Add styling here
       }
@@ -433,7 +434,8 @@ export default class DocumentTextEditor extends React.Component {
   }
 
   applyChanges() {
-    var htmlString = this.getHtml();
+    var htmlString = this.getHtml().replace(/<p><br><\/p>/gm, "");
+
     this.props.onUpdate(htmlString);
     this.setState({
       //readonly: !this.state.readonly,
@@ -503,14 +505,14 @@ export default class DocumentTextEditor extends React.Component {
   }
 
   toggleReadOnly = () => {
-    const { isReadOnly } = this.state;
+    const { readOnly } = this.state;
     this.setState({
-      isReadOnly: !isReadOnly,
+      readOnly: !readOnly,
     });
   };
 
   render() {
-    const { editorState, imageList, documents } = this.state;
+    const { editorState, imageList, documents, readOnly } = this.state;
 
     let editorContainer = styles.editor;
     var contentState = editorState.getCurrentContent();
@@ -652,7 +654,7 @@ export default class DocumentTextEditor extends React.Component {
             style={styles.editor}
             blockStyleFn={getBlockStyle}
             blockRendererFn={mediaBlockRenderer}
-            toggleReadOnly={false}
+            //toggleReadOnly={false}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             handlePastedText={this.handlePastedText}
@@ -661,7 +663,7 @@ export default class DocumentTextEditor extends React.Component {
             onChange={this.onChange}
             placeholder="Lägg till text..."
             ref="editor"
-            readOnly={this.state.isReadOnly}
+            readOnly={readOnly}
             plugins={this.plugins}
           />
         </div>
