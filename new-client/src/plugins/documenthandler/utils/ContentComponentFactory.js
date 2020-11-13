@@ -2,19 +2,11 @@ import React from "react";
 import MapIcon from "@material-ui/icons/Map";
 import DescriptionIcon from "@material-ui/icons/Description";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import clsx from "clsx";
+import Box from "@material-ui/core/Box";
 import TextArea from "../documentWindow/TextArea";
 import { makeStyles } from "@material-ui/core/styles";
-import {
-  Button,
-  Typography,
-  CardMedia,
-  ListItemIcon,
-  ListItem,
-  List,
-  ListItemText,
-} from "@material-ui/core";
+import { Button, Typography, CardMedia, List } from "@material-ui/core";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -36,32 +28,49 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(1),
     fontStyle: "italic",
   },
+  imageInformationWrapper: {
+    marginBottom: theme.spacing(1),
+  },
   imageCaption: {
     fontStyle: "italic",
   },
+  startIcon: {
+    marginLeft: theme.spacing(0),
+  },
   linkIcon: {
-    fontSize: getIconSizeFromFontSize(theme.typography.body1.fontSize),
-    marginRight: theme.spacing(1),
     verticalAlign: "middle",
   },
   heading: {
     marginBottom: theme.spacing(1),
   },
+  media: {
+    width: "auto",
+    maxWidth: "100%",
+  },
   typography: {
     overflowWrap: "break-word",
     marginBottom: theme.spacing(1),
   },
-  ulIcon: {
-    fontSize: "1rem",
+  ulList: {
+    listStyle: "initial",
+    listStylePosition: "inside",
+    padding: theme.spacing(0),
+    marginBottom: theme.spacing(1),
   },
-  listRoot: {
-    color: "black",
+  listItemMargin: {
+    marginLeft: theme.spacing(1),
   },
-  startIcon: {
-    marginRight: 0,
+  olList: {
+    listStyle: "decimal",
+    listStylePosition: "inside",
+    padding: theme.spacing(0),
+    marginBottom: theme.spacing(1),
+  },
+  bottomMargin: {
+    marginBottom: theme.spacing(1),
   },
   linkButton: {
-    padding: 0,
+    padding: theme.spacing(0),
     color: theme.palette.info.main,
   },
 }));
@@ -83,16 +92,6 @@ const getFormattedComponentFromTag = (tag) => {
   });
 };
 
-const getIconSizeFromFontSize = (fontSizeBody) => {
-  let format = "rem";
-  if (fontSizeBody.search("px") > -1) {
-    format = "px";
-  }
-  let index = fontSizeBody.search(format);
-  let size = fontSizeBody.substring(0, index);
-  return `${size * 1.7}${format}`;
-};
-
 export const Paragraph = ({ pTag }) => {
   const classes = useStyles();
   return (
@@ -106,20 +105,9 @@ export const ULComponent = ({ ulComponent }) => {
   let children = [...ulComponent.children];
   const classes = useStyles();
   return (
-    <List component="nav">
+    <List className={classes.ulList} component="ul">
       {children.map((listItem, index) => {
-        return (
-          <ListItem key={index}>
-            <ListItemIcon styles={{ root: classes.listRoot }}>
-              <FiberManualRecordIcon
-                className={classes.ulIcon}
-              ></FiberManualRecordIcon>
-            </ListItemIcon>
-            <ListItemText
-              primary={getFormattedComponentFromTag(listItem)}
-            ></ListItemText>
-          </ListItem>
-        );
+        return <li key={index}>{getFormattedComponentFromTag(listItem)}</li>;
       })}
     </List>
   );
@@ -129,18 +117,14 @@ export const OLComponent = ({ olComponent }) => {
   let children = [...olComponent.children];
   const classes = useStyles();
   return (
-    <List component="nav">
+    <List className={classes.olList} component="ol">
       {children.map((listItem, index) => {
         return (
-          <ListItem key={index}>
-            <ListItemText
-              styles={{ root: classes.listRoot }}
-              primary={`${index + 1}.`}
-            ></ListItemText>
-            <ListItemText
-              primary={getFormattedComponentFromTag(listItem)}
-            ></ListItemText>
-          </ListItem>
+          <li key={index}>
+            <span className={classes.listItemMargin}>
+              {getFormattedComponentFromTag(listItem)}
+            </span>
+          </li>
         );
       })}
     </List>
@@ -161,30 +145,32 @@ export const Heading = ({ headingTag }) => {
   );
 };
 
-export const BlockQuote = ({ blockQuoteTag }) => {
-  const getTextArea = (tag) => {
-    const children = [...tag.childNodes];
-    let textAreaContentArray = children.map((element, index) => {
-      return (
-        <React.Fragment key={index}>{renderChild(element)}</React.Fragment>
-      );
-    });
+const getTextArea = (tag, defaultColors) => {
+  const children = [...tag.childNodes];
+  let textAreaContentArray = children.map((element, index) => {
+    return <React.Fragment key={index}>{renderChild(element)}</React.Fragment>;
+  });
 
-    const backgroundColor = tag.attributes.getNamedItem("data-background-color")
-      ?.value;
-    const dividerColor = tag.attributes.getNamedItem("data-divider-color")
-      ?.value;
+  const backgroundColor =
+    tag.attributes.getNamedItem("data-background-color")?.value ||
+    defaultColors?.textAreaBackgroundColor;
 
-    return (
-      <TextArea
-        backgroundColor={backgroundColor}
-        dividerColor={dividerColor}
-        textAreaContentArray={textAreaContentArray}
-      ></TextArea>
-    );
-  };
+  const dividerColor =
+    tag.attributes.getNamedItem("data-divider-color")?.value ||
+    defaultColors?.textAreaDividerColor;
+
+  return (
+    <TextArea
+      backgroundColor={backgroundColor}
+      dividerColor={dividerColor}
+      textAreaContentArray={textAreaContentArray}
+    ></TextArea>
+  );
+};
+
+export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
-    return getTextArea(blockQuoteTag);
+    return getTextArea(blockQuoteTag, defaultColors);
   } else {
     return null;
   }
@@ -225,7 +211,7 @@ export const Img = ({ imgTag, localObserver }) => {
       if (image.popup) {
         className = clsx(classes.documentImage, classes.popupActivatedImage);
       } else {
-        className = clsx(classes.documentImage, classes.popupActivatedImage);
+        className = clsx(classes.documentImage);
       }
     }
     return className;
@@ -233,14 +219,18 @@ export const Img = ({ imgTag, localObserver }) => {
 
   const getImageDescription = (image) => {
     return (
-      <>
-        <Typography variant="subtitle2" className={classes.imageCaption}>
-          {image.caption}
-        </Typography>
-        <Typography variant="subtitle2" className={classes.imageText}>
-          {image.source}
-        </Typography>
-      </>
+      <Box className={classes.imageInformationWrapper}>
+        {image.caption && (
+          <Typography variant="subtitle2" className={classes.imageCaption}>
+            {image.caption}
+          </Typography>
+        )}
+        {image.source && (
+          <Typography variant="subtitle2" className={classes.imageText}>
+            {image.source}
+          </Typography>
+        )}
+      </Box>
     );
   };
   const image = {
@@ -264,6 +254,7 @@ export const Img = ({ imgTag, localObserver }) => {
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue}
+        classes={{ media: classes.media }}
         component="img"
         style={
           image.height && image.width
@@ -341,7 +332,7 @@ export const LineBreak = () => {
  *
  * @memberof Contents
  */
-export const CustomLink = ({ aTag, localObserver }) => {
+export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   const classes = useStyles();
 
   const getLinkDataPerType = (attributes) => {
@@ -370,7 +361,11 @@ export const CustomLink = ({ aTag, localObserver }) => {
         classes={{ startIcon: classes.startIcon }}
         target="_blank"
         component="a"
-        className={classes.linkButton}
+        className={clsx(
+          bottomMargin
+            ? [classes.bottomMargin, classes.linkButton]
+            : classes.linkButton
+        )}
         key="external-link"
         href={externalLink}
       >
@@ -382,7 +377,11 @@ export const CustomLink = ({ aTag, localObserver }) => {
     return (
       <Button
         color="default"
-        className={classes.linkButton}
+        className={clsx(
+          bottomMargin
+            ? [classes.bottomMargin, classes.linkButton]
+            : classes.linkButton
+        )}
         startIcon={<MapIcon className={classes.linkIcon}></MapIcon>}
         classes={{ startIcon: classes.startIcon }}
         target="_blank"
@@ -401,7 +400,11 @@ export const CustomLink = ({ aTag, localObserver }) => {
     return (
       <Button
         color="default"
-        className={classes.linkButton}
+        className={clsx(
+          bottomMargin
+            ? [classes.bottomMargin, classes.linkButton]
+            : classes.linkButton
+        )}
         startIcon={
           <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
         }
@@ -412,7 +415,6 @@ export const CustomLink = ({ aTag, localObserver }) => {
         component="button"
         underline="hover"
         onClick={() => {
-          console.log("ONCLICK");
           localObserver.publish("set-active-document", {
             documentName: documentLink,
             headerIdentifier: headerIdentifier,

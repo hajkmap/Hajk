@@ -652,15 +652,7 @@
     {
       "type": "documenthandler",
       "options": {
-        "searchImplemented": true,
         "title": "",
-        "tableOfContent": {
-          "expanded": false,
-          "chapterLevelsToShow": 1,
-          "title": "Innehåll i detta dokument"
-        },
-        "enablePrint": true,
-        "documentOnStart": "utgangspunkter",
         "target": "hidden",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
@@ -669,7 +661,22 @@
         },
         "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
         "width": 600,
-        "height": "90vh",
+        "height": "auto",
+        "searchImplemented": true,
+        "defaultDocumentColorSettings": {
+          "textAreaBackgroundColor": "#ccc",
+          "textAreaDividerColor": "#6A0DAD"
+        },
+        "tableOfContents": {
+          "expanded": false,
+          "active": false,
+          "chapterLevelsToShow": 2,
+          "title": ""
+        },
+        "enablePrint": true,
+        "documentOnStart": "utgangspunkter",
+        "drawerTitle": "Översiktsplan",
+        "drawerButtonTitle": "Meny",
         "menuConfig": {
           "menu": [
             {
@@ -907,6 +914,8 @@
       "secondaryColor": "#ffffff"
     },
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
-    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+    "crossOrigin": null,
+    "showCookieNotice": false
   }
 }

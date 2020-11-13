@@ -22,10 +22,12 @@ const styles = (theme) => {
       paddingTop: theme.spacing(1),
       paddingBottom: theme.spacing(1),
     },
+    collapseContainer: {
+      width: "100%",
+    },
     root: {
       width: "100%",
       padding: theme.spacing(0),
-      maxWidth: 360,
       backgroundColor: theme.palette.grey[200],
     },
   };
@@ -59,7 +61,6 @@ class TableOfContents extends React.PureComponent {
 
   static defaultProps = {
     expanded: true,
-    chapterLevelsToShow: 100,
     title: "Innehåll",
   };
 
@@ -89,7 +90,7 @@ class TableOfContents extends React.PureComponent {
 
   showSubChapter = (level) => {
     const { chapterLevelsToShow } = this.props;
-    return level <= chapterLevelsToShow;
+    return level < chapterLevelsToShow;
   };
 
   /**
@@ -133,19 +134,19 @@ class TableOfContents extends React.PureComponent {
     );
   };
 
-  toggleCollapse = (e) => {
-    this.setState({
-      expanded: !this.state.expanded,
-    });
-  };
-
   render() {
-    const { classes, activeDocument, title } = this.props;
-    const { expanded } = this.state;
+    const {
+      classes,
+      activeDocument,
+      title,
+      expanded,
+      toggleCollapse,
+    } = this.props;
+
     return (
       <Grid
         role="button"
-        onClick={this.toggleCollapse}
+        onClick={toggleCollapse}
         className={classes.tableOfContents}
         container
       >
@@ -167,7 +168,11 @@ class TableOfContents extends React.PureComponent {
             )}
           </Grid>
         </Grid>
-        <Collapse in={expanded} id="expansion-panel-content">
+        <Collapse
+          className={classes.collapseContainer}
+          in={expanded}
+          id="expansion-panel-content"
+        >
           <Grid container spacing={0}>
             {this.renderChapters(activeDocument)}
           </Grid>

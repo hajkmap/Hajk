@@ -5,13 +5,14 @@ import Fab from "@material-ui/core/Fab";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
+import clsx from "clsx";
 import Contents from "./Contents";
 import { Typography } from "@material-ui/core";
 
 const styles = (theme) => ({
   gridContainer: {
-    height: "100%",
-    overflowY: "scroll",
+    maxHeight: "100%",
+    overflowY: "auto",
     overflowX: "hidden",
     userSelect: "text",
     outline: "none",
@@ -20,6 +21,9 @@ const styles = (theme) => ({
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
+  },
+  margin: {
+    marginTop: theme.spacing(2),
   },
   scrollToTopButton: {
     position: "fixed",
@@ -34,15 +38,30 @@ const styles = (theme) => ({
   },
 });
 
+const expandedTocOnStart = (props) => {
+  const { activeDocument, options } = props;
+  const mapConfigSetting = options?.tableOfContents?.expanded;
+  const documentSetting = activeDocument?.tableOfContents?.expanded;
+  if (documentSetting || documentSetting === false) {
+    return documentSetting;
+  }
+  if (mapConfigSetting || mapConfigSetting === false) {
+    return mapConfigSetting;
+  }
+  return true;
+};
+
 class DocumentViewer extends React.PureComponent {
   state = {
     showScrollButton: false,
     showPrintWindow: false,
+    expandedTableOfContents: expandedTocOnStart(this.props),
   };
 
   constructor(props) {
     super(props);
-    console.log(props, "props");
+    console.log(this.state, "state");
+
     this.scrollElementRef = React.createRef();
     this.setScrollButtonLimit();
     this.bindSubscriptions();
@@ -115,6 +134,78 @@ class DocumentViewer extends React.PureComponent {
     window.getSelection().addRange(range);
   };
 
+  toggleCollapse = (e) => {
+    this.setState({
+      expandedTableOfContents: !this.state.expandedTableOfContents,
+    });
+  };
+
+  getTocTitle = () => {
+    const { activeDocument, options } = this.props;
+    const documentSettingTitle = activeDocument?.tableOfContents?.title;
+    const mapConfigSettingTitle = options?.tableOfContents?.title;
+
+    if (documentSettingTitle || documentSettingTitle === false) {
+      return documentSettingTitle;
+    }
+    if (mapConfigSettingTitle || mapConfigSettingTitle === false) {
+      return mapConfigSettingTitle;
+    }
+    return "Innehållsförteckning";
+  };
+
+  getChapterLevelsToShowInToc = () => {
+    const { activeDocument, options } = this.props;
+
+    const documentSettingLevels =
+      activeDocument?.tableOfContents?.chapterLevelsToShow;
+    const mapConfigSettingLevels =
+      options?.tableOfContents?.chapterLevelsToShow;
+
+    if (documentSettingLevels) {
+      return documentSettingLevels;
+    }
+    if (mapConfigSettingLevels) {
+      return mapConfigSettingLevels;
+    }
+
+    return 100;
+  };
+
+  getShouldShowTableOfContents = () => {
+    const { activeDocument, options } = this.props;
+
+    const documentSetting = activeDocument?.tableOfContents?.active;
+    const mapConfigSetting = options?.tableOfContents?.active;
+
+    if (documentSetting || documentSetting === false) {
+      return documentSetting;
+    }
+    if (mapConfigSetting || mapConfigSetting === false) {
+      return mapConfigSetting;
+    }
+    return true;
+  };
+
+  getTableOfContents = () => {
+    const { expandedTableOfContents } = this.state;
+    const { activeDocument, localObserver, documentColor } = this.props;
+
+    const title = this.getTocTitle();
+    const chapterLevelsToShow = this.getChapterLevelsToShowInToc();
+    return (
+      <TableOfContents
+        documentColor={documentColor}
+        localObserver={localObserver}
+        toggleCollapse={this.toggleCollapse}
+        activeDocument={activeDocument}
+        expanded={expandedTableOfContents}
+        title={title}
+        chapterLevelsToShow={chapterLevelsToShow}
+      />
+    );
+  };
+
   render() {
     const {
       classes,
@@ -123,10 +214,10 @@ class DocumentViewer extends React.PureComponent {
       documentWindowMaximized,
       model,
       options,
-      documentColor,
     } = this.props;
 
     const { showScrollButton } = this.state;
+    const showTableOfContents = this.getShouldShowTableOfContents();
     return (
       <>
         <Grid
@@ -143,18 +234,23 @@ class DocumentViewer extends React.PureComponent {
           className={classes.gridContainer}
           container
         >
-          <Grid className={classes.toc} xs={12} item>
-            <TableOfContents
-              documentColor={documentColor}
-              localObserver={localObserver}
-              activeDocument={activeDocument}
-              expanded={options.tableOfContent.expanded}
-              title={options.tableOfContent.title}
-              chapterLevelsToShow={options.tableOfContent.chapterLevelsToShow}
-            />
-          </Grid>
-          <Grid className={classes.contentContainer} container item>
+          {showTableOfContents && (
+            <Grid className={classes.toc} xs={12} item>
+              {this.getTableOfContents()}
+            </Grid>
+          )}
+
+          <Grid
+            className={clsx(
+              showTableOfContents
+                ? classes.contentContainer
+                : [classes.contentContainer, classes.margin]
+            )}
+            container
+            item
+          >
             <Contents
+              options={options}
               model={model}
               localObserver={localObserver}
               activeDocument={activeDocument}

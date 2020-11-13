@@ -14,6 +14,18 @@ const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
   listItemIcon: { minWidth: theme.spacing(3) },
   collapseIconRoot: { minWidth: theme.spacing(4) },
+  root: {
+    borderLeft: `${theme.spacing(1)}px solid ${theme.palette.background.paper}`,
+    "&.Mui-selected": {
+      borderLeftColor: theme.palette.action.selected,
+    },
+    "&.Mui-selected:hover": {
+      borderLeftColor: theme.palette.action.selected,
+    },
+    "&:hover": {
+      borderColor: theme.palette.action.hover,
+    },
+  },
 });
 
 class PanelMenuListItem extends React.PureComponent {
@@ -104,16 +116,14 @@ class PanelMenuListItem extends React.PureComponent {
 
   #getMenuItemStyle = () => {
     const { theme, item } = this.props;
+
     return this.#isColored()
       ? {
           paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
-          borderLeft: `${theme.spacing(0.5)}px solid ${item.color}`,
+          borderLeft: `${theme.spacing(1)}px solid ${item.color}`,
         }
       : {
           paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
-          borderLeft: `${theme.spacing(0.5)}px solid ${
-            theme.palette.background.paper
-          }`,
         };
   };
 
@@ -127,6 +137,9 @@ class PanelMenuListItem extends React.PureComponent {
           selected={this.#isSelected()}
           button
           size="small"
+          classes={{
+            root: classes.root,
+          }}
           disableGutters
           aria-controls={hasSubMenu ? `${item.id}` : null}
           onClick={() => {
