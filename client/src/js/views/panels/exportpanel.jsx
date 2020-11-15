@@ -336,7 +336,6 @@ var ExportPdfSettings = React.createClass({
         comments: this.getComments(),
         pdftitle: this.getPdfTitle(),
         teckenforklaring: document.getElementById("teckenforklaring").checked,
-        teckenforklaringplacement: document.getElementById("teckenforklaringplacement").options[document.getElementById("teckenforklaringplacement").selectedIndex].value
       }
     ;
     node.html('');
@@ -460,16 +459,7 @@ paperFormatOptions = this.paperFormats.map((s, i) => {
           <div className='panel-heading'>Teckenförklaring</div>
           <div className='panel-body'>
             <input type="checkbox" id="teckenforklaring" name="teckenforklaring" value="tecken" />
-              <label htmlFor="vehicle1">Lägg till en teckenförklaring</label> <br />
-              <label htmlFor="teckenforklaringplacement">Välj placering:</label>
-
-              <select name="teckenforklaringplacement" id="teckenforklaringplacement">
-                <option value="extra">Extra sidor</option>
-                <option value="upperleft">På kartan övre vänster</option>
-                <option value="upperright">På kartan övre höger</option>
-                <option value="lowerleft">På kartan nedre vänster</option>
-                <option value="lowerright">På kartan nedre höger</option>
-              </select>
+              <label htmlFor="teckenforklaring">Lägg till en teckenförklaring!!!</label> <br />
           </div>
         </div>
         <div>

@@ -800,7 +800,6 @@ var ExportModel = {
     data.pdftitle = options.pdftitle;
     data.proxyUrl = this.get('proxyUrl');
     data.teckenforklaring = options.teckenforklaring;
-    data.teckenforklaringplacement = options.teckenforklaringplacement;
 
     this.set('downloadingPdf', true);
     var dataString = '';

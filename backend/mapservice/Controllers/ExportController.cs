@@ -112,7 +112,7 @@ namespace MapService.Controllers
             }
             catch (Exception e)
             {
-                _log.ErrorFormat("Unable to create PDF: {0}", e.Message);
+                _log.ErrorFormat("Unable to create PDF: {0}\n{1}", e.Message, e.StackTrace);
                 throw e;
             }
         }

@@ -16,9 +16,9 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using PdfSharp;
 using Newtonsoft.Json;
-using log4net;
 using System.Net;
 using MapService.Models.Config;
+using log4net;
 
 namespace MapService.Components
 {
@@ -46,7 +46,7 @@ namespace MapService.Components
                     double vertical = (page.Height.Millimeter / 25.4) * 72 - (y * 2);
 
                     //draw svartram
-                    XRect rect = new XRect(x - 2, y - oneCM- 2, horizontal + 4, vertical + 4);
+                    XRect rect = new XRect(x - 2, y - oneCM - 2, horizontal + 4, vertical + 4);
                     gfx.DrawRectangle(XBrushes.Black, rect);
                     gfx.DrawImage(image, x, y - oneCM, horizontal, vertical);
 
@@ -58,7 +58,7 @@ namespace MapService.Components
                     double vertical = (page.Height.Millimeter / 25.4) * 72 - (y * 2);
                     gfx.DrawImage(image, x, y, horizontal, vertical);
                 }
-           
+
             }
         }
 
@@ -122,6 +122,7 @@ namespace MapService.Components
         /// <returns>byte[]</returns>
         private byte[] createPdf(Image img, MapExportItem exportItem, string fontName, string fontNameTitle)
         {
+            _log.Debug("Testing logging");
             PdfDocument document = new PdfDocument();
             PdfPage page = document.AddPage();
 
@@ -342,15 +343,16 @@ namespace MapService.Components
                 return bytes;
             }
             else if (layout == 3)//new layout
-                // kodändringar krävs när man byter logo, copyrights och % för marginal
+                                 // kodändringar krävs när man byter logo, copyrights och % för marginal
             {
+                _log.Debug("Exporting with layout 3");
                 // x and y 0 0(top left corner?)-> change
                 double xWhiteScale = 0.10; // 10% margin on each side. This has to be the same as the margin in export.js!!! Otherwise the scale will be incorrect!
                 double yWhiteScale = 0.12; // 12% margin on each side. This has to be the same as the margin in export.js!!! Otherwise the scale will be incorrect!
                 double oneCM = page.Height.Point * 0.02;
                 this.drawImage(gfx, img, page.Width.Point * xWhiteScale, page.Height.Point * yWhiteScale, page, layout);
 
-               
+
 
                 List<string> copyrights = new List<string>();
                 if (ConfigurationManager.AppSettings["exportCopyrightText"] != null)
@@ -383,7 +385,7 @@ namespace MapService.Components
 
                 //define x and y for each corner (kartbild)
                 int xLeft = (int)(page.Width.Point * xWhiteScale);
-                int xRight =(int)(page.Width.Point) - xLeft;
+                int xRight = (int)(page.Width.Point) - xLeft;
                 int yWhiteSpace = (int)(page.Height.Point * yWhiteScale);
                 int yBottom = (int)(page.Height.Point - yWhiteSpace);
 
@@ -400,7 +402,7 @@ namespace MapService.Components
 
                 //scaleText "Skala 1:{0}"
                 string scaleTextScalebar = exportItem.scale;
-                if (int.Parse(exportItem.scale)> 1000)
+                if (int.Parse(exportItem.scale) > 1000)
                 {
                     scaleTextScalebar = exportItem.scale.Substring(0, exportItem.scale.Length - 3) + " " + exportItem.scale.Substring(exportItem.scale.Length - 3);
                 }
@@ -430,7 +432,8 @@ namespace MapService.Components
                     gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle - 2), new XPoint(xLeftAfterScale + (displayLength / 2), yScalebarMiddle + 2)); //middle
                     gfx.DrawLine(XPens.Black, new XPoint(xLeftAfterScale + displayLength, yScalebarBottom), new XPoint(xLeftAfterScale + displayLength, yScalebarTop)); //right
                     this.drawText(gfx, fontName, displayText, xLeftAfterScale + 5 + displayLength, yScaleText, 12); //text "X m" next to the scale bar
-                }else
+                }
+                else
                 {
                     int xLeftAfterScale = xLeft + 100;
                     int yScaleText = (int)(yBottom + (yWhiteSpace * 0.38));
@@ -455,13 +458,13 @@ namespace MapService.Components
                 int yKomment = (int)(yBottom + (yWhiteSpace * 0.05));//**yLeftBottom + number(>font size)
                 gfx.DrawString(printText, fontComment, brushComment, xLeft, yKomment);
                 //this.drawText(gfx, fontName, printText, xLeft, yKomment, 12); // comment 
-                
+
 
                 //text "kartled..."
                 int yTextBottom = (int)(yBottom + (yWhiteSpace * 0.60));
                 this.drawText(gfx, fontName, infoText, xLeft, yTextBottom, 9); // text "kartled..."
 
-                
+
 
                 //gfx.DrawString(sourceText, fontSource, brushSource, xRight - 125, (int)(page.Height.Point * yWhiteScale) - (int)oneCM - 15);
                 //this.drawText(gfx, fontName, sourceText, xRight - 125, (int)(page.Height.Point * yWhiteScale) - (int)oneCM - 15, 9);
@@ -471,8 +474,8 @@ namespace MapService.Components
                 int i = 0;
                 copyrights.ForEach(copyright =>
                 {
-                    int startOrg= (int)page.Height.Point - 15;
-                    this.drawText(gfx, fontName, String.Format("© {0}", copyright), xRight - 90,  yKomment+ i * 12, 9); // coyright
+                    int startOrg = (int)page.Height.Point - 15;
+                    this.drawText(gfx, fontName, String.Format("© {0}", copyright), xRight - 90, yKomment + i * 12, 9); // coyright
                     i++;
                 });
 
@@ -494,7 +497,7 @@ namespace MapService.Components
                 XColor color = XColors.Black;
                 XFont font = new XFont(fontNameTitle, 20, XFontStyle.Bold);
                 XBrush brush = new XSolidBrush(color);
-                
+
                 XColor colorSource = XColors.Black;
                 XFont fontSource = new XFont(fontName, 9, XFontStyle.Regular);
                 XBrush brushSource = new XSolidBrush(colorSource);
@@ -504,7 +507,8 @@ namespace MapService.Components
                 XRect rectForDate = new XRect(xRight - 125, page.Height.Point * yWhiteScale - oneCM - 35, 125, 0);
                 XFont fontSourceDate = new XFont(fontName, 12, XFontStyle.Regular);
 
-                if (page.Size.ToString() == "A4" && page.Orientation.ToString() == "Landscape") {
+                if (page.Size.ToString() == "A4" && page.Orientation.ToString() == "Landscape")
+                {
                     gfx.DrawString(titleText, font, brush, (int)page.Width.Point / 2, (int)(page.Height.Point * yWhiteScale) - oneCM - 20, myTitle);
                     gfx.DrawString(printDate, fontSourceDate, brushSource, rectForDate, mySource); // date (x:(int)page.Width.Point - (int)(page.Width.Point * whiteScale *2 + 20))
                     gfx.DrawRectangle(XPens.Transparent, rectForDate);
@@ -521,7 +525,7 @@ namespace MapService.Components
                 }
 
 
-                //text "kartunderlag..."
+                //text "kartunderlag..."1
                 //make a box
 
                 int ySourceText = (int)(yBottom + (yWhiteSpace * 0.70));
@@ -547,6 +551,15 @@ namespace MapService.Components
 
         private Image downloadLegend(string url)
         {
+
+            // Only allow legends pointing to certain domains to prevent attackers from obtaining potential credentials sent between backend and legend location
+            Uri myUri = new Uri(url);
+            string host = myUri.Host;
+            if (!host.EndsWith("varberg.se")) // TODO Read these from the config
+            {
+                return null;
+            }
+
             WebClient client = new WebClient();
             Stream stream = client.OpenRead(url);
             return Image.FromStream(stream);
@@ -554,9 +567,13 @@ namespace MapService.Components
 
         private void drawLegend(PdfDocument document, XGraphics gfx, MapExportItem exportItem, XPoint[] corners, string fontName)
         {
+
+            _log.Debug("Creating a legend if it is enabled");
+
             // Draws a legend depending on the corners (some layout have whitespace around picture)
             if (exportItem.teckenforklaring)
             {
+                _log.Debug("Legend enabled, will attempt to create a legend");
                 // Download each legend
                 Dictionary<string, Image> images = new Dictionary<string, Image>();
                 foreach (WMSInfo layer in exportItem.wmsLayers)
@@ -566,61 +583,189 @@ namespace MapService.Components
                         // Just taking the first one in the layers list for each info
                         try
                         {
-                            images[layer.caption] = downloadLegend(layer.legend);
-                        } catch(Exception e)
+                            _log.Debug("Downloading legend for layer " + layer.caption + ". The URL was " + layer.legend);
+                            var tmp = downloadLegend(layer.legend);
+                            if (tmp != null)
+                            {
+                                images[layer.caption] = tmp;
+                            }
+                        }
+                        catch (Exception e)
                         {
                             _log.Error("Got error when attempting to download legend " + layer.legend + ". The error was " + e.ToString());
                         }
                     }
                 }
-                
-                if (exportItem.teckenforklaringplacement == "extra") // Add them to a new page
+
+                // Do not add anything if there is no valid legend
+                if (images.Count == 0)
                 {
-                    PdfPage page = document.AddPage();
-                    page.Size = GetPageSize(exportItem);
-                    page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
-                    gfx = XGraphics.FromPdfPage(page);
+                    _log.Debug("No legend image could be downloaded so no legend will be created");
+                    return;
+                }
 
-                    XPoint target = new XPoint(corners[1].X, corners[1].Y);
-                    bool left = true;
-                    double leftHeight = 0.0;
+                _log.Debug("Downloaded a total of " + images.Count.ToString() + " images");
 
-                    foreach (KeyValuePair<string, Image> item in images)
+                int maxWithforTwoColumns = (int)(corners[1].X - corners[0].X - 15);
+                int maxWithforOneColumn = (int)(corners[1].X - corners[0].X);
+                PdfPage page = document.AddPage();
+                page.Size = GetPageSize(exportItem);
+                page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
+                gfx = XGraphics.FromPdfPage(page);
+
+                XPoint leftTarget = new XPoint(corners[0].X, corners[0].Y);
+                XPoint rightTarget = new XPoint(corners[0].X + (corners[1].X - corners[0].X) / 2 + 15, corners[1].Y);
+                bool left = true;
+
+                List<string> painted = new List<string>();
+                XColor colorSource = XColors.Black;
+                int fontSize = 9;
+                XFont fontSource = new XFont(fontName, fontSize, XFontStyle.Bold);
+                XBrush brushSource = new XSolidBrush(colorSource);
+                bool leftAvailable = true;
+                bool rightAvailable = true;
+                bool added = false;
+                var mySortedList = images.OrderBy(d => d.Value.Height).ToList();
+
+                // Draw everything that fits into two columns
+                foreach (KeyValuePair<string, Image> item in mySortedList)
+                {
+                    added = false;
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        using (MemoryStream ms = new MemoryStream())
-                        {
-                            item.Value.Save(ms, ImageFormat.Jpeg);
-                            XImage image = XImage.FromStream(ms);
+                        item.Value.Save(ms, ImageFormat.Jpeg);
+                        XImage image = XImage.FromStream(ms);
 
-                            if (left)
+                        // Skip images that are too wide
+                        if (image.PixelWidth > maxWithforTwoColumns)
+                        {
+                            continue;
+                        }
+
+                        if (leftAvailable)
+                        {
+                            if (left || !rightAvailable)
                             {
-                                gfx.DrawImage(image, new XPoint(corners[0].X + (corners[1].X - corners[0].X)/2 - item.Value.Width - 10, target.Y));
-                                XColor colorSource = XColors.Black;
-                                XFont fontSource = new XFont(fontName, 9, XFontStyle.Regular);
-                                XBrush brushSource = new XSolidBrush(colorSource);
-                                gfx.DrawString(item.Key, fontSource, brushSource, new XPoint(corners[0].X, target.Y + item.Value.Height / 2));
-                                leftHeight = item.Value.Height;
-                                left = !left;
-                            } else
+                                if (leftTarget.Y + image.PixelHeight + 10 > page.Height)
+                                {
+                                    leftAvailable = false;
+                                    /*
+                                    page = document.AddPage();
+                                    page.Size = GetPageSize(exportItem);
+                                    page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
+                                    gfx = XGraphics.FromPdfPage(page);
+                                    leftTarget.Y = corners[1].Y;
+                                    rightTarget.Y = corners[1].Y;
+                                    */
+                                }
+                                else
+                                {
+                                    added = true;
+                                    gfx.DrawString(item.Key, fontSource, brushSource, leftTarget);
+                                    leftTarget.Y += fontSize + 4;
+                                    gfx.DrawImage(image, leftTarget);
+                                    leftTarget.Y += item.Value.Height + 10;
+                                }
+                            }
+
+                        }
+                        if (rightAvailable)
+                        {
+                            if ((!left || !leftAvailable) && !added)
                             {
-                                target.X -= item.Value.Width;
-                                gfx.DrawImage(image, target);
-                                target.X += item.Value.Width;
-                                XColor colorSource = XColors.Black;
-                                XFont fontSource = new XFont(fontName, 9, XFontStyle.Regular);
-                                XBrush brushSource = new XSolidBrush(colorSource);
-                                gfx.DrawString(item.Key, fontSource, brushSource, new XPoint(corners[0].X + (corners[1].X - corners[0].X) / 2 + 10, target.Y + item.Value.Height / 2));
-                                leftHeight = item.Value.Height;
-                                left = !left;
-                                target.Y += Math.Max(item.Value.Height,leftHeight) + 5;
+
+                                if (rightTarget.Y + image.PixelHeight + 10 > page.Height)
+                                {
+                                    rightAvailable = false;
+                                    /*
+                                    page = document.AddPage();
+                                    page.Size = GetPageSize(exportItem);
+                                    page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
+                                    gfx = XGraphics.FromPdfPage(page);
+                                    leftTarget.Y = corners[1].Y;
+                                    rightTarget.Y = corners[1].Y;
+                                    */
+                                }
+                                else
+                                {
+                                    added = true;
+                                    gfx.DrawString(item.Key, fontSource, brushSource, rightTarget);
+                                    rightTarget.Y += fontSize + 4;
+                                    gfx.DrawImage(image, rightTarget);
+                                    rightTarget.Y += item.Value.Height + 10;
+                                }
                             }
                         }
+
+                        if (!added)
+                        {
+                            page = document.AddPage();
+                            page.Size = GetPageSize(exportItem);
+                            page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
+                            gfx = XGraphics.FromPdfPage(page);
+                            leftTarget.Y = corners[1].Y;
+                            rightTarget.Y = corners[1].Y;
+
+                            added = true;
+                            gfx.DrawString(item.Key, fontSource, brushSource, leftTarget);
+                            leftTarget.Y += fontSize + 4;
+                            gfx.DrawImage(image, leftTarget);
+                            leftTarget.Y += item.Value.Height + 10;
+                            left = true;
+                            leftAvailable = true;
+                            rightAvailable = true;
+                        }
+
+                        left = !left;
+                        painted.Add(item.Key);
                     }
+                }
 
-                    
+                // Draw all the images that are too large for one column
+                XPoint target = new XPoint(corners[1].X, Math.Max(leftTarget.Y, rightTarget.Y));
 
-                    int a = 1;
+                foreach (KeyValuePair<string, Image> item in images)
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        item.Value.Save(ms, ImageFormat.Jpeg);
+                        XImage image = XImage.FromStream(ms);
 
+                        // Skip if the image has already been painted
+                        if (painted.Contains(item.Key))
+                        {
+                            continue;
+                        }
+                        gfx.DrawString(item.Key, fontSource, brushSource, target);
+                        target.Y += fontSize + 4;
+
+
+                        if (image.Size.Width > maxWithforOneColumn)
+                        {
+                            if (target.Y + (maxWithforOneColumn / image.Size.Width) * image.Size.Height + 10 > page.Height)
+                            {
+                                page = document.AddPage();
+                                page.Size = GetPageSize(exportItem);
+                                page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
+                                gfx = XGraphics.FromPdfPage(page);
+                                target.Y = corners[1].Y;
+                            }
+                            gfx.DrawImage(image, corners[1].X - item.Value.Width, target.Y, maxWithforOneColumn, (maxWithforOneColumn / image.Size.Width) * image.Size.Height);
+                        }
+                        else
+                        {
+                            if (target.Y + image.PixelHeight + 10 > page.Height)
+                            {
+                                page = document.AddPage();
+                                page.Size = GetPageSize(exportItem);
+                                page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
+                                gfx = XGraphics.FromPdfPage(page);
+                                target.Y = corners[1].Y;
+                            }
+                            gfx.DrawImage(image, new XPoint(corners[1].X - item.Value.Width, target.Y));
+                        }
+                        target.Y += item.Value.Height + 5;
+                    }
                 }
             }
         }
