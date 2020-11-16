@@ -276,13 +276,17 @@ export const Strong = ({ strongTag }) => {
     children.forEach((child, index) => {
       array.push(
         <React.Fragment key={index}>
-          <strong>{renderChild(child)}</strong>
+          <strong key={index}>{renderChild(child)}</strong>
         </React.Fragment>
       );
     });
     return array;
   }
-  return [<strong>{strongTag.textContent}</strong>];
+  return [
+    <React.Fragment key={0}>
+      <strong>{strongTag.textContent}</strong>
+    </React.Fragment>,
+  ];
 };
 export const Underline = ({ uTag }) => {
   const children = [...uTag.childNodes];
@@ -297,7 +301,11 @@ export const Underline = ({ uTag }) => {
     });
     return array;
   }
-  return [<u>{uTag.textContent}</u>];
+  return [
+    <React.Fragment key={0}>
+      <u>{uTag.textContent}</u>
+    </React.Fragment>,
+  ];
 };
 export const Italic = ({ emTag }) => {
   const children = [...emTag.childNodes];
@@ -312,7 +320,11 @@ export const Italic = ({ emTag }) => {
     });
     return array;
   }
-  return [<em>{emTag.textContent}</em>];
+  return [
+    <React.Fragment key={0}>
+      <em>{emTag.textContent}</em>
+    </React.Fragment>,
+  ];
 };
 
 /**
