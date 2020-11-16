@@ -2,13 +2,24 @@ import React from "react";
 import PanelList from "./PanelList";
 
 class PanelMenuView extends React.PureComponent {
-  state = { selectedIndex: null, coloredIndex: [], expandedIndex: [] };
+  state = {
+    selectedIndex: null,
+    coloredIndex: [],
+    expandedIndex: [],
+  };
 
   constructor(props) {
     super(props);
     this.#setInternalReferences();
     this.#bindSubscriptions();
   }
+
+  componentDidMount = () => {
+    const { options } = this.props;
+    this.setState({
+      expandedIndex: this.getDefaultExpanded(options.menuConfig.menu),
+    });
+  };
 
   handleExpandClick = (item) => {
     const indexOfItemId = this.state.expandedIndex.indexOf(item.id);
@@ -54,6 +65,23 @@ class PanelMenuView extends React.PureComponent {
         expandedIndex: this.#getItemIdsToExpand(item),
       });
     }
+  };
+
+  #hasSubMenu = (menuItem) => {
+    return menuItem.menu && menuItem.menu.length > 0;
+  };
+
+  getDefaultExpanded = (menu) => {
+    return menu.reduce((acc, menuItem) => {
+      const hasSubMenu = this.#hasSubMenu(menuItem);
+      if (menuItem.expandedSubMenu && hasSubMenu) {
+        acc = [...acc, menuItem.id];
+      }
+      if (hasSubMenu) {
+        acc = [...acc, ...this.getDefaultExpanded(menuItem.menu)];
+      }
+      return acc;
+    }, []);
   };
 
   #setInternalReferences = () => {
