@@ -31,12 +31,13 @@ export default class ExpressServer {
     app.use(compression());
 
     // Don't enable FB Proxy if necessary env variable isn't sat
-    if (process.env.FB_SERVICE_BASE_URL !== undefined)
+    if (
+      process.env.FB_SERVICE_ACTIVE === "true" &&
+      process.env.FB_SERVICE_BASE_URL !== undefined
+    )
       app.use("/api/v1/fbproxy", sokigoFBProxy());
     else
-      console.info(
-        "Sokigo FB Proxy not enabled due to missing settings, see your .env file."
-      );
+      console.info("Sokigo FB Proxy disabled according to settings in .env.");
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(
       bodyParser.urlencoded({
