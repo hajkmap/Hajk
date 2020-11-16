@@ -79,28 +79,36 @@ class TimeSliderView extends React.PureComponent {
     }
   };
 
-  getHiddenStyle() {
-    return [
-      new Style({
-        stroke: new Stroke({
-          color: "rgba(0, 0, 0, 0)",
-          width: 0,
-        }),
-        fill: new Fill({
-          color: "rgba(1, 2, 3, 0)",
-        }),
-        image: new Circle({
-          fill: new Fill({
-            color: "rgba(0, 0, 0, 0)",
-          }),
+  getTimeSliderStyle(feature, defaultStyle) {
+    const { currentUnixTime } = this.state;
+    if (
+      this.getUnixTimeFromString(feature.get("start")) <= currentUnixTime &&
+      this.getUnixTimeFromString(feature.get("end")) >= currentUnixTime
+    ) {
+      return null;
+    } else {
+      return [
+        new Style({
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 0)",
             width: 0,
           }),
-          radius: 0,
+          fill: new Fill({
+            color: "rgba(1, 2, 3, 0)",
+          }),
+          image: new Circle({
+            fill: new Fill({
+              color: "rgba(0, 0, 0, 0)",
+            }),
+            stroke: new Stroke({
+              color: "rgba(0, 0, 0, 0)",
+              width: 0,
+            }),
+            radius: 0,
+          }),
         }),
-      }),
-    ];
+      ];
+    }
   }
 
   toggleLayers = (layers, visible) => {
@@ -116,7 +124,14 @@ class TimeSliderView extends React.PureComponent {
           layer: layer,
           styleFunction: layer.getStyleFunction(),
         });
-        layer.setStyle(this.getHiddenStyle());
+        //layer.setStyle(this.getTimeSliderStyle());
+        // console.log("here", layer);
+        // layer.getSource().forEachFeature((feature) => {
+        //   console.log("feature");
+        //   feature.setStyle(
+        //     this.getTimeSliderStyle(feature, layer.getStyleFunction)
+        //   );
+        // });
         this.globalObserver.publish(
           `layerswitcher.${visible ? "show" : "hide"}Layer`,
           layer
@@ -195,22 +210,23 @@ class TimeSliderView extends React.PureComponent {
   };
 
   updateLayers = () => {
-    const { currentUnixTime } = this.state;
-
+    let extent = this.props.map.getView().calculateExtent();
     //This is not going to work. Need to check how many features in extent and warn the user if there are too many.
+
     this.layerInformation.map((layerInfo) => {
-      return layerInfo.layer.getSource().forEachFeature((feature) => {
-        if (
-          this.getUnixTimeFromString(feature.getProperties().start) <=
-            currentUnixTime &&
-          this.getUnixTimeFromString(feature.getProperties().end) >=
-            currentUnixTime
-        ) {
-          feature.setStyle(layerInfo.styleFunction);
-        } else {
-          feature.setStyle(this.getHiddenStyle());
-        }
-      });
+      console.log(
+        "layerInfo",
+        layerInfo.layer.getSource().getFeaturesInExtent(extent).length
+      );
+      return layerInfo.layer
+        .getSource()
+        .forEachFeatureInExtent(extent, (feature) => {
+          if (layerInfo.layer.getSource().getState() === "ready") {
+            feature.setStyle(
+              this.getTimeSliderStyle(feature, layerInfo.layer.styleFunction)
+            );
+          }
+        });
     });
   };
 
