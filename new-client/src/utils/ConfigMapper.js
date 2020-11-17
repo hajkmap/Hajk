@@ -272,6 +272,8 @@ export default class ConfigMapper {
         sldUrl: args.sldUrl,
         url: args.url,
         visible: args.visibleAtStart,
+        startDate: args.startDate,
+        endDate: args.endDate,
       },
     };
 

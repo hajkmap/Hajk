@@ -1,44 +1,43 @@
 import React from "react";
 import PropTypes from "prop-types";
+import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
-import { Style, Stroke, Fill, Circle } from "ol/style";
 import { withSnackbar } from "notistack";
 import Slider from "@material-ui/core/Slider";
 
-const styles = (theme) => ({});
+const styles = (theme) => ({
+  gridContainer: {
+    padding: theme.spacing(2),
+  },
+});
 
 class TimeSliderView extends React.PureComponent {
-  state = {
-    currentUnixTime: undefined,
-  };
-
   static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
+    map: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
   };
 
-  static defaultProps = {};
-
   constructor(props) {
     super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
-    this.startDate = this.props.options.startDate
-      ? this.getUnixTimeFromString(this.props.options.startDate)
-      : this.getUnixTimeFromString("20200101");
-    this.endDate = this.props.options.startDate
-      ? this.getUnixTimeFromString(this.props.options.endDate)
-      : this.getUnixTimeFromString("20450101");
-    this.resolution = this.props.options.resolution ?? "years";
-    this.stepSize = this.getStepSize();
-    this.sliderTimer = null;
-    this.layerInformation = [];
 
-    this.localObserver.subscribe("showTimeLineLayers", (layers) => {
-      this.toggleLayers(layers, true);
+    this.state = {
+      playing: false,
+      resolution: this.props.resolution ?? "years",
+      stepSize: this.getStepSize(this.props.resolution ?? "years"),
+    };
+
+    this.map = props.map;
+    this.layers = props.layers;
+    this.startTime = this.getTime("startDate");
+    this.endTime = this.getTime("endDate");
+    this.localObserver = props.localObserver;
+    this.bindSubscriptions();
+  }
+
+  bindSubscriptions = () => {
+    this.localObserver.subscribe("initiateTimeLine", () => {
+      this.initiateTimeLine();
     });
 
     this.localObserver.subscribe("hideTimeLineLayers", (layers) => {
@@ -48,96 +47,6 @@ class TimeSliderView extends React.PureComponent {
     this.localObserver.subscribe("toggleTimeSlider", (enabled) => {
       this.toggleTimeSlider(enabled);
     });
-  }
-
-  toggleTimeSlider = (enabled) => {
-    if (enabled) {
-      this.sliderTimer = setInterval(() => {
-        let nextDate = this.state.currentUnixTime
-          ? this.state.currentUnixTime + this.stepSize
-          : this.startDate + this.stepSize;
-        if (nextDate > this.endDate) {
-          nextDate = this.endDate;
-          clearInterval(this.sliderTimer);
-          this.props.updateCustomProp("playing", false);
-        }
-        this.handleSliderChange(nextDate);
-      }, 1000);
-    } else {
-      clearInterval(this.sliderTimer);
-    }
-  };
-
-  getStepSize = () => {
-    switch (this.resolution) {
-      case "years":
-        return 1000 * 60 * 60 * 24 * 365;
-      case "months":
-        return 1000 * 60 * 60 * 24 * 30;
-      default:
-        return 1000 * 60 * 60 * 24;
-    }
-  };
-
-  getTimeSliderStyle(feature, defaultStyle) {
-    const { currentUnixTime } = this.state;
-    if (
-      this.getUnixTimeFromString(feature.get("start")) <= currentUnixTime &&
-      this.getUnixTimeFromString(feature.get("end")) >= currentUnixTime
-    ) {
-      return null;
-    } else {
-      return [
-        new Style({
-          stroke: new Stroke({
-            color: "rgba(0, 0, 0, 0)",
-            width: 0,
-          }),
-          fill: new Fill({
-            color: "rgba(1, 2, 3, 0)",
-          }),
-          image: new Circle({
-            fill: new Fill({
-              color: "rgba(0, 0, 0, 0)",
-            }),
-            stroke: new Stroke({
-              color: "rgba(0, 0, 0, 0)",
-              width: 0,
-            }),
-            radius: 0,
-          }),
-        }),
-      ];
-    }
-  }
-
-  toggleLayers = (layers, visible) => {
-    this.props.app.map
-      .getLayers()
-      .getArray()
-      .filter((layer) => {
-        return layers.indexOf(layer.values_.name) > -1;
-      })
-      .forEach((layer) => {
-        this.layerInformation.push({
-          id: layer.values_.name,
-          layer: layer,
-          styleFunction: layer.getStyleFunction(),
-        });
-        //layer.setStyle(this.getTimeSliderStyle());
-        // console.log("here", layer);
-        // layer.getSource().forEachFeature((feature) => {
-        //   console.log("feature");
-        //   feature.setStyle(
-        //     this.getTimeSliderStyle(feature, layer.getStyleFunction)
-        //   );
-        // });
-        this.globalObserver.publish(
-          `layerswitcher.${visible ? "show" : "hide"}Layer`,
-          layer
-        );
-        layer.setVisible(visible);
-      });
   };
 
   getUnixTimeFromString = (str) => {
@@ -148,31 +57,110 @@ class TimeSliderView extends React.PureComponent {
     return new Date(`${y}-${m}-${d}`).getTime();
   };
 
-  getStringFromUnixTime = (date) => {
-    return new Date(date).toISOString().slice(0, 10).replace(/-/g, "");
+  getTime = (type) => {
+    let time = undefined;
+    this.layers.forEach((layer) => {
+      let layerTime = this.getUnixTimeFromString(layer.get(type));
+      if (!time) time = layerTime;
+
+      if (type === "startDate" && time > layerTime) {
+        time = layerTime;
+      } else if (type === "endDate" && time < layerTime) {
+        time = layerTime;
+      }
+    });
+    return time;
+  };
+
+  handleFeatureAdded = (event) => {
+    const source = event.target;
+    const feature = event.feature;
+    this.getTimeSliderLayerStyle(feature, source.originalStyleFunction);
+  };
+
+  getTimeSliderLayerStyle(feature, originalStyleFunction) {
+    const { currentUnixTime } = this.state;
+    if (
+      this.getUnixTimeFromString(feature.get("start")) <= currentUnixTime &&
+      this.getUnixTimeFromString(feature.get("end")) >= currentUnixTime
+    ) {
+      feature.setStyle(originalStyleFunction);
+    } else {
+      feature.setStyle(null);
+    }
+  }
+
+  initiateTimeLine = () => {
+    this.setState(
+      {
+        currentUnixTime: this.startTime,
+      },
+      () => {
+        this.initiateTimeLineLayers();
+      }
+    );
+  };
+
+  initiateTimeLineLayers = () => {
+    this.layers.forEach((layer) => {
+      const source = layer.getSource();
+      source.originalStyleFunction = layer.getStyleFunction();
+      source.on("addfeature", this.handleFeatureAdded);
+      layer.setStyle(null);
+      layer.setVisible(true);
+    });
+  };
+
+  toggleTimeSlider = (enabled) => {
+    const { currentUnixTime, stepSize } = this.state;
+    if (enabled) {
+      this.sliderTimer = setInterval(() => {
+        let nextUnixTime = currentUnixTime + stepSize;
+        if (nextUnixTime >= this.endTime) {
+          nextUnixTime = this.endTime;
+          clearInterval(this.sliderTimer);
+          this.props.updateCustomProp("playing", false);
+        }
+        this.handleSliderChange(nextUnixTime);
+      }, 500);
+    } else {
+      clearInterval(this.sliderTimer);
+    }
+  };
+
+  getStepSize = (resolution) => {
+    const day = 1000 * 60 * 60 * 24;
+    switch (resolution) {
+      case "years":
+        return day * 365;
+      case "months":
+        return day * 31;
+      default:
+        return day;
+    }
   };
 
   setNextDate = (nextUnixTime) => {
-    const { currentUnixTime } = this.state;
+    const { currentUnixTime, resolution } = this.state;
 
     const currentDate = new Date(currentUnixTime);
     let nextDate = new Date(nextUnixTime);
 
-    if (this.resolution === "years") {
+    if (resolution === "years") {
       if (currentDate.getFullYear() === nextDate.getFullYear()) {
-        currentUnixTime < nextUnixTime
+        currentUnixTime <= nextUnixTime
           ? nextDate.setFullYear(currentDate.getFullYear() + 1)
           : nextDate.setFullYear(currentDate.getFullYear() - 1);
       }
-    } else if (this.resolution === "months") {
+    } else if (resolution === "months") {
       if (currentDate.getMonth() === nextDate.getMonth()) {
-        currentUnixTime < nextUnixTime
+        currentUnixTime <= nextUnixTime
           ? nextDate.setMonth(currentDate.getMonth() + 1)
           : nextDate.setMonth(currentDate.getMonth() - 1);
       }
     } else {
       if (currentDate.getDay() === nextDate.getDay()) {
-        currentUnixTime < nextUnixTime
+        currentUnixTime <= nextUnixTime
           ? nextDate.setDate(currentDate.getDate() + 1)
           : nextDate.setDate(currentDate.getDate() - 1);
       }
@@ -189,10 +177,11 @@ class TimeSliderView extends React.PureComponent {
   };
 
   updateHeader = () => {
-    const currentDate = new Date(this.state.currentUnixTime);
+    const { currentUnixTime, resolution } = this.state;
+    const currentDate = new Date(currentUnixTime);
     let options = {};
 
-    switch (this.resolution) {
+    switch (resolution) {
       case "years":
         options = { year: "numeric" };
         break;
@@ -205,48 +194,50 @@ class TimeSliderView extends React.PureComponent {
     }
     this.props.updateCustomProp(
       "title",
-      `Timeslider - ${currentDate.toLocaleString("default", options)}`
+      `Tidslinje - ${currentDate.toLocaleString("default", options)}`
     );
   };
 
   updateLayers = () => {
-    let extent = this.props.map.getView().calculateExtent();
-    //This is not going to work. Need to check how many features in extent and warn the user if there are too many.
-
-    this.layerInformation.map((layerInfo) => {
-      console.log(
-        "layerInfo",
-        layerInfo.layer.getSource().getFeaturesInExtent(extent).length
-      );
-      return layerInfo.layer
-        .getSource()
-        .forEachFeatureInExtent(extent, (feature) => {
-          if (layerInfo.layer.getSource().getState() === "ready") {
-            feature.setStyle(
-              this.getTimeSliderStyle(feature, layerInfo.layer.styleFunction)
-            );
-          }
-        });
+    const extent = this.map.getView().calculateExtent();
+    this.layers.map((layer) => {
+      const source = layer.getSource();
+      return source.forEachFeatureInExtent(extent, (feature) => {
+        this.getTimeSliderLayerStyle(feature, source.originalStyleFunction);
+      });
     });
   };
 
   render() {
-    const { currentUnixTime } = this.state;
-    return (
-      <>
-        <Slider
-          value={currentUnixTime ? currentUnixTime : this.startDate}
-          min={this.startDate}
-          step={this.stepSize}
-          max={this.endDate}
-          onChangeCommitted={(e, value) => {
-            if (value !== currentUnixTime) {
-              this.handleSliderChange(value);
-            }
-          }}
-        />
-      </>
-    );
+    const { currentUnixTime, stepSize } = this.state;
+    const { classes } = this.props;
+    if (currentUnixTime) {
+      return (
+        <Grid container className={classes.gridContainer}>
+          <Grid item xs={12}>
+            <Grid item xs={3}></Grid>
+            <Grid item xs={3}></Grid>
+            <Grid item xs={3}></Grid>
+            <Grid item xs={3}></Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <Slider
+              value={currentUnixTime}
+              min={this.startTime}
+              max={this.endTime}
+              step={stepSize}
+              onChange={(e, value) => {
+                if (value !== currentUnixTime) {
+                  this.handleSliderChange(value);
+                }
+              }}
+            />
+          </Grid>
+        </Grid>
+      );
+    } else {
+      return null;
+    }
   }
 }
 

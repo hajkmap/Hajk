@@ -85,6 +85,8 @@ class WFSVectorLayer {
       featureType: config.params.typename.split(":")[1],
       minZoom: config?.minZoom >= 0 ? config.minZoom : undefined,
       maxZoom: config?.maxZoom >= 0 ? config.maxZoom : undefined,
+      startDate: config?.startDate,
+      endDate: config?.endDate,
     });
 
     // Styling section starts here.
@@ -285,6 +287,9 @@ class WFSVectorLayer {
       response.text().then((features) => {
         // Load all features (no filter active - only bbox limitation)
         this.allFeatures = this.getAllFeatures(features);
+
+        //Clear all previous features
+        this.vectorSource.clear();
 
         // See if filtering is needed and populate the source with resulting features
         this.vectorSource.addFeatures(
