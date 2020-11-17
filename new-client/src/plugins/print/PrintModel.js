@@ -68,46 +68,18 @@ export default class PrintModel {
     this.map.addLayer(this.previewLayer);
   }
 
-  getFittingScale = () => {
-    const zoom = Math.round(this.map.getView().getZoom());
-    let proposedScale = 200000 / (zoom * 2); //Seems to work fine for small-zoom levels
+  getMapScale = () => {
+    const dpi = 25.4 / 0.28,
+      mpu = this.map.getView().getProjection().getMetersPerUnit(),
+      inchesPerMeter = 39.37,
+      res = this.map.getView().getResolution();
 
-    switch (zoom) {
-      case 12:
-      case 11:
-      case 10:
-        proposedScale = 100;
-        break;
-      case 9:
-        proposedScale = 250;
-        break;
-      case 8:
-        proposedScale = 500;
-        break;
-      case 7:
-        proposedScale = 1000;
-        break;
-      case 6:
-        proposedScale = 2500;
-        break;
-      case 5:
-        proposedScale = 5000;
-        break;
-      case 4:
-        proposedScale = 10000;
-        break;
-      case 3:
-      case 2:
-      case 1:
-      case 0:
-        break;
-      default:
-        //Getting the middle-most scale as default
-        proposedScale = parseInt(
-          this.scales[Math.round((this.scales.length - 1) / 2)]
-        );
-        break;
-    }
+    return res * mpu * inchesPerMeter * dpi;
+  };
+
+  getFittingScale = () => {
+    //Get map scale
+    const proposedScale = this.getMapScale();
 
     //Get the scale closest to the proposed scale.
     return this.scales.reduce((prev, curr) => {
