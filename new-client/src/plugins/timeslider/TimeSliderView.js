@@ -5,6 +5,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Slider from "@material-ui/core/Slider";
 import Button from "@material-ui/core/Button";
+import OLCesium from "olcs/OLCesium.js";
 
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
@@ -33,9 +34,11 @@ class TimeSliderView extends React.PureComponent {
       playing: false,
       resolution: this.props.resolution ?? "years",
       stepSize: this.getStepSize(this.props.resolution ?? "years"),
+      cesiumActive: false,
     };
 
     this.map = props.map;
+    this.ol3d = new OLCesium({ map: this.map });
     this.layers = props.layers;
     this.startTime = this.getTime("startDate");
     this.endTime = this.getTime("endDate");
@@ -81,6 +84,12 @@ class TimeSliderView extends React.PureComponent {
     this.setState({
       currentUnixTime: this.startTime,
     });
+  };
+
+  toggle3D = (enabled) => {
+    this.setState({ cesiumActive: enabled });
+    this.ol3d.setEnabled(enabled);
+    //this.ol3d.enableAutoRenderLoop();
   };
 
   initiateTimeLineLayers = () => {
@@ -247,7 +256,7 @@ class TimeSliderView extends React.PureComponent {
   };
 
   render() {
-    const { currentUnixTime, stepSize } = this.state;
+    const { currentUnixTime, stepSize, cesiumActive } = this.state;
     const { classes, playing } = this.props;
 
     if (currentUnixTime) {
@@ -300,7 +309,11 @@ class TimeSliderView extends React.PureComponent {
               </Button>
             </Grid>
             <Grid item align="center" xs={3}>
-              <Button variant="outlined" color="primary">
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => this.toggle3D(!cesiumActive)}
+              >
                 <ThreeDRotationOutlinedIcon />
               </Button>
             </Grid>
