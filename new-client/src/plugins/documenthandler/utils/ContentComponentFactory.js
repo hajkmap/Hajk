@@ -104,7 +104,16 @@ export const ULComponent = ({ ulComponent }) => {
   return (
     <List className={classes.ulList} component="ul">
       {children.map((listItem, index) => {
-        return <li key={index}>{getFormattedComponentFromTag(listItem)}</li>;
+        return (
+          <Typography
+            key={index}
+            component="li"
+            className={classes.typography}
+            variant="body1"
+          >
+            {getFormattedComponentFromTag(listItem)}{" "}
+          </Typography>
+        );
       })}
     </List>
   );
@@ -117,11 +126,16 @@ export const OLComponent = ({ olComponent }) => {
     <List className={classes.olList} component="ol">
       {children.map((listItem, index) => {
         return (
-          <li key={index}>
+          <Typography
+            variant="body1"
+            component="li"
+            className={classes.typography}
+            key={index}
+          >
             <span className={classes.listItemMargin}>
               {getFormattedComponentFromTag(listItem)}
             </span>
-          </li>
+          </Typography>
         );
       })}
     </List>
