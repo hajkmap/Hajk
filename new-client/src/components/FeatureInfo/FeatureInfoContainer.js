@@ -65,7 +65,8 @@ class FeatureInfoContainer extends React.PureComponent {
   }
 
   showFeatureInMap = () => {
-    this.props.onDisplay(this.props.features[this.state.selectedIndex - 1]);
+    const { onDisplay, features } = this.props;
+    onDisplay(features[this.state.selectedIndex]);
   };
 
   stepLeft = () => {
