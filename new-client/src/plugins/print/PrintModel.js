@@ -536,6 +536,13 @@ export default class PrintModel {
         pdf.text(options.mapTitle, dim[0] / 2, 12, { align: "center" });
       }
 
+      // Add print comment if user supplied one
+      if (options.printComment.trim().length > 0) {
+        pdf.setFontSize(11);
+        pdf.setTextColor(options.mapTextColor);
+        pdf.text(options.printComment, dim[0] / 2, 18, { align: "center" });
+      }
+
       // Finally, save the PDF (or PNG)
       this.saveToFile(pdf, width, options.saveAsType)
         .then(() => {
