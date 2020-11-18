@@ -1,5 +1,5 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { ThemeProvider, withStyles } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
 import PrintWindow from "../printMenu/PrintWindow";
@@ -162,7 +162,7 @@ class DocumentWindowBase extends React.PureComponent {
 
   isModelReady = () => {
     const { model } = this.props;
-    return model;
+    return model ? true : false;
   };
 
   componentDidUpdate = (prevProps, prevState) => {
@@ -182,6 +182,24 @@ class DocumentWindowBase extends React.PureComponent {
     }
   };
 
+  getDocumentViewer = () => {
+    const {
+      documentWindowMaximized,
+      document,
+
+      documentColor,
+    } = this.props;
+    return (
+      <DocumentViewer
+        documentColor={documentColor || "#ffffff"}
+        documentWindowMaximized={documentWindowMaximized}
+        activeDocument={document}
+        togglePrintWindow={this.togglePrintWindow}
+        {...this.props}
+      />
+    );
+  };
+
   render() {
     const {
       options,
@@ -195,10 +213,11 @@ class DocumentWindowBase extends React.PureComponent {
       onWindowHide,
       documentColor,
       showPrintWindow,
+      customTheme,
       onMinimize,
       onMaximize,
     } = this.props;
-
+    const modelReady = this.isModelReady();
     const customHeaderButtons = options.enablePrint
       ? [
           {
@@ -207,7 +226,6 @@ class DocumentWindowBase extends React.PureComponent {
           },
         ]
       : [];
-
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -229,15 +247,15 @@ class DocumentWindowBase extends React.PureComponent {
           allowMaximizedWindow: false,
         }}
       >
-        {document != null && this.isModelReady() ? (
+        {document != null && modelReady ? (
           !showPrintWindow ? (
-            <DocumentViewer
-              documentColor={documentColor || "#ffffff"}
-              documentWindowMaximized={documentWindowMaximized}
-              activeDocument={document}
-              togglePrintWindow={this.togglePrintWindow}
-              {...this.props}
-            />
+            customTheme ? (
+              <ThemeProvider theme={customTheme}>
+                {this.getDocumentViewer()}
+              </ThemeProvider>
+            ) : (
+              this.getDocumentViewer()
+            )
           ) : (
             <PrintWindow
               chapters={chapters}

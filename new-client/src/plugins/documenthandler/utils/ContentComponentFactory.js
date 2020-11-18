@@ -26,14 +26,11 @@ const useStyles = makeStyles((theme) => ({
   },
   imageText: {
     marginBottom: theme.spacing(1),
-    fontStyle: "italic",
   },
   imageInformationWrapper: {
     marginBottom: theme.spacing(1),
   },
-  imageCaption: {
-    fontStyle: "italic",
-  },
+
   startIcon: {
     marginLeft: theme.spacing(0),
   },
@@ -221,9 +218,7 @@ export const Img = ({ imgTag, localObserver }) => {
     return (
       <Box className={classes.imageInformationWrapper}>
         {image.caption && (
-          <Typography variant="subtitle2" className={classes.imageCaption}>
-            {image.caption}
-          </Typography>
+          <Typography variant="subtitle2">{image.caption}</Typography>
         )}
         {image.source && (
           <Typography variant="subtitle2" className={classes.imageText}>
