@@ -54,11 +54,12 @@ class TimeSlider extends React.PureComponent {
   };
 
   onWindowShow = () => {
-    this.localObserver.publish("initiateTimeLine");
+    this.localObserver.publish("initiateTimeSliderView");
   };
 
   onWindowHide = () => {
-    this.localObserver.publish("hideTimeLineLayers", this.props.options.layers);
+    this.setState({ playing: false, title: "Tidslinje" });
+    this.localObserver.publish("resetTimeSliderView");
   };
 
   updateCustomProp = (prop, value) => {
@@ -86,7 +87,7 @@ class TimeSlider extends React.PureComponent {
                   },
                   () => {
                     this.localObserver.publish(
-                      "toggleTimeSlider",
+                      "toggleSlider",
                       this.state.playing
                     );
                   }
@@ -94,8 +95,8 @@ class TimeSlider extends React.PureComponent {
               },
             },
           ],
-          height: 450, // Custom height/width etc | Use "auto" for automatic or leave undefined
-          width: 400,
+          height: 100, // Custom height/width etc | Use "auto" for automatic or leave undefined
+          width: 700,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
         }}
@@ -108,6 +109,7 @@ class TimeSlider extends React.PureComponent {
           updateCustomProp={this.updateCustomProp}
           layers={this.layers}
           resolution={this.props.options.resolution}
+          playing={this.state.playing}
         />
       </BaseWindowPlugin>
     );

@@ -4,10 +4,18 @@ import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Slider from "@material-ui/core/Slider";
+import Button from "@material-ui/core/Button";
+
+import PlayArrowIcon from "@material-ui/icons/PlayArrow";
+import PauseIcon from "@material-ui/icons/Pause";
+import RotateLeftOutlinedIcon from "@material-ui/icons/RotateLeftOutlined";
+import SettingsOutlinedIcon from "@material-ui/icons/SettingsOutlined";
+import ThreeDRotationOutlinedIcon from "@material-ui/icons/ThreeDRotationOutlined";
 
 const styles = (theme) => ({
   gridContainer: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(4),
+    display: "flex",
   },
 });
 
@@ -36,16 +44,73 @@ class TimeSliderView extends React.PureComponent {
   }
 
   bindSubscriptions = () => {
-    this.localObserver.subscribe("initiateTimeLine", () => {
-      this.initiateTimeLine();
+    this.localObserver.subscribe("initiateTimeSliderView", () => {
+      this.initiateTimeSliderView();
     });
 
-    this.localObserver.subscribe("hideTimeLineLayers", (layers) => {
-      this.toggleLayers(layers, false);
+    this.localObserver.subscribe("resetTimeSliderView", () => {
+      this.resetTimeSliderView();
     });
 
-    this.localObserver.subscribe("toggleTimeSlider", (enabled) => {
-      this.toggleTimeSlider(enabled);
+    this.localObserver.subscribe("toggleSlider", (enabled) => {
+      this.toggleSlider(enabled);
+    });
+  };
+
+  initiateTimeSliderView = () => {
+    this.setState(
+      {
+        currentUnixTime: this.startTime,
+      },
+      () => {
+        this.initiateTimeLineLayers();
+        this.refreshLayers();
+      }
+    );
+  };
+
+  resetTimeSliderView = () => {
+    this.resetTimeSlider();
+    this.resetTimeLineLayers();
+  };
+
+  resetTimeSlider = () => {
+    this.toggleSlider(false);
+    this.refreshLayers();
+    this.props.updateCustomProp("title", `Tidslinje`);
+    this.setState({
+      currentUnixTime: this.startTime,
+    });
+  };
+
+  initiateTimeLineLayers = () => {
+    this.layers.forEach((layer) => {
+      const source = layer.getSource();
+      source.originalStyleFunction = layer.getStyleFunction();
+      source.on("addfeature", this.handleFeatureAdded);
+      layer.setStyle(null);
+      layer.setVisible(true);
+    });
+  };
+
+  resetTimeLineLayers = () => {
+    this.layers.forEach((layer) => {
+      const source = layer.getSource();
+      source.un("addfeature", this.handleFeatureAdded);
+      layer.setStyle(source.originalStyleFunction);
+      layer.setVisible(false);
+    });
+  };
+
+  handleFeatureAdded = (event) => {
+    const source = event.target;
+    const feature = event.feature;
+    this.getTimeSliderLayerStyle(feature, source.originalStyleFunction);
+  };
+
+  refreshLayers = () => {
+    this.layers.forEach((layer) => {
+      layer.getSource().refresh();
     });
   };
 
@@ -72,12 +137,6 @@ class TimeSliderView extends React.PureComponent {
     return time;
   };
 
-  handleFeatureAdded = (event) => {
-    const source = event.target;
-    const feature = event.feature;
-    this.getTimeSliderLayerStyle(feature, source.originalStyleFunction);
-  };
-
   getTimeSliderLayerStyle(feature, originalStyleFunction) {
     const { currentUnixTime } = this.state;
     if (
@@ -90,32 +149,10 @@ class TimeSliderView extends React.PureComponent {
     }
   }
 
-  initiateTimeLine = () => {
-    this.setState(
-      {
-        currentUnixTime: this.startTime,
-      },
-      () => {
-        this.initiateTimeLineLayers();
-      }
-    );
-  };
-
-  initiateTimeLineLayers = () => {
-    this.layers.forEach((layer) => {
-      const source = layer.getSource();
-      source.originalStyleFunction = layer.getStyleFunction();
-      source.on("addfeature", this.handleFeatureAdded);
-      layer.setStyle(null);
-      layer.setVisible(true);
-    });
-  };
-
-  toggleTimeSlider = (enabled) => {
-    const { currentUnixTime, stepSize } = this.state;
+  toggleSlider = (enabled) => {
     if (enabled) {
       this.sliderTimer = setInterval(() => {
-        let nextUnixTime = currentUnixTime + stepSize;
+        let nextUnixTime = this.state.currentUnixTime + this.state.stepSize;
         if (nextUnixTime >= this.endTime) {
           nextUnixTime = this.endTime;
           clearInterval(this.sliderTimer);
@@ -125,6 +162,7 @@ class TimeSliderView extends React.PureComponent {
       }, 500);
     } else {
       clearInterval(this.sliderTimer);
+      this.props.updateCustomProp("playing", false);
     }
   };
 
@@ -210,16 +248,11 @@ class TimeSliderView extends React.PureComponent {
 
   render() {
     const { currentUnixTime, stepSize } = this.state;
-    const { classes } = this.props;
+    const { classes, playing } = this.props;
+
     if (currentUnixTime) {
       return (
         <Grid container className={classes.gridContainer}>
-          <Grid item xs={12}>
-            <Grid item xs={3}></Grid>
-            <Grid item xs={3}></Grid>
-            <Grid item xs={3}></Grid>
-            <Grid item xs={3}></Grid>
-          </Grid>
           <Grid item xs={12}>
             <Slider
               value={currentUnixTime}
@@ -232,6 +265,45 @@ class TimeSliderView extends React.PureComponent {
                 }
               }}
             />
+          </Grid>
+          <Grid
+            container
+            direction="row"
+            justify="center"
+            alignItems="center"
+            spacing={2}
+          >
+            <Grid item align="center" xs={3}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => {
+                  this.props.updateCustomProp("playing", !playing);
+                  this.toggleSlider(!playing);
+                }}
+              >
+                {playing ? <PauseIcon /> : <PlayArrowIcon />}
+              </Button>
+            </Grid>
+            <Grid item align="center" xs={3}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={this.resetTimeSlider}
+              >
+                <RotateLeftOutlinedIcon />
+              </Button>
+            </Grid>
+            <Grid item align="center" xs={3}>
+              <Button variant="outlined" color="primary">
+                <SettingsOutlinedIcon />
+              </Button>
+            </Grid>
+            <Grid item align="center" xs={3}>
+              <Button variant="outlined" color="primary">
+                <ThreeDRotationOutlinedIcon />
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
       );
