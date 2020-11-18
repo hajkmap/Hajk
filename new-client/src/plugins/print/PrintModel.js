@@ -68,6 +68,27 @@ export default class PrintModel {
     this.map.addLayer(this.previewLayer);
   }
 
+  getMapScale = () => {
+    const dpi = 25.4 / 0.28,
+      mpu = this.map.getView().getProjection().getMetersPerUnit(),
+      inchesPerMeter = 39.37,
+      res = this.map.getView().getResolution();
+
+    return res * mpu * inchesPerMeter * dpi;
+  };
+
+  getFittingScale = () => {
+    //Get map scale
+    const proposedScale = this.getMapScale();
+
+    //Get the scale closest to the proposed scale.
+    return this.scales.reduce((prev, curr) => {
+      return Math.abs(curr - proposedScale) < Math.abs(prev - proposedScale)
+        ? curr
+        : prev;
+    });
+  };
+
   removePreview = () => {
     this.previewFeature = undefined;
     this.previewLayer.getSource().clear();

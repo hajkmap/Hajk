@@ -49,7 +49,7 @@ class PrintView extends React.PureComponent {
     format: "a4", // a0-a5
     orientation: "landscape",
     resolution: 150, // 72, 150, 300,
-    scale: 10000, // 10000 means scale of 1:10000
+    scale: this.props.scales[Math.round((this.props.scales.length - 1) / 2)], // 10000 means scale of 1:10000
     mapTitle: "", // User can set a title that will get printed on the map
     mapTextColor: "#FFFFFF", // Default color of text printed on the map
     printInProgress: false,
@@ -113,7 +113,8 @@ class PrintView extends React.PureComponent {
     });
 
     props.localObserver.subscribe("showPrintPreview", () => {
-      this.setState({ previewLayerVisible: true });
+      const scale = this.model.getFittingScale();
+      this.setState({ previewLayerVisible: true, scale: scale });
     });
 
     props.localObserver.subscribe("hidePrintPreview", () => {
