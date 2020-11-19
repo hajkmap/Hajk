@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 
+import ad from "./activedirectory.service";
+
 class ConfigService {
   constructor() {
     // TODO: As reading files is expansive, we can read all
@@ -18,11 +20,117 @@ class ConfigService {
    * @returns Map config contents in JSON
    * @memberof ConfigService
    */
-  async getMapConfig(map) {
+  async getMapConfig(map, user) {
+    console.log("getMapConfig for user: ", user);
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `${map}.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = await JSON.parse(text);
+
+      // If we haven't enabled AD restrictions, just return the entire map config
+      if (process.env.AD_LOOKUP_ACTIVE !== "true") {
+        return json;
+      }
+
+      // Else, it looks like MapService is configured to respect AD restrictions.
+      // We must do some extra work and remove layers that current user should
+      // see before we can return the contents of map config.
+
+      // First, ensure that we have a valid user name. This is necessary for AD lookups.
+      if (user === undefined) {
+        console.error(
+          "getMapConfig: Cannot lookup membership for undefined user. Ensure that correct user ID is provided in the request header."
+        );
+        throw new Error(
+          "getMapConfig: AD authentication is active, but no user name was supplied. Cannot continue."
+        );
+      }
+
+      // Restrictions can be placed on either map config (access to map), layers/groups
+      // or as a combination of both.
+
+      // First, let's see if user has access to the map config. If not, there's no
+      // need to further "wash" groups/layers, so we do it first.
+
+      // Grab the options from map config
+      const visibleForGroups = json.tools.find(
+        (t) => t.type === "layerswitcher"
+      ).options?.visibleForGroups;
+
+      // First see if access to the map config is allowed for group that current user is a member of
+      if (Array.isArray(visibleForGroups) && visibleForGroups.length > 0) {
+        for (const group of visibleForGroups) {
+          const isMember = await ad.isUserMemberOf(user, group);
+          console.log(group, isMember);
+          // Returned the map config, after first washing it for current uer
+          if (isMember === true) return this.washMapConfig(json, user);
+        }
+
+        // If we got this far, it looks as the current user isn't member in any
+        // of the required groups - hence no access can be given to the map.
+        console.log(
+          "User is not member in any of the necessary groups - access to map restricted."
+        );
+        throw new Error("NOT ALLOWED");
+      } else {
+        // It looks as the map config itself has no restriction.
+        // There can still be restrictions inside specific layers though,
+        // so let's wash the response before returning.
+        return this.washMapConfig(json, user);
+      }
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  washMapConfig(mapConfig, user) {
+    // TODO: The main thing left: do recursive washing so that only
+    // groups/layers that user has access to (or those that are unrestricted)
+    // are returned.
+
+    console.log("Washing map config for user:", user);
+    // Each map tool can have restrictions
+
+    // Baselayers and groups/layers can have recursive restrictions
+    return mapConfig;
+  }
+
+  async getLayersStore(user) {
+    console.log("getLayersStore for user: ", user);
+    try {
+      const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
+      const text = await fs.promises.readFile(pathToFile, "utf-8");
+      const json = await JSON.parse(text);
+
+      // TODO:
+      // /config/layers should be way smarter than it is today. We should modify client
+      // so that we fetch mapconfig and layers at the same time. This way, we would be
+      // able to find out which layers are necessary to be returned from the store for
+      // current map. This would obviously lead to drastically smaller response, but
+      // also be a security measure, as user would not be able to find out which layers
+      // exist in the store.
+
+      // If we haven't enabled AD restrictions, just return the entire layers store
+      if (process.env.AD_LOOKUP_ACTIVE !== "true") {
+        return json;
+      }
+
+      // Else, it looks like MapService is configured to respect AD restrictions.
+      // We must do some extra work and remove layers that current user should
+      // see before we can return the contents of map config.
+
+      // First, ensure that we have a valid user name. This is necessary for AD lookups.
+      if (user === undefined) {
+        console.error(
+          "getLayersStore: AD auth is required but no user was specified. Cannot return any layers."
+        );
+        throw new Error(
+          "getLayersStore: AD authentication is active, but no user name was supplied. Cannot continue."
+        );
+      }
+
+      // TODO: replace with something like:
+      // return this.washLayersStore(json);
       return json;
     } catch (error) {
       return { error };
@@ -44,7 +152,7 @@ class ConfigService {
     // Obtain layers definition as JSON. It will be needed
     // both if we want to grab all available layers or
     // describe a specific map config.
-    const layersConfig = await this.getMapConfig("layers");
+    const layersConfig = await this.getLayersStore();
 
     // Create a Map, indexed with each map's ID to allow
     // fast lookup later on
@@ -148,7 +256,8 @@ class ConfigService {
     }
   }
 
-  async getUserSpecificMaps() {
+  async getUserSpecificMaps(user) {
+    console.log("getUserSpecificMaps for user: ", user);
     try {
       // Prepare our return array
       const output = [];
@@ -157,17 +266,24 @@ class ConfigService {
       const availableMaps = await this.getAvailableMaps();
 
       // Open each of these map configs to see if it wants to be exposed
-      // in MapSwitcher, and to see what name it whishes to have
+      // in MapSwitcher, and to see what name it wishes to have.
       for (const map of availableMaps) {
         // Open map config and parse it to a JSON object
-        const mapConfig = await this.getMapConfig(map);
+        const mapConfig = await this.getMapConfig(map, user);
+
+        // If we encounter errors, access to current map is restricted for current user
+        // so let's just continue with next element in available maps.
+        if (mapConfig.error) continue;
+
+        // If we got this far, user seems to have access to map config.
 
         // The relevant settings will be found in LayerSwitcher config
         const lsConfig = mapConfig.tools.find(
           (t) => t.type === "layerswitcher"
         );
 
-        // If map config says so, push the current map into the return object
+        // If map config says is configured to be exposed in MapSwitcher,
+        // push the current map into the return object.
         if (lsConfig?.options.dropdownThemeMaps === true) {
           output.push({
             mapConfigurationName: map,
@@ -176,6 +292,14 @@ class ConfigService {
         }
       }
       return output;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async getAvailableADGroups() {
+    try {
+      return await ad.getAvailableADGroups();
     } catch (error) {
       return { error };
     }

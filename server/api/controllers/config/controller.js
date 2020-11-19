@@ -1,4 +1,5 @@
 import ConfigService from "../../services/config.service";
+import ad from "../../services/activedirectory.service";
 
 export class Controller {
   /**
@@ -10,8 +11,11 @@ export class Controller {
    * @memberof Controller
    */
   byMap(req, res) {
-    ConfigService.getMapConfig(req.params.map).then((r) => {
-      if (r.error) res.status(500).send(r.error.message);
+    ConfigService.getMapConfig(
+      req.params.map,
+      ad.getUserFromRequestHeader(req)
+    ).then((r) => {
+      if (r.error) res.status(500).send(r.error.toString());
       else res.json(r);
     });
   }
@@ -44,16 +48,14 @@ export class Controller {
    * @memberof Controller
    */
   layers(req, res) {
-    // Special case, essentially the same as above,
-    // but uses hard-coded file name: "layers"
-    ConfigService.getMapConfig("layers").then((r) => {
-      if (r.error) res.status(500).send(r.error.message);
+    ConfigService.getLayersStore(ad.getUserFromRequestHeader(req)).then((r) => {
+      if (r.error) res.status(500).send(r.error.toString());
       else res.json(r);
     });
   }
 
   /**
-   * @summary List all available map configs
+   * @summary List all available map configs - used in admin
    *
    * @param {*} req
    * @param {*} res
@@ -66,11 +68,18 @@ export class Controller {
     });
   }
 
-  // FIXME: Make a real implementation that actually respects
-  // each map's setting. This mock only lists all maps in dir.
   userSpecificMaps(req, res) {
-    ConfigService.getUserSpecificMaps().then((r) => {
-      if (r.error) res.status(500).send(r.error.message);
+    ConfigService.getUserSpecificMaps(ad.getUserFromRequestHeader(req)).then(
+      (r) => {
+        if (r.error) res.status(500).send(r.error.toString());
+        else res.json(r);
+      }
+    );
+  }
+
+  availableADGroups(req, res) {
+    ConfigService.getAvailableADGroups().then((r) => {
+      if (r.error) res.status(500).send(r.error.toString());
       else res.json(r);
     });
   }

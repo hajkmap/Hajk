@@ -193,6 +193,13 @@ paths:
       tags:
         - Maps and layers
       description: List available layers
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: All layers were fetched successfully
@@ -217,6 +224,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       description: Fetch contents of a map configuration
       responses:
         200:
@@ -335,6 +348,22 @@ paths:
       tags:
         - Maps and layers
       description: Get a list of maps that will be available in the MapSwitcher dropdown
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+  /config/availableadgroups:
+    get:
+      tags:
+        - Maps and layers
+      description: Get a list of all available AD groups to make it easier for admins to set map and layer permissions
       responses:
         200:
           description: Success

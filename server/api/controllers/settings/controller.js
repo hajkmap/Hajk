@@ -7,6 +7,7 @@ export class Controller {
         // If r contains mapConfig, update has succeeded
         if (r.mapConfig) res.status(200).json(r.mapConfig);
         // If r contains message, it looks like we got back an error object
+        // FIXME: Just check if 'r instanceof Error' and if so, send(r.toString()) so we also get Error name, not only message
         else if (r.message) res.status(500).send(r.message);
         // Else, we have no idea what we got, but it can't be good…
         else res.status(500).send(r);

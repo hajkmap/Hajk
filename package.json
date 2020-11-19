@@ -17,6 +17,7 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
+    "activedirectory": "^0.7.2",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
@@ -33,6 +34,7 @@
     "@babel/node": "^7.10.5",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.10.4",
     "@babel/plugin-proposal-optional-chaining": "^7.10.4",
+    "@babel/plugin-proposal-private-methods": "^7.12.1",
     "@babel/preset-env": "^7.11.5",
     "@babel/register": "^7.11.5",
     "babel-eslint": "^10.1.0",
