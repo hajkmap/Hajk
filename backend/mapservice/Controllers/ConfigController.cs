@@ -15,6 +15,7 @@ using Newtonsoft.Json.Linq;
 using MapService.DataAccess;
 using System.Collections;
 using System.Security.Principal;
+using System.Linq;
 
 namespace MapService.Controllers
 {
@@ -521,7 +522,7 @@ namespace MapService.Controllers
 
             return mapConfiguration;
         }
-        private string FilterSearchLayersByAD (ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        private JToken FilterSearchLayersByAD (ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
         {
             var childrenToRemove = new List<string>();  
             var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
@@ -531,7 +532,7 @@ namespace MapService.Controllers
             if(layersInSearchTool == null)
             {
                 _log.Warn("SearchTool is missing the layersobject");
-                return mapConfiguration.ToString();
+                return mapConfiguration;
             }
             else
             {
@@ -566,8 +567,60 @@ namespace MapService.Controllers
                 //{
                 //    layersInSearchTool.Replace(null);
                 //}
-                return mapConfiguration.ToString();
+                return mapConfiguration;
             }        
+        }
+        private JToken FilterEditLayersByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+            var childrenToRemove = new List<string>();
+            var editTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
+            var layersInEditTool = editTool.SelectToken("$.options.layers");
+            var userGroups = adLookup.GetGroups(activeUser);
+
+            if (layersInEditTool == null)
+            {
+                _log.Warn("EditTool is missing the layersobject");
+                return mapConfiguration;
+            }
+            else
+            {
+                foreach (JToken child in layersInEditTool.Children())
+                {
+                    var visibleForGroups = child.SelectToken("$.visibleForGroups");
+                    bool allowed = false;
+                    _log.Debug("Layer in edit tool: " + child.SelectToken("$.id").ToString() + ", visibleForGroups: " + visibleForGroups);
+
+                    if (HasValidVisibleForGroups(visibleForGroups))
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    }
+                    else
+                    {
+                        allowed = true;
+                        _log.Info("Can't filter edit layers because the key 'visibleForGroups' is missing, incorrect or empty");
+                    }
+
+                    if (!allowed)
+                    {
+                        childrenToRemove.Add(child.SelectToken("$.id").ToString());
+                    }
+                }
+
+                foreach (string id in childrenToRemove)
+                {
+                    layersInEditTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+                }
+
+                _log.Debug("Allowed layersInEditTool : " + layersInEditTool);
+                if(!layersInEditTool.HasValues)
+                {
+                    _log.Warn("No layers in edit tool. Remove the edit tool from map config");
+                    mapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]").Remove();
+                };
+
+
+                return mapConfiguration;
+            }
         }
         private bool IsGroupAllowedAccess (string [] userGroups, JToken visibleForGroups)
         {
@@ -718,21 +771,27 @@ namespace MapService.Controllers
 
                         JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(System.IO.File.ReadAllText(file));
 
+                        // Filter layers
                         var filteredMapConfiguration = FilterLayersByAD(adLookup, mapConfiguration, activeUser);
                         
-
+                        // Filter tools
                         filteredMapConfiguration = FilterToolsByAD(adLookup, filteredMapConfiguration, activeUser);
-                        var searchTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
 
+                        // Filter search layers
+                        var searchTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
                         if (searchTool != null)
                         {
-                            return FilterSearchLayersByAD(adLookup, filteredMapConfiguration, activeUser);
-                        }
-                        else
-                        {
-                            return filteredMapConfiguration.ToString();
+                            filteredMapConfiguration = FilterSearchLayersByAD(adLookup, filteredMapConfiguration, activeUser);
                         }
 
+                        // Filter edit layers
+                        var editTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
+                        if (editTool != null)
+                        {
+                            filteredMapConfiguration = FilterEditLayersByAD(adLookup, filteredMapConfiguration, activeUser);
+                        }
+
+                        return filteredMapConfiguration.ToString();
                     }
                     else
                     {
