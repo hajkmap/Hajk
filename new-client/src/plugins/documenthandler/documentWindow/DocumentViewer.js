@@ -16,6 +16,7 @@ const styles = (theme) => ({
     overflowX: "hidden",
     userSelect: "text",
     outline: "none",
+    //scrollBehavior: "smooth",
   },
   contentContainer: {
     paddingBottom: theme.spacing(1),
@@ -76,9 +77,12 @@ class DocumentViewer extends React.PureComponent {
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
-
     localObserver.subscribe("scroll-to-chapter", (chapter) => {
-      chapter.scrollRef.current.scrollIntoView();
+      /*scrollIntoView is buggy without dirty fix - 
+      tried using react life cycle methods but is, for some reason, not working*/
+      setTimeout(() => {
+        chapter.scrollRef.current.scrollIntoView();
+      }, 100);
     });
 
     localObserver.subscribe("scroll-to-top", () => {

@@ -46,15 +46,6 @@ class DocumentWindowBase extends React.PureComponent {
     return this.props.options.documentOnStart ? true : false;
   };
 
-  showDocument = (documentFileName) => {
-    const { app } = this.props;
-    app.globalObserver.publish("documentviewer.showWindow", {
-      hideOtherPlugins: false,
-    });
-    app.globalObserver.publish("core.maximizeWindow");
-    return this.setActiveDocument(documentFileName);
-  };
-
   scrollInDocument = (headerIdentifier) => {
     const { localObserver, model } = this.props;
 
@@ -96,7 +87,11 @@ class DocumentWindowBase extends React.PureComponent {
       return false;
     }
     return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
-      return ["data-maplink", "data-document", "data-header"].includes(key);
+      return [
+        "data-maplink",
+        "data-document",
+        "data-header-identifier",
+      ].includes(key);
     });
   };
 
