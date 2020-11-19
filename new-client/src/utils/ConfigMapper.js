@@ -144,6 +144,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        startDate: args.startDate,
+        endDate: args.endDate,
       },
     };
 
@@ -195,6 +197,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        startDate: args.startDate,
+        endDate: args.endDate,
       },
     };
     return config;
@@ -325,6 +329,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        startDate: args.startDate,
+        endDate: args.endDate,
       },
     };
 

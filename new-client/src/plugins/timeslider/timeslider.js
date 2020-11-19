@@ -45,7 +45,7 @@ class TimeSlider extends React.PureComponent {
       .getLayers()
       .getArray()
       .filter((layer) => {
-        return layerIds.indexOf(layer.values_.name) > -1;
+        return layerIds?.indexOf(layer.values_.name) > -1;
       });
   };
 
@@ -101,8 +101,6 @@ class TimeSlider extends React.PureComponent {
           onWindowHide: this.onWindowHide,
         }}
       >
-        {/* This is the child object of BaseWindowPlugin. It will be displayed
-            as content inside the plugin's window. */}
         <TimeSliderView
           map={this.props.map}
           localObserver={this.localObserver} // And also the Observer, so that those 2 can talk through it

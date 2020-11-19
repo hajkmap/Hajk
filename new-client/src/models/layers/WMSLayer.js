@@ -50,6 +50,8 @@ class WMSLayer {
         source: new ImageWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        startDate: config?.startDate,
+        endDate: config?.endDate,
       });
     } else {
       this.layer = new TileLayer({
@@ -60,6 +62,8 @@ class WMSLayer {
         source: new TileWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        startDate: config?.startDate,
+        endDate: config?.endDate,
       });
     }
 

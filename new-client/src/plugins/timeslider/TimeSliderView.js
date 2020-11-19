@@ -1,11 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import Slider from "@material-ui/core/Slider";
-import Button from "@material-ui/core/Button";
-import Badge from "@material-ui/core/Badge";
+
+import { Slider, Button, Badge, Grid } from "@material-ui/core";
+
+import { Vector as VectorLayer } from "ol/layer";
 
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
@@ -33,12 +33,13 @@ class TimeSliderView extends React.PureComponent {
       resolution: this.props.resolution ?? "years",
       stepSize: this.getStepSize(this.props.resolution ?? "years"),
       loadingError: true,
+      layerStatus: this.validateLayers(),
     };
 
     this.map = props.map;
     this.layers = props.layers;
-    this.startTime = this.getTime("startDate");
-    this.endTime = this.getTime("endDate");
+    this.startTime = this.getTime("startDate") || "20200101";
+    this.endTime = this.getTime("endDate") || "20451231";
     this.localObserver = props.localObserver;
     this.bindSubscriptions();
   }
@@ -55,6 +56,33 @@ class TimeSliderView extends React.PureComponent {
     this.localObserver.subscribe("toggleSlider", (enabled) => {
       this.toggleSlider(enabled);
     });
+  };
+
+  validateLayers = () => {
+    const { layers } = this.props;
+    let layerStatus = {
+      error: false,
+      errorType: "",
+      faultyLayers: [],
+    };
+
+    if (layers.length === 0) {
+      layerStatus.error = true;
+      layerStatus.errorType = "layers_missing";
+    }
+
+    layers.forEach((layer) => {
+      if (!layer.get("startDate") || !layer.get("endDate")) {
+        layerStatus.error = true;
+        layerStatus.errorType = "layer_error";
+        layerStatus.faultyLayers.push({
+          layerId: layer.get("name"),
+          layerError: "date_missing",
+        });
+      }
+    });
+
+    return layerStatus;
   };
 
   initiateTimeSliderView = () => {
@@ -76,19 +104,30 @@ class TimeSliderView extends React.PureComponent {
 
   resetTimeSlider = () => {
     this.toggleSlider(false);
-    this.refreshLayers();
+
     this.props.updateCustomProp("title", `Tidslinje`);
-    this.setState({
-      currentUnixTime: this.startTime,
-    });
+    this.setState(
+      {
+        currentUnixTime: this.startTime,
+      },
+      () => {
+        this.refreshLayers();
+      }
+    );
   };
 
   initiateTimeLineLayers = () => {
     this.layers.forEach((layer) => {
       const source = layer.getSource();
-      source.originalStyleFunction = layer.getStyleFunction();
-      source.on("addfeature", this.handleFeatureAdded);
-      layer.setStyle(null);
+      if (layer instanceof VectorLayer) {
+        source.originalStyleFunction = layer.getStyleFunction();
+        source.on("addfeature", this.handleFeatureAdded);
+        layer.setStyle(null);
+      } else {
+        source.updateParams({
+          TIME: new Date(this.state.currentUnixTime).toISOString(),
+        });
+      }
       layer.setVisible(true);
     });
   };
@@ -96,9 +135,16 @@ class TimeSliderView extends React.PureComponent {
   resetTimeLineLayers = () => {
     this.layers.forEach((layer) => {
       const source = layer.getSource();
-      source.un("addfeature", this.handleFeatureAdded);
-      layer.setStyle(source.originalStyleFunction);
-      layer.setVisible(false);
+      if (layer instanceof VectorLayer) {
+        source.un("addfeature", this.handleFeatureAdded);
+        layer.setStyle(source.originalStyleFunction);
+        layer.setVisible(false);
+      } else {
+        source.updateParams({
+          TIME: undefined,
+        });
+        layer.setVisible(false);
+      }
     });
   };
 
@@ -110,7 +156,13 @@ class TimeSliderView extends React.PureComponent {
 
   refreshLayers = () => {
     this.layers.forEach((layer) => {
-      layer.getSource().refresh();
+      if (layer instanceof VectorLayer) {
+        layer.getSource().refresh();
+      } else {
+        layer.getSource().updateParams({
+          TIME: new Date(this.startTime).toISOString(),
+        });
+      }
     });
   };
 
@@ -125,24 +177,43 @@ class TimeSliderView extends React.PureComponent {
   getTime = (type) => {
     let time = undefined;
     this.layers.forEach((layer) => {
-      let layerTime = this.getUnixTimeFromString(layer.get(type));
-      if (!time) time = layerTime;
+      const layerTime = layer.get(type);
+      if (layerTime) {
+        let layerUnixTime = this.getUnixTimeFromString(layerTime);
+        if (!time) time = layerUnixTime;
 
-      if (type === "startDate" && time > layerTime) {
-        time = layerTime;
-      } else if (type === "endDate" && time < layerTime) {
-        time = layerTime;
+        if (type === "startDate" && time > layerUnixTime) {
+          time = layerUnixTime;
+        } else if (type === "endDate" && time < layerUnixTime) {
+          time = layerUnixTime;
+        }
       }
     });
     return time;
   };
 
-  getTimeSliderLayerStyle(feature, originalStyleFunction) {
+  shouldFeatureShow = (feature) => {
     const { currentUnixTime } = this.state;
-    if (
-      this.getUnixTimeFromString(feature.get("start")) <= currentUnixTime &&
-      this.getUnixTimeFromString(feature.get("end")) >= currentUnixTime
-    ) {
+    const featureStart = feature.get("start");
+    const featureEnd = feature.get("end");
+
+    if (!featureStart || !featureEnd) {
+      return false;
+    }
+    let startDate = new Date(featureStart);
+    let endDate = new Date(featureEnd);
+    if (!startDate.getTime() > 0 || !endDate.getTime() > 0) {
+      startDate = this.getUnixTimeFromString(featureStart);
+      endDate = this.getUnixTimeFromString(featureEnd);
+    }
+    if (startDate <= currentUnixTime && endDate >= currentUnixTime) {
+      return true;
+    }
+    return false;
+  };
+
+  getTimeSliderLayerStyle(feature, originalStyleFunction) {
+    if (this.shouldFeatureShow(feature)) {
       feature.setStyle(originalStyleFunction);
     } else {
       feature.setStyle(null);
@@ -240,14 +311,20 @@ class TimeSliderView extends React.PureComponent {
     const extent = this.map.getView().calculateExtent();
     this.layers.map((layer) => {
       const source = layer.getSource();
-      return source.forEachFeatureInExtent(extent, (feature) => {
-        this.getTimeSliderLayerStyle(feature, source.originalStyleFunction);
-      });
+      if (layer instanceof VectorLayer) {
+        return source.forEachFeatureInExtent(extent, (feature) => {
+          this.getTimeSliderLayerStyle(feature, source.originalStyleFunction);
+        });
+      } else {
+        return source.updateParams({
+          TIME: new Date(this.state.currentUnixTime).toISOString(),
+        });
+      }
     });
   };
 
   render() {
-    const { currentUnixTime, stepSize, loadingError } = this.state;
+    const { currentUnixTime, stepSize, layerStatus } = this.state;
     const { classes, playing } = this.props;
 
     if (currentUnixTime) {
@@ -295,7 +372,7 @@ class TimeSliderView extends React.PureComponent {
               </Button>
             </Grid>
             <Grid item align="center" xs={4}>
-              <Badge color="error" badgeContent="1" hidden={!loadingError}>
+              <Badge color="error" badgeContent="1" hidden={!layerStatus.error}>
                 <Button variant="outlined" color="primary">
                   <SettingsOutlinedIcon />
                 </Button>
