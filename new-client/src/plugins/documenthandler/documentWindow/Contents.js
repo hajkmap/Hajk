@@ -38,26 +38,22 @@ class Contents extends React.PureComponent {
   };
 
   componentDidMount = () => {
+    const { localObserver } = this.props;
     this.appendParsedComponentsToDocument();
-    this.props.localObserver.unsubscribe("append-chapter-components");
-    this.props.localObserver.subscribe("image-popup", this.showPopupModal);
-    this.props.localObserver.subscribe(
-      "append-chapter-components",
-      (chapters) => {
-        chapters.forEach((chapter) => {
-          this.appendComponentsToChapter(chapter);
-        });
-        let renderedChapters = this.renderChapters(chapters);
-        this.props.localObserver.publish(
-          "chapter-components-appended",
-          renderedChapters
-        );
-      }
-    );
+    localObserver.unsubscribe("append-chapter-components");
+    localObserver.subscribe("image-popup", this.showPopupModal);
+    localObserver.subscribe("append-chapter-components", (chapters) => {
+      chapters.forEach((chapter) => {
+        this.appendComponentsToChapter(chapter);
+      });
+      let renderedChapters = this.renderChapters(chapters);
+      localObserver.publish("chapter-components-appended", renderedChapters);
+    });
   };
 
   componentWillUnmount = () => {
-    this.props.localObserver.unsubscribe("chapter-components-appended");
+    const { localObserver } = this.props;
+    localObserver.unsubscribe("chapter-components-appended");
   };
 
   getCustomLink = (e) => {
@@ -196,13 +192,17 @@ class Contents extends React.PureComponent {
     });
   };
 
+  hasSubChapters = (chapter) => {
+    return chapter.chapters && chapter.chapters.length > 0;
+  };
+
   appendComponentsToChapter = (chapter) => {
-    if (chapter.chapters && chapter.chapters.length > 0) {
+    if (this.hasSubChapters(chapter)) {
       chapter.chapters.forEach((subChapter) => {
         subChapter.components = this.getMaterialUIComponentsForChapter(
           subChapter
         );
-        if (subChapter.chapters && subChapter.chapters.length > 0) {
+        if (this.hasSubChapters(subChapter)) {
           this.appendComponentsToChapter(subChapter);
         }
       });

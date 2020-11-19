@@ -8,16 +8,16 @@ import Paper from "@material-ui/core/Paper";
 const mapDiv = document.getElementById("map");
 const blurCss = "filter : blur(7px)";
 
-const styles = theme => ({
+const styles = (theme) => ({
   closeButton: {
     position: "absolute",
     backgroundColor: theme.palette.grey[50],
     "&:hover": {
-      backgroundColor: theme.palette.grey[400]
+      backgroundColor: theme.palette.grey[400],
     },
     zIndex: 100,
     right: theme.spacing(2),
-    top: theme.spacing(2)
+    top: theme.spacing(2),
   },
   paper: {
     maxHeight: "80%",
@@ -25,8 +25,8 @@ const styles = theme => ({
     overflow: "auto",
     backgroundColor: "transparent",
     boxShadow: "none",
-    objectFit: "contain"
-  }
+    objectFit: "contain",
+  },
 });
 
 const PaperComponent = withStyles(styles)(PaperComponentRaw);
@@ -81,7 +81,7 @@ class ImagePopupModal extends React.PureComponent {
             component: "img",
             onClose: close,
             src: image?.url,
-            altValue: image?.altValue
+            altValue: image?.altValue,
           }}
           open={open}
         ></Dialog>

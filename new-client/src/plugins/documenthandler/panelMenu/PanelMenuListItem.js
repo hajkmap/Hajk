@@ -128,7 +128,18 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   render() {
-    const { item, classes, type, localObserver, globalObserver } = this.props;
+    const {
+      item,
+      classes,
+      type,
+      localObserver,
+      globalObserver,
+      handleExpandClick,
+      expandedIndex,
+      setActiveMenuItems,
+      coloredIndex,
+      selectedIndex,
+    } = this.props;
     const hasSubMenu = this.#hasSubMenu(item);
     return (
       <>
@@ -163,11 +174,11 @@ class PanelMenuListItem extends React.PureComponent {
               localObserver={localObserver}
               globalObserver={globalObserver}
               menu={item.menu}
-              handleExpandClick={this.props.handleExpandClick}
-              expandedIndex={this.props.expandedIndex}
-              setActiveMenuItems={this.props.setActiveMenuItems}
-              coloredIndex={this.props.coloredIndex}
-              selectedIndex={this.props.selectedIndex}
+              handleExpandClick={handleExpandClick}
+              expandedIndex={expandedIndex}
+              setActiveMenuItems={setActiveMenuItems}
+              coloredIndex={coloredIndex}
+              selectedIndex={selectedIndex}
             ></PanelList>
           </Collapse>
         )}
