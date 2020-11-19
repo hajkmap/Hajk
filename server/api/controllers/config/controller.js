@@ -84,6 +84,13 @@ export class Controller {
     });
   }
 
+  findCommonGroupsForUsers(req, res) {
+    ConfigService.findCommonGroupsForUsers(req.query.users).then((r) => {
+      if (r.error) res.status(500).send(r.error.toString());
+      else res.json(r);
+    });
+  }
+
   createNewMap(req, res) {
     ConfigService.createNewMap(req.params.name).then((r) => {
       if (r.error) res.status(500).send(r.error.message);

@@ -299,7 +299,15 @@ class ConfigService {
 
   async getAvailableADGroups() {
     try {
-      return await ad.getAvailableADGroups();
+      return ad.getAvailableADGroups();
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async findCommonGroupsForUsers(users) {
+    try {
+      return ad.findCommonGroupsForUsers(users);
     } catch (error) {
       return { error };
     }

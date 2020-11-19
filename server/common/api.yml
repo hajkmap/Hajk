@@ -368,6 +368,25 @@ paths:
         200:
           description: Success
           content: {}
+  /config/findcommongroupsforusers:
+    get:
+      tags:
+        - Maps and layers
+      description: Find out which AD group membership is shared between specified users
+      parameters:
+        - in: query
+          name: users
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          allowReserved: true
+      responses:
+        200:
+          description: Success
+          content: {}
   /fbproxy/{query}:
     get:
       tags:

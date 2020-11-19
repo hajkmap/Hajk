@@ -14,6 +14,7 @@ export default express
   .get("/list", controller.list) // List all available maps
   .get("/userspecificmaps", controller.userSpecificMaps) // MapSwitcher component uses this to determine which maps should be visible
   .get("/availableadgroups", controller.availableADGroups) // MapSwitcher component uses this to determine which maps should be visible
+  .get("/findcommongroupsforusers", controller.findCommonGroupsForUsers) // MapSwitcher component uses this to determine which maps should be visible
 
   // …but if none of the above matched, let's assume the string
   // provided is a param that should be used as map config name.

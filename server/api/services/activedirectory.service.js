@@ -34,10 +34,11 @@ class ActiveDirectoryService {
       throw new ActiveDirectoryError("Configuration missing");
     }
 
-    // Initiate 2 local stores to cache the results from AD.
+    // Initiate 3 local stores to cache the results from AD.
     // One will hold user details, the other will hold groups
     // per user.
     this._users = new Map();
+    this._groups = new Set();
     this._groupsPerUser = new Map();
 
     // The main AD object that will handle communication
@@ -129,6 +130,7 @@ class ActiveDirectoryService {
   flushCache() {
     console.log("Flushing local cache");
     this._users.clear();
+    this._groups.clear();
     this._groupsPerUser.clear();
   }
 
@@ -236,10 +238,58 @@ class ActiveDirectoryService {
     }
   }
 
+  /**
+   * @description Fetch an array of all available AD groups
+   *
+   * @returns {Array} AD groups
+   * @memberof ActiveDirectoryService
+   */
   async getAvailableADGroups() {
     try {
-      const groups = await this._findGroups();
-      return groups.map((g) => g.cn); // We're not interested in the whole object, but only CN property
+      // This is a bit of an expensive operation so we utilize a caching mechanism here too
+      if (this._groups.size === 0) {
+        // Looks as cache is empty, go on and ask the AD
+        const groups = await this._findGroups();
+
+        // Replace the cache with a new Set that…
+        this._groups = new Set(groups.map((g) => g.cn)); // isn't the whole object, but rather only an array of CN properties
+      }
+
+      // Spread the Set into an Array, which is the expected output format
+      return [...this._groups];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }
+
+  /**
+   * @summary A useful admin method that will return the common groups for any users
+   * TODO: Fix /admin so it makes use of this new method instead of the generic getAvailableADGroups().
+   * @param {Array} users A list of users
+   * @returns {Array} Groups that are common for all specified users
+   * @memberof ActiveDirectoryService
+   */
+  async findCommonGroupsForUsers(users) {
+    try {
+      if (users.length < 1)
+        throw new ActiveDirectoryError(
+          "Can't find common groups if no users are supplied"
+        );
+
+      // Grab Promises that will contain all users' groups
+      const promises = users.map((u) => this.getGroupMembershipForUser(u));
+
+      // Wait for all promises to resolve
+      const userGroups = await Promise.all(promises);
+
+      // Reduce the arrays of groups to only include common items
+      // (this is basically a multi-array intersection operation)
+      const commonGroups = userGroups.reduce((a, b) =>
+        a.filter((c) => b.includes(c))
+      );
+
+      return commonGroups;
     } catch (error) {
       console.error(error);
       return [];
