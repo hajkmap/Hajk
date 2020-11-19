@@ -51,6 +51,7 @@ class PrintView extends React.PureComponent {
     resolution: 150, // 72, 150, 300,
     scale: this.props.scales[Math.round((this.props.scales.length - 1) / 2)], // 10000 means scale of 1:10000
     mapTitle: "", // User can set a title that will get printed on the map
+    printComment: "", // User can set a comment that will get printed on the map
     mapTextColor: "#FFFFFF", // Default color of text printed on the map
     printInProgress: false,
     previewLayerVisible: false,
@@ -145,6 +146,7 @@ class PrintView extends React.PureComponent {
       resolution: this.state.resolution,
       scale: this.state.scale,
       mapTitle: this.state.mapTitle,
+      printComment: this.state.printComment,
       mapTextColor: this.state.mapTextColor,
       includeLogo: this.state.includeLogo,
       logoPlacement: this.state.logoPlacement,
@@ -220,6 +222,7 @@ class PrintView extends React.PureComponent {
     const {
       resolution,
       mapTitle,
+      printComment,
       mapTextColor,
       includeNorthArrow,
       northArrowPlacement,
@@ -233,6 +236,7 @@ class PrintView extends React.PureComponent {
       <AdvancedOptions
         resolution={resolution}
         mapTitle={mapTitle}
+        printComment={printComment}
         mapTextColor={mapTextColor}
         handleChange={(event) => {
           this.handleChange(event);
