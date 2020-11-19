@@ -18,6 +18,30 @@ const styles = (theme) => ({
   },
 });
 
+const FatSlider = withStyles({
+  root: {
+    height: 8,
+  },
+  thumb: {
+    height: 24,
+    width: 24,
+    border: "2px solid currentColor",
+    marginTop: -8,
+    marginLeft: -12,
+    "&:focus, &:hover, &$active": {
+      boxShadow: "inherit",
+    },
+  },
+  track: {
+    height: 8,
+    borderRadius: 4,
+  },
+  rail: {
+    height: 8,
+    borderRadius: 4,
+  },
+})(Slider);
+
 class TimeSliderView extends React.PureComponent {
   static propTypes = {
     map: PropTypes.object.isRequired,
@@ -40,6 +64,7 @@ class TimeSliderView extends React.PureComponent {
     this.layers = props.layers;
     this.startTime = this.getTime("startDate") || "20200101";
     this.endTime = this.getTime("endDate") || "20451231";
+    this.marks = this.getMarks();
     this.localObserver = props.localObserver;
     this.bindSubscriptions();
   }
@@ -321,6 +346,23 @@ class TimeSliderView extends React.PureComponent {
         });
       }
     });
+  };
+
+  getMarks = () => {
+    const totalTime = this.endTime - this.startTime;
+    const numMonths = Math.ceil(totalTime / 2592000000);
+    let marks = [{ value: 10, label: "x" }];
+    if (numMonths >= 120) {
+      console.log("Only start and end in years");
+    } else if (numMonths >= 24) {
+      console.log("Display every year");
+    } else if (numMonths > 12) {
+      console.log("Display 12 months");
+    } else {
+      console.log("Display every month");
+    }
+
+    console.log("numMonths: ", numMonths);
   };
 
   render() {
