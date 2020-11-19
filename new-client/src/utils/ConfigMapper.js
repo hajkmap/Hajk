@@ -176,6 +176,7 @@ export default class ConfigMapper {
         queryable: false,
         opacity: args.opacity || 1,
         format: "image/png",
+        crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         wrapX: false,
         url: args.url,
         layer: args.layer,

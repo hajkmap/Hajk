@@ -106,6 +106,7 @@ class AdvancedOptions extends React.PureComponent {
       handleChange,
       mapTextColor,
       mapTitle,
+      printComment,
       includeNorthArrow,
       northArrowPlacement,
       includeScaleBar,
@@ -146,6 +147,22 @@ class AdvancedOptions extends React.PureComponent {
                       </Tooltip>
                     </InputAdornment>
                   ),
+                }}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} className={classes.formControl}>
+            <FormControl fullWidth={true}>
+              <TextField
+                value={printComment}
+                fullWidth={true}
+                onChange={handleChange}
+                label="Valfri kommentar"
+                placeholder="Kan lämnas tomt"
+                variant="standard"
+                InputProps={{
+                  id: "printComment",
+                  name: "printComment",
                 }}
               />
             </FormControl>
