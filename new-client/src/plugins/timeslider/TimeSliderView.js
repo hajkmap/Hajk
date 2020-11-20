@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 
 import { Slider, Button, Badge, Grid } from "@material-ui/core";
 import { Vector as VectorLayer } from "ol/layer";
@@ -66,6 +65,10 @@ class TimeSliderView extends React.PureComponent {
       this.resetTimeSliderView();
     });
 
+    this.localObserver.subscribe("resetTimeSlider", () => {
+      this.resetTimeSlider();
+    });
+
     this.localObserver.subscribe("toggleSlider", (enabled) => {
       this.toggleSlider(enabled);
     });
@@ -126,7 +129,7 @@ class TimeSliderView extends React.PureComponent {
   resetTimeSlider = () => {
     this.toggleSlider(false);
 
-    this.props.updateCustomProp("title", `Tidslinje`);
+    this.localObserver.publish("updateHeaderTitle", "");
     this.setState(
       {
         currentUnixTime: this.startTime,
@@ -242,19 +245,21 @@ class TimeSliderView extends React.PureComponent {
   }
 
   toggleSlider = (enabled) => {
+    this.setState({ playing: enabled });
+    this.localObserver.publish("toggleHeaderPlayButton", enabled);
     if (enabled) {
       this.sliderTimer = setInterval(() => {
         let nextUnixTime = this.state.currentUnixTime + this.state.stepSize;
         if (nextUnixTime >= this.endTime) {
           nextUnixTime = this.endTime;
           clearInterval(this.sliderTimer);
-          this.props.updateCustomProp("playing", false);
+          this.localObserver.publish("toggleHeaderPlayButton", false);
+          this.setState({ playing: false });
         }
         this.handleSliderChange(nextUnixTime);
       }, 500);
     } else {
       clearInterval(this.sliderTimer);
-      this.props.updateCustomProp("playing", false);
     }
   };
 
@@ -308,10 +313,9 @@ class TimeSliderView extends React.PureComponent {
 
   updateHeader = () => {
     const { currentUnixTime, resolution } = this.state;
-
-    this.props.updateCustomProp(
-      "title",
-      `Tidslinje - ${this.getDateLabel(currentUnixTime, resolution)}`
+    this.localObserver.publish(
+      "updateHeaderTitle",
+      this.getDateLabel(currentUnixTime, resolution)
     );
   };
 
@@ -382,9 +386,8 @@ class TimeSliderView extends React.PureComponent {
   };
 
   render() {
-    const { currentUnixTime, stepSize, layerStatus } = this.state;
-    const { classes, playing } = this.props;
-    console.log("this.state: ", this.state);
+    const { currentUnixTime, stepSize, layerStatus, playing } = this.state;
+    const { classes } = this.props;
 
     if (currentUnixTime) {
       return (
@@ -425,7 +428,6 @@ class TimeSliderView extends React.PureComponent {
                 variant="outlined"
                 color="primary"
                 onClick={() => {
-                  this.props.updateCustomProp("playing", !playing);
                   this.toggleSlider(!playing);
                 }}
               >
@@ -460,9 +462,32 @@ class TimeSliderView extends React.PureComponent {
         </Grid>
       );
     } else {
-      return null;
+      return (
+        <Grid
+          container
+          alignItems="center"
+          justify="center"
+          style={{ width: "100%", height: "100%" }}
+        >
+          <Grid item>
+            <Badge
+              color="error"
+              invisible={!layerStatus.error}
+              badgeContent={`${
+                layerStatus.faultyLayers.length > 0
+                  ? layerStatus.faultyLayers.length
+                  : 1
+              }`}
+            >
+              <Button variant="outlined" color="primary">
+                <SettingsOutlinedIcon />
+              </Button>
+            </Badge>
+          </Grid>
+        </Grid>
+      );
     }
   }
 }
 
-export default withStyles(styles)(withSnackbar(TimeSliderView));
+export default withStyles(styles)(TimeSliderView);
