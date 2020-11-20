@@ -4,7 +4,6 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 
 import { Slider, Button, Badge, Grid } from "@material-ui/core";
-
 import { Vector as VectorLayer } from "ol/layer";
 
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
@@ -16,31 +15,19 @@ const styles = (theme) => ({
   gridContainer: {
     padding: theme.spacing(2),
   },
+  yearSlider: {
+    paddingRight: theme.spacing(2),
+    paddingLeft: theme.spacing(2),
+  },
+  monthSlider: {
+    paddingRight: theme.spacing(4),
+    paddingLeft: theme.spacing(4),
+  },
+  daySlider: {
+    paddingRight: theme.spacing(6),
+    paddingLeft: theme.spacing(6),
+  },
 });
-
-const FatSlider = withStyles({
-  root: {
-    height: 8,
-  },
-  thumb: {
-    height: 24,
-    width: 24,
-    border: "2px solid currentColor",
-    marginTop: -8,
-    marginLeft: -12,
-    "&:focus, &:hover, &$active": {
-      boxShadow: "inherit",
-    },
-  },
-  track: {
-    height: 8,
-    borderRadius: 4,
-  },
-  rail: {
-    height: 8,
-    borderRadius: 4,
-  },
-})(Slider);
 
 class TimeSliderView extends React.PureComponent {
   static propTypes = {
@@ -62,9 +49,10 @@ class TimeSliderView extends React.PureComponent {
 
     this.map = props.map;
     this.layers = props.layers;
-    this.startTime = this.getTime("startDate") || "20200101";
-    this.endTime = this.getTime("endDate") || "20451231";
-    this.marks = this.getMarks();
+    this.startTime = this.getTime("startDate");
+    this.endTime = this.getTime("endDate");
+    this.marks = this.getMarks(5); //Prop is number of marks no the slider
+    this.markResolution = "";
     this.localObserver = props.localObserver;
     this.bindSubscriptions();
   }
@@ -103,6 +91,14 @@ class TimeSliderView extends React.PureComponent {
         layerStatus.faultyLayers.push({
           layerId: layer.get("name"),
           layerError: "date_missing",
+        });
+      }
+      if (layer.get("startDate") === layer.get("endDate")) {
+        layerStatus.error = true;
+        layerStatus.errorType = "layer_error";
+        layerStatus.faultyLayers.push({
+          layerId: layer.get("name"),
+          layerError: "date_start_equals_end",
         });
       }
     });
@@ -312,8 +308,16 @@ class TimeSliderView extends React.PureComponent {
 
   updateHeader = () => {
     const { currentUnixTime, resolution } = this.state;
-    const currentDate = new Date(currentUnixTime);
+
+    this.props.updateCustomProp(
+      "title",
+      `Tidslinje - ${this.getDateLabel(currentUnixTime, resolution)}`
+    );
+  };
+
+  getDateLabel = (unixTime, resolution) => {
     let options = {};
+    const date = new Date(unixTime);
 
     switch (resolution) {
       case "years":
@@ -326,10 +330,8 @@ class TimeSliderView extends React.PureComponent {
         options = { day: "numeric", month: "long", year: "numeric" };
         break;
     }
-    this.props.updateCustomProp(
-      "title",
-      `Tidslinje - ${currentDate.toLocaleString("default", options)}`
-    );
+
+    return date.toLocaleString("default", options);
   };
 
   updateLayers = () => {
@@ -348,36 +350,62 @@ class TimeSliderView extends React.PureComponent {
     });
   };
 
-  getMarks = () => {
-    const totalTime = this.endTime - this.startTime;
-    const numMonths = Math.ceil(totalTime / 2592000000);
-    let marks = [{ value: 10, label: "x" }];
-    if (numMonths >= 120) {
-      console.log("Only start and end in years");
-    } else if (numMonths >= 24) {
-      console.log("Display every year");
-    } else if (numMonths > 12) {
-      console.log("Display 12 months");
-    } else {
-      console.log("Display every month");
+  createMarks = (totalTime, markResolution, numMarks) => {
+    let marks = [];
+    const stepSize = Math.floor(totalTime / (numMarks - 1)); //-1 since we want to include endDate
+
+    for (let i = 0; i < numMarks; i++) {
+      const markTime = this.startTime + stepSize * i;
+      marks.push({
+        value: markTime,
+        label: this.getDateLabel(markTime, markResolution),
+      });
     }
 
-    console.log("numMonths: ", numMonths);
+    return marks;
+  };
+
+  getMarks = (numMarks) => {
+    const totalTime = this.endTime - this.startTime;
+    const unixMsPerMonth = 2592000000;
+    const numMonths = Math.floor(totalTime / unixMsPerMonth);
+
+    if (numMonths >= numMarks * 12) {
+      this.markResolution = "years";
+    } else if (numMonths >= numMarks) {
+      this.markResolution = "months";
+    } else {
+      this.markResolution = "days";
+    }
+
+    return this.createMarks(totalTime, this.markResolution, numMarks);
   };
 
   render() {
     const { currentUnixTime, stepSize, layerStatus } = this.state;
     const { classes, playing } = this.props;
+    console.log("this.state: ", this.state);
 
     if (currentUnixTime) {
       return (
         <Grid container className={classes.gridContainer}>
-          <Grid item xs={12}>
+          <Grid
+            item
+            xs={12}
+            className={
+              this.markResolution === "years"
+                ? classes.yearSlider
+                : this.markResolution === "months"
+                ? classes.monthSlider
+                : classes.daySlider
+            }
+          >
             <Slider
               value={currentUnixTime}
               min={this.startTime}
               max={this.endTime}
               step={stepSize}
+              marks={this.marks}
               onChange={(e, value) => {
                 if (value !== currentUnixTime) {
                   this.handleSliderChange(value);
@@ -414,7 +442,15 @@ class TimeSliderView extends React.PureComponent {
               </Button>
             </Grid>
             <Grid item align="center" xs={4}>
-              <Badge color="error" badgeContent="1" hidden={!layerStatus.error}>
+              <Badge
+                color="error"
+                invisible={!layerStatus.error}
+                badgeContent={`${
+                  layerStatus.faultyLayers.length > 0
+                    ? layerStatus.faultyLayers.length
+                    : 1
+                }`}
+              >
                 <Button variant="outlined" color="primary">
                   <SettingsOutlinedIcon />
                 </Button>

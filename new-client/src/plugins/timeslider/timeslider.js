@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import TimeSliderModel from "./TimeSliderModel";
 import TimeSliderView from "./TimeSliderView";
 import Observer from "react-event-observer";
 
@@ -23,21 +22,10 @@ class TimeSlider extends React.PureComponent {
     options: PropTypes.object.isRequired,
   };
 
-  static defaultProps = {
-    options: {},
-  };
-
   constructor(props) {
     super(props);
-
     this.localObserver = Observer();
     this.layers = this.getLayers(props.options.layers);
-
-    this.TimeSliderModel = new TimeSliderModel({
-      localObserver: this.localObserver,
-      app: props.app,
-      map: props.map,
-    });
   }
 
   getLayers = (layerIds) => {
@@ -58,7 +46,6 @@ class TimeSlider extends React.PureComponent {
   };
 
   onWindowHide = () => {
-    this.setState({ playing: false, title: "Tidslinje" });
     this.localObserver.publish("resetTimeSliderView");
   };
 
@@ -103,7 +90,7 @@ class TimeSlider extends React.PureComponent {
       >
         <TimeSliderView
           map={this.props.map}
-          localObserver={this.localObserver} // And also the Observer, so that those 2 can talk through it
+          localObserver={this.localObserver}
           updateCustomProp={this.updateCustomProp}
           layers={this.layers}
           resolution={this.props.options.resolution}
@@ -114,5 +101,4 @@ class TimeSlider extends React.PureComponent {
   }
 }
 
-// Part of API. Make a HOC of our plugin.
 export default TimeSlider;
