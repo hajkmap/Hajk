@@ -1,9 +1,13 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 
-import { Slider, Button, Badge, Grid } from "@material-ui/core";
+import { Slider, Button, Badge, Grid, Tooltip } from "@material-ui/core";
 import { Vector as VectorLayer } from "ol/layer";
+
+import TimeSliderSettings from "./components/TimeSliderSettings.js";
+import Dialog from "../../components/Dialog.js";
 
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
@@ -40,10 +44,12 @@ class TimeSliderView extends React.PureComponent {
 
     this.state = {
       playing: false,
-      resolution: this.props.resolution ?? "years",
+      resolution: this.props.defaultResolution ?? "years",
       stepSize: this.getStepSize(this.props.resolution ?? "years"),
       loadingError: true,
       layerStatus: this.validateLayers(),
+      settingsDialog: false,
+      sliderSpeed: 1000,
     };
 
     this.map = props.map;
@@ -248,6 +254,8 @@ class TimeSliderView extends React.PureComponent {
     this.setState({ playing: enabled });
     this.localObserver.publish("toggleHeaderPlayButton", enabled);
     if (enabled) {
+      clearInterval(this.sliderTimer);
+      this.sliderTimer = null;
       this.sliderTimer = setInterval(() => {
         let nextUnixTime = this.state.currentUnixTime + this.state.stepSize;
         if (nextUnixTime >= this.endTime) {
@@ -257,7 +265,7 @@ class TimeSliderView extends React.PureComponent {
           this.setState({ playing: false });
         }
         this.handleSliderChange(nextUnixTime);
-      }, 500);
+      }, this.state.sliderSpeed);
     } else {
       clearInterval(this.sliderTimer);
     }
@@ -338,6 +346,25 @@ class TimeSliderView extends React.PureComponent {
     return date.toLocaleString("default", options);
   };
 
+  getShortDateLabel = (unixTime, resolution) => {
+    let options = {};
+    const date = new Date(unixTime);
+
+    switch (resolution) {
+      case "years":
+        options = { year: "numeric" };
+        break;
+      case "months":
+        options = { month: "short", year: "numeric" };
+        break;
+      default:
+        options = { day: "numeric", month: "short" };
+        break;
+    }
+
+    return date.toLocaleString("default", options);
+  };
+
   updateLayers = () => {
     const extent = this.map.getView().calculateExtent();
     this.layers.map((layer) => {
@@ -362,7 +389,7 @@ class TimeSliderView extends React.PureComponent {
       const markTime = this.startTime + stepSize * i;
       marks.push({
         value: markTime,
-        label: this.getDateLabel(markTime, markResolution),
+        label: this.getShortDateLabel(markTime, markResolution),
       });
     }
 
@@ -385,13 +412,82 @@ class TimeSliderView extends React.PureComponent {
     return this.createMarks(totalTime, this.markResolution, numMarks);
   };
 
+  handleResolutionChange = (value) => {
+    this.setState({ resolution: value });
+  };
+
+  handleSliderSpeedChange = (value) => {
+    this.setState({ sliderSpeed: value }, () => {
+      this.toggleSlider(this.state.playing);
+    });
+  };
+
+  renderSettingsDialog = () => {
+    const { settingsDialog, resolution, sliderSpeed, layerStatus } = this.state;
+    if (settingsDialog) {
+      return createPortal(
+        <Dialog
+          options={{
+            text: (
+              <TimeSliderSettings
+                layers={this.layers}
+                layerStatus={layerStatus}
+                resolution={resolution}
+                sliderSpeed={sliderSpeed}
+                handleResolutionChange={this.handleResolutionChange}
+                handleSliderSpeedChange={this.handleSliderSpeedChange}
+              />
+            ),
+            headerText: "Tidslinjeinställningar",
+            buttonText: "OK",
+          }}
+          open={settingsDialog}
+          onClose={() => {
+            this.setState({
+              settingsDialog: false,
+            });
+          }}
+        ></Dialog>,
+        document.getElementById("windows-container")
+      );
+    } else {
+      return null;
+    }
+  };
+
+  renderSettingsButton = () => {
+    const { layerStatus } = this.state;
+    return (
+      <Badge
+        color="error"
+        invisible={!layerStatus.error}
+        badgeContent={`${
+          layerStatus.faultyLayers.length > 0
+            ? layerStatus.faultyLayers.length
+            : 1
+        }`}
+      >
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => {
+            this.setState({ settingsDialog: !this.state.settingsDialog });
+          }}
+        >
+          <SettingsOutlinedIcon />
+        </Button>
+      </Badge>
+    );
+  };
+
   render() {
-    const { currentUnixTime, stepSize, layerStatus, playing } = this.state;
+    const { currentUnixTime, stepSize, playing } = this.state;
     const { classes } = this.props;
 
     if (currentUnixTime) {
       return (
         <Grid container className={classes.gridContainer}>
+          <>{this.renderSettingsDialog()}</>
           <Grid
             item
             xs={12}
@@ -424,39 +520,35 @@ class TimeSliderView extends React.PureComponent {
             spacing={2}
           >
             <Grid item align="center" xs={4}>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => {
-                  this.toggleSlider(!playing);
-                }}
+              <Tooltip
+                title={playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
               >
-                {playing ? <PauseIcon /> : <PlayArrowIcon />}
-              </Button>
-            </Grid>
-            <Grid item align="center" xs={4}>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={this.resetTimeSlider}
-              >
-                <RotateLeftOutlinedIcon />
-              </Button>
-            </Grid>
-            <Grid item align="center" xs={4}>
-              <Badge
-                color="error"
-                invisible={!layerStatus.error}
-                badgeContent={`${
-                  layerStatus.faultyLayers.length > 0
-                    ? layerStatus.faultyLayers.length
-                    : 1
-                }`}
-              >
-                <Button variant="outlined" color="primary">
-                  <SettingsOutlinedIcon />
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => {
+                    this.toggleSlider(!playing);
+                  }}
+                >
+                  {playing ? <PauseIcon /> : <PlayArrowIcon />}
                 </Button>
-              </Badge>
+              </Tooltip>
+            </Grid>
+            <Grid item align="center" xs={4}>
+              <Tooltip title="Återställ tidslinjen">
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={this.resetTimeSlider}
+                >
+                  <RotateLeftOutlinedIcon />
+                </Button>
+              </Tooltip>
+            </Grid>
+            <Grid item align="center" xs={4}>
+              <Tooltip title="Inställningar">
+                {this.renderSettingsButton()}
+              </Tooltip>
             </Grid>
           </Grid>
         </Grid>
@@ -469,21 +561,8 @@ class TimeSliderView extends React.PureComponent {
           justify="center"
           style={{ width: "100%", height: "100%" }}
         >
-          <Grid item>
-            <Badge
-              color="error"
-              invisible={!layerStatus.error}
-              badgeContent={`${
-                layerStatus.faultyLayers.length > 0
-                  ? layerStatus.faultyLayers.length
-                  : 1
-              }`}
-            >
-              <Button variant="outlined" color="primary">
-                <SettingsOutlinedIcon />
-              </Button>
-            </Badge>
-          </Grid>
+          <>{this.renderSettingsDialog()}</>
+          <Grid item>{this.renderSettingsButton()}</Grid>
         </Grid>
       );
     }

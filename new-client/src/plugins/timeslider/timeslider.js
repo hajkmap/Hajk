@@ -26,7 +26,7 @@ class TimeSlider extends React.PureComponent {
     super(props);
     this.localObserver = Observer();
     this.layers = this.getLayers(props.options.layers);
-    this.resolution = props.options.resolution ?? "years";
+    this.defaultResolution = props.options.defaultResolution ?? "years";
     this.originalTitle = this.props.options.title ?? "Tidslinje";
     this.bindSubscriptions();
   }
@@ -61,16 +61,15 @@ class TimeSlider extends React.PureComponent {
   render() {
     return (
       <BaseWindowPlugin
-        {...this.props} // Pass on all props
-        type="TimeSlider" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name
+        {...this.props}
+        type="TimeSlider"
         custom={{
-          icon: <UpdateIcon />, // Custom icon for this plugin
-          title: this.state.title, // By keeping title and color in TimeSlider's state we can pass on
-          color: this.state.color, // the changes to BaseWindowPlugin which will update internal state too.
+          icon: <UpdateIcon />,
+          title: this.state.title,
+          color: this.state.color,
           description: "Visa information under olika tidsperioder", // Shown on Widget button
           customPanelHeaderButtons: [
             {
-              //Add extra buttons to window-header with a specified onClickCallback
               icon: !this.state.playing ? <PlayArrowIcon /> : <PauseIcon />,
               onClickCallback: () => {
                 this.setState(
@@ -87,14 +86,13 @@ class TimeSlider extends React.PureComponent {
               },
             },
             {
-              //Add extra buttons to window-header with a specified onClickCallback
               icon: <RotateLeftOutlinedIcon />,
               onClickCallback: () => {
                 this.localObserver.publish("resetTimeSlider");
               },
             },
           ],
-          height: 100, // Custom height/width etc | Use "auto" for automatic or leave undefined
+          height: 100,
           width: 600,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
@@ -104,7 +102,7 @@ class TimeSlider extends React.PureComponent {
           map={this.props.map}
           localObserver={this.localObserver}
           layers={this.layers} //The layers to be used
-          resolution={this.resolution} //"years", "months", or "days"
+          defaultResolution={this.defaultResolution} //"years", "months", or "days"
         />
       </BaseWindowPlugin>
     );
