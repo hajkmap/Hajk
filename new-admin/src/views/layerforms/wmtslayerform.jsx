@@ -67,6 +67,9 @@ const defaultState = {
   infoUrl: "",
   infoUrlText: "",
   infoOwner: "",
+  timeSliderVisible: false,
+  timeSliderStart: "",
+  timeSliderEnd: "",
 };
 
 /**
@@ -120,6 +123,9 @@ class WMTSLayerForm extends Component {
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
+      timeSliderVisible: this.getValue("timeSliderVisible"),
+      timeSliderStart: this.getValue("timeSliderStart"),
+      timeSliderEnd: this.getValue("timeSliderEnd"),
     };
   }
 
@@ -147,6 +153,7 @@ class WMTSLayerForm extends Component {
     if (fieldName === "resolutions") value = value.split(",");
     if (fieldName === "matrixIds") value = value.split(",");
     if (fieldName === "infoVisible") value = input.checked;
+    if (fieldName === "timeSliderVisible") value = input.checked;
 
     return value;
   }
@@ -230,10 +237,13 @@ class WMTSLayerForm extends Component {
   }
 
   render() {
-    var imageLoader = this.state.imageLoad ? (
+    const imageLoader = this.state.imageLoad ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
-    var infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const timeSliderClass = this.state.timeSliderVisible
+      ? "tooltip-timeSlider"
+      : "hidden";
 
     return (
       <fieldset>
@@ -506,6 +516,45 @@ class WMTSLayerForm extends Component {
               }}
               value={this.state.infoOwner}
               className={this.getValidationClass("infoOwner")}
+            />
+          </div>
+        </div>
+        <div className="timeSlider-container">
+          <div>
+            <input
+              type="checkbox"
+              ref="input_timeSliderVisible"
+              id="timeSlider"
+              onChange={(e) => {
+                this.setState({ timeSliderVisible: e.target.checked });
+              }}
+              checked={this.state.timeSliderVisible}
+            />
+            &nbsp;
+            <label htmlFor="timeSlider">Tidslinjedatum</label>
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje start</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderStart"
+              onChange={(e) => {
+                this.setState({ timeSliderStart: e.target.value });
+              }}
+              value={this.state.timeSliderStart}
+            />
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje slut</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderEnd"
+              onChange={(e) => {
+                this.setState({ timeSliderEnd: e.target.value });
+              }}
+              value={this.state.timeSliderEnd}
             />
           </div>
         </div>

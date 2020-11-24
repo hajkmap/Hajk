@@ -160,6 +160,9 @@ namespace MapService.Models.Config
         public string infoUrlText { get; set; }
         public bool   infoVisible { get; set; }
         public string infobox { get; set; }
+        public bool   timeSliderVisible { get; set; }
+        public string timeSliderStart { get; set; }
+        public string timeSliderEnd { get; set; }
         public string layer { get; set; }
         public string legend { get; set; }
         public int    maxZoom { get; set; }

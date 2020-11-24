@@ -45,7 +45,7 @@ class TimeSliderView extends React.PureComponent {
     this.state = {
       playing: false,
       resolution: this.props.defaultResolution ?? "years",
-      stepSize: this.getStepSize(this.props.resolution ?? "years"),
+      stepSize: this.getStepSize(this.props.defaultResolution ?? "years"),
       loadingError: true,
       layerStatus: this.validateLayers(),
       settingsDialog: false,
@@ -54,8 +54,8 @@ class TimeSliderView extends React.PureComponent {
 
     this.map = props.map;
     this.layers = props.layers;
-    this.startTime = this.getTime("startDate");
-    this.endTime = this.getTime("endDate");
+    this.startTime = this.getTime("timeSliderStart");
+    this.endTime = this.getTime("timeSliderEnd");
     this.marks = this.getMarks(5); //Prop is number of marks no the slider
     this.markResolution = "";
     this.localObserver = props.localObserver;
@@ -94,7 +94,7 @@ class TimeSliderView extends React.PureComponent {
     }
 
     layers.forEach((layer) => {
-      if (!layer.get("startDate") || !layer.get("endDate")) {
+      if (!layer.get("timeSliderStart") || !layer.get("timeSliderEnd")) {
         layerStatus.error = true;
         layerStatus.errorType = "layer_error";
         layerStatus.faultyLayers.push({
@@ -102,7 +102,7 @@ class TimeSliderView extends React.PureComponent {
           layerError: "date_missing",
         });
       }
-      if (layer.get("startDate") === layer.get("endDate")) {
+      if (layer.get("timeSliderStart") === layer.get("timeSliderEnd")) {
         layerStatus.error = true;
         layerStatus.errorType = "layer_error";
         layerStatus.faultyLayers.push({
@@ -212,9 +212,9 @@ class TimeSliderView extends React.PureComponent {
         let layerUnixTime = this.getUnixTimeFromString(layerTime);
         if (!time) time = layerUnixTime;
 
-        if (type === "startDate" && time > layerUnixTime) {
+        if (type === "timeSliderStart" && time > layerUnixTime) {
           time = layerUnixTime;
-        } else if (type === "endDate" && time < layerUnixTime) {
+        } else if (type === "timeSliderEnd" && time < layerUnixTime) {
           time = layerUnixTime;
         }
       }
@@ -413,7 +413,7 @@ class TimeSliderView extends React.PureComponent {
   };
 
   handleResolutionChange = (value) => {
-    this.setState({ resolution: value });
+    this.setState({ resolution: value, stepSize: this.getStepSize(value) });
   };
 
   handleSliderSpeedChange = (value) => {

@@ -276,6 +276,9 @@ class Manager extends Component {
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner,
+          timeSliderVisible: layer.timeSliderVisible,
+          timeSliderStart: layer.timeSliderStart,
+          timeSliderEnd: layer.timeSliderEnd,
           pointSize: layer.pointSize,
           filterAttribute: layer.filterAttribute,
           filterValue: layer.filterValue,
@@ -324,6 +327,9 @@ class Manager extends Component {
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner,
+          timeSliderVisible: layer.timeSliderVisible,
+          timeSliderStart: layer.timeSliderStart,
+          timeSliderEnd: layer.timeSliderEnd,
         });
 
         this.refs["WMSLayerForm"].loadLayers(layer, () => {
@@ -363,6 +369,9 @@ class Manager extends Component {
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner,
+          timeSliderVisible: layer.timeSliderVisible,
+          timeSliderStart: layer.timeSliderStart,
+          timeSliderEnd: layer.timeSliderEnd,
         });
         setTimeout(() => {
           this.refs["WMTSLayerForm"].validate();

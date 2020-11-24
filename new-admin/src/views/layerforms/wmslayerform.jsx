@@ -59,6 +59,9 @@ const defaultState = {
   infoUrl: "",
   infoUrlText: "",
   infoOwner: "",
+  timeSliderVisible: false,
+  timeSliderStart: "",
+  timeSliderEnd: "",
   solpopup: solpop,
   capabilitiesList: [],
   version: "1.1.0",
@@ -851,6 +854,9 @@ class WMSLayerForm extends Component {
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
+      timeSliderVisible: this.getValue("timeSliderVisible"),
+      timeSliderStart: this.getValue("timeSliderStart"),
+      timeSliderEnd: this.getValue("timeSliderEnd"),
       // solpopup: this.getValue("solpopup"),
       version: this.state.version,
       infoFormat: this.getValue("infoFormat"),
@@ -886,6 +892,7 @@ class WMSLayerForm extends Component {
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
     if (fieldName === "infoVisible") value = input.checked;
+    if (fieldName === "timeSliderVisible") value = input.checked;
     // if (fieldName === "drawOrder") value = 1000;
     if (fieldName === "visibleAtStart") value = Boolean(value);
     if (fieldName === "searchFields") value = value || null;
@@ -988,13 +995,16 @@ class WMSLayerForm extends Component {
   };
 
   render() {
-    var loader = this.state.load ? (
+    const loader = this.state.load ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
-    var imageLoader = this.state.imageLoad ? (
+    const imageLoader = this.state.imageLoad ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
-    var infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const timeSliderClass = this.state.timeSliderVisible
+      ? "tooltip-timeSlider"
+      : "hidden";
 
     const version = this.state.version || "1.1.1";
     const infoFormat = this.state.infoFormat || "";
@@ -1370,6 +1380,45 @@ class WMSLayerForm extends Component {
                 this.state.infoOwner ? this.state.infoOwner : this.state.owner
               }
               className={this.getValidationClass("infoOwner")}
+            />
+          </div>
+        </div>
+        <div className="timeSlider-container">
+          <div>
+            <input
+              type="checkbox"
+              ref="input_timeSliderVisible"
+              id="timeSlider"
+              onChange={(e) => {
+                this.setState({ timeSliderVisible: e.target.checked });
+              }}
+              checked={this.state.timeSliderVisible}
+            />
+            &nbsp;
+            <label htmlFor="timeSlider">Tidslinjedatum</label>
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje start</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderStart"
+              onChange={(e) => {
+                this.setState({ timeSliderStart: e.target.value });
+              }}
+              value={this.state.timeSliderStart}
+            />
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje slut</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderEnd"
+              onChange={(e) => {
+                this.setState({ timeSliderEnd: e.target.value });
+              }}
+              value={this.state.timeSliderEnd}
             />
           </div>
         </div>

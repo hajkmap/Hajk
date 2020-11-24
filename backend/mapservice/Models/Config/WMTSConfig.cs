@@ -52,6 +52,12 @@ namespace MapService.Models.Config
 
         public string infoOwner { get; set; }
 
+        public bool timeSliderVisible { get; set; }
+
+        public string timeSliderStart { get; set; }
+
+        public string timeSliderEnd { get; set; }
+
         public int? zIndex { get; set; }
     }
 }
