@@ -1,10 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Observer from "react-event-observer";
 import { withStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
 
-import SearchModel from "../../models/SearchModel";
+import OldSearchModel from "./OldSearchModel";
 
 import SpatialSearchMenu from "./components/startview/SpatialSearchMenu.js";
 import SearchResultList from "./components/resultlist/SearchResultList.js";
@@ -96,15 +95,17 @@ class Search extends React.PureComponent {
     polygonSearch: this.props.options.polygonSearch,
   };
 
-  localObserver = new Observer();
-  searchModel = new SearchModel(
-    this.props.options,
-    this.props.map,
-    this.props.app,
-    this.localObserver
-  );
+  addLocalSearchModel() {
+    const { app, map } = this.props;
+
+    const searchConfig = app.config.mapConfig.tools.find(
+      (t) => t.type === "search"
+    ).options;
+    this.searchModel = new OldSearchModel(searchConfig, map, app);
+  }
 
   componentDidMount() {
+    this.addLocalSearchModel();
     /**
      * When appLoaded is triggered, we want to look see if automatic
      * search has been requested. If query param contains values for q,
@@ -147,29 +148,32 @@ class Search extends React.PureComponent {
       }
     });
 
-    this.localObserver.subscribe("searchStarted", () => {
+    this.searchModel.localObserver.subscribe("searchStarted", () => {
       this.setState({
         loading: true,
         activeSearchView: TEXTSEARCH,
       });
     });
 
-    this.localObserver.subscribe("spatialSearchStarted", () => {
+    this.searchModel.localObserver.subscribe("spatialSearchStarted", () => {
       this.setState({
         loading: true,
       });
     });
 
-    this.localObserver.subscribe("searchToolChanged", (placeholderText) => {
-      this.setState({
-        result: false,
-        searchboxPlaceholder: placeholderText
-          ? placeholderText
-          : this.props.options.tooltip,
-      });
-    });
+    this.searchModel.localObserver.subscribe(
+      "searchToolChanged",
+      (placeholderText) => {
+        this.setState({
+          result: false,
+          searchboxPlaceholder: placeholderText
+            ? placeholderText
+            : this.props.options.tooltip,
+        });
+      }
+    );
 
-    this.localObserver.subscribe("searchComplete", () => {
+    this.searchModel.localObserver.subscribe("searchComplete", () => {
       this.setState({
         loading: false,
       });
@@ -218,7 +222,7 @@ class Search extends React.PureComponent {
   doSearch(v) {
     v = v.trim();
     if (v.length < 1) return null;
-    this.localObserver.publish("searchToolChanged");
+    this.searchModel.localObserver.publish("searchToolChanged");
     this.searchModel.search(v, true, (d) => {
       this.resolve(d);
     });
@@ -314,7 +318,7 @@ class Search extends React.PureComponent {
 
   resetToStartView() {
     document.getElementById("searchbox").value = "";
-    this.localObserver.publish("searchToolChanged");
+    this.searchModel.localObserver.publish("searchToolChanged");
     this.searchModel.abortSearches();
     this.searchModel.clearRecentSpatialSearch();
     this.setState({ activeSearchView: STARTVIEW });
@@ -329,7 +333,7 @@ class Search extends React.PureComponent {
             resetToStartView={() => {
               this.resetToStartView();
             }}
-            localObserver={this.localObserver}
+            localObserver={this.searchModel.localObserver}
             onSearchDone={(featureCollections) => {
               this.resolve(featureCollections);
             }}
@@ -338,7 +342,7 @@ class Search extends React.PureComponent {
       case RADIUS: {
         return (
           <SearchWithRadiusInput
-            localObserver={this.localObserver}
+            localObserver={this.searchModel.localObserver}
             resetToStartView={() => {
               this.resetToStartView();
             }}
@@ -355,7 +359,7 @@ class Search extends React.PureComponent {
       case SELECTION: {
         return (
           <SearchWithSelectionInput
-            localObserver={this.localObserver}
+            localObserver={this.searchModel.localObserver}
             resetToStartView={() => {
               this.resetToStartView();
             }}

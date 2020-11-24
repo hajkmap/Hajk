@@ -41,6 +41,7 @@ import Measure from "./tools/measure.jsx";
 import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
+import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 
 var defaultState = {
   activeTool: ""
@@ -121,6 +122,8 @@ class ToolOptions extends Component {
         return <Routing parent={this} model={this.props.model} />;
       case "collector":
         return <Collector parent={this} model={this.props.model} />;
+      case "documenthandler":
+        return <MenuEditor parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -181,7 +184,8 @@ class ToolOptions extends Component {
       location: "Visa min position",
       routing: "Navigation",
       collector: "Tyck till",
-      dummy: "Dummy plugin"
+      dummy: "Dummy plugin",
+      documenthandler: "Menyhantering"
     };
 
     return (

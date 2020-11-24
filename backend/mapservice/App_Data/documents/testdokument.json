@@ -1,0 +1,45 @@
+{
+  "chapters": [
+    {
+      "header": "TEMATISKA INRIKTNINGAR",
+      "headerIdentifier": "tematiska_inriktningar/TEMATISKA INRIKTNINGAR",
+      "html": "<a data-link=\"http://google.se\"><strong>Länk till Google</strong></a>",
+      "mapSettings": {
+        "target": "map",
+        "center": [140700, 6399400],
+        "title": "Översiktsplan Göteborg",
+        "projection": "EPSG:3007",
+        "zoom": 1,
+        "maxZoom": 15,
+        "minZoom": 5,
+        "resulutions": [
+          70.00022,
+          28.00009,
+          14.00004,
+          7.000022,
+          2.800009,
+          1.400004,
+          0.700002,
+          0.280001,
+          0.14,
+          0.07
+        ],
+        "origin": [0, 0],
+        "extent": [110000, 6365000, 185000, 6425000],
+        "constrainOnlyCenter": false,
+        "logo": "/assets/logo.png",
+        "geoserverLegendOptions": "",
+        "mapselector": false,
+        "mapcleaner": true,
+        "drawerVisible": false,
+        "drawerPermanent": false,
+        "culors": { "primaryCulor": "#0076bc", "secondaryCulor": "#ffffff" },
+        "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+        "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+      },
+      "chapters": [],
+      "expanded": true
+    }
+  ],
+  "map": "oversiktsplan"
+}
