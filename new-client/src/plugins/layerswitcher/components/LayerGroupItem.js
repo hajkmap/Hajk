@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import cslx from "clsx";
-import { Button, Tooltip, Typography } from "@material-ui/core";
+import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
@@ -417,16 +417,48 @@ class LayerGroupItem extends Component {
     return (
       <div key={index} className={classes.layerItem}>
         <div className={classes.caption}>
-          <div onClick={this.toggleLayerVisible(subLayer)}>
-            {visible ? (
-              <CheckBoxIcon className={classes.checkBoxIcon} />
-            ) : (
-              <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
-            )}
-            <label className={classes.captionText}>
-              {layer.layersInfo[subLayer].caption}
-            </label>
-          </div>
+          <Grid
+            wrap="nowrap"
+            container
+            onClick={this.toggleLayerVisible(subLayer)}
+          >
+            <Grid item>
+              {visible ? (
+                <CheckBoxIcon className={classes.checkBoxIcon} />
+              ) : (
+                <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
+              )}
+            </Grid>
+            <Grid item>
+              <div
+                style={{
+                  display: "flex",
+                  marginRight: "6px",
+                  alignItems: "center",
+                  height: "1.5rem",
+                  width: "1.5rem",
+                }}
+              >
+                <img
+                  style={{
+                    maxWidth: "1.5rem",
+                    maxHeight: "1.5rem",
+                    marginRight: "5px",
+                  }}
+                  alt="Teckenförklaring"
+                  src={
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS75m0nA18ttFff0lq0sOCVtnuFU9gpOvS_fw&usqp=CAU"
+                  }
+                  className={classes.legendImage}
+                />
+              </div>
+            </Grid>
+            <Grid item>
+              <Typography className={classes.captionText}>
+                {layer.layersInfo[subLayer].caption}
+              </Typography>
+            </Grid>
+          </Grid>
           <div className={classes.layerButtons}>
             <div className={classes.layerButton}>
               <DownloadLink

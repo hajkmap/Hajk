@@ -1,11 +1,12 @@
 import React from "react";
-import { Button, Tooltip, Typography } from "@material-ui/core";
+import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import InfoIcon from "@material-ui/icons/Info";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import CardMedia from "@material-ui/core/CardMedia";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CloseIcon from "@material-ui/icons/Close";
@@ -75,7 +76,7 @@ const styles = (theme) => ({
   },
   checkBoxIcon: {
     cursor: "pointer",
-    float: "left",
+
     marginRight: "5px",
   },
 });
@@ -368,20 +369,44 @@ class LayerItem extends React.PureComponent {
     return (
       <div className={classes.layerItemContainer}>
         <div className={classes.layerItem}>
-          <div className={classes.layerItemInfo}>
-            <div
-              className={classes.caption}
-              onClick={this.toggleVisible(layer)}
-            >
-              <Typography>
+          <div>
+            <Grid wrap="nowrap" container onClick={this.toggleVisible(layer)}>
+              <Grid item>
                 {visible ? (
                   <CheckBoxIcon className={classes.checkBoxIcon} />
                 ) : (
                   <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
                 )}
-                <label className={classes.captionText}>{caption}</label>
-              </Typography>
-            </div>
+              </Grid>
+              <Grid item>
+                <div
+                  style={{
+                    display: "flex",
+                    marginRight: "6px",
+                    alignItems: "center",
+                    height: "1.5rem",
+                    width: "1.5rem",
+                  }}
+                >
+                  <img
+                    style={{
+                      maxWidth: "1.5rem",
+                      maxHeight: "1.5rem",
+
+                      marginRight: "5px",
+                    }}
+                    alt="Teckenförklaring"
+                    src="https://ext-geodata.lansstyrelsen.se/arcgis/services/WMS/LST_WMS_riksintressen_4_nv/mapserver/wmsserver?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Fageldirektivet_SPA_MB4&STYLE=&LEGEND_OPTIONS="
+                    className={classes.legendImage}
+                  />
+                </div>
+              </Grid>
+              <Grid item>
+                <Typography className={classes.captionText}>
+                  {caption}
+                </Typography>
+              </Grid>
+            </Grid>
           </div>
           <div className={classes.layerButtons}>
             <DownloadLink
