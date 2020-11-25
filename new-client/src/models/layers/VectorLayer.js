@@ -288,9 +288,6 @@ class WFSVectorLayer {
         // Load all features (no filter active - only bbox limitation)
         this.allFeatures = this.getAllFeatures(features);
 
-        //Clear all previous features
-        this.vectorSource.clear();
-
         // See if filtering is needed and populate the source with resulting features
         this.vectorSource.addFeatures(
           this.getFilteredFeatures(this.allFeatures)
