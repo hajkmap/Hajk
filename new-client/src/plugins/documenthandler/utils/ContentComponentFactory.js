@@ -11,6 +11,11 @@ import { Button, Typography, CardMedia, List } from "@material-ui/core";
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
 
+const getIndentationValue = (fontSize, multiplier, negative) => {
+  let value = multiplier * fontSize.substring(0, fontSize.length - 3);
+  return negative ? `${value * -1}rem` : `${value}rem`;
+};
+
 const useStyles = makeStyles((theme) => ({
   documentImage: {
     objectFit: "contain",
@@ -51,6 +56,12 @@ const useStyles = makeStyles((theme) => ({
   ulList: {
     listStyle: "initial",
     listStylePosition: "inside",
+    paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.375), //MAGIC
+    textIndent: getIndentationValue(
+      theme.typography.body1.fontSize,
+      1.375,
+      true
+    ), //MAGIC
     padding: theme.spacing(0),
     marginBottom: theme.spacing(1),
   },
@@ -60,6 +71,8 @@ const useStyles = makeStyles((theme) => ({
   olList: {
     listStyle: "decimal",
     listStylePosition: "inside",
+    paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.6), //MAGIC
+    textIndent: getIndentationValue(theme.typography.body1.fontSize, 1.6, true), //MAGIC
     padding: theme.spacing(0),
     marginBottom: theme.spacing(1),
   },
