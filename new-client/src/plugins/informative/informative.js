@@ -30,14 +30,14 @@ class Informative extends React.PureComponent {
    * Shows the Informative Window and opens a specified chapter.
    *
    * Opening the Window is achieved using the globalObserver. Each
-   * Plugin has a unique event (named as: "showPluginName"). See
+   * Plugin has a unique event (named as: "{pluginName}.showWindow"). See
    * BaseWindowPlugin for subscription.
    *
    * @memberof Informative
    */
   open = chapter => {
     this.localObserver.publish("changeChapter", chapter);
-    this.app.globalObserver.publish("showInformative", {
+    this.app.globalObserver.publish("informative.showWindow", {
       hideOtherPlugins: false
     });
   };

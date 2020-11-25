@@ -54,6 +54,7 @@ class WMTSLayer {
         format: "image/png",
         wrapX: false,
         url: config.url,
+        crossOrigin: config.crossOrigin,
         axisMode: config.axisMode,
         layer: config.layer,
         matrixSet: config.matrixSet,

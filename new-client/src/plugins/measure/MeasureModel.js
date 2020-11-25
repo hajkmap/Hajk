@@ -3,6 +3,7 @@ import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
 import { LineString, Polygon } from "ol/geom.js";
 import Draw from "ol/interaction/Draw.js";
+
 import Overlay from "ol/Overlay";
 
 class MeasureModel {
@@ -97,11 +98,6 @@ class MeasureModel {
     return this.type;
   }
 
-  removeInteraction() {
-    this.measureTooltip.setPosition(undefined);
-    this.map.removeInteraction(this.draw);
-  }
-
   setFeaturePropertiesFromGeometry(feature) {
     if (!feature) return;
     var geom,
@@ -148,7 +144,7 @@ class MeasureModel {
   }
 
   formatLabel(type, value) {
-    var label;
+    let label;
 
     if (type === "point") {
       label = "Nord: " + value.n + " Öst: " + value.e;
@@ -163,36 +159,38 @@ class MeasureModel {
     }
 
     if (type === "circle") {
-      let prefix = " m";
-      let prefixSq = " m²";
-      if (value >= 1e3) {
-        prefix = " km";
-        value = value / 1e3;
+      let unit = " m";
+      let squareUnit = " m²";
+      if (value >= 1000) {
+        unit = " km";
+        value = value / 1000;
       }
       label =
         "R = " +
-        value +
-        prefix +
+        Number(value).toLocaleString() +
+        unit +
         " \nA = " +
-        Math.round(value * value * Math.PI * 1e3) / 1e3 +
-        prefixSq;
+        (Math.round(value * value * Math.PI * 1000) / 1000).toLocaleString() +
+        squareUnit;
     }
 
     if (type === "area") {
-      if (value > 10000) {
-        label = Math.round((value / 1000000) * 100) / 100 + " km²";
+      if (value > 100000) {
+        label =
+          Number(Math.round((value / 1000000) * 100) / 100).toLocaleString() +
+          " km²";
       } else {
-        label = Math.round(value * 100) / 100 + " m²";
+        label = Number(Math.round(value * 100) / 100).toLocaleString() + " m²";
       }
     }
 
     if (type === "length") {
-      let prefix = " m";
-      if (value >= 1e3) {
-        prefix = " km";
-        value = value / 1e3;
+      let unit = " m";
+      if (value >= 1000) {
+        unit = " km";
+        value = value / 1000;
       }
-      label = value + prefix;
+      label = Number(value).toLocaleString() + unit;
     }
 
     return label;
@@ -258,14 +256,35 @@ class MeasureModel {
     this.draw.on("drawstart", this.handleDrawStart);
     this.draw.on("drawend", this.handleDrawEnd);
     this.map.addInteraction(this.draw);
+
+    // Add snap interactions AFTER measure source has been added
+    // this will allow us to snap to the newly added source too
+    this.map.snapHelper.add("measure");
   }
+
+  removeInteraction() {
+    this.measureTooltip.setPosition(undefined);
+    this.map.snapHelper.delete("measure");
+    this.map.removeInteraction(this.draw);
+  }
+
+  eventHandler = event => {
+    const key = event.key; // Or const {key} = event; in ES6+
+    if (key === "Escape") {
+      this.draw.finishDrawing();
+    }
+  };
 
   setActive(active) {
     if (active && !this.active) {
+      document.addEventListener("keydown", this.eventHandler);
       this.addInteraction();
+      this.map.clickLock.add("measure");
     }
     if (active === false) {
+      document.removeEventListener("keydown", this.eventHandler);
       this.removeInteraction();
+      this.map.clickLock.delete("measure");
     }
     this.active = active;
   }

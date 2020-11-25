@@ -4,11 +4,18 @@ import { withStyles } from "@material-ui/core/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile, getIsMobile } from "../utils/IsMobile.js";
-import FeatureInfo from "./FeatureInfo.js";
+import FeatureInfoContainer from "./FeatureInfo/FeatureInfoContainer.js";
+import clsx from "clsx";
 
-const zIndexStart = 1e3;
+const zIndexStart = 1000;
 // Patch the RND component's onDragStart method with the ability to disable drag by its internal state.
 // This is necessary so we can disable/enable drag at any time.
+//
+// Please note that since we override the onDragStart on prototype level, we must ensure that it's
+// kept up-to-date with the current version, see https://github.com/bokuweb/react-rnd/blob/master/src/index.tsx
+// for latest version of this method.
+//
+// TODO: Perhaps there's no need to disable drag at any time anymore, so this override could be removed?
 //
 Rnd.prototype.onDragStart = function(e, data) {
   if (this.state.disableDrag) {
@@ -18,49 +25,67 @@ Rnd.prototype.onDragStart = function(e, data) {
   if (this.props.onDragStart) {
     this.props.onDragStart(e, data);
   }
-
   if (!this.props.bounds) return;
-
-  var parent = this.getParent();
-  var boundary;
+  const parent = this.getParent();
+  const scale = this.props.scale;
+  let boundary;
   if (this.props.bounds === "parent") {
     boundary = parent;
   } else if (this.props.bounds === "body") {
-    boundary = document.body;
+    const parentRect = parent.getBoundingClientRect();
+    const parentLeft = parentRect.left;
+    const parentTop = parentRect.top;
+    const bodyRect = document.body.getBoundingClientRect();
+    const left =
+      -(parentLeft - parent.offsetLeft * scale - bodyRect.left) / scale;
+    const top = -(parentTop - parent.offsetTop * scale - bodyRect.top) / scale;
+    const right =
+      (document.body.offsetWidth - this.resizable.size.width * scale) / scale +
+      left;
+    const bottom =
+      (document.body.offsetHeight - this.resizable.size.height * scale) /
+        scale +
+      top;
+    return this.setState({ bounds: { top, right, bottom, left } });
   } else if (this.props.bounds === "window") {
     if (!this.resizable) return;
-    return this.setState({
-      bounds: {
-        top: 0,
-        right: window.innerWidth - this.resizable.size.width,
-        bottom: window.innerHeight - this.resizable.size.height,
-        left: 0
-      }
-    });
+    const parentRect = parent.getBoundingClientRect();
+    const parentLeft = parentRect.left;
+    const parentTop = parentRect.top;
+    const left = -(parentLeft - parent.offsetLeft * scale) / scale;
+    const top = -(parentTop - parent.offsetTop * scale) / scale;
+    const right =
+      (window.innerWidth - this.resizable.size.width * scale) / scale + left;
+    const bottom =
+      (window.innerHeight - this.resizable.size.height * scale) / scale + top;
+    return this.setState({ bounds: { top, right, bottom, left } });
   } else {
     boundary = document.querySelector(this.props.bounds);
   }
   if (!(boundary instanceof HTMLElement) || !(parent instanceof HTMLElement)) {
     return;
   }
-  var boundaryRect = boundary.getBoundingClientRect();
-  var boundaryLeft = boundaryRect.left;
-  var boundaryTop = boundaryRect.top;
-  var parentRect = parent.getBoundingClientRect();
-  var parentLeft = parentRect.left;
-  var parentTop = parentRect.top;
-  var left = boundaryLeft - parentLeft;
-  var top = boundaryTop - parentTop;
+  const boundaryRect = boundary.getBoundingClientRect();
+  const boundaryLeft = boundaryRect.left;
+  const boundaryTop = boundaryRect.top;
+  const parentRect = parent.getBoundingClientRect();
+  const parentLeft = parentRect.left;
+  const parentTop = parentRect.top;
+  const left = (boundaryLeft - parentLeft) / scale;
+  const top = boundaryTop - parentTop;
   if (!this.resizable) return;
-  var offset = this.getOffsetFromParent();
+  this.updateOffsetFromParent();
+  const offset = this.offsetFromParent;
   this.setState({
     bounds: {
       top: top - offset.top,
       right:
-        left + (boundary.offsetWidth - this.resizable.size.width) - offset.left,
+        left +
+        (boundary.offsetWidth - this.resizable.size.width) -
+        offset.left / scale,
       bottom:
         top + (boundary.offsetHeight - this.resizable.size.height) - offset.top,
-      left: left - offset.left
+      left: left - offset.left / scale
     }
   });
 };
@@ -70,10 +95,9 @@ const styles = theme => {
     window: {
       zIndex: zIndexStart + document.windows.length,
       position: "absolute",
-      background: "white",
-      boxShadow:
-        "2px 2px 2px rgba(0, 0, 0, 0.4), 0px 0px 4px rgba(0, 0, 0, 0.4)",
-      borderRadius: "5px",
+      background: theme.palette.background.paper,
+      boxShadow: theme.shadows[24],
+      borderRadius: theme.shape.borderRadius,
       overflow: "hidden",
       pointerEvents: "all",
       [theme.breakpoints.down("xs")]: {
@@ -96,6 +120,10 @@ const styles = theme => {
       overflowY: "auto",
       padding: "10px",
       cursor: "default !important"
+    },
+    nonScrollable: {
+      overflowY: "hidden",
+      padding: "0px"
     }
   };
 };
@@ -104,6 +132,7 @@ class Window extends React.PureComponent {
   static propTypes = {
     children: propTypes.object,
     classes: propTypes.object.isRequired,
+    color: propTypes.string,
     features: propTypes.array,
     globalObserver: propTypes.object.isRequired,
     height: propTypes.oneOfType([propTypes.number, propTypes.string])
@@ -120,6 +149,13 @@ class Window extends React.PureComponent {
     width: propTypes.number.isRequired
   };
 
+  static defaultProps = {
+    draggingEnabled: true,
+    resizingEnabled: true,
+    allowMaximizedWindow: false,
+    scrollable: true
+  };
+
   constructor(props) {
     super(props);
     document.windows.push(this);
@@ -131,7 +167,7 @@ class Window extends React.PureComponent {
     };
 
     window.addEventListener("resize", () => {
-      if (this.mode === "maximized") {
+      if (this.state.mode === "maximized") {
         this.fit(document.getElementById("windows-container"));
       } else {
         this.updatePosition();
@@ -142,13 +178,13 @@ class Window extends React.PureComponent {
   componentDidMount() {
     const { globalObserver } = this.props;
     if (globalObserver) {
-      globalObserver.subscribe("appLoaded", () => {
+      globalObserver.subscribe("core.appLoaded", () => {
         this.updatePosition();
       });
-      globalObserver.subscribe("drawerToggled", () => {
+      globalObserver.subscribe("core.drawerToggled", () => {
         this.updatePosition();
       });
-      globalObserver.subscribe("dialogOpen", open => {
+      globalObserver.subscribe("core.dialogOpen", open => {
         this.rnd.setState({
           disableDrag: open
         });
@@ -183,7 +219,7 @@ class Window extends React.PureComponent {
 
     //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
     this.left = 16; // Make sure we respect padding
-    this.top = 16 + 62; // Respect padding + nasty hack to ensure that Window is placed below Search bar
+    this.top = 16 + 62; // Respect top padding + don't overlap Drawer Toggle buttons
     this.width = width || 400;
     this.height = height || 300;
 
@@ -203,8 +239,6 @@ class Window extends React.PureComponent {
     // If Window renders on the right, there are some things that we need to compensate for
     if (position === "right") {
       this.left = parent.getBoundingClientRect().width - width - 16 - 56; // -16 to take care of usual right padding, -56 to not cover the Control buttons that are on the right
-      this.top = this.top - 62; // We won't overlap Search bar if Window is placed to the right, so don't take Search bar's height into account
-      this.height = this.height + 62; // Same as above
     }
 
     // Mobile screens are another special case: here our Window should take up max space available
@@ -216,7 +250,6 @@ class Window extends React.PureComponent {
     }
 
     this.left = this.left !== undefined ? this.left : 16;
-    this.mode = "window";
 
     this.setState(
       {
@@ -224,7 +257,7 @@ class Window extends React.PureComponent {
         top: this.top,
         width: this.width,
         height: this.height,
-        mode: this.mode
+        mode: "window"
       },
       () => {
         this.rnd.updatePosition({
@@ -251,12 +284,12 @@ class Window extends React.PureComponent {
     });
     this.setState({
       width: target.clientWidth,
-      height: target.clientHeight
+      height: target.clientHeight,
+      mode: "maximized"
     });
-    this.mode = "maximized";
   };
 
-  reset = target => {
+  reset = () => {
     this.rnd.updatePosition({
       y: Math.round(this.top),
       x: Math.round(this.left)
@@ -266,9 +299,9 @@ class Window extends React.PureComponent {
     });
     this.setState({
       width: this.width,
-      height: this.height
+      height: this.height,
+      mode: "window"
     });
-    this.mode = "window";
   };
 
   enlarge = () => {
@@ -288,69 +321,57 @@ class Window extends React.PureComponent {
       disableDrag: false
     });
     this.setState({
-      height: this.height
-    });
-    this.mode = "window";
-  };
-
-  moveToTop = () => {
-    this.rnd.updatePosition({
-      y: 0
+      height: this.height,
+      mode: "window"
     });
   };
 
-  moveToBottom = target => {
-    this.rnd.updatePosition({
-      y: Math.round(window.innerHeight - 106)
-    });
-    this.mode = "minimized";
-  };
+  maximize = () => {
+    const { onMaximize, onResize, allowMaximizedWindow } = this.props;
 
-  maximize = e => {
-    const { onMaximize } = this.props;
-    if (getIsMobile()) {
-      this.moveToTop();
-    } else {
-      switch (this.mode) {
-        case "minimized":
-          this.enlarge();
-          break;
-        case "window":
+    getIsMobile() && this.rnd.updatePosition({ y: 0 });
+
+    switch (this.state.mode) {
+      case "minimized":
+        // Enlarge back to "window" mode
+        this.enlarge();
+        break;
+      case "window":
+        // If already in "window" mode, fill the viewport
+        allowMaximizedWindow &&
           this.fit(document.getElementById("windows-container"));
-          break;
-        case "maximized":
-          this.reset(document.getElementById("windows-container"));
-          break;
-        default:
-          break;
-      }
+        break;
+      case "maximized":
+        // If already "maximized" mode, switch back to "window"
+        this.reset(document.getElementById("windows-container"));
+        break;
+      default:
+        break;
     }
-    if (onMaximize) onMaximize();
-    if (this.props.onResize) this.props.onResize();
+
+    // Run callbacks
+    typeof onMaximize === "function" && onMaximize();
+    typeof onResize === "function" && onResize();
   };
 
-  minimize = e => {
-    const { onMinimize } = this.props;
-    if (getIsMobile()) {
-      this.moveToBottom();
-    }
-    if (this.mode === "minimized") {
-      return;
-    }
-    if (this.mode === "maximized") {
-      this.reset(document.getElementById("windows-container"));
-    }
-    if (getIsMobile()) {
-      this.moveToBottom();
-    } else {
-      this.mode = "minimized";
-      this.height = this.state.height;
-      this.setState({
-        height: 0
+  minimize = () => {
+    const { onMinimize, onResize } = this.props;
+
+    getIsMobile() &&
+      this.rnd.updatePosition({
+        y: Math.round(window.innerHeight - 42)
       });
-    }
-    if (onMinimize) onMinimize();
-    if (this.props.onResize) this.props.onResize();
+
+    // Don't matter the current mode – just collapse
+    this.height = this.state.height;
+    this.setState({
+      height: 0,
+      mode: "minimized"
+    });
+
+    // Run callbacks
+    typeof onMinimize === "function" && onMinimize();
+    typeof onResize === "function" && onResize();
   };
 
   bringToFront() {
@@ -364,7 +385,18 @@ class Window extends React.PureComponent {
   }
 
   render() {
-    const { children, classes, features, open, title } = this.props;
+    const {
+      children,
+      classes,
+      color,
+      features,
+      open,
+      title,
+      resizingEnabled,
+      draggingEnabled,
+      allowMaximizedWindow,
+      customPanelHeaderButtons
+    } = this.props;
     const { left, top, width, height } = this.state;
 
     let resizeBottom = true,
@@ -379,16 +411,19 @@ class Window extends React.PureComponent {
     if (isMobile) {
       resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTopLeft = resizeTopRight = resizeLeft = false;
     } else {
-      if (this.mode === "maximized") {
+      if (this.state.mode === "maximized") {
         resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
       }
-      if (this.mode === "minimized") {
+      if (this.state.mode === "minimized") {
         resizeBottom = resizeBottomLeft = resizeBottomRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+      }
+
+      if (!resizingEnabled) {
+        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
       }
     }
 
     this.bringToFront();
-
     return (
       <Rnd
         onMouseDown={e => {
@@ -412,7 +447,7 @@ class Window extends React.PureComponent {
         }}
         onResizeStop={(e, direction, ref, delta, position) => {
           this.width = ref.style.width;
-          if (this.mode !== "minimized") {
+          if (this.state.mode !== "minimized") {
             this.height = ref.style.height;
           }
           this.setState({
@@ -423,7 +458,7 @@ class Window extends React.PureComponent {
         }}
         cancel="section,nav"
         bounds={"#windows-container"}
-        disableDragging={false || getIsMobile()}
+        disableDragging={!draggingEnabled || false || getIsMobile()}
         enableResizing={{
           bottom: resizeBottom,
           bottomLeft: resizeBottomLeft,
@@ -436,7 +471,7 @@ class Window extends React.PureComponent {
         }}
         className={classes.window}
         minWidth={200}
-        minHeight={this.mode === "minimized" ? 42 : 200}
+        minHeight={this.state.mode === "minimized" ? 42 : 200}
         size={{
           width: width,
           height: height
@@ -450,17 +485,27 @@ class Window extends React.PureComponent {
       >
         <div className={classes.panelContent}>
           <PanelHeader
+            allowMaximizedWindow={allowMaximizedWindow}
+            color={color}
+            customHeaderButtons={customPanelHeaderButtons}
+            globalObserver={this.props.globalObserver}
             onClose={this.close}
-            title={title}
             onMaximize={this.maximize}
             onMinimize={this.minimize}
-            mode={this.mode}
+            mode={this.state.mode}
+            title={title}
           />
-          <section className={classes.content}>
-            {features ? (
-              <FeatureInfo
+          <section
+            className={clsx(
+              classes.content,
+              this.props.scrollable ? null : classes.nonScrollable
+            )}
+          >
+            {features && features.length > 0 ? (
+              <FeatureInfoContainer
                 features={this.props.features}
                 onDisplay={this.props.onDisplay}
+                globalObserver={this.props.globalObserver}
                 key={
                   Array.isArray(this.props.features) &&
                   this.props.features.length > 0

@@ -23,6 +23,44 @@
 import React from "react";
 import { Component } from "react";
 import $ from "jquery";
+import Button from "@material-ui/core/Button";
+import AddIcon from "@material-ui/icons/Add";
+import CancelIcon from "@material-ui/icons/Cancel";
+import DoneIcon from "@material-ui/icons/Done";
+import RemoveIcon from "@material-ui/icons/Remove";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { red, green, blue } from "@material-ui/core/colors";
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 class ToolOptions extends Component {
   constructor() {
@@ -32,9 +70,10 @@ class ToolOptions extends Component {
       validationErrors: [],
       presetList: [],
       active: false,
-      //z index: 0,
+      index: 0,
       //z target: "toolbar",
       //z instruction: "",
+      visibleAtStart: false,
       visibleForGroups: [],
       editing: null,
       showResults: false
@@ -48,13 +87,14 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         authActive: this.props.parent.props.parent.state.authActive,
-        //z index: tool.index,
+        index: tool.index,
         //z target: tool.options.target || "toolbar",
         //z position: tool.options.position,
         //width: tool.options.width,
         // height: tool.options.height,
         //z instruction: tool.options.instruction,
         presetList: tool.options.presetList || [],
+        visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -117,7 +157,7 @@ class ToolOptions extends Component {
   save() {
     var tool = {
       type: this.type,
-      //z index: this.state.index,
+      index: this.state.index,
       options: {
         //z target: this.state.target,
         //z position: this.state.position,
@@ -193,93 +233,19 @@ class ToolOptions extends Component {
     });
   }
 
-  editPresetValue(e) {
-    var elements = this.refs.editForm.elements;
+  editPreset(e, name, url) {
+    if (name && url) {
+      var elements = this.refs.editName;
+      var elements2 = this.refs.editUrl;
 
-    if (elements) {
-      e.name = elements["name"].value;
-      e.presetUrl = "test-url";
+      e.name = elements.value;
+      e.presetUrl = elements2.value;
     }
-
-    this.state.presetList.forEach(t => {
-      var preset = {
-        name: elements["name"].value,
-        presetUrl: elements["presetUrl"].value
-      };
-      this.state.presetList.push(preset);
+    this.setState({
+      editing: e.name,
+      editUrl: e.presetUrl,
+      showResults: !this.state.showResults
     });
-    this.renderForm(e);
-  }
-
-  results(value) {
-    if (value.name === this.state.editing) {
-      return (
-        <div ref="editForm">
-          <label>Name:</label>
-          <br />
-          <input name="name" type="text" defaultValue={value.name} />
-          <br />
-          <input name="url" type="text" defaultValue={value.presetUrl} />
-          <br />
-          <input
-            type="submit"
-            value="Spara"
-            onSubmit={e => {
-              e.preventDefault();
-              this.handleSubmit(e);
-            }}
-          />
-        </div>
-      );
-    }
-  }
-
-  editPreset(e, newValue, newUrl) {
-    if (newValue && newUrl) {
-      this.setState({
-        editing: this.refs.newValue,
-        editUrl: this.refs.newUrl,
-        showResults: !this.state.showResults
-      });
-    }
-  }
-
-  cancelEdit() {
-    this.setState({ editing: null });
-  }
-
-  isActive(value) {
-    return (
-      "layer-node preset-name" +
-      (value === this.state.editing ? "preset-active" : "preset-default")
-    );
-  }
-
-  isActives(value) {
-    return value.name === this.state.editing ? this.renderForm(value) : null;
-  }
-
-  handleSubmit(e) {}
-
-  renderForm(value) {
-    if (value.name === this.state.editing) {
-      return (
-        <div>
-          <label>Name:</label>
-          <input type="text" name="name" defaultValue={this.state.presetList} />
-          <input type="text" name="test" value="asd" />
-          <button
-            className="btn btn-success"
-            onClick={e => {
-              e.preventDefault();
-              this.handleSubmit(e);
-            }}
-          >
-            Lägg till
-          </button>
-        </div>
-      );
-    }
   }
 
   createGuid() {
@@ -304,23 +270,6 @@ class ToolOptions extends Component {
     );
   }
 
-  createPreset(name, url, expanded, toggled) {
-    var elements = this.refs.presetForm.elements,
-      id = this.createGuid(),
-      layerName = elements["name"].value,
-      layer = $(`
-      <div><li
-        class="layer-node preset-name"
-        data-id=${id}
-        data-type="layer">
-        <span class="preset-name">${layerName}</span>
-      </li></div>
-    `);
-    $(".tree-view > ul").prepend(layer);
-    layer.editable(this);
-    this.forceUpdate();
-  }
-
   renderPresets() {
     return this.state.presetList.map((t, i) => (
       <div key={i}>
@@ -334,37 +283,43 @@ class ToolOptions extends Component {
             this.state.showResults ? (
               <div>
                 <input
-                  ref="newValue"
+                  ref="editName"
                   type="text"
                   defaultValue={t.name}
                   placeholder="Namn på snabbval"
                 />
                 <br />
                 <input
-                  ref="newUrl"
+                  ref="editUrl"
                   type="text"
                   defaultValue={t.presetUrl}
                   placeholder="Url"
                 />
                 <br />
-                <button
-                  className="btn btn-success"
+                <ColorButtonGreen
+                  variant="contained"
+                  className="btn"
                   onClick={() => this.editPreset(t, t.name, t.presetUrl)}
+                  startIcon={<DoneIcon />}
                 >
-                  Spara
-                </button>
-                <button
-                  className="btn btn-default"
+                  Klar
+                </ColorButtonGreen>
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
                   onClick={() => this.editPreset(t)}
+                  startIcon={<CancelIcon />}
                 >
                   Avbryt
-                </button>
-                <button
+                </ColorButtonBlue>
+                <ColorButtonRed
+                  variant="contained"
                   className="btn btn-danger"
                   onClick={() => this.removePreset(t.name)}
+                  startIcon={<RemoveIcon />}
                 >
                   Radera
-                </button>
+                </ColorButtonRed>
               </div>
             ) : (
               t.name
@@ -373,7 +328,7 @@ class ToolOptions extends Component {
             t.name
           )}
           <i
-            className="fa fa-pencil preset-icon"
+            className={this.state.showResults ? "" : "fa fa-pencil preset-icon"}
             onClick={() => this.editPreset(t)}
           />
         </li>
@@ -423,15 +378,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div>
             <input
@@ -446,30 +403,37 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
-          {/*           <div>
+          <div className="separator">Fönsterinställningar</div>
+          <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.index}
             />
           </div>
- */}
           {/*           <div>
             <label htmlFor="target">Verktygsplacering</label>
-            <input
+            <select
               id="target"
               name="target"
-              type="text"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
-            />
+            >
+              <option value="toolbar">Drawer</option>
+              <option value="left">Widget left</option>
+              <option value="right">Widget right</option>
+              <option value="control">Control button</option>
+            </select>
           </div>
  */}
           {/*           <div>
@@ -481,15 +445,18 @@ class ToolOptions extends Component {
                 title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
               />
             </label>
-            <input
+           <select
               id="position"
               name="position"
-              type="text"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
-            />
+            >
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
           </div>
  */}
           {/*           <div>
@@ -504,7 +471,9 @@ class ToolOptions extends Component {
             <input
               id="width"
               name="width"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -523,7 +492,9 @@ class ToolOptions extends Component {
             <input
               id="height"
               name="height"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -550,7 +521,23 @@ class ToolOptions extends Component {
               value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+          <div className="separator">Övriga inställningar</div>
  */}
+
+          <div className="separator">Övriga inställningar</div>
+          {/*<div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>*/}
           {this.renderVisibleForGroups()}
           <div>
             <div>
@@ -575,15 +562,17 @@ class ToolOptions extends Component {
                   ref="preset_url"
                 />
               </div>
-              <button
-                className="btn btn-success"
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
                 onClick={e => {
                   e.preventDefault();
                   this.addPreset(e);
                 }}
+                startIcon={<AddIcon />}
               >
                 Lägg till
-              </button>
+              </ColorButtonGreen>
             </div>
             <h4>Lista över aktiva snabbval</h4>
             <fieldset className="tree-view">

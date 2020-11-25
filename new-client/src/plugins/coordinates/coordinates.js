@@ -8,26 +8,14 @@ import CoordinatesModel from "./CoordinatesModel.js";
 import Observer from "react-event-observer";
 
 class Coordinates extends React.PureComponent {
-  state = {
-    transformedCoordinates: []
-  };
-
   constructor(props) {
     super(props);
 
     this.localObserver = Observer();
 
-    this.localObserver.subscribe(
-      "setTransformedCoordinates",
-      transformedCoordinates => {
-        this.setState({
-          transformedCoordinates: transformedCoordinates
-        });
-      }
-    );
-
     this.coordinatesModel = new CoordinatesModel({
       map: props.map,
+      app: props.app,
       options: props.options,
       localObserver: this.localObserver
     });

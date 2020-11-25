@@ -1,131 +1,228 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import Typography from "@material-ui/core/Typography";
+
+import Grid from "@material-ui/core/Grid";
 import AddIcon from "@material-ui/icons/AddBox";
 import ClearIcon from "@material-ui/icons/LayersClear";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+import ToggleButton from "@material-ui/lab/ToggleButton";
 import Tooltip from "@material-ui/core/Tooltip";
+import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
+import { withSnackbar } from "notistack";
 
-//var dist_val;
-const listStyle3 = {
-  background: "#f5f5f5",
-  backgroundColor: "#f5f5f5"
-};
-const styles = theme => ({});
+const styles = theme => ({
+  toggleButton: {
+    width: "100%",
+    paddingTop: 5,
+    paddingBottom: 5,
+    color: theme.palette.text.primary,
+    backgroundColor: theme.palette.primary
+  }
+});
 
 class BufferView extends React.PureComponent {
   state = {
-    name: ""
+    name: "",
+    isSelecting: false,
+    distance: 1000,
+    activeStep: 0
   };
+
   constructor(props) {
-    // If you're not using some of properties defined below, remove them from your code.
-    // They are shown here for demonstration purposes only.
     super(props);
+
     this.model = this.props.model;
     this.app = this.props.app;
-    this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.props.localObserver.subscribe("resetView", () => {
+      this.setState({ activeStep: 0, isSelecting: false });
+    });
   }
-  clearBuffer = name => event => {
-    this.props.model.clearBuffer();
+
+  setSelecting = () => {
+    this.setState({ isSelecting: !this.state.isSelecting }, () => {
+      this.props.model.activateSelecting(this.state.isSelecting);
+    });
   };
 
-  clearSelection = name => event => {
-    this.props.model.clearSelection();
+  setDistance = e => {
+    this.setState({ distance: e.target.value });
   };
 
-  activateSelecting = name => event => {
-    this.props.model.activateSelecting(true);
+  handleNext = () => {
+    // Some special handling for going from step 1 to 2:
+    //  - prevent action if no features have been selected
+    //  - if there are selected features, abort feature selection if user forgot to
+    let isSelecting = null;
+    if (this.state.activeStep === 0) {
+      if (this.props.model.highlightSource.getFeatures().length === 0) {
+        this.props.enqueueSnackbar(
+          "Du måste markera minst ett objekt i kartan för att kunna buffra",
+          {
+            variant: "error"
+          }
+        );
+        return;
+      }
+      this.props.model.activateSelecting(false);
+      isSelecting = false; // Prepare the state variable for setting later
+    }
+
+    const activeStep = this.state.activeStep + 1;
+    this.setState({
+      activeStep, // Always set active step to current (new) value
+      ...(isSelecting !== null && { isSelecting }) // Set isSelecting only if it isn't null
+    });
   };
-  bufferFeatures = name => event => {
-    var dist = document.querySelector("#distans").value;
-    this.props.model.bufferFeatures(dist);
+
+  handlePrev = () => {
+    const activeStep = this.state.activeStep - 1;
+    this.setState({ activeStep });
   };
+
+  getNextButtonLabel = () => {
+    let l = null;
+    switch (this.state.activeStep) {
+      case 1:
+        l = "Buffra";
+        break;
+      case 2:
+        l = "Börja om";
+        break;
+      default:
+        l = "Nästa";
+        break;
+    }
+    return l;
+  };
+
+  renderPrevButton = () => {
+    return (
+      <Grid item xs={6}>
+        <Button
+          fullWidth
+          disabled={this.state.activeStep === 0}
+          onClick={this.handlePrev}
+        >
+          Föregående
+        </Button>
+      </Grid>
+    );
+  };
+
+  renderClearButton = () => {
+    return (
+      (this.model.highlightSource.getFeatures().length !== 0 ||
+        this.model.bufferSource.getFeatures().length !== 0) && (
+        <Grid item xs={12}>
+          <Button
+            fullWidth
+            onClick={() => {
+              this.model.clear();
+              // The clear() above didn't cause any changes to this components
+              // state, hence we must force update… sorry! :/
+              this.forceUpdate();
+            }}
+          >
+            <ClearIcon /> Rensa
+          </Button>
+        </Grid>
+      )
+    );
+  };
+
   render() {
     const { classes } = this.props;
-
     return (
-      <div className="Buffert Verktyg">
-        Detta verktyg skapar en zon med angivet avstånd runt valda objekt i
-        kartan.
-        <br />
-        <br />
-        <Card className={classes.card}>
-          <CardContent style={listStyle3}>
-            <Typography component="h3">Välj objekt</Typography>
-          </CardContent>
-          <CardContent>
-            <div>
-              <Tooltip title="Markera flera objekt">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={this.activateSelecting()}
-                >
-                  <AddIcon />
-                </Button>
-              </Tooltip>
-              &nbsp;
-              <Tooltip title="Rensa selektering">
-                <Button onClick={this.clearSelection()}>
-                  <ClearIcon /> Rensa Selektering
-                </Button>
-              </Tooltip>
-            </div>
-          </CardContent>
-        </Card>
-        <br />
-        <Card className={classes.card}>
-          <CardContent style={listStyle3}>
-            <Typography component="h3">
-              Ange buffertavstånd (i meter)
-            </Typography>
-          </CardContent>
-          <CardContent>
-            <span>
-              <TextField
-                id="distans"
-                margin="normal"
-                variant="outlined"
-                defaultValue="1000"
-              />
-            </span>
-            <br />
-            <div>
-              <Button
-                onClick={this.bufferFeatures()}
-                variant="contained"
-                color="primary"
-                className={classes.button}
-              >
-                Skapa buffert
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        <br />
-        <Card className={classes.card}>
-          <CardContent style={listStyle3}>
-            <Typography component="h3">
-              Rensa kartan från buffrade objekt
-            </Typography>
-          </CardContent>
-          <CardContent>
-            <Button
-              onClick={this.clearBuffer()}
-              variant="contained"
-              color="primary"
-              className={classes.button}
-            >
-              Rensa
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <>
+        <Stepper activeStep={this.state.activeStep} orientation="vertical">
+          <Step key="1">
+            <StepLabel>Välj objekt att buffra</StepLabel>
+            <StepContent>
+              <Grid container spacing={2} direction="row">
+                {this.renderClearButton()}
+                <Grid item xs={12}>
+                  <Tooltip title="Markera flera objekt">
+                    <ToggleButton
+                      className={classes.toggleButton}
+                      onChange={this.setSelecting}
+                      selected={this.state.isSelecting}
+                      value="isSelecting"
+                    >
+                      <AddIcon />
+                      Välj objekt
+                    </ToggleButton>
+                  </Tooltip>
+                </Grid>
+                {this.renderPrevButton()}
+                <Grid item xs={6}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    onClick={this.handleNext}
+                  >
+                    Nästa
+                  </Button>
+                </Grid>
+              </Grid>
+            </StepContent>
+          </Step>
+          <Step key="2">
+            <StepLabel>Ange bufferavstånd</StepLabel>
+            <StepContent>
+              <Grid container spacing={2} direction="row">
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    fullWidth
+                    value={this.state.distance}
+                    onChange={this.setDistance}
+                    label="Bufferavstånd (i meter)"
+                  />
+                </Grid>
+                {this.renderPrevButton()}
+                <Grid item xs={6}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      this.handleNext();
+                      this.props.model.bufferFeatures(this.state.distance);
+                    }}
+                  >
+                    Buffra
+                  </Button>
+                </Grid>
+              </Grid>
+            </StepContent>
+          </Step>
+          <Step key="3">
+            <StepLabel>Klart</StepLabel>
+            <StepContent>
+              <Grid container spacing={2} direction="row">
+                {this.renderPrevButton()}
+                <Grid item xs={6}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      this.props.model.clear();
+                      this.setState({ activeStep: 0 });
+                    }}
+                  >
+                    Rensa
+                  </Button>
+                </Grid>
+              </Grid>
+            </StepContent>
+          </Step>
+        </Stepper>
+      </>
     );
   }
 }
@@ -134,4 +231,6 @@ BufferView.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles, { withTheme: true })(BufferView);
+export default withStyles(styles, { withTheme: true })(
+  withSnackbar(BufferView)
+);

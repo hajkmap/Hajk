@@ -12,8 +12,14 @@ const styles = theme => {
       "& .ol-attribution": {
         background: theme.palette.background.paper,
         boxShadow: theme.shadows[4],
-        border: "1px solid rgba(255 ,255, 255, 0.5)",
-        borderRadius: "2px"
+        borderRadius: theme.shape.borderRadius,
+
+        height: "25px",
+        overflow: "auto",
+        whiteSpace: "nowrap",
+        [theme.breakpoints.down("xs")]: {
+          maxWidth: "100px"
+        }
       },
       "& button": {
         cursor: "pointer",

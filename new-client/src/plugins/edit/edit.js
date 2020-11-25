@@ -9,7 +9,8 @@ import Observer from "react-event-observer";
 
 class Edit extends React.PureComponent {
   onWindowHide = () => {
-    this.editModel.deactivate();
+    this.localObserver.publish("resetView");
+    this.editModel.reset();
   };
 
   constructor(props) {
@@ -32,8 +33,8 @@ class Edit extends React.PureComponent {
           icon: <FormatShapesIcon />,
           title: "Redigera",
           description: "Redigera objekt i kartan (WFS)",
-          height: 400,
-          width: 400,
+          height: 500,
+          width: 500,
           top: undefined,
           left: undefined,
           onWindowHide: this.onWindowHide

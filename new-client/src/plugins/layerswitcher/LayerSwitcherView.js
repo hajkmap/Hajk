@@ -75,7 +75,7 @@ class LayersSwitcherView extends React.PureComponent {
     // Not beautiful but it works - timeout is needed to ensure rendering is done
     // and parent's element are correct.
     setTimeout(() => {
-      ref.updateIndicator();
+      ref !== null && ref.updateIndicator();
     }, 1);
   };
 
@@ -161,6 +161,8 @@ class LayersSwitcherView extends React.PureComponent {
               layerMap={this.props.model.layerMap}
               backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
               backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+              enableOSM={this.options.enableOSM}
+              map={this.props.map}
             />
           </div>
         </div>

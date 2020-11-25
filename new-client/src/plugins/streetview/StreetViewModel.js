@@ -32,7 +32,8 @@ class StreetViewModel {
   }
 
   activate() {
-    this.map.clicklock = true;
+    this.map.clickLock.add("streetview");
+
     this.streetViewService = new this.googleMapsApi.StreetViewService();
     this.panorama = new this.googleMapsApi.StreetViewPanorama(
       document.getElementById("street-view-window")
@@ -52,7 +53,7 @@ class StreetViewModel {
   }
 
   deactivate() {
-    this.map.clicklock = false;
+    this.map.clickLock.delete("streetview");
     document.querySelector(".ol-viewport").style.cursor = "default";
     this.map.un("singleclick", this.showLocation);
     this.activated = false;

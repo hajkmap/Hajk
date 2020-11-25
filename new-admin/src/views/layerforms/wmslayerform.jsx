@@ -64,7 +64,8 @@ const defaultState = {
   version: "1.1.0",
   projection: "",
   infoFormat: "",
-  style: []
+  style: [],
+  workspaceList: []
 };
 
 const supportedProjections = [
@@ -95,9 +96,10 @@ const supportedInfoFormats = [
 
 const supportedImageFormats = [
   "image/png",
+  "image/png8",
   "image/jpeg",
-  "image/png; mode=8bit",
-  "image/vnd.jpeg-png"
+  "image/vnd.jpeg-png",
+  "image/vnd.jpeg-png8"
 ];
 
 /**
@@ -373,6 +375,7 @@ class WMSLayerForm extends Component {
           </div>
           <select
             value={layerInfo.style}
+            className="control-fixed-width"
             onChange={e => {
               let addedLayersInfo = this.state.addedLayersInfo;
               addedLayersInfo[layerInfo.id].style = e.target.value;
@@ -542,9 +545,10 @@ class WMSLayerForm extends Component {
         }
       };
 
-      this.state.capabilities.Capability.Layer.Layer.forEach(layer => {
-        recursivePushLayer(layer);
-      });
+      this.state.capabilities?.Capability?.Layer?.Layer &&
+        this.state.capabilities.Capability.Layer.Layer.forEach(layer => {
+          recursivePushLayer(layer);
+        });
 
       return layers;
     } else {
@@ -616,10 +620,11 @@ class WMSLayerForm extends Component {
     });
 
     if (this.state.capabilities) {
-      this.state.capabilities.Capability.Layer.Layer.forEach((layer, i) => {
-        if (this.refs.hasOwnProperty(layer.Name))
-          this.refs[layer.Name].checked = false;
-      });
+      this.state.capabilities?.Capability?.Layer?.Layer &&
+        this.state.capabilities.Capability.Layer.Layer.forEach((layer, i) => {
+          if (this.refs.hasOwnProperty(layer.Name))
+            this.refs[layer.Name].checked = false;
+        });
     }
 
     var capabilitiesPromise = this.props.model.getAllWMSCapabilities(
@@ -652,7 +657,6 @@ class WMSLayerForm extends Component {
         );
       })
       .catch(err => {
-        console.error(err);
         if (this.props.parentView) {
           this.props.parentView.setState({
             alert: true,
@@ -814,7 +818,7 @@ class WMSLayerForm extends Component {
   }
 
   getLayer() {
-    return {
+    const o = {
       type: this.state.layerType,
       id: this.state.id,
       caption: this.getValue("caption"),
@@ -823,15 +827,19 @@ class WMSLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
+      projection: this.getValue("projection"),
       layers: this.getValue("layers"),
       layersInfo: this.getValue("layersInfo"),
+      searchFields: this.getValue("searchFields"),
+      displayFields: this.getValue("displayFields"),
+      visibleAtStart: this.getValue("visibleAtStart"),
+      tiled: this.getValue("tiled"),
+      opacity: this.getValue("opacity"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
-      opacity: this.getValue("opacity"),
-      tiled: this.getValue("tiled"),
-      drawOrder: this.getValue("drawOrder"),
       attribution: this.getValue("attribution"),
+      // drawOrder: this.getValue("drawOrder"),
       searchUrl: this.getValue("searchUrl"),
       searchPropertyName: this.getValue("searchPropertyName"),
       searchDisplayName: this.getValue("searchDisplayName"),
@@ -843,17 +851,19 @@ class WMSLayerForm extends Component {
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
-      solpopup: this.getValue("solpopup"),
+      // solpopup: this.getValue("solpopup"),
       version: this.state.version,
-      projection: this.getValue("projection"),
       infoFormat: this.getValue("infoFormat"),
-      style: this.getValue("style")
+      // style: this.getValue("style"),
+
+      zIndex: this.getValue("zIndex")
     };
+    return o;
   }
 
   getValue(fieldName) {
     function create_date() {
-      return new Date().getTime();
+      return new Date().getTime().toString();
     }
 
     function format_layers(layers) {
@@ -866,8 +876,8 @@ class WMSLayerForm extends Component {
       }));
     }
 
-    var input = this.refs["input_" + fieldName],
-      value = input ? input.value : "";
+    const input = this.refs["input_" + fieldName];
+    let value = input ? input.value : "";
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
@@ -876,6 +886,12 @@ class WMSLayerForm extends Component {
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
     if (fieldName === "infoVisible") value = input.checked;
+    // if (fieldName === "drawOrder") value = 1000;
+    if (fieldName === "visibleAtStart") value = Boolean(value);
+    if (fieldName === "searchFields") value = value || null;
+    if (fieldName === "displayFields") value = value || null;
+    if (fieldName === "zIndex") value = value || null;
+    if (fieldName === "opacity") value = parseFloat(Number(value).toFixed(2));
 
     return value;
   }
@@ -915,7 +931,7 @@ class WMSLayerForm extends Component {
         }
         break;
       case "opacity":
-        if (isNaN(Number(value)) || value <= 0 || value >= 1) {
+        if (isNaN(Number(value)) || value < 0 || value > 1) {
           valid = false;
         }
         break;
@@ -946,6 +962,31 @@ class WMSLayerForm extends Component {
     return valid;
   }
 
+  getWorkspaces = async url => {
+    //
+    url = url.substring(0, url.lastIndexOf("/")) + "/rest/workspaces";
+    //
+    const res = await fetch(url);
+    //
+    const json = await res.json();
+    //
+    //this.setState({ workspaceList: json.workspaces.workspace });
+    //
+    var sortedWorksapes = json.workspaces.workspace.sort(GetSortOrder("name")); //Pass the attribute to be sorted on
+
+    function GetSortOrder(prop) {
+      return function(a, b) {
+        if (a[prop] > b[prop]) {
+          return 1;
+        } else if (a[prop] < b[prop]) {
+          return -1;
+        }
+        return 0;
+      };
+    }
+    this.setState({ workspaceList: sortedWorksapes });
+  };
+
   render() {
     var loader = this.state.load ? (
       <i className="fa fa-refresh fa-spin" />
@@ -961,11 +1002,34 @@ class WMSLayerForm extends Component {
     return (
       <fieldset>
         <legend>WMS-lager</legend>
+        <div className="separator">Anslutning</div>
         <div>
-          <label>
-            <b>Url*</b>
-          </label>
-          <br />
+          <label>Servertyp</label>
+          <select
+            className="control-fixed-width"
+            ref="input_serverType"
+            value={this.state.serverType}
+            onChange={e => {
+              this.setState({ serverType: e.target.value });
+              if (
+                e.target.value === "geoserver"
+                  ? (document.getElementById(
+                      "availableWorkspaces"
+                    ).style.display = "unset")
+                  : (document.getElementById(
+                      "availableWorkspaces"
+                    ).style.display = "none")
+              );
+            }}
+          >
+            <option>geoserver</option>
+            <option>mapserver</option>
+            <option>qgis</option>
+            <option>arcgis</option>
+          </select>
+        </div>
+        <div>
+          <label>Url*</label>
           <input
             type="text"
             ref="input_url"
@@ -976,85 +1040,134 @@ class WMSLayerForm extends Component {
             }}
             className={this.getValidationClass("url")}
           />
+          {this.state.serverType === "geoserver" ? (
+            <span
+              onClick={e => {
+                this.getWorkspaces(this.state.url);
+              }}
+              className="btn btn-default"
+            >
+              Hämta workspace
+            </span>
+          ) : (
+            <span
+              onClick={e => {
+                this.loadWMSCapabilities(e);
+              }}
+              className="btn btn-default"
+            >
+              Ladda {loader}
+            </span>
+          )}
+        </div>
+
+        <div id="availableWorkspaces">
+          <label>Välj workspace</label>
+          <select
+            className="control-fixed-width"
+            ref="input_workspaceName"
+            value={this.state.workspaceName}
+            onChange={e =>
+              this.setState({
+                url:
+                  this.state.url.substring(
+                    0,
+                    this.state.url.lastIndexOf("geoserver/") + 10
+                  ) + e.target.value
+              })
+            }
+          >
+            <option key="wms" value="wms">
+              Alla
+            </option>
+            {this.state.workspaceList.map(workspace => {
+              return (
+                <option
+                  key={workspace.name + "/wms"}
+                  value={workspace.name + "/wms"}
+                >
+                  {workspace.name}
+                </option>
+              );
+            })}
+          </select>
+          &nbsp;
           <span
             onClick={e => {
               this.loadWMSCapabilities(e);
             }}
             className="btn btn-default"
           >
-            Ladda {loader}
+            Hämta lager {loader}
           </span>
         </div>
-        <div
-          style={{
-            background: "rgb(238, 238, 238)",
-            float: "left",
-            width: "100%"
-          }}
-        >
-          <div style={{ width: "50%", padding: "15px", float: "left" }}>
-            <label>
-              <b>Version</b>
-            </label>
-            <br />
-            <select
-              ref="input_version"
-              onChange={this.selectVersion.bind(this)}
-              value={version}
-              className="form-control"
-            >
-              {this.state.capabilitiesList.map(capa => {
-                return (
-                  <option key={capa.version} value={capa.version}>
-                    {capa.version}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div style={{ width: "50%", padding: "15px", float: "left" }}>
-            <label>
-              <b>Single tile</b>
-            </label>
-            <br />
-            <input
-              type="checkbox"
-              ref="input_singleTile"
-              onChange={e => this.setState({ singleTile: e.target.checked })}
-              checked={this.state.singleTile}
-            />
-          </div>
+
+        <div className="separator">Inställningar för request</div>
+
+        <div>
+          <label>Version</label>
+          <select
+            className="control-fixed-width"
+            ref="input_version"
+            onChange={this.selectVersion.bind(this)}
+            value={version}
+          >
+            {this.state.capabilitiesList.map(capa => {
+              return (
+                <option key={capa.version} value={capa.version}>
+                  {capa.version}
+                </option>
+              );
+            })}
+          </select>
         </div>
         <div>
-          <label>
-            <b>Bildformat</b>
-          </label>
-          <br />
+          <label>Bildformat</label>
           <select
-            style={{ width: "50%" }}
+            className="control-fixed-width"
             ref="input_imageFormat"
             value={this.state.imageFormat}
             onChange={e => this.setState({ imageFormat: e.target.value })}
-            className="form-control"
           >
             {this.setImageFormats()}
           </select>
         </div>
         <div>
-          <label>
-            <b>Koordinatsystem</b>
-          </label>
-          <br />
+          <label>Koordinatsystem</label>
           <select
-            style={{ width: "50%" }}
+            className="control-fixed-width"
             ref="input_projection"
             value={this.state.projection !== null ? this.state.projection : ""}
             onChange={e => this.setState({ projection: e.target.value })}
-            className="form-control"
           >
             {this.setProjections()}
           </select>
         </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_singleTile"
+            id="input_singleTile"
+            onChange={e => this.setState({ singleTile: e.target.checked })}
+            checked={this.state.singleTile}
+          />
+          &nbsp;
+          <label htmlFor="input_singleTile">Single tile</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_tiled"
+            id="input_tiled"
+            onChange={e => {
+              this.setState({ tiled: e.target.checked });
+            }}
+            checked={this.state.tiled}
+          />
+          &nbsp;
+          <label htmlFor="input_tiled">GeoWebCache</label>
+        </div>
+        <div className="separator">Tillgängliga lager</div>
         <div>
           <table
             style={{
@@ -1074,11 +1187,9 @@ class WMSLayerForm extends Component {
             {this.renderLayerList()}
           </table>
         </div>
+        <div className="separator">Hantera valda lager</div>
         <div>
-          <label>
-            <b>Valda lager*</b>
-          </label>
-          <br />
+          <label>Valda lager*</label>
           <div
             ref="input_layers"
             className={
@@ -1089,10 +1200,7 @@ class WMSLayerForm extends Component {
           </div>
         </div>
         <div>
-          <label>
-            <b>Visningsnamn*</b>
-          </label>
-          <br />
+          <label>Visningsnamn*</label>
           <input
             type="text"
             ref="input_caption"
@@ -1104,49 +1212,9 @@ class WMSLayerForm extends Component {
             className={this.getValidationClass("caption")}
           />
         </div>
+
         <div>
-          <label>
-            <b>Innehåll</b>
-          </label>
-          <br />
-          <input
-            type="text"
-            ref="input_content"
-            value={this.state.content}
-            onChange={e => this.setState({ content: e.target.value })}
-            className="form-control"
-          />
-        </div>
-        <div>
-          <label>
-            <b>Senast ändrad</b>
-          </label>
-          <br />
-          <span ref="input_date">
-            <i>{this.props.model.parseDate(this.state.date)}</i>
-          </span>
-        </div>
-        <div>
-          <label>
-            <b>Upphovsrätt</b>
-          </label>
-          <br />
-          <input
-            type="text"
-            ref="input_attribution"
-            onChange={e => {
-              this.setState({ attribution: e.target.value });
-              this.validateField("attribution", e);
-            }}
-            value={this.state.attribution}
-            className={this.getValidationClass("attribution")}
-          />
-        </div>
-        <div>
-          <label>
-            <b>Teckenförklaring</b>
-          </label>
-          <br />
+          <label>Teckenförklaring</label>
           <input
             type="text"
             ref="input_legend"
@@ -1163,61 +1231,68 @@ class WMSLayerForm extends Component {
           </span>
         </div>
         <div>
-          <label>
-            <b>Infoklick-format</b>
-          </label>
-          <br />
+          <label>Infoklick-format</label>
           <select
-            style={{ width: "50%" }}
+            className="control-fixed-width"
+            style={{ dispaly: "in-line" }}
             ref="input_infoFormat"
             value={infoFormat}
             onChange={e => this.setState({ infoFormat: e.target.value })}
-            className="form-control"
           >
             {this.setInfoFormats()}
           </select>
         </div>
+
         <div>
-          <label>
-            <b>Servertyp</b>
-          </label>
-          <br />
-          <select
-            style={{ width: "50%" }}
-            ref="input_serverType"
-            value={this.state.serverType}
-            onChange={e => this.setState({ serverType: e.target.value })}
-            className="form-control"
-          >
-            <option>geoserver</option>
-            <option>mapserver</option>
-            <option>qgis</option>
-            <option>arcgis</option>
-          </select>
-        </div>
-        <div>
-          <label>
-            <b>Opacitet*</b>
-          </label>
-          <br />
+          <label>Opacitet*</label>
           <input
-            style={{ width: "50%" }}
             type="number"
             step="0.01"
+            min="0"
+            max="1"
             ref="input_opacity"
             value={this.state.opacity}
-            className={this.getValidationClass("opacity")}
+            className={
+              (this.getValidationClass("opacity"), "control-fixed-width")
+            }
             onChange={e => {
               this.setState({ opacity: e.target.value });
               this.validateField("opacity");
             }}
           />
         </div>
+        <div className="separator">Metadata</div>
+        <div>
+          <label>Innehåll</label>
+          <input
+            className="control-fixed-width"
+            type="text"
+            ref="input_content"
+            value={this.state.content}
+            onChange={e => this.setState({ content: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>Senast ändrad</label>
+          <span ref="input_date">
+            <i>{this.props.model.parseDate(this.state.date)}</i>
+          </span>
+        </div>
+        <div>
+          <label>Upphovsrätt</label>
+          <input
+            type="text"
+            ref="input_attribution"
+            onChange={e => {
+              this.setState({ attribution: e.target.value });
+              this.validateField("attribution", e);
+            }}
+            value={this.state.attribution}
+            className={this.getValidationClass("attribution")}
+          />
+        </div>
         <div className="info-container">
           <div>
-            <label htmlFor="info-document">
-              <b>Infodokument</b>
-            </label>
             <input
               type="checkbox"
               ref="input_infoVisible"
@@ -1227,6 +1302,8 @@ class WMSLayerForm extends Component {
               }}
               checked={this.state.infoVisible}
             />
+            &nbsp;
+            <label htmlFor="info-document">Infodokument</label>
           </div>
           <div className={infoClass}>
             <label>Rubrik</label>
@@ -1296,20 +1373,8 @@ class WMSLayerForm extends Component {
             />
           </div>
         </div>
-        <div>
-          <label>
-            <b>GeoWebCache</b>
-          </label>
-          <input
-            type="checkbox"
-            ref="input_tiled"
-            onChange={e => {
-              this.setState({ tiled: e.target.checked });
-            }}
-            checked={this.state.tiled}
-          />
-        </div>
-        <h2>Sökning</h2>
+        <div className="separator">Sökning</div>
+        {/* <h2>Sökning</h2> */}
         <div>
           <label>Url</label>
           <input

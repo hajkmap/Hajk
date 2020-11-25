@@ -3,9 +3,9 @@ import propTypes from "prop-types";
 import LayerItem from "./LayerItem.js";
 import { withStyles } from "@material-ui/core/styles";
 import {
-  ExpansionPanel,
-  ExpansionPanelDetails,
-  ExpansionPanelSummary,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Typography
 } from "@material-ui/core";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
@@ -55,10 +55,10 @@ const styles = theme => ({
   arrowIcon: {
     float: "left"
   },
-  expansionPanel: {}
+  Accordion: {}
 });
 
-const StyledExpansionPanelSummary = withStyles({
+const StyledAccordionSummary = withStyles({
   root: {
     minHeight: 35,
     "&$expanded": {
@@ -75,7 +75,7 @@ const StyledExpansionPanelSummary = withStyles({
     }
   },
   expanded: {}
-})(ExpansionPanelSummary);
+})(AccordionSummary);
 
 class LayerGroup extends React.PureComponent {
   state = {
@@ -311,7 +311,7 @@ class LayerGroup extends React.PureComponent {
     }
     return (
       <div ref="panelElement" className={groupClass}>
-        <ExpansionPanel
+        <Accordion
           className={classes.disableTransition}
           expanded={this.state.expanded}
           TransitionProps={{
@@ -323,7 +323,7 @@ class LayerGroup extends React.PureComponent {
             });
           }}
         >
-          <StyledExpansionPanelSummary className={classes.panelSummary}>
+          <StyledAccordionSummary className={classes.panelSummary}>
             <div className={classes.arrowIcon}>
               {expanded ? (
                 <ArrowDropDownIcon onClick={() => this.toggleExpanded()} />
@@ -332,11 +332,12 @@ class LayerGroup extends React.PureComponent {
               )}
             </div>
             {this.renderToggleAll()}
-          </StyledExpansionPanelSummary>
-          <ExpansionPanelDetails classes={{ root: classes.root }}>
-            <div className={classes.expansionPanel}>
+          </StyledAccordionSummary>
+          <AccordionDetails classes={{ root: classes.root }}>
+            <div className={classes.Accordion}>
               {this.state.layers.map((layer, i) => {
                 var mapLayer = this.model.layerMap[Number(layer.id)];
+
                 if (mapLayer) {
                   return (
                     <LayerItem
@@ -359,8 +360,8 @@ class LayerGroup extends React.PureComponent {
               })}
               {this.renderLayerGroups()}
             </div>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
+          </AccordionDetails>
+        </Accordion>
       </div>
     );
   }

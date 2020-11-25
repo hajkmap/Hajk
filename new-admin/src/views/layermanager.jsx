@@ -28,6 +28,42 @@ import WMSLayerForm from "./layerforms/wmslayerform.jsx";
 import WMTSLayerForm from "./layerforms/wmtslayerform.jsx";
 import ArcGISLayerForm from "./layerforms/arcgislayerform.jsx";
 import VectorLayerForm from "./layerforms/vectorlayerform.jsx";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import AddIcon from "@material-ui/icons/Add";
+import CancelIcon from "@material-ui/icons/Cancel";
+import { withStyles } from "@material-ui/core/styles";
+import { red, green, blue } from "@material-ui/core/colors";
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 const defaultState = {
   layerType: "WMS",
@@ -123,7 +159,7 @@ class Manager extends Component {
     this.setState({
       alert: true,
       confirm: true,
-      alertMessage: "Lagret kommer att tas bort. Är detta ok?",
+      alertMessage: `Lagret "${layer.caption}" kommer att tas bort. Är detta ok?`,
       confirmAction: () => {
         this.props.model.removeLayer(layer, success => {
           if (success) {
@@ -138,7 +174,7 @@ class Manager extends Component {
           } else {
             this.setState({
               alert: true,
-              alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
+              alertMessage: `Lagret "${layer.caption}" kunde inte tas bort. Försök igen senare.`
             });
           }
         });
@@ -212,6 +248,11 @@ class Manager extends Component {
           lineColor: layer.lineColor || "rgba(0, 0, 0, 0.5)",
           fillColor: layer.fillColor || "rgba(255, 255, 255, 0.5)",
           opacity: layer.opacity,
+          minZoom: layer.minZoom,
+          maxZoom: layer.maxZoom,
+          sldUrl: layer.sldUrl,
+          sldText: layer.sldText,
+          sldStyle: layer.sldStyle,
           symbolXOffset: layer.symbolXOffset || 0,
           symbolYOffset: layer.symbolYOffset || 0,
           labelAlign: layer.labelAlign || "",
@@ -660,9 +701,14 @@ class Manager extends Component {
   render() {
     var abort =
         this.state.mode === "edit" ? (
-          <span className="btn btn-danger" onClick={e => this.abort(e)}>
+          <ColorButtonRed
+            variant="contained"
+            className="btn btn-danger"
+            onClick={e => this.abort(e)}
+            startIcon={<CancelIcon />}
+          >
             Avbryt
-          </span>
+          </ColorButtonRed>
         ) : null,
       url = this.props.config.url_import, // "/mapservice/export/importimage"
       typeSelectorDisabled = this.state.mode === "edit";
@@ -721,6 +767,7 @@ class Manager extends Component {
               <select
                 disabled={typeSelectorDisabled}
                 value={this.state.layerType}
+                className="control-fixed-width"
                 onChange={e => {
                   this.setState({ layerType: e.target.value });
                 }}
@@ -731,10 +778,47 @@ class Manager extends Component {
                 <option value="Vector">Vektor</option>
               </select>
             </p>
+            {this.state.mode === "edit" ? (
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<SaveIcon />}
+              >
+                Spara
+              </ColorButtonBlue>
+            ) : (
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<AddIcon />}
+              >
+                Lägg till
+              </ColorButtonGreen>
+            )}
+            &nbsp;
+            {abort}
             {this.renderForm()}
-            <button className="btn btn-primary">
-              {this.state.mode === "edit" ? "Spara" : "Lägg till"}
-            </button>
+            {this.state.mode === "edit" ? (
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<SaveIcon />}
+              >
+                Spara
+              </ColorButtonBlue>
+            ) : (
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<AddIcon />}
+              >
+                Lägg till
+              </ColorButtonGreen>
+            )}
             &nbsp;
             {abort}
           </form>

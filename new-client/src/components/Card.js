@@ -11,8 +11,7 @@ import {
 const styles = theme => {
   return {
     avatar: {
-      background: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText
+      background: theme.palette.text.secondary // A lighter color for these rather big icons
     },
     card: {
       marginBottom: theme.spacing(1),

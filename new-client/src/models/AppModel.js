@@ -1,3 +1,4 @@
+import SearchModel from "./SearchModel";
 import Plugin from "./Plugin.js";
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
@@ -11,24 +12,24 @@ import { bindMapClickEvent } from "./Click.js";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { Map, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
-import // defaults as defaultControls,
+// import {
+// defaults as defaultControls,
 // Attribution,
 // Control,
 // FullScreen, // TODO: Consider implementation
 // MousePosition, // TODO: Consider implementation, perhaps in a separate plugin
 // OverviewMap // TODO: Consider implementation
 // Rotate,
-// ScaleLine,
+// ScaleLine
 // Zoom,
 // ZoomSlider,
 // ZoomToExtent
-"ol/control";
+// } from "ol/control";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style.js";
-
-var map;
+import SnapHelper from "./SnapHelper";
 
 class AppModel {
   registerWindowPlugin(windowComponent) {
@@ -57,6 +58,7 @@ class AppModel {
    * @param Observer observer
    */
   constructor(config, globalObserver) {
+    this.map = undefined;
     this.windows = [];
     this.plugins = {};
     this.activeTool = undefined;
@@ -66,6 +68,7 @@ class AppModel {
     );
     this.globalObserver = globalObserver;
     this.layersFromParams = [];
+    this.cqlFiltersFromParams = {};
     register(this.coordinateSystemLoader.getProj4());
   }
   /**
@@ -107,10 +110,18 @@ class AppModel {
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
       .filter(plugin => {
-        return ["toolbar", "left", "right"].includes(plugin.options.target);
+        return ["toolbar", "left", "right", "control", "hidden"].includes(
+          plugin.options.target
+        );
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
     return r;
+  }
+
+  getDrawerPlugins() {
+    return this.getPlugins().filter(plugin => {
+      return ["toolbar"].includes(plugin.options.target);
+    });
   }
 
   /**
@@ -140,9 +151,10 @@ class AppModel {
           if (Object.keys(toolConfig).length > 0) {
             this.addPlugin(
               new Plugin({
-                map: map,
+                map: this.map,
                 app: this,
                 type: plugin,
+                searchInterface: {},
                 sortOrder: sortOrder,
                 options: toolOptions,
                 component: module.default
@@ -163,8 +175,8 @@ class AppModel {
    * @return {ol.Map} map
    */
   createMap() {
-    var config = this.translateConfig();
-    map = new Map({
+    const config = this.translateConfig();
+    this.map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
         // new Rotate({ target: document.getElementById("controls-column") }),
@@ -186,6 +198,7 @@ class AppModel {
         center: config.map.center,
         extent: config.map.extent.length > 0 ? config.map.extent : undefined, // backend will always write extent as an Array, so basic "config.map.extent || undefined" wouldn't work here
         constrainOnlyCenter: config.map.constrainOnlyCenter, // If true, the extent constraint will only apply to the view center and not the whole extent.
+        constrainResolution: config.map.constrainResolution, // If true, the view will always animate to the closest zoom level after an interaction; false means intermediary zoom levels are allowed.
         maxZoom: config.map.maxZoom || 24,
         minZoom: config.map.minZoom || 0,
         projection: config.map.projection,
@@ -195,25 +208,38 @@ class AppModel {
       })
     });
     setTimeout(() => {
-      map.updateSize();
+      this.map.updateSize();
     }, 0);
 
+    // Add Snap Helper to the Map
+    this.map.snapHelper = new SnapHelper(this);
+
     if (config.tools.some(tool => tool.type === "infoclick")) {
-      bindMapClickEvent(map, mapClickDataResult => {
-        this.globalObserver.publish("mapClick", mapClickDataResult);
+      bindMapClickEvent(this.map, mapClickDataResult => {
+        this.globalObserver.publish("core.mapClick", mapClickDataResult);
       });
     }
     return this;
   }
 
   getMap() {
-    return map;
+    return this.map;
+  }
+
+  addSearchModel() {
+    // TODO: Move configuration somewhere else, shouldn't be plugin-dependent.
+    const searchConfig = this.config.mapConfig.tools.find(
+      t => t.type === "search"
+    ).options;
+    this.searchModel = new SearchModel(searchConfig, this.getMap(), this);
+
+    return this;
   }
 
   clear() {
     this.clearing = true;
     this.highlight(false);
-    map
+    this.map
       .getLayers()
       .getArray()
       .forEach(layer => {
@@ -223,7 +249,7 @@ class AppModel {
           layer.getProperties().layerInfo.layerType === "layer"
         ) {
           if (layer.layerType === "group") {
-            this.globalObserver.publish("hideLayer", layer);
+            this.globalObserver.publish("layerswitcher.hideLayer", layer);
           } else {
             layer.setVisible(false);
           }
@@ -245,25 +271,25 @@ class AppModel {
           this.config.appConfig.proxy,
           this.globalObserver
         );
-        map.addLayer(layerItem.layer);
+        this.map.addLayer(layerItem.layer);
         break;
       case "wmts":
         layerConfig = configMapper.mapWMTSConfig(layer, this.config);
         layerItem = new WMTSLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
-          map
+          this.map
         );
-        map.addLayer(layerItem.layer);
+        this.map.addLayer(layerItem.layer);
         break;
       case "vector":
         layerConfig = configMapper.mapVectorConfig(layer);
         layerItem = new WFSVectorLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
-          map
+          this.map
         );
-        map.addLayer(layerItem.layer);
+        this.map.addLayer(layerItem.layer);
         break;
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);
@@ -281,7 +307,7 @@ class AppModel {
   lookup(layers, type) {
     var matchedLayers = [];
     layers.forEach(layer => {
-      var layerConfig = this.config.layersConfig.find(
+      const layerConfig = this.config.layersConfig.find(
         lookupLayer => lookupLayer.id === layer.id
       );
       layer.layerType = type;
@@ -311,14 +337,10 @@ class AppModel {
   }
 
   flattern(layerSwitcherConfig) {
-    var layers = [
+    const layers = [
       ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
       ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer")
     ];
-    // layers = layers.reduce((a, b) => {
-    //   a[b["id"]] = b;
-    //   return a;
-    // }, {});
 
     return layers;
   }
@@ -342,6 +364,7 @@ class AppModel {
             layerId => layerId === layer.id
           );
         }
+        layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
         this.addMapLayer(layer);
       });
 
@@ -384,7 +407,7 @@ class AppModel {
         })
       })
     });
-    map.addLayer(this.highlightLayer);
+    this.map.addLayer(this.highlightLayer);
   }
 
   getCenter(e) {
@@ -398,12 +421,16 @@ class AppModel {
         this.highlightSource.addFeature(feature);
         if (window.innerWidth < 600) {
           let geom = feature.getGeometry();
-          map.getView().setCenter(this.getCenter(geom.getExtent()));
+          this.map.getView().setCenter(this.getCenter(geom.getExtent()));
         }
       }
     }
   }
 
+  /**
+   * TODO: Obsolete, replaced by new app-wide solution using URL APIs, see #568.
+   * Ensure that this gets removed too.
+   */
   parseQueryParams() {
     var o = {};
     document.location.search
@@ -429,6 +456,9 @@ class AppModel {
       Boolean(b.hasOwnProperty("clean")) &&
       b.clean !== "false" &&
       b.clean !== "0";
+
+    // f contains our CQL Filters
+    const f = b.f;
 
     // Merge query params to the map config from JSON
     let x = parseFloat(b.x),
@@ -458,13 +488,9 @@ class AppModel {
       this.layersFromParams = l;
     }
 
-    // If 'v' query param is specified, it looks like we will want to search on load
-    if (b.v !== undefined && b.v.length > 0) {
-      a.map.searchOnStart = {
-        v: this.returnStringOrUndefined(b.v), // Search Value (will NOT search on start if null)
-        s: this.returnStringOrUndefined(b.s), // Search Service (will search in all, if null)
-        t: this.returnStringOrUndefined(b.t) // Search Type (controls which search plugin is used, default search if null)
-      };
+    if (f) {
+      // Filters come as a URI encoded JSON object, so we must parse it first
+      this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
     }
 
     return a;

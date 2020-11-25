@@ -46,8 +46,9 @@ class DrawView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.model = this.props.model;
-    this.app = this.props.app;
     this.localObserver = this.props.localObserver;
+    this.globalObserver = this.props.globalObserver;
+    this.snackbarKey = null;
     this.localObserver.subscribe("dialog", feature => {
       this.setState({
         feature: feature,
@@ -60,7 +61,84 @@ class DrawView extends React.PureComponent {
         dialogAbortCallback: this.onAbortTextDialog
       });
     });
+    this.addMapDropListeners();
   }
+
+  addMapDropListeners = () => {
+    const mapDiv = document.getElementById("map");
+    ["drop", "dragover", "dragend", "dragleave", "dragenter"].forEach(
+      eventName => {
+        mapDiv.addEventListener(
+          eventName,
+          this.preventDefaultDropBehavior,
+          false
+        );
+      }
+    );
+    mapDiv.addEventListener("dragenter", this.handleDragEnter, false);
+    mapDiv.addEventListener("drop", this.handleDrop, false);
+  };
+
+  handleDragEnter = () => {
+    this.snackbarKey = this.props.enqueueSnackbar(
+      "Släpp en KML-fil i kartan för att importera!"
+    );
+  };
+
+  handleDrop = e => {
+    try {
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const fileType = file.type ? file.type : file.name.split(".").pop();
+        //Not sure about filetype for kml... Qgis- and Hajk-generated kml:s does not contain any information about type.
+        //The application/vnd... is a guess.
+        if (
+          fileType === "kml" ||
+          fileType === "application/vnd.google-earth.kml+xml"
+        ) {
+          this.globalObserver.publish("draw.showWindow", {
+            hideOtherPlugins: false
+          });
+          this.addDroppedKmlToMap(file);
+        }
+      }
+    } catch (error) {
+      this.props.enqueueSnackbar("KML-filen kunde inte importeras.", {
+        variant: "error"
+      });
+      console.error(`Error importing KML-file... ${error}`);
+    }
+  };
+
+  addDroppedKmlToMap = file => {
+    const { model } = this.props;
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      model.import(reader.result, error => {
+        this.handleImportError(error);
+      });
+      this.props.closeSnackbar(this.snackbarKey);
+      this.snackbarKey = null;
+    };
+
+    reader.readAsText(file);
+  };
+
+  handleImportError = error => {
+    if (error === "no-features-found") {
+      this.props.enqueueSnackbar("Inga ritobjekt hittades i KML-filen.", {
+        variant: "warning"
+      });
+    } else {
+      throw error;
+    }
+  };
+
+  preventDefaultDropBehavior = e => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
 
   handleChange = name => event => {
     this.setState({ [name]: event.target.value });
@@ -196,13 +274,7 @@ class DrawView extends React.PureComponent {
             </Button>
           </div>
           <div>
-            <Button
-              onClick={() => {
-                this.props.model.export(url => {
-                  document.location.href = url;
-                });
-              }}
-            >
+            <Button onClick={this.props.model.export}>
               <SaveAltIcon />
               &nbsp; Exportera ritobjekt
             </Button>
@@ -257,7 +329,11 @@ class DrawView extends React.PureComponent {
               reader.onload = () => {
                 this.onCloseUploadDialog();
                 this.props.model.import(reader.result, error => {
-                  console.error("Import error", error);
+                  try {
+                    this.handleImportError(error);
+                  } catch (error) {
+                    console.error(`Error importing KML-file... ${error}`);
+                  }
                 });
               };
               if (file) {

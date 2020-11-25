@@ -22,6 +22,7 @@
 
 import React from "react";
 import { Component } from "react";
+import SaveIcon from "@material-ui/icons/Save";
 
 var defaultState = {
   validationErrors: [],
@@ -151,6 +152,7 @@ class ToolOptions extends Component {
       <div>
         <p>
           <button className="btn btn-primary" onClick={() => this.save()}>
+            <SaveIcon className="button-icon-vertical-align" />
             Spara
           </button>
         </p>
@@ -172,7 +174,8 @@ class ToolOptions extends Component {
           <input
             id="index"
             name="index"
-            type="text"
+            type="number"
+            min="0"
             onChange={e => {
               this.handleInputChange(e);
             }}

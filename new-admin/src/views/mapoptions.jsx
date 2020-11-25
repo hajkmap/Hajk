@@ -23,6 +23,20 @@
 import React from "react";
 import { Component } from "react";
 import { SketchPicker } from "react-color";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { blue } from "@material-ui/core/colors";
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 var defaultState = {
   primaryColor: "#00F",
@@ -48,8 +62,12 @@ class MapOptions extends Component {
         minZoom: config.minZoom,
         center: config.center,
         logo: config.logo,
+        resolutions: config.resolutions,
         extent: config.extent,
+        origin: config.origin,
         constrainOnlyCenter: config.constrainOnlyCenter,
+        constrainResolution: config.constrainResolution,
+        enableDownloadLink: config.enableDownloadLink,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
         drawerVisible: config.drawerVisible,
@@ -59,7 +77,10 @@ class MapOptions extends Component {
           ? config.geoserverLegendOptions
           : "",
         defaultCookieNoticeMessage: config.defaultCookieNoticeMessage,
-        defaultCookieNoticeUrl: config.defaultCookieNoticeUrl
+        defaultCookieNoticeUrl: config.defaultCookieNoticeUrl,
+        crossOrigin: config.crossOrigin,
+        showCookieNotice:
+          config.showCookieNotice !== undefined ? config.showCookieNotice : true
       });
       this.validate();
     });
@@ -87,8 +108,12 @@ class MapOptions extends Component {
       minZoom: mapConfig.minZoom,
       center: mapConfig.center,
       logo: mapConfig.logo,
+      resolutions: mapConfig.resolutions,
       extent: mapConfig.extent,
+      origin: mapConfig.origin,
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
+      constrainResolution: mapConfig.constrainResolution,
+      enableDownloadLink: mapConfig.enableDownloadLink,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
       drawerVisible: mapConfig.drawerVisible,
@@ -99,7 +124,12 @@ class MapOptions extends Component {
         : "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
       defaultCookieNoticeUrl: mapConfig.defaultCookieNoticeUrl
         ? mapConfig.defaultCookieNoticeUrl
-        : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+        : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+      crossOrigin: mapConfig.crossOrigin ? mapConfig.crossOrigin : "anonymous",
+      showCookieNotice:
+        mapConfig.showCookieNotice !== undefined
+          ? mapConfig.showCookieNotice
+          : true
     });
   }
 
@@ -111,8 +141,11 @@ class MapOptions extends Component {
       value = input.checked;
     }
 
-    if (fieldName === "center") value = value.split(",");
-    if (fieldName === "extent") value = value.split(",");
+    if (["zoom", "maxZoom", "minZoom"].includes(fieldName))
+      value = parseInt(value);
+    if (["origin", "extent", "center", "resolutions"].includes(fieldName))
+      value = value.split(",").map(v => parseFloat(v));
+
     if (fieldName === "title") {
       if (value === "") {
         value = this.props.model.get("mapFile");
@@ -172,6 +205,10 @@ class MapOptions extends Component {
       return v.length === 2 && v.every(number);
     }
 
+    function resolutions(v) {
+      return v.length > 0 && v.every(number);
+    }
+
     function extent(v) {
       return v.length === 4 && v.every(number);
     }
@@ -182,11 +219,17 @@ class MapOptions extends Component {
           valid = false;
         }
         break;
+      case "resolutions":
+        if (!resolutions(value)) {
+          valid = false;
+        }
+        break;
       case "extent":
         if (!extent(value)) {
           valid = false;
         }
         break;
+      case "origin":
       case "center":
         if (!coord(value) || empty(value)) {
           valid = false;
@@ -205,6 +248,8 @@ class MapOptions extends Component {
         }
         break;
       case "constrainOnlyCenter":
+      case "constrainResolution":
+      case "enableDownloadLink":
       case "mapselector":
       case "mapcleaner":
       case "drawerVisible":
@@ -245,8 +290,12 @@ class MapOptions extends Component {
         config.minZoom = this.getValue("minZoom");
         config.center = this.getValue("center");
         config.logo = this.getValue("logo");
+        config.resolutions = this.getValue("resolutions");
         config.extent = this.getValue("extent");
+        config.origin = this.getValue("origin");
         config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
+        config.constrainResolution = this.getValue("constrainResolution");
+        config.enableDownloadLink = this.getValue("enableDownloadLink");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
         config.drawerVisible = this.getValue("drawerVisible");
@@ -256,6 +305,8 @@ class MapOptions extends Component {
           "defaultCookieNoticeMessage"
         );
         config.defaultCookieNoticeUrl = this.getValue("defaultCookieNoticeUrl");
+        config.crossOrigin = this.getValue("crossOrigin");
+        config.showCookieNotice = this.getValue("showCookieNotice");
         this.props.model.updateMapConfig(config, success => {
           var msg = success
             ? "Uppdateringen lyckades."
@@ -302,9 +353,14 @@ class MapOptions extends Component {
         <article>
           <fieldset className="tree-view">
             <legend>Kartinställningar</legend>
-            <button className="btn btn-primary" onClick={e => this.save(e)}>
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              onClick={e => this.save(e)}
+              startIcon={<SaveIcon />}
+            >
               Spara
-            </button>
+            </ColorButtonBlue>
             <br />
             <div>
               <label>
@@ -328,6 +384,9 @@ class MapOptions extends Component {
               />
             </div>
             <div>
+              <div className="separator">
+                Grundinställningar för kartvisning
+              </div>
               <label>
                 Projektion{" "}
                 <i
@@ -358,10 +417,13 @@ class MapOptions extends Component {
                 />
               </label>
               <input
-                type="text"
+                type="number"
+                min="0"
                 ref="input_zoom"
                 value={this.state.zoom}
-                className={this.getValidationClass("zoom")}
+                className={
+                  (this.getValidationClass("zoom"), "control-fixed-width")
+                }
                 onChange={e => {
                   this.setState({ zoom: e.target.value }, () =>
                     this.validateField("zoom")
@@ -379,10 +441,13 @@ class MapOptions extends Component {
                 />
               </label>
               <input
-                type="text"
+                type="number"
+                min="0"
                 ref="input_maxZoom"
                 value={this.state.maxZoom}
-                className={this.getValidationClass("maxZoom")}
+                className={
+                  (this.getValidationClass("maxZoom"), "control-fixed-width")
+                }
                 onChange={e => {
                   this.setState({ maxZoom: e.target.value }, () =>
                     this.validateField("maxZoom")
@@ -400,10 +465,13 @@ class MapOptions extends Component {
                 />
               </label>
               <input
-                type="text"
+                type="number"
+                min="0"
                 ref="input_minZoom"
                 value={this.state.minZoom}
-                className={this.getValidationClass("minZoom")}
+                className={
+                  (this.getValidationClass("minZoom"), "control-fixed-width")
+                }
                 onChange={e => {
                   this.setState({ minZoom: e.target.value }, () =>
                     this.validateField("minZoom")
@@ -434,21 +502,21 @@ class MapOptions extends Component {
             </div>
             <div>
               <label>
-                Logo{" "}
+                Upplösningar{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Sökväg till logga att använda i <img>-taggen. Kan vara relativ Hajk-root eller absolut."
+                  title="Används som OpenLayers View 'resolutions'-parameter, ex '4096,2048,1024,512'"
                 />
               </label>
               <input
                 type="text"
-                ref="input_logo"
-                value={this.state.logo}
-                className={this.getValidationClass("logo")}
+                ref="input_resolutions"
+                value={this.state.resolutions}
+                className={this.getValidationClass("resolutions")}
                 onChange={e => {
-                  this.setState({ logo: e.target.value }, () =>
-                    this.validateField("logo")
+                  this.setState({ resolutions: e.target.value }, () =>
+                    this.validateField("resolutions")
                   );
                 }}
               />
@@ -475,14 +543,27 @@ class MapOptions extends Component {
               />
             </div>
             <div>
-              <label htmlFor="input_constrainOnlyCenter">
-                Lätta på extent{" "}
+              <label>
+                Origin{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Styr ol.Views 'constrainOnlyCenter'-parameter. Om sant kommer endast centrumkoordinaten att begränsas till extent."
+                  title="Används som OpenLayers View 'origin'-parameter, ex '0,0'"
                 />
               </label>
+              <input
+                type="text"
+                ref="input_origin"
+                value={this.state.origin}
+                className={this.getValidationClass("origin")}
+                onChange={e => {
+                  this.setState({ origin: e.target.value }, () =>
+                    this.validateField("origin")
+                  );
+                }}
+              />
+            </div>
+            <div>
               <input
                 id="input_constrainOnlyCenter"
                 type="checkbox"
@@ -493,6 +574,76 @@ class MapOptions extends Component {
                 checked={this.state.constrainOnlyCenter}
               />
               &nbsp;
+              <label className="long-label" htmlFor="input_constrainOnlyCenter">
+                Lätta på extent{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styr ol.Views 'constrainOnlyCenter'-parameter. Om sant kommer endast centrumkoordinaten att begränsas till extent."
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_constrainResolution"
+                type="checkbox"
+                ref="input_constrainResolution"
+                onChange={e => {
+                  this.setState({ constrainResolution: e.target.checked });
+                }}
+                checked={this.state.constrainResolution}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_constrainResolution">
+                Lås zoom till satta upplösningar{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styr ol.Views 'constrainResolution'-parameter. Om sant kommer det endast gå att zooma mellan satta resolutions"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_enableDownloadLink"
+                type="checkbox"
+                ref="input_enableDownloadLink"
+                onChange={e => {
+                  this.setState({ enableDownloadLink: e.target.checked });
+                }}
+                checked={this.state.enableDownloadLink}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_enableDownloadLink">
+                Tillåt nedladdning av WMS-lager{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt kommer en nedladdningsknapp att visas brevid varje lager i Lagerhanteraren."
+                />
+              </label>
+            </div>
+            <div className="separator">Extra inställningar</div>
+            <div>
+              <label>
+                Logo{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Sökväg till logga att använda i <img>-taggen. Kan vara relativ Hajk-root eller absolut."
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_logo"
+                value={this.state.logo}
+                className={this.getValidationClass("logo")}
+                onChange={e => {
+                  this.setState({ logo: e.target.value }, () =>
+                    this.validateField("logo")
+                  );
+                }}
+              />
             </div>
             <div>
               <label>
@@ -520,6 +671,26 @@ class MapOptions extends Component {
               />
             </div>
             <div>
+              <input
+                id="input_showCookieNotice"
+                type="checkbox"
+                ref="input_showCookieNotice"
+                onChange={e => {
+                  this.setState({ showCookieNotice: e.target.checked });
+                }}
+                checked={this.state.showCookieNotice}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_showCookieNotice">
+                Visa cookies-meddelande{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer ett meddelande angående hantering av cookies visas för nya användare."
+                />
+              </label>
+            </div>
+            <div>
               <label>
                 Cookies-meddelande{" "}
                 <i
@@ -530,6 +701,7 @@ class MapOptions extends Component {
               </label>
               <textarea
                 type="text"
+                disabled={!this.state.showCookieNotice}
                 ref="input_defaultCookieNoticeMessage"
                 value={this.state.defaultCookieNoticeMessage}
                 className={this.getValidationClass(
@@ -555,6 +727,7 @@ class MapOptions extends Component {
               <input
                 type="text"
                 ref="input_defaultCookieNoticeUrl"
+                disabled={!this.state.showCookieNotice}
                 value={this.state.defaultCookieNoticeUrl}
                 className={this.getValidationClass("defaultCookieNoticeUrl")}
                 onChange={e => {
@@ -563,14 +736,27 @@ class MapOptions extends Component {
               />
             </div>
             <div>
-              <label htmlFor="input_mapselector">
-                Visa kartväljare{" "}
+              <label>
+                Cross origin-parameter{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
+                  title="Ställer in vilket värde som används för 'crossOrigin'. Om osäker, används 'anonymous'. "
                 />
               </label>
+              <input
+                type="text"
+                ref="input_crossOrigin"
+                disabled={!this.state.showCookieNotice}
+                value={this.state.crossOrigin}
+                className={this.getValidationClass("crossOrigin")}
+                onChange={e => {
+                  this.setState({ crossOrigin: e.target.value });
+                }}
+              />
+            </div>
+            <div className="separator">Extra kontroller i kartan</div>
+            <div>
               <input
                 id="input_mapselector"
                 type="checkbox"
@@ -581,16 +767,16 @@ class MapOptions extends Component {
                 checked={this.state.mapselector}
               />
               &nbsp;
-            </div>
-            <div>
-              <label htmlFor="input_mapcleaner">
-                Visa knapp för att rensa kartan{" "}
+              <label className="long-label" htmlFor="input_mapselector">
+                Visa kartväljare{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
                 />
               </label>
+            </div>
+            <div>
               <input
                 id="input_mapcleaner"
                 type="checkbox"
@@ -601,16 +787,17 @@ class MapOptions extends Component {
                 checked={this.state.mapcleaner}
               />
               &nbsp;
-            </div>
-            <div>
-              <label htmlFor="input_drawerVisible">
-                Starta med sidopanelen synlig{" "}
+              <label className="long-label" htmlFor="input_mapcleaner">
+                Visa knapp för att rensa kartan{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Om aktiv kommer sidopanelen att vara synlig när kartan laddat"
+                  title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
                 />
               </label>
+            </div>
+            <div className="separator">Inställningar för sidopanel</div>
+            <div>
               <input
                 id="input_drawerVisible"
                 type="checkbox"
@@ -627,16 +814,16 @@ class MapOptions extends Component {
                 checked={this.state.drawerVisible}
               />
               &nbsp;
-            </div>
-            <div>
-              <label htmlFor="input_drawerPermanent">
-                Låt sidopanelen vara låst vid start{" "}
+              <label className="long-label" htmlFor="input_drawerVisible">
+                Starta med sidopanelen synlig{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Om aktiv kommer sidopanelen att vara låst vid skärmens kant vid start (gäller ej mobila enheter)"
+                  title="Om aktiv kommer sidopanelen att vara synlig när kartan laddat"
                 />
               </label>
+            </div>
+            <div>
               <input
                 id="input_drawerPermanent"
                 type="checkbox"
@@ -648,7 +835,16 @@ class MapOptions extends Component {
                 disabled={this.state.drawerVisible !== true}
               />
               &nbsp;
+              <label className="long-label" htmlFor="input_drawerPermanent">
+                Låt sidopanelen vara låst vid start{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer sidopanelen att vara låst vid skärmens kant vid start (gäller ej mobila enheter)"
+                />
+              </label>
             </div>
+            <div className="separator">Färginställningar för kartan</div>
             <div className="clearfix">
               <span className="pull-left">
                 <div>Huvudfärg</div>
@@ -666,9 +862,14 @@ class MapOptions extends Component {
               </span>
             </div>
             <br />
-            <button className="btn btn-primary" onClick={e => this.save(e)}>
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              onClick={e => this.save(e)}
+              startIcon={<SaveIcon />}
+            >
               Spara
-            </button>
+            </ColorButtonBlue>
             &nbsp;
           </fieldset>
         </article>

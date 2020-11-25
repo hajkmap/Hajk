@@ -52,7 +52,7 @@ const styles = theme => ({
     textDecoration: "underline"
   },
   content: {
-    userSelect: "all",
+    userSelect: "text",
     cursor: "auto",
     "& img": {
       maxWidth: "100%"
@@ -193,7 +193,7 @@ class Informative extends React.PureComponent {
   displayMap = (layers, mapSettings) => e => {
     this.props.parent.informativeModel.displayMap(layers, mapSettings);
     if (window.innerWidth < 600) {
-      this.props.observer.publish("minimizeWindow", true);
+      this.props.app.globalObserver.publish("core.minimizeWindow");
     }
     this.setState({
       displayLegend: true

@@ -1,5 +1,6 @@
 import React from "react";
 import VectorFilter from "./VectorFilter";
+import CQLFilter from "./CQLFilter";
 import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import { withStyles } from "@material-ui/core/styles";
@@ -34,6 +35,7 @@ const styles = theme => ({
 class LayerSettings extends React.PureComponent {
   constructor(props) {
     super(props);
+
     const { layer } = props;
     var layerInfo = layer.get("layerInfo");
     this.state = {
@@ -111,6 +113,9 @@ class LayerSettings extends React.PureComponent {
           {this.props.layer.getProperties().filterable ? (
             <VectorFilter layer={this.props.layer} />
           ) : null}
+          {this.props.cqlFilterVisible && (
+            <CQLFilter layer={this.props.layer} />
+          )}
         </div>
       </div>
     );

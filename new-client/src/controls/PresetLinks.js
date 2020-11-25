@@ -1,9 +1,12 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import propTypes from "prop-types";
 
 import { Button, Paper, Tooltip, Menu, MenuItem } from "@material-ui/core";
 import Bookmarks from "@material-ui/icons/Bookmarks";
+
+import Dialog from "../components/Dialog.js";
 
 const styles = theme => {
   return {
@@ -22,7 +25,13 @@ class Preset extends React.PureComponent {
     appModel: propTypes.object.isRequired
   };
 
-  state = {};
+  state = {
+    dialogOpen: false,
+    view: null,
+    location: null,
+    zoom: null,
+    layers: null
+  };
 
   constructor(props) {
     super(props);
@@ -31,8 +40,11 @@ class Preset extends React.PureComponent {
       t => t.type === "preset"
     );
 
+    this.appModel = props.appModel;
+    this.globalObserver = props.appModel.globalObserver;
+
     // If config wasn't found, it means that Preset is not configured. Quit.
-    if (this.config === undefined) return null;
+    if (this.config === undefined) return;
 
     // Else, if we're still here, go on.
     this.options = this.config.options;
@@ -57,11 +69,20 @@ class Preset extends React.PureComponent {
       let x = url[1].substring(2);
       let y = url[2].substring(2);
       let z = url[3].substring(2);
-      const view = this.map.getView();
-      view.animate({
-        center: [x, y],
-        zoom: z
-      });
+      let l = url[4]?.substring(2);
+      let location = [x, y];
+      let zoom = z;
+
+      if (l) {
+        this.setState({
+          location: location,
+          zoom: zoom,
+          layers: l
+        });
+        this.openDialog();
+      } else {
+        this.flyTo(this.map.getView(), location, zoom);
+      }
     } else {
       this.props.enqueueSnackbar(
         "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
@@ -93,6 +114,93 @@ class Preset extends React.PureComponent {
     });
     return menuItems;
   };
+
+  flyTo(view, location, zoom) {
+    const duration = 1500;
+    view.animate({
+      center: location,
+      zoom: zoom,
+      duration: duration
+    });
+  }
+
+  openDialog = () => {
+    this.setState({
+      dialogOpen: true
+    });
+  };
+
+  closeDialog = () => {
+    var visibleLayers = this.state.layers.split(",");
+    this.setState({
+      dialogOpen: false
+    });
+    this.displayMap(visibleLayers);
+  };
+
+  abortDialog = () => {
+    this.setState({
+      dialogOpen: false
+    });
+  };
+
+  displayMap(visibleLayers) {
+    const layers = this.map.getLayers().getArray();
+
+    visibleLayers.forEach(arrays =>
+      layers
+        .filter(
+          layer =>
+            layer.getProperties()["layerInfo"] &&
+            layer.getProperties()["layerInfo"]["layerType"] !== "base"
+        )
+        .forEach(layer => {
+          if (layer.getProperties()["name"] === arrays) {
+            this.globalObserver.publish("layerswitcher.showLayer", layer);
+            layer.setVisible(true);
+          }
+          if (
+            visibleLayers.some(
+              arrays => arrays === layer.getProperties()["name"]
+            )
+          ) {
+            if (layer.layerType === "group") {
+              this.globalObserver.publish("layerswitcher.showLayer", layer);
+            } else {
+              layer.setVisible(true);
+            }
+          } else {
+            if (layer.layerType === "group") {
+              this.globalObserver.publish("layerswitcher.hideLayer", layer);
+            } else {
+              layer.setVisible(false);
+            }
+          }
+        })
+    );
+    this.flyTo(this.map.getView(), this.state.location, this.state.zoom);
+  }
+
+  renderDialog() {
+    if (this.state.dialogOpen) {
+      return createPortal(
+        <Dialog
+          options={{
+            text: "Alla lager i kartan kommer nu att släckas.",
+            headerText: "Visa snabbval",
+            buttonText: "OK",
+            abortText: "Avbryt"
+          }}
+          open={this.state.dialogOpen}
+          onClose={this.closeDialog}
+          onAbort={this.abortDialog}
+        />,
+        document.getElementById("windows-container")
+      );
+    } else {
+      return null;
+    }
+  }
 
   render() {
     // If config for Control isn't found, or if the config doesn't contain any presets, quit.
@@ -127,6 +235,7 @@ class Preset extends React.PureComponent {
           >
             {this.renderMenuItems()}
           </Menu>
+          {this.renderDialog()}
         </>
       );
     }

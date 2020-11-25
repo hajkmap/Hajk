@@ -22,8 +22,21 @@
 
 import React, { Component } from "react";
 import { SketchPicker } from "react-color";
-
 import Tree from "../tree.jsx";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { blue } from "@material-ui/core/colors";
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 /**
  * I've removed the following from defaultState and save:
@@ -48,14 +61,16 @@ const defaultState = {
   strokeColor: { r: 244, g: 83, b: 63, a: 1 },
   strokeWidth: 4,
   fillColor: { r: 244, g: 83, b: 63, a: 0.2 },
-
+  showInMapOnSearchResult: false,
   polygonSearch: false,
   radiusSearch: false,
+  autoHideSearchResults: false,
   selectionSearch: false,
   // searchSettings: false, // Currently not implemented in client either, though stub exists
   tooltip: "Sök...",
   searchWithinButtonText: "Markera i kartan",
   maxFeatures: 100,
+  delayBeforeAutoSearch: 500,
   layers: [],
   visibleForGroups: [],
 
@@ -99,16 +114,20 @@ class ToolOptions extends Component {
           strokeColor: tool.options.strokeColor || this.state.strokeColor,
           strokeWidth: tool.options.strokeWidth || this.state.strokeWidth,
           fillColor: tool.options.fillColor || this.state.fillColor,
-
+          showInMapOnSearchResult: tool.options.showInMapOnSearchResult,
           polygonSearch: tool.options.polygonSearch,
           radiusSearch: tool.options.radiusSearch,
           selectionSearch: tool.options.selectionSearch,
+          autoHideSearchResults: tool.options.autoHideSearchResults,
           // searchSettings: tool.options.searchSettings,
           tooltip: tool.options.tooltip || this.state.tooltip,
           searchWithinButtonText:
             tool.options.searchWithinButtonText ||
             this.state.searchWithinButtonText,
           maxFeatures: tool.options.maxFeatures || this.state.maxFeatures,
+          delayBeforeAutoSearch:
+            tool.options.delayBeforeAutoSearch ||
+            this.state.delayBeforeAutoSearch,
           selectedSources: tool.options.selectedSources
             ? tool.options.selectedSources
             : [],
@@ -232,14 +251,16 @@ class ToolOptions extends Component {
         strokeColor: this.state.strokeColor,
         strokeWidth: this.state.strokeWidth,
         fillColor: this.state.fillColor,
-
+        showInMapOnSearchResult: this.state.showInMapOnSearchResult,
         polygonSearch: this.state.polygonSearch,
         radiusSearch: this.state.radiusSearch,
+        autoHideSearchResults: this.state.autoHideSearchResults,
         selectionSearch: this.state.selectionSearch,
         // searchSettings: this.state.searchSettings,
         tooltip: this.state.tooltip,
         searchWithinButtonText: this.state.searchWithinButtonText,
         maxFeatures: this.state.maxFeatures,
+        delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
         selectedSources: this.state.selectedSources
           ? this.state.selectedSources
           : [],
@@ -490,15 +511,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div>
             <input
@@ -520,7 +543,8 @@ class ToolOptions extends Component {
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -528,32 +552,71 @@ class ToolOptions extends Component {
             />
           </div> */}
           <div className="separator">Generella sökinställningar</div>
-          <div>
-            <label htmlFor="tooltip">Placeholdertext för sökrutan</label>
-            <input
-              value={this.state.tooltip}
-              type="text"
-              name="tooltip"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
+
           <div>
             <label htmlFor="maxFeatures">Max antal sökträffar</label>
             <input
               value={this.state.maxFeatures}
-              type="text"
+              type="number"
+              min="0"
+              step="10"
               name="maxFeatures"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
             />
           </div>
+          <div>
+            <label htmlFor="delayBeforeAutoSearch">
+              Fördröjning innan autosök (i millisekunder)
+            </label>
+            <input
+              value={this.state.delayBeforeAutoSearch}
+              type="number"
+              min="0"
+              max="5000"
+              step="100"
+              name="delayBeforeAutoSearch"
+              className="control-fixed-width"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <input
+              value={this.state.showInMapOnSearchResult}
+              type="checkbox"
+              name="showInMapOnSearchResult"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.showInMapOnSearchResult}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="showInMapOnSearchResult">
+              Visa sökresultat i kartan vid sökning
+            </label>
+          </div>
+          <div>
+            <input
+              id="autoHideSearchResults"
+              name="autoHideSearchResults"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.autoHideSearchResults}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="autoHideSearchResults">
+              Dölj listan med sökresultat automatiskt när användaren klickar på
+              ett sökresultat
+            </label>
+          </div>
           {this.state.tree}
-
           <div className="separator">Träffikon och markering</div>
-
           <div>
             <label htmlFor="src">
               URL till ikon för markering av träffar (punkter)
@@ -578,6 +641,7 @@ class ToolOptions extends Component {
               max="100"
               step="0.1"
               name="anchorX"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -593,13 +657,18 @@ class ToolOptions extends Component {
               max="100"
               step="0.1"
               name="anchorY"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
             />
           </div>
           <div>
-            <label htmlFor="scale">Skala för ikon (flyttal, 0-1)</label>
+            <label htmlFor="scale">
+              Skala för ikon
+              <br />
+              (flyttal, 0-1)
+            </label>
             <input
               value={this.state.scale}
               type="number"
@@ -608,31 +677,15 @@ class ToolOptions extends Component {
               min="0.01"
               max="10"
               name="scale"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
             />
           </div>
+          <div className="separator">Träffmarkering (polygon)</div>
           <div>
-            <label htmlFor="strokeColor">
-              Träffmarkering (polygon) - Färg på ramen (rgba)
-            </label>
-            <SketchPicker
-              color={{
-                r: this.state.strokeColor.r,
-                g: this.state.strokeColor.g,
-                b: this.state.strokeColor.b,
-                a: this.state.strokeColor.a
-              }}
-              onChangeComplete={color =>
-                this.handleColorChange("strokeColor", color)
-              }
-            />
-          </div>
-          <div>
-            <label htmlFor="strokeWidth">
-              Träffmarkering (polygon) - Bredd på ramen (px)
-            </label>
+            <label htmlFor="strokeWidth">Bredd på ramen (px)</label>
             <input
               value={this.state.strokeWidth}
               type="number"
@@ -641,30 +694,51 @@ class ToolOptions extends Component {
               max="100"
               step="1"
               name="strokeWidth"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
             />
           </div>
-          <div>
-            <label htmlFor="fillColor">
-              Träffmarkering (polygon) - Färg på fyllningen (rgba)
-            </label>
-            <SketchPicker
-              color={{
-                r: this.state.fillColor.r,
-                g: this.state.fillColor.g,
-                b: this.state.fillColor.b,
-                a: this.state.fillColor.a
-              }}
-              onChangeComplete={color =>
-                this.handleColorChange("fillColor", color)
-              }
-            />
+          <div className="clearfix">
+            <span className="pull-left">
+              <div>
+                <label htmlFor="strokeColor">Färg på ramen (rgba)</label>
+              </div>
+              <SketchPicker
+                color={{
+                  r: this.state.strokeColor.r,
+                  g: this.state.strokeColor.g,
+                  b: this.state.strokeColor.b,
+                  a: this.state.strokeColor.a
+                }}
+                onChangeComplete={color =>
+                  this.handleColorChange("strokeColor", color)
+                }
+              />
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="fillColor">
+                    Färg på fyllningen (rgba)
+                  </label>
+                </div>
+                <SketchPicker
+                  color={{
+                    r: this.state.fillColor.r,
+                    g: this.state.fillColor.g,
+                    b: this.state.fillColor.b,
+                    a: this.state.fillColor.a
+                  }}
+                  onChangeComplete={color =>
+                    this.handleColorChange("fillColor", color)
+                  }
+                />
+              </div>
+            </span>
           </div>
-
           <div className="separator">Spatial sök</div>
-
           <div>
             <strong>
               <label>
@@ -688,6 +762,7 @@ class ToolOptions extends Component {
                 }}
                 checked={this.state.polygonSearch}
               />
+              &nbsp;
               <label htmlFor="polygonSearch">Polygon</label>
               <div>
                 <input
@@ -699,7 +774,8 @@ class ToolOptions extends Component {
                   }}
                   checked={this.state.radiusSearch}
                 />
-                <label htmlFor="radiusSearch">
+                &nbsp;
+                <label className="long-label" htmlFor="radiusSearch">
                   Radie (aktiverar även en knapp bredvid varje sökresultat)
                 </label>
               </div>
@@ -713,6 +789,7 @@ class ToolOptions extends Component {
                   }}
                   checked={this.state.selectionSearch}
                 />
+                &nbsp;
                 <label htmlFor="selectionSearch">Selektion</label>
               </div>
             </div>
@@ -759,7 +836,6 @@ class ToolOptions extends Component {
               }}
             />
           </div> */}
-
           <div>
             <label htmlFor="searchLayers">
               Radiesök söker inom följande lager:
@@ -768,7 +844,6 @@ class ToolOptions extends Component {
               {this.renderSources(this.state.sources)}
             </div>
           </div>
-
           {this.renderVisibleForGroups()}
         </form>
       </div>

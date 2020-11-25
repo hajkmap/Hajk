@@ -11,7 +11,7 @@ import "./BreadCrumbs.css";
 
 const styles = theme => ({
   moreButton: {
-    background: "white",
+    background: theme.palette.background.paper,
     padding: "6px",
     margin: "0px",
     borderRadius: "100%",
@@ -27,15 +27,16 @@ const styles = theme => ({
   },
   breadCrumbs: {
     position: "fixed",
-    background: "white",
+    background: theme.palette.background.paper,
+    boxShadow: theme.shadows[24],
+    borderRadius: theme.shape.borderRadius,
     bottom: "20px",
     right: "20px",
     [theme.breakpoints.up("xs")]: {
-      borderRadius: "4px",
+      borderRadius: theme.shape.borderRadius,
       overflow: "hidden",
       width: "269px",
-      boxShadow:
-        "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+      boxShadow: theme.shadows[4]
     },
     [theme.breakpoints.down("xs")]: {
       left: 0,

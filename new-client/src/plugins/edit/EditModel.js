@@ -4,7 +4,7 @@ import { MultiPoint, Polygon } from "ol/geom";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
-import { Select, Modify, Draw, Translate, Snap } from "ol/interaction";
+import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
 
@@ -67,7 +67,10 @@ class EditModel {
           if (layer.getSource().getParams) {
             let params = layer.getSource().getParams();
             if (typeof params === "object") {
-              let paramName = params.LAYERS.split(":");
+              // FIXME: Can be a bug here: we can't expect our edited layer to always be of index 0 if a LayerGroup (which gives Array so we must handle that as well)
+              let paramName = Array.isArray(params.LAYERS)
+                ? params.LAYERS[0].split(":")
+                : params.LAYERS.split(":");
               let layerSplit = layerName.split(":");
               if (paramName.length === 2 && layerSplit.length === 2) {
                 match = layerName === params.LAYERS;
@@ -327,10 +330,6 @@ class EditModel {
     });
   };
 
-  loadDataError = response => {
-    alert("Fel: data kan inte hämtas. Försök igen senare.");
-  };
-
   urlFromObject(url, obj) {
     return Object.keys(obj).reduce((str, key, i, a) => {
       str = str + key + "=" + obj[key];
@@ -342,7 +341,7 @@ class EditModel {
   }
 
   loadData(source, extent, done) {
-    var url = this.urlFromObject(source.url, {
+    const url = this.urlFromObject(source.url, {
       service: "WFS",
       version: "1.1.0",
       request: "GetFeature",
@@ -351,14 +350,20 @@ class EditModel {
     });
     fetch(url, fetchConfig)
       .then(response => {
+        if (response.status !== 200) {
+          return done("data-load-error");
+        }
         response.text().then(data => {
+          if (data.includes("ows:ExceptionReport")) {
+            return done("data-load-error");
+          }
           this.loadDataSuccess(data);
+          return done("data-load-success");
         });
-        if (done) done();
       })
       .catch(error => {
-        this.loadDataError(error);
-        if (done) done();
+        console.warn(`Error loading vectorsource... ${error}`);
+        return done("data-load-error");
       });
   }
 
@@ -447,12 +452,8 @@ class EditModel {
     this.modify = new Modify({
       features: this.select.getFeatures()
     });
-    this.snap = new Snap({
-      source: this.vectorSource
-    });
     this.map.addInteraction(this.select);
     this.map.addInteraction(this.modify);
-    this.map.addInteraction(this.snap);
   }
 
   activateAdd(geometryType) {
@@ -462,16 +463,12 @@ class EditModel {
       type: geometryType,
       geometryName: this.geometryName
     });
-    this.snap = new Snap({
-      source: this.vectorSource
-    });
     this.draw.on("drawend", event => {
       event.feature.modification = "added";
       this.editAttributes(event.feature);
     });
     this.map.addInteraction(this.draw);
-    this.map.addInteraction(this.snap);
-    this.map.clicklock = true;
+    this.map.clickLock.add("edit");
   }
 
   activateRemove() {
@@ -497,9 +494,12 @@ class EditModel {
       this.activateModify();
     }
     if (type === "remove") {
-      this.map.clicklock = true;
+      this.map.clickLock.add("edit");
       this.activateRemove();
     }
+
+    // Add snap after all interactions have been added
+    this.map.snapHelper.add("measure");
   }
 
   removeSelected = e => {
@@ -516,6 +516,10 @@ class EditModel {
   };
 
   deactivateInteraction() {
+    // First remove the snap interaction
+    this.map.snapHelper.delete("measure");
+
+    // Next, remove correct map interaction
     if (this.select) {
       this.map.removeInteraction(this.select);
     }
@@ -528,12 +532,9 @@ class EditModel {
     if (this.move) {
       this.map.removeInteraction(this.move);
     }
-    if (this.snap) {
-      this.map.removeInteraction(this.snap);
-    }
     if (this.remove) {
       this.remove = false;
-      this.map.clicklock = false;
+      this.map.clickLock.delete("edit");
       this.map.un("singleclick", this.removeSelected);
     }
   }
@@ -544,13 +545,19 @@ class EditModel {
     this.removeFeature = undefined;
     this.removalToolMode = "off";
     this.filty = false;
-    this.map.clicklock = false;
+    this.map.clickLock.delete("edit");
+
     if (this.layer) {
       this.map.removeLayer(this.layer);
       this.layer = undefined;
     }
     this.deactivateInteraction();
   }
+
+  resetEditFeature = () => {
+    this.editFeature = undefined;
+    this.observer.publish("editFeature", this.editFeature);
+  };
 
   deactivate() {
     this.reset();

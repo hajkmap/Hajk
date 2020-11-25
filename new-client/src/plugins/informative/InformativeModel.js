@@ -113,13 +113,13 @@ class InformativeModel {
           )
         ) {
           if (layer.layerType === "group") {
-            this.globalObserver.publish("showLayer", layer);
+            this.globalObserver.publish("layerswitcher.showLayer", layer);
           } else {
             layer.setVisible(true);
           }
         } else {
           if (layer.layerType === "group") {
-            this.globalObserver.publish("hideLayer", layer);
+            this.globalObserver.publish("layerswitcher.hideLayer", layer);
           } else {
             layer.setVisible(false);
           }

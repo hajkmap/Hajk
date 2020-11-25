@@ -29,6 +29,7 @@ import Coordinates from "./tools/coordinates.jsx";
 import Draw from "./tools/draw.jsx";
 import Edit from "./tools/edit.jsx";
 import Export from "./tools/export.jsx";
+import Print from "./tools/print.jsx";
 import Infoclick from "./tools/infoclick.jsx";
 import Information from "./tools/information.jsx";
 import Informative from "./tools/informative.jsx";
@@ -40,6 +41,7 @@ import Measure from "./tools/measure.jsx";
 import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
+import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 
 var defaultState = {
   activeTool: ""
@@ -96,6 +98,8 @@ class ToolOptions extends Component {
         return <Edit parent={this} model={this.props.model} />;
       case "export":
         return <Export parent={this} model={this.props.model} />;
+      case "print":
+        return <Print parent={this} model={this.props.model} />;
       case "infoclick":
         return <Infoclick parent={this} model={this.props.model} />;
       case "information":
@@ -118,6 +122,8 @@ class ToolOptions extends Component {
         return <Routing parent={this} model={this.props.model} />;
       case "collector":
         return <Collector parent={this} model={this.props.model} />;
+      case "documenthandler":
+        return <MenuEditor parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -167,6 +173,7 @@ class ToolOptions extends Component {
       draw: "Rita och mäta",
       edit: "Editering",
       export: "Utskrift",
+      print: "Utskrift (på klienten)",
       infoclick: "Infoklick",
       information: "Om kartan",
       informative: "Dokumenthanterare",
@@ -177,7 +184,8 @@ class ToolOptions extends Component {
       location: "Visa min position",
       routing: "Navigation",
       collector: "Tyck till",
-      dummy: "Dummy plugin"
+      dummy: "Dummy plugin",
+      documenthandler: "Menyhantering"
     };
 
     return (

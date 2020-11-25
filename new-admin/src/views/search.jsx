@@ -23,6 +23,42 @@
 import React from "react";
 import { Component } from "react";
 import Alert from "../views/alert.jsx";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import AddIcon from "@material-ui/icons/Add";
+import CancelIcon from "@material-ui/icons/Cancel";
+import { withStyles } from "@material-ui/core/styles";
+import { red, green, blue } from "@material-ui/core/colors";
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 const defaultState = {
   load: false,
@@ -365,7 +401,7 @@ class Search extends Component {
    */
   getValue(fieldName) {
     function create_date() {
-      return new Date().getTime();
+      return new Date().getTime().toString();
     }
 
     function format_layers(layers) {
@@ -647,9 +683,14 @@ class Search extends Component {
     ) : null;
     var abort =
       this.state.mode === "edit" ? (
-        <span className="btn btn-danger" onClick={e => this.abort(e)}>
+        <ColorButtonRed
+          variant="contained"
+          className="btn btn-danger"
+          onClick={e => this.abort(e)}
+          startIcon={<CancelIcon />}
+        >
           Avbryt
-        </span>
+        </ColorButtonRed>
       ) : null;
 
     return (
@@ -673,23 +714,7 @@ class Search extends Component {
           >
             <fieldset>
               <legend>Lägg till WFS-tjänst</legend>
-              <div>
-                <label>Visningsnamn*</label>
-                <input
-                  type="text"
-                  ref="input_caption"
-                  value={this.state.caption}
-                  onChange={e => {
-                    this.setState(
-                      {
-                        caption: e.target.value
-                      },
-                      () => this.validateField("caption", true)
-                    );
-                  }}
-                  className={this.getValidationClass("caption")}
-                />
-              </div>
+              <div className="separator">Anslutning</div>
               <div>
                 <label>Url*</label>
                 <input
@@ -716,6 +741,31 @@ class Search extends Component {
                 </span>
               </div>
               <div>
+                <label>Responstyp</label>
+                <select
+                  ref="input_outputFormat"
+                  value={this.state.outputFormat}
+                  className="control-fixed-width"
+                  onChange={e => {
+                    this.setState(
+                      {
+                        outputFormat: e.target.value
+                      },
+                      () => this.validateField("outputFormat", true)
+                    );
+                  }}
+                >
+                  <option value="GML3">GML3</option>
+                  <option value="GML2">GML2</option>
+                </select>
+              </div>
+              <div className="separator">Tillgängliga lager</div>
+              <div>
+                <label>Lagerlista</label>
+                {this.renderLayerList()}
+              </div>
+              <div className="separator">Hantera valt lager</div>
+              <div>
                 <label>Valt lager*</label>
                 <div
                   ref="input_layers"
@@ -727,9 +777,23 @@ class Search extends Component {
                 </div>
               </div>
               <div>
-                <label>Lagerlista</label>
-                {this.renderLayerList()}
+                <label>Visningsnamn*</label>
+                <input
+                  type="text"
+                  ref="input_caption"
+                  value={this.state.caption}
+                  onChange={e => {
+                    this.setState(
+                      {
+                        caption: e.target.value
+                      },
+                      () => this.validateField("caption", true)
+                    );
+                  }}
+                  className={this.getValidationClass("caption")}
+                />
               </div>
+
               <div>
                 <label>Inforuta</label>
                 <textarea
@@ -799,28 +863,26 @@ class Search extends Component {
                   className={this.getValidationClass("geometryField")}
                 />
               </div>
-              <div>
-                <label>Responstyp</label>
-                <select
-                  ref="input_outputFormat"
-                  value={this.state.outputFormat}
-                  onChange={e => {
-                    this.setState(
-                      {
-                        outputFormat: e.target.value
-                      },
-                      () => this.validateField("outputFormat", true)
-                    );
-                  }}
-                >
-                  <option value="GML3">GML3</option>
-                  <option value="GML2">GML2</option>
-                </select>
-              </div>
             </fieldset>
-            <button className="btn btn-primary">
-              {this.state.mode === "edit" ? "Spara" : "Lägg till"}
-            </button>
+            {this.state.mode === "edit" ? (
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<SaveIcon />}
+              >
+                Spara
+              </ColorButtonBlue>
+            ) : (
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<AddIcon />}
+              >
+                Lägg till
+              </ColorButtonGreen>
+            )}
             &nbsp;
             {abort}
           </form>

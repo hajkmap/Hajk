@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import cslx from "clsx";
 import { Button, Tooltip, Typography } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import IconWarning from "@material-ui/icons/Warning";
@@ -70,6 +71,9 @@ const styles = theme => ({
     paddingBottom: "5px",
     marginLeft: "21px"
   },
+  layerGroupWithoutExpandArrow: {
+    marginLeft: "45px"
+  },
   layerGroupContainer: {
     marginTop: "0",
     marginBottom: "-5px"
@@ -85,7 +89,9 @@ const styles = theme => ({
   layerGroupItem: {
     display: "flex"
   },
-  legend: {},
+  legendImage: {
+    maxWidth: "250px"
+  },
   slider: {
     padding: "30px",
     overflow: "hidden"
@@ -118,7 +124,7 @@ const styles = theme => ({
 class LayerGroupItem extends Component {
   constructor(props) {
     super(props);
-    var layerInfo = props.layer.get("layerInfo");
+    const layerInfo = props.layer.get("layerInfo");
     this.state = {
       caption: layerInfo.caption,
       visible: props.layer.get("visible"),
@@ -142,6 +148,8 @@ class LayerGroupItem extends Component {
     };
     this.toggleSubLayerSettings = this.toggleSubLayerSettings.bind(this);
     this.renderSubLayer = this.renderSubLayer.bind(this);
+
+    this.hideExpandArrow = layerInfo?.hideExpandArrow === true ? true : false;
   }
   /**
    * Triggered when the component is successfully mounted into the DOM.
@@ -149,9 +157,9 @@ class LayerGroupItem extends Component {
    */
   componentDidMount() {
     const { model } = this.props;
-    model.globalObserver.subscribe("hideLayer", this.setHidden);
+    model.globalObserver.subscribe("layerswitcher.hideLayer", this.setHidden);
+    model.globalObserver.subscribe("layerswitcher.showLayer", this.setVisible);
     model.observer.subscribe("hideLayer", this.setHidden);
-    model.globalObserver.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("toggleGroup", this.toggleGroupVisible);
 
@@ -160,7 +168,7 @@ class LayerGroupItem extends Component {
     // don't change it back to "ok": we'll get a response for each tile, so most of
     // the tiles might be "ok", but if only one of the tiles has "loaderror", we
     // consider that the layer has failed loading and want to inform the user.
-    model.globalObserver.subscribe("wmsLayerLoadStatus", d => {
+    model.globalObserver.subscribe("layerswitcher.wmsLayerLoadStatus", d => {
       this.state.status !== "loaderror" &&
         this.state.name === d.id &&
         this.setState({
@@ -424,7 +432,7 @@ class LayerGroupItem extends Component {
               <DownloadLink
                 index={index}
                 layer={this.props.layer}
-                appConfig={this.props.appConfig}
+                enableDownloadLink={this.props.mapConfig.map.enableDownloadLink}
               />
             </div>
             <div className={classes.layerButton}>
@@ -442,13 +450,13 @@ class LayerGroupItem extends Component {
             </div>
           </div>
         </div>
-        <div className={classes.legend}>
+        <div>
           {this.state.toggleSubLayerSettings[index] ? (
             <div>
               <img
-                max-width="250px"
                 alt="Teckenförklaring"
                 src={this.props.layer.layersInfo[subLayer].legend}
+                className={classes.legendImage}
               />
             </div>
           ) : null}
@@ -482,6 +490,7 @@ class LayerGroupItem extends Component {
         <div className={classes.infoTextContainer}>
           <Typography variant="subtitle2">{infoTitle}</Typography>
           <Typography
+            variant="body2"
             dangerouslySetInnerHTML={{
               __html: infoText
             }}
@@ -515,9 +524,10 @@ class LayerGroupItem extends Component {
     if (infoOwner) {
       return (
         <div className={classes.infoTextContainer}>
-          <Typography>
-            <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
-          </Typography>
+          <Typography
+            variant="body2"
+            dangerouslySetInnerHTML={{ __html: infoOwner }}
+          ></Typography>
         </div>
       );
     } else {
@@ -583,9 +593,8 @@ class LayerGroupItem extends Component {
   };
 
   render() {
-    const { layer } = this.props;
+    const { classes, cqlFilterVisible, layer } = this.props;
     const { open, visible, visibleSubLayers } = this.state;
-    const { classes } = this.props;
 
     function getIcon() {
       if (visible) {
@@ -604,21 +613,27 @@ class LayerGroupItem extends Component {
       }
     }
     return (
-      <div className={classes.layerGroup}>
+      <div
+        className={cslx(classes.layerGroup, {
+          [classes.layerGroupWithoutExpandArrow]: this.hideExpandArrow === true
+        })}
+      >
         <div className={classes.layerGroupContainer}>
-          <div className={classes.arrowIcon}>
-            {open ? (
-              <ArrowDropDownIcon
-                className={classes.button}
-                onClick={() => this.toggle()}
-              />
-            ) : (
-              <ArrowRightIcon
-                className={classes.button}
-                onClick={() => this.toggle()}
-              />
-            )}
-          </div>
+          {this.hideExpandArrow === false && (
+            <div className={classes.arrowIcon}>
+              {open ? (
+                <ArrowDropDownIcon
+                  className={classes.button}
+                  onClick={() => this.toggle()}
+                />
+              ) : (
+                <ArrowRightIcon
+                  className={classes.button}
+                  onClick={() => this.toggle()}
+                />
+              )}
+            </div>
+          )}
           <div className={classes.layerGroupHeader}>
             <div className={classes.layerItemInfo}>
               <div
@@ -662,6 +677,7 @@ class LayerGroupItem extends Component {
           <div>
             <LayerSettings
               layer={layer}
+              cqlFilterVisible={cqlFilterVisible}
               observer={this.props.model.observer}
               toggled={this.state.toggleSettings}
               showOpacity={true}

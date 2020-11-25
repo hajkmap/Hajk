@@ -36,6 +36,10 @@ namespace MapService.Models
 
         public bool constrainOnlyCenter { get; set; }
 
+        public bool constrainResolution { get; set; }
+        
+        public bool enableDownloadLink { get; set; }
+
         public string logo { get; set; }
 
         public string geoserverLegendOptions { get; set; }
@@ -53,5 +57,9 @@ namespace MapService.Models
         public string defaultCookieNoticeMessage { get; set; }
 
         public string defaultCookieNoticeUrl { get; set; }
+        
+        public string crossOrigin { get; set; }
+
+        public bool showCookieNotice { get; set; }
     }
 }

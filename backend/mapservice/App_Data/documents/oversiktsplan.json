@@ -1,172 +1,373 @@
-{
+﻿{
   "chapters": [
     {
-      "header": "Kapitel 1",
-      "html": "<p>Detta kapitel beskriver information om riksintressen som till <em>exempel</em> naturreservat eller nationalparker.</p>\n<h2>Naturreservat</h2>\n<blockquote>Här är ett citat</blockquote>\n<p>Inom ramen för <strong>översiktsplanering</strong> hanterar kommunen naturreservat, det är länsstyrelsen som beslutar och vårdar dessa.</p>\n<h1>Nationalpark</h1>\n<p>En nationalpark är ett riksintresse som hanteras av staten, inom detta område finns tydliga restriktioner i hur kommunen får nyttja marken.&nbsp;</p>\n<p><br></p>\n<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin aliquam dapibus tincidunt. Aliquam sit amet metus imperdiet, pharetra lacus et, pharetra erat. Vestibulum ligula risus, elementum a luctus vitae, maximus a odio. Proin rhoncus sapien in est venenatis, ac egestas velit tincidunt. Maecenas fringilla leo non urna cursus hendrerit. Maecenas pretium faucibus leo at lobortis. Nam blandit rutrum eros ac volutpat. Maecenas fermentum augue mauris, quis fringilla urna blandit a.</p>\n<p><br></p>\n<p>Ut vitae nibh quam. Nam tincidunt dignissim ipsum, vel vestibulum felis interdum quis. Etiam eu dignissim magna, vitae vestibulum elit. Ut a faucibus felis, quis elementum sem. Ut ut posuere eros, vitae imperdiet nisl. Sed molestie dapibus enim, et auctor ligula ultricies ac. Sed ultrices vitae eros non volutpat. Nullam arcu dolor, pharetra a mi eu, auctor luctus ipsum. Mauris sagittis libero feugiat est commodo, vitae scelerisque mauris pellentesque. Donec a eleifend nisi. Nulla vehicula orci quis ex euismod bibendum.</p>\n<p>Aliquam vel vulputate nisl. Mauris eget elit semper, gravida nunc et, auctor sem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec nec elit eget erat aliquam finibus. Mauris fermentum iaculis augue ac molestie. Maecenas ac gravida elit, eget consectetur turpis. Cras a vestibulum est, quis scelerisque sapien. Vestibulum elementum sapien non enim imperdiet, vel posuere nisi accumsan. Donec et eros eleifend metus accumsan tincidunt id quis justo.</p>\n<p><br></p>\n<p>Duis nunc enim, vestibulum eget lectus ut, fermentum ultricies diam. Nullam euismod pellentesque interdum. Phasellus tempor, metus quis elementum pharetra, elit nulla ornare nisi, vel congue urna felis id mi. Pellentesque id rhoncus mi, sed lacinia tortor. Phasellus libero tellus, facilisis ac mauris nec, cursus fermentum augue. Aenean tincidunt, tortor in tincidunt fermentum, tortor ipsum pretium nisl, vitae volutpat ex magna vel mauris. Ut dignissim tincidunt diam at iaculis. Fusce in commodo metus. Vestibulum eleifend metus quis pharetra rutrum. Curabitur ut tortor in tortor egestas tristique et ut mi. Phasellus a ipsum in ex luctus maximus. Sed nunc dolor, ornare lacinia faucibus sed, dapibus ac odio. Nam varius vehicula leo, eu commodo neque finibus quis. Nullam sagittis erat sit amet justo gravida mattis. Duis ac metus id velit elementum pellentesque.</p>\n<p><br></p>\n<p>Phasellus sollicitudin diam non imperdiet pharetra. Morbi vitae ultricies est, eget lobortis libero. Proin lacinia mollis sem, in porttitor urna lobortis quis. Curabitur lectus diam, mattis pellentesque turpis in, egestas condimentum est. Vestibulum vehicula dictum lectus, posuere posuere lacus convallis iaculis. Integer at nisl sagittis, blandit arcu viverra, volutpat odio. Nunc faucibus augue at congue interdum. Aenean et rutrum augue, vel consectetur mauris. Pellentesque egestas diam vel dui mattis, id accumsan purus accumsan. Fusce eu quam urna. Aliquam eu ligula nec nisi facilisis suscipit.</p>",
+      "header": "Användning av mark- och vattenområden",
+      "html": "",
       "mapSettings": {
-        "center": [415728, 6583754],
-        "zoom": 12,
-        "extent": [415288.5, 6583342, 416167.5, 6584166]
+        "target": "map",
+        "center": [319771, 6399959],
+        "title": "Hajk 3",
+        "projection": "EPSG:3006",
+        "zoom": 8,
+        "maxZoom": 18,
+        "minZoom": 3,
+        "resolutions": [
+          4096,
+          2048,
+          1024,
+          512,
+          256,
+          128,
+          64,
+          32,
+          16,
+          8,
+          4,
+          2,
+          1,
+          0.5
+        ],
+        "origin": [0, 0],
+        "extent": [0, 6000000, 1000000, 9000000],
+        "constrainOnlyCenter": false,
+        "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+        "geoserverLegendOptions": "",
+        "mapselector": false,
+        "mapcleaner": true,
+        "drawerVisible": true,
+        "drawerPermanent": true,
+        "colors": { "primaryColor": "#333333", "secondaryColor": "#ffa000" },
+        "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+        "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
       },
       "chapters": [
         {
-          "header": "Underkapitel 1",
-          "html": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque luctus ultrices eros eu iaculis. Etiam eget tortor consectetur, egestas elit eu, malesuada metus. Fusce molestie odio hendrerit risus ultricies dignissim. Integer eleifend tellus in semper lacinia. Duis ut convallis quam. Nunc a turpis sed nisi aliquet pretium rhoncus ut dolor. Nulla facilisis lacus a arcu dictum ultricies. In magna turpis, posuere et egestas ac, pharetra quis tortor. Pellentesque ultricies nulla et dui interdum, vel mollis dolor molestie.</p>\n<p><br></p>\n<p>Donec urna quam, interdum molestie viverra at, faucibus id magna. Aliquam venenatis nunc eu eros tristique tincidunt. Integer elementum turpis justo, ac molestie mi iaculis maximus. Nam porta magna eget dapibus mollis. Integer ac leo facilisis, luctus massa nec, faucibus ante. Nam varius ornare velit at suscipit. Praesent ultrices eros eu velit eleifend maximus. Phasellus porta nibh non ornare suscipit. Praesent et mi velit. Aliquam scelerisque tristique orci, eget lacinia sem egestas quis. Phasellus quis lobortis nunc, et sodales eros. Pellentesque vehicula ut dolor sed dictum. Ut convallis imperdiet blandit. Aenean pharetra nisi non metus sollicitudin, non rutrum erat pretium. Donec augue nisl, aliquet in accumsan at, placerat at diam.</p>\n<p>Donec id commodo tellus. Donec tincidunt, risus et consectetur efficitur, magna risus commodo elit, a sodales est nunc quis tortor. Donec sapien diam, porta sed facilisis dictum, pretium eu est. Cras malesuada hendrerit risus, vel dapibus turpis interdum a. Nulla magna nisi, laoreet vel libero ut, hendrerit vehicula ante. Maecenas gravida ut leo quis viverra. Nam efficitur arcu ac consectetur tristique. Etiam in ligula quis lorem semper laoreet. Etiam vitae congue metus. Curabitur eget tortor vitae nibh ullamcorper malesuada. Proin sit amet egestas ex. Etiam cursus nibh a lectus pretium fermentum.</p>\n<p><br></p>\n<p>Phasellus aliquam vulputate metus. Nunc vehicula urna lectus, id ultricies arcu molestie quis. Cras sit amet sollicitudin magna. Etiam tempus, purus vitae pretium gravida, mi libero consectetur erat, eget sollicitudin justo lectus eu ex. Duis suscipit odio risus, sed porttitor lacus dictum et. Ut feugiat nunc faucibus, imperdiet elit eget, maximus massa. Curabitur eu diam porttitor tellus ultricies pellentesque. Quisque rhoncus arcu turpis, sed venenatis eros vulputate a.</p>\n<p><br></p>\n<p>Aliquam vitae arcu iaculis, tristique neque ut, auctor nunc. Donec hendrerit mi ipsum, vel dignissim orci sodales non. Vivamus ac augue enim. Integer eget consectetur turpis, egestas eleifend dui. Morbi tincidunt mi ipsum, eu aliquam mi cursus vitae. Fusce fringilla, tortor sit amet dictum euismod, tellus lectus tincidunt ligula, sed feugiat magna nisi nec metus. Etiam finibus justo a enim tempus mattis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Fusce consequat non purus eget pulvinar. Nunc hendrerit libero ut suscipit dapibus. Donec vel faucibus justo. Mauris ac fermentum felis, at ultricies mi. Donec in lectus malesuada, tristique turpis ut, condimentum sem. Etiam et cursus nulla, sit amet tempor odio.</p>",
+          "header": "Redovisning av planen",
+          "html": "<p>I översiktsplanens del 1 redovisas de mål och strategier som planen grundas på.<a data-header=\"{b51181b0-8b8b-4faa-98eb-5ed49018ef70}\" data-document=\"utgangspunkter\">Läs om Utmaningar i Utgånspunkter</a> I avsnitten ”Inriktning för stadens utveckling” och ”Områdesvisa inriktningar” i samma del kopplas den övergripande utbyggnadsstrategin till olika geografiska områden i staden. I översiktsplanens del 2 (denna del) och på kartor visas vilka fysiska uttryck strategier och överväganden får på markanvändningen samt också hur ställningstagandena kan följas upp i olika prövningar och beslut om förändrad användning av mark- och vattenområden. Redovisningen av planen görs på två kommuntäckande kartor ”Användning av mark och vattenområden ” och ”Regler och rekommendationer” samt i beskrivande text. Översiktsplanens karta 1 ”Användning av mark- och vattenområden”, är en illustration av huvuddragen i pågående och föreslagen förändrad mark- och vattenanvändning i planområdet. Karta 2 ”Regler och rekommendationer” visar hur bebyggelse får tillkomma, förändras eller bevaras samt vilka lagstadgade regler om markanvändningen som finns och var dessa gäller inom kommunens mark- och vattenområden. De båda kartorna med tillhörande text ska läsas och användas parallellt. Till översiktsplanen hör vidare karta 3 ”Riksintressen enligt miljöbalken kapitel 3 och 4” samt en sammanfattande redovisning av hur riksintressena tillgodoses i planen</p>",
           "mapSettings": {
-            "center": [415920.76923076925, 6583250],
-            "zoom": 10,
-            "extent": [414162.76923076925, 6581602, 417678.76923076925, 6584898]
+            "target": "map",
+            "center": [319771, 6399959],
+            "title": "Hajk 3",
+            "projection": "EPSG:3006",
+            "zoom": 8,
+            "maxZoom": 18,
+            "minZoom": 3,
+            "resolutions": [
+              4096,
+              2048,
+              1024,
+              512,
+              256,
+              128,
+              64,
+              32,
+              16,
+              8,
+              4,
+              2,
+              1,
+              0.5
+            ],
+            "origin": [0, 0],
+            "extent": [0, 6000000, 1000000, 9000000],
+            "constrainOnlyCenter": false,
+            "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": true,
+            "drawerPermanent": true,
+            "colors": {
+              "primaryColor": "#333333",
+              "secondaryColor": "#ffa000"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": false
+        },
+        {
+          "header": "Planens huvuddrag och övergripande struktur",
+          "headerIdentifier": "{f43cdffe-bc2b-446a-af8b-fb71f1b20e98}",
+          "html": "<p>En översiktsplan ska visa grunddragen i användningen av mark- och vattenområden i kommunen. Det är därför framför allt den övergripande strukturen som kan utläsas i planens kartor, medan detaljerad markanvändning successivt redovisas i fördjupningar av översiktsplanen, programstudier och detaljplaner. Översiktsplanen visar tydligt på en utbyggnad av staden som inriktas mot komplettering inom den del av den befintliga bebyggelsestrukturen där god försörjning med kollektivtrafik kan erhållas. Utbyggnaden ska kombineras med ett ökat byggande i strategiskt belägna knutpunkter. Nytillskott och förändringar kommer därför att ske i första hand i stadens centrala områden och mellanområden. I undantagsfall kan ett visst kompletteringsbyggande också behöva ske i ytterområden där t.ex. ett ökat befolkningsunderlag krävs för att förbättra infrastruktur och service eller där ensidigt utbud av bostadstyper behöver kompletteras till en mer varierad blandning av olika typer av bostäder. I flera av de centrala förnyelseområdena planeras radikala förändringar av markanvändningen. Sådana områden är Gullbergsvass, Frihamnen och Backaplan, och på längre sikt också Ringön och Marieholm-Slakthusområdet. För Backaplan pågår arbete med en fördjupning av översiktsplanen. Komplettering och förtätning planeras också i flera andra delar av staden som t.ex. Högsbo, Biskopsgården och Gamlestaden. Markanvändingsstudier finns framtagna eller pågår för några av dessa områden. De strategiska knutpunkterna är: Angereds centrum, Gamlestaden, Backaplan, City och Frölunda torg. Ett ökat byggande runt knutpunkterna förslås för att föra n v ä n d n i n g a v m a r k - o c h v a t t e n o m r å d e n Karta 1: Användning av mark- och vattenområden Ö v e r s i k t s p l a n f ö r G ö t e b o r g 2 0 0 9 - 0 2 - 2 6 : DEL 2 » SID a stärka underlaget för service och kollektivtrafik. Strategin medför att det inte planeras för någon utbyggnad av nya ytterområden förrän sådana områden är försörjda med utbyggd infrastruktur, främst god kollektivtrafik. Områden som kan bli aktuella för en utbyggnad på längre sikt redovisas i översiktsplanen på karta 1 som ”Utredningsområde för framtida bebyggelseområden”, respektive ”Utredningsområde för framtida verksamhetsområden”. Den omfattande utbyggnad av staden som föreslås i planen kräver stora förbättringar och förstärkning av det övergripande trafiksystemet. Lägen för nya förbindelser över och under Göta älv för biltrafik, järnväg och gång- och cykeltrafik föreslås i planen. Vidare föreslås reservat för ett antal kompletterande och förstärkande väglänkar för vägtrafiken samt utökad och förbättrad kollektivtrafik. En utbyggnadsstruktur som bygger på förtätning och komplettering i det redan byggda kräver att särskild hänsyn tas så att kvaliteterna i stadens grönytor bibehålls. I översiktsplanen uppmärksammas och betonas också vikten av god tillgång till kust- och skärgårdsområdet och till stora sammanhängande natur- och friluftsområden för rekreation i stadens närhet. Flera av dessa är eller föreslås bli säkrade genom t.ex. naturreservat eller detaljplan.</p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [319771, 6399959],
+            "title": "Hajk 3",
+            "projection": "EPSG:3006",
+            "zoom": 8,
+            "maxZoom": 18,
+            "minZoom": 3,
+            "resolutions": [
+              4096,
+              2048,
+              1024,
+              512,
+              256,
+              128,
+              64,
+              32,
+              16,
+              8,
+              4,
+              2,
+              1,
+              0.5
+            ],
+            "origin": [0, 0],
+            "extent": [0, 6000000, 1000000, 9000000],
+            "constrainOnlyCenter": false,
+            "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": true,
+            "drawerPermanent": true,
+            "colors": {
+              "primaryColor": "#333333",
+              "secondaryColor": "#ffa000"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": false
+        },
+        {
+          "header": "Redovisning i text och på karta",
+          "headerIdentifier": "{57427123-ef67-4f69-b72f-d5a737e41cc1}",
+          "html": "<p>På kartan redovisas huvuddragen i dels pågående, dels föreslagen användning av mark- och vattenområden i kommunen. Rubrikerna i texten följer i huvudsak kartans teckenförklaring. Eftersom övervägande utbyggnad av staden föreslås ske genom komplettering och omvandling i redan tidigare bebyggda områden kan mindre kompletteringar inte detaljerat utläsas ur kartan. Vidare medger inte kartunderlaget någon exakt tolkning av områdesgränserna. Dessa kommer att studeras vidare i fördjupningar av översiktsplanen och detaljplaner. Aktuella fördjupningar av översiktsplanen finns redovisade på karta 1 och 2. Se vidare ”Fördjupningar och tillägg”, del 2</p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [319771, 6399959],
+            "title": "Hajk 3",
+            "projection": "EPSG:3006",
+            "zoom": 8,
+            "maxZoom": 18,
+            "minZoom": 3,
+            "resolutions": [
+              4096,
+              2048,
+              1024,
+              512,
+              256,
+              128,
+              64,
+              32,
+              16,
+              8,
+              4,
+              2,
+              1,
+              0.5
+            ],
+            "origin": [0, 0],
+            "extent": [0, 6000000, 1000000, 9000000],
+            "constrainOnlyCenter": false,
+            "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": true,
+            "drawerPermanent": true,
+            "colors": {
+              "primaryColor": "#333333",
+              "secondaryColor": "#ffa000"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "Pågående användning av mark- och vattenområden",
+          "html": "",
+          "mapSettings": {
+            "target": "map",
+            "center": [319771, 6399959],
+            "title": "Hajk 3",
+            "projection": "EPSG:3006",
+            "zoom": 8,
+            "maxZoom": 18,
+            "minZoom": 3,
+            "resolutions": [
+              4096,
+              2048,
+              1024,
+              512,
+              256,
+              128,
+              64,
+              32,
+              16,
+              8,
+              4,
+              2,
+              1,
+              0.5
+            ],
+            "origin": [0, 0],
+            "extent": [0, 6000000, 1000000, 9000000],
+            "constrainOnlyCenter": false,
+            "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": true,
+            "drawerPermanent": true,
+            "colors": {
+              "primaryColor": "#333333",
+              "secondaryColor": "#ffa000"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
           },
           "chapters": [
             {
-              "header": "Underkapitel 1.1",
-              "html": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ac erat ac nulla aliquam aliquam eget ac nibh. Maecenas tristique quis eros vitae dapibus. Maecenas finibus, velit vulputate varius hendrerit, nunc eros lacinia lorem, a fermentum neque tellus vel neque. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Proin tincidunt nunc ut mi dapibus ultricies. Aliquam eget consectetur libero, vel accumsan ex. Fusce consectetur sed dui at sollicitudin. Integer dictum ultrices felis lacinia suscipit.</p>\n<p>Mauris a leo blandit, ultrices tortor consequat, rhoncus justo. Etiam justo est, malesuada id auctor at, facilisis a odio. Duis dignissim facilisis nunc et ultrices. Cras luctus molestie condimentum. Vivamus et mollis libero. Integer cursus nibh ac consequat molestie. Ut quis velit venenatis nibh ornare convallis ac ac tellus. Mauris vel ex et nulla porttitor mollis. Cras dignissim ante quis metus dignissim, fringilla accumsan nulla suscipit. Nunc in urna id erat cursus pretium. Duis eget condimentum metus, ac vestibulum nisl. Integer risus quam, tristique elementum suscipit placerat, feugiat ac arcu. Praesent porttitor quam a neque consectetur, eu cursus justo elementum. Sed non orci sed leo malesuada maximus vel et nisi.</p>\n<p><br></p>\n<p>Aenean ullamcorper scelerisque cursus. Curabitur lacinia purus erat, a convallis arcu molestie ut. Fusce ut velit eu ligula porta semper. Suspendisse diam ex, ornare rhoncus volutpat ut, viverra nec leo. Phasellus eros ex, feugiat quis purus sed, porttitor malesuada metus. Praesent vestibulum non diam vel efficitur. Pellentesque faucibus nunc nisi, ac ornare nulla viverra ac. Integer consequat sem id justo mollis vulputate.</p>\n<p>Sed sit amet justo venenatis, euismod massa tincidunt, facilisis turpis. Sed ac dictum urna, non fringilla purus. Nunc interdum felis a sapien pharetra auctor. Mauris ac est felis. Etiam nec sem ac risus commodo elementum sit amet non odio. Fusce scelerisque in leo nec congue. Nulla nec mauris nec tellus tincidunt tempor. Nam at justo sit amet nisl lobortis volutpat. Cras lacinia vel ipsum et efficitur. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum suscipit sem vitae interdum dapibus. Integer et malesuada est, a auctor ex. Donec vestibulum lorem lacus, eget scelerisque ligula pretium quis. Sed aliquet elit a ex feugiat, sit amet sagittis ipsum venenatis. Aliquam erat volutpat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>\n<p><br></p>\n<p>Vestibulum sollicitudin risus id mauris semper eleifend. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi at ornare lorem. Praesent bibendum ultricies pharetra. Praesent at libero sit amet tortor ultricies placerat. Nunc sem ligula, consequat nec interdum ac, ultricies quis ligula. Donec elementum est ac venenatis dapibus. Sed eu sem in justo vehicula rhoncus at id justo. Duis non pellentesque dui, quis lobortis tellus. Praesent tempor, leo eu hendrerit cursus, neque turpis vehicula nibh, ac hendrerit libero eros sed massa. Maecenas vel tellus imperdiet, tristique eros a, sodales arcu.</p>",
+              "header": "Bebyggelseområde med grön- och rekreationsytor",
+              "html": "<p>Områdena omfattar huvuddelen av den idag bebyggda staden utom större, sammanhängande verksamhetsområden, institutioner, större grönområden och trafikleder som redovisas separat. Inom områdena inryms bostäder i den täta innerstaden och villaområden i mer perifera delar. Dessutom inryms kontor, mindre verksamhetsområden, handel och andra anläggningar för service. Vidare ingår också lokalgator, allmänna platser, gång- och cykelstråk och grönytor, dvs sådana typer av funktioner som bidrar till en levande stadsmiljö och som är möjliga att blanda i en stad utan att störningar uppstår. Förnyelse genom ombyggnad och nybyggnad inom den byggda staden ska i första hand ske inom områden som kan försörjas med god kollektivtrafik. Komplettering bör också fortsättningsvis ske så att bostäder, service och verksamheter som inte är störande för omgivningen blandas. Vid komplettering och nybyggnad ska beaktas att tillgången till och kvaliteterna i stadens grönområden bevaras och att grönområden i tillräcklig omfattning tillskapas nära bostäderna för det som byggs nytt. Väl placerade ytor för barns lek ska säkras i detaljplanerna. Borttagna värden ska kompenseras så att kvaliteterna bibehålls. En annan utgångspunkt är att det ska finnas eller tillskapas också andra bostadskomplement och servicefunktioner i närområdet då staden kompletteras med nya bostäder och arbetsplatser. Vidare ska hänsyn tas till den befintliga bebyggelsens karaktär och kulturhistoriska innehåll vid förändringar, se vidare del 3 ”Kulturmiljö”. I områden av riksintresse för kulturmiljövården ska särskild hänsyn tas så att värdena inte skadas eller bebyggelsemiljöerna förvanskas. Läs vidare under avsnitten om strategiska frågor och de områdesvisa inriktningarna i del 1.</p>",
               "mapSettings": {
-                "center": [433319.47943833366, 6578472.708508875],
-                "zoom": 2,
-                "extent": [
-                  -16728.520561666344,
-                  6156584.708508875,
-                  883367.4794383337,
-                  7000360.708508875
-                ]
+                "target": "map",
+                "center": [319771, 6399959],
+                "title": "Hajk 3",
+                "projection": "EPSG:3006",
+                "zoom": 8,
+                "maxZoom": 18,
+                "minZoom": 3,
+                "resolutions": [
+                  4096,
+                  2048,
+                  1024,
+                  512,
+                  256,
+                  128,
+                  64,
+                  32,
+                  16,
+                  8,
+                  4,
+                  2,
+                  1,
+                  0.5
+                ],
+                "origin": [0, 0],
+                "extent": [0, 6000000, 1000000, 9000000],
+                "constrainOnlyCenter": false,
+                "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+                "geoserverLegendOptions": "",
+                "mapselector": false,
+                "mapcleaner": true,
+                "drawerVisible": true,
+                "drawerPermanent": true,
+                "colors": {
+                  "primaryColor": "#333333",
+                  "secondaryColor": "#ffa000"
+                },
+                "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+                "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
               },
               "chapters": [],
-              "expanded": false,
-              "layers": []
+              "expanded": false
             },
             {
-              "header": "Underkapitel 1.2",
-              "html": "<p>Aenean ullamcorper scelerisque cursus. Curabitur lacinia purus erat, a convallis arcu molestie ut. Fusce ut velit eu ligula porta semper. Suspendisse diam ex, ornare rhoncus volutpat ut, viverra nec leo. Phasellus eros ex, feugiat quis purus sed, porttitor malesuada metus. Praesent vestibulum non diam vel efficitur. Pellentesque faucibus nunc nisi, ac ornare nulla viverra ac. Integer consequat sem id justo mollis vulputate.</p>\n<p>Sed sit amet justo venenatis, euismod massa tincidunt, facilisis turpis. Sed ac dictum urna, non fringilla purus. Nunc interdum felis a sapien pharetra auctor. Mauris ac est felis. Etiam nec sem ac risus commodo elementum sit amet non odio. Fusce scelerisque in leo nec congue. Nulla nec mauris nec tellus tincidunt tempor. Nam at justo sit amet nisl lobortis volutpat. Cras lacinia vel ipsum et efficitur. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum suscipit sem vitae interdum dapibus. Integer et malesuada est, a auctor ex. Donec vestibulum lorem lacus, eget scelerisque ligula pretium quis. Sed aliquet elit a ex feugiat, sit amet sagittis ipsum venenatis. Aliquam erat volutpat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>\n<p><br></p>\n<p>Vestibulum sollicitudin risus id mauris semper eleifend. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi at ornare lorem. Praesent bibendum ultricies pharetra. Praesent at libero sit amet tortor ultricies placerat. Nunc sem ligula, consequat nec interdum ac, ultricies quis ligula. Donec elementum est ac venenatis dapibus. Sed eu sem in justo vehicula rhoncus at id justo. Duis non pellentesque dui, quis lobortis tellus. Praesent tempor, leo eu hendrerit cursus, neque turpis vehicula nibh, ac hendrerit libero eros sed massa. Maecenas vel tellus imperdiet, tristique eros a, sodales arcu.</p>",
+              "header": "Verksamhetsområde",
+              "html": "<p>Verksamhetsområden kan innehålla störande verksamheter, större och mindre industrianläggningar, lager, hamnverksamhet, partihandel och liknande. Vidare ingår också lokalgator, allmänna platser och gång- och cykelstråk samt grönytor. Områdena är olika till innehåll, struktur, utnyttjandegrad och karaktär. Generellt gäller att bostäder och andra funktioner som kan bli störda är olämpliga att lokalisera inom verksamhetsområden och också i vissa fall i nära anslutning till dessa. De flesta befintliga verksamhetsområden föreslås bibehålla sin nuvarande funktion. Undantagna är områdena Frihamnen, Gullbergsvass och delar av Gamlestaden samt Ringön, Marieholm-Slakthusområdet och en del av Högsbo/Sisjön som Exempel på verksamhetsområden med olika innehåll: • Ytterhamnsområdet med raffinaderier och andra omgivningspåverkande anläggningar som kräver skyddsavstånd mot bostadsbebyggelse. • Volvos anläggningar norr om ytterhamnsområdet - de är ytkrävande och har krav på skyddsavstånd till annan bebyggelse. • Alelyckan, Högsbo och Sisjön - områden med mindre störande verksamheter som småindustri, handel, lager, partihandel och transportverksamhet. a n v ä n d n i n g a v m a r k - o c h v a t t e n o m r å d e n Karta 1: Användning av mark- och vattenområden Ö v e r s i k t s p l a n f ö r G ö t e b o r g 2 0 0 9 - 0 2 - 2 6 : DEL 2 » SID a 1 1 samtliga är äldre hamn- och verksamhetsområden i behov av omvandling och förnyelse. Dessa ingår i de stadsutvecklingsområden där översiktsplanen anger förändrad markanvändning med blandade funktioner. I första hand ska nya störande verksamheter lokaliseras i befintliga verksamhetsområden där komplettering är möjlig. I vissa verksamhetsområden ryms också handel. Nya etableringar av handel ska generellt undvikas i verksamhetsområden. Eventuell ny handel ska koncentreras inom eller i anknytning till befintliga etableringar. Inom några verksamhetsområden finns värdefulla natur- och kulturmiljöer, se vidare beskrivningar del 3. Verksamheter som inte är störande finns också och kan tillkomma inom vad som i planen betecknas ”bebyggelseområden med grön- och rekreationsytor”.</p>",
               "mapSettings": {
-                "center": [400384, 6591488],
-                "zoom": 5,
-                "extent": [344128, 6538752, 456640, 6644224]
+                "target": "map",
+                "center": [319771, 6399959],
+                "title": "Hajk 3",
+                "projection": "EPSG:3006",
+                "zoom": 8,
+                "maxZoom": 18,
+                "minZoom": 3,
+                "resolutions": [
+                  4096,
+                  2048,
+                  1024,
+                  512,
+                  256,
+                  128,
+                  64,
+                  32,
+                  16,
+                  8,
+                  4,
+                  2,
+                  1,
+                  0.5
+                ],
+                "origin": [0, 0],
+                "extent": [0, 6000000, 1000000, 9000000],
+                "constrainOnlyCenter": false,
+                "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+                "geoserverLegendOptions": "",
+                "mapselector": false,
+                "mapcleaner": true,
+                "drawerVisible": true,
+                "drawerPermanent": true,
+                "colors": {
+                  "primaryColor": "#333333",
+                  "secondaryColor": "#ffa000"
+                },
+                "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+                "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
               },
               "chapters": [],
-              "expanded": false,
-              "layers": []
+              "expanded": false
             },
             {
-              "header": "Underkapitel 1.3",
-              "html": "<p>Hello there!</p>\n<p><br></p>\n<p>Aenean ullamcorper scelerisque cursus. Curabitur lacinia purus erat, a convallis arcu molestie ut. Fusce ut velit eu ligula porta semper. Suspendisse diam ex, ornare rhoncus volutpat ut, viverra nec leo. Phasellus eros ex, feugiat quis purus sed, porttitor malesuada metus. Praesent vestibulum non diam vel efficitur. Pellentesque faucibus nunc nisi, ac ornare nulla viverra ac. Integer consequat sem id justo mollis vulputate.</p>\n<p>Sed sit amet justo venenatis, euismod massa tincidunt, facilisis turpis. Sed ac dictum urna, non fringilla purus. Nunc interdum felis a sapien pharetra auctor. Mauris ac est felis. Etiam nec sem ac risus commodo elementum sit amet non odio. Fusce scelerisque in leo nec congue. Nulla nec mauris nec tellus tincidunt tempor. Nam at justo sit amet nisl lobortis volutpat. Cras lacinia vel ipsum et efficitur. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum suscipit sem vitae interdum dapibus. Integer et malesuada est, a auctor ex. Donec vestibulum lorem lacus, eget scelerisque ligula pretium quis. Sed aliquet elit a ex feugiat, sit amet sagittis ipsum venenatis. Aliquam erat volutpat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>\n<p><br></p>\n<p>Vestibulum sollicitudin risus id mauris semper eleifend. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi at ornare lorem. Praesent bibendum ultricies pharetra. Praesent at libero sit amet tortor ultricies placerat. Nunc sem ligula, consequat nec interdum ac, ultricies quis ligula. Donec elementum est ac venenatis dapibus. Sed eu sem in justo vehicula rhoncus at id justo. Duis non pellentesque dui, quis lobortis tellus. Praesent tempor, leo eu hendrerit cursus, neque turpis vehicula nibh, ac hendrerit libero eros sed massa. Maecenas vel tellus imperdiet, tristique eros a, sodales arcu.</p>",
+              "header": "Grön- och rekreationsområde",
+              "html": "<p>Inom områdena ingår förutom allmänna grön- och rekreationsytor också större parker, idrotts- och friluftsområden. Dessutom ingår till en mindre del i de grönmarkerade områdena också impediment, vägområden och andra områden som är mindre betydelsefulla som rekreations- och grönområden, men som ändå är olämpliga för bebyggelse. Större sammanhängande gröna områden med särskilt utpekade kvaliteter och värden har markerats med streckad yta och finns förtecknade i slutet av detta avsnitt. Avgränsning och utbredning av områdena är endast översiktligt redovisade. Vid planering för förändrad markanvändning i gränserna mot de grönmarkerade områdena måste hänsyn tas till dessa särskilt om grönområdet markerats ha utpekade kvaliteter. Motiv för eventuellt ianspråktagande ska anges i fördjupning av översiktsplanen och/eller i detaljplan.</p>",
               "mapSettings": {
-                "center": [415939.24324324325, 6582934],
-                "zoom": 11,
-                "extent": [
-                  415060.24324324325,
-                  6582110,
-                  416818.24324324325,
-                  6583758
-                ]
+                "target": "map",
+                "center": [319771, 6399959],
+                "title": "Hajk 3",
+                "projection": "EPSG:3006",
+                "zoom": 8,
+                "maxZoom": 18,
+                "minZoom": 3,
+                "resolutions": [
+                  4096,
+                  2048,
+                  1024,
+                  512,
+                  256,
+                  128,
+                  64,
+                  32,
+                  16,
+                  8,
+                  4,
+                  2,
+                  1,
+                  0.5
+                ],
+                "origin": [0, 0],
+                "extent": [0, 6000000, 1000000, 9000000],
+                "constrainOnlyCenter": false,
+                "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+                "geoserverLegendOptions": "",
+                "mapselector": false,
+                "mapcleaner": true,
+                "drawerVisible": true,
+                "drawerPermanent": true,
+                "colors": {
+                  "primaryColor": "#333333",
+                  "secondaryColor": "#ffa000"
+                },
+                "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+                "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
               },
-              "chapters": [
-                {
-                  "header": "Underkapitel 1.3.1",
-                  "html": "<p>Vestibulum sollicitudin risus id mauris semper eleifend. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi at ornare lorem. Praesent bibendum ultricies pharetra. Praesent at libero sit amet tortor ultricies placerat. Nunc sem ligula, consequat nec interdum ac, ultricies quis ligula. Donec elementum est ac venenatis dapibus. Sed eu sem in justo vehicula rhoncus at id justo. Duis non pellentesque dui, quis lobortis tellus. Praesent tempor, leo eu hendrerit cursus, neque turpis vehicula nibh, ac hendrerit libero eros sed massa. Maecenas vel tellus imperdiet, tristique eros a, sodales arcu.</p>\n<p><br></p>\n<p>End</p>",
-                  "mapSettings": {
-                    "target": "map",
-                    "center": [236000, 6585000],
-                    "title": "Översiktsplan",
-                    "projection": "EPSG:3007",
-                    "zoom": 10,
-                    "maxZoom": 3,
-                    "minZoom": 9,
-                    "resolutions": [
-                      4096,
-                      2048,
-                      1024,
-                      512,
-                      256,
-                      128,
-                      64,
-                      32,
-                      16,
-                      8,
-                      4,
-                      2,
-                      1,
-                      0.5
-                    ],
-                    "origin": [0, 0],
-                    "extent": [0, 6000000, 1000000, 9000000],
-                    "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
-                    "geoserverLegendOptions": "",
-                    "mapselector": false,
-                    "colors": {
-                      "primaryColor": "#0065a6",
-                      "secondaryColor": "#ffcc00"
-                    }
-                  },
-                  "chapters": [],
-                  "expanded": true
-                }
-              ],
-              "expanded": false,
-              "layers": ["27"]
+              "chapters": [],
+              "expanded": true
             }
           ],
-          "expanded": true,
-          "layers": ["32", "17", "18"]
+          "expanded": true
         }
       ],
-      "expanded": true,
-      "layers": ["32"]
-    },
-    {
-      "header": "Kapitel 2",
-      "html": "<p>Cras nec mollis lectus. Curabitur fringilla lorem quis ex tincidunt, in mattis libero molestie. Quisque erat erat, lacinia in nisl quis, pretium rutrum odio. In sit amet sodales felis, sit amet fermentum lacus. Quisque ultrices nunc ac ipsum ultricies condimentum. Curabitur faucibus dolor nec est molestie, vel accumsan sapien dapibus. In fermentum mattis pellentesque. Ut vitae pulvinar massa. Integer dictum, dui non consequat hendrerit, lorem nulla lobortis nibh, vitae commodo ligula sapien in dui. Donec imperdiet eros vitae venenatis auctor. Aliquam vulputate libero lacinia tellus eleifend, vitae malesuada sem lacinia. Mauris tincidunt vitae urna sit amet iaculis. Aenean tristique mattis accumsan. Nullam odio velit, gravida vitae orci sed, malesuada faucibus dui. Curabitur aliquet ante id hendrerit volutpat. Ut leo felis, varius at rhoncus eget, aliquam id sapien.</p>\n<p><br></p>\n<p>Vestibulum cursus eu justo vel aliquet. Maecenas mattis tortor a ex sollicitudin finibus. Cras nec eros sit amet enim suscipit vulputate. Nunc imperdiet metus enim, ut gravida libero sodales eu. Integer dictum tortor est, accumsan eleifend nibh scelerisque ut. Ut blandit urna fringilla, aliquam sem eget, tempus mi. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Sed rutrum ligula sit amet urna suscipit, congue pulvinar nibh pretium. Cras et erat aliquet, accumsan leo a, eleifend eros. Integer faucibus nunc vitae augue tempor hendrerit. Donec varius condimentum suscipit. Vivamus sagittis metus nec sodales tempus.</p>\n<p><br></p>\n<p>Nam hendrerit elit tortor, id convallis elit gravida ut. Phasellus porttitor aliquet turpis, id vestibulum orci blandit nec. Nullam id pharetra justo. Integer in urna vel metus commodo scelerisque. Cras pretium sapien est, ut sagittis nunc pharetra nec. Nullam non libero non elit aliquet hendrerit. Ut eu faucibus nunc, eget placerat lorem. Vivamus a metus et nunc imperdiet mattis. Sed nisi metus, tempus eu ipsum vulputate, porta tempor massa. Proin ipsum diam, lacinia sed nunc ac, dignissim tristique velit. Nunc pellentesque auctor fringilla. Aliquam maximus velit a felis finibus elementum. Donec mollis, tellus at elementum dapibus, ligula ligula bibendum sapien, blandit consequat nunc ligula sed ipsum. Nulla mauris erat, volutpat sit amet semper ut, vestibulum a nisi. Morbi suscipit porttitor ultricies. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>\n<p><br></p>\n<p>Mauris et consequat lorem, a laoreet enim. Proin viverra ante a augue condimentum ultrices et ut dui. Donec eu ullamcorper nulla. Nam varius, est in condimentum scelerisque, lectus lorem eleifend sem, id pharetra nisi nulla eu urna. Donec quis accumsan tortor, eu hendrerit purus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Ut mollis, arcu sed blandit molestie, erat eros aliquet nunc, a semper eros risus at sapien. Quisque tristique arcu lectus, tincidunt dapibus felis vestibulum et. Vestibulum scelerisque placerat metus, eu varius risus porta a. Ut venenatis libero velit, mattis auctor risus vestibulum ac. Nulla pulvinar, felis sit amet iaculis aliquet, dolor risus porttitor turpis, vel tempus dolor enim vel orci. Ut vehicula quam ac dignissim facilisis. Maecenas vel sapien cursus, tincidunt nunc nec, facilisis ex. Nullam fermentum est tellus, et ornare ligula euismod efficitur.</p>",
-      "mapSettings": {
-        "center": [319399, 6400255],
-        "zoom": 12,
-        "extent": [318959.5, 6399843, 319838.5, 6400667]
-      },
-      "chapters": [
-        {
-          "header": "Kapitel 2.1",
-          "html": "<p>Sed placerat massa vel eros tempus, eu molestie nunc lacinia. Nullam et ligula pellentesque, tempus lacus non, commodo dolor. Quisque vitae nisl congue, vehicula felis non, volutpat diam. Etiam commodo efficitur velit, nec rhoncus velit tincidunt ac. Nullam ac pretium nulla, et aliquam quam. Morbi ornare mattis quam eu scelerisque. Proin ut arcu pulvinar, vulputate augue non, elementum elit.</p>\n<p>Vivamus sit amet lectus nisl. Nunc id arcu at justo rhoncus elementum a sit amet diam. Proin mi quam, interdum non vulputate ac, pellentesque in purus. Ut feugiat tortor id nunc posuere consectetur. Sed est sem, euismod id iaculis a, feugiat semper nunc. Sed eu sem finibus, porta risus sed, congue metus. Aliquam quis metus mollis, porttitor dolor sit amet, pellentesque neque. Suspendisse vestibulum odio nunc, ut sollicitudin lectus viverra vitae. Fusce efficitur commodo velit nec aliquam. Integer venenatis porttitor fringilla. Donec in rutrum odio. Suspendisse eleifend erat sit amet odio commodo tincidunt.</p>\n<figure><img src=\"https://cdn.pixabay.com/photo/2018/11/17/22/15/tree-3822149_960_720.jpg\"/></figure>\n<p>Pellentesque accumsan tortor vitae elit dapibus, ut egestas leo tincidunt. Sed vulputate, dui ut pretium sodales, orci est malesuada eros, vel sodales ligula augue eu sapien. Donec vulputate hendrerit mi, vel consequat mauris porta a. Etiam fringilla metus in diam tincidunt, at sollicitudin mi venenatis. Vestibulum euismod molestie lobortis. Phasellus venenatis sem ac elit gravida ultricies. Donec ac tristique sem.</p>\n<p>Curabitur tincidunt, nibh nec efficitur aliquam, lectus dui varius nibh, sit amet vestibulum lectus nisl nec tortor. In blandit massa ac odio faucibus auctor. Fusce elit lacus, lobortis quis diam sit amet, commodo condimentum elit. Suspendisse potenti. Vestibulum in risus in mauris mattis iaculis vel eget mi. Donec sodales ante odio, quis iaculis mi laoreet in. Suspendisse et nunc tempor, fermentum felis sit amet, dignissim arcu. Donec convallis luctus risus, in facilisis lacus. Morbi convallis lacus arcu, ut imperdiet tortor faucibus non. Sed consequat sapien et odio vestibulum, maximus faucibus ipsum ultrices. Nam ex nisl, cursus et facilisis non, varius ac ipsum.</p>",
-          "mapSettings": {
-            "center": [236817.18151796266, 6585798.307536212],
-            "zoom": 13,
-            "extent": [
-              236424.43151796266,
-              6585558.057536212,
-              237209.93151796266,
-              6586038.557536212
-            ]
-          },
-          "chapters": [],
-          "expanded": true,
-          "layers": ["27", "18"]
-        }
-      ],
-      "expanded": false,
-      "layers": ["30"]
-    },
-    {
-      "header": "Kapitel 3",
-      "html": "<p><br></p>",
-      "mapSettings": {
-        "center": [324888, 6375272],
-        "zoom": 10,
-        "extent": [323130, 6373624, 326646, 6376920]
-      },
-      "chapters": [
-        {
-          "header": "Kapitel 3.1",
-          "html": "<h2><strong>Kapitel 3.1</strong></h2>\n<p>Vestibulum pretium justo a finibus iaculis. Duis cursus fermentum erat vel pulvinar. Maecenas finibus, tortor quis dignissim hendrerit, felis tellus bibendum turpis, eget dapibus diam est ut ex. Morbi ac dui et est tempor aliquam. Aliquam erat volutpat. Suspendisse pretium tortor arcu, eu volutpat quam auctor ut. Donec neque sem, consectetur tempor auctor ac, lobortis non sem. Donec rhoncus orci ut elit suscipit, eu pellentesque velit interdum. Duis tempus est blandit, venenatis dui quis, accumsan quam. Aliquam eleifend luctus enim sed finibus. Aenean ultricies consequat gravida. Etiam sit amet laoreet magna.</p>\n<p>Nulla eu egestas velit, ac egestas ipsum. Sed finibus ipsum eget dignissim iaculis. Etiam non dapibus nibh. Maecenas ac odio suscipit, pharetra odio et, aliquet erat. Cras ac elementum enim. Duis molestie diam quam, et varius felis tristique ut. Nulla ac elementum lacus. Curabitur efficitur fringilla sem ut sollicitudin. Fusce nec ullamcorper quam. Suspendisse faucibus bibendum scelerisque. Fusce sit amet faucibus ligula.</p>\n<p>Fusce eu luctus nulla. Sed dapibus, massa nec ultricies commodo, ante nisi maximus nunc, at pharetra dui tellus non nisl. Suspendisse luctus felis eu sapien faucibus vulputate. Sed lectus massa, porta eget tempus at, elementum ut turpis. Vivamus sed ipsum elit. Integer at quam magna. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce id lobortis nunc. Donec euismod ultricies tincidunt. Sed quis purus justo. Fusce id venenatis augue. Sed eu purus non lacus ullamcorper aliquet.</p>\n<p>Nunc sed velit ex. Nulla vulputate placerat neque vel semper. Maecenas eu justo porttitor orci mattis consequat. Fusce et est vel lacus pulvinar faucibus. Praesent auctor felis quis suscipit convallis. Aliquam quis commodo lorem, ut dapibus lectus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;</p>",
-          "mapSettings": {
-            "center": [236000, 6585000],
-            "zoom": 10,
-            "extent": [232858, 6583318, 239142, 6586682]
-          },
-          "chapters": [],
-          "expanded": true,
-          "layers": ["32"]
-        }
-      ],
-      "expanded": false,
-      "layers": ["14"]
+      "expanded": true
     }
   ],
   "map": "map_1"
