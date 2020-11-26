@@ -1,9 +1,32 @@
 import { createProxyMiddleware } from "http-proxy-middleware";
+import log4js from "log4js";
+
+// Value of process.env.LOG_LEVEL will be one of the allowed
+// log4js-values. We will customize HPM to use log4js too,
+// but we needed to send a "logLevel" property which unfortunately
+// allows only some of log4js's values. To make it work, we simply
+// map the possible log4js values to one of the allowed HMP log level
+// values.
+const logLevels = {
+  all: "debug",
+  trace: "debug",
+  debug: "debug",
+  info: "info",
+  warn: "warn",
+  error: "error",
+  fatal: "error",
+  mark: "error",
+  off: "silent",
+};
+
+// Grab a logger
+const logger = log4js.getLogger("proxy.sokigo");
 
 export default function sokigoFBProxy(err, req, res, next) {
   return createProxyMiddleware({
     target: process.env.FB_SERVICE_BASE_URL,
-    logLevel: process.env.LOG_LEVEL,
+    logLevel: logLevels[process.env.LOG_LEVEL],
+    logProvider: () => logger,
     pathRewrite: (originalPath, req) => {
       // Remove the portion that shouldn't be there when we proxy the request
       // and split the remaining string on "?" to separate any query params
@@ -16,14 +39,11 @@ export default function sokigoFBProxy(err, req, res, next) {
       // If there was another segment, it was the query string that we should preserve
       query = segments[1] ? query + "&" + segments[1] : query;
 
-      console.info(
-        "sokigo.fb.proxy.js - Rewrite:",
-        `${originalPath} --> ${path}${query}`
-      );
+      logger.debug(`${req.method} ${originalPath} ~> ${path}${query}`);
       return path + query;
     },
     onError: (err, req, res) => {
-      console.error(err, req, res);
+      logger.error(err);
     },
   });
 }

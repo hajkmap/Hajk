@@ -1,5 +1,8 @@
 import ActiveDirectory from "activedirectory";
 import ActiveDirectoryError from "../utils/ActiveDirectoryError";
+import log4js from "log4js";
+
+const logger = log4js.getLogger("service.auth");
 
 /**
  * @description Proposed setup:
@@ -22,7 +25,7 @@ import ActiveDirectoryError from "../utils/ActiveDirectoryError";
  */
 class ActiveDirectoryService {
   constructor() {
-    console.log("[AD] Initiating ActiveDirectoryService");
+    logger.trace("Initiating ActiveDirectoryService");
     // if (process.env.AD_ACTIVE !== "true")
     //   throw new ActiveDirectoryError("AD Service disabled in .env.");
     if (
@@ -88,15 +91,17 @@ class ActiveDirectoryService {
         process.env.AD_TRUSTED_PROXY_IPS?.split(",").includes(req.ip); // Else, if specified, split on comma and see if IP exists in list
 
       if (requestComesFromAcceptedIP === false) {
-        console.error(
-          "Request not accepted - request IP out of accepted range."
-        );
-        throw new Error(
+        const e = new Error(
           "AD auth requested but request comes from unaccepted IP range. See settings in .env."
         );
+        logger.error(e.message);
+        throw e;
       }
 
-      console.log("requestComesFromAcceptedIP: ", requestComesFromAcceptedIP);
+      logger.trace(
+        "[getUserFromRequestHeader] Request comes from accepted IP: %o",
+        requestComesFromAcceptedIP
+      );
 
       // See which header we should be looking into
       const xControlHeader =
@@ -107,7 +112,11 @@ class ActiveDirectoryService {
       // to errors being thrown (if AD auth is required in .env)
       const user =
         (requestComesFromAcceptedIP && req.get(xControlHeader)) || undefined;
-      console.log("user: ", user);
+      logger.trace(
+        "[getUserFromRequestHeader] Header %s has value: %o",
+        process.env.AD_TRUSTED_HEADER,
+        user
+      );
       return user;
     }
   }
@@ -128,7 +137,7 @@ class ActiveDirectoryService {
    * @memberof ActiveDirectoryService
    */
   flushCache() {
-    console.log("Flushing local cache");
+    logger.trace("Flushing local cache");
     this._users.clear();
     this._groups.clear();
     this._groupsPerUser.clear();
@@ -148,12 +157,13 @@ class ActiveDirectoryService {
     try {
       // Check if user entry already exists in store
       if (!this._users.has(sAMAccountName)) {
-        console.log(`Looking up ${sAMAccountName} in real AD…`);
+        logger.trace("[findUser] Looking up %o in real AD", sAMAccountName);
         // If store didn't contain the requested user, get it from AD
         const user = await this._findUser(sAMAccountName);
 
-        console.log(
-          `Saving the following as ${sAMAccountName} in Users Store:`,
+        logger.trace(
+          "[findUser] Saving %s in user store with value: %O",
+          sAMAccountName,
           user
         );
 
@@ -163,7 +173,7 @@ class ActiveDirectoryService {
 
       return this._users.get(sAMAccountName);
     } catch (error) {
-      console.error(error);
+      logger.error(error.message);
       // Save to Users Store to prevent subsequential lookups - we already
       // know that this user doesn't exist.
       this._users.set(sAMAccountName, {});
@@ -176,11 +186,17 @@ class ActiveDirectoryService {
       // See if we've got results in store already
       let groups = this._groupsPerUser.get(sAMAccountName);
       if (groups !== undefined) {
-        console.log("Found groups in store!");
+        logger.trace(
+          "[getGroupMembershipForUser] %o groups already found in groups-per-users store",
+          sAMAccountName
+        );
         return groups;
       }
 
-      console.log("Looking up groups in store…");
+      logger.trace(
+        "[getGroupMembershipForUser] No entry for %o in the groups-per-users store yet. Populating…",
+        sAMAccountName
+      );
 
       // First, we need to translate the incoming sAMAcountName
       // to the longer userPrincipalName that is required by
@@ -194,7 +210,11 @@ class ActiveDirectoryService {
       // We only care about the shortname (CN)
       groups = groups.map((g) => g.cn);
 
-      console.log("Done. Setting groups in store and returning.");
+      logger.trace(
+        "[getGroupMembershipForUser] Done. Setting groups-per-users store key %o to value: %O",
+        sAMAccountName,
+        groups
+      );
 
       // Set in local store
       this._groupsPerUser.set(sAMAccountName, groups);
@@ -202,7 +222,7 @@ class ActiveDirectoryService {
     } catch (error) {
       // If we didn't get groups, cache the empty result to eliminate subsequential requests
       this._groupsPerUser.set(sAMAccountName, []);
-      console.error(error);
+      logger.error(error.message);
       return [];
     }
   }
@@ -221,7 +241,10 @@ class ActiveDirectoryService {
 
       // If we haven't cached the requested user's groups yet…
       if (!this._groupsPerUser.has(sAMAccountName)) {
-        console.log("Populating store");
+        logger.trace(
+          "[isUserMemberOf] Can't find %o in groups-per-users store. Will need to populate.",
+          sAMAccountName
+        );
         // …let's cache them.
         await this.getGroupMembershipForUser(sAMAccountName);
       }
@@ -230,7 +253,7 @@ class ActiveDirectoryService {
       // of the specified group
       return this._groupsPerUser.get(sAMAccountName).includes(groupCN);
     } catch (error) {
-      console.error(error);
+      logger.error(error.message);
       // If an error was thrown above (e.g because user wasn't found
       // in AD), we return false (because a non-existing user isn't
       // a member of the specified group).
@@ -258,7 +281,7 @@ class ActiveDirectoryService {
       // Spread the Set into an Array, which is the expected output format
       return [...this._groups];
     } catch (error) {
-      console.error(error);
+      logger.error(error.message);
       return [];
     }
   }
@@ -291,7 +314,7 @@ class ActiveDirectoryService {
 
       return commonGroups;
     } catch (error) {
-      console.error(error);
+      logger.error(error.message);
       return [];
     }
   }
@@ -341,7 +364,7 @@ class ActiveDirectoryService {
   //         reject(err);
   //       }
 
-  //       console.log("isMember: ", isMember);
+  //       log.trace("isMember: ", isMember);
   //       resolve(isMember);
   //     });
   //   });

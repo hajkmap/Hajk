@@ -3,6 +3,9 @@ import path from "path";
 
 import ad from "./activedirectory.service";
 
+import log4js from "log4js";
+const logger = log4js.getLogger("service.config");
+
 class ConfigService {
   constructor() {
     // TODO: As reading files is expansive, we can read all
@@ -11,6 +14,7 @@ class ConfigService {
     // We should also implement an update-store method, perhaps
     // have a global bus (using EventEmitter?), so we can trigger
     // re-reads from FS into our in-memory store.
+    logger.trace("Initiating ConfigService");
   }
 
   /**
@@ -21,7 +25,7 @@ class ConfigService {
    * @memberof ConfigService
    */
   async getMapConfig(map, user) {
-    console.log("getMapConfig for user: ", user);
+    logger.trace("getMapConfig for user: ", user);
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `${map}.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -38,12 +42,11 @@ class ConfigService {
 
       // First, ensure that we have a valid user name. This is necessary for AD lookups.
       if (user === undefined) {
-        console.error(
-          "getMapConfig: Cannot lookup membership for undefined user. Ensure that correct user ID is provided in the request header."
-        );
-        throw new Error(
+        const e = new Error(
           "getMapConfig: AD authentication is active, but no user name was supplied. Cannot continue."
         );
+        logger.error(e);
+        throw e;
       }
 
       // Restrictions can be placed on either map config (access to map), layers/groups
@@ -59,17 +62,24 @@ class ConfigService {
 
       // First see if access to the map config is allowed for group that current user is a member of
       if (Array.isArray(visibleForGroups) && visibleForGroups.length > 0) {
+        logger.trace(
+          "Access to %s is allowed only for the following groups: %o. Checking if %s is member in any of them…",
+          map,
+          visibleForGroups,
+          user
+        );
         for (const group of visibleForGroups) {
           const isMember = await ad.isUserMemberOf(user, group);
-          console.log(group, isMember);
+          logger.trace("Member of %s? %o", group, isMember);
           // Returned the map config, after first washing it for current uer
           if (isMember === true) return this.washMapConfig(json, user);
         }
 
         // If we got this far, it looks as the current user isn't member in any
         // of the required groups - hence no access can be given to the map.
-        console.log(
-          "User is not member in any of the necessary groups - access to map restricted."
+        logger.warn(
+          "%s is not member in any of the necessary groups - access to map restricted.",
+          user
         );
         throw new Error("NOT ALLOWED");
       } else {
@@ -88,7 +98,7 @@ class ConfigService {
     // groups/layers that user has access to (or those that are unrestricted)
     // are returned.
 
-    console.log("Washing map config for user:", user);
+    logger.trace("Washing map config for user:", user);
     // Each map tool can have restrictions
 
     // Baselayers and groups/layers can have recursive restrictions
@@ -96,7 +106,7 @@ class ConfigService {
   }
 
   async getLayersStore(user) {
-    console.log("getLayersStore for user: ", user);
+    logger.trace("getLayersStore for user: ", user);
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -121,12 +131,11 @@ class ConfigService {
 
       // First, ensure that we have a valid user name. This is necessary for AD lookups.
       if (user === undefined) {
-        console.error(
-          "getLayersStore: AD auth is required but no user was specified. Cannot return any layers."
-        );
-        throw new Error(
+        const e = new Error(
           "getLayersStore: AD authentication is active, but no user name was supplied. Cannot continue."
         );
+        logger.error(e.message);
+        throw e;
       }
 
       // TODO: replace with something like:
@@ -257,7 +266,7 @@ class ConfigService {
   }
 
   async getUserSpecificMaps(user) {
-    console.log("getUserSpecificMaps for user: ", user);
+    logger.trace("getUserSpecificMaps for user: ", user);
     try {
       // Prepare our return array
       const output = [];
