@@ -40,11 +40,12 @@ const styles = (theme) => ({
 
 class SearchResultsDataset extends React.PureComponent {
   state = {
-    numberOfResultsToDisplay:
-      this.props.featureCollection.value.numberMatched >
-      this.props.featureCollection.value.numberReturned
+    numberOfResultsToDisplay: this.props.featureCollection.value.numberMatched
+      ? this.props.featureCollection.value.numberMatched >
+        this.props.featureCollection.value.numberReturned
         ? `${this.props.featureCollection.value.numberReturned}+`
-        : this.props.featureCollection.value.numberReturned,
+        : this.props.featureCollection.value.numberReturned
+      : this.props.featureCollection.value.features.length,
     expanded: this.props.sumOfResults === 1,
     showAllInformation: false,
   };
@@ -121,8 +122,10 @@ class SearchResultsDataset extends React.PureComponent {
   renderDatasetSummary = () => {
     const { numberOfResultsToDisplay } = this.state;
     const { featureCollection, classes, getOriginBasedIcon } = this.props;
-    const { numberReturned, numberMatched } = featureCollection.value;
-    const toolTipTitle = `Visar ${numberReturned} av ${numberMatched} resultat`;
+    const { numberReturned, numberMatched, features } = featureCollection.value;
+    const toolTipTitle = numberReturned
+      ? `Visar ${numberReturned} av ${numberMatched} resultat`
+      : `Visar ${features.length} resultat`;
     return (
       <AccordionSummary
         id={`search-result-dataset-${featureCollection.source.id}`}
@@ -165,10 +168,8 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   render() {
-    const { featureCollection } = this.props;
-    return featureCollection.value.numberReturned > 0
-      ? this.renderResultsDataset()
-      : null;
+    const { numberOfResultsToDisplay } = this.state;
+    return numberOfResultsToDisplay > 0 ? this.renderResultsDataset() : null;
   }
 }
 
