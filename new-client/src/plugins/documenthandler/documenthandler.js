@@ -51,6 +51,7 @@ class DocumentHandler extends React.PureComponent {
         .init()
         .then((loadedDocumentModel) => {
           this.fetchCustomThemeJson().then((customTheme) => {
+            console.log(customTheme, "customTheme");
             this.setState({
               model: loadedDocumentModel,
               customTheme: customTheme,
@@ -62,11 +63,28 @@ class DocumentHandler extends React.PureComponent {
     });
   }
 
+  /**
+   * @summary Loops customTheme and checks if certain typography-variants have marginBottom set
+   * in the theme file. If not set, then we inject default value.
+   * @param {customTheme} documentHandlerTheme
+   * @memberof documenthandler.js
+   */
+  setBottomMarginsForTypographyVariants = (documentHandlerTheme) => {
+    ["body1", "h1", "h2", "h3", "h4", "h5", "h6"].forEach((key) => {
+      const marginBottom = documentHandlerTheme.typography[key].marginBottom;
+      if (!marginBottom) {
+        documentHandlerTheme.typography[key].marginBottom =
+          this.props.theme.spacing(1) || "8px";
+      }
+    });
+  };
+
   fetchCustomThemeJson = () => {
     const { options } = this.props;
     return fetch(options.customThemeUrl, fetchOpts)
       .then((res) => {
         return res.json().then((documentHandlerTheme) => {
+          this.setBottomMarginsForTypographyVariants(documentHandlerTheme);
           return createMuiTheme(
             deepMerge(this.props.theme, documentHandlerTheme)
           );

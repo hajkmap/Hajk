@@ -31,6 +31,9 @@ const useStyles = makeStyles((theme) => ({
     objectFit: "contain",
     objectPosition: "left",
   },
+  test: {
+    margin: "20px",
+  },
   popupActivatedImage: {
     marginBottom: theme.spacing(1),
     cursor: "pointer",
@@ -115,7 +118,7 @@ const getFormattedComponentFromTag = (tag) => {
 export const Paragraph = ({ pTag }) => {
   const classes = useStyles();
   return (
-    <Typography className={classes.typography} variant="body1">
+    <Typography variant="body1">
       {getFormattedComponentFromTag(pTag)}
     </Typography>
   );
