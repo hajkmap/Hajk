@@ -6,7 +6,7 @@ import {
   AtomicBlockUtils,
   getDefaultKeyBinding,
   KeyBindingUtil,
-  convertToRaw,
+  convertToRaw
 } from "draft-js";
 import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
@@ -32,16 +32,16 @@ import { ReadOnly } from "./addMediaPlugin";
 
 import StyleButton from "./StyleButton";
 
-const ColorButtonGreen = withStyles((theme) => ({
+const ColorButtonGreen = withStyles(theme => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700],
+      backgroundColor: green[700]
     },
     marginRight: "28px",
-    float: "left",
-  },
+    float: "left"
+  }
 }))(Button);
 
 export default class DocumentTextEditor extends React.Component {
@@ -58,7 +58,7 @@ export default class DocumentTextEditor extends React.Component {
       urlType: "",
       imageList: this.props.imageList,
       documents: this.props.documents,
-      readOnly: false,
+      readOnly: false
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -67,21 +67,21 @@ export default class DocumentTextEditor extends React.Component {
       console.log(stateToHTML(content));
       console.log(convertToRaw(content));
     };
-    this.onChange = (editorState) => this.setState({ editorState });
-    this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
-    this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
-    this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
-    this.onWidthChange = (e) => this.setState({ mediaWidth: e.target.value });
-    this.onHeightChange = (e) => this.setState({ mediaHeight: e.target.value });
-    this.onDataCaptionChange = (e) =>
+    this.onChange = this._onChange.bind(this);
+    this.onURLChange = e => this.setState({ urlValue: e.target.value });
+    this.onTitleChange = e => this.setState({ urlTitle: e.target.value });
+    this.onTitleIdChange = e => this.setState({ urlTitleId: e.target.value });
+    this.onWidthChange = e => this.setState({ mediaWidth: e.target.value });
+    this.onHeightChange = e => this.setState({ mediaHeight: e.target.value });
+    this.onDataCaptionChange = e =>
       this.setState({ mediaCaption: e.target.value });
-    this.onDataSourceChange = (e) =>
+    this.onDataSourceChange = e =>
       this.setState({ mediaSource: e.target.value });
-    this.onDataPopupChange = (e) =>
+    this.onDataPopupChange = e =>
       this.setState({ mediaPopup: !this.state.mediaPopup });
-    this.onBlockBackgroundChange = (e) =>
+    this.onBlockBackgroundChange = e =>
       this.setState({ blockBackground: e.target.value });
-    this.onBlockDividerChange = (e) =>
+    this.onBlockDividerChange = e =>
       this.setState({ blockDivider: e.target.value });
     this.addAudio = this._addAudio.bind(this);
     this.addImage = this._addImage.bind(this);
@@ -101,6 +101,10 @@ export default class DocumentTextEditor extends React.Component {
     this.onLinkInputKeyDown = this._onLinkInputKeyDown.bind(this);
     this.toggleBlockType = this._toggleBlockType.bind(this);
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
+  }
+  _onChange(editorState) {
+    this.setState({ editorState });
+    this.applyChanges();
   }
   _handleKeyCommand(command, editorState) {
     const newState = RichUtils.handleKeyCommand(editorState, command);
@@ -128,7 +132,7 @@ export default class DocumentTextEditor extends React.Component {
       mediaHeight,
       mediaCaption,
       mediaSource,
-      mediaPopup,
+      mediaPopup
     } = this.state;
     const contentState = editorState.getCurrentContent();
 
@@ -141,7 +145,7 @@ export default class DocumentTextEditor extends React.Component {
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
-        "data-popup": mediaPopup,
+        "data-popup": mediaPopup
       }
     );
 
@@ -165,7 +169,7 @@ export default class DocumentTextEditor extends React.Component {
         mediaHeight: "",
         mediaCaption: "",
         mediaSource: "",
-        mediaPopup: false,
+        mediaPopup: false
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -187,7 +191,7 @@ export default class DocumentTextEditor extends React.Component {
         mediaHeight: "",
         mediaCaption: "",
         mediaSource: "",
-        mediaPopup: false,
+        mediaPopup: false
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -200,7 +204,7 @@ export default class DocumentTextEditor extends React.Component {
     const { editorState, urlValue, urlType, urlTitle, urlTitleId } = this.state;
     const data = {
       url: urlValue,
-      type: urlType,
+      type: urlType
     };
 
     if (urlType === "urllink") {
@@ -235,7 +239,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         urlValue: "",
         urlTitle: "",
-        urlTitleId: "",
+        urlTitleId: ""
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -255,7 +259,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         urlValue: "",
         urlTitle: "",
-        urlTitleId: "",
+        urlTitleId: ""
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -263,12 +267,12 @@ export default class DocumentTextEditor extends React.Component {
     );
   }
 
-  _handleReturn = (evt) => {
+  _handleReturn = evt => {
     // Handle soft break on Shift+Enter
     const blockType = RichUtils.getCurrentBlockType(this.state.editorState);
     if (evt.shiftKey) {
       this.setState({
-        editorState: RichUtils.insertSoftNewline(this.state.editorState),
+        editorState: RichUtils.insertSoftNewline(this.state.editorState)
       });
       return "handled";
     }
@@ -287,7 +291,7 @@ export default class DocumentTextEditor extends React.Component {
         mediaHeight: this.state.mediaHeight,
         mediaCaption: this.state.mediaCaption,
         mediaSource: this.state.mediaSource,
-        mediaPopup: this.state.mediaPopup,
+        mediaPopup: this.state.mediaPopup
       },
       () => {
         setTimeout(() => this.refs.url.focus(), 0);
@@ -302,7 +306,7 @@ export default class DocumentTextEditor extends React.Component {
         urlValue: this.state.urlValue,
         urlType: type,
         urlTitle: "",
-        urlTitleId: "",
+        urlTitleId: ""
       },
       () => {
         setTimeout(() => this.refs.link.focus(), 0);
@@ -395,14 +399,14 @@ export default class DocumentTextEditor extends React.Component {
 
   createMarkup(html) {
     return {
-      __html: html,
+      __html: html
     };
   }
 
   getHtml() {
     const content = this.state.editorState.getCurrentContent();
 
-    const blockStyleFn = (block) => {
+    const blockStyleFn = block => {
       const blockType = block.getType().toLowerCase();
 
       if (blockType === "blockquote") {
@@ -410,13 +414,13 @@ export default class DocumentTextEditor extends React.Component {
           attributes: {
             "data-divider-color": "",
             "data-background-color": "",
-            "data-text-section": "",
-          },
+            "data-text-section": ""
+          }
         };
       }
     };
 
-    const entityStyleFn = (entity) => {
+    const entityStyleFn = entity => {
       const entityType = entity.getType().toUpperCase();
       if (entityType === "LINK") {
         // Add styling here
@@ -428,7 +432,7 @@ export default class DocumentTextEditor extends React.Component {
 
     const options = {
       blockStyleFn,
-      entityStyleFn,
+      entityStyleFn
     };
     return stateToHTML(content, options);
   }
@@ -439,7 +443,7 @@ export default class DocumentTextEditor extends React.Component {
     this.props.onUpdate(htmlString);
     this.setState({
       //readonly: !this.state.readonly,
-      html: htmlString,
+      html: htmlString
     });
   }
 
@@ -507,7 +511,7 @@ export default class DocumentTextEditor extends React.Component {
   toggleReadOnly = () => {
     const { readOnly } = this.state;
     this.setState({
-      readOnly: !readOnly,
+      readOnly: !readOnly
     });
   };
 
@@ -654,7 +658,6 @@ export default class DocumentTextEditor extends React.Component {
             style={styles.editor}
             blockStyleFn={getBlockStyle}
             blockRendererFn={mediaBlockRenderer}
-            //toggleReadOnly={false}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             handlePastedText={this.handlePastedText}
@@ -695,10 +698,10 @@ const BLOCK_TYPES = [
   //{ label: "H1", style: "header-one" },
   { label: <FormatQuoteIcon />, style: "blockquote" },
   { label: <FormatListBulletedIcon />, style: "unordered-list-item" },
-  { label: <FormatListNumberedIcon />, style: "ordered-list-item" },
+  { label: <FormatListNumberedIcon />, style: "ordered-list-item" }
 ];
 
-const BlockStyleControls = (props) => {
+const BlockStyleControls = props => {
   const { editorState } = props;
   const selection = editorState.getSelection();
   const blockType = editorState
@@ -708,7 +711,7 @@ const BlockStyleControls = (props) => {
 
   return (
     <div style={styles.buttons}>
-      {BLOCK_TYPES.map((type) => (
+      {BLOCK_TYPES.map(type => (
         <StyleButton
           key={type.style}
           active={type.style === blockType}
@@ -725,13 +728,13 @@ const BlockStyleControls = (props) => {
 const INLINE_STYLES = [
   { label: <FormatBoldIcon />, style: "BOLD" },
   { label: <FormatItalicIcon />, style: "ITALIC" },
-  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" },
+  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" }
 ];
-const InlineStyleControls = (props) => {
+const InlineStyleControls = props => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
   return (
     <div style={styles.buttons}>
-      {INLINE_STYLES.map((type) => (
+      {INLINE_STYLES.map(type => (
         <StyleButton
           key={type.style}
           active={currentStyle.has(type.style)}
@@ -749,44 +752,44 @@ const styles = {
   root: {
     fontFamily: "'Georgia', serif",
     width: 1000,
-    border: "1px solid #ddd",
+    border: "1px solid #ddd"
   },
   buttonContainer: {
     height: 40,
-    borderBottom: "1px solid #ddd",
+    borderBottom: "1px solid #ddd"
   },
   buttons: {
     borderRight: "1px solid #ccc",
-    float: "left",
+    float: "left"
   },
   urlInputContainer: {
-    marginBottom: 10,
+    marginBottom: 10
   },
   urlInput: {
     fontFamily: "'Georgia', serif",
     marginRight: 10,
-    padding: 3,
+    padding: 3
   },
   editorContainer: {
     border: "1px solid #ccc",
     cursor: "text",
     minHeight: 80,
-    fontSize: 16,
+    fontSize: 16
   },
   editor: {
     backgroundColor: "#fff",
-    padding: "18px",
+    padding: "18px"
   },
   button: {
     marginTop: 10,
-    textAlign: "center",
+    textAlign: "center"
   },
   media: {
-    whiteSpace: "initial",
+    whiteSpace: "initial"
   },
   paper: {
     position: "absolute",
     width: 400,
-    border: "2px solid #000",
-  },
+    border: "2px solid #000"
+  }
 };
