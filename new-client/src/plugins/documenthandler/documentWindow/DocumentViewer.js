@@ -105,6 +105,9 @@ class DocumentViewer extends React.PureComponent {
   componentDidUpdate = (prevProps) => {
     if (prevProps.activeDocument !== this.props.activeDocument) {
       this.scrollToTop();
+      this.setState({
+        expandedTableOfContents: expandedTocOnStart(this.props),
+      });
     }
   };
 
