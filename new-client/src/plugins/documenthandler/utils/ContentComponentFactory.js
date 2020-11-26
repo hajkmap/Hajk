@@ -6,11 +6,21 @@ import clsx from "clsx";
 import Box from "@material-ui/core/Box";
 import TextArea from "../documentWindow/TextArea";
 import { makeStyles } from "@material-ui/core/styles";
-import { Button, Typography, CardMedia, List } from "@material-ui/core";
+import {
+  Button,
+  Typography,
+  CardMedia,
+  List,
+  ListItem,
+  Grid,
+} from "@material-ui/core";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
 
+//Had to make some magic to be able to handle list in all different sizes.
+//Common problem to get second row indented in a good way and even more difficult
+//when you can change the font-size in theme.
 const getIndentationValue = (fontSize, multiplier, negative) => {
   let value = multiplier * fontSize.substring(0, fontSize.length - 3);
   return negative ? `${value * -1}rem` : `${value}rem`;
@@ -35,7 +45,6 @@ const useStyles = makeStyles((theme) => ({
   imageInformationWrapper: {
     marginBottom: theme.spacing(1),
   },
-
   startIcon: {
     marginLeft: theme.spacing(0),
   },
@@ -49,13 +58,19 @@ const useStyles = makeStyles((theme) => ({
     width: "auto",
     maxWidth: "100%",
   },
-  typography: {
-    overflowWrap: "break-word",
+  listItemOneDigit: {
+    marginRight: getIndentationValue(theme.typography.body1.fontSize, 1), //MAGIC
+  },
+  listItemTwoDigit: {
     marginBottom: theme.spacing(1),
+    marginRight: getIndentationValue(theme.typography.body1.fontSize, 0.5), //MAGIC
   },
   ulList: {
     listStyle: "initial",
     listStylePosition: "inside",
+    overflowWrap: "break-word",
+    wordBreak: "break-word",
+    marginBottom: theme.spacing(1),
     paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.375), //MAGIC
     textIndent: getIndentationValue(
       theme.typography.body1.fontSize,
@@ -63,16 +78,11 @@ const useStyles = makeStyles((theme) => ({
       true
     ), //MAGIC
     padding: theme.spacing(0),
-    marginBottom: theme.spacing(1),
   },
-  listItemMargin: {
-    marginLeft: theme.spacing(1),
+  olListItem: {
+    wordBreak: "break-word",
   },
   olList: {
-    listStyle: "decimal",
-    listStylePosition: "inside",
-    paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.6), //MAGIC
-    textIndent: getIndentationValue(theme.typography.body1.fontSize, 1.6, true), //MAGIC
     padding: theme.spacing(0),
     marginBottom: theme.spacing(1),
   },
@@ -139,16 +149,25 @@ export const OLComponent = ({ olComponent }) => {
     <List className={classes.olList} component="ol">
       {children.map((listItem, index) => {
         return (
-          <Typography
-            variant="body1"
-            component="li"
-            className={classes.typography}
-            key={index}
-          >
-            <span className={classes.listItemMargin}>
-              {getFormattedComponentFromTag(listItem)}
-            </span>
-          </Typography>
+          <ListItem disableGutters key={index}>
+            <Grid wrap="nowrap" container>
+              <Grid
+                className={clsx(
+                  index < 10
+                    ? classes.listItemOneDigit
+                    : classes.listItemTwoDigit
+                )}
+                item
+              >
+                <Typography variant="body1">{`${index}.`}</Typography>
+              </Grid>
+              <Grid item>
+                <Typography className={classes.olListItem} variant="body1">
+                  {getFormattedComponentFromTag(listItem)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </ListItem>
         );
       })}
     </List>
