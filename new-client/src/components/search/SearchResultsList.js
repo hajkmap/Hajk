@@ -6,7 +6,6 @@ import SearchResultsDataset from "./SearchResultsDataset";
 
 const styles = (theme) => ({
   searchResultDatasetWrapper: {
-    paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(1),
   },
 });
@@ -67,25 +66,29 @@ class SearchResultsList extends React.PureComponent {
     return (
       <Grid container alignItems="center" justify="center">
         <Grid container direction="column" item>
-          {featureCollectionsContainingFeatures.map((featureCollection) => (
-            <Grid
-              key={featureCollection.source.id}
-              xs={12}
-              className={cslx(
-                featureCollections.length !== 1 && featureCollection,
-                classes.searchResultDatasetWrapper
-              )}
-              item
-            >
-              <SearchResultsDataset
-                app={app}
-                featureCollection={featureCollection}
-                getOriginBasedIcon={getOriginBasedIcon}
-                sumOfResults={sumOfResults}
-                handleOnResultClick={this.handleOnResultClick}
-              />
-            </Grid>
-          ))}
+          {featureCollectionsContainingFeatures.map(
+            (featureCollection, index) => (
+              <Grid
+                key={featureCollection.source.id}
+                xs={12}
+                className={cslx({
+                  [classes.searchResultDatasetWrapper]:
+                    featureCollections.length !== 1 &&
+                    featureCollection &&
+                    index !== featureCollectionsContainingFeatures.length - 1,
+                })}
+                item
+              >
+                <SearchResultsDataset
+                  app={app}
+                  featureCollection={featureCollection}
+                  getOriginBasedIcon={getOriginBasedIcon}
+                  sumOfResults={sumOfResults}
+                  handleOnResultClick={this.handleOnResultClick}
+                />
+              </Grid>
+            )
+          )}
         </Grid>
       </Grid>
     );

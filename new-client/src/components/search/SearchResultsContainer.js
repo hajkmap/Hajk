@@ -52,6 +52,12 @@ const styles = (theme) => ({
   },
 });
 
+const AccordionDetailsNoPadding = withStyles({
+  root: {
+    padding: 0,
+  },
+})(AccordionDetails);
+
 class SearchResultsContainer extends React.PureComponent {
   state = {
     expanded: true,
@@ -97,19 +103,15 @@ class SearchResultsContainer extends React.PureComponent {
         </Grid>
         <Grid item>{this.renderSearchResultListOptions()}</Grid>
         <Grid item>
-          <IconButton onClick={this.toggleResultListExpansion}>
-            {this.state.expanded ? (
-              <>
-                <ExpandLessIcon color="primary"></ExpandLessIcon>
-                <Typography color="primary">Dölj</Typography>
-              </>
-            ) : (
-              <>
-                <ExpandMoreIcon color="primary"></ExpandMoreIcon>
-                <Typography color="primary">Visa</Typography>
-              </>
-            )}
-          </IconButton>
+          <Button
+            onClick={this.toggleResultListExpansion}
+            color="primary"
+            endIcon={
+              this.state.expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />
+            }
+          >
+            {this.state.expanded ? `Dölj` : `Visa`}
+          </Button>
         </Grid>
       </Grid>
     );
@@ -144,7 +146,7 @@ class SearchResultsContainer extends React.PureComponent {
               >
                 {this.renderSearchResultContainerHeader()}
               </AccordionSummary>
-              <AccordionDetails
+              <AccordionDetailsNoPadding
                 id="search-result-list"
                 className={classes.searchResultListWrapper}
               >
@@ -155,7 +157,7 @@ class SearchResultsContainer extends React.PureComponent {
                   featureCollections={featureCollections}
                   app={app}
                 />
-              </AccordionDetails>
+              </AccordionDetailsNoPadding>
             </Accordion>
           </Paper>
         )}

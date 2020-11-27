@@ -16,7 +16,6 @@ import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 
 const styles = (theme) => ({
   datasetSummary: {
-    backgroundColor: "#f2f2f2",
     borderTop: "2px solid #dedede",
     borderBottom: "2px solid #dedede",
   },
@@ -31,12 +30,20 @@ const styles = (theme) => ({
     padding: 0,
   },
   datasetTable: {
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
     cursor: "pointer",
     "&:hover": {
       backgroundColor: theme.palette.action.hover,
     },
   },
 });
+
+const AccordionDetailsNoPadding = withStyles({
+  root: {
+    padding: 0,
+  },
+})(AccordionDetails);
 
 class SearchResultsDataset extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
@@ -81,7 +88,7 @@ class SearchResultsDataset extends React.PureComponent {
     const { showAllInformation } = this.state;
 
     return (
-      <AccordionDetails
+      <AccordionDetailsNoPadding
         id={`search-result-dataset-details-${featureCollection.source.id}`}
         className={classes.datasetDetailsContainer}
       >
@@ -97,8 +104,7 @@ class SearchResultsDataset extends React.PureComponent {
                   item
                 >
                   <Typography variant="srOnly">Aktivera sökresultat</Typography>
-                  <Grid item xs={1}></Grid>
-                  <Grid item xs={10}>
+                  <Grid item xs={12}>
                     <SearchResultsDatasetFeature
                       feature={f}
                       app={app}
@@ -107,7 +113,6 @@ class SearchResultsDataset extends React.PureComponent {
                       handleOnResultClick={handleOnResultClick}
                     />
                   </Grid>
-                  <Grid item xs={1}></Grid>
                 </Grid>
                 {this.renderShowMoreInformationButton()}
                 {!this.resultHasOnlyOneFeature() && (
@@ -116,7 +121,7 @@ class SearchResultsDataset extends React.PureComponent {
               </React.Fragment>
             ))}
         </Grid>
-      </AccordionDetails>
+      </AccordionDetailsNoPadding>
     );
   };
 
