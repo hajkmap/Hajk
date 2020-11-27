@@ -21,40 +21,30 @@ const app = new Express();
 log4js.configure({
   // Appenders are output methods, e.g. if log should be written to file or console (or both)
   appenders: {
-    // Default appender, will print to stdout
-    console: {
-      type: "stdout",
-    },
-    // This appender has a layout pattern that also prints line numbers,
-    // use it if you set 'enableCallStack: true' for a given category
-    consoleWithLineNumbers: {
-      type: "stdout",
-      layout: {
-        type: "pattern",
-        pattern: "%d %p %c %f:%l %m%n",
-      },
-    },
-    // This appender is used for writing access logs,
-    // it will rotate daily
+    // Console appender will print to stdout
+    console: { type: "stdout" },
+    // File appender will print to a log file, rotating it each day
+    file: { type: "dateFile", filename: "logs/output.log" },
+    // This appender is used for writing access logs and will rotate daily
     accessLog: { type: "dateFile", filename: "logs/access.log" },
   },
   categories: {
-    // 'default' will be valid for all categories if not overwritten.
     default: {
-      appenders: ["console"],
+      // Use settings from .env to decide which appenders (defined above) will be active
+      appenders: process.env.LOG_DEBUG_TO.split(","),
+      // Use settings from .env to determine which log level should be used
       level: process.env.LOG_LEVEL,
     },
-    // Rename this to default if you want line numbers (call stack)
-    defaultWithLineNumbers: {
-      appenders: ["consoleWithLineNumbers"],
-      level: process.env.LOG_LEVEL,
-      enableCallStack: true,
-    },
-
-    // Send log of http requests (access log) to a separate appender
-    http: { appenders: ["accessLog"], level: "all" },
+    // If activated in .env, write access log to the configured appenders
+    ...(process.env.LOG_ACCESS_LOG_TO.trim().length !== 0 && {
+      http: {
+        appenders: process.env.LOG_ACCESS_LOG_TO.split(","),
+        level: "all",
+      },
+    }),
   },
 });
+
 const logger = log4js.getLogger("hajk");
 const exit = process.exit;
 

@@ -25,9 +25,16 @@ const logger = log4js.getLogger("service.auth");
  */
 class ActiveDirectoryService {
   constructor() {
+    if (process.env.AD_LOOKUP_ACTIVE !== "true") {
+      logger.info(
+        "AD_LOOKUP_ACTIVE is set to %o in .env. Not enabling ActiveDirectory authentication.",
+        process.env.AD_LOOKUP_ACTIVE
+      );
+      return;
+    }
+
     logger.trace("Initiating ActiveDirectoryService");
-    // if (process.env.AD_ACTIVE !== "true")
-    //   throw new ActiveDirectoryError("AD Service disabled in .env.");
+
     if (
       process.env.AD_URL === undefined ||
       process.env.AD_BASE_DN === undefined ||
@@ -65,6 +72,9 @@ class ActiveDirectoryService {
    * be done), the header's value will only be read if request comes from a trusted IP. Else
    * undefined will be returned, which will lead to errors.
    *
+   * Please note that a special flag, AD_OVERRIDE_USER_WITH_VALUE, will override the value of
+   * request header. Use it only for development and debugging purposes, NEVER in production.
+   *
    * @param {*} req
    * @returns User as specified in configured request header or undefined if checks weren't met.
    * @memberof ActiveDirectoryService
@@ -75,6 +85,23 @@ class ActiveDirectoryService {
       // about doing any username checks. Just return undefined as username.
       return undefined;
     } else {
+      // AD authentication is active.
+      //
+      // First see if webmaster wants to override the header value (useful for developing and testing)
+      if (
+        process.env.AD_OVERRIDE_USER_WITH_VALUE !== undefined &&
+        process.env.AD_OVERRIDE_USER_WITH_VALUE.trim().length !== 0
+      ) {
+        logger.warn(
+          'AD_OVERRIDE_USER_WITH_VALUE is set in .env! Will use "%s" as user name for all AD functions. DON\'T USE THIS IN PRODUCTION!',
+          process.env.AD_OVERRIDE_USER_WITH_VALUE
+        );
+
+        return process.env.AD_OVERRIDE_USER_WITH_VALUE;
+      }
+
+      // Now it's time to take care of the _real_ AD authentication!
+      //
       // AD_LOOKUP_ACTIVE is "true" so let's find out a couple of things.
       // 1. Do we only accept requests from certain IPs? If so, check that
       // request comes from accepted IP. If not, abort.
@@ -82,6 +109,7 @@ class ActiveDirectoryService {
       // accepted IP, or because we accept any IPs (dangerous!)) we can now
       // take care of finding out the user name. It will be read from a REQ
       // header.
+      //
       // Implementation follows.
 
       // Step 1: See if the current req IP is within the accepted IPs range
@@ -90,17 +118,30 @@ class ActiveDirectoryService {
         process.env.AD_TRUSTED_PROXY_IPS.trim().length === 0 || // or because it's an empty string, it means that we accept any IP (dangerous!).
         process.env.AD_TRUSTED_PROXY_IPS?.split(",").includes(req.ip); // Else, if specified, split on comma and see if IP exists in list
 
+      // Abort if request comes from unaccepted IP range
       if (requestComesFromAcceptedIP === false) {
         const e = new Error(
-          "AD auth requested but request comes from unaccepted IP range. See settings in .env."
+          `[getUserFromRequestHeader] AD authentication does not allow requests from ${req.ip}. Aborting.`
         );
         logger.error(e.message);
         throw e;
       }
 
+      // If we got this far, we've got through the check above. But we should ensure
+      // that IP range really is configured - if not we should print an additional
+      // warning in the log, so that admin is aware of this possible misconfiguration.
+      if (
+        process.env.AD_TRUSTED_PROXY_IPS === undefined ||
+        process.env.AD_TRUSTED_PROXY_IPS.trim().length === 0
+      ) {
+        logger.warn(
+          `[getUserFromRequestHeader] AD authentication is active but no IP range restriction is set in .env. 
+                          ***This means that you accept the value of X-Control-Header from any request, which is potentially a huge security risk!***`
+        );
+      }
+
       logger.trace(
-        "[getUserFromRequestHeader] Request comes from accepted IP: %o",
-        requestComesFromAcceptedIP
+        `[getUserFromRequestHeader] Request from ${req.ip} accepted by AD`
       );
 
       // See which header we should be looking into
@@ -119,6 +160,30 @@ class ActiveDirectoryService {
       );
       return user;
     }
+  }
+
+  async isUserValid(sAMAccountName) {
+    logger.trace(
+      "[isUserValid] Checking if %o is a valid user in AD",
+      sAMAccountName
+    );
+
+    // Grab the user object from AD (or Users store, if already there)
+    const user = await this.findUser(sAMAccountName);
+
+    // We assume that the user is valid if it has the sAMAccountName property.
+    // Invalid users, that have not been found in AD, will be set to empty objects,
+    // so this should work in all cases (unless some AD lacks the sAMAccountName property).
+    const isValid = Object.prototype.hasOwnProperty.call(
+      user,
+      "sAMAccountName"
+    );
+    logger.trace(
+      "[isUserValid] %o is %sa valid user in AD",
+      sAMAccountName,
+      isValid ? "" : "NOT "
+    );
+    return isValid;
   }
 
   /**
@@ -155,6 +220,19 @@ class ActiveDirectoryService {
    */
   async findUser(sAMAccountName) {
     try {
+      // If anything else than String is supplied, it can't be a valid sAMAccountName
+      if (typeof sAMAccountName !== "string") {
+        throw new Error(
+          `${sAMAccountName} is not a string, hence it can't be a valid user name sAMAccountName`
+        );
+      }
+
+      sAMAccountName = sAMAccountName.trim();
+
+      if (sAMAccountName.length === 0) {
+        throw new Error("Empty string is not a valid sAMAccountName");
+      }
+
       // Check if user entry already exists in store
       if (!this._users.has(sAMAccountName)) {
         logger.trace("[findUser] Looking up %o in real AD", sAMAccountName);
@@ -162,7 +240,7 @@ class ActiveDirectoryService {
         const user = await this._findUser(sAMAccountName);
 
         logger.trace(
-          "[findUser] Saving %s in user store with value: %O",
+          "[findUser] Saving %o in user store with value: \n%O",
           sAMAccountName,
           user
         );
@@ -173,7 +251,7 @@ class ActiveDirectoryService {
 
       return this._users.get(sAMAccountName);
     } catch (error) {
-      logger.error(error.message);
+      logger.error("[findUser] %s", error.message);
       // Save to Users Store to prevent subsequential lookups - we already
       // know that this user doesn't exist.
       this._users.set(sAMAccountName, {});

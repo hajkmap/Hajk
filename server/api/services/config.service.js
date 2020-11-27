@@ -1,9 +1,8 @@
 import fs from "fs";
 import path from "path";
-
 import ad from "./activedirectory.service";
-
 import log4js from "log4js";
+
 const logger = log4js.getLogger("service.config");
 
 class ConfigService {
@@ -18,14 +17,15 @@ class ConfigService {
   }
 
   /**
-   * @summary Get contents of a map configuration as JSON object
+   * @summary Get contents of a map configuration as JSON object, if AD is active
+   * a check will be made to see if specified user has access to the map.
    *
-   * @param {*} map Name of the map configuration
+   * @param {String} map Name of the map configuration
+   * @param {String} user User name that must have explicit access to the map
    * @returns Map config contents in JSON
    * @memberof ConfigService
    */
   async getMapConfig(map, user) {
-    logger.trace("getMapConfig for user: ", user);
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `${map}.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -33,19 +33,25 @@ class ConfigService {
 
       // If we haven't enabled AD restrictions, just return the entire map config
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
+        logger.trace("[getMapConfig] Getting %s map config", map);
         return json;
       }
 
+      logger.trace(
+        "[getMapConfig] Attempting to get %s for user %s",
+        map,
+        user
+      );
       // Else, it looks like MapService is configured to respect AD restrictions.
       // We must do some extra work and remove layers that current user should
       // see before we can return the contents of map config.
 
       // First, ensure that we have a valid user name. This is necessary for AD lookups.
-      if (user === undefined) {
+      if ((await ad.isUserValid(user)) !== true) {
         const e = new Error(
-          "getMapConfig: AD authentication is active, but no user name was supplied. Cannot continue."
+          "[getMapConfig] AD authentication is active, but no valid user name was supplied. Access restricted."
         );
-        logger.error(e);
+        logger.error(e.message);
         throw e;
       }
 
@@ -63,25 +69,35 @@ class ConfigService {
       // First see if access to the map config is allowed for group that current user is a member of
       if (Array.isArray(visibleForGroups) && visibleForGroups.length > 0) {
         logger.trace(
-          "Access to %s is allowed only for the following groups: %o. Checking if %s is member in any of them…",
+          "[getMapConfig] Access to %s is allowed only for the following groups: %o. \nChecking if %s is member in any of them…",
           map,
           visibleForGroups,
           user
         );
+
         for (const group of visibleForGroups) {
           const isMember = await ad.isUserMemberOf(user, group);
-          logger.trace("Member of %s? %o", group, isMember);
+
+          logger.trace(
+            "[getMapConfig] Is %s? member of %s? %o ",
+            user,
+            group,
+            isMember
+          );
+
           // Returned the map config, after first washing it for current uer
           if (isMember === true) return this.washMapConfig(json, user);
         }
 
         // If we got this far, it looks as the current user isn't member in any
         // of the required groups - hence no access can be given to the map.
-        logger.warn(
-          "%s is not member in any of the necessary groups - access to map restricted.",
-          user
+        const e = new Error(
+          `[getMapConfig] ${user} is not member in any of the necessary groups. \nAccess to map restricted.`
         );
-        throw new Error("NOT ALLOWED");
+
+        logger.error(e);
+
+        throw e;
       } else {
         // It looks as the map config itself has no restriction.
         // There can still be restrictions inside specific layers though,
@@ -98,7 +114,7 @@ class ConfigService {
     // groups/layers that user has access to (or those that are unrestricted)
     // are returned.
 
-    logger.trace("Washing map config for user:", user);
+    logger.trace("[washMapConfig] Washing map config for %s", user);
     // Each map tool can have restrictions
 
     // Baselayers and groups/layers can have recursive restrictions
@@ -106,7 +122,7 @@ class ConfigService {
   }
 
   async getLayersStore(user) {
-    logger.trace("getLayersStore for user: ", user);
+    logger.trace("[getLayersStore] for user %o", user);
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -122,6 +138,9 @@ class ConfigService {
 
       // If we haven't enabled AD restrictions, just return the entire layers store
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
+        logger.trace(
+          "AD auth disabled - returning entire contents of layers store"
+        );
         return json;
       }
 
@@ -130,9 +149,9 @@ class ConfigService {
       // see before we can return the contents of map config.
 
       // First, ensure that we have a valid user name. This is necessary for AD lookups.
-      if (user === undefined) {
+      if ((await ad.isUserValid(user)) !== true) {
         const e = new Error(
-          "getLayersStore: AD authentication is active, but no user name was supplied. Cannot continue."
+          "[getLayersStore] AD authentication is active, but no valid user name was supplied. Cannot continue."
         );
         logger.error(e.message);
         throw e;
@@ -241,6 +260,7 @@ class ConfigService {
    * @memberof ConfigService
    */
   async getAvailableMaps() {
+    logger.trace("[getAvailableMaps] invoked");
     try {
       const dir = path.join(process.cwd(), "App_Data");
       // List dir contents, the second parameter will ensure we get Dirent objects
@@ -266,7 +286,7 @@ class ConfigService {
   }
 
   async getUserSpecificMaps(user) {
-    logger.trace("getUserSpecificMaps for user: ", user);
+    logger.trace("[getUserSpecificMaps] for %s", user);
     try {
       // Prepare our return array
       const output = [];
