@@ -153,13 +153,49 @@ class Search extends React.PureComponent {
     const { app } = this.props;
     app.globalObserver.subscribe("core.appLoaded", () => {
       this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
-        this.setState({
-          searchImplementedPluginsLoaded: true,
-          searchImplementedPlugins: searchImplementedPlugins,
-          searchTools: this.getSearchTools(searchImplementedPlugins),
-        });
+        this.setState(
+          {
+            searchImplementedPluginsLoaded: true,
+            searchImplementedPlugins: searchImplementedPlugins,
+            searchTools: this.getSearchTools(searchImplementedPlugins),
+          },
+          () => {
+            this.handlePotentialUrlQuerySearch();
+          }
+        );
       });
     });
+  };
+
+  getSourcesByIds = (sourceIds) => {
+    return this.searchModel
+      .getSources()
+      .filter((source) => sourceIds.indexOf(source.id) > -1);
+  };
+
+  handlePotentialUrlQuerySearch = () => {
+    const { appModel } = this.props.app;
+    // Grab the (already decoded) URL param values
+    const q = appModel.config.urlParams.get("q")?.trim(); // Use of "?." will return either a String or undefined
+    const s = appModel.config.urlParams.get("s")?.trim(); // (As opposed to null which would be the return value of get() otherwise!).
+
+    // Check so that we have a searchString in the url (q)
+    if (q !== undefined && q.length > 0) {
+      // Initializing sources to an empty array
+      // (The model will search in all sources if searchSources is set to [])
+      let sources = [];
+      // If source parameter is set in url (s)
+      // Get the sources corresponding to the ids
+      if (s !== undefined && s.length > 0) {
+        const sourceIds = s.split(",");
+        sources = this.getSourcesByIds(sourceIds);
+      }
+      // Update state according to searchString and sources from url
+      // and do a search.
+      this.setState({ searchString: q, searchSources: sources }, () => {
+        this.doSearch();
+      });
+    }
   };
 
   handleOnClear = () => {

@@ -170,7 +170,9 @@ class SearchResultsDataset extends React.PureComponent {
 
   render() {
     const { numberOfResultsToDisplay } = this.state;
-    return numberOfResultsToDisplay > 0 ? this.renderResultsDataset() : null;
+    return parseInt(numberOfResultsToDisplay) > 0
+      ? this.renderResultsDataset()
+      : null;
   }
 }
 
