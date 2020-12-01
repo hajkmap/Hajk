@@ -1,6 +1,7 @@
 import Express from "express";
 
 import log4js from "log4js";
+import clfDate from "clf-date";
 
 import * as path from "path";
 import * as bodyParser from "body-parser";
@@ -50,10 +51,51 @@ const exit = process.exit;
 
 export default class ExpressServer {
   constructor() {
-    const root = path.normalize(`${__dirname}/../..`);
-    app.set("appPath", `${root}client`);
+    logger.debug("Process's current working directory: ", process.cwd());
+    app.set("appPath", process.cwd());
 
-    app.use(log4js.connectLogger(log4js.getLogger("http")));
+    // If EXPRESS_TRUST_PROXY is sat in .env, pass on the value to Express.
+    // See https://expressjs.com/en/guide/behind-proxies.html.
+    if (process.env.EXPRESS_TRUST_PROXY) {
+      // .env doesn't handle boolean values well, but this setting can be
+      // either a boolean or a string or an array of strings. Let's fix it.
+      let trustProxy;
+
+      switch (process.env.EXPRESS_TRUST_PROXY) {
+        case "true":
+          trustProxy = true;
+          break;
+        case "false":
+          trustProxy = false;
+          break;
+        default:
+          trustProxy = process.env.EXPRESS_TRUST_PROXY;
+          break;
+      }
+
+      logger.debug(
+        "Express configured to run behind a proxy. Setting 'trust proxy' value to %o.",
+        trustProxy
+      );
+
+      app.set("trust proxy", trustProxy);
+    }
+
+    // Configure the HTTP access logger. We want it to log in the Combined Log Format, which requires some custom configuration below.
+    app.use(
+      log4js.connectLogger(log4js.getLogger("http"), {
+        format: (req, res, format) =>
+          format(
+            ":remote-addr - " + // Host name or IP of accesser. RFC 1413 identity (unreliable, hence always a dash)
+              (req.get(process.env.AD_TRUSTED_HEADER || "X-Control-Header") ||
+                "-") + // Value of X-Control-Header (or whatever header specified in .env)
+              ` [${clfDate()}]` + // Timestamp string surrounded by square brackets, e.g. [12/Dec/2012:12:12:12 -0500]
+              ' ":method :url HTTP/:http-version"' + // HTTP request surrounded by double quotes, e.g., "GET /stuff.html HTTP/1.1"
+              ' :status :content-length ":referrer"' + // HTTP status code, content length in bytes and referer (where request came from to your site)
+              ' ":user-agent"' // User agent string, e.g. name of the browser
+          ),
+      })
+    );
 
     app.use(helmet({ contentSecurityPolicy: false }));
     app.use(
@@ -88,7 +130,29 @@ export default class ExpressServer {
     );
     app.use(bodyParser.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(cookieParser(process.env.SESSION_SECRET));
-    app.use(Express.static(`${root}/public`));
+    logger.debug(
+      "Exposing static files from directory:",
+      path.join(process.cwd(), "public")
+    );
+    app.use(Express.static(path.join(process.cwd(), "public")));
+    app.use((req, res, next) => {
+      logger.trace("req.ip: %o", req.ip);
+      logger.trace("req.ips: %o", req.ips);
+      logger.debug(
+        "req.connection.remoteAddress: %o",
+        req.connection.remoteAddress
+      );
+      logger.trace("req.hostname: %o", req.hostname);
+      logger.trace(
+        "AD_TRUSTED_PROXY_IPS: %o",
+        process.env.AD_TRUSTED_PROXY_IPS
+      );
+      logger.trace(
+        "EXPRESS_TRUST_PROXY: app.set('trust proxy', %o)",
+        process.env.EXPRESS_TRUST_PROXY
+      );
+      next();
+    });
   }
 
   router(routes) {
