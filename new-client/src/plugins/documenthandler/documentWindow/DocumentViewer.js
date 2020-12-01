@@ -1,6 +1,5 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import Fab from "@material-ui/core/Fab";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
@@ -272,4 +271,4 @@ class DocumentViewer extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(DocumentViewer));
+export default withStyles(styles)(DocumentViewer);

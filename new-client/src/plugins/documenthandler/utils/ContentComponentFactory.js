@@ -140,7 +140,6 @@ const getFormattedComponentFromTag = (tag) => {
 };
 
 export const Paragraph = ({ pTag }) => {
-  const classes = useStyles();
   return (
     <Typography variant="body1">
       {getFormattedComponentFromTag(pTag)}
@@ -289,8 +288,6 @@ export const Img = ({ imgTag, localObserver }) => {
 
   const getImagePositionClass = (positioning) => {
     const { right, left, center, floatLeft, floatRight } = positioning;
-    console.log(floatLeft, "floatLeft");
-    console.log(floatRight, "floatRight");
 
     if (right) {
       return classes.pictureRight;
@@ -338,10 +335,7 @@ export const Img = ({ imgTag, localObserver }) => {
       </Box>
     );
   };
-  console.log(
-    imgTag.attributes.getNamedItem("data-image-float-right"),
-    "??????????????????"
-  );
+
   const image = {
     caption: imgTag.attributes.getNamedItem("data-caption")?.value,
     popup: tagIsPresent(imgTag, "data-image-popup"),

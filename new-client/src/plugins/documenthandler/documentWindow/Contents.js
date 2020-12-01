@@ -1,8 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { Grid, Box, AccordionActions } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
-
 import ImagePopupModal from "./ImagePopupModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
 import {
