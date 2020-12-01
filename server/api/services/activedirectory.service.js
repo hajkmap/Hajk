@@ -113,15 +113,25 @@ class ActiveDirectoryService {
       // Implementation follows.
 
       // Step 1: See if the current req IP is within the accepted IPs range
+      //
+      // Note that we'll be using req.connection.remoteAddress and not req.ip,
+      // because we're really interested of the last node that makes the actual
+      // request to this service (because it can modify the X-Control-Header).
+      // req.ip will render different values, depending on "trust proxy" setting,
+      // and it can in fact contain the value of X-Forwarded-For, which we don't care
+      // about in this case. We _really_ want to know who's the last node on the line
+      // and req.connection.remoteAddress gives us that.
       const requestComesFromAcceptedIP =
         process.env.AD_TRUSTED_PROXY_IPS === undefined || // If no IPs are specified, because variable isn't set,
         process.env.AD_TRUSTED_PROXY_IPS.trim().length === 0 || // or because it's an empty string, it means that we accept any IP (dangerous!).
-        process.env.AD_TRUSTED_PROXY_IPS?.split(",").includes(req.ip); // Else, if specified, split on comma and see if IP exists in list
+        process.env.AD_TRUSTED_PROXY_IPS?.split(",").includes(
+          req.connection.remoteAddress
+        ); // Else, if specified, split on comma and see if IP exists in list
 
       // Abort if request comes from unaccepted IP range
       if (requestComesFromAcceptedIP === false) {
         const e = new Error(
-          `[getUserFromRequestHeader] AD authentication does not allow requests from ${req.ip}. Aborting.`
+          `[getUserFromRequestHeader] AD authentication does not allow requests from ${req.connection.remoteAddress}. Aborting.`
         );
         logger.error(e.message);
         throw e;
@@ -141,7 +151,7 @@ class ActiveDirectoryService {
       }
 
       logger.trace(
-        `[getUserFromRequestHeader] Request from ${req.ip} accepted by AD`
+        `[getUserFromRequestHeader] Request from ${req.connection.remoteAddress} accepted by AD`
       );
 
       // See which header we should be looking into

@@ -139,7 +139,7 @@ class ConfigService {
       // If we haven't enabled AD restrictions, just return the entire layers store
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
         logger.trace(
-          "AD auth disabled - returning entire contents of layers store"
+          "[getLayersStore] AD auth disabled. Returning the entire contents of layers store."
         );
         return json;
       }
@@ -286,7 +286,7 @@ class ConfigService {
   }
 
   async getUserSpecificMaps(user) {
-    logger.trace("[getUserSpecificMaps] for %s", user);
+    logger.trace("[getUserSpecificMaps] for %o", user);
     try {
       // Prepare our return array
       const output = [];
