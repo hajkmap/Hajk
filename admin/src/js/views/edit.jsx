@@ -43,6 +43,7 @@ const defaultState = {
   corfirm: false,
   alertMessage: '',
   content: '',
+  withCredentials: false,
   confirmAction: () => {},
   denyAction: () => {}
 };
@@ -123,7 +124,8 @@ class Search extends Component {
       addedLayers: [],
       point: layer.editPoint,
       linestring: layer.editLine,
-      polygon: layer.editPolygon
+      polygon: layer.editPolygon,
+      withCredentials: layer.withCredentials
     });
 
     setTimeout(() => {
@@ -171,15 +173,26 @@ class Search extends Component {
       });
     }
 
-    this.props.model.getWMSCapabilities(this.state.url, (capabilities) => {
+    this.props.model.getWMSCapabilities(this.state.url, this.state.withCredentials, (capabilities, data) => {
       this.setState({
         capabilities: capabilities,
         load: false
       });
       if (capabilities === false) {
-        this.setState({
+
+        var alertMsg = '';
+
+        if(data.status === 0) {
+          alertMsg = `Ingen förfrågan skickades, Kan vara pga CORS, eller att t.ex domänen är felaktig.
+          1. Kontrollera URL:n.
+          2. Testa att slå ${this.state.withCredentials === true ? 'av' : 'på'} "withCredentials (CORS)".`;
+        } else {
+          alertMsg = `Ett fel inträffade. (Status = ${data.status})`;
+        }
+
+        this.props.model.application.setState({
           alert: true,
-          alertMessage: 'Servern svarar inte. Försök med en annan URL.'
+          alertMessage: alertMsg
         });
       }
       if (callback) {
@@ -344,7 +357,10 @@ class Search extends Component {
    *
    */
   describeLayer (e, layerName, layer) {
-    this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
+    this.props.model.getLayerDescription(this.refs.input_url.value, 
+      layerName, 
+      this.state.withCredentials, 
+      (properties) => {
       if (layer && layer.editableFields) {
         layer.editableFields.forEach((editableField) => {
           properties[editableField.index].listValues = editableField.values;
@@ -386,6 +402,7 @@ class Search extends Component {
    *
    */
   submit (e) {
+
     var validations = [
       this.validate('caption'),
       this.validate('url'),
@@ -763,6 +780,14 @@ class Search extends Component {
                   className={this.getValidationClass('url')}
                 />
                 <span onClick={(e) => { this.loadWMSCapabilities(e); }} className='btn btn-default'>Ladda lager {loader}</span>
+                <label className="with-credentials">
+                  <input type="checkbox"
+                    value={this.state.withCredentials} ref="input_withCredentials"
+                    onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}               
+                  />
+                  <span>withCredentials (CORS)</span>
+                </label>
               </div>
               <div>
                 <label>Projektion</label>
@@ -812,9 +837,19 @@ class Search extends Component {
                   <label htmlFor='polygon'>&nbsp;Ytor</label>
                 </div>
               </div>
+              <div>
+                <label>withCredentials (CORS)</label>
+                <input
+                  type='checkbox'
+                  ref='input_withCredentials2'
+                  onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+                    checked={this.state.withCredentials}
+                />
+              </div>
             </fieldset>
             <button className='btn btn-primary'>{this.state.mode == 'edit' ? 'Spara' : 'Lägg till'}</button>&nbsp;
             {abort}
+
           </form>
         </article>
       </section>

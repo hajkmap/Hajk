@@ -17,7 +17,7 @@
 // Den här programvaran är öppen i syfte att den skall vara till nytta för andra
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
+// 
 // https://github.com/hajkmap/Hajk
 
 import React from 'react';
@@ -186,6 +186,9 @@ class Application extends Component {
       console.error(e);
       return (<div>{e.message}</div>);
     }
+
+
+    model.application = this
 
     return React.createElement(content, {
       model: model,

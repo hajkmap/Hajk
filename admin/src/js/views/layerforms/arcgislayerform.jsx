@@ -50,7 +50,8 @@ const defaultState = {
   infoText: '',
   infoUrl: '',
   infoUrlText: '',
-  infoOwner: ''
+  infoOwner: '',
+  withCredentials: false,  
 };
 
 /**
@@ -102,7 +103,7 @@ class ArcGISLayerForm extends Component {
   }
 
   describeLayer (layer) {
-    this.props.model.getArcGISLayerDescription(this.state.url, layer, (info) => {
+    this.props.model.getArcGISLayerDescription(this.state.url, layer, this.state.withCredentials, (info) => {
       this.props.parent.setState({
         layerProperties: info.fields,
         layerPropertiesLayer: layer.name + '_' + layer.id
@@ -132,7 +133,8 @@ class ArcGISLayerForm extends Component {
       infoText: this.getValue('infoText'),
       infoUrl: this.getValue('infoUrl'),
       infoUrlText: this.getValue('infoUrlText'),
-      infoOwner: this.getValue('infoOwner')
+      infoOwner: this.getValue('infoOwner'),
+      withCredentials: this.getValue('withCredentials')
     };
   }
 
@@ -151,12 +153,13 @@ class ArcGISLayerForm extends Component {
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'queryable') value = input.checked;
+    if (fieldName === 'withCredentials') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'extent') value = value.split(',');
     if (fieldName === 'infoVisible') value = input.checked;
 
     return value;
-  }
+  } 
 
   validate () {
     var valid = true,
@@ -244,7 +247,7 @@ class ArcGISLayerForm extends Component {
   }
 
   loadWMSCapabilities (callback) {
-    this.props.model.getArcGISCapabilities(this.state.url, (data) => {
+    this.props.model.getArcGISCapabilities(this.state.url, this.state.withCredentials, (data) => {
       var extent = [
         data.fullExtent.xmin,
         data.fullExtent.ymin,
@@ -399,6 +402,14 @@ class ArcGISLayerForm extends Component {
             }}
           />
           <span onClick={(e) => { this.loadWMSCapabilities(e); }} className='btn btn-default'>Ladda {loader}</span>
+          <label className="with-credentials">
+            <input type="checkbox"
+              value={this.state.withCredentials} ref="input_withCredentials"
+              onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}               
+            />
+            <span>withCredentials (CORS)</span>
+          </label>
         </div>
         <div>
           <label>Senast ändrad</label>
@@ -517,6 +528,15 @@ class ArcGISLayerForm extends Component {
             }}
             value={this.state.attribution}
             className={this.getValidationClass('attribution')}
+          />
+        </div>
+        <div>
+          <label>withCredentials (CORS)</label>
+          <input
+            type='checkbox'
+            ref='input_withCredentials2'
+            onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}
           />
         </div>
         <div className='info-container'>

@@ -326,11 +326,13 @@ var SearchModel = {
     var contentType = "text/xml",
       data = str;
 
+    const _xhrFields = props.withCredentials === true ? { withCredentials: true } : null;
+
     this.requests.push(
       $.ajax({
         url: props.url,
         contentType: contentType,
-        crossDomain: true,
+        xhrFields: _xhrFields,
         type: "post",
         data: str,
         success: result => {
@@ -860,6 +862,7 @@ var SearchModel = {
             srsName: searchProps.srsName,
             outputFormat: searchProps.outputFormat,
             geometryField: searchProps.geometryField,
+            withCredentials: searchProps.withCredentials,
             done: features => {
               if (features.length > 0) {
                 features.forEach(feature => {
@@ -901,6 +904,7 @@ var SearchModel = {
 
     layers.forEach(layer => {
       layer.get('params').LAYERS.split(',').forEach(featureType => {
+        
         var searchProps = {
           url: (HAJK2.searchProxy || '') + layer.get('searchUrl'),
           caption: layer.get('caption'),
@@ -934,7 +938,8 @@ var SearchModel = {
           .getProjection()
           .getCode(),
         outputFormat: source.outputFormat,
-        geometryField: source.geometryField
+        geometryField: source.geometryField,
+        withCredentials: source.withCredentials,
       };
       addRequest.call(this, searchProps);
     });

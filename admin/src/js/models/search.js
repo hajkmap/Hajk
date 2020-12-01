@@ -93,14 +93,17 @@ var search = Model.extend({
       : url;
   },
 
-  getLayerDescription: function (url, layer, callback) {
+  getLayerDescription: function (url, layer, withCredentials = false, callback) {
+
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
+
     url = this.prepareProxyUrl(url);
     $.ajax(url, {
       data: {
         request: 'describeFeatureType',
         typename: layer
       },
-      xhrFields: { withCredentials: true },
+      xhrFields:_xhrFields,
       success: data => {
         var parser = new X2JS(),
           xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data),
@@ -130,20 +133,24 @@ var search = Model.extend({
     });
     return types;
   },
+ 
+  getWMSCapabilities: function (url, withCredentials = false, callback) {
 
-  getWMSCapabilities: function (url, callback) {
+    // TODO: function is named WMS,,, should be WFS 
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
+
     $.ajax(this.prepareProxyUrl(url), {
       data: {
         service: 'WFS',
-        request: 'GetCapabilities'
+        request: 'GetCapabilities',
       },
-      xhrFields: { withCredentials: true },
+      xhrFields: _xhrFields,
       success: data => {
         var response = this.parseWFSCapabilitesTypes(data);
         callback(response);
       },
       error: data => {
-        callback(false);
+        callback(false, data);
       }
     });
   }

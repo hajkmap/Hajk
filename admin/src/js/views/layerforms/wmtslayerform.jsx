@@ -129,6 +129,7 @@ class WMTSLayerForm extends Component {
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'imageFormat') value = input.value;
     if (fieldName === 'queryable') value = input.checked;
+    if (fieldName === 'withCredentials') value = input.checked;
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'searchFields') value = value.split(',');
     if (fieldName === 'displayFields') value = value.split(',');
@@ -363,6 +364,15 @@ class WMTSLayerForm extends Component {
             }}
             value={this.state.attribution}
             className={this.getValidationClass('attribution')}
+          />
+        </div>
+        <div>
+          <label>withCredentials (CORS)</label>
+          <input
+            type='checkbox'
+            ref='input_withCredentials2'
+            onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}
           />
         </div>
         <div className='info-container'>

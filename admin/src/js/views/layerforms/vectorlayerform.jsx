@@ -66,7 +66,8 @@ const defaultState = {
   infoText: '',
   infoUrl: '',
   infoUrlText: '',
-  infoOwner: ''
+  infoOwner: '',
+  withCredentials: false
 };
 
 /**
@@ -95,7 +96,10 @@ class VectorLayerForm extends Component {
   }
 
   describeLayer (layer) {
-    this.props.model.getWFSLayerDescription(this.state.url, this.state.addedLayers[0], layerDescription => {
+    this.props.model.getWFSLayerDescription(this.state.url,
+      this.state.addedLayers[0],
+      this.state.withCredentials,
+      layerDescription => {
       this.props.parent.setState({
         layerProperties: layerDescription.map(d => {
           return {
@@ -145,7 +149,8 @@ class VectorLayerForm extends Component {
       infoText: this.getValue('infoText'),
       infoUrl: this.getValue('infoUrl'),
       infoUrlText: this.getValue('infoUrlText'),
-      infoOwner: this.getValue('infoOwner')
+      infoOwner: this.getValue('infoOwner'),
+      withCredentials: this.getValue('withCredentials')
     };
   }
 
@@ -169,6 +174,7 @@ class VectorLayerForm extends Component {
 
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'queryable') value = input.checked;
+    if (fieldName === 'withCredentials') value = input.checked;
     if (fieldName === 'showLabels') value = input.checked;
     if (fieldName === 'fillColor') value = rgba_to_string(this.state.fillColor);
     if (fieldName === 'lineColor') value = rgba_to_string(this.state.lineColor);
@@ -281,7 +287,7 @@ class VectorLayerForm extends Component {
       });
     }
 
-    this.props.model.getWFSCapabilities(this.state.url, (capabilities) => {
+    this.props.model.getWFSCapabilities(this.state.url, this.state.withCredentials, (capabilities) => {
       var projection = '';
       if (Array.isArray(capabilities) && capabilities.length > 0) {
         projection = capabilities[0].projection;
@@ -503,6 +509,14 @@ class VectorLayerForm extends Component {
             }}
           />
           <span onClick={(e) => { this.loadWFSCapabilities(e); }} className='btn btn-default'>Ladda {loader}</span>
+          <label className="with-credentials">
+            <input type="checkbox"
+              value={this.state.withCredentials} ref="input_withCredentials"
+              onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}               
+            />
+            <span>withCredentials (CORS)</span>
+          </label>
         </div>
         <div>
           <label>Senast ändrad</label>
@@ -767,6 +781,15 @@ class VectorLayerForm extends Component {
               this.setState({opacity: e.target.value});
               this.validateField('opacity');
             }}
+          />
+        </div>
+        <div>
+          <label>withCredentials (CORS)</label>
+          <input
+            type='checkbox'
+            ref='input_withCredentials2'
+            onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}
           />
         </div>
         <div>
