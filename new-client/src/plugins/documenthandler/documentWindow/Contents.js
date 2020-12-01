@@ -1,6 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { Grid, Box } from "@material-ui/core";
+import { Grid, Box, AccordionActions } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 
 import ImagePopupModal from "./ImagePopupModal";
@@ -38,6 +38,20 @@ class Contents extends React.PureComponent {
     activeContent: null,
   };
 
+  flattenChaptersTree = (chapters) => {
+    return chapters.reduce((acc, chapter) => {
+      if (chapter.html && chapter.header) {
+        let chapterStrippedFromSubChapters = { ...chapter };
+        chapterStrippedFromSubChapters.chapters = [];
+        acc = [...acc, chapterStrippedFromSubChapters];
+      }
+      if (chapter.chapters && chapter.chapters.length > 0) {
+        return [...acc, ...this.flattenChaptersTree(chapter.chapters)];
+      }
+      return acc;
+    }, []);
+  };
+
   componentDidMount = () => {
     const { localObserver } = this.props;
     this.appendParsedComponentsToDocument();
@@ -48,9 +62,10 @@ class Contents extends React.PureComponent {
       chapters.forEach((chapter) => {
         this.appendComponentsToChapter(chapter);
       });
-      this.test(chapters);
 
-      let renderedChapters = this.renderChapters(chapters);
+      let renderedChapters = this.renderChapters(
+        this.flattenChaptersTree(chapters)
+      );
       localObserver.publish("chapter-components-appended", renderedChapters);
     });
   };
