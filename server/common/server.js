@@ -15,6 +15,7 @@ import cors from "cors";
 import compression from "compression";
 
 import oas from "./oas";
+import checkAdminAuthorization from "../api/middlewares/check.admin.authorization";
 import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
 
 const app = new Express();
@@ -135,11 +136,29 @@ export default class ExpressServer {
     );
     app.use(bodyParser.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(cookieParser(process.env.SESSION_SECRET));
-    logger.debug(
-      "Exposing static files from directory:",
-      path.join(process.cwd(), "public")
-    );
-    app.use(Express.static(path.join(process.cwd(), "public")));
+
+    // Serve some static files if requested to:
+    // - The API Explorer is useful but we should be able to disable it
+    process.env.EXPOSE_API_EXPLORER === "true" &&
+      app.use(
+        "/api-explorer",
+        Express.static(path.join(process.cwd(), "static", "api-explorer"))
+      );
+
+    // - Hajk consists of 3 apps: backend (this API), client and admin.
+    //   Client should be accessible directly under /…
+    process.env.EXPOSE_CLIENT === "true" &&
+      app.use(
+        "/",
+        Express.static(path.join(process.cwd(), "static", "client"))
+      );
+
+    //   …while admin app should be under /admin. Notice access restriction middleware.
+    process.env.EXPOSE_ADMIN === "true" &&
+      app.use("/admin", [
+        checkAdminAuthorization,
+        Express.static(path.join(process.cwd(), "static", "admin")),
+      ]);
     app.use(detailedRequestLogger);
   }
 
