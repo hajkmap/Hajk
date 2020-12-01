@@ -1,6 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
+import { Grid, Box } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 
 import ImagePopupModal from "./ImagePopupModal";
@@ -27,6 +27,7 @@ const styles = (theme) => {
     },
     chapter: {
       cursor: "text",
+      display: "block",
     },
   };
 };
@@ -43,9 +44,12 @@ class Contents extends React.PureComponent {
     localObserver.unsubscribe("append-chapter-components");
     localObserver.subscribe("image-popup", this.showPopupModal);
     localObserver.subscribe("append-chapter-components", (chapters) => {
+      console.log(chapters, "chapters");
       chapters.forEach((chapter) => {
         this.appendComponentsToChapter(chapter);
       });
+      this.test(chapters);
+
       let renderedChapters = this.renderChapters(chapters);
       localObserver.publish("chapter-components-appended", renderedChapters);
     });
@@ -265,25 +269,14 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderChapter = (chapter) => {
-    const { classes } = this.props;
     return (
-      <Grid
-        className={classes.chapter}
-        container
-        item
-        alignItems="center"
-        key={chapter.id}
-      >
-        <Grid item xs={12}>
-          {this.renderHeadline(chapter)}
-        </Grid>
-        <Grid item xs={12}>
-          {chapter.components}
-        </Grid>
+      <React.Fragment key={chapter.id}>
+        {this.renderHeadline(chapter)}
+        {chapter.components}
         {Array.isArray(chapter.chapters)
           ? chapter.chapters.map((subChapter) => this.renderChapter(subChapter))
           : null}
-      </Grid>
+      </React.Fragment>
     );
   };
 

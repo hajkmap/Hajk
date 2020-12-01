@@ -7,7 +7,7 @@ import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import clsx from "clsx";
 import Contents from "./Contents";
-import { Typography } from "@material-ui/core";
+import { Typography, Box } from "@material-ui/core";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -254,12 +254,14 @@ class DocumentViewer extends React.PureComponent {
             container
             item
           >
-            <Contents
-              options={options}
-              model={model}
-              localObserver={localObserver}
-              activeDocument={activeDocument}
-            />
+            <Box style={{ display: "block" }}>
+              <Contents
+                options={options}
+                model={model}
+                localObserver={localObserver}
+                activeDocument={activeDocument}
+              />
+            </Box>
           </Grid>
         </Grid>
         {showScrollButton &&

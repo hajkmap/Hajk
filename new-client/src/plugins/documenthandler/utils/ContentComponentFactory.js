@@ -31,9 +31,33 @@ const useStyles = makeStyles((theme) => ({
     objectFit: "contain",
     objectPosition: "left",
   },
-  test: {
-    margin: "20px",
+
+  pictureRightFloatingText: {},
+  pictureLeftFloatingText: {},
+
+  floatRight: {
+    float: "right",
   },
+  floatLeft: {
+    float: "left",
+  },
+
+  pictureRight: {
+    alignItems: "flex-end",
+    display: "flex",
+    flexDirection: "column",
+  },
+  pictureLeft: {
+    alignItems: "flex-start",
+    display: "flex",
+    flexDirection: "column",
+  },
+  pictureCenter: {
+    alignItems: "center",
+    display: "flex",
+    flexDirection: "column",
+  },
+
   popupActivatedImage: {
     marginBottom: theme.spacing(1),
     cursor: "pointer",
@@ -240,8 +264,8 @@ export const Figure = ({ figureTag }) => {
 export const Img = ({ imgTag, localObserver }) => {
   const classes = useStyles();
 
-  const isPopupAllowedForImage = (imgTag) => {
-    return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
+  const tagIsPresent = (imgTag, attribute) => {
+    return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
   };
 
   const getImageStyle = (image) => {
@@ -263,9 +287,46 @@ export const Img = ({ imgTag, localObserver }) => {
     return className;
   };
 
+  const getImagePositionClass = (positioning) => {
+    const { right, left, center, floatLeft, floatRight } = positioning;
+    console.log(floatLeft, "floatLeft");
+    console.log(floatRight, "floatRight");
+
+    if (right) {
+      return classes.pictureRight;
+    }
+
+    if (left) {
+      return classes.pictureLeft;
+    }
+
+    if (center && (!floatLeft || !floatRight)) {
+      return classes.pictureCenter;
+    }
+    return;
+  };
+
+  const getImageFloating = (positioning) => {
+    const { right, left, center, floatLeft, floatRight } = positioning;
+    if (!center) {
+      if (floatLeft && !right) {
+        return classes.floatLeft;
+      }
+
+      if (floatRight && !left) {
+        return classes.floatRight;
+      }
+    }
+
+    return;
+  };
+
   const getImageDescription = (image) => {
     return (
-      <Box className={classes.imageInformationWrapper}>
+      <Box
+        style={{ width: image.width }}
+        className={classes.imageInformationWrapper}
+      >
         {image.caption && (
           <Typography variant="subtitle2">{image.caption}</Typography>
         )}
@@ -277,14 +338,23 @@ export const Img = ({ imgTag, localObserver }) => {
       </Box>
     );
   };
+  console.log(
+    imgTag.attributes.getNamedItem("data-image-float-right"),
+    "??????????????????"
+  );
   const image = {
     caption: imgTag.attributes.getNamedItem("data-caption")?.value,
-    popup: isPopupAllowedForImage(imgTag),
+    popup: tagIsPresent(imgTag, "data-image-popup"),
     source: imgTag.attributes.getNamedItem("data-source")?.value,
     url: imgTag.attributes.getNamedItem("src")?.value,
     altValue: imgTag.attributes.getNamedItem("alt")?.value,
     height: imgTag.attributes.getNamedItem("data-image-height")?.value,
     width: imgTag.attributes.getNamedItem("data-image-width")?.value,
+    right: tagIsPresent(imgTag, "data-image-right"),
+    left: tagIsPresent(imgTag, "data-image-left"),
+    center: tagIsPresent(imgTag, "data-image-center"),
+    floatLeft: tagIsPresent(imgTag, "data-image-float-left"),
+    floatRight: tagIsPresent(imgTag, "data-image-float-right"),
   };
 
   let onClickCallback = image.popup
@@ -293,8 +363,11 @@ export const Img = ({ imgTag, localObserver }) => {
       }
     : null;
 
+  const positioningClass = getImagePositionClass(image);
+  const floatingPictureClass = getImageFloating(image);
+
   return (
-    <>
+    <Box className={clsx(positioningClass, floatingPictureClass)}>
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue}
@@ -309,7 +382,7 @@ export const Img = ({ imgTag, localObserver }) => {
         image={image.url}
       />
       {getImageDescription(image)}
-    </>
+    </Box>
   );
 };
 
