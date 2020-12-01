@@ -38,6 +38,8 @@ namespace MapService.Models.Config
 
         public bool singleTile { get; set; }
 
+        public bool withCredentials { get; set; }
+
         public string attribution { get; set; }
 
         public bool infoVisible { get; set; }

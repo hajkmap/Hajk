@@ -50,6 +50,8 @@ namespace MapService.Models.Config
 
         public string serverType { get; set; }
 
+        public bool withCredentials { get; set; }
+
         public string attribution { get; set; }
 
         public string searchUrl { get; set; }

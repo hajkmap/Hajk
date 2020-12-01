@@ -30,6 +30,8 @@ namespace MapService.Models.Config
 
         public string style { get; set; }
 
+        public bool withCredentials { get; set; }
+
         public string matrixSet { get; set; }     
            
         public string[] origin { get; set; }        

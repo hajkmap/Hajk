@@ -46,6 +46,8 @@ namespace MapService.Models.Config
 
         public string infobox { get; set; }
 
+        public bool withCredentials { get; set; }
+
         public bool queryable { get; set; }
             
         public string labelAlign { get; set; }
