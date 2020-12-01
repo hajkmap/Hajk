@@ -37,9 +37,11 @@ const useStyles = makeStyles((theme) => ({
 
   floatRight: {
     float: "right",
+    marginLeft: theme.spacing(1),
   },
   floatLeft: {
     float: "left",
+    marginRight: theme.spacing(1),
   },
 
   pictureRight: {
@@ -288,7 +290,9 @@ export const Img = ({ imgTag, localObserver }) => {
 
   const getImagePositionClass = (positioning) => {
     const { right, left, center, floatLeft, floatRight } = positioning;
-
+    console.log(right, "right");
+    console.log(left, "left");
+    console.log(left, "left");
     if (right) {
       return classes.pictureRight;
     }
@@ -307,6 +311,7 @@ export const Img = ({ imgTag, localObserver }) => {
     const { right, left, center, floatLeft, floatRight } = positioning;
     if (!center) {
       if (floatLeft && !right) {
+        console.log("FLOAT LEFT");
         return classes.floatLeft;
       }
 

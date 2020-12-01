@@ -17,6 +17,7 @@ const styles = (theme) => ({
     outline: "none",
     //scrollBehavior: "smooth",
   },
+
   contentContainer: {
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(2),
@@ -253,14 +254,12 @@ class DocumentViewer extends React.PureComponent {
             container
             item
           >
-            <Box style={{ display: "block" }}>
-              <Contents
-                options={options}
-                model={model}
-                localObserver={localObserver}
-                activeDocument={activeDocument}
-              />
-            </Box>
+            <Contents
+              options={options}
+              model={model}
+              localObserver={localObserver}
+              activeDocument={activeDocument}
+            />
           </Grid>
         </Grid>
         {showScrollButton &&

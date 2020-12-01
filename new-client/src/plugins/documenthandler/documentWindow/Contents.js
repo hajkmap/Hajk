@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import ImagePopupModal from "./ImagePopupModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
+import { Box } from "@material-ui/core";
 import {
   Paragraph,
   ULComponent,
@@ -328,10 +329,10 @@ class Contents extends React.PureComponent {
   render = () => {
     if (this.state.activeContent) {
       return (
-        <>
+        <Box style={{ display: "block", maxWidth: "100%" }}>
           {this.renderImageInModal()}
           {this.renderChapters(this.state.activeContent.chapters)}
-        </>
+        </Box>
       );
     } else {
       return null;
