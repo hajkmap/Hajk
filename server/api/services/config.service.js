@@ -95,7 +95,7 @@ class ConfigService {
           `[getMapConfig] ${user} is not member in any of the necessary groups. \nAccess to map restricted.`
         );
 
-        logger.error(e);
+        logger.warn(e);
 
         throw e;
       } else {

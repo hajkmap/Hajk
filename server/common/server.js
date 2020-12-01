@@ -15,6 +15,7 @@ import cors from "cors";
 import compression from "compression";
 
 import oas from "./oas";
+import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
 
 const app = new Express();
 
@@ -27,7 +28,11 @@ log4js.configure({
     // File appender will print to a log file, rotating it each day
     file: { type: "dateFile", filename: "logs/output.log" },
     // This appender is used for writing access logs and will rotate daily
-    accessLog: { type: "dateFile", filename: "logs/access.log" },
+    accessLog: {
+      type: "dateFile",
+      filename: "logs/access.log",
+      layout: { type: "messagePassThrough" },
+    },
   },
   categories: {
     default: {
@@ -135,24 +140,7 @@ export default class ExpressServer {
       path.join(process.cwd(), "public")
     );
     app.use(Express.static(path.join(process.cwd(), "public")));
-    app.use((req, res, next) => {
-      logger.trace("req.ip: %o", req.ip);
-      logger.trace("req.ips: %o", req.ips);
-      logger.debug(
-        "req.connection.remoteAddress: %o",
-        req.connection.remoteAddress
-      );
-      logger.trace("req.hostname: %o", req.hostname);
-      logger.trace(
-        "AD_TRUSTED_PROXY_IPS: %o",
-        process.env.AD_TRUSTED_PROXY_IPS
-      );
-      logger.trace(
-        "EXPRESS_TRUST_PROXY: app.set('trust proxy', %o)",
-        process.env.EXPRESS_TRUST_PROXY
-      );
-      next();
-    });
+    app.use(detailedRequestLogger);
   }
 
   router(routes) {
