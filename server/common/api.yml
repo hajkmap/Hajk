@@ -387,6 +387,42 @@ paths:
         200:
           description: Success
           content: {}
+  /ad/users:
+    get:
+      tags:
+        - ActiveDirectory
+      description: Get the current content of local AD Users store
+      responses:
+        200:
+          description: Success
+          content: {}
+  /ad/groups:
+    get:
+      tags:
+        - ActiveDirectory
+      description: Get the current content of local AD Groups store
+      responses:
+        200:
+          description: Success
+          content: {}
+  /ad/groupsPerUser:
+    get:
+      tags:
+        - ActiveDirectory
+      description: Get the current content of local AD Groups Per User store
+      responses:
+        200:
+          description: Success
+          content: {}
+  /ad/flushStores:
+    put:
+      tags:
+        - ActiveDirectory
+      description: Flush the contents of all local AD stores (removes the cached objects)
+      responses:
+        200:
+          description: Success
+          content: {}
   /fbproxy/{query}:
     get:
       tags:

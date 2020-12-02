@@ -4,7 +4,6 @@ import log4js from "log4js";
 import clfDate from "clf-date";
 
 import * as path from "path";
-import * as bodyParser from "body-parser";
 import * as http from "http";
 import cookieParser from "cookie-parser";
 
@@ -60,7 +59,7 @@ export default class ExpressServer {
     logger.debug("Process's current working directory: ", process.cwd());
     app.set("appPath", process.cwd());
 
-    // If EXPRESS_TRUST_PROXY is sat in .env, pass on the value to Express.
+    // If EXPRESS_TRUST_PROXY is set in .env, pass on the value to Express.
     // See https://expressjs.com/en/guide/behind-proxies.html.
     if (process.env.EXPRESS_TRUST_PROXY) {
       // .env doesn't handle boolean values well, but this setting can be
@@ -127,14 +126,14 @@ export default class ExpressServer {
         "FB_SERVICE_ACTIVE is set to %o in .env. Not enabling Sokigo FB Proxy",
         process.env.FB_SERVICE_ACTIVE
       );
-    app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
+    app.use(Express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(
-      bodyParser.urlencoded({
+      Express.urlencoded({
         extended: true,
         limit: process.env.REQUEST_LIMIT || "100kb",
       })
     );
-    app.use(bodyParser.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
+    app.use(Express.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(cookieParser(process.env.SESSION_SECRET));
 
     // Serve some static files if requested to:
@@ -159,7 +158,7 @@ export default class ExpressServer {
         checkAdminAuthorization,
         Express.static(path.join(process.cwd(), "static", "admin")),
       ]);
-    app.use(detailedRequestLogger);
+    // app.use(detailedRequestLogger);
   }
 
   router(routes) {
@@ -169,7 +168,9 @@ export default class ExpressServer {
 
   listen(port = process.env.PORT) {
     const welcome = (p) => () =>
-      logger.info(`Hajk backend is up and running on http://localhost:${p}`);
+      logger.info(
+        `Server startup completed. Hajk backend is up and running on http://localhost:${p}`
+      );
 
     oas(app, this.routes)
       .then(() => {

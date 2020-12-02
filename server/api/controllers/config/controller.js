@@ -1,5 +1,6 @@
 import ConfigService from "../../services/config.service";
 import ad from "../../services/activedirectory.service";
+import handleStandardResponse from "../../utils/handleStandardResponse";
 
 export class Controller {
   /**
@@ -14,10 +15,7 @@ export class Controller {
     ConfigService.getMapConfig(
       req.params.map,
       ad.getUserFromRequestHeader(req)
-    ).then((r) => {
-      if (r.error) res.status(500).send(r.error.toString());
-      else res.json(r);
-    });
+    ).then((data) => handleStandardResponse(res, data));
   }
 
   /**
@@ -36,6 +34,7 @@ export class Controller {
     ConfigService.exportMapConfig(
       req.params.map,
       req.params.format,
+      ad.getUserFromRequestHeader(req),
       next
     ).then((r) => res.send(r));
   }
@@ -48,10 +47,9 @@ export class Controller {
    * @memberof Controller
    */
   layers(req, res) {
-    ConfigService.getLayersStore(ad.getUserFromRequestHeader(req)).then((r) => {
-      if (r.error) res.status(500).send(r.error.toString());
-      else res.json(r);
-    });
+    ConfigService.getLayersStore(
+      ad.getUserFromRequestHeader(req)
+    ).then((data) => handleStandardResponse(res, data));
   }
 
   /**
@@ -62,56 +60,46 @@ export class Controller {
    * @memberof Controller
    */
   list(req, res) {
-    ConfigService.getAvailableMaps().then((r) => {
-      if (r.error) res.status(500).send(r.error.message);
-      else res.json(r);
-    });
+    ConfigService.getAvailableMaps().then((data) =>
+      handleStandardResponse(res, data)
+    );
   }
 
   userSpecificMaps(req, res) {
-    ConfigService.getUserSpecificMaps(ad.getUserFromRequestHeader(req)).then(
-      (r) => {
-        if (r.error) res.status(500).send(r.error.toString());
-        else res.json(r);
-      }
-    );
+    ConfigService.getUserSpecificMaps(
+      ad.getUserFromRequestHeader(req)
+    ).then((data) => handleStandardResponse(res, data));
   }
 
   availableADGroups(req, res) {
-    ConfigService.getAvailableADGroups().then((r) => {
-      if (r.error) res.status(500).send(r.error.toString());
-      else res.json(r);
-    });
-  }
-
-  findCommonGroupsForUsers(req, res) {
-    ConfigService.findCommonGroupsForUsers(req.query.users).then((r) => {
-      if (r.error) res.status(500).send(r.error.toString());
-      else res.json(r);
-    });
-  }
-
-  createNewMap(req, res) {
-    ConfigService.createNewMap(req.params.name).then((r) => {
-      if (r.error) res.status(500).send(r.error.message);
-      else res.json(r);
-    });
-  }
-
-  duplicateMap(req, res) {
-    ConfigService.duplicateMap(req.params.nameFrom, req.params.nameTo).then(
-      (r) => {
-        if (r.error) res.status(500).send(r.error.message);
-        else res.json(r);
-      }
+    ConfigService.getAvailableADGroups().then((data) =>
+      handleStandardResponse(res, data)
     );
   }
 
+  findCommonGroupsForUsers(req, res) {
+    ConfigService.findCommonGroupsForUsers(req.query.users).then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
+
+  createNewMap(req, res) {
+    ConfigService.createNewMap(req.params.name).then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
+
+  duplicateMap(req, res) {
+    ConfigService.duplicateMap(
+      req.params.nameFrom,
+      req.params.nameTo
+    ).then((data) => handleStandardResponse(res, data));
+  }
+
   deleteMap(req, res) {
-    ConfigService.deleteMap(req.params.name).then((r) => {
-      if (r.error) res.status(500).send(r.error.message);
-      else res.json(r);
-    });
+    ConfigService.deleteMap(req.params.name).then((data) =>
+      handleStandardResponse(res, data)
+    );
   }
 }
 export default new Controller();

@@ -63,6 +63,74 @@ class ActiveDirectoryService {
   }
 
   /**
+   * Some useful admin functions that can be reached via the /ad endpoint:
+   * - getUsers
+   * - getGroups
+   * - getGroupsPerUser
+   * - flushStores
+   */
+  async getStore(store) {
+    switch (store.toLowerCase()) {
+      case "users":
+        return Object.fromEntries(this._users);
+      case "groups":
+        return Array.from(this._groups);
+      case "groupsperuser":
+        try {
+          // This is a bit more complicated as our Store contains
+          // a Map of Promises, and that isn't easily JSON-able.
+          // A couple of steps are necessary to convert its values
+          // to a casual object that contains resolved Promises's values.
+
+          // Prepare the object that we'll populate
+          const output = {};
+
+          // Loop through each entry in the Map, note the async callback
+          this._groupsPerUser.forEach(async (v, k) => {
+            // Add a new entry to the output object, the key should
+            // be same as the Map's key, while value should be the resolved Promise
+            output[k] = await Promise.resolve(v);
+          });
+
+          return output;
+        } catch (error) {
+          return { error };
+        }
+
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * @summary Entirely flush the local cache of users and groups and start over by fetching from AD.
+   * @description We utilize a local caching mechanism in order to minimize the traffic to AD.
+   * This means that if a request comes in, and user object doesn't exist, we ask AD for the user
+   * and group details, and store them locally (in two Maps). When subsequential requests arrive,
+   * we just look them up in the local cache.
+   *
+   * The implication of this is that if network administrators change a users group membership,
+   * we don't have the latest updates (and won't even care about asking the AD for them, as the user
+   * is already cached!).
+   *
+   * This method simply resets this cache which will make all requests to be fetched from AD again.
+   *
+   * @memberof ActiveDirectoryService
+   */
+  async flushStores() {
+    try {
+      logger.trace("Flushing local cache stores…");
+      this._users.clear();
+      this._groups.clear();
+      this._groupsPerUser.clear();
+      return "All local caches successfully flushed.";
+    } catch (error) {
+      logger.error("[flushStores] %s", error.message);
+      return { error };
+    }
+  }
+
+  /**
    * @summary Helper that makes it easy to see if AD auth is configured, and
    * in that case if user name can be trusted.
    *
@@ -197,28 +265,6 @@ class ActiveDirectoryService {
   }
 
   /**
-   * @summary Entirely flush the local cache of users and groups and start over by fetching from AD.
-   * @description We utilize a local caching mechanism in order to minimize the traffic to AD.
-   * This means that if a request comes in, and user object doesn't exist, we ask AD for the user
-   * and group details, and store them locally (in two Maps). When subsequential requests arrive,
-   * we just look them up in the local cache.
-   *
-   * The implication of this is that if network administrators change a users group membership,
-   * we don't have the latest updates (and won't even care about asking the AD for them, as the user
-   * is already cached!).
-   *
-   * This method simply resets this cache which will make all requests to be fetched from AD again.
-   *
-   * @memberof ActiveDirectoryService
-   */
-  flushCache() {
-    logger.trace("Flushing local cache");
-    this._users.clear();
-    this._groups.clear();
-    this._groupsPerUser.clear();
-  }
-
-  /**
    * @summary Retrieve the user object from AD
    * @description The local store will be used to cache retrieved AD objects
    * in order to minimize requests to the AD. Requested user object is returned
@@ -269,50 +315,79 @@ class ActiveDirectoryService {
     }
   }
 
+  /**
+   * @summary Get a list of groups that a given user belongs to
+   *
+   * @param {*} sAMAccountName
+   * @returns {Promise} That will resolve to an Array of groups or empty array if user wasn't found
+   * @memberof ActiveDirectoryService
+   */
   async getGroupMembershipForUser(sAMAccountName) {
-    try {
-      // See if we've got results in store already
-      let groups = this._groupsPerUser.get(sAMAccountName);
-      if (groups !== undefined) {
-        logger.trace(
-          "[getGroupMembershipForUser] %o groups already found in groups-per-users store",
-          sAMAccountName
-        );
-        return groups;
-      }
-
+    // First, check if we the store already contains an entry for the given user.
+    // Note that the store holds Promises, hence we must use await to grab the values,
+    // or else we'd just get the Promise itself!
+    let groups = await this._groupsPerUser.get(sAMAccountName);
+    if (groups !== undefined) {
       logger.trace(
-        "[getGroupMembershipForUser] No entry for %o in the groups-per-users store yet. Populating…",
+        "[getGroupMembershipForUser] %o groups already found in groups-per-users store",
         sAMAccountName
       );
-
-      // First, we need to translate the incoming sAMAcountName
-      // to the longer userPrincipalName that is required by
-      // _getGroupMembershipForUser(). To do that, we need to
-      // grab it from user object.
-      const { userPrincipalName } = await this.findUser(sAMAccountName);
-
-      // Retrieve groups for user
-      groups = await this._getGroupMembershipForUser(userPrincipalName);
-
-      // We only care about the shortname (CN)
-      groups = groups.map((g) => g.cn);
-
-      logger.trace(
-        "[getGroupMembershipForUser] Done. Setting groups-per-users store key %o to value: %O",
-        sAMAccountName,
-        groups
-      );
-
-      // Set in local store
-      this._groupsPerUser.set(sAMAccountName, groups);
       return groups;
-    } catch (error) {
-      // If we didn't get groups, cache the empty result to eliminate subsequential requests
-      this._groupsPerUser.set(sAMAccountName, []);
-      logger.error(error.message);
-      return [];
     }
+
+    logger.trace(
+      "[getGroupMembershipForUser] No entry for %o in the groups-per-users store yet. Populating…",
+      sAMAccountName
+    );
+
+    // Before we start making any requests to AD, let's create an entry
+    // in the groups store, so that a Promise can be returned if
+    // more requests to this method would happened while we're already
+    // awaiting answer from the AD
+    // eslint-disable-next-line no-async-promise-executor
+    const promise = new Promise(async (resolve) => {
+      try {
+        // First, we need to translate the incoming sAMAcountName
+        // to the longer userPrincipalName that is required by
+        // _getGroupMembershipForUser(). To do that, we need to
+        // grab it from user object.
+        const { userPrincipalName } = await this.findUser(sAMAccountName);
+
+        // Retrieve groups for user
+        groups = await this._getGroupMembershipForUser(userPrincipalName);
+
+        // We only care about the shortname (CN)
+        groups = groups.map((g) => g.cn);
+
+        logger.trace(
+          "[getGroupMembershipForUser] Done. Setting groups-per-users store key %o to value: %O",
+          sAMAccountName,
+          groups
+        );
+
+        // Resolve the Promise with retrieved groups. Note that this will resolve
+        // the Promise that is stored in _groupsPerUser store.
+        resolve(groups);
+      } catch (error) {
+        // If we got here, something above must have thrown an error. The most probable
+        // reason is that user couldn't be found in AD. That means that there are no
+        // groups to resolve with. But we need an array as the value of our entry in
+        // _groupsPerUser, so we resolve with an empty array. Note that this means that
+        // our Promises in the store will be resolved either way - whether group membership
+        // was found, or not.
+        logger.error(error.message);
+        resolve([]);
+      }
+    });
+
+    // THIS IS IMPORTANT! Store the Promise in our _groupsPerUser store to prevent
+    // subsequent requests to the AD, if one request for a given user already is pending.
+    this._groupsPerUser.set(sAMAccountName, promise);
+
+    // Now return the Promise, so whatever function using this will wait for the Promise to
+    // settle (in practice resolve, as this Promise never gets rejected) before it attempts
+    // to read the value.
+    return promise;
   }
 
   async isUserMemberOf(sAMAccountName, groupCN) {
@@ -338,8 +413,10 @@ class ActiveDirectoryService {
       }
 
       // Now everything should be in store, see if user is member
-      // of the specified group
-      return this._groupsPerUser.get(sAMAccountName).includes(groupCN);
+      // of the specified group. Note that the store contains Promises,
+      // so we must use await to extract the resolved values.
+      const usersGroups = await this._groupsPerUser.get(sAMAccountName);
+      return usersGroups.includes(groupCN);
     } catch (error) {
       logger.error(error.message);
       // If an error was thrown above (e.g because user wasn't found
