@@ -1,10 +1,9 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-
 import ImagePopupModal from "./ImagePopupModal";
 import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
+import { Box } from "@material-ui/core";
 import {
   Paragraph,
   ULComponent,
@@ -27,6 +26,7 @@ const styles = (theme) => {
     },
     chapter: {
       cursor: "text",
+      display: "block",
     },
   };
 };
@@ -37,16 +37,34 @@ class Contents extends React.PureComponent {
     activeContent: null,
   };
 
+  flattenChaptersTree = (chapters) => {
+    return chapters.reduce((acc, chapter) => {
+      if (chapter.html && chapter.header) {
+        let chapterStrippedFromSubChapters = { ...chapter };
+        chapterStrippedFromSubChapters.chapters = [];
+        acc = [...acc, chapterStrippedFromSubChapters];
+      }
+      if (chapter.chapters && chapter.chapters.length > 0) {
+        return [...acc, ...this.flattenChaptersTree(chapter.chapters)];
+      }
+      return acc;
+    }, []);
+  };
+
   componentDidMount = () => {
     const { localObserver } = this.props;
     this.appendParsedComponentsToDocument();
     localObserver.unsubscribe("append-chapter-components");
     localObserver.subscribe("image-popup", this.showPopupModal);
     localObserver.subscribe("append-chapter-components", (chapters) => {
+      console.log(chapters, "chapters");
       chapters.forEach((chapter) => {
         this.appendComponentsToChapter(chapter);
       });
-      let renderedChapters = this.renderChapters(chapters);
+
+      let renderedChapters = this.renderChapters(
+        this.flattenChaptersTree(chapters)
+      );
       localObserver.publish("chapter-components-appended", renderedChapters);
     });
   };
@@ -265,25 +283,14 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderChapter = (chapter) => {
-    const { classes } = this.props;
     return (
-      <Grid
-        className={classes.chapter}
-        container
-        item
-        alignItems="center"
-        key={chapter.id}
-      >
-        <Grid item xs={12}>
-          {this.renderHeadline(chapter)}
-        </Grid>
-        <Grid item xs={12}>
-          {chapter.components}
-        </Grid>
+      <React.Fragment key={chapter.id}>
+        {this.renderHeadline(chapter)}
+        {chapter.components}
         {Array.isArray(chapter.chapters)
           ? chapter.chapters.map((subChapter) => this.renderChapter(subChapter))
           : null}
-      </Grid>
+      </React.Fragment>
     );
   };
 
@@ -322,10 +329,10 @@ class Contents extends React.PureComponent {
   render = () => {
     if (this.state.activeContent) {
       return (
-        <>
+        <Box style={{ display: "block", maxWidth: "100%" }}>
           {this.renderImageInModal()}
           {this.renderChapters(this.state.activeContent.chapters)}
-        </>
+        </Box>
       );
     } else {
       return null;

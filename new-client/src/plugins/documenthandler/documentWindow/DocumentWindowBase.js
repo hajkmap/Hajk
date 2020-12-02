@@ -1,21 +1,13 @@
 import React from "react";
-import { ThemeProvider, withStyles } from "@material-ui/core/styles";
+import { ThemeProvider } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
 import PrintWindow from "../printMenu/PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
-import Grid from "@material-ui/core/Grid";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
 import PrintIcon from "@material-ui/icons/Print";
-const styles = (theme) => ({
-  loader: {
-    height: "100%",
-  },
-  progress: {
-    height: "100%",
-  },
-});
+
 class DocumentWindowBase extends React.PureComponent {
   findMenuItem(menuItem, documentNameToFind) {
     if (menuItem.document === documentNameToFind) {
@@ -207,7 +199,6 @@ class DocumentWindowBase extends React.PureComponent {
       options,
       chapters,
       localObserver,
-      classes,
       documentWindowMaximized,
       document,
       documentTitle,
@@ -269,18 +260,11 @@ class DocumentWindowBase extends React.PureComponent {
             />
           )
         ) : (
-          <Grid
-            className={classes.loader}
-            alignItems="center"
-            justify="center"
-            container
-          >
-            <CircularProgress className={classes.progress} justify="center" />
-          </Grid>
+          <Progress />
         )}
       </BaseWindowPlugin>
     );
   }
 }
 
-export default withStyles(styles)(DocumentWindowBase);
+export default DocumentWindowBase;
