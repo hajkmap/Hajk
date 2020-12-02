@@ -11,10 +11,6 @@ import Lines from "./SearchViews/Lines";
 import Observer from "react-event-observer";
 import { Tooltip } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import CardActions from "@material-ui/core/CardActions";
-import Collapse from "@material-ui/core/Collapse";
 import IconButton from "@material-ui/core/IconButton";
 import clsx from "clsx";
 import MenuIcon from "@material-ui/icons/Menu";
@@ -62,7 +58,9 @@ const styles = (theme) => {
     },
     formControl: {
       margin: theme.spacing(1),
-      minWidth: 150,
+      marginLeft: "0px",
+      marginBottom: "24px",
+      minWidth: 200,
     },
     selectEmpty: {
       marginTop: theme.spacing(2),
@@ -76,7 +74,7 @@ const styles = (theme) => {
     iconButton: { padding: 7 },
 
     selectInput: {
-      padding: 10,
+      padding: 5,
     },
     searchModuleContainer: {
       minHeight: 200,
@@ -244,7 +242,7 @@ class VTSearch extends React.PureComponent {
           (clsx(classes.expand, {
             [classes.expandOpen]: this.state.expanded,
           }),
-            classes.dropDownIconButton)
+          classes.dropDownIconButton)
         }
         onClick={this.handleExpandClick}
         aria-expanded={this.state.expanded}
@@ -300,45 +298,23 @@ class VTSearch extends React.PureComponent {
           top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide
+          onWindowHide: this.onWindowHide,
         }}
       >
-        <>
-          <Card
-            className={classes.searchContainer}
-            onClick={this.onClickSearchContainer}
-          >
-            <CardActions disableSpacing className={classes.searchContainerBox}>
-              {this.renderMenuButton()}
-              {this.renderDropDown()}
-              {this.state.activeSearchTool !== searchTypes.DEFAULT &&
-                this.renderExpansionButton()}
-              <div className={classes.loaderContainer}>{this.renderLoader()}</div>
-            </CardActions>
-
-            <Collapse in={this.state.expanded} timeout="auto">
-              <CardContent
-                className={classes.searchModuleContainer}
-                classes={{ root: classes.searchModuleContainerRoot }}
-              >
-                {this.renderSearchmodule()}
-              </CardContent>
-            </Collapse>
-          </Card>
-          {ReactDOM.createPortal(
-            <SearchResultListContainer
-              localObserver={this.localObserver}
-              model={this.searchModel}
-              toolConfig={options}
-              app={app}
-            ></SearchResultListContainer>,
-            document.getElementById("windows-container")
-          )}
-        </>
+        {this.renderDropDown()}
+        {this.renderSearchmodule()}
+        {ReactDOM.createPortal(
+          <SearchResultListContainer
+            localObserver={this.localObserver}
+            model={this.searchModel}
+            toolConfig={options}
+            app={app}
+          ></SearchResultListContainer>,
+          document.getElementById("windows-container")
+        )}
       </BaseWindowPlugin>
     );
   }
 }
 
 export default withStyles(styles)(VTSearch);
-
