@@ -27,7 +27,7 @@ import { ThemeProvider } from "@material-ui/styles";
 import ErrorIcon from "@material-ui/icons/Error";
 
 const networkErrorMessage =
-  "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett nätverksfel. Försök igen senare.";
+  "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
 const parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
 
