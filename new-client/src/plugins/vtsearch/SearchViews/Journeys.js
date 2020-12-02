@@ -17,25 +17,25 @@ import CardMedia from "@material-ui/core/CardMedia";
 import {
   MuiPickersUtilsProvider,
   KeyboardTimePicker,
-  KeyboardDatePicker
+  KeyboardDatePicker,
 } from "@material-ui/pickers";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
-const styles = theme => ({
+const styles = (theme) => ({
   journeysForm: { marginTop: 10 },
   dateForm: {
     marginTop: 0,
     marginBottom: -4,
-    color: theme.palette.primary.main
+    color: theme.palette.primary.main,
   },
   spaceToFromDate: { marginBottom: 40 },
   divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
   errorMessage: { color: theme.palette.error.main },
   polygonAndRectangleImage: {
-    width: "80%"
-  }
+    width: "80%",
+  },
 });
 
 class Journeys extends React.PureComponent {
@@ -57,7 +57,7 @@ class Journeys extends React.PureComponent {
         0
       )
     ),
-    selectedFormType: ""
+    selectedFormType: "",
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -68,7 +68,7 @@ class Journeys extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object.isRequired,
   };
 
   static defaultProps = {};
@@ -82,7 +82,7 @@ class Journeys extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
   }
 
-  handleFromTimeChange = fromTime => {
+  handleFromTimeChange = (fromTime) => {
     this.updateStateForTimeOrDateChange(fromTime);
 
     // Bug in KeyboardTimePicker, sends today instead of correct date. Merge date and time to fix it.
@@ -94,7 +94,7 @@ class Journeys extends React.PureComponent {
 
     this.setState(
       {
-        selectedFromTime: fromTime
+        selectedFromTime: fromTime,
       },
       () => {
         this.validateDateAndTime(
@@ -109,7 +109,7 @@ class Journeys extends React.PureComponent {
     this.addOneHourTime(fromTime);
   };
 
-  handleFromDateChange = fromDate => {
+  handleFromDateChange = (fromDate) => {
     this.updateStateForTimeOrDateChange(fromDate);
     const newFromTime = this.mergeDateIntoTime(
       fromDate,
@@ -137,7 +137,7 @@ class Journeys extends React.PureComponent {
         selectedFromDate: fromDate,
         selectedFromTime: fromTime,
         selectedEndDate: endDate,
-        selectedEndTime: endTime
+        selectedEndTime: endTime,
       },
       () => {
         this.validateDateAndTime(
@@ -151,7 +151,7 @@ class Journeys extends React.PureComponent {
     );
   };
 
-  handleEndTimeChange = endTime => {
+  handleEndTimeChange = (endTime) => {
     this.updateStateForTimeOrDateChange(endTime);
 
     // Bug in KeyboardTimePicker, sends today instead of correct date. Merge date and time to fix it.
@@ -163,7 +163,7 @@ class Journeys extends React.PureComponent {
 
     this.setState(
       {
-        selectedEndTime: endTime
+        selectedEndTime: endTime,
       },
       () => {
         this.validateDateAndTime(
@@ -177,7 +177,7 @@ class Journeys extends React.PureComponent {
     );
   };
 
-  handleEndDateChange = endDate => {
+  handleEndDateChange = (endDate) => {
     this.updateStateForTimeOrDateChange(endDate);
     const newEndTime = this.mergeDateIntoTime(
       endDate,
@@ -189,7 +189,7 @@ class Journeys extends React.PureComponent {
     this.setState(
       {
         selectedEndDate: endDate,
-        selectedEndTime: endTime
+        selectedEndTime: endTime,
       },
       () => {
         this.validateDateAndTime(
@@ -218,7 +218,7 @@ class Journeys extends React.PureComponent {
     if (!this.state.spatialToolsEnabled) this.enablePolygonAndRectangleSearch();
   }
 
-  isTimeOrDateValid = timeOrDate => {
+  isTimeOrDateValid = (timeOrDate) => {
     if (!timeOrDate) return false;
     return timeOrDate.toString() !== "Invalid Date";
   };
@@ -256,7 +256,7 @@ class Journeys extends React.PureComponent {
       selectedFromDate,
       selectedEndDate,
       selectedEndTime,
-      selectedFromTime
+      selectedFromTime,
     } = this.state;
 
     if (
@@ -278,13 +278,13 @@ class Journeys extends React.PureComponent {
     if (callbackAllIsOK) return callbackAllIsOK();
   };
 
-  addOneHourTime = time => {
+  addOneHourTime = (time) => {
     if (time && !isNaN(time)) {
       let endTime = new Date(time);
       endTime.setHours(time.getHours() + 1);
       this.setState({
         selectedEndTime: endTime,
-        selectedEndDate: endTime
+        selectedEndDate: endTime,
       });
     }
   };
@@ -294,7 +294,7 @@ class Journeys extends React.PureComponent {
       selectedFromDate,
       selectedEndDate,
       selectedEndTime,
-      selectedFromTime
+      selectedFromTime,
     } = this.state;
     let fromTime = new Date(selectedFromTime);
     let endTime = new Date(selectedEndTime);
@@ -319,7 +319,7 @@ class Journeys extends React.PureComponent {
 
     var result = {
       formatFromDate: formatFromDate,
-      formatEndDate: formatEndDate
+      formatEndDate: formatEndDate,
     };
 
     return result;
@@ -336,7 +336,7 @@ class Journeys extends React.PureComponent {
     this.setState(
       {
         isPolygonActive: !this.state.isPolygonActive,
-        isRectangleActive: false
+        isRectangleActive: false,
       },
       () => {
         if (this.state.isPolygonActive) this.activateSearch("Polygon");
@@ -351,7 +351,7 @@ class Journeys extends React.PureComponent {
     this.setState(
       {
         isRectangleActive: !this.state.isRectangleActive,
-        isPolygonActive: false
+        isPolygonActive: false,
       },
       () => {
         if (this.state.isRectangleActive && this.state.spatialToolsEnabled)
@@ -364,14 +364,14 @@ class Journeys extends React.PureComponent {
     this.localObserver.publish("deactivate-search");
   };
 
-  activateSearch = spatialType => {
+  activateSearch = (spatialType) => {
     const { formatFromDate, formatEndDate } = this.getFormattedDate();
 
     this.localObserver.publish("journeys-search", {
       selectedFromDate: formatFromDate,
       selectedEndDate: formatEndDate,
       selectedFormType: spatialType,
-      searchCallback: this.inactivateSpatialSearchButtons
+      searchCallback: this.inactivateSpatialSearchButtons,
     });
   };
 
@@ -392,7 +392,7 @@ class Journeys extends React.PureComponent {
             value={this.state.selectedFromTime}
             onChange={this.handleFromTimeChange}
             KeyboardButtonProps={{
-              "aria-label": "change time"
+              "aria-label": "change time",
             }}
           />
         </Grid>
@@ -405,7 +405,7 @@ class Journeys extends React.PureComponent {
           value={this.state.selectedFromDate}
           onChange={this.handleFromDateChange}
           KeyboardButtonProps={{
-            "aria-label": "change date"
+            "aria-label": "change date",
           }}
         />
       </>
@@ -415,7 +415,7 @@ class Journeys extends React.PureComponent {
   renderEndDateSection = () => {
     const { classes } = this.props;
     return (
-      <Grid container justify="center" spacing={2}>
+      <>
         <Grid item xs={12}>
           <Typography variant="caption">TILL OCH MED</Typography>
           <KeyboardTimePicker
@@ -428,23 +428,23 @@ class Journeys extends React.PureComponent {
             value={this.state.selectedEndTime}
             onChange={this.handleEndTimeChange}
             KeyboardButtonProps={{
-              "aria-label": "change time"
+              "aria-label": "change time",
             }}
           />
         </Grid>
         <KeyboardDatePicker
+          className={classes.spaceToFromDate}
           format="yyyy-MM-dd"
           margin="normal"
           invalidDateMessage="FEL VÄRDE PÅ DATUM"
           value={this.state.selectedEndDate}
-          className={classes.spaceToFromDate}
           onChange={this.handleEndDateChange}
           KeyboardButtonProps={{
-            "aria-label": "change date"
+            "aria-label": "change date",
           }}
         />
         {this.showErrorMessage()}
-      </Grid>
+      </>
     );
   };
 
