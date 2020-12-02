@@ -1,6 +1,5 @@
 {
   "activeTools": [
-    "anchor",
     "buffer",
     "collector",
     "coordinates",
@@ -8,7 +7,6 @@
     "dummy",
     "edit",
     "export",
-    "informative",
     "layerswitcher",
     "location",
     "measure",

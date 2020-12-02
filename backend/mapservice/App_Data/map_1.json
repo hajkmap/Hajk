@@ -107,7 +107,7 @@
         ],
         "groups": [],
         "active": true,
-        "visibleAtStart": true,
+        "visibleAtStart": false,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
         "showBreadcrumbs": false,
@@ -160,8 +160,10 @@
     {
       "type": "vtsearch",
       "options": {
+        "target": "toolbar",
         "abstract": "VTSEARCH",
-        "title": "VTSEARCH",
+        "title": "Västtrafik",
+        "visibleAtStart": true,
         "mapColors": {
           "searchColor": {
             "fillColorRed": "220",
@@ -361,7 +363,7 @@
           }
         }
       },
-      "index": 0
+      "index": 18
     },
     {
       "type": "draw",
