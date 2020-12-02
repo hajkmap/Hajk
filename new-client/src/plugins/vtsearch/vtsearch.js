@@ -244,7 +244,7 @@ class VTSearch extends React.PureComponent {
           (clsx(classes.expand, {
             [classes.expandOpen]: this.state.expanded,
           }),
-          classes.dropDownIconButton)
+            classes.dropDownIconButton)
         }
         onClick={this.handleExpandClick}
         aria-expanded={this.state.expanded}
@@ -283,12 +283,13 @@ class VTSearch extends React.PureComponent {
   };
 
   render() {
-    const { classes, app, options } = this.props;
+    const { app, options } = this.props;
+    const { classes, children, ...baseWindowProps } = this.props; // BaseWindowPlugin can't handle content in classes.
 
     //OBS We need to keep the tooltip and IconButton to render menu!! //Tobias
     return (
       <BaseWindowPlugin
-        {...this.props}
+        {...baseWindowProps}
         type="vtsearch"
         custom={{
           icon: <DirectionsBusIcon />,
@@ -299,42 +300,45 @@ class VTSearch extends React.PureComponent {
           top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide,
+          onWindowHide: this.onWindowHide
         }}
       >
-        <Card
-          className={classes.searchContainer}
-          onClick={this.onClickSearchContainer}
-        >
-          <CardActions disableSpacing className={classes.searchContainerBox}>
-            {this.renderMenuButton()}
-            {this.renderDropDown()}
-            {this.state.activeSearchTool !== searchTypes.DEFAULT &&
-              this.renderExpansionButton()}
-            <div className={classes.loaderContainer}>{this.renderLoader()}</div>
-          </CardActions>
+        <>
+          <Card
+            className={classes.searchContainer}
+            onClick={this.onClickSearchContainer}
+          >
+            <CardActions disableSpacing className={classes.searchContainerBox}>
+              {this.renderMenuButton()}
+              {this.renderDropDown()}
+              {this.state.activeSearchTool !== searchTypes.DEFAULT &&
+                this.renderExpansionButton()}
+              <div className={classes.loaderContainer}>{this.renderLoader()}</div>
+            </CardActions>
 
-          <Collapse in={this.state.expanded} timeout="auto">
-            <CardContent
-              className={classes.searchModuleContainer}
-              classes={{ root: classes.searchModuleContainerRoot }}
-            >
-              {this.renderSearchmodule()}
-            </CardContent>
-          </Collapse>
-        </Card>
-        {ReactDOM.createPortal(
-          <SearchResultListContainer
-            localObserver={this.localObserver}
-            model={this.searchModel}
-            toolConfig={options}
-            app={app}
-          ></SearchResultListContainer>,
-          document.getElementById("windows-container")
-        )}
+            <Collapse in={this.state.expanded} timeout="auto">
+              <CardContent
+                className={classes.searchModuleContainer}
+                classes={{ root: classes.searchModuleContainerRoot }}
+              >
+                {this.renderSearchmodule()}
+              </CardContent>
+            </Collapse>
+          </Card>
+          {ReactDOM.createPortal(
+            <SearchResultListContainer
+              localObserver={this.localObserver}
+              model={this.searchModel}
+              toolConfig={options}
+              app={app}
+            ></SearchResultListContainer>,
+            document.getElementById("windows-container")
+          )}
+        </>
       </BaseWindowPlugin>
     );
   }
 }
 
 export default withStyles(styles)(VTSearch);
+
