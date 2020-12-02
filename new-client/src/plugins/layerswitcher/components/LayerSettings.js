@@ -108,7 +108,10 @@ class LayerSettings extends React.PureComponent {
     return (
       <div>
         <div className={this.props.classes.settingsContainer}>
-          {this.props.showOpacity ? this.renderOpacitySlider() : null}
+          {this.props.options.enableTransparencySlider !== false &&
+          this.props.showOpacity
+            ? this.renderOpacitySlider()
+            : null}
           {this.props.showLegend ? this.renderLegendImage() : null}
           {this.props.layer.getProperties().filterable ? (
             <VectorFilter layer={this.props.layer} />

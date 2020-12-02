@@ -101,6 +101,7 @@ class LayersSwitcherView extends React.PureComponent {
               model={this.props.model}
               chapters={this.state.chapters}
               app={this.props.app}
+              options={this.props.options}
             />
           );
         })}
