@@ -15,7 +15,7 @@ import { createBox } from "ol/interaction/Draw";
  */
 
 const mapContainer = document.getElementById("map");
-const appContainer = document.getElementById("app-container");
+const appContainer = document.getElementById("appBox");
 export default class MapViewModel {
   constructor(settings) {
     this.map = settings.map;
@@ -30,7 +30,7 @@ export default class MapViewModel {
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired
+    localObserver: PropTypes.object.isRequired,
   };
 
   /**
@@ -40,12 +40,15 @@ export default class MapViewModel {
    * @memberof MapViewModel
    */
   bindSubscriptions = () => {
-    this.localObserver.subscribe("highlight-search-result-feature", payload => {
-      var olFeature = this.getSearchResultLayerFromId(payload.searchResultId)
-        .getSource()
-        .getFeatureById(payload.olFeatureId);
-      this.highlightFeature(olFeature);
-    });
+    this.localObserver.subscribe(
+      "highlight-search-result-feature",
+      (payload) => {
+        var olFeature = this.getSearchResultLayerFromId(payload.searchResultId)
+          .getSource()
+          .getFeatureById(payload.olFeatureId);
+        this.highlightFeature(olFeature);
+      }
+    );
 
     this.localObserver.subscribe(
       "add-search-result-to-map",
@@ -55,7 +58,7 @@ export default class MapViewModel {
       }
     );
 
-    this.localObserver.subscribe("clear-search-result", searchResultId => {
+    this.localObserver.subscribe("clear-search-result", (searchResultId) => {
       this.map.removeLayer(this.getSearchResultLayerFromId(searchResultId));
     });
     this.localObserver.subscribe("deactivate-search", this.deactivateSearch);
@@ -65,13 +68,13 @@ export default class MapViewModel {
     });
 
     this.localObserver.subscribe("close-all-vt-searchLayer", () => {
-      this.map.getLayers().forEach(layer => {
+      this.map.getLayers().forEach((layer) => {
         if (layer.get("type") === "vt-search-result-layer")
           this.map.removeLayer(layer);
       });
     });
 
-    this.localObserver.subscribe("toggle-visibility", searchResultID => {
+    this.localObserver.subscribe("toggle-visibility", (searchResultID) => {
       this.toggleLayerVisibility(searchResultID);
     });
 
@@ -81,7 +84,7 @@ export default class MapViewModel {
 
     this.map.on("singleclick", this.onFeaturesClickedInMap);
 
-    this.localObserver.subscribe("add-search-result", olFeatures => {
+    this.localObserver.subscribe("add-search-result", (olFeatures) => {
       this.addFeatureToSearchResultLayer(olFeatures);
     });
 
@@ -89,7 +92,7 @@ export default class MapViewModel {
       this.highlightLayer.getSource().clear();
     });
 
-    this.localObserver.subscribe("resize-map", heightFromBottom => {
+    this.localObserver.subscribe("resize-map", (heightFromBottom) => {
       this.resizeMap(heightFromBottom);
     });
 
@@ -99,7 +102,7 @@ export default class MapViewModel {
 
     this.localObserver.subscribe("routes-search", this.routesSearch);
 
-    this.localObserver.subscribe("vtsearch-result-done", result => {
+    this.localObserver.subscribe("vtsearch-result-done", (result) => {
       this.clearDrawLayer();
     });
   };
@@ -113,20 +116,20 @@ export default class MapViewModel {
     this.drawlayer.getSource().clear();
   };
 
-  resizeMap = heightFromBottom => {
+  resizeMap = (heightFromBottom) => {
     //Not so "reacty" but no other solution possible because if we don't want to rewrite core functionality in Hajk3
-    [appContainer, mapContainer].forEach(container => {
+    [appContainer, mapContainer].forEach((container) => {
       container.style.bottom = `${heightFromBottom}px`;
     });
 
     this.map.updateSize();
   };
 
-  getSearchResultLayerFromId = searchResultId => {
+  getSearchResultLayerFromId = (searchResultId) => {
     return this.map
       .getLayers()
       .getArray()
-      .filter(layer => {
+      .filter((layer) => {
         return (
           layer.get("type") === "vt-search-result-layer" &&
           layer.get("searchResultId") === searchResultId
@@ -143,12 +146,12 @@ export default class MapViewModel {
       source: this.drawlayer.getSource(),
       type: value,
       stopClick: true,
-      geometryFunction: geometryFunction
+      geometryFunction: geometryFunction,
     });
 
     this.map.addInteraction(this.draw);
-    return new Promise(resolve => {
-      this.draw.on("drawend", e => {
+    return new Promise((resolve) => {
+      this.draw.on("drawend", (e) => {
         this.map.removeInteraction(this.draw);
         var format = new WKT();
         var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
@@ -161,7 +164,7 @@ export default class MapViewModel {
     selectedFromDate,
     selectedEndDate,
     selectedFormType,
-    searchCallback
+    searchCallback,
   }) => {
     var value = selectedFormType;
     var geometryFunction = undefined;
@@ -169,7 +172,7 @@ export default class MapViewModel {
       value = "Circle";
       geometryFunction = createBox();
     }
-    this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
+    this.getWktFromUser(value, geometryFunction).then((wktFeatureGeom) => {
       searchCallback();
       if (wktFeatureGeom != null) {
         this.model.getJourneys(
@@ -187,7 +190,7 @@ export default class MapViewModel {
     publicLine,
     municipality,
     selectedFormType,
-    searchCallback
+    searchCallback,
   }) => {
     var value = selectedFormType;
     var geometryFunction = undefined;
@@ -202,7 +205,7 @@ export default class MapViewModel {
         this.model.getStopPoints(stopNameOrNr, publicLine, municipality);
       }
     } else {
-      this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
+      this.getWktFromUser(value, geometryFunction).then((wktFeatureGeom) => {
         searchCallback();
         if (busStopValue === "stopAreas") {
           this.model.getStopAreas(
@@ -230,7 +233,7 @@ export default class MapViewModel {
     trafficTransport,
     throughStopArea,
     selectedFormType,
-    searchCallback
+    searchCallback,
   }) => {
     var value = selectedFormType;
     var geometryFunction = undefined;
@@ -248,7 +251,7 @@ export default class MapViewModel {
         throughStopArea
       );
     } else {
-      this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
+      this.getWktFromUser(value, geometryFunction).then((wktFeatureGeom) => {
         searchCallback();
         this.model.getRoutes(
           publicLineName,
@@ -264,7 +267,7 @@ export default class MapViewModel {
 
   addDrawSearch = () => {
     this.drawlayer = new VectorLayer({
-      source: new VectorSource({})
+      source: new VectorSource({}),
     });
     this.map.addLayer(this.drawlayer);
   };
@@ -276,31 +279,31 @@ export default class MapViewModel {
    * @returns {null}
    * @memberof MapViewModel
    */
-  addSearchResultLayerToMap = searchResultId => {
+  addSearchResultLayerToMap = (searchResultId) => {
     var fill = new Fill({
       color: `rgba(${this.model.mapColors.searchColor.fillColorRed},
         ${this.model.mapColors.searchColor.fillColorGreen},
         ${this.model.mapColors.searchColor.fillColorBlue},
-        ${this.model.mapColors.searchColor.fillColorOpacity})`
+        ${this.model.mapColors.searchColor.fillColorOpacity})`,
     });
     var stroke = new Stroke({
       color: `rgba(${this.model.mapColors.searchColor.strokeColorRed},
         ${this.model.mapColors.searchColor.strokeColorGreen},
         ${this.model.mapColors.searchColor.strokeColorBlue},
         ${this.model.mapColors.searchColor.strokeColorOpacity})`,
-      width: this.model.mapColors.searchColor.strokeLineWidth
+      width: this.model.mapColors.searchColor.strokeLineWidth,
     });
     var searchResultLayer = new VectorLayer({
       style: new Style({
         image: new Circle({
           fill: fill,
           stroke: stroke,
-          radius: this.model.mapColors.searchColor.strokePointWidth
+          radius: this.model.mapColors.searchColor.strokePointWidth,
         }),
         fill: fill,
-        stroke: stroke
+        stroke: stroke,
       }),
-      source: new VectorSource({})
+      source: new VectorSource({}),
     });
     console.log(this.map, "map");
     searchResultLayer.set("type", "vt-search-result-layer");
@@ -324,14 +327,14 @@ export default class MapViewModel {
       color: `rgba(${this.model.mapColors.highlightColor.fillColorRed},
         ${this.model.mapColors.highlightColor.fillColorGreen},
         ${this.model.mapColors.highlightColor.fillColorBlue},
-        ${this.model.mapColors.highlightColor.fillColorOpacity})`
+        ${this.model.mapColors.highlightColor.fillColorOpacity})`,
     });
     var stroke = new Stroke({
       color: `rgba(${this.model.mapColors.highlightColor.strokeColorRed},
         ${this.model.mapColors.highlightColor.strokeColorGreen},
         ${this.model.mapColors.highlightColor.strokeColorBlue},
         ${this.model.mapColors.highlightColor.strokeColorOpacity})`,
-      width: this.model.mapColors.highlightColor.strokeLineWidth
+      width: this.model.mapColors.highlightColor.strokeLineWidth,
     });
 
     this.highlightLayer = new VectorLayer({
@@ -339,12 +342,12 @@ export default class MapViewModel {
         image: new Circle({
           fill: fill,
           stroke: stroke,
-          radius: this.model.mapColors.highlightColor.strokePointWidth
+          radius: this.model.mapColors.highlightColor.strokePointWidth,
         }),
         fill: fill,
-        stroke: stroke
+        stroke: stroke,
       }),
-      source: new VectorSource({})
+      source: new VectorSource({}),
     });
     this.highlightLayer.set("type", "vt-highlight-layer");
     this.highlightLayer.setZIndex(50);
@@ -359,7 +362,7 @@ export default class MapViewModel {
    * @param {external:"ol.Feature"}
    */
 
-  highlightFeature = olFeature => {
+  highlightFeature = (olFeature) => {
     if (olFeature != null) {
       this.highlightLayer.getSource().clear();
       this.highlightLayer.getSource().addFeature(olFeature);
@@ -384,10 +387,10 @@ export default class MapViewModel {
    * @memberof MapViewModel
    * @param {Array<{external:"ol/interaction/Extent"}>}
    */
-  zoomToExtent = extent => {
+  zoomToExtent = (extent) => {
     this.map.getView().fit(extent, {
       size: this.map.getSize(),
-      padding: [10, 10, 10, 10]
+      padding: [10, 10, 10, 10],
     });
   };
 
@@ -397,16 +400,16 @@ export default class MapViewModel {
    * @param {integer : searchResultId}
    * @memberof MapViewModel
    */
-  toggleLayerVisibility = searchResultId => {
-    this.map.getLayers().forEach(layer => {
+  toggleLayerVisibility = (searchResultId) => {
+    this.map.getLayers().forEach((layer) => {
       if (layer.get("searchResultId") === searchResultId) {
         layer.set("visible", !layer.get("visible"));
         this.zoomToExtent(layer.getSource().getExtent());
       }
     });
   };
-  hideCurrentLayer = searchResultId => {
-    this.map.getLayers().forEach(layer => {
+  hideCurrentLayer = (searchResultId) => {
+    this.map.getLayers().forEach((layer) => {
       if (layer.get("searchResultId") === searchResultId) {
         layer.set("visible", false);
       }
@@ -419,7 +422,7 @@ export default class MapViewModel {
    * @memberof MapViewModel
    */
   hideAllLayers = () => {
-    this.map.getLayers().forEach(layer => {
+    this.map.getLayers().forEach((layer) => {
       if (layer.get("type") === "vt-search-result-layer") {
         layer.set("visible", false);
       }
@@ -433,7 +436,7 @@ export default class MapViewModel {
    * @param {*} event
    */
 
-  onFeaturesClickedInMap = e => {
+  onFeaturesClickedInMap = (e) => {
     var featuresClicked = this.getFeaturesAtClickedPixel(e);
     if (featuresClicked.length > 0) {
       this.highlightFeature(featuresClicked[0]);
@@ -448,7 +451,7 @@ export default class MapViewModel {
    * @memberof MapViewModel
    * @param {*} event
    */
-  getFeaturesAtClickedPixel = evt => {
+  getFeaturesAtClickedPixel = (evt) => {
     var features = [];
     this.map.forEachFeatureAtPixel(
       evt.pixel,
@@ -458,7 +461,7 @@ export default class MapViewModel {
         }
       },
       {
-        hitTolerance: 10
+        hitTolerance: 10,
       }
     );
     return features;
