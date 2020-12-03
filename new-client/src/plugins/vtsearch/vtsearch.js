@@ -85,6 +85,7 @@ const styles = (theme) => {
     loaderContainer: {
       flexBasis: "100%",
       minHeight: "5px",
+      marginTop: "10px",
     },
   };
 };
@@ -156,6 +157,14 @@ class VTSearch extends React.PureComponent {
 
     this.localObserver.subscribe("vtsearch-result-done", (ans) => {
       this.setState({ loading: false });
+    });
+
+    this.localObserver.subscribe("vtsearch-chosen", (typeOfSearch) => {
+      this.localObserver.publish("deactivate-search");
+      this.setState({
+        activeSearchTool: typeOfSearch,
+        expanded: typeOfSearch === searchTypes.DEFAULT ? false : true,
+      });
     });
   };
 
@@ -289,11 +298,13 @@ class VTSearch extends React.PureComponent {
       <BaseWindowPlugin
         {...baseWindowProps}
         type="vtsearch"
+        vtsearch="true"
+        localObserver={this.localObserver}
         custom={{
           icon: <DirectionsBusIcon />,
           title: "Title",
           description: "Description",
-          height: 700,
+          height: 650,
           width: 300,
           top: undefined,
           left: undefined,
@@ -301,17 +312,19 @@ class VTSearch extends React.PureComponent {
           onWindowHide: this.onWindowHide,
         }}
       >
-        {this.renderDropDown()}
-        {this.renderSearchmodule()}
-        {ReactDOM.createPortal(
-          <SearchResultListContainer
-            localObserver={this.localObserver}
-            model={this.searchModel}
-            toolConfig={options}
-            app={app}
-          ></SearchResultListContainer>,
-          document.getElementById("windows-container")
-        )}
+        <>
+          {this.renderSearchmodule()}
+          <div className={classes.loaderContainer}>{this.renderLoader()}</div>
+          {ReactDOM.createPortal(
+            <SearchResultListContainer
+              localObserver={this.localObserver}
+              model={this.searchModel}
+              toolConfig={options}
+              app={app}
+            ></SearchResultListContainer>,
+            document.getElementById("windows-container")
+          )}
+        </>
       </BaseWindowPlugin>
     );
   }

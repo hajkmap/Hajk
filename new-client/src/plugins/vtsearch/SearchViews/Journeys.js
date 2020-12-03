@@ -28,9 +28,10 @@ const styles = (theme) => ({
   dateForm: {
     marginTop: 0,
     marginBottom: -4,
+    width: "100%",
     color: theme.palette.primary.main,
   },
-  spaceToFromDate: { marginBottom: 40 },
+  spaceToFromDate: { marginBottom: 40, width: "100%" },
   divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
   errorMessage: { color: theme.palette.error.main },
   polygonAndRectangleImage: {

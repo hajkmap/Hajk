@@ -7,7 +7,10 @@ import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 import AspectRatioIcon from "@material-ui/icons/AspectRatio";
 import { Hidden, Typography } from "@material-ui/core";
 
-const styles = theme => {
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+
+const styles = (theme) => {
   return {
     header: {
       padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
@@ -15,22 +18,36 @@ const styles = theme => {
       userSelect: "none",
       display: "flex",
       justifyContent: "space-between",
-      minHeight: 46
+      minHeight: 46,
     },
     icons: {
       display: "flex",
       alignItems: "center",
       "&>*": {
-        marginLeft: theme.spacing(1)
-      }
+        marginLeft: theme.spacing(1),
+      },
     },
     icon: {
       cursor: "pointer",
       "&:hover": {
-        background: theme.palette.action.hover
-      }
-    }
+        background: theme.palette.action.hover,
+      },
+    },
+    formControl: {
+      marginLeft: "0px",
+      minWidth: 200,
+    },
+    selectInput: {
+      padding: 5,
+    },
   };
+};
+
+const searchTypes = {
+  DEFAULT: "Välj sökmetod",
+  JOURNEYS: "Sök Turer",
+  LINES: "Sök Linjer",
+  STOPS: "Sök Hållplatser",
 };
 
 class PanelHeader extends Component {
@@ -42,8 +59,14 @@ class PanelHeader extends Component {
     onClose: propTypes.func.isRequired,
     onMaximize: propTypes.func.isRequired,
     onMinimize: propTypes.func.isRequired,
-    title: propTypes.string.isRequired
+    title: propTypes.string.isRequired,
   };
+
+  constructor(props) {
+    super(props);
+
+    this.localObserver = this.props.localObserver;
+  }
 
   renderCustomHeaderButtons = () => {
     const { customHeaderButtons, classes } = this.props;
@@ -64,6 +87,55 @@ class PanelHeader extends Component {
     return customHeaderButtons && customHeaderButtons.length > 0;
   };
 
+  handleChange = (e) => {
+    var typeOfSearch = searchTypes[e.target.value];
+    this.localObserver.publish("vtsearch-chosen", typeOfSearch);
+  };
+
+  renderHeader = () => {
+    const { vtsearch } = this.props;
+
+    if (vtsearch) return this.renderDropDownMenuHeader();
+
+    return this.renderTextHeader();
+  };
+
+  renderTextHeader = () => {
+    const { classes } = this.props;
+
+    return (
+      <Typography variant="button" align="left" noWrap={true}>
+        {this.props.title}
+      </Typography>
+    );
+  };
+
+  renderDropDownMenuHeader = () => {
+    const { classes } = this.props;
+
+    return (
+      <FormControl variant="outlined" className={classes.formControl}>
+        <Select
+          classes={{ root: classes.selectInput }}
+          native
+          onChange={this.handleChange}
+          inputProps={{
+            name: "searchType",
+            id: "search-type",
+          }}
+        >
+          {Object.keys(searchTypes).map((key) => {
+            return (
+              <option key={key} value={key}>
+                {searchTypes[key]}
+              </option>
+            );
+          })}
+        </Select>
+      </FormControl>
+    );
+  };
+
   render() {
     const { allowMaximizedWindow, classes, mode } = this.props;
     return (
@@ -71,9 +143,7 @@ class PanelHeader extends Component {
         className={classes.header}
         style={{ borderColor: this.props.color }} // Allow for dynamic override of accent border color
       >
-        <Typography variant="button" align="left" noWrap={true}>
-          {this.props.title}
-        </Typography>
+        {this.renderHeader()}
         <nav className={classes.icons}>
           {this.shouldRenderCustomHeaderButtons() &&
             this.renderCustomHeaderButtons()}
