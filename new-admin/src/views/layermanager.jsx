@@ -599,7 +599,9 @@ class Manager extends Component {
     }
   }
 
-  uploadLegend(callback) {
+  uploadLegendIcon(callback) {
+    console.log("UPLOADLEGENDICON");
+    console.log(this.props.model, "MODEL");
     $("#upload-form").submit();
     this.refs.uploadIframe.addEventListener("load", () => {
       if (this.refs.uploadIframe.contentDocument) {
@@ -610,10 +612,36 @@ class Manager extends Component {
             window.location.hostname +
             (window.location.port ? ":" + window.location.port : "");
         }
+
         var node = $(this.refs.uploadIframe.contentDocument).find("body")[0],
           url = node.innerHTML,
           a = $(`<a href="${url}"">temp</a>`),
           b = a[0].href;
+
+        this.props.model.set("legendIcon", b);
+      }
+    });
+  }
+
+  uploadLegend(callback) {
+    console.log(callback, "callback");
+    $("#upload-form").submit();
+    this.refs.uploadIframe.addEventListener("load", () => {
+      console.log(this.refs.uploadIframe, "this.refs.uploadIframe");
+      if (this.refs.uploadIframe.contentDocument) {
+        if (!window.location.origin) {
+          window.location.origin =
+            window.location.protocol +
+            "//" +
+            window.location.hostname +
+            (window.location.port ? ":" + window.location.port : "");
+        }
+
+        var node = $(this.refs.uploadIframe.contentDocument).find("body")[0],
+          url = node.innerHTML,
+          a = $(`<a href="${url}"">temp</a>`),
+          b = a[0].href;
+
         this.props.model.set("legend", b);
       }
     });
@@ -745,7 +773,23 @@ class Manager extends Component {
               type="file"
               multiple={false}
               name="files[]"
-              onChange={(e) => this.uploadLegend(e)}
+              onChange={(e) => {
+                const caller = e.currentTarget.getAttribute("caller");
+                if (caller) {
+                  if (caller === "legendImage") {
+                    this.uploadLegend(e);
+                  }
+                  if (caller === "legendIcon") {
+                    this.uploadLegendIcon(e);
+                  }
+                  if (caller === "layerInfoLegendIcon") {
+                    console.log("Something else");
+                  }
+                } else {
+                  //DEFAULT
+                  this.uploadLegend(e);
+                }
+              }}
             />
             <iframe
               id="upload-iframe"

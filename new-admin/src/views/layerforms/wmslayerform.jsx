@@ -38,6 +38,7 @@ const defaultState = {
   content: "",
   date: "Fylls i per automatik",
   legend: "",
+  legendIcon: "",
   owner: "",
   url: "",
   opacity: 1.0,
@@ -110,15 +111,23 @@ class WMSLayerForm extends Component {
     defaultState.url = this.props.url;
     this.setState(defaultState);
     this.props.model.on("change:legend", () => {
+      console.log("legendChange");
       this.setState({
         legend: this.props.model.get("legend"),
       });
       this.validateField("legend");
     });
+    this.props.model.on("change:legendIcon", () => {
+      this.setState({
+        legendIcon: this.props.model.get("legendIcon"),
+      });
+      this.validateField("legendIcon");
+    });
   }
 
   componentWillUnmount() {
     this.props.model.off("change:legend");
+    this.props.model.off("change:legendIcon");
   }
 
   constructor() {
@@ -132,6 +141,12 @@ class WMSLayerForm extends Component {
   }
 
   loadLegendImage(e) {
+    $("#select-image").attr("caller", "legendImage");
+    $("#select-image").trigger("click");
+  }
+
+  loadLegendImageIcon(e) {
+    $("#select-image").attr("caller", "legendIcon");
     $("#select-image").trigger("click");
   }
 
@@ -253,6 +268,7 @@ class WMSLayerForm extends Component {
         id: checkedLayer,
         caption: "",
         legend: "",
+        legendIcon: "",
         infobox: "",
         style: "",
         queryable: "",
@@ -305,6 +321,9 @@ class WMSLayerForm extends Component {
 
   renderLayerInfoInput(layerInfo) {
     var currentLayer = this.findInCapabilities(layerInfo.id);
+    var imageLoader = this.state.imageLoad ? (
+      <i className="fa fa-refresh fa-spin" />
+    ) : null;
 
     this.setState({
       style: currentLayer.Style || [],
@@ -369,6 +388,37 @@ class WMSLayerForm extends Component {
             type="text"
           />
         </div>
+        <div>
+          <label>
+            Teckenförklar
+            <br />
+            ingsikon
+          </label>
+          <input
+            value={layerInfo.legendIcon}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].legendIcon = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegendImageIcon(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+
         <div>
           <div>
             <label>Stil</label>
@@ -579,6 +629,7 @@ class WMSLayerForm extends Component {
             id: layer,
             caption: "",
             legend: "",
+            legendIcon: "",
             infobox: "",
             style: "",
             queryable: "",
@@ -827,6 +878,7 @@ class WMSLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
+      legendIcon: this.getValue("legendIcon"),
       projection: this.getValue("projection"),
       layers: this.getValue("layers"),
       layersInfo: this.getValue("layersInfo"),
@@ -1224,6 +1276,27 @@ class WMSLayerForm extends Component {
           <span
             onClick={(e) => {
               this.loadLegendImage(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+        <div>
+          <label>
+            Teckenförklar
+            <br />
+            ingsikon
+          </label>
+          <input
+            type="text"
+            ref="input_legend_icon"
+            value={this.state.legendIconImage}
+            onChange={(e) => this.setState({ legendIconImage: e.target.value })}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegendImageIcon(e);
             }}
             className="btn btn-default"
           >
