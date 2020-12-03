@@ -51,7 +51,6 @@ class DocumentHandler extends React.PureComponent {
         .init()
         .then((loadedDocumentModel) => {
           this.fetchCustomThemeJson().then((customTheme) => {
-            console.log(customTheme, "customTheme");
             this.setState({
               model: loadedDocumentModel,
               customTheme: customTheme,

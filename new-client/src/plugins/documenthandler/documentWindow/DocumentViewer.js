@@ -6,7 +6,7 @@ import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import clsx from "clsx";
 import Contents from "./Contents";
-import { Typography, Box } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 
 const styles = (theme) => ({
   gridContainer: {

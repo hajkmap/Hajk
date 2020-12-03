@@ -290,9 +290,7 @@ export const Img = ({ imgTag, localObserver }) => {
 
   const getImagePositionClass = (positioning) => {
     const { right, left, center, floatLeft, floatRight } = positioning;
-    console.log(right, "right");
-    console.log(left, "left");
-    console.log(left, "left");
+
     if (right) {
       return classes.pictureRight;
     }
