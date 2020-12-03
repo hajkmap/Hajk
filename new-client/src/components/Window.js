@@ -17,7 +17,7 @@ const zIndexStart = 1000;
 //
 // TODO: Perhaps there's no need to disable drag at any time anymore, so this override could be removed?
 //
-Rnd.prototype.onDragStart = function(e, data) {
+Rnd.prototype.onDragStart = function (e, data) {
   if (this.state.disableDrag) {
     return false;
   }
@@ -85,12 +85,12 @@ Rnd.prototype.onDragStart = function(e, data) {
         offset.left / scale,
       bottom:
         top + (boundary.offsetHeight - this.resizable.size.height) - offset.top,
-      left: left - offset.left / scale
-    }
+      left: left - offset.left / scale,
+    },
   });
 };
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     window: {
       zIndex: zIndexStart + document.windows.length,
@@ -102,8 +102,8 @@ const styles = theme => {
       pointerEvents: "all",
       [theme.breakpoints.down("xs")]: {
         borderRadius: "0",
-        position: "fixed !important"
-      }
+        position: "fixed !important",
+      },
     },
     panelContent: {
       display: "flex",
@@ -113,18 +113,18 @@ const styles = theme => {
       bottom: 0,
       right: 0,
       flexDirection: "column",
-      userSelect: "none"
+      userSelect: "none",
     },
     content: {
       flex: "1",
       overflowY: "auto",
       padding: "10px",
-      cursor: "default !important"
+      cursor: "default !important",
     },
     nonScrollable: {
       overflowY: "hidden",
-      padding: "0px"
-    }
+      padding: "0px",
+    },
   };
 };
 
@@ -146,14 +146,14 @@ class Window extends React.PureComponent {
     open: propTypes.bool.isRequired,
     position: propTypes.string.isRequired,
     title: propTypes.string.isRequired,
-    width: propTypes.number.isRequired
+    width: propTypes.number.isRequired,
   };
 
   static defaultProps = {
     draggingEnabled: true,
     resizingEnabled: true,
     allowMaximizedWindow: false,
-    scrollable: true
+    scrollable: true,
   };
 
   constructor(props) {
@@ -163,7 +163,7 @@ class Window extends React.PureComponent {
       left: 0,
       top: 0,
       width: 300,
-      height: 400
+      height: 400,
     };
 
     window.addEventListener("resize", () => {
@@ -173,6 +173,8 @@ class Window extends React.PureComponent {
         this.updatePosition();
       }
     });
+
+    this.localObserver = this.props.localObserver;
   }
 
   componentDidMount() {
@@ -184,9 +186,9 @@ class Window extends React.PureComponent {
       globalObserver.subscribe("core.drawerToggled", () => {
         this.updatePosition();
       });
-      globalObserver.subscribe("core.dialogOpen", open => {
+      globalObserver.subscribe("core.dialogOpen", (open) => {
         this.rnd.setState({
-          disableDrag: open
+          disableDrag: open,
         });
       });
     }
@@ -257,50 +259,50 @@ class Window extends React.PureComponent {
         top: this.top,
         width: this.width,
         height: this.height,
-        mode: "window"
+        mode: "window",
       },
       () => {
         this.rnd.updatePosition({
           y: Math.round(this.top),
-          x: Math.round(this.left)
+          x: Math.round(this.left),
         });
       }
     );
   }
 
-  close = e => {
+  close = (e) => {
     const { onClose } = this.props;
     this.latestWidth = this.rnd.getSelfElement().clientWidth;
     if (onClose) onClose();
   };
 
-  fit = target => {
+  fit = (target) => {
     this.rnd.updatePosition({
       x: Math.round(target.getBoundingClientRect().left),
-      y: Math.round(target.getBoundingClientRect().top)
+      y: Math.round(target.getBoundingClientRect().top),
     });
     this.rnd.setState({
-      disableDrag: true
+      disableDrag: true,
     });
     this.setState({
       width: target.clientWidth,
       height: target.clientHeight,
-      mode: "maximized"
+      mode: "maximized",
     });
   };
 
   reset = () => {
     this.rnd.updatePosition({
       y: Math.round(this.top),
-      x: Math.round(this.left)
+      x: Math.round(this.left),
     });
     this.rnd.setState({
-      disableDrag: false
+      disableDrag: false,
     });
     this.setState({
       width: this.width,
       height: this.height,
-      mode: "window"
+      mode: "window",
     });
   };
 
@@ -315,14 +317,14 @@ class Window extends React.PureComponent {
     }
 
     this.rnd.updatePosition({
-      y: Math.round(this.top)
+      y: Math.round(this.top),
     });
     this.rnd.setState({
-      disableDrag: false
+      disableDrag: false,
     });
     this.setState({
       height: this.height,
-      mode: "window"
+      mode: "window",
     });
   };
 
@@ -359,14 +361,14 @@ class Window extends React.PureComponent {
 
     getIsMobile() &&
       this.rnd.updatePosition({
-        y: Math.round(window.innerHeight - 42)
+        y: Math.round(window.innerHeight - 42),
       });
 
     // Don't matter the current mode – just collapse
     this.height = this.state.height;
     this.setState({
       height: 0,
-      mode: "minimized"
+      mode: "minimized",
     });
 
     // Run callbacks
@@ -395,7 +397,7 @@ class Window extends React.PureComponent {
       resizingEnabled,
       draggingEnabled,
       allowMaximizedWindow,
-      customPanelHeaderButtons
+      customPanelHeaderButtons,
     } = this.props;
     const { left, top, width, height } = this.state;
 
@@ -426,15 +428,15 @@ class Window extends React.PureComponent {
     this.bringToFront();
     return (
       <Rnd
-        onMouseDown={e => {
+        onMouseDown={(e) => {
           this.bringToFront();
         }}
-        onMouseOver={e => e.stopPropagation()} // If this bubbles, we'll have Tooltip show up even when we're only on Window. FIXME: Not needed when we change the rendering order.
-        ref={c => {
+        onMouseOver={(e) => e.stopPropagation()} // If this bubbles, we'll have Tooltip show up even when we're only on Window. FIXME: Not needed when we change the rendering order.
+        ref={(c) => {
           this.rnd = c;
         }}
         style={{
-          display: open ? "block" : "none"
+          display: open ? "block" : "none",
         }}
         onDragStop={(e, d) => {
           const rect = this.rnd.getSelfElement().getClientRects()[0];
@@ -452,7 +454,7 @@ class Window extends React.PureComponent {
           }
           this.setState({
             width: ref.style.width,
-            height: ref.style.height
+            height: ref.style.height,
           });
           if (this.props.onResize) this.props.onResize();
         }}
@@ -467,20 +469,20 @@ class Window extends React.PureComponent {
           right: resizeRight,
           top: resizeTop,
           topLeft: resizeTopLeft,
-          topRight: resizeTopRight
+          topRight: resizeTopRight,
         }}
         className={classes.window}
         minWidth={200}
         minHeight={this.state.mode === "minimized" ? 42 : 200}
         size={{
           width: width,
-          height: height
+          height: height,
         }}
         default={{
           x: left,
           y: top,
           width: width,
-          height: height
+          height: height,
         }}
       >
         <div className={classes.panelContent}>
@@ -489,11 +491,13 @@ class Window extends React.PureComponent {
             color={color}
             customHeaderButtons={customPanelHeaderButtons}
             globalObserver={this.props.globalObserver}
+            localObserver={this.props.localObserver}
             onClose={this.close}
             onMaximize={this.maximize}
             onMinimize={this.minimize}
             mode={this.state.mode}
             title={title}
+            vtsearch={this.props.vtsearch}
           />
           <section
             className={clsx(
