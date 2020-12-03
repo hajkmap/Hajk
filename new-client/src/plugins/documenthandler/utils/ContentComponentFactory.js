@@ -89,10 +89,16 @@ const useStyles = makeStyles((theme) => ({
   },
   listItemOneDigit: {
     marginRight: getIndentationValue(theme.typography.body1.fontSize, 1), //MAGIC
+    padding: theme.spacing(0),
   },
   listItemTwoDigit: {
     marginBottom: theme.spacing(1),
+    padding: theme.spacing(0),
     marginRight: getIndentationValue(theme.typography.body1.fontSize, 0.5), //MAGIC
+  },
+  olListItem: {
+    padding: theme.spacing(0),
+    wordBreak: "break-word",
   },
   ulList: {
     listStyle: "initial",
@@ -107,9 +113,6 @@ const useStyles = makeStyles((theme) => ({
       true
     ), //MAGIC
     padding: theme.spacing(0),
-  },
-  olListItem: {
-    wordBreak: "break-word",
   },
   olList: {
     padding: theme.spacing(0),
@@ -177,7 +180,7 @@ export const OLComponent = ({ olComponent }) => {
     <List className={classes.olList} component="ol">
       {children.map((listItem, index) => {
         return (
-          <ListItem disableGutters key={index}>
+          <ListItem className={classes.olListItem} disableGutters key={index}>
             <Grid wrap="nowrap" container>
               <Grid
                 className={clsx(
@@ -187,7 +190,7 @@ export const OLComponent = ({ olComponent }) => {
                 )}
                 item
               >
-                <Typography variant="body1">{`${index}.`}</Typography>
+                <Typography variant="body1">{`${index + 1}.`}</Typography>
               </Grid>
               <Grid item>
                 <Typography className={classes.olListItem} variant="body1">

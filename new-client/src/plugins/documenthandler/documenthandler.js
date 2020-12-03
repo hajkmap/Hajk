@@ -70,10 +70,13 @@ class DocumentHandler extends React.PureComponent {
    */
   setBottomMarginsForTypographyVariants = (documentHandlerTheme) => {
     ["body1", "h1", "h2", "h3", "h4", "h5", "h6"].forEach((key) => {
-      const marginBottom = documentHandlerTheme.typography[key].marginBottom;
-      if (!marginBottom) {
-        documentHandlerTheme.typography[key].marginBottom =
-          this.props.theme.spacing(1) || "8px";
+      const keyHasValue = documentHandlerTheme.typography[key];
+      if (keyHasValue) {
+        const marginBottom = documentHandlerTheme.typography[key]?.marginBottom;
+        if (!marginBottom) {
+          documentHandlerTheme.typography[key].marginBottom =
+            this.props.theme.spacing(1) || "8px";
+        }
       }
     });
   };
@@ -83,7 +86,9 @@ class DocumentHandler extends React.PureComponent {
     return fetch(options.customThemeUrl, fetchOpts)
       .then((res) => {
         return res.json().then((documentHandlerTheme) => {
-          this.setBottomMarginsForTypographyVariants(documentHandlerTheme);
+          if (documentHandlerTheme.typography) {
+            this.setBottomMarginsForTypographyVariants(documentHandlerTheme);
+          }
           return createMuiTheme(
             deepMerge(this.props.theme, documentHandlerTheme)
           );
