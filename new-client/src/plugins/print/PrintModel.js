@@ -68,6 +68,27 @@ export default class PrintModel {
     this.map.addLayer(this.previewLayer);
   }
 
+  getMapScale = () => {
+    const dpi = 25.4 / 0.28,
+      mpu = this.map.getView().getProjection().getMetersPerUnit(),
+      inchesPerMeter = 39.37,
+      res = this.map.getView().getResolution();
+
+    return res * mpu * inchesPerMeter * dpi;
+  };
+
+  getFittingScale = () => {
+    //Get map scale
+    const proposedScale = this.getMapScale();
+
+    //Get the scale closest to the proposed scale.
+    return this.scales.reduce((prev, curr) => {
+      return Math.abs(curr - proposedScale) < Math.abs(prev - proposedScale)
+        ? curr
+        : prev;
+    });
+  };
+
   removePreview = () => {
     this.previewFeature = undefined;
     this.previewLayer.getSource().clear();
@@ -513,6 +534,13 @@ export default class PrintModel {
         pdf.setFontSize(24);
         pdf.setTextColor(options.mapTextColor);
         pdf.text(options.mapTitle, dim[0] / 2, 12, { align: "center" });
+      }
+
+      // Add print comment if user supplied one
+      if (options.printComment.trim().length > 0) {
+        pdf.setFontSize(11);
+        pdf.setTextColor(options.mapTextColor);
+        pdf.text(options.printComment, dim[0] / 2, 18, { align: "center" });
       }
 
       // Finally, save the PDF (or PNG)

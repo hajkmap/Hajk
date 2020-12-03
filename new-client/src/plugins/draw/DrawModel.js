@@ -557,6 +557,8 @@ class DrawModel {
         let size = this.map.getSize();
         this.map.getView().fit(extent, size);
       }
+    } else {
+      return errback("no-features-found");
     }
   };
 

@@ -330,10 +330,6 @@ class EditModel {
     });
   };
 
-  loadDataError = (response) => {
-    alert("Fel: data kan inte hämtas. Försök igen senare.");
-  };
-
   urlFromObject(url, obj) {
     return Object.keys(obj).reduce((str, key, i, a) => {
       str = str + key + "=" + obj[key];
@@ -345,7 +341,7 @@ class EditModel {
   }
 
   loadData(source, extent, done) {
-    var url = this.urlFromObject(source.url, {
+    const url = this.urlFromObject(source.url, {
       service: "WFS",
       version: "1.1.0",
       request: "GetFeature",
@@ -354,14 +350,20 @@ class EditModel {
     });
     fetch(url, fetchConfig)
       .then((response) => {
+        if (response.status !== 200) {
+          return done("data-load-error");
+        }
         response.text().then((data) => {
+          if (data.includes("ows:ExceptionReport")) {
+            return done("data-load-error");
+          }
           this.loadDataSuccess(data);
+          return done("data-load-success");
         });
-        if (done) done();
       })
       .catch((error) => {
-        this.loadDataError(error);
-        if (done) done();
+        console.warn(`Error loading vectorsource... ${error}`);
+        return done("data-load-error");
       });
   }
 
@@ -551,6 +553,11 @@ class EditModel {
     }
     this.deactivateInteraction();
   }
+
+  resetEditFeature = () => {
+    this.editFeature = undefined;
+    this.observer.publish("editFeature", this.editFeature);
+  };
 
   deactivate() {
     this.reset();

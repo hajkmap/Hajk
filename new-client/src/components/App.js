@@ -5,6 +5,7 @@ import { withStyles } from "@material-ui/core/styles";
 import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
+import { isMobile } from "./../utils/IsMobile.js";
 
 import AppModel from "./../models/AppModel.js";
 
@@ -224,13 +225,25 @@ class App extends React.PureComponent {
       // If cookie is not null, use it to show/hide Drawer.
       // If cookie however is null, fall back to the values from config.
       // Finally, fall back to "false" if no cookie or config is found.
+      // The drawer should not be permanent on mobile devices.
       drawerPermanent:
-        drawerPermanentFromLocalStorage !== null
+        drawerPermanentFromLocalStorage !== null && !isMobile
           ? drawerPermanentFromLocalStorage
           : (props.config.mapConfig.map.drawerVisible &&
-              props.config.mapConfig.map.drawerPermanent) ||
+              props.config.mapConfig.map.drawerPermanent &&
+              !isMobile) ||
             false,
-      activeDrawerContent: activeDrawerContentFromLocalStorage,
+
+      //First check the cookie for activeDrawerContent
+      //If cookie is not null, use it set the drawer content.
+      //If cookie is null, fall back to the values from config,
+      //Finally, fall back to 'plugins', the standard tools panel.
+      //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
+      activeDrawerContent:
+        activeDrawerContentFromLocalStorage !== null
+          ? activeDrawerContentFromLocalStorage
+          : props.config.mapConfig.map.activeDrawerOnStart || "plugins",
+
       drawerMouseOverLock: false,
     };
     this.globalObserver = new Observer();
@@ -666,6 +679,11 @@ class App extends React.PureComponent {
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
+                  initialActiveButton={
+                    this.state.drawerVisible
+                      ? this.state.activeDrawerContent
+                      : null
+                  }
                 />
               )}
               {clean === false && this.renderSearchComponent()}

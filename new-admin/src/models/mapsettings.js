@@ -133,13 +133,17 @@ var menu = Model.extend({
   fetchADGroups: function (callback) {
     if (this.get("config").authentication_active) {
       $.ajax({
-        url: "/mapservice/config/getusergroups",
+        url: this.get("config").url_available_ad_groups,
         method: "GET",
         success: (data) => {
-          let g = data.split(",");
-          let array = g.map(Function.prototype.call, String.prototype.trim);
+          if (Array.isArray(data)) {
+            callback(data);
+          } else {
+            let g = data.split(",");
+            let array = g.map(Function.prototype.call, String.prototype.trim);
 
-          callback(array);
+            callback(array);
+          }
         },
         error: (err) => {
           console.log("Fel: ", err);
