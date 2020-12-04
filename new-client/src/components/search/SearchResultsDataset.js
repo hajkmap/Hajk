@@ -39,11 +39,26 @@ const styles = (theme) => ({
   },
 });
 
-const AccordionDetailsNoPadding = withStyles({
+const TightAccordionDetails = withStyles({
   root: {
     padding: 0,
   },
 })(AccordionDetails);
+
+const TightAccordionSummary = withStyles({
+  root: {
+    minHeight: 56,
+    "&$expanded": {
+      minHeight: 56,
+    },
+  },
+  content: {
+    "&$expanded": {
+      margin: "12px 0",
+    },
+  },
+  expanded: {},
+})(AccordionSummary);
 
 class SearchResultsDataset extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
@@ -88,7 +103,7 @@ class SearchResultsDataset extends React.PureComponent {
     const { showAllInformation } = this.state;
 
     return (
-      <AccordionDetailsNoPadding
+      <TightAccordionDetails
         id={`search-result-dataset-details-${featureCollection.source.id}`}
         className={classes.datasetDetailsContainer}
       >
@@ -121,7 +136,7 @@ class SearchResultsDataset extends React.PureComponent {
               </React.Fragment>
             ))}
         </Grid>
-      </AccordionDetailsNoPadding>
+      </TightAccordionDetails>
     );
   };
 
@@ -133,7 +148,7 @@ class SearchResultsDataset extends React.PureComponent {
       ? `Visar ${numberReturned} av ${numberMatched} resultat`
       : `Visar ${features.length} resultat`;
     return (
-      <AccordionSummary
+      <TightAccordionSummary
         id={`search-result-dataset-${featureCollection.source.id}`}
         aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
         className={classes.datasetSummary}
@@ -152,7 +167,7 @@ class SearchResultsDataset extends React.PureComponent {
             </Tooltip>
           </Grid>
         </Grid>
-      </AccordionSummary>
+      </TightAccordionSummary>
     );
   };
 
@@ -164,6 +179,7 @@ class SearchResultsDataset extends React.PureComponent {
           className={classes.datasetContainer}
           square
           expanded={this.state.expanded}
+          TransitionProps={{ timeout: 100 }}
           onChange={() => this.setState({ expanded: !this.state.expanded })}
         >
           {this.renderDatasetSummary()}

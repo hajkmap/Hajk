@@ -52,7 +52,7 @@ const styles = (theme) => ({
   },
 });
 
-const AccordionDetailsNoPadding = withStyles({
+const TightAccordionDetails = withStyles({
   root: {
     padding: 0,
   },
@@ -135,7 +135,10 @@ class SearchResultsContainer extends React.PureComponent {
           </Paper>
         ) : (
           <Paper className={classes.root}>
-            <Accordion expanded={this.state.expanded}>
+            <Accordion
+              expanded={this.state.expanded}
+              TransitionProps={{ timeout: 200 }}
+            >
               <AccordionSummary
                 classes={{
                   content: classes.content,
@@ -146,7 +149,7 @@ class SearchResultsContainer extends React.PureComponent {
               >
                 {this.renderSearchResultContainerHeader()}
               </AccordionSummary>
-              <AccordionDetailsNoPadding
+              <TightAccordionDetails
                 id="search-result-list"
                 className={classes.searchResultListWrapper}
               >
@@ -157,7 +160,7 @@ class SearchResultsContainer extends React.PureComponent {
                   featureCollections={featureCollections}
                   app={app}
                 />
-              </AccordionDetailsNoPadding>
+              </TightAccordionDetails>
             </Accordion>
           </Paper>
         )}
