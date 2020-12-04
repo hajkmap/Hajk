@@ -58,6 +58,14 @@ const TightAccordionDetails = withStyles({
   },
 })(AccordionDetails);
 
+const TightAccordion = withStyles({
+  root: {
+    "&:last-child": {
+      borderBottom: "2px solid #dedede",
+    },
+  },
+})(Accordion);
+
 class SearchResultsContainer extends React.PureComponent {
   state = {
     expanded: true,
@@ -135,9 +143,9 @@ class SearchResultsContainer extends React.PureComponent {
           </Paper>
         ) : (
           <Paper className={classes.root}>
-            <Accordion
+            <TightAccordion
               expanded={this.state.expanded}
-              TransitionProps={{ timeout: 200 }}
+              TransitionProps={{ timeout: 100 }}
             >
               <AccordionSummary
                 classes={{
@@ -161,7 +169,7 @@ class SearchResultsContainer extends React.PureComponent {
                   app={app}
                 />
               </TightAccordionDetails>
-            </Accordion>
+            </TightAccordion>
           </Paper>
         )}
       </>

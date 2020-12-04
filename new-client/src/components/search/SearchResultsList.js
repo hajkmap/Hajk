@@ -6,7 +6,7 @@ import SearchResultsDataset from "./SearchResultsDataset";
 
 const styles = (theme) => ({
   searchResultDatasetWrapper: {
-    paddingBottom: theme.spacing(1),
+    paddingBottom: theme.spacing(0),
   },
 });
 
@@ -65,7 +65,7 @@ class SearchResultsList extends React.PureComponent {
 
     return (
       <Grid container alignItems="center" justify="center">
-        <Grid container direction="column" item>
+        <Grid container item>
           {featureCollectionsContainingFeatures.map(
             (featureCollection, index) => (
               <Grid
@@ -73,7 +73,7 @@ class SearchResultsList extends React.PureComponent {
                 xs={12}
                 className={cslx({
                   [classes.searchResultDatasetWrapper]:
-                    featureCollections.length !== 1 &&
+                    featureCollectionsContainingFeatures.length !== 1 &&
                     featureCollection &&
                     index !== featureCollectionsContainingFeatures.length - 1,
                 })}

@@ -373,7 +373,8 @@ class Search extends React.PureComponent {
     // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
     // however, we need just one Array, so let's flatten the results:
 
-    return this.sortAutocompleteList(resultsPerDataset.flat());
+    //return this.sortAutocompleteList(resultsPerDataset.flat());
+    return resultsPerDataset.flat();
   };
 
   sortAutocompleteList = (flatAutocompleteArray) => {
@@ -527,9 +528,30 @@ class Search extends React.PureComponent {
     });
   };
 
+  #sortAndShortenSearchResults = (featureCollections, maxSlots) => {
+    featureCollections.sort((a, b) => {
+      const sourceNameA = a.source.caption.toUpperCase();
+      const sourceNameB = b.source.caption.toUpperCase();
+      return sourceNameA.localeCompare(sourceNameB, "sv");
+    });
+    return featureCollections.slice(0, maxSlots);
+  };
+
   prepareAutocompleteList = (searchResults) => {
     let maxSlots = 7;
     let numSourcesWithResults = searchResults.featureCollections.length;
+
+    if (numSourcesWithResults > maxSlots) {
+      searchResults.featureCollections = searchResults.featureCollections.slice(
+        0,
+        maxSlots
+      );
+      // searchResults.featureCollections = this.#sortAndShortenSearchResults(
+      //   searchResults.featureCollections,
+      //   maxSlots
+      // );
+    }
+
     let numResults = 0;
     searchResults.featureCollections.forEach((fc) => {
       numResults += fc.value.features.length;

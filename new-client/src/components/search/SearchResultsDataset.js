@@ -15,12 +15,9 @@ import {
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 
 const styles = (theme) => ({
-  datasetSummary: {
-    borderTop: "2px solid #dedede",
-    borderBottom: "2px solid #dedede",
-  },
   datasetContainer: {
     boxShadow: "none",
+    overflow: "hidden",
   },
   divider: {
     backgroundColor: "#00000073",
@@ -39,9 +36,20 @@ const styles = (theme) => ({
   },
 });
 
+const TightAccordion = withStyles({
+  root: {
+    borderTop: "2px solid #dedede",
+  },
+})(Accordion);
+
 const TightAccordionDetails = withStyles({
   root: {
     padding: 0,
+    borderTop: "2px solid #dedede",
+    boxShadow: "none",
+    "&:before": {
+      display: "none",
+    },
   },
 })(AccordionDetails);
 
@@ -142,7 +150,7 @@ class SearchResultsDataset extends React.PureComponent {
 
   renderDatasetSummary = () => {
     const { numberOfResultsToDisplay } = this.state;
-    const { featureCollection, classes, getOriginBasedIcon } = this.props;
+    const { featureCollection, getOriginBasedIcon } = this.props;
     const { numberReturned, numberMatched, features } = featureCollection.value;
     const toolTipTitle = numberReturned
       ? `Visar ${numberReturned} av ${numberMatched} resultat`
@@ -151,7 +159,6 @@ class SearchResultsDataset extends React.PureComponent {
       <TightAccordionSummary
         id={`search-result-dataset-${featureCollection.source.id}`}
         aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
-        className={classes.datasetSummary}
         expandIcon={<ExpandMoreIcon />}
       >
         <Grid alignItems="center" container>
@@ -163,7 +170,11 @@ class SearchResultsDataset extends React.PureComponent {
           </Grid>
           <Grid item xs={2}>
             <Tooltip title={toolTipTitle}>
-              <Chip color="primary" label={numberOfResultsToDisplay} />
+              <Chip
+                size="small"
+                color="default"
+                label={numberOfResultsToDisplay}
+              />
             </Tooltip>
           </Grid>
         </Grid>
@@ -175,7 +186,7 @@ class SearchResultsDataset extends React.PureComponent {
     const { classes } = this.props;
     return (
       <>
-        <Accordion
+        <TightAccordion
           className={classes.datasetContainer}
           square
           expanded={this.state.expanded}
@@ -184,7 +195,7 @@ class SearchResultsDataset extends React.PureComponent {
         >
           {this.renderDatasetSummary()}
           {this.renderDatasetDetails()}
-        </Accordion>
+        </TightAccordion>
       </>
     );
   };
