@@ -202,8 +202,11 @@ var WmsLayer = {
         url = encodeURIComponent(url);
       }
 
+      const _xhrFields = this.attributes.withCredentials === true ? { withCredentials: true } : null;
+
       var request = $.ajax({
         url: HAJK2.searchProxy + url,
+        xhrFields:_xhrFields,
         success: (data, status, xhr) => {
           let type = xhr.getResponseHeader('Content-Type').split(';')[0];
           switch (type.toLowerCase()) {
