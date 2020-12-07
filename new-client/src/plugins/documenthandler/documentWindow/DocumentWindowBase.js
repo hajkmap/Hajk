@@ -251,6 +251,7 @@ class DocumentWindowBase extends React.PureComponent {
             )
           ) : (
             <PrintWindow
+              customTheme={customTheme}
               chapters={chapters}
               activeDocument={document}
               documentWindowMaximized={documentWindowMaximized}
