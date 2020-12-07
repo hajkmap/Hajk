@@ -440,7 +440,7 @@ class ActiveDirectoryService {
         const groups = await this._findGroups();
 
         // Replace the cache with a new Set that…
-        this._groups = new Set(groups.map((g) => g.cn)); // isn't the whole object, but rather only an array of CN properties
+        this._groups = new Set(groups.map((g) => g.cn).sort()); // isn't the whole object, but rather only an array of CN properties
       }
 
       // Spread the Set into an Array, which is the expected output format
