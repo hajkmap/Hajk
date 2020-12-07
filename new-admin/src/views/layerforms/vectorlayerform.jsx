@@ -48,6 +48,7 @@ class VectorLayerForm extends React.Component {
     layer: "",
     layerType: "Vector",
     legend: "",
+    legendIcon: "",
     load: false,
     maxZoom: -1,
     minZoom: -1,
@@ -71,10 +72,19 @@ class VectorLayerForm extends React.Component {
         () => this.validateField("legend")
       );
     });
+    this.props.model.on("change:legendIcon", () => {
+      this.setState(
+        {
+          legendIcon: this.props.model.get("legendIcon"),
+        },
+        () => this.validateField("legendIcon")
+      );
+    });
   }
 
   componentWillUnmount() {
     this.props.model.off("change:legend");
+    this.props.model.off("change:legendIcon");
   }
 
   describeLayer(layer) {
@@ -117,6 +127,7 @@ class VectorLayerForm extends React.Component {
       infobox: this.getValue("infobox"),
       layer: this.state.addedLayers[0],
       legend: this.getValue("legend"),
+      legendIcon: this.getValue("legendIcon"),
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
       opacity: this.getValue("opacity"),
@@ -269,6 +280,7 @@ class VectorLayerForm extends React.Component {
         capabilities: capabilities,
         projection: this.state.projection || projection || "",
         legend: this.state.legend || capabilities.legend || "",
+        legendIcon: this.state.legendIcon || "",
         load: false,
       });
 
@@ -286,7 +298,13 @@ class VectorLayerForm extends React.Component {
     });
   }
 
-  loadLegendImage(e) {
+  loadLegend(e) {
+    $("#select-image").attr("caller", "legend");
+    $("#select-image").trigger("click");
+  }
+
+  loadLegendIcon(e) {
+    $("#select-image").attr("caller", "legendIcon");
     $("#select-image").trigger("click");
   }
 
@@ -776,14 +794,34 @@ class VectorLayerForm extends React.Component {
           />
           <span
             onClick={(e) => {
-              this.loadLegendImage(e);
+              this.loadLegend(e);
             }}
             className="btn btn-default"
           >
             Välj fil {imageLoader}
           </span>
         </div>
-
+        <div>
+          <label>
+            Teckenförklar
+            <br />
+            ingsikon
+          </label>
+          <input
+            type="text"
+            ref="input_legendIcon"
+            value={this.state.legendIcon}
+            onChange={(e) => this.setState({ legendIcon: e.target.value })}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegendIcon(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
         <div className="separator">Metadata</div>
         <div>
           <label>Innehåll</label>

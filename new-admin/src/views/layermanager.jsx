@@ -198,6 +198,7 @@ class Manager extends Component {
           date: layer.date,
           infobox: layer.infobox,
           legend: layer.legend,
+          legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
@@ -238,6 +239,7 @@ class Manager extends Component {
           date: layer.date,
           infobox: layer.infobox,
           legend: layer.legend,
+          legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
@@ -301,6 +303,7 @@ class Manager extends Component {
           content: layer.content,
           date: layer.date,
           legend: layer.legend,
+          legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
           opacity: layer.opacity,
@@ -346,6 +349,7 @@ class Manager extends Component {
           date: layer.date,
           infobox: layer.infobox,
           legend: layer.legend,
+          legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
           layer: layer.layer,
@@ -599,32 +603,7 @@ class Manager extends Component {
     }
   }
 
-  uploadLegendIcon(callback) {
-    console.log("UPLOADLEGENDICON");
-    console.log(this.props.model, "MODEL");
-    $("#upload-form").submit();
-    this.refs.uploadIframe.addEventListener("load", () => {
-      if (this.refs.uploadIframe.contentDocument) {
-        if (!window.location.origin) {
-          window.location.origin =
-            window.location.protocol +
-            "//" +
-            window.location.hostname +
-            (window.location.port ? ":" + window.location.port : "");
-        }
-
-        var node = $(this.refs.uploadIframe.contentDocument).find("body")[0],
-          url = node.innerHTML,
-          a = $(`<a href="${url}"">temp</a>`),
-          b = a[0].href;
-
-        this.props.model.set("legendIcon", b);
-      }
-    });
-  }
-
-  uploadLegend(callback) {
-    console.log(callback, "callback");
+  uploadLegend(callback, type) {
     $("#upload-form").submit();
     this.refs.uploadIframe.addEventListener("load", () => {
       console.log(this.refs.uploadIframe, "this.refs.uploadIframe");
@@ -642,7 +621,7 @@ class Manager extends Component {
           a = $(`<a href="${url}"">temp</a>`),
           b = a[0].href;
 
-        this.props.model.set("legend", b);
+        this.props.model.set(type, b);
       }
     });
   }
@@ -776,18 +755,10 @@ class Manager extends Component {
               onChange={(e) => {
                 const caller = e.currentTarget.getAttribute("caller");
                 if (caller) {
-                  if (caller === "legendImage") {
-                    this.uploadLegend(e);
-                  }
-                  if (caller === "legendIcon") {
-                    this.uploadLegendIcon(e);
-                  }
-                  if (caller === "layerInfoLegendIcon") {
-                    console.log("Something else");
-                  }
+                  this.uploadLegend(e, caller);
                 } else {
                   //DEFAULT
-                  this.uploadLegend(e);
+                  this.uploadLegend(e, "legend");
                 }
               }}
             />

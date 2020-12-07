@@ -34,6 +34,7 @@ const defaultState = {
   date: "Fylls i per automatik",
   infobox: "",
   legend: "",
+  legendIcon: "",
   url: "",
   queryable: true,
   drawOrder: 1,
@@ -81,10 +82,16 @@ class WMTSLayerForm extends Component {
         legend: this.props.model.get("legend"),
       });
     });
+    this.props.model.on("change:legendIcon", () => {
+      this.setState({
+        legendIcon: this.props.model.get("legendIcon"),
+      });
+    });
   }
 
   componentWillUnmount() {
     this.props.model.off("change:legend");
+    this.props.model.off("change:legendIcon");
   }
 
   constructor() {
@@ -93,7 +100,13 @@ class WMTSLayerForm extends Component {
     this.layer = {};
   }
 
-  loadLegendImage(e) {
+  loadLegend(e) {
+    $("#select-image").attr("caller", "legend");
+    $("#select-image").trigger("click");
+  }
+
+  loadLegendIcon(e) {
+    $("#select-image").attr("caller", "legendIcon");
     $("#select-image").trigger("click");
   }
 
@@ -106,6 +119,7 @@ class WMTSLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
+      legendIcon: this.getValue("legendIcon"),
       layer: this.getValue("layer"),
       matrixSet: this.getValue("matrixSet"),
       style: this.getValue("style"),
@@ -290,7 +304,28 @@ class WMTSLayerForm extends Component {
           />
           <span
             onClick={(e) => {
-              this.props.parent.loadLegendImage(e);
+              this.loadLegend(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+        <div>
+          <label>
+            Teckenförklar
+            <br />
+            ingsikon
+          </label>
+          <input
+            type="text"
+            ref="input_legendIcon"
+            value={this.state.legendIcon}
+            onChange={(e) => this.setState({ legendIcon: e.target.value })}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegendIcon(e);
             }}
             className="btn btn-default"
           >
