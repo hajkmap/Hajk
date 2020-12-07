@@ -1561,7 +1561,7 @@ class Menu extends Component {
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
-                    title="Global inställning för att gör möjligt opacitet skjutreglage. Om specifika lager har en opacitet skjutreglage går att konfigurarar till varje lager. Om denna global inställning är inte ikryssad kommer inga opacitets skjutreglage att visas."
+                    title="Global inställning för att välja om opacitet skutreglage ska vara aktiv eller inte. Om inställningen är aktiv går det då att konfigurera individer lager om opacitet skutreglage ska visas till lagret.  Om denna ruta inte är ikryssad kommer opacitet skutreglage inte visas till någon lager."
                   />
                 </label>
               </div>
