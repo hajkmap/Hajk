@@ -23,10 +23,12 @@ class ConfigService {
    *
    * @param {String} map Name of the map configuration
    * @param {String} user User name that must have explicit access to the map
+   * @param {boolean} washContent If true, map config will be examinated and
+   * only those layers/groups/tools that user has access to will be returned.
    * @returns Map config contents in JSON
    * @memberof ConfigService
    */
-  async getMapConfig(map, user) {
+  async getMapConfig(map, user, washContent = true) {
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `${map}.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -87,7 +89,8 @@ class ConfigService {
           );
 
           // "Wash" the contents of map config given current user's group membership and return the results
-          if (isMember === true) return await this.washMapConfig(json, user);
+          if (isMember === true)
+            return washContent ? await this.washMapConfig(json, user) : json;
         }
 
         // If we got this far, it looks as the current user isn't member in any
@@ -103,7 +106,7 @@ class ConfigService {
         // It looks as the map config itself has no restrictions.
         // There can still be restrictions inside specific tools and layers though,
         // so let's "wash" the response before returning.
-        return await this.washMapConfig(json, user);
+        return washContent ? await this.washMapConfig(json, user) : json;
       }
     } catch (error) {
       return { error };
@@ -111,24 +114,27 @@ class ConfigService {
   }
 
   /**
-   * @summary Predicate function to use when filtering arrays
+   * @summary Determine whether a specified user has access to an object.
    *
-   * @param {*} visibleForGroups
-   * @param {*} user
-   * @returns true if user is member in any of the required groups, else false
+   * @param {Array} visibleForGroups List of groups that have access, or empty if access unrestricted
+   * @param {*} user User ID
+   * @param {*} identifier Some ID of the entity to be filtered (e.g. tool name or layer ID). Used for meaningful logging.
+   * @returns {boolean}
    * @memberof ConfigService
    */
-  async filterTools(tool, user) {
-    const visibleForGroups = tool.options?.visibleForGroups;
+  async filterByGroupVisibility(visibleForGroups, user, identifier) {
     if (!Array.isArray(visibleForGroups) || visibleForGroups.length === 0) {
       // If no restrictions are set, allow access
-      logger.trace("[filterTools] Access to tool %s unrestricted", tool.type);
+      logger.trace(
+        "[filterByGroupVisibility] Access to %s unrestricted",
+        identifier
+      );
       return true;
     } else {
       // There are tools restrictions.
       logger.trace(
-        "[filterTools] Only the following groups have access to tool %s: %o",
-        tool.type,
+        "[filterByGroupVisibility] Only the following groups have access to layer %s: %o",
+        identifier,
         visibleForGroups
       );
 
@@ -139,8 +145,8 @@ class ConfigService {
         // If membership found, return true - no need to keep looping
         if (isMember === true) {
           logger.trace(
-            "[filterTools] Access to tool %s gained for user %o",
-            tool.type,
+            "[filterByGroupVisibility] Access to %s gained for user %o",
+            identifier,
             user
           );
           return true;
@@ -150,9 +156,9 @@ class ConfigService {
 
     // If we got this far restrictions are set but user isn't member
     // in any of the specified groups.
-    logger.trace(
-      "[filterTools] Access to tool %s restricted for user %o",
-      tool.type,
+    logger.debug(
+      "[filterByGroupVisibility] Access to %s not allowed for user %o",
+      identifier,
       user
     );
 
@@ -160,19 +166,71 @@ class ConfigService {
   }
 
   async washMapConfig(mapConfig, user) {
+    // Helper function that will call itself recursively.
+    // Necessary to handle the nested tree of groups from LayerSwitcher config.
+    const recursivelyWashGroups = async (groups) => {
+      // Expect that we got an array of objects, and we must take
+      // a look into each one of them separately.
+      for (const group of groups) {
+        // Notice that we modify the groups array in place!
+        // Each group can have layers, take care of them. Remove any layers
+        // to which user lacks access.
+        group.layers = await asyncFilter(
+          // Overwrite the previous value of layers property with return value
+          group.layers, // Array to be modified
+          async (layer) =>
+            await this.filterByGroupVisibility(
+              layer.visibleForGroups,
+              user,
+              `layer "${layer.id}"`
+            )
+        );
+
+        // Now, recursively take care of groups
+        group.groups = await recursivelyWashGroups(group.groups);
+      }
+
+      return groups;
+    };
+
     logger.trace("[washMapConfig] Washing map config for %s", user);
 
     // Each map tool can have restrictions
     mapConfig.tools = await asyncFilter(
       mapConfig.tools,
-      async (tool) => await this.filterTools(tool, user) // Call the predicate
+      async (tool) =>
+        await this.filterByGroupVisibility(
+          tool.options.visibleForGroups,
+          user,
+          `plugin "${tool.type}"`
+        ) // Call the predicate
     );
 
-    // TODO: The main thing left: do recursive washing so that only
-    // groups/layers that user has access to (or those that are unrestricted)
-    // are returned.
+    // Find out where LayerSwitcher config is in the tools array, so that we can
+    // put it back in place when we're done
+    const lsIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "layerswitcher"
+    );
+    let { baselayers, groups } = mapConfig.tools[lsIndexInTools].options;
 
-    // Baselayers and groups/layers can have recursive restrictions
+    // Wash baselayers
+    baselayers = await asyncFilter(
+      baselayers,
+      async (baselayer) =>
+        await this.filterByGroupVisibility(
+          baselayer.visibleForGroups,
+          user,
+          `baselayer "${baselayer.id}"`
+        )
+    );
+
+    // Put back the washed baselayers into config
+    mapConfig.tools[lsIndexInTools].options.baselayers = baselayers;
+
+    // Take care of recursively washing groups too, and put back the results to config
+    groups = await recursivelyWashGroups(groups);
+    mapConfig.tools[lsIndexInTools].options.groups = groups;
+
     return mapConfig;
   }
 
@@ -356,7 +414,12 @@ class ConfigService {
         // we getMapConfig will return only those maps that current
         // user has access to, so there's no need to "wash" the result
         // later on.
-        const mapConfig = await this.getMapConfig(map, user);
+        //
+        // The optional, third, parameter tells getMapConfig not to
+        // wash the content (layers/groups/tools). We just need to know
+        // if user has access to map as a whole, washing for purpose of
+        // this method would introduce unnecessary overhead.
+        const mapConfig = await this.getMapConfig(map, user, false);
 
         // If we encounter errors, access to current map is restricted for current user
         // so let's just continue with next element in available maps.
