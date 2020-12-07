@@ -1,21 +1,19 @@
 import Express from "express";
-
-import log4js from "log4js";
-import clfDate from "clf-date";
-
 import * as path from "path";
 import * as http from "http";
-import cookieParser from "cookie-parser";
-
-import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
 
 import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
+import cookieParser from "cookie-parser";
 
+import log4js from "log4js";
+import clfDate from "clf-date";
 import oas from "./oas";
+
+import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
 import checkAdminAuthorization from "../api/middlewares/check.admin.authorization";
-import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
+// import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
 
 const app = new Express();
 
@@ -57,7 +55,6 @@ const exit = process.exit;
 export default class ExpressServer {
   constructor() {
     logger.debug("Process's current working directory: ", process.cwd());
-    app.set("appPath", process.cwd());
 
     // If EXPRESS_TRUST_PROXY is set in .env, pass on the value to Express.
     // See https://expressjs.com/en/guide/behind-proxies.html.
