@@ -37,7 +37,7 @@ const styles = (theme) => ({
   layerItem: {
     justifyContent: "space-between",
     borderBottom: "1px solid #CCC",
-    margin: "5px 0",
+    marginTop: "2.5px",
   },
   layerItemContainer: {
     background: "white",
@@ -115,6 +115,14 @@ const styles = (theme) => ({
     cursor: "pointer",
     float: "left",
     marginRight: "5px",
+  },
+  legendIcon: {
+    width: theme.typography.pxToRem(18),
+    height: theme.typography.pxToRem(18),
+    marginRight: "5px",
+  },
+  legendIconContainer: {
+    display: "flex",
   },
   arrowIcon: {
     float: "left",
@@ -405,6 +413,21 @@ class LayerGroupItem extends Component {
     }
   };
 
+  renderLegendIcon(url) {
+    const { classes } = this.props;
+    return (
+      <Grid item>
+        <div className={classes.legendIconContainer}>
+          <img
+            className={classes.legendIcon}
+            alt="Teckenförklaring"
+            src={url}
+          />
+        </div>
+      </Grid>
+    );
+  }
+
   renderSubLayer(layer, subLayer, index) {
     const { visibleSubLayers } = this.state;
     const { classes } = this.props;
@@ -413,46 +436,23 @@ class LayerGroupItem extends Component {
       (visibleSubLayer) => visibleSubLayer === subLayer
     );
     var toggleSettings = this.toggleSubLayerSettings.bind(this, index);
-
+    const legendIcon = layer.layersInfo[subLayer].legendIcon;
     return (
       <div key={index} className={classes.layerItem}>
         <div className={classes.caption}>
           <Grid
             wrap="nowrap"
             container
+            alignItems="center"
             onClick={this.toggleLayerVisible(subLayer)}
           >
-            <Grid item>
-              {visible ? (
-                <CheckBoxIcon className={classes.checkBoxIcon} />
-              ) : (
-                <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
-              )}
-            </Grid>
-            <Grid item>
-              <div
-                style={{
-                  display: "flex",
-                  marginRight: "6px",
-                  alignItems: "center",
-                  height: "1.5rem",
-                  width: "1.5rem",
-                }}
-              >
-                <img
-                  style={{
-                    maxWidth: "1.5rem",
-                    maxHeight: "1.5rem",
-                    marginRight: "5px",
-                  }}
-                  alt="Teckenförklaring"
-                  src={
-                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS75m0nA18ttFff0lq0sOCVtnuFU9gpOvS_fw&usqp=CAU"
-                  }
-                  className={classes.legendImage}
-                />
-              </div>
-            </Grid>
+            {visible ? (
+              <CheckBoxIcon className={classes.checkBoxIcon} />
+            ) : (
+              <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
+            )}
+
+            {legendIcon && this.renderLegendIcon(legendIcon)}
             <Grid item>
               <Typography className={classes.captionText}>
                 {layer.layersInfo[subLayer].caption}

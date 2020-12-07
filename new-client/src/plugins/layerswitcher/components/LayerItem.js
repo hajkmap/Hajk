@@ -74,6 +74,14 @@ const styles = (theme) => ({
     fontSize: "15pt",
     width: "32px",
   },
+  legendIconContainer: {
+    display: "flex",
+  },
+  legendIcon: {
+    width: theme.typography.pxToRem(18),
+    height: theme.typography.pxToRem(18),
+    marginRight: "5px",
+  },
   checkBoxIcon: {
     cursor: "pointer",
 
@@ -86,12 +94,14 @@ class LayerItem extends React.PureComponent {
     super(props);
     const { layer } = props;
     var layerInfo = layer.get("layerInfo");
+    console.log(layerInfo, "layerInfo");
     this.state = {
       caption: layerInfo.caption,
       visible: layer.get("visible"),
       expanded: false,
       name: layer.get("name"),
       legend: layerInfo.legend,
+      legendIcon: layerInfo.legendIcon,
       status: "ok",
       infoVisible: false,
       infoTitle: layerInfo.infoTitle,
@@ -336,10 +346,27 @@ class LayerItem extends React.PureComponent {
     });
   }
 
+  renderLegendIcon() {
+    const { classes } = this.props;
+    const { legendIcon } = this.state;
+    return (
+      <Grid item>
+        <div className={classes.legendIconContainer}>
+          <img
+            alt="Teckenförklaring"
+            src={legendIcon}
+            className={classes.legendIcon}
+          />
+        </div>
+      </Grid>
+    );
+  }
+
   render() {
     const { classes, layer, model, app, chapters } = this.props;
-    const { visible } = this.state;
+    const { visible, legendIcon } = this.state;
     const caption = layer.get("caption");
+
     const cqlFilterVisible =
       this.props.app.config.mapConfig.map?.cqlFilterVisible || false;
 
@@ -370,37 +397,19 @@ class LayerItem extends React.PureComponent {
       <div className={classes.layerItemContainer}>
         <div className={classes.layerItem}>
           <div>
-            <Grid wrap="nowrap" container onClick={this.toggleVisible(layer)}>
-              <Grid item>
-                {visible ? (
-                  <CheckBoxIcon className={classes.checkBoxIcon} />
-                ) : (
-                  <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
-                )}
-              </Grid>
-              <Grid item>
-                <div
-                  style={{
-                    display: "flex",
-                    marginRight: "6px",
-                    alignItems: "center",
-                    height: "1.5rem",
-                    width: "1.5rem",
-                  }}
-                >
-                  <img
-                    style={{
-                      maxWidth: "1.5rem",
-                      maxHeight: "1.5rem",
+            <Grid
+              wrap="nowrap"
+              alignItems="center"
+              container
+              onClick={this.toggleVisible(layer)}
+            >
+              {visible ? (
+                <CheckBoxIcon className={classes.checkBoxIcon} />
+              ) : (
+                <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
+              )}
 
-                      marginRight: "5px",
-                    }}
-                    alt="Teckenförklaring"
-                    src="https://ext-geodata.lansstyrelsen.se/arcgis/services/WMS/LST_WMS_riksintressen_4_nv/mapserver/wmsserver?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Fageldirektivet_SPA_MB4&STYLE=&LEGEND_OPTIONS="
-                    className={classes.legendImage}
-                  />
-                </div>
-              </Grid>
+              {legendIcon && this.renderLegendIcon()}
               <Grid item>
                 <Typography className={classes.captionText}>
                   {caption}
