@@ -2,6 +2,7 @@ import React from "react";
 import Alert from "@material-ui/lab/Alert";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import IconButton from "@material-ui/core/IconButton";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import SearchResultsList from "./SearchResultsList";
@@ -72,6 +73,7 @@ class SearchResultsContainer extends React.PureComponent {
     sumOfResults: this.props.searchResults.featureCollections
       .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
+    activeFeatureCollection: undefined,
   };
 
   componentDidMount = () => {
@@ -102,12 +104,31 @@ class SearchResultsContainer extends React.PureComponent {
     this.setState({ expanded: !this.state.expanded });
   };
 
+  handleFeatureCollectionSelected = (featureCollection) => {
+    this.setState({
+      activeFeatureCollection: featureCollection,
+    });
+  };
+
   renderSearchResultContainerHeader = () => {
-    const { sumOfResults } = this.state;
+    const { sumOfResults, activeFeatureCollection } = this.state;
+    const { featureCollections } = this.props;
     return (
       <Grid justify="space-between" alignItems="center" container>
         <Grid item>
-          <Typography>{`Visar ${sumOfResults} träffar`}</Typography>
+          {!activeFeatureCollection && (
+            <Typography>{`Visar ${sumOfResults} träffar`}</Typography>
+          )}
+          {featureCollections.length !== 1 && activeFeatureCollection && (
+            <Button
+              style={{ paddingLeft: 0 }}
+              onClick={() => this.handleFeatureCollectionSelected()}
+              color="primary"
+            >
+              <ArrowBackIcon fontSize="small" />
+              Tillbaka
+            </Button>
+          )}
         </Grid>
         <Grid item>{this.renderSearchResultListOptions()}</Grid>
         <Grid item>
@@ -128,12 +149,15 @@ class SearchResultsContainer extends React.PureComponent {
   render() {
     const {
       classes,
-      featureCollections,
+
       app,
       getOriginBasedIcon,
       localObserver,
     } = this.props;
-    const { sumOfResults } = this.state;
+    const { sumOfResults, activeFeatureCollection } = this.state;
+    const featureCollections = activeFeatureCollection
+      ? [activeFeatureCollection]
+      : this.props.featureCollections;
 
     return (
       <>
@@ -167,6 +191,9 @@ class SearchResultsContainer extends React.PureComponent {
                   getOriginBasedIcon={getOriginBasedIcon}
                   featureCollections={featureCollections}
                   app={app}
+                  handleFeatureCollectionSelected={
+                    this.handleFeatureCollectionSelected
+                  }
                 />
               </TightAccordionDetails>
             </TightAccordion>

@@ -10,7 +10,11 @@ import {
   TableHead,
   TableContainer,
   Typography,
+  Tooltip,
+  Grid,
+  Button,
 } from "@material-ui/core";
+import MapIcon from "@material-ui/icons/Map";
 
 const styles = () => ({
   hidden: {
@@ -25,6 +29,10 @@ const styles = () => ({
   },
   showMoreInformationButton: {
     width: "100%",
+  },
+  featureDisplayFieldsContainer: {
+    padding: 5,
+    paddingLeft: 15,
   },
 });
 
@@ -197,6 +205,53 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     );
   };
 
+  handleItemTitleLinkClick = (e) => {
+    const { handleOnResultClick, feature } = this.props;
+    e.stopPropagation();
+    this.setState({ activeInMap: !this.state.activeInMap });
+    handleOnResultClick(feature);
+  };
+
+  renderShowInMapButton = () => {
+    const { feature, visibleInMap } = this.props;
+    const helpText = !visibleInMap ? "Visa i kartan" : "Ta bort från kartan";
+    if (feature.geometry) {
+      return (
+        <Tooltip title={helpText}>
+          <Button onClick={this.handleItemTitleLinkClick}>
+            <Typography variant="srOnly">{helpText}</Typography>
+            <MapIcon color={visibleInMap ? "primary" : "disabled"} />
+          </Button>
+        </Tooltip>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  renderTightFeatureDetails = () => {
+    const { classes } = this.props;
+    const title = this.getFeatureTitle();
+    if (title.length > 0) {
+      return (
+        <Grid
+          container
+          alignItems="center"
+          className={classes.featureDisplayFieldsContainer}
+        >
+          <Grid item xs={10}>
+            <Typography variant="subtitle1" align="left">
+              {title}
+            </Typography>
+          </Grid>
+          <Grid item xs={2}>
+            {this.renderShowInMapButton()}
+          </Grid>
+        </Grid>
+      );
+    }
+  };
+
   render() {
     if (this.shouldRenderCustomInfoBox()) {
       return (
@@ -207,7 +262,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
           {this.renderCustomInfoBoxTable()}
         </>
       );
-    } else {
+    } else if (false) {
       return (
         <>
           <TableContainer>
@@ -218,6 +273,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
           </TableContainer>
         </>
       );
+    } else {
+      return <>{this.renderTightFeatureDetails()}</>;
     }
   }
 }

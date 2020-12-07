@@ -1,12 +1,14 @@
 import React from "react";
-import cslx from "clsx";
 import { withStyles } from "@material-ui/core/styles";
 import { Grid, withWidth } from "@material-ui/core";
 import SearchResultsDataset from "./SearchResultsDataset";
 
 const styles = (theme) => ({
   searchResultDatasetWrapper: {
-    paddingBottom: theme.spacing(0),
+    cursor: "pointer",
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
   },
 });
 
@@ -40,7 +42,7 @@ class SearchResultsList extends React.PureComponent {
     );
   };
 
-  handleOnResultClick = (feature) => () => {
+  handleOnResultClick = (feature) => {
     const { app } = this.props;
     if (feature.onClickName) {
       app.globalObserver.publish(feature.onClickName, feature);
@@ -56,7 +58,9 @@ class SearchResultsList extends React.PureComponent {
       getOriginBasedIcon,
       app,
       classes,
+      handleFeatureCollectionSelected,
     } = this.props;
+
     const featureCollectionsContainingFeatures = featureCollections.filter(
       (featureCollection) => {
         return featureCollection.value.features.length > 0;
@@ -70,13 +74,9 @@ class SearchResultsList extends React.PureComponent {
             (featureCollection, index) => (
               <Grid
                 key={featureCollection.source.id}
+                role="button"
                 xs={12}
-                className={cslx({
-                  [classes.searchResultDatasetWrapper]:
-                    featureCollectionsContainingFeatures.length !== 1 &&
-                    featureCollection &&
-                    index !== featureCollectionsContainingFeatures.length - 1,
-                })}
+                className={classes.searchResultDatasetWrapper}
                 item
               >
                 <SearchResultsDataset
@@ -85,6 +85,11 @@ class SearchResultsList extends React.PureComponent {
                   getOriginBasedIcon={getOriginBasedIcon}
                   sumOfResults={sumOfResults}
                   handleOnResultClick={this.handleOnResultClick}
+                  selectedItems={this.state.selectedItems}
+                  handleFeatureCollectionSelected={
+                    handleFeatureCollectionSelected
+                  }
+                  expanded={featureCollectionsContainingFeatures.length === 1}
                 />
               </Grid>
             )

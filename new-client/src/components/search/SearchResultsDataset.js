@@ -1,5 +1,4 @@
 import React from "react";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { withStyles } from "@material-ui/core/styles";
 import {
   Typography,
@@ -53,20 +52,27 @@ const TightAccordionDetails = withStyles({
   },
 })(AccordionDetails);
 
-const TightAccordionSummary = withStyles({
+const TightAccordionSummary = withStyles((theme) => ({
   root: {
-    minHeight: 56,
+    cursor: "pointer",
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
+    padding: "0px 10px",
+    minHeight: 36,
     "&$expanded": {
-      minHeight: 56,
+      padding: "0px 10px",
+      minHeight: 36,
     },
   },
   content: {
+    margin: "5px 0",
     "&$expanded": {
-      margin: "12px 0",
+      margin: "5px 0",
     },
   },
   expanded: {},
-})(AccordionSummary);
+}))(AccordionSummary);
 
 class SearchResultsDataset extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
@@ -77,7 +83,7 @@ class SearchResultsDataset extends React.PureComponent {
         ? `${this.props.featureCollection.value.numberReturned}+`
         : this.props.featureCollection.value.numberReturned
       : this.props.featureCollection.value.features.length,
-    expanded: this.props.sumOfResults === 1,
+    //expanded: this.props.sumOfResults === 1,
     showAllInformation: false,
   };
 
@@ -107,7 +113,13 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   renderDatasetDetails = () => {
-    const { featureCollection, handleOnResultClick, classes, app } = this.props;
+    const {
+      featureCollection,
+      handleOnResultClick,
+      classes,
+      app,
+      selectedItems,
+    } = this.props;
     const { showAllInformation } = this.state;
 
     return (
@@ -116,12 +128,12 @@ class SearchResultsDataset extends React.PureComponent {
         className={classes.datasetDetailsContainer}
       >
         <Grid justify="center" container>
-          {this.state.expanded &&
+          {this.props.expanded &&
             featureCollection.value.features.map((f) => (
               <React.Fragment key={f.id}>
                 <Grid
                   role="button"
-                  onClick={handleOnResultClick(f)}
+                  onClick={() => handleOnResultClick(f)}
                   className={classes.datasetTable}
                   container
                   item
@@ -133,11 +145,14 @@ class SearchResultsDataset extends React.PureComponent {
                       app={app}
                       showAllInformation={showAllInformation}
                       source={featureCollection.source}
-                      handleOnResultClick={handleOnResultClick}
+                      visibleInMap={selectedItems.indexOf(f.id) > -1}
+                      handleOnResultClick={(feature) => {
+                        handleOnResultClick(feature);
+                      }}
                     />
                   </Grid>
                 </Grid>
-                {this.renderShowMoreInformationButton()}
+                {/*this.renderShowMoreInformationButton()*/}
                 {!this.resultHasOnlyOneFeature() && (
                   <Divider className={classes.divider}></Divider>
                 )}
@@ -159,16 +174,18 @@ class SearchResultsDataset extends React.PureComponent {
       <TightAccordionSummary
         id={`search-result-dataset-${featureCollection.source.id}`}
         aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
-        expandIcon={<ExpandMoreIcon />}
+        //expandIcon={<ExpandMoreIcon />}
       >
         <Grid alignItems="center" container>
           <Grid item xs={1}>
             {getOriginBasedIcon(featureCollection.origin)}
           </Grid>
           <Grid item xs={9}>
-            <Typography>{featureCollection.source.caption}</Typography>
+            <Typography variant="button">
+              {featureCollection.source.caption}
+            </Typography>
           </Grid>
-          <Grid item xs={2}>
+          <Grid container item justify="flex-end" xs={2}>
             <Tooltip title={toolTipTitle}>
               <Chip
                 size="small"
@@ -183,15 +200,23 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   renderResultsDataset = () => {
-    const { classes } = this.props;
+    const {
+      classes,
+      featureCollection,
+      handleFeatureCollectionSelected,
+      expanded,
+    } = this.props;
     return (
       <>
         <TightAccordion
           className={classes.datasetContainer}
           square
-          expanded={this.state.expanded}
+          expanded={expanded}
           TransitionProps={{ timeout: 100 }}
-          onChange={() => this.setState({ expanded: !this.state.expanded })}
+          onChange={() => {
+            //this.setState({ expanded: !this.state.expanded });
+            handleFeatureCollectionSelected(featureCollection);
+          }}
         >
           {this.renderDatasetSummary()}
           {this.renderDatasetDetails()}
