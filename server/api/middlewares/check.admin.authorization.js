@@ -16,20 +16,28 @@ export default async function (req, res, next) {
     return next();
   }
 
+  // Looks like AD auth is active. But before we can see if current user
+  // is authorized to do admin stuff, we must see which group is
+  // specified as admin group - if none is set, we cannot continue!
+  const adminGroup = process.env.RESTRICT_ADMIN_ACCESS_TO_AD_GROUP;
+  if (adminGroup === undefined || adminGroup.trim().length === 0) {
+    logger.error(
+      "Cannot verify admin access because no admin group is specified in config. Make sure that RESTRICT_ADMIN_ACCESS_TO_AD_GROUP is set in .env."
+    );
+    return res.status(500).end();
+  }
+
   // Save user name to eliminate multiple calls to the same method
   const user = ad.getUserFromRequestHeader(req);
 
   // Check if current user is member of the admins AD group
-  const allowed = await ad.isUserMemberOf(
-    user,
-    process.env.RESTRICT_ADMIN_ACCESS_TO_AD_GROUP
-  );
+  const allowed = await ad.isUserMemberOf(user, adminGroup);
 
   if (allowed) {
     logger.trace(
       "Access to admin granted. %o is member of %o.",
       user,
-      process.env.RESTRICT_ADMIN_ACCESS_TO_AD_GROUP
+      adminGroup
     );
     // Access granted! Go on with the next middleware.
     return next();
@@ -37,7 +45,7 @@ export default async function (req, res, next) {
     logger.warn(
       "Access to admin forbidden. %o is not member of %o.",
       user,
-      process.env.RESTRICT_ADMIN_ACCESS_TO_AD_GROUP
+      adminGroup
     );
     res.status(403).send("Forbidden");
     // Here we aren't calling next() so no following middlewares will run
