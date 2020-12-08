@@ -1,56 +1,39 @@
-## Hajkmap
+# Välkommen till HAJK!
 
-Vi är ett antal kommuner m.fl i framför allt Västsverige som tagit fram en bra och användbar webbGIS-karta baserad på Open source lösningen Openlayers.
-Aktiva kommuner är bl a Halmstad, Göteborg, Kungsbacka, Uddevalla och Varberg.
+Vi är ett antal kommuner och organisationer baserade framförallt i Västsverige som tagit fram ett avancerat open source webbGIS-verktyg baserat på Openlayers. 
 
-Några goda kartexempel:
-1. [Halmstad](https://nykarta.halmstad.se/)
-2. [Kungsbacka](https://karta.kungsbacka.se/)
-3. [Uddevalla](https://karta.uddevalla.se/)
-4. [Varberg](https://karta.varberg.se/)
+## Vad är HAJK? 
+HAJK är ett modulärt uppbyggt flerfunktionellt webbGIS-verktyg som kan användas i flera olika sammanhang. Det kan användas som ett enkelt publikt ”tittskåp” eller mer avancerat internt stödsystem där man har möjlighet att exempelvis editera WFS-lager med förändringar som slår igenom live. 
+HAJK är fritt att använda och förändra, källkoden är fritt tillgänglig och licensen tillåter förändringar, samt delning av dessa. HAJK används vanligtvis tillsammans med GeoServer men det finns visst stöd för ArcGIS och QGIS Server. 
 
-Kontakta någon av oss om _din_ organisation är intresserad av att medverka :-)
+![HAJK3](https://user-images.githubusercontent.com/110222/96265856-42960000-0fc6-11eb-805e-9e41ec5d77f9.png)
 
+## Historik
+HAJK är just nu inne på sin tredje generation. HAJK 1 utvecklades 2013, denna version krävde mer av administratören då all konfiguration sparades i JSON-filer som editerades manuellt. 
+Det var en av anledningarna till att man bestämde sig för att utveckla HAJK 2, som lade till ett grafiskt administrationsverktyg och en underliggande serverkomponent. Dessa kallas admin och backend. Delen som de flesta kallar för HAJK, webbGIS-verktyget, kallas för client. 
+För att säkerställa att HAJK låg i fronten för den tekniska utvecklingen påbörjades därför under slutet av 2018 en total omskrivning av client-delen som hösten 2019 resulterade i HAJK 3. 
 
+## Organisationen
+Aktiva kommuner är Halmstad, Göteborg, Kungsbacka, Uddevalla, Varberg, m.fl. Andra organisationer som använder (och utvecklar) HAJK är bl. a. Västtrafik och Göteborgsregionen. 
 
+Det finns en produktägargrupp, en kodgrupp och en förvaltargrupp där medlemmar som är aktiva utvecklare är representerade. 
+* Produktägargruppen är beslutande och står för det strategiska.
+* Kodgruppen utvecklar och har även ansvar för support.
+* Förvaltargruppen är närmare slutanvändaren och hjälper med first line-support. 
 
+Vi har stormöten där alla som är aktiva utvecklare, användare eller nyfikna är välkomna att delta. Dessa möten turas vi om att anordna, på plats eller digitalt. Slack används för kommunikation och alla frågor som rör HAJK-samarbetet, här informerar vi om kommande möten och dylikt. Tekniska frågor som rör kod ställs på GitHub. Här används Issues för att tackla eventuella problem och ny utveckling.  
+På GitHub har vi [Wiki-sidan](https://github.com/hajkmap/Hajk/wiki) där man kommer åt användardokumentation på svenska. Här finns också en Quick setup guide och annat läsvärt. 
 
+### Exempel på karttjänster med HAJK: 
+Halmstad –	 https://nykarta.halmstad.se/
+Kungsbacka –	 https://karta.kungsbacka.se/
+Uddevalla –	 https://karta. uddevalla.se/
+Varberg –	 https://karta.varberg.se/
 
+För dig som är sugen på att vara med och bidra med kod, läs Contributing. 
+Kontakta oss om din organisation är intresserad av att medverka,
+Vi finns på [Slack](https://hajk.slack.com/) utöver Github, med en öppen inbjudan på denna länk: 
+Inbjudan
 
-You can use the [editor on GitHub](https://github.com/hajkmap/Hajk/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-- **.**
-
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/hajkmap/Hajk/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+## Komma igång
+Om du vill komma igång med HAJK snabbt så kan du hoppa över till vår GitHub-sida där vi har en [Quick start](https://github.com/hajkmap/Hajk/) längst ner.
