@@ -73,6 +73,7 @@ const useStyles = makeStyles((theme) => ({
   },
   imageInformationWrapper: {
     marginBottom: theme.spacing(1),
+    maxWidth: "100%",
   },
   startIcon: {
     marginLeft: theme.spacing(0),
@@ -311,7 +312,6 @@ export const Img = ({ imgTag, localObserver }) => {
     const { right, left, center, floatLeft, floatRight } = positioning;
     if (!center) {
       if (floatLeft && !right) {
-        console.log("FLOAT LEFT");
         return classes.floatLeft;
       }
 
