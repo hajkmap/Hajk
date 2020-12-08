@@ -1,4 +1,4 @@
-import ActiveDirectory from "activedirectory";
+import ActiveDirectory from "activedirectory2";
 import ActiveDirectoryError from "../utils/ActiveDirectoryError";
 import log4js from "log4js";
 
@@ -357,7 +357,7 @@ class ActiveDirectoryService {
         groups = await this._getGroupMembershipForUser(userPrincipalName);
 
         // We only care about the shortname (CN)
-        groups = groups.map((g) => g.cn);
+        groups = groups.map((g) => g.cn).sort();
 
         logger.trace(
           "[getGroupMembershipForUser] Done. Setting groups-per-users store key %o to value: %O",

@@ -36,7 +36,10 @@ class ConfigService {
 
       // If we haven't enabled AD restrictions, just return the entire map config
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
-        logger.trace("[getMapConfig] Getting %s map config", map);
+        logger.trace(
+          "[getMapConfig] AD auth disabled. Getting the entire %s map config",
+          map
+        );
         return json;
       }
 
