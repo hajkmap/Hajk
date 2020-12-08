@@ -6,7 +6,8 @@ import {
   AtomicBlockUtils,
   getDefaultKeyBinding,
   KeyBindingUtil,
-  convertToRaw
+  convertToRaw,
+  ContentBlock
 } from "draft-js";
 import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
@@ -229,15 +230,14 @@ export default class DocumentTextEditor extends React.Component {
       data
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    const newEditorState = EditorState.push(
-      editorState,
-      contentStateWithEntity,
-      "create-entity"
-    );
+    const newEditorState = EditorState.set(editorState, {
+      currentContent: contentStateWithEntity
+    });
     this.setState(
       {
-        editorState: AtomicBlockUtils.insertAtomicBlock(
+        editorState: RichUtils.toggleLink(
           newEditorState,
+          newEditorState.getSelection(),
           entityKey,
           urlTitle
         ),
@@ -253,7 +253,6 @@ export default class DocumentTextEditor extends React.Component {
     );
     return "handled";
   }
-
   _onLinkInputKeyDown(e) {
     if (e.which === 13) {
       this._confirmLink(e);
@@ -272,10 +271,10 @@ export default class DocumentTextEditor extends React.Component {
       }
     );
   }
-
   _handleReturn = (evt, editorState) => {
     // Handle soft break on Shift+Enter
     const blockType = RichUtils.getCurrentBlockType(this.state.editorState);
+
     if (evt.shiftKey) {
       this.setState({
         editorState: RichUtils.insertSoftNewline(this.state.editorState)
@@ -427,7 +426,6 @@ export default class DocumentTextEditor extends React.Component {
         const contentBlockKey = block.getKey();
 
         return {
-          //component: MediaImage,
           component: ImageComponent,
           editable: true,
           //editable: false,
@@ -492,30 +490,24 @@ export default class DocumentTextEditor extends React.Component {
     return editorState;
   }
 
-  createMarkup(html) {
-    return {
-      __html: html
-    };
-  }
-
   getHtml() {
     const contentState = this.state.editorState.getCurrentContent();
 
     const blockStyleFn = block => {
-      const blockType = block.getType().toLowerCase();
-      const entity = contentState.getEntity(block.getEntityAt(0));
-
-      const data = entity.getData();
-
-      if (blockType === "blockquote") {
+      //const blockType = block.getType().toLowerCase();
+      //const entity = contentState.getEntity(
+      //  block.getEntityAt(0)
+      //);
+      //const data = entity.getData();
+      /*if (blockType === "blockquote") {
         return {
           attributes: {
             "data-divider-color": "",
             "data-background-color": "",
-            "data-text-section": ""
-          }
+            "data-text-section": "",
+          },
         };
-      }
+      }*/
     };
 
     const entityStyleFn = entity => {
@@ -625,6 +617,7 @@ export default class DocumentTextEditor extends React.Component {
     }
     const contentState = editorState.getCurrentContent();
     const contentBlock = contentState.getBlockForKey(selection.getAnchorKey());
+
     return this.isImageBlock(contentBlock, contentState);
   }
 
@@ -652,11 +645,16 @@ export default class DocumentTextEditor extends React.Component {
 
     let editorContainer = styles.editor;
     var contentState = editorState.getCurrentContent();
-    /*if (!contentState.hasText()) {
-      if (contentState.getBlockMap().first().getType() !== "unstyled") {
+    if (!contentState.hasText()) {
+      if (
+        contentState
+          .getBlockMap()
+          .first()
+          .getType() !== "unstyled"
+      ) {
         editorContainer = " RichEditor-hidePlaceholder";
       }
-    }*/
+    }
 
     let urlInput;
     if (this.state.showURLInput) {
@@ -739,16 +737,8 @@ export default class DocumentTextEditor extends React.Component {
       urlInput = (
         <div style={styles.urlInputContainer}>
           <h1>Lägg till {this.getUrlType(this.state.urlType)}</h1>
+          <p>Markera den text som ska bli en länk</p>
           {this.getUrlInput(this.state.urlType, documents)}
-          <input
-            onChange={this.onTitleChange}
-            ref="url"
-            style={styles.urlInput}
-            type="text"
-            value={this.state.urlTitle || ""}
-            placeholder="Rubrik på länk"
-            onKeyDown={this.onLinkInputKeyDown}
-          />
           {this.getUrlId(this.state.urlType)}
           <button onMouseDown={this.confirmLink}>OK</button>
           <button onMouseDown={this.closeLinkInput}>Avbryt</button>
@@ -783,8 +773,6 @@ export default class DocumentTextEditor extends React.Component {
             style={styles.editor}
             blockStyleFn={getBlockStyle}
             blockRendererFn={this.blockRenderer}
-            //blockRendererFn={mediaBlockRenderer}
-            //toggleReadOnly={false}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             handlePastedText={this.handlePastedText}
@@ -794,12 +782,11 @@ export default class DocumentTextEditor extends React.Component {
             onFocus={this.handleEditorClick}
             placeholder="Lägg till text..."
             ref="editor"
-            //readOnly={readOnly}
             readOnly={this.state.onReadOnly}
-            //readOnly={readOnlyState}
             plugins={this.plugins}
           />
         </div>
+        <button onClick={this.logState}>LOGGA</button>
       </div>
     );
   }

@@ -5,19 +5,21 @@ import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
 
 const LinkStrategy = (contentBlock, callback, contentState) => {
-  contentBlock.findEntityRanges((character) => {
-    const entity = character.getEntity();
+  contentBlock.findEntityRanges(character => {
+    const entityKey = character.getEntity();
     return (
-      entity !== null &&
-      contentState.getEntity(entity).getType().toLowerCase() === "link"
+      entityKey !== null &&
+      contentState
+        .getEntity(entityKey)
+        .getType()
+        .toUpperCase() === "LINK"
     );
   }, callback);
 };
 
-const Link = (props) => {
-  const entity = props.contentState.getEntity(props.entityKey);
-  const data = entity.getData();
-  const title = props.decoratedText;
+const Link = props => {
+  const data = props.contentState.getEntity(props.entityKey).getData();
+  const title = props.children;
 
   if (data["data-document"]) {
     return (
@@ -35,7 +37,6 @@ const Link = (props) => {
       <a
         data-link={data["data-link"]}
         data-header-identifier={data["data-header-identifier"]}
-        data-title={data.title}
       >
         <LaunchIcon /> {title}
       </a>
@@ -80,9 +81,9 @@ export const addLinkPlugin = {
   decorators: [
     {
       strategy: LinkStrategy,
-      component: Link,
-    },
-  ],
+      component: Link
+    }
+  ]
 };
 
 export default addLinkPlugin;
