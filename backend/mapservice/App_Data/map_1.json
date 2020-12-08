@@ -156,7 +156,7 @@
           }
         ],
         "active": true,
-        "visibleAtStart": true,
+        "visibleAtStart": false,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
         "enableOSM": true,
@@ -167,6 +167,7 @@
         "height": 0,
         "title": "",
         "description": "",
+        "enableTransparencySlider": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "instruction": "",
@@ -437,7 +438,7 @@
     "mapcleaner": true,
     "drawerVisible": true,
     "drawerPermanent": true,
-    "drawerVisibleMobile": true,
+    "drawerVisibleMobile": false,
     "activeDrawerOnStart": "plugins",
     "colors": {
       "primaryColor": "#333333",
