@@ -52,6 +52,15 @@ class Search extends React.PureComponent {
     },
   };
 
+  // Used for setTimeout/clearTimeout, in order to delay update of autocomplete when user is typing
+  timer = null;
+
+  // Amount of time before autocomplete is updated
+  delayBeforeAutoSearch =
+    isNaN(this.props.options.delayBeforeAutoSearch) === false
+      ? this.props.options.delayBeforeAutoSearch
+      : 500;
+
   searchImplementedPlugins = [];
   featuresToFilter = [];
   localObserver = Observer();
@@ -229,26 +238,38 @@ class Search extends React.PureComponent {
     }
   };
 
-  handleOnAutompleteInputChange = (event, searchString, reason) => {
-    this.localObserver.publish("clear-search-results");
-
-    this.setState(
-      {
-        autoCompleteOpen: searchString.length >= 3,
-        loading: searchString.length >= 3,
-        showSearchResults: false,
-        searchString: searchString,
-      },
-      () => {
-        if (this.state.searchString.length >= 3) {
-          this.updateAutocompleteList(this.state.searchString);
-        } else {
-          this.setState({
-            autocompleteList: [],
-          });
-        }
-      }
+  isUserInput = (searchString, reason) => {
+    // Reason equals "reset" when input is changed programmatically
+    // This catches user click on clear (searchString === 0)
+    return (
+      (searchString.length === 0 && reason === "reset") || reason === "input"
     );
+  };
+
+  handleOnAutompleteInputChange = (event, searchString, reason) => {
+    if (this.isUserInput(searchString, reason)) {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.localObserver.publish("clear-search-results");
+        this.setState(
+          {
+            autoCompleteOpen: searchString.length >= 3,
+            loading: searchString.length >= 3,
+            showSearchResults: false,
+            searchString: searchString,
+          },
+          () => {
+            if (this.state.searchString.length >= 3) {
+              this.updateAutocompleteList(this.state.searchString);
+            } else {
+              this.setState({
+                autocompleteList: [],
+              });
+            }
+          }
+        );
+      }, this.delayBeforeAutoSearch);
+    }
   };
 
   updateSearchOptions = (searchOptions) => {

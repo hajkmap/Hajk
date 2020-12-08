@@ -10,6 +10,7 @@ import {
   Accordion,
   Paper,
   Typography,
+  Tooltip,
   Button,
   AccordionDetails,
   AccordionSummary,
@@ -110,26 +111,36 @@ class SearchResultsContainer extends React.PureComponent {
     });
   };
 
-  renderSearchResultContainerHeader = () => {
-    const { sumOfResults, activeFeatureCollection } = this.state;
+  renderLeftHeaderInfo = () => {
+    const { sumOfResults, activeFeatureCollection, expanded } = this.state;
     const { featureCollections } = this.props;
+
+    if (!activeFeatureCollection || featureCollections.length === 1) {
+      return <Typography>{`Visar ${sumOfResults} träffar`}</Typography>;
+    } else if (activeFeatureCollection && expanded) {
+      return (
+        <Tooltip title={"Tillbaka till hela sökresultatet"}>
+          <Button
+            style={{ paddingLeft: 0 }}
+            onClick={() => this.handleFeatureCollectionSelected()}
+            color="primary"
+          >
+            <ArrowBackIcon fontSize="small" />
+            Tillbaka
+          </Button>
+        </Tooltip>
+      );
+    } else {
+      return (
+        <Typography>{`Visar ${activeFeatureCollection.value.totalFeatures} träffar`}</Typography>
+      );
+    }
+  };
+
+  renderSearchResultContainerHeader = () => {
     return (
       <Grid justify="space-between" alignItems="center" container>
-        <Grid item>
-          {!activeFeatureCollection && (
-            <Typography>{`Visar ${sumOfResults} träffar`}</Typography>
-          )}
-          {featureCollections.length !== 1 && activeFeatureCollection && (
-            <Button
-              style={{ paddingLeft: 0 }}
-              onClick={() => this.handleFeatureCollectionSelected()}
-              color="primary"
-            >
-              <ArrowBackIcon fontSize="small" />
-              Tillbaka
-            </Button>
-          )}
-        </Grid>
+        <Grid item>{this.renderLeftHeaderInfo()}</Grid>
         <Grid item>{this.renderSearchResultListOptions()}</Grid>
         <Grid item>
           <Button
