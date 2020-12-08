@@ -12,7 +12,6 @@ import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
 import { stateFromHTML } from "draft-js-import-html";
 import Button from "@material-ui/core/Button";
-import DoneIcon from "@material-ui/icons/DoneOutline";
 import { withStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
@@ -27,10 +26,13 @@ import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
 
 import addLinkPlugin from "./addLinkPlugin";
-import { mediaBlockRenderer } from "./addMediaPlugin";
-import { ReadOnly } from "./addMediaPlugin";
 
 import StyleButton from "./StyleButton";
+import ImageComponent from "./ImageComponent";
+
+import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
+
+import insertNewLine from "../utils/insertNewLine";
 
 const ColorButtonGreen = withStyles(theme => ({
   root: {
@@ -58,7 +60,10 @@ export default class DocumentTextEditor extends React.Component {
       urlType: "",
       imageList: this.props.imageList,
       documents: this.props.documents,
-      readOnly: false
+      readOnly: false,
+      onReadOnly: false,
+      currentImage: "",
+      imageData: {}
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -101,6 +106,7 @@ export default class DocumentTextEditor extends React.Component {
     this.onLinkInputKeyDown = this._onLinkInputKeyDown.bind(this);
     this.toggleBlockType = this._toggleBlockType.bind(this);
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
+    this.blockRenderer = this._blockRenderer.bind(this);
   }
   _onChange(editorState) {
     this.setState({ editorState });
@@ -138,7 +144,7 @@ export default class DocumentTextEditor extends React.Component {
 
     const contentStateWithEntity = contentState.createEntity(
       urlType,
-      "IMMUTABLE",
+      "MUTABLE",
       {
         src: urlValue,
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
@@ -267,12 +273,18 @@ export default class DocumentTextEditor extends React.Component {
     );
   }
 
-  _handleReturn = evt => {
+  _handleReturn = (evt, editorState) => {
     // Handle soft break on Shift+Enter
     const blockType = RichUtils.getCurrentBlockType(this.state.editorState);
     if (evt.shiftKey) {
       this.setState({
         editorState: RichUtils.insertSoftNewline(this.state.editorState)
+      });
+      return "handled";
+    }
+    if (this.isImageBlockInSelection(editorState)) {
+      this.setState({
+        editorState: insertNewLine(editorState)
       });
       return "handled";
     }
@@ -397,6 +409,89 @@ export default class DocumentTextEditor extends React.Component {
     return true;
   };
 
+  _blockRenderer(block, { getEditorState }) {
+    let blockType = block.getType();
+
+    if (blockType === "atomic") {
+      const { editorState } = this.state;
+      const contentState = getEditorState().getCurrentContent();
+      const entityKey = contentState.getEntity(block.getEntityAt(0));
+      const type = entityKey.getType().toLowerCase();
+
+      if (type === "image") {
+        const selection = editorState.getSelection();
+        const anchorKey = selection.getAnchorKey();
+        const blocks = contentState.getBlocksAsArray();
+        const contentBlock = blocks.find(b => b.getKey() === anchorKey);
+
+        const contentBlockKey = block.getKey();
+
+        return {
+          //component: MediaImage,
+          component: ImageComponent,
+          editable: true,
+          //editable: false,
+          props: {
+            readOnlyMode: this.toggleReadOnly,
+            currentImage: img => this.setState({ currentImage: img }),
+            imageData: data =>
+              this.updateSelectedImageData(contentBlockKey, editorState, data),
+            isFocused: () =>
+              selection.getAnchorKey() === contentBlockKey &&
+              this.isImageBlockInSelection(editorState),
+            onClick: () =>
+              EditorState.push(
+                this.selectImageWithBlockKey(editorState, contentBlockKey)
+              )
+          }
+        };
+      }
+    }
+    return null;
+  }
+
+  selectImageWithBlockKey(editorState, key) {
+    const offsetKey = DraftOffsetKey.encode(key, 0, 0);
+    const node = document.querySelectorAll(
+      `[data-offset-key="${offsetKey}"]`
+    )[0];
+    if (node) {
+      const nativeSelection = window.getSelection();
+      const range = document.createRange();
+      range.setStart(node, 0);
+      range.setEnd(node, 0);
+      nativeSelection.removeAllRanges();
+      nativeSelection.addRange(range);
+    }
+
+    const selection = editorState.getSelection();
+    const sel = selection.merge({
+      anchorKey: key,
+      anchorOffset: 0,
+      focusKey: key,
+      focusOffset: 0
+    });
+    return EditorState.forceSelection(editorState, sel);
+  }
+
+  updateSelectedImageData(anchorKey, editorState, data) {
+    const selection = editorState.getSelection();
+    if (anchorKey !== selection.getFocusKey()) {
+      return editorState;
+    }
+    const contentState = editorState.getCurrentContent();
+    const contentBlock = contentState.getBlockForKey(anchorKey);
+    if (contentBlock && contentBlock.getType() === "atomic") {
+      const entityKey = contentBlock.getEntityAt(0);
+      const entity = contentState.getEntity(entityKey);
+      if (entity && entity.getType().toUpperCase() === "IMAGE") {
+        const newContentState = contentState.mergeEntityData(entityKey, data);
+        return EditorState.push(editorState, newContentState, "apply-entity");
+      }
+    }
+    return editorState;
+  }
+
   createMarkup(html) {
     return {
       __html: html
@@ -404,10 +499,13 @@ export default class DocumentTextEditor extends React.Component {
   }
 
   getHtml() {
-    const content = this.state.editorState.getCurrentContent();
+    const contentState = this.state.editorState.getCurrentContent();
 
     const blockStyleFn = block => {
       const blockType = block.getType().toLowerCase();
+      const entity = contentState.getEntity(block.getEntityAt(0));
+
+      const data = entity.getData();
 
       if (blockType === "blockquote") {
         return {
@@ -434,7 +532,7 @@ export default class DocumentTextEditor extends React.Component {
       blockStyleFn,
       entityStyleFn
     };
-    return stateToHTML(content, options);
+    return stateToHTML(contentState, options);
   }
 
   applyChanges() {
@@ -508,10 +606,44 @@ export default class DocumentTextEditor extends React.Component {
     }
   }
 
-  toggleReadOnly = () => {
-    const { readOnly } = this.state;
+  isImageBlock(contentBlock, contentState) {
+    if (contentBlock && contentBlock.getType() === "atomic") {
+      const entityKey = contentBlock.getEntityAt(0);
+      const entity = contentState.getEntity(entityKey);
+
+      if (entity.getType().toUpperCase() === "IMAGE") {
+        return entity && entity.getType().toUpperCase() === "IMAGE";
+      }
+    }
+    return false;
+  }
+
+  isImageBlockInSelection(editorState) {
+    const selection = editorState.getSelection();
+    if (selection.getAnchorKey() !== selection.getFocusKey()) {
+      return false;
+    }
+    const contentState = editorState.getCurrentContent();
+    const contentBlock = contentState.getBlockForKey(selection.getAnchorKey());
+    return this.isImageBlock(contentBlock, contentState);
+  }
+
+  toggleReadOnly = e => {
+    const { onReadOnly } = this.state;
     this.setState({
-      readOnly: !readOnly
+      onReadOnly: !onReadOnly
+    });
+  };
+
+  handleEditorClick = () => {
+    var { readOnly } = this.state;
+    if (document.getElementById("edit-image-modal")) {
+      readOnly = true;
+    } else {
+      readOnly = false;
+    }
+    this.setState({
+      readOnly: readOnly
     });
   };
 
@@ -628,13 +760,6 @@ export default class DocumentTextEditor extends React.Component {
       <div style={styles.root}>
         <div style={styles.buttonContainer}>
           <div style={styles.buttons}>
-            <ColorButtonGreen
-              variant="contained"
-              className="btn btn-primary"
-              title="Godkänn ändringar"
-              onClick={() => this.applyChanges()}
-              startIcon={<DoneIcon />}
-            />
             <InlineStyleControls
               editorState={editorState}
               onToggle={this.toggleInlineStyle}
@@ -657,28 +782,24 @@ export default class DocumentTextEditor extends React.Component {
           <Editor
             style={styles.editor}
             blockStyleFn={getBlockStyle}
-            blockRendererFn={mediaBlockRenderer}
+            blockRendererFn={this.blockRenderer}
+            //blockRendererFn={mediaBlockRenderer}
+            //toggleReadOnly={false}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             handlePastedText={this.handlePastedText}
             handleReturn={this.handleReturn}
             keyBindingFn={this.mapKeyToEditorCommand}
             onChange={this.onChange}
+            onFocus={this.handleEditorClick}
             placeholder="Lägg till text..."
             ref="editor"
-            readOnly={readOnly}
+            //readOnly={readOnly}
+            readOnly={this.state.onReadOnly}
+            //readOnly={readOnlyState}
             plugins={this.plugins}
           />
         </div>
-        <input
-          onClick={this.logState}
-          style={styles.button}
-          type="button"
-          value="Log State"
-        />
-        <button onMouseDown={this.toggleReadOnly} style={{ marginBottom: 5 }}>
-          Read Only Mode
-        </button>
       </div>
     );
   }
