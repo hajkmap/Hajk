@@ -98,7 +98,6 @@ const useStyles = makeStyles((theme) => ({
   },
   olListItem: {
     padding: theme.spacing(0),
-    wordBreak: "break-word",
   },
   ulList: {
     listStyle: "initial",
@@ -184,7 +183,7 @@ export const OLComponent = ({ olComponent }) => {
             <Grid wrap="nowrap" container>
               <Grid
                 className={clsx(
-                  index < 10
+                  index < 9
                     ? classes.listItemOneDigit
                     : classes.listItemTwoDigit
                 )}
