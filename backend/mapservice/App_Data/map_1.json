@@ -156,7 +156,7 @@
           }
         ],
         "active": true,
-        "visibleAtStart": false,
+        "visibleAtStart": true,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
         "enableOSM": true,
@@ -167,7 +167,6 @@
         "height": 0,
         "title": "",
         "description": "",
-        "enableTransparencySlider": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "instruction": "",
