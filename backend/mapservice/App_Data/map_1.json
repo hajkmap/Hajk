@@ -437,6 +437,7 @@
     "mapcleaner": true,
     "drawerVisible": true,
     "drawerPermanent": true,
+    "drawerVisibleMobile": true,
     "activeDrawerOnStart": "plugins",
     "colors": {
       "primaryColor": "#333333",
