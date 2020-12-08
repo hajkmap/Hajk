@@ -1557,11 +1557,11 @@ class Menu extends Component {
                   className="long-label"
                   htmlFor="enableTransparencySlider"
                 >
-                  Visa "opacitet skjutreglage"{" "}
+                  Visa transparensreglage{" "}
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
-                    title="Global inställning för att välja om opacitet skutreglage ska vara aktiv eller inte. Om inställningen är aktiv går det då att konfigurera individer lager om opacitet skutreglage ska visas till lagret.  Om denna ruta inte är ikryssad kommer opacitet skutreglage inte visas till någon lager."
+                    title="Global inställning för att välja om transparensreglage ska vara aktiv eller inte. Om inställningen är aktiv går det då att konfigurera individer lager om transparensreglage ska visas till lagret.  Om denna ruta inte är ikryssad kommer transparensreglage inte visas till någon lager."
                   />
                 </label>
               </div>
