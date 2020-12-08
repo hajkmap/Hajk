@@ -351,6 +351,16 @@ var ExportModel = {
       .getArray()
       .filter(exportable)
       .map((layer, i) => {
+
+        var legend = "";
+        for(var i = 0; i < this.get("shell").get("layers").length; i++){
+          var layerConfig = this.get("shell").get("layers")[i];
+          if (layerConfig.id === layer.get("name")){
+            legend = layerConfig.legend;
+            break;
+          }
+        }
+
         return {
           url: layer.getSource().get('url'),
           layers: layer.getSource().getParams()["LAYERS"].split(','),
@@ -358,7 +368,9 @@ var ExportModel = {
           version: layer.getSource().getParams()["VERSION"],
           zIndex: i,
           workspacePrefix: null,
-          coordinateSystemId: this.get('olMap').getView().getProjection().getCode().split(':')[1]
+          coordinateSystemId: this.get('olMap').getView().getProjection().getCode().split(':')[1],
+          legend: legend,
+          caption: layer.get("caption"),
         };
       });
   },

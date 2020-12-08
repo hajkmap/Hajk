@@ -390,6 +390,13 @@ namespace MapService.Components
                 int yWhiteSpace = (int)(page.Height.Point * yWhiteScale);
                 int yBottom = (int)(page.Height.Point - yWhiteSpace);
 
+                XPoint[] corners =
+                {
+                    new XPoint(xLeft, yWhiteSpace),
+                    new XPoint(xRight, yWhiteSpace),
+                    new XPoint(xLeft, yBottom),
+                    new XPoint(xRight, yBottom)
+                };
 
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
 
@@ -531,6 +538,8 @@ namespace MapService.Components
                 XRect rectForText = new XRect(xRight - 125, page.Height.Point * yWhiteScale - oneCM - 15, 125, 0);
                 gfx.DrawString(sourceText, fontSource, brushSource, rectForText, mySource);
                 gfx.DrawRectangle(XPens.Transparent, rectForText);
+
+                this.drawLegend(document, gfx, exportItem, corners, fontName);
 
                 byte[] bytes;
 
