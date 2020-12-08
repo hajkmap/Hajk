@@ -459,7 +459,7 @@ paperFormatOptions = this.paperFormats.map((s, i) => {
           <div className='panel-heading'>Teckenförklaring</div>
           <div className='panel-body'>
             <input type="checkbox" id="teckenforklaring" name="teckenforklaring" value="tecken" />
-              <label htmlFor="teckenforklaring">Lägg till en teckenförklaring!!!</label> <br />
+              <label htmlFor="teckenforklaring">Lägg till en teckenförklaring</label> <br />
           </div>
         </div>
         <div>

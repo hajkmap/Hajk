@@ -271,6 +271,7 @@ namespace MapService.Components
                     document.Save(ms);
                     bytes = ReadFully(ms);
                 }
+                document.Dispose();
 
                 return bytes;
             }
@@ -625,7 +626,8 @@ namespace MapService.Components
                 bool leftAvailable = true;
                 bool rightAvailable = true;
                 bool added = false;
-                var mySortedList = images.OrderBy(d => d.Value.Height).ToList();
+                var mySortedList = images.OrderBy(d => d.Key).ToList();
+                const int maxSize = 100;
 
                 // Draw everything that fits into two columns
                 foreach (KeyValuePair<string, Image> item in mySortedList)
@@ -635,36 +637,41 @@ namespace MapService.Components
                     {
                         item.Value.Save(ms, ImageFormat.Jpeg);
                         XImage image = XImage.FromStream(ms);
-
-                        // Skip images that are too wide
-                        if (image.PixelWidth > maxWithforTwoColumns)
+                        
+                        // calculate image size and reduce if needed
+                        double imgWidth = image.PixelWidth;
+                        double imgHeigth = image.PixelHeight;
+                        if (imgHeigth > maxSize || imgWidth > maxSize)
                         {
-                            continue;
+                            if (imgHeigth > imgWidth)
+                            {
+                                double quota = imgHeigth / maxSize;
+                                imgHeigth = maxSize;
+                                imgWidth = imgWidth / quota;
+                            }
+                            else
+                            {
+                                double quota = imgWidth / maxSize;
+                                imgWidth = maxSize;
+                                imgHeigth = imgHeigth / quota;
+                            }
                         }
 
                         if (leftAvailable)
                         {
                             if (left || !rightAvailable)
                             {
-                                if (leftTarget.Y + image.PixelHeight + 10 > page.Height)
+                                if (leftTarget.Y + imgHeigth + 10 > page.Height)
                                 {
                                     leftAvailable = false;
-                                    /*
-                                    page = document.AddPage();
-                                    page.Size = GetPageSize(exportItem);
-                                    page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
-                                    gfx = XGraphics.FromPdfPage(page);
-                                    leftTarget.Y = corners[1].Y;
-                                    rightTarget.Y = corners[1].Y;
-                                    */
                                 }
                                 else
                                 {
                                     added = true;
                                     gfx.DrawString(item.Key, fontSource, brushSource, leftTarget);
                                     leftTarget.Y += fontSize + 4;
-                                    gfx.DrawImage(image, leftTarget);
-                                    leftTarget.Y += item.Value.Height + 10;
+                                    gfx.DrawImage(image, leftTarget.X, leftTarget.Y, imgWidth, imgHeigth);
+                                    leftTarget.Y += imgHeigth + 10;
                                 }
                             }
 
@@ -674,25 +681,17 @@ namespace MapService.Components
                             if ((!left || !leftAvailable) && !added)
                             {
 
-                                if (rightTarget.Y + image.PixelHeight + 10 > page.Height)
+                                if (rightTarget.Y + imgHeigth + 10 > page.Height)
                                 {
                                     rightAvailable = false;
-                                    /*
-                                    page = document.AddPage();
-                                    page.Size = GetPageSize(exportItem);
-                                    page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
-                                    gfx = XGraphics.FromPdfPage(page);
-                                    leftTarget.Y = corners[1].Y;
-                                    rightTarget.Y = corners[1].Y;
-                                    */
                                 }
                                 else
                                 {
                                     added = true;
                                     gfx.DrawString(item.Key, fontSource, brushSource, rightTarget);
                                     rightTarget.Y += fontSize + 4;
-                                    gfx.DrawImage(image, rightTarget);
-                                    rightTarget.Y += item.Value.Height + 10;
+                                    gfx.DrawImage(image, rightTarget.X, rightTarget.Y, imgWidth, imgHeigth);
+                                    rightTarget.Y += imgHeigth + 10;
                                 }
                             }
                         }
@@ -709,8 +708,8 @@ namespace MapService.Components
                             added = true;
                             gfx.DrawString(item.Key, fontSource, brushSource, leftTarget);
                             leftTarget.Y += fontSize + 4;
-                            gfx.DrawImage(image, leftTarget);
-                            leftTarget.Y += item.Value.Height + 10;
+                            gfx.DrawImage(image, leftTarget.X, leftTarget.Y, imgWidth, imgHeigth);
+                            leftTarget.Y += imgHeigth + 10;
                             left = true;
                             leftAvailable = true;
                             rightAvailable = true;
@@ -718,54 +717,14 @@ namespace MapService.Components
 
                         left = !left;
                         painted.Add(item.Key);
+                        image.Dispose();
                     }
                 }
 
-                // Draw all the images that are too large for one column
-                XPoint target = new XPoint(corners[1].X, Math.Max(leftTarget.Y, rightTarget.Y));
-
-                foreach (KeyValuePair<string, Image> item in images)
+                // Free the memory used to store images
+                foreach(Image img in images.Values)
                 {
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        item.Value.Save(ms, ImageFormat.Jpeg);
-                        XImage image = XImage.FromStream(ms);
-
-                        // Skip if the image has already been painted
-                        if (painted.Contains(item.Key))
-                        {
-                            continue;
-                        }
-                        gfx.DrawString(item.Key, fontSource, brushSource, target);
-                        target.Y += fontSize + 4;
-
-
-                        if (image.Size.Width > maxWithforOneColumn)
-                        {
-                            if (target.Y + (maxWithforOneColumn / image.Size.Width) * image.Size.Height + 10 > page.Height)
-                            {
-                                page = document.AddPage();
-                                page.Size = GetPageSize(exportItem);
-                                page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
-                                gfx = XGraphics.FromPdfPage(page);
-                                target.Y = corners[1].Y;
-                            }
-                            gfx.DrawImage(image, corners[1].X - item.Value.Width, target.Y, maxWithforOneColumn, (maxWithforOneColumn / image.Size.Width) * image.Size.Height);
-                        }
-                        else
-                        {
-                            if (target.Y + image.PixelHeight + 10 > page.Height)
-                            {
-                                page = document.AddPage();
-                                page.Size = GetPageSize(exportItem);
-                                page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
-                                gfx = XGraphics.FromPdfPage(page);
-                                target.Y = corners[1].Y;
-                            }
-                            gfx.DrawImage(image, new XPoint(corners[1].X - item.Value.Width, target.Y));
-                        }
-                        target.Y += item.Value.Height + 5;
-                    }
+                    img.Dispose();
                 }
             }
         }
