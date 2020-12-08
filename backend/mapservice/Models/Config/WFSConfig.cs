@@ -27,7 +27,9 @@ namespace MapService.Models.Config
         public string geometryField { get; set; }
 
         public string outputFormat { get; set; }
-        
+
+        public bool withCredentials { get; set; }
+
         public bool infoVisible { get; set; }
 
         public string infoTitle { get; set; }

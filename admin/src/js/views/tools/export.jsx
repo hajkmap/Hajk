@@ -46,6 +46,10 @@ var defaultState = {
     100000,
     250000
   ],
+  resolutions: [72, 96, 150, 200, 300],
+  allowedResolutions: [72, 96, 150, 200, 300],
+  paperFormats: ["A2", "A3", "A4"],
+  allowedPaperFormats:  ["A2", "A3", "A4"], // Paper formats supported
   proxyUrl: '',
   visibleForGroups: []
 };
@@ -74,7 +78,9 @@ class ToolOptions extends Component {
         autoScale: tool.options.autoScale,
         proxyUrl: tool.options.proxyUrl,
         instruction: tool.options.instruction,
-        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : [],
+        resolutions: tool.options.resolutions ? tool.options.resolutions.sort((a, b) => a - b) : this.state.allowedResolutions.slice(),
+        paperFormats: tool.options.paperFormats ? tool.options.paperFormats.sort() : this.state.allowedPaperFormats.slice()
       });
     } else {
       this.setState({
@@ -143,6 +149,8 @@ class ToolOptions extends Component {
         base64Encode: this.state.base64Encode,
         autoScale: this.state.autoScale,
         scales: this.state.scales,
+        resolutions: this.state.resolutions,
+        paperFormats: this.state.paperFormats,
         proxyUrl: this.state.proxyUrl,
         instruction: this.state.instruction,
         visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
@@ -216,6 +224,60 @@ class ToolOptions extends Component {
     }
   }
 
+  handlePaperFormatChanged (name){
+    if(this.state.paperFormats.includes(name)){
+      this.state.paperFormats = this.state.paperFormats.filter((value, idx, arr) => {return value !== name});
+    } else {
+      this.state.paperFormats.push(name);
+    }
+    this.state.paperFormats.sort((a, b) => a - b);
+    this.setState({"update": true}); // code to force it to render itself
+  }
+
+  renderpaperFormat () {
+
+    return this.state.allowedPaperFormats.map((t, i) =>
+        (
+            <div key={i} className='inset-form'>
+              <label htmlFor={t}>{t}</label>
+              <input
+                  name={t}
+                  type="checkbox"
+                  onChange={() => this.handlePaperFormatChanged(t)}
+                  checked={this.state.paperFormats.includes(t)} />
+            </div>
+        )
+    );
+  }
+
+  handleResolutionChanged (name){
+    if(this.state.resolutions.includes(name)){
+      this.state.resolutions = this.state.resolutions.filter((value, idx, arr) => {return value !== name});
+    } else {
+      this.state.resolutions.push(name);
+    }
+    this.state.resolutions.sort((a, b) => a - b);
+    this.setState({"update": true}); // code to force it to render itself
+  }
+
+  renderresolutions () {
+
+    return this.state.allowedResolutions.map((t, i) =>
+          (
+          <div key={i} className='inset-form'>
+            <label htmlFor={t}>{t}</label>
+            <input
+                name={t}
+                type="checkbox"
+                onChange={() => this.handleResolutionChanged(t)}
+                checked={this.state.resolutions.includes(t)} />
+          </div>
+          )
+    );
+  }
+
+
+
   /**
    *
    */
@@ -287,6 +349,14 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               checked={this.state.autoScale} />&nbsp;
             <label htmlFor='autoScale-active'>autoScale av previewLayer för mobil aktiverad</label>
+          </div>
+          <div>
+            <div><b>Pappersstorlek:</b></div>
+            {this.renderpaperFormat()}
+          </div>
+          <div>
+            <div><b>Upplösningar:</b></div>
+            {this.renderresolutions()}
           </div>
           <div>
             <label htmlFor='instruction'>Instruktion</label>

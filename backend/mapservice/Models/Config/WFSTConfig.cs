@@ -31,8 +31,10 @@ namespace MapService.Models.Config
 
         public bool editPolygon { get; set; }
 
-        public bool editLine { get; set; }        
-        
+        public bool editLine { get; set; }
+
+        public bool withCredentials { get; set; }
+
         public bool infoVisible { get; set; }
 
         public string infoTitle { get; set; }

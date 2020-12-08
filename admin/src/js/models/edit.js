@@ -94,14 +94,18 @@ var edit = Model.extend({
       : url;
   },
 
-  getLayerDescription: function (url, layer, callback) {
+  getLayerDescription: function (url, layer, withCredentials = false, callback) {
+
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
     url = this.prepareProxyUrl(url);
+    
     $.ajax(url, {
       data: {
         request: 'describeFeatureType',
         outputFormat: 'application/json',
         typename: layer
       },
+      xhrFields:_xhrFields,
       success: data => {
         if (data.featureTypes && data.featureTypes[0]) {
           callback(data.featureTypes[0].properties);
@@ -123,18 +127,23 @@ var edit = Model.extend({
     return types;
   },
 
-  getWMSCapabilities: function (url, callback) {
+  getWMSCapabilities: function (url, withCredentials = false, callback) {
+
+    // TODO: function is named WMS,,, should be WFS 
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
+
     $.ajax(this.prepareProxyUrl(url), {
       data: {
         service: 'WFS',
-        request: 'GetCapabilities'
+        request: 'GetCapabilities',
       },
+      xhrFields: _xhrFields,
       success: data => {
         var response = this.parseWFSCapabilitesTypes(data);
         callback(response);
       },
       error: data => {
-        callback(false);
+        callback(false, data);
       }
     });
   }

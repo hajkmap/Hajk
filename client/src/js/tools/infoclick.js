@@ -427,7 +427,7 @@ var InfoClickModel = {
     properties = feature.getProperties();
     information = layerModel && layerModel.get('information') || '';
 
-    if (feature.infobox) {
+    if (feature.infobox && typeof feature.infobox === "string" && feature.infobox.length > 0) {
       information = feature.infobox;
       information = information.replace(/export:/g, '');
     }
@@ -549,19 +549,12 @@ var InfoClickModel = {
    * @param {*} resolution 
    */
   checkLayerResolution: function (layer, resolution) {
-    var maxResPasses = true;
-    var minResPasses = true;
-    
-    if (layer.get('minResolution') > 0 || layer.get('maxResolution') > 0) {
-      if (resolution > layer.get('maxResolution') + 0.001) {
-        maxResPasses = false;
-      }
-      if (resolution < layer.get('minResolution')) {
-        minResPasses = false;
-      } 
+
+    if (layer.get('maxResolution') > 0 && resolution > layer.get('maxResolution') + 0.001){
+      return false;
     }
-   
-    if (maxResPasses === false || minResPasses === false) {
+
+    if (layer.get('minResolution') > 0 && resolution < layer.get('minResolution')){
       return false;
     }
 

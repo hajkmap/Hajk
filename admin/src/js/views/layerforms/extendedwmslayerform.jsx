@@ -66,7 +66,8 @@ const defaultState = {
   infoText: '',
   infoUrl: '',
   infoUrlText: '',
-  infoOwner: ''
+  infoOwner: '',
+  withCredentials: false,
 };
 
 const supportedProjections = [
@@ -422,6 +423,7 @@ class ExtendedWMSLayerForm extends Component {
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
+    if (fieldName === 'withCredentials') value = input.checked;
     if (fieldName === 'layers') value = this.state.addedLayers;
     if (fieldName === 'infoVisible') value = input.checked;
 
@@ -583,6 +585,14 @@ class ExtendedWMSLayerForm extends Component {
                 className={this.getValidationClass('url') + 'form-control display-inline'}
               />
               <span onClick={(e) => { this.loadWMSCapabilities(e); }} className='btn btn-default btn-sm'>Ladda {loader}</span>
+              <label className="with-credentials">
+                <input type="checkbox"
+                  value={this.state.withCredentials} ref="input_withCredentials"
+                  onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}               
+                />
+                <span>withCredentials (CORS)</span>
+              </label>
             </div>
           </div>
         </div>
@@ -769,6 +779,15 @@ class ExtendedWMSLayerForm extends Component {
               checked={this.state.tiled}
             />
           </div>
+        </div>
+        <div>
+          <label>withCredentials (CORS)</label>
+          <input
+            type='checkbox'
+            ref='input_withCredentials2'
+            onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}
+          />
         </div>
         <div className='info-container' style={{margin: 'unset'}}>
           <div>

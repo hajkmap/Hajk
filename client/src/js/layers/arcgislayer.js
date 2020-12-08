@@ -174,9 +174,12 @@ var ArcGISLayer = {
     url += '/identify?';
     url += toParamString(this.getQueryParams(params.coordinate));
 
+    const _xhrFields = this.attributes.withCredentials === true ? { withCredentials: true } : null
+
     $.ajax({
       url: url,
       dataType: 'json',
+      xhrFields:_xhrFields,
       success: (data) => {
         this.parseFeatueInfoResponse(data, params.success);
       },

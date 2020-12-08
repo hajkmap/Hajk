@@ -390,14 +390,6 @@ namespace MapService.Components
                 int yWhiteSpace = (int)(page.Height.Point * yWhiteScale);
                 int yBottom = (int)(page.Height.Point - yWhiteSpace);
 
-                XPoint[] corners =
-                {
-                    new XPoint(xLeft, yWhiteSpace),
-                    new XPoint(xRight, yWhiteSpace),
-                    new XPoint(xLeft, yBottom),
-                    new XPoint(xRight, yBottom)
-                };
-
 
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
 
@@ -418,12 +410,12 @@ namespace MapService.Components
                         break;
                     }
                 }
-
+                int yScaleText = 0; // Defined here to be used for the northArrow
                 if (showScale)
                 {
                     // skalstocken x y
                     int xLeftAfterScale = xLeft + 100;
-                    int yScaleText = (int)(yBottom + (yWhiteSpace * 0.38));
+                    yScaleText = (int)(yBottom + (yWhiteSpace * 0.38));
                     int yScalebarTop = (int)(yBottom + (yWhiteSpace * 0.30)); //29
                     int yScalebarMiddle = (int)(yBottom + (yWhiteSpace * 0.35)); //26
                     int yScalebarBottom = (int)(yBottom + (yWhiteSpace * 0.40)); //23
@@ -437,7 +429,7 @@ namespace MapService.Components
                 else
                 {
                     int xLeftAfterScale = xLeft + 100;
-                    int yScaleText = (int)(yBottom + (yWhiteSpace * 0.38));
+                    yScaleText = (int)(yBottom + (yWhiteSpace * 0.38));
                     int yScalebarTop = (int)(yBottom + (yWhiteSpace * 0.30)); //29
                     int yScalebarMiddle = (int)(yBottom + (yWhiteSpace * 0.35)); //26
                     int yScalebarBottom = (int)(yBottom + (yWhiteSpace * 0.40)); //23
@@ -483,6 +475,9 @@ namespace MapService.Components
                 XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
                 var logo1Path = HostingEnvironment.ApplicationPhysicalPath + ConfigurationManager.AppSettings["exportLogotype"];
                 XImage logo1 = XImage.FromFile(logo1Path);
+                
+                var northArrowPath = HostingEnvironment.ApplicationPhysicalPath + ConfigurationManager.AppSettings["exportNorthArrow"];
+                XImage northArrow = XImage.FromFile(northArrowPath);
 
 
                 // Layout3 title
@@ -507,6 +502,7 @@ namespace MapService.Components
                 var printDate = pdfDate;
                 XRect rectForDate = new XRect(xRight - 125, page.Height.Point * yWhiteScale - oneCM - 35, 125, 0);
                 XFont fontSourceDate = new XFont(fontName, 12, XFontStyle.Regular);
+                double northArrowScale = 0.1;
 
                 if (page.Size.ToString() == "A4" && page.Orientation.ToString() == "Landscape")
                 {
@@ -514,7 +510,8 @@ namespace MapService.Components
                     gfx.DrawString(printDate, fontSourceDate, brushSource, rectForDate, mySource); // date (x:(int)page.Width.Point - (int)(page.Width.Point * whiteScale *2 + 20))
                     gfx.DrawRectangle(XPens.Transparent, rectForDate);
                     // this.drawText(gfx, fontName, printDate, xRight - 80, (int)(page.Height.Point * yWhiteScale) - (int)oneCM - 15, 12); // gamla
-                    gfx.DrawImage(logo1, xLeft, (page.Height.Point * yWhiteScale) - oneCM - (logo.PixelHeight * 0.26), logo.PixelWidth * 0.12, logo.PixelHeight * 0.24); //logotype 0.1 & 0.2
+                    gfx.DrawImage(logo1, xLeft, (page.Height.Point * yWhiteScale) - oneCM - (logo.PixelHeight * 0.26), logo.PixelWidth * 0.12, logo.PixelHeight * 0.24);
+                    gfx.DrawImage(northArrow, xLeft + 1, yScaleText - 15 - northArrow.PixelHeight * northArrowScale, northArrow.PixelWidth * northArrowScale, northArrow.PixelHeight * northArrowScale); //north arrow
                 }
                 else
                 {
@@ -523,6 +520,7 @@ namespace MapService.Components
                     gfx.DrawRectangle(XPens.Transparent, rectForDate);
                     //this.drawText(gfx, fontName, printDate, xRight - 80, (int)(page.Height.Point * yWhiteScale) - (int)oneCM - 35, 12); // gamla
                     gfx.DrawImage(logo1, xLeft, (page.Height.Point * yWhiteScale) - oneCM - (logo.PixelHeight * 0.45), logo.PixelWidth * 0.18, logo.PixelHeight * 0.4); //logotype
+                    gfx.DrawImage(northArrow, xLeft + 1, yScaleText - 15 - northArrow.PixelHeight * northArrowScale, northArrow.PixelWidth * northArrowScale, northArrow.PixelHeight * northArrowScale); //north arrow
                 }
 
 
@@ -533,8 +531,6 @@ namespace MapService.Components
                 XRect rectForText = new XRect(xRight - 125, page.Height.Point * yWhiteScale - oneCM - 15, 125, 0);
                 gfx.DrawString(sourceText, fontSource, brushSource, rectForText, mySource);
                 gfx.DrawRectangle(XPens.Transparent, rectForText);
-
-                this.drawLegend(document, gfx, exportItem, corners, fontName);
 
                 byte[] bytes;
 
@@ -549,7 +545,7 @@ namespace MapService.Components
 
             return null;
         }
-
+        
         private Image downloadLegend(string url)
         {
 
@@ -728,7 +724,7 @@ namespace MapService.Components
                 }
             }
         }
-
+        
         private int GetDisplayLength(double unitLength, Dictionary<int, int> scaleBarLengths, int scale)
         {
             int scaleBarLength = 0;

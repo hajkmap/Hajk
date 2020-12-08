@@ -62,7 +62,8 @@ const defaultState = {
   infoUrl: '',
   infoUrlText: '',
   infoOwner: '',
-  solpopup: solpop
+  solpopup: solpop,
+  withCredentials: false
 };
 
 /**
@@ -239,7 +240,6 @@ class WMSLayerForm extends Component {
 
   loadWMSCapabilities (e, callback) {
     if (e) { e.preventDefault(); }
-
     this.setState({
       load: true,
       addedLayers: [],
@@ -254,15 +254,26 @@ class WMSLayerForm extends Component {
       });
     }
 
-    this.props.model.getWMSCapabilities(this.state.url, (capabilities) => {
+    this.props.model.getWMSCapabilities(this.state.url, this.state.withCredentials, (capabilities, data) => {
       this.setState({
         capabilities: capabilities,
         load: false
       });
       if (capabilities === false) {
-        this.props.application.setState({
+
+        var alertMsg = '';
+
+        if(data.status === 0) {
+          alertMsg = `Ingen förfrågan skickades, Kan vara pga CORS, eller att t.ex domänen är felaktig.
+          1. Kontrollera URL:n.
+          2. Testa att slå ${this.state.withCredentials === true ? 'av' : 'på'} "withCredentials (CORS)".`;
+        } else {
+          alertMsg = `Ett fel inträffade. (Status = ${data.status})`;
+        }
+
+        this.props.parent.setState({
           alert: true,
-          alertMessage: 'Servern svarar inte. Försök med en annan URL.'
+          alertMessage: alertMsg
         });
       }
       if (callback) {
@@ -306,7 +317,8 @@ class WMSLayerForm extends Component {
       infoOwner: this.getValue('infoOwner'),
       searchGeometryField: this.getValue('searchGeometryField'),
       attribution: this.getValue('attribution'),
-      solpopup: this.getValue('solpopup')
+      solpopup: this.getValue('solpopup'),
+      withCredentials: this.getValue('withCredentials')
     };
   }
 
@@ -326,6 +338,7 @@ class WMSLayerForm extends Component {
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
+    if (fieldName === 'withCredentials') value = input.checked;
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'infoVisible') value = input.checked;
 
@@ -422,6 +435,14 @@ class WMSLayerForm extends Component {
             className={this.getValidationClass('url')}
           />
           <span onClick={(e) => { this.loadWMSCapabilities(e); }} className='btn btn-default'>Ladda {loader}</span>
+          <label className="with-credentials">
+            <input type="checkbox"
+              value={this.state.withCredentials} ref="input_withCredentials"
+              onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}            
+            />
+            <span>withCredentials (CORS)</span>
+          </label>
         </div>
         <div>
           <label>Senast ändrad</label>
@@ -554,6 +575,15 @@ class WMSLayerForm extends Component {
               }
             }
             checked={this.state.tiled}
+          />
+        </div>
+        <div>
+          <label>withCredentials (CORS)</label>
+          <input
+            type='checkbox'
+            ref='input_withCredentials2'
+            onChange={(e) => this.setState({'withCredentials': !this.state.withCredentials})}
+              checked={this.state.withCredentials}
           />
         </div>
         <div>

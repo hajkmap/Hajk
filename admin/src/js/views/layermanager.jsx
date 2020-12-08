@@ -125,6 +125,7 @@ class Manager extends Component {
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
+          withCredentials: layer.withCredentials,
           singleTile: layer.singleTile,
           projection: layer.projection,
           extent: layer.extent,
@@ -165,6 +166,7 @@ class Manager extends Component {
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
+          withCredentials: layer.withCredentials,
           projection: layer.projection,
           lineWidth: layer.lineWidth || "3",
           lineStyle: layer.lineStyle || "solid",
@@ -219,6 +221,7 @@ class Manager extends Component {
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
+          withCredentials: layer.withCredentials,
           opacity: layer.opacity,
           minResolution: layer.minResolution / 0.00028, // Convert from m/pixel
           maxResolution: layer.maxResolution / 0.00028, // Convert from m/pixel
@@ -266,6 +269,7 @@ class Manager extends Component {
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
+          withCredentials: layer.withCredentials,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
           imageFormat: layer.imageFormat,
@@ -301,6 +305,7 @@ class Manager extends Component {
           id: layer.id,
           caption: layer.caption,
           content: layer.content,
+          withCredentials: layer.withCredentials,
           date: layer.date,
           infobox: layer.infobox,
           legend: layer.legend,
@@ -335,6 +340,7 @@ class Manager extends Component {
     this.props.model.getLayerDescription(
       this.refs.input_url.value,
       layerName,
+      this.state.withCredentials,
       properties => {
         this.setState({
           layerProperties: properties,
@@ -608,6 +614,7 @@ class Manager extends Component {
             model={this.props.model}
             layer={this.state.layer}
             url={this.props.config.url_default_server}
+            parent={this}
           />
         );
       case "ExtendedWMS":
@@ -617,6 +624,7 @@ class Manager extends Component {
             model={this.props.model}
             layer={this.state.layer}
             parentView={this}
+            parent={this}
             url={this.props.config.url_default_server}
           />
         );
@@ -627,6 +635,7 @@ class Manager extends Component {
             model={this.props.model}
             layer={this.state.layer}
             url={this.props.config.url_default_server}
+            parent={this}
           />
         );
       case "WMTS":
@@ -636,6 +645,7 @@ class Manager extends Component {
             model={this.props.model}
             layer={this.state.layer}
             url={this.props.config.url_default_server}
+            parent={this}
           />
         );
       case "ArcGIS":

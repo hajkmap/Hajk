@@ -40,7 +40,8 @@ var CoordinatesModelProperties = {
   position: {
     x: undefined,
     y: undefined
-  }
+  },
+  formattedNumbers: false
 };
 
 /**

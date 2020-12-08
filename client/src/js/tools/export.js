@@ -74,6 +74,8 @@ var ExportModelProperties = {
   autoScale: false,
   instruction: '',
   scales: [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000],
+  resolutions: [72, 96, 150, 200, 300],
+  paperFormats: ["A2", "A3", "A4"],
   layout: 1 // TODO: change to 1
 };
 
@@ -343,23 +345,12 @@ var ExportModel = {
       /^\//.test(url)
         ? (window.location.protocol + '//' + window.location.host + url)
         : url;
+
     return this.get('olMap')
       .getLayers()
       .getArray()
       .filter(exportable)
       .map((layer, i) => {
-        console.log("layer", layer);
-        console.log("this", this);
-
-        // Gets the legend from the original configuration so it can be shown on the PDF in case the option has been enabled
-        var legend = "";
-        for(var i = 0; i < this.get("shell").get("layers").length; i++){
-          var layerConfig = this.get("shell").get("layers")[i];
-          if (layerConfig.id === layer.get("name")){
-            legend = layerConfig.legend;
-            break;
-          }
-        }
         return {
           url: layer.getSource().get('url'),
           layers: layer.getSource().getParams()["LAYERS"].split(','),
@@ -367,9 +358,7 @@ var ExportModel = {
           version: layer.getSource().getParams()["VERSION"],
           zIndex: i,
           workspacePrefix: null,
-          coordinateSystemId: this.get('olMap').getView().getProjection().getCode().split(':')[1],
-          legend: legend,
-          caption: layer.get("caption")
+          coordinateSystemId: this.get('olMap').getView().getProjection().getCode().split(':')[1]
         };
       });
   },

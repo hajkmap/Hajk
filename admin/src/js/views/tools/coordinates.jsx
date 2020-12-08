@@ -30,7 +30,8 @@ var defaultState = {
   index: 0,
   instruction: '',
   searchOnCoordinates: '',
-  visibleForGroups: []
+  visibleForGroups: [],
+  formattedNumbers: false
 };
 
 class ToolOptions extends Component {
@@ -55,7 +56,8 @@ class ToolOptions extends Component {
         instruction: tool.options.instruction,
         searchOnCoordinates: tool.options.searchOnCoordinates,
         transformations: tool.options.transformations || [],
-        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : [],
+        formattedNumbers: tool.options.formattedNumbers ? tool.options.formattedNumbers : false
       });
     } else {
       this.setState({
@@ -120,7 +122,8 @@ class ToolOptions extends Component {
         'instruction': this.state.instruction,
         'searchOnCoordinates': this.state.searchOnCoordinates,
         'transformations': this.state.transformations,
-        'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
+        'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim),
+        'formattedNumbers': this.state.formattedNumbers
       }
     };
 
@@ -267,6 +270,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               checked={this.state.searchOnCoordinates} />&nbsp;
           <label htmlFor='active'>activate searchOnCoordinates</label>
+        </div>
+        <div>
+          <input
+              id='formattedNumbers'
+              name='formattedNumbers'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.formattedNumbers} />&nbsp;
+          <label htmlFor='active'>Formaterade nummer</label>
         </div>
         <div>
           <label htmlFor='instruction'>Instruktion</label>

@@ -30,8 +30,6 @@ namespace MapService.Components.MapExport
         public int zIndex { get; set; }
         public string workspacePrefix { get; set; }
         public List<string> layers { get; set; }
-        public int coordinateSystemId { get; set; }  
-        public string legend { get; set; } 
-        public string caption { get; set; }
+        public int coordinateSystemId { get; set; }   
     }
 }

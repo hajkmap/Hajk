@@ -68,9 +68,8 @@ class ToolOptions extends Component {
   }
 
   componentDidMount () {
-    if (this.props.parent.props.parent.state.authActive) {
-      this.loadSearchableLayers();
-    }
+    this.loadSearchableLayers();
+
     var tool = this.getTool();
     if (tool) {
       this.setState({
@@ -158,9 +157,9 @@ class ToolOptions extends Component {
       this.setState({
         searchableLayers: layers.wfslayers
       });
-
+      
       this.setState({
-        tree: <Tree type="search" model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers} />
+        tree: <Tree type="search" model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers} authActive={this.props.parent.props.parent.state.authActive}/>
       });
     });
   }
@@ -220,10 +219,13 @@ class ToolOptions extends Component {
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
         popupOffsetY: this.state.popupOffsetY,
         visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim),
-        layers: this.state.layers ? this.state.layers : [],
         placeholder: this.state.placeholder
       }
     };
+
+    if(this.state.layers && this.state.layers.length > 0){
+      tool["options"]["layers"] = this.state.layers;
+    }
 
     var existing = this.getTool();
 

@@ -189,11 +189,11 @@ var KirSearchView = {
     renderImportKml: function () {
       function upload () {
           this.refs.firUploadIframe.addEventListener('load', () => {
-              this.props.model.importDrawLayer(this.refs.firUploadIframe.contentDocument);
+              this.props.model.get("firSelectionModel").importDrawLayer(this.refs.firUploadIframe.contentDocument);
               var element = $(kmlImport);
               element.toggle();
               this.setState({ importKMLActive: false });
-              this.props.model.setActiveTool(undefined);
+              this.props.model.get("firSelectionModel").setActiveTool(undefined);
               if(!$('#slackaBufferSokomrade').is(":checked")) {
                   $('#slackaBufferSokomrade').click();
               }

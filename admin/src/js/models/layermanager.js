@@ -54,6 +54,7 @@ var manager = Model.extend({
   },
 
   getConfig: function (url) {
+
     $.ajax(url, {
       success: data => {
         var layers = [];
@@ -81,6 +82,9 @@ var manager = Model.extend({
   },
 
   getLegend: function (state, callback) {
+    
+    const _xhrFields = state.withCredentials === true ? { withCredentials: true } : null
+
     $.ajax({
         url: state.url + '/legend',
         method: 'GET',
@@ -88,6 +92,7 @@ var manager = Model.extend({
         data: {
           f: 'json'
         },
+        xhrFields: _xhrFields,
         success: (rsp) => {
           var legends = []
           ,   addedLayers = state.addedLayers.map(layer => layer.id);
@@ -162,13 +167,17 @@ var manager = Model.extend({
       url;
   },
 
-  getWFSLayerDescription: function(url, layer, callback) {
+  getWFSLayerDescription: function(url, layer, withCredentials = false, callback) {
+    
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
+
     url = this.prepareProxyUrl(url);
     $.ajax(url, {
       data: {
         request: 'describeFeatureType',
         typename: layer
       },
+      xhrFields: _xhrFields,
       success: data => {
         var parser = new X2JS()
         ,   xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data)
@@ -262,18 +271,23 @@ var manager = Model.extend({
     return types;
   },
 
-  getWFSCapabilities: function (url, callback) {
+  getWFSCapabilities: function (url, withCredentials = false, callback) {
+
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
+
     $.ajax(this.prepareProxyUrl(url), {
       data: {
         service: 'WFS',
         request: 'GetCapabilities'
       },
+      xhrFields: _xhrFields,
       success: data => {
         var response = this.parseWFSCapabilitesTypes(data);
         if (/MapServer\/WFSServer$/.test(url)) {
           url = url.replace('/services/', '/rest/services/').replace('WFSServer', 'legend?f=pjson');
           $.ajax(this.prepareProxyUrl(url), {
             dataType: "json",
+            xhrFields: _xhrFields,
             success: (legend) => {
               if (legend && legend.layers && legend.layers[0]) {
                 if (legend.layers[0].legend[0]) {
@@ -297,7 +311,9 @@ var manager = Model.extend({
     });
   },
 
-  getArcGISLayerDescription: function(url, layer, callback) {
+  getArcGISLayerDescription: function(url, layer, withCredentials = false, callback) {
+    
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
 
     url = this.prepareProxyUrl(url);
     url += "/" + layer.id;
@@ -307,19 +323,23 @@ var manager = Model.extend({
       data: {
         f: 'json'
       },
+      xhrFields: _xhrFields,
       success: data => {
         callback(data);
       }
     });
   },
 
-  getArcGISCapabilities: function (url, callback) {
+  getArcGISCapabilities: function (url, withCredentials = false, callback) {
+    
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
 
     $.ajax(this.prepareProxyUrl(url), {
       dataType: "json",
       data: {
         f: "json"
       },
+      xhrFields: _xhrFields,
       success: data => {
         callback(data);
       },
@@ -330,9 +350,11 @@ var manager = Model.extend({
 
   },
 
-  getAllWMSCapabilities: function(url) {
-    var promises = [];
+  getAllWMSCapabilities: function(url, withCredentials = false) {
 
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
+
+    var promises = [];
     var xmlParser = new X2JS({
       attributePrefix: '',
       arrayAccessFormPaths: [
@@ -357,7 +379,8 @@ var manager = Model.extend({
             service: 'WMS',
             request: 'GetCapabilities',
             version
-          }
+          },
+          xhrFields: _xhrFields
         })
       )
     });
@@ -387,18 +410,22 @@ var manager = Model.extend({
       })
   },
 
-  getWMSCapabilities: function (url, callback) {
+  getWMSCapabilities: function (url, withCredentials = false, callback) {
+
+    const _xhrFields = withCredentials === true ? { withCredentials: true } : null
+
     $.ajax(this.prepareProxyUrl(url), {
       data: {
         service: 'WMS',
         request: 'GetCapabilities',
       },
+      xhrFields: _xhrFields,
       success: data => {
         var response = (new format.WMSCapabilities()).read(data);
         callback(response);
       },
       error: data => {
-        callback(false);
+        callback(false, data);
       }
     });
   }
