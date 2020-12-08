@@ -676,6 +676,7 @@ class LayerGroupItem extends Component {
           ) : null}
           <div>
             <LayerSettings
+              options={this.props.options}
               layer={layer}
               cqlFilterVisible={cqlFilterVisible}
               observer={this.props.model.observer}

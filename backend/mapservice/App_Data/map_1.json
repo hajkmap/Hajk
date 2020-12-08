@@ -167,6 +167,7 @@
         "height": 0,
         "title": "",
         "description": "",
+        "enableTransparencySlider": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "instruction": "",
