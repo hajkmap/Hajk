@@ -1,5 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
+import { isMobile } from "./../utils/IsMobile.js";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withTheme } from "@material-ui/styles";
@@ -70,11 +71,20 @@ class BaseWindowPlugin extends React.PureComponent {
 
   // Runs on initial render.
   componentDidMount() {
-    // visibleAtStart is false by default. Change to true only if option really is 'true'.
-    this.props.options.visibleAtStart === true &&
+    //If on a mobile, and there is a specific visibleAtStart setting for mobile, check the mobile setting.
+    //visibleAtStart is false by default. Change to true only if visibleAtStartMobile really is 'true'.
+    //Otherwise, if not on mobile, or there is no specific mobile setting, change to true only if visibleAtStart option really is 'true'.
+    if (isMobile && this.props.options.visibleAtStartMobile !== undefined) {
+      if (this.props.options.visibleAtStartMobile === true) {
+        this.setState({
+          windowVisible: true,
+        });
+      }
+    } else if (this.props.options.visibleAtStart === true) {
       this.setState({
         windowVisible: true,
       });
+    }
   }
 
   // Does not run on initial render, but runs on subsequential re-renders.
