@@ -3,6 +3,7 @@ import cslx from "clsx";
 import FeaturePropsParsing from "../../components/FeatureInfo/FeaturePropsParsing";
 import { withStyles } from "@material-ui/core/styles";
 import {
+  Checkbox,
   Table,
   TableBody,
   TableRow,
@@ -12,9 +13,7 @@ import {
   Typography,
   Tooltip,
   Grid,
-  Button,
 } from "@material-ui/core";
-import MapIcon from "@material-ui/icons/Map";
 
 const styles = () => ({
   hidden: {
@@ -31,7 +30,6 @@ const styles = () => ({
     width: "100%",
   },
   featureDisplayFieldsContainer: {
-    padding: 5,
     paddingLeft: 15,
   },
 });
@@ -218,10 +216,13 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     if (feature.geometry) {
       return (
         <Tooltip title={helpText}>
-          <Button onClick={this.handleItemTitleLinkClick}>
-            <Typography variant="srOnly">{helpText}</Typography>
-            <MapIcon color={visibleInMap ? "primary" : "disabled"} />
-          </Button>
+          <Checkbox
+            color="primary"
+            disableRipple
+            checked={visibleInMap}
+            onChange={this.handleItemTitleLinkClick}
+            inputProps={{ "aria-label": "primary checkbox" }}
+          />
         </Tooltip>
       );
     } else {

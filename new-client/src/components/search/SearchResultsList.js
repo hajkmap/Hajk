@@ -59,6 +59,7 @@ class SearchResultsList extends React.PureComponent {
       app,
       classes,
       handleFeatureCollectionSelected,
+      showDetailedView,
     } = this.props;
 
     const featureCollectionsContainingFeatures = featureCollections.filter(
@@ -90,6 +91,7 @@ class SearchResultsList extends React.PureComponent {
                     handleFeatureCollectionSelected
                   }
                   expanded={featureCollectionsContainingFeatures.length === 1}
+                  showDetailedView={showDetailedView}
                 />
               </Grid>
             )

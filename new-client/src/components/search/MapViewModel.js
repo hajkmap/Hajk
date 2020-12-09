@@ -185,12 +185,12 @@ class MapViewModel {
   };
 
   toggleDraw = (active, type, freehand = false) => {
-    this.localObserver.publish("on-draw-start");
+    this.localObserver.publish("on-draw-start", type);
     if (active) {
       this.draw = new Draw({
         source: this.drawSource,
         type: type,
-        freehand: freehand,
+        freehand: type === "Circle" ? true : freehand,
         stopClick: true,
         style: drawStyle,
       });

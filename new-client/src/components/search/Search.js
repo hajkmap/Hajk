@@ -1,6 +1,7 @@
 import React from "react";
 import SearchBar from "./SearchBar";
 import { withStyles } from "@material-ui/core/styles";
+import { withSnackbar } from "notistack";
 import Observer from "react-event-observer";
 import EditIcon from "@material-ui/icons/Edit";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
@@ -65,6 +66,8 @@ class Search extends React.PureComponent {
   featuresToFilter = [];
   localObserver = Observer();
 
+  snackbarKey = null;
+
   constructor(props) {
     super(props);
     this.map = props.map;
@@ -93,10 +96,26 @@ class Search extends React.PureComponent {
 
   bindSubscriptions = () => {
     this.localObserver.subscribe("on-draw-end", (feature) => {
+      this.props.closeSnackbar(this.snackbarKey);
       this.setFeaturesToFilter([feature]);
       this.doSearch();
     });
-    this.localObserver.subscribe("on-draw-start", () => {
+    this.localObserver.subscribe("on-draw-start", (type) => {
+      if (type === "Circle") {
+        this.props.enqueueSnackbar(
+          "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp.",
+          {
+            variant: "information",
+          }
+        );
+      } else if (type === "Polygon") {
+        this.props.enqueueSnackbar(
+          "Tryck en gång i kartan för varje nod i polygonen.",
+          {
+            variant: "information",
+          }
+        );
+      }
       this.setState({ searchActive: "draw" });
     });
   };
@@ -670,4 +689,4 @@ class Search extends React.PureComponent {
     );
   }
 }
-export default withStyles(styles)(Search);
+export default withStyles(styles)(withSnackbar(Search));

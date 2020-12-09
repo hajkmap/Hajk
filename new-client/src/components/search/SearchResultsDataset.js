@@ -19,15 +19,13 @@ const styles = (theme) => ({
     overflow: "hidden",
   },
   divider: {
-    backgroundColor: "#00000073",
+    backgroundColor: theme.palette.divider,
     width: "100%",
   },
   datasetDetailsContainer: {
     padding: 0,
   },
   datasetTable: {
-    paddingLeft: theme.spacing(1),
-    paddingRight: theme.spacing(1),
     cursor: "pointer",
     "&:hover": {
       backgroundColor: theme.palette.action.hover,
@@ -35,25 +33,20 @@ const styles = (theme) => ({
   },
 });
 
-const TightAccordion = withStyles({
-  root: {
-    borderTop: "2px solid #dedede",
-  },
-})(Accordion);
-
-const TightAccordionDetails = withStyles({
+const TightAccordionDetails = withStyles((theme) => ({
   root: {
     padding: 0,
-    borderTop: "2px solid #dedede",
+    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
     boxShadow: "none",
     "&:before": {
       display: "none",
     },
   },
-})(AccordionDetails);
+}))(AccordionDetails);
 
 const TightAccordionSummary = withStyles((theme) => ({
   root: {
+    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
     cursor: "pointer",
     "&:hover": {
       backgroundColor: theme.palette.action.hover,
@@ -63,6 +56,7 @@ const TightAccordionSummary = withStyles((theme) => ({
     "&$expanded": {
       padding: "0px 10px",
       minHeight: 36,
+      backgroundColor: theme.palette.action.selected,
     },
   },
   content: {
@@ -163,38 +157,62 @@ class SearchResultsDataset extends React.PureComponent {
     );
   };
 
-  renderDatasetSummary = () => {
+  renderDetailsHeader = () => {
+    const { featureCollection } = this.props;
+    return (
+      <Grid alignItems="center" container>
+        <Grid item xs={12}>
+          <Typography variant="button">
+            {featureCollection.source.caption}
+          </Typography>
+        </Grid>
+      </Grid>
+    );
+  };
+
+  renderListHeader = () => {
     const { numberOfResultsToDisplay } = this.state;
+
     const { featureCollection, getOriginBasedIcon } = this.props;
     const { numberReturned, numberMatched, features } = featureCollection.value;
     const toolTipTitle = numberReturned
       ? `Visar ${numberReturned} av ${numberMatched} resultat`
       : `Visar ${features.length} resultat`;
     return (
+      <Grid alignItems="center" container>
+        <Grid item xs={1}>
+          {getOriginBasedIcon(featureCollection.origin)}
+        </Grid>
+        <Grid item xs={9}>
+          <Typography variant="button">
+            {featureCollection.source.caption}
+          </Typography>
+        </Grid>
+        <Grid container item justify="flex-end" xs={2}>
+          <Tooltip title={toolTipTitle}>
+            <Chip
+              size="small"
+              color="default"
+              label={numberOfResultsToDisplay}
+            />
+          </Tooltip>
+        </Grid>
+      </Grid>
+    );
+  };
+
+  renderDatasetSummary = () => {
+    const { showDetailedView, featureCollection } = this.props;
+
+    return (
       <TightAccordionSummary
         id={`search-result-dataset-${featureCollection.source.id}`}
         aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
         //expandIcon={<ExpandMoreIcon />}
       >
-        <Grid alignItems="center" container>
-          <Grid item xs={1}>
-            {getOriginBasedIcon(featureCollection.origin)}
-          </Grid>
-          <Grid item xs={9}>
-            <Typography variant="button">
-              {featureCollection.source.caption}
-            </Typography>
-          </Grid>
-          <Grid container item justify="flex-end" xs={2}>
-            <Tooltip title={toolTipTitle}>
-              <Chip
-                size="small"
-                color="default"
-                label={numberOfResultsToDisplay}
-              />
-            </Tooltip>
-          </Grid>
-        </Grid>
+        {showDetailedView
+          ? this.renderDetailsHeader()
+          : this.renderListHeader()}
       </TightAccordionSummary>
     );
   };
@@ -208,7 +226,7 @@ class SearchResultsDataset extends React.PureComponent {
     } = this.props;
     return (
       <>
-        <TightAccordion
+        <Accordion
           className={classes.datasetContainer}
           square
           expanded={expanded}
@@ -220,7 +238,7 @@ class SearchResultsDataset extends React.PureComponent {
         >
           {this.renderDatasetSummary()}
           {this.renderDatasetDetails()}
-        </TightAccordion>
+        </Accordion>
       </>
     );
   };

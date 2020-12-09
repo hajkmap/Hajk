@@ -169,6 +169,7 @@ class SearchResultsContainer extends React.PureComponent {
     const featureCollections = activeFeatureCollection
       ? [activeFeatureCollection]
       : this.props.featureCollections;
+    const showDetailedView = featureCollections.length === 1 ? true : false;
 
     return (
       <>
@@ -205,6 +206,7 @@ class SearchResultsContainer extends React.PureComponent {
                   handleFeatureCollectionSelected={
                     this.handleFeatureCollectionSelected
                   }
+                  showDetailedView={showDetailedView}
                 />
               </TightAccordionDetails>
             </TightAccordion>
