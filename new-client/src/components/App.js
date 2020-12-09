@@ -5,7 +5,7 @@ import { withStyles } from "@material-ui/core/styles";
 import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
-import { getIsMobile } from "./../utils/IsMobile.js";
+import { isMobile } from "./../utils/IsMobile";
 
 import AppModel from "./../models/AppModel.js";
 
@@ -215,8 +215,7 @@ class App extends React.PureComponent {
       //Finally, don't show the drawer.
 
       drawerVisible:
-        getIsMobile() &&
-        props.config.mapConfig.map.drawerVisibleMobile !== undefined
+        isMobile && props.config.mapConfig.map.drawerVisibleMobile !== undefined
           ? props.config.mapConfig.map.drawerVisibleMobile
           : drawerPermanentFromLocalStorage !== null
           ? drawerPermanentFromLocalStorage
@@ -227,7 +226,7 @@ class App extends React.PureComponent {
       // If cookie is not null, use it to show/hide Drawer.
       // If cookie however is null, fall back to the values from config.
       // Finally, fall back to "false" if no cookie or config is found.
-      drawerPermanent: getIsMobile()
+      drawerPermanent: isMobile
         ? false
         : drawerPermanentFromLocalStorage !== null
         ? drawerPermanentFromLocalStorage
