@@ -60,13 +60,13 @@ const TightAccordionDetails = withStyles({
   },
 })(AccordionDetails);
 
-const TightAccordion = withStyles({
+const TightAccordion = withStyles((theme) => ({
   root: {
     "&:last-child": {
-      borderBottom: "2px solid #dedede",
+      borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
     },
   },
-})(Accordion);
+}))(Accordion);
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
