@@ -74,7 +74,10 @@ class SearchResultsContainer extends React.PureComponent {
     sumOfResults: this.props.searchResults.featureCollections
       .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
-    activeFeatureCollection: undefined,
+    activeFeatureCollection:
+      this.props.featureCollections.length === 1
+        ? this.props.featureCollections[0]
+        : undefined,
   };
 
   componentDidMount = () => {
@@ -113,9 +116,8 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderLeftHeaderInfo = () => {
     const { sumOfResults, activeFeatureCollection, expanded } = this.state;
-    const { featureCollections } = this.props;
 
-    if (!activeFeatureCollection || featureCollections.length === 1) {
+    if (!activeFeatureCollection) {
       return <Typography>{`Visar ${sumOfResults} träffar`}</Typography>;
     } else if (activeFeatureCollection && expanded) {
       return (
@@ -169,7 +171,7 @@ class SearchResultsContainer extends React.PureComponent {
     const featureCollections = activeFeatureCollection
       ? [activeFeatureCollection]
       : this.props.featureCollections;
-    const showDetailedView = featureCollections.length === 1 ? true : false;
+    const showDetailedView = activeFeatureCollection ? true : false;
 
     return (
       <>

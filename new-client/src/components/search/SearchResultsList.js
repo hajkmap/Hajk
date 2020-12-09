@@ -90,7 +90,7 @@ class SearchResultsList extends React.PureComponent {
                   handleFeatureCollectionSelected={
                     handleFeatureCollectionSelected
                   }
-                  expanded={featureCollectionsContainingFeatures.length === 1}
+                  expanded={showDetailedView}
                   showDetailedView={showDetailedView}
                 />
               </Grid>
