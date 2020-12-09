@@ -79,6 +79,7 @@
         ],
         "active": true,
         "visibleAtStart": true,
+        "visibleAtStartMobile": false,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
         "enableOSM": true,
@@ -360,6 +361,7 @@
     "mapcleaner": true,
     "drawerVisible": true,
     "drawerPermanent": true,
+    "drawerVisibleMobile": false,
     "activeDrawerOnStart": "plugins",
     "colors": {
       "primaryColor": "#333333",
