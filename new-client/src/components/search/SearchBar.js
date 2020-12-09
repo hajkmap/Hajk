@@ -8,6 +8,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import RoomIcon from "@material-ui/icons/Room";
 import DescriptionIcon from "@material-ui/icons/Description";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import WarningIcon from "@material-ui/icons/Warning";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import SearchResultsContainer from "./SearchResultsContainer";
 import SearchTools from "./SearchTools";
@@ -22,6 +23,7 @@ import {
   FormHelperText,
   useMediaQuery,
   Popper,
+  Tooltip,
 } from "@material-ui/core";
 
 const styles = (theme) => ({
@@ -243,6 +245,31 @@ class SearchBar extends React.PureComponent {
     );
   };
 
+  getPotentialWFSErrorMessage = () => {
+    const { searchResults } = this.props;
+    return searchResults.errors.length === 0
+      ? ``
+      : `OBS: Följande WFS:er svarar inte: `.concat(
+          searchResults.errors
+            .map((error, index) => {
+              return index === searchResults.errors.length - 1
+                ? error.source.caption
+                : `${error.source.caption}, `;
+            })
+            .join("")
+        );
+  };
+
+  renderFailedWFSFetchWarning = (errorMessage) => {
+    return (
+      <Tooltip title={errorMessage}>
+        <WarningIcon color="error">
+          <Typography variant="srOnly">{errorMessage}</Typography>
+        </WarningIcon>
+      </Tooltip>
+    );
+  };
+
   renderAutoCompleteInputField = (params) => {
     const {
       searchString,
@@ -262,6 +289,7 @@ class SearchBar extends React.PureComponent {
       setSearchSources,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
+    const failedWFSFetchMessage = this.getPotentialWFSErrorMessage();
     return (
       <TextField
         {...params}
@@ -276,6 +304,8 @@ class SearchBar extends React.PureComponent {
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}
               {params.InputProps.endAdornment}
+              {failedWFSFetchMessage.length > 0 &&
+                this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
               <IconButton size="small" onClick={handleOnClickOrKeyboardSearch}>
                 <Typography variant="srOnly">Exekvera sökning</Typography>
                 <SearchIcon />
