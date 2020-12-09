@@ -137,11 +137,14 @@ var KirSearchView = {
 
       this.setState({ searchInProgress: true });
       this.props.model.set("kirExcelReportIsReady", false);
+
+      const _xhrFields = wfslayer.withCredentials === true ? { withCredentials: true } : null
+
       $.ajax({
         url: wfslayer.url,
         method: 'POST',
         contentType: 'application/xml',
-        xhrFields: { withCredentials: true },
+        xhrFields: _xhrFields,
         data: new XMLSerializer().serializeToString(featureRequest),
         success: function(response) {
           var features = wfslayer.outputFormat === "GML3" ?

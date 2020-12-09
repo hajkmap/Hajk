@@ -509,11 +509,13 @@ var KirModel = {
         var contentType = 'text/xml',
             data = str;
 
+        const _xhrFields = props.withCredentials === true ? { withCredentials: true } : null
 
         this.requests.push(
             $.ajax({
                 url: props.url,
                 contentType: contentType,
+                xhrFields: _xhrFields,
                 crossDomain: true,
                 type: 'post',
                 data: str,
@@ -942,6 +944,7 @@ var KirModel = {
                             geometryField: searchProps.geometryField,
                             enableFilter: true,
                             exaktMatching: this.get("exaktMatching"),
+                            withCredentials: searchProps.withCredentials,
                             done: features => {
                                 if (features.length > 0) {
                                     features.forEach(feature => {
@@ -1005,7 +1008,8 @@ var KirModel = {
                     srsName: this.get('map').getView().getProjection().getCode(),
                     outputFormat: layer.get('searchOutputFormat'),
                     geometryField: layer.get('searchGeometryField'),
-                    omradeField: layer.get(this.get("realEstateLayer").omradeField)
+                    omradeField: layer.get(this.get("realEstateLayer").omradeField),
+                    withCredentials: layer.get('withCredentials')
                 };
                 addRequest.call(this, searchProps);
             });
@@ -1022,7 +1026,8 @@ var KirModel = {
                 displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || 'Sökträff'),
                 srsName: this.get('map').getView().getProjection().getCode(),
                 outputFormat: source.outputFormat,
-                geometryField: source.geometryField
+                geometryField: source.geometryField,
+                withCredentials: source.withCredentials
             };
             addRequest.call(this, searchProps);
         });
@@ -1067,7 +1072,8 @@ var KirModel = {
                 displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || 'Sökträff'),
                 srsName: this.get('map').getView().getProjection().getCode(),
                 outputFormat: source.outputFormat,
-                geometryField: source.geometryField
+                geometryField: source.geometryField,
+                withCredentials: searchProps.withCredentials
             };
 
             var sameNameFilter = "";
@@ -1112,6 +1118,7 @@ var KirModel = {
                     enableFilter: false,
                     exaktMatching: true,
                     sameNameFilter: sameNameFilter,
+                    withCredentials: searchProps.withCredentials,
                     done: features => {
                         if (features.length > 0) {
                             features.forEach(feature => {
@@ -1169,7 +1176,8 @@ var KirModel = {
                     displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || 'Sökträff'),
                     srsName: this.get('map').getView().getProjection().getCode(),
                     outputFormat: source.outputFormat,
-                    geometryField: source.geometryField
+                    geometryField: source.geometryField,
+                    withCredentials: source.withCredentials
                 };
 
                 var sameNameFilter = "";
@@ -1204,6 +1212,7 @@ var KirModel = {
                         enableFilter: false,
                         exaktMatching: true,
                         sameNameFilter: sameNameFilter,
+                        withCredentials: searchProps.withCredentials,
                         done: features => {
                             if (features.length > 0) {
                                 features.forEach(feature => {
@@ -1260,7 +1269,8 @@ var KirModel = {
                 displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || 'Sökträff'),
                 srsName: this.get('map').getView().getProjection().getCode(),
                 outputFormat: source.outputFormat,
-                geometryField: source.geometryField
+                geometryField: source.geometryField,
+                withCredentials: source.withCredentials
             };
 
             if (value === '' && features.length === 0) return;
@@ -1276,6 +1286,7 @@ var KirModel = {
                     geometryField: searchProps.geometryField,
                     enableFilter: true,
                     exaktMatching: this.get("exaktMatching"),
+                    withCredentials: searchProps.withCredentials,
                     done: features => {
                         var keys = [];
                         if (features.length > 0) {
