@@ -62,6 +62,7 @@
     "detect-browser": "^5.1.1",
     "element-scroll-polyfill": "^1.0.1",
     "elm-pep": "^1.0.6",
+    "file-saver": "^2.0.2",
     "html2json": "^1.0.2",
     "intro.js": "^2.9.3",
     "intro.js-react": "^0.2.0",
