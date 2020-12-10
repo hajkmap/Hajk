@@ -208,14 +208,15 @@ class PanelMenuView extends React.PureComponent {
 
   render() {
     const { localObserver, app, options } = this.props;
+    const { expandedIndex, coloredIndex, selectedIndex } = this.state;
     return (
       <PanelList
         localObserver={localObserver}
         handleExpandClick={this.handleExpandClick}
         setActiveMenuItems={this.setActiveMenuItems}
-        expandedIndex={this.state.expandedIndex}
-        coloredIndex={this.state.coloredIndex}
-        selectedIndex={this.state.selectedIndex}
+        expandedIndex={expandedIndex}
+        coloredIndex={coloredIndex}
+        selectedIndex={selectedIndex}
         globalObserver={app.globalObserver}
         menu={options.menuConfig.menu}
       ></PanelList>

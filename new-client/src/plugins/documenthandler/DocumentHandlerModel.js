@@ -181,7 +181,9 @@ export default class DocumentHandlerModel {
       );
       const text = await response.text();
       if (text === "File not found") {
-        throw new Error("File not found");
+        throw new Error(
+          `Could not find document with title ${title} in folder with documents`
+        );
       }
       const document = await JSON.parse(text);
       this.internalId = 0;

@@ -1,25 +1,18 @@
 import React from "react";
-import { ThemeProvider, withStyles } from "@material-ui/core/styles";
+import { ThemeProvider } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
 import PrintWindow from "../printMenu/PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
-import Grid from "@material-ui/core/Grid";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
 import PrintIcon from "@material-ui/icons/Print";
 
-const styles = (theme) => ({});
-
 class DocumentWindowBase extends React.PureComponent {
-  static propTypes = {};
-
-  static defaultProps = {};
-
   findMenuItem(menuItem, documentNameToFind) {
     if (menuItem.document === documentNameToFind) {
       return menuItem;
-    } else if (menuItem.menu && menuItem.menu.length > 0) {
+    } else if (this.hasSubMenu(menuItem)) {
       let i,
         result = null;
       for (i = 0; result == null && i < menuItem.menu.length; i++) {
@@ -29,6 +22,10 @@ class DocumentWindowBase extends React.PureComponent {
     }
     return null;
   }
+
+  hasSubMenu = (menuItem) => {
+    return menuItem.menu && menuItem.menu.length > 0;
+  };
 
   findReferringMenuItem = (documentNameToFind) => {
     const { options } = this.props;
@@ -43,28 +40,30 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   shouldShowDocumentOnStart = () => {
-    return this.props.options.documentOnStart ? true : false;
+    const { options } = this.props;
+    return options.documentOnStart ? true : false;
   };
 
   scrollInDocument = (headerIdentifier) => {
-    const { localObserver, model } = this.props;
+    const { localObserver, model, document } = this.props;
 
     if (headerIdentifier) {
       localObserver.publish(
         "scroll-to-chapter",
-        model.getHeaderRef(this.props.document, headerIdentifier)
+        model.getHeaderRef(document, headerIdentifier)
       );
     } else {
       localObserver.publish(
         "scroll-to-top",
-        model.getHeaderRef(this.props.document, headerIdentifier)
+        model.getHeaderRef(document, headerIdentifier)
       );
     }
   };
 
   showHeaderInDocument = ({ documentName, headerIdentifier }) => {
+    const { documentTitle } = this.props;
     if (documentName) {
-      if (documentName !== this.props.documentTitle) {
+      if (documentName !== documentTitle) {
         this.props.showDocument(documentName).then(() => {
           this.scrollInDocument(headerIdentifier);
         });
@@ -200,7 +199,6 @@ class DocumentWindowBase extends React.PureComponent {
       options,
       chapters,
       localObserver,
-      classes,
       documentWindowMaximized,
       document,
       documentTitle,
@@ -253,6 +251,7 @@ class DocumentWindowBase extends React.PureComponent {
             )
           ) : (
             <PrintWindow
+              customTheme={customTheme}
               chapters={chapters}
               activeDocument={document}
               documentWindowMaximized={documentWindowMaximized}
@@ -262,19 +261,11 @@ class DocumentWindowBase extends React.PureComponent {
             />
           )
         ) : (
-          <Grid
-            style={{ height: "100%" }}
-            className={classes.loader}
-            alignItems="center"
-            justify="center"
-            container
-          >
-            <CircularProgress style={{ height: "100%" }} justify="center" />
-          </Grid>
+          <Progress />
         )}
       </BaseWindowPlugin>
     );
   }
 }
 
-export default withStyles(styles)(DocumentWindowBase);
+export default DocumentWindowBase;

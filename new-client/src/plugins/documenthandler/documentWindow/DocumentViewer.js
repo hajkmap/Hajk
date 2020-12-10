@@ -1,6 +1,5 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import Fab from "@material-ui/core/Fab";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
@@ -18,6 +17,7 @@ const styles = (theme) => ({
     outline: "none",
     //scrollBehavior: "smooth",
   },
+
   contentContainer: {
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(2),
@@ -105,6 +105,9 @@ class DocumentViewer extends React.PureComponent {
   componentDidUpdate = (prevProps) => {
     if (prevProps.activeDocument !== this.props.activeDocument) {
       this.scrollToTop();
+      this.setState({
+        expandedTableOfContents: expandedTocOnStart(this.props),
+      });
     }
   };
 
@@ -267,4 +270,4 @@ class DocumentViewer extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(DocumentViewer));
+export default withStyles(styles)(DocumentViewer);

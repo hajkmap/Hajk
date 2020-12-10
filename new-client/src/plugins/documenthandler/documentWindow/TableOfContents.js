@@ -144,13 +144,9 @@ class TableOfContents extends React.PureComponent {
     } = this.props;
 
     return (
-      <Grid
-        role="button"
-        onClick={toggleCollapse}
-        className={classes.tableOfContents}
-        container
-      >
+      <Grid role="button" className={classes.tableOfContents} container>
         <Grid
+          onClick={toggleCollapse}
           xs={12}
           alignItems="center"
           justify="space-between"
