@@ -364,11 +364,11 @@ class Search extends React.PureComponent {
     feature.searchFieldOrder.map((sf, index) => {
       if (index === feature.searchFieldOrder.length - 1) {
         return (autocompleteEntry = autocompleteEntry.concat(
-          feature.properties[sf]
+          encodeURIComponent(feature.properties[sf])
         ));
       } else {
         return (autocompleteEntry = autocompleteEntry.concat(
-          `${feature.properties[sf]}, `
+          `${encodeURIComponent(feature.properties[sf])}, `
         ));
       }
     });

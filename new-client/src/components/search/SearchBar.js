@@ -216,7 +216,7 @@ class SearchBar extends React.PureComponent {
         clearOnEscape
         disabled={searchActive === "draw"}
         autoComplete
-        value={searchString}
+        value={decodeURIComponent(searchString)}
         selectOnFocus
         open={autoCompleteOpen}
         disableClearable
@@ -230,14 +230,21 @@ class SearchBar extends React.PureComponent {
             return (
               <>
                 {this.getOriginBasedIcon(option.origin)}
-                {this.getHighlightedACE(searchString, option.autocompleteEntry)}
+                {this.getHighlightedACE(
+                  searchString,
+                  decodeURIComponent(option.autocompleteEntry)
+                )}
 
                 <FormHelperText>{option.dataset}</FormHelperText>
               </>
             );
           }
         }}
-        getOptionLabel={(option) => option?.autocompleteEntry || option}
+        getOptionLabel={(option) => {
+          return option?.autocompleteEntry?.length > 0
+            ? decodeURIComponent(option?.autocompleteEntry)
+            : option;
+        }}
         options={autocompleteList}
         loading={loading}
         renderInput={this.renderAutoCompleteInputField}

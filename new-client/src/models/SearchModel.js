@@ -258,8 +258,12 @@ class SearchModel {
     return word;
   };
 
-  test = (word) => {
-    return this.escapeSpecialChars(word);
+  #decodePotentialCommasFromFeatureProps = (searchCombinations) => {
+    return searchCombinations.map((combination) => {
+      return combination.map((word) => {
+        return decodeURIComponent(word);
+      });
+    });
   };
 
   #lookup = (searchString, searchSource, searchOptions) => {
@@ -283,6 +287,10 @@ class SearchModel {
           this.#splitAndTrimOnCommas(searchString)
         );
       }
+
+      possibleSearchCombinations = this.#decodePotentialCommasFromFeatureProps(
+        possibleSearchCombinations
+      );
 
       let searchFilters = possibleSearchCombinations.map((combination) => {
         let searchWordsForCombination = combination.map((wordInCombination) => {
