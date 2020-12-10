@@ -106,8 +106,8 @@ class WMTSLayerForm extends Component {
   }
 
   loadLegendIcon(e) {
-    $("#select-image").attr("caller", "legendIcon");
-    $("#select-image").trigger("click");
+    $("#select-legend-icon").attr("caller", "select-legend-icon");
+    $("#select-legend-icon").trigger("click");
   }
 
   getLayer() {

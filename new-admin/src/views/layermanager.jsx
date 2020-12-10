@@ -604,10 +604,10 @@ class Manager extends Component {
   }
 
   uploadLegend(callback, type) {
-    $("#upload-form").submit();
-    this.refs.uploadIframe.addEventListener("load", () => {
-      console.log(this.refs.uploadIframe, "this.refs.uploadIframe");
-      if (this.refs.uploadIframe.contentDocument) {
+    $(`#${type}-form`).submit();
+    this.refs[`${type}Iframe`].addEventListener("load", () => {
+      console.log(this.refs[`${type}Iframe`], "this.refs.uploadIframe");
+      if (this.refs[`${type}Iframe`].contentDocument) {
         if (!window.location.origin) {
           window.location.origin =
             window.location.protocol +
@@ -616,7 +616,9 @@ class Manager extends Component {
             (window.location.port ? ":" + window.location.port : "");
         }
 
-        var node = $(this.refs.uploadIframe.contentDocument).find("body")[0],
+        var node = $(this.refs[`${type}Iframe`].contentDocument).find(
+            "body"
+          )[0],
           url = node.innerHTML,
           a = $(`<a href="${url}"">temp</a>`),
           b = a[0].href;
@@ -732,44 +734,50 @@ class Manager extends Component {
           <ul className="config-layer-list">{this.renderLayersFromConfig()}</ul>
         </aside>
         <article>
-          <form
-            id="upload-form"
-            method="post"
-            action={url}
-            encType="multipart/form-data"
-            target="upload-iframe"
-          >
-            <input
-              style={{
-                opacity: 0,
-                position: "absolute",
-                width: "auto",
-                height: "100%",
-                padding: 0,
-                top: "-500px",
-              }}
-              id="select-image"
-              type="file"
-              multiple={false}
-              name="files[]"
-              onChange={(e) => {
-                const caller = e.currentTarget.getAttribute("caller");
-                if (caller) {
-                  this.uploadLegend(e, caller);
-                } else {
-                  //DEFAULT
-                  this.uploadLegend(e, "legend");
-                }
-              }}
-            />
-            <iframe
-              id="upload-iframe"
-              name="upload-iframe"
-              ref="uploadIframe"
-              style={{ display: "none" }}
-              title="upload-iframe"
-            />
-          </form>
+          {[
+            "select-layers-info-legend-icon",
+            "select-image",
+            "select-legend-icon",
+          ].map((type) => {
+            return (
+              <form
+                id={`${type}-form`}
+                method="post"
+                action={url}
+                encType="multipart/form-data"
+                target={`${type}-iframe`}
+              >
+                <input
+                  style={{
+                    opacity: 0,
+                    position: "absolute",
+                    width: "auto",
+                    height: "100%",
+                    padding: 0,
+                    top: "-500px",
+                  }}
+                  id={type}
+                  type="file"
+                  multiple={false}
+                  name="files[]"
+                  onChange={(e) => {
+                    const caller = e.currentTarget.getAttribute("caller");
+                    if (caller) {
+                      this.uploadLegend(e, caller);
+                    }
+                  }}
+                />
+                <iframe
+                  id={`${type}-iframe`}
+                  name={`${type}-iframe`}
+                  ref={`${type}Iframe`}
+                  style={{ display: "none" }}
+                  title={`${type}-iframe`}
+                />
+              </form>
+            );
+          })}
+
           <form
             method="post"
             action=""

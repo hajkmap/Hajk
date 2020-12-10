@@ -140,18 +140,21 @@ class WMSLayerForm extends Component {
   }
 
   loadLegend(e) {
-    $("#select-image").attr("caller", "legend");
+    $("#select-image").attr("caller", "select-image");
     $("#select-image").trigger("click");
   }
 
   loadLegendIcon(e) {
-    $("#select-image").attr("caller", "legendIcon");
-    $("#select-image").trigger("click");
+    $("#select-legend-icon").attr("caller", "select-legend-icon");
+    $("#select-legend-icon").trigger("click");
   }
 
   loadLayersInfoLegendIcon(e) {
-    $("#select-image").attr("caller", "layersInfoLegendIcon");
-    $("#select-image").trigger("click");
+    $("#select-layers-info-legend-icon").attr(
+      "caller",
+      "select-layers-info-legend-icon"
+    );
+    $("#select-layers-info-legend-icon").trigger("click");
   }
 
   renderLayerList() {
