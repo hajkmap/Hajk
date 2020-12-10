@@ -166,7 +166,7 @@ export default class ExpressServer {
   listen(port = process.env.PORT) {
     const welcome = (p) => () =>
       logger.info(
-        `Server startup completed. Hajk backend is up and running on http://localhost:${p}`
+        `Server startup completed. Launched on port ${p}. (http://localhost:${p})`
       );
 
     oas(app, this.routes)

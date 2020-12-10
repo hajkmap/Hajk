@@ -491,7 +491,7 @@ class ActiveDirectoryService {
         groups
       ) {
         if (err) {
-          reject(err);
+          return reject(err);
         }
 
         if (!groups)
@@ -508,42 +508,26 @@ class ActiveDirectoryService {
       // Else, lookup and add answer to adStore
       this._ad.findUser(sAMAccountName, function (err, u) {
         if (err) {
-          reject(err);
+          return reject(err);
         }
+
         if (!u)
           reject(new ActiveDirectoryError(`User ${sAMAccountName} not found.`));
-        resolve(u);
+        else resolve(u);
       });
     });
   }
-
-  // Not needed, as we have another implementation that doesn't use the AD-method
-  // _isUserMemberOf(user, group) {
-  //   return new Promise((resolve, reject) => {
-  //     // First check in this.adStore and easily resolve if found
-  //     // resolve(true|false)
-
-  //     // Else, lookup and add answer to adStore
-  //     this._ad.isUserMemberOf(user, group, (err, isMember) => {
-  //       if (err) {
-  //         reject(err);
-  //       }
-
-  //       log.trace("isMember: ", isMember);
-  //       resolve(isMember);
-  //     });
-  //   });
-  // }
 
   _findGroups(query = "CN=*") {
     return new Promise((resolve, reject) => {
       // Else, lookup and add answer to adStore
       this._ad.findGroups(query, function (err, g) {
         if (err) {
-          reject(err);
+          return reject(err);
         }
+
         if (!g) reject(new ActiveDirectoryError(`Couldn't retrieve groups.`));
-        resolve(g);
+        else resolve(g);
       });
     });
   }

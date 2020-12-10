@@ -267,7 +267,7 @@ class ConfigService {
       // First, ensure that we have a valid user name. This is necessary for AD lookups.
       if ((await ad.isUserValid(user)) !== true) {
         const e = new Error(
-          "[getLayersStore] AD authentication is active, but no valid user name was supplied. Cannot continue."
+          "[getLayersStore] AD authentication is active, but supplied user name could not be validated. Please check logs for any errors regarding connectivity problems with ActiveDirectory."
         );
         logger.error(e.message);
         throw e;
