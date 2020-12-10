@@ -7,14 +7,13 @@ import {
   getDefaultKeyBinding,
   KeyBindingUtil,
   convertToRaw,
-  ContentBlock
+  SelectionState
 } from "draft-js";
 import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
+import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
 import { stateFromHTML } from "draft-js-import-html";
-import Button from "@material-ui/core/Button";
-import { withStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
@@ -27,25 +26,9 @@ import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
 
 import addLinkPlugin from "./addLinkPlugin";
-
 import StyleButton from "./StyleButton";
 import ImageComponent from "./ImageComponent";
-
-import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
-
 import insertNewLine from "../utils/insertNewLine";
-
-const ColorButtonGreen = withStyles(theme => ({
-  root: {
-    color: theme.palette.getContrastText(green[700]),
-    backgroundColor: green[500],
-    "&:hover": {
-      backgroundColor: green[700]
-    },
-    marginRight: "28px",
-    float: "left"
-  }
-}))(Button);
 
 export default class DocumentTextEditor extends React.Component {
   constructor(props) {
@@ -70,6 +53,7 @@ export default class DocumentTextEditor extends React.Component {
     this.focus = () => this.refs.editor.focus();
     this.logState = () => {
       const content = this.state.editorState.getCurrentContent();
+      console.log("HTML", this.props.html);
       console.log(stateToHTML(content));
       console.log(convertToRaw(content));
     };
@@ -407,28 +391,23 @@ export default class DocumentTextEditor extends React.Component {
 
     return true;
   };
-
   _blockRenderer(block, { getEditorState }) {
     let blockType = block.getType();
+    const { editorState } = this.state;
+    const contentState = getEditorState().getCurrentContent();
 
     if (blockType === "atomic") {
-      const { editorState } = this.state;
-      const contentState = getEditorState().getCurrentContent();
       const entityKey = contentState.getEntity(block.getEntityAt(0));
       const type = entityKey.getType().toLowerCase();
 
       if (type === "image") {
         const selection = editorState.getSelection();
-        const anchorKey = selection.getAnchorKey();
-        const blocks = contentState.getBlocksAsArray();
-        const contentBlock = blocks.find(b => b.getKey() === anchorKey);
 
         const contentBlockKey = block.getKey();
 
         return {
           component: ImageComponent,
           editable: true,
-          //editable: false,
           props: {
             readOnlyMode: this.toggleReadOnly,
             currentImage: img => this.setState({ currentImage: img }),
@@ -473,15 +452,37 @@ export default class DocumentTextEditor extends React.Component {
   }
 
   updateSelectedImageData(anchorKey, editorState, data) {
-    const selection = editorState.getSelection();
-    if (anchorKey !== selection.getFocusKey()) {
+    let selection = this.state.editorState.getSelection();
+
+    const updateSelection = new SelectionState({
+      anchorKey: anchorKey,
+      anchorOffset: selection.anchorOffset,
+      focusKey: anchorKey,
+      focusOffset: selection.focusOffset,
+      isBackward: false
+    });
+    let newEditorState = EditorState.acceptSelection(
+      editorState,
+      updateSelection
+    );
+
+    this.setState({
+      editorState: newEditorState
+    });
+
+    let newSelection = newEditorState.getSelection();
+
+    if (anchorKey !== newSelection.getFocusKey()) {
       return editorState;
     }
+
     const contentState = editorState.getCurrentContent();
     const contentBlock = contentState.getBlockForKey(anchorKey);
-    if (contentBlock && contentBlock.getType() === "atomic") {
+
+    if (contentBlock && contentBlock.getType().toLowerCase() === "atomic") {
       const entityKey = contentBlock.getEntityAt(0);
       const entity = contentState.getEntity(entityKey);
+
       if (entity && entity.getType().toUpperCase() === "IMAGE") {
         const newContentState = contentState.mergeEntityData(entityKey, data);
         return EditorState.push(editorState, newContentState, "apply-entity");
@@ -494,20 +495,17 @@ export default class DocumentTextEditor extends React.Component {
     const contentState = this.state.editorState.getCurrentContent();
 
     const blockStyleFn = block => {
-      //const blockType = block.getType().toLowerCase();
-      //const entity = contentState.getEntity(
-      //  block.getEntityAt(0)
-      //);
-      //const data = entity.getData();
-      /*if (blockType === "blockquote") {
+      const blockType = block.getType().toLowerCase();
+
+      if (blockType === "blockquote") {
         return {
           attributes: {
             "data-divider-color": "",
             "data-background-color": "",
-            "data-text-section": "",
-          },
+            "data-text-section": ""
+          }
         };
-      }*/
+      }
     };
 
     const entityStyleFn = entity => {
@@ -532,7 +530,6 @@ export default class DocumentTextEditor extends React.Component {
 
     this.props.onUpdate(htmlString);
     this.setState({
-      //readonly: !this.state.readonly,
       html: htmlString
     });
   }
@@ -641,7 +638,7 @@ export default class DocumentTextEditor extends React.Component {
   };
 
   render() {
-    const { editorState, imageList, documents, readOnly } = this.state;
+    const { editorState, imageList, documents } = this.state;
 
     let editorContainer = styles.editor;
     var contentState = editorState.getCurrentContent();

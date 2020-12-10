@@ -3,31 +3,57 @@ import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
-import LanguageIcon from "@material-ui/icons/Language";
 import ArrowRightAltIcon from "@material-ui/icons/ArrowRightAlt";
 import HeightIcon from "@material-ui/icons/Height";
 import SubtitlesIcon from "@material-ui/icons/Subtitles";
 import LinkIcon from "@material-ui/icons/Link";
+import CheckIcon from "@material-ui/icons/Check";
 
-export const ReadOnly = () => {
-  return false;
-};
-
-const ImageComponent = (props) => {
+const ImageComponent = props => {
   const classes = useStyles();
 
-  const [open, setOpen] = useState(false);
-  const [width, setWidth] = useState("");
-  const [height, setHeight] = useState("");
+  const { readOnlyMode } = props.blockProps;
+  const entity = props.contentState.getEntity(props.block.getEntityAt(0));
 
-  const handleOpen = (e) => {
+  const { src } = entity.getData();
+  const data = entity.getData();
+  const imageWidth = data["data-image-width"];
+  const imageHeight = data["data-image-height"];
+  const dataCaption = data["data-caption"];
+  const dataSource = data["data-source"];
+  const dataPopup = data["data-popup"];
+
+  const [open, setOpen] = useState(false);
+  const [width, setWidth] = useState(imageWidth);
+  const [height, setHeight] = useState(imageHeight);
+  const [caption, setCaption] = useState(dataCaption);
+  const [source, setSource] = useState(dataSource);
+  const [popup, setPopup] = useState(dataPopup);
+
+  const handleOpen = e => {
     e.preventDefault();
     setOpen(true);
+    readOnlyMode();
   };
 
-  const handleClose = (e) => {
+  const handleClose = e => {
     e.preventDefault();
     setOpen(false);
+    readOnlyMode();
+  };
+
+  const handleSubmit = () => {
+    const { imageData } = props.blockProps;
+    const data = {
+      src: src,
+      "data-image-width": width,
+      "data-image-height": height,
+      "data-caption": caption,
+      "data-source": source,
+      "data-popup": popup
+    };
+
+    imageData(data);
   };
 
   const body = (
@@ -37,21 +63,13 @@ const ImageComponent = (props) => {
         <div className={classes.margin}>
           <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
-              <LanguageIcon />
-            </Grid>
-            <Grid item>
-              <TextField id="image-url" value={props.src} label="URL" />
-            </Grid>
-          </Grid>
-          <Grid container spacing={1} alignItems="flex-end">
-            <Grid item>
               <ArrowRightAltIcon />
             </Grid>
             <Grid item>
               <TextField
                 id="image-width"
-                value={props.width}
-                onChange={(e) => setWidth(e.target.value)}
+                defaultValue={width}
+                onChange={e => setWidth(e.target.value)}
                 label="data-image-width"
               />
             </Grid>
@@ -63,8 +81,8 @@ const ImageComponent = (props) => {
             <Grid item>
               <TextField
                 id="image-height"
-                value={props.height}
-                onChange={(e) => setWidth(e.target.value)}
+                defaultValue={height}
+                onChange={e => setHeight(e.target.value)}
                 label="data-image-height"
               />
             </Grid>
@@ -76,7 +94,8 @@ const ImageComponent = (props) => {
             <Grid item>
               <TextField
                 id="image-caption"
-                value={props["data-caption"]}
+                defaultValue={dataCaption}
+                onChange={e => setCaption(e.target.value)}
                 label="data-caption"
               />
             </Grid>
@@ -88,14 +107,20 @@ const ImageComponent = (props) => {
             <Grid item>
               <TextField
                 id="image-source"
-                value={props["data-source"]}
+                defaultValue={dataSource}
+                onChange={e => setSource(e.target.value)}
                 label="data-source"
               />
             </Grid>
           </Grid>
         </div>
 
-        <input type="checkbox" id="image-popup" value={props["data-popup"]} />
+        <input
+          type="checkbox"
+          id="image-popup"
+          value={dataPopup}
+          onChange={e => setPopup(e.target.checked)}
+        />
         <label>Popup</label>
       </form>
     </div>
@@ -105,37 +130,38 @@ const ImageComponent = (props) => {
     <Modal
       open={open}
       onClose={handleClose}
+      id="edit-image-modal"
       aria-labelledby="image-modal-title"
       aria-describedby="image-modal-description"
-      onClick={(event) => event.stopPropagation()}
-      onMouseDown={(event) => event.stopPropagation()}
+      onClick={event => event.stopPropagation()}
+      onMouseDown={event => event.stopPropagation()}
     >
       {body}
     </Modal>
   );
 
-  if (props["data-popup"]) {
+  if (dataPopup) {
     return (
       <div className={classes.imgContainer}>
         <img
-          src={props.src}
-          width={props.width}
-          height={props.height}
-          alt={props["data-caption"]}
-          data-image-width={props.width}
-          data-image-height={props.height}
-          data-caption={props["data-caption"]}
-          data-source={props["data-source"]}
+          src={src}
+          width={width}
+          height={height}
+          alt={dataCaption}
+          data-image-width={width}
+          data-image-height={height}
+          data-caption={dataCaption}
+          data-source={dataSource}
           data-popup
+          onClick={handleOpen}
         />
         <button
           type="button"
           variant="contained"
-          className="btn btn-primary"
-          value="true"
-          onClick={handleOpen}
+          className="btn btn-success"
+          onClick={handleSubmit}
         >
-          Redigera bild
+          <CheckIcon /> Godkänn ändringar
         </button>
         {modal}
       </div>
@@ -144,23 +170,23 @@ const ImageComponent = (props) => {
     return (
       <div className={classes.imgContainer}>
         <img
-          src={props.src}
-          width={props.width}
-          height={props.height}
-          alt={props["data-caption"]}
-          data-image-width={props.width}
-          data-image-height={props.height}
-          data-caption={props["data-caption"]}
-          data-source={props["data-source"]}
+          src={src}
+          width={width}
+          height={height}
+          alt={dataCaption}
+          data-image-width={width}
+          data-image-height={height}
+          data-caption={dataCaption}
+          data-source={dataSource}
+          onClick={handleOpen}
         />
         <button
           type="button"
           variant="contained"
-          className="btn btn-primary"
-          value="true"
-          onClick={handleOpen}
+          className="btn btn-success"
+          onClick={handleSubmit}
         >
-          Redigera bild
+          <CheckIcon /> Godkänn ändringar
         </button>
         {modal}
       </div>
@@ -169,38 +195,38 @@ const ImageComponent = (props) => {
 };
 
 /* CSS styling */
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     fontFamily: "'Georgia', serif",
     padding: 20,
-    width: 1000,
+    width: 1000
   },
   buttons: {
-    marginBottom: 10,
+    marginBottom: 10
   },
   margin: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   urlInputContainer: {
-    marginBottom: 10,
+    marginBottom: 10
   },
   urlInput: {
     fontFamily: "'Georgia', serif",
     marginRight: 10,
-    padding: 3,
+    padding: 3
   },
   editor: {
     border: "1px solid #ccc",
     cursor: "text",
     minHeight: 80,
-    padding: 10,
+    padding: 10
   },
   button: {
     marginTop: 10,
-    textAlign: "center",
+    textAlign: "center"
   },
   media: {
-    whiteSpace: "initial",
+    whiteSpace: "initial"
   },
   paper: {
     position: "absolute",
@@ -210,8 +236,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "1rem",
     backgroundColor: theme.palette.background.paper,
     border: "2px solid #000",
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
+    boxShadow: theme.shadows[5]
   },
   imgContainer: {
     position: "relative",
@@ -219,30 +244,21 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 400,
     "& > .btn": {
       position: "absolute",
-      top: "50%",
-      left: "50%",
+      top: "30px",
+      left: "30%",
       transform: "translate(-50%, -50%)",
       "-ms-transform": "translate(-50%, -50%)",
-      backgroundColor: "#555",
       color: "white",
       fontSize: "16px",
-      padding: "12px 24px",
       border: "none",
       cursor: "pointer",
       borderRadius: "5px",
-      textAlign: "center",
+      textAlign: "center"
     },
     "& > .btn:hover": {
-      backgroundColor: "black",
-    },
-  },
-  form: {
-    /*padding: "1rem",
-    marginTop: "2rem",
-    marginRight: "auto",
-    marginLeft: "auto",
-    maxWidth: "remy(380px)",*/
-  },
+      backgroundColor: "black"
+    }
+  }
 }));
 
 export default ImageComponent;
