@@ -152,6 +152,7 @@ class LayerGroup extends React.PureComponent {
           classes={classes}
           child={true}
           chapters={this.props.chapters}
+          options={this.props.options}
         />
       );
     });
@@ -335,6 +336,7 @@ class LayerGroup extends React.PureComponent {
                       key={mapLayer.get("name")}
                       layer={mapLayer}
                       model={this.props.model}
+                      options={this.props.options}
                       chapters={this.props.chapters}
                       app={this.props.app}
                       onOpenChapter={(chapter) => {
