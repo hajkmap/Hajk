@@ -304,7 +304,7 @@ class VTSearch extends React.PureComponent {
           icon: <DirectionsBusIcon />,
           title: "Title",
           description: "Description",
-          height: 650,
+          height: "dynamic",
           width: 300,
           top: undefined,
           left: undefined,
