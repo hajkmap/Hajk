@@ -102,17 +102,19 @@ class Search extends React.PureComponent {
     });
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
-        this.props.enqueueSnackbar(
+        this.snackbarKey = this.props.enqueueSnackbar(
           "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp.",
           {
             variant: "information",
+            anchorOrigin: { vertical: "bottom", horizontal: "center" },
           }
         );
       } else if (type === "Polygon") {
-        this.props.enqueueSnackbar(
+        this.snackbarKey = this.props.enqueueSnackbar(
           "Tryck en gång i kartan för varje nod i polygonen.",
           {
             variant: "information",
+            anchorOrigin: { vertical: "bottom", horizontal: "center" },
           }
         );
       }
