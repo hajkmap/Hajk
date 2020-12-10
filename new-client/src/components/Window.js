@@ -115,6 +115,9 @@ const styles = (theme) => {
       flexDirection: "column",
       userSelect: "none",
     },
+    panelContentDisplayContents: {
+      display: "contents",
+    },
     content: {
       flex: "1",
       overflowY: "auto",
@@ -163,7 +166,7 @@ class Window extends React.PureComponent {
       left: 0,
       top: 0,
       width: 300,
-      height: 400,
+      height: this.props.height === "dynamic" ? "auto" : 400,
     };
 
     window.addEventListener("resize", () => {
@@ -226,7 +229,7 @@ class Window extends React.PureComponent {
     this.height = height || 300;
 
     // If "auto" height is set, it means we want the Window to take up maximum space available
-    if (this.height === "auto") {
+    if (this.props.height !== "dynamic" && this.height === "auto") {
       // If Breadcrumbs are activated (in LayerSwitcher's config), we must make
       // sure that our Windows leave some space at the bottom for the Breadcrumbs.
       const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? 42 : 0;
@@ -485,7 +488,14 @@ class Window extends React.PureComponent {
           height: height,
         }}
       >
-        <div className={classes.panelContent}>
+        <div
+          className={clsx(
+            classes.panelContent,
+            this.props.height === "dynamic"
+              ? classes.panelContentDisplayContents
+              : null
+          )}
+        >
           <PanelHeader
             allowMaximizedWindow={allowMaximizedWindow}
             color={color}
