@@ -539,7 +539,10 @@ class Search extends React.PureComponent {
     return this.state.searchImplementedPlugins.reduce((promises, plugin) => {
       if (plugin.searchInterface.getResults) {
         promises.push(
-          plugin.searchInterface.getResults(searchString, fetchOptions)
+          plugin.searchInterface.getResults(
+            decodeURIComponent(searchString),
+            fetchOptions
+          )
         );
         return promises;
       }
