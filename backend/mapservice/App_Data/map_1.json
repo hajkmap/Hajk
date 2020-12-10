@@ -107,7 +107,7 @@
         ],
         "groups": [],
         "active": true,
-        "visibleAtStart": true,
+        "visibleAtStart": false,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
         "enableOSM": false,
@@ -163,7 +163,7 @@
       "options": {
         "target": "toolbar",
         "abstract": "VTSEARCH",
-        "title": "Västtrafik",
+        "title": "Sök",
         "position": "left",
         "visibleAtStart": true,
         "mapColors": {
@@ -479,11 +479,7 @@
         "selectedSources": ["8", "7", "30", "27", "32", "34", "33", "14", "18"],
         "layers": [
           {
-            "id": "9",
-            "visibleForGroups": []
-          },
-          {
-            "id": "10",
+            "id": "101",
             "visibleForGroups": []
           }
         ],
