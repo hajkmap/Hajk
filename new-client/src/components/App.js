@@ -5,6 +5,7 @@ import { withStyles } from "@material-ui/core/styles";
 import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
+import { isMobile } from "./../utils/IsMobile";
 
 import AppModel from "./../models/AppModel.js";
 
@@ -213,24 +214,41 @@ class App extends React.PureComponent {
       mapClickDataResult: {},
 
       // Drawer-related states
-      // If cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-      // else fall back to value from config, or finally don't show Drawer.
+      //If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
+      //Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
+      //If there a no cookie settings, use the config drawVisible setting.
+      //Finally, don't show the drawer.
+
       drawerVisible:
-        drawerPermanentFromLocalStorage !== null
+        isMobile && props.config.mapConfig.map.drawerVisibleMobile !== undefined
+          ? props.config.mapConfig.map.drawerVisibleMobile
+          : drawerPermanentFromLocalStorage !== null
           ? drawerPermanentFromLocalStorage
           : props.config.mapConfig.map.drawerVisible || false,
 
-      // To check whether drawer is permanent, first take a look at the cookie.
+      // If on a mobile device, the drawer should never be permanent.
+      // If not on mobile, if cookie is not null, use it to show/hide Drawer.
       // If cookie is not null, use it to show/hide Drawer.
       // If cookie however is null, fall back to the values from config.
       // Finally, fall back to "false" if no cookie or config is found.
-      drawerPermanent:
-        drawerPermanentFromLocalStorage !== null
-          ? drawerPermanentFromLocalStorage
-          : (props.config.mapConfig.map.drawerVisible &&
-              props.config.mapConfig.map.drawerPermanent) ||
-            false,
-      activeDrawerContent: activeDrawerContentFromLocalStorage,
+      drawerPermanent: isMobile
+        ? false
+        : drawerPermanentFromLocalStorage !== null
+        ? drawerPermanentFromLocalStorage
+        : (props.config.mapConfig.map.drawerVisible &&
+            props.config.mapConfig.map.drawerPermanent) ||
+          false,
+
+      //First check the cookie for activeDrawerContent
+      //If cookie is not null, use it set the drawer content.
+      //If cookie is null, fall back to the values from config,
+      //Finally, fall back to 'plugins', the standard tools panel.
+      //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
+      activeDrawerContent:
+        activeDrawerContentFromLocalStorage !== null
+          ? activeDrawerContentFromLocalStorage
+          : props.config.mapConfig.map.activeDrawerOnStart || "plugins",
+
       drawerMouseOverLock: false,
     };
     this.globalObserver = new Observer();
@@ -666,6 +684,11 @@ class App extends React.PureComponent {
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
+                  initialActiveButton={
+                    this.state.drawerVisible
+                      ? this.state.activeDrawerContent
+                      : null
+                  }
                 />
               )}
               {clean === false && this.renderSearchComponent()}
