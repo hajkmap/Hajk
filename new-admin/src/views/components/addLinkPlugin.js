@@ -24,6 +24,7 @@ const Link = props => {
   if (data["data-document"]) {
     return (
       <a
+        href={data["data-document"]}
         data-document={data["data-document"]}
         data-header-identifier={data["data-header-identifier"]}
         rel="noopener noreferrer"
@@ -35,6 +36,7 @@ const Link = props => {
   } else if (data["data-link"]) {
     return (
       <a
+        href={data["data-link"]}
         data-link={data["data-link"]}
         data-header-identifier={data["data-header-identifier"]}
       >
@@ -44,6 +46,7 @@ const Link = props => {
   } else if (data["data-maplink"]) {
     return (
       <a
+        href={data["data-maplink"]}
         data-maplink={data["data-maplink"]}
         data-header-identifier={data["data-header-identifier"]}
         rel="noopener noreferrer"
@@ -55,6 +58,7 @@ const Link = props => {
   } else {
     return (
       <a
+        href={data.url}
         data-header-identifier={data["data-header-identifier"]}
         rel="noopener noreferrer"
         target="_blank"

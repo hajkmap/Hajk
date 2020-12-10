@@ -1,7 +1,6 @@
 import {
   BlockMapBuilder,
   ContentBlock,
-  ContentState,
   EditorState,
   genKey as generateRandomKey,
   Modifier

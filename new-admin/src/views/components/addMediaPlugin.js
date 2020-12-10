@@ -10,27 +10,26 @@ export const mediaBlockRenderer = (block, { getEditorState }) => {
     if (type === "image") {
       return {
         component: Image,
-        editable: true,
+        editable: false
       };
     } else if (type === "video") {
       return {
         component: Video,
-        editable: true,
+        editable: false
       };
     } else if (type === "audio") {
       return {
         component: Audio,
-        editable: true,
+        editable: false
       };
     }
   }
   return null;
 };
 
-const Image = ({ block, contentState }) => {
+const Image = ({ block, contentState, readOnly }) => {
   const entity = contentState.getEntity(block.getEntityAt(0));
   const { src } = entity.getData();
-  const type = entity.getType().toLowerCase();
   const data = entity.getData();
   const width = data["data-image-width"];
   const height = data["data-image-height"];
@@ -42,8 +41,8 @@ const Image = ({ block, contentState }) => {
     return (
       <ImageComponent
         src={src}
-        width={width}
-        height={height}
+        data-image-width={width}
+        data-image-height={height}
         data-caption={dataCaption}
         data-source={dataSource}
         data-popup={dataPopup}
