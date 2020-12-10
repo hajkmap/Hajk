@@ -147,7 +147,6 @@ class BaseWindowPlugin extends React.PureComponent {
       <>
         <Window
           globalObserver={this.props.app.globalObserver}
-          localObserver={this.props.localObserver}
           title={this.state.title}
           color={this.state.color}
           onClose={this.closeWindow}
@@ -164,7 +163,6 @@ class BaseWindowPlugin extends React.PureComponent {
           height={this.height}
           position={this.position}
           mode={mode}
-          vtsearch={this.props.vtsearch}
           layerswitcherConfig={this.props.app.config.mapConfig.tools.find(
             (t) => t.type === "layerswitcher"
           )}

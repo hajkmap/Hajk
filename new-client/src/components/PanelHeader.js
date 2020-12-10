@@ -87,55 +87,6 @@ class PanelHeader extends Component {
     return customHeaderButtons && customHeaderButtons.length > 0;
   };
 
-  handleChange = (e) => {
-    var typeOfSearch = searchTypes[e.target.value];
-    this.localObserver.publish("vtsearch-chosen", typeOfSearch);
-  };
-
-  renderHeader = () => {
-    const { vtsearch } = this.props;
-
-    if (vtsearch) return this.renderDropDownMenuHeader();
-
-    return this.renderTextHeader();
-  };
-
-  renderTextHeader = () => {
-    const { classes } = this.props;
-
-    return (
-      <Typography variant="button" align="left" noWrap={true}>
-        {this.props.title}
-      </Typography>
-    );
-  };
-
-  renderDropDownMenuHeader = () => {
-    const { classes } = this.props;
-
-    return (
-      <FormControl variant="outlined" className={classes.formControl}>
-        <Select
-          classes={{ root: classes.selectInput }}
-          native
-          onChange={this.handleChange}
-          inputProps={{
-            name: "searchType",
-            id: "search-type",
-          }}
-        >
-          {Object.keys(searchTypes).map((key) => {
-            return (
-              <option key={key} value={key}>
-                {searchTypes[key]}
-              </option>
-            );
-          })}
-        </Select>
-      </FormControl>
-    );
-  };
-
   render() {
     const { allowMaximizedWindow, classes, mode } = this.props;
     return (
@@ -143,7 +94,9 @@ class PanelHeader extends Component {
         className={classes.header}
         style={{ borderColor: this.props.color }} // Allow for dynamic override of accent border color
       >
-        {this.renderHeader()}
+        <Typography variant="button" align="left" noWrap={true}>
+          {this.props.title}
+        </Typography>
         <nav className={classes.icons}>
           {this.shouldRenderCustomHeaderButtons() &&
             this.renderCustomHeaderButtons()}
