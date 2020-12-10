@@ -23,7 +23,7 @@ import ReactDOM from "react-dom";
 import MapViewModel from "./MapViewModel";
 
 import BaseWindowPlugin from "../BaseWindowPlugin";
-import DirectionsBusIcon from "@material-ui/icons/DirectionsBus";
+import SearchIcon from "@material-ui/icons/Search";
 
 const styles = (theme) => {
   return {
@@ -91,7 +91,7 @@ const styles = (theme) => {
 };
 
 const searchTypes = {
-  DEFAULT: "Sök",
+  DEFAULT: "Välj sökmetod",
   JOURNEYS: "Sök Turer",
   LINES: "Sök Linjer",
   STOPS: "Sök Hållplatser",
@@ -298,14 +298,12 @@ class VTSearch extends React.PureComponent {
       <BaseWindowPlugin
         {...baseWindowProps}
         type="vtsearch"
-        vtsearch="true"
-        localObserver={this.localObserver}
         custom={{
-          icon: <DirectionsBusIcon />,
+          icon: <SearchIcon />,
           title: "Title",
           description: "Description",
           height: 650,
-          width: 300,
+          width: 400,
           top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
@@ -313,6 +311,7 @@ class VTSearch extends React.PureComponent {
         }}
       >
         <>
+          {this.renderDropDown()}
           {this.renderSearchmodule()}
           <div className={classes.loaderContainer}>{this.renderLoader()}</div>
           {ReactDOM.createPortal(
