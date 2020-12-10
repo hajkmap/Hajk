@@ -13,7 +13,7 @@ import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
  */
 
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 export default class DocumentHandlerModel {
@@ -32,10 +32,10 @@ export default class DocumentHandlerModel {
 
   init = () => {
     return this.getAllDocumentsContainedInMenu()
-      .then(allDocuments => {
+      .then((allDocuments) => {
         this.allDocuments = allDocuments;
         this.documentSearchmodel = new DocumentSearchModel({
-          allDocuments: allDocuments
+          allDocuments: allDocuments,
         });
         this.settings.resolveSearchInterface(
           this.documentSearchmodel.implementSearchInterface()
@@ -48,7 +48,7 @@ export default class DocumentHandlerModel {
 
   flattenMenu(menu) {
     let menuItems = [];
-    menu.forEach(menuItem => {
+    menu.forEach((menuItem) => {
       if (menuItem.menu.length > 0) {
         menuItems = menuItems.concat(this.flattenMenu(menuItem.menu));
       } else {
@@ -66,13 +66,13 @@ export default class DocumentHandlerModel {
 
       const menuItemsWithDocumentConnetion = this.flattenMenu(
         this.settings.menu
-      ).filter(menuItem => {
+      ).filter((menuItem) => {
         return menuItem.document;
       });
 
       Promise.all(
-        menuItemsWithDocumentConnetion.map(menuItem => {
-          return this.fetchJsonDocument(menuItem.document).then(doc => {
+        menuItemsWithDocumentConnetion.map((menuItem) => {
+          return this.fetchJsonDocument(menuItem.document).then((doc) => {
             doc.documentColor = menuItem.color;
             doc.documentFileName = menuItem.document;
             doc.documentTitle = menuItem.title;
@@ -80,10 +80,10 @@ export default class DocumentHandlerModel {
           });
         })
       )
-        .then(documents => {
+        .then((documents) => {
           resolve(documents);
         })
-        .catch(err => {
+        .catch((err) => {
           reject(err);
         });
     });
@@ -91,9 +91,9 @@ export default class DocumentHandlerModel {
 
   getDocuments(fileNames) {
     let documents = [];
-    fileNames.forEach(fileName => {
+    fileNames.forEach((fileName) => {
       let document = this.allDocuments.find(
-        document => document.documentFileName === fileName
+        (document) => document.documentFileName === fileName
       );
       documents = [...documents, document];
     });
@@ -137,7 +137,7 @@ export default class DocumentHandlerModel {
       chapterInfo.hasSubChapters = true;
       this.chapterInfo = [...this.chapterInfo, chapterInfo];
       level = level + 1;
-      chapter.chapters.forEach(subChapter => {
+      chapter.chapters.forEach((subChapter) => {
         subChapter = this.setChapterInfo(subChapter, level, color);
       });
     } else {
@@ -147,13 +147,13 @@ export default class DocumentHandlerModel {
   }
 
   mergeChapterInfo() {
-    this.chapterInfo.forEach(item => {
+    this.chapterInfo.forEach((item) => {
       if (item.hasSubChapters && item.headerIdentifier) {
         item.chapters = this.chapterInfo.filter(
-          chapterItem => chapterItem.parent === item.headerIdentifier
+          (chapterItem) => chapterItem.parent === item.headerIdentifier
         );
         this.chapterInfo = this.chapterInfo.filter(
-          chapterItem => chapterItem.parent !== item.headerIdentifier
+          (chapterItem) => chapterItem.parent !== item.headerIdentifier
         );
       }
     });
@@ -181,11 +181,13 @@ export default class DocumentHandlerModel {
       );
       const text = await response.text();
       if (text === "File not found") {
-        throw new Error("File not found");
+        throw new Error(
+          `Could not find document with title ${title} in folder with documents`
+        );
       }
       const document = await JSON.parse(text);
       this.internalId = 0;
-      document.chapters.forEach(chapter => {
+      document.chapters.forEach((chapter) => {
         this.setParentChapter(chapter, undefined);
         this.setInternalId(chapter);
         this.setScrollReferences(chapter);
@@ -203,7 +205,7 @@ export default class DocumentHandlerModel {
       return chapter;
     }
     if (chapter.chapters.length > 0) {
-      return chapter.chapters.find(child => {
+      return chapter.chapters.find((child) => {
         return this.findChapter(child, headerIdentifierToFind);
       });
     }
@@ -216,7 +218,7 @@ export default class DocumentHandlerModel {
    */
   getHeaderRef = (activeDocument, headerIdentifierToFind) => {
     let foundChapter;
-    activeDocument.chapters.some(chapter => {
+    activeDocument.chapters.some((chapter) => {
       foundChapter = this.findChapter(chapter, headerIdentifierToFind);
       return foundChapter;
     });
@@ -229,10 +231,10 @@ export default class DocumentHandlerModel {
    *
    * @memberof DocumentHandlerModel
    */
-  setScrollReferences = chapter => {
+  setScrollReferences = (chapter) => {
     chapter.scrollRef = React.createRef();
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
+      chapter.chapters.forEach((child) => {
         this.setScrollReferences(child);
       });
     }
@@ -241,7 +243,7 @@ export default class DocumentHandlerModel {
   setInternalId(chapter) {
     chapter.id = this.internalId;
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
+      chapter.chapters.forEach((child) => {
         this.internalId = this.internalId + 1;
         this.setInternalId(child);
       });
@@ -257,7 +259,7 @@ export default class DocumentHandlerModel {
   setParentChapter(chapter, parent) {
     chapter.parent = parent;
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
+      chapter.chapters.forEach((child) => {
         this.setParentChapter(child, chapter);
       });
     }

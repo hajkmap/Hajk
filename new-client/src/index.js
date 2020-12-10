@@ -28,12 +28,12 @@ import { ThemeProvider } from "@material-ui/styles";
 import ErrorIcon from "@material-ui/icons/Error";
 
 const networkErrorMessage =
-  "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett nätverksfel. Försök igen senare.";
+  "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
 const parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
 
 const fetchOpts = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 /**
@@ -54,15 +54,15 @@ function getTheme(config, customTheme) {
   const hardCodedDefaults = {
     palette: {
       primary: {
-        main: config.mapConfig.map.colors.primaryColor // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
+        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
       },
       secondary: {
-        main: config.mapConfig.map.colors.secondaryColor // secondary: { main: "#11cb5f" } // <- Or like this
-      }
+        main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
+      },
     },
     shape: {
-      borderRadius: 2
-    }
+      borderRadius: 2,
+    },
   };
 
   const mergedTheme = deepMerge(hardCodedDefaults, customTheme);
@@ -78,8 +78,8 @@ function getTheme(config, customTheme) {
  * as well as the default preferred map configuration's file name.
  */
 fetch("appConfig.json", fetchOpts)
-  .then(appConfigResponse => {
-    appConfigResponse.json().then(appConfig => {
+  .then((appConfigResponse) => {
+    appConfigResponse.json().then((appConfig) => {
       // Grab URL params using the new URL API, save for later
       const urlParams = new URL(window.location).searchParams;
 
@@ -124,14 +124,14 @@ fetch("appConfig.json", fetchOpts)
         fetchMapConfig(),
         // Additionally, we fetch a custom theme that allows site admins to override
         // the default MUI theme without re-compiling the application.
-        fetch("customTheme.json", fetchOpts)
+        fetch("customTheme.json", fetchOpts),
       ])
         .then(
           ([layersConfigResponse, mapConfigResponse, customThemeResponse]) => {
             Promise.all([
               layersConfigResponse.json(),
               mapConfigResponse.json(),
-              customThemeResponse.json()
+              customThemeResponse.json(),
             ])
               .then(([layersConfig, mapConfig, customTheme]) => {
                 // The fetched files are decoded to Objects and placed in
@@ -141,12 +141,12 @@ fetch("appConfig.json", fetchOpts)
                   appConfig: appConfig,
                   layersConfig: layersConfig,
                   mapConfig: mapConfig,
-                  urlParams
+                  urlParams,
                 };
 
                 // Make sure that the current user is allowed to display the current map
                 const layerSwitcherConfig = config.mapConfig.tools.find(
-                  tool => tool.type === "layerswitcher"
+                  (tool) => tool.type === "layerswitcher"
                 );
                 if (layerSwitcherConfig === undefined) {
                   throw new Error(
@@ -171,7 +171,7 @@ fetch("appConfig.json", fetchOpts)
                   document.getElementById("root")
                 );
               })
-              .catch(err => {
+              .catch((err) => {
                 console.error("Parse error: ", err.message);
                 let errMsg = parseErrorMessage;
                 if (err.message.startsWith("noLayerSwitcher:")) {
@@ -190,7 +190,7 @@ fetch("appConfig.json", fetchOpts)
               });
           }
         )
-        .catch(err => {
+        .catch((err) => {
           console.error("Network error: ", err);
           ReactDOM.render(
             <div className="start-error">
@@ -204,7 +204,7 @@ fetch("appConfig.json", fetchOpts)
         });
     });
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Network error: ", err);
     ReactDOM.render(
       <div className="start-error">

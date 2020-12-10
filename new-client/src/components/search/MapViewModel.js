@@ -6,11 +6,11 @@ import GeoJSON from "ol/format/GeoJSON";
 import { extend, createEmpty, isEmpty } from "ol/extent";
 
 var fill = new Fill({
-  color: "rgba(255,255,255,0.4)"
+  color: "rgba(255,255,255,0.4)",
 });
 var stroke = new Stroke({
   color: "#3399CC",
-  width: 1.25
+  width: 1.25,
 });
 
 const defaultStyles = [
@@ -18,45 +18,45 @@ const defaultStyles = [
     image: new Circle({
       fill: fill,
       stroke: stroke,
-      radius: 5
+      radius: 5,
     }),
     fill: fill,
-    stroke: stroke
-  })
+    stroke: stroke,
+  }),
 ];
 
 const highlightedStyle = new Style({
   stroke: new Stroke({
     color: [200, 0, 0, 0.7],
-    width: 4
+    width: 4,
   }),
   fill: new Fill({
-    color: [255, 0, 0, 0.1]
+    color: [255, 0, 0, 0.1],
   }),
   image: new Circle({
     radius: 6,
     stroke: new Stroke({
       color: [200, 0, 0, 0.7],
-      width: 4
-    })
-  })
+      width: 4,
+    }),
+  }),
 });
 
 const drawStyle = new Style({
   stroke: new Stroke({
     color: "rgba(255, 214, 91, 0.6)",
-    width: 4
+    width: 4,
   }),
   fill: new Fill({
-    color: "rgba(255, 214, 91, 0.2)"
+    color: "rgba(255, 214, 91, 0.2)",
   }),
   image: new Circle({
     radius: 6,
     stroke: new Stroke({
       color: "rgba(255, 214, 91, 0.6)",
-      width: 2
-    })
-  })
+      width: 2,
+    }),
+  }),
 });
 
 class MapViewModel {
@@ -76,7 +76,7 @@ class MapViewModel {
   getNewVectorLayer = (source, style) => {
     return new VectorLayer({
       source: source,
-      style: style
+      style: style,
     });
   };
 
@@ -103,7 +103,7 @@ class MapViewModel {
       this.highlightFeaturesInMap
     );
     this.localObserver.subscribe("zoom-to-features", this.zoomToFeatureIds);
-    this.app.globalObserver.subscribe("spatial-search", options => {
+    this.app.globalObserver.subscribe("spatial-search", (options) => {
       this.toggleDraw(true, options.type);
     });
   };
@@ -115,18 +115,18 @@ class MapViewModel {
     }
   };
 
-  fitMapToExtent = extent => {
+  fitMapToExtent = (extent) => {
     this.map.getView().fit(extent, {
       size: this.map.getSize(),
       padding: [20, 20, 20, 20],
-      maxZoom: 7
+      maxZoom: 7,
     });
   };
 
-  addFeaturesToResultsLayer = features => {
+  addFeaturesToResultsLayer = (features) => {
     this.resultSource.clear();
     this.resultSource.addFeatures(
-      features.map(f => {
+      features.map((f) => {
         return new GeoJSON().readFeature(f);
       })
     );
@@ -137,30 +137,28 @@ class MapViewModel {
   };
 
   resetStyleForFeaturesInResultSource = () => {
-    this.resultSource.getFeatures().map(f => f.setStyle(null));
+    this.resultSource.getFeatures().map((f) => f.setStyle(null));
   };
 
-  highlightFeaturesInMap = featureIds => {
+  highlightFeaturesInMap = (featureIds) => {
     this.resetStyleForFeaturesInResultSource();
-    featureIds.map(fid =>
+    featureIds.map((fid) =>
       this.getFeatureFromResultSourceById(fid).setStyle(highlightedStyle)
     );
   };
 
-  getFeatureFromResultSourceById = fid => {
+  getFeatureFromResultSourceById = (fid) => {
     return this.resultSource.getFeatureById(fid);
   };
 
-  zoomToFeatureIds = featureIds => {
+  zoomToFeatureIds = (featureIds) => {
     let extent = createEmpty();
 
     //BoundingExtent-function gave wrong coordinates for some
-    featureIds.forEach(fid =>
+    featureIds.forEach((fid) =>
       extend(
         extent,
-        this.getFeatureFromResultSourceById(fid)
-          .getGeometry()
-          .getExtent()
+        this.getFeatureFromResultSourceById(fid).getGeometry().getExtent()
       )
     );
     const extentToZoomTo = isEmpty(extent)
@@ -187,21 +185,21 @@ class MapViewModel {
   };
 
   toggleDraw = (active, type, freehand = false) => {
-    this.localObserver.publish("on-draw-start");
+    this.localObserver.publish("on-draw-start", type);
     if (active) {
       this.draw = new Draw({
         source: this.drawSource,
         type: type,
-        freehand: freehand,
+        freehand: type === "Circle" ? true : freehand,
         stopClick: true,
-        style: drawStyle
+        style: drawStyle,
       });
 
       this.map.clickLock.add("search");
       this.map.addInteraction(this.draw);
       this.drawSource.clear();
 
-      this.drawSource.on("addfeature", e => {
+      this.drawSource.on("addfeature", (e) => {
         this.map.removeInteraction(this.draw);
         this.localObserver.publish("on-draw-end", e.feature);
       });

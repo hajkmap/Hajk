@@ -8,39 +8,39 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import CloseIcon from "@material-ui/icons/Close";
 import { Paper, Hidden } from "@material-ui/core";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     marginRight: theme.spacing(1),
     [theme.breakpoints.down("xs")]: {
-      boxShadow: "none"
-    }
+      boxShadow: "none",
+    },
   },
   button: {
-    border: 0
+    border: 0,
   },
   icon: {
     [theme.breakpoints.up("md")]: {
-      marginRight: theme.spacing(1)
-    }
+      marginRight: theme.spacing(1),
+    },
   },
   grouped: {
     [theme.breakpoints.down("xs")]: {
-      border: "none"
-    }
-  }
+      border: "none",
+    },
+  },
 }));
 
-function DrawerToggleButtons({ drawerButtons, globalObserver }) {
+function DrawerToggleButtons({
+  drawerButtons,
+  globalObserver,
+  initialActiveButton,
+}) {
   const classes = useStyles();
 
-  // If cookie for drawerPermanent is true, get the last active
-  // content and set as active toggle button.
-  const [activeButton, setActiveButton] = useState(
-    window.localStorage.getItem("drawerPermanent") === "true" &&
-      window.localStorage.getItem("activeDrawerContent") !== null
-      ? window.localStorage.getItem("activeDrawerContent")
-      : null
-  );
+  //Set initial active button state based on the initially active drawer, received from App.js
+  //This will either be a drawer button name such as "plugins" or null, depending on whether there
+  //is an active drawer when the map starts (set either from the cookie or config).
+  const [activeButton, setActiveButton] = useState(initialActiveButton);
 
   // Sort by the (optional) @order property prior rendering
   // Sort using minus (-) causes the correct behavior, as this will
@@ -99,7 +99,7 @@ function DrawerToggleButtons({ drawerButtons, globalObserver }) {
           aria-label="Drawer content"
           classes={{ grouped: classes.grouped }}
         >
-          {drawerButtons.map(b => renderToggleButton(b))}
+          {drawerButtons.map((b) => renderToggleButton(b))}
         </ToggleButtonGroup>
       </Paper>
     )

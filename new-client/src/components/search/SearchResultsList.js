@@ -1,22 +1,23 @@
 import React from "react";
-import cslx from "clsx";
 import { withStyles } from "@material-ui/core/styles";
 import { Grid, withWidth } from "@material-ui/core";
 import SearchResultsDataset from "./SearchResultsDataset";
 
-const styles = theme => ({
+const styles = (theme) => ({
   searchResultDatasetWrapper: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1)
-  }
+    cursor: "pointer",
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
+  },
 });
 
 class SearchResultsList extends React.PureComponent {
   state = {
-    selectedItems: []
+    selectedItems: [],
   };
 
-  showClickResultInMap = feature => {
+  showClickResultInMap = (feature) => {
     const { localObserver } = this.props;
     const currentIndex = this.state.selectedItems.indexOf(feature.id);
     const selectedItems = [...this.state.selectedItems];
@@ -29,7 +30,7 @@ class SearchResultsList extends React.PureComponent {
 
     this.setState(
       {
-        selectedItems: selectedItems
+        selectedItems: selectedItems,
       },
       () => {
         if (this.props.width === "xs" || this.props.width === "sm") {
@@ -41,7 +42,7 @@ class SearchResultsList extends React.PureComponent {
     );
   };
 
-  handleOnResultClick = feature => () => {
+  handleOnResultClick = (feature) => {
     const { app } = this.props;
     if (feature.onClickName) {
       app.globalObserver.publish(feature.onClickName, feature);
@@ -56,36 +57,45 @@ class SearchResultsList extends React.PureComponent {
       sumOfResults,
       getOriginBasedIcon,
       app,
-      classes
+      classes,
+      handleFeatureCollectionSelected,
+      showDetailedView,
     } = this.props;
+
     const featureCollectionsContainingFeatures = featureCollections.filter(
-      featureCollection => {
+      (featureCollection) => {
         return featureCollection.value.features.length > 0;
       }
     );
 
     return (
       <Grid container alignItems="center" justify="center">
-        <Grid container direction="column" item>
-          {featureCollectionsContainingFeatures.map(featureCollection => (
-            <Grid
-              key={featureCollection.source.id}
-              xs={12}
-              className={cslx(
-                featureCollections.length !== 1 && featureCollection,
-                classes.searchResultDatasetWrapper
-              )}
-              item
-            >
-              <SearchResultsDataset
-                app={app}
-                featureCollection={featureCollection}
-                getOriginBasedIcon={getOriginBasedIcon}
-                sumOfResults={sumOfResults}
-                handleOnResultClick={this.handleOnResultClick}
-              />
-            </Grid>
-          ))}
+        <Grid container item>
+          {featureCollectionsContainingFeatures.map(
+            (featureCollection, index) => (
+              <Grid
+                key={featureCollection.source.id}
+                role="button"
+                xs={12}
+                className={classes.searchResultDatasetWrapper}
+                item
+              >
+                <SearchResultsDataset
+                  app={app}
+                  featureCollection={featureCollection}
+                  getOriginBasedIcon={getOriginBasedIcon}
+                  sumOfResults={sumOfResults}
+                  handleOnResultClick={this.handleOnResultClick}
+                  selectedItems={this.state.selectedItems}
+                  handleFeatureCollectionSelected={
+                    handleFeatureCollectionSelected
+                  }
+                  expanded={showDetailedView}
+                  showDetailedView={showDetailedView}
+                />
+              </Grid>
+            )
+          )}
         </Grid>
       </Grid>
     );

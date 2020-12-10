@@ -3,42 +3,48 @@ import cslx from "clsx";
 import FeaturePropsParsing from "../../components/FeatureInfo/FeaturePropsParsing";
 import { withStyles } from "@material-ui/core/styles";
 import {
+  Checkbox,
   Table,
   TableBody,
   TableRow,
   TableCell,
   TableHead,
   TableContainer,
-  Typography
+  Typography,
+  Tooltip,
+  Grid,
 } from "@material-ui/core";
 
 const styles = () => ({
   hidden: {
-    display: "none"
+    display: "none",
   },
   tableCell: {
     paddingLeft: 0,
-    wordBreak: "break-all"
+    wordBreak: "break-all",
   },
   customDetailsHtmlTypography: {
-    overflow: "hidden"
+    overflow: "hidden",
   },
   showMoreInformationButton: {
-    width: "100%"
-  }
+    width: "100%",
+  },
+  featureDisplayFieldsContainer: {
+    paddingLeft: 15,
+  },
 });
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   state = {
     visibleFeatureInfo: null,
-    hiddenFeatureInfo: null
+    hiddenFeatureInfo: null,
   };
 
   constructor(props) {
     super(props);
 
     this.featurePropsParsing = new FeaturePropsParsing({
-      globalObserver: props.app.globalObserver
+      globalObserver: props.app.globalObserver,
     });
   }
 
@@ -59,12 +65,12 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     );
   };
 
-  getHtmlSections = renderedHtml => {
-    let visibleFeatureInfo = renderedHtml[0].props.children.find(child => {
+  getHtmlSections = (renderedHtml) => {
+    let visibleFeatureInfo = renderedHtml[0].props.children.find((child) => {
       return child.props && child.props.hasOwnProperty("data-visible");
     });
 
-    let hiddenFeatureInfo = renderedHtml[0].props.children.find(child => {
+    let hiddenFeatureInfo = renderedHtml[0].props.children.find((child) => {
       return child.props && child.props.hasOwnProperty("data-hidden");
     });
 
@@ -74,7 +80,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
         : "",
       hiddenFeatureInfo: hiddenFeatureInfo
         ? hiddenFeatureInfo.props.children
-        : ""
+        : "",
     };
   };
 
@@ -84,13 +90,13 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     );
     this.featurePropsParsing
       .mergeFeaturePropsWithMarkdown(infoBox, feature.properties)
-      .then(featureInfo => {
+      .then((featureInfo) => {
         const { visibleFeatureInfo, hiddenFeatureInfo } = this.getHtmlSections(
           featureInfo
         );
         this.setState({
           visibleFeatureInfo: visibleFeatureInfo,
-          hiddenFeatureInfo: hiddenFeatureInfo
+          hiddenFeatureInfo: hiddenFeatureInfo,
         });
       });
   };
@@ -197,6 +203,56 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     );
   };
 
+  handleItemTitleLinkClick = (e) => {
+    const { handleOnResultClick, feature } = this.props;
+    e.stopPropagation();
+    this.setState({ activeInMap: !this.state.activeInMap });
+    handleOnResultClick(feature);
+  };
+
+  renderShowInMapButton = () => {
+    const { feature, visibleInMap } = this.props;
+    const helpText = !visibleInMap ? "Visa i kartan" : "Ta bort från kartan";
+    if (feature.geometry) {
+      return (
+        <Tooltip title={helpText}>
+          <Checkbox
+            color="primary"
+            disableRipple
+            checked={visibleInMap}
+            onChange={this.handleItemTitleLinkClick}
+            inputProps={{ "aria-label": "primary checkbox" }}
+          />
+        </Tooltip>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  renderTightFeatureDetails = () => {
+    const { classes } = this.props;
+    const title = this.getFeatureTitle();
+    if (title.length > 0) {
+      return (
+        <Grid
+          container
+          alignItems="center"
+          className={classes.featureDisplayFieldsContainer}
+        >
+          <Grid item xs={10}>
+            <Typography variant="subtitle1" align="left">
+              {title}
+            </Typography>
+          </Grid>
+          <Grid item xs={2}>
+            {this.renderShowInMapButton()}
+          </Grid>
+        </Grid>
+      );
+    }
+  };
+
   render() {
     if (this.shouldRenderCustomInfoBox()) {
       return (
@@ -207,7 +263,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
           {this.renderCustomInfoBoxTable()}
         </>
       );
-    } else {
+    } else if (false) {
       return (
         <>
           <TableContainer>
@@ -218,6 +274,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
           </TableContainer>
         </>
       );
+    } else {
+      return <>{this.renderTightFeatureDetails()}</>;
     }
   }
 }

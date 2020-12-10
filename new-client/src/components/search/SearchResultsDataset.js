@@ -1,5 +1,4 @@
 import React from "react";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { withStyles } from "@material-ui/core/styles";
 import {
   Typography,
@@ -10,43 +9,76 @@ import {
   Tooltip,
   Button,
   Divider,
-  Grid
+  Grid,
 } from "@material-ui/core";
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 
-const styles = theme => ({
-  datasetSummary: {
-    backgroundColor: "#f2f2f2",
-    borderTop: "2px solid #dedede",
-    borderBottom: "2px solid #dedede"
-  },
+const styles = (theme) => ({
   datasetContainer: {
-    boxShadow: "none"
+    boxShadow: "none",
+    overflow: "hidden",
   },
   divider: {
-    backgroundColor: "#00000073",
-    width: "100%"
+    backgroundColor: theme.palette.divider,
+    width: "100%",
   },
   datasetDetailsContainer: {
-    padding: 0
+    padding: 0,
   },
   datasetTable: {
     cursor: "pointer",
     "&:hover": {
-      backgroundColor: theme.palette.action.hover
-    }
-  }
+      backgroundColor: theme.palette.action.hover,
+    },
+  },
 });
 
+const TightAccordionDetails = withStyles((theme) => ({
+  root: {
+    padding: 0,
+    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    boxShadow: "none",
+    "&:before": {
+      display: "none",
+    },
+  },
+}))(AccordionDetails);
+
+const TightAccordionSummary = withStyles((theme) => ({
+  root: {
+    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    cursor: "pointer",
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
+    padding: "0px 10px",
+    minHeight: 36,
+    "&$expanded": {
+      padding: "0px 10px",
+      minHeight: 36,
+      backgroundColor: theme.palette.action.selected,
+    },
+  },
+  content: {
+    margin: "5px 0",
+    "&$expanded": {
+      margin: "5px 0",
+    },
+  },
+  expanded: {},
+}))(AccordionSummary);
+
 class SearchResultsDataset extends React.PureComponent {
+  //Some sources does not return numberMatched and numberReturned, falling back on features.length
   state = {
-    numberOfResultsToDisplay:
-      this.props.featureCollection.value.numberMatched >
-      this.props.featureCollection.value.numberReturned
+    numberOfResultsToDisplay: this.props.featureCollection.value.numberMatched
+      ? this.props.featureCollection.value.numberMatched >
+        this.props.featureCollection.value.numberReturned
         ? `${this.props.featureCollection.value.numberReturned}+`
-        : this.props.featureCollection.value.numberReturned,
-    expanded: this.props.sumOfResults === 1,
-    showAllInformation: false
+        : this.props.featureCollection.value.numberReturned
+      : this.props.featureCollection.value.features.length,
+    //expanded: this.props.sumOfResults === 1,
+    showAllInformation: false,
   };
 
   resultHasOnlyOneFeature = () => {
@@ -62,10 +94,10 @@ class SearchResultsDataset extends React.PureComponent {
         color="primary"
         fullWidth
         className={classes.showMoreInformationButton}
-        onClick={e => {
+        onClick={(e) => {
           e.stopPropagation();
           this.setState({
-            showAllInformation: !this.state.showAllInformation
+            showAllInformation: !this.state.showAllInformation,
           });
         }}
       >
@@ -75,87 +107,134 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   renderDatasetDetails = () => {
-    const { featureCollection, handleOnResultClick, classes, app } = this.props;
+    const {
+      featureCollection,
+      handleOnResultClick,
+      classes,
+      app,
+      selectedItems,
+    } = this.props;
     const { showAllInformation } = this.state;
 
     return (
-      <AccordionDetails
+      <TightAccordionDetails
         id={`search-result-dataset-details-${featureCollection.source.id}`}
         className={classes.datasetDetailsContainer}
       >
         <Grid justify="center" container>
-          {this.state.expanded &&
-            featureCollection.value.features.map(f => (
+          {this.props.expanded &&
+            featureCollection.value.features.map((f) => (
               <React.Fragment key={f.id}>
                 <Grid
                   role="button"
-                  onClick={handleOnResultClick(f)}
+                  onClick={() => handleOnResultClick(f)}
                   className={classes.datasetTable}
                   container
                   item
                 >
                   <Typography variant="srOnly">Aktivera sökresultat</Typography>
-                  <Grid item xs={1}></Grid>
-                  <Grid item xs={10}>
+                  <Grid item xs={12}>
                     <SearchResultsDatasetFeature
                       feature={f}
                       app={app}
                       showAllInformation={showAllInformation}
                       source={featureCollection.source}
-                      handleOnResultClick={handleOnResultClick}
+                      visibleInMap={selectedItems.indexOf(f.id) > -1}
+                      handleOnResultClick={(feature) => {
+                        handleOnResultClick(feature);
+                      }}
                     />
                   </Grid>
-                  <Grid item xs={1}></Grid>
                 </Grid>
-                {this.renderShowMoreInformationButton()}
+                {/*this.renderShowMoreInformationButton()*/}
                 {!this.resultHasOnlyOneFeature() && (
                   <Divider className={classes.divider}></Divider>
                 )}
               </React.Fragment>
             ))}
         </Grid>
-      </AccordionDetails>
+      </TightAccordionDetails>
+    );
+  };
+
+  renderDetailsHeader = () => {
+    const { featureCollection } = this.props;
+    return (
+      <Grid alignItems="center" container>
+        <Grid item xs={12}>
+          <Typography variant="button">
+            {featureCollection.source.caption}
+          </Typography>
+        </Grid>
+      </Grid>
+    );
+  };
+
+  renderListHeader = () => {
+    const { numberOfResultsToDisplay } = this.state;
+
+    const { featureCollection, getOriginBasedIcon } = this.props;
+    const { numberReturned, numberMatched, features } = featureCollection.value;
+    const toolTipTitle = numberReturned
+      ? `Visar ${numberReturned} av ${numberMatched} resultat`
+      : `Visar ${features.length} resultat`;
+    return (
+      <Grid alignItems="center" container>
+        <Grid item xs={1}>
+          {getOriginBasedIcon(featureCollection.origin)}
+        </Grid>
+        <Grid item xs={9}>
+          <Typography variant="button">
+            {featureCollection.source.caption}
+          </Typography>
+        </Grid>
+        <Grid container item justify="flex-end" xs={2}>
+          <Tooltip title={toolTipTitle}>
+            <Chip
+              size="small"
+              color="default"
+              label={numberOfResultsToDisplay}
+            />
+          </Tooltip>
+        </Grid>
+      </Grid>
     );
   };
 
   renderDatasetSummary = () => {
-    const { numberOfResultsToDisplay } = this.state;
-    const { featureCollection, classes, getOriginBasedIcon } = this.props;
-    const { numberReturned, numberMatched } = featureCollection.value;
-    const toolTipTitle = `Visar ${numberReturned} av ${numberMatched} resultat`;
+    const { showDetailedView, featureCollection } = this.props;
+
     return (
-      <AccordionSummary
+      <TightAccordionSummary
         id={`search-result-dataset-${featureCollection.source.id}`}
         aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
-        className={classes.datasetSummary}
-        expandIcon={<ExpandMoreIcon />}
+        //expandIcon={<ExpandMoreIcon />}
       >
-        <Grid alignItems="center" container>
-          <Grid item xs={1}>
-            {getOriginBasedIcon(featureCollection.origin)}
-          </Grid>
-          <Grid item xs={9}>
-            <Typography>{featureCollection.source.caption}</Typography>
-          </Grid>
-          <Grid item xs={2}>
-            <Tooltip title={toolTipTitle}>
-              <Chip color="primary" label={numberOfResultsToDisplay} />
-            </Tooltip>
-          </Grid>
-        </Grid>
-      </AccordionSummary>
+        {showDetailedView
+          ? this.renderDetailsHeader()
+          : this.renderListHeader()}
+      </TightAccordionSummary>
     );
   };
 
   renderResultsDataset = () => {
-    const { classes } = this.props;
+    const {
+      classes,
+      featureCollection,
+      handleFeatureCollectionSelected,
+      expanded,
+    } = this.props;
     return (
       <>
         <Accordion
           className={classes.datasetContainer}
           square
-          expanded={this.state.expanded}
-          onChange={() => this.setState({ expanded: !this.state.expanded })}
+          expanded={expanded}
+          TransitionProps={{ timeout: 100 }}
+          onChange={() => {
+            //this.setState({ expanded: !this.state.expanded });
+            handleFeatureCollectionSelected(featureCollection);
+          }}
         >
           {this.renderDatasetSummary()}
           {this.renderDatasetDetails()}
@@ -165,8 +244,8 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   render() {
-    const { featureCollection } = this.props;
-    return featureCollection.value.numberReturned > 0
+    const { numberOfResultsToDisplay } = this.state;
+    return parseInt(numberOfResultsToDisplay) > 0
       ? this.renderResultsDataset()
       : null;
   }

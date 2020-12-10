@@ -1,25 +1,18 @@
 import React from "react";
-import { ThemeProvider, withStyles } from "@material-ui/core/styles";
+import { ThemeProvider } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
 import PrintWindow from "../printMenu/PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
-import Grid from "@material-ui/core/Grid";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
 import PrintIcon from "@material-ui/icons/Print";
 
-const styles = theme => ({});
-
 class DocumentWindowBase extends React.PureComponent {
-  static propTypes = {};
-
-  static defaultProps = {};
-
   findMenuItem(menuItem, documentNameToFind) {
     if (menuItem.document === documentNameToFind) {
       return menuItem;
-    } else if (menuItem.menu && menuItem.menu.length > 0) {
+    } else if (this.hasSubMenu(menuItem)) {
       let i,
         result = null;
       for (i = 0; result == null && i < menuItem.menu.length; i++) {
@@ -30,10 +23,14 @@ class DocumentWindowBase extends React.PureComponent {
     return null;
   }
 
-  findReferringMenuItem = documentNameToFind => {
+  hasSubMenu = (menuItem) => {
+    return menuItem.menu && menuItem.menu.length > 0;
+  };
+
+  findReferringMenuItem = (documentNameToFind) => {
     const { options } = this.props;
     let foundMenuItem = null;
-    options.menuConfig.menu.forEach(rootItemToSearch => {
+    options.menuConfig.menu.forEach((rootItemToSearch) => {
       let found = this.findMenuItem(rootItemToSearch, documentNameToFind);
       if (found != null) {
         foundMenuItem = found;
@@ -43,28 +40,30 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   shouldShowDocumentOnStart = () => {
-    return this.props.options.documentOnStart ? true : false;
+    const { options } = this.props;
+    return options.documentOnStart ? true : false;
   };
 
-  scrollInDocument = headerIdentifier => {
-    const { localObserver, model } = this.props;
+  scrollInDocument = (headerIdentifier) => {
+    const { localObserver, model, document } = this.props;
 
     if (headerIdentifier) {
       localObserver.publish(
         "scroll-to-chapter",
-        model.getHeaderRef(this.props.document, headerIdentifier)
+        model.getHeaderRef(document, headerIdentifier)
       );
     } else {
       localObserver.publish(
         "scroll-to-top",
-        model.getHeaderRef(this.props.document, headerIdentifier)
+        model.getHeaderRef(document, headerIdentifier)
       );
     }
   };
 
   showHeaderInDocument = ({ documentName, headerIdentifier }) => {
+    const { documentTitle } = this.props;
     if (documentName) {
-      if (documentName !== this.props.documentTitle) {
+      if (documentName !== documentTitle) {
         this.props.showDocument(documentName).then(() => {
           this.scrollInDocument(headerIdentifier);
         });
@@ -76,31 +75,31 @@ class DocumentWindowBase extends React.PureComponent {
 
   togglePrintWindow = () => {
     this.setState({
-      showPrintWindow: !this.state.showPrintWindow
+      showPrintWindow: !this.state.showPrintWindow,
     });
   };
 
   createHtmlObjectFromInfoClickEvent = () => {};
 
-  canHandleInfoClickEvent = infoClickEvent => {
+  canHandleInfoClickEvent = (infoClickEvent) => {
     if (infoClickEvent.payload.type !== "a") {
       return false;
     }
-    return Object.keys(infoClickEvent.payload.dataAttributes).every(key => {
+    return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
       return [
         "data-maplink",
         "data-document",
-        "data-header-identifier"
+        "data-header-identifier",
       ].includes(key);
     });
   };
 
-  handleInfoClickRequest = infoClickEvent => {
+  handleInfoClickRequest = (infoClickEvent) => {
     if (this.canHandleInfoClickEvent(infoClickEvent)) {
       var htmlObject = document.createElement(infoClickEvent.payload.type);
       htmlObject.innerHTML = infoClickEvent.payload.children[0];
       Object.entries(infoClickEvent.payload.dataAttributes).forEach(
-        dataAttributeEntry => {
+        (dataAttributeEntry) => {
           var att = document.createAttribute(dataAttributeEntry[0]);
           att.value = dataAttributeEntry[1];
           htmlObject.setAttributeNode(att);
@@ -124,10 +123,10 @@ class DocumentWindowBase extends React.PureComponent {
 
     app.globalObserver.subscribe(
       "documenthandler-searchresult-clicked",
-      searchResultClick => {
+      (searchResultClick) => {
         localObserver.publish("set-active-document", {
           documentName: searchResultClick.properties.documentFileName,
-          headerIdentifier: searchResultClick.properties.headerIdentifier
+          headerIdentifier: searchResultClick.properties.headerIdentifier,
         });
       }
     );
@@ -148,7 +147,7 @@ class DocumentWindowBase extends React.PureComponent {
     chapter.level = level;
     if (chapter.chapters && chapter.chapters.length > 0) {
       level = level + 1;
-      chapter.chapters.forEach(subChapter => {
+      chapter.chapters.forEach((subChapter) => {
         subChapter = this.setChapterLevels(subChapter, level);
       });
     }
@@ -170,7 +169,7 @@ class DocumentWindowBase extends React.PureComponent {
         if (this.shouldShowDocumentOnStart()) {
           localObserver.publish("set-active-document", {
             documentName: this.props.options.documentOnStart,
-            headerIdentifier: null
+            headerIdentifier: null,
           });
         }
       }
@@ -182,7 +181,7 @@ class DocumentWindowBase extends React.PureComponent {
       documentWindowMaximized,
       document,
 
-      documentColor
+      documentColor,
     } = this.props;
     return (
       <DocumentViewer
@@ -200,7 +199,6 @@ class DocumentWindowBase extends React.PureComponent {
       options,
       chapters,
       localObserver,
-      classes,
       documentWindowMaximized,
       document,
       documentTitle,
@@ -210,15 +208,15 @@ class DocumentWindowBase extends React.PureComponent {
       showPrintWindow,
       customTheme,
       onMinimize,
-      onMaximize
+      onMaximize,
     } = this.props;
     const modelReady = this.isModelReady();
     const customHeaderButtons = options.enablePrint
       ? [
           {
             icon: <PrintIcon />,
-            onClickCallback: togglePrintWindow
-          }
+            onClickCallback: togglePrintWindow,
+          },
         ]
       : [];
     return (
@@ -239,7 +237,7 @@ class DocumentWindowBase extends React.PureComponent {
           onWindowHide: onWindowHide,
           draggingEnabled: false,
           resizingEnabled: false,
-          allowMaximizedWindow: false
+          allowMaximizedWindow: false,
         }}
       >
         {document != null && modelReady ? (
@@ -253,6 +251,7 @@ class DocumentWindowBase extends React.PureComponent {
             )
           ) : (
             <PrintWindow
+              customTheme={customTheme}
               chapters={chapters}
               activeDocument={document}
               documentWindowMaximized={documentWindowMaximized}
@@ -262,19 +261,11 @@ class DocumentWindowBase extends React.PureComponent {
             />
           )
         ) : (
-          <Grid
-            style={{ height: "100%" }}
-            className={classes.loader}
-            alignItems="center"
-            justify="center"
-            container
-          >
-            <CircularProgress style={{ height: "100%" }} justify="center" />
-          </Grid>
+          <Progress />
         )}
       </BaseWindowPlugin>
     );
   }
 }
 
-export default withStyles(styles)(DocumentWindowBase);
+export default DocumentWindowBase;

@@ -9,16 +9,16 @@ import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 
-const styles = theme => ({
+const styles = (theme) => ({
   windowContent: {
-    margin: -10 // special case, we need to "unset" the padding for Window content that's set in Window.js
+    margin: -10, // special case, we need to "unset" the padding for Window content that's set in Window.js
   },
   stickyAppBar: {
-    top: -10
+    top: -10,
   },
   tabContent: {
-    padding: 10
-  }
+    padding: 10,
+  },
 });
 
 class LayersSwitcherView extends React.PureComponent {
@@ -28,7 +28,7 @@ class LayersSwitcherView extends React.PureComponent {
     map: propTypes.object.isRequired,
     model: propTypes.object.isRequired,
     observer: propTypes.object.isRequired,
-    options: propTypes.object.isRequired
+    options: propTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -37,13 +37,13 @@ class LayersSwitcherView extends React.PureComponent {
     this.state = {
       chapters: [],
       baseLayers: props.model.getBaseLayers(),
-      activeTab: 0
+      activeTab: 0,
     };
 
-    props.app.globalObserver.subscribe("informativeLoaded", chapters => {
+    props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
         this.setState({
-          chapters: chapters
+          chapters: chapters,
         });
       }
     });
@@ -71,7 +71,7 @@ class LayersSwitcherView extends React.PureComponent {
    *
    * @memberof LayersSwitcherView
    */
-  handleTabsMounted = ref => {
+  handleTabsMounted = (ref) => {
     // Not beautiful but it works - timeout is needed to ensure rendering is done
     // and parent's element are correct.
     setTimeout(() => {
@@ -90,7 +90,7 @@ class LayersSwitcherView extends React.PureComponent {
     return (
       <div
         style={{
-          display: shouldRender === true ? "block" : "none"
+          display: shouldRender === true ? "block" : "none",
         }}
       >
         {this.options.groups.map((group, i) => {
@@ -101,6 +101,7 @@ class LayersSwitcherView extends React.PureComponent {
               model={this.props.model}
               chapters={this.state.chapters}
               app={this.props.app}
+              options={this.props.options}
             />
           );
         })}

@@ -10,14 +10,14 @@ import { withTheme, createMuiTheme } from "@material-ui/core/styles";
 import { deepMerge } from "../../utils/DeepMerge";
 
 const fetchOpts = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired
+    options: PropTypes.object.isRequired,
   };
 
   state = {
@@ -27,7 +27,7 @@ class DocumentHandler extends React.PureComponent {
     chapters: [],
     documentTitle: "",
     documentColor: null,
-    model: null
+    model: null,
   };
 
   constructor(props) {
@@ -37,23 +37,23 @@ class DocumentHandler extends React.PureComponent {
     this.mapViewModel = new MapViewModel({
       localObserver: this.localObserver,
       globalObserver: props.app.globalObserver,
-      map: props.map
+      map: props.map,
     });
 
-    this.props.searchInterface.getSearchMethods = new Promise(resolve => {
+    this.props.searchInterface.getSearchMethods = new Promise((resolve) => {
       new DocumentHandlerModel({
         localObserver: this.localObserver,
         app: props.app,
         map: props.map,
         menu: props.options.menuConfig.menu,
-        resolveSearchInterface: resolve
+        resolveSearchInterface: resolve,
       })
         .init()
-        .then(loadedDocumentModel => {
-          this.fetchCustomThemeJson().then(customTheme => {
+        .then((loadedDocumentModel) => {
+          this.fetchCustomThemeJson().then((customTheme) => {
             this.setState({
               model: loadedDocumentModel,
-              customTheme: customTheme
+              customTheme: customTheme,
             });
           });
         });
@@ -62,11 +62,33 @@ class DocumentHandler extends React.PureComponent {
     });
   }
 
+  /**
+   * @summary Loops customTheme and checks if certain typography-variants have marginBottom set
+   * in the theme file. If not set, then we inject default value.
+   * @param {customTheme} documentHandlerTheme
+   * @memberof documenthandler.js
+   */
+  setBottomMarginsForTypographyVariants = (documentHandlerTheme) => {
+    ["body1", "h1", "h2", "h3", "h4", "h5", "h6"].forEach((key) => {
+      const keyHasValue = documentHandlerTheme.typography[key];
+      if (keyHasValue) {
+        const marginBottom = documentHandlerTheme.typography[key]?.marginBottom;
+        if (!marginBottom) {
+          documentHandlerTheme.typography[key].marginBottom =
+            this.props.theme.spacing(1) || "8px";
+        }
+      }
+    });
+  };
+
   fetchCustomThemeJson = () => {
     const { options } = this.props;
     return fetch(options.customThemeUrl, fetchOpts)
-      .then(res => {
-        return res.json().then(documentHandlerTheme => {
+      .then((res) => {
+        return res.json().then((documentHandlerTheme) => {
+          if (documentHandlerTheme.typography) {
+            this.setBottomMarginsForTypographyVariants(documentHandlerTheme);
+          }
           return createMuiTheme(
             deepMerge(this.props.theme, documentHandlerTheme)
           );
@@ -118,14 +140,14 @@ class DocumentHandler extends React.PureComponent {
       caption: options.drawerButtonTitle || "Meny",
       drawerTitle: options.drawerTitle || "Översiktsplan",
       order: 100,
-      renderDrawerContent: this.renderDrawerContent
+      renderDrawerContent: this.renderDrawerContent,
     });
   };
 
-  showDocument = documentFileName => {
+  showDocument = (documentFileName) => {
     const { app } = this.props;
     app.globalObserver.publish("documentviewer.showWindow", {
-      hideOtherPlugins: false
+      hideOtherPlugins: false,
     });
     app.globalObserver.publish("core.maximizeWindow");
     return this.setActiveDocument(documentFileName);
@@ -134,7 +156,7 @@ class DocumentHandler extends React.PureComponent {
   onWindowHide = () => {
     this.localObserver.publish("set-active-document", {
       documentName: null,
-      headerIdentifier: null
+      headerIdentifier: null,
     });
     return;
   };
@@ -147,7 +169,7 @@ class DocumentHandler extends React.PureComponent {
     this.setState({ documentWindowMaximized: true });
   };
 
-  setActiveDocument = documentFileName => {
+  setActiveDocument = (documentFileName) => {
     return new Promise((resolve, reject) => {
       let document = null;
       if (documentFileName) {
@@ -163,7 +185,7 @@ class DocumentHandler extends React.PureComponent {
           documentColor: document?.documentColor
             ? document.documentColor
             : null,
-          showPrintWindow: false
+          showPrintWindow: false,
         },
         resolve
       );
@@ -172,7 +194,7 @@ class DocumentHandler extends React.PureComponent {
 
   togglePrintWindow = () => {
     this.setState({
-      showPrintWindow: !this.state.showPrintWindow
+      showPrintWindow: !this.state.showPrintWindow,
     });
   };
 

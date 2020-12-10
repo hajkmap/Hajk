@@ -9,10 +9,10 @@ import {
   ListItem,
   ListItemText,
   Typography,
-  Collapse
+  Collapse,
 } from "@material-ui/core";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     tableOfContents: {
       backgroundColor: theme.palette.grey[200],
@@ -20,16 +20,16 @@ const styles = theme => {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
       paddingTop: theme.spacing(1),
-      paddingBottom: theme.spacing(1)
+      paddingBottom: theme.spacing(1),
     },
     collapseContainer: {
-      width: "100%"
+      width: "100%",
     },
     root: {
       width: "100%",
       padding: theme.spacing(0),
-      backgroundColor: theme.palette.grey[200]
-    }
+      backgroundColor: theme.palette.grey[200],
+    },
   };
 };
 
@@ -44,7 +44,7 @@ function NestedListItemRaw(props) {
       style={{
         paddingTop: 0,
         paddingBottom: 0,
-        paddingLeft: props.theme.spacing(props.level * 3)
+        paddingLeft: props.theme.spacing(props.level * 3),
       }}
     >
       <ListItemText>{props.children}</ListItemText>
@@ -56,15 +56,15 @@ const NestedListItem = withTheme(NestedListItemRaw);
 
 class TableOfContents extends React.PureComponent {
   state = {
-    expanded: this.props.expanded
+    expanded: this.props.expanded,
   };
 
   static defaultProps = {
     expanded: true,
-    title: "Innehåll"
+    title: "Innehåll",
   };
 
-  linkClick = chapter => {
+  linkClick = (chapter) => {
     const { localObserver } = this.props;
     localObserver.publish("scroll-to-chapter", chapter);
   };
@@ -74,13 +74,13 @@ class TableOfContents extends React.PureComponent {
    *
    * @memberof TableOfContents
    */
-  renderChapters = activeDocument => {
+  renderChapters = (activeDocument) => {
     const { classes } = this.props;
     let mainChapter = 0;
     return (
       <List className={classes.root} aria-labelledby="nested-list-subheader">
         {Array.isArray(activeDocument?.chapters)
-          ? activeDocument.chapters.map(chapter =>
+          ? activeDocument.chapters.map((chapter) =>
               this.renderSubChapters(chapter, 0, (++mainChapter).toString())
             )
           : null}
@@ -88,7 +88,7 @@ class TableOfContents extends React.PureComponent {
     );
   };
 
-  showSubChapter = level => {
+  showSubChapter = (level) => {
     const { chapterLevelsToShow } = this.props;
     return level < chapterLevelsToShow;
   };
@@ -121,7 +121,7 @@ class TableOfContents extends React.PureComponent {
         </NestedListItem>
         <List disablePadding>
           {Array.isArray(chapter.chapters)
-            ? chapter.chapters.map(subChapter =>
+            ? chapter.chapters.map((subChapter) =>
                 this.renderSubChapters(
                   subChapter,
                   newLevel,
@@ -140,17 +140,13 @@ class TableOfContents extends React.PureComponent {
       activeDocument,
       title,
       expanded,
-      toggleCollapse
+      toggleCollapse,
     } = this.props;
 
     return (
-      <Grid
-        role="button"
-        onClick={toggleCollapse}
-        className={classes.tableOfContents}
-        container
-      >
+      <Grid role="button" className={classes.tableOfContents} container>
         <Grid
+          onClick={toggleCollapse}
           xs={12}
           alignItems="center"
           justify="space-between"

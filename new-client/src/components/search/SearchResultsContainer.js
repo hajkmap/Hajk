@@ -2,6 +2,7 @@ import React from "react";
 import Alert from "@material-ui/lab/Alert";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import IconButton from "@material-ui/core/IconButton";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import SearchResultsList from "./SearchResultsList";
@@ -9,55 +10,74 @@ import {
   Accordion,
   Paper,
   Typography,
+  Tooltip,
   Button,
   AccordionDetails,
   AccordionSummary,
-  Grid
+  Grid,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 
-const styles = theme => ({
+const styles = (theme) => ({
   hidden: {
-    display: "none"
+    display: "none",
   },
   searchResultListWrapper: {
     [theme.breakpoints.down("xs")]: {
-      maxHeight: "78vh"
+      maxHeight: "78vh",
     },
     [theme.breakpoints.up("sm")]: {
-      maxHeight: "82vh"
-    }
+      maxHeight: "82vh",
+    },
   },
   expanded: {
     "&$expanded": {
       margin: theme.spacing(0),
-      minHeight: theme.spacing(0)
-    }
+      minHeight: theme.spacing(0),
+    },
   },
   content: {
-    margin: theme.spacing(0)
+    margin: theme.spacing(0),
   },
   root: {
     maxHeight: "80vh",
     overflow: "auto",
     minWidth: 200,
     [theme.breakpoints.up("sm")]: {
-      maxWidth: 520
+      maxWidth: 520,
     },
     [theme.breakpoints.down("xs")]: {
       minWidth: "100%",
       position: "absolute",
-      left: 0
-    }
-  }
+      left: 0,
+    },
+  },
 });
+
+const TightAccordionDetails = withStyles({
+  root: {
+    padding: 0,
+  },
+})(AccordionDetails);
+
+const TightAccordion = withStyles((theme) => ({
+  root: {
+    "&:last-child": {
+      borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    },
+  },
+}))(Accordion);
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
     expanded: true,
     sumOfResults: this.props.searchResults.featureCollections
-      .map(fc => fc.value.totalFeatures)
-      .reduce((a, b) => a + b, 0)
+      .map((fc) => fc.value.totalFeatures)
+      .reduce((a, b) => a + b, 0),
+    activeFeatureCollection:
+      this.props.featureCollections.length === 1
+        ? this.props.featureCollections[0]
+        : undefined,
   };
 
   componentDidMount = () => {
@@ -88,28 +108,52 @@ class SearchResultsContainer extends React.PureComponent {
     this.setState({ expanded: !this.state.expanded });
   };
 
+  handleFeatureCollectionSelected = (featureCollection) => {
+    this.setState({
+      activeFeatureCollection: featureCollection,
+    });
+  };
+
+  renderLeftHeaderInfo = () => {
+    const { sumOfResults, activeFeatureCollection, expanded } = this.state;
+
+    if (!activeFeatureCollection) {
+      return <Typography>{`Visar ${sumOfResults} träffar`}</Typography>;
+    } else if (activeFeatureCollection && expanded) {
+      return (
+        <Tooltip title={"Tillbaka till hela sökresultatet"}>
+          <Button
+            style={{ paddingLeft: 0 }}
+            onClick={() => this.handleFeatureCollectionSelected()}
+            color="primary"
+          >
+            <ArrowBackIcon fontSize="small" />
+            Tillbaka
+          </Button>
+        </Tooltip>
+      );
+    } else {
+      return (
+        <Typography>{`Visar ${activeFeatureCollection.value.totalFeatures} träffar`}</Typography>
+      );
+    }
+  };
+
   renderSearchResultContainerHeader = () => {
-    const { sumOfResults } = this.state;
     return (
       <Grid justify="space-between" alignItems="center" container>
-        <Grid item>
-          <Typography>{`Visar ${sumOfResults} träffar`}</Typography>
-        </Grid>
+        <Grid item>{this.renderLeftHeaderInfo()}</Grid>
         <Grid item>{this.renderSearchResultListOptions()}</Grid>
         <Grid item>
-          <IconButton onClick={this.toggleResultListExpansion}>
-            {this.state.expanded ? (
-              <>
-                <ExpandLessIcon color="primary"></ExpandLessIcon>
-                <Typography color="primary">Dölj</Typography>
-              </>
-            ) : (
-              <>
-                <ExpandMoreIcon color="primary"></ExpandMoreIcon>
-                <Typography color="primary">Visa</Typography>
-              </>
-            )}
-          </IconButton>
+          <Button
+            onClick={this.toggleResultListExpansion}
+            color="primary"
+            endIcon={
+              this.state.expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />
+            }
+          >
+            {this.state.expanded ? `Dölj` : `Visa`}
+          </Button>
         </Grid>
       </Grid>
     );
@@ -118,12 +162,16 @@ class SearchResultsContainer extends React.PureComponent {
   render() {
     const {
       classes,
-      featureCollections,
+
       app,
       getOriginBasedIcon,
-      localObserver
+      localObserver,
     } = this.props;
-    const { sumOfResults } = this.state;
+    const { sumOfResults, activeFeatureCollection } = this.state;
+    const featureCollections = activeFeatureCollection
+      ? [activeFeatureCollection]
+      : this.props.featureCollections;
+    const showDetailedView = activeFeatureCollection ? true : false;
 
     return (
       <>
@@ -133,18 +181,21 @@ class SearchResultsContainer extends React.PureComponent {
           </Paper>
         ) : (
           <Paper className={classes.root}>
-            <Accordion expanded={this.state.expanded}>
+            <TightAccordion
+              expanded={this.state.expanded}
+              TransitionProps={{ timeout: 100 }}
+            >
               <AccordionSummary
                 classes={{
                   content: classes.content,
-                  expanded: classes.expanded
+                  expanded: classes.expanded,
                 }}
                 aria-controls="search-result-list"
                 id="search-result-list-header"
               >
                 {this.renderSearchResultContainerHeader()}
               </AccordionSummary>
-              <AccordionDetails
+              <TightAccordionDetails
                 id="search-result-list"
                 className={classes.searchResultListWrapper}
               >
@@ -154,9 +205,13 @@ class SearchResultsContainer extends React.PureComponent {
                   getOriginBasedIcon={getOriginBasedIcon}
                   featureCollections={featureCollections}
                   app={app}
+                  handleFeatureCollectionSelected={
+                    this.handleFeatureCollectionSelected
+                  }
+                  showDetailedView={showDetailedView}
                 />
-              </AccordionDetails>
-            </Accordion>
+              </TightAccordionDetails>
+            </TightAccordion>
           </Paper>
         )}
       </>

@@ -5,31 +5,31 @@ import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import { withStyles } from "@material-ui/core/styles";
 
-const styles = theme => ({
+const styles = (theme) => ({
   sliderContainer: {
-    overflow: "hidden"
+    overflow: "hidden",
   },
   icon: {
-    cursor: "pointer"
+    cursor: "pointer",
   },
   settingsContainer: {
     overflow: "hidden",
     paddingLeft: "45px",
     paddingRight: "30px",
     paddingBottom: "10px",
-    paddingTop: "10px"
+    paddingTop: "10px",
   },
   subtitle2: {
-    fontWeight: 500
+    fontWeight: 500,
   },
   sliderItem: {
     float: "left",
     width: "120px",
-    padding: "10px"
+    padding: "10px",
   },
   sliderText: {
-    float: "left"
-  }
+    float: "left",
+  },
 });
 
 class LayerSettings extends React.PureComponent {
@@ -40,16 +40,16 @@ class LayerSettings extends React.PureComponent {
     var layerInfo = layer.get("layerInfo");
     this.state = {
       opacityValue: props.layer.get("opacity"),
-      legend: layerInfo.legend
+      legend: layerInfo.legend,
     };
     props.layer.on("change:opacity", this.updateOpacity);
   }
 
-  updateOpacity = e => {
+  updateOpacity = (e) => {
     var o = e.target.getOpacity();
     if (o === 0 || o === 1) {
       this.setState({
-        opacityValue: o
+        opacityValue: o,
       });
     }
   };
@@ -98,9 +98,9 @@ class LayerSettings extends React.PureComponent {
     });
   };
 
-  toggle = e => {
+  toggle = (e) => {
     this.setState({
-      toggled: !this.state.toggled
+      toggled: !this.state.toggled,
     });
   };
 
@@ -108,7 +108,10 @@ class LayerSettings extends React.PureComponent {
     return (
       <div>
         <div className={this.props.classes.settingsContainer}>
-          {this.props.showOpacity ? this.renderOpacitySlider() : null}
+          {this.props.options.enableTransparencySlider !== false &&
+          this.props.showOpacity
+            ? this.renderOpacitySlider()
+            : null}
           {this.props.showLegend ? this.renderLegendImage() : null}
           {this.props.layer.getProperties().filterable ? (
             <VectorFilter layer={this.props.layer} />

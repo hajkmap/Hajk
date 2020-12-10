@@ -10,22 +10,22 @@ import PanelList from "./PanelList";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import { Typography } from "@material-ui/core";
 
-const styles = theme => ({
+const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
   listItemIcon: { minWidth: theme.spacing(3) },
   collapseIconRoot: { minWidth: theme.spacing(4) },
   root: {
     borderLeft: `${theme.spacing(1)}px solid ${theme.palette.background.paper}`,
     "&.Mui-selected": {
-      borderLeftColor: theme.palette.action.selected
+      borderLeftColor: theme.palette.action.selected,
     },
     "&.Mui-selected:hover": {
-      borderLeftColor: theme.palette.action.selected
+      borderLeftColor: theme.palette.action.selected,
     },
     "&:hover": {
-      borderColor: theme.palette.action.hover
-    }
-  }
+      borderColor: theme.palette.action.hover,
+    },
+  },
 });
 
 class PanelMenuListItem extends React.PureComponent {
@@ -66,7 +66,7 @@ class PanelMenuListItem extends React.PureComponent {
     );
   };
 
-  #getListIcon = item => {
+  #getListIcon = (item) => {
     const { classes } = this.props;
     return (
       <ListItemIcon className={classes.listItemIcon}>
@@ -80,7 +80,7 @@ class PanelMenuListItem extends React.PureComponent {
     );
   };
 
-  #hasSubMenu = item => {
+  #hasSubMenu = (item) => {
     if (item.menu && item.menu.length > 0) {
       return true;
     } else {
@@ -120,15 +120,26 @@ class PanelMenuListItem extends React.PureComponent {
     return this.#isColored()
       ? {
           paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
-          borderLeft: `${theme.spacing(1)}px solid ${item.color}`
+          borderLeft: `${theme.spacing(1)}px solid ${item.color}`,
         }
       : {
-          paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3)
+          paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
         };
   };
 
   render() {
-    const { item, classes, type, localObserver, globalObserver } = this.props;
+    const {
+      item,
+      classes,
+      type,
+      localObserver,
+      globalObserver,
+      handleExpandClick,
+      expandedIndex,
+      setActiveMenuItems,
+      coloredIndex,
+      selectedIndex,
+    } = this.props;
     const hasSubMenu = this.#hasSubMenu(item);
     return (
       <>
@@ -138,7 +149,7 @@ class PanelMenuListItem extends React.PureComponent {
           button
           size="small"
           classes={{
-            root: classes.root
+            root: classes.root,
           }}
           disableGutters
           aria-controls={hasSubMenu ? `${item.id}` : null}
@@ -163,11 +174,11 @@ class PanelMenuListItem extends React.PureComponent {
               localObserver={localObserver}
               globalObserver={globalObserver}
               menu={item.menu}
-              handleExpandClick={this.props.handleExpandClick}
-              expandedIndex={this.props.expandedIndex}
-              setActiveMenuItems={this.props.setActiveMenuItems}
-              coloredIndex={this.props.coloredIndex}
-              selectedIndex={this.props.selectedIndex}
+              handleExpandClick={handleExpandClick}
+              expandedIndex={expandedIndex}
+              setActiveMenuItems={setActiveMenuItems}
+              coloredIndex={coloredIndex}
+              selectedIndex={selectedIndex}
             ></PanelList>
           </Collapse>
         )}

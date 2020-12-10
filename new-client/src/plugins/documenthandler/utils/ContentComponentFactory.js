@@ -6,73 +6,128 @@ import clsx from "clsx";
 import Box from "@material-ui/core/Box";
 import TextArea from "../documentWindow/TextArea";
 import { makeStyles } from "@material-ui/core/styles";
-import { Button, Typography, CardMedia, List } from "@material-ui/core";
+import {
+  Button,
+  Typography,
+  CardMedia,
+  List,
+  ListItem,
+  Grid,
+} from "@material-ui/core";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
 
-const useStyles = makeStyles(theme => ({
+//Had to make some magic to be able to handle list in all different sizes.
+//Common problem to get second row indented in a good way and even more difficult
+//when you can change the font-size in theme.
+const getIndentationValue = (fontSize, multiplier, negative) => {
+  let value = multiplier * fontSize.substring(0, fontSize.length - 3);
+  return negative ? `${value * -1}rem` : `${value}rem`;
+};
+
+const useStyles = makeStyles((theme) => ({
   documentImage: {
     objectFit: "contain",
-    objectPosition: "left"
+    objectPosition: "left",
   },
+
+  pictureRightFloatingText: {},
+  pictureLeftFloatingText: {},
+
+  floatRight: {
+    float: "right",
+    marginLeft: theme.spacing(1),
+  },
+  floatLeft: {
+    float: "left",
+    marginRight: theme.spacing(1),
+  },
+
+  pictureRight: {
+    alignItems: "flex-end",
+    display: "flex",
+    flexDirection: "column",
+  },
+  pictureLeft: {
+    alignItems: "flex-start",
+    display: "flex",
+    flexDirection: "column",
+  },
+  pictureCenter: {
+    alignItems: "center",
+    display: "flex",
+    flexDirection: "column",
+  },
+
   popupActivatedImage: {
     marginBottom: theme.spacing(1),
-    cursor: "pointer"
+    cursor: "pointer",
   },
   naturalDocumentImageProportions: {
     marginTop: theme.spacing(1),
-    width: "100%"
+    width: "100%",
   },
   imageText: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   imageInformationWrapper: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
+    maxWidth: "100%",
   },
-
   startIcon: {
-    marginLeft: theme.spacing(0)
+    marginLeft: theme.spacing(0),
   },
   linkIcon: {
-    verticalAlign: "middle"
+    verticalAlign: "middle",
   },
   heading: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   media: {
     width: "auto",
-    maxWidth: "100%"
+    maxWidth: "100%",
   },
-  typography: {
-    overflowWrap: "break-word",
-    marginBottom: theme.spacing(1)
+  listItemOneDigit: {
+    marginRight: getIndentationValue(theme.typography.body1.fontSize, 1), //MAGIC
+    padding: theme.spacing(0),
+  },
+  listItemTwoDigit: {
+    marginBottom: theme.spacing(1),
+    padding: theme.spacing(0),
+    marginRight: getIndentationValue(theme.typography.body1.fontSize, 0.5), //MAGIC
+  },
+  olListItem: {
+    padding: theme.spacing(0),
   },
   ulList: {
     listStyle: "initial",
     listStylePosition: "inside",
+    overflowWrap: "break-word",
+    wordBreak: "break-word",
+    marginBottom: theme.spacing(1),
+    paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.375), //MAGIC
+    textIndent: getIndentationValue(
+      theme.typography.body1.fontSize,
+      1.375,
+      true
+    ), //MAGIC
     padding: theme.spacing(0),
-    marginBottom: theme.spacing(1)
-  },
-  listItemMargin: {
-    marginLeft: theme.spacing(1)
   },
   olList: {
-    listStyle: "decimal",
-    listStylePosition: "inside",
     padding: theme.spacing(0),
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   bottomMargin: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   linkButton: {
     padding: theme.spacing(0),
-    color: theme.palette.info.main
-  }
+    color: theme.palette.info.main,
+  },
 }));
 
-const renderChild = child => {
+const renderChild = (child) => {
   if (child.nodeType === TEXT_NODE) {
     return child.data;
   }
@@ -82,7 +137,7 @@ const renderChild = child => {
   }
 };
 
-const getFormattedComponentFromTag = tag => {
+const getFormattedComponentFromTag = (tag) => {
   const childNodes = [...tag.childNodes];
   return childNodes.map((child, index) => {
     return <React.Fragment key={index}>{renderChild(child)}</React.Fragment>;
@@ -90,9 +145,8 @@ const getFormattedComponentFromTag = tag => {
 };
 
 export const Paragraph = ({ pTag }) => {
-  const classes = useStyles();
   return (
-    <Typography className={classes.typography} variant="body1">
+    <Typography variant="body1">
       {getFormattedComponentFromTag(pTag)}
     </Typography>
   );
@@ -126,16 +180,25 @@ export const OLComponent = ({ olComponent }) => {
     <List className={classes.olList} component="ol">
       {children.map((listItem, index) => {
         return (
-          <Typography
-            variant="body1"
-            component="li"
-            className={classes.typography}
-            key={index}
-          >
-            <span className={classes.listItemMargin}>
-              {getFormattedComponentFromTag(listItem)}
-            </span>
-          </Typography>
+          <ListItem className={classes.olListItem} disableGutters key={index}>
+            <Grid wrap="nowrap" container>
+              <Grid
+                className={clsx(
+                  index < 9
+                    ? classes.listItemOneDigit
+                    : classes.listItemTwoDigit
+                )}
+                item
+              >
+                <Typography variant="body1">{`${index + 1}.`}</Typography>
+              </Grid>
+              <Grid item>
+                <Typography className={classes.olListItem} variant="body1">
+                  {getFormattedComponentFromTag(listItem)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </ListItem>
         );
       })}
     </List>
@@ -205,11 +268,11 @@ export const Figure = ({ figureTag }) => {
 export const Img = ({ imgTag, localObserver }) => {
   const classes = useStyles();
 
-  const isPopupAllowedForImage = imgTag => {
-    return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
+  const tagIsPresent = (imgTag, attribute) => {
+    return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
   };
 
-  const getImageStyle = image => {
+  const getImageStyle = (image) => {
     let className = image.popup
       ? clsx(
           classes.documentImage,
@@ -228,9 +291,44 @@ export const Img = ({ imgTag, localObserver }) => {
     return className;
   };
 
-  const getImageDescription = image => {
+  const getImagePositionClass = (positioning) => {
+    const { right, left, center, floatLeft, floatRight } = positioning;
+
+    if (right) {
+      return classes.pictureRight;
+    }
+
+    if (left) {
+      return classes.pictureLeft;
+    }
+
+    if (center && (!floatLeft || !floatRight)) {
+      return classes.pictureCenter;
+    }
+    return;
+  };
+
+  const getImageFloating = (positioning) => {
+    const { right, left, center, floatLeft, floatRight } = positioning;
+    if (!center) {
+      if (floatLeft && !right) {
+        return classes.floatLeft;
+      }
+
+      if (floatRight && !left) {
+        return classes.floatRight;
+      }
+    }
+
+    return;
+  };
+
+  const getImageDescription = (image) => {
     return (
-      <Box className={classes.imageInformationWrapper}>
+      <Box
+        style={{ width: image.width }}
+        className={classes.imageInformationWrapper}
+      >
         {image.caption && (
           <Typography variant="subtitle2">{image.caption}</Typography>
         )}
@@ -242,14 +340,20 @@ export const Img = ({ imgTag, localObserver }) => {
       </Box>
     );
   };
+
   const image = {
     caption: imgTag.attributes.getNamedItem("data-caption")?.value,
-    popup: isPopupAllowedForImage(imgTag),
+    popup: tagIsPresent(imgTag, "data-image-popup"),
     source: imgTag.attributes.getNamedItem("data-source")?.value,
     url: imgTag.attributes.getNamedItem("src")?.value,
     altValue: imgTag.attributes.getNamedItem("alt")?.value,
     height: imgTag.attributes.getNamedItem("data-image-height")?.value,
-    width: imgTag.attributes.getNamedItem("data-image-width")?.value
+    width: imgTag.attributes.getNamedItem("data-image-width")?.value,
+    right: tagIsPresent(imgTag, "data-image-right"),
+    left: tagIsPresent(imgTag, "data-image-left"),
+    center: tagIsPresent(imgTag, "data-image-center"),
+    floatLeft: tagIsPresent(imgTag, "data-image-float-left"),
+    floatRight: tagIsPresent(imgTag, "data-image-float-right"),
   };
 
   let onClickCallback = image.popup
@@ -258,8 +362,11 @@ export const Img = ({ imgTag, localObserver }) => {
       }
     : null;
 
+  const positioningClass = getImagePositionClass(image);
+  const floatingPictureClass = getImageFloating(image);
+
   return (
-    <>
+    <Box className={clsx(positioningClass, floatingPictureClass)}>
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue}
@@ -274,7 +381,7 @@ export const Img = ({ imgTag, localObserver }) => {
         image={image.url}
       />
       {getImageDescription(image)}
-    </>
+    </Box>
   );
 };
 
@@ -294,7 +401,7 @@ export const Strong = ({ strongTag }) => {
   return [
     <React.Fragment key={0}>
       <strong>{strongTag.textContent}</strong>
-    </React.Fragment>
+    </React.Fragment>,
   ];
 };
 export const Underline = ({ uTag }) => {
@@ -313,7 +420,7 @@ export const Underline = ({ uTag }) => {
   return [
     <React.Fragment key={0}>
       <u>{uTag.textContent}</u>
-    </React.Fragment>
+    </React.Fragment>,
   ];
 };
 export const Italic = ({ emTag }) => {
@@ -332,7 +439,7 @@ export const Italic = ({ emTag }) => {
   return [
     <React.Fragment key={0}>
       <em>{emTag.textContent}</em>
-    </React.Fragment>
+    </React.Fragment>,
   ];
 };
 
@@ -356,25 +463,25 @@ export const LineBreak = () => {
 export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   const classes = useStyles();
 
-  const getLinkDataPerType = attributes => {
+  const getLinkDataPerType = (attributes) => {
     const {
       0: mapLink,
       1: headerIdentifier,
       2: documentLink,
-      3: externalLink
+      3: externalLink,
     } = [
       "data-maplink",
       "data-header-identifier",
       "data-document",
-      "data-link"
-    ].map(attributeKey => {
+      "data-link",
+    ].map((attributeKey) => {
       return attributes.getNamedItem(attributeKey)?.value;
     });
 
     return { mapLink, headerIdentifier, documentLink, externalLink };
   };
 
-  const getExternalLink = externalLink => {
+  const getExternalLink = (externalLink) => {
     return (
       <Button
         color="default"
@@ -438,7 +545,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         onClick={() => {
           localObserver.publish("set-active-document", {
             documentName: documentLink,
-            headerIdentifier: headerIdentifier
+            headerIdentifier: headerIdentifier,
           });
         }}
       >
@@ -451,7 +558,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     mapLink,
     headerIdentifier,
     documentLink,
-    externalLink
+    externalLink,
   } = getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {
