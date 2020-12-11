@@ -51,6 +51,7 @@ class Search extends React.PureComponent {
       matchCase: false,
       activeSpatialFilter: "within",
     },
+    failedWFSFetchMessage: "",
   };
 
   // Used for setTimeout/clearTimeout, in order to delay update of autocomplete when user is typing
@@ -234,6 +235,7 @@ class Search extends React.PureComponent {
       searchActive: "",
       showSearchResults: false,
       searchResults: { featureCollections: [], errors: [] },
+      failedWFSFetchMessage: "",
     });
     this.resetFeaturesToFilter();
     this.localObserver.publish("clear-search-results");
@@ -480,16 +482,34 @@ class Search extends React.PureComponent {
       });
   };
 
+  getPotentialWFSErrorMessage = (searchResults) => {
+    return searchResults.errors.length === 0
+      ? ``
+      : `OBS: Kunde inte hämta data från: `.concat(
+          searchResults.errors
+            .map((error, index) => {
+              return index === searchResults.errors.length - 1
+                ? error.source.caption
+                : `${error.source.caption}, `;
+            })
+            .join("")
+        );
+  };
+
   async doSearch() {
     this.setState({ loading: true });
-    let fetchOptions = this.getSearchResultsFetchSettings();
-    let searchResults = await this.fetchResultFromSearchModel(fetchOptions);
+    const fetchOptions = this.getSearchResultsFetchSettings();
+    const searchResults = await this.fetchResultFromSearchModel(fetchOptions);
+    const failedWFSFetchMessage = this.getPotentialWFSErrorMessage(
+      searchResults
+    );
 
     this.setState({
       searchResults,
       showSearchResults: true,
       loading: false,
       autoCompleteOpen: false,
+      failedWFSFetchMessage,
     });
 
     let features = this.extractFeatureWithFromFeatureCollections(
@@ -654,6 +674,7 @@ class Search extends React.PureComponent {
       searchOptions,
       searchSources,
       searchTools,
+      failedWFSFetchMessage,
     } = this.state;
 
     return (
@@ -687,6 +708,7 @@ class Search extends React.PureComponent {
             searchSources={searchSources}
             handleSearchBarKeyPress={this.handleSearchBarKeyPress}
             getArrayWithSearchWords={this.getArrayWithSearchWords}
+            failedWFSFetchMessage={failedWFSFetchMessage}
             {...this.props}
           />
         </>
