@@ -282,6 +282,8 @@ class SearchBar extends React.PureComponent {
       failedWFSFetchMessage,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
+    const showFailedWFSMessage =
+      failedWFSFetchMessage.length > 0 && showSearchResults;
     return (
       <TextField
         {...params}
@@ -296,7 +298,7 @@ class SearchBar extends React.PureComponent {
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}
               {params.InputProps.endAdornment}
-              {failedWFSFetchMessage.length > 0 &&
+              {showFailedWFSMessage &&
                 this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
               <IconButton size="small" onClick={handleOnClickOrKeyboardSearch}>
                 <Typography variant="srOnly">Exekvera sökning</Typography>
