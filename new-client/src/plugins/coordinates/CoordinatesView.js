@@ -108,6 +108,9 @@ class CoordinatesView extends React.PureComponent {
                       ? transformations.coordinates[0]
                       : transformations.coordinates[1]
                   }
+                  onChange={this.model.handleInput}
+                  transform={transformations.code}
+                  axis={transformations.inverseAxis ? "X" : "Y"}
                 />
                 <TextField
                   label={transformations.xtitle}
@@ -119,6 +122,9 @@ class CoordinatesView extends React.PureComponent {
                       ? transformations.coordinates[1]
                       : transformations.coordinates[0]
                   }
+                  onChange={this.model.handleInput}
+                  transform={transformations.code}
+                  axis={transformations.inverseAxis ? "Y" : "X"}
                 />
               </TableCell>
             </TableRow>

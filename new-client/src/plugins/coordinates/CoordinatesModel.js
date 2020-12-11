@@ -1,4 +1,4 @@
-import { transform } from "ol/proj";
+import { get as getProjection, transform } from "ol/proj";
 import Feature from "ol/Feature";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
@@ -78,6 +78,90 @@ class CoordinatesModel {
     // Grab coordinates from the Point that has been drawn
     this.coordinates = e.feature.getGeometry().getCoordinates();
 
+    this.updateTransforms();
+  };
+
+  addInteraction() {
+    this.draw = new Draw({
+      source: this.source,
+      type: "Point",
+      style: new Style({
+        image: new CircleStyle({
+          radius: 5,
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 0.7)",
+          }),
+          fill: new Fill({
+            color: "rgba(255, 255, 255, 0.2)",
+          }),
+        }),
+      }),
+    });
+    this.draw.on("drawend", this.handleDrawEnd);
+    this.map.addInteraction(this.draw);
+    this.map.clickLock.add("coordinates");
+
+    // Add snap interactions AFTER measure source has been added
+    // this will allow us to snap to the newly added source too
+    this.map.snapHelper.add("coordinates");
+  }
+
+  removeInteraction() {
+    this.map.snapHelper.delete("coordinates");
+    this.map.removeInteraction(this.draw);
+    this.map.clickLock.delete("coordinates");
+  }
+
+  handleInput = (event) => {
+    // Gets the transform that was specified on the TextField
+    // it is used to transform the coordinates to the map projection which is the one updateTransforms expects
+    var transformCode =
+      event.target.parentElement.parentElement.attributes["transform"].value;
+    // Gets the axis so we can know whether this is for the X or Y axis
+    var axis =
+      event.target.parentElement.parentElement.attributes["axis"].value;
+    var updatedCoordinates =
+      axis === "X" ? [event.target.value, 0] : [0, event.target.value];
+
+    // We need to look in grand grand parent's children to find the other input field and pick the one
+    // which does not have the same transform. From there, we can get the other input field
+    event.target.parentElement.parentElement.parentElement.children.forEach(
+      (item) => {
+        if (axis !== item.attributes["axis"].value) {
+          // Index to update
+          var idx = item.attributes["axis"].value === "X" ? 0 : 1;
+
+          // Need to collect the value which is inside an input grandchild
+          item.children.forEach((child) => {
+            if (child.localName === "div") {
+              child.children.forEach((grandchild) => {
+                if (grandchild.localName === "input") {
+                  updatedCoordinates[idx] = grandchild.value;
+                }
+              });
+            }
+          });
+        }
+      }
+    );
+    // transform the coordinations if needed
+    updatedCoordinates = [
+      parseFloat(updatedCoordinates[0]),
+      parseFloat(updatedCoordinates[1]),
+    ];
+    if (transformCode !== this.map.getView().getProjection()._code) {
+      updatedCoordinates = transform(
+        updatedCoordinates,
+        getProjection(transformCode),
+        this.map.getView().getProjection()
+      );
+    }
+    // Set the coordinates field and run the update function so all values are updated
+    this.coordinates = updatedCoordinates;
+    this.updateTransforms();
+  };
+
+  updateTransforms = () => {
     // Add a nice marker to those coordinates
     this.addMarker(this.coordinates);
 
@@ -134,37 +218,6 @@ class CoordinatesModel {
       transformedCoordinates
     );
   };
-
-  addInteraction() {
-    this.draw = new Draw({
-      source: this.source,
-      type: "Point",
-      style: new Style({
-        image: new CircleStyle({
-          radius: 5,
-          stroke: new Stroke({
-            color: "rgba(0, 0, 0, 0.7)",
-          }),
-          fill: new Fill({
-            color: "rgba(255, 255, 255, 0.2)",
-          }),
-        }),
-      }),
-    });
-    this.draw.on("drawend", this.handleDrawEnd);
-    this.map.addInteraction(this.draw);
-    this.map.clickLock.add("coordinates");
-
-    // Add snap interactions AFTER measure source has been added
-    // this will allow us to snap to the newly added source too
-    this.map.snapHelper.add("coordinates");
-  }
-
-  removeInteraction() {
-    this.map.snapHelper.delete("coordinates");
-    this.map.removeInteraction(this.draw);
-    this.map.clickLock.delete("coordinates");
-  }
 }
 
 export default CoordinatesModel;
