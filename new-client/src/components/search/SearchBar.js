@@ -7,9 +7,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import SearchIcon from "@material-ui/icons/Search";
 import RoomIcon from "@material-ui/icons/Room";
 import DescriptionIcon from "@material-ui/icons/Description";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import WarningIcon from "@material-ui/icons/Warning";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import SearchResultsContainer from "./SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
@@ -18,7 +16,6 @@ import {
   IconButton,
   Paper,
   TextField,
-  Checkbox,
   Typography,
   FormHelperText,
   useMediaQuery,
@@ -42,9 +39,6 @@ const styles = (theme) => ({
 
   inputRoot: {
     height: theme.spacing(6),
-  },
-  hidden: {
-    display: "none",
   },
 });
 
@@ -330,43 +324,6 @@ class SearchBar extends React.PureComponent {
     );
   };
 
-  renderSelectSearchOptions = () => {
-    const { selectSourcesOpen } = this.state;
-    const { classes, searchModel, searchSources } = this.props;
-    return (
-      <Autocomplete
-        className={cslx(selectSourcesOpen === false ? classes.hidden : null)}
-        onChange={(event, value, reason) => this.props.setSearchSources(value)}
-        value={searchSources}
-        multiple
-        id="searchSources"
-        options={searchModel.getSources()}
-        disableCloseOnSelect
-        getOptionLabel={(option) => option.caption}
-        renderOption={(option, { selected }) => (
-          <>
-            <Checkbox
-              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-              checkedIcon={<CheckBoxIcon fontSize="small" />}
-              style={{ marginRight: 8 }}
-              checked={selected}
-            />
-            {option.caption}
-          </>
-        )}
-        style={{ width: 400 }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            // label="Sökkällor"
-            placeholder="Välj sökkälla"
-          />
-        )}
-      />
-    );
-  };
-
   render() {
     const { classes, showSearchResults, width } = this.props;
     const { panelCollapsed } = this.state;
@@ -380,8 +337,6 @@ class SearchBar extends React.PureComponent {
         <Grid item>
           <Paper elevation={width === "xs" ? 0 : 1}>
             {this.renderAutoComplete()}
-
-            {this.renderSelectSearchOptions()}
           </Paper>
         </Grid>
         {showSearchResults && this.renderSearchResultList()}
