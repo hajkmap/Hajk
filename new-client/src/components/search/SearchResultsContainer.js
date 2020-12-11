@@ -78,6 +78,12 @@ class SearchResultsContainer extends React.PureComponent {
       this.props.featureCollections.length === 1
         ? this.props.featureCollections[0]
         : undefined,
+    activeFeature:
+      this.props.featureCollections.length === 1
+        ? this.props.featureCollections[0].value.features.length === 1
+          ? this.props.featureCollections[0].value.features[0]
+          : undefined
+        : undefined,
   };
 
   componentDidMount = () => {
@@ -108,9 +114,28 @@ class SearchResultsContainer extends React.PureComponent {
     this.setState({ expanded: !this.state.expanded });
   };
 
-  handleFeatureCollectionSelected = (featureCollection) => {
+  handleButtonBackPress = () => {
+    const { activeFeature } = this.state;
+
+    if (activeFeature) {
+      this.setActiveFeature(undefined);
+    } else {
+      this.setActiveFeatureCollection(undefined);
+    }
+  };
+
+  setActiveFeature = (feature) => {
+    this.setState({ activeFeature: feature });
+  };
+
+  setActiveFeatureCollection = (featureCollection) => {
+    this.setState({ activeFeatureCollection: featureCollection });
+  };
+
+  resetFeatureAndCollection = () => {
     this.setState({
-      activeFeatureCollection: featureCollection,
+      activeFeatureCollection: undefined,
+      activeFeature: undefined,
     });
   };
 
@@ -124,7 +149,7 @@ class SearchResultsContainer extends React.PureComponent {
         <Tooltip title={"Tillbaka till hela sökresultatet"}>
           <Button
             style={{ paddingLeft: 0 }}
-            onClick={() => this.handleFeatureCollectionSelected()}
+            onClick={() => this.handleButtonBackPress()}
             color="primary"
           >
             <ArrowBackIcon fontSize="small" />
@@ -160,18 +185,11 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   render() {
-    const {
-      classes,
-
-      app,
-      getOriginBasedIcon,
-      localObserver,
-    } = this.props;
-    const { sumOfResults, activeFeatureCollection } = this.state;
+    const { classes, app, getOriginBasedIcon, localObserver } = this.props;
+    const { sumOfResults, activeFeatureCollection, activeFeature } = this.state;
     const featureCollections = activeFeatureCollection
       ? [activeFeatureCollection]
       : this.props.featureCollections;
-    const showDetailedView = activeFeatureCollection ? true : false;
 
     return (
       <>
@@ -205,10 +223,11 @@ class SearchResultsContainer extends React.PureComponent {
                   getOriginBasedIcon={getOriginBasedIcon}
                   featureCollections={featureCollections}
                   app={app}
-                  handleFeatureCollectionSelected={
-                    this.handleFeatureCollectionSelected
-                  }
-                  showDetailedView={showDetailedView}
+                  setActiveFeatureCollection={this.setActiveFeatureCollection}
+                  setActiveFeature={this.setActiveFeature}
+                  resetFeatureAndCollection={this.resetFeatureAndCollection}
+                  activeFeatureCollection={activeFeatureCollection}
+                  activeFeature={activeFeature}
                 />
               </TightAccordionDetails>
             </TightAccordion>

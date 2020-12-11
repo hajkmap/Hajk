@@ -203,15 +203,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     );
   };
 
-  handleItemTitleLinkClick = (e) => {
-    const { handleOnResultClick, feature } = this.props;
-    e.stopPropagation();
-    this.setState({ activeInMap: !this.state.activeInMap });
-    handleOnResultClick(feature);
-  };
-
-  renderShowInMapButton = () => {
-    const { feature, visibleInMap } = this.props;
+  renderShowInMapCheckbox = () => {
+    const { feature, visibleInMap, showClickResultInMap } = this.props;
     const helpText = !visibleInMap ? "Visa i kartan" : "Ta bort från kartan";
     if (feature.geometry) {
       return (
@@ -220,7 +213,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             color="primary"
             disableRipple
             checked={visibleInMap}
-            onChange={this.handleItemTitleLinkClick}
+            onClick={(e) => e.stopPropagation()}
+            onChange={() => showClickResultInMap(feature)}
             inputProps={{ "aria-label": "primary checkbox" }}
           />
         </Tooltip>
@@ -246,7 +240,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             </Typography>
           </Grid>
           <Grid item xs={2}>
-            {this.renderShowInMapButton()}
+            {this.renderShowInMapCheckbox()}
           </Grid>
         </Grid>
       );
@@ -254,6 +248,22 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   render() {
+    const { activeFeature } = this.props;
+    if (activeFeature) {
+      return (
+        <>
+          <TableContainer>
+            <Table size={"small"}>
+              {this.renderDetailsTitle()}
+              {this.renderDefaultInfoBoxTable()}
+            </Table>
+          </TableContainer>
+        </>
+      );
+    } else {
+      return <>{this.renderTightFeatureDetails()}</>;
+    }
+    /*
     if (this.shouldRenderCustomInfoBox()) {
       return (
         <>
@@ -277,6 +287,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     } else {
       return <>{this.renderTightFeatureDetails()}</>;
     }
+    */
   }
 }
 export default withStyles(styles)(SearchResultsDatasetFeature);
