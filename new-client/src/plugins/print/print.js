@@ -43,8 +43,10 @@ class Print extends React.PureComponent {
     super(props);
 
     // Prepare scales from admin options, fallback to default if needed
-    if (typeof props?.options?.scales === "string") {
+    if (props?.options?.scales?.split(",").length > 1) {
       props.options.scales = props.options.scales.replace(/\s/g, "").split(",");
+    } else {
+      props.options.scales = this.scales;
     }
 
     // If no valid max logo width is supplied, use a hard-coded default

@@ -1,5 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import Grid from "@material-ui/core/Grid";
 import Input from "@material-ui/core/Input";
 import TextField from "@material-ui/core/TextField";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -8,85 +9,70 @@ import FormLabel from "@material-ui/core/FormLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import { Button } from "@material-ui/core";
+import Chip from "@material-ui/core/Chip";
 
 const styles = (theme) => ({
-  container: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  textField: {
-    marginLeft: 0,
-    marginRight: 0,
-    width: "100%",
-  },
-  dense: {
-    marginTop: 16,
-  },
-  menu: {
-    width: 200,
-  },
-  formControl: {
-    marginTop: "8px",
-    marginBottom: "8px",
-  },
-  error: {
-    color: "rgb(255, 50, 50)",
-    backgroundColor: "rgb(255, 150, 150)",
-    padding: "5px",
-    border: "1px solid rgb(255, 50, 50)",
-    borderRadius: "4px",
+  centeredContainer: {
+    textAlign: "center",
+    padding: theme.spacing(1),
   },
 });
 
-class AttributeEditor extends React.PureComponent {
+class AttributeEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      disabled: true,
-      formValues: {},
+      formValues: undefined,
+      feature: undefined,
     };
     this.formErrors = {};
-  }
-
-  componentDidMount() {
-    this.props.observer.subscribe("editFeature", (attr) => {
-      var valueMap = {},
-        feature = this.props.model.editFeature,
-        source = this.props.model.editSource,
-        props,
-        defaultValue = "";
-
-      if (!feature || !source) return;
-
-      props = feature.getProperties();
-      source.editableFields.forEach((field) => {
-        field.initialRender = true;
-        if (field.textType === "flerval") {
-          valueMap[field.name] = field.values.map((value) => {
-            return {
-              name: value,
-              checked:
-                typeof props[field.name] === "string"
-                  ? props[field.name].split(";").find((v) => v === value) !==
-                    undefined
-                  : false,
-            };
-          });
-        } else {
-          valueMap[field.name] = props[field.name] || defaultValue;
-        }
-      });
-
+    props.observer.subscribe("feature-to-update-view", (feature) => {
       this.setState({
-        formValues: valueMap,
+        formValues: this.initFormValues(feature),
+        feature: feature,
       });
     });
   }
 
-  updateFeature(formValues) {
-    var props = this.props.model.editFeature.getProperties();
+  componentWillUnmount() {
+    this.props.observer.unsubscribe("feature-to-update-view");
+  }
+
+  initFormValues = (feature) => {
+    const { editSource } = this.props;
+    if (!feature || !editSource) return;
+
+    const featureProps = feature.getProperties();
+    let valueMap = {};
+
+    editSource.editableFields.forEach((field) => {
+      if (field.textType === "flerval") {
+        valueMap[field.name] = field.values.map((value) => {
+          return {
+            name: value,
+            checked:
+              typeof featureProps[field.name] === "string"
+                ? featureProps[field.name]
+                    .split(";")
+                    .find((v) => v === value) !== undefined
+                : false,
+          };
+        });
+      } else {
+        //If the feature has field: "" it will be changed to the default value.
+        //Not sure if we want this behavior?
+        valueMap[field.name] =
+          featureProps[field.name] || field.defaultValue || "";
+      }
+    });
+    return valueMap;
+  };
+
+  updateFeature() {
+    const featureProps = this.props.model.editFeature.getProperties();
     Object.keys(this.state.formValues).forEach((key) => {
-      var value = this.state.formValues[key];
+      let value = this.state.formValues[key];
       if (value === "") value = null;
       if (Array.isArray(value)) {
         value = value
@@ -94,13 +80,13 @@ class AttributeEditor extends React.PureComponent {
           .map((v) => v.name)
           .join(";");
       }
-      props[key] = value;
+      featureProps[key] = value;
     });
-    this.props.model.editFeature.setProperties(props);
+    this.props.model.editFeature.setProperties(featureProps);
   }
 
   checkInteger(name, value) {
-    var formValues = Object.assign({}, this.state.formValues);
+    let formValues = Object.assign({}, this.state.formValues);
     if (/^\d+$/.test(value) || value === "") {
       formValues[name] = value;
     } else {
@@ -119,7 +105,7 @@ class AttributeEditor extends React.PureComponent {
   }
 
   checkNumber(name, value) {
-    var formValues = Object.assign({}, this.state.formValues);
+    let formValues = Object.assign({}, this.state.formValues);
     if (/^\d+([.,](\d+)?)?$/.test(value) || value === "") {
       value = value.replace(",", ".");
       formValues[name] = value;
@@ -139,9 +125,9 @@ class AttributeEditor extends React.PureComponent {
   }
 
   checkUrl(name, value) {
-    var regex = /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:|@)|\/|\?)*)?$/i;
-    var valid = regex.test(value);
-    var formValues = Object.assign({}, this.state.formValues);
+    let regex = /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!$&'()*+,;=]|:|@)|\/|\?)*)?$/i;
+    let valid = regex.test(value);
+    let formValues = Object.assign({}, this.state.formValues);
     if (valid || value === "") {
       formValues[name] = value;
       delete this.formErrors[name];
@@ -161,7 +147,7 @@ class AttributeEditor extends React.PureComponent {
   }
 
   checkText(name, value) {
-    var formValues = Object.assign({}, this.state.formValues);
+    let formValues = Object.assign({}, this.state.formValues);
     formValues[name] = value;
     this.setState(
       {
@@ -174,7 +160,7 @@ class AttributeEditor extends React.PureComponent {
   }
 
   checkSelect(name, value) {
-    var formValues = Object.assign({}, this.state.formValues);
+    let formValues = Object.assign({}, this.state.formValues);
     formValues[name] = value;
     this.setState(
       {
@@ -187,7 +173,7 @@ class AttributeEditor extends React.PureComponent {
   }
 
   checkMultiple(name, checked, value, index) {
-    var formValues = Object.assign({}, this.state.formValues);
+    let formValues = Object.assign({}, this.state.formValues);
     formValues[name][index].checked = checked;
     this.setState(
       {
@@ -200,7 +186,7 @@ class AttributeEditor extends React.PureComponent {
   }
 
   checkDate(name, date) {
-    var formValues = Object.assign({}, this.state.formValues);
+    let formValues = Object.assign({}, this.state.formValues);
     formValues[name] = date;
     this.updateFeature();
     this.setState(
@@ -222,15 +208,7 @@ class AttributeEditor extends React.PureComponent {
     }
   }
 
-  getError(field) {
-    const { classes } = this.props;
-    return this.formErrors.hasOwnProperty(field.name) ? (
-      <div className={classes.error}>{this.formErrors[field.name]}</div>
-    ) : null;
-  }
-
   getValueMarkup(field) {
-    const { classes } = this.props;
     if (field.dataType === "int") {
       field.textType = "heltal";
     }
@@ -243,7 +221,7 @@ class AttributeEditor extends React.PureComponent {
       field.textType = "datum";
     }
 
-    var value = this.state.formValues[field.name];
+    let value = this.state.formValues[field.name];
 
     if (value === undefined || value === null) {
       value = "";
@@ -261,7 +239,7 @@ class AttributeEditor extends React.PureComponent {
           <TextField
             id={field.id}
             label={field.name}
-            className={classes.textField}
+            fullWidth={true}
             margin="normal"
             variant="outlined"
             value={value}
@@ -277,7 +255,7 @@ class AttributeEditor extends React.PureComponent {
           <TextField
             id={field.id}
             label={field.name}
-            className={classes.textField}
+            fullWidth={true}
             margin="normal"
             variant="outlined"
             value={value}
@@ -293,9 +271,9 @@ class AttributeEditor extends React.PureComponent {
           <TextField
             id={field.id}
             label={field.name}
-            className={classes.textField}
-            type="datetime-local"
+            fullWidth={true}
             margin="normal"
+            type="datetime-local"
             variant="outlined"
             value={value}
             onChange={(e) => {
@@ -315,9 +293,12 @@ class AttributeEditor extends React.PureComponent {
             <TextField
               id={field.id}
               label={field.name}
-              className={classes.textField}
+              size="small"
+              fullWidth={true}
               margin="normal"
               variant="outlined"
+              error={this.formErrors.hasOwnProperty(field.name)}
+              helperText={this.formErrors[field.name] ?? ""}
               value={value}
               onChange={(e) => {
                 this.setChanged();
@@ -332,7 +313,6 @@ class AttributeEditor extends React.PureComponent {
                 field.initialRender = false;
               }}
             />
-            {this.getError(field)}
           </>
         );
       case "flerval":
@@ -351,7 +331,7 @@ class AttributeEditor extends React.PureComponent {
         }
 
         let checkboxes = field.values.map((val, i) => {
-          var id = field.name + i,
+          let id = field.name + i,
             item = value.find((item) => item.name === val) || {
               checked: false,
             };
@@ -362,6 +342,7 @@ class AttributeEditor extends React.PureComponent {
               control={
                 <Checkbox
                   checked={item.checked}
+                  color="primary"
                   onChange={(e) => {
                     this.setChanged();
                     this.checkMultiple(field.name, e.target.checked, val, i);
@@ -374,12 +355,10 @@ class AttributeEditor extends React.PureComponent {
           );
         });
         return (
-          <div className={classes.root}>
-            <FormControl component="fieldset" className={classes.formControl}>
-              <FormLabel component="legend">{field.name}</FormLabel>
-              <FormGroup>{checkboxes}</FormGroup>
-            </FormControl>
-          </div>
+          <FormControl fullWidth margin="normal" component="fieldset">
+            <FormLabel component="legend">{field.name}</FormLabel>
+            <FormGroup>{checkboxes}</FormGroup>
+          </FormControl>
         );
       case "lista":
         let options = null;
@@ -391,11 +370,12 @@ class AttributeEditor extends React.PureComponent {
           ));
         }
         return (
-          <div className={classes.root}>
-            <FormControl component="fieldset" className={classes.formControl}>
+          <>
+            <FormControl fullWidth={true} component="fieldset">
               <FormLabel component="legend">{field.name}</FormLabel>
               <NativeSelect
                 value={value}
+                variant="outlined"
                 input={<Input name={field.name} id={field.name} />}
                 onChange={(e) => {
                   this.setChanged();
@@ -407,7 +387,7 @@ class AttributeEditor extends React.PureComponent {
                 {options}
               </NativeSelect>
             </FormControl>
-          </div>
+          </>
         );
       case null:
         return <span>{value}</span>;
@@ -417,21 +397,42 @@ class AttributeEditor extends React.PureComponent {
   }
 
   render() {
-    if (!this.props.feature) {
-      return null;
-    }
+    const { formValues } = this.state;
+    const { classes, model } = this.props;
 
-    var markup = this.props.source.editableFields.map((field, i) => {
-      var valueMarkup = this.getValueMarkup(field);
-      this.updateFeature();
+    if (!formValues) return null;
+
+    const markup = this.props.editSource.editableFields.map((field, i) => {
+      const valueMarkup = this.getValueMarkup(field);
       return (
-        <div key={i} ref={field.name}>
+        <Grid item xs={12} key={i} ref={field.name}>
           {valueMarkup}
-        </div>
+        </Grid>
       );
     });
 
-    return <div>{markup}</div>;
+    return (
+      <>
+        <Grid item xs={12} className={classes.centeredContainer}>
+          <Chip
+            variant="outlined"
+            color="primary"
+            label="Ange objektets attribut:"
+          />
+        </Grid>
+        {markup}
+        <Grid item xs={12} className={classes.centeredContainer}>
+          <Button
+            color="primary"
+            style={{ width: 100 }}
+            variant="contained"
+            onClick={model.resetEditFeature}
+          >
+            OK
+          </Button>
+        </Grid>
+      </>
+    );
   }
 }
 

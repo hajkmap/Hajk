@@ -6,7 +6,12 @@ import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
 import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
-import { withTheme } from "@material-ui/core/styles";
+import { withTheme, createMuiTheme } from "@material-ui/core/styles";
+import { deepMerge } from "../../utils/DeepMerge";
+
+const fetchOpts = {
+  credentials: "same-origin",
+};
 
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
@@ -45,12 +50,57 @@ class DocumentHandler extends React.PureComponent {
       })
         .init()
         .then((loadedDocumentModel) => {
-          this.setState({ model: loadedDocumentModel });
+          this.fetchCustomThemeJson().then((customTheme) => {
+            this.setState({
+              model: loadedDocumentModel,
+              customTheme: customTheme,
+            });
+          });
         });
 
       this.addDrawerToggleButton();
     });
   }
+
+  /**
+   * @summary Loops customTheme and checks if certain typography-variants have marginBottom set
+   * in the theme file. If not set, then we inject default value.
+   * @param {customTheme} documentHandlerTheme
+   * @memberof documenthandler.js
+   */
+  setBottomMarginsForTypographyVariants = (documentHandlerTheme) => {
+    ["body1", "h1", "h2", "h3", "h4", "h5", "h6"].forEach((key) => {
+      const keyHasValue = documentHandlerTheme.typography[key];
+      if (keyHasValue) {
+        const marginBottom = documentHandlerTheme.typography[key]?.marginBottom;
+        if (!marginBottom) {
+          documentHandlerTheme.typography[key].marginBottom =
+            this.props.theme.spacing(1) || "8px";
+        }
+      }
+    });
+  };
+
+  fetchCustomThemeJson = () => {
+    const { options } = this.props;
+    return fetch(options.customThemeUrl, fetchOpts)
+      .then((res) => {
+        return res.json().then((documentHandlerTheme) => {
+          if (documentHandlerTheme.typography) {
+            this.setBottomMarginsForTypographyVariants(documentHandlerTheme);
+          }
+          return createMuiTheme(
+            deepMerge(this.props.theme, documentHandlerTheme)
+          );
+        });
+      })
+      .catch(() => {
+        console.warn(
+          "Could not find custom theme for documenthandler, check customThemeUrl"
+        );
+        return null;
+      });
+  };
 
   dynamicallyImportOpenSans = () => {
     const { dynamicImportUrls } = this.props.options;
@@ -158,6 +208,7 @@ class DocumentHandler extends React.PureComponent {
           onMinimize={this.onMinimize}
           showDocument={this.showDocument}
           onMaximize={this.onMaximize}
+          customTheme={this.state.customTheme}
           onWindowHide={this.onWindowHide}
           togglePrintWindow={this.togglePrintWindow}
           document={this.state.document}

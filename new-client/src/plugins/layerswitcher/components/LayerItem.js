@@ -353,6 +353,7 @@ class LayerItem extends React.PureComponent {
           mapConfig={app.config.mapConfig}
           layer={layer}
           model={model}
+          options={this.props.options}
           chapters={chapters}
           cqlFilterVisible={cqlFilterVisible}
           onOpenChapter={(chapter) => {
@@ -434,6 +435,7 @@ class LayerItem extends React.PureComponent {
             <hr />
           ) : null}
           <LayerSettings
+            options={this.props.options}
             layer={layer}
             toggled={this.state.toggleSettings}
             showOpacity={true}

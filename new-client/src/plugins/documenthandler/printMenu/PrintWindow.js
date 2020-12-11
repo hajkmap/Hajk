@@ -15,6 +15,7 @@ import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { ThemeProvider } from "@material-ui/styles";
 
 import {
   LinearProgress,
@@ -325,9 +326,15 @@ class PrintWindow extends React.PureComponent {
 
   customRender = (element, container) => {
     return new Promise((resolve) => {
-      ReactDOM.render(element, container, (e) => {
-        resolve();
-      });
+      ReactDOM.render(
+        <ThemeProvider theme={this.props.customTheme || this.props.theme}>
+          {element}
+        </ThemeProvider>,
+        container,
+        (e) => {
+          resolve();
+        }
+      );
     });
   };
 

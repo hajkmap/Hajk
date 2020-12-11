@@ -30,17 +30,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function DrawerToggleButtons({ drawerButtons, globalObserver }) {
+function DrawerToggleButtons({
+  drawerButtons,
+  globalObserver,
+  initialActiveButton,
+}) {
   const classes = useStyles();
 
-  // If cookie for drawerPermanent is true, get the last active
-  // content and set as active toggle button.
-  const [activeButton, setActiveButton] = useState(
-    window.localStorage.getItem("drawerPermanent") === "true" &&
-      window.localStorage.getItem("activeDrawerContent") !== null
-      ? window.localStorage.getItem("activeDrawerContent")
-      : null
-  );
+  //Set initial active button state based on the initially active drawer, received from App.js
+  //This will either be a drawer button name such as "plugins" or null, depending on whether there
+  //is an active drawer when the map starts (set either from the cookie or config).
+  const [activeButton, setActiveButton] = useState(initialActiveButton);
 
   // Sort by the (optional) @order property prior rendering
   // Sort using minus (-) causes the correct behavior, as this will

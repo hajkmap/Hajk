@@ -1,6 +1,5 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
 import Fab from "@material-ui/core/Fab";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import Grid from "@material-ui/core/Grid";
@@ -16,7 +15,9 @@ const styles = (theme) => ({
     overflowX: "hidden",
     userSelect: "text",
     outline: "none",
+    //scrollBehavior: "smooth",
   },
+
   contentContainer: {
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(2),
@@ -60,8 +61,6 @@ class DocumentViewer extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    console.log(this.state, "state");
-
     this.scrollElementRef = React.createRef();
     this.setScrollButtonLimit();
     this.bindSubscriptions();
@@ -78,9 +77,12 @@ class DocumentViewer extends React.PureComponent {
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
-
     localObserver.subscribe("scroll-to-chapter", (chapter) => {
-      chapter.scrollRef.current.scrollIntoView();
+      /*scrollIntoView is buggy without dirty fix - 
+      tried using react life cycle methods but is, for some reason, not working*/
+      setTimeout(() => {
+        chapter.scrollRef.current.scrollIntoView();
+      }, 100);
     });
 
     localObserver.subscribe("scroll-to-top", () => {
@@ -103,6 +105,9 @@ class DocumentViewer extends React.PureComponent {
   componentDidUpdate = (prevProps) => {
     if (prevProps.activeDocument !== this.props.activeDocument) {
       this.scrollToTop();
+      this.setState({
+        expandedTableOfContents: expandedTocOnStart(this.props),
+      });
     }
   };
 
@@ -265,4 +270,4 @@ class DocumentViewer extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(DocumentViewer));
+export default withStyles(styles)(DocumentViewer);

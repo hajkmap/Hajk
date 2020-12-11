@@ -6,16 +6,60 @@ import clsx from "clsx";
 import Box from "@material-ui/core/Box";
 import TextArea from "../documentWindow/TextArea";
 import { makeStyles } from "@material-ui/core/styles";
-import { Button, Typography, CardMedia, List } from "@material-ui/core";
+import {
+  Button,
+  Typography,
+  CardMedia,
+  List,
+  ListItem,
+  Grid,
+} from "@material-ui/core";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
+
+//Had to make some magic to be able to handle list in all different sizes.
+//Common problem to get second row indented in a good way and even more difficult
+//when you can change the font-size in theme.
+const getIndentationValue = (fontSize, multiplier, negative) => {
+  let value = multiplier * fontSize.substring(0, fontSize.length - 3);
+  return negative ? `${value * -1}rem` : `${value}rem`;
+};
 
 const useStyles = makeStyles((theme) => ({
   documentImage: {
     objectFit: "contain",
     objectPosition: "left",
   },
+
+  pictureRightFloatingText: {},
+  pictureLeftFloatingText: {},
+
+  floatRight: {
+    float: "right",
+    marginLeft: theme.spacing(1),
+  },
+  floatLeft: {
+    float: "left",
+    marginRight: theme.spacing(1),
+  },
+
+  pictureRight: {
+    alignItems: "flex-end",
+    display: "flex",
+    flexDirection: "column",
+  },
+  pictureLeft: {
+    alignItems: "flex-start",
+    display: "flex",
+    flexDirection: "column",
+  },
+  pictureCenter: {
+    alignItems: "center",
+    display: "flex",
+    flexDirection: "column",
+  },
+
   popupActivatedImage: {
     marginBottom: theme.spacing(1),
     cursor: "pointer",
@@ -26,13 +70,10 @@ const useStyles = makeStyles((theme) => ({
   },
   imageText: {
     marginBottom: theme.spacing(1),
-    fontStyle: "italic",
   },
   imageInformationWrapper: {
     marginBottom: theme.spacing(1),
-  },
-  imageCaption: {
-    fontStyle: "italic",
+    maxWidth: "100%",
   },
   startIcon: {
     marginLeft: theme.spacing(0),
@@ -47,22 +88,33 @@ const useStyles = makeStyles((theme) => ({
     width: "auto",
     maxWidth: "100%",
   },
-  typography: {
-    overflowWrap: "break-word",
+  listItemOneDigit: {
+    marginRight: getIndentationValue(theme.typography.body1.fontSize, 1), //MAGIC
+    padding: theme.spacing(0),
+  },
+  listItemTwoDigit: {
     marginBottom: theme.spacing(1),
+    padding: theme.spacing(0),
+    marginRight: getIndentationValue(theme.typography.body1.fontSize, 0.5), //MAGIC
+  },
+  olListItem: {
+    padding: theme.spacing(0),
   },
   ulList: {
     listStyle: "initial",
     listStylePosition: "inside",
-    padding: theme.spacing(0),
+    overflowWrap: "break-word",
+    wordBreak: "break-word",
     marginBottom: theme.spacing(1),
-  },
-  listItemMargin: {
-    marginLeft: theme.spacing(1),
+    paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.375), //MAGIC
+    textIndent: getIndentationValue(
+      theme.typography.body1.fontSize,
+      1.375,
+      true
+    ), //MAGIC
+    padding: theme.spacing(0),
   },
   olList: {
-    listStyle: "decimal",
-    listStylePosition: "inside",
     padding: theme.spacing(0),
     marginBottom: theme.spacing(1),
   },
@@ -93,9 +145,8 @@ const getFormattedComponentFromTag = (tag) => {
 };
 
 export const Paragraph = ({ pTag }) => {
-  const classes = useStyles();
   return (
-    <Typography className={classes.typography} variant="body1">
+    <Typography variant="body1">
       {getFormattedComponentFromTag(pTag)}
     </Typography>
   );
@@ -107,7 +158,16 @@ export const ULComponent = ({ ulComponent }) => {
   return (
     <List className={classes.ulList} component="ul">
       {children.map((listItem, index) => {
-        return <li key={index}>{getFormattedComponentFromTag(listItem)}</li>;
+        return (
+          <Typography
+            key={index}
+            component="li"
+            className={classes.typography}
+            variant="body1"
+          >
+            {getFormattedComponentFromTag(listItem)}{" "}
+          </Typography>
+        );
       })}
     </List>
   );
@@ -120,11 +180,25 @@ export const OLComponent = ({ olComponent }) => {
     <List className={classes.olList} component="ol">
       {children.map((listItem, index) => {
         return (
-          <li key={index}>
-            <span className={classes.listItemMargin}>
-              {getFormattedComponentFromTag(listItem)}
-            </span>
-          </li>
+          <ListItem className={classes.olListItem} disableGutters key={index}>
+            <Grid wrap="nowrap" container>
+              <Grid
+                className={clsx(
+                  index < 9
+                    ? classes.listItemOneDigit
+                    : classes.listItemTwoDigit
+                )}
+                item
+              >
+                <Typography variant="body1">{`${index + 1}.`}</Typography>
+              </Grid>
+              <Grid item>
+                <Typography className={classes.olListItem} variant="body1">
+                  {getFormattedComponentFromTag(listItem)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </ListItem>
         );
       })}
     </List>
@@ -194,8 +268,8 @@ export const Figure = ({ figureTag }) => {
 export const Img = ({ imgTag, localObserver }) => {
   const classes = useStyles();
 
-  const isPopupAllowedForImage = (imgTag) => {
-    return imgTag.attributes.getNamedItem("data-popup") == null ? false : true;
+  const tagIsPresent = (imgTag, attribute) => {
+    return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
   };
 
   const getImageStyle = (image) => {
@@ -217,13 +291,46 @@ export const Img = ({ imgTag, localObserver }) => {
     return className;
   };
 
+  const getImagePositionClass = (positioning) => {
+    const { right, left, center, floatLeft, floatRight } = positioning;
+
+    if (right) {
+      return classes.pictureRight;
+    }
+
+    if (left) {
+      return classes.pictureLeft;
+    }
+
+    if (center && (!floatLeft || !floatRight)) {
+      return classes.pictureCenter;
+    }
+    return;
+  };
+
+  const getImageFloating = (positioning) => {
+    const { right, left, center, floatLeft, floatRight } = positioning;
+    if (!center) {
+      if (floatLeft && !right) {
+        return classes.floatLeft;
+      }
+
+      if (floatRight && !left) {
+        return classes.floatRight;
+      }
+    }
+
+    return;
+  };
+
   const getImageDescription = (image) => {
     return (
-      <Box className={classes.imageInformationWrapper}>
+      <Box
+        style={{ width: image.width }}
+        className={classes.imageInformationWrapper}
+      >
         {image.caption && (
-          <Typography variant="subtitle2" className={classes.imageCaption}>
-            {image.caption}
-          </Typography>
+          <Typography variant="subtitle2">{image.caption}</Typography>
         )}
         {image.source && (
           <Typography variant="subtitle2" className={classes.imageText}>
@@ -233,14 +340,20 @@ export const Img = ({ imgTag, localObserver }) => {
       </Box>
     );
   };
+
   const image = {
     caption: imgTag.attributes.getNamedItem("data-caption")?.value,
-    popup: isPopupAllowedForImage(imgTag),
+    popup: tagIsPresent(imgTag, "data-image-popup"),
     source: imgTag.attributes.getNamedItem("data-source")?.value,
     url: imgTag.attributes.getNamedItem("src")?.value,
     altValue: imgTag.attributes.getNamedItem("alt")?.value,
     height: imgTag.attributes.getNamedItem("data-image-height")?.value,
     width: imgTag.attributes.getNamedItem("data-image-width")?.value,
+    right: tagIsPresent(imgTag, "data-image-right"),
+    left: tagIsPresent(imgTag, "data-image-left"),
+    center: tagIsPresent(imgTag, "data-image-center"),
+    floatLeft: tagIsPresent(imgTag, "data-image-float-left"),
+    floatRight: tagIsPresent(imgTag, "data-image-float-right"),
   };
 
   let onClickCallback = image.popup
@@ -249,8 +362,11 @@ export const Img = ({ imgTag, localObserver }) => {
       }
     : null;
 
+  const positioningClass = getImagePositionClass(image);
+  const floatingPictureClass = getImageFloating(image);
+
   return (
-    <>
+    <Box className={clsx(positioningClass, floatingPictureClass)}>
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue}
@@ -265,7 +381,7 @@ export const Img = ({ imgTag, localObserver }) => {
         image={image.url}
       />
       {getImageDescription(image)}
-    </>
+    </Box>
   );
 };
 
@@ -276,13 +392,17 @@ export const Strong = ({ strongTag }) => {
     children.forEach((child, index) => {
       array.push(
         <React.Fragment key={index}>
-          <strong>{renderChild(child)}</strong>
+          <strong key={index}>{renderChild(child)}</strong>
         </React.Fragment>
       );
     });
     return array;
   }
-  return [<strong>{strongTag.textContent}</strong>];
+  return [
+    <React.Fragment key={0}>
+      <strong>{strongTag.textContent}</strong>
+    </React.Fragment>,
+  ];
 };
 export const Underline = ({ uTag }) => {
   const children = [...uTag.childNodes];
@@ -297,7 +417,11 @@ export const Underline = ({ uTag }) => {
     });
     return array;
   }
-  return [<u>{uTag.textContent}</u>];
+  return [
+    <React.Fragment key={0}>
+      <u>{uTag.textContent}</u>
+    </React.Fragment>,
+  ];
 };
 export const Italic = ({ emTag }) => {
   const children = [...emTag.childNodes];
@@ -312,7 +436,11 @@ export const Italic = ({ emTag }) => {
     });
     return array;
   }
-  return [<em>{emTag.textContent}</em>];
+  return [
+    <React.Fragment key={0}>
+      <em>{emTag.textContent}</em>
+    </React.Fragment>,
+  ];
 };
 
 /**

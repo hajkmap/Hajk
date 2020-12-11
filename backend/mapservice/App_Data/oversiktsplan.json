@@ -654,6 +654,7 @@
       "options": {
         "title": "",
         "target": "hidden",
+        "customThemeUrl": "/documentHandlerTheme.json",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
           "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
