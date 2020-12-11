@@ -201,6 +201,7 @@ class MapViewModel {
 
       this.drawSource.on("addfeature", (e) => {
         this.map.removeInteraction(this.draw);
+        this.map.clickLock.delete("search");
         this.localObserver.publish("on-draw-end", e.feature);
       });
     } else {

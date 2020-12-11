@@ -128,14 +128,15 @@ class SearchSettings extends React.PureComponent {
                 <Tooltip title={searchOptions.activeSpatialFilter}>
                   <ToggleButton
                     value="activeSpatialFilter"
-                    onChange={() =>
+                    onChange={(e) => {
+                      e.preventDefault();
                       this.updateSearchOptions(
                         "activeSpatialFilter",
                         searchOptions.activeSpatialFilter === "intersects"
                           ? "within"
                           : "intersects"
-                      )
-                    }
+                      );
+                    }}
                   >
                     {searchOptions.activeSpatialFilter === "intersects" ? (
                       <IntersectsIcon />
