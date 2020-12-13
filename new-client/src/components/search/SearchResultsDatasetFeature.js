@@ -2,23 +2,9 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { Checkbox, Typography, Tooltip, Grid } from "@material-ui/core";
 
-const styles = (theme) => ({
-  tableCell: {
-    paddingLeft: 0,
-    wordBreak: "break-all",
-    width: "50%",
-  },
+const styles = () => ({
   featureDisplayFieldsContainer: {
     paddingLeft: 15,
-  },
-  allFeatureDetailsContainer: {
-    maxWidth: "100%",
-    padding: theme.spacing(2),
-  },
-  allFeatureDetailsHeader: {
-    maxWidth: "100%",
-    fontWeight: 500,
-    paddingBottom: theme.spacing(1),
   },
 });
 
@@ -54,7 +40,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
 
   render() {
     const { classes, feature, featureTitle } = this.props;
-    if (feature && featureTitle.length > 0) {
+    if (featureTitle.length > 0) {
       return (
         <Grid
           container
@@ -76,6 +62,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             : this.renderOriginBasedIcon()}
         </Grid>
       );
+    } else {
+      return null;
     }
   }
 }
