@@ -33,8 +33,7 @@ const styles = (theme) => ({
   },
 
   autocompleteTypography: {
-    paddingRight: 8,
-    maxWidth: "60%",
+    maxWidth: "100%",
   },
 
   inputRoot: {
@@ -222,15 +221,22 @@ class SearchBar extends React.PureComponent {
         renderOption={(option) => {
           if (searchString.length > 0) {
             return (
-              <>
-                {this.getOriginBasedIcon(option.origin)}
-                {this.getHighlightedACE(
-                  searchString,
-                  decodeURIComponent(option.autocompleteEntry)
-                )}
-
-                <FormHelperText>{option.dataset}</FormHelperText>
-              </>
+              <Grid container alignItems="center">
+                <Grid item xs={1}>
+                  {this.getOriginBasedIcon(option.origin)}
+                </Grid>
+                <Grid container item xs={11}>
+                  <Grid item xs={12}>
+                    {this.getHighlightedACE(
+                      searchString,
+                      decodeURIComponent(option.autocompleteEntry)
+                    )}
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormHelperText>{option.dataset}</FormHelperText>
+                  </Grid>
+                </Grid>
+              </Grid>
             );
           }
         }}

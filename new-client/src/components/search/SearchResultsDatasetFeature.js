@@ -1,5 +1,4 @@
 import React from "react";
-import cslx from "clsx";
 import FeaturePropsParsing from "../../components/FeatureInfo/FeaturePropsParsing";
 import { withStyles } from "@material-ui/core/styles";
 import {
@@ -8,36 +7,35 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  TableHead,
   TableContainer,
   Typography,
   Tooltip,
   Grid,
 } from "@material-ui/core";
 
-const styles = () => ({
-  hidden: {
-    display: "none",
-  },
+const styles = (theme) => ({
   tableCell: {
     paddingLeft: 0,
     wordBreak: "break-all",
-  },
-  customDetailsHtmlTypography: {
-    overflow: "hidden",
-  },
-  showMoreInformationButton: {
-    width: "100%",
+    width: "50%",
   },
   featureDisplayFieldsContainer: {
     paddingLeft: 15,
+  },
+  allFeatureDetailsContainer: {
+    maxWidth: "100%",
+    padding: theme.spacing(2),
+  },
+  allFeatureDetailsHeader: {
+    maxWidth: "100%",
+    fontWeight: 500,
+    paddingBottom: theme.spacing(1),
   },
 });
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   state = {
-    visibleFeatureInfo: null,
-    hiddenFeatureInfo: null,
+    featureInfo: null,
   };
 
   constructor(props) {
@@ -49,10 +47,14 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   }
 
   componentDidMount = () => {
-    const { feature, source } = this.props;
     if (this.shouldRenderCustomInfoBox()) {
-      this.getHtmlItemInfoBox(feature, source.infobox);
+      this.getHtmlItemInfoBox();
     }
+  };
+
+  shouldRenderCustomInfoBox = () => {
+    const { source } = this.props;
+    return source.infobox && source.infobox !== "";
   };
 
   renderTableCell = (content, position) => {
@@ -65,39 +67,15 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     );
   };
 
-  getHtmlSections = (renderedHtml) => {
-    let visibleFeatureInfo = renderedHtml[0].props.children.find((child) => {
-      return child.props && child.props.hasOwnProperty("data-visible");
-    });
-
-    let hiddenFeatureInfo = renderedHtml[0].props.children.find((child) => {
-      return child.props && child.props.hasOwnProperty("data-hidden");
-    });
-
-    return {
-      visibleFeatureInfo: visibleFeatureInfo
-        ? visibleFeatureInfo.props.children
-        : "",
-      hiddenFeatureInfo: hiddenFeatureInfo
-        ? hiddenFeatureInfo.props.children
-        : "",
-    };
-  };
-
-  getHtmlItemInfoBox = (feature, infoBox) => {
+  getHtmlItemInfoBox = () => {
+    const { source, feature } = this.props;
     feature.properties = this.featurePropsParsing.extractPropertiesFromJson(
       feature.properties
     );
     this.featurePropsParsing
-      .mergeFeaturePropsWithMarkdown(infoBox, feature.properties)
+      .mergeFeaturePropsWithMarkdown(source.infobox, feature.properties)
       .then((featureInfo) => {
-        const { visibleFeatureInfo, hiddenFeatureInfo } = this.getHtmlSections(
-          featureInfo
-        );
-        this.setState({
-          visibleFeatureInfo: visibleFeatureInfo,
-          hiddenFeatureInfo: hiddenFeatureInfo,
-        });
+        this.setState({ featureInfo: featureInfo });
       });
   };
 
@@ -122,85 +100,35 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     }, "");
   };
 
-  renderHiddenSection = () => {
-    if (this.state.hiddenFeatureInfo) {
-      return this.state.hiddenFeatureInfo.map((element, index) => {
+  renderDefaultInfoBox = () => {
+    const { feature } = this.props;
+    return (
+      <TableContainer>
+        <Table size="small">
+          {Object.entries(feature.properties).map((row, index) => {
+            return (
+              <TableBody key={index}>
+                <TableRow key={row[0]}>
+                  {this.renderTableCell(row[0])}
+                  {this.renderTableCell(row[1], "right")}
+                </TableRow>
+              </TableBody>
+            );
+          })}
+        </Table>
+      </TableContainer>
+    );
+  };
+
+  renderCustomInfoBox = () => {
+    if (this.state.featureInfo) {
+      return this.state.featureInfo.map((element, index) => {
         if (typeof element == "string") {
           return <Typography key={index}>{element}</Typography>;
         }
         return <React.Fragment key={index}>{element}</React.Fragment>;
       });
     }
-
-    return this.state.hiddenFeatureInfo;
-  };
-
-  renderVisibleSection = () => {
-    if (this.state.visibleFeatureInfo) {
-      return this.state.visibleFeatureInfo.map((element, index) => {
-        if (typeof element == "string") {
-          return <Typography key={index}>{element}</Typography>;
-        }
-        return <React.Fragment key={index}>{element}</React.Fragment>;
-      });
-    }
-
-    return this.state.visibleFeatureInfo;
-  };
-
-  renderDefaultInfoBoxTable = () => {
-    const { feature, classes, showAllInformation } = this.props;
-
-    return Object.entries(feature.properties).map((row, index) => {
-      return (
-        <TableBody key={index}>
-          <TableRow
-            className={cslx(
-              !showAllInformation && index >= 2 ? classes.hidden : null
-            )}
-            key={row[0]}
-          >
-            {this.renderTableCell(row[0])}
-            {this.renderTableCell(row[1], "right")}
-          </TableRow>
-        </TableBody>
-      );
-    });
-  };
-
-  renderCustomInfoBoxTable = () => {
-    const { showAllInformation } = this.props;
-
-    return (
-      <>
-        {this.renderVisibleSection()}
-        {showAllInformation && this.renderHiddenSection()}
-      </>
-    );
-  };
-
-  shouldRenderCustomInfoBox = () => {
-    const { source } = this.props;
-    return (
-      source.infobox &&
-      source.infobox !== "" &&
-      source.infobox.search("<section data-visible>") !== -1
-    );
-  };
-
-  renderDetailsTitle = () => {
-    const { classes } = this.props;
-    return (
-      <TableHead>
-        <TableRow>
-          <TableCell colSpan="6" variant="head" className={classes.tableCell}>
-            <Typography variant="subtitle1" align="left">
-              {this.getFeatureTitle()}
-            </Typography>
-          </TableCell>
-        </TableRow>
-      </TableHead>
-    );
   };
 
   renderShowInMapCheckbox = () => {
@@ -225,9 +153,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   renderTightFeatureDetails = () => {
-    const { classes } = this.props;
-    const title = this.getFeatureTitle();
-    if (title.length > 0) {
+    const { classes, featureTitle } = this.props;
+    if (featureTitle.length > 0) {
       return (
         <Grid
           container
@@ -235,8 +162,13 @@ class SearchResultsDatasetFeature extends React.PureComponent {
           className={classes.featureDisplayFieldsContainer}
         >
           <Grid item xs={10}>
-            <Typography variant="subtitle1" align="left">
-              {title}
+            <Typography
+              noWrap
+              variant="subtitle1"
+              align="left"
+              style={{ maxWidth: "100%" }}
+            >
+              {featureTitle}
             </Typography>
           </Grid>
           <Grid item xs={2}>
@@ -247,47 +179,37 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     }
   };
 
-  render() {
-    const { activeFeature } = this.props;
-    if (activeFeature) {
-      return (
-        <>
-          <TableContainer>
-            <Table size={"small"}>
-              {this.renderDetailsTitle()}
-              {this.renderDefaultInfoBoxTable()}
-            </Table>
-          </TableContainer>
-        </>
-      );
-    } else {
-      return <>{this.renderTightFeatureDetails()}</>;
-    }
-    /*
-    if (this.shouldRenderCustomInfoBox()) {
-      return (
-        <>
-          <Typography variant="subtitle1" align="left">
-            {this.getFeatureTitle()}
+  renderAllFeatureDetails = () => {
+    const { classes, featureTitle } = this.props;
+
+    return (
+      <Grid container className={classes.allFeatureDetailsContainer}>
+        <Grid item xs={12} align="center">
+          <Typography noWrap className={classes.allFeatureDetailsHeader}>
+            {featureTitle}
           </Typography>
-          {this.renderCustomInfoBoxTable()}
-        </>
-      );
-    } else if (false) {
-      return (
-        <>
-          <TableContainer>
-            <Table size={"small"}>
-              {this.renderDetailsTitle()}
-              {this.renderDefaultInfoBoxTable()}
-            </Table>
-          </TableContainer>
-        </>
-      );
+        </Grid>
+        {this.state.featureInfo && (
+          <Grid item xs={12}>
+            {this.renderCustomInfoBox()}
+          </Grid>
+        )}
+        {!this.state.featureInfo && (
+          <Grid item xs={12}>
+            {this.renderDefaultInfoBox()}
+          </Grid>
+        )}
+      </Grid>
+    );
+  };
+
+  render() {
+    const { shouldRenderAllFeatureDetails } = this.props;
+    if (shouldRenderAllFeatureDetails) {
+      return <>{this.renderAllFeatureDetails()}</>;
     } else {
       return <>{this.renderTightFeatureDetails()}</>;
     }
-    */
   }
 }
 export default withStyles(styles)(SearchResultsDatasetFeature);

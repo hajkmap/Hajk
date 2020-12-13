@@ -26,38 +26,13 @@ const styles = (theme) => ({
   datasetDetailsContainer: {
     padding: 0,
   },
-  datasetTable: {
+  hover: {
     cursor: "pointer",
     "&:hover": {
       backgroundColor: theme.palette.action.hover,
     },
   },
 });
-
-const TightAccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: 0,
-    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
-    boxShadow: "none",
-    "&:before": {
-      display: "none",
-    },
-  },
-}))(AccordionDetails);
-
-const TightBreadcrumbs = withStyles({
-  root: {
-    width: "100%",
-    display: "inline-block",
-  },
-  ol: {
-    width: "100%",
-  },
-  li: {
-    display: "flex",
-    maxWidth: (props) => (props.numelements > 2 ? "35%" : "90%"),
-  },
-})(Breadcrumbs);
 
 const TightAccordionSummary = withStyles((theme) => ({
   root: {
@@ -84,6 +59,32 @@ const TightAccordionSummary = withStyles((theme) => ({
   expanded: {},
 }))(AccordionSummary);
 
+const TightAccordionDetails = withStyles((theme) => ({
+  root: {
+    padding: 0,
+    cursor: "default",
+    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    boxShadow: "none",
+    "&:before": {
+      display: "none",
+    },
+  },
+}))(AccordionDetails);
+
+const TightBreadcrumbs = withStyles({
+  root: {
+    width: "100%",
+    display: "inline-block",
+  },
+  ol: {
+    width: "100%",
+  },
+  li: {
+    display: "flex",
+    maxWidth: (props) => (props.numelements > 2 ? "35%" : "90%"),
+  },
+})(Breadcrumbs);
+
 class SearchResultsDataset extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
   state = {
@@ -93,12 +94,37 @@ class SearchResultsDataset extends React.PureComponent {
         ? `${this.props.featureCollection.value.numberReturned}+`
         : this.props.featureCollection.value.numberReturned
       : this.props.featureCollection.value.features.length,
-    showAllInformation: false,
   };
 
   resultHasOnlyOneFeature = () => {
     const { featureCollection } = this.props;
     return featureCollection.value.features.length === 1;
+  };
+
+  getFeatureTitle = (feature) => {
+    const { activeFeatureCollection } = this.props;
+
+    return activeFeatureCollection.source.displayFields.reduce(
+      (featureTitleString, df) => {
+        let displayField = feature.properties[df];
+        if (Array.isArray(displayField)) {
+          displayField = displayField.join(", ");
+        }
+
+        if (displayField) {
+          if (featureTitleString.length > 0) {
+            featureTitleString = featureTitleString.concat(
+              ` | ${displayField}`
+            );
+          } else {
+            featureTitleString = displayField;
+          }
+        }
+
+        return featureTitleString;
+      },
+      ""
+    );
   };
 
   renderDatasetDetails = () => {
@@ -116,6 +142,8 @@ class SearchResultsDataset extends React.PureComponent {
     const features = activeFeature
       ? [activeFeature]
       : featureCollection.value.features;
+    const shouldRenderAllFeatureDetails =
+      activeFeature && !activeFeature.onClickName;
     return (
       <TightAccordionDetails
         id={`search-result-dataset-details-${featureCollection.source.id}`}
@@ -127,23 +155,34 @@ class SearchResultsDataset extends React.PureComponent {
               <React.Fragment key={f.id}>
                 <Grid
                   role="button"
-                  onClick={() => handleOnFeatureClick(f)}
-                  className={classes.datasetTable}
+                  onClick={
+                    !shouldRenderAllFeatureDetails
+                      ? () => handleOnFeatureClick(f)
+                      : null
+                  }
+                  className={
+                    !shouldRenderAllFeatureDetails ? classes.hover : null
+                  }
                   container
                   item
                 >
-                  <Typography variant="srOnly">Aktivera sökresultat</Typography>
-                  <Grid item xs={12}>
-                    <SearchResultsDatasetFeature
-                      feature={f}
-                      app={app}
-                      showAllInformation={activeFeature ? true : false}
-                      source={featureCollection.source}
-                      visibleInMap={selectedItems.indexOf(f.id) > -1}
-                      showClickResultInMap={showClickResultInMap}
-                      activeFeature={activeFeature}
-                    />
-                  </Grid>
+                  {!shouldRenderAllFeatureDetails && (
+                    <Typography variant="srOnly">
+                      Aktivera sökresultat
+                    </Typography>
+                  )}
+                  <SearchResultsDatasetFeature
+                    feature={f}
+                    featureTitle={this.getFeatureTitle(f)}
+                    app={app}
+                    shouldRenderAllFeatureDetails={
+                      shouldRenderAllFeatureDetails
+                    }
+                    source={featureCollection.source}
+                    visibleInMap={selectedItems.indexOf(f.id) > -1}
+                    showClickResultInMap={showClickResultInMap}
+                    activeFeature={activeFeature}
+                  />
                 </Grid>
                 {!this.resultHasOnlyOneFeature() && (
                   <Divider className={classes.divider}></Divider>
@@ -157,7 +196,7 @@ class SearchResultsDataset extends React.PureComponent {
 
   renderDetailsHeader = () => {
     const {
-      featureCollection,
+      activeFeatureCollection,
       activeFeature,
       resetFeatureAndCollection,
       setActiveFeature,
@@ -170,37 +209,39 @@ class SearchResultsDataset extends React.PureComponent {
           aria-label="breadcrumb"
           component="div"
         >
-          <Link
-            noWrap
-            component="div"
-            onClick={(e) => {
-              e.stopPropagation();
-              resetFeatureAndCollection();
-            }}
-            onChange={resetFeatureAndCollection}
-            variant="button"
-          >
-            Start
-          </Link>
-          <Link
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveFeature(undefined);
-            }}
-            noWrap
-            component="div"
-            variant="button"
-          >
-            {featureCollection.source.caption}
-          </Link>
-          {activeFeature && (
-            <Link noWrap component="div" variant="button">
-              {
-                activeFeature.properties[
-                  featureCollection.source.displayFields[0]
-                ]
-              }
+          <Tooltip title="Tillbaka till alla sökresultat">
+            <Link
+              noWrap
+              component="div"
+              onClick={(e) => {
+                e.stopPropagation();
+                resetFeatureAndCollection();
+              }}
+              onChange={resetFeatureAndCollection}
+              variant="button"
+            >
+              Start
             </Link>
+          </Tooltip>
+          <Tooltip title={activeFeatureCollection.source.caption}>
+            <Link
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveFeature(undefined);
+              }}
+              noWrap
+              component="div"
+              variant="button"
+            >
+              {activeFeatureCollection.source.caption}
+            </Link>
+          </Tooltip>
+          {activeFeature && (
+            <Tooltip title={this.getFeatureTitle(activeFeature)}>
+              <Link noWrap component="div" variant="button">
+                {this.getFeatureTitle(activeFeature)}
+              </Link>
+            </Tooltip>
           )}
         </TightBreadcrumbs>
       </Grid>
