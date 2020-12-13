@@ -11,6 +11,7 @@ import {
   Grid,
 } from "@material-ui/core";
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
+import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 
@@ -137,51 +138,57 @@ class SearchResultsDataset extends React.PureComponent {
       activeFeatureCollection,
       activeFeature,
       handleOnFeatureClick,
+      getOriginBasedIcon,
     } = this.props;
 
-    const features = activeFeature
-      ? [activeFeature]
-      : featureCollection.value.features;
-    const shouldRenderAllFeatureDetails =
+    const shouldRenderFeatureDetails =
       activeFeature && !activeFeature.onClickName;
-    return (
-      <TightAccordionDetails
-        id={`search-result-dataset-details-${featureCollection.source.id}`}
-        className={classes.datasetDetailsContainer}
-      >
-        <Grid justify="center" container>
-          {activeFeatureCollection &&
-            features.map((f) => (
+
+    if (shouldRenderFeatureDetails) {
+      return (
+        <TightAccordionDetails
+          id={`search-result-dataset-details-${featureCollection.source.id}`}
+          className={classes.datasetDetailsContainer}
+        >
+          <SearchResultsDatasetFeatureDetails
+            feature={activeFeature}
+            featureTitle={this.getFeatureTitle(activeFeature)}
+            app={app}
+            source={activeFeatureCollection.source}
+          />
+        </TightAccordionDetails>
+      );
+    } else {
+      return (
+        <TightAccordionDetails
+          id={`search-result-dataset-details-${featureCollection.source.id}`}
+          className={classes.datasetDetailsContainer}
+        >
+          <Grid justify="center" container>
+            {featureCollection.value.features.map((f) => (
               <React.Fragment key={f.id}>
                 <Grid
                   role="button"
-                  onClick={
-                    !shouldRenderAllFeatureDetails
-                      ? () => handleOnFeatureClick(f)
-                      : null
-                  }
-                  className={
-                    !shouldRenderAllFeatureDetails ? classes.hover : null
-                  }
+                  onClick={() => handleOnFeatureClick(f)}
+                  className={classes.hover}
                   container
                   item
                 >
-                  {!shouldRenderAllFeatureDetails && (
+                  {
                     <Typography variant="srOnly">
                       Aktivera sökresultat
                     </Typography>
-                  )}
+                  }
                   <SearchResultsDatasetFeature
                     feature={f}
                     featureTitle={this.getFeatureTitle(f)}
                     app={app}
-                    shouldRenderAllFeatureDetails={
-                      shouldRenderAllFeatureDetails
-                    }
                     source={featureCollection.source}
+                    origin={featureCollection.origin}
                     visibleInMap={selectedItems.indexOf(f.id) > -1}
                     showClickResultInMap={showClickResultInMap}
                     activeFeature={activeFeature}
+                    getOriginBasedIcon={getOriginBasedIcon}
                   />
                 </Grid>
                 {!this.resultHasOnlyOneFeature() && (
@@ -189,9 +196,10 @@ class SearchResultsDataset extends React.PureComponent {
                 )}
               </React.Fragment>
             ))}
-        </Grid>
-      </TightAccordionDetails>
-    );
+          </Grid>
+        </TightAccordionDetails>
+      );
+    }
   };
 
   renderDetailsHeader = () => {
@@ -201,7 +209,9 @@ class SearchResultsDataset extends React.PureComponent {
       resetFeatureAndCollection,
       setActiveFeature,
     } = this.props;
-    const numElements = activeFeature ? 3 : 2;
+    const shouldRenderFeatureDetails =
+      activeFeature && !activeFeature.onClickName;
+    const numElements = shouldRenderFeatureDetails ? 3 : 2;
     return (
       <Grid alignItems="center" style={{ maxWidth: "100%" }} container>
         <TightBreadcrumbs
@@ -236,7 +246,7 @@ class SearchResultsDataset extends React.PureComponent {
               {activeFeatureCollection.source.caption}
             </Link>
           </Tooltip>
-          {activeFeature && (
+          {shouldRenderFeatureDetails && (
             <Tooltip title={this.getFeatureTitle(activeFeature)}>
               <Link noWrap component="div" variant="button">
                 {this.getFeatureTitle(activeFeature)}
@@ -313,7 +323,7 @@ class SearchResultsDataset extends React.PureComponent {
           }}
         >
           {this.renderDatasetSummary()}
-          {this.renderDatasetDetails()}
+          {activeFeatureCollection && this.renderDatasetDetails()}
         </Accordion>
       </>
     );

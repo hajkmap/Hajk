@@ -17,6 +17,14 @@ class SearchResultsList extends React.PureComponent {
     selectedItems: [],
   };
 
+  componentDidMount = () => {
+    const { activeFeature } = this.props;
+    //If the search results in exactly one hit, we activate it right a way.
+    if (activeFeature) {
+      this.handleOnFeatureClick(activeFeature);
+    }
+  };
+
   showClickResultInMap = (feature) => {
     const { localObserver } = this.props;
     const currentIndex = this.state.selectedItems.indexOf(feature.id);

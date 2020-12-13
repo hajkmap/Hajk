@@ -74,26 +74,34 @@ class SearchResultsContainer extends React.PureComponent {
     sumOfResults: this.props.searchResults.featureCollections
       .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
-    activeFeatureCollection:
-      this.props.featureCollections.length === 1
-        ? this.props.featureCollections[0]
-        : undefined,
-    activeFeature:
-      this.props.featureCollections.length === 1
-        ? this.props.featureCollections[0].value.features.length === 1
-          ? this.props.featureCollections[0].value.features[0]
-          : undefined
-        : undefined,
   };
 
   componentDidMount = () => {
     this.bindSubscriptions();
+    this.getPotentialSingleHit();
   };
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe("minimize-search-result-list", () => {
       this.setState({ expanded: false });
+    });
+  };
+
+  getPotentialSingleHit = () => {
+    const { featureCollections } = this.props;
+
+    const activeFeatureCollection =
+      featureCollections.length === 1 ? featureCollections[0] : undefined;
+    const activeFeature = activeFeatureCollection
+      ? activeFeatureCollection.value.features.length === 1
+        ? activeFeatureCollection.value.features[0]
+        : undefined
+      : undefined;
+
+    this.setState({
+      activeFeatureCollection: activeFeatureCollection,
+      activeFeature: activeFeature,
     });
   };
 
