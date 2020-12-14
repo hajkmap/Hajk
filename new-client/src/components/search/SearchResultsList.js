@@ -25,12 +25,16 @@ class SearchResultsList extends React.PureComponent {
     }
   };
 
-  showClickResultInMap = (feature, source) => {
-    const { localObserver } = this.props;
-    //const currentIndex = this.state.selectedItems.indexOf(feature.id);
-    const currentIndex = this.state.selectedItems.findIndex(
+  getFeatureSelectedIndex = (feature) => {
+    return this.state.selectedItems.findIndex(
       (item) => item.featureId === feature.id
     );
+  };
+
+  showClickResultInMap = (feature, source) => {
+    const { localObserver } = this.props;
+    const currentIndex = this.getFeatureSelectedIndex(feature);
+
     const selectedItems = [...this.state.selectedItems];
     const displayFields = source.displayFields ? source.displayFields : [];
 
@@ -63,7 +67,7 @@ class SearchResultsList extends React.PureComponent {
       app.globalObserver.publish(feature.onClickName, feature);
     } else {
       setActiveFeature(feature);
-      if (this.state.selectedItems.indexOf(feature.id) === -1) {
+      if (this.getFeatureSelectedIndex(feature) === -1) {
         this.showClickResultInMap(feature, activeFeatureCollection.source);
       }
     }
