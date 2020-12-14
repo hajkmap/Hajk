@@ -65,7 +65,6 @@ class SearchResultsList extends React.PureComponent {
   render() {
     const {
       featureCollections,
-      sumOfResults,
       getOriginBasedIcon,
       app,
       classes,
@@ -91,7 +90,6 @@ class SearchResultsList extends React.PureComponent {
                 app={app}
                 featureCollection={featureCollection}
                 getOriginBasedIcon={getOriginBasedIcon}
-                sumOfResults={sumOfResults}
                 selectedItems={this.state.selectedItems}
                 showClickResultInMap={this.showClickResultInMap}
                 activeFeatureCollection={activeFeatureCollection}

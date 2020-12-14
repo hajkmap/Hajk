@@ -7,6 +7,8 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import SearchIcon from "@material-ui/icons/Search";
 import RoomIcon from "@material-ui/icons/Room";
 import DescriptionIcon from "@material-ui/icons/Description";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import WarningIcon from "@material-ui/icons/Warning";
 import SearchResultsContainer from "./SearchResultsContainer";
 import SearchTools from "./SearchTools";
@@ -170,8 +172,13 @@ class SearchBar extends React.PureComponent {
   };
 
   renderSearchResultList = () => {
-    const { resultPanelCollapsed } = this.state;
-    const { searchResults, app, map, localObserver } = this.props;
+    const {
+      searchResults,
+      app,
+      map,
+      localObserver,
+      resultPanelCollapsed,
+    } = this.props;
 
     return (
       <SearchResultsContainer
@@ -272,6 +279,8 @@ class SearchBar extends React.PureComponent {
       app,
       handleOnClear,
       showSearchResults,
+      toggleCollapseSearchResults,
+      resultPanelCollapsed,
       handleSearchBarKeyPress,
       searchOptions,
       searchSources,
@@ -284,6 +293,7 @@ class SearchBar extends React.PureComponent {
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
       failedWFSFetchMessage.length > 0 && showSearchResults;
+    const expandMessage = resultPanelCollapsed ? `Visa` : `Dölj`;
     return (
       <TextField
         {...params}
@@ -300,10 +310,32 @@ class SearchBar extends React.PureComponent {
               {params.InputProps.endAdornment}
               {showFailedWFSMessage &&
                 this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
-              <IconButton size="small" onClick={handleOnClickOrKeyboardSearch}>
-                <Typography variant="srOnly">Exekvera sökning</Typography>
-                <SearchIcon />
-              </IconButton>
+              {!showSearchResults ? (
+                <IconButton
+                  size="small"
+                  onClick={handleOnClickOrKeyboardSearch}
+                >
+                  <Typography variant="srOnly">Exekvera sökning</Typography>
+                  <SearchIcon />
+                </IconButton>
+              ) : (
+                <Tooltip title={expandMessage}>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCollapseSearchResults();
+                    }}
+                    size="small"
+                  >
+                    <Typography variant="srOnly">{expandMessage}</Typography>
+                    {resultPanelCollapsed ? (
+                      <ExpandMoreIcon />
+                    ) : (
+                      <ExpandLessIcon />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              )}
               {searchString.length > 0 ||
               showSearchResults ||
               searchActive !== "" ? (

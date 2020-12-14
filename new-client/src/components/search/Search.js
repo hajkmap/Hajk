@@ -52,6 +52,7 @@ class Search extends React.PureComponent {
       activeSpatialFilter: "within",
     },
     failedWFSFetchMessage: "",
+    resultPanelCollapsed: false,
   };
 
   // Used for setTimeout/clearTimeout, in order to delay update of autocomplete when user is typing
@@ -120,6 +121,9 @@ class Search extends React.PureComponent {
         );
       }
       this.setState({ searchActive: "draw" });
+    });
+    this.localObserver.subscribe("minimize-search-result-list", () => {
+      this.setState({ resultPanelCollapsed: false });
     });
   };
 
@@ -236,6 +240,7 @@ class Search extends React.PureComponent {
       showSearchResults: false,
       searchResults: { featureCollections: [], errors: [] },
       failedWFSFetchMessage: "",
+      resultPanelCollapsed: false,
     });
     this.resetFeaturesToFilter();
     this.localObserver.publish("clear-search-results");
@@ -280,6 +285,7 @@ class Search extends React.PureComponent {
             loading: searchString.length >= 3,
             showSearchResults: false,
             searchString: searchString,
+            resultPanelCollapsed: false,
           },
           () => {
             if (this.state.searchString.length >= 3) {
@@ -510,6 +516,7 @@ class Search extends React.PureComponent {
       loading: false,
       autoCompleteOpen: false,
       failedWFSFetchMessage,
+      resultPanelCollapsed: false,
     });
 
     let features = this.extractFeatureWithFromFeatureCollections(
@@ -661,6 +668,10 @@ class Search extends React.PureComponent {
     };
   };
 
+  toggleCollapseSearchResults = () => {
+    this.setState({ resultPanelCollapsed: !this.state.resultPanelCollapsed });
+  };
+
   render() {
     const { classes, target } = this.props;
     const {
@@ -675,6 +686,7 @@ class Search extends React.PureComponent {
       searchSources,
       searchTools,
       failedWFSFetchMessage,
+      resultPanelCollapsed,
     } = this.state;
 
     return (
@@ -696,6 +708,8 @@ class Search extends React.PureComponent {
             handleOnClickOrKeyboardSearch={this.handleOnClickOrKeyboardSearch}
             autoCompleteOpen={autoCompleteOpen}
             showSearchResults={showSearchResults}
+            resultPanelCollapsed={resultPanelCollapsed}
+            toggleCollapseSearchResults={this.toggleCollapseSearchResults}
             handleOnAutompleteInputChange={this.handleOnAutompleteInputChange}
             handleOnClear={this.handleOnClear}
             autocompleteList={autocompleteList}
