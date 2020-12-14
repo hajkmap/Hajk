@@ -185,7 +185,11 @@ class SearchResultsDataset extends React.PureComponent {
                     app={app}
                     source={featureCollection.source}
                     origin={featureCollection.origin}
-                    visibleInMap={selectedItems.indexOf(f.id) > -1}
+                    visibleInMap={
+                      selectedItems.findIndex(
+                        (item) => item.featureId === f.id
+                      ) > -1
+                    }
                     showClickResultInMap={showClickResultInMap}
                     activeFeature={activeFeature}
                     getOriginBasedIcon={getOriginBasedIcon}
