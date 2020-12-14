@@ -119,25 +119,25 @@
         "geoServer": {
           "lineNumberAndPublicLineNumbers": {
             "searchLabel": "Linjenummer",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=LineNumberAndPublicLineNumber&outputFormat=application/json"
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=LineNumberAndPublicLineNumber&outputFormat=application/json"
           },
           "municipalityZoneNames": {
             "searchLabel": "Kommunnamn",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=MunicipalityZoneName&outputFormat=application/json"
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=MunicipalityZoneName&outputFormat=application/json"
           },
           "stopAreaNameAndNumbers": {
             "searchLabel": "Hållplats",
             "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=StopAreaNameAndNumber&outputFormat=application/json"
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=StopAreaNameAndNumber&outputFormat=application/json"
           },
           "transportModeTypeNames": {
             "searchLabel": "Trafikslag",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=TransportModeTypeName&outputFormat=application/json"
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=TransportModeTypeName&outputFormat=application/json"
           },
           "journeys": {
             "searchLabel": "Turer",
             "defaultSortAttribute": "EarliestDepartureTimeAtToStopPoint",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=GetJourneys&outputFormat=application/json",
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=GetJourneys&outputFormat=application/json",
             "attributesToDisplay": [
               {
                 "displayName": "PUBLIK LINJE",
@@ -177,7 +177,7 @@
           "routes": {
             "searchLabel": "Linje",
             "defaultSortAttribute": "InternalLineNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.1.0&request=GetFeature&typeName=Route&outputFormat=application/json",
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.1.0&request=GetFeature&typeName=Route&outputFormat=application/json",
             "attributesToDisplay": [
               {
                 "displayName": "TEKNISK LINJE",
@@ -208,7 +208,7 @@
           "stopAreas": {
             "searchLabel": "Hållplatsomr",
             "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=GetStopAreas&outputFormat=application/json",
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=GetStopAreas&outputFormat=application/json",
             "attributesToDisplay": [
               {
                 "displayName": "HÅLLPLATSNUMMER",
@@ -243,7 +243,7 @@
           "stopPoints": {
             "searchLabel": "Hållplatslägen",
             "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=GetStopPoints&outputFormat=application/json",
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=GetStopPoints&outputFormat=application/json",
             "attributesToDisplay": [
               {
                 "displayName": "HÅLLPLATSNUMMER",
@@ -404,6 +404,10 @@
         "layers": [
           {
             "id": "101",
+            "visibleForGroups": []
+          },
+          {
+            "id": "102",
             "visibleForGroups": []
           }
         ],
