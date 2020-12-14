@@ -10,7 +10,7 @@ const styles = () => ({
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
-    const { feature, visibleInMap, showClickResultInMap } = this.props;
+    const { feature, source, visibleInMap, showClickResultInMap } = this.props;
     const helpText = !visibleInMap ? "Visa i kartan" : "Ta bort från kartan";
 
     return (
@@ -21,7 +21,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             disableRipple
             checked={visibleInMap}
             onClick={(e) => e.stopPropagation()}
-            onChange={() => showClickResultInMap(feature)}
+            onChange={() => showClickResultInMap(feature, source)}
             inputProps={{ "aria-label": "primary checkbox" }}
           />
         </Tooltip>

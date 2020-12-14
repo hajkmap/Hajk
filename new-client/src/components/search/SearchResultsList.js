@@ -25,13 +25,20 @@ class SearchResultsList extends React.PureComponent {
     }
   };
 
-  showClickResultInMap = (feature) => {
+  showClickResultInMap = (feature, source) => {
     const { localObserver } = this.props;
-    const currentIndex = this.state.selectedItems.indexOf(feature.id);
+    //const currentIndex = this.state.selectedItems.indexOf(feature.id);
+    const currentIndex = this.state.selectedItems.findIndex(
+      (item) => item.featureId === feature.id
+    );
     const selectedItems = [...this.state.selectedItems];
+    const displayFields = source.displayFields ? source.displayFields : [];
 
     if (currentIndex === -1) {
-      selectedItems.push(feature.id);
+      selectedItems.push({
+        featureId: feature.id,
+        displayFields: displayFields,
+      });
     } else {
       selectedItems.splice(currentIndex, 1);
     }
@@ -51,13 +58,13 @@ class SearchResultsList extends React.PureComponent {
   };
 
   handleOnFeatureClick = (feature) => {
-    const { app, setActiveFeature } = this.props;
+    const { app, setActiveFeature, activeFeatureCollection } = this.props;
     if (feature.onClickName) {
       app.globalObserver.publish(feature.onClickName, feature);
     } else {
       setActiveFeature(feature);
       if (this.state.selectedItems.indexOf(feature.id) === -1) {
-        this.showClickResultInMap(feature);
+        this.showClickResultInMap(feature, activeFeatureCollection.source);
       }
     }
   };
