@@ -1,22 +1,29 @@
 import React from "react";
 
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import { withStyles } from "@material-ui/core/styles";
 import {
-  // Tooltip,
-  TextField,
-  Checkbox,
+  Tooltip,
   Grid,
   Switch,
   FormGroup,
   FormLabel,
   FormControl,
   FormControlLabel,
+  Select,
+  Chip,
+  MenuItem,
+  Input,
 } from "@material-ui/core";
 
-const styles = (theme) => ({});
+const styles = (theme) => ({
+  chips: {
+    display: "flex",
+    flexWrap: "wrap",
+  },
+  chip: {
+    margin: 2,
+  },
+});
 
 class SearchSettings extends React.PureComponent {
   state = {
@@ -32,7 +39,7 @@ class SearchSettings extends React.PureComponent {
   };
 
   render() {
-    const { searchOptions, searchSources, searchModel } = this.props;
+    const { classes, searchOptions, searchSources, searchModel } = this.props;
     return (
       <Grid container spacing={2} direction="column">
         <Grid item xs>
@@ -42,55 +49,62 @@ class SearchSettings extends React.PureComponent {
               <FormControlLabel
                 label="Begränsa sökkällor"
                 control={
-                  <Switch
-                    checked={this.state.showSearchSourcesFilter}
-                    onChange={(e) => {
-                      // Pull out the new value
-                      const showSearchSourcesFilter = e.target.checked;
+                  <Tooltip title="Aktivera för att precisera vilka datakällor som sökningen kommer göras i">
+                    <Switch
+                      checked={this.state.showSearchSourcesFilter}
+                      onChange={(e) => {
+                        // Pull out the new value
+                        const showSearchSourcesFilter = e.target.checked;
 
-                      // Set state to reflect in Switch's UI
-                      this.setState({
-                        showSearchSourcesFilter,
-                      });
+                        // Set state to reflect in Switch's UI
+                        this.setState({
+                          showSearchSourcesFilter,
+                        });
 
-                      // Now, if user has turned off this setting, ensure
-                      // that we also clean all search sources
-                      if (showSearchSourcesFilter === false)
-                        this.props.setSearchSources([]);
-                    }}
-                    color="primary"
-                  />
+                        // Now, if user has turned off this setting, ensure
+                        // that we also clean all search sources
+                        if (showSearchSourcesFilter === false)
+                          this.props.setSearchSources([]);
+                      }}
+                      color="primary"
+                    />
+                  </Tooltip>
                 }
               />
               {this.state.showSearchSourcesFilter && (
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Autocomplete
-                      id="searchSources"
+                  <Grid item xs>
+                    <Select
+                      fullWidth
+                      labelId="demo-mutiple-chip-label"
                       multiple
                       value={searchSources}
-                      onChange={(event, value, reason) =>
-                        this.props.setSearchSources(value)
+                      onChange={(event) =>
+                        this.props.setSearchSources(event.target.value)
                       }
-                      options={searchModel.getSources()}
-                      disableCloseOnSelect
-                      getOptionLabel={(option) => option.caption}
-                      renderOption={(option, { selected }) => (
-                        <React.Fragment>
-                          <Checkbox
-                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                            checkedIcon={<CheckBoxIcon fontSize="small" />}
-                            style={{ marginRight: 8 }}
-                            checked={selected}
-                            color="primary"
-                          />
-                          {option.caption}
-                        </React.Fragment>
+                      input={<Input id="select-multiple-chip" />}
+                      renderValue={(selected) => (
+                        <div className={classes.chips}>
+                          {selected.map((option) => (
+                            <Chip
+                              key={option.id}
+                              label={option.caption}
+                              className={classes.chip}
+                            />
+                          ))}
+                        </div>
                       )}
-                      renderInput={(params) => (
-                        <TextField {...params} variant="outlined" />
-                      )}
-                    />
+                    >
+                      {searchModel.getSources().map((source) => (
+                        <MenuItem
+                          key={source.id}
+                          value={source}
+                          // style={getStyles(name, personName, theme)}
+                        >
+                          {source.caption}
+                        </MenuItem>
+                      ))}
+                    </Select>
                   </Grid>
                 </Grid>
               )}
@@ -107,46 +121,52 @@ class SearchSettings extends React.PureComponent {
               <FormControlLabel
                 label="Wildcard före"
                 control={
-                  <Switch
-                    checked={searchOptions.wildcardAtStart}
-                    onChange={() =>
-                      this.updateSearchOptions(
-                        "wildcardAtStart",
-                        !searchOptions.wildcardAtStart
-                      )
-                    }
-                    color="primary"
-                  />
+                  <Tooltip title="Om aktivit kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'">
+                    <Switch
+                      checked={searchOptions.wildcardAtStart}
+                      onChange={() =>
+                        this.updateSearchOptions(
+                          "wildcardAtStart",
+                          !searchOptions.wildcardAtStart
+                        )
+                      }
+                      color="primary"
+                    />
+                  </Tooltip>
                 }
               />
               <FormControlLabel
                 label="Wildcard efter"
                 control={
-                  <Switch
-                    checked={searchOptions.wildcardAtEnd}
-                    onChange={() =>
-                      this.updateSearchOptions(
-                        "wildcardAtEnd",
-                        !searchOptions.wildcardAtEnd
-                      )
-                    }
-                    color="primary"
-                  />
+                  <Tooltip title="Om aktivit kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'">
+                    <Switch
+                      checked={searchOptions.wildcardAtEnd}
+                      onChange={() =>
+                        this.updateSearchOptions(
+                          "wildcardAtEnd",
+                          !searchOptions.wildcardAtEnd
+                        )
+                      }
+                      color="primary"
+                    />
+                  </Tooltip>
                 }
               />
               <FormControlLabel
                 label="Skiftlägeskänslighet"
                 control={
-                  <Switch
-                    checked={searchOptions.matchCase}
-                    onChange={() =>
-                      this.updateSearchOptions(
-                        "matchCase",
-                        !searchOptions.matchCase
-                      )
-                    }
-                    color="primary"
-                  />
+                  <Tooltip title="Om aktivit kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler.">
+                    <Switch
+                      checked={searchOptions.matchCase}
+                      onChange={() =>
+                        this.updateSearchOptions(
+                          "matchCase",
+                          !searchOptions.matchCase
+                        )
+                      }
+                      color="primary"
+                    />
+                  </Tooltip>
                 }
               />
             </FormGroup>
@@ -160,18 +180,20 @@ class SearchSettings extends React.PureComponent {
               <FormControlLabel
                 label="Kräv att hela objektet rymms inom sökområde"
                 control={
-                  <Switch
-                    checked={searchOptions.activeSpatialFilter === "within"}
-                    onChange={() =>
-                      this.updateSearchOptions(
-                        "activeSpatialFilter",
-                        searchOptions.activeSpatialFilter === "intersects"
-                          ? "within"
-                          : "intersects"
-                      )
-                    }
-                    color="primary"
-                  />
+                  <Tooltip title="Om aktivit kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet rymms inom sökområdet.">
+                    <Switch
+                      checked={searchOptions.activeSpatialFilter === "within"}
+                      onChange={() =>
+                        this.updateSearchOptions(
+                          "activeSpatialFilter",
+                          searchOptions.activeSpatialFilter === "intersects"
+                            ? "within"
+                            : "intersects"
+                        )
+                      }
+                      color="primary"
+                    />
+                  </Tooltip>
                 }
               />
             </FormGroup>
