@@ -118,6 +118,10 @@
     }
   ],
   "map": "oversiktsplan",
-
-  "documentTitle": "Utgångspunkter2"
+  "tableOfContents": {
+    "expanded": true,
+    "active": false,
+    "chapterLevelsToShow": 2,
+    "title": "Innehåll"
+  }
 }

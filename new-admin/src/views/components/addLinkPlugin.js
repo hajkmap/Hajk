@@ -5,23 +5,26 @@ import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
 
 const LinkStrategy = (contentBlock, callback, contentState) => {
-  contentBlock.findEntityRanges((character) => {
-    const entity = character.getEntity();
+  contentBlock.findEntityRanges(character => {
+    const entityKey = character.getEntity();
     return (
-      entity !== null &&
-      contentState.getEntity(entity).getType().toLowerCase() === "link"
+      entityKey !== null &&
+      contentState
+        .getEntity(entityKey)
+        .getType()
+        .toUpperCase() === "LINK"
     );
   }, callback);
 };
 
-const Link = (props) => {
-  const entity = props.contentState.getEntity(props.entityKey);
-  const data = entity.getData();
-  const title = props.decoratedText;
+const Link = props => {
+  const data = props.contentState.getEntity(props.entityKey).getData();
+  const title = props.children;
 
   if (data["data-document"]) {
     return (
       <a
+        href={data["data-document"]}
         data-document={data["data-document"]}
         data-header-identifier={data["data-header-identifier"]}
         rel="noopener noreferrer"
@@ -33,9 +36,9 @@ const Link = (props) => {
   } else if (data["data-link"]) {
     return (
       <a
+        href={data["data-link"]}
         data-link={data["data-link"]}
         data-header-identifier={data["data-header-identifier"]}
-        data-title={data.title}
       >
         <LaunchIcon /> {title}
       </a>
@@ -43,6 +46,7 @@ const Link = (props) => {
   } else if (data["data-maplink"]) {
     return (
       <a
+        href={data["data-maplink"]}
         data-maplink={data["data-maplink"]}
         data-header-identifier={data["data-header-identifier"]}
         rel="noopener noreferrer"
@@ -54,6 +58,7 @@ const Link = (props) => {
   } else {
     return (
       <a
+        href={data.url}
         data-header-identifier={data["data-header-identifier"]}
         rel="noopener noreferrer"
         target="_blank"
@@ -80,9 +85,9 @@ export const addLinkPlugin = {
   decorators: [
     {
       strategy: LinkStrategy,
-      component: Link,
-    },
-  ],
+      component: Link
+    }
+  ]
 };
 
 export default addLinkPlugin;
