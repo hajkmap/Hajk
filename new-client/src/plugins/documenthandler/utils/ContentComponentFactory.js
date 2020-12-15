@@ -291,33 +291,25 @@ export const Img = ({ imgTag, localObserver }) => {
     return className;
   };
 
-  const getImagePositionClass = (positioning) => {
-    const { right, left, center, floatLeft, floatRight } = positioning;
-
-    if (right) {
+  const getImagePositionClass = (position) => {
+    if (position === "right") {
       return classes.pictureRight;
     }
 
-    if (left) {
+    if (position === "left") {
       return classes.pictureLeft;
     }
 
-    if (center && (!floatLeft || !floatRight)) {
+    if (position === "center") {
       return classes.pictureCenter;
     }
-    return;
-  };
 
-  const getImageFloating = (positioning) => {
-    const { right, left, center, floatLeft, floatRight } = positioning;
-    if (!center) {
-      if (floatLeft && !right) {
-        return classes.floatLeft;
-      }
+    if (position === "floatLeft") {
+      return classes.floatLeft;
+    }
 
-      if (floatRight && !left) {
-        return classes.floatRight;
-      }
+    if (position === "floatRight") {
+      return classes.floatRight;
     }
 
     return;
@@ -349,11 +341,7 @@ export const Img = ({ imgTag, localObserver }) => {
     altValue: imgTag.attributes.getNamedItem("alt")?.value,
     height: imgTag.attributes.getNamedItem("data-image-height")?.value,
     width: imgTag.attributes.getNamedItem("data-image-width")?.value,
-    right: tagIsPresent(imgTag, "data-image-right"),
-    left: tagIsPresent(imgTag, "data-image-left"),
-    center: tagIsPresent(imgTag, "data-image-center"),
-    floatLeft: tagIsPresent(imgTag, "data-image-float-left"),
-    floatRight: tagIsPresent(imgTag, "data-image-float-right"),
+    position: imgTag.attributes.getNamedItem("data-image-position")?.value,
   };
 
   let onClickCallback = image.popup
@@ -362,11 +350,10 @@ export const Img = ({ imgTag, localObserver }) => {
       }
     : null;
 
-  const positioningClass = getImagePositionClass(image);
-  const floatingPictureClass = getImageFloating(image);
+  const positioningClass = getImagePositionClass(image.position);
 
   return (
-    <Box className={clsx(positioningClass, floatingPictureClass)}>
+    <Box className={positioningClass}>
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue}
