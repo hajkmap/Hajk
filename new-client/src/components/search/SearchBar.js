@@ -43,8 +43,8 @@ const styles = (theme) => ({
   },
 });
 
-//Needed to make a CustomPopper with inlinestyling to be able to override width.. *
-//Popper.js didnt work as expected
+//Needed to make a CustomPopper with inline styling to be able to override width,
+//Popper.js didn't work as expected
 const CustomPopper = (props) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
@@ -81,11 +81,11 @@ class SearchBar extends React.PureComponent {
   getOriginBasedIcon = (origin) => {
     switch (origin) {
       case "WFS":
-        return <RoomIcon color="disabled"></RoomIcon>;
+        return <RoomIcon color="disabled" />;
       case "DOCUMENT":
-        return <DescriptionIcon color="disabled"></DescriptionIcon>;
+        return <DescriptionIcon color="disabled" />;
       default:
-        return <RoomIcon color="disabled"></RoomIcon>;
+        return <RoomIcon color="disabled" />;
     }
   };
 
@@ -93,7 +93,7 @@ class SearchBar extends React.PureComponent {
     return string.replace(/,/g, "").replace(/ /g, "");
   };
 
-  //Cant use string.prototype.matchAll because of Edge (Polyfill not working atm)
+  //Can't use string.prototype.matchAll because of Edge (Polyfill not working atm)
   getMatches = (string, regex, index) => {
     var matches = [];
     var match = regex.exec(string);
@@ -125,13 +125,13 @@ class SearchBar extends React.PureComponent {
     );
   };
 
-  //Highlights everything in autocompleteentry up until the last occurence of a match in string.
+  //Highlights everything in autocomplete entry up until the last occurrence of a match in string.
   renderHighlightedAutocompleteEntry = (
     highlightInformation,
     autocompleteEntry
   ) => {
     const countOfHighlightInformation = highlightInformation.length;
-    //We get last higligtInformation because we want to higlight everything up to last word that matches
+    //We get lastHighlightInformation because we want to highlight everything up to last word that matches
     const lastHighlightInformation =
       highlightInformation[countOfHighlightInformation - 1];
 
@@ -202,7 +202,7 @@ class SearchBar extends React.PureComponent {
       searchActive,
       classes,
       loading,
-      handleOnAutompleteInputChange,
+      handleOnAutocompleteInputChange,
       handleSearchInput,
     } = this.props;
     return (
@@ -222,7 +222,7 @@ class SearchBar extends React.PureComponent {
         open={autoCompleteOpen}
         disableClearable
         onChange={handleSearchInput}
-        onInputChange={handleOnAutompleteInputChange}
+        onInputChange={handleOnAutocompleteInputChange}
         getOptionSelected={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
