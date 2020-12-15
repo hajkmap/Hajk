@@ -13,8 +13,7 @@ const styles = (theme) => {
         padding: "3px",
         background: theme.palette.background.paper,
         boxShadow: theme.shadows[4],
-        border: "1px solid rgba(255 ,255, 255, 0.5)",
-        borderRadius: "2px",
+        borderRadius: theme.shape.borderRadius,
       },
       "& .ol-scale-line-inner": {
         cursor: "default",
@@ -26,10 +25,10 @@ const styles = (theme) => {
     },
     scaleBadge: {
       padding: "0 4px",
-      color: "rgba(0, 0, 0, 0.87)",
+      color: theme.palette.text.primary,
       fontSize: "0.7em",
       lineHeight: "25px",
-      borderRadius: "2px",
+      borderRadius: theme.shape.borderRadius,
       cursor: "default",
     },
   };

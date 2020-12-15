@@ -40,6 +40,12 @@ const styles = (theme) => ({
   featureInfo: {
     width: "100%",
   },
+  togglerButtonRightContainer: {
+    borderRight: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+  },
+  togglerButtonLeftContainer: {
+    borderLeft: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+  },
 });
 
 class FeatureInfoContainer extends React.PureComponent {
@@ -93,33 +99,35 @@ class FeatureInfoContainer extends React.PureComponent {
         className={classes.toggler}
         container
       >
-        <Grid item>
+        <Grid item className={classes.togglerButtonRightContainer}>
           <Button
             fullWidth
-            variant="outlined"
             disabled={this.state.selectedIndex - 1 < 0}
             onClick={this.stepLeft}
             aria-label="previous"
             id="step-left"
           >
-            <ArrowLeftIcon />
+            <ArrowLeftIcon color="secondary" />
           </Button>
         </Grid>
         <Grid item>
-          <Typography className={classes.typography}>
+          <Typography
+            variant="button"
+            color="secondary"
+            className={classes.typography}
+          >
             {this.state.selectedIndex + 1} av {features.length}
           </Typography>
         </Grid>
-        <Grid item>
+        <Grid item className={classes.togglerButtonLeftContainer}>
           <Button
             fullWidth
-            variant="outlined"
             disabled={this.state.selectedIndex + 1 >= features.length}
             onClick={this.stepRight}
             aria-label="next"
             id="step-right"
           >
-            <ArrowRightIcon />
+            <ArrowRightIcon color="secondary" />
           </Button>
         </Grid>
       </Grid>
@@ -325,17 +333,20 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, features } = this.props;
     const featureInfoLoaded = this.isReadyToShowInfo();
     return (
       <Grid
         alignContent="flex-start"
         className={classes.infoContainer}
         container
+        spacing={1}
       >
-        <Grid xs={12} item>
-          {this.getToggler()}
-        </Grid>
+        {features.length > 1 && (
+          <Grid xs={12} item>
+            {this.getToggler()}
+          </Grid>
+        )}
         <Grid
           justify="center"
           alignContent={featureInfoLoaded ? "flex-start" : "center"}
