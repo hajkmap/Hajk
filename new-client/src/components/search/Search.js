@@ -673,7 +673,7 @@ class Search extends React.PureComponent {
   };
 
   render() {
-    const { classes, target } = this.props;
+    const { classes } = this.props;
     const {
       searchString,
       searchActive,
