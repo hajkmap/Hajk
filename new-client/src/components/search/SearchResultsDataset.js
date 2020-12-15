@@ -165,41 +165,48 @@ class SearchResultsDataset extends React.PureComponent {
           className={classes.datasetDetailsContainer}
         >
           <Grid justify="center" container>
-            {featureCollection.value.features.map((f) => (
-              <React.Fragment key={f.id}>
-                <Grid
-                  role="button"
-                  onClick={() => handleOnFeatureClick(f)}
-                  className={classes.hover}
-                  container
-                  item
-                >
-                  {
-                    <Typography variant="srOnly">
-                      Aktivera sökresultat
-                    </Typography>
-                  }
-                  <SearchResultsDatasetFeature
-                    feature={f}
-                    featureTitle={this.getFeatureTitle(f)}
-                    app={app}
-                    source={featureCollection.source}
-                    origin={featureCollection.origin}
-                    visibleInMap={
-                      selectedItems.findIndex(
-                        (item) => item.featureId === f.id
-                      ) > -1
-                    }
-                    showClickResultInMap={showClickResultInMap}
-                    activeFeature={activeFeature}
-                    getOriginBasedIcon={getOriginBasedIcon}
-                  />
-                </Grid>
-                {!this.resultHasOnlyOneFeature() && (
-                  <Divider className={classes.divider}></Divider>
-                )}
-              </React.Fragment>
-            ))}
+            {featureCollection.value.features.map((f) => {
+              const featureTitle = this.getFeatureTitle(f);
+              if (featureTitle.length > 0) {
+                return (
+                  <React.Fragment key={f.id}>
+                    <Grid
+                      role="button"
+                      onClick={() => handleOnFeatureClick(f)}
+                      className={classes.hover}
+                      container
+                      item
+                    >
+                      {
+                        <Typography variant="srOnly">
+                          Aktivera sökresultat
+                        </Typography>
+                      }
+                      <SearchResultsDatasetFeature
+                        feature={f}
+                        featureTitle={this.getFeatureTitle(f)}
+                        app={app}
+                        source={featureCollection.source}
+                        origin={featureCollection.origin}
+                        visibleInMap={
+                          selectedItems.findIndex(
+                            (item) => item.featureId === f.id
+                          ) > -1
+                        }
+                        showClickResultInMap={showClickResultInMap}
+                        activeFeature={activeFeature}
+                        getOriginBasedIcon={getOriginBasedIcon}
+                      />
+                    </Grid>
+                    {!this.resultHasOnlyOneFeature() && (
+                      <Divider className={classes.divider}></Divider>
+                    )}
+                  </React.Fragment>
+                );
+              } else {
+                return null;
+              }
+            })}
           </Grid>
         </TightAccordionDetails>
       );

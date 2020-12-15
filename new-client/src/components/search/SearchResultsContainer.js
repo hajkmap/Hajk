@@ -71,7 +71,56 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   componentDidMount = () => {
+    const { app } = this.props;
+    app.globalObserver.subscribe("core.searchResultLayerClick", (features) => {
+      const featureIds = features.map((feature) => {
+        return feature.getId();
+      });
+      this.showFeatureDetails(featureIds);
+    });
     this.getPotentialSingleHit();
+  };
+
+  componentWillUnmount = () => {
+    const { app } = this.props;
+    app.globalObserver.unsubscribe("core.searchResultLayerClick");
+  };
+
+  showFeatureDetails = (featureIds) => {
+    const { toggleCollapseSearchResults } = this.props;
+    const featureId = featureIds[0]; // Do we want to handle stacked features?
+
+    // If searchResultContainer is collapsed, open it.
+    if (this.props.panelCollapsed) toggleCollapseSearchResults();
+
+    // We first have to make sure that the list with all searchResults is mounted,
+    // e.g. that activeFeature is unset.
+    this.setState({ activeFeature: undefined }, () => {
+      // Get the featureCollection which the clicked feature belongs to
+      const featureCollection = this.getFeatureCollectionFromFeatureId(
+        featureId
+      );
+      // Get the clicked feature
+      const feature = featureCollection.value.features.find(
+        (feature) => feature.id === featureId
+      );
+      // Set active collection and feature accordingly
+      this.setState({
+        activeFeatureCollection: featureCollection,
+        activeFeature: feature,
+      });
+    });
+  };
+
+  getFeatureCollectionFromFeatureId = (featureId) => {
+    const { featureCollections } = this.props;
+    return featureCollections.find((featureCollection) => {
+      return (
+        featureCollection.value.features.findIndex(
+          (feature) => feature.id === featureId
+        ) > -1
+      );
+    });
   };
 
   getPotentialSingleHit = () => {

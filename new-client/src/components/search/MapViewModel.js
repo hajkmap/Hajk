@@ -70,6 +70,7 @@ class MapViewModel {
       this.resultSource,
       this.options.showInMapOnSearchResult ? defaultStyles : null
     );
+    this.resultsLayer.set("type", "searchResultLayer");
     this.drawSource = this.getNewVectorSource();
     this.drawLayer = this.getNewVectorLayer(this.drawSource, drawStyle);
     this.map.addLayer(this.drawLayer);

@@ -216,7 +216,30 @@ class AppModel {
 
     if (config.tools.some((tool) => tool.type === "infoclick")) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
-        this.globalObserver.publish("core.mapClick", mapClickDataResult);
+        // We have to separate features coming from the searchResult-layer
+        // from the rest, since we want to render this information in the
+        // search-component rather than in the featureInfo-component.
+        const searchResultFeatures = mapClickDataResult.features.filter(
+          (feature) => {
+            return feature?.layer.get("type") === "searchResultLayer";
+          }
+        );
+
+        // If we have features coming from the searchResult-layer, we don't want
+        // to invoke core.mapClick, since this could potentially (say if we have
+        // searchResult-features stacked on wms-features) lead to the user getting
+        // prompted with both the searchResult-featureInfo as well as the "standard"
+        // featureInfo-component.
+        if (searchResultFeatures.length > 0) {
+          // Clicked features sent to the search-component for display
+          this.globalObserver.publish(
+            "core.searchResultLayerClick",
+            searchResultFeatures
+          );
+        } else {
+          // Clicked features sent to the featureInfo-component for display
+          this.globalObserver.publish("core.mapClick", mapClickDataResult);
+        }
       });
     }
     return this;

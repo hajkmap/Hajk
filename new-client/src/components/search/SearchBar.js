@@ -70,7 +70,6 @@ class SearchBar extends React.PureComponent {
     moreOptionsId: undefined,
     moreOptionsOpen: false,
     selectSourcesOpen: false,
-    resultPanelCollapsed: false,
   };
 
   updateSearchOptions = (name, value) => {
@@ -178,6 +177,7 @@ class SearchBar extends React.PureComponent {
       map,
       localObserver,
       resultPanelCollapsed,
+      toggleCollapseSearchResults,
     } = this.props;
 
     return (
@@ -189,6 +189,7 @@ class SearchBar extends React.PureComponent {
         featureCollections={searchResults.featureCollections}
         map={map}
         panelCollapsed={resultPanelCollapsed}
+        toggleCollapseSearchResults={toggleCollapseSearchResults}
       />
     );
   };
