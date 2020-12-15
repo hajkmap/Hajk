@@ -691,39 +691,37 @@ class Search extends React.PureComponent {
 
     return (
       this.state.searchImplementedPluginsLoaded && (
-        <>
-          <SearchBar
-            classes={{
-              root: classes.inputRoot,
-            }}
-            escapeRegExp={this.escapeRegExp}
-            localObserver={this.localObserver}
-            searchTools={searchTools}
-            searchResults={searchResults}
-            handleSearchInput={this.handleSearchInput}
-            searchString={searchString}
-            searchActive={searchActive}
-            handleOnClickOrKeyboardSearch={this.handleOnClickOrKeyboardSearch}
-            autoCompleteOpen={autoCompleteOpen}
-            showSearchResults={showSearchResults}
-            resultPanelCollapsed={resultPanelCollapsed}
-            toggleCollapseSearchResults={this.toggleCollapseSearchResults}
-            handleOnAutompleteInputChange={this.handleOnAutompleteInputChange}
-            handleOnClear={this.handleOnClear}
-            autocompleteList={autocompleteList}
-            doSearch={this.doSearch.bind(this)}
-            searchModel={this.searchModel}
-            searchOptions={searchOptions}
-            updateSearchOptions={this.updateSearchOptions}
-            setSearchSources={this.setSearchSources}
-            loading={loading}
-            searchSources={searchSources}
-            handleSearchBarKeyPress={this.handleSearchBarKeyPress}
-            getArrayWithSearchWords={this.getArrayWithSearchWords}
-            failedWFSFetchMessage={failedWFSFetchMessage}
-            {...this.props}
-          />
-        </>
+        <SearchBar
+          classes={{
+            root: classes.inputRoot,
+          }}
+          escapeRegExp={this.escapeRegExp}
+          localObserver={this.localObserver}
+          searchTools={searchTools}
+          searchResults={searchResults}
+          handleSearchInput={this.handleSearchInput}
+          searchString={searchString}
+          searchActive={searchActive}
+          handleOnClickOrKeyboardSearch={this.handleOnClickOrKeyboardSearch}
+          autoCompleteOpen={autoCompleteOpen}
+          showSearchResults={showSearchResults}
+          resultPanelCollapsed={resultPanelCollapsed}
+          toggleCollapseSearchResults={this.toggleCollapseSearchResults}
+          handleOnAutompleteInputChange={this.handleOnAutompleteInputChange}
+          handleOnClear={this.handleOnClear}
+          autocompleteList={autocompleteList}
+          doSearch={this.doSearch.bind(this)}
+          searchModel={this.searchModel}
+          searchOptions={searchOptions}
+          updateSearchOptions={this.updateSearchOptions}
+          setSearchSources={this.setSearchSources}
+          loading={loading}
+          searchSources={searchSources}
+          handleSearchBarKeyPress={this.handleSearchBarKeyPress}
+          getArrayWithSearchWords={this.getArrayWithSearchWords}
+          failedWFSFetchMessage={failedWFSFetchMessage}
+          {...this.props}
+        />
       )
     );
   }
