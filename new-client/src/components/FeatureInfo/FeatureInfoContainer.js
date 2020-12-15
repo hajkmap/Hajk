@@ -102,11 +102,15 @@ class FeatureInfoContainer extends React.PureComponent {
             aria-label="previous"
             id="step-left"
           >
-            <ArrowLeftIcon />
+            <ArrowLeftIcon color="secondary" />
           </Button>
         </Grid>
         <Grid item>
-          <Typography className={classes.typography}>
+          <Typography
+            variant="button"
+            color="secondary"
+            className={classes.typography}
+          >
             {this.state.selectedIndex + 1} av {features.length}
           </Typography>
         </Grid>
@@ -119,7 +123,7 @@ class FeatureInfoContainer extends React.PureComponent {
             aria-label="next"
             id="step-right"
           >
-            <ArrowRightIcon />
+            <ArrowRightIcon color="secondary" />
           </Button>
         </Grid>
       </Grid>
@@ -325,17 +329,20 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, features } = this.props;
     const featureInfoLoaded = this.isReadyToShowInfo();
     return (
       <Grid
         alignContent="flex-start"
         className={classes.infoContainer}
         container
+        spacing={1}
       >
-        <Grid xs={12} item>
-          {this.getToggler()}
-        </Grid>
+        {features.length > 1 && (
+          <Grid xs={12} item>
+            {this.getToggler()}
+          </Grid>
+        )}
         <Grid
           justify="center"
           alignContent={featureInfoLoaded ? "flex-start" : "center"}

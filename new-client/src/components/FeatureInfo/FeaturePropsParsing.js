@@ -42,7 +42,9 @@ export default class FeaturePropsParsing {
   };
 
   #hasChildren = (child) => {
-    return child.props.children && child.props.children.length > 0;
+    return child?.props?.children && child.props.children.length > 0
+      ? true
+      : false;
   };
 
   /**
@@ -228,7 +230,7 @@ export default class FeaturePropsParsing {
       });
     }
 
-    let html = marked(`<div id="wrapper">${markdown}</div>`);
+    let html = `<div id="wrapper">${marked(markdown)}</div>`;
     return await this.#renderHtmlAsReactComponents(html);
   };
 }
