@@ -93,6 +93,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
           <button
             className={classes.textAreaButton}
             onMouseDown={onConfirmClick}
+            disabled={!hasFocus}
           >
             OK
           </button>
