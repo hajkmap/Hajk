@@ -29,6 +29,7 @@ const ImageComponent = props => {
   const dataCaption = data["data-caption"];
   const dataSource = data["data-source"];
   const dataPopup = data["data-popup"];
+  const dataImagePosition = data["data-image-position"];
 
   const [open, setOpen] = useState(false);
   const [width, setWidth] = useState(imageWidth);
@@ -36,7 +37,7 @@ const ImageComponent = props => {
   const [caption, setCaption] = useState(dataCaption);
   const [source, setSource] = useState(dataSource);
   const [popup, setPopup] = useState(dataPopup);
-  const [imagePosition, setImagePosition] = useState(null);
+  const [imagePosition, setImagePosition] = useState(dataImagePosition);
   const [saveButton, showSaveButton] = useState(true);
 
   useEffect(() => {
@@ -45,7 +46,8 @@ const ImageComponent = props => {
       imageHeight !== height ||
       dataCaption !== caption ||
       dataSource !== source ||
-      dataPopup !== popup
+      dataPopup !== popup ||
+      dataImagePosition !== imagePosition
     ) {
       showSaveButton(false);
     } else {
@@ -74,15 +76,14 @@ const ImageComponent = props => {
       "data-caption": caption,
       "data-source": source,
       "data-popup": popup,
-      "data-image-right": "floatLeft"
+      "data-image-right": "floatLeft",
+      "data-image-position": imagePosition
     };
     imageData(data);
   };
 
   const handleChange = event => {
     setImagePosition(event.target.value);
-    if (width !== imageWidth) {
-    }
   };
 
   const body = (
