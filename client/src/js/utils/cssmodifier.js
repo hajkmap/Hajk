@@ -88,6 +88,9 @@ module.exports = {
     var searchbarSearchButton = getCSSRule('#searchbar-search-button');
     var searchResultGroup = getCSSRule('.search-tools .group');
 
+    var anchorLink = getCSSRule('#link');
+    var btnToolbarHover = getCSSRule('.btn-primary.btn-toolbar:hover');
+
     if (panelHeader) {
       panelHeader.style.backgroundColor = config.primaryColor;
       panelHeader.style.borderColor = config.primaryColor;
@@ -115,11 +118,11 @@ module.exports = {
       btnPrimary.style.color = config.secondaryColor;
     }
     if (btnPrimaryFocus) {
-      btnPrimaryFocus.style.backgroundColor = config.primaryColor;
+      btnPrimaryFocus.style.backgroundColor = config.primaryColor; 
       btnPrimaryFocus.style.color = config.secondaryColor;
     }
     if (btnPrimaryHover) {
-      btnPrimaryHover.style.backgroundColor = config.primaryColor;
+      btnPrimaryHover.style.backgroundColor = config.activeColor || config.primaryColor;
       btnPrimaryHover.style.color = config.secondaryColor;
     }
     if (btnPrimaryActive) {
@@ -220,6 +223,12 @@ module.exports = {
     }
     if (searchResultGroup) {
       searchResultGroup.style.backgroundColor = config.primaryColor;
+    }
+    if (anchorLink) {
+      anchorLink.style.borderColor = config.primaryColor;
+    }
+    if (btnToolbarHover) {
+      btnToolbarHover.style.backgroundColor = config.primaryColor;
     }
   }
 };
