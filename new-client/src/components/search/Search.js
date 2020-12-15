@@ -274,7 +274,7 @@ class Search extends React.PureComponent {
     );
   };
 
-  handleOnAutompleteInputChange = (event, searchString, reason) => {
+  handleOnAutocompleteInputChange = (event, searchString, reason) => {
     if (this.isUserInput(searchString, reason)) {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
@@ -707,7 +707,7 @@ class Search extends React.PureComponent {
           showSearchResults={showSearchResults}
           resultPanelCollapsed={resultPanelCollapsed}
           toggleCollapseSearchResults={this.toggleCollapseSearchResults}
-          handleOnAutompleteInputChange={this.handleOnAutompleteInputChange}
+          handleOnAutocompleteInputChange={this.handleOnAutocompleteInputChange}
           handleOnClear={this.handleOnClear}
           autocompleteList={autocompleteList}
           doSearch={this.doSearch.bind(this)}
