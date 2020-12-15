@@ -40,6 +40,12 @@ const styles = (theme) => ({
   featureInfo: {
     width: "100%",
   },
+  togglerButtonRightContainer: {
+    borderRight: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+  },
+  togglerButtonLeftContainer: {
+    borderLeft: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+  },
 });
 
 class FeatureInfoContainer extends React.PureComponent {
@@ -93,10 +99,9 @@ class FeatureInfoContainer extends React.PureComponent {
         className={classes.toggler}
         container
       >
-        <Grid item>
+        <Grid item className={classes.togglerButtonRightContainer}>
           <Button
             fullWidth
-            variant="outlined"
             disabled={this.state.selectedIndex - 1 < 0}
             onClick={this.stepLeft}
             aria-label="previous"
@@ -114,10 +119,9 @@ class FeatureInfoContainer extends React.PureComponent {
             {this.state.selectedIndex + 1} av {features.length}
           </Typography>
         </Grid>
-        <Grid item>
+        <Grid item className={classes.togglerButtonLeftContainer}>
           <Button
             fullWidth
-            variant="outlined"
             disabled={this.state.selectedIndex + 1 >= features.length}
             onClick={this.stepRight}
             aria-label="next"
