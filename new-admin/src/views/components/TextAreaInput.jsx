@@ -11,6 +11,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
 
   const selectionState = editorState.getSelection();
   const hasFocus = selectionState.get("hasFocus");
+
   const contentState = editorState.getCurrentContent();
   const contentBlock = contentState.getBlockForKey(
     selectionState.getAnchorKey()
@@ -105,14 +106,14 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
         <Grid direction="column" container item>
           <Grid item>
             {hasFocus && (
-              <label>{`Markerad faktaruta har data-background-color
-            ${focusedBackgroundColor}`}</label>
+              <p>{`Markerad faktaruta har data-background-color
+            ${focusedBackgroundColor}`}</p>
             )}
           </Grid>
           <Grid item>
             {hasFocus && (
-              <label>{`Markerad faktaruta har data-divider-color
-            ${focusedDividerColor}`}</label>
+              <p>{`Markerad faktaruta har data-divider-color
+            ${focusedDividerColor}`}</p>
             )}
           </Grid>
         </Grid>

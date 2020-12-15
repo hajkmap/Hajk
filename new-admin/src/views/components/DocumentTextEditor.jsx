@@ -70,12 +70,6 @@ export default class DocumentTextEditor extends React.Component {
       this.setState({ mediaCaption: e.target.value });
     this.onDataSourceChange = (e) =>
       this.setState({ mediaSource: e.target.value });
-    this.onDataTextAreaBackgroundColorChange = (e) => {
-      this.setState({ textAreaBackgroundColor: e.target.value });
-    };
-    this.onDataTextAreaDividerColorChange = (e) => {
-      this.setState({ textAreaDividerColor: e.target.value });
-    };
     this.onDataPopupChange = (e) =>
       this.setState({ mediaPopup: !this.state.mediaPopup });
     this.onBlockBackgroundChange = (e) =>
