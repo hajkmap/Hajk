@@ -25,9 +25,9 @@ export default express
     checkAdminAuthorization,
     controller.availableADGroups,
   ]) // MapSwitcher component uses this to determine which maps should be visible
-  .get("/findcommongroupsforusers", [
+  .get("/findcommonadgroupsforusers", [
     checkAdminAuthorization,
-    controller.findCommonGroupsForUsers,
+    controller.findCommonADGroupsForUsers,
   ]) // MapSwitcher component uses this to determine which maps should be visible
 
   // …but if none of the above matched, let's assume the string

@@ -370,7 +370,7 @@ paths:
         200:
           description: Success
           content: {}
-  /config/findcommongroupsforusers:
+  /config/findcommonadgroupsforusers:
     get:
       tags:
         - Admin - ActiveDirectory
