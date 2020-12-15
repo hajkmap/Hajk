@@ -695,8 +695,6 @@ class Search extends React.PureComponent {
           <SearchBar
             classes={{
               root: classes.inputRoot,
-              input:
-                target === "top" ? classes.inputInputWide : classes.inputInput,
             }}
             escapeRegExp={this.escapeRegExp}
             localObserver={this.localObserver}
