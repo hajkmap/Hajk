@@ -48,9 +48,8 @@ class ConfigService {
         map,
         user
       );
-      // Else, it looks like MapService is configured to respect AD restrictions.
-      // We must do some extra work and remove layers that current user should
-      // see before we can return the contents of map config.
+
+      // If we got this far, it looks like MapService is configured to respect AD restrictions.
 
       // First, ensure that we have a valid user name. This is necessary for AD lookups.
       if ((await ad.isUserValid(user)) !== true) {
@@ -61,18 +60,12 @@ class ConfigService {
         throw e;
       }
 
-      // Restrictions can be placed on either map config (access to map), layers/groups
-      // or as a combination of both.
-
-      // First, let's see if user has access to the map config. If not, there's no
+      // Now let's see if the user has access to the map config. If not, there's no
       // need to further "wash" groups/layers, so we do it first.
-
-      // Grab the options from map config
       const visibleForGroups = json.tools.find(
         (t) => t.type === "layerswitcher"
       ).options?.visibleForGroups;
 
-      // First see if access to the map config is allowed for group that current user is a member of
       if (Array.isArray(visibleForGroups) && visibleForGroups.length > 0) {
         logger.trace(
           "[getMapConfig] Access to %s is allowed only for the following groups: %o. \nChecking if %s is member in any of them…",
@@ -136,7 +129,7 @@ class ConfigService {
     } else {
       // There are tools restrictions.
       logger.trace(
-        "[filterByGroupVisibility] Only the following groups have access to layer %s: %o",
+        "[filterByGroupVisibility] Only the following groups have access to %s: %o",
         identifier,
         visibleForGroups
       );
@@ -168,6 +161,20 @@ class ConfigService {
     return false;
   }
 
+  /**
+   * @summary Take a map config as JSON object and return
+   * only those parts of itthat the current user has access to.
+   *
+   * @description The following content will be washed:
+   *  - Part 1: tools (access to each of them can be restricted)
+   *  - Part 2: groups and layers (in LayerSwitcher's options)
+   *  - Part 3: WFS search services (in Search's options)
+   *
+   * @param {*} mapConfig
+   * @param {*} user
+   * @returns
+   * @memberof ConfigService
+   */
   async washMapConfig(mapConfig, user) {
     // Helper function that will call itself recursively.
     // Necessary to handle the nested tree of groups from LayerSwitcher config.
@@ -198,7 +205,7 @@ class ConfigService {
 
     logger.trace("[washMapConfig] Washing map config for %s", user);
 
-    // Each map tool can have restrictions
+    // Part 1: Remove those tools that user lacks access to
     mapConfig.tools = await asyncFilter(
       mapConfig.tools,
       async (tool) =>
@@ -209,30 +216,53 @@ class ConfigService {
         ) // Call the predicate
     );
 
-    // Find out where LayerSwitcher config is in the tools array, so that we can
-    // put it back in place when we're done
+    // Part 2: Remove groups/layers/baselayers that user lacks access to
     const lsIndexInTools = mapConfig.tools.findIndex(
       (t) => t.type === "layerswitcher"
     );
-    let { baselayers, groups } = mapConfig.tools[lsIndexInTools].options;
 
-    // Wash baselayers
-    baselayers = await asyncFilter(
-      baselayers,
-      async (baselayer) =>
-        await this.filterByGroupVisibility(
-          baselayer.visibleForGroups,
-          user,
-          `baselayer "${baselayer.id}"`
-        )
+    if (lsIndexInTools !== -1) {
+      let { baselayers, groups } = mapConfig.tools[lsIndexInTools].options;
+
+      // Wash baselayers
+      baselayers = await asyncFilter(
+        baselayers,
+        async (baselayer) =>
+          await this.filterByGroupVisibility(
+            baselayer.visibleForGroups,
+            user,
+            `baselayer "${baselayer.id}"`
+          )
+      );
+
+      // Put back the washed baselayers into config
+      mapConfig.tools[lsIndexInTools].options.baselayers = baselayers;
+
+      // Take care of recursively washing groups too, and put back the results to config
+      groups = await recursivelyWashGroups(groups);
+      mapConfig.tools[lsIndexInTools].options.groups = groups;
+    }
+
+    // Part 3: Wash WFS search services
+    const searchIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "search"
     );
 
-    // Put back the washed baselayers into config
-    mapConfig.tools[lsIndexInTools].options.baselayers = baselayers;
+    if (searchIndexInTools !== -1) {
+      let { layers } = mapConfig.tools[searchIndexInTools].options;
 
-    // Take care of recursively washing groups too, and put back the results to config
-    groups = await recursivelyWashGroups(groups);
-    mapConfig.tools[lsIndexInTools].options.groups = groups;
+      // Wash WFS search layers
+      layers = await asyncFilter(
+        layers,
+        async (layer) =>
+          await this.filterByGroupVisibility(
+            layer.visibleForGroups,
+            user,
+            `WFS search layer "${layer.id}"`
+          )
+      );
+      mapConfig.tools[searchIndexInTools].options.layers = layers;
+    }
 
     return mapConfig;
   }
