@@ -51,6 +51,7 @@ export default class DocumentSearchModel {
   };
 
   createFeatureCollection = (document, matchedFeatures, searchFields) => {
+    console.log(document, "docuemtn");
     return {
       value: {
         status: "fulfilled",
@@ -63,7 +64,7 @@ export default class DocumentSearchModel {
         totalFeatures: matchedFeatures.length,
       },
       source: {
-        id: `${document.documentTitle}`,
+        id: `${document.documentFileName}`,
         caption: document.documentTitle,
         displayFields: ["header"],
         searchFields: [...searchFields],
@@ -86,6 +87,7 @@ export default class DocumentSearchModel {
             chapters[i],
             document
           );
+          console.log(matchedFeature, "matchedFeature");
 
           let chapterSearchFields = this.getMockedSearchFieldForChapter(
             chapters[i],
@@ -114,6 +116,7 @@ export default class DocumentSearchModel {
   getFeatureCollectionsForMatchingDocuments = (possibleSearchCombinations) => {
     let featureCollections = [];
     this.allDocuments.forEach((document) => {
+      console.log(this.allDocuments, "allDocuments");
       document.chapters.forEach((chapter) => {
         this.setmatchedSearchValuesOnChapter(
           document,
@@ -175,10 +178,15 @@ export default class DocumentSearchModel {
     });
   };
 
-  setSearchValuesForChapter = (chapter) => {
+  setSearchValuesForChapter = (document, chapter) => {
     chapter.searchValues = [];
+    console.log(chapter, "chapter");
     if (chapter.keywords) {
-      chapter.searchValues = chapter.searchValues.concat(chapter.keywords);
+      chapter.searchValues = [
+        ...chapter.searchValues,
+        ...chapter.keywords,
+        document.documentTitle,
+      ];
     }
     chapter.searchValues.push(chapter.header);
   };
@@ -197,7 +205,7 @@ export default class DocumentSearchModel {
         );
       });
     }
-    this.setmatchedSearchValues(chapter, searchCombinations);
+    this.setmatchedSearchValues(document, chapter, searchCombinations);
   };
 
   getMockedSearchFieldForChapter = (chapter, properties) => {
@@ -220,6 +228,7 @@ export default class DocumentSearchModel {
   };
 
   createFeatureFromChapter = (chapter, document) => {
+    console.log(chapter, "chapter");
     let properties = {
       header: chapter.header,
       geoids: chapter.geoids,
@@ -231,7 +240,7 @@ export default class DocumentSearchModel {
     return {
       type: "Feature",
       geometry: null,
-      id: `${chapter.documentTitle}${Math.floor(Math.random() * 1000)}`,
+      id: `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`,
       onClickName: "documenthandler-searchresult-clicked",
       properties: properties,
     };
@@ -247,8 +256,8 @@ export default class DocumentSearchModel {
    * @return Returns true if a match is found.
    *
    */
-  setmatchedSearchValues = (chapter, searchCombinations) => {
-    this.setSearchValuesForChapter(chapter);
+  setmatchedSearchValues = (document, chapter, searchCombinations) => {
+    this.setSearchValuesForChapter(document, chapter);
     let allMatched = [];
     let match = searchCombinations.some((searchCombination) => {
       let everyResult = searchCombination.every((word) => {
@@ -325,50 +334,4 @@ export default class DocumentSearchModel {
 
     return matchedSearchValues;
   };
-
-  getDocumentsFromMenus(menu) {
-    return menu.filter((menuItem) => {
-      return menuItem.document || menuItem.menu.length > 0;
-    });
-  }
-
-  getFlattenedMenu(menu) {
-    let flattenedMenu = [];
-    menu.forEach((menuItem) => {
-      if (menuItem.menu.length > 0) {
-        flattenedMenu = flattenedMenu.concat(
-          this.getFlattenedMenu(menuItem.menu)
-        );
-      } else {
-        flattenedMenu.push(menuItem);
-      }
-    });
-    return flattenedMenu;
-  }
-
-  getAllDocumentsContainedInMenu() {
-    return new Promise((resolve, reject) => {
-      if (this.allDocuments.length > 0) {
-        resolve(this.allDocuments);
-      }
-      Promise.all(
-        this.getFlattenedMenu(
-          this.getDocumentsFromMenus(this.settings.menu)
-        ).map((menuItem) => {
-          return this.fetchJsonDocument(menuItem.document).then((doc) => {
-            doc.documentColor = menuItem.color;
-            doc.documentFileName = menuItem.document;
-            doc.documentTitle = menuItem.title;
-            return doc;
-          });
-        })
-      )
-        .then((documents) => {
-          resolve(documents);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
-  }
 }
