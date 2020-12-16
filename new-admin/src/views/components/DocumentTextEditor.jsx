@@ -416,7 +416,7 @@ export default class DocumentTextEditor extends React.Component {
       img["data-image-height"] = "";
       img["data-caption"] = "";
       img["data-source"] = "";
-      img["data-image-position"] = "left";
+      img["data-image-position"] = "";
       let figure = document.createElement("figure");
       figure.innerHTML = img.outerHTML;
       img.parentNode.replaceChild(figure, img);
@@ -771,7 +771,9 @@ export default class DocumentTextEditor extends React.Component {
           <label>Popup</label>
           <select
             value={this.state.mediaPosition}
+            ref="data-image-position"
             onChange={this.onDataPositionChange}
+            placeholder="data-image-position"
           >
             <option value="left">Vänster</option>
             <option value="center">Center</option>

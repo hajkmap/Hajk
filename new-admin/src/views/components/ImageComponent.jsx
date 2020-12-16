@@ -168,7 +168,7 @@ const ImageComponent = props => {
           </Grid>
         </div>
       </FormControl>
-      <FormControl component="fieldset">
+      <FormControl className={classes.form} component="fieldset">
         <FormLabel component="legend">Position</FormLabel>
         <RadioGroup
           aria-label="position"
@@ -194,27 +194,17 @@ const ImageComponent = props => {
             control={<Radio />}
             label="Höger"
           />
-        </RadioGroup>
-      </FormControl>
-      <FormControl className={classes.formRight} component="fieldset">
-        <FormLabel component="legend">Text runt bild</FormLabel>
-        <RadioGroup
-          aria-label="text-position"
-          name="text-position"
-          value="text-position"
-          onChange={handleChange}
-        >
           <FormControlLabel
             value="floatRight"
             checked={imagePosition === "floatRight"}
             control={<Radio />}
-            label="Före"
+            label="Höger med text"
           />
           <FormControlLabel
             value="floatLeft"
             checked={imagePosition === "floatLeft"}
             control={<Radio />}
-            label="Efter"
+            label="Vänster med text"
           />
         </RadioGroup>
       </FormControl>
