@@ -12,7 +12,7 @@ import { Typography } from "@material-ui/core";
 import {
   ColorButtonBlue,
   ColorButtonGreen,
-  ColorButtonRed
+  ColorButtonRed,
 } from "./custombuttons.jsx";
 
 import Tree from "antd/es/tree"; //Specific import to keep bundle-size small
@@ -20,14 +20,14 @@ import "antd/es/tree/style/css"; //Specific import to keep bundle-size small
 
 const HEADER_KEY = -2;
 
-const styles = theme => ({
+const styles = (theme) => ({
   background: {
-    backgroundColor: "#e8e8e8"
+    backgroundColor: "#e8e8e8",
   },
   header: {
     paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1)
-  }
+    paddingBottom: theme.spacing(1),
+  },
 });
 
 class ToolOptions extends Component {
@@ -41,7 +41,8 @@ class ToolOptions extends Component {
     menuConfig: {},
     iconLibraryLink: "https://material.io/resources/icons/?style=baseline",
     openMenuEditor: false,
-    validationErrors: []
+    validationErrors: [],
+    documentOnStart: "",
   };
   treeKeys = [];
   menuConfig = null;
@@ -52,14 +53,14 @@ class ToolOptions extends Component {
     this.type = "documenthandler";
     this.mapSettingsModel = props.model;
     this.menuEditorModel = this.getMenuEditorModel();
-    this.menuEditorModel.listAllAvailableDocuments().then(list => {
+    this.menuEditorModel.listAllAvailableDocuments().then((list) => {
       this.availableDocuments = list;
     });
   }
 
   getMenuEditorModel = () => {
     return new MenuEditorModel({
-      config: this.props.model.get("config")
+      config: this.props.model.get("config"),
     });
   };
 
@@ -79,11 +80,12 @@ class ToolOptions extends Component {
         width: tool.options.width,
         height: tool.options.height,
         menuConfig: tool.options.menuConfig,
-        iconLibraryLink: tool.options.iconLibraryLink
+        iconLibraryLink: tool.options.iconLibraryLink,
+        documentOnStart: tool.options.documentOnStart,
       });
     } else {
       this.setState({
-        active: false
+        active: false,
       });
     }
   };
@@ -96,14 +98,14 @@ class ToolOptions extends Component {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
     this.setState({
-      [name]: value
+      [name]: value,
     });
   }
 
   getTool() {
     return this.props.model
       .get("toolConfig")
-      .find(tool => tool.type === this.type);
+      .find((tool) => tool.type === this.type);
   }
 
   add(tool) {
@@ -114,12 +116,12 @@ class ToolOptions extends Component {
     this.props.model.set({
       toolConfig: this.props.model
         .get("toolConfig")
-        .filter(tool => tool.type !== this.type)
+        .filter((tool) => tool.type !== this.type),
     });
   }
 
   replace(tool) {
-    this.props.model.get("toolConfig").forEach(t => {
+    this.props.model.get("toolConfig").forEach((t) => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -143,8 +145,9 @@ class ToolOptions extends Component {
         iconLibraryLink: this.state.iconLibraryLink,
         width: this.state.width,
         height: this.state.height,
-        menuConfig: this.menuConfig
-      }
+        documentOnStart: this.state.documentOnStart,
+        menuConfig: this.menuConfig,
+      },
     };
 
     var existing = this.getTool();
@@ -155,7 +158,7 @@ class ToolOptions extends Component {
         () => {
           this.props.parent.props.parent.setState({
             alert: true,
-            alertMessage: "Uppdateringen lyckades"
+            alertMessage: "Uppdateringen lyckades",
           });
         }
       );
@@ -170,7 +173,7 @@ class ToolOptions extends Component {
           confirmAction: () => {
             this.remove();
             update.call(this);
-          }
+          },
         });
       } else {
         this.remove();
@@ -189,24 +192,24 @@ class ToolOptions extends Component {
   //
   //END
 
-  onCloseMenuEditorClick = e => {
+  onCloseMenuEditorClick = (e) => {
     e.preventDefault();
     this.setState({ openMenuEditor: false, tree: [] });
   };
 
-  onSaveMenuEditsClick = e => {
+  onSaveMenuEditsClick = (e) => {
     e.preventDefault();
     this.setState({ openMenuEditor: false }, () => {
       this.save();
     });
   };
 
-  onNewTreeRowClick = e => {
+  onNewTreeRowClick = (e) => {
     e.preventDefault();
     this.addNewItem();
   };
 
-  getHeader = canSave => {
+  getHeader = (canSave) => {
     const { classes } = this.props;
     return (
       <Grid
@@ -272,7 +275,7 @@ class ToolOptions extends Component {
     this.setState({ tree: newTree });
   };
 
-  addHeaderRowToTreeStructure = treeData => {
+  addHeaderRowToTreeStructure = (treeData) => {
     treeData.unshift({
       title: this.getHeader(
         this.menuEditorModel.canSave(this.getTreeWithoutHeader(treeData))
@@ -280,29 +283,29 @@ class ToolOptions extends Component {
       disabled: true,
       children: [],
       menuItem: [],
-      key: HEADER_KEY
+      key: HEADER_KEY,
     });
   };
 
   getTreeView = () => {
     return this.menuEditorModel
       .loadMenuConfigForMap(this.mapSettingsModel.get("mapFile"))
-      .then(menuConfig => {
+      .then((menuConfig) => {
         this.menuConfig = menuConfig.options.menuConfig;
         let treeData = this.createTreeStructure(this.menuConfig.menu);
         return treeData;
       });
   };
 
-  createTreeStructure = menu => {
+  createTreeStructure = (menu) => {
     this.treeKeys = [];
     let tree = this.createTree(menu);
     this.menuEditorModel.setParentForAllTreeNodes(tree);
     return tree;
   };
 
-  createTree = menu => {
-    return menu.map(menuItem => {
+  createTree = (menu) => {
+    return menu.map((menuItem) => {
       return this.createTreeChild(menuItem);
     });
   };
@@ -334,7 +337,7 @@ class ToolOptions extends Component {
   };
 
   //Need to manually update title-component because cant incorporate into render method
-  updateTreeRowComponent = treeNode => {
+  updateTreeRowComponent = (treeNode) => {
     treeNode.title = this.getRowTitleComponent(
       treeNode.menuItem,
       treeNode.children,
@@ -342,32 +345,32 @@ class ToolOptions extends Component {
     );
   };
 
-  updateTreeValidation = tree => {
-    tree.forEach(treeNode => {
+  updateTreeValidation = (tree) => {
+    tree.forEach((treeNode) => {
       if (treeNode.key !== HEADER_KEY) {
         this.updateValidation(treeNode);
       }
     });
   };
 
-  updateValidationForTreeNode = treeNodeId => {
+  updateValidationForTreeNode = (treeNodeId) => {
     let newTree = [...this.state.tree];
     let foundTreeNode = this.menuEditorModel.findInTree(newTree, treeNodeId);
     this.updateValidation(foundTreeNode);
     this.setState({ tree: newTree });
   };
 
-  updateValidation = treeNode => {
+  updateValidation = (treeNode) => {
     this.updateTreeRowComponent(treeNode);
 
     if (treeNode.children.length > 0) {
-      treeNode.children.forEach(child => {
+      treeNode.children.forEach((child) => {
         this.updateValidation(child);
       });
     }
   };
 
-  createTreeChild = menuItem => {
+  createTreeChild = (menuItem) => {
     let children = [];
     if (menuItem.menu && menuItem.menu.length > 0) {
       children = this.createTree(menuItem.menu);
@@ -379,11 +382,11 @@ class ToolOptions extends Component {
       children: children,
       selectable: false,
       menuItem: this.menuEditorModel.getMenuItemWithoutChildren(menuItem),
-      key: key
+      key: key,
     };
   };
 
-  onDropNode = info => {
+  onDropNode = (info) => {
     const dropKey = info.node.props.eventKey;
     const dragKey = info.dragNode.props.eventKey;
     let newTree = [...this.state.tree];
@@ -419,14 +422,14 @@ class ToolOptions extends Component {
     }
   };
 
-  getTreeWithoutHeader = tree => {
-    return tree.filter(treeNode => {
+  getTreeWithoutHeader = (tree) => {
+    return tree.filter((treeNode) => {
       return treeNode.key !== HEADER_KEY;
     });
   };
 
   //Need to manually update title-component because cant incorporate into render method
-  saveNewTree = newTree => {
+  saveNewTree = (newTree) => {
     this.updateTreeValidation(newTree);
     newTree[0].title = this.getHeader(
       this.menuEditorModel.canSave(this.getTreeWithoutHeader(newTree))
@@ -440,7 +443,7 @@ class ToolOptions extends Component {
     if (treeNode) {
       treeNode.menuItem = {
         ...treeNode.menuItem,
-        ...objectWithKeyValuesToUpdate
+        ...objectWithKeyValuesToUpdate,
       };
 
       this.updateTreeRowComponent(treeNode);
@@ -450,7 +453,7 @@ class ToolOptions extends Component {
   };
 
   deleteTreeNode = (nodeArrayToSearch, treeNodeToDelete) => {
-    nodeArrayToSearch.forEach(child => {
+    nodeArrayToSearch.forEach((child) => {
       if (child.key === treeNodeToDelete.key) {
         nodeArrayToSearch.splice(
           nodeArrayToSearch.indexOf(treeNodeToDelete),
@@ -460,11 +463,11 @@ class ToolOptions extends Component {
     });
   };
 
-  isRootNode = treeNode => {
+  isRootNode = (treeNode) => {
     return treeNode.parent === undefined ? true : false;
   };
 
-  deleteMenuItem = treeNodeId => {
+  deleteMenuItem = (treeNodeId) => {
     let newTreeState = [...this.state.tree];
     let treeNode = this.menuEditorModel.findInTree(newTreeState, treeNodeId);
     if (this.isRootNode(treeNode)) {
@@ -475,9 +478,9 @@ class ToolOptions extends Component {
     this.saveNewTree(newTreeState);
   };
 
-  onEditMenuClick = e => {
+  onEditMenuClick = (e) => {
     e.preventDefault();
-    this.getTreeView().then(treeData => {
+    this.getTreeView().then((treeData) => {
       this.addHeaderRowToTreeStructure(treeData);
       this.setState({ openMenuEditor: true, tree: treeData });
     });
@@ -485,7 +488,7 @@ class ToolOptions extends Component {
 
   render() {
     const { classes } = this.props;
-    let expandedKeys = this.treeKeys.map(key => {
+    let expandedKeys = this.treeKeys.map((key) => {
       return key.toString();
     });
 
@@ -502,6 +505,27 @@ class ToolOptions extends Component {
               <Typography variant="button">Redigera meny</Typography>
             </ColorButtonBlue>
           </p>
+          <div className="separator">Fönsterinställningar</div>
+          <div className="separator">Övriga inställningar</div>
+          <div>
+            <label htmlFor="documentOnStart">
+              Start Dokument{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Namn på dokument som ska vara öppet vid map start - lämna tom om ingen dokument ska visas"
+              />
+            </label>
+            <input
+              id="documentOnStart"
+              value={this.state.documentOnStart}
+              type="text"
+              name="documentOnStart"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
 
           <section className="tab-pane active">
             <Modal
@@ -509,7 +533,7 @@ class ToolOptions extends Component {
                 position: "absolute",
                 top: "100px",
                 left: "100px",
-                right: "100px"
+                right: "100px",
               }}
               open={this.state.openMenuEditor}
             >
