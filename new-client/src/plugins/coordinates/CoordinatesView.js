@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -164,6 +165,20 @@ class CoordinatesView extends React.PureComponent {
             </TableHead>
             <TableBody>{this.renderProjections()}</TableBody>
           </Table>
+          <Button
+            onClick={() => {
+              this.props.model.zoomOnMarker();
+            }}
+          >
+            Zooma
+          </Button>
+          <Button
+            onClick={() => {
+              this.props.model.centerOnMarker();
+            }}
+          >
+            Panorera
+          </Button>
         </Paper>
       </>
     );

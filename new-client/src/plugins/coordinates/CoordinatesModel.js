@@ -65,6 +65,27 @@ class CoordinatesModel {
     this.source.addFeature(feature);
   };
 
+  centerOnMarker = () => {
+    if (this.vector.getSource().getFeatures().length > 0) {
+      this.map
+        .getView()
+        .setCenter(
+          this.vector
+            .getSource()
+            .getFeatures()[0]
+            .getGeometry()
+            .getCoordinates()
+        );
+    }
+  };
+
+  zoomOnMarker = () => {
+    if (this.vector.getSource().getFeatures().length > 0) {
+      this.map
+        .getView()
+        .fit(this.vector.getSource().getFeatures()[0].getGeometry());
+    }
+  };
   transform(coordinates, to) {
     const from = this.map.getView().getProjection();
     return transform(coordinates, from, to);
