@@ -9,12 +9,10 @@ import {
   convertToRaw,
   SelectionState
 } from "draft-js";
-import TextAreaInput from "./TextAreaInput";
 import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
 import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
 import { stateFromHTML } from "draft-js-import-html";
-import { Grid } from "@material-ui/core";
 
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
@@ -27,6 +25,7 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
 
+import TextAreaInput from "./TextAreaInput";
 import addLinkPlugin from "./addLinkPlugin";
 import StyleButton from "./StyleButton";
 import ImageComponent from "./ImageComponent";
@@ -416,7 +415,7 @@ export default class DocumentTextEditor extends React.Component {
       img["data-image-height"] = "";
       img["data-caption"] = "";
       img["data-source"] = "";
-      img["data-image-position"] = "left";
+      img["data-image-position"] = "";
       let figure = document.createElement("figure");
       figure.innerHTML = img.outerHTML;
       img.parentNode.replaceChild(figure, img);
@@ -771,7 +770,9 @@ export default class DocumentTextEditor extends React.Component {
           <label>Popup</label>
           <select
             value={this.state.mediaPosition}
+            ref="data-image-position"
             onChange={this.onDataPositionChange}
+            placeholder="data-image-position"
           >
             <option value="left">Vänster</option>
             <option value="center">Center</option>
