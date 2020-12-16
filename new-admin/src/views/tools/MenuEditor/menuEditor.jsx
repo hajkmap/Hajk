@@ -149,11 +149,13 @@ class ToolOptions extends Component {
     });
   }
 
-  save() {
-    this.menuConfig = this.menuEditorModel.exportTreeAsMenuJson(
-      this.state.tree,
-      this.menuConfig
-    );
+  save(savedFromMenuEditor) {
+    if (savedFromMenuEditor) {
+      this.menuConfig = this.menuEditorModel.exportTreeAsMenuJson(
+        this.state.tree,
+        this.menuConfig
+      );
+    }
     var tool = {
       type: this.type,
       index: this.state.index,
@@ -170,7 +172,9 @@ class ToolOptions extends Component {
         drawerButtonTitle: this.state.drawerButton,
         searchImplemented: this.state.searchImplemented,
         enablePrint: this.state.enablePrint,
-        menuConfig: this.menuConfig,
+        menuConfig: savedFromMenuEditor
+          ? this.menuConfig
+          : this.state.menuConfig,
         tableOfContents: this.state.tableOfContents,
         defaultDocumentColorSettings: this.state.defaultDocumentColorSettings,
       },
@@ -226,7 +230,7 @@ class ToolOptions extends Component {
   onSaveMenuEditsClick = (e) => {
     e.preventDefault();
     this.setState({ openMenuEditor: false }, () => {
-      this.save();
+      this.save(true);
     });
   };
 
@@ -525,6 +529,19 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
+              onClick={(e) => {
+                e.preventDefault();
+                this.save();
+              }}
+              startIcon={<SaveIcon />}
+            >
+              Spara
+            </ColorButtonBlue>
+          </p>
+          <p>
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={this.onEditMenuClick}
               startIcon={<SaveIcon />}
             >
@@ -729,7 +746,7 @@ class ToolOptions extends Component {
               onChange={(e) => {
                 const value = e.target.value;
                 this.setState((prevState) => ({
-                  tableOfContents: {
+                  defaultDocumentColorSettings: {
                     ...prevState.defaultDocumentColorSettings,
                     textAreaBackgroundColor: value,
                   },
@@ -757,7 +774,7 @@ class ToolOptions extends Component {
               onChange={(e) => {
                 const value = e.target.value;
                 this.setState((prevState) => ({
-                  tableOfContents: {
+                  defaultDocumentColorSettings: {
                     ...prevState.defaultDocumentColorSettings,
                     textAreaDividerColor: value,
                   },
