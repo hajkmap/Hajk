@@ -1,5 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import { isMobile } from "../../utils/IsMobile";
 import {
   Typography,
   Accordion,
@@ -12,6 +13,7 @@ import {
 } from "@material-ui/core";
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
+import SearchResultsPreview from "./SearchResultsPreview";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 
@@ -95,7 +97,12 @@ class SearchResultsDataset extends React.PureComponent {
         ? `${this.props.featureCollection.value.numberReturned}+`
         : this.props.featureCollection.value.numberReturned
       : this.props.featureCollection.value.features.length,
+    previewFeature: undefined, // Feature to show in preview
+    popOverAnchorEl: undefined, // The element which the preview popper will anchor to
   };
+
+  delayBeforeShowingPreview = 800; //Delay before showing preview popper in ms
+  previewTimer = null; // Timer to keep track of when delay has passed
 
   resultHasOnlyOneFeature = () => {
     const { featureCollection } = this.props;
@@ -126,6 +133,26 @@ class SearchResultsDataset extends React.PureComponent {
       },
       ""
     );
+  };
+
+  setPreviewFeature = (e, feature) => {
+    const target = e.currentTarget;
+    clearTimeout(this.previewTimer);
+    this.previewTimer = setTimeout(() => {
+      this.setState({
+        previewAnchorEl: target,
+        previewFeature: feature,
+      });
+    }, this.delayBeforeShowingPreview);
+  };
+
+  resetPreview = () => {
+    clearTimeout(this.previewTimer);
+    if (this.state.previewFeature)
+      this.setState({
+        previewAnchorEl: undefined,
+        previewFeature: undefined,
+      });
   };
 
   renderDatasetDetails = () => {
@@ -172,8 +199,15 @@ class SearchResultsDataset extends React.PureComponent {
                   <React.Fragment key={f.id}>
                     <Grid
                       role="button"
-                      onClick={() => handleOnFeatureClick(f)}
+                      onClick={() => {
+                        this.resetPreview();
+                        handleOnFeatureClick(f);
+                      }}
                       className={classes.hover}
+                      onMouseEnter={
+                        !isMobile ? (e) => this.setPreviewFeature(e, f) : null
+                      }
+                      onMouseLeave={!isMobile ? this.resetPreview : null}
                       container
                       item
                     >
@@ -322,6 +356,9 @@ class SearchResultsDataset extends React.PureComponent {
       setActiveFeatureCollection,
       activeFeatureCollection,
     } = this.props;
+    const { previewFeature, previewAnchorEl } = this.state;
+    const shouldShowPreview =
+      !isMobile && !previewFeature?.onClickName ? true : false;
     return (
       <>
         <Accordion
@@ -336,6 +373,14 @@ class SearchResultsDataset extends React.PureComponent {
           {this.renderDatasetSummary()}
           {activeFeatureCollection && this.renderDatasetDetails()}
         </Accordion>
+        {shouldShowPreview && (
+          <SearchResultsPreview
+            {...this.props}
+            previewFeature={previewFeature}
+            anchorEl={previewAnchorEl}
+            getFeatureTitle={this.getFeatureTitle}
+          />
+        )}
       </>
     );
   };

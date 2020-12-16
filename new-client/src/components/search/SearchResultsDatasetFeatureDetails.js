@@ -24,7 +24,6 @@ const styles = (theme) => ({
   allFeatureDetailsHeader: {
     maxWidth: "100%",
     fontWeight: 500,
-    paddingBottom: theme.spacing(1),
   },
 });
 
