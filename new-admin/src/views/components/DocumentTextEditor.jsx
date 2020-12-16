@@ -769,14 +769,16 @@ export default class DocumentTextEditor extends React.Component {
             placeholder="data-popup"
           />
           <label>Popup</label>
-          <input
+          <select
+            value={this.state.mediaPosition}
             onChange={this.onDataPositionChange}
-            ref="data-position"
-            type="text"
-            value={this.state.mediaPosition || ""}
-            onKeyDown={this.onURLInputKeyDown}
-            placeholder="data-position"
-          />
+          >
+            <option value="left">Vänster</option>
+            <option value="center">Center</option>
+            <option value="right">Höger</option>
+            <option value="floatRight">Höger med text</option>
+            <option value="floatLeft">Vänster med text</option>
+          </select>
           <button onMouseDown={this.confirmMedia}>OK</button>
           <button onMouseDown={this.closeURLInput}>Avbryt</button>
         </div>
@@ -870,7 +872,6 @@ export default class DocumentTextEditor extends React.Component {
             plugins={this.plugins}
           />
         </div>
-        <button onClick={this.logState}>LOGGA</button>
       </div>
     );
   }
