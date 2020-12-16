@@ -251,11 +251,22 @@ class AppModel {
 
   addSearchModel() {
     // TODO: Move configuration somewhere else, shouldn't be plugin-dependent.
-    const searchConfig = this.config.mapConfig.tools.find(
-      (t) => t.type === "search"
-    ).options;
-    this.searchModel = new SearchModel(searchConfig, this.getMap(), this);
 
+    // See if Search is configured in map config
+    const searchConfigIndex = this.config.mapConfig.tools.findIndex(
+      (t) => t.type === "search"
+    );
+
+    // If it is, go on and add the search model to App model
+    if (searchConfigIndex !== -1) {
+      this.searchModel = new SearchModel(
+        this.config.mapConfig.tools[searchConfigIndex].options,
+        this.getMap(),
+        this
+      );
+    }
+
+    // Either way, return self, so we can go on and chain more methods on App model
     return this;
   }
 
