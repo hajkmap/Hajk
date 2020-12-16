@@ -376,7 +376,7 @@ class App extends React.PureComponent {
     //     });
     //   });
 
-    // TODO: More plugins could use this - currently only SNap helper registers though
+    // TODO: More plugins could use this - currently only Snap helper registers though
     this.appModel
       .getMap()
       .getLayers()

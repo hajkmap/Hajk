@@ -214,6 +214,17 @@ class AppModel {
     // Add Snap Helper to the Map
     this.map.snapHelper = new SnapHelper(this);
 
+    // Add the clickLock set. Its primary use is to disable infoclick action
+    // when some other plugin (such as Draw or Measure) is active (in that case
+    // we want the plugin to handle click - not to show infoclick).
+    // It's easy to think that this is only needed if Infoclick plugin is active
+    // in map config - but that is not the case:
+    // A lot of plugins rely on the 'clickLock' property to exist on Map,
+    // and to be a Set (we use .has()).
+    // So, we create the Set no matter what:
+    this.map.clickLock = new Set();
+
+    // But we register the Infoclick handler only if the plugin exists in map config:
     if (config.tools.some((tool) => tool.type === "infoclick")) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
