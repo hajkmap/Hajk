@@ -181,20 +181,20 @@ class Search extends React.PureComponent {
 
   componentDidMount = () => {
     const { app } = this.props;
-    app.globalObserver.subscribe("core.appLoaded", () => {
-      this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
-        this.setState(
-          {
-            searchImplementedPluginsLoaded: true,
-            searchImplementedPlugins: searchImplementedPlugins,
-            searchTools: this.getSearchTools(searchImplementedPlugins),
-          },
-          () => {
-            this.handlePotentialUrlQuerySearch();
-          }
-        );
-      });
+    // app.globalObserver.subscribe("core.appLoaded", () => {
+    this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
+      this.setState(
+        {
+          searchImplementedPluginsLoaded: true,
+          searchImplementedPlugins: searchImplementedPlugins,
+          searchTools: this.getSearchTools(searchImplementedPlugins),
+        },
+        () => {
+          this.handlePotentialUrlQuerySearch();
+        }
+      );
     });
+    //  });
   };
 
   getSourcesByIds = (sourceIds) => {

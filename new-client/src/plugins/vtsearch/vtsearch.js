@@ -25,6 +25,8 @@ import MapViewModel from "./MapViewModel";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import SearchIcon from "@material-ui/icons/Search";
 
+import Search from "./../../components/search/Search";
+
 const styles = (theme) => {
   return {
     root: {
@@ -92,6 +94,7 @@ const styles = (theme) => {
 
 const searchTypes = {
   DEFAULT: "Välj sökmetod",
+  SEARCH: "Sök",
   JOURNEYS: "Sök Turer",
   LINES: "Sök Linjer",
   STOPS: "Sök Hållplatser",
@@ -131,6 +134,7 @@ class VTSearch extends React.PureComponent {
     super(props);
     this.type = "VTSearch"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.localObserver = Observer();
+    this.globalObserver = props.app.globalObserver;
 
     this.searchModel = new SearchModel({
       localObserver: this.localObserver,
@@ -183,9 +187,23 @@ class VTSearch extends React.PureComponent {
     });
   };
 
+  componentDidMount = () => {
+    this.globalObserver.publish("core.appLoaded");
+  };
+
   renderSearchmodule = () => {
     const { app } = this.props;
     switch (this.state.activeSearchTool) {
+      case searchTypes.SEARCH: {
+        this.props.app.appModel = this.props.app; // Fixa till
+        return (
+          <Search
+            map={this.props.app.getMap()}
+            app={this.props.app}
+            options={this.props.app.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
+          ></Search>
+        );
+      }
       case searchTypes.JOURNEYS: {
         return (
           <Journeys
@@ -303,7 +321,7 @@ class VTSearch extends React.PureComponent {
           title: "Title",
           description: "Description",
           height: "dynamic",
-          width: 300,
+          width: 420,
           top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
