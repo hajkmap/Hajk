@@ -294,7 +294,9 @@ class SearchBar extends React.PureComponent {
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
       failedWFSFetchMessage.length > 0 && showSearchResults;
-    const expandMessage = resultPanelCollapsed ? `Visa` : `Dölj`;
+    const expandMessage = resultPanelCollapsed
+      ? "Visa sökresultat"
+      : "Dölj sökresultat";
     return (
       <TextField
         {...params}
@@ -312,13 +314,15 @@ class SearchBar extends React.PureComponent {
               {showFailedWFSMessage &&
                 this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
               {!showSearchResults ? (
-                <IconButton
-                  size="small"
-                  onClick={handleOnClickOrKeyboardSearch}
-                >
-                  <Typography variant="srOnly">Exekvera sökning</Typography>
-                  <SearchIcon />
-                </IconButton>
+                <Tooltip title="Utför sökning">
+                  <IconButton
+                    size="small"
+                    onClick={handleOnClickOrKeyboardSearch}
+                  >
+                    <Typography variant="srOnly">Exekvera sökning</Typography>
+                    <SearchIcon />
+                  </IconButton>
+                </Tooltip>
               ) : (
                 <Tooltip title={expandMessage}>
                   <IconButton
@@ -340,10 +344,12 @@ class SearchBar extends React.PureComponent {
               {searchString.length > 0 ||
               showSearchResults ||
               searchActive !== "" ? (
-                <IconButton onClick={handleOnClear} size="small">
-                  <Typography variant="srOnly">Rensa sökfält</Typography>
-                  <ClearIcon />
-                </IconButton>
+                <Tooltip title="Rensa sökning">
+                  <IconButton onClick={handleOnClear} size="small">
+                    <Typography variant="srOnly">Rensa sökning</Typography>
+                    <ClearIcon />
+                  </IconButton>
+                </Tooltip>
               ) : (
                 <SearchTools
                   map={map}

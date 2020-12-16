@@ -4,11 +4,12 @@ import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { withStyles } from "@material-ui/core/styles";
 import {
-  Paper,
+  ListItemIcon,
   Menu,
   MenuItem,
+  Paper,
+  Tooltip,
   Typography,
-  ListItemIcon,
 } from "@material-ui/core";
 
 import Dialog from "../Dialog.js";
@@ -81,21 +82,23 @@ class SearchTools extends React.PureComponent {
     return (
       <div>
         {this.renderSettingsDialog()}
-        <IconButton
-          aria-haspopup="true"
-          aria-controls="lock-menu"
-          size="small"
-          onClick={(e) =>
-            this.setState({
-              anchorEl: e.currentTarget,
-            })
-          }
-        >
-          <Typography variant="srOnly">
-            Öppna dialog med fler inställningar
-          </Typography>
-          <MoreVertIcon />
-        </IconButton>
+        <Tooltip title="Fler sökverktyg och inställningar">
+          <IconButton
+            aria-haspopup="true"
+            aria-controls="lock-menu"
+            size="small"
+            onClick={(e) =>
+              this.setState({
+                anchorEl: e.currentTarget,
+              })
+            }
+          >
+            <Typography variant="srOnly">
+              Öppna dialog med fler inställningar
+            </Typography>
+            <MoreVertIcon />
+          </IconButton>
+        </Tooltip>
         <Paper>
           <Menu
             id="lock-menu"
