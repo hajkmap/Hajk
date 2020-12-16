@@ -396,6 +396,7 @@
         "polygonSearch": true,
         "radiusSearch": true,
         "selectionSearch": true,
+        "renderElsewhere": true,
         "tooltip": "Sök i kartlager",
         "searchWithinButtonText": "Markera i kartan",
         "maxFeatures": 100,
