@@ -9,10 +9,12 @@ import {
   convertToRaw,
   SelectionState
 } from "draft-js";
+import TextAreaInput from "./TextAreaInput";
 import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
 import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
 import { stateFromHTML } from "draft-js-import-html";
+import { Grid } from "@material-ui/core";
 
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
@@ -35,11 +37,12 @@ export default class DocumentTextEditor extends React.Component {
     super(props);
     this.state = {
       editorState: EditorState.createWithContent(
-        stateFromHTML(this.props.html)
+        this._stateFromHtmlWithOptions(this.props.html)
       ),
       html: this.props.html,
       showURLInput: false,
       showLinkInput: false,
+      showTextAreaInput: false,
       url: "",
       urlType: "",
       imageList: this.props.imageList,
@@ -69,6 +72,8 @@ export default class DocumentTextEditor extends React.Component {
       this.setState({ mediaSource: e.target.value });
     this.onDataPopupChange = e =>
       this.setState({ mediaPopup: !this.state.mediaPopup });
+    this.onDataPositionChange = e =>
+      this.setState({ mediaPosition: e.target.value });
     this.onBlockBackgroundChange = e =>
       this.setState({ blockBackground: e.target.value });
     this.onBlockDividerChange = e =>
@@ -79,6 +84,7 @@ export default class DocumentTextEditor extends React.Component {
     this.addMapLink = this._addMapLink.bind(this);
     this.addDocumentLink = this._addDocumentLink.bind(this);
     this.addWebLink = this._addWebLink.bind(this);
+    this.addTextArea = this._addTextArea.bind(this);
     this.closeURLInput = this._closeURLInput.bind(this);
     this.closeLinkInput = this._closeLinkInput.bind(this);
     this.confirmMedia = this._confirmMedia.bind(this);
@@ -93,6 +99,27 @@ export default class DocumentTextEditor extends React.Component {
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
     this.blockRenderer = this._blockRenderer.bind(this);
   }
+
+  _stateFromHtmlWithOptions = html => {
+    const customBlockFn = element => {
+      let { tagName } = element;
+      if (tagName === "BLOCKQUOTE") {
+        return {
+          type: "blockquote",
+          data: {
+            dividerColor: element.attributes.getNamedItem("data-divider-color")
+              ?.value,
+            backgroundColor: element.attributes.getNamedItem(
+              "data-background-color"
+            )?.value,
+            textSection:
+              element.attributes.getNamedItem("data-text-section")?.value || ""
+          }
+        };
+      }
+    };
+    return stateFromHTML(html, { customBlockFn });
+  };
   _onChange(editorState) {
     this.setState({ editorState });
     this.applyChanges();
@@ -123,7 +150,8 @@ export default class DocumentTextEditor extends React.Component {
       mediaHeight,
       mediaCaption,
       mediaSource,
-      mediaPopup
+      mediaPopup,
+      mediaPosition
     } = this.state;
     const contentState = editorState.getCurrentContent();
 
@@ -136,7 +164,8 @@ export default class DocumentTextEditor extends React.Component {
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
-        "data-popup": mediaPopup
+        "data-popup": mediaPopup,
+        "data-image-position": mediaPosition
       }
     );
 
@@ -155,6 +184,7 @@ export default class DocumentTextEditor extends React.Component {
         ),
         showURLInput: false,
         showLinkInput: false,
+        showTextAreaInput: false,
         urlValue: "",
         mediaWidth: "",
         mediaHeight: "",
@@ -177,6 +207,7 @@ export default class DocumentTextEditor extends React.Component {
       {
         showURLInput: false,
         showLinkInput: false,
+        showTextAreaInput: false,
         urlValue: "",
         mediaWidth: "",
         mediaHeight: "",
@@ -227,6 +258,7 @@ export default class DocumentTextEditor extends React.Component {
         ),
         showURLInput: false,
         showLinkInput: false,
+        showTextAreaInput: false,
         urlValue: "",
         urlTitle: "",
         urlTitleId: ""
@@ -275,11 +307,19 @@ export default class DocumentTextEditor extends React.Component {
       return "not_handled";
     }
   };
+  _promptForTextArea() {
+    this.setState({
+      showURLInput: false,
+      showLinkInput: false,
+      showTextAreaInput: true
+    });
+  }
   _promptForMedia(type) {
     this.setState(
       {
         showURLInput: true,
         showLinkInput: false,
+        showTextAreaInput: false,
         urlValue: this.state.urlValue,
         urlType: type,
         mediaWidth: this.state.mediaWidth,
@@ -298,6 +338,7 @@ export default class DocumentTextEditor extends React.Component {
       {
         showURLInput: false,
         showLinkInput: true,
+        showTextAreaInput: false,
         urlValue: this.state.urlValue,
         urlType: type,
         urlTitle: "",
@@ -308,6 +349,11 @@ export default class DocumentTextEditor extends React.Component {
       }
     );
   }
+
+  _addTextArea() {
+    this._promptForTextArea();
+  }
+
   _addAudio() {
     this._promptForMedia("audio");
   }
@@ -353,7 +399,7 @@ export default class DocumentTextEditor extends React.Component {
       html = text;
     }
     const { editorState } = this.state;
-    const generatedState = stateFromHTML(html);
+    const generatedState = this._stateFromHtmlWithOptions(html);
     const generatedHtml = stateToHTML(generatedState);
     const el = document.createElement("div");
     el.innerHTML = generatedHtml;
@@ -370,6 +416,7 @@ export default class DocumentTextEditor extends React.Component {
       img["data-image-height"] = "";
       img["data-caption"] = "";
       img["data-source"] = "";
+      img["data-image-position"] = "left";
       let figure = document.createElement("figure");
       figure.innerHTML = img.outerHTML;
       img.parentNode.replaceChild(figure, img);
@@ -381,7 +428,7 @@ export default class DocumentTextEditor extends React.Component {
       el.appendChild(p);
     }
 
-    const blockMap = stateFromHTML(el.outerHTML).blockMap;
+    const blockMap = this._stateFromHtmlWithOptions(el.outerHTML).blockMap;
     const newState = Modifier.replaceWithFragment(
       editorState.getCurrentContent(),
       editorState.getSelection(),
@@ -496,13 +543,12 @@ export default class DocumentTextEditor extends React.Component {
 
     const blockStyleFn = block => {
       const blockType = block.getType().toLowerCase();
-
       if (blockType === "blockquote") {
         return {
           attributes: {
-            "data-divider-color": "",
-            "data-background-color": "",
-            "data-text-section": ""
+            "data-divider-color": block.getData().get("dividerColor"),
+            "data-background-color": block.getData().get("backgroundColor"),
+            "data-text-section": block.getData().get("textSection")
           }
         };
       }
@@ -527,7 +573,6 @@ export default class DocumentTextEditor extends React.Component {
 
   applyChanges() {
     var htmlString = this.getHtml().replace(/<p><br><\/p>/gm, "");
-
     this.props.onUpdate(htmlString);
     this.setState({
       html: htmlString
@@ -724,8 +769,48 @@ export default class DocumentTextEditor extends React.Component {
             placeholder="data-popup"
           />
           <label>Popup</label>
+          <select
+            value={this.state.mediaPosition}
+            onChange={this.onDataPositionChange}
+          >
+            <option value="left">Vänster</option>
+            <option value="center">Center</option>
+            <option value="right">Höger</option>
+            <option value="floatRight">Höger med text</option>
+            <option value="floatLeft">Vänster med text</option>
+          </select>
           <button onMouseDown={this.confirmMedia}>OK</button>
           <button onMouseDown={this.closeURLInput}>Avbryt</button>
+        </div>
+      );
+    }
+
+    if (this.state.showTextAreaInput) {
+      urlInput = (
+        <div style={styles.urlInputContainer}>
+          <TextAreaInput
+            onCancelClick={() => {
+              this.setState({ showTextAreaInput: false });
+            }}
+            updateEditorState={newEditorState => {
+              this.setState({ editorState: newEditorState }, () => {
+                const selection = editorState.getSelection();
+                const blockType = editorState
+                  .getCurrentContent()
+                  .getBlockForKey(selection.getStartKey())
+                  .getType();
+                if (blockType !== "blockquote") {
+                  this.onChange(
+                    RichUtils.toggleBlockType(
+                      this.state.editorState,
+                      "blockquote"
+                    )
+                  );
+                }
+              });
+            }}
+            editorState={editorState}
+          ></TextAreaInput>
         </div>
       );
     }
@@ -755,6 +840,10 @@ export default class DocumentTextEditor extends React.Component {
               editorState={editorState}
               onToggle={this.toggleBlockType}
             />
+            <StyleButton
+              label={<FormatQuoteIcon />}
+              onToggle={this.addTextArea}
+            />
             <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
             <StyleButton label={<LaunchIcon />} onToggle={this.addWebLink} />
             <StyleButton
@@ -783,7 +872,6 @@ export default class DocumentTextEditor extends React.Component {
             plugins={this.plugins}
           />
         </div>
-        <button onClick={this.logState}>LOGGA</button>
       </div>
     );
   }
@@ -801,7 +889,7 @@ function getBlockStyle(block) {
 
 const BLOCK_TYPES = [
   //{ label: "H1", style: "header-one" },
-  { label: <FormatQuoteIcon />, style: "blockquote" },
+
   { label: <FormatListBulletedIcon />, style: "unordered-list-item" },
   { label: <FormatListNumberedIcon />, style: "ordered-list-item" }
 ];
@@ -859,6 +947,7 @@ const styles = {
     width: 1000,
     border: "1px solid #ddd"
   },
+
   buttonContainer: {
     height: 40,
     borderBottom: "1px solid #ddd"
