@@ -14,6 +14,8 @@ class CoordinatesModel {
 
     this.coordinates = undefined;
     this.transformations = settings.options.transformations;
+    this.updatedTransformId = "";
+    this.updatedTransformIdx = 0;
 
     this.source = new VectorSource();
     this.vector = new Vector({
@@ -158,6 +160,9 @@ class CoordinatesModel {
     }
     // Set the coordinates field and run the update function so all values are updated
     this.coordinates = updatedCoordinates;
+    // Save the position of the cursor so it can be restored later
+    this.updatedTransformId = event.target.id;
+    this.updatedTransformIdx = event.target.selectionStart;
     this.updateTransforms();
   };
 

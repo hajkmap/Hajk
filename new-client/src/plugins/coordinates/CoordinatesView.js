@@ -46,9 +46,22 @@ class CoordinatesView extends React.PureComponent {
     this.localObserver.subscribe(
       "setTransformedCoordinates",
       (transformedCoordinates) => {
-        this.setState({
-          transformedCoordinates: transformedCoordinates,
-        });
+        this.setState(
+          {
+            transformedCoordinates: transformedCoordinates,
+          },
+          () => {
+            // React moves the cursor to the end for the field that was modified so we restore the position here
+            if (this.props.model.updatedTransformId !== "") {
+              document.getElementById(
+                this.props.model.updatedTransformId
+              ).selectionStart = this.props.model.updatedTransformIdx;
+              document.getElementById(
+                this.props.model.updatedTransformId
+              ).selectionEnd = this.props.model.updatedTransformIdx;
+            }
+          }
+        );
       }
     );
 
@@ -86,45 +99,47 @@ class CoordinatesView extends React.PureComponent {
 
     return (
       <>
-        {this.state.transformedCoordinates.map((transformations, i) => {
+        {this.state.transformedCoordinates.map((transformation, i) => {
           return (
             <TableRow key={i}>
               <TableCell>
                 <Typography variant="body1" style={{ display: "flex" }}>
-                  {transformations.title}
+                  {transformation.title}
                 </Typography>
                 <Typography variant="body2" style={{ display: "flex" }}>
-                  ({transformations.code})
+                  ({transformation.code})
                 </Typography>
               </TableCell>
               <TableCell>
                 <TextField
-                  label={transformations.ytitle}
+                  label={transformation.ytitle}
                   className={classes.textField}
+                  id={"coordinates-transforms-X-" + i}
                   margin="dense"
                   variant="outlined"
                   value={
-                    transformations.inverseAxis
-                      ? transformations.coordinates[0]
-                      : transformations.coordinates[1]
+                    transformation.inverseAxis
+                      ? transformation.coordinates[0]
+                      : transformation.coordinates[1]
                   }
                   onChange={this.model.handleInput}
-                  transform={transformations.code}
-                  axis={transformations.inverseAxis ? "X" : "Y"}
+                  transform={transformation.code}
+                  axis={transformation.inverseAxis ? "X" : "Y"}
                 />
                 <TextField
-                  label={transformations.xtitle}
+                  label={transformation.xtitle}
                   className={classes.textField}
+                  id={"coordinates-transforms-Y-" + i}
                   margin="dense"
                   variant="outlined"
                   value={
-                    transformations.inverseAxis
-                      ? transformations.coordinates[1]
-                      : transformations.coordinates[0]
+                    transformation.inverseAxis
+                      ? transformation.coordinates[1]
+                      : transformation.coordinates[0]
                   }
                   onChange={this.model.handleInput}
-                  transform={transformations.code}
-                  axis={transformations.inverseAxis ? "Y" : "X"}
+                  transform={transformation.code}
+                  axis={transformation.inverseAxis ? "Y" : "X"}
                 />
               </TableCell>
             </TableRow>
