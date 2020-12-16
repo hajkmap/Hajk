@@ -43,6 +43,20 @@ class ToolOptions extends Component {
     openMenuEditor: false,
     validationErrors: [],
     documentOnStart: "",
+    drawerTitle: "",
+    drawerButtonTitle: "",
+    searchImplemented: true,
+    enablePrint: true,
+    tableOfContents: {
+      active: false,
+      expanded: false,
+      chapterLevelsToShow: 2,
+      title: "Innehållsförteckning",
+    },
+    defaultDocumentColorSettings: {
+      textAreaBackgroundColor: "#ccc",
+      textAreaDividerColor: "#6A0DAD",
+    },
   };
   treeKeys = [];
   menuConfig = null;
@@ -82,6 +96,12 @@ class ToolOptions extends Component {
         menuConfig: tool.options.menuConfig,
         iconLibraryLink: tool.options.iconLibraryLink,
         documentOnStart: tool.options.documentOnStart,
+        drawerTitle: tool.options.drawerTitle,
+        drawerButtonTitle: tool.options.drawerButtonTitle,
+        searchImplemented: tool.options.searchImplemented,
+        enablePrint: tool.options.enablePrint,
+        tableOfContents: tool.options.tableOfContents,
+        defaultDocumentColorSettings: tool.options.defaultDocumentColorSettings,
       });
     } else {
       this.setState({
@@ -146,7 +166,13 @@ class ToolOptions extends Component {
         width: this.state.width,
         height: this.state.height,
         documentOnStart: this.state.documentOnStart,
+        drawerTitle: this.state.drawerTitle,
+        drawerButtonTitle: this.state.drawerButton,
+        searchImplemented: this.state.searchImplemented,
+        enablePrint: this.state.enablePrint,
         menuConfig: this.menuConfig,
+        tableOfContents: this.state.tableOfContents,
+        defaultDocumentColorSettings: this.state.defaultDocumentColorSettings,
       },
     };
 
@@ -505,8 +531,7 @@ class ToolOptions extends Component {
               <Typography variant="button">Redigera meny</Typography>
             </ColorButtonBlue>
           </p>
-          <div className="separator">Fönsterinställningar</div>
-          <div className="separator">Övriga inställningar</div>
+          <div className="separator">Generalla inställningar</div>
           <div>
             <label htmlFor="documentOnStart">
               Start Dokument{" "}
@@ -523,6 +548,220 @@ class ToolOptions extends Component {
               name="documentOnStart"
               onChange={(e) => {
                 this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="drawerTitle">
+              Drawer Title{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Namn på knapp"
+              />
+            </label>
+            <input
+              id="drawerTitle"
+              value={this.state.drawerTitle}
+              type="text"
+              name="drawerTitle"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="drawerButtonTitle">
+              Button Title{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Text som ska visas som namn till knapp"
+              />
+            </label>
+            <input
+              id="drawerButtonTitle"
+              value={this.state.drawerButtonTitle}
+              type="text"
+              name="drawerButtonTitle"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+
+          <div>
+            <input
+              id="searchImplemented"
+              name="searchImplemented"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.searchImplemented}
+            />
+            &nbsp;
+            <label htmlFor="searchImplemented">Search Activated</label>
+          </div>
+
+          <div>
+            <input
+              id="enablePrint"
+              name="enablePrint"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enablePrint}
+            />
+            &nbsp;
+            <label htmlFor="enablePrint">Print Activated</label>
+          </div>
+          <div className="separator">Innehållsförteckning inställningar</div>
+
+          <div>
+            <input
+              id="tableOfContentsActive"
+              name="tableOfContentsActive"
+              type="checkbox"
+              onChange={(e) => {
+                //gör så här för att den är object i state som den befintlig handleInputChange inte hantera.
+                const checked = e.target.checked;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    active: checked,
+                  },
+                }));
+              }}
+              checked={this.state.tableOfContents.active}
+            />
+            &nbsp;
+            <label htmlFor="tableOfContentsActive">Active</label>
+          </div>
+
+          <div>
+            <input
+              id="tableOfContentsExpanded"
+              name="tableOfContentsExpanded"
+              type="checkbox"
+              onChange={(e) => {
+                //gör så här för att den är object i state som den befintlig handleInputChange inte hantera.
+                const checked = e.target.checked;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    expanded: checked,
+                  },
+                }));
+              }}
+              checked={this.state.tableOfContents.expanded}
+            />
+            &nbsp;
+            <label htmlFor="tableOfContentsExpanded">Expanded</label>
+          </div>
+
+          <div>
+            <label htmlFor="tableOfContentsTitle">
+              Title{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Table of contents title"
+              />
+            </label>
+            <input
+              id="tableOfContentsTitle"
+              value={this.state.tableOfContents.title}
+              type="text"
+              name="tableOfContentsTitle"
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    title: value,
+                  },
+                }));
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="chapterLevelsToShow">
+              Antal kaptitel nivå att visa
+            </label>
+            <input
+              id="chapterLevelsToShow"
+              name="chapterLevelsToShow"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    chapterLevelsToShow: value,
+                  },
+                }));
+              }}
+              value={this.state.tableOfContents.chapterLevelsToShow}
+            />
+          </div>
+          <div className="separator">Utseende inställningar</div>
+          <div>
+            <label htmlFor="textAreaBackgroundColor">
+              Textområde bakgrund färg{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Bakgrundsfärg till textområde"
+              />
+            </label>
+            <input
+              id="textAreaBackgroundColor"
+              value={
+                this.state.defaultDocumentColorSettings.textAreaBackgroundColor
+              }
+              type="text"
+              name="textAreaBackgroundColor"
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.defaultDocumentColorSettings,
+                    textAreaBackgroundColor: value,
+                  },
+                }));
+              }}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="textAreaDividerColor">
+              Textområde divider färg{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Divider färg till textområde"
+              />
+            </label>
+            <input
+              id="textAreaDividerColor"
+              value={
+                this.state.defaultDocumentColorSettings.textAreaDividerColor
+              }
+              type="text"
+              name="textAreaDividerColor"
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.defaultDocumentColorSettings,
+                    textAreaDividerColor: value,
+                  },
+                }));
               }}
             />
           </div>
