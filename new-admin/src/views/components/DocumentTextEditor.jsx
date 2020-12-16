@@ -9,12 +9,10 @@ import {
   convertToRaw,
   SelectionState
 } from "draft-js";
-import TextAreaInput from "./TextAreaInput";
 import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
 import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
 import { stateFromHTML } from "draft-js-import-html";
-import { Grid } from "@material-ui/core";
 
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
@@ -27,6 +25,7 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
 
+import TextAreaInput from "./TextAreaInput";
 import addLinkPlugin from "./addLinkPlugin";
 import StyleButton from "./StyleButton";
 import ImageComponent from "./ImageComponent";

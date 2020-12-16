@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { EditorState } from "draft-js";
-
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
@@ -53,7 +51,20 @@ const ImageComponent = props => {
     } else {
       showSaveButton(true);
     }
-  });
+  }, [
+    imageWidth,
+    width,
+    imageHeight,
+    height,
+    dataCaption,
+    caption,
+    dataSource,
+    source,
+    dataPopup,
+    popup,
+    dataImagePosition,
+    imagePosition
+  ]);
 
   const handleOpen = e => {
     e.preventDefault();
