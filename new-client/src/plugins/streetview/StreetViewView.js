@@ -23,7 +23,7 @@ const styles = (theme) => ({
     marginTop: "30px",
   },
   date: {
-    color: "white",
+    color: theme.palette.common.white,
     position: "absolute",
     zIndex: 1,
     top: "42px",

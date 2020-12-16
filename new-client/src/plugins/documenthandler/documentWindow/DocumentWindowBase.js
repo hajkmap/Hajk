@@ -64,9 +64,16 @@ class DocumentWindowBase extends React.PureComponent {
     const { documentTitle } = this.props;
     if (documentName) {
       if (documentName !== documentTitle) {
-        this.props.showDocument(documentName).then(() => {
-          this.scrollInDocument(headerIdentifier);
-        });
+        this.props.showDocument(documentName).then(
+          () => {
+            this.scrollInDocument(headerIdentifier);
+          },
+          () => {
+            console.warn(
+              "Could not fetch document, link to document probably reference a document not present in panelmenu"
+            );
+          }
+        );
       } else {
         this.scrollInDocument(headerIdentifier);
       }

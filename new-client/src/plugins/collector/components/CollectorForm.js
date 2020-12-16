@@ -6,15 +6,14 @@ import Typography from "@material-ui/core/Typography/Typography";
 const styles = (theme) => {
   return {
     saveError: {
-      color: "red",
-      background: "rgb(255, 200, 200)",
+      color: theme.palette.error.contrastText,
+      background: theme.palette.error.main,
       marginTop: "15px",
-      borderRadius: "5px",
+      borderRadius: theme.shape.borderRadius,
       padding: "5px",
     },
     errorText: {
-      fontSize: "14pt",
-      color: "red",
+      color: theme.palette.error.contrastText,
     },
   };
 };

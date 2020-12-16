@@ -130,12 +130,12 @@ class SearchModel {
       fetchResponses.map((fetchResponse) => {
         // We look at the status and filter out only those that fulfilled.
         if (fetchResponse.status === "rejected")
-          Promise.reject("Could not fetch");
+          return Promise.reject("Could not fetch");
         // The Fetch Promise might have fulfilled, but it doesn't mean the Response
         // can be parsed with JSON (i.e. errors from GeoServer will arrive as XML),
         // so we must be careful before invoking .json() on our Response's value.
         if (typeof fetchResponse.value.json !== "function")
-          Promise.reject("Fetched result is not JSON");
+          return Promise.reject("Fetched result is not JSON");
         // If Response can be parsed as JSON, return it.
         return fetchResponse.value.json();
       })
@@ -258,8 +258,12 @@ class SearchModel {
     return word;
   };
 
-  test = (word) => {
-    return this.escapeSpecialChars(word);
+  #decodePotentialCommasFromFeatureProps = (searchCombinations) => {
+    return searchCombinations.map((combination) => {
+      return combination.map((word) => {
+        return decodeURIComponent(word);
+      });
+    });
   };
 
   #lookup = (searchString, searchSource, searchOptions) => {
@@ -283,6 +287,10 @@ class SearchModel {
           this.#splitAndTrimOnCommas(searchString)
         );
       }
+
+      possibleSearchCombinations = this.#decodePotentialCommasFromFeatureProps(
+        possibleSearchCombinations
+      );
 
       let searchFilters = possibleSearchCombinations.map((combination) => {
         let searchWordsForCombination = combination.map((wordInCombination) => {

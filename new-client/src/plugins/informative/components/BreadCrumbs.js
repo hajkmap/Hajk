@@ -8,10 +8,10 @@ const styles = (theme) => ({
     cursor: "pointer",
   },
   breadCrum: {
-    color: theme.palette.primary.main,
+    color: theme.palette.primary.light,
   },
   last: {
-    color: "black",
+    color: theme.palette.primary.dark,
     cursor: "pointer",
   },
 });

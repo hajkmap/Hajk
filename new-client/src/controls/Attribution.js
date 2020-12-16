@@ -13,13 +13,16 @@ const styles = (theme) => {
         background: theme.palette.background.paper,
         boxShadow: theme.shadows[4],
         borderRadius: theme.shape.borderRadius,
-
         height: "25px",
         overflow: "auto",
         whiteSpace: "nowrap",
         [theme.breakpoints.down("xs")]: {
           maxWidth: "100px",
         },
+      },
+      "& .ol-attribution ul": {
+        color: "unset",
+        textShadow: "unset",
       },
       "& button": {
         cursor: "pointer",

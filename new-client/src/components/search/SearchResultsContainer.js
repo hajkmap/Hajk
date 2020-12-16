@@ -1,17 +1,14 @@
 import React from "react";
 import Alert from "@material-ui/lab/Alert";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import IconButton from "@material-ui/core/IconButton";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import SearchResultsList from "./SearchResultsList";
+import Collapse from "@material-ui/core/Collapse";
 import {
   Accordion,
   Paper,
-  Typography,
   Button,
   AccordionDetails,
-  AccordionSummary,
   Grid,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
@@ -52,29 +49,100 @@ const styles = (theme) => ({
   },
 });
 
+const TightAccordionDetails = withStyles({
+  root: {
+    padding: 0,
+  },
+})(AccordionDetails);
+
+const TightAccordion = withStyles((theme) => ({
+  root: {
+    "&:last-child": {
+      borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    },
+  },
+}))(Accordion);
+
 class SearchResultsContainer extends React.PureComponent {
   state = {
-    expanded: true,
     sumOfResults: this.props.searchResults.featureCollections
       .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
   };
 
   componentDidMount = () => {
-    this.bindSubscriptions();
+    const { app } = this.props;
+    app.globalObserver.subscribe("core.searchResultLayerClick", (features) => {
+      const featureIds = features.map((feature) => {
+        return feature.getId();
+      });
+      this.showFeatureDetails(featureIds);
+    });
+    this.getPotentialSingleHit();
   };
 
-  bindSubscriptions = () => {
-    const { localObserver } = this.props;
-    localObserver.subscribe("minimize-search-result-list", () => {
-      this.setState({ expanded: false });
+  componentWillUnmount = () => {
+    const { app } = this.props;
+    app.globalObserver.unsubscribe("core.searchResultLayerClick");
+  };
+
+  showFeatureDetails = (featureIds) => {
+    const { toggleCollapseSearchResults } = this.props;
+    const featureId = featureIds[0]; // Do we want to handle stacked features?
+
+    // If searchResultContainer is collapsed, open it.
+    if (this.props.panelCollapsed) toggleCollapseSearchResults();
+
+    // We first have to make sure that the list with all searchResults is mounted,
+    // e.g. that activeFeature is unset.
+    this.setState({ activeFeature: undefined }, () => {
+      // Get the featureCollection which the clicked feature belongs to
+      const featureCollection = this.getFeatureCollectionFromFeatureId(
+        featureId
+      );
+      // Get the clicked feature
+      const feature = featureCollection.value.features.find(
+        (feature) => feature.id === featureId
+      );
+      // Set active collection and feature accordingly
+      this.setState({
+        activeFeatureCollection: featureCollection,
+        activeFeature: feature,
+      });
+    });
+  };
+
+  getFeatureCollectionFromFeatureId = (featureId) => {
+    const { featureCollections } = this.props;
+    return featureCollections.find((featureCollection) => {
+      return (
+        featureCollection.value.features.findIndex(
+          (feature) => feature.id === featureId
+        ) > -1
+      );
+    });
+  };
+
+  getPotentialSingleHit = () => {
+    const { featureCollections } = this.props;
+
+    const activeFeatureCollection =
+      featureCollections.length === 1 ? featureCollections[0] : undefined;
+    const activeFeature = activeFeatureCollection
+      ? activeFeatureCollection.value.features.length === 1
+        ? activeFeatureCollection.value.features[0]
+        : undefined
+      : undefined;
+
+    this.setState({
+      activeFeatureCollection: activeFeatureCollection,
+      activeFeature: activeFeature,
     });
   };
 
   renderSearchResultListOptions = () => {
-    const { classes } = this.props;
     return (
-      <Grid className={classes.hidden} item>
+      <Grid align="center" item xs={12}>
         <Button>Filtrera</Button>
         <Button>Sortera</Button>
         <IconButton>
@@ -84,82 +152,70 @@ class SearchResultsContainer extends React.PureComponent {
     );
   };
 
-  toggleResultListExpansion = () => {
-    this.setState({ expanded: !this.state.expanded });
+  setActiveFeature = (feature) => {
+    this.setState({ activeFeature: feature });
   };
 
-  renderSearchResultContainerHeader = () => {
-    const { sumOfResults } = this.state;
-    return (
-      <Grid justify="space-between" alignItems="center" container>
-        <Grid item>
-          <Typography>{`Visar ${sumOfResults} träffar`}</Typography>
-        </Grid>
-        <Grid item>{this.renderSearchResultListOptions()}</Grid>
-        <Grid item>
-          <IconButton onClick={this.toggleResultListExpansion}>
-            {this.state.expanded ? (
-              <>
-                <ExpandLessIcon color="primary"></ExpandLessIcon>
-                <Typography color="primary">Dölj</Typography>
-              </>
-            ) : (
-              <>
-                <ExpandMoreIcon color="primary"></ExpandMoreIcon>
-                <Typography color="primary">Visa</Typography>
-              </>
-            )}
-          </IconButton>
-        </Grid>
-      </Grid>
-    );
+  setActiveFeatureCollection = (featureCollection) => {
+    this.setState({ activeFeatureCollection: featureCollection });
+  };
+
+  resetFeatureAndCollection = () => {
+    this.setState({
+      activeFeatureCollection: undefined,
+      activeFeature: undefined,
+    });
   };
 
   render() {
     const {
       classes,
-      featureCollections,
       app,
       getOriginBasedIcon,
       localObserver,
+      panelCollapsed,
     } = this.props;
-    const { sumOfResults } = this.state;
+    const { sumOfResults, activeFeatureCollection, activeFeature } = this.state;
+    const featureCollections = activeFeatureCollection
+      ? [activeFeatureCollection]
+      : this.props.featureCollections;
 
     return (
-      <>
+      <Collapse in={!panelCollapsed}>
         {sumOfResults === 0 ? (
           <Paper className={classes.root}>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
           </Paper>
         ) : (
           <Paper className={classes.root}>
-            <Accordion expanded={this.state.expanded}>
-              <AccordionSummary
-                classes={{
-                  content: classes.content,
-                  expanded: classes.expanded,
-                }}
-                aria-controls="search-result-list"
-                id="search-result-list-header"
-              >
-                {this.renderSearchResultContainerHeader()}
-              </AccordionSummary>
-              <AccordionDetails
+            <TightAccordion>
+              <TightAccordionDetails
                 id="search-result-list"
                 className={classes.searchResultListWrapper}
               >
-                <SearchResultsList
-                  localObserver={localObserver}
-                  sumOfResults={sumOfResults}
-                  getOriginBasedIcon={getOriginBasedIcon}
-                  featureCollections={featureCollections}
-                  app={app}
-                />
-              </AccordionDetails>
-            </Accordion>
+                <Grid container>
+                  {this.renderSearchResultListOptions()}
+                  <Grid item xs={12}>
+                    <SearchResultsList
+                      localObserver={localObserver}
+                      getOriginBasedIcon={getOriginBasedIcon}
+                      featureCollections={featureCollections}
+                      app={app}
+                      setActiveFeatureCollection={
+                        this.setActiveFeatureCollection
+                      }
+                      setActiveFeature={this.setActiveFeature}
+                      resetFeatureAndCollection={this.resetFeatureAndCollection}
+                      activeFeatureCollection={activeFeatureCollection}
+                      activeFeature={activeFeature}
+                    />
+                  </Grid>
+                </Grid>
+              </TightAccordionDetails>
+            </TightAccordion>
           </Paper>
         )}
-      </>
+      </Collapse>
     );
   }
 }
