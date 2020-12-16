@@ -541,6 +541,7 @@ class ToolOptions extends Component {
               Spara
             </ColorButtonBlue>
           </p>
+          <div className="separator">Meny Ändringar</div>
           <p>
             <ColorButtonBlue
               variant="contained"
@@ -554,11 +555,11 @@ class ToolOptions extends Component {
           <div className="separator">Generalla inställningar</div>
           <div>
             <label htmlFor="documentOnStart">
-              Start Dokument{" "}
+              Startdokument{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Namn på dokument som ska vara öppet vid map start - lämna tom om ingen dokument ska visas"
+                title="Dokument som ska vara öppet när kartan öppnas. Lämna tom om ingen dokument ska visas"
               />
             </label>
             <input
@@ -573,11 +574,11 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="drawerTitle">
-              Drawer Title{" "}
+              Panel titel{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Namn på knapp"
+                title="Titel på dokumentverktygets panel. Detta visas högst upp i panelen"
               />
             </label>
             <input
@@ -593,11 +594,11 @@ class ToolOptions extends Component {
 
           <div>
             <label htmlFor="drawerButtonTitle">
-              Button Title{" "}
+              Knapp titel{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Text som ska visas som namn till knapp"
+                title="Text på knapp som öppna verktyget"
               />
             </label>
             <input
@@ -622,7 +623,7 @@ class ToolOptions extends Component {
               checked={this.state.searchImplemented}
             />
             &nbsp;
-            <label htmlFor="searchImplemented">Search Activated</label>
+            <label htmlFor="searchImplemented">Sökning aktiverad</label>
           </div>
 
           <div>
@@ -636,7 +637,7 @@ class ToolOptions extends Component {
               checked={this.state.enablePrint}
             />
             &nbsp;
-            <label htmlFor="enablePrint">Print Activated</label>
+            <label htmlFor="enablePrint">Utskrift aktiverad</label>
           </div>
           <div className="separator">Innehållsförteckning inställningar</div>
 
@@ -679,16 +680,16 @@ class ToolOptions extends Component {
               checked={this.state.tableOfContents.expanded}
             />
             &nbsp;
-            <label htmlFor="tableOfContentsExpanded">Expanded</label>
+            <label htmlFor="tableOfContentsExpanded">Expanderat</label>
           </div>
 
           <div>
             <label htmlFor="tableOfContentsTitle">
-              Title{" "}
+              Titel{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Table of contents title"
+                title="Innehållsförteckning titel"
               />
             </label>
             <input
@@ -709,7 +710,12 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="chapterLevelsToShow">
-              Antal kaptitel nivå att visa
+              Kaptitel nivåer{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Antal kapitel nivåer som ska ingå i innehållsförteckningen"
+              />
             </label>
             <input
               id="chapterLevelsToShow"
@@ -732,11 +738,11 @@ class ToolOptions extends Component {
           <div className="separator">Utseende inställningar</div>
           <div>
             <label htmlFor="textAreaBackgroundColor">
-              Textområde bakgrund färg{" "}
+              Textområde bakgrundfärg{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Bakgrundsfärg till textområde"
+                title="Färg till textområde bakgrund"
               />
             </label>
             <input
@@ -760,11 +766,11 @@ class ToolOptions extends Component {
 
           <div>
             <label htmlFor="textAreaDividerColor">
-              Textområde divider färg{" "}
+              Textområde skiljelinje färg{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Divider färg till textområde"
+                title="Färg till textområde skiljelinje"
               />
             </label>
             <input
