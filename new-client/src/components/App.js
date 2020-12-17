@@ -16,7 +16,7 @@ import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
-import Search from "./Search/Search";
+import Search from "./search/search";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
@@ -483,13 +483,18 @@ class App extends React.PureComponent {
   };
 
   renderSearchComponent() {
-    return (
-      <Search
-        map={this.appModel.getMap()}
-        app={this}
-        options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
-      />
-    );
+    // FIXME: We should get config from somewhere else now when Search is part of Core
+    if (this.appModel.plugins.search) {
+      return (
+        <Search
+          map={this.appModel.getMap()}
+          app={this}
+          options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
+        />
+      );
+    } else {
+      return null;
+    }
   }
 
   renderInformationPlugin() {
@@ -672,9 +677,7 @@ class App extends React.PureComponent {
                   }
                 />
               )}
-              {clean === false &&
-                this.appModel.plugins.search &&
-                this.renderSearchComponent()}
+              {clean === false && this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div
