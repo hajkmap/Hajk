@@ -3198,10 +3198,22 @@
       "caption": "Platser",
       "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/ows",
       "layers": ["vt:PointOfInterest"],
-      "searchFields": ["Name", "Category", "Municipality"],
+      "searchFields": [
+        "Name",
+        "Category1",
+        "Category2",
+        "Category3",
+        "Municipality"
+      ],
       "infobox": "**Plats:** {plats}  ",
       "aliasDict": "",
-      "displayFields": ["Name", "Category", "Municipality"],
+      "displayFields": [
+        "Name",
+        "Category1",
+        "Category2",
+        "Category3",
+        "Municipality"
+      ],
       "geometryField": "geom",
       "outputFormat": "GML2",
       "infoVisible": false,
