@@ -42,6 +42,7 @@ import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
 import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
+import VtSearch from "./tools/vtsearch.jsx";
 
 var defaultState = {
   activeTool: ""
@@ -124,6 +125,8 @@ class ToolOptions extends Component {
         return <Collector parent={this} model={this.props.model} />;
       case "documenthandler":
         return <MenuEditor parent={this} model={this.props.model} />;
+      case "vtsearch":
+        return <VtSearch parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -185,7 +188,8 @@ class ToolOptions extends Component {
       routing: "Navigation",
       collector: "Tyck till",
       dummy: "Dummy plugin",
-      documenthandler: "Menyhantering"
+      documenthandler: "Menyhantering",
+      vtsearch: "VT Sök"
     };
 
     return (
