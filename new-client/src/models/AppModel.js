@@ -132,9 +132,10 @@ class AppModel {
    * @returns {Array} - List of promises to be resolved for.
    */
   loadPlugins(plugins) {
-    var promises = [];
+    const promises = [];
     plugins.forEach((plugin) => {
-      var prom = import(`../plugins/${plugin}/${plugin}.js`)
+      const dir = ["search"].includes(plugin) ? "components" : "plugins";
+      const prom = import(`../${dir}/${plugin}/${plugin}.js`)
         .then((module) => {
           const toolConfig =
             this.config.mapConfig.tools.find(
@@ -244,12 +245,12 @@ class AppModel {
         if (searchResultFeatures.length > 0) {
           // Clicked features sent to the search-component for display
           this.globalObserver.publish(
-            "core.searchResultLayerClick",
+            "infoClick.searchResultLayerClick",
             searchResultFeatures
           );
         } else {
           // Clicked features sent to the featureInfo-component for display
-          this.globalObserver.publish("core.mapClick", mapClickDataResult);
+          this.globalObserver.publish("infoClick.mapClick", mapClickDataResult);
         }
       });
     }

@@ -78,19 +78,28 @@ class MapViewModel {
   };
 
   bindSubscriptions = () => {
-    this.localObserver.subscribe("clear-search-results", this.clearMap);
+    // Local subscriptions
+    this.localObserver.subscribe("clearMapView", this.clearMap);
     this.localObserver.subscribe(
-      "add-features-to-results-layer",
+      "map.zoomToFeaturesByIds",
+      this.zoomToFeatureIds
+    );
+    this.localObserver.subscribe(
+      "map.addFeaturesToResultsLayer",
       this.addFeaturesToResultsLayer
     );
     this.localObserver.subscribe(
-      "highlight-features",
+      "map.highlightFeaturesByIds",
       this.highlightFeaturesInMap
     );
-    this.localObserver.subscribe("zoom-to-features", this.zoomToFeatureIds);
-    this.app.globalObserver.subscribe("spatial-search", (options) => {
-      this.toggleDraw(true, options.type);
-    });
+
+    // Global subscriptions
+    this.app.globalObserver.subscribe(
+      "search.spatialSearchActivated",
+      (options) => {
+        this.toggleDraw(true, options.type);
+      }
+    );
   };
 
   fitMapToSearchResult = () => {

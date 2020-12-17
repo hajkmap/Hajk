@@ -72,18 +72,21 @@ class SearchResultsContainer extends React.PureComponent {
 
   componentDidMount = () => {
     const { app } = this.props;
-    app.globalObserver.subscribe("core.searchResultLayerClick", (features) => {
-      const featureIds = features.map((feature) => {
-        return feature.getId();
-      });
-      this.showFeatureDetails(featureIds);
-    });
+    app.globalObserver.subscribe(
+      "infoClick.searchResultLayerClick",
+      (features) => {
+        const featureIds = features.map((feature) => {
+          return feature.getId();
+        });
+        this.showFeatureDetails(featureIds);
+      }
+    );
     this.getPotentialSingleHit();
   };
 
   componentWillUnmount = () => {
     const { app } = this.props;
-    app.globalObserver.unsubscribe("core.searchResultLayerClick");
+    app.globalObserver.unsubscribe("infoClick.searchResultLayerClick");
   };
 
   showFeatureDetails = (featureIds) => {
@@ -167,6 +170,19 @@ class SearchResultsContainer extends React.PureComponent {
     });
   };
 
+  handleFeatureCollectionClick = (featureCollection) => {
+    const { app } = this.props;
+    const onClickName = featureCollection?.source?.onClickName;
+    if (onClickName) {
+      app.globalObserver.publish(
+        `search.featureCollectionClicked.${onClickName}`,
+        featureCollection
+      );
+    } else {
+      this.setActiveFeatureCollection(featureCollection);
+    }
+  };
+
   render() {
     const {
       classes,
@@ -201,8 +217,8 @@ class SearchResultsContainer extends React.PureComponent {
                       getOriginBasedIcon={getOriginBasedIcon}
                       featureCollections={featureCollections}
                       app={app}
-                      setActiveFeatureCollection={
-                        this.setActiveFeatureCollection
+                      handleFeatureCollectionClick={
+                        this.handleFeatureCollectionClick
                       }
                       setActiveFeature={this.setActiveFeature}
                       resetFeatureAndCollection={this.resetFeatureAndCollection}

@@ -21,7 +21,8 @@ export default class DocumentSearchModel {
       name: "Dokumentverktyg",
       icon: <AcUnitIcon />,
       type: "EXTERNAL_PLUGIN",
-      searchFunctionalityClickName: "documenthandler-searchfunctionality-click",
+      searchFunctionalityClickName:
+        "search.documentHandlerSearchFunctionalityClick",
     };
   };
 
@@ -232,7 +233,7 @@ export default class DocumentSearchModel {
       type: "Feature",
       geometry: null,
       id: `${chapter.documentTitle}${Math.floor(Math.random() * 1000)}`,
-      onClickName: "documenthandler-searchresult-clicked",
+      onClickName: "documentHandlerSearchResultClicked",
       properties: properties,
     };
   };

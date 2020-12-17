@@ -121,8 +121,11 @@ class DocumentWindowBase extends React.PureComponent {
   bindListenForSearchResultClick = () => {
     const { app, localObserver } = this.props;
 
+    // The event published from the search component will be prepended
+    // with "search.featureClicked", therefore we have to subscribe
+    // to search.featureClicked.onClickName to catch the event.
     app.globalObserver.subscribe(
-      "documenthandler-searchresult-clicked",
+      "search.featureClicked.documentHandlerSearchResultClicked",
       (searchResultClick) => {
         localObserver.publish("set-active-document", {
           documentName: searchResultClick.properties.documentFileName,

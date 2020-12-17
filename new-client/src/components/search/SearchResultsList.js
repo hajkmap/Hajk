@@ -53,10 +53,16 @@ class SearchResultsList extends React.PureComponent {
       },
       () => {
         if (this.props.width === "xs" || this.props.width === "sm") {
-          localObserver.publish("minimize-search-result-list");
+          localObserver.publish("minimizeSearchResultList");
         }
-        localObserver.publish("highlight-features", this.state.selectedItems);
-        localObserver.publish("zoom-to-features", this.state.selectedItems);
+        localObserver.publish(
+          "map.highlightFeaturesByIds",
+          this.state.selectedItems
+        );
+        localObserver.publish(
+          "map.zoomToFeaturesByIds",
+          this.state.selectedItems
+        );
       }
     );
   };
@@ -64,7 +70,10 @@ class SearchResultsList extends React.PureComponent {
   handleOnFeatureClick = (feature) => {
     const { app, setActiveFeature, activeFeatureCollection } = this.props;
     if (feature.onClickName) {
-      app.globalObserver.publish(feature.onClickName, feature);
+      app.globalObserver.publish(
+        `search.featureClicked.${feature.onClickName}`,
+        feature
+      );
     } else {
       setActiveFeature(feature);
       if (this.getFeatureSelectedIndex(feature) === -1) {
@@ -79,11 +88,11 @@ class SearchResultsList extends React.PureComponent {
       getOriginBasedIcon,
       app,
       classes,
-      setActiveFeatureCollection,
       activeFeatureCollection,
       activeFeature,
       setActiveFeature,
       resetFeatureAndCollection,
+      handleFeatureCollectionClick,
     } = this.props;
 
     return (
@@ -105,7 +114,7 @@ class SearchResultsList extends React.PureComponent {
                 showClickResultInMap={this.showClickResultInMap}
                 activeFeatureCollection={activeFeatureCollection}
                 activeFeature={activeFeature}
-                setActiveFeatureCollection={setActiveFeatureCollection}
+                handleFeatureCollectionClick={handleFeatureCollectionClick}
                 setActiveFeature={setActiveFeature}
                 handleOnFeatureClick={this.handleOnFeatureClick}
                 resetFeatureAndCollection={resetFeatureAndCollection}

@@ -19,13 +19,13 @@ const defaultSearchTools = [
     name: "Sök med polygon",
     icon: <EditIcon />,
     type: "Polygon",
-    onClickEventName: "spatial-search",
+    onClickEventName: "search.spatialSearchActivated",
   },
   {
     name: "Sök med radie",
     icon: <RadioButtonUncheckedIcon />,
     type: "Circle",
-    onClickEventName: "spatial-search",
+    onClickEventName: "search.spatialSearchActivated",
   },
   {
     name: "Sökinställningar",
@@ -122,7 +122,7 @@ class Search extends React.PureComponent {
       }
       this.setState({ searchActive: "draw" });
     });
-    this.localObserver.subscribe("minimize-search-result-list", () => {
+    this.localObserver.subscribe("minimizeSearchResultList", () => {
       this.setState({ resultPanelCollapsed: false });
     });
   };
@@ -243,7 +243,7 @@ class Search extends React.PureComponent {
       resultPanelCollapsed: false,
     });
     this.resetFeaturesToFilter();
-    this.localObserver.publish("clear-search-results");
+    this.localObserver.publish("clearMapView");
   };
 
   handleSearchInput = (event, value, reason) => {
@@ -525,7 +525,7 @@ class Search extends React.PureComponent {
 
     features = this.filterFeaturesWithGeometry(features);
 
-    this.localObserver.publish("add-features-to-results-layer", features);
+    this.localObserver.publish("map.addFeaturesToResultsLayer", features);
   }
 
   filterFeaturesWithGeometry = (features) => {

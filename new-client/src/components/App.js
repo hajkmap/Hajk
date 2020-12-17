@@ -16,7 +16,7 @@ import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
-import Search from "./search/Search";
+import Search from "./search/search";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
@@ -291,7 +291,7 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
-    this.globalObserver.subscribe("core.mapClick", (results) => {
+    this.globalObserver.subscribe("infoClick.mapClick", (results) => {
       this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: results,
@@ -481,19 +481,6 @@ class App extends React.PureComponent {
   handleMouseLeave = (e) => {
     this.setState({ drawerMouseOverLock: false });
   };
-
-  // Method below renders the **old** Search plugin. See below for the current implementation.
-  renderSearchPlugin() {
-    const searchPlugin = this.appModel.plugins.search;
-    // Renders the configured search plugin (if one is configured)
-    return searchPlugin ? (
-      <searchPlugin.component
-        map={searchPlugin.map}
-        app={searchPlugin.app}
-        options={searchPlugin.options}
-      />
-    ) : null;
-  }
 
   renderSearchComponent() {
     // FIXME: We should get config from somewhere else now when Search is part of Core

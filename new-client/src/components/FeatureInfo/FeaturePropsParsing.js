@@ -72,8 +72,8 @@ export default class FeaturePropsParsing {
     }, {});
   };
 
-  #unescapeString = (strng) => {
-    return strng.replace(/\\"/g, "");
+  #unescapeString = (string) => {
+    return string.replace(/\\"/g, "");
   };
 
   #extractDataAttributes = (props) => {

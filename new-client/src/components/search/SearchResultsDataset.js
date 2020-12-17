@@ -353,8 +353,8 @@ class SearchResultsDataset extends React.PureComponent {
     const {
       classes,
       featureCollection,
-      setActiveFeatureCollection,
       activeFeatureCollection,
+      handleFeatureCollectionClick,
     } = this.props;
     const { previewFeature, previewAnchorEl } = this.state;
     const shouldShowPreview =
@@ -367,7 +367,7 @@ class SearchResultsDataset extends React.PureComponent {
           expanded={activeFeatureCollection ? true : false}
           TransitionProps={{ timeout: 100 }}
           onChange={() => {
-            setActiveFeatureCollection(featureCollection);
+            handleFeatureCollectionClick(featureCollection);
           }}
         >
           {this.renderDatasetSummary()}
