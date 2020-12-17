@@ -134,7 +134,8 @@ class AppModel {
   loadPlugins(plugins) {
     const promises = [];
     plugins.forEach((plugin) => {
-      const dir = ["search"].includes(plugin) ? "components" : "plugins";
+      // Search (and soon even LayerSwitcher) reside in /components, rather than /plugins
+      const dir = ["Search"].includes(plugin) ? "components" : "plugins";
       const prom = import(`../${dir}/${plugin}/${plugin}.js`)
         .then((module) => {
           const toolConfig =
@@ -154,7 +155,7 @@ class AppModel {
               new Plugin({
                 map: this.map,
                 app: this,
-                type: plugin,
+                type: plugin.toLowerCase(),
                 searchInterface: {},
                 sortOrder: sortOrder,
                 options: toolOptions,

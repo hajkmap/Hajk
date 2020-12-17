@@ -1,0 +1,67 @@
+.informative img {
+  width: 50%;
+  cursor: pointer;
+}
+
+.informative h1 {
+  font-size: 15pt;
+  cursor: pointer;
+}
+
+.informative h1:hover {
+}
+
+.informative h2 {
+}
+
+.informative-tool-toggle-button {
+  position: absolute;
+  top: 20px;
+  right: 0;
+  background: white;
+  padding: 10px;
+  cursor: pointer;
+  border: 1px solid;
+  border-right: 0;
+}
+
+.informative-tool-toggle-button:active {
+}
+
+.informative-panel {
+  right: 0;
+  left: auto;
+}
+
+@media only screen and (max-width: 600px) {
+  .informative-panel {
+    right: 0;
+    left: 0;
+  }
+}
+
+.toc,
+.content {
+}
+
+.content img {
+  width: 100%;
+}
+
+.toc {
+}
+
+.chapter {
+  border: 1px solid #ccc;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 10px;
+}
+
+.selected {
+  background: #ccc;
+}
+
+.folded {
+  display: none;
+}

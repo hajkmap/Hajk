@@ -1,0 +1,57 @@
+.collector-tool-toggle-button {
+  position: absolute;
+  bottom: 10px;
+  right: 0;
+  background: white;
+  padding: 10px;
+  cursor: pointer;
+  border: 1px solid;
+  border-right: 0;
+}
+
+.cross i {
+  font-size: 50pt;
+  margin-left: -25pt;
+}
+
+.static-popup {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 300px;
+  margin-left: -150px;
+  margin-top: -215px;
+  border: 1px solid;
+  border-radius: 10px;
+}
+
+.static-popup:after,
+.static-popup:before {
+  top: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.static-popup:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-top-color: #ffffff;
+  border-width: 12px;
+  margin-left: -12px;
+}
+.static-popup:before {
+  border-color: rgba(0, 0, 0, 0);
+  border-top-color: #000000;
+  border-width: 13px;
+  margin-left: -13px;
+}
+
+.static-popup .popup-content {
+  border-radius: 10px;
+  padding: 15px;
+  background: white;
+}
