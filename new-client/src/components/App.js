@@ -5,9 +5,9 @@ import { withStyles } from "@material-ui/core/styles";
 import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
-import { isMobile } from "./../utils/IsMobile";
+import { isMobile } from "../utils/IsMobile";
 
-import AppModel from "./../models/AppModel.js";
+import AppModel from "../models/AppModel.js";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
@@ -16,7 +16,7 @@ import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
-import Search from "./search/search";
+import Search from "./Search/Search.js";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
