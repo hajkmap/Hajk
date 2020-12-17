@@ -185,7 +185,7 @@ class ToolOptions extends Component {
       routing: "Navigation",
       collector: "Tyck till",
       dummy: "Dummy plugin",
-      documenthandler: "Dokumenthantering",
+      documenthandler: "Dokumenthanterare 2.0",
     };
 
     return (
