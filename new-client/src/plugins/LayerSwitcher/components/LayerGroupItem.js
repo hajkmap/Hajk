@@ -36,11 +36,10 @@ const styles = (theme) => ({
   },
   layerItem: {
     justifyContent: "space-between",
-    borderBottom: "1px solid #CCC",
+    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
     margin: "5px 0",
   },
   layerItemContainer: {
-    background: "white",
     borderTopRightRadius: "10px",
     boxShadow:
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
@@ -56,7 +55,7 @@ const styles = (theme) => ({
     display: "flex",
     alignItems: "center",
     padding: "3px",
-    border: "1px solid #ccc",
+    border: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
   },
   infoContainer: {},
   infoButton: {
@@ -66,7 +65,6 @@ const styles = (theme) => ({
     margin: "10px 45px",
   },
   layerGroup: {
-    background: "white",
     paddingTop: "5px",
     paddingBottom: "5px",
     marginLeft: "21px",
@@ -81,7 +79,7 @@ const styles = (theme) => ({
   layerGroupHeader: {
     display: "flex",
     justifyContent: "space-between",
-    borderBottom: "1px solid #ccc",
+    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
   },
   layerGroupLayers: {
     marginLeft: "45px",

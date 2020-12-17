@@ -38,11 +38,10 @@ const styles = (theme) => ({
     marginBottom: "-5px",
   },
   layerItemContainer: {
-    background: "white",
     paddingLeft: "0",
     paddingTop: "5px",
     paddingBottom: "5px",
-    borderBottom: "1px solid #CCC",
+    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
     marginLeft: "45px",
   },
   layerItemInfo: {
@@ -56,7 +55,7 @@ const styles = (theme) => ({
     display: "flex",
     alignItems: "center",
     padding: "3px",
-    border: "1px solid #ccc",
+    border: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
   },
   infoContainer: {},
   infoButton: {},

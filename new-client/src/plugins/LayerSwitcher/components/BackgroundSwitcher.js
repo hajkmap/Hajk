@@ -11,7 +11,7 @@ import TileLayer from "ol/layer/Tile";
 
 const styles = (theme) => ({
   layerItemContainer: {
-    borderBottom: "1px solid #ccc",
+    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
   },
   captionText: {
     position: "relative",
