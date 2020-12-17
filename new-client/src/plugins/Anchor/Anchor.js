@@ -22,7 +22,6 @@ class Anchor extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    //heejhejejeje
     this.options = props.options;
     this.title = this.options.title || "Dela";
     this.app = props.app;
