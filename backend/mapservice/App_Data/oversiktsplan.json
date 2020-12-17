@@ -675,6 +675,7 @@
           "title": ""
         },
         "enablePrint": true,
+        "closePanelOnMapLinkOpen": false,
         "documentOnStart": "utgangspunkter",
         "drawerTitle": "Översiktsplan",
         "drawerButtonTitle": "Meny",

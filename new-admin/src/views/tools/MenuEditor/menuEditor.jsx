@@ -48,6 +48,7 @@ class ToolOptions extends Component {
     drawerButtonTitle: "",
     searchImplemented: true,
     enablePrint: true,
+    closePanelOnMapLinkOpen: false,
     tableOfContents: {
       active: false,
       expanded: false,
@@ -102,6 +103,7 @@ class ToolOptions extends Component {
         drawerButtonTitle: tool.options.drawerButtonTitle,
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
+        closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
         tableOfContents: tool.options.tableOfContents,
         defaultDocumentColorSettings: tool.options.defaultDocumentColorSettings,
       });
@@ -172,6 +174,7 @@ class ToolOptions extends Component {
         height: this.state.height,
         searchImplemented: this.state.searchImplemented,
         enablePrint: this.state.enablePrint,
+        closePanelOnMapLinkOpen: this.state.closePanelOnMapLinkOpen,
         documentOnStart: this.state.documentOnStart,
         drawerTitle: this.state.drawerTitle,
         drawerButtonTitle: this.state.drawerButtonTitle,
@@ -639,6 +642,23 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="enablePrint">Utskrift aktiverad</label>
           </div>
+
+          <div>
+            <input
+              id="closePanelOnMapLinkOpen"
+              name="closePanelOnMapLinkOpen"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.closePanelOnMapLinkOpen}
+            />
+            &nbsp;
+            <label htmlFor="closePanelOnMapLinkOpen">
+              Stäng panel vid kartlänk klick
+            </label>
+          </div>
+
           <div className="separator">Innehållsförteckning inställningar</div>
 
           <div>
