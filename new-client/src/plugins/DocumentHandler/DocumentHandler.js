@@ -175,20 +175,23 @@ class DocumentHandler extends React.PureComponent {
       if (documentFileName) {
         document = this.state.model.getDocuments([documentFileName])[0];
       }
-
-      this.setState(
-        {
-          documentTitle: document?.documentTitle
-            ? document.documentTitle
-            : null,
-          document: document,
-          documentColor: document?.documentColor
-            ? document.documentColor
-            : null,
-          showPrintWindow: false,
-        },
-        resolve
-      );
+      if (document) {
+        this.setState(
+          {
+            documentTitle: document?.documentTitle
+              ? document.documentTitle
+              : null,
+            document: document,
+            documentColor: document?.documentColor
+              ? document.documentColor
+              : null,
+            showPrintWindow: false,
+          },
+          resolve
+        );
+      } else {
+        reject();
+      }
     });
   };
 
