@@ -267,6 +267,7 @@ class SearchResultsDataset extends React.PureComponent {
           <Tooltip title="Tillbaka till alla sökresultat">
             <Link
               noWrap
+              color="textPrimary"
               component="div"
               onClick={(e) => {
                 e.stopPropagation();
@@ -285,6 +286,7 @@ class SearchResultsDataset extends React.PureComponent {
                 setActiveFeature(undefined);
               }}
               noWrap
+              color="textPrimary"
               component="div"
               variant="button"
             >
@@ -293,7 +295,7 @@ class SearchResultsDataset extends React.PureComponent {
           </Tooltip>
           {shouldRenderFeatureDetails && (
             <Tooltip title={this.getFeatureTitle(activeFeature)}>
-              <Link noWrap component="div" variant="button">
+              <Link noWrap color="textPrimary" component="div" variant="button">
                 {this.getFeatureTitle(activeFeature)}
               </Link>
             </Tooltip>
