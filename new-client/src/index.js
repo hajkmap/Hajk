@@ -49,9 +49,38 @@ const fetchOpts = {
  * @returns {Object} A complete, ready to used theme object
  */
 function getTheme(config, customTheme) {
+  // Determine if user's browser prefers dark mode:
+  let colorScheme = null;
+  switch (
+    config.mapConfig.map.colors?.preferredColorScheme // If setting in admin is…
+  ) {
+    case "dark": // …dark, use it,
+      colorScheme = "dark";
+      break;
+    case "light": // …light, use it,
+      colorScheme = "light";
+      break;
+    case "user": // …user, or any other value
+    default:
+      colorScheme =
+        window?.matchMedia("(prefers-color-scheme: dark)").matches === true // …check if browser prefers dark mode…
+          ? "dark" // …if so, use dark mode…
+          : "light"; // … else go for light.
+      break;
+  }
+
   // Standard behavior is to use colors from current map config
   // and make them primary and secondary colors for MUI theme.
   const hardCodedDefaults = {
+    palette: {
+      type: colorScheme,
+    },
+    shape: {
+      borderRadius: 2,
+    },
+  };
+
+  const themeFromMapConfig = {
     palette: {
       primary: {
         main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
@@ -60,12 +89,13 @@ function getTheme(config, customTheme) {
         main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
       },
     },
-    shape: {
-      borderRadius: 2,
-    },
   };
 
-  const mergedTheme = deepMerge(hardCodedDefaults, customTheme);
+  const mergedTheme = deepMerge(
+    hardCodedDefaults,
+    customTheme,
+    themeFromMapConfig
+  );
   return createMuiTheme(mergedTheme);
 }
 
