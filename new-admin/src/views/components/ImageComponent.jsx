@@ -26,7 +26,7 @@ const ImageComponent = props => {
   const imageHeight = data["data-image-height"];
   const dataCaption = data["data-caption"];
   const dataSource = data["data-source"];
-  const dataPopup = data["data-popup"];
+  const dataPopup = data["data-image-popup"];
   const dataImagePosition = data["data-image-position"];
 
   const [open, setOpen] = useState(false);
@@ -86,7 +86,7 @@ const ImageComponent = props => {
       "data-image-height": height,
       "data-caption": caption,
       "data-source": source,
-      "data-popup": popup,
+      "data-image-popup": popup,
       "data-image-right": "floatLeft",
       "data-image-position": imagePosition
     };
@@ -248,7 +248,7 @@ const ImageComponent = props => {
           data-image-height={height}
           data-caption={caption}
           data-source={source}
-          data-popup
+          data-image-popup
           data-image-position={imagePosition}
           onClick={handleOpen}
         />

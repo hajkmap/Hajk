@@ -156,14 +156,14 @@ export default class DocumentTextEditor extends React.Component {
 
     const contentStateWithEntity = contentState.createEntity(
       urlType,
-      "MUTABLE",
+      "IMMUTABLE",
       {
         src: urlValue,
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
-        "data-popup": mediaPopup,
+        "data-image-popup": mediaPopup,
         "data-image-position": mediaPosition
       }
     );
@@ -759,13 +759,13 @@ export default class DocumentTextEditor extends React.Component {
             placeholder="data-source"
           />
           <input
-            id="data-popup"
+            id="data-image-popup"
             onChange={this.onDataPopupChange}
-            ref="data-popup"
+            ref="data-image-popup"
             type="checkbox"
             value={this.state.mediaPopup || ""}
             onKeyDown={this.onURLInputKeyDown}
-            placeholder="data-popup"
+            placeholder="data-image-popup"
           />
           <label>Popup</label>
           <select
