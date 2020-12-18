@@ -69,8 +69,7 @@ function getTheme(config, customTheme) {
       break;
   }
 
-  // Standard behavior is to use colors from current map config
-  // and make them primary and secondary colors for MUI theme.
+  // Setup some app-wide defaults that differ from MUI's defaults:
   const hardCodedDefaults = {
     palette: {
       type: colorScheme,
@@ -80,6 +79,7 @@ function getTheme(config, customTheme) {
     },
   };
 
+  // Allow even more customization by reading values from each map config
   const themeFromMapConfig = {
     palette: {
       primary: {
@@ -91,10 +91,11 @@ function getTheme(config, customTheme) {
     },
   };
 
+  // Create the merged theme object by:
   const mergedTheme = deepMerge(
-    hardCodedDefaults,
-    customTheme,
-    themeFromMapConfig
+    hardCodedDefaults, // Using the hardcoded default…
+    customTheme, // … overriding them with stuff from customTheme.json (app-wide customizations, common for each maps)…
+    themeFromMapConfig // … and finally overriding them with map-specific customizations.
   );
   return createMuiTheme(mergedTheme);
 }
