@@ -19,13 +19,9 @@ import * as serviceWorker from "./serviceWorker";
 
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./components/App.js";
 import buildConfig from "./buildConfig.json";
-import { deepMerge } from "./utils/DeepMerge";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import { createMuiTheme } from "@material-ui/core/styles";
-import { ThemeProvider } from "@material-ui/styles";
 import ErrorIcon from "@material-ui/icons/Error";
+import HajkThemeProvider from "./components/HajkThemeProvider";
 
 const networkErrorMessage =
   "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
@@ -35,70 +31,6 @@ const parseErrorMessage =
 const fetchOpts = {
   credentials: "same-origin",
 };
-
-/**
- * Helper function that creates a MUI theme by merging
- * hard-coded values (in this function), with custom values
- * (obtained from customTheme.json in /public).
- * This way, user can customize look and feel of application
- * AFTER it has been build with webpack, by simply tweaking
- * values in customTheme.json.
- *
- * @param {Object} config Map config that, among other objects, contains the default MUI theme
- * @param {Object} customTheme An object with the custom theme, obtained via fetch from customTheme.json
- * @returns {Object} A complete, ready to used theme object
- */
-function getTheme(config, customTheme) {
-  // Determine if user's browser prefers dark mode:
-  let colorScheme = null;
-  switch (
-    config.mapConfig.map.colors?.preferredColorScheme // If setting in admin is…
-  ) {
-    case "dark": // …dark, use it,
-      colorScheme = "dark";
-      break;
-    case "light": // …light, use it,
-      colorScheme = "light";
-      break;
-    case "user": // …user, or any other value
-    default:
-      colorScheme =
-        window?.matchMedia("(prefers-color-scheme: dark)").matches === true // …check if browser prefers dark mode…
-          ? "dark" // …if so, use dark mode…
-          : "light"; // … else go for light.
-      break;
-  }
-
-  // Setup some app-wide defaults that differ from MUI's defaults:
-  const hardCodedDefaults = {
-    palette: {
-      type: colorScheme,
-    },
-    shape: {
-      borderRadius: 2,
-    },
-  };
-
-  // Allow even more customization by reading values from each map config
-  const themeFromMapConfig = {
-    palette: {
-      primary: {
-        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
-      },
-      secondary: {
-        main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
-      },
-    },
-  };
-
-  // Create the merged theme object by:
-  const mergedTheme = deepMerge(
-    hardCodedDefaults, // Using the hardcoded default…
-    customTheme, // … overriding them with stuff from customTheme.json (app-wide customizations, common for each maps)…
-    themeFromMapConfig // … and finally overriding them with map-specific customizations.
-  );
-  return createMuiTheme(mergedTheme);
-}
 
 /**
  * Entry point to Hajk.
@@ -188,17 +120,13 @@ fetch("appConfig.json", fetchOpts)
                   );
                 }
 
-                // Invoke React's renderer
+                // Invoke React's renderer. Render Theme. Theme will render App.
                 ReactDOM.render(
-                  // Wrap it all in a MUI Theme object
-                  <ThemeProvider theme={getTheme(config, customTheme)}>
-                    <CssBaseline />
-                    {/* See App.js's constructor() and render() to further investigate the App's flow */}
-                    <App
-                      activeTools={buildConfig.activeTools}
-                      config={config}
-                    />
-                  </ThemeProvider>,
+                  <HajkThemeProvider
+                    activeTools={buildConfig.activeTools}
+                    config={config}
+                    customTheme={customTheme}
+                  />,
                   document.getElementById("root")
                 );
               })
