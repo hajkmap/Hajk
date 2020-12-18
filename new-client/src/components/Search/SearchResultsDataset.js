@@ -177,6 +177,22 @@ class SearchResultsDataset extends React.PureComponent {
     return featureCollection.value.features;
   };
 
+  getSortedFeatures = (features) => {
+    const { featureSortingStrategy } = this.props;
+
+    const featuresAtoZSorted = features.sort((a, b) =>
+      this.getFeatureTitle(a).localeCompare(this.getFeatureTitle(b), "sv")
+    );
+
+    switch (featureSortingStrategy) {
+      case "ZtoA":
+        return featuresAtoZSorted.reverse();
+      default:
+        // AtoZ
+        return featuresAtoZSorted;
+    }
+  };
+
   renderDatasetDetails = () => {
     const {
       featureCollection,
@@ -197,6 +213,7 @@ class SearchResultsDataset extends React.PureComponent {
       activeFeature && !activeFeature.onClickName;
 
     const features = this.getFilteredFeatures();
+    const sortedFeatures = this.getSortedFeatures(features);
 
     if (shouldRenderFeatureDetails) {
       return (
@@ -219,7 +236,7 @@ class SearchResultsDataset extends React.PureComponent {
           className={classes.datasetDetailsContainer}
         >
           <Grid justify="center" container>
-            {features.map((f) => {
+            {sortedFeatures.map((f) => {
               const featureTitle = this.getFeatureTitle(f);
               if (featureTitle.length > 0) {
                 return (

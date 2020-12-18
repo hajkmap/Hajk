@@ -14,6 +14,8 @@ import {
   Typography,
   Tooltip,
   Badge,
+  Menu,
+  MenuItem,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -77,9 +79,30 @@ class SearchResultsContainer extends React.PureComponent {
       .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
     filterInputFieldOpen: false,
-    featureCollectionFilter: "",
-    featureFilter: "",
+    featureCollectionFilter: "", // String used to filter featureCollections
+    featureFilter: "", // String used to filter features
+    sortingMenuAnchorEl: null,
+    featureCollectionSortingStrategy: "AtoZ", // AtoZ representing alphabetical order
+    featureSortingStrategy: "AtoZ",
   };
+
+  sortingStrategies = [
+    {
+      type: "AtoZ",
+      name: "alfabetisk ordning",
+      appliesTo: ["featureCollections", "features"],
+    },
+    {
+      type: "ZtoA",
+      name: "inverterad alfabetisk ordning",
+      appliesTo: ["featureCollections", "features"],
+    },
+    {
+      type: "numHits",
+      name: "antal träffar",
+      appliesTo: ["featureCollections"],
+    },
+  ];
 
   componentDidMount = () => {
     const { app } = this.props;
@@ -216,27 +239,120 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
+  // Helper function that checks if the filter is active in the
+  // current view.
   isFilterActive = () => {
     const {
       activeFeatureCollection,
       featureFilter,
       featureCollectionFilter,
     } = this.state;
+    // If we have an active featureCollection (meaning that we are
+    // viewing _features_, and the featureFilter-value is set, the
+    // filter is active.
     return activeFeatureCollection && featureFilter.length > 0
       ? true
-      : !activeFeatureCollection && featureCollectionFilter.length > 0
+      : // If we do not have an active featureCollection (meaning that
+      // we are viewing _featureCollections_, and the featureCollection-
+      // filter is set, the filter is active.
+      !activeFeatureCollection && featureCollectionFilter.length > 0
       ? true
-      : false;
+      : // Otherwise, the filter is not active.
+        false;
+  };
+
+  getSortingStrategiesApplyingToView = (view) => {
+    return this.sortingStrategies.filter((strategy) =>
+      strategy.appliesTo.includes(view)
+    );
+  };
+
+  handleSortingMenuItemClick = (type) => {
+    const { activeFeatureCollection } = this.state;
+
+    if (activeFeatureCollection) {
+      this.setState({
+        featureSortingStrategy: type,
+        sortingMenuAnchorEl: null,
+      });
+    } else {
+      this.setState({
+        featureCollectionSortingStrategy: type,
+        sortingMenuAnchorEl: null,
+      });
+    }
+  };
+
+  renderSortingMenu = () => {
+    const {
+      featureCollectionSortingStrategy,
+      featureSortingStrategy,
+      sortingMenuAnchorEl,
+      activeFeatureCollection,
+    } = this.state;
+
+    const currentSortingStrategies = this.getSortingStrategiesApplyingToView(
+      activeFeatureCollection ? "features" : "featureCollections"
+    );
+    return (
+      <Menu
+        anchorEl={sortingMenuAnchorEl}
+        open={Boolean(sortingMenuAnchorEl)}
+        onClose={() => this.setState({ sortingMenuAnchorEl: null })}
+      >
+        {currentSortingStrategies.map((strategy, index) => {
+          return (
+            <MenuItem
+              selected={
+                strategy.type ===
+                (activeFeatureCollection
+                  ? featureSortingStrategy
+                  : featureCollectionSortingStrategy)
+              }
+              onClick={() => this.handleSortingMenuItemClick(strategy.type)}
+              key={index}
+              value={strategy.type}
+            >
+              {`${strategy.name[0].toUpperCase()}${strategy.name.slice(1)}`}
+            </MenuItem>
+          );
+        })}
+      </Menu>
+    );
   };
 
   renderSearchResultListOptions = () => {
+    const {
+      activeFeatureCollection,
+      featureCollectionSortingStrategy,
+      featureSortingStrategy,
+      activeFeature,
+    } = this.state;
     const filterActive = this.isFilterActive();
-    const helpText = filterActive ? "Filtret är aktivt" : "Filtrera resultatet";
+    const filterHelpText = filterActive
+      ? "Filtret är aktivt"
+      : "Filtrera resultatet";
+
+    const sortHelpText = `Sortera resultatet, sorterar nu enligt ${
+      // Get current sorting strategy from the array of strategies
+      this.sortingStrategies.find(
+        // by finding...
+        (strategy) =>
+          // the strategy with the "type"-value...
+          strategy.type ===
+          // corresponding to either the current feature or featureCollection
+          // sorting strategy (depending on if we have an active collection or not)
+          (activeFeatureCollection
+            ? featureSortingStrategy
+            : featureCollectionSortingStrategy)
+      ).name // And it is the name value of the strategy we want to show
+    }`;
     return (
       <Grid align="center" item xs={12}>
-        <Typography variant="srOnly">{helpText}</Typography>
-        <Tooltip title={helpText}>
+        <Typography variant="srOnly">{filterHelpText}</Typography>
+        <Tooltip title={filterHelpText}>
           <Button
+            disabled={activeFeature ? true : false}
             onClick={() =>
               this.setState({
                 filterInputFieldOpen: !this.state.filterInputFieldOpen,
@@ -253,7 +369,17 @@ class SearchResultsContainer extends React.PureComponent {
             </Badge>
           </Button>
         </Tooltip>
-        <Button>Sortera</Button>
+        <Typography variant="srOnly">{sortHelpText}</Typography>
+        <Tooltip title={sortHelpText}>
+          <Button
+            disabled={activeFeature ? true : false}
+            onClick={(e) =>
+              this.setState({ sortingMenuAnchorEl: e.currentTarget })
+            }
+          >
+            Sortera
+          </Button>
+        </Tooltip>
         <IconButton>
           <MoreHorizIcon />
         </IconButton>
@@ -266,7 +392,11 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   setActiveFeatureCollection = (featureCollection) => {
-    this.setState({ activeFeatureCollection: featureCollection });
+    this.setState({
+      activeFeatureCollection: featureCollection,
+      filterInputFieldOpen: false,
+      featureFilter: "",
+    });
   };
 
   resetFeatureAndCollection = () => {
@@ -289,6 +419,26 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
+  sortFeatureCollections = (featureCollections) => {
+    const { featureCollectionSortingStrategy } = this.state;
+
+    const featureCollectionsAtoZSorted = featureCollections.sort((a, b) =>
+      a.source.caption.localeCompare(b.source.caption, "sv")
+    );
+
+    switch (featureCollectionSortingStrategy) {
+      case "numHits":
+        return featureCollections.sort((a, b) =>
+          a.value.totalFeatures > b.value.totalFeatures ? -1 : 1
+        );
+      case "ZtoA":
+        return featureCollectionsAtoZSorted.reverse();
+      default:
+        // AtoZ
+        return featureCollectionsAtoZSorted;
+    }
+  };
+
   render() {
     const {
       classes,
@@ -303,6 +453,8 @@ class SearchResultsContainer extends React.PureComponent {
       activeFeature,
       filterInputFieldOpen,
       featureFilter,
+      featureCollectionSortingStrategy,
+      featureSortingStrategy,
     } = this.state;
 
     const featureCollections =
@@ -312,6 +464,10 @@ class SearchResultsContainer extends React.PureComponent {
           [activeFeatureCollection]
         : // Otherwise we return all collections passing the filter
           this.getFilteredFeatureCollections(this.props.featureCollections);
+
+    const sortedFeatureCollections = this.sortFeatureCollections(
+      featureCollections
+    );
 
     return (
       <Collapse in={!panelCollapsed}>
@@ -329,11 +485,12 @@ class SearchResultsContainer extends React.PureComponent {
                 <Grid container>
                   {this.renderSearchResultListOptions()}
                   {filterInputFieldOpen && this.renderFilterInputField()}
+                  {this.renderSortingMenu()}
                   <Grid item xs={12}>
                     <SearchResultsList
                       localObserver={localObserver}
                       getOriginBasedIcon={getOriginBasedIcon}
-                      featureCollections={featureCollections}
+                      featureCollections={sortedFeatureCollections}
                       app={app}
                       handleFeatureCollectionClick={
                         this.handleFeatureCollectionClick
@@ -343,6 +500,10 @@ class SearchResultsContainer extends React.PureComponent {
                       activeFeatureCollection={activeFeatureCollection}
                       activeFeature={activeFeature}
                       featureFilter={featureFilter}
+                      featureCollectionSortingStrategy={
+                        featureCollectionSortingStrategy
+                      }
+                      featureSortingStrategy={featureSortingStrategy}
                     />
                   </Grid>
                 </Grid>
