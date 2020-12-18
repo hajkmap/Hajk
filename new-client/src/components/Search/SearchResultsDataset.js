@@ -155,6 +155,28 @@ class SearchResultsDataset extends React.PureComponent {
       });
   };
 
+  getFilteredFeatures = () => {
+    const { featureFilter } = this.props;
+    const featureCollection = { ...this.props.featureCollection };
+    // If user has a value in the filter input...
+    if (featureFilter.length > 0) {
+      // Filter all features in the collection
+      const filteredFeatures = featureCollection.value.features.filter(
+        (feature) => {
+          // Returning the features having a title including
+          // the filter string
+          const featureTitle = this.getFeatureTitle(feature);
+          return featureTitle
+            .toLowerCase()
+            .includes(featureFilter.toLowerCase());
+        }
+      );
+      return filteredFeatures;
+    }
+    // Filter length is zero? Return all features
+    return featureCollection.value.features;
+  };
+
   renderDatasetDetails = () => {
     const {
       featureCollection,
@@ -169,7 +191,12 @@ class SearchResultsDataset extends React.PureComponent {
     } = this.props;
 
     const shouldRenderFeatureDetails =
+      // If the user has selected a feature, we should show it's details
+      // IF the feature does not have a onClickName, if it does, the details
+      // will be taken care of somewhere else.
       activeFeature && !activeFeature.onClickName;
+
+    const features = this.getFilteredFeatures();
 
     if (shouldRenderFeatureDetails) {
       return (
@@ -192,7 +219,7 @@ class SearchResultsDataset extends React.PureComponent {
           className={classes.datasetDetailsContainer}
         >
           <Grid justify="center" container>
-            {featureCollection.value.features.map((f) => {
+            {features.map((f) => {
               const featureTitle = this.getFeatureTitle(f);
               if (featureTitle.length > 0) {
                 return (

@@ -2,7 +2,6 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { Grid, Popover, Typography, fade } from "@material-ui/core";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
-import SearchResultsDataset from "./SearchResultsDataset";
 
 const styles = (theme) => ({
   datasetContainer: {
@@ -91,51 +90,9 @@ class SearchResultsPreview extends React.PureComponent {
     );
   };
 
-  renderFeatureCollectionPreview = () => {
-    const {
-      classes,
-      previewFeatureCollection,
-      anchorEl,
-      app,
-      selectedItems,
-    } = this.props;
-
-    return (
-      <Popover
-        id="mouse-over-popover"
-        open={anchorEl ? true : false}
-        anchorEl={anchorEl}
-        classes={{
-          root: classes.preview,
-          paper: classes.previewPaper,
-        }}
-        anchorOrigin={{
-          vertical: "center",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        disableRestoreFocus
-      >
-        <SearchResultsDataset
-          app={app}
-          featureCollection={previewFeatureCollection}
-          activeFeatureCollection={previewFeatureCollection}
-          selectedItems={selectedItems}
-        />
-      </Popover>
-    );
-  };
-
   render() {
-    const { previewFeature, previewFeatureCollection } = this.props;
-    return previewFeature
-      ? this.renderFeaturePreview()
-      : previewFeatureCollection
-      ? this.renderFeatureCollectionPreview()
-      : null;
+    const { previewFeature } = this.props;
+    return previewFeature ? this.renderFeaturePreview() : null;
   }
 }
 

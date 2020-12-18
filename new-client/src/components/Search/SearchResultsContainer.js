@@ -10,6 +10,10 @@ import {
   Button,
   AccordionDetails,
   Grid,
+  TextField,
+  Typography,
+  Tooltip,
+  Badge,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -47,6 +51,10 @@ const styles = (theme) => ({
       left: 0,
     },
   },
+  filterInputFieldContainer: {
+    padding: theme.spacing(1),
+    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+  },
 });
 
 const TightAccordionDetails = withStyles({
@@ -68,6 +76,9 @@ class SearchResultsContainer extends React.PureComponent {
     sumOfResults: this.props.searchResults.featureCollections
       .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
+    filterInputFieldOpen: false,
+    featureCollectionFilter: "",
+    featureFilter: "",
   };
 
   componentDidMount = () => {
@@ -143,10 +154,105 @@ class SearchResultsContainer extends React.PureComponent {
     });
   };
 
+  handleFilterTextFieldInputChange = (e) => {
+    // If we don't have a collection active, we know
+    // that the filter is intended for the collections
+    if (!this.state.activeFeatureCollection) {
+      this.setState({
+        featureCollectionFilter: e.target.value,
+      });
+    } else {
+      // If we DO have a collection active, we know that
+      // the filter is intended for the features in the active
+      // collection
+      this.setState({
+        featureFilter: e.target.value,
+      });
+    }
+  };
+
+  renderFilterInputField = () => {
+    const { classes } = this.props;
+    const {
+      activeFeatureCollection,
+      featureFilter,
+      featureCollectionFilter,
+    } = this.state;
+    return (
+      <Grid item className={classes.filterInputFieldContainer} xs={12}>
+        <Typography variant="srOnly">
+          Textfält för att filtrera resultatet
+        </Typography>
+        <TextField
+          autoFocus
+          onChange={this.handleFilterTextFieldInputChange}
+          value={
+            activeFeatureCollection ? featureFilter : featureCollectionFilter
+          }
+          fullWidth
+          size="small"
+          variant="outlined"
+          label="Filtrera sökresultaten"
+        ></TextField>
+      </Grid>
+    );
+  };
+
+  getFilteredFeatureCollections = () => {
+    const { featureCollectionFilter } = this.state;
+    const { featureCollections } = this.props;
+    // Do we have a filter value?
+    if (featureCollectionFilter.length > 0) {
+      // Filter all collections
+      return featureCollections.filter((featureCollection) => {
+        // Returning collections where the filter is included in caption
+        return featureCollection?.source?.caption
+          .toLowerCase()
+          .includes(featureCollectionFilter.toLowerCase());
+      });
+    } else {
+      // No filter? Return all collections
+      return featureCollections;
+    }
+  };
+
+  isFilterActive = () => {
+    const {
+      activeFeatureCollection,
+      featureFilter,
+      featureCollectionFilter,
+    } = this.state;
+    return activeFeatureCollection && featureFilter.length > 0
+      ? true
+      : !activeFeatureCollection && featureCollectionFilter.length > 0
+      ? true
+      : false;
+  };
+
   renderSearchResultListOptions = () => {
+    const filterActive = this.isFilterActive();
+    const helpText = filterActive ? "Filtret är aktivt" : "Filtrera resultatet";
     return (
       <Grid align="center" item xs={12}>
-        <Button>Filtrera</Button>
+        <Typography variant="srOnly">{helpText}</Typography>
+        <Tooltip title={helpText}>
+          <Button
+            onClick={() =>
+              this.setState({
+                filterInputFieldOpen: !this.state.filterInputFieldOpen,
+              })
+            }
+          >
+            <Badge
+              color="primary"
+              badgeContent=" "
+              variant="dot"
+              invisible={!filterActive}
+            >
+              Filtrera
+            </Badge>
+          </Button>
+        </Tooltip>
         <Button>Sortera</Button>
         <IconButton>
           <MoreHorizIcon />
@@ -191,10 +297,21 @@ class SearchResultsContainer extends React.PureComponent {
       localObserver,
       panelCollapsed,
     } = this.props;
-    const { sumOfResults, activeFeatureCollection, activeFeature } = this.state;
-    const featureCollections = activeFeatureCollection
-      ? [activeFeatureCollection]
-      : this.props.featureCollections;
+    const {
+      sumOfResults,
+      activeFeatureCollection,
+      activeFeature,
+      filterInputFieldOpen,
+      featureFilter,
+    } = this.state;
+
+    const featureCollections =
+      // Do we have an active (selected) featureCollection?
+      activeFeatureCollection
+        ? // Return a array containing only that collection
+          [activeFeatureCollection]
+        : // Otherwise we return all collections passing the filter
+          this.getFilteredFeatureCollections(this.props.featureCollections);
 
     return (
       <Collapse in={!panelCollapsed}>
@@ -211,6 +328,7 @@ class SearchResultsContainer extends React.PureComponent {
               >
                 <Grid container>
                   {this.renderSearchResultListOptions()}
+                  {filterInputFieldOpen && this.renderFilterInputField()}
                   <Grid item xs={12}>
                     <SearchResultsList
                       localObserver={localObserver}
@@ -224,6 +342,7 @@ class SearchResultsContainer extends React.PureComponent {
                       resetFeatureAndCollection={this.resetFeatureAndCollection}
                       activeFeatureCollection={activeFeatureCollection}
                       activeFeature={activeFeature}
+                      featureFilter={featureFilter}
                     />
                   </Grid>
                 </Grid>

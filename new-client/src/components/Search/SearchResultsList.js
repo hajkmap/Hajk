@@ -93,6 +93,7 @@ class SearchResultsList extends React.PureComponent {
       setActiveFeature,
       resetFeatureAndCollection,
       handleFeatureCollectionClick,
+      featureFilter,
     } = this.props;
 
     return (
@@ -118,6 +119,7 @@ class SearchResultsList extends React.PureComponent {
                 setActiveFeature={setActiveFeature}
                 handleOnFeatureClick={this.handleOnFeatureClick}
                 resetFeatureAndCollection={resetFeatureAndCollection}
+                featureFilter={featureFilter}
               />
             </Grid>
           ))}
