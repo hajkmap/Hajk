@@ -118,6 +118,7 @@ class VTSearch extends React.PureComponent {
     expanded: false,
     activeSearchTool: searchTypes.DEFAULT,
     loading: false,
+    appLoaded: false,
   };
 
   static propTypes = {
@@ -188,7 +189,11 @@ class VTSearch extends React.PureComponent {
   };
 
   componentDidMount = () => {
-    this.globalObserver.publish("core.appLoaded");
+    this.globalObserver.subscribe("core.appLoaded", () => {
+      this.setState({
+        appLoaded: true,
+      });
+    });
   };
 
   renderSearchmodule = () => {
@@ -198,6 +203,7 @@ class VTSearch extends React.PureComponent {
         this.props.app.appModel = this.props.app; // Fixa till
         return (
           <Search
+            appLoadedFromRenderElsewhere={this.state.appLoaded}
             map={this.props.app.getMap()}
             app={this.props.app}
             options={this.props.app.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
