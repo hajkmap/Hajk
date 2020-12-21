@@ -127,6 +127,10 @@ export default class DocumentSearchModel {
 
   getFeatureCollectionsForMatchingDocuments = (possibleSearchCombinations) => {
     return this.allDocuments.reduce((featureCollections, document) => {
+      document.chapters[0].searchValues = document.title
+        ? [document.title]
+        : [];
+
       const {
         searchFields,
         matchedFeatures,
@@ -193,18 +197,15 @@ export default class DocumentSearchModel {
     });
   };
 
-  getSearchValuesForChapter = (document, chapter) => {
-    let searchValues = [];
+  getSearchValuesForChapter = (chapter) => {
+    let searchValues = chapter.searchValues ? chapter.searchValues : [];
     if (chapter.header) {
-      searchValues = [chapter.header];
+      searchValues = [...searchValues, chapter.header];
     }
     if (chapter.keywords && chapter.keywords.length > 0) {
       searchValues = [...searchValues, chapter.keywords];
     }
-    if (document.title) {
-      searchValues = [...searchValues, document.title];
-    }
-    console.log(searchValues, "SEARCHVALUES");
+    console.log(searchValues, "searchVBalues");
     return searchValues;
   };
 
@@ -223,9 +224,8 @@ export default class DocumentSearchModel {
       });
     } else {
       chapter.matchedSearchValues = this.getMatchedSearchValues(
-        document,
-        chapter,
-        searchCombinations
+        searchCombinations,
+        this.getSearchValuesForChapter(chapter)
       );
     }
   };
@@ -279,8 +279,7 @@ export default class DocumentSearchModel {
    * @return Returns true if a match is found.
    *
    */
-  getMatchedSearchValues = (document, chapter, searchCombinations) => {
-    let searchValues = this.getSearchValuesForChapter(document, chapter);
+  getMatchedSearchValues = (searchCombinations, searchValues) => {
     let allMatched = [];
     let match = searchCombinations.some((searchCombination) => {
       let everyResult = searchCombination.every((word) => {
