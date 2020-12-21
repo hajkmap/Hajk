@@ -91,12 +91,8 @@ const TightBreadcrumbs = withStyles({
 class SearchResultsDataset extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
   state = {
-    numberOfResultsToDisplay: this.props.featureCollection.value.numberMatched
-      ? this.props.featureCollection.value.numberMatched >
-        this.props.featureCollection.value.numberReturned
-        ? `${this.props.featureCollection.value.numberReturned}+`
-        : this.props.featureCollection.value.numberReturned
-      : this.props.featureCollection.value.features.length,
+    numberOfResultsToDisplay: this.props.featureCollection.value.features
+      .length,
     previewFeature: undefined, // Feature to show in preview
     popOverAnchorEl: undefined, // The element which the preview popper will anchor to
   };
@@ -353,10 +349,7 @@ class SearchResultsDataset extends React.PureComponent {
     const { numberOfResultsToDisplay } = this.state;
 
     const { featureCollection, getOriginBasedIcon } = this.props;
-    const { numberReturned, numberMatched, features } = featureCollection.value;
-    const toolTipTitle = numberReturned
-      ? `Visar ${numberReturned} av ${numberMatched} resultat`
-      : `Visar ${features.length} resultat`;
+    const toolTipTitle = `Visar ${numberOfResultsToDisplay} resultat`;
     return (
       <Grid alignItems="center" container>
         <Grid item xs={1}>

@@ -50,6 +50,9 @@ class Search extends React.PureComponent {
       wildcardAtEnd: true,
       matchCase: false,
       activeSpatialFilter: "within",
+      maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
+        ? this.props.options.maxResultsPerDataset
+        : 100,
     },
     failedWFSFetchMessage: "",
     resultPanelCollapsed: false,
@@ -656,6 +659,7 @@ class Search extends React.PureComponent {
       matchCase,
       wildcardAtEnd,
       wildcardAtStart,
+      maxResultsPerDataset,
     } = this.state.searchOptions;
     return {
       ...searchOptionsFromModel,
@@ -665,6 +669,7 @@ class Search extends React.PureComponent {
       matchCase: matchCase,
       wildcardAtStart: wildcardAtStart,
       wildcardAtEnd: wildcardAtEnd,
+      maxResultsPerDataset: maxResultsPerDataset,
     };
   };
 
