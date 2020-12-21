@@ -125,6 +125,7 @@ class DocumentWindowBase extends React.PureComponent {
     app.globalObserver.subscribe(
       "documenthandler-searchresult-clicked",
       (searchResultClick) => {
+        console.log(searchResultClick, "searchResultClick");
         localObserver.publish("set-active-document", {
           documentName: searchResultClick.properties.documentFileName,
           headerIdentifier: searchResultClick.properties.headerIdentifier,
