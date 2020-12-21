@@ -74,6 +74,8 @@ class Search extends React.PureComponent {
     this.searchModel = props.app.appModel.searchModel;
     this.initMapViewModel();
     this.bindSubscriptions();
+
+    if (props.appLoadedFromRenderElsewhere) this.bindSearchImplementedPlugins();
   }
 
   initMapViewModel = () => {
@@ -181,7 +183,12 @@ class Search extends React.PureComponent {
 
   componentDidMount = () => {
     const { app } = this.props;
-    // app.globalObserver.subscribe("core.appLoaded", () => {
+    app.globalObserver.subscribe("core.appLoaded", () => {
+      this.bindSearchImplementedPlugins();
+    });
+  };
+
+  bindSearchImplementedPlugins = () => {
     this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
       this.setState(
         {
@@ -194,7 +201,6 @@ class Search extends React.PureComponent {
         }
       );
     });
-    //  });
   };
 
   getSourcesByIds = (sourceIds) => {

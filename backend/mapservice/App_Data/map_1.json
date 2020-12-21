@@ -86,6 +86,7 @@
       "type": "vtsearch",
       "options": {
         "target": "toolbar",
+        "searchImplemented": true,
         "abstract": "VTSEARCH",
         "title": "Sök",
         "position": "left",
