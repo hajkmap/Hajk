@@ -351,34 +351,38 @@ class SearchResultsContainer extends React.PureComponent {
       <Grid align="center" item xs={12}>
         <Typography variant="srOnly">{filterHelpText}</Typography>
         <Tooltip title={filterHelpText}>
-          <Button
-            disabled={activeFeature ? true : false}
-            onClick={() =>
-              this.setState({
-                filterInputFieldOpen: !this.state.filterInputFieldOpen,
-              })
-            }
-          >
-            <Badge
-              color="primary"
-              badgeContent=" "
-              variant="dot"
-              invisible={!filterActive}
+          <span>
+            <Button
+              disabled={activeFeature ? true : false}
+              onClick={() =>
+                this.setState({
+                  filterInputFieldOpen: !this.state.filterInputFieldOpen,
+                })
+              }
             >
-              Filtrera
-            </Badge>
-          </Button>
+              <Badge
+                color="primary"
+                badgeContent=" "
+                variant="dot"
+                invisible={!filterActive}
+              >
+                Filtrera
+              </Badge>
+            </Button>
+          </span>
         </Tooltip>
         <Typography variant="srOnly">{sortHelpText}</Typography>
         <Tooltip title={sortHelpText}>
-          <Button
-            disabled={activeFeature ? true : false}
-            onClick={(e) =>
-              this.setState({ sortingMenuAnchorEl: e.currentTarget })
-            }
-          >
-            Sortera
-          </Button>
+          <span>
+            <Button
+              disabled={activeFeature ? true : false}
+              onClick={(e) =>
+                this.setState({ sortingMenuAnchorEl: e.currentTarget })
+              }
+            >
+              Sortera
+            </Button>
+          </span>
         </Tooltip>
         <IconButton>
           <MoreHorizIcon />
