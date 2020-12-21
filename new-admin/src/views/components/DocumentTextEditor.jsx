@@ -461,7 +461,7 @@ export default class DocumentTextEditor extends React.Component {
 
         return {
           component: ImageComponent,
-          editable: true,
+          editable: false,
           props: {
             readOnlyMode: this.toggleReadOnly,
             currentImage: img => this.setState({ currentImage: img }),
