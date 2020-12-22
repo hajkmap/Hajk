@@ -95,6 +95,7 @@ class SearchResultsList extends React.PureComponent {
       handleFeatureCollectionClick,
       featureFilter,
       featureSortingStrategy,
+      showFeaturePreview,
     } = this.props;
 
     return (
@@ -122,6 +123,7 @@ class SearchResultsList extends React.PureComponent {
                 resetFeatureAndCollection={resetFeatureAndCollection}
                 featureFilter={featureFilter}
                 featureSortingStrategy={featureSortingStrategy}
+                showFeaturePreview={showFeaturePreview}
               />
             </Grid>
           ))}

@@ -450,6 +450,7 @@ class SearchResultsContainer extends React.PureComponent {
       getOriginBasedIcon,
       localObserver,
       panelCollapsed,
+      showFeaturePreview,
     } = this.props;
     const {
       sumOfResults,
@@ -508,6 +509,7 @@ class SearchResultsContainer extends React.PureComponent {
                         featureCollectionSortingStrategy
                       }
                       featureSortingStrategy={featureSortingStrategy}
+                      showFeaturePreview={showFeaturePreview}
                     />
                   </Grid>
                 </Grid>

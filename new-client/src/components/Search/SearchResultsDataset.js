@@ -394,10 +394,13 @@ class SearchResultsDataset extends React.PureComponent {
       featureCollection,
       activeFeatureCollection,
       handleFeatureCollectionClick,
+      showFeaturePreview,
     } = this.props;
     const { previewFeature, previewAnchorEl } = this.state;
     const shouldShowPreview =
-      !isMobile && !previewFeature?.onClickName ? true : false;
+      showFeaturePreview && !isMobile && !previewFeature?.onClickName
+        ? true
+        : false;
     return (
       <>
         <Accordion
