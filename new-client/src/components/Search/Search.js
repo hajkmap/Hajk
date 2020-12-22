@@ -561,11 +561,28 @@ class Search extends React.PureComponent {
       .flat();
   };
 
+  getNumResults = (searchResults) => {
+    let numResults = 0;
+    searchResults.featureCollections.forEach((fc) => {
+      numResults += fc.value.features.length;
+    });
+    return numResults;
+  };
+
   updateAutocompleteList = async () => {
     let fetchOptions = this.getAutoCompleteFetchSettings();
     let autoCompleteResult = await this.fetchResultFromSearchModel(
       fetchOptions
     );
+
+    // If we get few results (less than 3) we do a new
+    // search to try to fill the autocomplete with wildCardAtStart
+    // active.
+    if (this.getNumResults(autoCompleteResult) < 3) {
+      fetchOptions.wildcardAtStart = true;
+      autoCompleteResult = await this.fetchResultFromSearchModel(fetchOptions);
+    }
+
     this.setState({
       autocompleteList: this.prepareAutocompleteList(autoCompleteResult),
       loading: false,
