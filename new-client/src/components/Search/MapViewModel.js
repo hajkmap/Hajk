@@ -134,12 +134,31 @@ class MapViewModel {
     this.resultSource.getFeatures().map((f) => f.setStyle(null));
   };
 
+  getFeatureTitle = (feature, displayFields) => {
+    return displayFields.reduce((featureTitleString, df) => {
+      let displayField = feature.get(df);
+      if (Array.isArray(displayField)) {
+        displayField = displayField.join(", ");
+      }
+
+      if (displayField) {
+        if (featureTitleString.length > 0) {
+          featureTitleString = featureTitleString.concat(` | ${displayField}`);
+        } else {
+          featureTitleString = displayField;
+        }
+      }
+
+      return featureTitleString;
+    }, "");
+  };
+
   getHighlightLabelValueFromFeature = (feature, displayFields) => {
     if (this.showLabelOnHighlight) {
       if (!displayFields || displayFields.length < 1) {
         return `Visningsfält saknas`;
       } else {
-        return feature.get(displayFields[0]);
+        return this.getFeatureTitle(feature, displayFields);
       }
     }
   };
