@@ -352,24 +352,41 @@ class Search extends React.PureComponent {
   };
 
   sortSearchFieldsOnFeature = (searchFields, feature, wordsInTextField) => {
-    let orderedSearchFields = [];
+    const matchedSearchFields = [];
 
-    searchFields.forEach((searchField) => {
-      let searchFieldMatch = wordsInTextField.some((word) => {
-        return RegExp(`^${this.escapeRegExp(word)}\\W*`, "i").test(
-          feature.properties[searchField] || ""
-        );
-      });
-
-      if (feature.properties[searchField]) {
-        if (searchFieldMatch) {
-          orderedSearchFields.unshift(searchField);
-        } else {
-          orderedSearchFields.push(searchField);
-        }
-      }
+    // We loop over each word in the input field first to ensure
+    // that we don't mess upp the order of the displayFields...
+    wordsInTextField.forEach((word) => {
+      // then we get the searchFields that has not been matched yet
+      searchFields
+        .filter((sf) => !matchedSearchFields.includes(sf))
+        // and loop over these...
+        .forEach((sf) => {
+          // to find searchFields matching the current word...
+          const searchFieldMatch = RegExp(
+            `^${this.escapeRegExp(word)}\\W*`,
+            "i"
+          ).test(feature.properties[sf] || "");
+          // If we find a match, and the matched searchField
+          // returns a feature prop which is not undefined...
+          if (feature.properties[sf]) {
+            // we add the searchField to the array of matched
+            // searchFields.
+            if (searchFieldMatch) {
+              matchedSearchFields.push(sf);
+            }
+          }
+        });
     });
-    return orderedSearchFields;
+
+    // The function should return ALL searchField (no matter if
+    // they have been matched or not. Therefore we get the searchFields
+    // that have not been matched)...
+    const unMatchedSearchFields = searchFields.filter(
+      (sf) => !matchedSearchFields.includes(sf) && feature.properties[sf]
+    );
+    // And concatenate the matched searchFields with the unMatched searchFields.
+    return matchedSearchFields.concat(unMatchedSearchFields);
   };
 
   getSortedAutocompleteEntry = (feature) => {
@@ -426,8 +443,7 @@ class Search extends React.PureComponent {
     // Now we have an Array of Arrays, one per dataset. For the Autocomplete component
     // however, we need just one Array, so let's flatten the results:
 
-    //return this.sortAutocompleteList(resultsPerDataset.flat());
-    return resultsPerDataset.flat();
+    return this.sortAutocompleteList(resultsPerDataset.flat());
   };
 
   sortAutocompleteList = (flatAutocompleteArray) => {
