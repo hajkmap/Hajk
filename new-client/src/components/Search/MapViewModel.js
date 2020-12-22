@@ -25,29 +25,24 @@ const defaultStyles = [
   }),
 ];
 
-const drawStyle = new Style({
-  stroke: new Stroke({
-    color: "rgba(255, 214, 91, 0.6)",
-    width: 4,
-  }),
-  fill: new Fill({
-    color: "rgba(255, 214, 91, 0.2)",
-  }),
-  image: new Circle({
-    radius: 6,
-    stroke: new Stroke({
-      color: "rgba(255, 214, 91, 0.6)",
-      width: 2,
-    }),
-  }),
-});
-
 class MapViewModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
     this.options = settings.options;
     this.showLabelOnHighlight = settings.options.showLabelOnHighlight ?? true;
+    this.drawStrokeColor =
+      settings.options.drawStrokeColor || "rgba(255, 214, 91, 0.6)";
+    this.drawFillColor =
+      settings.options.drawFillColor || "rgba(255, 214, 91, 0.2)";
+    this.highlightStrokeColor =
+      settings.options.highlightStrokeColor || "rgba(200, 0, 0, 0.7)";
+    this.highlightFillColor =
+      settings.options.highlightFillColor || "rgba(255, 0, 0, 0.1)";
+    this.highlightTextFill =
+      settings.options.highlightTextFill || "rgba(255, 255, 255, 1)";
+    this.highlightTextStroke =
+      settings.options.highlightTextStroke || "rgba(0, 0, 0, 0.5)";
     this.localObserver = settings.localObserver;
     this.initMapLayers();
     this.bindSubscriptions();
@@ -72,7 +67,10 @@ class MapViewModel {
     );
     this.resultsLayer.set("type", "searchResultLayer");
     this.drawSource = this.getNewVectorSource();
-    this.drawLayer = this.getNewVectorLayer(this.drawSource, drawStyle);
+    this.drawLayer = this.getNewVectorLayer(
+      this.drawSource,
+      this.getDrawStyle()
+    );
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
   };
@@ -166,16 +164,16 @@ class MapViewModel {
   getHighlightedStyle = (feature, displayFields) => {
     return new Style({
       fill: new Fill({
-        color: [255, 0, 0, 0.1],
+        color: this.highlightFillColor,
       }),
       stroke: new Stroke({
-        color: [200, 0, 0, 0.7],
+        color: this.highlightStrokeColor,
         width: 4,
       }),
       image: new Circle({
         radius: 6,
         stroke: new Stroke({
-          color: [200, 0, 0, 0.7],
+          color: this.highlightStrokeColor,
           width: 4,
         }),
       }),
@@ -183,17 +181,36 @@ class MapViewModel {
         textAlign: "center",
         textBaseline: "middle",
         font: "12pt sans-serif",
-        fill: new Fill({ color: "#FFF" }),
+        fill: new Fill({ color: this.highlightTextFill }),
         text: this.getHighlightLabelValueFromFeature(feature, displayFields),
         overflow: true,
         stroke: new Stroke({
-          color: "rgba(0, 0, 0, 0.5)",
+          color: this.highlightTextStroke,
           width: 3,
         }),
         offsetX: 0,
         offsetY: -10,
         rotation: 0,
         scale: 1,
+      }),
+    });
+  };
+
+  getDrawStyle = () => {
+    return new Style({
+      stroke: new Stroke({
+        color: this.drawStrokeColor,
+        width: 4,
+      }),
+      fill: new Fill({
+        color: this.drawFillColor,
+      }),
+      image: new Circle({
+        radius: 6,
+        stroke: new Stroke({
+          color: this.drawStrokeColor,
+          width: 2,
+        }),
       }),
     });
   };
@@ -257,7 +274,7 @@ class MapViewModel {
         type: type,
         freehand: type === "Circle" ? true : freehand,
         stopClick: true,
-        style: drawStyle,
+        style: this.getDrawStyle(),
       });
 
       this.map.clickLock.add("search");
