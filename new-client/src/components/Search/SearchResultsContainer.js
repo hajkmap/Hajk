@@ -500,7 +500,7 @@ class SearchResultsContainer extends React.PureComponent {
               ` | ${displayField}`
             );
           } else {
-            featureTitleString = displayField;
+            featureTitleString = displayField.toString();
           }
         }
 
