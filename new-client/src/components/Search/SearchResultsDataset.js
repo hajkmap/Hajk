@@ -252,7 +252,12 @@ class SearchResultsDataset extends React.PureComponent {
           {getOriginBasedIcon(featureCollection.origin)}
         </Grid>
         <Grid item xs={9}>
-          <Typography variant="button">
+          <Typography
+            noWrap
+            variant="button"
+            component="div" // The noWrap does not work on variant="button" without changing component
+            style={{ maxWidth: "100%" }}
+          >
             {featureCollection.source.caption}
           </Typography>
         </Grid>
