@@ -581,7 +581,7 @@ class SearchResultsContainer extends React.PureComponent {
       );
     } else {
       return (
-        <Grid item xs={12} style={{ paddingTop: 15 }}>
+        <Grid item xs={12} align="center" style={{ paddingTop: 15 }}>
           <Typography
             noWrap
             className={classes.headerTypography}
