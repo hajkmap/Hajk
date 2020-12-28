@@ -96,6 +96,7 @@ class SearchResultsList extends React.PureComponent {
       featureFilter,
       featureSortingStrategy,
       showFeaturePreview,
+      getFeatureTitle,
     } = this.props;
 
     return (
@@ -106,7 +107,9 @@ class SearchResultsList extends React.PureComponent {
               key={featureCollection.source.id}
               role="button"
               xs={12}
-              className={classes.searchResultDatasetWrapper}
+              className={
+                activeFeature ? null : classes.searchResultDatasetWrapper
+              }
               item
             >
               <SearchResultsDataset
@@ -124,6 +127,7 @@ class SearchResultsList extends React.PureComponent {
                 featureFilter={featureFilter}
                 featureSortingStrategy={featureSortingStrategy}
                 showFeaturePreview={showFeaturePreview}
+                getFeatureTitle={getFeatureTitle}
               />
             </Grid>
           ))}

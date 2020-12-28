@@ -14,8 +14,6 @@ import {
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 import SearchResultsPreview from "./SearchResultsPreview";
-import Breadcrumbs from "@material-ui/core/Breadcrumbs";
-import Link from "@material-ui/core/Link";
 
 const styles = (theme) => ({
   datasetContainer: {
@@ -74,20 +72,6 @@ const TightAccordionDetails = withStyles((theme) => ({
   },
 }))(AccordionDetails);
 
-const TightBreadcrumbs = withStyles({
-  root: {
-    width: "100%",
-    display: "inline-block",
-  },
-  ol: {
-    width: "100%",
-  },
-  li: {
-    display: "flex",
-    maxWidth: (props) => (props.numelements > 2 ? "35%" : "90%"),
-  },
-})(Breadcrumbs);
-
 class SearchResultsDataset extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
   state = {
@@ -103,32 +87,6 @@ class SearchResultsDataset extends React.PureComponent {
   resultHasOnlyOneFeature = () => {
     const { featureCollection } = this.props;
     return featureCollection.value.features.length === 1;
-  };
-
-  getFeatureTitle = (feature) => {
-    const { activeFeatureCollection } = this.props;
-
-    return activeFeatureCollection.source.displayFields.reduce(
-      (featureTitleString, df) => {
-        let displayField = feature.properties[df];
-        if (Array.isArray(displayField)) {
-          displayField = displayField.join(", ");
-        }
-
-        if (displayField) {
-          if (featureTitleString.length > 0) {
-            featureTitleString = featureTitleString.concat(
-              ` | ${displayField}`
-            );
-          } else {
-            featureTitleString = displayField;
-          }
-        }
-
-        return featureTitleString;
-      },
-      ""
-    );
   };
 
   setPreviewFeature = (e, feature) => {
@@ -152,7 +110,7 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   getFilteredFeatures = () => {
-    const { featureFilter } = this.props;
+    const { featureFilter, getFeatureTitle } = this.props;
     const featureCollection = { ...this.props.featureCollection };
     // If user has a value in the filter input...
     if (featureFilter.length > 0) {
@@ -161,7 +119,7 @@ class SearchResultsDataset extends React.PureComponent {
         (feature) => {
           // Returning the features having a title including
           // the filter string
-          const featureTitle = this.getFeatureTitle(feature);
+          const featureTitle = getFeatureTitle(feature);
           return featureTitle
             .toLowerCase()
             .includes(featureFilter.toLowerCase());
@@ -174,10 +132,10 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   getSortedFeatures = (features) => {
-    const { featureSortingStrategy } = this.props;
+    const { featureSortingStrategy, getFeatureTitle } = this.props;
 
     const featuresAtoZSorted = features.sort((a, b) =>
-      this.getFeatureTitle(a).localeCompare(this.getFeatureTitle(b), "sv")
+      getFeatureTitle(a).localeCompare(getFeatureTitle(b), "sv")
     );
 
     switch (featureSortingStrategy) {
@@ -200,6 +158,7 @@ class SearchResultsDataset extends React.PureComponent {
       activeFeature,
       handleOnFeatureClick,
       getOriginBasedIcon,
+      getFeatureTitle,
     } = this.props;
 
     const shouldRenderFeatureDetails =
@@ -213,17 +172,12 @@ class SearchResultsDataset extends React.PureComponent {
 
     if (shouldRenderFeatureDetails) {
       return (
-        <TightAccordionDetails
-          id={`search-result-dataset-details-${featureCollection.source.id}`}
-          className={classes.datasetDetailsContainer}
-        >
-          <SearchResultsDatasetFeatureDetails
-            feature={activeFeature}
-            featureTitle={this.getFeatureTitle(activeFeature)}
-            app={app}
-            source={activeFeatureCollection.source}
-          />
-        </TightAccordionDetails>
+        <SearchResultsDatasetFeatureDetails
+          feature={activeFeature}
+          featureTitle={getFeatureTitle(activeFeature)}
+          app={app}
+          source={activeFeatureCollection.source}
+        />
       );
     } else {
       return (
@@ -233,7 +187,7 @@ class SearchResultsDataset extends React.PureComponent {
         >
           <Grid justify="center" container>
             {sortedFeatures.map((f) => {
-              const featureTitle = this.getFeatureTitle(f);
+              const featureTitle = getFeatureTitle(f);
               if (featureTitle.length > 0) {
                 return (
                   <React.Fragment key={f.id}>
@@ -258,7 +212,7 @@ class SearchResultsDataset extends React.PureComponent {
                       }
                       <SearchResultsDatasetFeature
                         feature={f}
-                        featureTitle={this.getFeatureTitle(f)}
+                        featureTitle={getFeatureTitle(f)}
                         app={app}
                         source={featureCollection.source}
                         origin={featureCollection.origin}
@@ -285,64 +239,6 @@ class SearchResultsDataset extends React.PureComponent {
         </TightAccordionDetails>
       );
     }
-  };
-
-  renderDetailsHeader = () => {
-    const {
-      activeFeatureCollection,
-      activeFeature,
-      resetFeatureAndCollection,
-      setActiveFeature,
-    } = this.props;
-    const shouldRenderFeatureDetails =
-      activeFeature && !activeFeature.onClickName;
-    const numElements = shouldRenderFeatureDetails ? 3 : 2;
-    return (
-      <Grid alignItems="center" style={{ maxWidth: "100%" }} container>
-        <TightBreadcrumbs
-          numelements={numElements}
-          aria-label="breadcrumb"
-          component="div"
-        >
-          <Tooltip title="Tillbaka till alla sökresultat">
-            <Link
-              noWrap
-              color="textPrimary"
-              component="div"
-              onClick={(e) => {
-                e.stopPropagation();
-                resetFeatureAndCollection();
-              }}
-              onChange={resetFeatureAndCollection}
-              variant="button"
-            >
-              Start
-            </Link>
-          </Tooltip>
-          <Tooltip title={activeFeatureCollection.source.caption}>
-            <Link
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveFeature(undefined);
-              }}
-              noWrap
-              color="textPrimary"
-              component="div"
-              variant="button"
-            >
-              {activeFeatureCollection.source.caption}
-            </Link>
-          </Tooltip>
-          {shouldRenderFeatureDetails && (
-            <Tooltip title={this.getFeatureTitle(activeFeature)}>
-              <Link noWrap color="textPrimary" component="div" variant="button">
-                {this.getFeatureTitle(activeFeature)}
-              </Link>
-            </Tooltip>
-          )}
-        </TightBreadcrumbs>
-      </Grid>
-    );
   };
 
   renderListHeader = () => {
@@ -376,16 +272,18 @@ class SearchResultsDataset extends React.PureComponent {
   renderDatasetSummary = () => {
     const { activeFeatureCollection, featureCollection } = this.props;
 
-    return (
-      <TightAccordionSummary
-        id={`search-result-dataset-${featureCollection.source.id}`}
-        aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
-      >
-        {activeFeatureCollection
-          ? this.renderDetailsHeader()
-          : this.renderListHeader()}
-      </TightAccordionSummary>
-    );
+    if (!activeFeatureCollection) {
+      return (
+        <TightAccordionSummary
+          id={`search-result-dataset-${featureCollection.source.id}`}
+          aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
+        >
+          {this.renderListHeader()}
+        </TightAccordionSummary>
+      );
+    } else {
+      return null;
+    }
   };
 
   renderResultsDataset = () => {
@@ -395,6 +293,7 @@ class SearchResultsDataset extends React.PureComponent {
       activeFeatureCollection,
       handleFeatureCollectionClick,
       showFeaturePreview,
+      getFeatureTitle,
     } = this.props;
     const { previewFeature, previewAnchorEl } = this.state;
     const shouldShowPreview =
@@ -420,7 +319,7 @@ class SearchResultsDataset extends React.PureComponent {
             {...this.props}
             previewFeature={previewFeature}
             anchorEl={previewAnchorEl}
-            getFeatureTitle={this.getFeatureTitle}
+            getFeatureTitle={getFeatureTitle}
           />
         )}
       </>

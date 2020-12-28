@@ -19,7 +19,8 @@ const styles = (theme) => ({
   },
   allFeatureDetailsContainer: {
     maxWidth: "100%",
-    padding: theme.spacing(2),
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
   },
   allFeatureDetailsHeader: {
     maxWidth: "100%",
@@ -105,15 +106,10 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   render() {
-    const { classes, featureTitle } = this.props;
+    const { classes } = this.props;
 
     return (
       <Grid container className={classes.allFeatureDetailsContainer}>
-        <Grid item xs={12} align="center">
-          <Typography noWrap className={classes.allFeatureDetailsHeader}>
-            {featureTitle}
-          </Typography>
-        </Grid>
         {this.state.featureInfo && (
           <Grid item xs={12}>
             {this.renderCustomInfoBox()}

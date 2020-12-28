@@ -330,7 +330,7 @@ class Search extends React.PureComponent {
     let fetchSettings = { ...this.searchModel.getSearchOptions() }; //Getting default-options when fetching auto
     fetchSettings = {
       ...fetchSettings,
-      maxResultsPerDataset: 5,
+      maxResultsPerDataset: 7,
       getPossibleCombinations: true,
     };
     return fetchSettings;

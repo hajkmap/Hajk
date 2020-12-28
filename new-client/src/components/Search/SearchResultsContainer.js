@@ -1,9 +1,12 @@
 import React from "react";
 import Alert from "@material-ui/lab/Alert";
-import IconButton from "@material-ui/core/IconButton";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import SearchResultsList from "./SearchResultsList";
 import Collapse from "@material-ui/core/Collapse";
+import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+import Link from "@material-ui/core/Link";
+import FilterListIcon from "@material-ui/icons/FilterList";
+import SortIcon from "@material-ui/icons/Sort";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import {
   Accordion,
   Paper,
@@ -57,6 +60,20 @@ const styles = (theme) => ({
     padding: theme.spacing(1),
     borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
   },
+  headerContainer: {
+    paddingRight: theme.spacing(1),
+    paddingLeft: theme.spacing(2),
+  },
+  headerTypography: {
+    width: "100%",
+    fontSize: 18,
+  },
+  headerButtons: {
+    minWidth: 30,
+  },
+  breadCrumbLinks: {
+    cursor: "pointer",
+  },
 });
 
 const TightAccordionDetails = withStyles({
@@ -89,12 +106,12 @@ class SearchResultsContainer extends React.PureComponent {
   sortingStrategies = [
     {
       type: "AtoZ",
-      name: "alfabetisk ordning",
+      name: "alfabetisk stigande",
       appliesTo: ["featureCollections", "features"],
     },
     {
       type: "ZtoA",
-      name: "inverterad alfabetisk ordning",
+      name: "alfabetisk fallande",
       appliesTo: ["featureCollections", "features"],
     },
     {
@@ -322,11 +339,11 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSearchResultListOptions = () => {
+    const { classes } = this.props;
     const {
       activeFeatureCollection,
       featureCollectionSortingStrategy,
       featureSortingStrategy,
-      activeFeature,
     } = this.state;
     const filterActive = this.isFilterActive();
     const filterHelpText = filterActive
@@ -351,42 +368,40 @@ class SearchResultsContainer extends React.PureComponent {
       <Grid align="center" item xs={12}>
         <Typography variant="srOnly">{filterHelpText}</Typography>
         <Tooltip title={filterHelpText}>
-          <span>
-            <Button
-              disabled={activeFeature ? true : false}
-              onClick={() =>
-                this.setState({
-                  filterInputFieldOpen: !this.state.filterInputFieldOpen,
-                })
-              }
+          <Button
+            className={classes.headerButtons}
+            onClick={() =>
+              this.setState({
+                filterInputFieldOpen: !this.state.filterInputFieldOpen,
+              })
+            }
+          >
+            <Badge
+              color="primary"
+              badgeContent=" "
+              variant="dot"
+              invisible={!filterActive}
             >
-              <Badge
-                color="primary"
-                badgeContent=" "
-                variant="dot"
-                invisible={!filterActive}
-              >
-                Filtrera
-              </Badge>
-            </Button>
-          </span>
+              <FilterListIcon />
+            </Badge>
+          </Button>
         </Tooltip>
         <Typography variant="srOnly">{sortHelpText}</Typography>
         <Tooltip title={sortHelpText}>
-          <span>
-            <Button
-              disabled={activeFeature ? true : false}
-              onClick={(e) =>
-                this.setState({ sortingMenuAnchorEl: e.currentTarget })
-              }
-            >
-              Sortera
-            </Button>
-          </span>
+          <Button
+            className={classes.headerButtons}
+            onClick={(e) =>
+              this.setState({ sortingMenuAnchorEl: e.currentTarget })
+            }
+          >
+            <SortIcon />
+          </Button>
         </Tooltip>
-        <IconButton>
-          <MoreHorizIcon />
-        </IconButton>
+        <Tooltip title={"Mer"}>
+          <Button className={classes.headerButtons}>
+            <MoreVertIcon />
+          </Button>
+        </Tooltip>
       </Grid>
     );
   };
@@ -443,6 +458,164 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
+  getFeatureTitle = (feature) => {
+    const { activeFeatureCollection } = this.state;
+
+    return activeFeatureCollection.source.displayFields.reduce(
+      (featureTitleString, df) => {
+        let displayField = feature.properties[df];
+        if (Array.isArray(displayField)) {
+          displayField = displayField.join(", ");
+        }
+
+        if (displayField) {
+          if (featureTitleString.length > 0) {
+            featureTitleString = featureTitleString.concat(
+              ` | ${displayField}`
+            );
+          } else {
+            featureTitleString = displayField;
+          }
+        }
+
+        return featureTitleString;
+      },
+      ""
+    );
+  };
+
+  renderBreadCrumbs = (featureCollectionTitle, featureTitle) => {
+    const { classes } = this.props;
+    const { activeFeatureCollection, activeFeature } = this.state;
+    const shouldRenderFeatureCollectionDetails =
+      activeFeatureCollection && !activeFeatureCollection.source.onClickName;
+    const shouldRenderFeatureDetails =
+      activeFeature && !activeFeature.onClickName;
+    if (shouldRenderFeatureCollectionDetails) {
+      return (
+        <Breadcrumbs aria-label="breadcrumb" separator="-">
+          <Tooltip title="Tillbaka till alla sökresultat">
+            <Link
+              className={classes.breadCrumbLinks}
+              variant="caption"
+              onClick={(e) => {
+                e.stopPropagation();
+                this.resetFeatureAndCollection();
+              }}
+              onChange={this.resetFeatureAndCollection}
+            >
+              Sökresultat
+            </Link>
+          </Tooltip>
+          <Tooltip title={featureCollectionTitle}>
+            <Link
+              className={classes.breadCrumbLinks}
+              variant="caption"
+              onClick={(e) => {
+                e.stopPropagation();
+                this.setActiveFeature(undefined);
+              }}
+            >
+              {featureCollectionTitle}
+            </Link>
+          </Tooltip>
+          {shouldRenderFeatureDetails && (
+            <Tooltip title={featureTitle}>
+              <Link className={classes.breadCrumbLinks} variant="caption">
+                {featureTitle}
+              </Link>
+            </Tooltip>
+          )}
+        </Breadcrumbs>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  renderHeaderInfoBar = (featureCollectionTitle, featureTitle) => {
+    const { activeFeatureCollection, activeFeature } = this.state;
+    const { classes, getOriginBasedIcon } = this.props;
+    if (!activeFeature) {
+      return (
+        <Grid
+          container
+          item
+          justify="space-between"
+          alignItems="center"
+          xs={12}
+        >
+          <Grid container item xs={7}>
+            <Grid container>
+              {activeFeatureCollection && (
+                <Grid item xs={2} align="center">
+                  {getOriginBasedIcon(activeFeatureCollection.origin)}
+                </Grid>
+              )}
+              <Grid item xs={10}>
+                <Tooltip
+                  title={
+                    activeFeatureCollection
+                      ? featureCollectionTitle
+                      : "Sökresultat"
+                  }
+                >
+                  <Typography
+                    variant="button"
+                    component="div"
+                    noWrap
+                    className={classes.headerTypography}
+                  >
+                    {`${
+                      activeFeatureCollection
+                        ? featureCollectionTitle
+                        : "Sökresultat"
+                    }`}
+                  </Typography>
+                </Tooltip>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item>{this.renderSearchResultListOptions()}</Grid>
+        </Grid>
+      );
+    } else {
+      return (
+        <Grid item xs={12} style={{ paddingTop: 15 }}>
+          <Typography
+            noWrap
+            className={classes.headerTypography}
+            component="div"
+            variant="button"
+          >
+            {featureTitle}
+          </Typography>
+        </Grid>
+      );
+    }
+  };
+
+  renderSearchResultsHeader = () => {
+    const { classes } = this.props;
+    const { activeFeatureCollection, activeFeature } = this.state;
+
+    const featureCollectionTitle = activeFeatureCollection
+      ? activeFeatureCollection.source.caption
+      : "";
+    const featureTitle = activeFeature
+      ? this.getFeatureTitle(activeFeature)
+      : "";
+
+    return (
+      <Grid className={classes.headerContainer} container item xs={12}>
+        <Grid item xs={12}>
+          {this.renderBreadCrumbs(featureCollectionTitle, featureTitle)}
+        </Grid>
+        {this.renderHeaderInfoBar(featureCollectionTitle, featureTitle)}
+      </Grid>
+    );
+  };
+
   render() {
     const {
       classes,
@@ -488,7 +661,7 @@ class SearchResultsContainer extends React.PureComponent {
                 className={classes.searchResultListWrapper}
               >
                 <Grid container>
-                  {this.renderSearchResultListOptions()}
+                  {this.renderSearchResultsHeader()}
                   {filterInputFieldOpen && this.renderFilterInputField()}
                   {this.renderSortingMenu()}
                   <Grid item xs={12}>
@@ -510,6 +683,7 @@ class SearchResultsContainer extends React.PureComponent {
                       }
                       featureSortingStrategy={featureSortingStrategy}
                       showFeaturePreview={showFeaturePreview}
+                      getFeatureTitle={this.getFeatureTitle}
                     />
                   </Grid>
                 </Grid>
