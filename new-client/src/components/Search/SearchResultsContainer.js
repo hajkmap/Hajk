@@ -414,8 +414,10 @@ class SearchResultsContainer extends React.PureComponent {
           </Grid>
         </Grow>
         <Grid item>
-          <Typography variant="srOnly">Hantera sökresultatet</Typography>
-          <Tooltip title={"Hantera sökresultatet"}>
+          <Typography variant="srOnly">
+            {`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
+          </Typography>
+          <Tooltip title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}>
             <Button
               className={classes.headerButtons}
               onClick={() =>
@@ -519,7 +521,7 @@ class SearchResultsContainer extends React.PureComponent {
       activeFeature && !activeFeature.onClickName;
     if (shouldRenderFeatureCollectionDetails) {
       return (
-        <Breadcrumbs aria-label="breadcrumb" separator="-">
+        <Breadcrumbs aria-label="breadcrumb" separator="/">
           <Tooltip title="Tillbaka till alla sökresultat">
             <Link
               className={classes.breadCrumbLinks}

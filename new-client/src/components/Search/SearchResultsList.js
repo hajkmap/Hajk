@@ -19,9 +19,51 @@ class SearchResultsList extends React.PureComponent {
 
   componentDidMount = () => {
     const { activeFeature } = this.props;
-    //If the search results in exactly one hit, we activate it right a way.
+    //If the search results in exactly one hit (meaning that activeFeature is set on first render),
+    // we activate it right a way.
     if (activeFeature) {
-      this.handleOnFeatureClick(activeFeature);
+      this.handleSingleSearchResult();
+    }
+  };
+
+  handleSingleSearchResult = () => {
+    const {
+      app,
+      activeFeature,
+      activeFeatureCollection,
+      localObserver,
+    } = this.props;
+
+    if (activeFeature.onClickName) {
+      app.globalObserver.publish(
+        `search.featureClicked.${activeFeature.onClickName}`,
+        activeFeature
+      );
+    } else {
+      const selectedItems = [];
+      const source = activeFeatureCollection?.source;
+      const displayFields = source?.displayFields ? source.displayFields : [];
+      selectedItems.push({
+        featureId: activeFeature.id,
+        displayFields: displayFields,
+      });
+      this.setState(
+        {
+          selectedItems: selectedItems,
+        },
+        () => {
+          if (this.props.width === "xs" || this.props.width === "sm") {
+            localObserver.publish("minimizeSearchResultList");
+          }
+          localObserver.publish(
+            "map.addAndHighlightFeatureInSearchResultLayer",
+            {
+              feature: activeFeature,
+              displayFields: displayFields,
+            }
+          );
+        }
+      );
     }
   };
 

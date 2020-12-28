@@ -544,7 +544,10 @@ class Search extends React.PureComponent {
 
     features = this.filterFeaturesWithGeometry(features);
 
-    this.localObserver.publish("map.addFeaturesToResultsLayer", features);
+    // If we get a single search-result, we add it to the map in the searchResultList-component instead.
+    if (features.length !== 1) {
+      this.localObserver.publish("map.addFeaturesToResultsLayer", features);
+    }
   }
 
   filterFeaturesWithGeometry = (features) => {

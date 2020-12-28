@@ -90,6 +90,10 @@ class MapViewModel {
       "map.highlightFeaturesByIds",
       this.highlightFeaturesInMap
     );
+    this.localObserver.subscribe(
+      "map.addAndHighlightFeatureInSearchResultLayer",
+      this.addAndHighlightFeatureInSearchResultLayer
+    );
 
     // Global subscriptions
     this.app.globalObserver.subscribe(
@@ -225,6 +229,15 @@ class MapViewModel {
         this.getHighlightedStyle(feature, featureInfo.displayFields)
       );
     });
+  };
+
+  addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
+    const feature = new GeoJSON().readFeature(featureInfo.feature);
+    feature.setStyle(
+      this.getHighlightedStyle(feature, featureInfo.displayFields)
+    );
+    this.resultSource.addFeature(feature);
+    this.fitMapToSearchResult();
   };
 
   getFeatureFromResultSourceById = (fid) => {
