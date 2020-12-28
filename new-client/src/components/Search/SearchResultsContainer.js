@@ -19,6 +19,7 @@ import {
   Badge,
   Menu,
   MenuItem,
+  Grow,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -52,6 +53,7 @@ const styles = (theme) => ({
     },
     [theme.breakpoints.down("xs")]: {
       minWidth: "100%",
+      maxWidth: "100%",
       position: "absolute",
       left: 0,
     },
@@ -62,10 +64,10 @@ const styles = (theme) => ({
   },
   headerContainer: {
     paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(2),
+    paddingLeft: theme.spacing(1),
   },
   headerTypography: {
-    width: "100%",
+    maxWidth: "100%",
     fontSize: 18,
   },
   headerButtons: {
@@ -101,6 +103,7 @@ class SearchResultsContainer extends React.PureComponent {
     sortingMenuAnchorEl: null,
     featureCollectionSortingStrategy: "AtoZ", // AtoZ representing alphabetical order
     featureSortingStrategy: "AtoZ",
+    showTools: false,
   };
 
   sortingStrategies = [
@@ -188,10 +191,19 @@ class SearchResultsContainer extends React.PureComponent {
         : undefined
       : undefined;
 
-    this.setState({
-      activeFeatureCollection: activeFeatureCollection,
-      activeFeature: activeFeature,
-    });
+    // Hack hack.. we shouldn't set active collection and feature if we have a onClickName
+    // on the source
+    const shouldSetActiveFeatureOrCollection = activeFeatureCollection?.source
+      ?.onClickName
+      ? false
+      : true;
+
+    if (shouldSetActiveFeatureOrCollection) {
+      this.setState({
+        activeFeatureCollection: activeFeatureCollection,
+        activeFeature: activeFeature,
+      });
+    }
   };
 
   handleFilterTextFieldInputChange = (e) => {
@@ -365,43 +377,57 @@ class SearchResultsContainer extends React.PureComponent {
       ).name // And it is the name value of the strategy we want to show
     }`;
     return (
-      <Grid align="center" item xs={12}>
-        <Typography variant="srOnly">{filterHelpText}</Typography>
-        <Tooltip title={filterHelpText}>
-          <Button
-            className={classes.headerButtons}
-            onClick={() =>
-              this.setState({
-                filterInputFieldOpen: !this.state.filterInputFieldOpen,
-              })
-            }
-          >
-            <Badge
-              color="primary"
-              badgeContent=" "
-              variant="dot"
-              invisible={!filterActive}
+      <Grid item container align="center" justify="flex-end">
+        <Grow in={this.state.showTools}>
+          <Grid item className={!this.state.showTools ? classes.hidden : null}>
+            <Typography variant="srOnly">{filterHelpText}</Typography>
+            <Tooltip title={filterHelpText}>
+              <Button
+                className={classes.headerButtons}
+                onClick={() =>
+                  this.setState({
+                    filterInputFieldOpen: !this.state.filterInputFieldOpen,
+                  })
+                }
+              >
+                <Badge
+                  color="primary"
+                  badgeContent=" "
+                  variant="dot"
+                  invisible={!filterActive}
+                >
+                  <FilterListIcon />
+                </Badge>
+              </Button>
+            </Tooltip>
+            <Typography variant="srOnly">{sortHelpText}</Typography>
+            <Tooltip title={sortHelpText}>
+              <Button
+                className={classes.headerButtons}
+                onClick={(e) =>
+                  this.setState({ sortingMenuAnchorEl: e.currentTarget })
+                }
+              >
+                <SortIcon />
+              </Button>
+            </Tooltip>
+          </Grid>
+        </Grow>
+        <Grid item>
+          <Typography variant="srOnly">Hantera sökresultatet</Typography>
+          <Tooltip title={"Hantera sökresultatet"}>
+            <Button
+              className={classes.headerButtons}
+              onClick={() =>
+                this.setState({
+                  showTools: !this.state.showTools,
+                })
+              }
             >
-              <FilterListIcon />
-            </Badge>
-          </Button>
-        </Tooltip>
-        <Typography variant="srOnly">{sortHelpText}</Typography>
-        <Tooltip title={sortHelpText}>
-          <Button
-            className={classes.headerButtons}
-            onClick={(e) =>
-              this.setState({ sortingMenuAnchorEl: e.currentTarget })
-            }
-          >
-            <SortIcon />
-          </Button>
-        </Tooltip>
-        <Tooltip title={"Mer"}>
-          <Button className={classes.headerButtons}>
-            <MoreVertIcon />
-          </Button>
-        </Tooltip>
+              <MoreVertIcon />
+            </Button>
+          </Tooltip>
+        </Grid>
       </Grid>
     );
   };
@@ -543,40 +569,39 @@ class SearchResultsContainer extends React.PureComponent {
           item
           justify="space-between"
           alignItems="center"
+          wrap="nowrap"
           xs={12}
         >
-          <Grid container item xs={7}>
-            <Grid container>
-              {activeFeatureCollection && (
-                <Grid item xs={2} align="center">
-                  {getOriginBasedIcon(activeFeatureCollection.origin)}
-                </Grid>
-              )}
-              <Grid item xs={10}>
-                <Tooltip
-                  title={
-                    activeFeatureCollection
-                      ? featureCollectionTitle
-                      : "Sökresultat"
-                  }
-                >
-                  <Typography
-                    variant="button"
-                    component="div"
-                    noWrap
-                    className={classes.headerTypography}
-                  >
-                    {`${
-                      activeFeatureCollection
-                        ? featureCollectionTitle
-                        : "Sökresultat"
-                    }`}
-                  </Typography>
-                </Tooltip>
-              </Grid>
-            </Grid>
+          <Grid container item wrap="nowrap" xs={this.state.showTools ? 5 : 11}>
+            {activeFeatureCollection &&
+              getOriginBasedIcon(activeFeatureCollection.origin)}
+            <Tooltip
+              title={
+                activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
+              }
+            >
+              <Typography
+                variant="button"
+                component="div"
+                noWrap
+                className={classes.headerTypography}
+              >
+                {`${
+                  activeFeatureCollection
+                    ? featureCollectionTitle
+                    : "Sökresultat"
+                }`}
+              </Typography>
+            </Tooltip>
           </Grid>
-          <Grid item>{this.renderSearchResultListOptions()}</Grid>
+          <Grid
+            container
+            item
+            justify="flex-end"
+            xs={this.state.showTools ? 7 : 1}
+          >
+            {this.renderSearchResultListOptions()}
+          </Grid>
         </Grid>
       );
     } else {
