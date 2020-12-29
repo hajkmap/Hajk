@@ -538,6 +538,7 @@ class SearchResultsContainer extends React.PureComponent {
           <Tooltip title="Tillbaka till alla sökresultat">
             <Link
               className={classes.breadCrumbLinks}
+              color="textPrimary"
               variant="caption"
               onClick={(e) => {
                 e.stopPropagation();
@@ -551,6 +552,7 @@ class SearchResultsContainer extends React.PureComponent {
           <Tooltip title={featureCollectionTitle}>
             <Link
               className={classes.breadCrumbLinks}
+              color="textPrimary"
               variant="caption"
               onClick={(e) => {
                 e.stopPropagation();
@@ -562,7 +564,11 @@ class SearchResultsContainer extends React.PureComponent {
           </Tooltip>
           {shouldRenderFeatureDetails && (
             <Tooltip title={featureTitle}>
-              <Link className={classes.breadCrumbLinks} variant="caption">
+              <Link
+                className={classes.breadCrumbLinks}
+                color="textPrimary"
+                variant="caption"
+              >
                 {featureTitle}
               </Link>
             </Tooltip>
@@ -620,18 +626,7 @@ class SearchResultsContainer extends React.PureComponent {
         </Grid>
       );
     } else {
-      return (
-        <Grid item xs={12} align="center" style={{ paddingTop: 15 }}>
-          <Typography
-            noWrap
-            className={classes.headerTypography}
-            component="div"
-            variant="button"
-          >
-            {featureTitle}
-          </Typography>
-        </Grid>
-      );
+      return null;
     }
   };
 

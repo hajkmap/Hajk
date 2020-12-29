@@ -28,6 +28,16 @@ class SearchResultsList extends React.PureComponent {
       "searchResultList.clearAllSelectedFeatures",
       this.clearAllSelectedFeatures
     );
+    localObserver.subscribe(
+      "searchResultList.handleFeatureTogglerClicked",
+      this.handleFeatureTogglerClicked
+    );
+  };
+
+  componentWillUnmount = () => {
+    const { localObserver } = this.props;
+    localObserver.unsubscribe("searchResultList.clearAllSelectedFeatures");
+    localObserver.unsubscribe("searchResultList.handleFeatureTogglerClicked");
   };
 
   componentDidMount = () => {
@@ -37,6 +47,47 @@ class SearchResultsList extends React.PureComponent {
     if (activeFeature) {
       this.handleSingleSearchResult();
     }
+  };
+
+  handleFeatureTogglerClicked = (currenAndNextInfo) => {
+    const { setActiveFeature, localObserver } = this.props;
+    const displayFields = currenAndNextInfo?.source?.displayFields ?? [];
+    const currentFeatureIndex = this.getFeatureSelectedIndex(
+      currenAndNextInfo.currentFeature
+    );
+    const nextFeatureIndex = this.getFeatureSelectedIndex(
+      currenAndNextInfo.nextFeature
+    );
+    const selectedItems = [...this.state.selectedItems];
+
+    if (currentFeatureIndex !== -1) {
+      selectedItems.splice(currentFeatureIndex, 1);
+    }
+    if (nextFeatureIndex === -1) {
+      selectedItems.push({
+        featureId: currenAndNextInfo.nextFeature.id,
+        displayFields: displayFields,
+      });
+    }
+    this.setState(
+      {
+        selectedItems: selectedItems,
+      },
+      () => {
+        if (this.props.width === "xs" || this.props.width === "sm") {
+          localObserver.publish("minimizeSearchResultList");
+        }
+        localObserver.publish(
+          "map.highlightFeaturesByIds",
+          this.state.selectedItems
+        );
+        localObserver.publish(
+          "map.zoomToFeaturesByIds",
+          this.state.selectedItems
+        );
+        setActiveFeature(currenAndNextInfo.nextFeature);
+      }
+    );
   };
 
   handleSingleSearchResult = () => {
@@ -162,6 +213,7 @@ class SearchResultsList extends React.PureComponent {
       featureSortingStrategy,
       showFeaturePreview,
       getFeatureTitle,
+      localObserver,
     } = this.props;
 
     return (
@@ -193,6 +245,7 @@ class SearchResultsList extends React.PureComponent {
                 featureSortingStrategy={featureSortingStrategy}
                 showFeaturePreview={showFeaturePreview}
                 getFeatureTitle={getFeatureTitle}
+                localObserver={localObserver}
               />
             </Grid>
           ))}

@@ -159,6 +159,7 @@ class SearchResultsDataset extends React.PureComponent {
       handleOnFeatureClick,
       getOriginBasedIcon,
       getFeatureTitle,
+      localObserver,
     } = this.props;
 
     const shouldRenderFeatureDetails =
@@ -175,8 +176,10 @@ class SearchResultsDataset extends React.PureComponent {
         <SearchResultsDatasetFeatureDetails
           feature={activeFeature}
           featureTitle={getFeatureTitle(activeFeature)}
+          featureCollection={featureCollection}
           app={app}
           source={activeFeatureCollection.source}
+          localObserver={localObserver}
         />
       );
     } else {
