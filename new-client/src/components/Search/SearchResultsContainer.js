@@ -7,6 +7,7 @@ import Link from "@material-ui/core/Link";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import SortIcon from "@material-ui/icons/Sort";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import DeleteIcon from "@material-ui/icons/Delete";
 import {
   Accordion,
   Paper,
@@ -378,7 +379,7 @@ class SearchResultsContainer extends React.PureComponent {
     }`;
     return (
       <Grid item container align="center" justify="flex-end">
-        <Grow in={this.state.showTools}>
+        <Grow in={this.state.showTools} timeout={800}>
           <Grid item className={!this.state.showTools ? classes.hidden : null}>
             <Typography variant="srOnly">{filterHelpText}</Typography>
             <Tooltip title={filterHelpText}>
@@ -409,6 +410,18 @@ class SearchResultsContainer extends React.PureComponent {
                 }
               >
                 <SortIcon />
+              </Button>
+            </Tooltip>
+            <Tooltip title="Rensa alla selekterade objekt">
+              <Button
+                className={classes.headerButtons}
+                onClick={() => {
+                  this.props.localObserver.publish(
+                    "searchResultList.clearAllSelectedFeatures"
+                  );
+                }}
+              >
+                <DeleteIcon />
               </Button>
             </Tooltip>
           </Grid>

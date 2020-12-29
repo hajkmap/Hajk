@@ -13,8 +13,21 @@ const styles = (theme) => ({
 });
 
 class SearchResultsList extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.bindSubscriptions();
+  }
+
   state = {
     selectedItems: [],
+  };
+
+  bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe(
+      "searchResultList.clearAllSelectedFeatures",
+      this.clearAllSelectedFeatures
+    );
   };
 
   componentDidMount = () => {
@@ -122,6 +135,16 @@ class SearchResultsList extends React.PureComponent {
         this.showClickResultInMap(feature, activeFeatureCollection.source);
       }
     }
+  };
+
+  clearAllSelectedFeatures = () => {
+    const { localObserver } = this.props;
+    const selectedItems = [];
+    // Remove all selected items from array, then publish to
+    // mapViewModel to reset style (clearing highlight).
+    this.setState({ selectedItems: selectedItems }, () => {
+      localObserver.publish("map.resetStyleForFeaturesInResultSource");
+    });
   };
 
   render() {
