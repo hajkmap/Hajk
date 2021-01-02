@@ -1,6 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { isMobile } from "../../utils/IsMobile";
+import { isMobile } from "../../../utils/IsMobile";
 import {
   Typography,
   Accordion,

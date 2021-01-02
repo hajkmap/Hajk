@@ -1,5 +1,5 @@
 import React from "react";
-import FeaturePropsParsing from "../../components/FeatureInfo/FeaturePropsParsing";
+import FeaturePropsParsing from "../../FeatureInfo/FeaturePropsParsing";
 import { withStyles } from "@material-ui/core/styles";
 import {
   Table,

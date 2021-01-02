@@ -10,7 +10,7 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import WarningIcon from "@material-ui/icons/Warning";
-import SearchResultsContainer from "./SearchResultsContainer";
+import SearchResultsContainer from "./searchResults/SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
 import {
