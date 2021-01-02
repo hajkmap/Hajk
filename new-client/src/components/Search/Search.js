@@ -152,11 +152,26 @@ class Search extends React.PureComponent {
 
   pluginsHavingCorrectSearchMethods = (plugins) => {
     return plugins.filter((plugin) => {
-      return (
-        plugin.searchInterface.getResults &&
-        plugin.searchInterface.getFunctionality
-      );
+      const getResults = plugin.searchInterface.getResults;
+      const getFunctionality = plugin.searchInterface.getFunctionality;
+      if (!getResults || !getFunctionality) {
+        this.displayPluginMissingCrucialMethodsWarning(plugin);
+      }
+      return getResults && getFunctionality;
     });
+  };
+
+  displayPluginMissingCrucialMethodsWarning = (plugin) => {
+    console.warn(
+      `${
+        plugin.type ?? "<Plugin type missing>"
+      } is marked as a search-plugin, but is missing the getResults() and/or getFunctionality() method(s) in it's searchInterface.
+
+      Because of this, the search component will not make use of this plugin. 
+      
+      If you intend to use this plugin as a search-plugin, make sure to implement both methods. 
+      If you do not intend to use this plugin within the search component, please update plugin-config so that searchImplemented = false.`
+    );
   };
 
   //For a plugin to use the searchInterface, following must be met
@@ -167,18 +182,27 @@ class Search extends React.PureComponent {
 
   getSearchImplementedPlugins = () => {
     const pluginsConfToUseSearchInterface = this.getPluginsConfToUseSearchInterface();
-    const searchBindedPlugins = this.tryBindSearchMethods(
+    const searchBoundPlugins = this.tryBindSearchMethods(
       pluginsConfToUseSearchInterface
     );
-    return Promise.all(searchBindedPlugins).then((plugins) => {
+    return Promise.all(searchBoundPlugins).then((plugins) => {
       return this.pluginsHavingCorrectSearchMethods(plugins);
     });
   };
 
   getExternalSearchTools = (searchImplementedSearchTools) => {
-    return searchImplementedSearchTools.map((searchImplementedPlugin) => {
-      return searchImplementedPlugin.searchInterface.getFunctionality();
-    });
+    // TODO (To discuss)
+    // We demand that getFunctionality is implemented, but we do not demand that
+    // the method returns a "correct" object. If the method return a null-ish
+    // value we simply discard the extra functionality. Maybe we shouldn't demand that
+    // getFunctionality is implemented?
+    return searchImplementedSearchTools
+      .filter((searchImplementedPlugin) => {
+        return searchImplementedPlugin.searchInterface.getFunctionality();
+      })
+      .map((toolWithFunctionality) => {
+        return toolWithFunctionality.searchInterface.getFunctionality();
+      });
   };
 
   getSearchTools = (searchImplementedSearchTools) => {
