@@ -5,48 +5,67 @@ import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import { extend, createEmpty, isEmpty } from "ol/extent";
 
-var fill = new Fill({
-  color: "rgba(255,255,255,0.4)",
-});
-var stroke = new Stroke({
-  color: "#3399CC",
-  width: 1.25,
-});
-
-const defaultStyles = [
-  new Style({
-    image: new Circle({
-      fill: fill,
-      stroke: stroke,
-      radius: 5,
-    }),
-    fill: fill,
-    stroke: stroke,
-  }),
-];
-
 class MapViewModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
     this.options = settings.options;
     this.showLabelOnHighlight = settings.options.showLabelOnHighlight ?? true;
-    this.drawStrokeColor =
-      settings.options.drawStrokeColor || "rgba(255, 214, 91, 0.6)";
-    this.drawFillColor =
-      settings.options.drawFillColor || "rgba(255, 214, 91, 0.2)";
-    this.highlightStrokeColor =
-      settings.options.highlightStrokeColor || "rgba(200, 0, 0, 0.7)";
-    this.highlightFillColor =
-      settings.options.highlightFillColor || "rgba(255, 0, 0, 0.1)";
-    this.highlightTextFill =
-      settings.options.highlightTextFill || "rgba(255, 255, 255, 1)";
-    this.highlightTextStroke =
-      settings.options.highlightTextStroke || "rgba(0, 0, 0, 0.5)";
+    this.defaultStyle = this.getDefaultStyle();
+    this.drawStyleSettings = this.getDrawStyleSettings();
+    this.highlightStyleSettings = this.getHighlightStyleSettings();
     this.localObserver = settings.localObserver;
     this.initMapLayers();
     this.bindSubscriptions();
   }
+
+  getDefaultStyle = () => {
+    const fill = new Fill({
+      color: "rgba(255,255,255,0.4)",
+    });
+    const stroke = new Stroke({
+      color: "#3399CC",
+      width: 1.25,
+    });
+
+    return [
+      new Style({
+        image: new Circle({
+          fill: fill,
+          stroke: stroke,
+          radius: 5,
+        }),
+        fill: fill,
+        stroke: stroke,
+      }),
+    ];
+  };
+
+  getDrawStyleSettings = () => {
+    const strokeColor =
+      this.options.drawStrokeColor ?? "rgba(255, 214, 91, 0.6)";
+    const fillColor = this.options.drawFillColor ?? "rgba(255, 214, 91, 0.2)";
+
+    return { strokeColor: strokeColor, fillColor: fillColor };
+  };
+
+  getHighlightStyleSettings = () => {
+    const strokeColor =
+      this.options.highlightStrokeColor ?? "rgba(255, 214, 91, 0.6)";
+    const fillColor =
+      this.options.highlightFillColor ?? "rgba(255, 214, 91, 0.2)";
+    const textFillColor =
+      this.options.highlightTextFill ?? "rgba(255, 255, 255, 1)";
+    const textStrokeColor =
+      this.options.highlightTextStroke ?? "rgba(0, 0, 0, 0.5)";
+
+    return {
+      strokeColor: strokeColor,
+      fillColor: fillColor,
+      textFillColor: textFillColor,
+      textStrokeColor: textStrokeColor,
+    };
+  };
 
   getNewVectorSource = () => {
     return new VectorSource({ wrapX: false });
@@ -63,7 +82,7 @@ class MapViewModel {
     this.resultSource = this.getNewVectorSource();
     this.resultsLayer = this.getNewVectorLayer(
       this.resultSource,
-      this.options.showInMapOnSearchResult ? defaultStyles : null
+      this.options.showInMapOnSearchResult ? this.defaultStyle : null
     );
     this.resultsLayer.set("type", "searchResultLayer");
     this.drawSource = this.getNewVectorSource();
@@ -172,16 +191,16 @@ class MapViewModel {
   getHighlightedStyle = (feature, displayFields) => {
     return new Style({
       fill: new Fill({
-        color: this.highlightFillColor,
+        color: this.highlightStyleSettings.fillColor,
       }),
       stroke: new Stroke({
-        color: this.highlightStrokeColor,
+        color: this.highlightStyleSettings.strokeColor,
         width: 4,
       }),
       image: new Circle({
         radius: 6,
         stroke: new Stroke({
-          color: this.highlightStrokeColor,
+          color: this.highlightStyleSettings.strokeColor,
           width: 4,
         }),
       }),
@@ -189,11 +208,11 @@ class MapViewModel {
         textAlign: "center",
         textBaseline: "middle",
         font: "12pt sans-serif",
-        fill: new Fill({ color: this.highlightTextFill }),
+        fill: new Fill({ color: this.highlightStyleSettings.textFillColor }),
         text: this.getHighlightLabelValueFromFeature(feature, displayFields),
         overflow: true,
         stroke: new Stroke({
-          color: this.highlightTextStroke,
+          color: this.highlightStyleSettings.textStrokeColor,
           width: 3,
         }),
         offsetX: 0,
@@ -207,16 +226,16 @@ class MapViewModel {
   getDrawStyle = () => {
     return new Style({
       stroke: new Stroke({
-        color: this.drawStrokeColor,
+        color: this.drawStyleSettings.strokeColor,
         width: 4,
       }),
       fill: new Fill({
-        color: this.drawFillColor,
+        color: this.drawStyleSettings.fillColor,
       }),
       image: new Circle({
         radius: 6,
         stroke: new Stroke({
-          color: this.drawStrokeColor,
+          color: this.drawStyleSettings.strokeColor,
           width: 2,
         }),
       }),
