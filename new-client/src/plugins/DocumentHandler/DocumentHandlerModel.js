@@ -200,16 +200,21 @@ export default class DocumentHandlerModel {
     }
   }
 
-  findChapter(chapter, headerIdentifierToFind) {
-    if (chapter.headerIdentifier === headerIdentifierToFind) {
-      return chapter;
-    }
-    if (chapter.chapters.length > 0) {
-      return chapter.chapters.find((child) => {
-        return this.findChapter(child, headerIdentifierToFind);
-      });
-    }
-  }
+  findChapters = (chapters, headerIdentifierToFind) => {
+    return chapters.reduce((chaptersFound, chapter) => {
+      if (chapter.chapters && chapter.chapters.length > 0) {
+        chaptersFound = [
+          ...chaptersFound,
+          ...this.findChapters(chapter.chapters, headerIdentifierToFind),
+        ];
+      }
+      if (chapter.headerIdentifier === headerIdentifierToFind) {
+        return [...chaptersFound, chapter];
+      }
+      return chaptersFound;
+    }, []);
+  };
+
   /**
    * @summary method to find a certain chapter in a fetched document with a unique headerGUID.
    * it is used when user clicks a text-link to a certain document and header in the text in the document-window
@@ -217,12 +222,16 @@ export default class DocumentHandlerModel {
    * @memberof DocumentHandlerModel
    */
   getHeaderRef = (activeDocument, headerIdentifierToFind) => {
-    let foundChapter;
-    activeDocument.chapters.some((chapter) => {
-      foundChapter = this.findChapter(chapter, headerIdentifierToFind);
-      return foundChapter;
-    });
-    return foundChapter;
+    const foundChapters = this.findChapters(
+      activeDocument.chapters,
+      headerIdentifierToFind
+    );
+
+    if (foundChapters.length > 1) {
+      throw new Error("Two chapters with same header identifier found");
+    } else {
+      return foundChapters[0];
+    }
   };
 
   /**
