@@ -6,15 +6,14 @@ import {
   AtomicBlockUtils,
   getDefaultKeyBinding,
   KeyBindingUtil,
-  convertToRaw
+  convertToRaw,
+  SelectionState,
 } from "draft-js";
 import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
+import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
 import { stateFromHTML } from "draft-js-import-html";
-import Button from "@material-ui/core/Button";
-import DoneIcon from "@material-ui/icons/DoneOutline";
-import { withStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
@@ -26,61 +25,57 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
 
+import TextAreaInput from "./TextAreaInput";
 import addLinkPlugin from "./addLinkPlugin";
-import { mediaBlockRenderer } from "./addMediaPlugin";
-
 import StyleButton from "./StyleButton";
-
-const ColorButtonGreen = withStyles(theme => ({
-  root: {
-    color: theme.palette.getContrastText(green[700]),
-    backgroundColor: green[500],
-    "&:hover": {
-      backgroundColor: green[700]
-    },
-    marginRight: "28px",
-    float: "left"
-  }
-}))(Button);
+import ImageComponent from "./ImageComponent";
+import insertNewLine from "../utils/insertNewLine";
 
 export default class DocumentTextEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       editorState: EditorState.createWithContent(
-        stateFromHTML(this.props.html)
+        this._stateFromHtmlWithOptions(this.props.html)
       ),
       html: this.props.html,
       showURLInput: false,
       showLinkInput: false,
+      showTextAreaInput: false,
       url: "",
       urlType: "",
       imageList: this.props.imageList,
       documents: this.props.documents,
-      isReadOnly: false
+      readOnly: false,
+      onReadOnly: false,
+      currentImage: "",
+      imageData: {},
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
     this.logState = () => {
       const content = this.state.editorState.getCurrentContent();
+      console.log("HTML", this.props.html);
       console.log(stateToHTML(content));
       console.log(convertToRaw(content));
     };
-    this.onChange = editorState => this.setState({ editorState });
-    this.onURLChange = e => this.setState({ urlValue: e.target.value });
-    this.onTitleChange = e => this.setState({ urlTitle: e.target.value });
-    this.onTitleIdChange = e => this.setState({ urlTitleId: e.target.value });
-    this.onWidthChange = e => this.setState({ mediaWidth: e.target.value });
-    this.onHeightChange = e => this.setState({ mediaHeight: e.target.value });
-    this.onDataCaptionChange = e =>
+    this.onChange = this._onChange.bind(this);
+    this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
+    this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
+    this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
+    this.onWidthChange = (e) => this.setState({ mediaWidth: e.target.value });
+    this.onHeightChange = (e) => this.setState({ mediaHeight: e.target.value });
+    this.onDataCaptionChange = (e) =>
       this.setState({ mediaCaption: e.target.value });
-    this.onDataSourceChange = e =>
+    this.onDataSourceChange = (e) =>
       this.setState({ mediaSource: e.target.value });
-    this.onDataPopupChange = e =>
+    this.onDataPopupChange = (e) =>
       this.setState({ mediaPopup: !this.state.mediaPopup });
-    this.onBlockBackgroundChange = e =>
+    this.onDataPositionChange = (e) =>
+      this.setState({ mediaPosition: e.target.value });
+    this.onBlockBackgroundChange = (e) =>
       this.setState({ blockBackground: e.target.value });
-    this.onBlockDividerChange = e =>
+    this.onBlockDividerChange = (e) =>
       this.setState({ blockDivider: e.target.value });
     this.addAudio = this._addAudio.bind(this);
     this.addImage = this._addImage.bind(this);
@@ -88,6 +83,7 @@ export default class DocumentTextEditor extends React.Component {
     this.addMapLink = this._addMapLink.bind(this);
     this.addDocumentLink = this._addDocumentLink.bind(this);
     this.addWebLink = this._addWebLink.bind(this);
+    this.addTextArea = this._addTextArea.bind(this);
     this.closeURLInput = this._closeURLInput.bind(this);
     this.closeLinkInput = this._closeLinkInput.bind(this);
     this.confirmMedia = this._confirmMedia.bind(this);
@@ -100,6 +96,32 @@ export default class DocumentTextEditor extends React.Component {
     this.onLinkInputKeyDown = this._onLinkInputKeyDown.bind(this);
     this.toggleBlockType = this._toggleBlockType.bind(this);
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
+    this.blockRenderer = this._blockRenderer.bind(this);
+  }
+
+  _stateFromHtmlWithOptions = (html) => {
+    const customBlockFn = (element) => {
+      let { tagName } = element;
+      if (tagName === "BLOCKQUOTE") {
+        return {
+          type: "blockquote",
+          data: {
+            dividerColor: element.attributes.getNamedItem("data-divider-color")
+              ?.value,
+            backgroundColor: element.attributes.getNamedItem(
+              "data-background-color"
+            )?.value,
+            textSection:
+              element.attributes.getNamedItem("data-text-section")?.value || "",
+          },
+        };
+      }
+    };
+    return stateFromHTML(html, { customBlockFn });
+  };
+  _onChange(editorState) {
+    this.setState({ editorState });
+    this.applyChanges();
   }
   _handleKeyCommand(command, editorState) {
     const newState = RichUtils.handleKeyCommand(editorState, command);
@@ -127,22 +149,25 @@ export default class DocumentTextEditor extends React.Component {
       mediaHeight,
       mediaCaption,
       mediaSource,
-      mediaPopup
+      mediaPopup,
+      mediaPosition,
     } = this.state;
     const contentState = editorState.getCurrentContent();
 
     const contentStateWithEntity = contentState.createEntity(
       urlType,
-      "IMMUTABLE",
+      "MUTABLE",
       {
         src: urlValue,
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
-        "data-popup": mediaPopup
+        "data-popup": mediaPopup,
+        "data-image-position": mediaPosition,
       }
     );
+
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.push(
       editorState,
@@ -158,12 +183,13 @@ export default class DocumentTextEditor extends React.Component {
         ),
         showURLInput: false,
         showLinkInput: false,
+        showTextAreaInput: false,
         urlValue: "",
         mediaWidth: "",
         mediaHeight: "",
         mediaCaption: "",
         mediaSource: "",
-        mediaPopup: false
+        mediaPopup: false,
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -180,12 +206,13 @@ export default class DocumentTextEditor extends React.Component {
       {
         showURLInput: false,
         showLinkInput: false,
+        showTextAreaInput: false,
         urlValue: "",
         mediaWidth: "",
         mediaHeight: "",
         mediaCaption: "",
         mediaSource: "",
-        mediaPopup: false
+        mediaPopup: false,
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -198,7 +225,7 @@ export default class DocumentTextEditor extends React.Component {
     const { editorState, urlValue, urlType, urlTitle, urlTitleId } = this.state;
     const data = {
       url: urlValue,
-      type: urlType
+      type: urlType,
     };
 
     if (urlType === "urllink") {
@@ -217,23 +244,23 @@ export default class DocumentTextEditor extends React.Component {
       data
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    const newEditorState = EditorState.push(
-      editorState,
-      contentStateWithEntity,
-      "create-entity"
-    );
+    const newEditorState = EditorState.set(editorState, {
+      currentContent: contentStateWithEntity,
+    });
     this.setState(
       {
-        editorState: AtomicBlockUtils.insertAtomicBlock(
+        editorState: RichUtils.toggleLink(
           newEditorState,
+          newEditorState.getSelection(),
           entityKey,
           urlTitle
         ),
         showURLInput: false,
         showLinkInput: false,
+        showTextAreaInput: false,
         urlValue: "",
         urlTitle: "",
-        urlTitleId: ""
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -241,7 +268,6 @@ export default class DocumentTextEditor extends React.Component {
     );
     return "handled";
   }
-
   _onLinkInputKeyDown(e) {
     if (e.which === 13) {
       this._confirmLink(e);
@@ -253,20 +279,26 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         urlValue: "",
         urlTitle: "",
-        urlTitleId: ""
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
       }
     );
   }
-
-  _handleReturn = evt => {
+  _handleReturn = (evt, editorState) => {
     // Handle soft break on Shift+Enter
     const blockType = RichUtils.getCurrentBlockType(this.state.editorState);
+
     if (evt.shiftKey) {
       this.setState({
-        editorState: RichUtils.insertSoftNewline(this.state.editorState)
+        editorState: RichUtils.insertSoftNewline(this.state.editorState),
+      });
+      return "handled";
+    }
+    if (this.isImageBlockInSelection(editorState)) {
+      this.setState({
+        editorState: insertNewLine(editorState),
       });
       return "handled";
     }
@@ -274,18 +306,26 @@ export default class DocumentTextEditor extends React.Component {
       return "not_handled";
     }
   };
+  _promptForTextArea() {
+    this.setState({
+      showURLInput: false,
+      showLinkInput: false,
+      showTextAreaInput: true,
+    });
+  }
   _promptForMedia(type) {
     this.setState(
       {
         showURLInput: true,
         showLinkInput: false,
+        showTextAreaInput: false,
         urlValue: this.state.urlValue,
         urlType: type,
         mediaWidth: this.state.mediaWidth,
         mediaHeight: this.state.mediaHeight,
         mediaCaption: this.state.mediaCaption,
         mediaSource: this.state.mediaSource,
-        mediaPopup: this.state.mediaPopup
+        mediaPopup: this.state.mediaPopup,
       },
       () => {
         setTimeout(() => this.refs.url.focus(), 0);
@@ -297,16 +337,22 @@ export default class DocumentTextEditor extends React.Component {
       {
         showURLInput: false,
         showLinkInput: true,
+        showTextAreaInput: false,
         urlValue: this.state.urlValue,
         urlType: type,
         urlTitle: "",
-        urlTitleId: ""
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.refs.link.focus(), 0);
       }
     );
   }
+
+  _addTextArea() {
+    this._promptForTextArea();
+  }
+
   _addAudio() {
     this._promptForMedia("audio");
   }
@@ -352,7 +398,7 @@ export default class DocumentTextEditor extends React.Component {
       html = text;
     }
     const { editorState } = this.state;
-    const generatedState = stateFromHTML(html);
+    const generatedState = this._stateFromHtmlWithOptions(html);
     const generatedHtml = stateToHTML(generatedState);
     const el = document.createElement("div");
     el.innerHTML = generatedHtml;
@@ -369,6 +415,7 @@ export default class DocumentTextEditor extends React.Component {
       img["data-image-height"] = "";
       img["data-caption"] = "";
       img["data-source"] = "";
+      img["data-image-position"] = "";
       let figure = document.createElement("figure");
       figure.innerHTML = img.outerHTML;
       img.parentNode.replaceChild(figure, img);
@@ -380,7 +427,7 @@ export default class DocumentTextEditor extends React.Component {
       el.appendChild(p);
     }
 
-    const blockMap = stateFromHTML(el.outerHTML).blockMap;
+    const blockMap = this._stateFromHtmlWithOptions(el.outerHTML).blockMap;
     const newState = Modifier.replaceWithFragment(
       editorState.getCurrentContent(),
       editorState.getSelection(),
@@ -390,33 +437,124 @@ export default class DocumentTextEditor extends React.Component {
 
     return true;
   };
+  _blockRenderer(block, { getEditorState }) {
+    let blockType = block.getType();
+    const { editorState } = this.state;
+    const contentState = getEditorState().getCurrentContent();
 
-  createMarkup(html) {
-    return {
-      __html: html
-    };
+    if (blockType === "atomic") {
+      const entityKey = contentState.getEntity(block.getEntityAt(0));
+      const type = entityKey.getType().toLowerCase();
+
+      if (type === "image") {
+        const selection = editorState.getSelection();
+
+        const contentBlockKey = block.getKey();
+
+        return {
+          component: ImageComponent,
+          editable: true,
+          props: {
+            readOnlyMode: this.toggleReadOnly,
+            currentImage: (img) => this.setState({ currentImage: img }),
+            imageData: (data) =>
+              this.updateSelectedImageData(contentBlockKey, editorState, data),
+            isFocused: () =>
+              selection.getAnchorKey() === contentBlockKey &&
+              this.isImageBlockInSelection(editorState),
+            onClick: () =>
+              EditorState.push(
+                this.selectImageWithBlockKey(editorState, contentBlockKey)
+              ),
+          },
+        };
+      }
+    }
+    return null;
+  }
+
+  selectImageWithBlockKey(editorState, key) {
+    const offsetKey = DraftOffsetKey.encode(key, 0, 0);
+    const node = document.querySelectorAll(
+      `[data-offset-key="${offsetKey}"]`
+    )[0];
+    if (node) {
+      const nativeSelection = window.getSelection();
+      const range = document.createRange();
+      range.setStart(node, 0);
+      range.setEnd(node, 0);
+      nativeSelection.removeAllRanges();
+      nativeSelection.addRange(range);
+    }
+
+    const selection = editorState.getSelection();
+    const sel = selection.merge({
+      anchorKey: key,
+      anchorOffset: 0,
+      focusKey: key,
+      focusOffset: 0,
+    });
+    return EditorState.forceSelection(editorState, sel);
+  }
+
+  updateSelectedImageData(anchorKey, editorState, data) {
+    let selection = this.state.editorState.getSelection();
+
+    const updateSelection = new SelectionState({
+      anchorKey: anchorKey,
+      anchorOffset: selection.anchorOffset,
+      focusKey: anchorKey,
+      focusOffset: selection.focusOffset,
+      isBackward: false,
+    });
+    let newEditorState = EditorState.acceptSelection(
+      editorState,
+      updateSelection
+    );
+
+    this.setState({
+      editorState: newEditorState,
+    });
+
+    let newSelection = newEditorState.getSelection();
+
+    if (anchorKey !== newSelection.getFocusKey()) {
+      return editorState;
+    }
+
+    const contentState = editorState.getCurrentContent();
+    const contentBlock = contentState.getBlockForKey(anchorKey);
+
+    if (contentBlock && contentBlock.getType().toLowerCase() === "atomic") {
+      const entityKey = contentBlock.getEntityAt(0);
+      const entity = contentState.getEntity(entityKey);
+
+      if (entity && entity.getType().toUpperCase() === "IMAGE") {
+        const newContentState = contentState.mergeEntityData(entityKey, data);
+        return EditorState.push(editorState, newContentState, "apply-entity");
+      }
+    }
+    return editorState;
   }
 
   getHtml() {
-    const content = this.state.editorState.getCurrentContent();
+    const contentState = this.state.editorState.getCurrentContent();
 
-    const blockStyleFn = block => {
+    const blockStyleFn = (block) => {
       const blockType = block.getType().toLowerCase();
-
       if (blockType === "blockquote") {
         return {
           attributes: {
-            "data-divider-color": "",
-            "data-background-color": "",
-            "data-text-section": ""
-          }
+            "data-divider-color": block.getData().get("dividerColor"),
+            "data-background-color": block.getData().get("backgroundColor"),
+            "data-text-section": block.getData().get("textSection"),
+          },
         };
       }
     };
 
-    const entityStyleFn = entity => {
+    const entityStyleFn = (entity) => {
       const entityType = entity.getType().toUpperCase();
-      console.log("ent", entityType);
       if (entityType === "LINK") {
         // Add styling here
       }
@@ -427,17 +565,16 @@ export default class DocumentTextEditor extends React.Component {
 
     const options = {
       blockStyleFn,
-      entityStyleFn
+      entityStyleFn,
     };
-    return stateToHTML(content, options);
+    return stateToHTML(contentState, options);
   }
 
   applyChanges() {
-    var htmlString = this.getHtml();
+    var htmlString = this.getHtml().replace(/<p><br><\/p>/gm, "");
     this.props.onUpdate(htmlString);
     this.setState({
-      //readonly: !this.state.readonly,
-      html: htmlString
+      html: htmlString,
     });
   }
 
@@ -502,10 +639,45 @@ export default class DocumentTextEditor extends React.Component {
     }
   }
 
-  toggleReadOnly = () => {
-    const { isReadOnly } = this.state;
+  isImageBlock(contentBlock, contentState) {
+    if (contentBlock && contentBlock.getType() === "atomic") {
+      const entityKey = contentBlock.getEntityAt(0);
+      const entity = contentState.getEntity(entityKey);
+
+      if (entity.getType().toUpperCase() === "IMAGE") {
+        return entity && entity.getType().toUpperCase() === "IMAGE";
+      }
+    }
+    return false;
+  }
+
+  isImageBlockInSelection(editorState) {
+    const selection = editorState.getSelection();
+    if (selection.getAnchorKey() !== selection.getFocusKey()) {
+      return false;
+    }
+    const contentState = editorState.getCurrentContent();
+    const contentBlock = contentState.getBlockForKey(selection.getAnchorKey());
+
+    return this.isImageBlock(contentBlock, contentState);
+  }
+
+  toggleReadOnly = (e) => {
+    const { onReadOnly } = this.state;
     this.setState({
-      isReadOnly: !isReadOnly
+      onReadOnly: !onReadOnly,
+    });
+  };
+
+  handleEditorClick = () => {
+    var { readOnly } = this.state;
+    if (document.getElementById("edit-image-modal")) {
+      readOnly = true;
+    } else {
+      readOnly = false;
+    }
+    this.setState({
+      readOnly: readOnly,
     });
   };
 
@@ -514,11 +686,11 @@ export default class DocumentTextEditor extends React.Component {
 
     let editorContainer = styles.editor;
     var contentState = editorState.getCurrentContent();
-    /*if (!contentState.hasText()) {
+    if (!contentState.hasText()) {
       if (contentState.getBlockMap().first().getType() !== "unstyled") {
         editorContainer = " RichEditor-hidePlaceholder";
       }
-    }*/
+    }
 
     let urlInput;
     if (this.state.showURLInput) {
@@ -591,8 +763,50 @@ export default class DocumentTextEditor extends React.Component {
             placeholder="data-popup"
           />
           <label>Popup</label>
+          <select
+            value={this.state.mediaPosition}
+            ref="data-image-position"
+            onChange={this.onDataPositionChange}
+            placeholder="data-image-position"
+          >
+            <option value="left">Vänster</option>
+            <option value="center">Center</option>
+            <option value="right">Höger</option>
+            <option value="floatRight">Höger med text</option>
+            <option value="floatLeft">Vänster med text</option>
+          </select>
           <button onMouseDown={this.confirmMedia}>OK</button>
           <button onMouseDown={this.closeURLInput}>Avbryt</button>
+        </div>
+      );
+    }
+
+    if (this.state.showTextAreaInput) {
+      urlInput = (
+        <div style={styles.urlInputContainer}>
+          <TextAreaInput
+            onCancelClick={() => {
+              this.setState({ showTextAreaInput: false });
+            }}
+            updateEditorState={(newEditorState) => {
+              this.setState({ editorState: newEditorState }, () => {
+                const selection = editorState.getSelection();
+                const blockType = editorState
+                  .getCurrentContent()
+                  .getBlockForKey(selection.getStartKey())
+                  .getType();
+                if (blockType !== "blockquote") {
+                  this.onChange(
+                    RichUtils.toggleBlockType(
+                      this.state.editorState,
+                      "blockquote"
+                    )
+                  );
+                }
+              });
+            }}
+            editorState={editorState}
+          ></TextAreaInput>
         </div>
       );
     }
@@ -601,16 +815,8 @@ export default class DocumentTextEditor extends React.Component {
       urlInput = (
         <div style={styles.urlInputContainer}>
           <h1>Lägg till {this.getUrlType(this.state.urlType)}</h1>
+          <p>Markera den text som ska bli en länk</p>
           {this.getUrlInput(this.state.urlType, documents)}
-          <input
-            onChange={this.onTitleChange}
-            ref="url"
-            style={styles.urlInput}
-            type="text"
-            value={this.state.urlTitle || ""}
-            placeholder="Rubrik på länk"
-            onKeyDown={this.onLinkInputKeyDown}
-          />
           {this.getUrlId(this.state.urlType)}
           <button onMouseDown={this.confirmLink}>OK</button>
           <button onMouseDown={this.closeLinkInput}>Avbryt</button>
@@ -622,13 +828,6 @@ export default class DocumentTextEditor extends React.Component {
       <div style={styles.root}>
         <div style={styles.buttonContainer}>
           <div style={styles.buttons}>
-            <ColorButtonGreen
-              variant="contained"
-              className="btn btn-primary"
-              title="Godkänn ändringar"
-              onClick={() => this.applyChanges()}
-              startIcon={<DoneIcon />}
-            />
             <InlineStyleControls
               editorState={editorState}
               onToggle={this.toggleInlineStyle}
@@ -636,6 +835,10 @@ export default class DocumentTextEditor extends React.Component {
             <BlockStyleControls
               editorState={editorState}
               onToggle={this.toggleBlockType}
+            />
+            <StyleButton
+              label={<FormatQuoteIcon />}
+              onToggle={this.addTextArea}
             />
             <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
             <StyleButton label={<LaunchIcon />} onToggle={this.addWebLink} />
@@ -651,29 +854,20 @@ export default class DocumentTextEditor extends React.Component {
           <Editor
             style={styles.editor}
             blockStyleFn={getBlockStyle}
-            blockRendererFn={mediaBlockRenderer}
-            toggleReadOnly={false}
+            blockRendererFn={this.blockRenderer}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             handlePastedText={this.handlePastedText}
             handleReturn={this.handleReturn}
             keyBindingFn={this.mapKeyToEditorCommand}
             onChange={this.onChange}
+            onFocus={this.handleEditorClick}
             placeholder="Lägg till text..."
             ref="editor"
-            readOnly={this.state.isReadOnly}
+            readOnly={this.state.onReadOnly}
             plugins={this.plugins}
           />
         </div>
-        <input
-          onClick={this.logState}
-          style={styles.button}
-          type="button"
-          value="Log State"
-        />
-        <button onMouseDown={this.toggleReadOnly} style={{ marginBottom: 5 }}>
-          Read Only Mode
-        </button>
       </div>
     );
   }
@@ -691,12 +885,12 @@ function getBlockStyle(block) {
 
 const BLOCK_TYPES = [
   //{ label: "H1", style: "header-one" },
-  { label: <FormatQuoteIcon />, style: "blockquote" },
+
   { label: <FormatListBulletedIcon />, style: "unordered-list-item" },
-  { label: <FormatListNumberedIcon />, style: "ordered-list-item" }
+  { label: <FormatListNumberedIcon />, style: "ordered-list-item" },
 ];
 
-const BlockStyleControls = props => {
+const BlockStyleControls = (props) => {
   const { editorState } = props;
   const selection = editorState.getSelection();
   const blockType = editorState
@@ -706,7 +900,7 @@ const BlockStyleControls = props => {
 
   return (
     <div style={styles.buttons}>
-      {BLOCK_TYPES.map(type => (
+      {BLOCK_TYPES.map((type) => (
         <StyleButton
           key={type.style}
           active={type.style === blockType}
@@ -723,13 +917,13 @@ const BlockStyleControls = props => {
 const INLINE_STYLES = [
   { label: <FormatBoldIcon />, style: "BOLD" },
   { label: <FormatItalicIcon />, style: "ITALIC" },
-  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" }
+  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" },
 ];
-const InlineStyleControls = props => {
+const InlineStyleControls = (props) => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
   return (
     <div style={styles.buttons}>
-      {INLINE_STYLES.map(type => (
+      {INLINE_STYLES.map((type) => (
         <StyleButton
           key={type.style}
           active={currentStyle.has(type.style)}
@@ -747,44 +941,45 @@ const styles = {
   root: {
     fontFamily: "'Georgia', serif",
     width: 1000,
-    border: "1px solid #ddd"
+    border: "1px solid #ddd",
   },
+
   buttonContainer: {
     height: 40,
-    borderBottom: "1px solid #ddd"
+    borderBottom: "1px solid #ddd",
   },
   buttons: {
     borderRight: "1px solid #ccc",
-    float: "left"
+    float: "left",
   },
   urlInputContainer: {
-    marginBottom: 10
+    marginBottom: 10,
   },
   urlInput: {
     fontFamily: "'Georgia', serif",
     marginRight: 10,
-    padding: 3
+    padding: 3,
   },
   editorContainer: {
     border: "1px solid #ccc",
     cursor: "text",
     minHeight: 80,
-    fontSize: 16
+    fontSize: 16,
   },
   editor: {
     backgroundColor: "#fff",
-    padding: "18px"
+    padding: "18px",
   },
   button: {
     marginTop: 10,
-    textAlign: "center"
+    textAlign: "center",
   },
   media: {
-    whiteSpace: "initial"
+    whiteSpace: "initial",
   },
   paper: {
     position: "absolute",
     width: 400,
-    border: "2px solid #000"
-  }
+    border: "2px solid #000",
+  },
 };

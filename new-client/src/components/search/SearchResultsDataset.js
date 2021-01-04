@@ -7,11 +7,13 @@ import {
   AccordionDetails,
   Chip,
   Tooltip,
-  Button,
   Divider,
   Grid,
 } from "@material-ui/core";
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
+import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
+import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+import Link from "@material-ui/core/Link";
 
 const styles = (theme) => ({
   datasetContainer: {
@@ -25,24 +27,13 @@ const styles = (theme) => ({
   datasetDetailsContainer: {
     padding: 0,
   },
-  datasetTable: {
+  hover: {
     cursor: "pointer",
     "&:hover": {
       backgroundColor: theme.palette.action.hover,
     },
   },
 });
-
-const TightAccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: 0,
-    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
-    boxShadow: "none",
-    "&:before": {
-      display: "none",
-    },
-  },
-}))(AccordionDetails);
 
 const TightAccordionSummary = withStyles((theme) => ({
   root: {
@@ -60,6 +51,7 @@ const TightAccordionSummary = withStyles((theme) => ({
     },
   },
   content: {
+    maxWidth: "100%",
     margin: "5px 0",
     "&$expanded": {
       margin: "5px 0",
@@ -67,6 +59,32 @@ const TightAccordionSummary = withStyles((theme) => ({
   },
   expanded: {},
 }))(AccordionSummary);
+
+const TightAccordionDetails = withStyles((theme) => ({
+  root: {
+    padding: 0,
+    cursor: "default",
+    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    boxShadow: "none",
+    "&:before": {
+      display: "none",
+    },
+  },
+}))(AccordionDetails);
+
+const TightBreadcrumbs = withStyles({
+  root: {
+    width: "100%",
+    display: "inline-block",
+  },
+  ol: {
+    width: "100%",
+  },
+  li: {
+    display: "flex",
+    maxWidth: (props) => (props.numelements > 2 ? "35%" : "90%"),
+  },
+})(Breadcrumbs);
 
 class SearchResultsDataset extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
@@ -77,8 +95,6 @@ class SearchResultsDataset extends React.PureComponent {
         ? `${this.props.featureCollection.value.numberReturned}+`
         : this.props.featureCollection.value.numberReturned
       : this.props.featureCollection.value.features.length,
-    //expanded: this.props.sumOfResults === 1,
-    showAllInformation: false,
   };
 
   resultHasOnlyOneFeature = () => {
@@ -86,86 +102,169 @@ class SearchResultsDataset extends React.PureComponent {
     return featureCollection.value.features.length === 1;
   };
 
-  renderShowMoreInformationButton = () => {
-    const { showAllInformation } = this.state;
-    const { classes } = this.props;
-    return (
-      <Button
-        color="primary"
-        fullWidth
-        className={classes.showMoreInformationButton}
-        onClick={(e) => {
-          e.stopPropagation();
-          this.setState({
-            showAllInformation: !this.state.showAllInformation,
-          });
-        }}
-      >
-        {showAllInformation ? "Visa mindre" : "Visa mer"}
-      </Button>
+  getFeatureTitle = (feature) => {
+    const { activeFeatureCollection } = this.props;
+
+    return activeFeatureCollection.source.displayFields.reduce(
+      (featureTitleString, df) => {
+        let displayField = feature.properties[df];
+        if (Array.isArray(displayField)) {
+          displayField = displayField.join(", ");
+        }
+
+        if (displayField) {
+          if (featureTitleString.length > 0) {
+            featureTitleString = featureTitleString.concat(
+              ` | ${displayField}`
+            );
+          } else {
+            featureTitleString = displayField;
+          }
+        }
+
+        return featureTitleString;
+      },
+      ""
     );
   };
 
   renderDatasetDetails = () => {
     const {
       featureCollection,
-      handleOnResultClick,
       classes,
       app,
       selectedItems,
+      showClickResultInMap,
+      activeFeatureCollection,
+      activeFeature,
+      handleOnFeatureClick,
+      getOriginBasedIcon,
     } = this.props;
-    const { showAllInformation } = this.state;
 
-    return (
-      <TightAccordionDetails
-        id={`search-result-dataset-details-${featureCollection.source.id}`}
-        className={classes.datasetDetailsContainer}
-      >
-        <Grid justify="center" container>
-          {this.props.expanded &&
-            featureCollection.value.features.map((f) => (
-              <React.Fragment key={f.id}>
-                <Grid
-                  role="button"
-                  onClick={() => handleOnResultClick(f)}
-                  className={classes.datasetTable}
-                  container
-                  item
-                >
-                  <Typography variant="srOnly">Aktivera sökresultat</Typography>
-                  <Grid item xs={12}>
-                    <SearchResultsDatasetFeature
-                      feature={f}
-                      app={app}
-                      showAllInformation={showAllInformation}
-                      source={featureCollection.source}
-                      visibleInMap={selectedItems.indexOf(f.id) > -1}
-                      handleOnResultClick={(feature) => {
-                        handleOnResultClick(feature);
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                {/*this.renderShowMoreInformationButton()*/}
-                {!this.resultHasOnlyOneFeature() && (
-                  <Divider className={classes.divider}></Divider>
-                )}
-              </React.Fragment>
-            ))}
-        </Grid>
-      </TightAccordionDetails>
-    );
+    const shouldRenderFeatureDetails =
+      activeFeature && !activeFeature.onClickName;
+
+    if (shouldRenderFeatureDetails) {
+      return (
+        <TightAccordionDetails
+          id={`search-result-dataset-details-${featureCollection.source.id}`}
+          className={classes.datasetDetailsContainer}
+        >
+          <SearchResultsDatasetFeatureDetails
+            feature={activeFeature}
+            featureTitle={this.getFeatureTitle(activeFeature)}
+            app={app}
+            source={activeFeatureCollection.source}
+          />
+        </TightAccordionDetails>
+      );
+    } else {
+      return (
+        <TightAccordionDetails
+          id={`search-result-dataset-details-${featureCollection.source.id}`}
+          className={classes.datasetDetailsContainer}
+        >
+          <Grid justify="center" container>
+            {featureCollection.value.features.map((f) => {
+              const featureTitle = this.getFeatureTitle(f);
+              if (featureTitle.length > 0) {
+                return (
+                  <React.Fragment key={f.id}>
+                    <Grid
+                      role="button"
+                      onClick={() => handleOnFeatureClick(f)}
+                      className={classes.hover}
+                      container
+                      item
+                    >
+                      {
+                        <Typography variant="srOnly">
+                          Aktivera sökresultat
+                        </Typography>
+                      }
+                      <SearchResultsDatasetFeature
+                        feature={f}
+                        featureTitle={this.getFeatureTitle(f)}
+                        app={app}
+                        source={featureCollection.source}
+                        origin={featureCollection.origin}
+                        visibleInMap={
+                          selectedItems.findIndex(
+                            (item) => item.featureId === f.id
+                          ) > -1
+                        }
+                        showClickResultInMap={showClickResultInMap}
+                        activeFeature={activeFeature}
+                        getOriginBasedIcon={getOriginBasedIcon}
+                      />
+                    </Grid>
+                    {!this.resultHasOnlyOneFeature() && (
+                      <Divider className={classes.divider}></Divider>
+                    )}
+                  </React.Fragment>
+                );
+              } else {
+                return null;
+              }
+            })}
+          </Grid>
+        </TightAccordionDetails>
+      );
+    }
   };
 
   renderDetailsHeader = () => {
-    const { featureCollection } = this.props;
+    const {
+      activeFeatureCollection,
+      activeFeature,
+      resetFeatureAndCollection,
+      setActiveFeature,
+    } = this.props;
+    const shouldRenderFeatureDetails =
+      activeFeature && !activeFeature.onClickName;
+    const numElements = shouldRenderFeatureDetails ? 3 : 2;
     return (
-      <Grid alignItems="center" container>
-        <Grid item xs={12}>
-          <Typography variant="button">
-            {featureCollection.source.caption}
-          </Typography>
-        </Grid>
+      <Grid alignItems="center" style={{ maxWidth: "100%" }} container>
+        <TightBreadcrumbs
+          numelements={numElements}
+          aria-label="breadcrumb"
+          component="div"
+        >
+          <Tooltip title="Tillbaka till alla sökresultat">
+            <Link
+              noWrap
+              component="div"
+              onClick={(e) => {
+                e.stopPropagation();
+                resetFeatureAndCollection();
+              }}
+              onChange={resetFeatureAndCollection}
+              variant="button"
+            >
+              Start
+            </Link>
+          </Tooltip>
+          <Tooltip title={activeFeatureCollection.source.caption}>
+            <Link
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveFeature(undefined);
+              }}
+              noWrap
+              component="div"
+              variant="button"
+            >
+              {activeFeatureCollection.source.caption}
+            </Link>
+          </Tooltip>
+          {shouldRenderFeatureDetails && (
+            <Tooltip title={this.getFeatureTitle(activeFeature)}>
+              <Link noWrap component="div" variant="button">
+                {this.getFeatureTitle(activeFeature)}
+              </Link>
+            </Tooltip>
+          )}
+        </TightBreadcrumbs>
       </Grid>
     );
   };
@@ -202,15 +301,14 @@ class SearchResultsDataset extends React.PureComponent {
   };
 
   renderDatasetSummary = () => {
-    const { showDetailedView, featureCollection } = this.props;
+    const { activeFeatureCollection, featureCollection } = this.props;
 
     return (
       <TightAccordionSummary
         id={`search-result-dataset-${featureCollection.source.id}`}
         aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
-        //expandIcon={<ExpandMoreIcon />}
       >
-        {showDetailedView
+        {activeFeatureCollection
           ? this.renderDetailsHeader()
           : this.renderListHeader()}
       </TightAccordionSummary>
@@ -221,23 +319,22 @@ class SearchResultsDataset extends React.PureComponent {
     const {
       classes,
       featureCollection,
-      handleFeatureCollectionSelected,
-      expanded,
+      setActiveFeatureCollection,
+      activeFeatureCollection,
     } = this.props;
     return (
       <>
         <Accordion
           className={classes.datasetContainer}
           square
-          expanded={expanded}
+          expanded={activeFeatureCollection ? true : false}
           TransitionProps={{ timeout: 100 }}
           onChange={() => {
-            //this.setState({ expanded: !this.state.expanded });
-            handleFeatureCollectionSelected(featureCollection);
+            setActiveFeatureCollection(featureCollection);
           }}
         >
           {this.renderDatasetSummary()}
-          {this.renderDatasetDetails()}
+          {activeFeatureCollection && this.renderDatasetDetails()}
         </Accordion>
       </>
     );

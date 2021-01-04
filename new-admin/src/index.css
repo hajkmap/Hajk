@@ -1022,3 +1022,13 @@ figure img {
 .public-DraftStyleDefault-block {
   margin-bottom: 0.5em;
 }
+
+.toc-modal {
+  position: absolute;
+  width: 500px;
+  top: 20%;
+  left: 30%;
+  padding: 1rem;
+  background-color: #fff;
+  border: 2px solid #000;
+}

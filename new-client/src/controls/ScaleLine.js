@@ -3,7 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { ScaleLine } from "ol/control";
 import { Paper, Tooltip } from "@material-ui/core";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     scaleLine: {
       "& .ol-scale-line": {
@@ -13,31 +13,30 @@ const styles = theme => {
         padding: "3px",
         background: theme.palette.background.paper,
         boxShadow: theme.shadows[4],
-        border: "1px solid rgba(255 ,255, 255, 0.5)",
-        borderRadius: "2px"
+        borderRadius: theme.shape.borderRadius,
       },
       "& .ol-scale-line-inner": {
         cursor: "default",
         borderColor: theme.palette.text.primary,
         color: theme.palette.text.primary,
         fontSize: "0.7em",
-        lineHeight: "1.5em"
-      }
+        lineHeight: "1.5em",
+      },
     },
     scaleBadge: {
       padding: "0 4px",
-      color: "rgba(0, 0, 0, 0.87)",
+      color: theme.palette.text.primary,
       fontSize: "0.7em",
       lineHeight: "25px",
-      borderRadius: "2px",
-      cursor: "default"
-    }
+      borderRadius: theme.shape.borderRadius,
+      cursor: "default",
+    },
   };
 };
 
 class ScaleLineControl extends React.PureComponent {
   state = {
-    scale: 0
+    scale: 0,
   };
 
   componentDidUpdate() {
@@ -45,12 +44,12 @@ class ScaleLineControl extends React.PureComponent {
     if (this.props.map && this.refs.scaleLine.children.length === 0) {
       // Set initial value of scale
       this.setState({
-        scale: this.formatScale(this.getScale())
+        scale: this.formatScale(this.getScale()),
       });
 
       // Add ScaleLine
       const scaleLineControl = new ScaleLine({
-        target: this.refs.scaleLine
+        target: this.refs.scaleLine,
       });
       this.props.map.addControl(scaleLineControl);
 
@@ -58,7 +57,7 @@ class ScaleLineControl extends React.PureComponent {
       // Bind change event to update current scale
       this.props.map.getView().on("change:resolution", () => {
         this.setState({
-          scale: this.formatScale(this.getScale())
+          scale: this.formatScale(this.getScale()),
         });
       });
     }
@@ -71,10 +70,7 @@ class ScaleLineControl extends React.PureComponent {
    */
   getScale() {
     const dpi = 25.4 / 0.28,
-      mpu = this.props.map
-        .getView()
-        .getProjection()
-        .getMetersPerUnit(),
+      mpu = this.props.map.getView().getProjection().getMetersPerUnit(),
       inchesPerMeter = 39.37,
       res = this.props.map.getView().getResolution();
 

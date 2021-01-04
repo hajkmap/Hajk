@@ -17,13 +17,32 @@ class SearchResultsList extends React.PureComponent {
     selectedItems: [],
   };
 
-  showClickResultInMap = (feature) => {
+  componentDidMount = () => {
+    const { activeFeature } = this.props;
+    //If the search results in exactly one hit, we activate it right a way.
+    if (activeFeature) {
+      this.handleOnFeatureClick(activeFeature);
+    }
+  };
+
+  getFeatureSelectedIndex = (feature) => {
+    return this.state.selectedItems.findIndex(
+      (item) => item.featureId === feature.id
+    );
+  };
+
+  showClickResultInMap = (feature, source) => {
     const { localObserver } = this.props;
-    const currentIndex = this.state.selectedItems.indexOf(feature.id);
+    const currentIndex = this.getFeatureSelectedIndex(feature);
+
     const selectedItems = [...this.state.selectedItems];
+    const displayFields = source.displayFields ? source.displayFields : [];
 
     if (currentIndex === -1) {
-      selectedItems.push(feature.id);
+      selectedItems.push({
+        featureId: feature.id,
+        displayFields: displayFields,
+      });
     } else {
       selectedItems.splice(currentIndex, 1);
     }
@@ -42,60 +61,57 @@ class SearchResultsList extends React.PureComponent {
     );
   };
 
-  handleOnResultClick = (feature) => {
-    const { app } = this.props;
+  handleOnFeatureClick = (feature) => {
+    const { app, setActiveFeature, activeFeatureCollection } = this.props;
     if (feature.onClickName) {
       app.globalObserver.publish(feature.onClickName, feature);
     } else {
-      this.showClickResultInMap(feature);
+      setActiveFeature(feature);
+      if (this.getFeatureSelectedIndex(feature) === -1) {
+        this.showClickResultInMap(feature, activeFeatureCollection.source);
+      }
     }
   };
 
   render() {
     const {
       featureCollections,
-      sumOfResults,
       getOriginBasedIcon,
       app,
       classes,
-      handleFeatureCollectionSelected,
-      showDetailedView,
+      setActiveFeatureCollection,
+      activeFeatureCollection,
+      activeFeature,
+      setActiveFeature,
+      resetFeatureAndCollection,
     } = this.props;
-
-    const featureCollectionsContainingFeatures = featureCollections.filter(
-      (featureCollection) => {
-        return featureCollection.value.features.length > 0;
-      }
-    );
 
     return (
       <Grid container alignItems="center" justify="center">
         <Grid container item>
-          {featureCollectionsContainingFeatures.map(
-            (featureCollection, index) => (
-              <Grid
-                key={featureCollection.source.id}
-                role="button"
-                xs={12}
-                className={classes.searchResultDatasetWrapper}
-                item
-              >
-                <SearchResultsDataset
-                  app={app}
-                  featureCollection={featureCollection}
-                  getOriginBasedIcon={getOriginBasedIcon}
-                  sumOfResults={sumOfResults}
-                  handleOnResultClick={this.handleOnResultClick}
-                  selectedItems={this.state.selectedItems}
-                  handleFeatureCollectionSelected={
-                    handleFeatureCollectionSelected
-                  }
-                  expanded={showDetailedView}
-                  showDetailedView={showDetailedView}
-                />
-              </Grid>
-            )
-          )}
+          {featureCollections.map((featureCollection) => (
+            <Grid
+              key={featureCollection.source.id}
+              role="button"
+              xs={12}
+              className={classes.searchResultDatasetWrapper}
+              item
+            >
+              <SearchResultsDataset
+                app={app}
+                featureCollection={featureCollection}
+                getOriginBasedIcon={getOriginBasedIcon}
+                selectedItems={this.state.selectedItems}
+                showClickResultInMap={this.showClickResultInMap}
+                activeFeatureCollection={activeFeatureCollection}
+                activeFeature={activeFeature}
+                setActiveFeatureCollection={setActiveFeatureCollection}
+                setActiveFeature={setActiveFeature}
+                handleOnFeatureClick={this.handleOnFeatureClick}
+                resetFeatureAndCollection={resetFeatureAndCollection}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Grid>
     );

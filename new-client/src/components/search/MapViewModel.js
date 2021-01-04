@@ -1,5 +1,5 @@
 import Draw from "ol/interaction/Draw";
-import { Stroke, Style, Circle, Fill } from "ol/style";
+import { Stroke, Style, Circle, Fill, Text } from "ol/style";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
@@ -25,23 +25,6 @@ const defaultStyles = [
   }),
 ];
 
-const highlightedStyle = new Style({
-  stroke: new Stroke({
-    color: [200, 0, 0, 0.7],
-    width: 4,
-  }),
-  fill: new Fill({
-    color: [255, 0, 0, 0.1],
-  }),
-  image: new Circle({
-    radius: 6,
-    stroke: new Stroke({
-      color: [200, 0, 0, 0.7],
-      width: 4,
-    }),
-  }),
-});
-
 const drawStyle = new Style({
   stroke: new Stroke({
     color: "rgba(255, 214, 91, 0.6)",
@@ -64,6 +47,7 @@ class MapViewModel {
     this.map = settings.map;
     this.app = settings.app;
     this.options = settings.options;
+    this.showLabelOnHighlight = settings.options.showLabelOnHighlight ?? true;
     this.localObserver = settings.localObserver;
     this.initMapLayers();
     this.bindSubscriptions();
@@ -86,6 +70,7 @@ class MapViewModel {
       this.resultSource,
       this.options.showInMapOnSearchResult ? defaultStyles : null
     );
+    this.resultsLayer.set("type", "searchResultLayer");
     this.drawSource = this.getNewVectorSource();
     this.drawLayer = this.getNewVectorLayer(this.drawSource, drawStyle);
     this.map.addLayer(this.drawLayer);
@@ -140,25 +125,77 @@ class MapViewModel {
     this.resultSource.getFeatures().map((f) => f.setStyle(null));
   };
 
-  highlightFeaturesInMap = (featureIds) => {
+  getHighlightLabelValueFromFeature = (feature, displayFields) => {
+    if (this.showLabelOnHighlight) {
+      if (!displayFields || displayFields.length < 1) {
+        return `Visningsfält saknas`;
+      } else {
+        return feature.get(displayFields[0]);
+      }
+    }
+  };
+
+  getHighlightedStyle = (feature, displayFields) => {
+    return new Style({
+      fill: new Fill({
+        color: [255, 0, 0, 0.1],
+      }),
+      stroke: new Stroke({
+        color: [200, 0, 0, 0.7],
+        width: 4,
+      }),
+      image: new Circle({
+        radius: 6,
+        stroke: new Stroke({
+          color: [200, 0, 0, 0.7],
+          width: 4,
+        }),
+      }),
+      text: new Text({
+        textAlign: "center",
+        textBaseline: "middle",
+        font: "12pt sans-serif",
+        fill: new Fill({ color: "#FFF" }),
+        text: this.getHighlightLabelValueFromFeature(feature, displayFields),
+        overflow: true,
+        stroke: new Stroke({
+          color: "rgba(0, 0, 0, 0.5)",
+          width: 3,
+        }),
+        offsetX: 0,
+        offsetY: -10,
+        rotation: 0,
+        scale: 1,
+      }),
+    });
+  };
+
+  highlightFeaturesInMap = (featuresInfo) => {
     this.resetStyleForFeaturesInResultSource();
-    featureIds.map((fid) =>
-      this.getFeatureFromResultSourceById(fid).setStyle(highlightedStyle)
-    );
+    featuresInfo.map((featureInfo) => {
+      const feature = this.getFeatureFromResultSourceById(
+        featureInfo.featureId
+      );
+      return feature.setStyle(
+        this.getHighlightedStyle(feature, featureInfo.displayFields)
+      );
+    });
   };
 
   getFeatureFromResultSourceById = (fid) => {
     return this.resultSource.getFeatureById(fid);
   };
 
-  zoomToFeatureIds = (featureIds) => {
+  zoomToFeatureIds = (featuresInfo) => {
     let extent = createEmpty();
 
     //BoundingExtent-function gave wrong coordinates for some
-    featureIds.forEach((fid) =>
+    featuresInfo.forEach((featureInfo) =>
       extend(
         extent,
-        this.getFeatureFromResultSourceById(fid).getGeometry().getExtent()
+        this.getFeatureFromResultSourceById(featureInfo.featureId)
+          .getGeometry()
+          .getExtent()
       )
     );
     const extentToZoomTo = isEmpty(extent)
@@ -201,6 +238,7 @@ class MapViewModel {
 
       this.drawSource.on("addfeature", (e) => {
         this.map.removeInteraction(this.draw);
+        this.map.clickLock.delete("search");
         this.localObserver.publish("on-draw-end", e.feature);
       });
     } else {

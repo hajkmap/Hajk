@@ -7,9 +7,9 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import SearchIcon from "@material-ui/icons/Search";
 import RoomIcon from "@material-ui/icons/Room";
 import DescriptionIcon from "@material-ui/icons/Description";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import WarningIcon from "@material-ui/icons/Warning";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import SearchResultsContainer from "./SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
@@ -18,7 +18,6 @@ import {
   IconButton,
   Paper,
   TextField,
-  Checkbox,
   Typography,
   FormHelperText,
   useMediaQuery,
@@ -36,15 +35,11 @@ const styles = (theme) => ({
   },
 
   autocompleteTypography: {
-    paddingRight: 8,
-    maxWidth: "60%",
+    maxWidth: "100%",
   },
 
   inputRoot: {
     height: theme.spacing(6),
-  },
-  hidden: {
-    display: "none",
   },
 });
 
@@ -75,7 +70,6 @@ class SearchBar extends React.PureComponent {
     moreOptionsId: undefined,
     moreOptionsOpen: false,
     selectSourcesOpen: false,
-    resultPanelCollapsed: false,
   };
 
   updateSearchOptions = (name, value) => {
@@ -177,8 +171,14 @@ class SearchBar extends React.PureComponent {
   };
 
   renderSearchResultList = () => {
-    const { resultPanelCollapsed } = this.state;
-    const { searchResults, app, map, localObserver } = this.props;
+    const {
+      searchResults,
+      app,
+      map,
+      localObserver,
+      resultPanelCollapsed,
+      toggleCollapseSearchResults,
+    } = this.props;
 
     return (
       <SearchResultsContainer
@@ -189,6 +189,7 @@ class SearchBar extends React.PureComponent {
         featureCollections={searchResults.featureCollections}
         map={map}
         panelCollapsed={resultPanelCollapsed}
+        toggleCollapseSearchResults={toggleCollapseSearchResults}
       />
     );
   };
@@ -228,15 +229,22 @@ class SearchBar extends React.PureComponent {
         renderOption={(option) => {
           if (searchString.length > 0) {
             return (
-              <>
-                {this.getOriginBasedIcon(option.origin)}
-                {this.getHighlightedACE(
-                  searchString,
-                  decodeURIComponent(option.autocompleteEntry)
-                )}
-
-                <FormHelperText>{option.dataset}</FormHelperText>
-              </>
+              <Grid container alignItems="center">
+                <Grid item xs={1}>
+                  {this.getOriginBasedIcon(option.origin)}
+                </Grid>
+                <Grid container item xs={11}>
+                  <Grid item xs={12}>
+                    {this.getHighlightedACE(
+                      searchString,
+                      decodeURIComponent(option.autocompleteEntry)
+                    )}
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormHelperText>{option.dataset}</FormHelperText>
+                  </Grid>
+                </Grid>
+              </Grid>
             );
           }
         }}
@@ -250,21 +258,6 @@ class SearchBar extends React.PureComponent {
         renderInput={this.renderAutoCompleteInputField}
       />
     );
-  };
-
-  getPotentialWFSErrorMessage = () => {
-    const { searchResults } = this.props;
-    return searchResults.errors.length === 0
-      ? ``
-      : `OBS: Följande WFS:er svarar inte: `.concat(
-          searchResults.errors
-            .map((error, index) => {
-              return index === searchResults.errors.length - 1
-                ? error.source.caption
-                : `${error.source.caption}, `;
-            })
-            .join("")
-        );
   };
 
   renderFailedWFSFetchWarning = (errorMessage) => {
@@ -287,6 +280,8 @@ class SearchBar extends React.PureComponent {
       app,
       handleOnClear,
       showSearchResults,
+      toggleCollapseSearchResults,
+      resultPanelCollapsed,
       handleSearchBarKeyPress,
       searchOptions,
       searchSources,
@@ -294,9 +289,12 @@ class SearchBar extends React.PureComponent {
       searchModel,
       handleOnClickOrKeyboardSearch,
       setSearchSources,
+      failedWFSFetchMessage,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
-    const failedWFSFetchMessage = this.getPotentialWFSErrorMessage();
+    const showFailedWFSMessage =
+      failedWFSFetchMessage.length > 0 && showSearchResults;
+    const expandMessage = resultPanelCollapsed ? `Visa` : `Dölj`;
     return (
       <TextField
         {...params}
@@ -311,12 +309,34 @@ class SearchBar extends React.PureComponent {
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}
               {params.InputProps.endAdornment}
-              {failedWFSFetchMessage.length > 0 &&
+              {showFailedWFSMessage &&
                 this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
-              <IconButton size="small" onClick={handleOnClickOrKeyboardSearch}>
-                <Typography variant="srOnly">Exekvera sökning</Typography>
-                <SearchIcon />
-              </IconButton>
+              {!showSearchResults ? (
+                <IconButton
+                  size="small"
+                  onClick={handleOnClickOrKeyboardSearch}
+                >
+                  <Typography variant="srOnly">Exekvera sökning</Typography>
+                  <SearchIcon />
+                </IconButton>
+              ) : (
+                <Tooltip title={expandMessage}>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCollapseSearchResults();
+                    }}
+                    size="small"
+                  >
+                    <Typography variant="srOnly">{expandMessage}</Typography>
+                    {resultPanelCollapsed ? (
+                      <ExpandMoreIcon />
+                    ) : (
+                      <ExpandLessIcon />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              )}
               {searchString.length > 0 ||
               showSearchResults ||
               searchActive !== "" ? (
@@ -343,43 +363,6 @@ class SearchBar extends React.PureComponent {
     );
   };
 
-  renderSelectSearchOptions = () => {
-    const { selectSourcesOpen } = this.state;
-    const { classes, searchModel, searchSources } = this.props;
-    return (
-      <Autocomplete
-        className={cslx(selectSourcesOpen === false ? classes.hidden : null)}
-        onChange={(event, value, reason) => this.props.setSearchSources(value)}
-        value={searchSources}
-        multiple
-        id="searchSources"
-        options={searchModel.getSources()}
-        disableCloseOnSelect
-        getOptionLabel={(option) => option.caption}
-        renderOption={(option, { selected }) => (
-          <>
-            <Checkbox
-              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-              checkedIcon={<CheckBoxIcon fontSize="small" />}
-              style={{ marginRight: 8 }}
-              checked={selected}
-            />
-            {option.caption}
-          </>
-        )}
-        style={{ width: 400 }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            // label="Sökkällor"
-            placeholder="Välj sökkälla"
-          />
-        )}
-      />
-    );
-  };
-
   render() {
     const { classes, showSearchResults, width } = this.props;
     const { panelCollapsed } = this.state;
@@ -393,8 +376,6 @@ class SearchBar extends React.PureComponent {
         <Grid item>
           <Paper elevation={width === "xs" ? 0 : 1}>
             {this.renderAutoComplete()}
-
-            {this.renderSelectSearchOptions()}
           </Paper>
         </Grid>
         {showSearchResults && this.renderSearchResultList()}

@@ -3,19 +3,18 @@ import { withStyles } from "@material-ui/core/styles";
 import Page from "./Page.js";
 import Typography from "@material-ui/core/Typography/Typography";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     saveError: {
-      color: "red",
-      background: "rgb(255, 200, 200)",
+      color: theme.palette.error.contrastText,
+      background: theme.palette.error.main,
       marginTop: "15px",
-      borderRadius: "5px",
-      padding: "5px"
+      borderRadius: theme.shape.borderRadius,
+      padding: "5px",
     },
     errorText: {
-      fontSize: "14pt",
-      color: "red"
-    }
+      color: theme.palette.error.contrastText,
+    },
   };
 };
 
@@ -29,7 +28,7 @@ class CollectorForm extends Component {
     form: [],
     displayPlace: false,
     activePage: 0,
-    direction: "right"
+    direction: "right",
   };
 
   constructor(props) {
@@ -37,7 +36,7 @@ class CollectorForm extends Component {
 
     this.state = {
       ...this.state,
-      form: props.form
+      form: props.form,
     };
 
     props.model.observer.subscribe("abort", () => {
@@ -50,11 +49,11 @@ class CollectorForm extends Component {
       // Just setting the flag to 0 will not reset the form if there is only one page.
       this.setState(
         {
-          activePage: -1
+          activePage: -1,
         },
         () => {
           this.setState({
-            activePage: 0
+            activePage: 0,
           });
         }
       );
@@ -64,14 +63,14 @@ class CollectorForm extends Component {
   componentDidMount() {
     if (!this.props.model.serviceConfig) {
       this.setState({
-        configurationError: true
+        configurationError: true,
       });
     }
   }
 
-  saveError = text => {
+  saveError = (text) => {
     this.setState({
-      saveError: text || saveErrorText
+      saveError: text || saveErrorText,
     });
   };
 
@@ -116,13 +115,13 @@ class CollectorForm extends Component {
                 onNextPage={() => {
                   this.setState({
                     activePage: activePage + 1,
-                    direction: "left"
+                    direction: "left",
                   });
                 }}
                 onPrevPage={() => {
                   this.setState({
                     activePage: activePage - 1,
-                    direction: "right"
+                    direction: "right",
                   });
                 }}
               ></Page>

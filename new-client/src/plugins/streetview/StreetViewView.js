@@ -4,26 +4,26 @@ import PropTypes from "prop-types";
 import { withSnackbar } from "notistack";
 import Typography from "@material-ui/core/Typography";
 
-const styles = theme => ({
+const styles = (theme) => ({
   streetViewWindow: {
     flex: 1,
     position: "absolute !important",
     top: "42px",
     bottom: 0,
     left: 0,
-    right: 0
+    right: 0,
   },
   panorama: {
-    display: "flex"
+    display: "flex",
   },
   hidden: {
-    display: "none"
+    display: "none",
   },
   streetView: {
-    marginTop: "30px"
+    marginTop: "30px",
   },
   date: {
-    color: "white",
+    color: theme.palette.common.white,
     position: "absolute",
     zIndex: 1,
     top: "42px",
@@ -31,8 +31,8 @@ const styles = theme => ({
     background: "rgba(0, 0, 0, 0.7)",
     padding: "0px 3px",
     lineHeight: 1.4,
-    fontSize: "10px"
-  }
+    fontSize: "10px",
+  },
 });
 
 class StreetViewView extends React.PureComponent {
@@ -46,9 +46,9 @@ class StreetViewView extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.localObserver.subscribe("changeImageDate", imageDate => {
+    this.localObserver.subscribe("changeImageDate", (imageDate) => {
       this.setState({
-        imageDate: imageDate
+        imageDate: imageDate,
       });
     });
   }
@@ -89,7 +89,7 @@ class StreetViewView extends React.PureComponent {
 }
 
 StreetViewView.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(withSnackbar(StreetViewView));

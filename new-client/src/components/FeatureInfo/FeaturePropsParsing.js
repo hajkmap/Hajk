@@ -6,12 +6,12 @@ export default class FeaturePropsParsing {
     this.globalObserver = settings.globalObserver;
   }
 
-  #valueFromJson = str => {
+  #valueFromJson = (str) => {
     if (typeof str !== "string") return false;
     const jsonStart = /^\[|^\{(?!\{)/;
     const jsonEnds = {
       "[": /]$/,
-      "{": /}$/
+      "{": /}$/,
     };
     const start = str.match(jsonStart);
     const jsonLike = start && jsonEnds[start[0]].test(str);
@@ -30,19 +30,21 @@ export default class FeaturePropsParsing {
     return result;
   };
 
-  #isChildTextOnly = child => {
+  #isChildTextOnly = (child) => {
     return child && !child.props;
   };
 
-  #nodeShouldBeFetchedExternally = nextSibling => {
+  #nodeShouldBeFetchedExternally = (nextSibling) => {
     return (
       this.#isChildTextOnly(nextSibling) &&
       this.#isMarkupForExternalElement(nextSibling)
     );
   };
 
-  #hasChildren = child => {
-    return child.props.children && child.props.children.length > 0;
+  #hasChildren = (child) => {
+    return child?.props?.children && child.props.children.length > 0
+      ? true
+      : false;
   };
 
   /**
@@ -50,8 +52,8 @@ export default class FeaturePropsParsing {
    * @param {str} properties
    * @returns {object}
    */
-  extractPropertiesFromJson = properties => {
-    Object.keys(properties).forEach(property => {
+  extractPropertiesFromJson = (properties) => {
+    Object.keys(properties).forEach((property) => {
       var jsonData = this.#valueFromJson(properties[property]);
       if (jsonData) {
         delete properties[property];
@@ -61,21 +63,21 @@ export default class FeaturePropsParsing {
     return properties;
   };
 
-  #createDataAttributesObjectFromEntriesArray = entries => {
+  #createDataAttributesObjectFromEntriesArray = (entries) => {
     return entries.reduce((dataAttributeObject, entry) => {
       return {
         ...dataAttributeObject,
-        ...{ [entry[0]]: this.#unescapeString(entry[1]) }
+        ...{ [entry[0]]: this.#unescapeString(entry[1]) },
       };
     }, {});
   };
 
-  #unescapeString = strng => {
+  #unescapeString = (strng) => {
     return strng.replace(/\\"/g, "");
   };
 
-  #extractDataAttributes = props => {
-    let entries = Object.entries(props).filter(entry => {
+  #extractDataAttributes = (props) => {
+    let entries = Object.entries(props).filter((entry) => {
       return entry[0].search("data-") !== -1;
     });
     return this.#createDataAttributesObjectFromEntriesArray(entries);
@@ -86,22 +88,22 @@ export default class FeaturePropsParsing {
       this.globalObserver.getListeners(`core.info-click-${externalEvent}`)
         .length > 0
     )
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         let dataAttributes = this.#extractDataAttributes(property.props);
         //Let subscription resolve the promise
         this.globalObserver.publish(`core.info-click-${externalEvent}`, {
           payload: {
             type: property.type,
             children: property.props.children,
-            dataAttributes: dataAttributes
+            dataAttributes: dataAttributes,
           },
-          resolve: resolve
+          resolve: resolve,
         });
       });
     return null;
   };
 
-  #isMarkupForExternalElement = string => {
+  #isMarkupForExternalElement = (string) => {
     return string.match(/@@(.*?)/g);
   };
 
@@ -122,9 +124,9 @@ export default class FeaturePropsParsing {
     }
   };
 
-  #renderHtmlAsReactComponents = async html => {
+  #renderHtmlAsReactComponents = async (html) => {
     const reactElementFromHtml = ReactHtmlParser(html);
-    const injectIfExternalComponents = async children => {
+    const injectIfExternalComponents = async (children) => {
       children.forEach(async (child, index) => {
         if (this.#isChildTextOnly(child)) {
           if (this.#isMarkupForExternalElement(child)) {
@@ -157,12 +159,12 @@ export default class FeaturePropsParsing {
       let pluginToUseForRenderAttribute = attributeInformation[1];
       return {
         placeholder: placeholder,
-        renderWithPlugin: pluginToUseForRenderAttribute
+        renderWithPlugin: pluginToUseForRenderAttribute,
       };
     }
     return {
       placeholder: attributePlaceholder.split("."),
-      renderWithPlugin: null
+      renderWithPlugin: null,
     };
   };
 
@@ -175,7 +177,7 @@ export default class FeaturePropsParsing {
 
     const {
       placeholder,
-      renderWithPlugin
+      renderWithPlugin,
     } = this.#getAttributePlaceholderInformation(
       attributePlaceholder,
       isExternal
@@ -214,7 +216,7 @@ export default class FeaturePropsParsing {
   mergeFeaturePropsWithMarkdown = async (markdown, properties) => {
     markdown = markdown.replace(/export:/g, "");
     if (markdown && typeof markdown === "string") {
-      (markdown.match(/{(.*?)}/g) || []).forEach(property => {
+      (markdown.match(/{(.*?)}/g) || []).forEach((property) => {
         let propertyIsExternal = this.#isMarkupForExternalElement(property);
         let attributePlaceholder = property.replace("{", "").replace("}", "");
         markdown = markdown.replace(
@@ -228,7 +230,7 @@ export default class FeaturePropsParsing {
       });
     }
 
-    let html = marked(`<div id="wrapper">${markdown}</div>`);
+    let html = `<div id="wrapper">${marked(markdown)}</div>`;
     return await this.#renderHtmlAsReactComponents(html);
   };
 }

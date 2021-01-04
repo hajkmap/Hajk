@@ -1,19 +1,19 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 
-const styles = theme => ({
+const styles = (theme) => ({
   breadCrumContainer: {
     display: "inline-block",
     padding: "3px",
-    cursor: "pointer"
+    cursor: "pointer",
   },
   breadCrum: {
-    color: theme.palette.primary.main
+    color: theme.palette.primary.light,
   },
   last: {
-    color: "black",
-    cursor: "pointer"
-  }
+    color: theme.palette.primary.dark,
+    cursor: "pointer",
+  },
 });
 
 class BreadCrumbs extends React.PureComponent {
@@ -28,8 +28,8 @@ class BreadCrumbs extends React.PureComponent {
           ...crums,
           {
             text: c.header,
-            chapter: c
-          }
+            chapter: c,
+          },
         ];
       }
       if (c.parent) {
@@ -40,12 +40,12 @@ class BreadCrumbs extends React.PureComponent {
     var crums = traverse(chapter, []);
     crums.push({
       text: this.props.caption,
-      chapter: "home"
+      chapter: "home",
     });
     return crums.reverse();
   }
 
-  onCrumClick = chapter => event => {
+  onCrumClick = (chapter) => (event) => {
     this.props.observer.publish("changeChapter", chapter);
   };
 

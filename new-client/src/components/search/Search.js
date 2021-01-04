@@ -51,6 +51,8 @@ class Search extends React.PureComponent {
       matchCase: false,
       activeSpatialFilter: "within",
     },
+    failedWFSFetchMessage: "",
+    resultPanelCollapsed: false,
   };
 
   // Used for setTimeout/clearTimeout, in order to delay update of autocomplete when user is typing
@@ -121,6 +123,9 @@ class Search extends React.PureComponent {
         );
       }
       this.setState({ searchActive: "draw" });
+    });
+    this.localObserver.subscribe("minimize-search-result-list", () => {
+      this.setState({ resultPanelCollapsed: false });
     });
   };
 
@@ -240,6 +245,8 @@ class Search extends React.PureComponent {
       searchActive: "",
       showSearchResults: false,
       searchResults: { featureCollections: [], errors: [] },
+      failedWFSFetchMessage: "",
+      resultPanelCollapsed: false,
     });
     this.resetFeaturesToFilter();
     this.localObserver.publish("clear-search-results");
@@ -284,6 +291,7 @@ class Search extends React.PureComponent {
             loading: searchString.length >= 3,
             showSearchResults: false,
             searchString: searchString,
+            resultPanelCollapsed: false,
           },
           () => {
             if (this.state.searchString.length >= 3) {
@@ -486,16 +494,35 @@ class Search extends React.PureComponent {
       });
   };
 
+  getPotentialWFSErrorMessage = (searchResults) => {
+    return searchResults.errors.length === 0
+      ? ``
+      : `OBS: Kunde inte hämta data från: `.concat(
+          searchResults.errors
+            .map((error, index) => {
+              return index === searchResults.errors.length - 1
+                ? error.source.caption
+                : `${error.source.caption}, `;
+            })
+            .join("")
+        );
+  };
+
   async doSearch() {
     this.setState({ loading: true });
-    let fetchOptions = this.getSearchResultsFetchSettings();
-    let searchResults = await this.fetchResultFromSearchModel(fetchOptions);
+    const fetchOptions = this.getSearchResultsFetchSettings();
+    const searchResults = await this.fetchResultFromSearchModel(fetchOptions);
+    const failedWFSFetchMessage = this.getPotentialWFSErrorMessage(
+      searchResults
+    );
 
     this.setState({
       searchResults,
       showSearchResults: true,
       loading: false,
       autoCompleteOpen: false,
+      failedWFSFetchMessage,
+      resultPanelCollapsed: false,
     });
 
     let features = this.extractFeatureWithFromFeatureCollections(
@@ -647,8 +674,12 @@ class Search extends React.PureComponent {
     };
   };
 
+  toggleCollapseSearchResults = () => {
+    this.setState({ resultPanelCollapsed: !this.state.resultPanelCollapsed });
+  };
+
   render() {
-    const { classes, target } = this.props;
+    const { classes } = this.props;
     const {
       searchString,
       searchActive,
@@ -660,42 +691,43 @@ class Search extends React.PureComponent {
       searchOptions,
       searchSources,
       searchTools,
+      failedWFSFetchMessage,
+      resultPanelCollapsed,
     } = this.state;
 
     return (
       this.state.searchImplementedPluginsLoaded && (
-        <>
-          <SearchBar
-            classes={{
-              root: classes.inputRoot,
-              input:
-                target === "top" ? classes.inputInputWide : classes.inputInput,
-            }}
-            escapeRegExp={this.escapeRegExp}
-            localObserver={this.localObserver}
-            searchTools={searchTools}
-            searchResults={searchResults}
-            handleSearchInput={this.handleSearchInput}
-            searchString={searchString}
-            searchActive={searchActive}
-            handleOnClickOrKeyboardSearch={this.handleOnClickOrKeyboardSearch}
-            autoCompleteOpen={autoCompleteOpen}
-            showSearchResults={showSearchResults}
-            handleOnAutompleteInputChange={this.handleOnAutompleteInputChange}
-            handleOnClear={this.handleOnClear}
-            autocompleteList={autocompleteList}
-            doSearch={this.doSearch.bind(this)}
-            searchModel={this.searchModel}
-            searchOptions={searchOptions}
-            updateSearchOptions={this.updateSearchOptions}
-            setSearchSources={this.setSearchSources}
-            loading={loading}
-            searchSources={searchSources}
-            handleSearchBarKeyPress={this.handleSearchBarKeyPress}
-            getArrayWithSearchWords={this.getArrayWithSearchWords}
-            {...this.props}
-          />
-        </>
+        <SearchBar
+          classes={{
+            root: classes.inputRoot,
+          }}
+          escapeRegExp={this.escapeRegExp}
+          localObserver={this.localObserver}
+          searchTools={searchTools}
+          searchResults={searchResults}
+          handleSearchInput={this.handleSearchInput}
+          searchString={searchString}
+          searchActive={searchActive}
+          handleOnClickOrKeyboardSearch={this.handleOnClickOrKeyboardSearch}
+          autoCompleteOpen={autoCompleteOpen}
+          showSearchResults={showSearchResults}
+          resultPanelCollapsed={resultPanelCollapsed}
+          toggleCollapseSearchResults={this.toggleCollapseSearchResults}
+          handleOnAutompleteInputChange={this.handleOnAutompleteInputChange}
+          handleOnClear={this.handleOnClear}
+          autocompleteList={autocompleteList}
+          doSearch={this.doSearch.bind(this)}
+          searchModel={this.searchModel}
+          searchOptions={searchOptions}
+          updateSearchOptions={this.updateSearchOptions}
+          setSearchSources={this.setSearchSources}
+          loading={loading}
+          searchSources={searchSources}
+          handleSearchBarKeyPress={this.handleSearchBarKeyPress}
+          getArrayWithSearchWords={this.getArrayWithSearchWords}
+          failedWFSFetchMessage={failedWFSFetchMessage}
+          {...this.props}
+        />
       )
     );
   }

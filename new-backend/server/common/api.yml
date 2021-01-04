@@ -6,12 +6,14 @@ info:
 servers:
   - url: /api/v1
 tags:
-  - name: Maps and layers
-    description: Operations for retriving contents from the layers and maps database
-  - name: Map and layers settings
-    description: Preform CRUD operations on layers and map configurations
-  - name: Documents
-    description: Operations available for the "Documents API", used mainly by the Informative plugin
+  - name: Client-accessible
+    description: Resources necessary to load a working map in client
+  - name: Admin - Maps and layers
+    description: Preform CRUD operations on layers and maps configurations
+  - name: Admin - Informative/DocumentHandler
+    description: Resources for working with the "Documents API", used mainly by the Informative plugin
+  - name: Admin - ActiveDirectory
+    description: Resources for working with ActiveDirectory
   - name: Sokigo FB Proxy
     description: Proxy specified in working with Sokigo's FB API
   - name: Specification
@@ -20,7 +22,7 @@ paths:
   /informative/load/{name}:
     get:
       tags:
-        - Documents
+        - Client-accessible
       parameters:
         - name: name
           in: path
@@ -45,7 +47,7 @@ paths:
     post:
       deprecated: true
       tags:
-        - Documents
+        - Admin - Informative/DocumentHandler
       responses:
         200:
           description: Create a document connected to a specified map (OBSOLETE)
@@ -61,7 +63,7 @@ paths:
                 $ref: "#/components/schemas/Error"
     put:
       tags:
-        - Documents
+        - Admin - Informative/DocumentHandler
       responses:
         200:
           description: Create a document connected to a specified map
@@ -78,7 +80,7 @@ paths:
   /informative/list:
     get:
       tags:
-        - Documents
+        - Admin - Informative/DocumentHandler
       responses:
         200:
           description: Return all available documents
@@ -95,7 +97,7 @@ paths:
   /informative/list/{name}:
     get:
       tags:
-        - Documents
+        - Admin - Informative/DocumentHandler
       parameters:
         - name: name
           in: path
@@ -120,7 +122,7 @@ paths:
     post:
       deprecated: true
       tags:
-        - Documents
+        - Admin - Informative/DocumentHandler
       parameters:
         - name: name
           in: path
@@ -143,7 +145,7 @@ paths:
                 $ref: "#/components/schemas/Error"
     put:
       tags:
-        - Documents
+        - Admin - Informative/DocumentHandler
       parameters:
         - name: name
           in: path
@@ -167,7 +169,7 @@ paths:
   /informative/delete/{name}:
     delete:
       tags:
-        - Documents
+        - Admin - Informative/DocumentHandler
       parameters:
         - name: name
           in: path
@@ -191,7 +193,7 @@ paths:
   /config/layers:
     get:
       tags:
-        - Maps and layers
+        - Client-accessible
       description: List available layers
       parameters:
         - in: header
@@ -207,7 +209,7 @@ paths:
   /config/list:
     get:
       tags:
-        - Maps and layers
+        - Admin - Maps and layers
       description: List available map configurations
       responses:
         200:
@@ -216,7 +218,7 @@ paths:
   /config/{map}:
     get:
       tags:
-        - Maps and layers
+        - Client-accessible
       parameters:
         - name: map
           in: path
@@ -238,7 +240,7 @@ paths:
   /config/export/{map}/{format}:
     get:
       tags:
-        - Maps and layers
+        - Admin - Maps and layers
       parameters:
         - name: map
           in: path
@@ -261,7 +263,7 @@ paths:
     get:
       deprecated: true
       tags:
-        - Maps and layers
+        - Admin - Maps and layers
       parameters:
         - name: name
           in: path
@@ -276,7 +278,7 @@ paths:
           content: {}
     put:
       tags:
-        - Maps and layers
+        - Admin - Maps and layers
       parameters:
         - name: name
           in: path
@@ -293,7 +295,7 @@ paths:
     get:
       deprecated: true
       tags:
-        - Maps and layers
+        - Admin - Maps and layers
       parameters:
         - name: name
           in: path
@@ -308,7 +310,7 @@ paths:
           content: {}
     delete:
       tags:
-        - Maps and layers
+        - Admin - Maps and layers
       parameters:
         - name: name
           in: path
@@ -324,7 +326,7 @@ paths:
   /config/duplicate/{nameFrom}/{nameTo}:
     put:
       tags:
-        - Maps and layers
+        - Admin - Maps and layers
       parameters:
         - name: nameFrom
           in: path
@@ -346,7 +348,7 @@ paths:
   /config/userspecificmaps:
     get:
       tags:
-        - Maps and layers
+        - Client-accessible
       description: Get a list of maps that will be available in the MapSwitcher dropdown
       parameters:
         - in: header
@@ -362,7 +364,7 @@ paths:
   /config/availableadgroups:
     get:
       tags:
-        - Maps and layers
+        - Admin - ActiveDirectory
       description: Get a list of all available AD groups to make it easier for admins to set map and layer permissions
       responses:
         200:
@@ -371,7 +373,7 @@ paths:
   /config/findcommongroupsforusers:
     get:
       tags:
-        - Maps and layers
+        - Admin - ActiveDirectory
       description: Find out which AD group membership is shared between specified users
       parameters:
         - in: query
@@ -390,7 +392,7 @@ paths:
   /ad/users:
     get:
       tags:
-        - ActiveDirectory
+        - Admin - ActiveDirectory
       description: Get the current content of local AD Users store
       responses:
         200:
@@ -399,7 +401,7 @@ paths:
   /ad/groups:
     get:
       tags:
-        - ActiveDirectory
+        - Admin - ActiveDirectory
       description: Get the current content of local AD Groups store
       responses:
         200:
@@ -408,7 +410,7 @@ paths:
   /ad/groupsPerUser:
     get:
       tags:
-        - ActiveDirectory
+        - Admin - ActiveDirectory
       description: Get the current content of local AD Groups Per User store
       responses:
         200:
@@ -417,7 +419,7 @@ paths:
   /ad/flushStores:
     put:
       tags:
-        - ActiveDirectory
+        - Admin - ActiveDirectory
       description: Flush the contents of all local AD stores (removes the cached objects)
       responses:
         200:
@@ -450,7 +452,7 @@ paths:
   /settings/layermenu:
     put:
       tags:
-        - Map and layers settings
+        - Admin - Maps and layers
       requestBody:
         description: Settings for given map's LayerSwitcher component
         content:
@@ -472,7 +474,7 @@ paths:
   /settings/mapsettings:
     put:
       tags:
-        - Map and layers settings
+        - Admin - Maps and layers
       requestBody:
         description: Settings for given map's LayerSwitcher component
         content:
@@ -494,7 +496,7 @@ paths:
   /settings/toolsettings:
     put:
       tags:
-        - Map and layers settings
+        - Admin - Maps and layers
       requestBody:
         description: Settings for given map's LayerSwitcher component
         content:
@@ -516,7 +518,7 @@ paths:
   /settings/{layerType}:
     post:
       tags:
-        - Map and layers settings
+        - Admin - Maps and layers
       description: Add a new layer of specified type
       requestBody:
         description: Content of the layer to be added
@@ -538,7 +540,7 @@ paths:
           content: {}
     put:
       tags:
-        - Map and layers settings
+        - Admin - Maps and layers
       description: Replace a specific layer with supplied content
       requestBody:
         description: Layer to be added or updated
@@ -561,7 +563,7 @@ paths:
   /settings/{type}/{layerId}:
     delete:
       tags:
-        - Map and layers settings
+        - Admin - Maps and layers
       parameters:
         - name: type
           in: path

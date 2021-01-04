@@ -15,48 +15,54 @@ import {
   TableBody,
   Button,
   Typography,
-  Grid
+  Grid,
 } from "@material-ui/core";
 
-const styles = theme => ({
+const styles = (theme) => ({
   toggler: {
-    backgroundColor: theme.palette.primary.main
+    backgroundColor: theme.palette.primary.main,
   },
   infoContainer: {
-    height: "100%"
+    height: "100%",
   },
   typography: {
-    textAlign: "center"
+    textAlign: "center",
   },
   columnValue: {
-    wordBreak: "break-all"
+    wordBreak: "break-all",
   },
   columnKey: {
-    verticalAlign: "top"
+    verticalAlign: "top",
   },
   featureInfoContainer: {
-    flex: "auto"
+    flex: "auto",
   },
   featureInfo: {
-    width: "100%"
-  }
+    width: "100%",
+  },
+  togglerButtonRightContainer: {
+    borderRight: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+  },
+  togglerButtonLeftContainer: {
+    borderLeft: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+  },
 });
 
 class FeatureInfoContainer extends React.PureComponent {
   state = {
-    selectedIndex: 0
+    selectedIndex: 0,
   };
 
   static propTypes = {
     classes: propTypes.object.isRequired,
     features: propTypes.array.isRequired,
-    onDisplay: propTypes.func.isRequired
+    onDisplay: propTypes.func.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.featurePropsParsing = new FeaturePropsParsing({
-      globalObserver: props.globalObserver
+      globalObserver: props.globalObserver,
     });
   }
 
@@ -93,33 +99,35 @@ class FeatureInfoContainer extends React.PureComponent {
         className={classes.toggler}
         container
       >
-        <Grid item>
+        <Grid item className={classes.togglerButtonRightContainer}>
           <Button
             fullWidth
-            variant="outlined"
             disabled={this.state.selectedIndex - 1 < 0}
             onClick={this.stepLeft}
             aria-label="previous"
             id="step-left"
           >
-            <ArrowLeftIcon />
+            <ArrowLeftIcon color="secondary" />
           </Button>
         </Grid>
         <Grid item>
-          <Typography className={classes.typography}>
+          <Typography
+            variant="button"
+            color="secondary"
+            className={classes.typography}
+          >
             {this.state.selectedIndex + 1} av {features.length}
           </Typography>
         </Grid>
-        <Grid item>
+        <Grid item className={classes.togglerButtonLeftContainer}>
           <Button
             fullWidth
-            variant="outlined"
             disabled={this.state.selectedIndex + 1 >= features.length}
             onClick={this.stepRight}
             aria-label="next"
             id="step-right"
           >
-            <ArrowRightIcon />
+            <ArrowRightIcon color="secondary" />
           </Button>
         </Grid>
       </Grid>
@@ -163,12 +171,9 @@ class FeatureInfoContainer extends React.PureComponent {
     shortcodes = shortcodes === null ? [] : shortcodes;
 
     if (shortcodes) {
-      shortcodes.forEach(code => {
+      shortcodes.forEach((code) => {
         str = str.replace(code, "");
-        var params = code
-          .replace("[", "")
-          .replace("]", "")
-          .split(" ");
+        var params = code.replace("[", "").replace("]", "").split(" ");
         var c = {};
 
         params.forEach((param, i) => {
@@ -183,7 +188,7 @@ class FeatureInfoContainer extends React.PureComponent {
       });
       return {
         str: str,
-        codes: codes
+        codes: codes,
       };
     } else {
       return;
@@ -201,15 +206,15 @@ class FeatureInfoContainer extends React.PureComponent {
     );
   };
 
-  getAGSCompatibleLayer = feature => {
-    return Object.keys(feature.layer.layersInfo).find(id => {
+  getAGSCompatibleLayer = (feature) => {
+    return Object.keys(feature.layer.layersInfo).find((id) => {
       const fid = feature.getId().split(".")[0];
       const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
       return fid === layerId;
     });
   };
 
-  getFeatureProperties = feature => {
+  getFeatureProperties = (feature) => {
     let properties = feature.getProperties();
     properties = this.featurePropsParsing.extractPropertiesFromJson(properties);
     feature.setProperties(properties);
@@ -260,7 +265,7 @@ class FeatureInfoContainer extends React.PureComponent {
         caption: caption,
         shortcodes: shortcodes,
         selectedIndex: newIndex,
-        markdown: markdown
+        markdown: markdown,
       },
       () => {
         this.showFeatureInMap();
@@ -328,17 +333,20 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, features } = this.props;
     const featureInfoLoaded = this.isReadyToShowInfo();
     return (
       <Grid
         alignContent="flex-start"
         className={classes.infoContainer}
         container
+        spacing={1}
       >
-        <Grid xs={12} item>
-          {this.getToggler()}
-        </Grid>
+        {features.length > 1 && (
+          <Grid xs={12} item>
+            {this.getToggler()}
+          </Grid>
+        )}
         <Grid
           justify="center"
           alignContent={featureInfoLoaded ? "flex-start" : "center"}

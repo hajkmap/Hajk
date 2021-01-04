@@ -1,19 +1,14 @@
 import React from "react";
 import Alert from "@material-ui/lab/Alert";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import IconButton from "@material-ui/core/IconButton";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import SearchResultsList from "./SearchResultsList";
+import Collapse from "@material-ui/core/Collapse";
 import {
   Accordion,
   Paper,
-  Typography,
-  Tooltip,
   Button,
   AccordionDetails,
-  AccordionSummary,
   Grid,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
@@ -70,31 +65,84 @@ const TightAccordion = withStyles((theme) => ({
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
-    expanded: true,
     sumOfResults: this.props.searchResults.featureCollections
       .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
-    activeFeatureCollection:
-      this.props.featureCollections.length === 1
-        ? this.props.featureCollections[0]
-        : undefined,
   };
 
   componentDidMount = () => {
-    this.bindSubscriptions();
+    const { app } = this.props;
+    app.globalObserver.subscribe("core.searchResultLayerClick", (features) => {
+      const featureIds = features.map((feature) => {
+        return feature.getId();
+      });
+      this.showFeatureDetails(featureIds);
+    });
+    this.getPotentialSingleHit();
   };
 
-  bindSubscriptions = () => {
-    const { localObserver } = this.props;
-    localObserver.subscribe("minimize-search-result-list", () => {
-      this.setState({ expanded: false });
+  componentWillUnmount = () => {
+    const { app } = this.props;
+    app.globalObserver.unsubscribe("core.searchResultLayerClick");
+  };
+
+  showFeatureDetails = (featureIds) => {
+    const { toggleCollapseSearchResults } = this.props;
+    const featureId = featureIds[0]; // Do we want to handle stacked features?
+
+    // If searchResultContainer is collapsed, open it.
+    if (this.props.panelCollapsed) toggleCollapseSearchResults();
+
+    // We first have to make sure that the list with all searchResults is mounted,
+    // e.g. that activeFeature is unset.
+    this.setState({ activeFeature: undefined }, () => {
+      // Get the featureCollection which the clicked feature belongs to
+      const featureCollection = this.getFeatureCollectionFromFeatureId(
+        featureId
+      );
+      // Get the clicked feature
+      const feature = featureCollection.value.features.find(
+        (feature) => feature.id === featureId
+      );
+      // Set active collection and feature accordingly
+      this.setState({
+        activeFeatureCollection: featureCollection,
+        activeFeature: feature,
+      });
+    });
+  };
+
+  getFeatureCollectionFromFeatureId = (featureId) => {
+    const { featureCollections } = this.props;
+    return featureCollections.find((featureCollection) => {
+      return (
+        featureCollection.value.features.findIndex(
+          (feature) => feature.id === featureId
+        ) > -1
+      );
+    });
+  };
+
+  getPotentialSingleHit = () => {
+    const { featureCollections } = this.props;
+
+    const activeFeatureCollection =
+      featureCollections.length === 1 ? featureCollections[0] : undefined;
+    const activeFeature = activeFeatureCollection
+      ? activeFeatureCollection.value.features.length === 1
+        ? activeFeatureCollection.value.features[0]
+        : undefined
+      : undefined;
+
+    this.setState({
+      activeFeatureCollection: activeFeatureCollection,
+      activeFeature: activeFeature,
     });
   };
 
   renderSearchResultListOptions = () => {
-    const { classes } = this.props;
     return (
-      <Grid className={classes.hidden} item>
+      <Grid align="center" item xs={12}>
         <Button>Filtrera</Button>
         <Button>Sortera</Button>
         <IconButton>
@@ -104,117 +152,70 @@ class SearchResultsContainer extends React.PureComponent {
     );
   };
 
-  toggleResultListExpansion = () => {
-    this.setState({ expanded: !this.state.expanded });
+  setActiveFeature = (feature) => {
+    this.setState({ activeFeature: feature });
   };
 
-  handleFeatureCollectionSelected = (featureCollection) => {
+  setActiveFeatureCollection = (featureCollection) => {
+    this.setState({ activeFeatureCollection: featureCollection });
+  };
+
+  resetFeatureAndCollection = () => {
     this.setState({
-      activeFeatureCollection: featureCollection,
+      activeFeatureCollection: undefined,
+      activeFeature: undefined,
     });
-  };
-
-  renderLeftHeaderInfo = () => {
-    const { sumOfResults, activeFeatureCollection, expanded } = this.state;
-
-    if (!activeFeatureCollection) {
-      return <Typography>{`Visar ${sumOfResults} träffar`}</Typography>;
-    } else if (activeFeatureCollection && expanded) {
-      return (
-        <Tooltip title={"Tillbaka till hela sökresultatet"}>
-          <Button
-            style={{ paddingLeft: 0 }}
-            onClick={() => this.handleFeatureCollectionSelected()}
-            color="primary"
-          >
-            <ArrowBackIcon fontSize="small" />
-            Tillbaka
-          </Button>
-        </Tooltip>
-      );
-    } else {
-      return (
-        <Typography>{`Visar ${activeFeatureCollection.value.totalFeatures} träffar`}</Typography>
-      );
-    }
-  };
-
-  renderSearchResultContainerHeader = () => {
-    return (
-      <Grid justify="space-between" alignItems="center" container>
-        <Grid item>{this.renderLeftHeaderInfo()}</Grid>
-        <Grid item>{this.renderSearchResultListOptions()}</Grid>
-        <Grid item>
-          <Button
-            onClick={this.toggleResultListExpansion}
-            color="primary"
-            endIcon={
-              this.state.expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />
-            }
-          >
-            {this.state.expanded ? `Dölj` : `Visa`}
-          </Button>
-        </Grid>
-      </Grid>
-    );
   };
 
   render() {
     const {
       classes,
-
       app,
       getOriginBasedIcon,
       localObserver,
+      panelCollapsed,
     } = this.props;
-    const { sumOfResults, activeFeatureCollection } = this.state;
+    const { sumOfResults, activeFeatureCollection, activeFeature } = this.state;
     const featureCollections = activeFeatureCollection
       ? [activeFeatureCollection]
       : this.props.featureCollections;
-    const showDetailedView = activeFeatureCollection ? true : false;
 
     return (
-      <>
+      <Collapse in={!panelCollapsed}>
         {sumOfResults === 0 ? (
           <Paper className={classes.root}>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
           </Paper>
         ) : (
           <Paper className={classes.root}>
-            <TightAccordion
-              expanded={this.state.expanded}
-              TransitionProps={{ timeout: 100 }}
-            >
-              <AccordionSummary
-                classes={{
-                  content: classes.content,
-                  expanded: classes.expanded,
-                }}
-                aria-controls="search-result-list"
-                id="search-result-list-header"
-              >
-                {this.renderSearchResultContainerHeader()}
-              </AccordionSummary>
+            <TightAccordion>
               <TightAccordionDetails
                 id="search-result-list"
                 className={classes.searchResultListWrapper}
               >
-                <SearchResultsList
-                  localObserver={localObserver}
-                  sumOfResults={sumOfResults}
-                  getOriginBasedIcon={getOriginBasedIcon}
-                  featureCollections={featureCollections}
-                  app={app}
-                  handleFeatureCollectionSelected={
-                    this.handleFeatureCollectionSelected
-                  }
-                  showDetailedView={showDetailedView}
-                />
+                <Grid container>
+                  {this.renderSearchResultListOptions()}
+                  <Grid item xs={12}>
+                    <SearchResultsList
+                      localObserver={localObserver}
+                      getOriginBasedIcon={getOriginBasedIcon}
+                      featureCollections={featureCollections}
+                      app={app}
+                      setActiveFeatureCollection={
+                        this.setActiveFeatureCollection
+                      }
+                      setActiveFeature={this.setActiveFeature}
+                      resetFeatureAndCollection={this.resetFeatureAndCollection}
+                      activeFeatureCollection={activeFeatureCollection}
+                      activeFeature={activeFeature}
+                    />
+                  </Grid>
+                </Grid>
               </TightAccordionDetails>
             </TightAccordion>
           </Paper>
         )}
-      </>
+      </Collapse>
     );
   }
 }

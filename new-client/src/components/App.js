@@ -118,7 +118,6 @@ const styles = (theme) => {
     controlsColumn: {
       display: "flex",
       flexDirection: "column",
-      marginTop: theme.spacing(7),
       [theme.breakpoints.down("xs")]: {
         marginTop: theme.spacing(2),
       },
@@ -157,11 +156,11 @@ const styles = (theme) => {
     },
     drawerGrid: {
       padding: theme.spacing(0, 2),
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
       minHeight: theme.spacing(6),
     },
     drawerLiveContent: {
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.default,
     },
     backdrop: {
       zIndex: theme.zIndex.drawer - 1, // Carefully selected to be above Window but below Drawer
