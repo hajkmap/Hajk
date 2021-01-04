@@ -144,7 +144,14 @@ class SearchResultListContainer extends React.Component {
   bindSubscriptions = () => {
     const { localObserver, app } = this.props;
 
-    app.globalObserver.subscribe("drawerToggled", () => {
+    app.globalObserver.subscribe("core.drawerToggled", () => {
+      this.setState({
+        windowWidth: getWindowContainerWidth(),
+        windowHeight: getWindowContainerHeight()
+      });
+    });
+
+    app.globalObserver.subscribe("core.hideDrawer", () => {
       this.setState({
         windowWidth: getWindowContainerWidth(),
         windowHeight: getWindowContainerHeight()
@@ -157,6 +164,10 @@ class SearchResultListContainer extends React.Component {
 
     localObserver.subscribe("vtsearch-result-done", result => {
       this.bringToFrontSearchResultContainer();
+      this.setState({
+        windowWidth: getWindowContainerWidth(),
+        windowHeight: getWindowContainerHeight()
+      });
       this.onSearchDone(result);
     });
 

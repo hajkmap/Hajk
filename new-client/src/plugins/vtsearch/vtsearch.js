@@ -27,7 +27,7 @@ import SearchIcon from "@material-ui/icons/Search";
 
 import Search from "./../../components/search/Search";
 
-const styles = (theme) => {
+const styles = theme => {
   return {
     root: {
       padding: "2px 4px",
@@ -35,60 +35,60 @@ const styles = (theme) => {
       alignItems: "center",
 
       [theme.breakpoints.up("sm")]: {
-        maxWidth: 620,
-      },
+        maxWidth: 620
+      }
     },
     input: {
       marginLeft: theme.spacing(1),
-      flex: 1,
+      flex: 1
     },
     searchContainer: {
       maxWidth: 260,
-      boxShadow: theme.shadows[10],
+      boxShadow: theme.shadows[10]
     },
     searchContainerBox: {
       display: "flex",
       padding: 0, // override current padding
       flexWrap: "wrap",
-      minHeight: 60,
+      minHeight: 60
     },
     expand: {
       transform: "rotate(0deg)",
       transition: theme.transitions.create("transform", {
-        duration: theme.transitions.duration.shortest,
-      }),
+        duration: theme.transitions.duration.shortest
+      })
     },
     formControl: {
       margin: theme.spacing(1),
       marginLeft: "0px",
       marginBottom: "24px",
-      minWidth: 200,
+      minWidth: 200
     },
     selectEmpty: {
-      marginTop: theme.spacing(2),
+      marginTop: theme.spacing(2)
     },
     expandOpen: {
-      transform: "rotate(180deg)",
+      transform: "rotate(180deg)"
     },
     searchContainerTitle: {
-      marginLeft: 10,
+      marginLeft: 10
     },
     iconButton: { padding: 7 },
 
     selectInput: {
-      padding: 5,
+      padding: 5
     },
     searchModuleContainer: {
-      minHeight: 200,
+      minHeight: 200
     },
     searchModuleContainerRoot: {
-      padding: 10,
+      padding: 10
     },
     loaderContainer: {
       flexBasis: "100%",
       minHeight: "5px",
-      marginTop: "10px",
-    },
+      marginTop: "10px"
+    }
   };
 };
 
@@ -97,7 +97,7 @@ const searchTypes = {
   SEARCH: "Sök",
   JOURNEYS: "Sök Turer",
   LINES: "Sök Linjer",
-  STOPS: "Sök Hållplatser",
+  STOPS: "Sök Hållplatser"
 };
 
 /**
@@ -118,17 +118,17 @@ class VTSearch extends React.PureComponent {
     expanded: false,
     activeSearchTool: searchTypes.DEFAULT,
     loading: false,
-    appLoaded: false,
+    appLoaded: false
   };
 
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired,
+    options: PropTypes.object.isRequired
   };
 
   static defaultProps = {
-    options: {},
+    options: {}
   };
 
   constructor(props) {
@@ -142,56 +142,56 @@ class VTSearch extends React.PureComponent {
       app: props.app,
       map: props.map,
       geoServer: props.options.geoServer,
-      mapColors: props.options.mapColors,
+      mapColors: props.options.mapColors
     });
 
     this.mapViewModel = new MapViewModel({
       app: props.app,
       map: props.map,
       localObserver: this.localObserver,
-      model: this.searchModel,
+      model: this.searchModel
     });
     this.bindSubscriptions();
   }
 
   bindSubscriptions = () => {
     // Subscribes for an event when the vt-search has begun.
-    this.localObserver.subscribe("vtsearch-result-begin", (label) => {
+    this.localObserver.subscribe("vtsearch-result-begin", label => {
       this.setState({ loading: true });
     });
 
-    this.localObserver.subscribe("vtsearch-result-done", (ans) => {
+    this.localObserver.subscribe("vtsearch-result-done", ans => {
       this.setState({ loading: false });
     });
 
-    this.localObserver.subscribe("vtsearch-chosen", (typeOfSearch) => {
+    this.localObserver.subscribe("vtsearch-chosen", typeOfSearch => {
       this.localObserver.publish("deactivate-search");
       this.setState({
         activeSearchTool: typeOfSearch,
-        expanded: typeOfSearch === searchTypes.DEFAULT ? false : true,
+        expanded: typeOfSearch === searchTypes.DEFAULT ? false : true
       });
     });
   };
 
   handleExpandClick = () => {
     this.setState({
-      expanded: !this.state.expanded,
+      expanded: !this.state.expanded
     });
   };
 
-  handleChange = (e) => {
+  handleChange = e => {
     var typeOfSearch = searchTypes[e.target.value];
     this.localObserver.publish("deactivate-search");
     this.setState({
       activeSearchTool: typeOfSearch,
-      expanded: typeOfSearch === searchTypes.DEFAULT ? false : true,
+      expanded: typeOfSearch === searchTypes.DEFAULT ? false : true
     });
   };
 
   componentDidMount = () => {
     this.globalObserver.subscribe("core.appLoaded", () => {
       this.setState({
-        appLoaded: true,
+        appLoaded: true
       });
     });
   };
@@ -252,10 +252,10 @@ class VTSearch extends React.PureComponent {
           onChange={this.handleChange}
           inputProps={{
             name: "searchType",
-            id: "search-type",
+            id: "search-type"
           }}
         >
-          {Object.keys(searchTypes).map((key) => {
+          {Object.keys(searchTypes).map(key => {
             return (
               <option key={key} value={key}>
                 {searchTypes[key]}
@@ -273,7 +273,7 @@ class VTSearch extends React.PureComponent {
       <IconButton
         className={
           (clsx(classes.expand, {
-            [classes.expandOpen]: this.state.expanded,
+            [classes.expandOpen]: this.state.expanded
           }),
           classes.dropDownIconButton)
         }
@@ -331,7 +331,7 @@ class VTSearch extends React.PureComponent {
           top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide,
+          onWindowHide: this.onWindowHide
         }}
       >
         <>
@@ -341,6 +341,7 @@ class VTSearch extends React.PureComponent {
           {ReactDOM.createPortal(
             <SearchResultListContainer
               localObserver={this.localObserver}
+              globalObserver={this.globalObserver}
               model={this.searchModel}
               toolConfig={options}
               app={app}
