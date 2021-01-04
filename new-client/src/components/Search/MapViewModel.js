@@ -1,19 +1,19 @@
 import Draw from "ol/interaction/Draw";
-import { Stroke, Style, Circle, Fill, Text, Icon } from "ol/style";
+import { Stroke, Style, Circle, Fill } from "ol/style";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import { extend, createEmpty, isEmpty } from "ol/extent";
+import FeatureStyle from "./utils/FeatureStyle";
 
 class MapViewModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
     this.options = settings.options;
-    this.showLabelOnHighlight = settings.options.showLabelOnHighlight ?? true;
     this.defaultStyle = this.getDefaultStyle();
     this.drawStyleSettings = this.getDrawStyleSettings();
-    this.highlightStyleSettings = this.getHighlightStyleSettings();
+    this.FeatureStyle = new FeatureStyle(settings.options);
     this.localObserver = settings.localObserver;
     this.initMapLayers();
     this.bindSubscriptions();
@@ -47,24 +47,6 @@ class MapViewModel {
     const fillColor = this.options.drawFillColor ?? "rgba(255, 214, 91, 0.2)";
 
     return { strokeColor: strokeColor, fillColor: fillColor };
-  };
-
-  getHighlightStyleSettings = () => {
-    const strokeColor =
-      this.options.highlightStrokeColor ?? "rgba(255, 214, 91, 0.6)";
-    const fillColor =
-      this.options.highlightFillColor ?? "rgba(255, 214, 91, 0.2)";
-    const textFillColor =
-      this.options.highlightTextFill ?? "rgba(255, 255, 255, 1)";
-    const textStrokeColor =
-      this.options.highlightTextStroke ?? "rgba(0, 0, 0, 0.5)";
-
-    return {
-      strokeColor: strokeColor,
-      fillColor: fillColor,
-      textFillColor: textFillColor,
-      textStrokeColor: textStrokeColor,
-    };
   };
 
   getNewVectorSource = () => {
@@ -159,69 +141,6 @@ class MapViewModel {
     this.resultSource.getFeatures().map((f) => f.setStyle(null));
   };
 
-  getFeatureTitle = (feature, displayFields) => {
-    return displayFields.reduce((featureTitleString, df) => {
-      let displayField = feature.get(df);
-      if (Array.isArray(displayField)) {
-        displayField = displayField.join(", ");
-      }
-
-      if (displayField) {
-        if (featureTitleString.length > 0) {
-          featureTitleString = featureTitleString.concat(` | ${displayField}`);
-        } else {
-          featureTitleString = displayField;
-        }
-      }
-
-      return featureTitleString;
-    }, "");
-  };
-
-  getHighlightLabelValueFromFeature = (feature, displayFields) => {
-    if (this.showLabelOnHighlight) {
-      if (!displayFields || displayFields.length < 1) {
-        return `Visningsfält saknas`;
-      } else {
-        return this.getFeatureTitle(feature, displayFields);
-      }
-    }
-  };
-
-  getHighlightedStyle = (feature, displayFields) => {
-    const { anchor, scale, markerImg } = this.options;
-    return new Style({
-      fill: new Fill({
-        color: this.highlightStyleSettings.fillColor,
-      }),
-      stroke: new Stroke({
-        color: this.highlightStyleSettings.strokeColor,
-        width: 4,
-      }),
-      image: new Icon({
-        anchor: [anchor[0] ?? 0.5, anchor[1] ?? 1],
-        scale: scale ?? 0.15,
-        src: markerImg ?? "marker.png",
-      }),
-      text: new Text({
-        textAlign: "center",
-        textBaseline: "middle",
-        font: "12pt sans-serif",
-        fill: new Fill({ color: this.highlightStyleSettings.textFillColor }),
-        text: this.getHighlightLabelValueFromFeature(feature, displayFields),
-        overflow: true,
-        stroke: new Stroke({
-          color: this.highlightStyleSettings.textStrokeColor,
-          width: 3,
-        }),
-        offsetX: 0,
-        offsetY: -20,
-        rotation: 0,
-        scale: 1,
-      }),
-    });
-  };
-
   getDrawStyle = () => {
     return new Style({
       stroke: new Stroke({
@@ -248,7 +167,10 @@ class MapViewModel {
         featureInfo.featureId
       );
       return feature.setStyle(
-        this.getHighlightedStyle(feature, featureInfo.displayFields)
+        this.FeatureStyle.getHighlightedStyle(
+          feature,
+          featureInfo.displayFields
+        )
       );
     });
   };
@@ -256,7 +178,7 @@ class MapViewModel {
   addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
     const feature = new GeoJSON().readFeature(featureInfo.feature);
     feature.setStyle(
-      this.getHighlightedStyle(feature, featureInfo.displayFields)
+      this.FeatureStyle.getHighlightedStyle(feature, featureInfo.displayFields)
     );
     this.resultSource.addFeature(feature);
     this.fitMapToSearchResult();
