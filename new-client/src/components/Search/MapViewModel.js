@@ -1,5 +1,5 @@
 import Draw from "ol/interaction/Draw";
-import { Stroke, Style, Circle, Fill, Text } from "ol/style";
+import { Stroke, Style, Circle, Fill, Text, Icon } from "ol/style";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
@@ -189,6 +189,7 @@ class MapViewModel {
   };
 
   getHighlightedStyle = (feature, displayFields) => {
+    const { anchor, scale, markerImg } = this.options;
     return new Style({
       fill: new Fill({
         color: this.highlightStyleSettings.fillColor,
@@ -197,12 +198,10 @@ class MapViewModel {
         color: this.highlightStyleSettings.strokeColor,
         width: 4,
       }),
-      image: new Circle({
-        radius: 6,
-        stroke: new Stroke({
-          color: this.highlightStyleSettings.strokeColor,
-          width: 4,
-        }),
+      image: new Icon({
+        anchor: [anchor[0] ?? 0.5, anchor[1] ?? 1],
+        scale: scale ?? 0.15,
+        src: markerImg ?? "marker.png",
       }),
       text: new Text({
         textAlign: "center",
@@ -216,7 +215,7 @@ class MapViewModel {
           width: 3,
         }),
         offsetX: 0,
-        offsetY: -10,
+        offsetY: -20,
         rotation: 0,
         scale: 1,
       }),
