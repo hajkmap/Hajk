@@ -1,4 +1,5 @@
 import { Stroke, Style, Fill, Text, Icon } from "ol/style";
+import { Point } from "ol/geom.js";
 
 export default class FeatureStyle {
   #options;
@@ -58,7 +59,7 @@ export default class FeatureStyle {
           width: 3,
         }),
         offsetX: 0,
-        offsetY: -10,
+        offsetY: feature?.getGeometry() instanceof Point ? 10 : -10,
         rotation: 0,
         scale: 1,
       }),
