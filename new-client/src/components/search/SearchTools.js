@@ -4,22 +4,23 @@ import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { withStyles } from "@material-ui/core/styles";
 import {
-  Paper,
+  ListItemIcon,
   Menu,
   MenuItem,
+  Paper,
+  Tooltip,
   Typography,
-  ListItemIcon
 } from "@material-ui/core";
 
 import Dialog from "../Dialog.js";
 import SearchSettings from "./SearchSettings";
 
-const styles = theme => ({});
+const styles = (theme) => ({});
 
 class SearchTools extends React.PureComponent {
   state = {
     anchorEl: undefined,
-    settingsDialog: false
+    settingsDialog: false,
   };
 
   constructor(props) {
@@ -44,7 +45,7 @@ class SearchTools extends React.PureComponent {
       searchSources,
       updateSearchOptions,
       searchModel,
-      setSearchSources
+      setSearchSources,
     } = this.props;
     if (settingsDialog) {
       return createPortal(
@@ -60,12 +61,12 @@ class SearchTools extends React.PureComponent {
               />
             ),
             headerText: "Sökinställningar",
-            buttonText: "OK"
+            buttonText: "OK",
           }}
           open={settingsDialog}
           onClose={() => {
             this.setState({
-              settingsDialog: false
+              settingsDialog: false,
             });
           }}
         ></Dialog>,
@@ -81,21 +82,23 @@ class SearchTools extends React.PureComponent {
     return (
       <div>
         {this.renderSettingsDialog()}
-        <IconButton
-          aria-haspopup="true"
-          aria-controls="lock-menu"
-          size="small"
-          onClick={e =>
-            this.setState({
-              anchorEl: e.currentTarget
-            })
-          }
-        >
-          <Typography variant="srOnly">
-            Öppna dialog med fler inställningar
-          </Typography>
-          <MoreVertIcon />
-        </IconButton>
+        <Tooltip title="Fler sökverktyg och inställningar">
+          <IconButton
+            aria-haspopup="true"
+            aria-controls="lock-menu"
+            size="small"
+            onClick={(e) =>
+              this.setState({
+                anchorEl: e.currentTarget,
+              })
+            }
+          >
+            <Typography variant="srOnly">
+              Öppna dialog med fler inställningar
+            </Typography>
+            <MoreVertIcon />
+          </IconButton>
+        </Tooltip>
         <Paper>
           <Menu
             id="lock-menu"
@@ -107,14 +110,14 @@ class SearchTools extends React.PureComponent {
             open={Boolean(anchorEl)}
             onClose={() =>
               this.setState({
-                anchorEl: undefined
+                anchorEl: undefined,
               })
             }
           >
             {this.props.searchTools.map((option, index) => (
               <MenuItem
                 key={index}
-                onClick={event =>
+                onClick={(event) =>
                   this.handleMenuItemClick(event, index, option)
                 }
               >

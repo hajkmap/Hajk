@@ -546,8 +546,9 @@
     "drawerVisibleMobile": false,
     "activeDrawerOnStart": "plugins",
     "colors": {
-      "primaryColor": "#0096ED",
-      "secondaryColor": "#F0FAF9"
+      "primaryColor": "#333333",
+      "secondaryColor": "#ffa000",
+      "preferredColorScheme": "user"
     },
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",

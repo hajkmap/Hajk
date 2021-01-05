@@ -5,9 +5,9 @@ import { withStyles } from "@material-ui/core/styles";
 import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
-import { isMobile } from "./../utils/IsMobile";
+import { isMobile } from "../utils/IsMobile";
 
-import AppModel from "./../models/AppModel.js";
+import AppModel from "../models/AppModel.js";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
@@ -16,7 +16,7 @@ import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
-import Search from "./search/Search";
+import Search from "./Search/Search.js";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
@@ -45,6 +45,7 @@ import {
 import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import MapIcon from "@material-ui/icons/Map";
+import ThemeToggler from "../controls/ThemeToggler";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -291,7 +292,7 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
-    this.globalObserver.subscribe("core.mapClick", (results) => {
+    this.globalObserver.subscribe("infoClick.mapClick", (results) => {
       this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: results,
@@ -376,7 +377,7 @@ class App extends React.PureComponent {
     //     });
     //   });
 
-    // TODO: More plugins could use this - currently only SNap helper registers though
+    // TODO: More plugins could use this - currently only Snap helper registers though
     this.appModel
       .getMap()
       .getLayers()
@@ -481,19 +482,6 @@ class App extends React.PureComponent {
   handleMouseLeave = (e) => {
     this.setState({ drawerMouseOverLock: false });
   };
-
-  // Method below renders the **old** Search plugin. See below for the current implementation.
-  renderSearchPlugin() {
-    const searchPlugin = this.appModel.plugins.search;
-    // Renders the configured search plugin (if one is configured)
-    return searchPlugin ? (
-      <searchPlugin.component
-        map={searchPlugin.map}
-        app={searchPlugin.app}
-        options={searchPlugin.options}
-      />
-    ) : null;
-  }
 
   renderSearchComponent() {
     // FIXME: We should get config from somewhere else now when Search is part of Core
@@ -728,6 +716,9 @@ class App extends React.PureComponent {
                 {clean === false && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
+                {clean === false && (
+                  <ThemeToggler toggleMUITheme={this.props.toggleMUITheme} />
+                )}
                 {clean === false && this.renderInformationPlugin()}
                 {clean === true && (
                   <MapResetter

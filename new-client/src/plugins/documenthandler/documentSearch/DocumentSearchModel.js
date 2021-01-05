@@ -1,5 +1,3 @@
-import React from "react";
-import AcUnitIcon from "@material-ui/icons/AcUnit";
 import MatchSearch from "./MatchSearch";
 
 export default class DocumentSearchModel {
@@ -15,7 +13,18 @@ export default class DocumentSearchModel {
     };
   };
 
-  //Method called by searchComponent in core (Part of searchInterface)
+  // getFunctionality is called by searchComponent in core (Part of searchInterface)
+  // The search-component demands this method, and if it is not present in the interface,
+  // the plugin will not be used in the search-component at all.
+  // The getFunctionality-method is supposed to return an object as follows:
+  // return {
+  //   name: "TOOL DISPLAY NAME",
+  //   icon: TOOL ICON,
+  //   type: "EXTERNAL_PLUGIN",
+  //   searchFunctionalityClickName: "GLOBAL OBSERVER EVENT NAME",
+  // };
+  // If we want to make use of the plugin in the search-component regardless (without the functionality)
+  // we can just let the method return null.
   getFunctionality = () => {
     return {
       name: "Dokumentverktyg",
