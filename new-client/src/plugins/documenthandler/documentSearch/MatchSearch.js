@@ -5,6 +5,7 @@ export default class MatchSearch {
 
   getMatchRegexp = (searchString) => {
     const { wildcardAtEnd, wildcardAtStart, matchCase } = this.searchOptions;
+
     let regexpOptions = matchCase ? "g" : "gi";
     if (wildcardAtStart && !wildcardAtEnd) {
       return new RegExp(`.*${searchString}$`, regexpOptions);
@@ -34,6 +35,7 @@ export default class MatchSearch {
    */
   compare = (searchString, keyword) => {
     let toSearchIn = this.escapeSpecialChars(searchString);
+
     let match = this.getMatchRegexp(toSearchIn).test(keyword);
 
     return {
