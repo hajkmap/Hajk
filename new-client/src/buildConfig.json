@@ -7,14 +7,14 @@
     "DocumentHandler",
     "Draw",
     "Edit",
-    "Informative",
     "LayerSwitcher",
     "Location",
     "Measure",
     "Print",
     "Routing",
     "Search",
-    "StreetView"
+    "StreetView",
+    "vtsearch"
   ],
   "allTools": [
     "Anchor",
@@ -26,7 +26,6 @@
     "Dummy",
     "Edit",
     "FBService",
-    "Informative",
     "LayerSwitcher",
     "Location",
     "Measure",
@@ -34,6 +33,7 @@
     "Routing",
     "Search",
     "StreetView",
-    "Suggest"
+    "Suggest",
+    "vtsearch"
   ]
 }

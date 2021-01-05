@@ -9,7 +9,7 @@ export default class DocumentSearchModel {
   implementSearchInterface = () => {
     return {
       getResults: this.getResults,
-      getFunctionality: this.getFunctionality
+      getFunctionality: this.getFunctionality,
     };
   };
 
@@ -26,12 +26,7 @@ export default class DocumentSearchModel {
   // If we want to make use of the plugin in the search-component regardless (without the functionality)
   // we can just let the method return null.
   getFunctionality = () => {
-    return {
-      name: "Dokumentverktyg",
-      icon: <AcUnitIcon />,
-      type: "EXTERNAL_PLUGIN",
-      searchFunctionalityClickName: "documenthandler-searchfunctionality-click"
-    };
+    return null;
   };
 
   //Method called by searchComponent in core (Part of searchInterface)
@@ -69,23 +64,23 @@ export default class DocumentSearchModel {
         numberMatched: matchedFeatures.length,
         numberReturned: matchedFeatures.length,
         timeStamp: null,
-        totalFeatures: matchedFeatures.length
+        totalFeatures: matchedFeatures.length,
       },
       source: {
         id: `${document.documentTitle}`,
         caption: document.documentTitle,
         displayFields: ["header"],
-        searchFields: [...searchFields]
+        searchFields: [...searchFields],
       },
-      origin: "DOCUMENT"
+      origin: "DOCUMENT",
     };
   };
 
-  createFeatureCollectionForDocument = document => {
+  createFeatureCollectionForDocument = (document) => {
     let matchedFeatures = [];
     let documentSearchFields = [];
 
-    const recursivelyCreateFeaturesFromChapters = chapters => {
+    const recursivelyCreateFeaturesFromChapters = (chapters) => {
       for (var i = 0; i < chapters.length; i++) {
         if (this.hasSubChapters(chapters[i])) {
           recursivelyCreateFeaturesFromChapters(chapters[i].chapters);
@@ -120,10 +115,10 @@ export default class DocumentSearchModel {
     return null;
   };
 
-  getFeatureCollectionsForMatchingDocuments = possibleSearchCombinations => {
+  getFeatureCollectionsForMatchingDocuments = (possibleSearchCombinations) => {
     let featureCollections = [];
-    this.allDocuments.forEach(document => {
-      document.chapters.forEach(chapter => {
+    this.allDocuments.forEach((document) => {
+      document.chapters.forEach((chapter) => {
         this.setmatchedSearchValuesOnChapter(
           document,
           chapter,
@@ -143,13 +138,13 @@ export default class DocumentSearchModel {
     return featureCollections;
   };
 
-  splitAndTrimOnCommas = searchString => {
-    return searchString.split(",").map(string => {
+  splitAndTrimOnCommas = (searchString) => {
+    return searchString.split(",").map((string) => {
       return string.trim();
     });
   };
 
-  getStringArray = searchString => {
+  getStringArray = (searchString) => {
     let tempStringArray = this.splitAndTrimOnCommas(searchString);
     return tempStringArray.join(" ").split(" ");
   };
@@ -175,8 +170,8 @@ export default class DocumentSearchModel {
   };
 
   addPotentialWildCards = (possibleSearchCombinations, searchOptions) => {
-    return possibleSearchCombinations.map(wordArray => {
-      return wordArray.map(word => {
+    return possibleSearchCombinations.map((wordArray) => {
+      return wordArray.map((word) => {
         word = searchOptions.wildcardAtStart ? `*${word}` : word;
         word = searchOptions.wildcardAtEnd ? `${word}*` : word;
         return word;
@@ -184,7 +179,7 @@ export default class DocumentSearchModel {
     });
   };
 
-  setSearchValuesForChapter = chapter => {
+  setSearchValuesForChapter = (chapter) => {
     chapter.searchValues = [];
     if (chapter.keywords) {
       chapter.searchValues = chapter.searchValues.concat(chapter.keywords);
@@ -192,13 +187,13 @@ export default class DocumentSearchModel {
     chapter.searchValues.push(chapter.header);
   };
 
-  hasSubChapters = chapter => {
+  hasSubChapters = (chapter) => {
     return chapter.chapters && chapter.chapters.length > 0;
   };
 
   setmatchedSearchValuesOnChapter = (document, chapter, searchCombinations) => {
     if (this.hasSubChapters(chapter)) {
-      chapter.chapters.forEach(subChapter => {
+      chapter.chapters.forEach((subChapter) => {
         this.setmatchedSearchValuesOnChapter(
           document,
           subChapter,
@@ -234,7 +229,7 @@ export default class DocumentSearchModel {
       geoids: chapter.geoids,
       headerIdentifier: chapter.headerIdentifier,
       documentTitle: document.documentTitle,
-      documentFileName: document.documentFileName
+      documentFileName: document.documentFileName,
     };
 
     return {
@@ -242,7 +237,7 @@ export default class DocumentSearchModel {
       geometry: null,
       id: `${chapter.documentTitle}${Math.floor(Math.random() * 1000)}`,
       onClickName: "documenthandler-searchresult-clicked",
-      properties: properties
+      properties: properties,
     };
   };
 
@@ -259,8 +254,8 @@ export default class DocumentSearchModel {
   setmatchedSearchValues = (chapter, searchCombinations) => {
     this.setSearchValuesForChapter(chapter);
     let allMatched = [];
-    let match = searchCombinations.some(searchCombination => {
-      let everyResult = searchCombination.every(word => {
+    let match = searchCombinations.some((searchCombination) => {
+      let everyResult = searchCombination.every((word) => {
         let matchedSearchValues = this.getMatchSearchValues(
           word,
           chapter.searchValues
@@ -291,8 +286,8 @@ export default class DocumentSearchModel {
   };
 
   setMatchInformationForDocument = (document, possibleSearchCombinations) => {
-    document.chapters.forEach(chapter => {
-      possibleSearchCombinations.forEach(searchCombination => {
+    document.chapters.forEach((chapter) => {
+      possibleSearchCombinations.forEach((searchCombination) => {
         this.setMatchedSearchValuesOnChapter(
           document,
           chapter,
@@ -303,7 +298,7 @@ export default class DocumentSearchModel {
   };
 
   arrayContainsString(array, string, ignoreCase) {
-    return array.some(word => {
+    return array.some((word) => {
       if (ignoreCase) {
         return word.toLowerCase() === string.toLowerCase();
       } else {
@@ -321,7 +316,7 @@ export default class DocumentSearchModel {
    */
   getMatchSearchValues = (searchString, searchFields) => {
     let matchedSearchValues = [];
-    searchFields.forEach(searchField => {
+    searchFields.forEach((searchField) => {
       let compareResults = this.matchSearch.compare(searchString, searchField);
 
       if (
@@ -336,14 +331,14 @@ export default class DocumentSearchModel {
   };
 
   getDocumentsFromMenus(menu) {
-    return menu.filter(menuItem => {
+    return menu.filter((menuItem) => {
       return menuItem.document || menuItem.menu.length > 0;
     });
   }
 
   getFlattenedMenu(menu) {
     let flattenedMenu = [];
-    menu.forEach(menuItem => {
+    menu.forEach((menuItem) => {
       if (menuItem.menu.length > 0) {
         flattenedMenu = flattenedMenu.concat(
           this.getFlattenedMenu(menuItem.menu)
@@ -363,8 +358,8 @@ export default class DocumentSearchModel {
       Promise.all(
         this.getFlattenedMenu(
           this.getDocumentsFromMenus(this.settings.menu)
-        ).map(menuItem => {
-          return this.fetchJsonDocument(menuItem.document).then(doc => {
+        ).map((menuItem) => {
+          return this.fetchJsonDocument(menuItem.document).then((doc) => {
             doc.documentColor = menuItem.color;
             doc.documentFileName = menuItem.document;
             doc.documentTitle = menuItem.title;
@@ -372,10 +367,10 @@ export default class DocumentSearchModel {
           });
         })
       )
-        .then(documents => {
+        .then((documents) => {
           resolve(documents);
         })
-        .catch(err => {
+        .catch((err) => {
           reject(err);
         });
     });
