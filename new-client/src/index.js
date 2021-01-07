@@ -19,13 +19,9 @@ import * as serviceWorker from "./serviceWorker";
 
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./components/App.js";
 import buildConfig from "./buildConfig.json";
-import { deepMerge } from "./utils/DeepMerge";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import { createMuiTheme } from "@material-ui/core/styles";
-import { ThemeProvider } from "@material-ui/styles";
 import ErrorIcon from "@material-ui/icons/Error";
+import HajkThemeProvider from "./components/HajkThemeProvider";
 
 const networkErrorMessage =
   "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
@@ -35,39 +31,6 @@ const parseErrorMessage =
 const fetchOpts = {
   credentials: "same-origin",
 };
-
-/**
- * Helper function that creates a MUI theme by merging
- * hard-coded values (in this function), with custom values
- * (obtained from customTheme.json in /public).
- * This way, user can customize look and feel of application
- * AFTER it has been build with webpack, by simply tweaking
- * values in customTheme.json.
- *
- * @param {Object} config Map config that, among other objects, contains the default MUI theme
- * @param {Object} customTheme An object with the custom theme, obtained via fetch from customTheme.json
- * @returns {Object} A complete, ready to used theme object
- */
-function getTheme(config, customTheme) {
-  // Standard behavior is to use colors from current map config
-  // and make them primary and secondary colors for MUI theme.
-  const hardCodedDefaults = {
-    palette: {
-      primary: {
-        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
-      },
-      secondary: {
-        main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
-      },
-    },
-    shape: {
-      borderRadius: 2,
-    },
-  };
-
-  const mergedTheme = deepMerge(hardCodedDefaults, customTheme);
-  return createMuiTheme(mergedTheme);
-}
 
 /**
  * Entry point to Hajk.
@@ -157,17 +120,13 @@ fetch("appConfig.json", fetchOpts)
                   );
                 }
 
-                // Invoke React's renderer
+                // Invoke React's renderer. Render Theme. Theme will render App.
                 ReactDOM.render(
-                  // Wrap it all in a MUI Theme object
-                  <ThemeProvider theme={getTheme(config, customTheme)}>
-                    <CssBaseline />
-                    {/* See App.js's constructor() and render() to further investigate the App's flow */}
-                    <App
-                      activeTools={buildConfig.activeTools}
-                      config={config}
-                    />
-                  </ThemeProvider>,
+                  <HajkThemeProvider
+                    activeTools={buildConfig.activeTools}
+                    config={config}
+                    customTheme={customTheme}
+                  />,
                   document.getElementById("root")
                 );
               })

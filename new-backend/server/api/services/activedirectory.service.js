@@ -458,7 +458,7 @@ class ActiveDirectoryService {
    * @returns {Array} Groups that are common for all specified users
    * @memberof ActiveDirectoryService
    */
-  async findCommonGroupsForUsers(users) {
+  async findCommonADGroupsForUsers(users) {
     try {
       if (users.length < 1)
         throw new ActiveDirectoryError(

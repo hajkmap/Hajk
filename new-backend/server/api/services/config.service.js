@@ -488,9 +488,9 @@ class ConfigService {
     }
   }
 
-  async findCommonGroupsForUsers(users) {
+  async findCommonADGroupsForUsers(users) {
     try {
-      return ad.findCommonGroupsForUsers(users);
+      return ad.findCommonADGroupsForUsers(users);
     } catch (error) {
       return { error };
     }

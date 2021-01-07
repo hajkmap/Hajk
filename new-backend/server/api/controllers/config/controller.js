@@ -77,8 +77,8 @@ export class Controller {
     );
   }
 
-  findCommonGroupsForUsers(req, res) {
-    ConfigService.findCommonGroupsForUsers(req.query.users).then((data) =>
+  findCommonADGroupsForUsers(req, res) {
+    ConfigService.findCommonADGroupsForUsers(req.query.users).then((data) =>
       handleStandardResponse(res, data)
     );
   }

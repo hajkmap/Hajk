@@ -34,10 +34,18 @@ const styles = (theme) => {
 };
 
 class AttributionControl extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.ref = React.createRef();
+  }
+
   componentDidUpdate() {
-    if (this.props.map) {
+    // Go on only if map exists AND we haven't done this yet.
+    // Without the children.length part, we'd do this all the
+    // time as we're inside componentDidUpdate.
+    if (this.props.map && this.ref.current.children.length === 0) {
       const attributionControl = new Attribution({
-        target: this.refs.attributions,
+        target: this.ref.current,
         tipLabel: "Visa/dölj copyrightinformation för kartdata",
         label: "©",
       });
@@ -47,7 +55,7 @@ class AttributionControl extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    return <div ref="attributions" className={classes.attributions} />;
+    return <div ref={this.ref} className={classes.attributions} />;
   }
 }
 
