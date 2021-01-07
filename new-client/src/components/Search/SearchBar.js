@@ -146,6 +146,7 @@ class SearchBar extends React.PureComponent {
   getHighlightedACE = (searchString, autocompleteEntry) => {
     const { getArrayWithSearchWords, classes } = this.props;
     const stringArraySS = getArrayWithSearchWords(searchString);
+
     let highlightInformation = stringArraySS
       .map((searchWord) => {
         return this.getAllStartingIndexForOccurencesInString(
@@ -162,10 +163,12 @@ class SearchBar extends React.PureComponent {
 
     return (
       <Typography noWrap={true} className={classes.autocompleteTypography}>
-        {this.renderHighlightedAutocompleteEntry(
-          highlightInformation,
-          autocompleteEntry
-        )}
+        {highlightInformation.length > 0
+          ? this.renderHighlightedAutocompleteEntry(
+              highlightInformation,
+              autocompleteEntry
+            )
+          : autocompleteEntry}
       </Typography>
     );
   };
