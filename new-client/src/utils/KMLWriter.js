@@ -237,8 +237,10 @@ export function createXML(features, name) {
 
     doc += '<Style id="' + i + '">';
     if (style.getImage() instanceof Icon) {
+      const scale =
+        style?.getImage()?.getScale() ?? style.getImage().getSize()[0] / 32;
       doc += "<IconStyle>";
-      doc += "<scale>" + style.getImage().getSize()[0] / 32 + "</scale>";
+      doc += "<scale>" + scale + "</scale>";
       doc += "<Icon>";
       doc += "<href>" + style.getImage().getSrc() + "</href>";
       doc += "</Icon>";
