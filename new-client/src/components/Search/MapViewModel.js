@@ -13,7 +13,7 @@ class MapViewModel {
     this.options = settings.options;
     this.defaultStyle = this.getDefaultStyle();
     this.drawStyleSettings = this.getDrawStyleSettings();
-    this.FeatureStyle = new FeatureStyle(settings.options);
+    this.featureStyle = new FeatureStyle(settings.options);
     this.localObserver = settings.localObserver;
     this.initMapLayers();
     this.bindSubscriptions();
@@ -167,7 +167,7 @@ class MapViewModel {
         featureInfo.featureId
       );
       return feature.setStyle(
-        this.FeatureStyle.getHighlightedStyle(
+        this.featureStyle.getHighlightedStyle(
           feature,
           featureInfo.displayFields
         )
@@ -178,7 +178,7 @@ class MapViewModel {
   addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
     const feature = new GeoJSON().readFeature(featureInfo.feature);
     feature.setStyle(
-      this.FeatureStyle.getHighlightedStyle(feature, featureInfo.displayFields)
+      this.featureStyle.getHighlightedStyle(feature, featureInfo.displayFields)
     );
     this.resultSource.addFeature(feature);
     this.fitMapToSearchResult();

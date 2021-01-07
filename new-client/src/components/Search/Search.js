@@ -7,6 +7,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
+import KmlExport from "./utils/KmlExport";
 
 const styles = () => ({
   inputRoot: {
@@ -78,6 +79,7 @@ class Search extends React.PureComponent {
     this.map = props.map;
     this.searchModel = props.app.appModel.searchModel;
     this.initMapViewModel();
+    this.initExportHandlers();
     this.bindSubscriptions();
   }
 
@@ -88,6 +90,14 @@ class Search extends React.PureComponent {
       localObserver: this.localObserver,
       map: this.map,
       app: app,
+    });
+  };
+
+  initExportHandlers = () => {
+    this.kmlExport = new KmlExport({
+      options: this.props.options,
+      localObserver: this.localObserver,
+      map: this.map,
     });
   };
 

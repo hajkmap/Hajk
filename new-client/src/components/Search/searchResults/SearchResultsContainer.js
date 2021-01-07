@@ -23,6 +23,7 @@ import {
   Grow,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
+import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 
 const styles = (theme) => ({
   hidden: {
@@ -352,7 +353,7 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSearchResultListOptions = () => {
-    const { classes } = this.props;
+    const { classes, featureCollections } = this.props;
     const {
       activeFeatureCollection,
       featureCollectionSortingStrategy,
@@ -424,6 +425,14 @@ class SearchResultsContainer extends React.PureComponent {
                 <DeleteIcon />
               </Button>
             </Tooltip>
+            <SearchResultsDownloadMenu
+              featureCollections={
+                activeFeatureCollection
+                  ? [activeFeatureCollection]
+                  : featureCollections
+              }
+              localObserver={this.props.localObserver}
+            />
           </Grid>
         </Grow>
         <Grid item>
