@@ -17,18 +17,24 @@ import checkAdminAuthorization from "../api/middlewares/check.admin.authorizatio
 
 const app = new Express();
 
-// Setup our logger
+// Setup our logger.
+// First, see if Hajk is running in a clustered environment, if so, we want unique log file
+// names for each instance
+const uniqueInstance =
+  process.env.HAJK_INSTANCE_ID.length > 0
+    ? `_${process.env.HAJK_INSTANCE_ID}`
+    : "";
 log4js.configure({
   // Appenders are output methods, e.g. if log should be written to file or console (or both)
   appenders: {
     // Console appender will print to stdout
     console: { type: "stdout" },
-    // File appender will print to a log file, rotating it each day
-    file: { type: "dateFile", filename: "logs/output.log" },
+    // File appender will print to a log file, rotating it each day.
+    file: { type: "dateFile", filename: `logs/output${uniqueInstance}.log` },
     // This appender is used for writing access logs and will rotate daily
     accessLog: {
       type: "dateFile",
-      filename: "logs/access.log",
+      filename: `logs/access${uniqueInstance}.log`,
       layout: { type: "messagePassThrough" },
     },
   },
