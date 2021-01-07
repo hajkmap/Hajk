@@ -302,12 +302,15 @@ class SearchResultsDataset extends React.PureComponent {
       handleFeatureCollectionClick,
       showFeaturePreview,
       getFeatureTitle,
+      globalObserver,
     } = this.props;
     const { previewFeature, previewAnchorEl } = this.state;
     const shouldShowPreview =
       showFeaturePreview && !isMobile && !previewFeature?.onClickName
         ? true
         : false;
+    const renderFeatureCollection = !this.props.app
+      .appLoadedFromRenderElsewhere;
     return (
       <>
         <Accordion
@@ -316,7 +319,12 @@ class SearchResultsDataset extends React.PureComponent {
           expanded={activeFeatureCollection ? true : false}
           TransitionProps={{ timeout: 100 }}
           onChange={() => {
-            handleFeatureCollectionClick(featureCollection);
+            globalObserver.publish(
+              "search.featureCollectionClicked",
+              featureCollection
+            );
+            renderFeatureCollection &&
+              handleFeatureCollectionClick(featureCollection);
           }}
         >
           {this.renderDatasetSummary()}

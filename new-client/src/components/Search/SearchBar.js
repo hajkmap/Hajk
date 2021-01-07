@@ -176,6 +176,7 @@ class SearchBar extends React.PureComponent {
       app,
       map,
       localObserver,
+      globalObserver,
       resultPanelCollapsed,
       toggleCollapseSearchResults,
       options,
@@ -184,6 +185,7 @@ class SearchBar extends React.PureComponent {
     return (
       <SearchResultsContainer
         searchResults={searchResults}
+        globalObserver={globalObserver}
         localObserver={localObserver}
         app={app}
         getOriginBasedIcon={this.getOriginBasedIcon}
