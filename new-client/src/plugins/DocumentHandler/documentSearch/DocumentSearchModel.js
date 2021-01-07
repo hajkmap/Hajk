@@ -4,42 +4,21 @@ import { getStringArray, splitAndTrimOnCommas } from "../utils/helpers";
 
 export default class DocumentSearchModel {
   constructor(settings) {
-    this.settings = settings;
-    this.featureCollectionsToSearch = this.createDocumentCollectionsToSearch(
+    this.documentCollections = this.createDocumentCollectionsToSearch(
       settings.allDocuments
     );
   }
 
   createDocumentCollectionsToSearch = (allDocuments) => {
-    return allDocuments.reduce((featureCollections, document) => {
-      const features = this.getFeatures(document.chapters, document);
+    return allDocuments.reduce((documentCollection, document) => {
       return [
-        ...featureCollections,
-        this.getFeatureCollection(features, document),
+        ...documentCollection,
+        {
+          documentTitle: document.documentTitle,
+          features: this.getFeatures(document.chapters, document),
+        },
       ];
     }, []);
-  };
-
-  getFeatureCollection = (features, document) => {
-    return {
-      value: {
-        status: "fulfilled",
-        type: "FeatureCollection",
-        crs: { type: null, properties: { name: null } },
-        features: features,
-        numberMatched: 0,
-        numberReturned: 0,
-        timeStamp: null,
-        totalFeatures: 0,
-      },
-      source: {
-        id: document.documentTitle || document.documentFileName,
-        caption: document.documentTitle,
-        displayFields: ["header"],
-        searchFields: [],
-      },
-      origin: "DOCUMENT",
-    };
   };
 
   getFeatures = (chapters, document) => {
@@ -82,7 +61,6 @@ export default class DocumentSearchModel {
       searchValues: searchValues,
       id: `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`,
       onClickName: "documentHandlerSearchResultClicked",
-      internalChapterRef: chapter.id,
       properties: properties,
     };
   };
@@ -113,7 +91,7 @@ export default class DocumentSearchModel {
   //Method called by searchComponent in core (Part of searchInterface)
   getResults = (searchString, searchOptions) => {
     this.matchSearch = new MatchSearch(searchOptions);
-    this.searchOptions = searchOptions;
+
     return this.getDocumentHandlerResults(searchString, searchOptions);
   };
 
@@ -122,15 +100,9 @@ export default class DocumentSearchModel {
       if (searchString === "") {
         resolve({ featureCollections: [], errors: [] });
       }
-      let possibleSearchCombinations = [];
-      if (searchOptions.getPossibleCombinations) {
-        possibleSearchCombinations = this.getPossibleSearchCombinations(
-          searchString,
-          searchOptions
-        );
-      } else {
-        possibleSearchCombinations.push(splitAndTrimOnCommas(searchString));
-      }
+      let possibleSearchCombinations = searchOptions.getPossibleCombinations
+        ? this.getPossibleSearchCombinations(searchString, searchOptions)
+        : [splitAndTrimOnCommas(searchString)];
 
       resolve({
         featureCollections: this.getFeatureCollectionsForMatchingDocuments(
@@ -154,28 +126,24 @@ export default class DocumentSearchModel {
   };
 
   getMatchedFeatures = (docFeatureCollection, possibleSearchCombinations) => {
-    return docFeatureCollection.value.features.reduce(
-      (matchedFeatures, feature) => {
-        feature.matchedSearchValues = this.getMatchedSearchValues(
-          possibleSearchCombinations,
-          feature.properties.documentTitle,
-          feature.searchValues
-        );
+    return docFeatureCollection.features.reduce((matchedFeatures, feature) => {
+      feature.matchedSearchValues = this.getMatchedSearchValues(
+        possibleSearchCombinations,
+        feature.properties.documentTitle,
+        feature.searchValues
+      );
 
-        return feature.matchedSearchValues.length > 0
-          ? [...matchedFeatures, feature]
-          : matchedFeatures;
-      },
-      []
-    );
+      return feature.matchedSearchValues.length > 0
+        ? [...matchedFeatures, feature]
+        : matchedFeatures;
+    }, []);
   };
 
-  getUpdatedFeatureCollection = (
+  createFeatureCollection = (
     matchedFeatures,
     searchFields,
     docFeatureCollection
   ) => {
-    console.log(docFeatureCollection, "docFeatureCollection");
     return {
       value: {
         status: "fulfilled",
@@ -184,12 +152,12 @@ export default class DocumentSearchModel {
         features: matchedFeatures,
         numberMatched: matchedFeatures.length,
         numberReturned: matchedFeatures.length,
-        timeStamp: null,
+        timeStamp: new Date().toISOString(),
         totalFeatures: matchedFeatures.length,
       },
       source: {
-        id: docFeatureCollection.source.documentFileName,
-        caption: docFeatureCollection.source.caption,
+        id: docFeatureCollection.documentTitle,
+        caption: docFeatureCollection.documentTitle,
         displayFields: ["header"],
         searchFields: [...searchFields],
       },
@@ -198,18 +166,17 @@ export default class DocumentSearchModel {
   };
 
   getFeatureCollectionsForMatchingDocuments = (possibleSearchCombinations) => {
-    return this.featureCollectionsToSearch.reduce(
-      (featureCollections, docFeatureCollection) => {
+    return this.documentCollections.reduce(
+      (featureCollections, documentCollection) => {
         const matchedFeatures = this.getMatchedFeatures(
-          docFeatureCollection,
+          documentCollection,
           possibleSearchCombinations
         );
-        console.log(matchedFeatures, "matchedFeatures");
         const searchFields = this.getSearchFields(matchedFeatures);
-        const featureCollection = this.getUpdatedFeatureCollection(
+        const featureCollection = this.createFeatureCollection(
           matchedFeatures,
           searchFields,
-          docFeatureCollection
+          documentCollection
         );
 
         return featureCollection
@@ -245,15 +212,26 @@ export default class DocumentSearchModel {
     }, []);
   };
 
+  documentTitleInSearchCombination = (searchCombination, documentTitle) => {
+    return searchCombination.some((word) => {
+      return documentTitle.toLowerCase().search(word.toLowerCase()) !== -1;
+    });
+  };
+
+  getAllMatchedSearchValues = (word, searchValues) => {
+    const allMatched = new Set();
+    const matchedSearchValues = this.getMatched(word, searchValues);
+    matchedSearchValues.forEach((matched) => {
+      allMatched.add(matched);
+    });
+    return allMatched;
+  };
+
   /**
-   * Sets matchedsearchvalues for each chapter
+   * TODO - Try to refactor, difficult though
    * If any (some-function) of the searchcombinations is hit, that is a match
-   * For a searchCombination to be a match must every (every-function) searchword in that combination
-   * find a match
-   * @param {chapter} chapter chapter.
-   * @param {array} searchCombinations array with arrays containing searchwords.
-   * @return Returns true if a match is found.
-   *
+   * a searchCombination can be a hit if the documentTitle is present in the combination, results in adding all as matched
+   * a searchCombination can be hit if every combination has a searchhit
    */
   getMatchedSearchValues = (
     searchCombinations,
@@ -261,38 +239,27 @@ export default class DocumentSearchModel {
     searchValues
   ) => {
     let allMatched = new Set();
-
     let match = searchCombinations.some((searchCombination) => {
-      const docexists = searchCombination.some((comb) => {
-        return comb.toLowerCase() === documentTitle.toLowerCase();
-      });
-      console.log(docexists, "docexists");
-      if (docexists) {
-        searchValues.forEach((x) => {
-          console.log(x, "x");
-          allMatched.add(x);
-        });
+      if (
+        this.documentTitleInSearchCombination(searchCombination, documentTitle)
+      ) {
+        searchValues.forEach(allMatched.add, allMatched);
         return true;
       } else {
         return searchCombination.every((word) => {
-          const matchedSearchValues = this.getMatched(word, searchValues);
-
-          matchedSearchValues.forEach((matched) => {
-            allMatched.add(matched);
-          });
-          return matchedSearchValues.length > 0;
+          let matchedSet = this.getAllMatchedSearchValues(word, searchValues);
+          allMatched = [...allMatched, ...matchedSet];
+          return matchedSet.size > 0;
         });
       }
     });
-    console.log(Array.from(allMatched), "allmatched");
+
     return match ? Array.from(allMatched) : [];
   };
 
   getMatched = (searchString, searchFields) => {
     return searchFields.reduce((matchedSearchFields, searchField) => {
-      let match = this.matchSearch.compare(searchString, searchField)
-        .searchResults.match;
-      if (match) {
+      if (this.matchSearch.compare(searchString, searchField)) {
         return [...matchedSearchFields, searchField];
       }
       return matchedSearchFields;

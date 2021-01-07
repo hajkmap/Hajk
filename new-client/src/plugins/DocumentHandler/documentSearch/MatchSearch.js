@@ -25,22 +25,10 @@ export default class MatchSearch {
     return string.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
   };
 
-  /**
-   * Compare searchString agains keyword to se if it matches
-   * @param {string} searchString The search string.
-   * @param {string} keyword The keyword.
-   * @returns Returns an object of the compare results.
-   *
-   * @memberof MatchSearch
-   */
   compare = (searchString, searchword) => {
     const toSearchIn = this.escapeSpecialChars(searchString);
     const match = this.getMatchRegexp(toSearchIn).test(searchword);
 
-    return {
-      searchResults: {
-        match: match,
-      },
-    };
+    return match;
   };
 }
