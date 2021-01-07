@@ -1,26 +1,24 @@
 import MatchSearch from "./MatchSearch";
 import { v4 as uuidv4 } from "uuid";
-import { getStringArray } from "../utils/helpers";
+import { getStringArray, splitAndTrimOnCommas } from "../utils/helpers";
 
 export default class DocumentSearchModel {
   constructor(settings) {
     this.settings = settings;
-    this.allDocuments = settings.allDocuments;
-    this.featureCollectionsToSearch = this.allDocuments.reduce(
-      (featureCollections, document) => {
-        let features = this.getFeatures(document.chapters, document);
-        if (document.documentTitle) {
-          features[0].searchValues.push(document.documentTitle);
-        }
-
-        return [
-          ...featureCollections,
-          this.getFeatureCollection(features, document),
-        ];
-      },
-      []
+    this.featureCollectionsToSearch = this.createDocumentCollectionsToSearch(
+      settings.allDocuments
     );
   }
+
+  createDocumentCollectionsToSearch = (allDocuments) => {
+    return allDocuments.reduce((featureCollections, document) => {
+      const features = this.getFeatures(document.chapters, document);
+      return [
+        ...featureCollections,
+        this.getFeatureCollection(features, document),
+      ];
+    }, []);
+  };
 
   getFeatureCollection = (features, document) => {
     return {
@@ -35,8 +33,8 @@ export default class DocumentSearchModel {
         totalFeatures: 0,
       },
       source: {
-        id: document.documentFileName,
-        caption: "Dokument",
+        id: document.documentTitle || document.documentFileName,
+        caption: document.documentTitle,
         displayFields: ["header"],
         searchFields: [],
       },
@@ -115,6 +113,7 @@ export default class DocumentSearchModel {
   //Method called by searchComponent in core (Part of searchInterface)
   getResults = (searchString, searchOptions) => {
     this.matchSearch = new MatchSearch(searchOptions);
+    this.searchOptions = searchOptions;
     return this.getDocumentHandlerResults(searchString, searchOptions);
   };
 
@@ -123,9 +122,19 @@ export default class DocumentSearchModel {
       if (searchString === "") {
         resolve({ featureCollections: [], errors: [] });
       }
+      let possibleSearchCombinations = [];
+      if (searchOptions.getPossibleCombinations) {
+        possibleSearchCombinations = this.getPossibleSearchCombinations(
+          searchString,
+          searchOptions
+        );
+      } else {
+        possibleSearchCombinations.push(splitAndTrimOnCommas(searchString));
+      }
+
       resolve({
         featureCollections: this.getFeatureCollectionsForMatchingDocuments(
-          this.getPossibleSearchCombinations(searchString)
+          possibleSearchCombinations
         ),
         errors: [],
       });
@@ -149,6 +158,7 @@ export default class DocumentSearchModel {
       (matchedFeatures, feature) => {
         feature.matchedSearchValues = this.getMatchedSearchValues(
           possibleSearchCombinations,
+          feature.properties.documentTitle,
           feature.searchValues
         );
 
@@ -160,7 +170,12 @@ export default class DocumentSearchModel {
     );
   };
 
-  getUpdatedFeatureCollection = (matchedFeatures, searchFields) => {
+  getUpdatedFeatureCollection = (
+    matchedFeatures,
+    searchFields,
+    docFeatureCollection
+  ) => {
+    console.log(docFeatureCollection, "docFeatureCollection");
     return {
       value: {
         status: "fulfilled",
@@ -173,8 +188,8 @@ export default class DocumentSearchModel {
         totalFeatures: matchedFeatures.length,
       },
       source: {
-        id: `${document.documentFileName}`,
-        caption: "Dokument",
+        id: docFeatureCollection.source.documentFileName,
+        caption: docFeatureCollection.source.caption,
         displayFields: ["header"],
         searchFields: [...searchFields],
       },
@@ -189,11 +204,12 @@ export default class DocumentSearchModel {
           docFeatureCollection,
           possibleSearchCombinations
         );
-
+        console.log(matchedFeatures, "matchedFeatures");
         const searchFields = this.getSearchFields(matchedFeatures);
         const featureCollection = this.getUpdatedFeatureCollection(
           matchedFeatures,
-          searchFields
+          searchFields,
+          docFeatureCollection
         );
 
         return featureCollection
@@ -239,18 +255,36 @@ export default class DocumentSearchModel {
    * @return Returns true if a match is found.
    *
    */
-  getMatchedSearchValues = (searchCombinations, searchValues) => {
-    let allMatched = new Set(); //To ensure no duplicates
-    let match = searchCombinations.some((searchCombination) => {
-      return searchCombination.every((word) => {
-        const matchedSearchValues = this.getMatched(word, searchValues);
-        matchedSearchValues.forEach((matched) => {
-          allMatched.add(matched);
-        });
-        return matchedSearchValues.length > 0;
-      });
-    });
+  getMatchedSearchValues = (
+    searchCombinations,
+    documentTitle,
+    searchValues
+  ) => {
+    let allMatched = new Set();
 
+    let match = searchCombinations.some((searchCombination) => {
+      const docexists = searchCombination.some((comb) => {
+        return comb.toLowerCase() === documentTitle.toLowerCase();
+      });
+      console.log(docexists, "docexists");
+      if (docexists) {
+        searchValues.forEach((x) => {
+          console.log(x, "x");
+          allMatched.add(x);
+        });
+        return true;
+      } else {
+        return searchCombination.every((word) => {
+          const matchedSearchValues = this.getMatched(word, searchValues);
+
+          matchedSearchValues.forEach((matched) => {
+            allMatched.add(matched);
+          });
+          return matchedSearchValues.length > 0;
+        });
+      }
+    });
+    console.log(Array.from(allMatched), "allmatched");
     return match ? Array.from(allMatched) : [];
   };
 

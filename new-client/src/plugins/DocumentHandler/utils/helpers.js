@@ -1,4 +1,4 @@
-const splitAndTrimOnCommas = (searchString) => {
+export const splitAndTrimOnCommas = (searchString) => {
   return searchString.split(",").map((string) => {
     return string.trim();
   });
