@@ -35,7 +35,7 @@ export default class DocumentSearchModel {
         totalFeatures: 0,
       },
       source: {
-        id: `${document.documentFileName}`,
+        id: document.documentFileName,
         caption: "Dokument",
         displayFields: ["header"],
         searchFields: [],
@@ -62,11 +62,11 @@ export default class DocumentSearchModel {
 
   createFeatureFromChapter = (chapter, document) => {
     let searchValues = [];
+
     if (chapter.header) {
       searchValues.push(chapter.header);
     }
     if (chapter.keywords && chapter.keywords.length > 0) {
-      console.log(chapter, "chapter");
       searchValues = [...searchValues, ...chapter.keywords];
     }
 
@@ -83,7 +83,7 @@ export default class DocumentSearchModel {
       geometry: null,
       searchValues: searchValues,
       id: `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`,
-      onClickName: "documenthandler-searchresult-clicked",
+      onClickName: "documentHandlerSearchResultClicked",
       internalChapterRef: chapter.id,
       properties: properties,
     };
@@ -205,60 +205,28 @@ export default class DocumentSearchModel {
   };
 
   getPossibleSearchCombinations = (searchString) => {
-    let possibleSearchCombinations = [];
+    let possibleSearchCombinations = [[searchString]];
     let wordsInTextField = getStringArray(searchString);
-    if (wordsInTextField.length > 1) {
-      for (let i = 0; i < wordsInTextField.length; i++) {
-        let combination = wordsInTextField.slice(wordsInTextField.length - i);
 
-        combination.unshift(
-          wordsInTextField
-            .slice(0, wordsInTextField.length - i)
-            .join()
-            .replace(/,/g, " ")
-        );
-        possibleSearchCombinations.push(combination);
-      }
-    } else {
-      possibleSearchCombinations.push([searchString]);
+    for (let i = 0; i < wordsInTextField.length; i++) {
+      let combination = wordsInTextField.slice(wordsInTextField.length - i);
+      let word = wordsInTextField
+        .slice(0, wordsInTextField.length - i)
+        .join()
+        .replace(/,/g, " ");
+
+      combination.unshift(word);
+      possibleSearchCombinations.push(combination);
     }
-
     return possibleSearchCombinations;
   };
 
   getMockedSearchFieldForChapter = (feature) => {
     return feature.matchedSearchValues.reduce((searchFields, searchValue) => {
       const searchField = uuidv4();
-
-      if (!this.arrayContainsString(searchFields, searchField, true)) {
-        searchFields = [...searchFields, searchField];
-      }
-      if (
-        this.arrayContainsString(feature.matchedSearchValues, searchValue, true)
-      ) {
-        feature.properties[searchField] = searchValue;
-      } else {
-        feature.properties[searchField] = "";
-      }
+      feature.properties[searchField] = searchValue;
+      return [...searchFields, searchField];
     }, []);
-  };
-
-  createFeatureFromChapter = (chapter, document) => {
-    let properties = {
-      header: chapter.header,
-      geoids: chapter.geoids,
-      headerIdentifier: chapter.headerIdentifier,
-      documentTitle: document.documentTitle,
-      documentFileName: document.documentFileName,
-    };
-
-    return {
-      type: "Feature",
-      geometry: null,
-      id: `${chapter.documentTitle}${Math.floor(Math.random() * 1000)}`,
-      onClickName: "documentHandlerSearchResultClicked",
-      properties: properties,
-    };
   };
 
   /**
@@ -272,41 +240,28 @@ export default class DocumentSearchModel {
    *
    */
   getMatchedSearchValues = (searchCombinations, searchValues) => {
-    let allMatched = [];
+    let allMatched = new Set(); //To ensure no duplicates
     let match = searchCombinations.some((searchCombination) => {
-      let everyResult = searchCombination.every((word) => {
-        let matchedSearchValues = this.getMatched(word, searchValues);
-        allMatched = allMatched.concat(matchedSearchValues);
+      return searchCombination.every((word) => {
+        const matchedSearchValues = this.getMatched(word, searchValues);
+        matchedSearchValues.forEach((matched) => {
+          allMatched.add(matched);
+        });
         return matchedSearchValues.length > 0;
       });
-
-      return everyResult;
     });
 
-    return match ? allMatched : [];
+    return match ? Array.from(allMatched) : [];
   };
 
-  arrayContainsString(array, string, ignoreCase) {
-    return array.some((word) => {
-      if (ignoreCase) {
-        return word.toLowerCase() === string.toLowerCase();
-      } else {
-        return word === string;
-      }
-    });
-  }
-
   getMatched = (searchString, searchFields) => {
-    return searchFields.reduce((matchedSearchValues, searchField) => {
+    return searchFields.reduce((matchedSearchFields, searchField) => {
       let match = this.matchSearch.compare(searchString, searchField)
         .searchResults.match;
-      if (
-        match &&
-        !this.arrayContainsString(matchedSearchValues, searchField, true)
-      ) {
-        return [...matchedSearchValues, searchField];
+      if (match) {
+        return [...matchedSearchFields, searchField];
       }
-      return matchedSearchValues;
+      return matchedSearchFields;
     }, []);
   };
 }
