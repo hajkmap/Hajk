@@ -33,10 +33,9 @@ export default class MatchSearch {
    *
    * @memberof MatchSearch
    */
-  compare = (searchString, keyword) => {
-    let toSearchIn = this.escapeSpecialChars(searchString);
-
-    let match = this.getMatchRegexp(toSearchIn).test(keyword);
+  compare = (searchString, searchword) => {
+    const toSearchIn = this.escapeSpecialChars(searchString);
+    const match = this.getMatchRegexp(toSearchIn).test(searchword);
 
     return {
       searchResults: {
