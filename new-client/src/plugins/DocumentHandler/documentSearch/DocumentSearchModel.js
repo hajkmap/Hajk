@@ -1,10 +1,93 @@
 import MatchSearch from "./MatchSearch";
+import { v4 as uuidv4 } from "uuid";
+import { getStringArray } from "../utils/helpers";
 
 export default class DocumentSearchModel {
   constructor(settings) {
     this.settings = settings;
     this.allDocuments = settings.allDocuments;
+    this.featureCollectionsToSearch = this.allDocuments.reduce(
+      (featureCollections, document) => {
+        let features = this.getFeatures(document.chapters, document);
+        if (document.documentTitle) {
+          features[0].searchValues.push(document.documentTitle);
+        }
+
+        return [
+          ...featureCollections,
+          this.getFeatureCollection(features, document),
+        ];
+      },
+      []
+    );
   }
+
+  getFeatureCollection = (features, document) => {
+    return {
+      value: {
+        status: "fulfilled",
+        type: "FeatureCollection",
+        crs: { type: null, properties: { name: null } },
+        features: features,
+        numberMatched: 0,
+        numberReturned: 0,
+        timeStamp: null,
+        totalFeatures: 0,
+      },
+      source: {
+        id: `${document.documentFileName}`,
+        caption: "Dokument",
+        displayFields: ["header"],
+        searchFields: [],
+      },
+      origin: "DOCUMENT",
+    };
+  };
+
+  getFeatures = (chapters, document) => {
+    return chapters.reduce((features, chapter) => {
+      if (chapter.chapters) {
+        features = [
+          ...features,
+          ...this.getFeatures(chapter.chapters, document),
+        ];
+      }
+      features = [
+        ...features,
+        this.createFeatureFromChapter(chapter, document),
+      ];
+      return features;
+    }, []);
+  };
+
+  createFeatureFromChapter = (chapter, document) => {
+    let searchValues = [];
+    if (chapter.header) {
+      searchValues.push(chapter.header);
+    }
+    if (chapter.keywords && chapter.keywords.length > 0) {
+      console.log(chapter, "chapter");
+      searchValues = [...searchValues, ...chapter.keywords];
+    }
+
+    let properties = {
+      header: chapter.header,
+      geoids: chapter.geoids,
+      headerIdentifier: chapter.headerIdentifier,
+      documentTitle: document.documentTitle,
+      documentFileName: document.documentFileName,
+    };
+
+    return {
+      type: "Feature",
+      geometry: null,
+      searchValues: searchValues,
+      id: `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`,
+      onClickName: "documenthandler-searchresult-clicked",
+      internalChapterRef: chapter.id,
+      properties: properties,
+    };
+  };
 
   implementSearchInterface = () => {
     return {
@@ -31,7 +114,7 @@ export default class DocumentSearchModel {
 
   //Method called by searchComponent in core (Part of searchInterface)
   getResults = (searchString, searchOptions) => {
-    this.matchSearch = new MatchSearch(1.0, searchOptions);
+    this.matchSearch = new MatchSearch(searchOptions);
     return this.getDocumentHandlerResults(searchString, searchOptions);
   };
 
@@ -40,21 +123,44 @@ export default class DocumentSearchModel {
       if (searchString === "") {
         resolve({ featureCollections: [], errors: [] });
       }
-
-      let possibleSearchCombinations = this.getPossibleSearchCombinations(
-        searchOptions,
-        searchString
-      );
-
-      let featureCollections = this.getFeatureCollectionsForMatchingDocuments(
-        possibleSearchCombinations
-      );
-
-      resolve({ featureCollections: featureCollections, errors: [] });
+      resolve({
+        featureCollections: this.getFeatureCollectionsForMatchingDocuments(
+          this.getPossibleSearchCombinations(searchString)
+        ),
+        errors: [],
+      });
     });
   };
 
-  createFeatureCollection = (document, matchedFeatures, searchFields) => {
+  getSearchFields = (matchedFeatures) => {
+    return matchedFeatures.reduce((searchFields, feature) => {
+      if (feature.matchedSearchValues.length > 0) {
+        searchFields = [
+          ...searchFields,
+          ...this.getMockedSearchFieldForChapter(feature),
+        ];
+      }
+      return searchFields;
+    }, []);
+  };
+
+  getMatchedFeatures = (docFeatureCollection, possibleSearchCombinations) => {
+    return docFeatureCollection.value.features.reduce(
+      (matchedFeatures, feature) => {
+        feature.matchedSearchValues = this.getMatchedSearchValues(
+          possibleSearchCombinations,
+          feature.searchValues
+        );
+
+        return feature.matchedSearchValues.length > 0
+          ? [...matchedFeatures, feature]
+          : matchedFeatures;
+      },
+      []
+    );
+  };
+
+  getUpdatedFeatureCollection = (matchedFeatures, searchFields) => {
     return {
       value: {
         status: "fulfilled",
@@ -67,8 +173,8 @@ export default class DocumentSearchModel {
         totalFeatures: matchedFeatures.length,
       },
       source: {
-        id: `${document.documentTitle}`,
-        caption: document.documentTitle,
+        id: `${document.documentFileName}`,
+        caption: "Dokument",
         displayFields: ["header"],
         searchFields: [...searchFields],
       },
@@ -76,151 +182,65 @@ export default class DocumentSearchModel {
     };
   };
 
-  createFeatureCollectionForDocument = (document) => {
-    let matchedFeatures = [];
-    let documentSearchFields = [];
-
-    const recursivelyCreateFeaturesFromChapters = (chapters) => {
-      for (var i = 0; i < chapters.length; i++) {
-        if (this.hasSubChapters(chapters[i])) {
-          recursivelyCreateFeaturesFromChapters(chapters[i].chapters);
-        }
-        if (chapters[i].matchedSearchValues.length > 0) {
-          let matchedFeature = this.createFeatureFromChapter(
-            chapters[i],
-            document
-          );
-
-          let chapterSearchFields = this.getMockedSearchFieldForChapter(
-            chapters[i],
-            matchedFeature.properties
-          );
-
-          documentSearchFields = [documentSearchFields, ...chapterSearchFields];
-
-          matchedFeatures.push(matchedFeature);
-        }
-      }
-    };
-
-    recursivelyCreateFeaturesFromChapters(document.chapters);
-
-    if (matchedFeatures.length > 0) {
-      return this.createFeatureCollection(
-        document,
-        matchedFeatures,
-        documentSearchFields
-      );
-    }
-    return null;
-  };
-
   getFeatureCollectionsForMatchingDocuments = (possibleSearchCombinations) => {
-    let featureCollections = [];
-    this.allDocuments.forEach((document) => {
-      document.chapters.forEach((chapter) => {
-        this.setmatchedSearchValuesOnChapter(
-          document,
-          chapter,
+    return this.featureCollectionsToSearch.reduce(
+      (featureCollections, docFeatureCollection) => {
+        const matchedFeatures = this.getMatchedFeatures(
+          docFeatureCollection,
           possibleSearchCombinations
         );
-      });
 
-      let featureCollection = this.createFeatureCollectionForDocument(
-        document,
-        possibleSearchCombinations
-      );
+        const searchFields = this.getSearchFields(matchedFeatures);
+        const featureCollection = this.getUpdatedFeatureCollection(
+          matchedFeatures,
+          searchFields
+        );
 
-      if (featureCollection) {
-        featureCollections.push(featureCollection);
-      }
-    });
-    return featureCollections;
-  };
-
-  splitAndTrimOnCommas = (searchString) => {
-    return searchString.split(",").map((string) => {
-      return string.trim();
-    });
-  };
-
-  getStringArray = (searchString) => {
-    let tempStringArray = this.splitAndTrimOnCommas(searchString);
-    return tempStringArray.join(" ").split(" ");
-  };
-
-  getPossibleSearchCombinations = (searchString, searchOptions) => {
-    let possibleSearchCombinations = [];
-    let wordsInTextField = this.getStringArray(searchString);
-
-    for (let i = 0; i < wordsInTextField.length; i++) {
-      let combination = wordsInTextField.slice(wordsInTextField.length - i);
-      combination.unshift(
-        wordsInTextField
-          .slice(0, wordsInTextField.length - i)
-          .join()
-          .replace(/,/g, " ")
-      );
-      possibleSearchCombinations.push(combination);
-    }
-    return this.addPotentialWildCards(
-      possibleSearchCombinations,
-      searchOptions
+        return featureCollection
+          ? [...featureCollections, featureCollection]
+          : featureCollections;
+      },
+      []
     );
   };
 
-  addPotentialWildCards = (possibleSearchCombinations, searchOptions) => {
-    return possibleSearchCombinations.map((wordArray) => {
-      return wordArray.map((word) => {
-        word = searchOptions.wildcardAtStart ? `*${word}` : word;
-        word = searchOptions.wildcardAtEnd ? `${word}*` : word;
-        return word;
-      });
-    });
-  };
+  getPossibleSearchCombinations = (searchString) => {
+    let possibleSearchCombinations = [];
+    let wordsInTextField = getStringArray(searchString);
+    if (wordsInTextField.length > 1) {
+      for (let i = 0; i < wordsInTextField.length; i++) {
+        let combination = wordsInTextField.slice(wordsInTextField.length - i);
 
-  setSearchValuesForChapter = (chapter) => {
-    chapter.searchValues = [];
-    if (chapter.keywords) {
-      chapter.searchValues = chapter.searchValues.concat(chapter.keywords);
-    }
-    chapter.searchValues.push(chapter.header);
-  };
-
-  hasSubChapters = (chapter) => {
-    return chapter.chapters && chapter.chapters.length > 0;
-  };
-
-  setmatchedSearchValuesOnChapter = (document, chapter, searchCombinations) => {
-    if (this.hasSubChapters(chapter)) {
-      chapter.chapters.forEach((subChapter) => {
-        this.setmatchedSearchValuesOnChapter(
-          document,
-          subChapter,
-          searchCombinations
+        combination.unshift(
+          wordsInTextField
+            .slice(0, wordsInTextField.length - i)
+            .join()
+            .replace(/,/g, " ")
         );
-      });
+        possibleSearchCombinations.push(combination);
+      }
+    } else {
+      possibleSearchCombinations.push([searchString]);
     }
-    this.setmatchedSearchValues(chapter, searchCombinations);
+
+    return possibleSearchCombinations;
   };
 
-  getMockedSearchFieldForChapter = (chapter, properties) => {
-    let searchFields = [];
-    chapter.matchedSearchValues.forEach((searchValue, index) => {
-      if (
-        !this.arrayContainsString(searchFields, `searchField${index}`, true)
-      ) {
-        searchFields.push(`searchField${index}`);
+  getMockedSearchFieldForChapter = (feature) => {
+    return feature.matchedSearchValues.reduce((searchFields, searchValue) => {
+      const searchField = uuidv4();
+
+      if (!this.arrayContainsString(searchFields, searchField, true)) {
+        searchFields = [...searchFields, searchField];
       }
       if (
-        this.arrayContainsString(chapter.matchedSearchValues, searchValue, true)
+        this.arrayContainsString(feature.matchedSearchValues, searchValue, true)
       ) {
-        properties[`searchField${index}`] = searchValue;
+        feature.properties[searchField] = searchValue;
       } else {
-        properties[`searchField${index}`] = "";
+        feature.properties[searchField] = "";
       }
-    });
-    return searchFields;
+    }, []);
   };
 
   createFeatureFromChapter = (chapter, document) => {
@@ -251,50 +271,19 @@ export default class DocumentSearchModel {
    * @return Returns true if a match is found.
    *
    */
-  setmatchedSearchValues = (chapter, searchCombinations) => {
-    this.setSearchValuesForChapter(chapter);
+  getMatchedSearchValues = (searchCombinations, searchValues) => {
     let allMatched = [];
     let match = searchCombinations.some((searchCombination) => {
       let everyResult = searchCombination.every((word) => {
-        let matchedSearchValues = this.getMatchSearchValues(
-          word,
-          chapter.searchValues
-        );
+        let matchedSearchValues = this.getMatched(word, searchValues);
         allMatched = allMatched.concat(matchedSearchValues);
-
         return matchedSearchValues.length > 0;
       });
 
       return everyResult;
     });
 
-    if (match) {
-      chapter.matchedSearchValues = allMatched;
-    } else {
-      chapter.matchedSearchValues = [];
-    }
-  };
-
-  getPossibleSearchCombinations = (searchOptions, searchString) => {
-    let possibleSearchCombinations = [];
-    possibleSearchCombinations.push(this.splitAndTrimOnCommas(searchString));
-    // possibleSearchCombinations = this.addPotentialWildCards(
-    //   possibleSearchCombinations,
-    //   searchOptions
-    // );
-    return possibleSearchCombinations;
-  };
-
-  setMatchInformationForDocument = (document, possibleSearchCombinations) => {
-    document.chapters.forEach((chapter) => {
-      possibleSearchCombinations.forEach((searchCombination) => {
-        this.setMatchedSearchValuesOnChapter(
-          document,
-          chapter,
-          searchCombination
-        );
-      });
-    });
+    return match ? allMatched : [];
   };
 
   arrayContainsString(array, string, ignoreCase) {
@@ -307,72 +296,17 @@ export default class DocumentSearchModel {
     });
   }
 
-  /**
-   * Perform a search match between the search string and all keywords.
-   * @param {string} searchString The search string.
-   * @param {array} keywords The chapter's keywords.
-   * @return Returns true if a match is found.
-   *
-   */
-  getMatchSearchValues = (searchString, searchFields) => {
-    let matchedSearchValues = [];
-    searchFields.forEach((searchField) => {
-      let compareResults = this.matchSearch.compare(searchString, searchField);
-
+  getMatched = (searchString, searchFields) => {
+    return searchFields.reduce((matchedSearchValues, searchField) => {
+      let match = this.matchSearch.compare(searchString, searchField)
+        .searchResults.match;
       if (
-        compareResults.searchResults.match &&
+        match &&
         !this.arrayContainsString(matchedSearchValues, searchField, true)
       ) {
-        matchedSearchValues.push(searchField);
+        return [...matchedSearchValues, searchField];
       }
-    });
-
-    return matchedSearchValues;
+      return matchedSearchValues;
+    }, []);
   };
-
-  getDocumentsFromMenus(menu) {
-    return menu.filter((menuItem) => {
-      return menuItem.document || menuItem.menu.length > 0;
-    });
-  }
-
-  getFlattenedMenu(menu) {
-    let flattenedMenu = [];
-    menu.forEach((menuItem) => {
-      if (menuItem.menu.length > 0) {
-        flattenedMenu = flattenedMenu.concat(
-          this.getFlattenedMenu(menuItem.menu)
-        );
-      } else {
-        flattenedMenu.push(menuItem);
-      }
-    });
-    return flattenedMenu;
-  }
-
-  getAllDocumentsContainedInMenu() {
-    return new Promise((resolve, reject) => {
-      if (this.allDocuments.length > 0) {
-        resolve(this.allDocuments);
-      }
-      Promise.all(
-        this.getFlattenedMenu(
-          this.getDocumentsFromMenus(this.settings.menu)
-        ).map((menuItem) => {
-          return this.fetchJsonDocument(menuItem.document).then((doc) => {
-            doc.documentColor = menuItem.color;
-            doc.documentFileName = menuItem.document;
-            doc.documentTitle = menuItem.title;
-            return doc;
-          });
-        })
-      )
-        .then((documents) => {
-          resolve(documents);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
-  }
 }
