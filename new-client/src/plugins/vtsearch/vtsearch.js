@@ -171,6 +171,13 @@ class VTSearch extends React.PureComponent {
         expanded: typeOfSearch === searchTypes.DEFAULT ? false : true,
       });
     });
+
+    this.globalObserver.subscribe(
+      "search.featureCollectionClicked",
+      (featureCollection) => {
+        // this.localObserver.publish("vtsearch-result-done", featureCollection);
+      }
+    );
   };
 
   handleExpandClick = () => {
@@ -201,9 +208,9 @@ class VTSearch extends React.PureComponent {
     switch (this.state.activeSearchTool) {
       case searchTypes.SEARCH: {
         this.props.app.appModel = this.props.app; // Fixa till
+        this.props.app.appModel.appLoadedFromRenderElsewhere = this.state.appLoaded;
         return (
           <Search
-            appLoadedFromRenderElsewhere={this.state.appLoaded}
             map={this.props.app.getMap()}
             app={this.props.app}
             options={this.props.app.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core

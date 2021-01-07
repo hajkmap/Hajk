@@ -80,7 +80,8 @@ class Search extends React.PureComponent {
     this.initMapViewModel();
     this.bindSubscriptions();
 
-    if (props.appLoadedFromRenderElsewhere) this.bindSearchImplementedPlugins();
+    if (props.app.appLoadedFromRenderElsewhere)
+      this.bindSearchImplementedPlugins();
   }
 
   initMapViewModel = () => {
@@ -767,6 +768,7 @@ class Search extends React.PureComponent {
             root: classes.inputRoot,
           }}
           escapeRegExp={this.escapeRegExp}
+          globalObserver={this.props.app.globalObserver}
           localObserver={this.localObserver}
           searchTools={searchTools}
           searchResults={searchResults}

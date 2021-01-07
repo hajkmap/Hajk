@@ -657,6 +657,7 @@ class SearchResultsContainer extends React.PureComponent {
       app,
       getOriginBasedIcon,
       localObserver,
+      globalObserver,
       panelCollapsed,
       showFeaturePreview,
     } = this.props;
@@ -702,6 +703,7 @@ class SearchResultsContainer extends React.PureComponent {
                   <Grid item xs={12}>
                     <SearchResultsList
                       localObserver={localObserver}
+                      globalObserver={globalObserver}
                       getOriginBasedIcon={getOriginBasedIcon}
                       featureCollections={sortedFeatureCollections}
                       app={app}

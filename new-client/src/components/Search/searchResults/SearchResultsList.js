@@ -214,6 +214,7 @@ class SearchResultsList extends React.PureComponent {
       showFeaturePreview,
       getFeatureTitle,
       localObserver,
+      globalObserver,
     } = this.props;
 
     return (
@@ -246,6 +247,7 @@ class SearchResultsList extends React.PureComponent {
                 showFeaturePreview={showFeaturePreview}
                 getFeatureTitle={getFeatureTitle}
                 localObserver={localObserver}
+                globalObserver={globalObserver}
               />
             </Grid>
           ))}
