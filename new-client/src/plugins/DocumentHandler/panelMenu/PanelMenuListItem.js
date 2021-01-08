@@ -141,6 +141,7 @@ class PanelMenuListItem extends React.PureComponent {
       selectedIndex,
     } = this.props;
     const hasSubMenu = this.#hasSubMenu(item);
+
     return (
       <>
         <ListItem
@@ -152,7 +153,8 @@ class PanelMenuListItem extends React.PureComponent {
             root: classes.root,
           }}
           disableGutters
-          aria-controls={hasSubMenu ? `${item.id}` : null}
+          aria-controls={hasSubMenu ? `submenu_${item.id}` : null}
+          aria-expanded={this.#isExpanded()}
           onClick={() => {
             this.#handleMenuButtonClick(type, item);
           }}
@@ -165,8 +167,7 @@ class PanelMenuListItem extends React.PureComponent {
         </ListItem>
         {hasSubMenu && (
           <Collapse
-            aria-expanded={this.#isExpanded()}
-            id={item.id}
+            id={`submenu_${item.id}`}
             in={this.#isExpanded()}
             timeout="auto"
           >
