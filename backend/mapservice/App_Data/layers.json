@@ -3197,7 +3197,7 @@
     {
       "id": "102",
       "caption": "Platser",
-      "onClickName": "Platser",
+      "onClickName": "POIs",
       "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/ows",
       "layers": ["vt:PointOfInterest"],
       "searchFields": [

@@ -313,6 +313,42 @@
                 "key": "Municipality"
               }
             ]
+          },
+          "POIs": {
+            "searchLabel": "Platser",
+            "defaultSortAttribute": "StreetName",
+            "attributesToDisplay": [
+              {
+                "displayName": "NAME",
+                "key": "Name"
+              },
+              {
+                "displayName": "KOMMUN",
+                "key": "Municipality"
+              },
+              {
+                "displayName": "KATEGORI 1",
+                "key": "Category1"
+              },
+              {
+                "displayName": "KATEGORI 2",
+                "key": "Category2"
+              },
+              {
+                "displayName": "KATEGORI 3",
+                "key": "Category3"
+              },
+              {
+                "displayName": "BÖRJAR GÄLLA",
+                "key": "AppliesFromDate",
+                "displayFormat": "YYYY-MM-DD hh:mm"
+              },
+              {
+                "displayName": "SLUTAR GÄLLA",
+                "key": "AppliesUptoDate",
+                "displayFormat": "YYYY-MM-DD hh:mm"
+              }
+            ]
           }
         }
       },
