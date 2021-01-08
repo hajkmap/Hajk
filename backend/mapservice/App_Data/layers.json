@@ -3177,6 +3177,7 @@
     {
       "id": "101",
       "caption": "Adresser",
+      "onClickName": "Addresses",
       "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/ows",
       "layers": ["vt:Address"],
       "searchFields": ["StreetName", "StreetNumber", "Municipality"],
@@ -3196,6 +3197,7 @@
     {
       "id": "102",
       "caption": "Platser",
+      "onClickName": "Platser",
       "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/ows",
       "layers": ["vt:PointOfInterest"],
       "searchFields": [

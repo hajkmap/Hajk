@@ -174,8 +174,9 @@ class VTSearch extends React.PureComponent {
 
     this.globalObserver.subscribe(
       "search.featureCollectionClicked",
-      (featureCollection) => {
-        // this.localObserver.publish("vtsearch-result-done", featureCollection);
+      (searchResult) => {
+        searchResult.type = searchResult?.source?.onClickName;
+        this.localObserver.publish("vtsearch-result-done", searchResult);
       }
     );
   };
