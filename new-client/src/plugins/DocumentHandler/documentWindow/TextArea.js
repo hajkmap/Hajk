@@ -56,7 +56,12 @@ class TextArea extends React.PureComponent {
           >
             {this.renderDivider()}
             <Grid justify="center" container>
-              <Grid className={classes.typographyContainer} xs={12} item>
+              <Grid
+                component="blockquote"
+                className={classes.typographyContainer}
+                xs={12}
+                item
+              >
                 {textAreaContentArray}
               </Grid>
             </Grid>
