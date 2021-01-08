@@ -176,6 +176,16 @@ class VTSearch extends React.PureComponent {
       "search.featureCollectionClicked",
       (searchResult) => {
         searchResult.type = searchResult?.source?.onClickName;
+
+        const featureCollection = searchResult?.value;
+        const attributesToDisplay = this.searchModel.geoServer[
+          searchResult.type
+        ]?.attributesToDisplay;
+        this.searchModel.updateDisplayFormat(
+          featureCollection,
+          attributesToDisplay
+        );
+
         this.localObserver.publish("vtsearch-result-done", searchResult);
       }
     );
