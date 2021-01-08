@@ -265,13 +265,12 @@ export const Figure = ({ figureTag }) => {
  *
  * @memberof Contents
  */
-export const Img = ({ imgTag, localObserver }) => {
+export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
   const classes = useStyles();
-
   const tagIsPresent = (imgTag, attribute) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
   };
-
+  console.log(getUniqueIntegerNumber(), "UNIQUE");
   const getImageStyle = (image) => {
     let className = image.popup
       ? clsx(
@@ -320,12 +319,19 @@ export const Img = ({ imgTag, localObserver }) => {
       <Box
         style={{ width: image.width }}
         className={classes.imageInformationWrapper}
+        id={image.id}
       >
         {image.caption && (
-          <Typography variant="subtitle2">{image.caption}</Typography>
+          <Typography id={image.captionId} variant="subtitle2">
+            {image.caption}
+          </Typography>
         )}
         {image.source && (
-          <Typography variant="subtitle2" className={classes.imageText}>
+          <Typography
+            id={image.sourceId}
+            variant="subtitle2"
+            className={classes.imageText}
+          >
             {image.source}
           </Typography>
         )}
@@ -342,6 +348,8 @@ export const Img = ({ imgTag, localObserver }) => {
     height: imgTag.attributes.getNamedItem("data-image-height")?.value,
     width: imgTag.attributes.getNamedItem("data-image-width")?.value,
     position: imgTag.attributes.getNamedItem("data-image-position")?.value,
+    captionId: getUniqueIntegerNumber(),
+    sourceId: getUniqueIntegerNumber(),
   };
 
   let onClickCallback = image.popup
@@ -352,12 +360,24 @@ export const Img = ({ imgTag, localObserver }) => {
 
   const positioningClass = getImagePositionClass(image.position);
 
+  const getDescribedByAttribute = () => {
+    let describedBy = [];
+    if (image.caption) {
+      describedBy.push(`image_${image.captionId}`);
+    }
+    if (image.source) {
+      describedBy.push(`image_${image.sourceId}`);
+    }
+    return describedBy.length > 0 ? describedBy.join(" ") : null;
+  };
+
   return (
     <Box className={positioningClass}>
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue}
         classes={{ media: classes.media }}
+        aria-describedby={getDescribedByAttribute()}
         component="img"
         style={
           image.height && image.width
