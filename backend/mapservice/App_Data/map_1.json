@@ -287,6 +287,32 @@
                 "key": "IsFlexibleTaxiService"
               }
             ]
+          },
+          "Addresses": {
+            "searchLabel": "Addresser",
+            "defaultSortAttribute": "StreetName",
+            "attributesToDisplay": [
+              {
+                "displayName": "GATUNAMN",
+                "key": "StreetName"
+              },
+              {
+                "displayName": "GATUNUMMER",
+                "key": "StreetNumber"
+              },
+              {
+                "displayName": "POSTNUMMER",
+                "key": "PostCode"
+              },
+              {
+                "displayName": "ORT",
+                "key": "PlaceName"
+              },
+              {
+                "displayName": "KOMMUN",
+                "key": "Municipality"
+              }
+            ]
           }
         }
       },

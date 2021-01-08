@@ -13,7 +13,7 @@ import {
   Typography,
   Divider,
   Grid,
-  ButtonGroup
+  ButtonGroup,
 } from "@material-ui/core";
 import InactivePolygon from "../img/polygonmarkering.png";
 import InactiveRectangle from "../img/rektangelmarkering.png";
@@ -23,11 +23,11 @@ import ActiveRectangle from "../img/rektangelmarkering-blue.png";
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
-const styles = theme => ({
+const styles = (theme) => ({
   divider: { marginTop: theme.spacing(2), marginBottom: theme.spacing(2) },
   firstMenuItem: { minHeight: 36 },
   searchButtonColor: { borderColor: theme.palette.primary.main },
-  searchButtonText: { color: theme.palette.primary.main }
+  searchButtonText: { color: theme.palette.primary.main },
 });
 
 class Stops extends React.PureComponent {
@@ -38,7 +38,7 @@ class Stops extends React.PureComponent {
     publicLine: "",
     municipalities: [],
     municipality: "",
-    selectedFormType: ""
+    selectedFormType: "",
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -49,7 +49,7 @@ class Stops extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object.isRequired,
   };
 
   static defaultProps = {};
@@ -62,9 +62,9 @@ class Stops extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
     this.bindSubscriptions();
-    this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
+    this.model.fetchAllPossibleMunicipalityZoneNames().then((result) => {
       this.setState({
-        municipalities: result.length > 0 ? result : []
+        municipalities: result?.length > 0 ? result : [],
       });
     });
   }
@@ -80,27 +80,27 @@ class Stops extends React.PureComponent {
     });
   };
 
-  handleChange = event => {
+  handleChange = (event) => {
     this.setState({
-      busStopValue: event.target.value
+      busStopValue: event.target.value,
     });
   };
 
-  handleStopNameOrNrChange = event => {
+  handleStopNameOrNrChange = (event) => {
     this.setState({
-      stopNameOrNr: event.target.value
+      stopNameOrNr: event.target.value,
     });
   };
 
-  handlePublicLineChange = event => {
+  handlePublicLineChange = (event) => {
     this.setState({
-      publicLine: event.target.value
+      publicLine: event.target.value,
     });
   };
 
-  handleMunicipalChange = event => {
+  handleMunicipalChange = (event) => {
     this.setState({
-      municipality: event.target.value
+      municipality: event.target.value,
     });
   };
 
@@ -121,7 +121,7 @@ class Stops extends React.PureComponent {
       stopNameOrNr: "",
       publicLine: "",
       municipality: "",
-      selectedFormType: ""
+      selectedFormType: "",
     });
   };
   inactivateSpatialSearchButtons = () => {
@@ -136,7 +136,7 @@ class Stops extends React.PureComponent {
       publicLine: publicLine,
       municipality: municipality.gid,
       selectedFormType: "",
-      searchCallback: this.clearSearchInputAndButtons
+      searchCallback: this.clearSearchInputAndButtons,
     });
   };
 
@@ -156,7 +156,7 @@ class Stops extends React.PureComponent {
         publicLine: publicLine,
         municipality: municipality.name,
         selectedFormType: "Polygon",
-        searchCallback: this.inactivateSpatialSearchButtons
+        searchCallback: this.inactivateSpatialSearchButtons,
       });
     }
   };
@@ -173,7 +173,7 @@ class Stops extends React.PureComponent {
         busStopValue,
         stopNameOrNr,
         publicLine,
-        municipality
+        municipality,
       } = this.state;
       this.localObserver.publish("stops-search", {
         busStopValue: busStopValue,
@@ -181,7 +181,7 @@ class Stops extends React.PureComponent {
         publicLine: publicLine,
         municipality: municipality.name,
         selectedFormType: "Box",
-        searchCallback: this.inactivateSpatialSearchButtons
+        searchCallback: this.inactivateSpatialSearchButtons,
       });
     }
   };
