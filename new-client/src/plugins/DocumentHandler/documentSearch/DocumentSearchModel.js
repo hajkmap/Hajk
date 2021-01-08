@@ -14,6 +14,7 @@ export default class DocumentSearchModel {
       return [
         ...documentCollection,
         {
+          documentFileName: document.documentFileName,
           documentTitle: document.documentTitle,
           features: this.getFeatures(document.chapters, document),
         },
@@ -156,8 +157,12 @@ export default class DocumentSearchModel {
         totalFeatures: matchedFeatures.length,
       },
       source: {
-        id: docFeatureCollection.documentTitle,
-        caption: docFeatureCollection.documentTitle,
+        id:
+          docFeatureCollection.documentTitle ||
+          docFeatureCollection.documentFileName,
+        caption:
+          docFeatureCollection.documentTitle ||
+          docFeatureCollection.documentFileName,
         displayFields: ["header"],
         searchFields: [...searchFields],
       },
@@ -241,6 +246,7 @@ export default class DocumentSearchModel {
     let allMatched = new Set();
     let match = searchCombinations.some((searchCombination) => {
       if (
+        documentTitle &&
         this.documentTitleInSearchCombination(searchCombination, documentTitle)
       ) {
         searchValues.forEach(allMatched.add, allMatched);
