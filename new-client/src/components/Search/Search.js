@@ -768,7 +768,6 @@ class Search extends React.PureComponent {
             root: classes.inputRoot,
           }}
           escapeRegExp={this.escapeRegExp}
-          globalObserver={this.props.app.globalObserver}
           localObserver={this.localObserver}
           searchTools={searchTools}
           searchResults={searchResults}
