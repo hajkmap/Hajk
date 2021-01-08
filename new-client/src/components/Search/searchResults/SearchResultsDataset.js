@@ -42,19 +42,19 @@ const TightAccordionSummary = withStyles((theme) => ({
     "&:hover": {
       backgroundColor: theme.palette.action.hover,
     },
-    padding: "0px 10px",
-    minHeight: 36,
+    padding: `${theme.spacing(0)}px ${theme.spacing(1)}px`,
+    minHeight: 42,
     "&$expanded": {
       padding: "0px 10px",
-      minHeight: 36,
+      minHeight: 42,
       backgroundColor: theme.palette.action.selected,
     },
   },
   content: {
     maxWidth: "100%",
-    margin: "5px 0",
+    margin: "0 0",
     "&$expanded": {
-      margin: "5px 0",
+      margin: "0 0",
     },
   },
   expanded: {},

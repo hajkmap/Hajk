@@ -2,7 +2,14 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { Checkbox, Typography, Tooltip, Grid } from "@material-ui/core";
 
-const styles = () => ({});
+const styles = (theme) => ({
+  root: {
+    minHeight: 42,
+  },
+  originIconWrapper: {
+    paddingLeft: theme.spacing(1),
+  },
+});
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
@@ -10,7 +17,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     const helpText = !visibleInMap ? "Visa i kartan" : "Ta bort från kartan";
 
     return (
-      <Grid item xs={2} align="center">
+      <Grid item align="center">
         <Tooltip title={helpText}>
           <Checkbox
             color="primary"
@@ -26,24 +33,19 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   renderOriginBasedIcon = () => {
-    const { getOriginBasedIcon, origin } = this.props;
+    const { getOriginBasedIcon, origin, classes } = this.props;
     return (
-      <Grid
-        item
-        style={{ paddingTop: 5, paddingBottom: 5 }}
-        xs={2}
-        align="center"
-      >
+      <Grid className={classes.originIconWrapper}>
         {getOriginBasedIcon(origin)}
       </Grid>
     );
   };
 
   render() {
-    const { feature, featureTitle } = this.props;
+    const { feature, featureTitle, classes } = this.props;
     if (featureTitle.length > 0) {
       return (
-        <Grid container alignItems="center">
+        <Grid container alignItems="center" className={classes.root}>
           {feature.geometry
             ? this.renderShowInMapCheckbox()
             : this.renderOriginBasedIcon()}
