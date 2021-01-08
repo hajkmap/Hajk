@@ -65,6 +65,10 @@ const styles = (theme) => ({
     borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
   },
   headerContainer: {
+    paddingRight: theme.spacing(1),
+    paddingLeft: theme.spacing(1),
+  },
+  tallHeaderContainer: {
     minHeight: 42,
     paddingRight: theme.spacing(1),
     paddingLeft: theme.spacing(1),
@@ -590,60 +594,54 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
-  renderHeaderInfoBar = (featureCollectionTitle, featureTitle) => {
-    const { activeFeatureCollection, activeFeature } = this.state;
+  renderHeaderInfoBar = (featureCollectionTitle) => {
+    const { activeFeatureCollection } = this.state;
     const { classes, getOriginBasedIcon } = this.props;
-    if (!activeFeature || activeFeature?.onClickName) {
-      return (
+    return (
+      <Grid
+        container
+        item
+        justify="space-between"
+        alignItems="center"
+        wrap="nowrap"
+        xs={12}
+      >
         <Grid
           container
           item
-          justify="space-between"
-          alignItems="center"
           wrap="nowrap"
-          xs={12}
+          alignItems="center"
+          xs={this.state.showTools ? 5 : 11}
         >
-          <Grid
-            container
-            item
-            wrap="nowrap"
-            alignItems="center"
-            xs={this.state.showTools ? 5 : 11}
+          {activeFeatureCollection &&
+            getOriginBasedIcon(activeFeatureCollection.origin)}
+          <Tooltip
+            title={
+              activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
+            }
           >
-            {activeFeatureCollection &&
-              getOriginBasedIcon(activeFeatureCollection.origin)}
-            <Tooltip
-              title={
-                activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
-              }
+            <Typography
+              variant="button"
+              component="div"
+              noWrap
+              className={classes.headerTypography}
             >
-              <Typography
-                variant="button"
-                component="div"
-                noWrap
-                className={classes.headerTypography}
-              >
-                {`${
-                  activeFeatureCollection
-                    ? featureCollectionTitle
-                    : "Sökresultat"
-                }`}
-              </Typography>
-            </Tooltip>
-          </Grid>
-          <Grid
-            container
-            item
-            justify="flex-end"
-            xs={this.state.showTools ? 7 : 1}
-          >
-            {this.renderSearchResultListOptions()}
-          </Grid>
+              {`${
+                activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
+              }`}
+            </Typography>
+          </Tooltip>
         </Grid>
-      );
-    } else {
-      return null;
-    }
+        <Grid
+          container
+          item
+          justify="flex-end"
+          xs={this.state.showTools ? 7 : 1}
+        >
+          {this.renderSearchResultListOptions()}
+        </Grid>
+      </Grid>
+    );
   };
 
   renderSearchResultsHeader = () => {
@@ -656,13 +654,25 @@ class SearchResultsContainer extends React.PureComponent {
     const featureTitle = activeFeature
       ? this.getFeatureTitle(activeFeature)
       : "";
+    const shouldRenderHeaderInfoBar =
+      !activeFeature || activeFeature?.onClickName;
 
     return (
-      <Grid className={classes.headerContainer} container item xs={12}>
+      <Grid
+        className={
+          shouldRenderHeaderInfoBar
+            ? classes.tallHeaderContainer
+            : classes.headerContainer
+        }
+        container
+        item
+        xs={12}
+      >
         <Grid item xs={12}>
           {this.renderBreadCrumbs(featureCollectionTitle, featureTitle)}
         </Grid>
-        {this.renderHeaderInfoBar(featureCollectionTitle, featureTitle)}
+        {shouldRenderHeaderInfoBar &&
+          this.renderHeaderInfoBar(featureCollectionTitle, featureTitle)}
       </Grid>
     );
   };
