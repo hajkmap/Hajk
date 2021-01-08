@@ -70,6 +70,12 @@ export default class DocumentHandlerModel {
       Promise.all(
         menuItemsWithDocumentConnetion.map((menuItem) => {
           return this.fetchJsonDocument(menuItem.document).then((doc) => {
+            if (!doc.title) {
+              console.warn(
+                `The document ${menuItem.document} is missing a title`
+              );
+            }
+
             return {
               ...doc,
               documentColor: menuItem.color,
