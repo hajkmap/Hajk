@@ -302,7 +302,6 @@ class SearchResultsDataset extends React.PureComponent {
       handleFeatureCollectionClick,
       showFeaturePreview,
       getFeatureTitle,
-      globalObserver,
     } = this.props;
     const { previewFeature, previewAnchorEl } = this.state;
     const shouldShowPreview =
@@ -319,12 +318,7 @@ class SearchResultsDataset extends React.PureComponent {
           expanded={activeFeatureCollection ? true : false}
           TransitionProps={{ timeout: 100 }}
           onChange={() => {
-            globalObserver.publish(
-              "search.featureCollectionClicked",
-              featureCollection
-            );
-            renderFeatureCollection &&
-              handleFeatureCollectionClick(featureCollection);
+            handleFeatureCollectionClick(featureCollection);
           }}
         >
           {this.renderDatasetSummary()}
