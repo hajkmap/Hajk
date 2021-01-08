@@ -41,6 +41,11 @@ const styles = (theme) => ({
   inputRoot: {
     height: theme.spacing(6),
   },
+  originIconWrapper: {
+    display: "flex",
+    flexWrap: "wrap",
+    paddingRight: theme.spacing(1),
+  },
 });
 
 //Needed to make a CustomPopper with inline styling to be able to override width,
@@ -79,14 +84,19 @@ class SearchBar extends React.PureComponent {
   };
 
   getOriginBasedIcon = (origin) => {
+    const { classes } = this.props;
+    let icon;
     switch (origin) {
       case "WFS":
-        return <RoomIcon color="disabled" />;
+        icon = <RoomIcon color="disabled" />;
+        break;
       case "DOCUMENT":
-        return <DescriptionIcon color="disabled" />;
+        icon = <DescriptionIcon color="disabled" />;
+        break;
       default:
-        return <RoomIcon color="disabled" />;
+        icon = <RoomIcon color="disabled" />;
     }
+    return <div className={classes.originIconWrapper}>{icon}</div>;
   };
 
   removeCommasAndSpaces = (string) => {

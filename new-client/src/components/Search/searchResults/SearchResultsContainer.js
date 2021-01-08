@@ -65,6 +65,7 @@ const styles = (theme) => ({
     borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
   },
   headerContainer: {
+    minHeight: 42,
     paddingRight: theme.spacing(1),
     paddingLeft: theme.spacing(1),
   },
@@ -602,7 +603,13 @@ class SearchResultsContainer extends React.PureComponent {
           wrap="nowrap"
           xs={12}
         >
-          <Grid container item wrap="nowrap" xs={this.state.showTools ? 5 : 11}>
+          <Grid
+            container
+            item
+            wrap="nowrap"
+            alignItems="center"
+            xs={this.state.showTools ? 5 : 11}
+          >
             {activeFeatureCollection &&
               getOriginBasedIcon(activeFeatureCollection.origin)}
             <Tooltip
