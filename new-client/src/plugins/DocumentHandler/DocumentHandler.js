@@ -25,7 +25,6 @@ class DocumentHandler extends React.PureComponent {
     documentWindowMaximized: true,
     showPrintWindow: false,
     chapters: [],
-    documentTitle: "",
     documentColor: null,
     model: null,
   };
@@ -178,13 +177,7 @@ class DocumentHandler extends React.PureComponent {
       if (document) {
         this.setState(
           {
-            documentTitle: document?.documentTitle
-              ? document.documentTitle
-              : null,
             document: document,
-            documentColor: document?.documentColor
-              ? document.documentColor
-              : null,
             showPrintWindow: false,
           },
           resolve
@@ -219,7 +212,6 @@ class DocumentHandler extends React.PureComponent {
           documentWindowMaximized={this.state.documentWindowMaximized}
           showPrintWindow={this.state.showPrintWindow}
           chapters={this.state.chapters}
-          documentTitle={this.state.documentTitle}
           model={this.state.model}
           localObserver={this.localObserver}
         ></DocumentWindowBase>

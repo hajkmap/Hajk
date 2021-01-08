@@ -8,6 +8,7 @@ import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
 import KmlExport from "./utils/KmlExport";
+import { cloneDeep } from "lodash";
 
 const styles = () => ({
   inputRoot: {
@@ -640,11 +641,16 @@ class Search extends React.PureComponent {
     }
     return this.state.searchImplementedPlugins.reduce((promises, plugin) => {
       if (plugin.searchInterface.getResults) {
+        //Had to make a deep clone to not directly manipulate the reference from plugin
         promises.push(
-          plugin.searchInterface.getResults(
-            decodeURIComponent(searchString),
-            fetchOptions
-          )
+          plugin.searchInterface
+            .getResults(decodeURIComponent(searchString), fetchOptions)
+            .then((res) => {
+              return {
+                errors: res.errors,
+                featureCollections: cloneDeep(res.featureCollections),
+              };
+            })
         );
         return promises;
       }

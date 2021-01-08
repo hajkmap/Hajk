@@ -194,13 +194,12 @@ class DocumentViewer extends React.PureComponent {
 
   getTableOfContents = () => {
     const { expandedTableOfContents } = this.state;
-    const { activeDocument, localObserver, documentColor } = this.props;
+    const { activeDocument, localObserver } = this.props;
 
     const title = this.getTocTitle();
     const chapterLevelsToShow = this.getChapterLevelsToShowInToc();
     return (
       <TableOfContents
-        documentColor={documentColor}
         localObserver={localObserver}
         toggleCollapse={this.toggleCollapse}
         activeDocument={activeDocument}
