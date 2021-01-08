@@ -251,7 +251,7 @@ class SearchResultsDataset extends React.PureComponent {
     const toolTipTitle = `Visar ${numberOfResultsToDisplay} resultat`;
     return (
       <Grid alignItems="center" container>
-        <Grid item align="center">
+        <Grid item xs={1}>
           {getOriginBasedIcon(featureCollection.origin)}
         </Grid>
         <Grid item xs={9}>
