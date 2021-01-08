@@ -593,7 +593,7 @@ class SearchResultsContainer extends React.PureComponent {
   renderHeaderInfoBar = (featureCollectionTitle, featureTitle) => {
     const { activeFeatureCollection, activeFeature } = this.state;
     const { classes, getOriginBasedIcon } = this.props;
-    if (!activeFeature) {
+    if (!activeFeature || activeFeature?.onClickName) {
       return (
         <Grid
           container
