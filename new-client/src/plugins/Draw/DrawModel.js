@@ -504,8 +504,8 @@ class DrawModel {
       });
       feature.getGeometry().setCoordinates(newCoordinates);
     } else if (type === "Polygon") {
-      newCoordinates[0] = [];
       coordinates.forEach((polygon, i) => {
+        newCoordinates[i] = [];
         polygon.forEach((vertex, j) => {
           var pairs = [];
           vertex.forEach((digit) => {
@@ -513,7 +513,7 @@ class DrawModel {
               pairs.push(digit);
             }
           });
-          newCoordinates[0].push(pairs);
+          newCoordinates[i].push(pairs);
         });
       });
       feature.getGeometry().setCoordinates(newCoordinates);
