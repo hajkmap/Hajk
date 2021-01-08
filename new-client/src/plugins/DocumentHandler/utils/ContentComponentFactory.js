@@ -270,7 +270,7 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
   const tagIsPresent = (imgTag, attribute) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
   };
-  console.log(getUniqueIntegerNumber(), "UNIQUE");
+
   const getImageStyle = (image) => {
     let className = image.popup
       ? clsx(
