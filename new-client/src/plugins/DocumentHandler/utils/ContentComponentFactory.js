@@ -322,13 +322,13 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
         id={image.id}
       >
         {image.caption && (
-          <Typography id={image.captionId} variant="subtitle2">
+          <Typography id={`image_${image.captionId}`} variant="subtitle2">
             {image.caption}
           </Typography>
         )}
         {image.source && (
           <Typography
-            id={image.sourceId}
+            id={`image_${image.sourceId}`}
             variant="subtitle2"
             className={classes.imageText}
           >
