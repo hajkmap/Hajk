@@ -539,6 +539,10 @@ class SearchResultsContainer extends React.PureComponent {
     );
   };
 
+  keyPressIsEnter = (event) => {
+    return event.which === 13 || event.keyCode === 13;
+  };
+
   renderBreadCrumbs = (featureCollectionTitle, featureTitle) => {
     const { classes } = this.props;
     const { activeFeatureCollection, activeFeature } = this.state;
@@ -552,11 +556,17 @@ class SearchResultsContainer extends React.PureComponent {
           <Tooltip title="Tillbaka till alla sökresultat">
             <Link
               className={classes.breadCrumbLinks}
+              tabIndex={0}
               color="textPrimary"
               variant="caption"
               onClick={(e) => {
                 e.stopPropagation();
                 this.resetFeatureAndCollection();
+              }}
+              onKeyDown={(event) => {
+                if (this.keyPressIsEnter(event)) {
+                  this.resetFeatureAndCollection();
+                }
               }}
               onChange={this.resetFeatureAndCollection}
             >
@@ -566,11 +576,17 @@ class SearchResultsContainer extends React.PureComponent {
           <Tooltip title={featureCollectionTitle}>
             <Link
               className={classes.breadCrumbLinks}
+              tabIndex={0}
               color="textPrimary"
               variant="caption"
               onClick={(e) => {
                 e.stopPropagation();
                 this.setActiveFeature(undefined);
+              }}
+              onKeyDown={(event) => {
+                if (this.keyPressIsEnter(event)) {
+                  this.setActiveFeature(undefined);
+                }
               }}
             >
               {featureCollectionTitle}
@@ -579,6 +595,7 @@ class SearchResultsContainer extends React.PureComponent {
           {shouldRenderFeatureDetails && (
             <Tooltip title={featureTitle}>
               <Link
+                tabIndex={0}
                 className={classes.breadCrumbLinks}
                 color="textPrimary"
                 variant="caption"
