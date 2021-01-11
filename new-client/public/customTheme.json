@@ -1,1 +1,5 @@
-{}
+{
+  "typography": {
+    "fontFamily": "'Open Sans',Arial,sans-serif"
+  }
+}

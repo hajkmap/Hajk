@@ -40,3 +40,10 @@ FATAL 2020-03-18 16:09:02 Can't get configuration file: Newtonsoft.Json.JsonRead
    vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations() i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 133
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 370
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 724 
+<<<<<<< HEAD
+=======
+FATAL 2020-12-03 07:55:41 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 539 
+FATAL 2020-12-03 07:55:51 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 539 
+>>>>>>> feature/legend-summary-icon

@@ -34,6 +34,7 @@ const defaultState = {
   date: "Fylls i per automatik",
   infobox: "",
   legend: "",
+  legendIcon: "",
   url: "",
   queryable: true,
   drawOrder: 1,
@@ -76,15 +77,21 @@ class WMTSLayerForm extends Component {
   componentDidMount() {
     defaultState.url = this.props.url;
     this.setState(defaultState);
-    this.props.model.on("change:legend", () => {
+    this.props.model.on("change:select-image", () => {
       this.setState({
-        legend: this.props.model.get("legend"),
+        legend: this.props.model.get("select-image"),
+      });
+    });
+    this.props.model.on("change:select-legend-icon", () => {
+      this.setState({
+        legendIcon: this.props.model.get("select-legend-icon"),
       });
     });
   }
 
   componentWillUnmount() {
-    this.props.model.off("change:legend");
+    this.props.model.off("change:select-image");
+    this.props.model.off("change:select-legend-icon");
   }
 
   constructor() {
@@ -93,8 +100,14 @@ class WMTSLayerForm extends Component {
     this.layer = {};
   }
 
-  loadLegendImage(e) {
+  loadLegend(e) {
+    $("#select-image").attr("caller", "select-image");
     $("#select-image").trigger("click");
+  }
+
+  loadLegendIcon(e) {
+    $("#select-legend-icon").attr("caller", "select-legend-icon");
+    $("#select-legend-icon").trigger("click");
   }
 
   getLayer() {
@@ -106,6 +119,7 @@ class WMTSLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
+      legendIcon: this.getValue("legendIcon"),
       layer: this.getValue("layer"),
       matrixSet: this.getValue("matrixSet"),
       style: this.getValue("style"),
@@ -290,7 +304,28 @@ class WMTSLayerForm extends Component {
           />
           <span
             onClick={(e) => {
-              this.props.parent.loadLegendImage(e);
+              this.loadLegend(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+        <div>
+          <label>
+            Teckenförklar
+            <br />
+            ingsikon
+          </label>
+          <input
+            type="text"
+            ref="input_legendIcon"
+            value={this.state.legendIcon}
+            onChange={(e) => this.setState({ legendIcon: e.target.value })}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegendIcon(e);
             }}
             className="btn btn-default"
           >

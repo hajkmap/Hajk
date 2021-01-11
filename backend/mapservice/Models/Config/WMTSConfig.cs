@@ -22,6 +22,8 @@ namespace MapService.Models.Config
 
         public string legend { get; set; }
 
+        public string legendIcon { get; set; }
+
         public string projection { get; set; }
 
         public bool visibleAtStart { get; set; }
