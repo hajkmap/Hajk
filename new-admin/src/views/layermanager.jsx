@@ -610,11 +610,9 @@ class Manager extends Component {
             window.location.hostname +
             (window.location.port ? ":" + window.location.port : "");
         }
-        var node = $(this.refs.uploadIframe.contentDocument).find("body")[0],
-          url = node.innerHTML,
-          a = $(`<a href="${url}"">temp</a>`),
-          b = a[0].href;
-        this.props.model.set("legend", b);
+        let node = $(this.refs.uploadIframe.contentDocument).find("body")[0];
+        let url = `${window.location.origin}/${node.innerHTML}`;
+        this.props.model.set("legend", url);
       }
     });
   }
