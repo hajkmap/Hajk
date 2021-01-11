@@ -211,6 +211,7 @@ class DocumentWindowBase extends React.PureComponent {
       ? [
           {
             icon: <PrintIcon />,
+            description: "Öppna utskrift",
             onClickCallback: togglePrintWindow,
           },
         ]
