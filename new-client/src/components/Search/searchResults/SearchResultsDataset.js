@@ -203,12 +203,12 @@ class SearchResultsDataset extends React.PureComponent {
                   >
                     {
                       <Typography variant="srOnly">
-                        Aktivera sökresultat
+                        {`Visa detaljer - ${featureTitle}`}
                       </Typography>
                     }
                     <SearchResultsDatasetFeature
                       feature={f}
-                      featureTitle={getFeatureTitle(f)}
+                      featureTitle={featureTitle}
                       app={app}
                       source={featureCollection.source}
                       origin={featureCollection.origin}
