@@ -228,7 +228,6 @@ class SearchResultsList extends React.PureComponent {
           {featureCollections.map((featureCollection) => (
             <Grid
               key={featureCollection.source.id}
-              role="button"
               xs={12}
               className={
                 activeFeature ? null : classes.searchResultDatasetWrapper

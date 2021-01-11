@@ -441,9 +441,6 @@ class SearchResultsContainer extends React.PureComponent {
           </Grid>
         </Grow>
         <Grid item>
-          <Typography variant="srOnly">
-            {`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
-          </Typography>
           <Tooltip title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}>
             <Button
               className={classes.headerButtons}
@@ -453,6 +450,9 @@ class SearchResultsContainer extends React.PureComponent {
                 })
               }
             >
+              <Typography variant="srOnly">
+                {`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
+              </Typography>
               <MoreVertIcon />
             </Button>
           </Tooltip>
