@@ -114,7 +114,7 @@ class Lines extends React.PureComponent {
     });
   };
 
-  searchButtonClick = () => {
+  doSearch = () => {
     const {
       publicLineName,
       internalLineNumber,
@@ -160,6 +160,7 @@ class Lines extends React.PureComponent {
       });
     }
   };
+
   handleRectangleClick = () => {
     const {
       publicLineName,
@@ -193,25 +194,35 @@ class Lines extends React.PureComponent {
       internalLineNumber: event.target.value,
     });
   };
+
   handlePublicLineNameChange = (event) => {
     this.setState({
       publicLineName: event.target.value,
     });
   };
+
   handleMunicipalChange = (e) => {
     this.setState({
       municipality: e.target.value,
     });
   };
+
   handleTrafficTransportChange = (e) => {
     this.setState({
       trafficTransport: e.target.value,
     });
   };
+
   handleThroughStopAreaChange = (event) => {
     this.setState({
       throughStopArea: event.target.value,
     });
+  };
+
+  handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      this.doSearch();
+    }
   };
 
   renderPublicAndTechnicalNrSection = () => {
@@ -328,7 +339,7 @@ class Lines extends React.PureComponent {
       <Grid item xs={12}>
         <Button
           className={classes.searchButton}
-          onClick={this.searchButtonClick}
+          onClick={this.doSearch}
           variant="outlined"
         >
           <Typography className={classes.searchButtonText}>SÖK</Typography>
@@ -387,7 +398,12 @@ class Lines extends React.PureComponent {
   render() {
     return (
       <div>
-        <Grid container justify="center" spacing={2}>
+        <Grid
+          container
+          justify="center"
+          spacing={2}
+          onKeyPress={this.handleKeyPress}
+        >
           {this.renderPublicAndTechnicalNrSection()}
           {this.renderInputValueSection()}
           {this.renderTrafficTypeSection()}

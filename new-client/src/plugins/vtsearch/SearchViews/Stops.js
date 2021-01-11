@@ -104,6 +104,12 @@ class Stops extends React.PureComponent {
     });
   };
 
+  handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      this.doSearch();
+    }
+  };
+
   bindSubscriptions() {
     const { localObserver } = this.props;
     localObserver.subscribe("vtsearch-result-done", () => {
@@ -128,7 +134,7 @@ class Stops extends React.PureComponent {
     this.setState({ isPolygonActive: false, isRectangleActive: false });
   };
 
-  searchButtonClick = () => {
+  doSearch = () => {
     const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
@@ -287,7 +293,7 @@ class Stops extends React.PureComponent {
         <ButtonGroup className={classes.searchButtonColor}>
           <Button
             className={classes.searchButtonColor}
-            onClick={this.searchButtonClick}
+            onClick={this.doSearch}
             variant="outlined"
           >
             <Typography className={classes.searchButtonText}>SÖK</Typography>
@@ -348,7 +354,12 @@ class Stops extends React.PureComponent {
   render() {
     return (
       <div>
-        <Grid container justify="center" spacing={2}>
+        <Grid
+          container
+          justify="center"
+          spacing={2}
+          onKeyPress={this.handleKeyPress}
+        >
           {this.renderRadioButtonSection()}
           {this.renderTextParameterSection()}
           {this.renderSearchButton()}
