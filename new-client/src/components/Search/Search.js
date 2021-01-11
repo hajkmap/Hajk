@@ -357,7 +357,9 @@ class Search extends React.PureComponent {
 
   handleSearchBarKeyPress = (event) => {
     if (event.which === 13 || event.keyCode === 13) {
-      this.handleOnClickOrKeyboardSearch();
+      if (event.target.id === "searchInputField") {
+        this.handleOnClickOrKeyboardSearch();
+      }
     }
   };
 
