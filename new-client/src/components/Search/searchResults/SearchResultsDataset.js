@@ -35,6 +35,9 @@ const styles = (theme) => ({
   datasetFeaturesContainer: {
     borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
   },
+  typography: {
+    maxWidth: "100%",
+  },
 });
 
 const TightAccordionSummary = withStyles((theme) => ({
@@ -239,7 +242,7 @@ class SearchResultsDataset extends React.PureComponent {
   renderListHeader = () => {
     const { numberOfResultsToDisplay } = this.state;
 
-    const { featureCollection, getOriginBasedIcon } = this.props;
+    const { featureCollection, getOriginBasedIcon, classes } = this.props;
     const toolTipTitle = `Visar ${numberOfResultsToDisplay} resultat`;
     return (
       <Grid alignItems="center" container>
@@ -251,7 +254,7 @@ class SearchResultsDataset extends React.PureComponent {
             noWrap
             variant="button"
             component="div" // The noWrap does not work on variant="button" without changing component
-            style={{ maxWidth: "100%" }}
+            className={classes.typography}
           >
             {featureCollection.source.caption}
           </Typography>

@@ -9,6 +9,9 @@ const styles = (theme) => ({
   originIconWrapper: {
     paddingLeft: theme.spacing(1),
   },
+  typography: {
+    maxWidth: "100%",
+  },
 });
 
 class SearchResultsDatasetFeature extends React.PureComponent {
@@ -49,7 +52,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             ? this.renderShowInMapCheckbox()
             : this.renderOriginBasedIcon()}
           <Grid item xs={9}>
-            <Typography noWrap align="left" style={{ maxWidth: "100%" }}>
+            <Typography noWrap align="left" className={classes.typography}>
               {featureTitle}
             </Typography>
           </Grid>
