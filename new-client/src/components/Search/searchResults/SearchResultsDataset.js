@@ -147,6 +147,7 @@ class SearchResultsDataset extends React.PureComponent {
       activeFeatureCollection,
       activeFeature,
       handleOnFeatureClick,
+      handleOnFeatureKeyPress,
       getOriginBasedIcon,
       getFeatureTitle,
       localObserver,
@@ -190,6 +191,8 @@ class SearchResultsDataset extends React.PureComponent {
                       this.resetPreview();
                       handleOnFeatureClick(f);
                     }}
+                    tabIndex={0}
+                    onKeyDown={(event) => handleOnFeatureKeyPress(event, f)}
                     className={classes.hover}
                     onMouseEnter={
                       !isMobile ? (e) => this.setPreviewFeature(e, f) : null

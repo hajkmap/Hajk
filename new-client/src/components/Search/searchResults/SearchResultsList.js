@@ -188,6 +188,12 @@ class SearchResultsList extends React.PureComponent {
     }
   };
 
+  handleOnFeatureKeyPress = (event, feature) => {
+    if (event.which === 13 || event.keyCode === 13) {
+      this.handleOnFeatureClick(feature);
+    }
+  };
+
   clearAllSelectedFeatures = () => {
     const { localObserver } = this.props;
     const selectedItems = [];
@@ -240,6 +246,7 @@ class SearchResultsList extends React.PureComponent {
                 handleFeatureCollectionClick={handleFeatureCollectionClick}
                 setActiveFeature={setActiveFeature}
                 handleOnFeatureClick={this.handleOnFeatureClick}
+                handleOnFeatureKeyPress={this.handleOnFeatureKeyPress}
                 resetFeatureAndCollection={resetFeatureAndCollection}
                 featureFilter={featureFilter}
                 featureSortingStrategy={featureSortingStrategy}
