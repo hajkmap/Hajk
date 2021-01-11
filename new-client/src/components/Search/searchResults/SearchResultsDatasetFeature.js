@@ -25,7 +25,6 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             checked={visibleInMap}
             onClick={(e) => e.stopPropagation()}
             onChange={() => showClickResultInMap(feature, source)}
-            inputProps={{ "aria-label": "primary checkbox" }}
           />
         </Tooltip>
       </Grid>

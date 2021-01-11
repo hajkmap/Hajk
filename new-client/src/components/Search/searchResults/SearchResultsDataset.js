@@ -5,7 +5,6 @@ import {
   Typography,
   Accordion,
   AccordionSummary,
-  AccordionDetails,
   Chip,
   Tooltip,
   Divider,
@@ -33,6 +32,9 @@ const styles = (theme) => ({
       backgroundColor: theme.palette.action.hover,
     },
   },
+  datasetFeaturesContainer: {
+    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+  },
 });
 
 const TightAccordionSummary = withStyles((theme) => ({
@@ -59,18 +61,6 @@ const TightAccordionSummary = withStyles((theme) => ({
   },
   expanded: {},
 }))(AccordionSummary);
-
-const TightAccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: 0,
-    cursor: "default",
-    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
-    boxShadow: "none",
-    "&:before": {
-      display: "none",
-    },
-  },
-}))(AccordionDetails);
 
 class SearchResultsDataset extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
@@ -184,62 +174,61 @@ class SearchResultsDataset extends React.PureComponent {
       );
     } else {
       return (
-        <TightAccordionDetails
-          id={`search-result-dataset-details-${featureCollection.source.id}`}
-          className={classes.datasetDetailsContainer}
+        <Grid
+          justify="center"
+          container
+          className={classes.datasetFeaturesContainer}
         >
-          <Grid justify="center" container>
-            {sortedFeatures.map((f) => {
-              const featureTitle = getFeatureTitle(f);
-              if (featureTitle.length > 0) {
-                return (
-                  <React.Fragment key={f.id}>
-                    <Grid
-                      role="button"
-                      onClick={() => {
-                        this.resetPreview();
-                        handleOnFeatureClick(f);
-                      }}
-                      className={classes.hover}
-                      onMouseEnter={
-                        !isMobile ? (e) => this.setPreviewFeature(e, f) : null
+          {sortedFeatures.map((f) => {
+            const featureTitle = getFeatureTitle(f);
+            if (featureTitle.length > 0) {
+              return (
+                <React.Fragment key={f.id}>
+                  <Grid
+                    role="button"
+                    onClick={() => {
+                      this.resetPreview();
+                      handleOnFeatureClick(f);
+                    }}
+                    className={classes.hover}
+                    onMouseEnter={
+                      !isMobile ? (e) => this.setPreviewFeature(e, f) : null
+                    }
+                    onMouseLeave={!isMobile ? this.resetPreview : null}
+                    container
+                    item
+                  >
+                    {
+                      <Typography variant="srOnly">
+                        Aktivera sökresultat
+                      </Typography>
+                    }
+                    <SearchResultsDatasetFeature
+                      feature={f}
+                      featureTitle={getFeatureTitle(f)}
+                      app={app}
+                      source={featureCollection.source}
+                      origin={featureCollection.origin}
+                      visibleInMap={
+                        selectedItems.findIndex(
+                          (item) => item.featureId === f.id
+                        ) > -1
                       }
-                      onMouseLeave={!isMobile ? this.resetPreview : null}
-                      container
-                      item
-                    >
-                      {
-                        <Typography variant="srOnly">
-                          Aktivera sökresultat
-                        </Typography>
-                      }
-                      <SearchResultsDatasetFeature
-                        feature={f}
-                        featureTitle={getFeatureTitle(f)}
-                        app={app}
-                        source={featureCollection.source}
-                        origin={featureCollection.origin}
-                        visibleInMap={
-                          selectedItems.findIndex(
-                            (item) => item.featureId === f.id
-                          ) > -1
-                        }
-                        showClickResultInMap={showClickResultInMap}
-                        activeFeature={activeFeature}
-                        getOriginBasedIcon={getOriginBasedIcon}
-                      />
-                    </Grid>
-                    {!this.resultHasOnlyOneFeature() && (
-                      <Divider className={classes.divider}></Divider>
-                    )}
-                  </React.Fragment>
-                );
-              } else {
-                return null;
-              }
-            })}
-          </Grid>
-        </TightAccordionDetails>
+                      showClickResultInMap={showClickResultInMap}
+                      activeFeature={activeFeature}
+                      getOriginBasedIcon={getOriginBasedIcon}
+                    />
+                  </Grid>
+                  {!this.resultHasOnlyOneFeature() && (
+                    <Divider className={classes.divider}></Divider>
+                  )}
+                </React.Fragment>
+              );
+            } else {
+              return null;
+            }
+          })}
+        </Grid>
       );
     }
   };
