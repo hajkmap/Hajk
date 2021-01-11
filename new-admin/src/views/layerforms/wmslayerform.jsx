@@ -110,23 +110,23 @@ class WMSLayerForm extends Component {
   componentDidMount() {
     defaultState.url = this.props.url;
     this.setState(defaultState);
-    this.props.model.on("change:legend", () => {
+    this.props.model.on("change:select-image", () => {
       this.setState({
-        legend: this.props.model.get("legend"),
+        legend: this.props.model.get("select-image"),
       });
-      this.validateField("legend");
+      this.validateField("select-image");
     });
-    this.props.model.on("change:legendIcon", () => {
+    this.props.model.on("change:select-legend-icon", () => {
       this.setState({
-        legendIcon: this.props.model.get("legendIcon"),
+        legendIcon: this.props.model.get("select-legend-icon"),
       });
-      this.validateField("legendIcon");
+      this.validateField("select-legend-icon");
     });
   }
 
   componentWillUnmount() {
     this.props.model.off("change:legend");
-    this.props.model.off("change:legendIcon");
+    this.props.model.off("change:select-legend-icon");
   }
 
   constructor() {
@@ -418,22 +418,29 @@ class WMSLayerForm extends Component {
           />
           <span
             onClick={(e) => {
-              this.props.model.on("change:layersInfoLegendIcon", () => {
-                this.validateField("layersInfoLegendIcon");
-                let addedLayersInfo = this.state.addedLayersInfo;
-                addedLayersInfo[layerInfo.id].legendIcon = this.props.model.get(
-                  "layersInfoLegendIcon"
-                );
-                this.setState(
-                  {
-                    addedLayersInfo: addedLayersInfo,
-                  },
-                  () => {
-                    this.renderLayerInfoDialog(layerInfo);
-                    this.props.model.off("change:layersInfoLegendIcon");
-                  }
-                );
-              });
+              this.props.model.on(
+                "change:select-layers-info-legend-icon",
+                () => {
+                  this.validateField("select-layers-info-legend-icon");
+                  let addedLayersInfo = this.state.addedLayersInfo;
+                  addedLayersInfo[
+                    layerInfo.id
+                  ].legendIcon = this.props.model.get(
+                    "select-layers-info-legend-icon"
+                  );
+                  this.setState(
+                    {
+                      addedLayersInfo: addedLayersInfo,
+                    },
+                    () => {
+                      this.renderLayerInfoDialog(layerInfo);
+                      this.props.model.off(
+                        "change:select-layers-info-legend-icon"
+                      );
+                    }
+                  );
+                }
+              );
               this.loadLayersInfoLegendIcon(e);
             }}
             className="btn btn-default"

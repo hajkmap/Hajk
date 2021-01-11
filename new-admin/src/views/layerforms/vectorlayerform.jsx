@@ -64,20 +64,20 @@ class VectorLayerForm extends React.Component {
   };
 
   componentDidMount() {
-    this.props.model.on("change:legend", () => {
+    this.props.model.on("change:select-image", () => {
       this.setState(
         {
-          legend: this.props.model.get("legend"),
+          legend: this.props.model.get("select-image"),
         },
-        () => this.validateField("legend")
+        () => this.validateField("select-image")
       );
     });
-    this.props.model.on("change:legendIcon", () => {
+    this.props.model.on("change:select-legend-icon", () => {
       this.setState(
         {
-          legendIcon: this.props.model.get("legendIcon"),
+          legendIcon: this.props.model.get("select-legend-icon"),
         },
-        () => this.validateField("legendIcon")
+        () => this.validateField("select-legend-icon")
       );
     });
   }
@@ -299,7 +299,7 @@ class VectorLayerForm extends React.Component {
   }
 
   loadLegend(e) {
-    $("#select-image").attr("caller", "legend");
+    $("#select-image").attr("caller", "select-image");
     $("#select-image").trigger("click");
   }
 
