@@ -49,12 +49,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             ? this.renderShowInMapCheckbox()
             : this.renderOriginBasedIcon()}
           <Grid item xs={9}>
-            <Typography
-              noWrap
-              variant="subtitle1"
-              align="left"
-              style={{ maxWidth: "100%" }}
-            >
+            <Typography noWrap align="left" style={{ maxWidth: "100%" }}>
               {featureTitle}
             </Typography>
           </Grid>
