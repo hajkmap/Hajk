@@ -440,12 +440,17 @@ namespace MapService.Components
                 XFont fontComment = new XFont(fontName, 12, XFontStyle.Bold);
                 XBrush brushComment = new XSolidBrush(colorComment);
 
+                // Load image here so we can calculate where to put the comment based on its size
+                var northArrowPath = HostingEnvironment.ApplicationPhysicalPath + ConfigurationManager.AppSettings["exportNorthArrow"];
+                XImage northArrow = XImage.FromFile(northArrowPath);
+                double northArrowScale = 0.1;
+
                 //place the comment
                 var printText = commentText;
                 int yKomment = (int)(yBottom + (yWhiteSpace * 0.05));//**yLeftBottom + number(>font size)
-                gfx.DrawString(printText, fontComment, brushComment, xLeft, yKomment);
+                gfx.DrawString(printText, fontComment, brushComment, xLeft + northArrow.PixelWidth * northArrowScale + 4, yKomment);
                 //this.drawText(gfx, fontName, printText, xLeft, yKomment, 12); // comment 
-                
+
 
                 //text "kartled..."
                 int yTextBottom = (int)(yBottom + (yWhiteSpace * 0.60));
@@ -469,10 +474,6 @@ namespace MapService.Components
                 XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
                 var logo1Path = HostingEnvironment.ApplicationPhysicalPath + ConfigurationManager.AppSettings["exportLogotype"];
                 XImage logo1 = XImage.FromFile(logo1Path);
-                
-                var northArrowPath = HostingEnvironment.ApplicationPhysicalPath + ConfigurationManager.AppSettings["exportNorthArrow"];
-                XImage northArrow = XImage.FromFile(northArrowPath);
-
 
                 // Layout3 title
                 XStringFormat myTitle = new XStringFormat();
@@ -496,7 +497,6 @@ namespace MapService.Components
                 var printDate = pdfDate;
                 XRect rectForDate = new XRect(xRight - 125, page.Height.Point * yWhiteScale - oneCM - 35, 125, 0);
                 XFont fontSourceDate = new XFont(fontName, 12, XFontStyle.Regular);
-                double northArrowScale = 0.1;
 
                 if (page.Size.ToString() == "A4" && page.Orientation.ToString() == "Landscape") {
                     gfx.DrawString(titleText, font, brush, (int)page.Width.Point / 2, (int)(page.Height.Point * yWhiteScale) - oneCM - 20, myTitle);
