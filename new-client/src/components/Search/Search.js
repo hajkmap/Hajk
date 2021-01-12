@@ -646,7 +646,7 @@ class Search extends React.PureComponent {
         //Had to make a deep clone to not directly manipulate the reference from plugin
         promises.push(
           plugin.searchInterface
-            .getResults(decodeURIComponent(searchString), fetchOptions)
+            .getResults(searchString, fetchOptions)
             .then((res) => {
               return {
                 errors: res.errors,
