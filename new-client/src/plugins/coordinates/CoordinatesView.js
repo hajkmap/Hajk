@@ -53,7 +53,11 @@ class CoordinatesView extends React.PureComponent {
           },
           () => {
             // React moves the cursor to the end for the field that was modified so we restore the position here
-            if (this.props.model.updatedTransformId !== "") {
+            if (
+              this.props.model.updatedTransformId !== "" &&
+              document.getElementById(this.props.model.updatedTransformId) !==
+                null
+            ) {
               document.getElementById(
                 this.props.model.updatedTransformId
               ).selectionStart = this.props.model.updatedTransformIdx;
