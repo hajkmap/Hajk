@@ -1,14 +1,20 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { Grid, withWidth } from "@material-ui/core";
+import { withWidth, List, ListItem } from "@material-ui/core";
 import SearchResultsDataset from "./SearchResultsDataset";
+import SearchResultsDatasetSummary from "./SearchResultsDatasetSummary";
 
-const styles = (theme) => ({
-  searchResultDatasetWrapper: {
-    cursor: "pointer",
-    "&:hover": {
-      backgroundColor: theme.palette.action.hover,
-    },
+const styles = () => ({
+  searchResultList: {
+    padding: 0,
+    width: "100%",
+    transition: "none",
+  },
+  searchResultListItem: {
+    width: "100%",
+    display: "flex",
+    padding: 0,
+    transition: "none",
   },
 });
 
@@ -204,12 +210,20 @@ class SearchResultsList extends React.PureComponent {
     });
   };
 
-  render() {
+  renderSearchResultDatasetSummary = (featureCollection) => {
+    const { getOriginBasedIcon } = this.props;
+    return (
+      <SearchResultsDatasetSummary
+        featureCollection={featureCollection}
+        getOriginBasedIcon={getOriginBasedIcon}
+      />
+    );
+  };
+
+  renderSearchResultDataset = (featureCollection) => {
     const {
-      featureCollections,
       getOriginBasedIcon,
       app,
-      classes,
       activeFeatureCollection,
       activeFeature,
       setActiveFeature,
@@ -221,43 +235,61 @@ class SearchResultsList extends React.PureComponent {
       getFeatureTitle,
       localObserver,
     } = this.props;
-
     return (
-      <Grid container alignItems="center" justify="center">
-        <Grid container item>
-          {featureCollections.map((featureCollection) => (
-            <Grid
-              key={featureCollection.source.id}
-              xs={12}
-              className={
-                activeFeature ? null : classes.searchResultDatasetWrapper
-              }
-              item
-            >
-              <SearchResultsDataset
-                app={app}
-                featureCollection={featureCollection}
-                getOriginBasedIcon={getOriginBasedIcon}
-                selectedItems={this.state.selectedItems}
-                showClickResultInMap={this.showClickResultInMap}
-                activeFeatureCollection={activeFeatureCollection}
-                activeFeature={activeFeature}
-                handleFeatureCollectionClick={handleFeatureCollectionClick}
-                setActiveFeature={setActiveFeature}
-                handleOnFeatureClick={this.handleOnFeatureClick}
-                handleOnFeatureKeyPress={this.handleOnFeatureKeyPress}
-                resetFeatureAndCollection={resetFeatureAndCollection}
-                featureFilter={featureFilter}
-                featureSortingStrategy={featureSortingStrategy}
-                showFeaturePreview={showFeaturePreview}
-                getFeatureTitle={getFeatureTitle}
-                localObserver={localObserver}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      </Grid>
+      <SearchResultsDataset
+        app={app}
+        featureCollection={featureCollection}
+        getOriginBasedIcon={getOriginBasedIcon}
+        selectedItems={this.state.selectedItems}
+        showClickResultInMap={this.showClickResultInMap}
+        activeFeatureCollection={activeFeatureCollection}
+        activeFeature={activeFeature}
+        handleFeatureCollectionClick={handleFeatureCollectionClick}
+        setActiveFeature={setActiveFeature}
+        handleOnFeatureClick={this.handleOnFeatureClick}
+        handleOnFeatureKeyPress={this.handleOnFeatureKeyPress}
+        resetFeatureAndCollection={resetFeatureAndCollection}
+        featureFilter={featureFilter}
+        featureSortingStrategy={featureSortingStrategy}
+        showFeaturePreview={showFeaturePreview}
+        getFeatureTitle={getFeatureTitle}
+        localObserver={localObserver}
+      />
     );
+  };
+
+  renderSearchResultList = () => {
+    const {
+      featureCollections,
+      classes,
+      handleFeatureCollectionClick,
+    } = this.props;
+    return (
+      <List className={classes.searchResultList}>
+        {featureCollections.map((featureCollection) => (
+          <ListItem
+            disableTouchRipple
+            key={featureCollection.source.id}
+            className={classes.searchResultListItem}
+            id={`search-result-dataset-${featureCollection.source.id}`}
+            aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
+            onClick={() => handleFeatureCollectionClick(featureCollection)}
+            button
+            divider
+          >
+            {this.renderSearchResultDatasetSummary(featureCollection)}
+          </ListItem>
+        ))}
+      </List>
+    );
+  };
+
+  render() {
+    const { activeFeatureCollection } = this.props;
+
+    return activeFeatureCollection
+      ? this.renderSearchResultDataset(activeFeatureCollection)
+      : this.renderSearchResultList();
   }
 }
 

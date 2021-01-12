@@ -5,6 +5,7 @@ import { Checkbox, Typography, Tooltip, Grid } from "@material-ui/core";
 const styles = (theme) => ({
   root: {
     minHeight: 42,
+    width: "100%",
   },
   originIconWrapper: {
     paddingLeft: theme.spacing(1),
