@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import cslx from "clsx";
-import { Button, Tooltip, Typography } from "@material-ui/core";
+import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
@@ -34,6 +34,10 @@ const styles = (theme) => ({
     margin: 0,
     listStyle: "none",
   },
+  layerGroupTypography: {
+    display: "flex",
+    alignItems: "center",
+  },
   layerItem: {
     justifyContent: "space-between",
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
@@ -64,6 +68,10 @@ const styles = (theme) => ({
   infoTextContainer: {
     margin: "10px 45px",
   },
+  layerGroupWrapper: {
+    display: "flex",
+    alignItems: "center",
+  },
   layerGroup: {
     paddingTop: "5px",
     paddingBottom: "5px",
@@ -77,6 +85,7 @@ const styles = (theme) => ({
     marginBottom: "-5px",
   },
   layerGroupHeader: {
+    width: "100%",
     display: "flex",
     justifyContent: "space-between",
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
@@ -114,7 +123,16 @@ const styles = (theme) => ({
     float: "left",
     marginRight: "5px",
   },
+  legendIcon: {
+    width: theme.typography.pxToRem(18),
+    height: theme.typography.pxToRem(18),
+    marginRight: "5px",
+  },
+  legendIconContainer: {
+    display: "flex",
+  },
   arrowIcon: {
+    display: "flex",
     float: "left",
   },
 });
@@ -403,6 +421,21 @@ class LayerGroupItem extends Component {
     }
   };
 
+  renderLegendIcon(url) {
+    const { classes } = this.props;
+    return (
+      <Grid item>
+        <div className={classes.legendIconContainer}>
+          <img
+            className={classes.legendIcon}
+            alt="Teckenförklaring"
+            src={url}
+          />
+        </div>
+      </Grid>
+    );
+  }
+
   renderSubLayer(layer, subLayer, index) {
     const { visibleSubLayers } = this.state;
     const { classes } = this.props;
@@ -411,20 +444,29 @@ class LayerGroupItem extends Component {
       (visibleSubLayer) => visibleSubLayer === subLayer
     );
     var toggleSettings = this.toggleSubLayerSettings.bind(this, index);
-
+    const legendIcon = layer.layersInfo[subLayer].legendIcon;
     return (
       <div key={index} className={classes.layerItem}>
         <div className={classes.caption}>
-          <div onClick={this.toggleLayerVisible(subLayer)}>
+          <Grid
+            wrap="nowrap"
+            container
+            alignItems="center"
+            onClick={this.toggleLayerVisible(subLayer)}
+          >
             {visible ? (
               <CheckBoxIcon className={classes.checkBoxIcon} />
             ) : (
               <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
             )}
-            <label className={classes.captionText}>
-              {layer.layersInfo[subLayer].caption}
-            </label>
-          </div>
+
+            {legendIcon && this.renderLegendIcon(legendIcon)}
+            <Grid item>
+              <Typography className={classes.captionText}>
+                {layer.layersInfo[subLayer].caption}
+              </Typography>
+            </Grid>
+          </Grid>
           <div className={classes.layerButtons}>
             <div className={classes.layerButton}>
               <DownloadLink
@@ -610,6 +652,7 @@ class LayerGroupItem extends Component {
         return <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />;
       }
     }
+    const legendIcon = layer.get("layerInfo").legendIcon;
     return (
       <div
         className={cslx(classes.layerGroup, {
@@ -617,52 +660,57 @@ class LayerGroupItem extends Component {
         })}
       >
         <div className={classes.layerGroupContainer}>
-          {this.hideExpandArrow === false && (
-            <div className={classes.arrowIcon}>
-              {open ? (
-                <ArrowDropDownIcon
-                  className={classes.button}
-                  onClick={() => this.toggle()}
-                />
-              ) : (
-                <ArrowRightIcon
-                  className={classes.button}
-                  onClick={() => this.toggle()}
-                />
-              )}
-            </div>
-          )}
-          <div className={classes.layerGroupHeader}>
-            <div className={classes.layerItemInfo}>
-              <div
-                className={classes.caption}
-                onClick={this.toggleVisible(this.props.layer)}
-              >
-                <div
-                  onClick={this.toggleGroupVisible(layer)}
-                  className={classes.caption}
-                >
-                  <Typography>
-                    {getIcon()}
-                    <label className={classes.captionText}>
-                      {layer.get("caption")}
-                    </label>
-                  </Typography>
-                </div>
-              </div>
-            </div>
-            <div className={classes.layerButtons}>
-              {this.renderStatus()}
-              {this.renderInfoToggler()}
-              <div className={classes.layerButton}>
-                {this.state.toggleSettings ? (
-                  <CloseIcon onClick={() => this.toggleSettings()} />
+          <div className={classes.layerGroupWrapper}>
+            {this.hideExpandArrow === false && (
+              <div className={classes.arrowIcon}>
+                {open ? (
+                  <ArrowDropDownIcon
+                    className={classes.button}
+                    onClick={() => this.toggle()}
+                  />
                 ) : (
-                  <MoreHorizIcon
-                    onClick={() => this.toggleSettings()}
-                    className={classes.settingsButton}
+                  <ArrowRightIcon
+                    className={classes.button}
+                    onClick={() => this.toggle()}
                   />
                 )}
+              </div>
+            )}
+            <div className={classes.layerGroupHeader}>
+              <div className={classes.layerItemInfo}>
+                <div
+                  className={classes.caption}
+                  onClick={this.toggleVisible(this.props.layer)}
+                >
+                  <div
+                    onClick={this.toggleGroupVisible(layer)}
+                    className={classes.caption}
+                  >
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      {getIcon()}
+                      {legendIcon && this.renderLegendIcon(legendIcon)}
+                      <Typography className={classes.layerGroupTypography}>
+                        <label className={classes.captionText}>
+                          {layer.get("caption")}
+                        </label>
+                      </Typography>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className={classes.layerButtons}>
+                {this.renderStatus()}
+                {this.renderInfoToggler()}
+                <div className={classes.layerButton}>
+                  {this.state.toggleSettings ? (
+                    <CloseIcon onClick={() => this.toggleSettings()} />
+                  ) : (
+                    <MoreHorizIcon
+                      onClick={() => this.toggleSettings()}
+                      className={classes.settingsButton}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>

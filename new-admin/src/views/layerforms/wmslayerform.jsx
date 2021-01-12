@@ -38,6 +38,7 @@ const defaultState = {
   content: "",
   date: "Fylls i per automatik",
   legend: "",
+  legendIcon: "",
   owner: "",
   url: "",
   opacity: 1.0,
@@ -109,16 +110,23 @@ class WMSLayerForm extends Component {
   componentDidMount() {
     defaultState.url = this.props.url;
     this.setState(defaultState);
-    this.props.model.on("change:legend", () => {
+    this.props.model.on("change:select-image", () => {
       this.setState({
-        legend: this.props.model.get("legend"),
+        legend: this.props.model.get("select-image"),
       });
-      this.validateField("legend");
+      this.validateField("select-image");
+    });
+    this.props.model.on("change:select-legend-icon", () => {
+      this.setState({
+        legendIcon: this.props.model.get("select-legend-icon"),
+      });
+      this.validateField("select-legend-icon");
     });
   }
 
   componentWillUnmount() {
     this.props.model.off("change:legend");
+    this.props.model.off("change:select-legend-icon");
   }
 
   constructor() {
@@ -131,8 +139,22 @@ class WMSLayerForm extends Component {
     this.setState(defaultState);
   }
 
-  loadLegendImage(e) {
+  loadLegend(e) {
+    $("#select-image").attr("caller", "select-image");
     $("#select-image").trigger("click");
+  }
+
+  loadLegendIcon(e) {
+    $("#select-legend-icon").attr("caller", "select-legend-icon");
+    $("#select-legend-icon").trigger("click");
+  }
+
+  loadLayersInfoLegendIcon(e) {
+    $("#select-layers-info-legend-icon").attr(
+      "caller",
+      "select-layers-info-legend-icon"
+    );
+    $("#select-layers-info-legend-icon").trigger("click");
   }
 
   renderLayerList() {
@@ -253,6 +275,7 @@ class WMSLayerForm extends Component {
         id: checkedLayer,
         caption: "",
         legend: "",
+        legendIcon: "",
         infobox: "",
         style: "",
         queryable: "",
@@ -305,6 +328,9 @@ class WMSLayerForm extends Component {
 
   renderLayerInfoInput(layerInfo) {
     var currentLayer = this.findInCapabilities(layerInfo.id);
+    var imageLoader = this.state.imageLoad ? (
+      <i className="fa fa-refresh fa-spin" />
+    ) : null;
 
     this.setState({
       style: currentLayer.Style || [],
@@ -369,6 +395,60 @@ class WMSLayerForm extends Component {
             type="text"
           />
         </div>
+        <div>
+          <div>
+            <label>Teckenförklaringsikon</label>
+          </div>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.legendIcon}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].legendIcon = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+          <span
+            onClick={(e) => {
+              this.props.model.on(
+                "change:select-layers-info-legend-icon",
+                () => {
+                  this.validateField("select-layers-info-legend-icon");
+                  let addedLayersInfo = this.state.addedLayersInfo;
+                  addedLayersInfo[
+                    layerInfo.id
+                  ].legendIcon = this.props.model.get(
+                    "select-layers-info-legend-icon"
+                  );
+                  this.setState(
+                    {
+                      addedLayersInfo: addedLayersInfo,
+                    },
+                    () => {
+                      this.renderLayerInfoDialog(layerInfo);
+                      this.props.model.off(
+                        "change:select-layers-info-legend-icon"
+                      );
+                    }
+                  );
+                }
+              );
+              this.loadLayersInfoLegendIcon(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+
         <div>
           <div>
             <label>Stil</label>
@@ -579,6 +659,7 @@ class WMSLayerForm extends Component {
             id: layer,
             caption: "",
             legend: "",
+            legendIcon: "",
             infobox: "",
             style: "",
             queryable: "",
@@ -827,6 +908,7 @@ class WMSLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
+      legendIcon: this.getValue("legendIcon"),
       projection: this.getValue("projection"),
       layers: this.getValue("layers"),
       layersInfo: this.getValue("layersInfo"),
@@ -930,6 +1012,7 @@ class WMSLayerForm extends Component {
           valid = false;
         }
         break;
+
       case "opacity":
         if (isNaN(Number(value)) || value < 0 || value > 1) {
           valid = false;
@@ -1223,7 +1306,28 @@ class WMSLayerForm extends Component {
           />
           <span
             onClick={(e) => {
-              this.loadLegendImage(e);
+              this.loadLegend(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+        <div>
+          <label>
+            Teckenförklar
+            <br />
+            ingsikon
+          </label>
+          <input
+            type="text"
+            ref="input_legendIcon"
+            value={this.state.legendIcon}
+            onChange={(e) => this.setState({ legendIcon: e.target.value })}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegendIcon(e);
             }}
             className="btn btn-default"
           >
