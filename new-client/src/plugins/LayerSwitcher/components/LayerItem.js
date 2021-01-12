@@ -6,7 +6,6 @@ import CallMadeIcon from "@material-ui/icons/CallMade";
 import InfoIcon from "@material-ui/icons/Info";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import CardMedia from "@material-ui/core/CardMedia";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CloseIcon from "@material-ui/icons/Close";
@@ -93,7 +92,6 @@ class LayerItem extends React.PureComponent {
     super(props);
     const { layer } = props;
     var layerInfo = layer.get("layerInfo");
-    console.log(layerInfo, "layerInfo");
     this.state = {
       caption: layerInfo.caption,
       visible: layer.get("visible"),

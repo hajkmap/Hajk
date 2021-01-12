@@ -105,11 +105,25 @@ export default class DocumentSearchModel {
         ? this.getPossibleSearchCombinations(searchString, searchOptions)
         : [splitAndTrimOnCommas(searchString)];
 
+      // The searchString will be encoded if the search has been initiated
+      // by selecting an alternative in the autocomplete.
+      possibleSearchCombinations = this.decodePotentialSpecialCharsFromFeatureProps(
+        possibleSearchCombinations
+      );
+
       resolve({
         featureCollections: this.getFeatureCollectionsForMatchingDocuments(
           possibleSearchCombinations
         ),
         errors: [],
+      });
+    });
+  };
+
+  decodePotentialSpecialCharsFromFeatureProps = (searchCombinations) => {
+    return searchCombinations.map((combination) => {
+      return combination.map((word) => {
+        return decodeURIComponent(word);
       });
     });
   };

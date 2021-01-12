@@ -1,6 +1,10 @@
 import ConfigService from "../../services/config.service";
 import ad from "../../services/activedirectory.service";
 import handleStandardResponse from "../../utils/handleStandardResponse";
+import log4js from "log4js";
+
+// Create a logger for admin events, those will be saved in a separate log file.
+const ael = log4js.getLogger("adminEvent");
 
 export class Controller {
   /**
@@ -84,22 +88,35 @@ export class Controller {
   }
 
   createNewMap(req, res) {
-    ConfigService.createNewMap(req.params.name).then((data) =>
-      handleStandardResponse(res, data)
-    );
+    ConfigService.createNewMap(req.params.name).then((data) => {
+      handleStandardResponse(res, data);
+      !data.error &&
+        ael.info(
+          `${res.locals.authUser} created a new map config: ${req.params.name}.json`
+        );
+    });
   }
 
   duplicateMap(req, res) {
-    ConfigService.duplicateMap(
-      req.params.nameFrom,
-      req.params.nameTo
-    ).then((data) => handleStandardResponse(res, data));
+    ConfigService.duplicateMap(req.params.nameFrom, req.params.nameTo).then(
+      (data) => {
+        handleStandardResponse(res, data);
+        !data.error &&
+          ael.info(
+            `${res.locals.authUser} created a new map config, ${req.params.nameTo}.json, by duplicating ${req.params.nameFrom}.json`
+          );
+      }
+    );
   }
 
   deleteMap(req, res) {
-    ConfigService.deleteMap(req.params.name).then((data) =>
-      handleStandardResponse(res, data)
-    );
+    ConfigService.deleteMap(req.params.name).then((data) => {
+      handleStandardResponse(res, data);
+      !data.error &&
+        ael.info(
+          `${res.locals.authUser} deleted map config ${req.params.name}.json`
+        );
+    });
   }
 }
 export default new Controller();
