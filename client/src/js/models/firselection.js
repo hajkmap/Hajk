@@ -341,8 +341,10 @@ var FirSelectionModel = {
 
     bufferSearchingInput: function(){
         var bufferLength = document.getElementById("bufferSearchingInput").value;
-        this.set("bufferLength", bufferLength);
-        this.bufferSearching(bufferLength);
+        if(this.set) {
+            this.set("bufferLength", bufferLength);
+            this.bufferSearching(bufferLength);
+        }
     },
 
     bufferSearching: function(bufferSearchingLength) {

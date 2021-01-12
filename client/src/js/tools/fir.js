@@ -1136,7 +1136,7 @@ var FirModel = {
                 srsName: this.get('map').getView().getProjection().getCode(),
                 outputFormat: source.outputFormat,
                 geometryField: source.geometryField,
-                withCredentials: searchProps.withCredentials
+                withCredentials: source.withCredentials
             };
 
             var sameNameFilter = "";
