@@ -320,6 +320,7 @@ class Search extends React.PureComponent {
         this.setState(
           {
             autoCompleteOpen: searchString.length >= 3,
+            autocompleteList: [],
             loading: searchString.length >= 3,
             showSearchResults: false,
             searchString: searchString,
