@@ -34,9 +34,6 @@ const styles = (theme) => ({
   spaceToFromDate: { marginBottom: 40, width: "100%" },
   divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
   errorMessage: { color: theme.palette.error.main },
-  polygonAndRectangleImage: {
-    width: "80%",
-  },
 });
 
 class Journeys extends React.PureComponent {
@@ -507,57 +504,39 @@ class Journeys extends React.PureComponent {
         </Grid>
         <Grid justify="center" container>
           <Grid item xs={4}>
-            {this.getImageSourceForPolygon()}
+            <div>
+              <img
+                src={
+                  this.state.isPolygonActive ? ActivePolygon : InactivePolygon
+                }
+                onClick={this.handlePolygonClick}
+                value={this.state.selectedFormType}
+                alt="#"
+              ></img>
+            </div>
             <Grid item xs={4}>
               <Typography variant="body2">POLYGON</Typography>
             </Grid>
           </Grid>
           <Grid item xs={4}>
-            {this.getImageSourceForRectangle()}
+            <div>
+              <img
+                src={
+                  this.state.isRectangleActive
+                    ? ActiveRectangle
+                    : InactiveRectangle
+                }
+                onClick={this.handleRectangleClick}
+                value={this.state.selectedFormType}
+                alt="#"
+              ></img>
+            </div>
             <Grid item xs={4}>
               <Typography variant="body2">REKTANGEL</Typography>
             </Grid>
           </Grid>
         </Grid>
       </>
-    );
-  };
-
-  getImageSourceForPolygon = () => {
-    const { classes } = this.props;
-
-    let imageSrc = ActivePolygon;
-    if (!this.state.isPolygonActive) imageSrc = InactivePolygon;
-    if (!this.state.spatialToolsEnabled) imageSrc = DisabledPolygon;
-
-    return (
-      <CardMedia
-        image={imageSrc}
-        className={classes.polygonAndRectangleImage}
-        component="img"
-        onClick={this.handlePolygonClick}
-        value={this.state.selectedFormType}
-        alt="#"
-      ></CardMedia>
-    );
-  };
-
-  getImageSourceForRectangle = () => {
-    const { classes } = this.props;
-
-    let imageSrc = ActiveRectangle;
-    if (!this.state.isRectangleActive) imageSrc = InactiveRectangle;
-    if (!this.state.spatialToolsEnabled) imageSrc = DisabledRectangle;
-
-    return (
-      <CardMedia
-        image={imageSrc}
-        className={classes.polygonAndRectangleImage}
-        component="img"
-        onClick={this.handleRectangleClick}
-        value={this.state.selectedFormType}
-        alt="#"
-      ></CardMedia>
     );
   };
 
