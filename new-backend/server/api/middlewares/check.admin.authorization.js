@@ -30,6 +30,9 @@ export default async function (req, res, next) {
   // Save user name to eliminate multiple calls to the same method
   const user = ad.getUserFromRequestHeader(req);
 
+  // Save user name so that it's available to following middleware
+  res.locals.authUser = user;
+
   // Check if current user is member of the admins AD group
   const allowed = await ad.isUserMemberOf(user, adminGroup);
 

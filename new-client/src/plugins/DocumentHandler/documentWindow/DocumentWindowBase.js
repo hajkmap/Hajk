@@ -9,6 +9,7 @@ import { CustomLink } from "../utils/ContentComponentFactory";
 import PrintIcon from "@material-ui/icons/Print";
 
 class DocumentWindowBase extends React.PureComponent {
+  //Could be rewritten
   findMenuItem(menuItem, documentNameToFind) {
     if (menuItem.document === documentNameToFind) {
       return menuItem;
@@ -61,22 +62,17 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   showHeaderInDocument = ({ documentName, headerIdentifier }) => {
-    const { documentTitle } = this.props;
     if (documentName) {
-      if (documentName !== documentTitle) {
-        this.props.showDocument(documentName).then(
-          () => {
-            this.scrollInDocument(headerIdentifier);
-          },
-          () => {
-            console.warn(
-              "Could not fetch document, link to document probably reference a document not present in panelmenu"
-            );
-          }
-        );
-      } else {
-        this.scrollInDocument(headerIdentifier);
-      }
+      this.props.showDocument(documentName).then(
+        () => {
+          this.scrollInDocument(headerIdentifier);
+        },
+        () => {
+          console.warn(
+            "Could not fetch document, link to document probably reference a document not present in panelmenu"
+          );
+        }
+      );
     }
   };
 
@@ -85,8 +81,6 @@ class DocumentWindowBase extends React.PureComponent {
       showPrintWindow: !this.state.showPrintWindow,
     });
   };
-
-  createHtmlObjectFromInfoClickEvent = () => {};
 
   canHandleInfoClickEvent = (infoClickEvent) => {
     if (infoClickEvent.payload.type !== "a") {
@@ -187,15 +181,9 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   getDocumentViewer = () => {
-    const {
-      documentWindowMaximized,
-      document,
-
-      documentColor,
-    } = this.props;
+    const { documentWindowMaximized, document } = this.props;
     return (
       <DocumentViewer
-        documentColor={documentColor || "#ffffff"}
         documentWindowMaximized={documentWindowMaximized}
         activeDocument={document}
         togglePrintWindow={this.togglePrintWindow}
@@ -211,10 +199,8 @@ class DocumentWindowBase extends React.PureComponent {
       localObserver,
       documentWindowMaximized,
       document,
-      documentTitle,
       togglePrintWindow,
       onWindowHide,
-      documentColor,
       showPrintWindow,
       customTheme,
       onMinimize,
@@ -225,6 +211,7 @@ class DocumentWindowBase extends React.PureComponent {
       ? [
           {
             icon: <PrintIcon />,
+            description: "Öppna utskrift",
             onClickCallback: togglePrintWindow,
           },
         ]
@@ -235,8 +222,8 @@ class DocumentWindowBase extends React.PureComponent {
         type="DocumentViewer"
         custom={{
           icon: <MenuBookIcon />,
-          title: documentTitle || options.windowTitle || "Documents",
-          color: documentColor || "#ffffff",
+          title: document?.documentTitle || options.windowTitle || "Documents",
+          color: document?.documentColor || "#ffffff",
           customPanelHeaderButtons: customHeaderButtons,
           description: "En kort beskrivning som visas i widgeten",
           height: options.height || "auto",

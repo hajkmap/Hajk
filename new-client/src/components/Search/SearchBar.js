@@ -41,6 +41,11 @@ const styles = (theme) => ({
   inputRoot: {
     height: theme.spacing(6),
   },
+  originIconWrapper: {
+    display: "flex",
+    flexWrap: "wrap",
+    paddingRight: theme.spacing(1),
+  },
 });
 
 //Needed to make a CustomPopper with inline styling to be able to override width,
@@ -79,14 +84,19 @@ class SearchBar extends React.PureComponent {
   };
 
   getOriginBasedIcon = (origin) => {
+    const { classes } = this.props;
+    let icon;
     switch (origin) {
       case "WFS":
-        return <RoomIcon color="disabled" />;
+        icon = <RoomIcon color="disabled" />;
+        break;
       case "DOCUMENT":
-        return <DescriptionIcon color="disabled" />;
+        icon = <DescriptionIcon color="disabled" />;
+        break;
       default:
-        return <RoomIcon color="disabled" />;
+        icon = <RoomIcon color="disabled" />;
     }
+    return <div className={classes.originIconWrapper}>{icon}</div>;
   };
 
   removeCommasAndSpaces = (string) => {
@@ -146,6 +156,7 @@ class SearchBar extends React.PureComponent {
   getHighlightedACE = (searchString, autocompleteEntry) => {
     const { getArrayWithSearchWords, classes } = this.props;
     const stringArraySS = getArrayWithSearchWords(searchString);
+
     let highlightInformation = stringArraySS
       .map((searchWord) => {
         return this.getAllStartingIndexForOccurencesInString(
@@ -162,10 +173,12 @@ class SearchBar extends React.PureComponent {
 
     return (
       <Typography noWrap={true} className={classes.autocompleteTypography}>
-        {this.renderHighlightedAutocompleteEntry(
-          highlightInformation,
-          autocompleteEntry
-        )}
+        {highlightInformation.length > 0
+          ? this.renderHighlightedAutocompleteEntry(
+              highlightInformation,
+              autocompleteEntry
+            )
+          : autocompleteEntry}
       </Typography>
     );
   };

@@ -9,10 +9,8 @@ import SortIcon from "@material-ui/icons/Sort";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {
-  Accordion,
   Paper,
   Button,
-  AccordionDetails,
   Grid,
   TextField,
   Typography,
@@ -23,6 +21,7 @@ import {
   Grow,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
+import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 
 const styles = (theme) => ({
   hidden: {
@@ -35,15 +34,6 @@ const styles = (theme) => ({
     [theme.breakpoints.up("sm")]: {
       maxHeight: "82vh",
     },
-  },
-  expanded: {
-    "&$expanded": {
-      margin: theme.spacing(0),
-      minHeight: theme.spacing(0),
-    },
-  },
-  content: {
-    margin: theme.spacing(0),
   },
   root: {
     maxHeight: "80vh",
@@ -67,6 +57,12 @@ const styles = (theme) => ({
     paddingRight: theme.spacing(1),
     paddingLeft: theme.spacing(1),
   },
+  tallHeaderContainer: {
+    minHeight: 42,
+    paddingRight: theme.spacing(1),
+    paddingLeft: theme.spacing(1),
+    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+  },
   headerTypography: {
     maxWidth: "100%",
     fontSize: 18,
@@ -75,23 +71,10 @@ const styles = (theme) => ({
     minWidth: 30,
   },
   breadCrumbLinks: {
+    border: "none",
     cursor: "pointer",
   },
 });
-
-const TightAccordionDetails = withStyles({
-  root: {
-    padding: 0,
-  },
-})(AccordionDetails);
-
-const TightAccordion = withStyles((theme) => ({
-  root: {
-    "&:last-child": {
-      borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
-    },
-  },
-}))(Accordion);
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
@@ -352,7 +335,7 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSearchResultListOptions = () => {
-    const { classes } = this.props;
+    const { classes, featureCollections } = this.props;
     const {
       activeFeatureCollection,
       featureCollectionSortingStrategy,
@@ -424,12 +407,17 @@ class SearchResultsContainer extends React.PureComponent {
                 <DeleteIcon />
               </Button>
             </Tooltip>
+            <SearchResultsDownloadMenu
+              featureCollections={
+                activeFeatureCollection
+                  ? [activeFeatureCollection]
+                  : featureCollections
+              }
+              localObserver={this.props.localObserver}
+            />
           </Grid>
         </Grow>
         <Grid item>
-          <Typography variant="srOnly">
-            {`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
-          </Typography>
           <Tooltip title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}>
             <Button
               className={classes.headerButtons}
@@ -439,6 +427,9 @@ class SearchResultsContainer extends React.PureComponent {
                 })
               }
             >
+              <Typography variant="srOnly">
+                {`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
+              </Typography>
               <MoreVertIcon />
             </Button>
           </Tooltip>
@@ -525,6 +516,10 @@ class SearchResultsContainer extends React.PureComponent {
     );
   };
 
+  keyPressIsEnter = (event) => {
+    return event.which === 13 || event.keyCode === 13;
+  };
+
   renderBreadCrumbs = (featureCollectionTitle, featureTitle) => {
     const { classes } = this.props;
     const { activeFeatureCollection, activeFeature } = this.state;
@@ -538,11 +533,17 @@ class SearchResultsContainer extends React.PureComponent {
           <Tooltip title="Tillbaka till alla sökresultat">
             <Link
               className={classes.breadCrumbLinks}
+              tabIndex={0}
               color="textPrimary"
               variant="caption"
               onClick={(e) => {
                 e.stopPropagation();
                 this.resetFeatureAndCollection();
+              }}
+              onKeyDown={(event) => {
+                if (this.keyPressIsEnter(event)) {
+                  this.resetFeatureAndCollection();
+                }
               }}
               onChange={this.resetFeatureAndCollection}
             >
@@ -552,11 +553,17 @@ class SearchResultsContainer extends React.PureComponent {
           <Tooltip title={featureCollectionTitle}>
             <Link
               className={classes.breadCrumbLinks}
+              tabIndex={0}
               color="textPrimary"
               variant="caption"
               onClick={(e) => {
                 e.stopPropagation();
                 this.setActiveFeature(undefined);
+              }}
+              onKeyDown={(event) => {
+                if (this.keyPressIsEnter(event)) {
+                  this.setActiveFeature(undefined);
+                }
               }}
             >
               {featureCollectionTitle}
@@ -565,6 +572,7 @@ class SearchResultsContainer extends React.PureComponent {
           {shouldRenderFeatureDetails && (
             <Tooltip title={featureTitle}>
               <Link
+                tabIndex={0}
                 className={classes.breadCrumbLinks}
                 color="textPrimary"
                 variant="caption"
@@ -580,54 +588,54 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
-  renderHeaderInfoBar = (featureCollectionTitle, featureTitle) => {
-    const { activeFeatureCollection, activeFeature } = this.state;
+  renderHeaderInfoBar = (featureCollectionTitle) => {
+    const { activeFeatureCollection } = this.state;
     const { classes, getOriginBasedIcon } = this.props;
-    if (!activeFeature) {
-      return (
+    return (
+      <Grid
+        container
+        item
+        justify="space-between"
+        alignItems="center"
+        wrap="nowrap"
+        xs={12}
+      >
         <Grid
           container
           item
-          justify="space-between"
-          alignItems="center"
           wrap="nowrap"
-          xs={12}
+          alignItems="center"
+          xs={this.state.showTools ? 5 : 11}
         >
-          <Grid container item wrap="nowrap" xs={this.state.showTools ? 5 : 11}>
-            {activeFeatureCollection &&
-              getOriginBasedIcon(activeFeatureCollection.origin)}
-            <Tooltip
-              title={
-                activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
-              }
-            >
-              <Typography
-                variant="button"
-                component="div"
-                noWrap
-                className={classes.headerTypography}
-              >
-                {`${
-                  activeFeatureCollection
-                    ? featureCollectionTitle
-                    : "Sökresultat"
-                }`}
-              </Typography>
-            </Tooltip>
-          </Grid>
-          <Grid
-            container
-            item
-            justify="flex-end"
-            xs={this.state.showTools ? 7 : 1}
+          {activeFeatureCollection &&
+            getOriginBasedIcon(activeFeatureCollection.origin)}
+          <Tooltip
+            title={
+              activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
+            }
           >
-            {this.renderSearchResultListOptions()}
-          </Grid>
+            <Typography
+              variant="button"
+              component="div"
+              noWrap
+              className={classes.headerTypography}
+            >
+              {`${
+                activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
+              }`}
+            </Typography>
+          </Tooltip>
         </Grid>
-      );
-    } else {
-      return null;
-    }
+        <Grid
+          container
+          item
+          justify="flex-end"
+          xs={this.state.showTools ? 7 : 1}
+        >
+          {this.renderSearchResultListOptions()}
+        </Grid>
+      </Grid>
+    );
   };
 
   renderSearchResultsHeader = () => {
@@ -640,13 +648,25 @@ class SearchResultsContainer extends React.PureComponent {
     const featureTitle = activeFeature
       ? this.getFeatureTitle(activeFeature)
       : "";
+    const shouldRenderHeaderInfoBar =
+      !activeFeature || activeFeature?.onClickName;
 
     return (
-      <Grid className={classes.headerContainer} container item xs={12}>
+      <Grid
+        className={
+          shouldRenderHeaderInfoBar
+            ? classes.tallHeaderContainer
+            : classes.headerContainer
+        }
+        container
+        item
+        xs={12}
+      >
         <Grid item xs={12}>
           {this.renderBreadCrumbs(featureCollectionTitle, featureTitle)}
         </Grid>
-        {this.renderHeaderInfoBar(featureCollectionTitle, featureTitle)}
+        {shouldRenderHeaderInfoBar &&
+          this.renderHeaderInfoBar(featureCollectionTitle, featureTitle)}
       </Grid>
     );
   };
@@ -690,40 +710,33 @@ class SearchResultsContainer extends React.PureComponent {
           </Paper>
         ) : (
           <Paper className={classes.root}>
-            <TightAccordion>
-              <TightAccordionDetails
-                id="search-result-list"
-                className={classes.searchResultListWrapper}
-              >
-                <Grid container>
-                  {this.renderSearchResultsHeader()}
-                  {filterInputFieldOpen && this.renderFilterInputField()}
-                  {this.renderSortingMenu()}
-                  <Grid item xs={12}>
-                    <SearchResultsList
-                      localObserver={localObserver}
-                      getOriginBasedIcon={getOriginBasedIcon}
-                      featureCollections={sortedFeatureCollections}
-                      app={app}
-                      handleFeatureCollectionClick={
-                        this.handleFeatureCollectionClick
-                      }
-                      setActiveFeature={this.setActiveFeature}
-                      resetFeatureAndCollection={this.resetFeatureAndCollection}
-                      activeFeatureCollection={activeFeatureCollection}
-                      activeFeature={activeFeature}
-                      featureFilter={featureFilter}
-                      featureCollectionSortingStrategy={
-                        featureCollectionSortingStrategy
-                      }
-                      featureSortingStrategy={featureSortingStrategy}
-                      showFeaturePreview={showFeaturePreview}
-                      getFeatureTitle={this.getFeatureTitle}
-                    />
-                  </Grid>
-                </Grid>
-              </TightAccordionDetails>
-            </TightAccordion>
+            <Grid container className={classes.searchResultListWrapper}>
+              {this.renderSearchResultsHeader()}
+              {filterInputFieldOpen && this.renderFilterInputField()}
+              {this.renderSortingMenu()}
+              <Grid item xs={12}>
+                <SearchResultsList
+                  localObserver={localObserver}
+                  getOriginBasedIcon={getOriginBasedIcon}
+                  featureCollections={sortedFeatureCollections}
+                  app={app}
+                  handleFeatureCollectionClick={
+                    this.handleFeatureCollectionClick
+                  }
+                  setActiveFeature={this.setActiveFeature}
+                  resetFeatureAndCollection={this.resetFeatureAndCollection}
+                  activeFeatureCollection={activeFeatureCollection}
+                  activeFeature={activeFeature}
+                  featureFilter={featureFilter}
+                  featureCollectionSortingStrategy={
+                    featureCollectionSortingStrategy
+                  }
+                  featureSortingStrategy={featureSortingStrategy}
+                  showFeaturePreview={showFeaturePreview}
+                  getFeatureTitle={this.getFeatureTitle}
+                />
+              </Grid>
+            </Grid>
           </Paper>
         )}
       </Collapse>

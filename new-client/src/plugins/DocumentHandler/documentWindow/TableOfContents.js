@@ -25,6 +25,11 @@ const styles = (theme) => {
     collapseContainer: {
       width: "100%",
     },
+    listItemText: {
+      "&:hover": {
+        backgroundColor: theme.palette.grey[300],
+      },
+    },
     root: {
       width: "100%",
       padding: theme.spacing(0),
@@ -34,9 +39,9 @@ const styles = (theme) => {
 };
 
 function NestedListItemRaw(props) {
+  const { classes } = props;
   return (
     <ListItem
-      button
       component="li"
       size="small"
       dense
@@ -47,12 +52,18 @@ function NestedListItemRaw(props) {
         paddingLeft: props.theme.spacing(props.level * 3),
       }}
     >
-      <ListItemText>{props.children}</ListItemText>
+      <ListItemText
+        className={classes.listItemText}
+        role="link"
+        onClick={props.onCLick}
+      >
+        {props.children}
+      </ListItemText>
     </ListItem>
   );
 }
 
-const NestedListItem = withTheme(NestedListItemRaw);
+const NestedListItem = withStyles(styles)(withTheme(NestedListItemRaw));
 
 class TableOfContents extends React.PureComponent {
   state = {
@@ -144,7 +155,7 @@ class TableOfContents extends React.PureComponent {
     } = this.props;
 
     return (
-      <Grid role="button" className={classes.tableOfContents} container>
+      <Grid className={classes.tableOfContents} container>
         <Grid
           onClick={toggleCollapse}
           xs={12}

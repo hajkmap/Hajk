@@ -23,8 +23,8 @@ const styles = (theme) => ({
   },
   allFeatureDetailsContainer: {
     maxWidth: "100%",
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
   },
   allFeatureDetailsHeader: {
     maxWidth: "100%",
@@ -35,11 +35,11 @@ const styles = (theme) => ({
     fontSize: 18,
   },
   headerTitleContainer: {
-    paddingTop: theme.spacing(2),
+    paddingTop: theme.spacing(1),
   },
   togglerContainer: {
-    paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
   },
   toggler: {
     border: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,

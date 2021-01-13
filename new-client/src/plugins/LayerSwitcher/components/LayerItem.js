@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Tooltip, Typography } from "@material-ui/core";
+import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
@@ -72,9 +72,17 @@ const styles = (theme) => ({
     fontSize: "15pt",
     width: "32px",
   },
+  legendIconContainer: {
+    display: "flex",
+  },
+  legendIcon: {
+    width: theme.typography.pxToRem(18),
+    height: theme.typography.pxToRem(18),
+    marginRight: "5px",
+  },
   checkBoxIcon: {
     cursor: "pointer",
-    float: "left",
+
     marginRight: "5px",
   },
 });
@@ -90,6 +98,7 @@ class LayerItem extends React.PureComponent {
       expanded: false,
       name: layer.get("name"),
       legend: layerInfo.legend,
+      legendIcon: layerInfo.legendIcon,
       status: "ok",
       infoVisible: false,
       infoTitle: layerInfo.infoTitle,
@@ -334,10 +343,27 @@ class LayerItem extends React.PureComponent {
     });
   }
 
+  renderLegendIcon() {
+    const { classes } = this.props;
+    const { legendIcon } = this.state;
+    return (
+      <Grid item>
+        <div className={classes.legendIconContainer}>
+          <img
+            alt="Teckenförklaring"
+            src={legendIcon}
+            className={classes.legendIcon}
+          />
+        </div>
+      </Grid>
+    );
+  }
+
   render() {
     const { classes, layer, model, app, chapters } = this.props;
-    const { visible } = this.state;
+    const { visible, legendIcon } = this.state;
     const caption = layer.get("caption");
+
     const cqlFilterVisible =
       this.props.app.config.mapConfig.map?.cqlFilterVisible || false;
 
@@ -368,20 +394,26 @@ class LayerItem extends React.PureComponent {
     return (
       <div className={classes.layerItemContainer}>
         <div className={classes.layerItem}>
-          <div className={classes.layerItemInfo}>
-            <div
-              className={classes.caption}
+          <div>
+            <Grid
+              wrap="nowrap"
+              alignItems="center"
+              container
               onClick={this.toggleVisible(layer)}
             >
-              <Typography>
-                {visible ? (
-                  <CheckBoxIcon className={classes.checkBoxIcon} />
-                ) : (
-                  <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
-                )}
-                <label className={classes.captionText}>{caption}</label>
-              </Typography>
-            </div>
+              {visible ? (
+                <CheckBoxIcon className={classes.checkBoxIcon} />
+              ) : (
+                <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
+              )}
+
+              {legendIcon && this.renderLegendIcon()}
+              <Grid item>
+                <Typography className={classes.captionText}>
+                  {caption}
+                </Typography>
+              </Grid>
+            </Grid>
           </div>
           <div className={classes.layerButtons}>
             <DownloadLink

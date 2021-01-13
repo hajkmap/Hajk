@@ -37,6 +37,17 @@ class Contents extends React.PureComponent {
     activeContent: null,
   };
 
+  constructor(props) {
+    super(props);
+    this.internalIds = [];
+  }
+
+  getUniqueIntegerNumber = () => {
+    const id = this.internalIds.length + 1;
+    this.internalIds.push(id);
+    return id;
+  };
+
   flattenChaptersTree = (chapters) => {
     return chapters.reduce((acc, chapter) => {
       if (chapter.html && chapter.header) {
@@ -165,7 +176,13 @@ class Contents extends React.PureComponent {
     allowedHtmlTags.push({
       tagType: "img",
       callback: (e) => {
-        return <Img imgTag={e} localObserver={this.props.localObserver}></Img>;
+        return (
+          <Img
+            getUniqueIntegerNumber={this.getUniqueIntegerNumber}
+            imgTag={e}
+            localObserver={this.props.localObserver}
+          ></Img>
+        );
       },
     });
     allowedHtmlTags.push({

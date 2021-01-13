@@ -46,17 +46,14 @@ export default class DocumentHandlerModel {
       });
   };
 
-  flattenMenu(menu) {
-    let menuItems = [];
-    menu.forEach((menuItem) => {
-      if (menuItem.menu.length > 0) {
-        menuItems = menuItems.concat(this.flattenMenu(menuItem.menu));
-      } else {
-        menuItems.push(menuItem);
+  flattenMenu = (menuItems) => {
+    return menuItems.reduce((menu, menuItem) => {
+      if (menuItem.menu && menuItem.menu.length > 0) {
+        menu = [...menu, ...this.flattenMenu(menuItem.menu)];
       }
-    });
-    return menuItems;
-  }
+      return [...menu, menuItem];
+    }, []);
+  };
 
   getAllDocumentsContainedInMenu() {
     return new Promise((resolve, reject) => {
@@ -73,10 +70,18 @@ export default class DocumentHandlerModel {
       Promise.all(
         menuItemsWithDocumentConnetion.map((menuItem) => {
           return this.fetchJsonDocument(menuItem.document).then((doc) => {
-            doc.documentColor = menuItem.color;
-            doc.documentFileName = menuItem.document;
-            doc.documentTitle = menuItem.title;
-            return doc;
+            if (!doc.title) {
+              console.warn(
+                `The document ${menuItem.document} is missing a title`
+              );
+            }
+
+            return {
+              ...doc,
+              documentColor: menuItem.color,
+              documentFileName: menuItem.document,
+              documentTitle: doc.title,
+            };
           });
         })
       )

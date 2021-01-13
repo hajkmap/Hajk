@@ -35,34 +35,34 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
 
-const ColorButtonRed = withStyles(theme => ({
+const ColorButtonRed = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(red[500]),
     backgroundColor: red[500],
     "&:hover": {
-      backgroundColor: red[700]
-    }
-  }
+      backgroundColor: red[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 const defaultState = {
@@ -74,7 +74,7 @@ const defaultState = {
   alertMessage: "",
   content: "",
   confirmAction: () => {},
-  denyAction: () => {}
+  denyAction: () => {},
 };
 
 class Manager extends Component {
@@ -89,7 +89,7 @@ class Manager extends Component {
     this.setState(defaultState);
     this.props.model.on("change:layers", () => {
       this.setState({
-        layers: this.props.model.get("layers")
+        layers: this.props.model.get("layers"),
       });
     });
 
@@ -106,13 +106,13 @@ class Manager extends Component {
     let matchedConfigs = [];
 
     function findInBaselayers(baselayers, layerId) {
-      return baselayers.find(l => l.id === layerId);
+      return baselayers.find((l) => l.id === layerId);
     }
 
     function findInGroups(groups, layerId) {
       let config;
-      groups.forEach(group => {
-        let found = group.layers.find(l => l.id === layerId);
+      groups.forEach((group) => {
+        let found = group.layers.find((l) => l.id === layerId);
         if (found) {
           config = found;
         }
@@ -150,7 +150,7 @@ class Manager extends Component {
 
     this.setState({
       alert: true,
-      alertMessage: alertMessage
+      alertMessage: alertMessage,
     });
     e.stopPropagation();
   }
@@ -161,12 +161,12 @@ class Manager extends Component {
       confirm: true,
       alertMessage: `Lagret "${layer.caption}" kommer att tas bort. Är detta ok?`,
       confirmAction: () => {
-        this.props.model.removeLayer(layer, success => {
+        this.props.model.removeLayer(layer, (success) => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
             this.setState({
               alert: true,
-              alertMessage: `Lagret ${layer.caption} togs bort!`
+              alertMessage: `Lagret ${layer.caption} togs bort!`,
             });
             if (this.state.id === layer.id) {
               this.abort();
@@ -174,11 +174,11 @@ class Manager extends Component {
           } else {
             this.setState({
               alert: true,
-              alertMessage: `Lagret "${layer.caption}" kunde inte tas bort. Försök igen senare.`
+              alertMessage: `Lagret "${layer.caption}" kunde inte tas bort. Försök igen senare.`,
             });
           }
         });
-      }
+      },
     });
     e.stopPropagation();
   }
@@ -187,7 +187,7 @@ class Manager extends Component {
     if (layer.type === "ArcGIS") {
       this.setState({
         mode: "edit",
-        layerType: "ArcGIS"
+        layerType: "ArcGIS",
       });
 
       setTimeout(() => {
@@ -198,6 +198,7 @@ class Manager extends Component {
           date: layer.date,
           infobox: layer.infobox,
           legend: layer.legend,
+          legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
@@ -214,7 +215,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
-          infoOwner: layer.infoOwner
+          infoOwner: layer.infoOwner,
         });
 
         this.refs["ArcGISLayerForm"].loadLayers(layer, () => {
@@ -226,7 +227,7 @@ class Manager extends Component {
     if (layer.type === "Vector") {
       this.setState({
         mode: "edit",
-        layerType: "Vector"
+        layerType: "Vector",
       });
 
       setTimeout(() => {
@@ -238,6 +239,7 @@ class Manager extends Component {
           date: layer.date,
           infobox: layer.infobox,
           legend: layer.legend,
+          legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
@@ -279,7 +281,7 @@ class Manager extends Component {
           pointSize: layer.pointSize,
           filterAttribute: layer.filterAttribute,
           filterValue: layer.filterValue,
-          filterComparer: layer.filterComparer
+          filterComparer: layer.filterComparer,
         });
 
         this.refs["VectorLayerForm"].loadLayers(layer, () => {
@@ -291,7 +293,7 @@ class Manager extends Component {
     if (layer.type === "WMS") {
       this.setState({
         mode: "edit",
-        layerType: "WMS"
+        layerType: "WMS",
       });
 
       setTimeout(() => {
@@ -301,6 +303,7 @@ class Manager extends Component {
           content: layer.content,
           date: layer.date,
           legend: layer.legend,
+          legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
           opacity: layer.opacity,
@@ -323,7 +326,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
-          infoOwner: layer.infoOwner
+          infoOwner: layer.infoOwner,
         });
 
         this.refs["WMSLayerForm"].loadLayers(layer, () => {
@@ -335,7 +338,7 @@ class Manager extends Component {
     if (layer.type === "WMTS") {
       this.setState({
         mode: "edit",
-        layerType: "WMTS"
+        layerType: "WMTS",
       });
 
       setTimeout(() => {
@@ -346,6 +349,7 @@ class Manager extends Component {
           date: layer.date,
           infobox: layer.infobox,
           legend: layer.legend,
+          legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
           layer: layer.layer,
@@ -362,7 +366,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
-          infoOwner: layer.infoOwner
+          infoOwner: layer.infoOwner,
         });
         setTimeout(() => {
           this.refs["WMTSLayerForm"].validate();
@@ -375,10 +379,10 @@ class Manager extends Component {
     this.props.model.getLayerDescription(
       this.refs.input_url.value,
       layerName,
-      properties => {
+      (properties) => {
         this.setState({
           layerProperties: properties,
-          layerPropertiesName: layerName
+          layerPropertiesName: layerName,
         });
       }
     );
@@ -387,7 +391,7 @@ class Manager extends Component {
   closeDetails() {
     this.setState({
       layerProperties: undefined,
-      layerPropertiesLayer: undefined
+      layerPropertiesLayer: undefined,
     });
   }
 
@@ -439,12 +443,12 @@ class Manager extends Component {
 
   filterLayers(e) {
     this.setState({
-      filter: e.target.value
+      filter: e.target.value,
     });
   }
 
   getLayersWithFilter(filter) {
-    return this.props.model.get("layers").filter(layer => {
+    return this.props.model.get("layers").filter((layer) => {
       return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
     });
   }
@@ -458,19 +462,19 @@ class Manager extends Component {
     var alphabetically = [];
 
     if (this.state.filter) {
-      layers.forEach(layer => {
+      layers.forEach((layer) => {
         layer.caption.toLowerCase().indexOf(this.state.filter) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
-      startsWith.sort(function(a, b) {
+      startsWith.sort(function (a, b) {
         if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
         return 0;
       });
 
-      alphabetically.sort(function(a, b) {
+      alphabetically.sort(function (a, b) {
         if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
         return 0;
@@ -499,7 +503,7 @@ class Manager extends Component {
       }
 
       return (
-        <li onClick={e => this.loadLayer(e, layer)} key={"layer_" + i}>
+        <li onClick={(e) => this.loadLayer(e, layer)} key={"layer_" + i}>
           <div className="main-box">
             <span>
               {layer.caption} {displayType}
@@ -508,12 +512,12 @@ class Manager extends Component {
           <div className="options-box">
             <i
               title="Info om lager"
-              onClick={e => this.infoAboutLayer(e, layer)}
+              onClick={(e) => this.infoAboutLayer(e, layer)}
               className="fa fa-info"
             />
             <i
               title="Radera lager"
-              onClick={e => this.removeLayer(e, layer)}
+              onClick={(e) => this.removeLayer(e, layer)}
               className="fa fa-trash"
             />
           </div>
@@ -535,12 +539,12 @@ class Manager extends Component {
       this.abort();
       this.setState({
         alert: true,
-        alertMessage: "Lagret har lagts till i listan av tillgängliga lager."
+        alertMessage: "Lagret har lagts till i listan av tillgängliga lager.",
       });
     } else {
       this.setState({
         alert: true,
-        alertMessage: "Lagret kunde inte läggas till. Försök igen senare."
+        alertMessage: "Lagret kunde inte läggas till. Försök igen senare.",
       });
     }
   }
@@ -552,12 +556,12 @@ class Manager extends Component {
       this.setState({
         alert: true,
         alertMessage: "Uppdateringen lyckades!",
-        date: date
+        date: date,
       });
     } else {
       this.setState({
         alert: true,
-        alertMessage: "Uppdateringen misslyckades."
+        alertMessage: "Uppdateringen misslyckades.",
       });
     }
   }
@@ -578,31 +582,32 @@ class Manager extends Component {
     if (this.state.mode === "add") {
       layer.type = this.state.layerType;
       layer.id = null;
-      this.props.model.addLayer(layer, success => {
+      this.props.model.addLayer(layer, (success) => {
         this.whenLayerAdded(success, layer.date);
       });
     }
 
     if (this.state.mode === "edit") {
       if (layer.type === "ArcGIS" && layer.legend === "") {
-        this.props.model.getLegend(layer, legend => {
+        this.props.model.getLegend(layer, (legend) => {
           layer.legend = legend;
-          this.props.model.updateLayer(layer, success => {
+          this.props.model.updateLayer(layer, (success) => {
             this.whenLayerUpdated(success);
           });
         });
       } else {
-        this.props.model.updateLayer(layer, success => {
+        this.props.model.updateLayer(layer, (success) => {
           this.whenLayerUpdated(success);
         });
       }
     }
   }
 
-  uploadLegend(callback) {
-    $("#upload-form").submit();
-    this.refs.uploadIframe.addEventListener("load", () => {
-      if (this.refs.uploadIframe.contentDocument) {
+  uploadLegend(callback, type) {
+    $(`#${type}-form`).submit();
+    this.refs[`${type}Iframe`].addEventListener("load", () => {
+      console.log(this.refs[`${type}Iframe`], "this.refs.uploadIframe");
+      if (this.refs[`${type}Iframe`].contentDocument) {
         if (!window.location.origin) {
           window.location.origin =
             window.location.protocol +
@@ -610,11 +615,12 @@ class Manager extends Component {
             window.location.hostname +
             (window.location.port ? ":" + window.location.port : "");
         }
-        var node = $(this.refs.uploadIframe.contentDocument).find("body")[0],
-          url = node.innerHTML,
-          a = $(`<a href="${url}"">temp</a>`),
-          b = a[0].href;
-        this.props.model.set("legend", b);
+
+        let node = $(this.refs[`${type}Iframe`].contentDocument).find(
+          "body"
+        )[0];
+        let url = `${window.location.origin}/${node.innerHTML}`;
+        this.props.model.set(type, url);
       }
     });
   }
@@ -678,7 +684,7 @@ class Manager extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       denyAction: () => {
@@ -686,15 +692,15 @@ class Manager extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ""
+          alertMessage: "",
         });
-      }
+      },
     };
   }
 
@@ -704,7 +710,7 @@ class Manager extends Component {
           <ColorButtonRed
             variant="contained"
             className="btn btn-danger"
-            onClick={e => this.abort(e)}
+            onClick={(e) => this.abort(e)}
             startIcon={<CancelIcon />}
           >
             Avbryt
@@ -720,45 +726,59 @@ class Manager extends Component {
           <input
             placeholder="filtrera"
             type="text"
-            onChange={e => this.filterLayers(e)}
+            onChange={(e) => this.filterLayers(e)}
           />
           <ul className="config-layer-list">{this.renderLayersFromConfig()}</ul>
         </aside>
         <article>
-          <form
-            id="upload-form"
-            method="post"
-            action={url}
-            encType="multipart/form-data"
-            target="upload-iframe"
-          >
-            <input
-              style={{
-                opacity: 0,
-                position: "absolute",
-                width: "auto",
-                height: "100%",
-                padding: 0,
-                top: "-500px"
-              }}
-              id="select-image"
-              type="file"
-              multiple={false}
-              name="files[]"
-              onChange={e => this.uploadLegend(e)}
-            />
-            <iframe
-              id="upload-iframe"
-              name="upload-iframe"
-              ref="uploadIframe"
-              style={{ display: "none" }}
-              title="upload-iframe"
-            />
-          </form>
+          {[
+            "select-layers-info-legend-icon",
+            "select-image",
+            "select-legend-icon",
+          ].map((type) => {
+            return (
+              <form
+                id={`${type}-form`}
+                method="post"
+                action={url}
+                encType="multipart/form-data"
+                target={`${type}-iframe`}
+              >
+                <input
+                  style={{
+                    opacity: 0,
+                    position: "absolute",
+                    width: "auto",
+                    height: "100%",
+                    padding: 0,
+                    top: "-500px",
+                  }}
+                  id={type}
+                  type="file"
+                  multiple={false}
+                  name="files[]"
+                  onChange={(e) => {
+                    const caller = e.currentTarget.getAttribute("caller");
+                    if (caller) {
+                      this.uploadLegend(e, caller);
+                    }
+                  }}
+                />
+                <iframe
+                  id={`${type}-iframe`}
+                  name={`${type}-iframe`}
+                  ref={`${type}Iframe`}
+                  style={{ display: "none" }}
+                  title={`${type}-iframe`}
+                />
+              </form>
+            );
+          })}
+
           <form
             method="post"
             action=""
-            onSubmit={e => {
+            onSubmit={(e) => {
               this.submit(e);
             }}
           >
@@ -768,7 +788,7 @@ class Manager extends Component {
                 disabled={typeSelectorDisabled}
                 value={this.state.layerType}
                 className="control-fixed-width"
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({ layerType: e.target.value });
                 }}
               >

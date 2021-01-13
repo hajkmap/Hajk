@@ -7,6 +7,8 @@ import EditIcon from "@material-ui/icons/Edit";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
+import KmlExport from "./utils/KmlExport";
+import { cloneDeep } from "lodash";
 
 const styles = () => ({
   inputRoot: {
@@ -78,6 +80,7 @@ class Search extends React.PureComponent {
     this.map = props.map;
     this.searchModel = props.app.appModel.searchModel;
     this.initMapViewModel();
+    this.initExportHandlers();
     this.bindSubscriptions();
 
     if (props.app.appLoadedFromRenderElsewhere)
@@ -91,6 +94,14 @@ class Search extends React.PureComponent {
       localObserver: this.localObserver,
       map: this.map,
       app: app,
+    });
+  };
+
+  initExportHandlers = () => {
+    this.kmlExport = new KmlExport({
+      options: this.props.options,
+      localObserver: this.localObserver,
+      map: this.map,
     });
   };
 
@@ -316,6 +327,7 @@ class Search extends React.PureComponent {
         this.setState(
           {
             autoCompleteOpen: searchString.length >= 3,
+            autocompleteList: [],
             loading: searchString.length >= 3,
             showSearchResults: false,
             searchString: searchString,
@@ -353,7 +365,9 @@ class Search extends React.PureComponent {
 
   handleSearchBarKeyPress = (event) => {
     if (event.which === 13 || event.keyCode === 13) {
-      this.handleOnClickOrKeyboardSearch();
+      if (event.target.id === "searchInputField") {
+        this.handleOnClickOrKeyboardSearch();
+      }
     }
   };
 
@@ -361,7 +375,6 @@ class Search extends React.PureComponent {
     let fetchSettings = { ...this.searchModel.getSearchOptions() }; //Getting default-options when fetching auto
     fetchSettings = {
       ...fetchSettings,
-      maxResultsPerDataset: 7,
       getPossibleCombinations: true,
     };
     return fetchSettings;
@@ -637,11 +650,16 @@ class Search extends React.PureComponent {
     }
     return this.state.searchImplementedPlugins.reduce((promises, plugin) => {
       if (plugin.searchInterface.getResults) {
+        //Had to make a deep clone to not directly manipulate the reference from plugin
         promises.push(
-          plugin.searchInterface.getResults(
-            decodeURIComponent(searchString),
-            fetchOptions
-          )
+          plugin.searchInterface
+            .getResults(searchString, fetchOptions)
+            .then((res) => {
+              return {
+                errors: res.errors,
+                featureCollections: cloneDeep(res.featureCollections),
+              };
+            })
         );
         return promises;
       }
