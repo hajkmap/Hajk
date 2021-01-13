@@ -128,7 +128,9 @@ class SearchResultListContainer extends React.Component {
     var searchResultId = this.addResultToSearchResultList(result);
     localObserver.publish("add-search-result-to-map", {
       searchResultId: searchResultId,
-      olFeatures: this.convertToGeoJson(result.featureCollection),
+      olFeatures: this.convertToGeoJson(
+        result?.featureCollection || result?.value
+      ),
     });
     this.setActiveTabId(searchResultId);
 
