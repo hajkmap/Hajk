@@ -625,7 +625,7 @@ class Search extends React.PureComponent {
     // If we get few results (less than 3) we do a new
     // search to try to fill the autocomplete with wildCardAtStart
     // active.
-    if (this.getNumResults(autoCompleteResult) < 3) {
+    if (this.getNumResults(autoCompleteResult) < 1) {
       fetchOptions.wildcardAtStart = true;
       autoCompleteResult = await this.fetchResultFromSearchModel(fetchOptions);
     }
