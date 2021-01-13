@@ -319,7 +319,7 @@
             "defaultSortAttribute": "StreetName",
             "attributesToDisplay": [
               {
-                "displayName": "NAME",
+                "displayName": "NAMN",
                 "key": "Name"
               },
               {
@@ -608,8 +608,8 @@
     "drawerVisibleMobile": false,
     "activeDrawerOnStart": "plugins",
     "colors": {
-      "primaryColor": "#333333",
-      "secondaryColor": "#ffa000",
+      "primaryColor": "#0096ed",
+      "secondaryColor": "#f0faf9",
       "preferredColorScheme": "user"
     },
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",

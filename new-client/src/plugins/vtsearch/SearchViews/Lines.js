@@ -17,12 +17,12 @@ import ActivePolygon from "../img/polygonmarkering-blue.png";
 import ActiveRectangle from "../img/rektangelmarkering-blue.png";
 
 // Define JSS styles that will be used in this component.
-// Examle below utilizes the very powerful "theme" object
+// Example below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 
 const styles = (theme) => ({
   searchButton: { marginTop: 8, borderColor: theme.palette.primary.main },
-  divider: { margin: theme.spacing(3, 3) },
+  divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
   textFields: { marginLeft: 10 },
   fontSize: { fontSize: 12 },
   polygonAndRectangle: {
