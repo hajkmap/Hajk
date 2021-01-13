@@ -234,17 +234,21 @@ class SearchModel {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "!$&"); // $& means the whole matched string
   };
 
-  #getPossibleSearchCombinations = (searchString, searchOptions) => {
-    let possibleSearchCombinations = [];
-    let wordsInTextField = this.#getStringArray(searchString);
+  #getPossibleSearchCombinations = (searchString) => {
+    const possibleSearchCombinations = [];
+    const wordsInTextField = this.#getStringArray(searchString);
 
     for (let i = 0; i < wordsInTextField.length; i++) {
-      let combination = wordsInTextField.slice(wordsInTextField.length - i);
-      let word = wordsInTextField
+      const combination = wordsInTextField.slice(wordsInTextField.length - i);
+      const word = wordsInTextField
         .slice(0, wordsInTextField.length - i)
         .join()
         .replace(/,/g, " ");
 
+      if (combination.length > 0) {
+        const joinedCombination = combination.join().replace(/,/g, " ");
+        possibleSearchCombinations.push([word, joinedCombination]);
+      }
       combination.unshift(word);
       possibleSearchCombinations.push(combination);
     }
