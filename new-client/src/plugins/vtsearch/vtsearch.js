@@ -17,6 +17,7 @@ import MenuIcon from "@material-ui/icons/Menu";
 import { withStyles } from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import SearchResultListContainer from "./SearchResultList/SearchResultListContainer";
 import ReactDOM from "react-dom";
@@ -62,6 +63,7 @@ const styles = (theme) => {
       margin: theme.spacing(1),
       marginLeft: "0px",
       marginBottom: "24px",
+      width: "100%",
       minWidth: 200,
     },
     selectEmpty: {
@@ -93,7 +95,7 @@ const styles = (theme) => {
 };
 
 const searchTypes = {
-  DEFAULT: "Välj sökmetod",
+  DEFAULT: "",
   SEARCH: "Sök",
   JOURNEYS: "Sök Turer",
   LINES: "Sök Linjer",
@@ -263,17 +265,20 @@ class VTSearch extends React.PureComponent {
   renderDropDown() {
     const { classes } = this.props;
     return (
-      <FormControl variant="outlined" className={classes.formControl}>
+      <FormControl className={classes.formControl}>
+        <InputLabel id="search-type">SÖKALTERNATIV</InputLabel>
         <Select
           classes={{ root: classes.selectInput }}
-          native
           onChange={this.handleChange}
+          native
           inputProps={{
             name: "searchType",
             id: "search-type",
           }}
         >
           {Object.keys(searchTypes).map((key) => {
+            if (key === "DEFAULT")
+              return <option key={key} value="" aria-label="None" />;
             return (
               <option key={key} value={key}>
                 {searchTypes[key]}
