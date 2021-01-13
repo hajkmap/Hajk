@@ -44,7 +44,7 @@ const styles = (theme) => {
 };
 
 const searchTypes = {
-  DEFAULT: "Välj sökmetod",
+  DEFAULT: "",
   JOURNEYS: "Sök Turer",
   LINES: "Sök Linjer",
   STOPS: "Sök Hållplatser",
