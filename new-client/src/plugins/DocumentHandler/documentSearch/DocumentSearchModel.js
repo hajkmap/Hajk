@@ -4,7 +4,6 @@ import { splitAndTrimOnCommas } from "../utils/helpers";
 
 export default class DocumentSearchModel {
   constructor(settings) {
-    console.log(settings, "settings");
     this.globalSearchModel = settings.globalSearchModel;
     this.documentCollections = this.createDocumentCollectionsToSearch(
       settings.allDocuments
@@ -94,20 +93,19 @@ export default class DocumentSearchModel {
   //Method called by searchComponent in core (Part of searchInterface)
   getResults = (searchString, searchOptions) => {
     this.matchSearch = new MatchSearch(searchOptions);
+    this.searchOptions = searchOptions;
 
-    return this.getDocumentHandlerResults(searchString, searchOptions);
+    return this.getDocumentHandlerResults(searchString);
   };
 
-  getDocumentHandlerResults = (searchString, searchOptions) => {
+  getDocumentHandlerResults = (searchString) => {
     return new Promise((resolve, reject) => {
       if (searchString === "") {
         resolve({ featureCollections: [], errors: [] });
       }
-      let possibleSearchCombinations = searchOptions.getPossibleCombinations
-        ? this.globalSearchModel.getPossibleSearchCombinations(
-            searchString,
-            searchOptions
-          )
+      let possibleSearchCombinations = this.searchOptions
+        .getPossibleCombinations
+        ? this.globalSearchModel.getPossibleSearchCombinations(searchString)
         : [splitAndTrimOnCommas(searchString)];
 
       // The searchString will be encoded if the search has been initiated
@@ -220,8 +218,11 @@ export default class DocumentSearchModel {
   };
 
   documentTitleInSearchCombination = (searchCombination, documentTitle) => {
-    return searchCombination.some((word) => {
-      return documentTitle.toLowerCase().search(word.toLowerCase()) !== -1;
+    return searchCombination.every((word) => {
+      if (!this.searchOptions.matchCase) {
+        return documentTitle.toLowerCase().search(word.toLowerCase()) !== -1;
+      }
+      return documentTitle.search(word) !== -1;
     });
   };
 
