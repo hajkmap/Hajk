@@ -216,8 +216,23 @@ class Search extends React.PureComponent {
       });
   };
 
+  getEnabledDefaultSearchTools = () => {
+    const { options } = this.props;
+    let searchTools = [...defaultSearchTools];
+    const polygonSearchDisabled = options.polygonSearchDisabled ?? false;
+    const radiusSearchDisabled = options.polygonSearchDisabled ?? false;
+    if (polygonSearchDisabled) {
+      searchTools = searchTools.filter((tool) => tool.type !== "Polygon");
+    }
+    if (radiusSearchDisabled) {
+      searchTools = searchTools.filter((tool) => tool.type !== "Circle");
+    }
+    return searchTools;
+  };
+
   getSearchTools = (searchImplementedSearchTools) => {
-    return defaultSearchTools.concat(
+    const enabledSearchTools = this.getEnabledDefaultSearchTools();
+    return enabledSearchTools.concat(
       this.getExternalSearchTools(searchImplementedSearchTools)
     );
   };
