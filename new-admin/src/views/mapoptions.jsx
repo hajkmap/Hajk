@@ -71,6 +71,7 @@ class MapOptions extends Component {
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
         drawerVisible: config.drawerVisible,
+        drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
         title: config.title ? config.title : "",
         geoserverLegendOptions: config.geoserverLegendOptions
@@ -119,7 +120,11 @@ class MapOptions extends Component {
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
       drawerVisible: mapConfig.drawerVisible,
+      drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
+      activeDrawerOnStart: mapConfig.activeDrawerOnStart
+        ? mapConfig.activeDrawerOnStart
+        : "plugins",
       geoserverLegendOptions: mapConfig.geoserverLegendOptions,
       defaultCookieNoticeMessage: mapConfig.defaultCookieNoticeMessage
         ? mapConfig.defaultCookieNoticeMessage
@@ -255,6 +260,7 @@ class MapOptions extends Component {
       case "mapselector":
       case "mapcleaner":
       case "drawerVisible":
+      case "drawVisibleMobile":
       case "drawerPermanent":
         if (value !== true && value !== false) {
           valid = false;
@@ -301,7 +307,9 @@ class MapOptions extends Component {
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
         config.drawerVisible = this.getValue("drawerVisible");
+        config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
+        config.activeDrawerOnStart = this.getValue("activeDrawerOnStart");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
         config.defaultCookieNoticeMessage = this.getValue(
           "defaultCookieNoticeMessage"
@@ -827,6 +835,27 @@ class MapOptions extends Component {
             </div>
             <div>
               <input
+                id="input_drawerVisibleMobile"
+                type="checkbox"
+                ref="input_drawerVisibleMobile"
+                onChange={(e) => {
+                  this.setState({ drawerVisibleMobile: e.target.checked });
+                }}
+                checked={this.state.drawerVisibleMobile}
+                disabled={this.state.drawerVisibleMobile !== true}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_drawerVisibleMobile">
+                Starta med sidopanelen synlig i mobilläge{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer sidopanelen att vara öppen - men inte låst -  vid skärmens kant vid start"
+                />
+              </label>
+            </div>
+            <div>
+              <input
                 id="input_drawerPermanent"
                 type="checkbox"
                 ref="input_drawerPermanent"
@@ -845,6 +874,27 @@ class MapOptions extends Component {
                   title="Om aktiv kommer sidopanelen att vara låst vid skärmens kant vid start (gäller ej mobila enheter)"
                 />
               </label>
+            </div>
+            <div>
+              <label>
+                Aktiv drawer verktyg{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om du använda en annat drawer button verktyg som Dokument verktyg kan du välja att den ska vara aktiv vid start istället för den standard plugins verktyg genom att ange plugin namnet."
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_activeDrawerOnStart"
+                value={this.state.activeDrawerOnStart}
+                className={this.getValidationClass("activeDrawerOnStart")}
+                onChange={(e) => {
+                  this.setState({ activeDrawerOnStart: e.target.value }, () =>
+                    this.validateField("activeDrawerOnStart")
+                  );
+                }}
+              />
             </div>
             <div className="separator">Färginställningar för kartan</div>
             <div className="clearfix">
