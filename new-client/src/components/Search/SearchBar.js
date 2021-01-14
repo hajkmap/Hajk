@@ -30,6 +30,10 @@ const styles = (theme) => ({
     width: 400,
     height: theme.spacing(6),
   },
+  searchContainerRenderElsewhere: {
+    width: 400,
+    height: "auto",
+  },
   searchCollapsed: {
     left: -440,
   },
@@ -387,10 +391,11 @@ class SearchBar extends React.PureComponent {
   render() {
     const { classes, showSearchResults, width } = this.props;
     const { panelCollapsed } = this.state;
+    const { renderElsewhere } = this.props.app.plugins.search.options;
 
     return (
       <Grid
-        className={cslx(classes.searchContainer, {
+        className={cslx(renderElsewhere ? classes.searchContainerRenderElsewhere : classes.searchContainer, {
           [classes.searchCollapsed]: panelCollapsed,
         })}
       >
