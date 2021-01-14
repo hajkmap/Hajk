@@ -24,6 +24,7 @@ export default class DocumentHandlerModel {
       settings.app.config.appConfig.proxy +
       settings.app.config.appConfig.mapserviceBase;
     this.settings = settings;
+    this.app = settings.app;
     this.allDocuments = [];
     this.chaptersMatchSearch = [];
     this.chapterInfo = [];
@@ -36,6 +37,7 @@ export default class DocumentHandlerModel {
         this.allDocuments = allDocuments;
         this.documentSearchmodel = new DocumentSearchModel({
           allDocuments: allDocuments,
+          globalSearchModel: this.app.searchModel,
         });
         this.settings.resolveSearchInterface(
           this.documentSearchmodel.implementSearchInterface()

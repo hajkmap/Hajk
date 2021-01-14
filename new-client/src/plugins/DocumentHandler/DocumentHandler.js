@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-import MenuBook from "@material-ui/icons/MenuBook";
+import MenuIcon from "@material-ui/icons/Menu";
+
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
 import Observer from "react-event-observer";
@@ -135,7 +136,7 @@ class DocumentHandler extends React.PureComponent {
     const { app, options } = this.props;
     app.globalObserver.publish("core.addDrawerToggleButton", {
       value: "menu",
-      ButtonIcon: MenuBook,
+      ButtonIcon: MenuIcon,
       caption: options.drawerButtonTitle || "Meny",
       drawerTitle: options.drawerTitle || "Översiktsplan",
       order: 100,
