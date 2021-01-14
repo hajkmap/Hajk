@@ -331,7 +331,7 @@ class Search extends React.PureComponent {
     if (this.isUserInput(searchString, reason)) {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.localObserver.publish("clear-search-results");
+        this.localObserver.publish("clearMapView");
         this.setState(
           {
             autoCompleteOpen: searchString.length >= 3,
