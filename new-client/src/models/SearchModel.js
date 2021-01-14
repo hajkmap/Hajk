@@ -235,25 +235,46 @@ class SearchModel {
   };
 
   #getPossibleSearchCombinations = (searchString) => {
-    const possibleSearchCombinations = [];
+    const possibleSearchCombinations = new Set();
     const wordsInTextField = this.#getStringArray(searchString);
+    const numWords = wordsInTextField.length;
 
-    for (let i = 0; i < wordsInTextField.length; i++) {
-      const combination = wordsInTextField.slice(wordsInTextField.length - i);
-      const word = wordsInTextField
-        .slice(0, wordsInTextField.length - i)
+    possibleSearchCombinations.add(wordsInTextField);
+
+    if (numWords > 1) {
+      for (let i = 0; i < numWords; i++) {
+        this.#getPossibleForwardCombinations(
+          i,
+          wordsInTextField,
+          possibleSearchCombinations
+        );
+      }
+    }
+
+    return Array.from(possibleSearchCombinations);
+  };
+
+  #getPossibleForwardCombinations = (
+    index,
+    stringArray,
+    possibleSearchCombinations
+  ) => {
+    const wordsBeforeCurrent = stringArray.slice(0, index);
+
+    for (let ii = index; ii < stringArray.length - 1; ii++) {
+      const currentWord = stringArray
+        .slice(index, ii + 2)
         .join()
         .replace(/,/g, " ");
 
-      if (combination.length > 0) {
-        const joinedCombination = combination.join().replace(/,/g, " ");
-        possibleSearchCombinations.push([word, joinedCombination]);
-      }
-      combination.unshift(word);
-      possibleSearchCombinations.push(combination);
-    }
+      const wordsAfterCurrent = stringArray.slice(ii + 2);
 
-    return possibleSearchCombinations;
+      possibleSearchCombinations.add([
+        ...wordsBeforeCurrent,
+        currentWord,
+        ...wordsAfterCurrent,
+      ]);
+    }
   };
 
   #addPotentialWildCards = (word, searchOptions) => {
