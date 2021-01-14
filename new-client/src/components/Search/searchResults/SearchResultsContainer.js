@@ -90,6 +90,33 @@ class SearchResultsContainer extends React.PureComponent {
     showTools: false,
   };
 
+  searchResultTools = [
+    {
+      name: "Filtrera",
+      type: "filter",
+      render: () => this.renderFilterTool(),
+      disabled: this.props.options.filterDisabled ?? false,
+    },
+    {
+      name: "Sortera",
+      type: "sort",
+      render: () => this.renderSortTool(),
+      disabled: this.props.options.sortDisabled ?? false,
+    },
+    {
+      name: "Rensa",
+      type: "clear",
+      render: () => this.renderClearTool(),
+      disabled: this.props.options.clearDisabled ?? false,
+    },
+    {
+      name: "Ladda ner",
+      type: "download",
+      render: () => this.renderDownloadTool(),
+      disabled: this.props.options.downloadDisabled ?? false,
+    },
+  ];
+
   sortingStrategies = [
     {
       type: "AtoZ",
@@ -334,17 +361,42 @@ class SearchResultsContainer extends React.PureComponent {
     );
   };
 
-  renderSearchResultListOptions = () => {
-    const { classes, featureCollections } = this.props;
+  renderFilterTool = () => {
+    const { classes } = this.props;
+    const filterActive = this.isFilterActive();
+    const filterHelpText = filterActive
+      ? "Filtret är aktivt"
+      : "Filtrera resultatet";
+    return (
+      <Tooltip title={filterHelpText}>
+        <Button
+          className={classes.headerButtons}
+          onClick={() =>
+            this.setState({
+              filterInputFieldOpen: !this.state.filterInputFieldOpen,
+            })
+          }
+        >
+          <Badge
+            color="primary"
+            badgeContent=" "
+            variant="dot"
+            invisible={!filterActive}
+          >
+            <FilterListIcon />
+          </Badge>
+        </Button>
+      </Tooltip>
+    );
+  };
+
+  renderSortTool = () => {
+    const { classes } = this.props;
     const {
       activeFeatureCollection,
       featureCollectionSortingStrategy,
       featureSortingStrategy,
     } = this.state;
-    const filterActive = this.isFilterActive();
-    const filterHelpText = filterActive
-      ? "Filtret är aktivt"
-      : "Filtrera resultatet";
 
     const sortHelpText = `Sortera resultatet, sorterar nu enligt ${
       // Get current sorting strategy from the array of strategies
@@ -360,82 +412,101 @@ class SearchResultsContainer extends React.PureComponent {
             : featureCollectionSortingStrategy)
       ).name // And it is the name value of the strategy we want to show
     }`;
+
     return (
-      <Grid item container align="center" justify="flex-end">
-        <Grow in={this.state.showTools} timeout={800}>
-          <Grid item className={!this.state.showTools ? classes.hidden : null}>
-            <Typography variant="srOnly">{filterHelpText}</Typography>
-            <Tooltip title={filterHelpText}>
+      <Tooltip title={sortHelpText}>
+        <Button
+          className={classes.headerButtons}
+          onClick={(e) =>
+            this.setState({ sortingMenuAnchorEl: e.currentTarget })
+          }
+        >
+          <SortIcon />
+        </Button>
+      </Tooltip>
+    );
+  };
+
+  renderClearTool = () => {
+    const { classes } = this.props;
+    return (
+      <Tooltip title="Rensa alla selekterade objekt">
+        <Button
+          className={classes.headerButtons}
+          onClick={() => {
+            this.props.localObserver.publish(
+              "searchResultList.clearAllSelectedFeatures"
+            );
+          }}
+        >
+          <DeleteIcon />
+        </Button>
+      </Tooltip>
+    );
+  };
+
+  renderDownloadTool = () => {
+    const { featureCollections } = this.props;
+    const { activeFeatureCollection } = this.state;
+    return (
+      <SearchResultsDownloadMenu
+        featureCollections={
+          activeFeatureCollection
+            ? [activeFeatureCollection]
+            : featureCollections
+        }
+        localObserver={this.props.localObserver}
+      />
+    );
+  };
+
+  allToolsDisabled = () => {
+    return this.searchResultTools.filter((tool) => !tool.disabled).length === 0;
+  };
+
+  renderSearchResultListTools = () => {
+    const { classes } = this.props;
+    if (this.allToolsDisabled()) {
+      return null;
+    } else {
+      return (
+        <Grid item container align="center" justify="flex-end">
+          <Grow in={this.state.showTools} timeout={800}>
+            <Grid
+              item
+              className={!this.state.showTools ? classes.hidden : null}
+            >
+              {this.searchResultTools.map((tool, index) => {
+                return (
+                  !tool.disabled && (
+                    <React.Fragment key={index}>{tool.render()}</React.Fragment>
+                  )
+                );
+              })}
+            </Grid>
+          </Grow>
+          <Grid item>
+            <Tooltip
+              title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
+            >
               <Button
                 className={classes.headerButtons}
                 onClick={() =>
                   this.setState({
-                    filterInputFieldOpen: !this.state.filterInputFieldOpen,
+                    showTools: !this.state.showTools,
                   })
                 }
               >
-                <Badge
-                  color="primary"
-                  badgeContent=" "
-                  variant="dot"
-                  invisible={!filterActive}
-                >
-                  <FilterListIcon />
-                </Badge>
+                <Typography variant="srOnly">
+                  {`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
+                </Typography>
+                <MoreVertIcon />
               </Button>
             </Tooltip>
-            <Typography variant="srOnly">{sortHelpText}</Typography>
-            <Tooltip title={sortHelpText}>
-              <Button
-                className={classes.headerButtons}
-                onClick={(e) =>
-                  this.setState({ sortingMenuAnchorEl: e.currentTarget })
-                }
-              >
-                <SortIcon />
-              </Button>
-            </Tooltip>
-            <Tooltip title="Rensa alla selekterade objekt">
-              <Button
-                className={classes.headerButtons}
-                onClick={() => {
-                  this.props.localObserver.publish(
-                    "searchResultList.clearAllSelectedFeatures"
-                  );
-                }}
-              >
-                <DeleteIcon />
-              </Button>
-            </Tooltip>
-            <SearchResultsDownloadMenu
-              featureCollections={
-                activeFeatureCollection
-                  ? [activeFeatureCollection]
-                  : featureCollections
-              }
-              localObserver={this.props.localObserver}
-            />
           </Grid>
-        </Grow>
-        <Grid item>
-          <Tooltip title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}>
-            <Button
-              className={classes.headerButtons}
-              onClick={() =>
-                this.setState({
-                  showTools: !this.state.showTools,
-                })
-              }
-            >
-              <Typography variant="srOnly">
-                {`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
-              </Typography>
-              <MoreVertIcon />
-            </Button>
-          </Tooltip>
         </Grid>
-      </Grid>
-    );
+      );
+    }
   };
 
   setActiveFeature = (feature) => {
@@ -632,7 +703,7 @@ class SearchResultsContainer extends React.PureComponent {
           justify="flex-end"
           xs={this.state.showTools ? 7 : 1}
         >
-          {this.renderSearchResultListOptions()}
+          {this.renderSearchResultListTools()}
         </Grid>
       </Grid>
     );
@@ -678,7 +749,7 @@ class SearchResultsContainer extends React.PureComponent {
       getOriginBasedIcon,
       localObserver,
       panelCollapsed,
-      showFeaturePreview,
+      options,
     } = this.props;
     const {
       sumOfResults,
@@ -732,7 +803,7 @@ class SearchResultsContainer extends React.PureComponent {
                     featureCollectionSortingStrategy
                   }
                   featureSortingStrategy={featureSortingStrategy}
-                  showFeaturePreview={showFeaturePreview}
+                  showFeaturePreview={options.showFeaturePreview}
                   getFeatureTitle={this.getFeatureTitle}
                 />
               </Grid>
