@@ -1,9 +1,11 @@
 import MatchSearch from "./MatchSearch";
 import { v4 as uuidv4 } from "uuid";
-import { getStringArray, splitAndTrimOnCommas } from "../utils/helpers";
+import { splitAndTrimOnCommas } from "../utils/helpers";
 
 export default class DocumentSearchModel {
   constructor(settings) {
+    console.log(settings, "settings");
+    this.globalSearchModel = settings.globalSearchModel;
     this.documentCollections = this.createDocumentCollectionsToSearch(
       settings.allDocuments
     );
@@ -102,7 +104,10 @@ export default class DocumentSearchModel {
         resolve({ featureCollections: [], errors: [] });
       }
       let possibleSearchCombinations = searchOptions.getPossibleCombinations
-        ? this.getPossibleSearchCombinations(searchString, searchOptions)
+        ? this.globalSearchModel.getPossibleSearchCombinations(
+            searchString,
+            searchOptions
+          )
         : [splitAndTrimOnCommas(searchString)];
 
       // The searchString will be encoded if the search has been initiated
@@ -204,23 +209,6 @@ export default class DocumentSearchModel {
       },
       []
     );
-  };
-
-  getPossibleSearchCombinations = (searchString) => {
-    let possibleSearchCombinations = [[searchString]];
-    let wordsInTextField = getStringArray(searchString);
-
-    for (let i = 0; i < wordsInTextField.length; i++) {
-      let combination = wordsInTextField.slice(wordsInTextField.length - i);
-      let word = wordsInTextField
-        .slice(0, wordsInTextField.length - i)
-        .join()
-        .replace(/,/g, " ");
-
-      combination.unshift(word);
-      possibleSearchCombinations.push(combination);
-    }
-    return possibleSearchCombinations;
   };
 
   getMockedSearchFieldForChapter = (feature) => {
