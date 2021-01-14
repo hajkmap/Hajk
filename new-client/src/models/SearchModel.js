@@ -234,7 +234,7 @@ class SearchModel {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "!$&"); // $& means the whole matched string
   };
 
-  #getPossibleSearchCombinations = (searchString) => {
+  getPossibleSearchCombinations = (searchString) => {
     const possibleSearchCombinations = new Set();
     const wordsInTextField = this.#getStringArray(searchString);
     const numWords = wordsInTextField.length;
@@ -303,7 +303,7 @@ class SearchModel {
 
     if (searchString !== "") {
       if (searchOptions.getPossibleCombinations) {
-        possibleSearchCombinations = this.#getPossibleSearchCombinations(
+        possibleSearchCombinations = this.getPossibleSearchCombinations(
           searchString,
           searchOptions
         );
