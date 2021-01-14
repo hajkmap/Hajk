@@ -877,11 +877,11 @@ class MapOptions extends Component {
             </div>
             <div>
               <label>
-                Aktiv drawer verktyg{" "}
+                Aktiv drawer innehåll{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Om du använda en annat drawer button verktyg som Dokument verktyg kan du välja att den ska vara aktiv vid start istället för den standard plugins verktyg genom att ange plugin namnet."
+                  title="Styra drawer innehåll som ska vara aktiv vid start. Gäller om flera verktyg som aktiveras via drawer knapp användas."
                 />
               </label>
               <input
