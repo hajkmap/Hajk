@@ -29,7 +29,6 @@ const styles = (theme) => {
       zIndex: theme.zIndex.appBar,
       background: theme.palette.common.white,
       boxShadow: theme.shadows[24],
-      borderRadius: "5px",
       overflow: "hidden",
       pointerEvents: "all",
     },
@@ -41,7 +40,7 @@ const styles = (theme) => {
       height: theme.spacing(4),
       padding: theme.spacing(0),
       borderRadius: "5px 5px 0px 0px",
-      margin: theme.spacing(0.3),
+      marginLeft: theme.spacing(0.5),
       backgroundColor: theme.palette.primary.light,
     },
     toolbar: {
