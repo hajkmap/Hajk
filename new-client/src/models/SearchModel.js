@@ -234,22 +234,47 @@ class SearchModel {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "!$&"); // $& means the whole matched string
   };
 
-  #getPossibleSearchCombinations = (searchString, searchOptions) => {
-    let possibleSearchCombinations = [];
-    let wordsInTextField = this.#getStringArray(searchString);
+  #getPossibleSearchCombinations = (searchString) => {
+    const possibleSearchCombinations = new Set();
+    const wordsInTextField = this.#getStringArray(searchString);
+    const numWords = wordsInTextField.length;
 
-    for (let i = 0; i < wordsInTextField.length; i++) {
-      let combination = wordsInTextField.slice(wordsInTextField.length - i);
-      let word = wordsInTextField
-        .slice(0, wordsInTextField.length - i)
+    possibleSearchCombinations.add(wordsInTextField);
+
+    if (numWords > 1) {
+      for (let i = 0; i < numWords; i++) {
+        this.#getPossibleForwardCombinations(
+          i,
+          wordsInTextField,
+          possibleSearchCombinations
+        );
+      }
+    }
+
+    return Array.from(possibleSearchCombinations);
+  };
+
+  #getPossibleForwardCombinations = (
+    index,
+    stringArray,
+    possibleSearchCombinations
+  ) => {
+    const wordsBeforeCurrent = stringArray.slice(0, index);
+
+    for (let ii = index; ii < stringArray.length - 1; ii++) {
+      const currentWord = stringArray
+        .slice(index, ii + 2)
         .join()
         .replace(/,/g, " ");
 
-      combination.unshift(word);
-      possibleSearchCombinations.push(combination);
-    }
+      const wordsAfterCurrent = stringArray.slice(ii + 2);
 
-    return possibleSearchCombinations;
+      possibleSearchCombinations.add([
+        ...wordsBeforeCurrent,
+        currentWord,
+        ...wordsAfterCurrent,
+      ]);
+    }
   };
 
   #addPotentialWildCards = (word, searchOptions) => {

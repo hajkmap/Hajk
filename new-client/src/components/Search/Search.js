@@ -320,6 +320,7 @@ class Search extends React.PureComponent {
         this.setState(
           {
             autoCompleteOpen: searchString.length >= 3,
+            autocompleteList: [],
             loading: searchString.length >= 3,
             showSearchResults: false,
             searchString: searchString,
@@ -367,7 +368,6 @@ class Search extends React.PureComponent {
     let fetchSettings = { ...this.searchModel.getSearchOptions() }; //Getting default-options when fetching auto
     fetchSettings = {
       ...fetchSettings,
-      maxResultsPerDataset: 7,
       getPossibleCombinations: true,
     };
     return fetchSettings;
@@ -618,7 +618,7 @@ class Search extends React.PureComponent {
     // If we get few results (less than 3) we do a new
     // search to try to fill the autocomplete with wildCardAtStart
     // active.
-    if (this.getNumResults(autoCompleteResult) < 3) {
+    if (this.getNumResults(autoCompleteResult) < 1) {
       fetchOptions.wildcardAtStart = true;
       autoCompleteResult = await this.fetchResultFromSearchModel(fetchOptions);
     }
