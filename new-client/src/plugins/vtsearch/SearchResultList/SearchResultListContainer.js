@@ -39,7 +39,6 @@ const styles = (theme) => {
       minHeight: 0,
       height: theme.spacing(4),
       padding: theme.spacing(0),
-      borderRadius: "5px 5px 0px 0px",
       marginLeft: theme.spacing(0.5),
       backgroundColor: theme.palette.primary.light,
     },

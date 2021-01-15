@@ -21,8 +21,11 @@ class AttributeTable extends React.Component {
       index: null,
       olFeatureId: null,
     },
-    sortBy: this.props.toolConfig.geoServer[this.props.searchResult.type]
-      ?.defaultSortAttribute,
+    sortBy: this.props.toolConfig.geoServer[
+      this.props.searchResult.type
+    ]?.defaultSortOrder.slice(-1)[0],
+    sortOrder: this.props.toolConfig.geoServer[this.props.searchResult.type]
+      ?.defaultSortOrder,
     focusedRow: 0,
     rows: this.getRows(),
   };
@@ -30,9 +33,11 @@ class AttributeTable extends React.Component {
   //Most efficient way to do it?
   componentDidMount() {
     if (this.state.rows.length > 0) {
-      this.sort({
-        sortBy: this.state.sortBy,
-        sortDirection: SortDirection.ASC,
+      this.state.sortOrder.map((sortAttribute) => {
+        this.sort({
+          sortBy: sortAttribute,
+          sortDirection: SortDirection.ASC,
+        });
       });
     }
   }
