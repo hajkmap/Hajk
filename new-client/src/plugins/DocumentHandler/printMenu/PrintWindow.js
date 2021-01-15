@@ -25,6 +25,11 @@ import {
   DialogContentText,
 } from "@material-ui/core";
 
+const getIndentationValue = (fontSize, multiplier, negative) => {
+  let value = multiplier * fontSize.substring(0, fontSize.length - 3);
+  return negative ? `${value * -1}rem` : `${value}rem`;
+};
+
 const styles = (theme) => ({
   gridContainer: {
     padding: theme.spacing(4),
@@ -113,7 +118,7 @@ class PrintWindow extends React.PureComponent {
     if (this.isContentHeaderTag(content)) {
       return this.getAvailableHeight() >= 0.4 * maxHeight;
     }
-    let contentHeight = content.clientHeight;
+    let contentHeight = content.getBoundingClientRect().height;
 
     let availableHeight = this.getAvailableHeight();
 
@@ -131,7 +136,8 @@ class PrintWindow extends React.PureComponent {
   };
 
   addContentToNewPage = (content, maxHeight, type) => {
-    let height = content.clientHeight;
+    let height = content.getBoundingClientRect().height;
+
     if (this.isContentFloatingPicture(content)) {
       height = 0;
     }
@@ -143,7 +149,8 @@ class PrintWindow extends React.PureComponent {
   };
 
   addContentToCurrentPage = (content) => {
-    let height = content.clientHeight;
+    let height = content.getBoundingClientRect().height;
+
     if (this.isContentFloatingPicture(content)) {
       height = 0;
     }
@@ -164,7 +171,9 @@ class PrintWindow extends React.PureComponent {
   };
 
   hasChildren = (content) => {
-    return content.children && content.children.length > 0;
+    return (
+      content.children && content.children.length > 0 && content.tagName !== "P"
+    );
   };
 
   isContentTextArea = (content) => {
@@ -200,6 +209,11 @@ class PrintWindow extends React.PureComponent {
       this.handleBrTags(content);
     }
 
+    if (content.nodeName === "UL") {
+      for (let child of content.children) {
+        child.style.paddingLeft = "8px";
+      }
+    }
     if (this.isContentTextArea(content)) {
       if (this.contentFitsCurrentPage(content)) {
         this.addContentToCurrentPage(content);
@@ -207,13 +221,9 @@ class PrintWindow extends React.PureComponent {
         this.addContentToNewPage(content, maxHeight, type);
       }
     } else {
-      let previousContentIsFloatingImage = this.isContentFloatingPicture(
-        previousContent
-      );
-
       if (
         this.checkIfContentIsChapterTitle(content) &&
-        !previousContentIsFloatingImage
+        !this.isContentFloatingPicture(previousContent)
       ) {
         this.addContentToNewPage(content, maxHeight, type);
       } else {
@@ -228,6 +238,7 @@ class PrintWindow extends React.PureComponent {
           } else {
             [...content.children].forEach((child, index, children) => {
               const previousContent = index === 0 ? null : children[index - 1];
+
               this.distributeContentOnPages(child, type, previousContent);
             });
           }
@@ -298,12 +309,12 @@ class PrintWindow extends React.PureComponent {
   };
 
   resizeImage = (img) => {
-    img.height = img.clientHeight * imageResizeRatio;
+    img.height = img.getBoundingClientRect().height * imageResizeRatio;
     img.width = img.clientWidth * imageResizeRatio;
   };
 
   imageFitsOnePage = (img) => {
-    return img.clientHeight < maxHeight * 0.9;
+    return img.getBoundingClientRect().height < maxHeight * 0.9;
   };
 
   loadImage = (img) => {
