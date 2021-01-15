@@ -71,7 +71,6 @@
     "jspdf": "^1.5.3",
     "jsts": "^2.5.0",
     "load-google-maps-api": "^2.0.2",
-    "lodash": "^4.17.20",
     "marked": "^1.2.7",
     "notistack": "^0.9.17",
     "ol": "^6.5.0",
