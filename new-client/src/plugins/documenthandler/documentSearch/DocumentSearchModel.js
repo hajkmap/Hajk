@@ -1,9 +1,10 @@
 import MatchSearch from "./MatchSearch";
 import { v4 as uuidv4 } from "uuid";
-import { getStringArray, splitAndTrimOnCommas } from "../utils/helpers";
+import { splitAndTrimOnCommas } from "../utils/helpers";
 
 export default class DocumentSearchModel {
   constructor(settings) {
+    this.globalSearchModel = settings.globalSearchModel;
     this.documentCollections = this.createDocumentCollectionsToSearch(
       settings.allDocuments
     );
@@ -92,17 +93,19 @@ export default class DocumentSearchModel {
   //Method called by searchComponent in core (Part of searchInterface)
   getResults = (searchString, searchOptions) => {
     this.matchSearch = new MatchSearch(searchOptions);
+    this.searchOptions = searchOptions;
 
-    return this.getDocumentHandlerResults(searchString, searchOptions);
+    return this.getDocumentHandlerResults(searchString);
   };
 
-  getDocumentHandlerResults = (searchString, searchOptions) => {
+  getDocumentHandlerResults = (searchString) => {
     return new Promise((resolve, reject) => {
       if (searchString === "") {
         resolve({ featureCollections: [], errors: [] });
       }
-      let possibleSearchCombinations = searchOptions.getPossibleCombinations
-        ? this.getPossibleSearchCombinations(searchString, searchOptions)
+      let possibleSearchCombinations = this.searchOptions
+        .getPossibleCombinations
+        ? this.globalSearchModel.getPossibleSearchCombinations(searchString)
         : [splitAndTrimOnCommas(searchString)];
 
       // The searchString will be encoded if the search has been initiated
@@ -206,23 +209,6 @@ export default class DocumentSearchModel {
     );
   };
 
-  getPossibleSearchCombinations = (searchString) => {
-    let possibleSearchCombinations = [[searchString]];
-    let wordsInTextField = getStringArray(searchString);
-
-    for (let i = 0; i < wordsInTextField.length; i++) {
-      let combination = wordsInTextField.slice(wordsInTextField.length - i);
-      let word = wordsInTextField
-        .slice(0, wordsInTextField.length - i)
-        .join()
-        .replace(/,/g, " ");
-
-      combination.unshift(word);
-      possibleSearchCombinations.push(combination);
-    }
-    return possibleSearchCombinations;
-  };
-
   getMockedSearchFieldForChapter = (feature) => {
     return feature.matchedSearchValues.reduce((searchFields, searchValue) => {
       const searchField = uuidv4();
@@ -232,8 +218,11 @@ export default class DocumentSearchModel {
   };
 
   documentTitleInSearchCombination = (searchCombination, documentTitle) => {
-    return searchCombination.some((word) => {
-      return documentTitle.toLowerCase().search(word.toLowerCase()) !== -1;
+    return searchCombination.every((word) => {
+      if (!this.searchOptions.matchCase) {
+        return documentTitle.toLowerCase().search(word.toLowerCase()) !== -1;
+      }
+      return documentTitle.search(word) !== -1;
     });
   };
 

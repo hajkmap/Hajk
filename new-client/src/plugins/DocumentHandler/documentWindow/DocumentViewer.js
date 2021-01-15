@@ -15,7 +15,7 @@ const styles = (theme) => ({
     overflowX: "hidden",
     userSelect: "text",
     outline: "none",
-    //scrollBehavior: "smooth",
+    scrollBehavior: "smooth",
   },
 
   contentContainer: {

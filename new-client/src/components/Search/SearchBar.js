@@ -208,7 +208,7 @@ class SearchBar extends React.PureComponent {
         map={map}
         panelCollapsed={resultPanelCollapsed}
         toggleCollapseSearchResults={toggleCollapseSearchResults}
-        showFeaturePreview={options.showFeaturePreview}
+        options={options}
       />
     );
   };

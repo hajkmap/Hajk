@@ -234,10 +234,19 @@ class SearchModel {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "!$&"); // $& means the whole matched string
   };
 
-  #getPossibleSearchCombinations = (searchString) => {
+  getPossibleSearchCombinations = (searchString) => {
     const possibleSearchCombinations = new Set();
     const wordsInTextField = this.#getStringArray(searchString);
     const numWords = wordsInTextField.length;
+
+    // If the user has typed more than five words, we only create
+    // one string containing all words to avoid sending humongous
+    // requests to geoServer.
+    if (numWords > 5) {
+      const joinedWord = wordsInTextField.join().replace(/,/g, " ");
+      possibleSearchCombinations.add([joinedWord]);
+      return Array.from(possibleSearchCombinations);
+    }
 
     possibleSearchCombinations.add(wordsInTextField);
 
@@ -303,7 +312,7 @@ class SearchModel {
 
     if (searchString !== "") {
       if (searchOptions.getPossibleCombinations) {
-        possibleSearchCombinations = this.#getPossibleSearchCombinations(
+        possibleSearchCombinations = this.getPossibleSearchCombinations(
           searchString,
           searchOptions
         );

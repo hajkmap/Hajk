@@ -24,6 +24,8 @@ const styles = (theme) => ({
   },
   infoContainer: {
     height: "100%",
+    cursor: "auto",
+    userSelect: "text",
   },
   typography: {
     textAlign: "center",

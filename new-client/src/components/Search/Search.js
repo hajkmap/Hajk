@@ -8,7 +8,6 @@ import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
 import KmlExport from "./utils/KmlExport";
-import { cloneDeep } from "lodash";
 
 const styles = () => ({
   inputRoot: {
@@ -219,8 +218,23 @@ class Search extends React.PureComponent {
       });
   };
 
+  getEnabledDefaultSearchTools = () => {
+    const { options } = this.props;
+    let searchTools = [...defaultSearchTools];
+    const polygonSearchDisabled = options.polygonSearchDisabled ?? false;
+    const radiusSearchDisabled = options.polygonSearchDisabled ?? false;
+    if (polygonSearchDisabled) {
+      searchTools = searchTools.filter((tool) => tool.type !== "Polygon");
+    }
+    if (radiusSearchDisabled) {
+      searchTools = searchTools.filter((tool) => tool.type !== "Circle");
+    }
+    return searchTools;
+  };
+
   getSearchTools = (searchImplementedSearchTools) => {
-    return defaultSearchTools.concat(
+    const enabledSearchTools = this.getEnabledDefaultSearchTools();
+    return enabledSearchTools.concat(
       this.getExternalSearchTools(searchImplementedSearchTools)
     );
   };
@@ -323,7 +337,7 @@ class Search extends React.PureComponent {
     if (this.isUserInput(searchString, reason)) {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.localObserver.publish("clear-search-results");
+        this.localObserver.publish("clearMapView");
         this.setState(
           {
             autoCompleteOpen: searchString.length >= 3,
@@ -492,9 +506,10 @@ class Search extends React.PureComponent {
 
   sortAutocompleteList = (flatAutocompleteArray) => {
     return flatAutocompleteArray.sort((a, b) =>
-      a.autocompleteEntry.localeCompare(b.autocompleteEntry, "sv", {
-        numeric: true,
-      })
+      decodeURIComponent(a.autocompleteEntry).localeCompare(
+        decodeURIComponent(b.autocompleteEntry),
+        "sv"
+      )
     );
   };
 
@@ -657,7 +672,7 @@ class Search extends React.PureComponent {
             .then((res) => {
               return {
                 errors: res.errors,
-                featureCollections: cloneDeep(res.featureCollections),
+                featureCollections: res.featureCollections,
               };
             })
         );
@@ -725,17 +740,40 @@ class Search extends React.PureComponent {
       )
     );
 
-    if (numResults <= maxSlots) {
-      //All results can be shown
-      return this.flattenAndSortAutoCompleteList(searchResults);
-    } else {
-      searchResults.featureCollections.forEach((fc) => {
-        if (fc.value.features.length > spacesPerSource) {
-          fc = fc.value.features.splice(spacesPerSource);
-        }
-      });
-      return this.flattenAndSortAutoCompleteList(searchResults);
+    const autoCompleteList = this.flattenAndSortAutoCompleteList(searchResults);
+
+    if (numResults > maxSlots) {
+      // The list must be shortened before we return
+      return this.shortenAutoCompleteList(autoCompleteList, spacesPerSource);
     }
+    return autoCompleteList;
+  };
+
+  shortenAutoCompleteList = (autoCompleteList, spacesPerSource) => {
+    let shortenedAutoComplete = [];
+
+    const groupedAutoComplete = this.groupObjArrayByProp(
+      autoCompleteList,
+      "dataset"
+    );
+
+    for (const group in groupedAutoComplete) {
+      shortenedAutoComplete = [
+        ...shortenedAutoComplete,
+        ...groupedAutoComplete[group].slice(0, spacesPerSource),
+      ];
+    }
+    return shortenedAutoComplete;
+  };
+
+  groupObjArrayByProp = (array, property) => {
+    return array.reduce((grouped, obj) => {
+      if (!grouped[obj[property]]) {
+        grouped[obj[property]] = [];
+      }
+      grouped[obj[property]].push(obj);
+      return grouped;
+    }, {});
   };
 
   getUserCustomFetchSettings = (searchOptionsFromModel) => {
