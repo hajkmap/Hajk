@@ -372,7 +372,7 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
   };
 
   return (
-    <Box className={positioningClass}>
+    <Box data-position={image.position} className={positioningClass}>
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue}
