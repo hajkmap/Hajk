@@ -7,6 +7,7 @@ import Link from "@material-ui/core/Link";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import SortIcon from "@material-ui/icons/Sort";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import CloseIcon from "@material-ui/icons/Close";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {
   Paper,
@@ -497,10 +498,7 @@ class SearchResultsContainer extends React.PureComponent {
                   })
                 }
               >
-                <Typography variant="srOnly">
-                  {`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
-                </Typography>
-                <MoreVertIcon />
+                {this.state.showTools ? <CloseIcon /> : <MoreVertIcon />}
               </Button>
             </Tooltip>
           </Grid>
