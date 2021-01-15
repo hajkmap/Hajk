@@ -128,7 +128,7 @@
           },
           "stopAreaNameAndNumbers": {
             "searchLabel": "Hållplats",
-            "defaultSortAttribute": "StopAreaNumber",
+            "defaultSortOrder": ["StopAreaNumber"],
             "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=StopAreaNameAndNumber&outputFormat=application/json"
           },
           "transportModeTypeNames": {
@@ -137,7 +137,15 @@
           },
           "journeys": {
             "searchLabel": "Turer",
-            "defaultSortAttribute": "EarliestDepartureTimeAtToStopPoint",
+            "defaultSortOrder": [
+              "TransportCompany",
+              "InternalLineNumber",
+              "FromStopPointName",
+              "FromStopPointDesignation",
+              "ToStopPointName",
+              "ToStopPointDesignation",
+              "EarliestDepartureTimeAtToStopPoint"
+            ],
             "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=GetJourneys&outputFormat=application/json",
             "attributesToDisplay": [
               {
@@ -177,7 +185,11 @@
           },
           "routes": {
             "searchLabel": "Linje",
-            "defaultSortAttribute": "InternalLineNumber",
+            "defaultSortOrder": [
+              "TransportModeType",
+              "Direction",
+              "InternalLineNumber"
+            ],
             "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.1.0&request=GetFeature&typeName=Route&outputFormat=application/json",
             "attributesToDisplay": [
               {
@@ -208,7 +220,7 @@
           },
           "stopAreas": {
             "searchLabel": "Hållplatsomr",
-            "defaultSortAttribute": "StopAreaNumber",
+            "defaultSortOrder": ["StopAreaNumber"],
             "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=GetStopAreas&outputFormat=application/json",
             "attributesToDisplay": [
               {
@@ -243,7 +255,7 @@
           },
           "stopPoints": {
             "searchLabel": "Hållplatslägen",
-            "defaultSortAttribute": "StopAreaNumber",
+            "defaultSortOrder": ["Designation", "StopAreaNumber"],
             "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=GetStopPoints&outputFormat=application/json",
             "attributesToDisplay": [
               {
@@ -290,7 +302,13 @@
           },
           "Addresses": {
             "searchLabel": "Addresser",
-            "defaultSortAttribute": "StreetName",
+            "defaultSortOrder": [
+              "StreetNumber",
+              "PostCode",
+              "PlaceName",
+              "Municipality",
+              "StreetName"
+            ],
             "attributesToDisplay": [
               {
                 "displayName": "GATUNAMN",
@@ -316,7 +334,7 @@
           },
           "POIs": {
             "searchLabel": "Platser",
-            "defaultSortAttribute": "StreetName",
+            "defaultSortOrder": ["Municipality", "Name"],
             "attributesToDisplay": [
               {
                 "displayName": "NAMN",
