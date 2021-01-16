@@ -4,7 +4,9 @@ import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import { extend, createEmpty, isEmpty } from "ol/extent";
+import Feature from "ol/Feature";
 import FeatureStyle from "./utils/FeatureStyle";
+import { fromExtent } from "ol/geom/Polygon";
 
 class MapViewModel {
   constructor(settings) {
@@ -104,7 +106,11 @@ class MapViewModel {
     this.app.globalObserver.subscribe(
       "search.spatialSearchActivated",
       (options) => {
-        this.toggleDraw(true, options.type);
+        if (options.type === "Extent") {
+          this.searchInCurrentExtent();
+        } else {
+          this.toggleDraw(true, options.type);
+        }
       }
     );
   };
@@ -249,6 +255,33 @@ class MapViewModel {
 
       this.drawSource.clear();
     }
+  };
+
+  searchInCurrentExtent = () => {
+    try {
+      const currentExtent = this.map
+        .getView()
+        .calculateExtent(this.map.getSize());
+
+      if (!this.extentIsFinite(currentExtent)) {
+        return this.handleSearchInCurrentExtentError(
+          "Current extent could not be calculated correctly."
+        );
+      }
+      const feature = new Feature(fromExtent(currentExtent));
+      this.localObserver.publish("on-draw-end", feature);
+    } catch (error) {
+      this.handleSearchInCurrentExtentError(error);
+    }
+  };
+
+  extentIsFinite = (extent) => {
+    return extent.map(Number.isFinite).includes(false) === false;
+  };
+
+  handleSearchInCurrentExtentError = (error) => {
+    this.localObserver.publish("extent-search-failed");
+    console.warn("Extent-search-failed: ", error);
   };
 }
 

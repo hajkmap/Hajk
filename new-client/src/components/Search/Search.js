@@ -4,6 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Observer from "react-event-observer";
 import EditIcon from "@material-ui/icons/Edit";
+import Crop54Icon from "@material-ui/icons/Crop54";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
@@ -20,18 +21,28 @@ const defaultSearchTools = [
     name: "Sök med polygon",
     icon: <EditIcon />,
     type: "Polygon",
+    toolTipTitle: "Genomför en sökning i ett område genom att rita en polygon.",
     onClickEventName: "search.spatialSearchActivated",
   },
   {
     name: "Sök med radie",
     icon: <RadioButtonUncheckedIcon />,
     type: "Circle",
+    toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
+    onClickEventName: "search.spatialSearchActivated",
+  },
+  {
+    name: "Sök i området",
+    icon: <Crop54Icon />,
+    type: "Extent",
+    toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
     onClickEventName: "search.spatialSearchActivated",
   },
   {
     name: "Sökinställningar",
     icon: <SettingsIcon />,
     type: "SETTINGS",
+    toolTipTitle: "Ändra sökinställningarna.",
     onClickEventName: "",
   },
 ];
@@ -139,6 +150,15 @@ class Search extends React.PureComponent {
     this.localObserver.subscribe("minimizeSearchResultList", () => {
       this.setState({ resultPanelCollapsed: false });
     });
+    this.localObserver.subscribe("extent-search-failed", () => {
+      this.snackbarKey = this.props.enqueueSnackbar(
+        "Ett problem uppstod vid sökning i området. Kontakta systemadministratören.",
+        {
+          variant: "warning",
+          anchorOrigin: { vertical: "top", horizontal: "center" },
+        }
+      );
+    });
   };
 
   getPluginsConfToUseSearchInterface = () => {
@@ -221,11 +241,15 @@ class Search extends React.PureComponent {
     let searchTools = [...defaultSearchTools];
     const polygonSearchDisabled = options.polygonSearchDisabled ?? false;
     const radiusSearchDisabled = options.polygonSearchDisabled ?? false;
+    const extentSearchDisabled = options.extentSearchDisabled ?? false;
     if (polygonSearchDisabled) {
       searchTools = searchTools.filter((tool) => tool.type !== "Polygon");
     }
     if (radiusSearchDisabled) {
       searchTools = searchTools.filter((tool) => tool.type !== "Circle");
+    }
+    if (extentSearchDisabled) {
+      searchTools = searchTools.filter((tool) => tool.type !== "Extent");
     }
     return searchTools;
   };
