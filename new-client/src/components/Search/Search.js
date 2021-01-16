@@ -43,6 +43,7 @@ class Search extends React.PureComponent {
     searchResults: { featureCollections: [], errors: [] },
     autocompleteList: [],
     searchString: "",
+    searchFromAutoComplete: false,
     searchActive: "",
     autoCompleteOpen: false,
     loading: false,
@@ -305,6 +306,7 @@ class Search extends React.PureComponent {
       this.setState(
         {
           searchString: searchString,
+          searchFromAutoComplete: true,
           searchActive: "input",
         },
         () => {
@@ -360,7 +362,9 @@ class Search extends React.PureComponent {
 
   handleOnClickOrKeyboardSearch = () => {
     if (this.hasEnoughCharsForSearch()) {
-      this.doSearch();
+      this.setState({ searchFromAutoComplete: false }, () => {
+        this.doSearch();
+      });
     }
   };
 
@@ -630,9 +634,8 @@ class Search extends React.PureComponent {
       fetchOptions
     );
 
-    // If we get few results (less than 3) we do a new
-    // search to try to fill the autocomplete with wildCardAtStart
-    // active.
+    // If we get zero results we do a new search to try
+    // to fill the autocomplete with wildCardAtStart active.
     if (this.getNumResults(autoCompleteResult) < 1) {
       fetchOptions.wildcardAtStart = true;
       autoCompleteResult = await this.fetchResultFromSearchModel(fetchOptions);
@@ -780,7 +783,7 @@ class Search extends React.PureComponent {
     return {
       ...searchOptionsFromModel,
       activeSpatialFilter: activeSpatialFilter,
-      getPossibleCombinations: false,
+      getPossibleCombinations: this.state.searchFromAutoComplete ? false : true,
       featuresToFilter: this.featuresToFilter || [],
       matchCase: matchCase,
       wildcardAtStart: wildcardAtStart,
@@ -831,7 +834,6 @@ class Search extends React.PureComponent {
           handleOnAutocompleteInputChange={this.handleOnAutocompleteInputChange}
           handleOnClear={this.handleOnClear}
           autocompleteList={autocompleteList}
-          doSearch={this.doSearch.bind(this)}
           searchModel={this.searchModel}
           searchOptions={searchOptions}
           updateSearchOptions={this.updateSearchOptions}
