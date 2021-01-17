@@ -101,7 +101,7 @@ const styles = (theme) => {
         marginTop: -theme.spacing(2),
         maxHeight: theme.spacing(6),
         boxShadow: theme.shadows[3],
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.paper,
       },
     },
     main: {
