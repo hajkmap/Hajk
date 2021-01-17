@@ -305,6 +305,7 @@ class SearchBar extends React.PureComponent {
       handleOnClickOrKeyboardSearch,
       setSearchSources,
       failedWFSFetchMessage,
+      options,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
@@ -317,7 +318,7 @@ class SearchBar extends React.PureComponent {
         {...params}
         label={undefined}
         variant={width === "xs" ? "standard" : "outlined"}
-        placeholder="Sök..."
+        placeholder={options.searchBarPlaceholder ?? "Sök..."}
         onKeyPress={handleSearchBarKeyPress}
         InputProps={{
           ...params.InputProps,
