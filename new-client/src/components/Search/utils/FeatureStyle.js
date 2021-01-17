@@ -16,9 +16,9 @@ export default class FeatureStyle {
 
   #getDefaultHighlightStyleSettings = () => {
     const strokeColor =
-      this.#options.highlightStrokeColor ?? "rgba(255, 214, 91, 0.6)";
+      this.#options.highlightStrokeColor ?? "rgba(255, 0, 0, 0.6)";
     const fillColor =
-      this.#options.highlightFillColor ?? "rgba(255, 214, 91, 0.2)";
+      this.#options.highlightFillColor ?? "rgba(255, 0, 0, 0.2)";
     const textFillColor =
       this.#options.highlightTextFill ?? "rgba(255, 255, 255, 1)";
     const textStrokeColor =
