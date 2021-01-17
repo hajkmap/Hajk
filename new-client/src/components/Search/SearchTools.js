@@ -38,6 +38,11 @@ class SearchTools extends React.PureComponent {
     this.setState({ anchorEl: undefined });
   };
 
+  getEnabledTools = () => {
+    const { searchTools } = this.props;
+    return searchTools.filter((tool) => !tool.disabled);
+  };
+
   renderSettingsDialog = () => {
     const { settingsDialog } = this.state;
     const {
@@ -79,6 +84,7 @@ class SearchTools extends React.PureComponent {
 
   render() {
     const { anchorEl } = this.state;
+    const enabledTools = this.getEnabledTools();
     return (
       <div>
         {this.renderSettingsDialog()}
@@ -115,7 +121,7 @@ class SearchTools extends React.PureComponent {
               })
             }
           >
-            {this.props.searchTools.map((option, index) => (
+            {enabledTools.map((option, index) => (
               <Tooltip key={index} title={option.toolTipTitle ?? ""}>
                 <MenuItem
                   onClick={(event) =>

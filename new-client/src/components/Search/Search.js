@@ -5,6 +5,7 @@ import { withSnackbar } from "notistack";
 import Observer from "react-event-observer";
 import EditIcon from "@material-ui/icons/Edit";
 import Crop54Icon from "@material-ui/icons/Crop54";
+import TouchAppIcon from "@material-ui/icons/TouchApp";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
@@ -15,37 +16,6 @@ const styles = () => ({
     width: "100%",
   },
 });
-
-const defaultSearchTools = [
-  {
-    name: "Sök med polygon",
-    icon: <EditIcon />,
-    type: "Polygon",
-    toolTipTitle: "Genomför en sökning i ett område genom att rita en polygon.",
-    onClickEventName: "search.spatialSearchActivated",
-  },
-  {
-    name: "Sök med radie",
-    icon: <RadioButtonUncheckedIcon />,
-    type: "Circle",
-    toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
-    onClickEventName: "search.spatialSearchActivated",
-  },
-  {
-    name: "Sök i området",
-    icon: <Crop54Icon />,
-    type: "Extent",
-    toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
-    onClickEventName: "search.spatialSearchActivated",
-  },
-  {
-    name: "Sökinställningar",
-    icon: <SettingsIcon />,
-    type: "SETTINGS",
-    toolTipTitle: "Ändra sökinställningarna.",
-    onClickEventName: "",
-  },
-];
 
 class Search extends React.PureComponent {
   state = {
@@ -85,6 +55,50 @@ class Search extends React.PureComponent {
   localObserver = Observer();
 
   snackbarKey = null;
+
+  defaultSearchTools = [
+    {
+      name: "Sök med polygon",
+      icon: <EditIcon />,
+      type: "Polygon",
+      disabled: this.props.options.polygonSearchDisabled ?? false,
+      toolTipTitle:
+        "Genomför en sökning i ett område genom att rita en polygon.",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sök med radie",
+      icon: <RadioButtonUncheckedIcon />,
+      type: "Circle",
+      disabled: this.props.options.radiusSearchDisabled ?? false,
+      toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sök med yta",
+      icon: <TouchAppIcon />,
+      type: "Select",
+      disabled: this.props.options.selectSearchDisabled ?? false,
+      toolTipTitle:
+        "Genomför en sökning genom att välja en eller flera områden i kartan.",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sök i området",
+      icon: <Crop54Icon />,
+      type: "Extent",
+      disabled: this.props.options.extentSearchDisabled ?? false,
+      toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sökinställningar",
+      icon: <SettingsIcon />,
+      type: "SETTINGS",
+      toolTipTitle: "Ändra sökinställningarna.",
+      onClickEventName: "",
+    },
+  ];
 
   constructor(props) {
     super(props);
@@ -127,6 +141,11 @@ class Search extends React.PureComponent {
       this.setFeaturesToFilter([feature]);
       this.doSearch();
     });
+    this.localObserver.subscribe("search-with-features", (features) => {
+      this.props.closeSnackbar(this.snackbarKey);
+      this.setFeaturesToFilter(features);
+      this.doSearch();
+    });
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
@@ -145,6 +164,17 @@ class Search extends React.PureComponent {
           }
         );
       }
+      this.setState({ searchActive: "draw" });
+    });
+    this.localObserver.subscribe("on-select-search-start", () => {
+      this.snackbarKey = this.props.enqueueSnackbar(
+        "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
+        {
+          variant: "information",
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
+        }
+      );
+
       this.setState({ searchActive: "draw" });
     });
     this.localObserver.subscribe("minimizeSearchResultList", () => {
@@ -236,27 +266,8 @@ class Search extends React.PureComponent {
       });
   };
 
-  getEnabledDefaultSearchTools = () => {
-    const { options } = this.props;
-    let searchTools = [...defaultSearchTools];
-    const polygonSearchDisabled = options.polygonSearchDisabled ?? false;
-    const radiusSearchDisabled = options.polygonSearchDisabled ?? false;
-    const extentSearchDisabled = options.extentSearchDisabled ?? false;
-    if (polygonSearchDisabled) {
-      searchTools = searchTools.filter((tool) => tool.type !== "Polygon");
-    }
-    if (radiusSearchDisabled) {
-      searchTools = searchTools.filter((tool) => tool.type !== "Circle");
-    }
-    if (extentSearchDisabled) {
-      searchTools = searchTools.filter((tool) => tool.type !== "Extent");
-    }
-    return searchTools;
-  };
-
   getSearchTools = (searchImplementedSearchTools) => {
-    const enabledSearchTools = this.getEnabledDefaultSearchTools();
-    return enabledSearchTools.concat(
+    return this.defaultSearchTools.concat(
       this.getExternalSearchTools(searchImplementedSearchTools)
     );
   };
