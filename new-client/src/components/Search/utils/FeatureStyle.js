@@ -33,7 +33,8 @@ export default class FeatureStyle {
   };
 
   getHighlightedStyle = (feature, displayFields) => {
-    const { anchor, scale, markerImg } = this.#options;
+    const { scale, markerImg } = this.#options;
+    const anchor = this.#options.anchor ?? [];
     const isPoint = feature?.getGeometry() instanceof Point;
     const textAlign = isPoint ? "left" : "center";
     const offsetY = isPoint ? -50 : -10;
