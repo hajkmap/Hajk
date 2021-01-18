@@ -61,9 +61,14 @@ const CustomPopper = (props) => {
       popperOptions={{
         modifiers: {
           computeStyle: { gpuAcceleration: false },
+          preventOverflow: {
+            enabled: smallScreen,
+            boundariesElement: "root",
+          },
+          hide: { enabled: smallScreen },
         },
       }}
-      placement="bottom-start"
+      placement="bottom-end"
     />
   );
 };
