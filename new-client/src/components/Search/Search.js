@@ -145,6 +145,7 @@ class Search extends React.PureComponent {
       this.props.closeSnackbar(this.snackbarKey);
       this.setFeaturesToFilter(features);
       this.doSearch();
+      this.setState({ searchActive: "draw" });
     });
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
