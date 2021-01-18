@@ -4,7 +4,10 @@ import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import { extend, createEmpty, isEmpty } from "ol/extent";
+import Feature from "ol/Feature";
 import FeatureStyle from "./utils/FeatureStyle";
+import { fromExtent } from "ol/geom/Polygon";
+import { handleClick } from "../../models/Click";
 
 class MapViewModel {
   constructor(settings) {
@@ -18,6 +21,8 @@ class MapViewModel {
     this.initMapLayers();
     this.bindSubscriptions();
   }
+
+  ctrlKeyPressed = false;
 
   getDefaultStyle = () => {
     const fill = new Fill({
@@ -104,7 +109,13 @@ class MapViewModel {
     this.app.globalObserver.subscribe(
       "search.spatialSearchActivated",
       (options) => {
-        this.toggleDraw(true, options.type);
+        if (options.type === "Extent") {
+          this.searchInCurrentExtent();
+        } else if (options.type === "Select") {
+          this.enableSelectFeaturesSearch();
+        } else {
+          this.toggleDraw(true, options.type);
+        }
       }
     );
   };
@@ -139,6 +150,10 @@ class MapViewModel {
 
   resetStyleForFeaturesInResultSource = () => {
     this.resultSource.getFeatures().map((f) => f.setStyle(null));
+  };
+
+  drawSourceHasFeatures = () => {
+    return this.drawSource.getFeatures().length > 0;
   };
 
   getDrawStyle = () => {
@@ -215,6 +230,7 @@ class MapViewModel {
       this.resultSource.clear();
     }
     this.removeDrawInteraction();
+    this.removeSelectListeners();
   };
 
   removeDrawInteraction = () => {
@@ -248,6 +264,85 @@ class MapViewModel {
       this.map.clickLock.delete("search");
 
       this.drawSource.clear();
+    }
+  };
+
+  searchInCurrentExtent = () => {
+    try {
+      const currentExtent = this.map
+        .getView()
+        .calculateExtent(this.map.getSize());
+
+      if (!this.extentIsFinite(currentExtent)) {
+        throw new Error("Current extent could not be calculated correctly.");
+      }
+      const feature = new Feature(fromExtent(currentExtent));
+      this.localObserver.publish("search-with-features", [feature]);
+    } catch (error) {
+      this.handleSearchInCurrentExtentError(error);
+    }
+  };
+
+  extentIsFinite = (extent) => {
+    return extent.map(Number.isFinite).includes(false) === false;
+  };
+
+  handleSearchInCurrentExtentError = (error) => {
+    this.localObserver.publish("extent-search-failed");
+    console.warn("Extent-search-failed: ", error);
+  };
+
+  enableSelectFeaturesSearch = () => {
+    this.ctrlKeyPressed = false;
+    this.localObserver.publish("on-select-search-start");
+    this.addSelectListeners();
+  };
+
+  addSelectListeners = () => {
+    this.map.clickLock.add("search");
+    this.map.on("singleclick", this.handleSelectFeatureClick);
+    document.addEventListener("keydown", this.handleKeyDown);
+    document.addEventListener("keyup", this.handleKeyUp);
+  };
+
+  removeSelectListeners = () => {
+    this.map.clickLock.delete("search");
+    this.map.un("singleclick", this.handleSelectFeatureClick);
+    document.removeEventListener("keydown", this.handleKeyDown);
+    document.removeEventListener("keyup", this.handleKeyUp);
+  };
+
+  handleSelectFeatureClick = (event) => {
+    handleClick(event, event.map, (response) => {
+      const features = response.features;
+      if (features.length === 0) {
+        return;
+      }
+      this.drawSource.addFeatures(response.features);
+      if (!this.ctrlKeyPressed) {
+        const allFeatures = this.drawSource.getFeatures();
+        this.localObserver.publish("search-with-features", allFeatures);
+        this.removeSelectListeners();
+      }
+    });
+  };
+
+  handleKeyDown = (event) => {
+    const { keyCode } = event;
+    if (keyCode === 17 && !this.ctrlKeyPressed) {
+      this.ctrlKeyPressed = true;
+    }
+  };
+
+  handleKeyUp = (event) => {
+    const { keyCode } = event;
+    if (keyCode === 17) {
+      this.ctrlKeyPressed = false;
+      if (this.drawSourceHasFeatures()) {
+        const features = this.drawSource.getFeatures();
+        this.localObserver.publish("search-with-features", features);
+        this.removeSelectListeners();
+      }
     }
   };
 }

@@ -16,9 +16,9 @@ export default class FeatureStyle {
 
   #getDefaultHighlightStyleSettings = () => {
     const strokeColor =
-      this.#options.highlightStrokeColor ?? "rgba(255, 214, 91, 0.6)";
+      this.#options.highlightStrokeColor ?? "rgba(255, 0, 0, 0.6)";
     const fillColor =
-      this.#options.highlightFillColor ?? "rgba(255, 214, 91, 0.2)";
+      this.#options.highlightFillColor ?? "rgba(255, 0, 0, 0.2)";
     const textFillColor =
       this.#options.highlightTextFill ?? "rgba(255, 255, 255, 1)";
     const textStrokeColor =
@@ -33,7 +33,8 @@ export default class FeatureStyle {
   };
 
   getHighlightedStyle = (feature, displayFields) => {
-    const { anchor, scale, markerImg } = this.#options;
+    const { scale, markerImg } = this.#options;
+    const anchor = this.#options.anchor ?? [];
     const isPoint = feature?.getGeometry() instanceof Point;
     const textAlign = isPoint ? "left" : "center";
     const offsetY = isPoint ? -50 : -10;

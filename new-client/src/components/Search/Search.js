@@ -4,6 +4,8 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Observer from "react-event-observer";
 import EditIcon from "@material-ui/icons/Edit";
+import Crop54Icon from "@material-ui/icons/Crop54";
+import TouchAppIcon from "@material-ui/icons/TouchApp";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
@@ -15,27 +17,6 @@ const styles = () => ({
   },
 });
 
-const defaultSearchTools = [
-  {
-    name: "Sök med polygon",
-    icon: <EditIcon />,
-    type: "Polygon",
-    onClickEventName: "search.spatialSearchActivated",
-  },
-  {
-    name: "Sök med radie",
-    icon: <RadioButtonUncheckedIcon />,
-    type: "Circle",
-    onClickEventName: "search.spatialSearchActivated",
-  },
-  {
-    name: "Sökinställningar",
-    icon: <SettingsIcon />,
-    type: "SETTINGS",
-    onClickEventName: "",
-  },
-];
-
 class Search extends React.PureComponent {
   state = {
     searchImplementedPluginsLoaded: false,
@@ -43,6 +24,7 @@ class Search extends React.PureComponent {
     searchResults: { featureCollections: [], errors: [] },
     autocompleteList: [],
     searchString: "",
+    searchFromAutoComplete: false,
     searchActive: "",
     autoCompleteOpen: false,
     loading: false,
@@ -73,6 +55,50 @@ class Search extends React.PureComponent {
   localObserver = Observer();
 
   snackbarKey = null;
+
+  defaultSearchTools = [
+    {
+      name: "Sök med polygon",
+      icon: <EditIcon />,
+      type: "Polygon",
+      disabled: this.props.options.polygonSearchDisabled ?? false,
+      toolTipTitle:
+        "Genomför en sökning i ett område genom att rita en polygon.",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sök med radie",
+      icon: <RadioButtonUncheckedIcon />,
+      type: "Circle",
+      disabled: this.props.options.radiusSearchDisabled ?? false,
+      toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sök med yta",
+      icon: <TouchAppIcon />,
+      type: "Select",
+      disabled: this.props.options.selectSearchDisabled ?? false,
+      toolTipTitle:
+        "Genomför en sökning genom att välja en eller flera områden i kartan.",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sök i området",
+      icon: <Crop54Icon />,
+      type: "Extent",
+      disabled: this.props.options.extentSearchDisabled ?? false,
+      toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sökinställningar",
+      icon: <SettingsIcon />,
+      type: "SETTINGS",
+      toolTipTitle: "Ändra sökinställningarna.",
+      onClickEventName: "",
+    },
+  ];
 
   constructor(props) {
     super(props);
@@ -118,6 +144,11 @@ class Search extends React.PureComponent {
       this.setFeaturesToFilter([feature]);
       this.doSearch();
     });
+    this.localObserver.subscribe("search-with-features", (features) => {
+      this.props.closeSnackbar(this.snackbarKey);
+      this.setFeaturesToFilter(features);
+      this.doSearch();
+    });
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
@@ -138,8 +169,28 @@ class Search extends React.PureComponent {
       }
       this.setState({ searchActive: "draw" });
     });
+    this.localObserver.subscribe("on-select-search-start", () => {
+      this.snackbarKey = this.props.enqueueSnackbar(
+        "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
+        {
+          variant: "information",
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
+        }
+      );
+
+      this.setState({ searchActive: "draw" });
+    });
     this.localObserver.subscribe("minimizeSearchResultList", () => {
       this.setState({ resultPanelCollapsed: false });
+    });
+    this.localObserver.subscribe("extent-search-failed", () => {
+      this.snackbarKey = this.props.enqueueSnackbar(
+        "Ett problem uppstod vid sökning i området. Kontakta systemadministratören.",
+        {
+          variant: "warning",
+          anchorOrigin: { vertical: "top", horizontal: "center" },
+        }
+      );
     });
   };
 
@@ -218,23 +269,8 @@ class Search extends React.PureComponent {
       });
   };
 
-  getEnabledDefaultSearchTools = () => {
-    const { options } = this.props;
-    let searchTools = [...defaultSearchTools];
-    const polygonSearchDisabled = options.polygonSearchDisabled ?? false;
-    const radiusSearchDisabled = options.polygonSearchDisabled ?? false;
-    if (polygonSearchDisabled) {
-      searchTools = searchTools.filter((tool) => tool.type !== "Polygon");
-    }
-    if (radiusSearchDisabled) {
-      searchTools = searchTools.filter((tool) => tool.type !== "Circle");
-    }
-    return searchTools;
-  };
-
   getSearchTools = (searchImplementedSearchTools) => {
-    const enabledSearchTools = this.getEnabledDefaultSearchTools();
-    return enabledSearchTools.concat(
+    return this.defaultSearchTools.concat(
       this.getExternalSearchTools(searchImplementedSearchTools)
     );
   };
@@ -312,6 +348,7 @@ class Search extends React.PureComponent {
       this.setState(
         {
           searchString: searchString,
+          searchFromAutoComplete: true,
           searchActive: "input",
         },
         () => {
@@ -367,7 +404,9 @@ class Search extends React.PureComponent {
 
   handleOnClickOrKeyboardSearch = () => {
     if (this.hasEnoughCharsForSearch()) {
-      this.doSearch();
+      this.setState({ searchFromAutoComplete: false }, () => {
+        this.doSearch();
+      });
     }
   };
 
@@ -637,9 +676,8 @@ class Search extends React.PureComponent {
       fetchOptions
     );
 
-    // If we get few results (less than 3) we do a new
-    // search to try to fill the autocomplete with wildCardAtStart
-    // active.
+    // If we get zero results we do a new search to try
+    // to fill the autocomplete with wildCardAtStart active.
     if (this.getNumResults(autoCompleteResult) < 1) {
       fetchOptions.wildcardAtStart = true;
       autoCompleteResult = await this.fetchResultFromSearchModel(fetchOptions);
@@ -787,7 +825,7 @@ class Search extends React.PureComponent {
     return {
       ...searchOptionsFromModel,
       activeSpatialFilter: activeSpatialFilter,
-      getPossibleCombinations: false,
+      getPossibleCombinations: this.state.searchFromAutoComplete ? false : true,
       featuresToFilter: this.featuresToFilter || [],
       matchCase: matchCase,
       wildcardAtStart: wildcardAtStart,
@@ -838,7 +876,6 @@ class Search extends React.PureComponent {
           handleOnAutocompleteInputChange={this.handleOnAutocompleteInputChange}
           handleOnClear={this.handleOnClear}
           autocompleteList={autocompleteList}
-          doSearch={this.doSearch.bind(this)}
           searchModel={this.searchModel}
           searchOptions={searchOptions}
           updateSearchOptions={this.updateSearchOptions}
