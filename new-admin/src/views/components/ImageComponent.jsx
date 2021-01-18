@@ -13,6 +13,7 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
+import Checkbox from "@material-ui/core/Checkbox";
 
 const ImageComponent = props => {
   const classes = useStyles();
@@ -26,7 +27,7 @@ const ImageComponent = props => {
   const imageHeight = data["data-image-height"];
   const dataCaption = data["data-caption"];
   const dataSource = data["data-source"];
-  const dataPopup = data["data-popup"];
+  const dataPopup = data["data-image-popup"] === undefined ? false : true;
   const dataImagePosition = data["data-image-position"];
 
   const [open, setOpen] = useState(false);
@@ -80,21 +81,26 @@ const ImageComponent = props => {
 
   const handleSubmit = () => {
     const { imageData } = props.blockProps;
-    const data = {
+    let data = {
       src: src,
       "data-image-width": width,
       "data-image-height": height,
       "data-caption": caption,
       "data-source": source,
-      "data-popup": popup,
-      "data-image-right": "floatLeft",
       "data-image-position": imagePosition
     };
+    if (popup) {
+      data["data-image-popup"] = "";
+    }
     imageData(data);
   };
 
   const handleChange = event => {
     setImagePosition(event.target.value);
+  };
+
+  const handlePopupChange = event => {
+    setPopup(event.target.checked);
   };
 
   const body = (
@@ -154,17 +160,13 @@ const ImageComponent = props => {
               />
             </Grid>
           </Grid>
-          <Grid container spacing={1} alignItems="flex-end">
-            <Grid item>
-              <input
-                type="checkbox"
-                id="image-popup"
-                value={popup}
-                onChange={e => setPopup(e.target.checked)}
-              />
-              <label>Popup</label>
-            </Grid>
-          </Grid>
+          <Checkbox
+            id="image-popup"
+            checked={popup}
+            onChange={handlePopupChange}
+            inputProps={{ "aria-label": "primary checkbox" }}
+          />
+          <label>Popup</label>
           <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
               <button
@@ -236,7 +238,7 @@ const ImageComponent = props => {
     </Modal>
   );
 
-  if (dataPopup) {
+  if (popup) {
     return (
       <div className={classes.imgContainer}>
         <img
@@ -248,7 +250,7 @@ const ImageComponent = props => {
           data-image-height={height}
           data-caption={caption}
           data-source={source}
-          data-popup
+          data-image-popup=""
           data-image-position={imagePosition}
           onClick={handleOpen}
         />
