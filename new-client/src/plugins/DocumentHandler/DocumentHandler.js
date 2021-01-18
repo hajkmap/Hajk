@@ -145,12 +145,15 @@ class DocumentHandler extends React.PureComponent {
   };
 
   showDocument = (documentFileName) => {
+    console.log(documentFileName, "documentFileName");
     const { app } = this.props;
-    app.globalObserver.publish("documentviewer.showWindow", {
-      hideOtherPlugins: false,
+
+    return this.setActiveDocument(documentFileName).then(() => {
+      app.globalObserver.publish("documentviewer.showWindow", {
+        hideOtherPlugins: false,
+      });
+      app.globalObserver.publish("core.maximizeWindow");
     });
-    app.globalObserver.publish("core.maximizeWindow");
-    return this.setActiveDocument(documentFileName);
   };
 
   onWindowHide = () => {
