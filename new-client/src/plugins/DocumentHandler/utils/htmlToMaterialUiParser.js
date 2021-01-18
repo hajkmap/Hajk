@@ -5,7 +5,7 @@
  * @returns {Array} Returns array with MaterialUI Components - see getTagSpecificCallbacks to see the translation used
  * @memberof htmlToMaterialUiParser
  */
-export default (html, tagSpecificCallbacks) => {
+const htmlToMaterialUIParser = (html, tagSpecificCallbacks) => {
   let parser = new DOMParser();
   let htmlDoc = parser.parseFromString(html, "text/html");
   for (const child of htmlDoc.body.children) {
@@ -30,3 +30,5 @@ const parseChild = (child, tagSpecificCallbacks) => {
     }
   }
 };
+
+export default htmlToMaterialUIParser;
