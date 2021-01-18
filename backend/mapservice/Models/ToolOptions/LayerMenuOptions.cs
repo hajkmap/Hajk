@@ -33,6 +33,8 @@ namespace MapService.Models.ToolOptions
 
         public bool visibleAtStart { get; set; }
 
+        public bool visibleAtStartMobile {get; set; }
+
         public bool backgroundSwitcherBlack { get; set; }
 
         public bool backgroundSwitcherWhite { get; set; }

@@ -38,6 +38,11 @@ class SearchTools extends React.PureComponent {
     this.setState({ anchorEl: undefined });
   };
 
+  getEnabledTools = () => {
+    const { searchTools } = this.props;
+    return searchTools.filter((tool) => !tool.disabled);
+  };
+
   renderSettingsDialog = () => {
     const { settingsDialog } = this.state;
     const {
@@ -79,6 +84,7 @@ class SearchTools extends React.PureComponent {
 
   render() {
     const { anchorEl } = this.state;
+    const enabledTools = this.getEnabledTools();
     return (
       <div>
         {this.renderSettingsDialog()}
@@ -102,6 +108,7 @@ class SearchTools extends React.PureComponent {
         <Paper>
           <Menu
             id="lock-menu"
+            autoFocus={false}
             anchorEl={anchorEl}
             getContentAnchorEl={null}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -114,23 +121,24 @@ class SearchTools extends React.PureComponent {
               })
             }
           >
-            {this.props.searchTools.map((option, index) => (
-              <MenuItem
-                key={index}
-                onClick={(event) =>
-                  this.handleMenuItemClick(event, index, option)
-                }
-              >
-                {option.icon ? (
-                  <ListItemIcon>{option.icon}</ListItemIcon>
-                ) : null}
-                <Typography variant="srOnly" noWrap>
-                  {option.name}
-                </Typography>
-                <Typography variant="inherit" noWrap>
-                  {option.name}
-                </Typography>
-              </MenuItem>
+            {enabledTools.map((option, index) => (
+              <Tooltip key={index} title={option.toolTipTitle ?? ""}>
+                <MenuItem
+                  onClick={(event) =>
+                    this.handleMenuItemClick(event, index, option)
+                  }
+                >
+                  {option.icon ? (
+                    <ListItemIcon>{option.icon}</ListItemIcon>
+                  ) : null}
+                  <Typography variant="srOnly" noWrap>
+                    {option.name}
+                  </Typography>
+                  <Typography variant="inherit" noWrap>
+                    {option.name}
+                  </Typography>
+                </MenuItem>
+              </Tooltip>
             ))}
           </Menu>
         </Paper>

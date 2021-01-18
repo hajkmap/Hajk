@@ -4,38 +4,18 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Observer from "react-event-observer";
 import EditIcon from "@material-ui/icons/Edit";
+import Crop54Icon from "@material-ui/icons/Crop54";
+import TouchAppIcon from "@material-ui/icons/TouchApp";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
 import KmlExport from "./utils/KmlExport";
-import { cloneDeep } from "lodash";
 
 const styles = () => ({
   inputRoot: {
     width: "100%",
   },
 });
-
-const defaultSearchTools = [
-  {
-    name: "Sök med polygon",
-    icon: <EditIcon />,
-    type: "Polygon",
-    onClickEventName: "search.spatialSearchActivated",
-  },
-  {
-    name: "Sök med radie",
-    icon: <RadioButtonUncheckedIcon />,
-    type: "Circle",
-    onClickEventName: "search.spatialSearchActivated",
-  },
-  {
-    name: "Sökinställningar",
-    icon: <SettingsIcon />,
-    type: "SETTINGS",
-    onClickEventName: "",
-  },
-];
 
 class Search extends React.PureComponent {
   state = {
@@ -44,6 +24,7 @@ class Search extends React.PureComponent {
     searchResults: { featureCollections: [], errors: [] },
     autocompleteList: [],
     searchString: "",
+    searchFromAutoComplete: false,
     searchActive: "",
     autoCompleteOpen: false,
     loading: false,
@@ -74,6 +55,50 @@ class Search extends React.PureComponent {
   localObserver = Observer();
 
   snackbarKey = null;
+
+  defaultSearchTools = [
+    {
+      name: "Sök med polygon",
+      icon: <EditIcon />,
+      type: "Polygon",
+      disabled: this.props.options.polygonSearchDisabled ?? false,
+      toolTipTitle:
+        "Genomför en sökning i ett område genom att rita en polygon.",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sök med radie",
+      icon: <RadioButtonUncheckedIcon />,
+      type: "Circle",
+      disabled: this.props.options.radiusSearchDisabled ?? false,
+      toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sök med yta",
+      icon: <TouchAppIcon />,
+      type: "Select",
+      disabled: this.props.options.selectSearchDisabled ?? false,
+      toolTipTitle:
+        "Genomför en sökning genom att välja en eller flera områden i kartan.",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sök i området",
+      icon: <Crop54Icon />,
+      type: "Extent",
+      disabled: this.props.options.extentSearchDisabled ?? false,
+      toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
+      onClickEventName: "search.spatialSearchActivated",
+    },
+    {
+      name: "Sökinställningar",
+      icon: <SettingsIcon />,
+      type: "SETTINGS",
+      toolTipTitle: "Ändra sökinställningarna.",
+      onClickEventName: "",
+    },
+  ];
 
   constructor(props) {
     super(props);
@@ -116,6 +141,12 @@ class Search extends React.PureComponent {
       this.setFeaturesToFilter([feature]);
       this.doSearch();
     });
+    this.localObserver.subscribe("search-with-features", (features) => {
+      this.props.closeSnackbar(this.snackbarKey);
+      this.setFeaturesToFilter(features);
+      this.doSearch();
+      this.setState({ searchActive: "draw" });
+    });
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
@@ -136,8 +167,28 @@ class Search extends React.PureComponent {
       }
       this.setState({ searchActive: "draw" });
     });
+    this.localObserver.subscribe("on-select-search-start", () => {
+      this.snackbarKey = this.props.enqueueSnackbar(
+        "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
+        {
+          variant: "information",
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
+        }
+      );
+
+      this.setState({ searchActive: "draw" });
+    });
     this.localObserver.subscribe("minimizeSearchResultList", () => {
       this.setState({ resultPanelCollapsed: false });
+    });
+    this.localObserver.subscribe("extent-search-failed", () => {
+      this.snackbarKey = this.props.enqueueSnackbar(
+        "Ett problem uppstod vid sökning i området. Kontakta systemadministratören.",
+        {
+          variant: "warning",
+          anchorOrigin: { vertical: "top", horizontal: "center" },
+        }
+      );
     });
   };
 
@@ -217,7 +268,7 @@ class Search extends React.PureComponent {
   };
 
   getSearchTools = (searchImplementedSearchTools) => {
-    return defaultSearchTools.concat(
+    return this.defaultSearchTools.concat(
       this.getExternalSearchTools(searchImplementedSearchTools)
     );
   };
@@ -291,6 +342,7 @@ class Search extends React.PureComponent {
       this.setState(
         {
           searchString: searchString,
+          searchFromAutoComplete: true,
           searchActive: "input",
         },
         () => {
@@ -316,7 +368,7 @@ class Search extends React.PureComponent {
     if (this.isUserInput(searchString, reason)) {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.localObserver.publish("clear-search-results");
+        this.localObserver.publish("clearMapView");
         this.setState(
           {
             autoCompleteOpen: searchString.length >= 3,
@@ -346,7 +398,9 @@ class Search extends React.PureComponent {
 
   handleOnClickOrKeyboardSearch = () => {
     if (this.hasEnoughCharsForSearch()) {
-      this.doSearch();
+      this.setState({ searchFromAutoComplete: false }, () => {
+        this.doSearch();
+      });
     }
   };
 
@@ -485,9 +539,10 @@ class Search extends React.PureComponent {
 
   sortAutocompleteList = (flatAutocompleteArray) => {
     return flatAutocompleteArray.sort((a, b) =>
-      a.autocompleteEntry.localeCompare(b.autocompleteEntry, "sv", {
-        numeric: true,
-      })
+      decodeURIComponent(a.autocompleteEntry).localeCompare(
+        decodeURIComponent(b.autocompleteEntry),
+        "sv"
+      )
     );
   };
 
@@ -615,9 +670,8 @@ class Search extends React.PureComponent {
       fetchOptions
     );
 
-    // If we get few results (less than 3) we do a new
-    // search to try to fill the autocomplete with wildCardAtStart
-    // active.
+    // If we get zero results we do a new search to try
+    // to fill the autocomplete with wildCardAtStart active.
     if (this.getNumResults(autoCompleteResult) < 1) {
       fetchOptions.wildcardAtStart = true;
       autoCompleteResult = await this.fetchResultFromSearchModel(fetchOptions);
@@ -650,7 +704,7 @@ class Search extends React.PureComponent {
             .then((res) => {
               return {
                 errors: res.errors,
-                featureCollections: cloneDeep(res.featureCollections),
+                featureCollections: res.featureCollections,
               };
             })
         );
@@ -718,17 +772,40 @@ class Search extends React.PureComponent {
       )
     );
 
-    if (numResults <= maxSlots) {
-      //All results can be shown
-      return this.flattenAndSortAutoCompleteList(searchResults);
-    } else {
-      searchResults.featureCollections.forEach((fc) => {
-        if (fc.value.features.length > spacesPerSource) {
-          fc = fc.value.features.splice(spacesPerSource);
-        }
-      });
-      return this.flattenAndSortAutoCompleteList(searchResults);
+    const autoCompleteList = this.flattenAndSortAutoCompleteList(searchResults);
+
+    if (numResults > maxSlots) {
+      // The list must be shortened before we return
+      return this.shortenAutoCompleteList(autoCompleteList, spacesPerSource);
     }
+    return autoCompleteList;
+  };
+
+  shortenAutoCompleteList = (autoCompleteList, spacesPerSource) => {
+    let shortenedAutoComplete = [];
+
+    const groupedAutoComplete = this.groupObjArrayByProp(
+      autoCompleteList,
+      "dataset"
+    );
+
+    for (const group in groupedAutoComplete) {
+      shortenedAutoComplete = [
+        ...shortenedAutoComplete,
+        ...groupedAutoComplete[group].slice(0, spacesPerSource),
+      ];
+    }
+    return shortenedAutoComplete;
+  };
+
+  groupObjArrayByProp = (array, property) => {
+    return array.reduce((grouped, obj) => {
+      if (!grouped[obj[property]]) {
+        grouped[obj[property]] = [];
+      }
+      grouped[obj[property]].push(obj);
+      return grouped;
+    }, {});
   };
 
   getUserCustomFetchSettings = (searchOptionsFromModel) => {
@@ -742,7 +819,7 @@ class Search extends React.PureComponent {
     return {
       ...searchOptionsFromModel,
       activeSpatialFilter: activeSpatialFilter,
-      getPossibleCombinations: false,
+      getPossibleCombinations: this.state.searchFromAutoComplete ? false : true,
       featuresToFilter: this.featuresToFilter || [],
       matchCase: matchCase,
       wildcardAtStart: wildcardAtStart,
@@ -793,7 +870,6 @@ class Search extends React.PureComponent {
           handleOnAutocompleteInputChange={this.handleOnAutocompleteInputChange}
           handleOnClear={this.handleOnClear}
           autocompleteList={autocompleteList}
-          doSearch={this.doSearch.bind(this)}
           searchModel={this.searchModel}
           searchOptions={searchOptions}
           updateSearchOptions={this.updateSearchOptions}
