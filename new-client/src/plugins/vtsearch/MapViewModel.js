@@ -281,16 +281,16 @@ export default class MapViewModel {
    */
   addSearchResultLayerToMap = (searchResultId) => {
     var fill = new Fill({
-      color: `rgba(${this.model.mapColors.searchColor.fillColorRed},
-        ${this.model.mapColors.searchColor.fillColorGreen},
-        ${this.model.mapColors.searchColor.fillColorBlue},
-        ${this.model.mapColors.searchColor.fillColorOpacity})`,
+      color: `rgba(${this.model.mapColors.searchColor.fillColor.r},
+        ${this.model.mapColors.searchColor.fillColor.g},
+        ${this.model.mapColors.searchColor.fillColor.b},
+        ${this.model.mapColors.searchColor.fillColor.a})`,
     });
     var stroke = new Stroke({
-      color: `rgba(${this.model.mapColors.searchColor.strokeColorRed},
-        ${this.model.mapColors.searchColor.strokeColorGreen},
-        ${this.model.mapColors.searchColor.strokeColorBlue},
-        ${this.model.mapColors.searchColor.strokeColorOpacity})`,
+      color: `rgba(${this.model.mapColors.searchColor.strokeColor.r},
+        ${this.model.mapColors.searchColor.strokeColor.g},
+        ${this.model.mapColors.searchColor.strokeColor.b},
+        ${this.model.mapColors.searchColor.strokeColor.a})`,
       width: this.model.mapColors.searchColor.strokeLineWidth,
     });
     var searchResultLayer = new VectorLayer({
@@ -324,17 +324,17 @@ export default class MapViewModel {
    */
   addHighlightLayerToMap = () => {
     var fill = new Fill({
-      color: `rgba(${this.model.mapColors.highlightColor.fillColorRed},
-        ${this.model.mapColors.highlightColor.fillColorGreen},
-        ${this.model.mapColors.highlightColor.fillColorBlue},
-        ${this.model.mapColors.highlightColor.fillColorOpacity})`,
+      color: `rgba(${this.model.mapColors.highlightFillColor.r},
+        ${this.model.mapColors.highlightFillColor.g},
+        ${this.model.mapColors.highlightFillColor.b},
+        ${this.model.mapColors.highlightFillColor.a})`,
     });
     var stroke = new Stroke({
-      color: `rgba(${this.model.mapColors.highlightColor.strokeColorRed},
-        ${this.model.mapColors.highlightColor.strokeColorGreen},
-        ${this.model.mapColors.highlightColor.strokeColorBlue},
-        ${this.model.mapColors.highlightColor.strokeColorOpacity})`,
-      width: this.model.mapColors.highlightColor.strokeLineWidth,
+      color: `rgba(${this.model.mapColors.highlightStrokeColor.r},
+        ${this.model.mapColors.highlightStrokeColor.g},
+        ${this.model.mapColors.highlightStrokeColor.b},
+        ${this.model.mapColors.highlightStrokeColor.a})`,
+      width: this.model.mapColors.highlightStrokeLineWidth,
     });
 
     this.highlightLayer = new VectorLayer({
@@ -342,7 +342,7 @@ export default class MapViewModel {
         image: new Circle({
           fill: fill,
           stroke: stroke,
-          radius: this.model.mapColors.highlightColor.strokePointWidth,
+          radius: this.model.mapColors.highlightStrokePointWidth,
         }),
         fill: fill,
         stroke: stroke,

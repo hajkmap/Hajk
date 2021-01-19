@@ -186,30 +186,34 @@ var defaultState = {
     displayName: "NÄRTRAFIK",
     key: "IsFlexibleTaxiService",
   },
-  searchColor: {
-    fillColorRed: 255,
-    fillColorGreen: 255,
-    fillColorBlue: 255,
-    fillColorOpacity: 0,
-    strokeColorRed: 255,
-    strokeColorGreen: 255,
-    strokeColorBlue: 255,
-    strokeColorOpacity: 0,
-    strokePointWidth: 5,
-    strokeLineWidth: 2,
+  searchFillColor: {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 0,
   },
-  highlightColor: {
-    fillColorRed: 255,
-    fillColorGreen: 255,
-    fillColorBlue: 255,
-    fillColorOpacity: 0,
-    strokeColorRed: 255,
-    strokeColorGreen: 255,
-    strokeColorBlue: 255,
-    strokeColorOpacity: 0,
-    strokePointWidth: 5,
-    strokeLineWidth: 2,
+  searchStrokeColor: {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 0,
   },
+  searchStrokePointWidth: 5,
+  searchStrokeLineWidth: 2,
+  highlightFillColor: {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 0,
+  },
+  highlightStrokeColor: {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 0,
+  },
+  highlightStrokePointWidth: 5,
+  highlightStrokeLineWidth: 2,
 };
 
 const ColorButtonBlue = withStyles((theme) => ({
@@ -245,10 +249,29 @@ class ToolOptions extends Component {
         width: tool.options.width,
         height: tool.options.height,
         visibleAtStart: tool.options.visibleAtStart,
-        searchColor:
-          tool.options.mapColors.searchColor || this.state.searchColor,
-        highlightColor:
-          tool.options.mapColors.highlightColor || this.state.highlightColor,
+        searchStrokeColor:
+          tool.options.mapColors.searchStrokeColor ||
+          this.state.searchStrokeColor,
+        searchFillColor:
+          tool.options.mapColors.searchFillColor || this.state.searchFillColor,
+        searchStrokePointWidth:
+          tool.options.mapColors.searchStrokePointWidth ||
+          this.state.searchStrokePointWidth,
+        searchStrokeLineWidth:
+          tool.options.mapColors.searchStrokeLineWidth ||
+          this.state.searchStrokeLineWidth,
+        highlightStrokeColor:
+          tool.options.mapColors.highlightStrokeColor ||
+          this.state.highlightStrokeColor,
+        highlightFillColor:
+          tool.options.mapColors.highlightFillColor ||
+          this.state.highlightFillColor,
+        highlightStrokePointWidth:
+          tool.options.mapColors.highlightStrokePointWidth ||
+          this.state.highlightStrokePointWidth,
+        highlightStrokeLineWidth:
+          tool.options.mapColors.highlightStrokeLineWidth ||
+          this.state.highlightStrokeLineWidth,
         lineNumberAndPublicLineNumbers:
           tool.options.geoServer.lineNumberAndPublicLineNumbers ||
           this.state.lineNumberAndPublicLineNumbers,
@@ -331,8 +354,14 @@ class ToolOptions extends Component {
         height: this.state.height,
         visibleAtStart: this.state.visibleAtStart,
         mapColors: {
-          searchColor: this.state.searchColor,
-          highlightColor: this.state.highlightColor,
+          searchFillColor: this.state.searchFillColor,
+          searchStrokeColor: this.state.searchStrokeColor,
+          searchStrokePointWidth: this.state.searchStrokePointWidth,
+          searchStrokeLineWidth: this.state.searchStrokeLineWidth,
+          highlightFillColor: this.state.highlightFillColor,
+          highlightStrokeColor: this.state.highlightStrokeColor,
+          highlightStrokePointWidth: this.state.highlightStrokePointWidth,
+          highlightStrokeLineWidth: this.state.highlightStrokeLineWidth,
         },
         geoServer: {
           lineNumberAndPublicLineNumbers: this.state
@@ -540,13 +569,13 @@ class ToolOptions extends Component {
               <div>
                 <SketchPicker
                   color={{
-                    r: this.state.searchColor.fillColorRed,
-                    b: this.state.searchColor.fillColorBlue,
-                    g: this.state.searchColor.fillColorGreen,
-                    a: this.state.searchColor.fillColorOpacity,
+                    r: this.state.searchFillColor.r,
+                    g: this.state.searchFillColor.g,
+                    b: this.state.searchFillColor.b,
+                    a: this.state.searchFillColor.a,
                   }}
                   onChangeComplete={(color) =>
-                    this.handleColorChange("searchColor", color)
+                    this.handleColorChange("searchFillColor", color)
                   }
                 />
               </div>
@@ -560,46 +589,48 @@ class ToolOptions extends Component {
               <div>
                 <SketchPicker
                   color={{
-                    r: this.state.searchColor.strokeColorRed,
-                    b: this.state.searchColor.strokeColorBlue,
-                    g: this.state.searchColor.strokeColorGreen,
-                    a: this.state.searchColor.strokeColorOpacity,
+                    r: this.state.searchStrokeColor.r,
+                    g: this.state.searchStrokeColor.g,
+                    b: this.state.searchStrokeColor.b,
+                    a: this.state.searchStrokeColor.a,
                   }}
                   onChangeComplete={(color) =>
-                    this.handleColorChange("searchColor", color)
+                    this.handleColorChange("searchStrokeColor", color)
                   }
                 />
               </div>
             </span>
           </div>
           <div>
-            <label htmlFor="searchColorStrokePointWidth">
+            <label htmlFor="searchStrokePointWidth">
               Sökfärgens punktstorlek
             </label>
             <input
-              value={this.state.searchColor.strokePointWidth}
-              type="text"
-              placeholder={defaultState.searchColor.strokePointWidth}
-              name="searchColorStrokePointWidth"
+              id="searchStrokePointWidth"
+              name="searchStrokePointWidth"
+              placeholder={defaultState.searchStrokePointWidth}
+              type="number"
+              min="0"
               className="control-fixed-width"
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
+              value={this.state.searchStrokePointWidth}
             />
           </div>
           <div>
-            <label htmlFor="searchColorStrokeLineWidth">
-              Sökfärgens linjebredd
-            </label>
+            <label htmlFor="searchStrokeLineWidth">Sökfärgens linjebredd</label>
             <input
-              value={this.state.searchColor.strokeLineWidth}
-              type="text"
-              placeholder={defaultState.searchColor.strokeLineWidth}
-              name="searchColorStrokeLineWidth"
+              id="searchStrokeLineWidth"
+              name="searchStrokeLineWidth"
+              placeholder={defaultState.searchStrokeLineWidth}
+              type="number"
+              min="0"
               className="control-fixed-width"
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
+              value={this.state.searchStrokeLineWidth || ""}
             />
           </div>
           <div className="separator">
@@ -608,76 +639,77 @@ class ToolOptions extends Component {
           <div className="clearfix">
             <span className="pull-left">
               <div>
-                <label className="long-label" htmlFor="highlightColorFillColor">
+                <label className="long-label" htmlFor="highlightFillColor">
                   Färg på markeringens fyllnad (rgba)
                 </label>
               </div>
               <div>
                 <SketchPicker
                   color={{
-                    r: this.state.highlightColor.fillColorRed,
-                    b: this.state.highlightColor.fillColorBlue,
-                    g: this.state.highlightColor.fillColorGreen,
-                    a: this.state.highlightColor.fillColorOpacity,
+                    r: this.state.highlightFillColor.r,
+                    g: this.state.highlightFillColor.g,
+                    b: this.state.highlightFillColor.b,
+                    a: this.state.highlightFillColor.a,
                   }}
                   onChangeComplete={(color) =>
-                    this.handleColorChange("highlightColor", color)
+                    this.handleColorChange("highlightFillColor", color)
                   }
                 />
               </div>
             </span>
             <span className="pull-left" style={{ marginLeft: "100px" }}>
               <div>
-                <label
-                  className="long-label"
-                  htmlFor="highlightColorStrokeColor"
-                >
+                <label className="long-label" htmlFor="highlightStrokeColor">
                   Färg på markringens ram (rgba)
                 </label>
               </div>
               <div>
                 <SketchPicker
                   color={{
-                    r: this.state.highlightColor.strokeColorRed,
-                    b: this.state.highlightColor.strokeColorBlue,
-                    g: this.state.highlightColor.strokeColorGreen,
-                    a: this.state.highlightColor.strokeColorOpacity,
+                    r: this.state.highlightStrokeColor.r,
+                    g: this.state.highlightStrokeColor.g,
+                    b: this.state.highlightStrokeColor.b,
+                    a: this.state.highlightStrokeColor.a,
                   }}
                   onChangeComplete={(color) =>
-                    this.handleColorChange("highlightColor", color)
+                    this.handleColorChange("highlightStrokeColor", color)
                   }
                 />
               </div>
             </span>
           </div>
           <div>
-            <label htmlFor="highlightColorStrokePointWidth">
+            <label htmlFor="highlightStrokePointWidth">
               Markeringsfärgens punktstorlek
             </label>
             <input
-              value={this.state.highlightColor.strokePointWidth}
-              type="text"
-              placeholder={defaultState.highlightColor.strokePointWidth}
-              name="highlightColorStrokePointWidth"
+              id="highlightStrokePointWidth"
+              name="highlightStrokePointWidth"
+              placeholder={defaultState.highlightStrokePointWidth}
+              type="number"
+              min="0"
               className="control-fixed-width"
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
+              value={this.state.highlightStrokePointWidth || ""}
             />
           </div>
           <div>
-            <label htmlFor="highlightColorStrokeLineWidth">
+            <label htmlFor="highlightStrokeLineWidth">
               Markeringsfärgens linjebredd
             </label>
             <input
-              value={this.state.highlightColor.strokeLineWidth}
-              type="text"
-              placeholder={defaultState.highlightColor.strokeLineWidth}
-              name="highlightColorStrokeLineWidth"
+              id="highlightStrokeLineWidth"
+              name="highlightStrokeLineWidth"
+              placeholder={defaultState.highlightStrokeLineWidth}
+              type="number"
+              min="0"
               className="control-fixed-width"
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
+              value={this.state.highlightStrokeLineWidth || ""}
             />
           </div>
           <div className="separator">Inställningar GeoServer</div>
