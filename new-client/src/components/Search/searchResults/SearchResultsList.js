@@ -55,6 +55,15 @@ class SearchResultsList extends React.PureComponent {
     }
   };
 
+  shouldRemoveSelectionFromCurrent = (currentFeatureIndex) => {
+    const { selectedItems } = this.state;
+    if (currentFeatureIndex === -1) {
+      return false;
+    }
+    const selectedItem = selectedItems[currentFeatureIndex];
+    return selectedItem?.from !== "userSelect";
+  };
+
   handleFeatureTogglerClicked = (currenAndNextInfo) => {
     const { setActiveFeature, localObserver } = this.props;
     const displayFields = currenAndNextInfo?.source?.displayFields ?? [];
@@ -66,13 +75,14 @@ class SearchResultsList extends React.PureComponent {
     );
     const selectedItems = [...this.state.selectedItems];
 
-    if (currentFeatureIndex !== -1) {
+    if (this.shouldRemoveSelectionFromCurrent(currentFeatureIndex)) {
       selectedItems.splice(currentFeatureIndex, 1);
     }
     if (nextFeatureIndex === -1) {
       selectedItems.push({
         featureId: currenAndNextInfo.nextFeature.id,
         displayFields: displayFields,
+        from: "toggler",
       });
     }
     this.setState(
@@ -116,6 +126,7 @@ class SearchResultsList extends React.PureComponent {
       selectedItems.push({
         featureId: activeFeature.id,
         displayFields: displayFields,
+        from: "showDetails",
       });
       this.setState(
         {
@@ -143,7 +154,7 @@ class SearchResultsList extends React.PureComponent {
     );
   };
 
-  showClickResultInMap = (feature, source) => {
+  showClickResultInMap = (feature, source, from) => {
     const { localObserver } = this.props;
     const currentIndex = this.getFeatureSelectedIndex(feature);
 
@@ -154,6 +165,7 @@ class SearchResultsList extends React.PureComponent {
       selectedItems.push({
         featureId: feature.id,
         displayFields: displayFields,
+        from: from,
       });
     } else {
       selectedItems.splice(currentIndex, 1);
@@ -189,7 +201,11 @@ class SearchResultsList extends React.PureComponent {
     } else {
       setActiveFeature(feature);
       if (this.getFeatureSelectedIndex(feature) === -1) {
-        this.showClickResultInMap(feature, activeFeatureCollection.source);
+        this.showClickResultInMap(
+          feature,
+          activeFeatureCollection.source,
+          "showDetails"
+        );
       }
     }
   };

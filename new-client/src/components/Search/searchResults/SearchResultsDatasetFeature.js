@@ -28,7 +28,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             disableRipple
             checked={visibleInMap}
             onClick={(e) => e.stopPropagation()}
-            onChange={() => showClickResultInMap(feature, source)}
+            onChange={() => showClickResultInMap(feature, source, "userSelect")}
           />
         </Tooltip>
       </Grid>
