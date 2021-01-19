@@ -72,6 +72,7 @@ class MapOptions extends Component {
         enableDownloadLink: config.enableDownloadLink,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
+        showThemeToggler: config.showThemeToggler,
         drawerVisible: config.drawerVisible,
         drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
@@ -125,6 +126,7 @@ class MapOptions extends Component {
       enableDownloadLink: mapConfig.enableDownloadLink,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
+      showThemeToggler: mapConfig.showThemeToggler,
       drawerVisible: mapConfig.drawerVisible,
       drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
@@ -265,6 +267,7 @@ class MapOptions extends Component {
       case "enableDownloadLink":
       case "mapselector":
       case "mapcleaner":
+      case "showThemeToggler":
       case "drawerVisible":
       case "drawVisibleMobile":
       case "drawerPermanent":
@@ -312,6 +315,7 @@ class MapOptions extends Component {
         config.enableDownloadLink = this.getValue("enableDownloadLink");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
+        config.showThemeToggler = this.getValue("showThemeToggler");
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
@@ -819,6 +823,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_showThemeToggler"
+                type="checkbox"
+                ref="input_showThemeToggler"
+                onChange={(e) => {
+                  this.setState({ showThemeToggler: e.target.checked });
+                }}
+                checked={this.state.showThemeToggler}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_showThemeToggler">
+                Visa knapp för att byta mellan ljust och mörkt tema{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer en knapp som möjliggör temaväxling att visas"
                 />
               </label>
             </div>
