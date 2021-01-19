@@ -43,183 +43,187 @@ var defaultState = {
   stopAreaNameAndNumbers: {
     searchLabel: "Hållplats",
     defaultSortAttribute: "StopAreaNumber",
-    url: ""
+    url: "",
   },
   transportModeTypeNames: { searchLabel: "Trafikslag", url: "" },
   journeys: {
     searchLabel: "Turer",
     defaultSortAttribute: "EarliestDepartureTimeAtToStopPoint",
-    url: ""
+    url: "",
   },
   journeysAttributesToDisplayInternalLine: {
     displayName: "TEKNISK LINJE",
-    key: "InternalLineNumber"
+    key: "InternalLineNumber",
   },
   journeysAttributesToDisplayPublicLine: {
     displayName: "PUBLIK LINJE",
-    key: "PublicLineName"
+    key: "PublicLineName",
   },
   journeysAttributesToDisplayTransportCompany: {
     displayName: "TRAFIKFÖRETAG",
-    key: "TransportCompany"
+    key: "TransportCompany",
   },
   journeysAttributesToDisplayFromStopPointName: {
     displayName: "FRÅN HÅLLPLATSOMR",
-    key: "FromStopPointName"
+    key: "FromStopPointName",
   },
   journeysAttributesToDisplayFromStopPointDesignation: {
     displayName: "FRÅN HÅLLPLATSLÄGE",
-    key: "FromStopPointDesignation"
+    key: "FromStopPointDesignation",
   },
   journeysAttributesToDisplayToStopPointName: {
     displayName: "TILL HÅLLPLATSOMR",
-    key: "ToStopPointName"
+    key: "ToStopPointName",
   },
   journeysAttributesToDisplayToStopPointDesignation: {
     displayName: "TILL HÅLLPLATSLÄGE",
     key: "ToStopPointDesignation",
-    displayFormat: "YYYY-MM-DD hh:mm"
+    displayFormat: "YYYY-MM-DD hh:mm",
   },
   journeysAttributesToDisplayEarliestDepartureTimeAtToStopPoint: {
     displayName: "AVGÅNG",
     key: "EarliestDepartureTimeAtToStopPoint",
-    displayFormat: "YYYY-MM-DD hh:mm"
+    displayFormat: "YYYY-MM-DD hh:mm",
   },
   routes: {
     searchLabel: "Linje",
     defaultSortAttribute: "InternalLineNumber",
-    url: ""
+    url: "",
   },
   routesAttributesToDisplayInternalLine: {
     displayName: "TEKNISK LINJE",
-    key: "InternalLineNumber"
+    key: "InternalLineNumber",
   },
   routesAttributesToDisplayPublicLine: {
     displayName: "PUBLIK LINJE",
-    key: "PublicLineName"
+    key: "PublicLineName",
   },
   routesAttributesToDisplayDescription: {
     displayName: "BESKRIVNING",
-    key: "Description"
+    key: "Description",
   },
   routesAttributesToDisplayDirection: {
     displayName: "RIKTNING",
-    key: "Direction"
+    key: "Direction",
   },
   routesAttributesToDisplayTransportModeType: {
     displayName: "TRAFIKSLAG",
-    key: "TransportModeType"
+    key: "TransportModeType",
   },
   routesAttributesToDisplayTransportCompany: {
     displayName: "TRAFIKFÖRETAG",
-    key: "TransportCompany"
+    key: "TransportCompany",
   },
   stopAreas: {
     searchLabel: "Hållplatsomr",
     defaultSortAttribute: "StopAreaNumber",
-    url: ""
+    url: "",
   },
   stopAreasAttributesToDisplayStopAreaNumber: {
     displayName: "HÅLLPLATSNUMMER",
-    key: "StopAreaNumber"
+    key: "StopAreaNumber",
   },
   stopAreasAttributesToDisplayName: { displayName: "NAMN", key: "Name" },
   stopAreasAttributesToDisplayMunicipalityName: {
     displayName: "KOMMUN",
-    key: "MunicipalityName"
+    key: "MunicipalityName",
   },
   stopAreasAttributesToDisplayInterchangePriorityMessage: {
     displayName: "BYTESPRIO",
-    key: "InterchangePriorityMessage"
+    key: "InterchangePriorityMessage",
   },
   stopAreasAttributesToDisplayTariffZone1Name: {
     displayName: "TAXEZON 1",
-    key: "TariffZone1Name"
+    key: "TariffZone1Name",
   },
   stopAreasAttributesToDisplayTariffZone2Name: {
     displayName: "TAXEZON 2",
-    key: "TariffZone2Name"
+    key: "TariffZone2Name",
   },
   stopAreasAttributesToDisplayAbbreviation: {
     displayName: "KOD",
-    key: "Abbreviation"
+    key: "Abbreviation",
   },
   stopPoints: {
     searchLabel: "Hållplatslägen",
     defaultSortAttribute: "StopAreaNumber",
-    url: ""
+    url: "",
   },
   stopPointsAttributesToDisplayStopAreaNumber: {
     displayName: "HÅLLPLATSNUMMER",
-    key: "StopAreaNumber"
+    key: "StopAreaNumber",
   },
   stopPointsAttributesToDisplayName: { displayName: "NAMN", key: "Name" },
   stopPointsAttributesToDisplayDesignation: {
     displayName: "BETECKNING",
-    key: "Designation"
+    key: "Designation",
   },
   stopPointsAttributesToDisplayIsForBoarding: {
     displayName: "PÅSTIGNING",
-    key: "IsForBoarding"
+    key: "IsForBoarding",
   },
   stopPointsAttributesToDisplayIsForAlighting: {
     displayName: "AVSTIGNING",
-    key: "IsForAlighting"
+    key: "IsForAlighting",
   },
   stopPointsAttributesToDisplayIsFictitious: {
     displayName: "VIRTUELLT",
-    key: "IsFictitious"
+    key: "IsFictitious",
   },
   stopPointsAttributesToDisplayMunicipalityName: {
     displayName: "KOMMUN",
-    key: "MunicipalityName"
+    key: "MunicipalityName",
   },
   stopPointsAttributesToDisplayIsRegularTraffic: {
     displayName: "LINJETRAFIK",
-    key: "IsRegularTraffic"
+    key: "IsRegularTraffic",
   },
   stopPointsAttributesToDisplayIsFlexibleBusService: {
     displayName: "FLEXLINJE",
-    key: "IsFlexibleBusService"
+    key: "IsFlexibleBusService",
   },
   stopPointsAttributesToDisplayIsFlexibleTaxiService: {
     displayName: "NÄRTRAFIK",
-    key: "IsFlexibleTaxiService"
+    key: "IsFlexibleTaxiService",
   },
-  searchColor: {
-    fillColorRed: 255,
-    fillColorGreen: 255,
-    fillColorBlue: 255,
-    fillColorOpacity: 0,
-    strokeColorRed: 255,
-    strokeColorGreen: 255,
-    strokeColorBlue: 255,
-    strokeColorOpacity: 0,
-    strokePointWidth: 5,
-    strokeLineWidth: 2
+  searchFillColor: {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 0,
   },
-  highlightColor: {
-    fillColorRed: 255,
-    fillColorGreen: 255,
-    fillColorBlue: 255,
-    fillColorOpacity: 0,
-    strokeColorRed: 255,
-    strokeColorGreen: 255,
-    strokeColorBlue: 255,
-    strokeColorOpacity: 0,
-    strokePointWidth: 5,
-    strokeLineWidth: 2
-  }
+  searchStrokeColor: {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 0,
+  },
+  searchStrokePointWidth: 5,
+  searchStrokeLineWidth: 2,
+  highlightFillColor: {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 0,
+  },
+  highlightStrokeColor: {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 0,
+  },
+  highlightStrokePointWidth: 5,
+  highlightStrokeLineWidth: 2,
 };
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 class ToolOptions extends Component {
@@ -245,10 +249,29 @@ class ToolOptions extends Component {
         width: tool.options.width,
         height: tool.options.height,
         visibleAtStart: tool.options.visibleAtStart,
-        searchColor:
-          tool.options.mapColors.searchColor || this.state.searchColor,
-        highlightColor:
-          tool.options.mapColors.highlightColor || this.state.highlightColor,
+        searchStrokeColor:
+          tool.options.mapColors.searchStrokeColor ||
+          this.state.searchStrokeColor,
+        searchFillColor:
+          tool.options.mapColors.searchFillColor || this.state.searchFillColor,
+        searchStrokePointWidth:
+          tool.options.mapColors.searchStrokePointWidth ||
+          this.state.searchStrokePointWidth,
+        searchStrokeLineWidth:
+          tool.options.mapColors.searchStrokeLineWidth ||
+          this.state.searchStrokeLineWidth,
+        highlightStrokeColor:
+          tool.options.mapColors.highlightStrokeColor ||
+          this.state.highlightStrokeColor,
+        highlightFillColor:
+          tool.options.mapColors.highlightFillColor ||
+          this.state.highlightFillColor,
+        highlightStrokePointWidth:
+          tool.options.mapColors.highlightStrokePointWidth ||
+          this.state.highlightStrokePointWidth,
+        highlightStrokeLineWidth:
+          tool.options.mapColors.highlightStrokeLineWidth ||
+          this.state.highlightStrokeLineWidth,
         lineNumberAndPublicLineNumbers:
           tool.options.geoServer.lineNumberAndPublicLineNumbers ||
           this.state.lineNumberAndPublicLineNumbers,
@@ -264,11 +287,11 @@ class ToolOptions extends Component {
         journeys: tool.options.geoServer.journeys || this.state.journeys,
         routes: tool.options.geoServer.routes || this.state.routes,
         stopAreas: tool.options.geoServer.stopAreas || this.state.stopAreas,
-        stopPoints: tool.options.geoServer.stopPoints || this.state.stopPoints
+        stopPoints: tool.options.geoServer.stopPoints || this.state.stopPoints,
       });
     } else {
       this.setState({
-        active: false
+        active: false,
       });
     }
   }
@@ -287,14 +310,14 @@ class ToolOptions extends Component {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
     this.setState({
-      [name]: value
+      [name]: value,
     });
   }
 
   getTool() {
     return this.props.model
       .get("toolConfig")
-      .find(tool => tool.type === this.type);
+      .find((tool) => tool.type === this.type);
   }
 
   add(tool) {
@@ -305,12 +328,12 @@ class ToolOptions extends Component {
     this.props.model.set({
       toolConfig: this.props.model
         .get("toolConfig")
-        .filter(tool => tool.type !== this.type)
+        .filter((tool) => tool.type !== this.type),
     });
   }
 
   replace(tool) {
-    this.props.model.get("toolConfig").forEach(t => {
+    this.props.model.get("toolConfig").forEach((t) => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -331,8 +354,14 @@ class ToolOptions extends Component {
         height: this.state.height,
         visibleAtStart: this.state.visibleAtStart,
         mapColors: {
-          searchColor: this.state.searchColor,
-          highlightColor: this.state.highlightColor
+          searchFillColor: this.state.searchFillColor,
+          searchStrokeColor: this.state.searchStrokeColor,
+          searchStrokePointWidth: this.state.searchStrokePointWidth,
+          searchStrokeLineWidth: this.state.searchStrokeLineWidth,
+          highlightFillColor: this.state.highlightFillColor,
+          highlightStrokeColor: this.state.highlightStrokeColor,
+          highlightStrokePointWidth: this.state.highlightStrokePointWidth,
+          highlightStrokeLineWidth: this.state.highlightStrokeLineWidth,
         },
         geoServer: {
           lineNumberAndPublicLineNumbers: this.state
@@ -343,9 +372,9 @@ class ToolOptions extends Component {
           journeys: this.state.journeys,
           routes: this.state.routes,
           stopAreas: this.state.stopAreas,
-          stopPoints: this.state.stopPoints
-        }
-      }
+          stopPoints: this.state.stopPoints,
+        },
+      },
     };
 
     var existing = this.getTool();
@@ -356,7 +385,7 @@ class ToolOptions extends Component {
         () => {
           this.props.parent.props.parent.setState({
             alert: true,
-            alertMessage: "Uppdateringen lyckades"
+            alertMessage: "Uppdateringen lyckades",
           });
         }
       );
@@ -373,7 +402,7 @@ class ToolOptions extends Component {
             this.remove();
             update.call(this);
             this.setState(defaultState);
-          }
+          },
         });
       } else {
         this.remove();
@@ -421,7 +450,7 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 this.save();
               }}
@@ -435,7 +464,7 @@ class ToolOptions extends Component {
               id="active"
               name="active"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.active}
@@ -458,7 +487,7 @@ class ToolOptions extends Component {
               name="title"
               placeholder={defaultState.title}
               type="text"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.title}
@@ -470,7 +499,7 @@ class ToolOptions extends Component {
               value={this.state.abstract}
               type="text"
               name="abstract"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -481,7 +510,7 @@ class ToolOptions extends Component {
               id="target"
               name="target"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
@@ -505,7 +534,7 @@ class ToolOptions extends Component {
               id="position"
               name="position"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
@@ -530,7 +559,7 @@ class ToolOptions extends Component {
               type="number"
               min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.width}
@@ -552,10 +581,10 @@ class ToolOptions extends Component {
               type="number"
               min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
-              value={this.state.height}
+              value={this.state.height || ""}
             />
           </div>
           <div>
@@ -563,7 +592,7 @@ class ToolOptions extends Component {
               id="visibleAtStart"
               name="visibleAtStart"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.visibleAtStart}
@@ -584,13 +613,13 @@ class ToolOptions extends Component {
               <div>
                 <SketchPicker
                   color={{
-                    r: this.state.searchColor.fillColorRed,
-                    b: this.state.searchColor.fillColorBlue,
-                    g: this.state.searchColor.fillColorGreen,
-                    a: this.state.searchColor.fillColorOpacity
+                    r: this.state.searchFillColor.r,
+                    g: this.state.searchFillColor.g,
+                    b: this.state.searchFillColor.b,
+                    a: this.state.searchFillColor.a,
                   }}
-                  onChangeComplete={color =>
-                    this.handleColorChange("searchColor", color)
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("searchFillColor", color)
                   }
                 />
               </div>
@@ -604,46 +633,48 @@ class ToolOptions extends Component {
               <div>
                 <SketchPicker
                   color={{
-                    r: this.state.searchColor.strokeColorRed,
-                    b: this.state.searchColor.strokeColorBlue,
-                    g: this.state.searchColor.strokeColorGreen,
-                    a: this.state.searchColor.strokeColorOpacity
+                    r: this.state.searchStrokeColor.r,
+                    g: this.state.searchStrokeColor.g,
+                    b: this.state.searchStrokeColor.b,
+                    a: this.state.searchStrokeColor.a,
                   }}
-                  onChangeComplete={color =>
-                    this.handleColorChange("searchColor", color)
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("searchStrokeColor", color)
                   }
                 />
               </div>
             </span>
           </div>
           <div>
-            <label htmlFor="searchColorStrokePointWidth">
+            <label htmlFor="searchStrokePointWidth">
               Sökfärgens punktstorlek
             </label>
             <input
-              value={this.state.searchColor.strokePointWidth}
-              type="text"
-              placeholder={defaultState.searchColor.strokePointWidth}
-              name="searchColorStrokePointWidth"
+              id="searchStrokePointWidth"
+              name="searchStrokePointWidth"
+              placeholder={defaultState.searchStrokePointWidth}
+              type="number"
+              min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
+              value={this.state.searchStrokePointWidth}
             />
           </div>
           <div>
-            <label htmlFor="searchColorStrokeLineWidth">
-              Sökfärgens linjebredd
-            </label>
+            <label htmlFor="searchStrokeLineWidth">Sökfärgens linjebredd</label>
             <input
-              value={this.state.searchColor.strokeLineWidth}
-              type="text"
-              placeholder={defaultState.searchColor.strokeLineWidth}
-              name="searchColorStrokeLineWidth"
+              id="searchStrokeLineWidth"
+              name="searchStrokeLineWidth"
+              placeholder={defaultState.searchStrokeLineWidth}
+              type="number"
+              min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
+              value={this.state.searchStrokeLineWidth || ""}
             />
           </div>
           <div className="separator">
@@ -652,76 +683,77 @@ class ToolOptions extends Component {
           <div className="clearfix">
             <span className="pull-left">
               <div>
-                <label className="long-label" htmlFor="highlightColorFillColor">
+                <label className="long-label" htmlFor="highlightFillColor">
                   Färg på markeringens fyllnad (rgba)
                 </label>
               </div>
               <div>
                 <SketchPicker
                   color={{
-                    r: this.state.highlightColor.fillColorRed,
-                    b: this.state.highlightColor.fillColorBlue,
-                    g: this.state.highlightColor.fillColorGreen,
-                    a: this.state.highlightColor.fillColorOpacity
+                    r: this.state.highlightFillColor.r,
+                    g: this.state.highlightFillColor.g,
+                    b: this.state.highlightFillColor.b,
+                    a: this.state.highlightFillColor.a,
                   }}
-                  onChangeComplete={color =>
-                    this.handleColorChange("highlightColor", color)
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("highlightFillColor", color)
                   }
                 />
               </div>
             </span>
             <span className="pull-left" style={{ marginLeft: "100px" }}>
               <div>
-                <label
-                  className="long-label"
-                  htmlFor="highlightColorStrokeColor"
-                >
+                <label className="long-label" htmlFor="highlightStrokeColor">
                   Färg på markringens ram (rgba)
                 </label>
               </div>
               <div>
                 <SketchPicker
                   color={{
-                    r: this.state.highlightColor.strokeColorRed,
-                    b: this.state.highlightColor.strokeColorBlue,
-                    g: this.state.highlightColor.strokeColorGreen,
-                    a: this.state.highlightColor.strokeColorOpacity
+                    r: this.state.highlightStrokeColor.r,
+                    g: this.state.highlightStrokeColor.g,
+                    b: this.state.highlightStrokeColor.b,
+                    a: this.state.highlightStrokeColor.a,
                   }}
-                  onChangeComplete={color =>
-                    this.handleColorChange("highlightColor", color)
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("highlightStrokeColor", color)
                   }
                 />
               </div>
             </span>
           </div>
           <div>
-            <label htmlFor="highlightColorStrokePointWidth">
+            <label htmlFor="highlightStrokePointWidth">
               Markeringsfärgens punktstorlek
             </label>
             <input
-              value={this.state.highlightColor.strokePointWidth}
-              type="text"
-              placeholder={defaultState.highlightColor.strokePointWidth}
-              name="highlightColorStrokePointWidth"
+              id="highlightStrokePointWidth"
+              name="highlightStrokePointWidth"
+              placeholder={defaultState.highlightStrokePointWidth}
+              type="number"
+              min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
+              value={this.state.highlightStrokePointWidth || ""}
             />
           </div>
           <div>
-            <label htmlFor="highlightColorStrokeLineWidth">
+            <label htmlFor="highlightStrokeLineWidth">
               Markeringsfärgens linjebredd
             </label>
             <input
-              value={this.state.highlightColor.strokeLineWidth}
-              type="text"
-              placeholder={defaultState.highlightColor.strokeLineWidth}
-              name="highlightColorStrokeLineWidth"
+              id="highlightStrokeLineWidth"
+              name="highlightStrokeLineWidth"
+              placeholder={defaultState.highlightStrokeLineWidth}
+              type="number"
+              min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
+              value={this.state.highlightStrokeLineWidth || ""}
             />
           </div>
           <div className="separator">Inställningar GeoServer</div>
@@ -737,7 +769,7 @@ class ToolOptions extends Component {
               }
               name="lineNumberAndPublicLineNumbersSearchLabel"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -752,7 +784,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.lineNumberAndPublicLineNumbers.url}
               name="lineNumberAndPublicLineNumbersUrl"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -767,7 +799,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.municipalityZoneNames.searchLabel}
               name="municipalityZoneNamesSearchLabel"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -780,7 +812,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.municipalityZoneNames.url}
               name="municipalityZoneNamesUrl"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -795,7 +827,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopAreaNameAndNumbers.searchLabel}
               name="stopAreaNameAndNumbersSearchLabel"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -812,7 +844,7 @@ class ToolOptions extends Component {
               }
               name="stopAreaNameAndNumbersDefaultSortAttribute"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -825,7 +857,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopAreaNameAndNumbers.url}
               name="stopAreaNameAndNumbersUrl"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -840,7 +872,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.transportModeTypeNames.searchLabel}
               name="transportModeTypeNamesSearchLabel"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -853,7 +885,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.transportModeTypeNames.url}
               name="transportModeTypeNamesUrl"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -867,7 +899,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.journeys.searchLabel}
               name="journeysSearchLabel"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -882,7 +914,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.journeys.defaultSortAttribute}
               name="journeysDefaultSortAttribute"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -895,7 +927,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.journeys.url}
               name="journeysUrl"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -919,7 +951,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayInternalLineName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -936,7 +968,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayInternalLineKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -955,7 +987,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayPublicLineName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -972,7 +1004,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayPublicLineKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -993,7 +1025,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayTransportCompanyName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1010,7 +1042,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayTransportCompanyKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1031,7 +1063,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayFromStopPointNameName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1050,7 +1082,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayFromStopPointNameKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1071,7 +1103,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayFromStopPointDesignationName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1092,7 +1124,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayFromStopPointDesignationKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1113,7 +1145,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayToStopPointNameName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1130,7 +1162,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayToStopPointNameKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1151,7 +1183,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayToStopPointDesignationName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1171,7 +1203,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayToStopPointDesignationKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1194,7 +1226,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayEarliestDepartureTimeAtToStopPointName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1217,7 +1249,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayEarliestDepartureTimeAtToStopPointKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1240,7 +1272,7 @@ class ToolOptions extends Component {
               }
               name="journeysAttributesToDisplayEarliestDepartureTimeAtToStopPointFormat"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1254,7 +1286,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.routes.searchLabel}
               name="routesSearchLabel"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1267,7 +1299,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.routes.defaultSortAttribute}
               name="routesDefaultSortAttribute"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1280,7 +1312,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.routes.url}
               name="routesUrl"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1304,7 +1336,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayInternalLineName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1321,7 +1353,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayInternalLineKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1338,7 +1370,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayPublicLineName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1353,7 +1385,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.routesAttributesToDisplayPublicLine.key}
               name="routesAttributesToDisplayPublicLineKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1372,7 +1404,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayDescriptionName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1389,7 +1421,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayDescriptionKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1406,7 +1438,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayDirectionName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1421,7 +1453,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.routesAttributesToDisplayDirection.key}
               name="routesAttributesToDisplayDirectionKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1442,7 +1474,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayTransportModeTypeName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1459,7 +1491,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayTransportModeTypeKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1479,7 +1511,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayTransportCompanyName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1496,7 +1528,7 @@ class ToolOptions extends Component {
               }
               name="routesAttributesToDisplayTransportCompanyKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1512,7 +1544,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopAreas.searchLabel}
               name="stopAreasSearchLabel"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1527,7 +1559,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopAreas.defaultSortAttribute}
               name="stopAreasDefaultSortAttribute"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1540,7 +1572,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopAreas.url}
               name="stopAreasUrl"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1566,7 +1598,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayStopAreaNumberName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1583,7 +1615,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayStopAreaNumberKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1598,7 +1630,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayNameName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1613,7 +1645,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopAreasAttributesToDisplayName.key}
               name="stopAreasAttributesToDisplayNameKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1634,7 +1666,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayMunicipalityNameName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1653,7 +1685,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayMunicipalityNameKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1676,7 +1708,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayInterchangePriorityMessageName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1697,7 +1729,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayInterchangePriorityMessageKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1718,7 +1750,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayTariffZone1NameName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1735,7 +1767,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayTariffZone1NameKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1756,7 +1788,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayTariffZone2NameName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1773,7 +1805,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayTariffZone2NameKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1793,7 +1825,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayAbbreviationName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1810,7 +1842,7 @@ class ToolOptions extends Component {
               }
               name="stopAreasAttributesToDisplayAbbreviationKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1826,7 +1858,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopPoints.searchLabel}
               name="stopPointsSearchLabel"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1841,7 +1873,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopPoints.defaultSortAttribute}
               name="stopPointsDefaultSortAttribute"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1854,7 +1886,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopPoints.url}
               name="stopPointsUrl"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1880,7 +1912,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayStopAreaNumberName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1897,7 +1929,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayStopAreaNumberKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1912,7 +1944,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayNameName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1927,7 +1959,7 @@ class ToolOptions extends Component {
               placeholder={defaultState.stopPointsAttributesToDisplayName.key}
               name="stopPointsAttributesToDisplayNameKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1947,7 +1979,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayDesignationName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1964,7 +1996,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayDesignationKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -1985,7 +2017,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsForBoardingName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2002,7 +2034,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsForBoardingKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2023,7 +2055,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsForAlightingName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2040,7 +2072,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsForAlightingKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2060,7 +2092,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsFictitiousName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2077,7 +2109,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsFictitiousKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2098,7 +2130,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayMunicipalityNameName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2117,7 +2149,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayMunicipalityNameKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2138,7 +2170,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsRegularTrafficName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2157,7 +2189,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsRegularTrafficKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2178,7 +2210,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsFlexibleBusServiceName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2198,7 +2230,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsFlexibleBusServiceKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2219,7 +2251,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsFlexibleTaxiServiceName"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2240,7 +2272,7 @@ class ToolOptions extends Component {
               }
               name="stopPointsAttributesToDisplayIsFlexibleTaxiServiceKey"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -2250,7 +2282,7 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 this.save();
               }}

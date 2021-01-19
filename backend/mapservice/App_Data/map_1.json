@@ -91,31 +91,37 @@
         "title": "Sök",
         "position": "left",
         "visibleAtStart": true,
+        "width": 450,
+        "height": 350,
         "mapColors": {
-          "searchColor": {
-            "fillColorRed": "220",
-            "fillColorGreen": "10",
-            "fillColorBlue": "90",
-            "fillColorOpacity": "0.7",
-            "strokeColorRed": "220",
-            "strokeColorGreen": "10",
-            "strokeColorBlue": "90",
-            "strokeColorOpacity": "0.7",
-            "strokePointWidth": 5,
-            "strokeLineWidth": 2
+          "searchFillColor": {
+            "r": 220,
+            "g": 10,
+            "b": 90,
+            "a": 0.7
           },
-          "highlightColor": {
-            "fillColorRed": "130",
-            "fillColorGreen": "35",
-            "fillColorBlue": "150",
-            "fillColorOpacity": "0.4",
-            "strokeColorRed": "130",
-            "strokeColorGreen": "35",
-            "strokeColorBlue": "150",
-            "strokeColorOpacity": "0.4",
-            "strokePointWidth": 8,
-            "strokeLineWidth": 8
-          }
+          "searchStrokeColor": {
+            "r": 220,
+            "g": 10,
+            "b": 90,
+            "a": 0.7
+          },
+          "searchStrokePointWidth": 5,
+          "searchStrokeLineWidth": 2,
+          "highlightFillColor": {
+            "r": 130,
+            "g": 35,
+            "b": 150,
+            "a": 0.4
+          },
+          "highlightStrokeColor": {
+            "r": 130,
+            "g": 35,
+            "b": 150,
+            "a": 0.4
+          },
+          "highlightStrokePointWidth": 8,
+          "highlightStrokeLineWidth": 8
         },
         "geoServer": {
           "lineNumberAndPublicLineNumbers": {
