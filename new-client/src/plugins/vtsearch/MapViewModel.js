@@ -281,24 +281,24 @@ export default class MapViewModel {
    */
   addSearchResultLayerToMap = (searchResultId) => {
     var fill = new Fill({
-      color: `rgba(${this.model.mapColors.searchColor.fillColor.r},
-        ${this.model.mapColors.searchColor.fillColor.g},
-        ${this.model.mapColors.searchColor.fillColor.b},
-        ${this.model.mapColors.searchColor.fillColor.a})`,
+      color: `rgba(${this.model.mapColors.searchFillColor.r},
+        ${this.model.mapColors.searchFillColor.g},
+        ${this.model.mapColors.searchFillColor.b},
+        ${this.model.mapColors.searchFillColor.a})`,
     });
     var stroke = new Stroke({
-      color: `rgba(${this.model.mapColors.searchColor.strokeColor.r},
-        ${this.model.mapColors.searchColor.strokeColor.g},
-        ${this.model.mapColors.searchColor.strokeColor.b},
-        ${this.model.mapColors.searchColor.strokeColor.a})`,
-      width: this.model.mapColors.searchColor.strokeLineWidth,
+      color: `rgba(${this.model.mapColors.searchStrokeColor.r},
+        ${this.model.mapColors.searchStrokeColor.g},
+        ${this.model.mapColors.searchStrokeColor.b},
+        ${this.model.mapColors.searchStrokeColor.a})`,
+      width: this.model.mapColors.searchStrokeLineWidth,
     });
     var searchResultLayer = new VectorLayer({
       style: new Style({
         image: new Circle({
           fill: fill,
           stroke: stroke,
-          radius: this.model.mapColors.searchColor.strokePointWidth,
+          radius: this.model.mapColors.searchStrokePointWidth,
         }),
         fill: fill,
         stroke: stroke,
