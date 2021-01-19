@@ -837,8 +837,8 @@ class ToolOptions extends Component {
                   </Grid>
                 </Grid>
               ) : (
-                <></>
-              )}
+                  <></>
+                )}
             </Modal>
           </section>
         </form>

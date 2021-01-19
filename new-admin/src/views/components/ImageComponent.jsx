@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
@@ -8,6 +8,12 @@ import HeightIcon from "@material-ui/icons/Height";
 import SubtitlesIcon from "@material-ui/icons/Subtitles";
 import LinkIcon from "@material-ui/icons/Link";
 import CheckIcon from "@material-ui/icons/Check";
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormControl from "@material-ui/core/FormControl";
+import FormLabel from "@material-ui/core/FormLabel";
+import Checkbox from "@material-ui/core/Checkbox";
 
 const ImageComponent = props => {
   const classes = useStyles();
@@ -21,7 +27,8 @@ const ImageComponent = props => {
   const imageHeight = data["data-image-height"];
   const dataCaption = data["data-caption"];
   const dataSource = data["data-source"];
-  const dataPopup = data["data-popup"];
+  const dataPopup = data["data-image-popup"] === undefined ? false : true;
+  const dataImagePosition = data["data-image-position"];
 
   const [open, setOpen] = useState(false);
   const [width, setWidth] = useState(imageWidth);
@@ -29,6 +36,36 @@ const ImageComponent = props => {
   const [caption, setCaption] = useState(dataCaption);
   const [source, setSource] = useState(dataSource);
   const [popup, setPopup] = useState(dataPopup);
+  const [imagePosition, setImagePosition] = useState(dataImagePosition);
+  const [saveButton, showSaveButton] = useState(true);
+
+  useEffect(() => {
+    if (
+      imageWidth !== width ||
+      imageHeight !== height ||
+      dataCaption !== caption ||
+      dataSource !== source ||
+      dataPopup !== popup ||
+      dataImagePosition !== imagePosition
+    ) {
+      showSaveButton(false);
+    } else {
+      showSaveButton(true);
+    }
+  }, [
+    imageWidth,
+    width,
+    imageHeight,
+    height,
+    dataCaption,
+    caption,
+    dataSource,
+    source,
+    dataPopup,
+    popup,
+    dataImagePosition,
+    imagePosition
+  ]);
 
   const handleOpen = e => {
     e.preventDefault();
@@ -37,29 +74,39 @@ const ImageComponent = props => {
   };
 
   const handleClose = e => {
-    e.preventDefault();
+    //e.preventDefault();
     setOpen(false);
     readOnlyMode();
   };
 
   const handleSubmit = () => {
     const { imageData } = props.blockProps;
-    const data = {
+    let data = {
       src: src,
       "data-image-width": width,
       "data-image-height": height,
       "data-caption": caption,
       "data-source": source,
-      "data-popup": popup
+      "data-image-position": imagePosition
     };
-
+    if (popup) {
+      data["data-image-popup"] = "";
+    }
     imageData(data);
+  };
+
+  const handleChange = event => {
+    setImagePosition(event.target.value);
+  };
+
+  const handlePopupChange = event => {
+    setPopup(event.target.checked);
   };
 
   const body = (
     <div className={classes.paper}>
-      <form className={classes.form}>
-        <h2 id="image-modal-title">Redigera bild</h2>
+      <h3 id="image-modal-title">Inställningar</h3>
+      <FormControl className={classes.form} component="fieldset">
         <div className={classes.margin}>
           <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
@@ -70,7 +117,7 @@ const ImageComponent = props => {
                 id="image-width"
                 defaultValue={width}
                 onChange={e => setWidth(e.target.value)}
-                label="data-image-width"
+                label="Bredd"
               />
             </Grid>
           </Grid>
@@ -83,7 +130,7 @@ const ImageComponent = props => {
                 id="image-height"
                 defaultValue={height}
                 onChange={e => setHeight(e.target.value)}
-                label="data-image-height"
+                label="Höjd"
               />
             </Grid>
           </Grid>
@@ -94,9 +141,9 @@ const ImageComponent = props => {
             <Grid item>
               <TextField
                 id="image-caption"
-                defaultValue={dataCaption}
+                defaultValue={caption}
                 onChange={e => setCaption(e.target.value)}
-                label="data-caption"
+                label="Bildtext"
               />
             </Grid>
           </Grid>
@@ -107,22 +154,73 @@ const ImageComponent = props => {
             <Grid item>
               <TextField
                 id="image-source"
-                defaultValue={dataSource}
+                defaultValue={source}
                 onChange={e => setSource(e.target.value)}
-                label="data-source"
+                label="Källa"
               />
             </Grid>
           </Grid>
+          <Checkbox
+            id="image-popup"
+            checked={popup}
+            onChange={handlePopupChange}
+            inputProps={{ "aria-label": "primary checkbox" }}
+          />
+          <label>Popup</label>
+          <Grid container spacing={1} alignItems="flex-end">
+            <Grid item>
+              <button
+                type="button"
+                variant="contained"
+                className="btn btn-primary"
+                onClick={handleClose}
+              >
+                <CheckIcon /> Stäng
+              </button>
+            </Grid>
+          </Grid>
         </div>
-
-        <input
-          type="checkbox"
-          id="image-popup"
-          value={dataPopup}
-          onChange={e => setPopup(e.target.checked)}
-        />
-        <label>Popup</label>
-      </form>
+      </FormControl>
+      <FormControl className={classes.form} component="fieldset">
+        <FormLabel component="legend">Position</FormLabel>
+        <RadioGroup
+          aria-label="position"
+          name="position"
+          value="img-position"
+          onChange={handleChange}
+        >
+          <FormControlLabel
+            value="left"
+            checked={imagePosition === "left"}
+            control={<Radio />}
+            label="Vänster"
+          />
+          <FormControlLabel
+            value="center"
+            checked={imagePosition === "center"}
+            control={<Radio />}
+            label="Center"
+          />
+          <FormControlLabel
+            value="right"
+            checked={imagePosition === "right"}
+            control={<Radio />}
+            label="Höger"
+          />
+          <FormControlLabel
+            value="floatRight"
+            checked={imagePosition === "floatRight"}
+            control={<Radio />}
+            label="Höger med text"
+          />
+          <FormControlLabel
+            value="floatLeft"
+            checked={imagePosition === "floatLeft"}
+            control={<Radio />}
+            label="Vänster med text"
+          />
+        </RadioGroup>
+      </FormControl>
     </div>
   );
 
@@ -140,19 +238,20 @@ const ImageComponent = props => {
     </Modal>
   );
 
-  if (dataPopup) {
+  if (popup) {
     return (
       <div className={classes.imgContainer}>
         <img
           src={src}
           width={width}
           height={height}
-          alt={dataCaption}
+          alt={caption}
           data-image-width={width}
           data-image-height={height}
-          data-caption={dataCaption}
-          data-source={dataSource}
-          data-popup
+          data-caption={caption}
+          data-source={source}
+          data-image-popup=""
+          data-image-position={imagePosition}
           onClick={handleOpen}
         />
         <button
@@ -160,6 +259,7 @@ const ImageComponent = props => {
           variant="contained"
           className="btn btn-success"
           onClick={handleSubmit}
+          hidden={saveButton}
         >
           <CheckIcon /> Godkänn ändringar
         </button>
@@ -173,11 +273,11 @@ const ImageComponent = props => {
           src={src}
           width={width}
           height={height}
-          alt={dataCaption}
+          alt={caption}
           data-image-width={width}
           data-image-height={height}
-          data-caption={dataCaption}
-          data-source={dataSource}
+          data-caption={caption}
+          data-image-position={imagePosition}
           onClick={handleOpen}
         />
         <button
@@ -185,6 +285,7 @@ const ImageComponent = props => {
           variant="contained"
           className="btn btn-success"
           onClick={handleSubmit}
+          hidden={saveButton}
         >
           <CheckIcon /> Godkänn ändringar
         </button>
@@ -230,7 +331,6 @@ const useStyles = makeStyles(theme => ({
   },
   paper: {
     position: "absolute",
-    width: 400,
     top: "20%",
     left: "30%",
     padding: "1rem",
@@ -258,6 +358,10 @@ const useStyles = makeStyles(theme => ({
     "& > .btn:hover": {
       backgroundColor: "black"
     }
+  },
+  form: {
+    width: 300,
+    float: "left"
   }
 }));
 

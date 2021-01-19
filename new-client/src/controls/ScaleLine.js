@@ -39,9 +39,14 @@ class ScaleLineControl extends React.PureComponent {
     scale: 0,
   };
 
+  constructor(props) {
+    super(props);
+    this.ref = React.createRef();
+  }
+
   componentDidUpdate() {
     // Important condition, to ensure that we don't add new ScaleLine and Binds each time value changes
-    if (this.props.map && this.refs.scaleLine.children.length === 0) {
+    if (this.props.map && this.ref.current.children.length === 0) {
       // Set initial value of scale
       this.setState({
         scale: this.formatScale(this.getScale()),
@@ -49,7 +54,7 @@ class ScaleLineControl extends React.PureComponent {
 
       // Add ScaleLine
       const scaleLineControl = new ScaleLine({
-        target: this.refs.scaleLine,
+        target: this.ref.current,
       });
       this.props.map.addControl(scaleLineControl);
 
@@ -104,7 +109,7 @@ class ScaleLineControl extends React.PureComponent {
     const { classes } = this.props;
     return (
       <>
-        <div ref="scaleLine" className={classes.scaleLine} />
+        <div ref={this.ref} className={classes.scaleLine} />
         {this.renderScaleBadge()}
       </>
     );

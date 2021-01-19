@@ -41,10 +41,14 @@ function toKmlColor(color) {
   var s, r, g, b, o;
   if (color) {
     let res;
-    if (/^rgba/.test(color)) {
-      res = colorToArray(color, "rgba");
-    } else if (/^rgb/.test(color)) {
-      res = colorToArray(color, "rgb");
+    if (Array.isArray(color)) {
+      res = color;
+    } else {
+      if (/^rgba/.test(color)) {
+        res = colorToArray(color, "rgba");
+      } else if (/^rgb/.test(color)) {
+        res = colorToArray(color, "rgb");
+      }
     }
     if (Array.isArray(res)) {
       s = rgbToHex(res[0], res[1], res[2]);
@@ -77,8 +81,6 @@ function toKmlString(str, type) {
     case "line":
       str = str.replace(/^LINESTRING\(/, "").replace(/\)$/, "");
       str = str.replace(/^LINESTRING Z\(/, "").replace(/\)$/, "");
-      str = str.replace(/^MULTILINESTRING\(/, "").replace(/\)$/, "");
-      str = str.replace(/^MULTILINESTRING Z\(/, "").replace(/\)$/, "");
       break;
     case "polygon":
       strs = str.split("),(");
@@ -142,6 +144,17 @@ function toKmlString(str, type) {
         str += "</Polygon>";
       });
       break;
+    case "multiLine":
+      str = str.replace(/^MULTILINESTRING\(/, "").replace(/\)$/, "");
+      str = str.replace(/^MULTILINESTRING Z\(/, "").replace(/\)$/, "");
+      let lines = str.split("),");
+      lines = lines.map((line) => {
+        return line.replace(/[()]/g, "");
+      });
+      lines.forEach((line) => {
+        str += `<LineString><coordinates>${line}</coordinates></LineString>`;
+      });
+      break;
     default:
       break;
   }
@@ -182,6 +195,14 @@ function multiPolygon(f) {
   var str = "";
   str += "<MultiGeometry>";
   str += toKmlString(f, "multiPolygon");
+  str += "</MultiGeometry>";
+  return str;
+}
+
+function multiLine(f) {
+  var str = "";
+  str += "<MultiGeometry>";
+  str += toKmlString(f, "multiLine");
   str += "</MultiGeometry>";
   return str;
 }
@@ -237,8 +258,10 @@ export function createXML(features, name) {
 
     doc += '<Style id="' + i + '">';
     if (style.getImage() instanceof Icon) {
+      const scale =
+        style?.getImage()?.getScale() ?? style.getImage().getSize()[0] / 32;
       doc += "<IconStyle>";
-      doc += "<scale>" + style.getImage().getSize()[0] / 32 + "</scale>";
+      doc += "<scale>" + scale + "</scale>";
       doc += "<Icon>";
       doc += "<href>" + style.getImage().getSrc() + "</href>";
       doc += "</Icon>";
@@ -317,7 +340,7 @@ export function createXML(features, name) {
       doc += line(parser.writeFeature(feature));
     }
     if (feature.getGeometry() instanceof MultiLineString) {
-      doc += line(parser.writeFeature(feature));
+      doc += multiLine(parser.writeFeature(feature));
     }
     if (feature.getGeometry() instanceof Polygon) {
       doc += polygon(parser.writeFeature(feature));

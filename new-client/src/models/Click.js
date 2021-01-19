@@ -197,9 +197,9 @@ export function bindMapClickEvent(map, callback) {
   //
   // Please see issue #591 for more info.
   //
-  // Below we declare a Set that will hold values of plugins that
-  // want to de-active the click behavior for the moment.
-  map.clickLock = new Set();
+  // The 'clickLock' Set is added to Map in appModel.createMap(),
+  // so by the time we bind this handler, we can be sure that
+  // map.clickLock already exists.
 
   // Bind the "singleclick" event of OL Map
   map.on("singleclick", (evt) => {

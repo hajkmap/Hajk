@@ -70,20 +70,30 @@ class ActiveDirectoryService {
    * - flushStores
    */
   async getStore(store) {
-    switch (store.toLowerCase()) {
-      case "users":
-        return Object.fromEntries(this._users);
-      case "groups":
-        return Array.from(this._groups);
-      case "groupsperuser":
-        try {
+    try {
+      // Exit early if someone tries to call this endpoint on a setup with disabled AD
+      if (!this._ad) {
+        logger.trace(
+          "Attempt to access AD functionality failed – AD is disabled in .env"
+        );
+        throw new ActiveDirectoryError(
+          "Can't access AD methods because AD functionality is disabled in .env"
+        );
+      }
+
+      // Prepare the object that we'll populate when looping GroupsPerUser
+      const output = {};
+
+      switch (store.toLowerCase()) {
+        case "users":
+          return Object.fromEntries(this._users);
+        case "groups":
+          return Array.from(this._groups);
+        case "groupsperuser":
           // This is a bit more complicated as our Store contains
           // a Map of Promises, and that isn't easily JSON-able.
           // A couple of steps are necessary to convert its values
           // to a casual object that contains resolved Promises's values.
-
-          // Prepare the object that we'll populate
-          const output = {};
 
           // Loop through each entry in the Map, note the async callback
           this._groupsPerUser.forEach(async (v, k) => {
@@ -93,12 +103,12 @@ class ActiveDirectoryService {
           });
 
           return output;
-        } catch (error) {
-          return { error };
-        }
 
-      default:
-        return null;
+        default:
+          return null;
+      }
+    } catch (error) {
+      return { error };
     }
   }
 
@@ -434,6 +444,13 @@ class ActiveDirectoryService {
    */
   async getAvailableADGroups() {
     try {
+      // Exit early if someone tries to call this endpoint on a setup with disabled AD
+      if (!this._ad) {
+        throw new ActiveDirectoryError(
+          "AD functionality disabled - there is no way to find out available AD groups"
+        );
+      }
+
       // This is a bit of an expensive operation so we utilize a caching mechanism here too
       if (this._groups.size === 0) {
         // Looks as cache is empty, go on and ask the AD
@@ -458,7 +475,7 @@ class ActiveDirectoryService {
    * @returns {Array} Groups that are common for all specified users
    * @memberof ActiveDirectoryService
    */
-  async findCommonGroupsForUsers(users) {
+  async findCommonADGroupsForUsers(users) {
     try {
       if (users.length < 1)
         throw new ActiveDirectoryError(
