@@ -38,47 +38,70 @@ const ColorButtonBlue = withStyles((theme) => ({
   },
 }))(Button);
 
-/**
- * I've removed the following from defaultState and save:
- * target, toolbar, onMap, bothSynlig, enableViewTogglePopupInSnabbsok,
- * selectionTools, base64Encode, instruction, filterVisible, displayPopup,
- * maxZoom, excelExportUrl, kmlExportUrl, anchorX, anchorY, imgSizeX,
- * imgSizeY, toolDescription, popupOffsetY
- *
- * I'm leaving this comment for documentation purposes. I'll do a coupe of
- * checks to ensure these are not used anywhere else in the code. If they are
- * that code might as well be removed too.
- */
 const defaultState = {
   // State variables that are used in save()
   active: false,
   index: 0,
 
+  layers: [],
+  visibleForGroups: [],
+  maxResultsPerDataset: 100,
   anchorX: 0.5,
   anchorY: 1,
   scale: 0.15,
-  src: "",
-  strokeColor: { r: 244, g: 83, b: 63, a: 1 },
-  strokeWidth: 4,
-  fillColor: { r: 244, g: 83, b: 63, a: 0.2 },
-  showInMapOnSearchResult: false,
-  polygonSearch: false,
-  radiusSearch: false,
-  autoHideSearchResults: false,
-  selectionSearch: false,
-  // searchSettings: false, // Currently not implemented in client either, though stub exists
-  tooltip: "Sök...",
-  searchWithinButtonText: "Markera i kartan",
-  maxFeatures: 100,
+  markerImg: "marker.png",
   delayBeforeAutoSearch: 500,
-  layers: [],
-  visibleForGroups: [],
+  searchBarPlaceholder: "Sök...",
+
+  enablePolygonSearch: true,
+  enableRadiusSearch: true,
+  enableSelectSearch: true,
+  enableExtentSearch: true,
+  enableResultsFiltering: true,
+  enableResultsSorting: true,
+  enableResultsSelectionClearing: true,
+  enableResultsDownloading: true,
+  enableFeaturePreview: true,
+  enableLabelOnHighlight: true,
+  showResultFeaturesInMap: true,
+  enableFeatureToggler: true,
+
+  highlightTextStroke: "rgba(0,0,0,1)",
+  highlightTextFill: "rgba(255,255,255,1)",
+  highlightFillColor: "rgba(200, 0, 0, 0.5)",
+  highlightStrokeColor: "rgba(200, 0, 0, 0.7)",
+  drawFillColor: "rgba(50, 50, 50, 0.6)",
+  drawStrokeColor: "rgba(50, 50, 50, 0.2)",
 
   // Only local state, not used in save()
   validationErrors: [],
   searchableLayers: {},
   tree: "",
 };
+
+class RGBA {
+  static toString(o) {
+    return `rgba(${o.r},${o.g},${o.b},${o.a})`;
+  }
+
+  static parse(s) {
+    try {
+      // 1. RegEx that matches stuff between a set of parentheses
+      // 2. Execute that regex on the input string, but first remove any whitespace it may contain
+      // 3. RegEx exec returns an array. Grab the second element, which will contain the value.
+      // 4. Split the value to extract individual rgba values
+      const o = /\(([^)]+)\)/.exec(s.replace(/\s/g, ""))[1].split(",");
+      return {
+        r: o[0],
+        g: o[1],
+        b: o[2],
+        a: o[3],
+      };
+    } catch (error) {
+      console.error("RGBA parsing failed: " + error.message);
+    }
+  }
+}
 
 class ToolOptions extends Component {
   /**
@@ -96,13 +119,19 @@ class ToolOptions extends Component {
   componentDidMount() {
     this.loadSearchableLayers();
 
-    var tool = this.getTool();
+    const tool = this.getTool();
     if (tool) {
       this.setState(
         {
           active: true,
           index: tool.index,
 
+          layers: tool.options.layers || this.state.layers,
+          visibleForGroups:
+            tool.options.visibleForGroups || this.state.visibleForGroups,
+          maxResultsPerDataset:
+            tool.options.maxResultsPerDataset ||
+            this.state.maxResultsPerDataset,
           anchorX:
             (tool.options.anchor && tool.options.anchor[0]) ||
             this.state.anchorX,
@@ -110,32 +139,57 @@ class ToolOptions extends Component {
             (tool.options.anchor && tool.options.anchor[1]) ||
             this.state.anchorY,
           scale: tool.options.scale || this.state.scale,
-          src: tool.options.src,
-          strokeColor: tool.options.strokeColor || this.state.strokeColor,
-          strokeWidth: tool.options.strokeWidth || this.state.strokeWidth,
-          fillColor: tool.options.fillColor || this.state.fillColor,
-          showInMapOnSearchResult: tool.options.showInMapOnSearchResult,
-          polygonSearch: tool.options.polygonSearch,
-          radiusSearch: tool.options.radiusSearch,
-          selectionSearch: tool.options.selectionSearch,
-          autoHideSearchResults: tool.options.autoHideSearchResults,
-          // searchSettings: tool.options.searchSettings,
-          tooltip: tool.options.tooltip || this.state.tooltip,
-          searchWithinButtonText:
-            tool.options.searchWithinButtonText ||
-            this.state.searchWithinButtonText,
-          maxFeatures: tool.options.maxFeatures || this.state.maxFeatures,
+          markerImg: tool.options.markerImg || this.state.markerImg,
           delayBeforeAutoSearch:
             tool.options.delayBeforeAutoSearch ||
             this.state.delayBeforeAutoSearch,
-          selectedSources: tool.options.selectedSources
-            ? tool.options.selectedSources
-            : [],
-
-          layers: tool.options.layers ? tool.options.layers : [],
-          visibleForGroups: tool.options.visibleForGroups
-            ? tool.options.visibleForGroups
-            : [],
+          searchBarPlaceholder:
+            tool.options.searchBarPlaceholder ||
+            this.state.searchBarPlaceholder,
+          enablePolygonSearch:
+            tool.options.enablePolygonSearch ?? this.state.enablePolygonSearch,
+          enableRadiusSearch:
+            tool.options.enableRadiusSearch ?? this.state.enableRadiusSearch,
+          enableSelectSearch:
+            tool.options.enableSelectSearch ?? this.state.enableSelectSearch,
+          enableExtentSearch:
+            tool.options.enableExtentSearch ?? this.state.enableExtentSearch,
+          enableResultsFiltering:
+            tool.options.enableResultsFiltering ??
+            this.state.enableResultsFiltering,
+          enableResultsSorting:
+            tool.options.enableResultsSorting ??
+            this.state.enableResultsSorting,
+          enableResultsSelectionClearing:
+            tool.options.enableResultsSelectionClearing ??
+            this.state.enableResultsSelectionClearing,
+          enableResultsDownloading:
+            tool.options.enableResultsDownloading ??
+            this.state.enableResultsDownloading,
+          enableFeaturePreview:
+            tool.options.enableFeaturePreview ??
+            this.state.enableFeaturePreview,
+          enableLabelOnHighlight:
+            tool.options.enableLabelOnHighlight ??
+            this.state.enableLabelOnHighlight,
+          showResultFeaturesInMap:
+            tool.options.showResultFeaturesInMap ??
+            this.state.showResultFeaturesInMap,
+          enableFeatureToggler:
+            tool.options.enableFeatureToggler ??
+            this.state.enableFeatureToggler,
+          highlightTextStroke:
+            tool.options.highlightTextStroke || this.state.highlightTextStroke,
+          highlightTextFill:
+            tool.options.highlightTextFill || this.state.highlightTextFill,
+          highlightFillColor:
+            tool.options.highlightFillColor || this.state.highlightFillColor,
+          highlightStrokeColor:
+            tool.options.highlightStrokeColor ||
+            this.state.highlightStrokeColor,
+          drawFillColor: tool.options.drawFillColor || this.state.drawFillColor,
+          drawStrokeColor:
+            tool.options.drawStrokeColor || this.state.drawStrokeColor,
         },
         () => {
           this.loadLayers();
@@ -148,12 +202,6 @@ class ToolOptions extends Component {
       });
     }
   }
-
-  componentWillUnmount() {}
-  /**
-   *
-   */
-  componentWillMount() {}
 
   /**
    * Anropas från tree.jsx i componentDidMount som passar med refs.
@@ -179,9 +227,9 @@ class ToolOptions extends Component {
   }
 
   handleInputChange(event) {
-    var t = event.target;
-    var name = t.name;
-    var value = t.type === "checkbox" ? t.checked : t.value;
+    const t = event.target;
+    const name = t.name;
+    let value = t.type === "checkbox" ? t.checked : t.value;
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
@@ -241,38 +289,46 @@ class ToolOptions extends Component {
   }
 
   save() {
-    var tool = {
+    const tool = {
       type: this.type,
       index: this.state.index,
       options: {
-        anchor: [this.state.anchorX, this.state.anchorY],
-        scale: this.state.scale,
-        src: this.state.src,
-        strokeColor: this.state.strokeColor,
-        strokeWidth: this.state.strokeWidth,
-        fillColor: this.state.fillColor,
-        showInMapOnSearchResult: this.state.showInMapOnSearchResult,
-        polygonSearch: this.state.polygonSearch,
-        radiusSearch: this.state.radiusSearch,
-        autoHideSearchResults: this.state.autoHideSearchResults,
-        selectionSearch: this.state.selectionSearch,
-        // searchSettings: this.state.searchSettings,
-        tooltip: this.state.tooltip,
-        searchWithinButtonText: this.state.searchWithinButtonText,
-        maxFeatures: this.state.maxFeatures,
-        delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
-        selectedSources: this.state.selectedSources
-          ? this.state.selectedSources
-          : [],
-        layers: this.state.layers ? this.state.layers : [],
+        layers: this.state.layers,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
         ),
+        maxResultsPerDataset: this.state.maxResultsPerDataset,
+        anchor: [this.state.anchorX, this.state.anchorY],
+        scale: this.state.scale,
+        markerImg: this.state.markerImg,
+        delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
+        searchBarPlaceholder: this.state.searchBarPlaceholder,
+
+        enablePolygonSearch: this.state.enablePolygonSearch,
+        enableRadiusSearch: this.state.enableRadiusSearch,
+        enableSelectSearch: this.state.enableSelectSearch,
+        enableExtentSearch: this.state.enableExtentSearch,
+        enableResultsFiltering: this.state.enableResultsFiltering,
+        enableResultsSorting: this.state.enableResultsSorting,
+        enableResultsSelectionClearing: this.state
+          .enableResultsSelectionClearing,
+        enableResultsDownloading: this.state.enableResultsDownloading,
+        enableFeaturePreview: this.state.enableFeaturePreview,
+        enableLabelOnHighlight: this.state.enableLabelOnHighlight,
+        showResultFeaturesInMap: this.state.showResultFeaturesInMap,
+        enableFeatureToggler: this.state.enableFeatureToggler,
+
+        highlightTextStroke: this.state.highlightTextStroke,
+        highlightTextFill: this.state.highlightTextFill,
+        highlightFillColor: this.state.highlightFillColor,
+        highlightStrokeColor: this.state.highlightStrokeColor,
+        drawFillColor: this.state.drawFillColor,
+        drawStrokeColor: this.state.drawStrokeColor,
       },
     };
 
-    var existing = this.getTool();
+    const existing = this.getTool();
 
     function update() {
       this.props.model.updateToolConfig(
@@ -455,44 +511,6 @@ class ToolOptions extends Component {
     });
   };
 
-  selectedSourceChange = (id, checked) => (e) => {
-    var selectedSources = checked
-      ? this.state.selectedSources.filter(
-          (selectedSource) => selectedSource !== id
-        )
-      : [id, ...this.state.selectedSources];
-
-    this.setState({
-      selectedSources: selectedSources,
-    });
-  };
-
-  renderSources(sources) {
-    if (!sources) return null;
-    return (
-      <ul>
-        {sources.map((source, i) => {
-          var id = "layer_" + source.id;
-          var checked = this.state.selectedSources.some(
-            (id) => id === source.id
-          );
-          return (
-            <li key={i}>
-              <input
-                id={id}
-                type="checkbox"
-                checked={checked}
-                onChange={this.selectedSourceChange(source.id, checked)}
-              />
-              &nbsp;
-              <label htmlFor={id}>{source.name}</label>
-            </li>
-          );
-        })}
-      </ul>
-    );
-  }
-
   /**
    * Infoclick's stroke and fill color are set by the React
    * color picker. This method handles change event for those
@@ -502,7 +520,8 @@ class ToolOptions extends Component {
    * @param {*} color
    */
   handleColorChange = (target, color) => {
-    this.setState({ [target]: color.rgb });
+    console.log("color: ", color, RGBA.toString(color.rgb));
+    this.setState({ [target]: RGBA.toString(color.rgb) });
   };
 
   /**
@@ -538,40 +557,41 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
-          {/* Currently unused as Search isn't rendered among other buttons - no need to sort
-          <div className="separator">Fönsterinställningar</div>
-          <div>
-            <label htmlFor="index">Sorteringsordning</label>
-            <input
-              id="index"
-              name="index"
-              type="number"
-              min="0"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.index}
-            />
-          </div> */}
           <div className="separator">Generella sökinställningar</div>
 
           <div>
-            <label htmlFor="maxFeatures">Max antal sökträffar</label>
+            <label htmlFor="searchBarPlaceholder">Infotext i sökfältet</label>
             <input
-              value={this.state.maxFeatures}
+              id="searchBarPlaceholder"
+              value={this.state.searchBarPlaceholder}
+              type="text"
+              name="searchBarPlaceholder"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="maxResultsPerDataset">
+              Max antal sökträffar per dataset
+            </label>
+            <input
+              value={this.state.maxResultsPerDataset}
               type="number"
               min="0"
               step="10"
-              name="maxFeatures"
+              name="maxResultsPerDataset"
               className="control-fixed-width"
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
           </div>
+
           <div>
             <label htmlFor="delayBeforeAutoSearch">
-              Fördröjning innan autosök (i millisekunder)
+              Fördröjning innan autocomplete (i millisekunder)
             </label>
             <input
               value={this.state.delayBeforeAutoSearch}
@@ -586,53 +606,263 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-          <div>
-            <input
-              value={this.state.showInMapOnSearchResult}
-              type="checkbox"
-              name="showInMapOnSearchResult"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.showInMapOnSearchResult}
-            />
-            &nbsp;
-            <label className="long-label" htmlFor="showInMapOnSearchResult">
-              Visa sökresultat i kartan vid sökning
-            </label>
-          </div>
-          <div>
-            <input
-              id="autoHideSearchResults"
-              name="autoHideSearchResults"
-              type="checkbox"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.autoHideSearchResults}
-            />
-            &nbsp;
-            <label className="long-label" htmlFor="autoHideSearchResults">
-              Dölj listan med sökresultat automatiskt när användaren klickar på
-              ett sökresultat
-            </label>
-          </div>
+
+          <div className="separator">Söktjänster</div>
+
           {this.state.tree}
-          <div className="separator">Träffikon och markering</div>
+
+          <div className="separator">Spatiala sökverktyg</div>
+
           <div>
-            <label htmlFor="src">
-              URL till ikon för markering av träffar (punkter)
+            <input
+              id="enablePolygonSearch"
+              name="enablePolygonSearch"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enablePolygonSearch}
+            />
+            &nbsp;
+            <label htmlFor="enablePolygonSearch">Sök med polygon</label>
+          </div>
+
+          <div>
+            <input
+              id="enableRadiusSearch"
+              name="enableRadiusSearch"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableRadiusSearch}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableRadiusSearch">
+              Sök med radie
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableSelectSearch"
+              name="enableSelectSearch"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableSelectSearch}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableSelectSearch">
+              Sök med yta
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableExtentSearch"
+              name="enableExtentSearch"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableExtentSearch}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableExtentSearch">
+              Sök i området
+            </label>
+          </div>
+
+          <span className="pull-left" style={{ marginLeft: "10px" }}>
+            <div>
+              <div>
+                <label className="long-label" htmlFor="drawFillColor">
+                  Fyllnadsfärg
+                </label>
+              </div>
+              <SketchPicker
+                color={RGBA.parse(this.state.drawFillColor)}
+                onChangeComplete={(color) =>
+                  this.handleColorChange("drawFillColor", color)
+                }
+              />
+            </div>
+          </span>
+          <div>
+            <div>
+              <label className="long-label" htmlFor="drawStrokeColor">
+                Ramfärg
+              </label>
+            </div>
+            <SketchPicker
+              color={RGBA.parse(this.state.drawStrokeColor)}
+              onChangeComplete={(color) =>
+                this.handleColorChange("drawStrokeColor", color)
+              }
+            />
+          </div>
+
+          <div className="separator">Alternativ för visning av resultat</div>
+
+          <div>
+            <input
+              id="showResultFeaturesInMap"
+              value={this.state.showResultFeaturesInMap}
+              type="checkbox"
+              name="showResultFeaturesInMap"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.showResultFeaturesInMap}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="showResultFeaturesInMap">
+              Rita ut alla sökträffar i kartan automatiskt
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableResultsFiltering"
+              value={this.state.enableResultsFiltering}
+              type="checkbox"
+              name="enableResultsFiltering"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableResultsFiltering}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableResultsFiltering">
+              Tillåt filtering av resultat
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableResultsSorting"
+              value={this.state.enableResultsSorting}
+              type="checkbox"
+              name="enableResultsSorting"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableResultsSorting}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableResultsSorting">
+              Tillåt sortering av resultat
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableResultsSelectionClearing"
+              value={this.state.enableResultsSelectionClearing}
+              type="checkbox"
+              name="enableResultsSelectionClearing"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableResultsSelectionClearing}
+            />
+            &nbsp;
+            <label
+              className="long-label"
+              htmlFor="enableResultsSelectionClearing"
+            >
+              Tillåt snabbrensning av markerade sökresultat
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableResultsDownloading"
+              value={this.state.enableResultsDownloading}
+              type="checkbox"
+              name="enableResultsDownloading"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableResultsDownloading}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableResultsDownloading">
+              Tillåt nedladdning av sökresultat
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableFeaturePreview"
+              value={this.state.enableFeaturePreview}
+              type="checkbox"
+              name="enableFeaturePreview"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableFeaturePreview}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableFeaturePreview">
+              Visa förhandvisning vid mouse over
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableLabelOnHighlight"
+              value={this.state.enableLabelOnHighlight}
+              type="checkbox"
+              name="enableLabelOnHighlight"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableLabelOnHighlight}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableLabelOnHighlight">
+              Visa etikett för valda resultat i kartan
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableFeatureToggler"
+              value={this.state.enableFeatureToggler}
+              type="checkbox"
+              name="enableFeatureToggler"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableFeatureToggler}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableFeatureToggler">
+              Visa föregående/nästa-knapp för bläddring av resultat
+            </label>
+          </div>
+
+          <div className="separator">
+            Träffikon och markering av resultat i karta
+          </div>
+          <div>
+            <label htmlFor="markerImg">
+              Ikon för markering av sökträffar i kartan
             </label>
             <input
-              value={this.state.src}
+              id="markerImg"
+              value={this.state.markerImg}
               type="text"
-              name="src"
-              placeholder="URL till bild eller lämna tomt för grå punkt"
+              name="markerImg"
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
           </div>
+
           <div>
             <label htmlFor="anchorX">Ikonförskjutning X</label>
             <input
@@ -649,6 +879,7 @@ class ToolOptions extends Component {
               }}
             />
           </div>
+
           <div>
             <label htmlFor="anchorY">Ikonförskjutning Y</label>
             <input
@@ -665,6 +896,7 @@ class ToolOptions extends Component {
               }}
             />
           </div>
+
           <div>
             <label htmlFor="scale">
               Skala för ikon
@@ -685,167 +917,70 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-          <div className="separator">Träffmarkering (polygon)</div>
-          <div>
-            <label htmlFor="strokeWidth">Bredd på ramen (px)</label>
-            <input
-              value={this.state.strokeWidth}
-              type="number"
-              placeholder={defaultState.strokeWidth}
-              min="0"
-              max="100"
-              step="1"
-              name="strokeWidth"
-              className="control-fixed-width"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
+
           <div className="clearfix">
-            <span className="pull-left">
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
               <div>
-                <label htmlFor="strokeColor">Färg på ramen (rgba)</label>
+                <div>
+                  <label className="long-label" htmlFor="highlightTextFill">
+                    Textfyllnad
+                  </label>
+                </div>
+                <SketchPicker
+                  color={RGBA.parse(this.state.highlightTextFill)}
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("highlightTextFill", color)
+                  }
+                />
               </div>
-              <SketchPicker
-                color={{
-                  r: this.state.strokeColor.r,
-                  g: this.state.strokeColor.g,
-                  b: this.state.strokeColor.b,
-                  a: this.state.strokeColor.a,
-                }}
-                onChangeComplete={(color) =>
-                  this.handleColorChange("strokeColor", color)
-                }
-              />
             </span>
             <span className="pull-left" style={{ marginLeft: "10px" }}>
               <div>
                 <div>
-                  <label className="long-label" htmlFor="fillColor">
-                    Färg på fyllningen (rgba)
+                  <label className="long-label" htmlFor="highlightTextStroke">
+                    Textram
                   </label>
                 </div>
                 <SketchPicker
-                  color={{
-                    r: this.state.fillColor.r,
-                    g: this.state.fillColor.g,
-                    b: this.state.fillColor.b,
-                    a: this.state.fillColor.a,
-                  }}
+                  color={RGBA.parse(this.state.highlightTextStroke)}
                   onChangeComplete={(color) =>
-                    this.handleColorChange("fillColor", color)
+                    this.handleColorChange("highlightTextStroke", color)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="highlightFillColor">
+                    Markeringsfyllnad
+                  </label>
+                </div>
+                <SketchPicker
+                  color={RGBA.parse(this.state.highlightFillColor)}
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("highlightFillColor", color)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="highlightStrokeColor">
+                    Markeringsram
+                  </label>
+                </div>
+                <SketchPicker
+                  color={RGBA.parse(this.state.highlightStrokeColor)}
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("highlightStrokeColor", color)
                   }
                 />
               </div>
             </span>
           </div>
-          <div className="separator">Spatial sök</div>
-          <div>
-            <strong>
-              <label>
-                Aktiva spatial sökverktyg{" "}
-                <i
-                  className="fa fa-question-circle"
-                  data-toggle="tooltip"
-                  title='"Radie" fungerar endast med angivna visningstjänster (se lista längst ner)'
-                />
-              </label>
-            </strong>
-          </div>
-          <div>
-            <div>
-              <input
-                id="polygonSearch"
-                name="polygonSearch"
-                type="checkbox"
-                onChange={(e) => {
-                  this.handleInputChange(e);
-                }}
-                checked={this.state.polygonSearch}
-              />
-              &nbsp;
-              <label htmlFor="polygonSearch">Polygon</label>
-              <div>
-                <input
-                  id="radiusSearch"
-                  name="radiusSearch"
-                  type="checkbox"
-                  onChange={(e) => {
-                    this.handleInputChange(e);
-                  }}
-                  checked={this.state.radiusSearch}
-                />
-                &nbsp;
-                <label className="long-label" htmlFor="radiusSearch">
-                  Radie (aktiverar även en knapp bredvid varje sökresultat)
-                </label>
-              </div>
-              <div>
-                <input
-                  id="selectionSearch"
-                  name="selectionSearch"
-                  type="checkbox"
-                  onChange={(e) => {
-                    this.handleInputChange(e);
-                  }}
-                  checked={this.state.selectionSearch}
-                />
-                &nbsp;
-                <label htmlFor="selectionSearch">Selektion</label>
-              </div>
-            </div>
-            &nbsp;
-          </div>
-          <div>
-            <label htmlFor="searchWithinButtonText">
-              Text för knapp som visas bredvid varje sökresultat om radiesök är
-              aktivt
-            </label>
-            <input
-              value={this.state.searchWithinButtonText}
-              type="text"
-              name="searchWithinButtonText"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          {/* <div>
-            <input
-              id="searchSettings"
-              name="searchSettings"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.searchSettings}
-            />
-            &nbsp;
-            <label htmlFor="searchSettings">Visa sökalternativ</label>
-          </div> */}
-          {/* 
-          // TODO: maxZoom is currently hard-coded in SearchModel (maxZoom: 7).
-          // We should check if it's really necessary, and if not use this setting instead.
-          <div>
-            <label htmlFor="maxZoom">Zoomnivå</label>
-            <input
-              value={this.state.maxZoom}
-              type="text"
-              name="maxZoom"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div> */}
-          <div>
-            <label htmlFor="searchLayers">
-              Radiesök söker inom följande lager:
-            </label>
-            <div className="layer-list">
-              {this.renderSources(this.state.sources)}
-            </div>
-          </div>
+
           {this.renderVisibleForGroups()}
         </form>
       </div>
