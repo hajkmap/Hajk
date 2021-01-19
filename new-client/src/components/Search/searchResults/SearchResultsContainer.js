@@ -509,7 +509,7 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   setActiveFeature = (feature) => {
-    this.setState({ activeFeature: feature });
+    this.setState({ activeFeature: feature, filterInputFieldOpen: false });
   };
 
   setActiveFeatureCollection = (featureCollection) => {
