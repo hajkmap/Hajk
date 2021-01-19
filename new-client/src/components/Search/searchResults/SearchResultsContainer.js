@@ -48,6 +48,7 @@ const styles = (theme) => ({
       maxWidth: "100%",
       position: "absolute",
       left: 0,
+      borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
     },
   },
   filterInputFieldContainer: {

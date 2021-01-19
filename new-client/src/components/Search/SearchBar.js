@@ -73,6 +73,18 @@ const CustomPopper = (props) => {
   );
 };
 
+const CustomPaper = (props) => {
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
+  const style = smallScreen
+    ? {
+        margin: 0,
+        borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+      }
+    : { margin: 0 };
+  return <Paper {...props} style={style} />;
+};
+
 class SearchBar extends React.PureComponent {
   state = {
     drawActive: false,
@@ -234,6 +246,7 @@ class SearchBar extends React.PureComponent {
           inputRoot: classes.inputRoot, // class name, e.g. `classes-nesting-root-x`
         }}
         PopperComponent={CustomPopper}
+        PaperComponent={CustomPaper}
         clearOnEscape
         disabled={searchActive === "draw"}
         autoComplete
