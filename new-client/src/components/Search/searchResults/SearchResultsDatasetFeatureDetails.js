@@ -26,31 +26,18 @@ const styles = (theme) => ({
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
   },
-  allFeatureDetailsHeader: {
-    maxWidth: "100%",
-    fontWeight: 500,
-  },
   headerTypography: {
     maxWidth: "100%",
     fontSize: 18,
   },
-  headerTitleContainer: {
+  headerContainer: {
     paddingTop: theme.spacing(1),
   },
-  togglerContainer: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
+  togglerButton: {
+    minWidth: 26,
+    padding: 0,
   },
-  toggler: {
-    border: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  togglerButtonRightContainer: {
-    borderLeft: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  togglerButtonLeftContainer: {
-    borderRight: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  togglerIcons: {
+  togglerButtonIcon: {
     color: theme.palette.text.primary,
   },
 });
@@ -174,13 +161,8 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       currentFeatureIndex + 1 >= numFeaturesInCollection;
 
     return (
-      <Grid
-        alignItems="center"
-        justify="space-between"
-        className={classes.toggler}
-        container
-      >
-        <Grid item className={classes.togglerButtonLeftContainer}>
+      <Grid container item alignItems="center" justify="space-between">
+        <Grid item>
           <Tooltip
             title={
               !buttonLeftDisabled
@@ -190,30 +172,25 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
           >
             <span>
               <Button
-                fullWidth
                 size="small"
+                variant="outlined"
+                className={classes.togglerButton}
                 disabled={buttonLeftDisabled}
                 onClick={() =>
                   this.handleTogglerPressed(currentFeatureIndex - 1)
                 }
-                aria-label="previous"
+                aria-label="show-previous-feature"
                 id="step-left"
               >
-                <ArrowLeftIcon className={classes.togglerIcons} />
+                <ArrowLeftIcon
+                  fontSize="small"
+                  className={classes.togglerButtonIcon}
+                />
               </Button>
             </span>
           </Tooltip>
         </Grid>
         <Grid item>
-          <Typography
-            variant="button"
-            color="textPrimary"
-            className={classes.typography}
-          >
-            {currentFeatureIndex + 1} av {numFeaturesInCollection}
-          </Typography>
-        </Grid>
-        <Grid item className={classes.togglerButtonRightContainer}>
           <Tooltip
             title={
               !buttonRightDisabled ? "Visa nästa objekt i resultatlistan" : ""
@@ -221,16 +198,20 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
           >
             <span>
               <Button
-                fullWidth
                 size="small"
+                variant="outlined"
+                className={classes.togglerButton}
                 disabled={buttonRightDisabled}
                 onClick={() =>
                   this.handleTogglerPressed(currentFeatureIndex + 1)
                 }
-                aria-label="next"
-                id="step-right"
+                aria-label="show-next-feature"
+                id="step-left"
               >
-                <ArrowRightIcon className={classes.togglerIcons} />
+                <ArrowRightIcon
+                  fontSize="small"
+                  className={classes.togglerButtonIcon}
+                />
               </Button>
             </span>
           </Tooltip>
@@ -239,7 +220,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     );
   };
 
-  renderFeatureTitleHeader = () => {
+  renderFeatureTitle = () => {
     const { featureTitle, classes } = this.props;
     return (
       <Typography
@@ -247,6 +228,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
         className={classes.headerTypography}
         component="div"
         variant="button"
+        align="left"
       >
         {featureTitle}
       </Typography>
@@ -259,20 +241,19 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       this.getNumFeaturesInCollection(featureCollection) > 1;
     return (
       <Grid container className={classes.allFeatureDetailsContainer}>
-        {shouldRenderToggler && (
-          <Grid item xs={12} className={classes.togglerContainer}>
-            {this.renderFeatureToggler()}
+        <Grid container alignItems="center" className={classes.headerContainer}>
+          <Grid
+            item
+            xs={shouldRenderToggler ? 9 : 12}
+            md={shouldRenderToggler ? 10 : 12}
+          >
+            {this.renderFeatureTitle()}
           </Grid>
-        )}
-        <Grid
-          item
-          xs={12}
-          align="center"
-          className={
-            !shouldRenderToggler ? classes.headerTitleContainer : undefined
-          }
-        >
-          {this.renderFeatureTitleHeader()}
+          {shouldRenderToggler && (
+            <Grid item xs={3} md={2}>
+              {this.renderFeatureToggler()}
+            </Grid>
+          )}
         </Grid>
         {this.state.featureInfo && (
           <Grid item xs={12}>
