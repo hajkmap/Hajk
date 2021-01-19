@@ -277,7 +277,7 @@ class MapViewModel {
         throw new Error("Current extent could not be calculated correctly.");
       }
       const feature = new Feature(fromExtent(currentExtent));
-      this.localObserver.publish("search-with-features", [feature]);
+      this.localObserver.publish("search-within-extent", [feature]);
     } catch (error) {
       this.handleSearchInCurrentExtentError(error);
     }
@@ -321,7 +321,7 @@ class MapViewModel {
       this.drawSource.addFeatures(response.features);
       if (!this.ctrlKeyPressed) {
         const allFeatures = this.drawSource.getFeatures();
-        this.localObserver.publish("search-with-features", allFeatures);
+        this.localObserver.publish("on-search-selection-done", allFeatures);
         this.removeSelectListeners();
       }
     });
@@ -340,7 +340,7 @@ class MapViewModel {
       this.ctrlKeyPressed = false;
       if (this.drawSourceHasFeatures()) {
         const features = this.drawSource.getFeatures();
-        this.localObserver.publish("search-with-features", features);
+        this.localObserver.publish("on-search-selection-done", features);
         this.removeSelectListeners();
       }
     }

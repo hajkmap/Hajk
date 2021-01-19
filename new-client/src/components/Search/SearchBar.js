@@ -200,6 +200,15 @@ class SearchBar extends React.PureComponent {
     );
   };
 
+  getPlaceholder = () => {
+    const { options, searchActive } = this.props;
+    return searchActive === "selectSearch" || searchActive === "draw"
+      ? "Söker med objekt..."
+      : searchActive === "extentSearch"
+      ? "Söker i området..."
+      : options.searchBarPlaceholder ?? "Sök...";
+  };
+
   renderSearchResultList = () => {
     const {
       searchResults,
@@ -243,12 +252,16 @@ class SearchBar extends React.PureComponent {
         freeSolo
         size={"small"}
         classes={{
-          inputRoot: classes.inputRoot, // class name, e.g. `classes-nesting-root-x`
+          inputRoot: classes.inputRoot,
         }}
         PopperComponent={CustomPopper}
         PaperComponent={CustomPaper}
         clearOnEscape
-        disabled={searchActive === "draw"}
+        disabled={
+          searchActive === "extentSearch" ||
+          searchActive === "selectSearch" ||
+          searchActive === "draw"
+        }
         autoComplete
         value={decodeURIComponent(searchString)}
         selectOnFocus
@@ -323,7 +336,6 @@ class SearchBar extends React.PureComponent {
       handleOnClickOrKeyboardSearch,
       setSearchSources,
       failedWFSFetchMessage,
-      options,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
@@ -331,12 +343,13 @@ class SearchBar extends React.PureComponent {
     const expandMessage = resultPanelCollapsed
       ? "Visa sökresultat"
       : "Dölj sökresultat";
+    const placeholder = this.getPlaceholder();
     return (
       <TextField
         {...params}
         label={undefined}
         variant={width === "xs" ? "standard" : "outlined"}
-        placeholder={options.searchBarPlaceholder ?? "Sök..."}
+        placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
         InputProps={{
           ...params.InputProps,
