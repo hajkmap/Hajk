@@ -83,6 +83,7 @@ class SearchResultsList extends React.PureComponent {
       const displayFields = source?.displayFields ? source.displayFields : [];
       selectedItems.push({
         featureId: activeFeature.id,
+        sourceId: source?.id,
         displayFields: displayFields,
         from: "showDetails",
       });
@@ -125,6 +126,7 @@ class SearchResultsList extends React.PureComponent {
       const displayFields = source.displayFields ? source.displayFields : [];
       selectedItems.push({
         featureId: feature.id,
+        sourceId: source.id,
         displayFields: displayFields,
         from: "userSelect",
       });
@@ -179,6 +181,7 @@ class SearchResultsList extends React.PureComponent {
     if (this.shouldAddNextToCollection(nextFeature)) {
       selectedItems.push({
         featureId: nextFeature.id,
+        sourceId: nextSource?.id,
         displayFields: displayFields,
         from: "showDetails",
       });
@@ -205,6 +208,9 @@ class SearchResultsList extends React.PureComponent {
   };
 
   handleCurrentFeatureReset = (currentFeature) => {
+    if (!currentFeature) {
+      return;
+    }
     const { localObserver } = this.props;
     const currentFeatureIndex = this.getFeatureSelectedIndex(currentFeature);
     const selectedItems = [...this.state.selectedItems];
@@ -235,12 +241,18 @@ class SearchResultsList extends React.PureComponent {
   };
 
   clearAllSelectedFeatures = () => {
-    const { localObserver } = this.props;
-    const selectedItems = [];
+    const { localObserver, activeFeatureCollection } = this.props;
+    const sourceId = activeFeatureCollection?.source?.id;
+
+    const selectedItems = !sourceId
+      ? []
+      : [...this.state.selectedItems].filter((selectedItem) => {
+          return selectedItem.sourceId !== sourceId;
+        });
     // Remove all selected items from array, then publish to
     // mapViewModel to reset style (clearing highlight).
     this.setState({ selectedItems: selectedItems }, () => {
-      localObserver.publish("map.resetStyleForFeaturesInResultSource");
+      localObserver.publish("map.highlightFeaturesByIds", selectedItems);
     });
   };
 

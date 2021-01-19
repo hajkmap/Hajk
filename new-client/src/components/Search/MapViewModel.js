@@ -100,10 +100,6 @@ class MapViewModel {
       "map.addAndHighlightFeatureInSearchResultLayer",
       this.addAndHighlightFeatureInSearchResultLayer
     );
-    this.localObserver.subscribe(
-      "map.resetStyleForFeaturesInResultSource",
-      this.resetStyleForFeaturesInResultSource
-    );
 
     // Global subscriptions
     this.app.globalObserver.subscribe(
