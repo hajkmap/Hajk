@@ -44,7 +44,7 @@ const styles = (theme) => ({
 
 class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   state = {
-    featureInfo: null,
+    infoBox: null,
   };
 
   constructor(props) {
@@ -56,8 +56,22 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   }
 
   componentDidMount = () => {
+    this.getInfoBox();
+  };
+
+  componentDidUpdate = (prevProps) => {
+    const { feature } = this.props;
+    const prevFeature = prevProps.feature;
+    if (feature !== prevFeature) {
+      this.getInfoBox();
+    }
+  };
+
+  getInfoBox = () => {
     if (this.shouldRenderCustomInfoBox()) {
       this.getHtmlItemInfoBox();
+    } else {
+      this.getDefaultInfoBox();
     }
   };
 
@@ -74,15 +88,23 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     this.featurePropsParsing
       .mergeFeaturePropsWithMarkdown(source.infobox, feature.properties)
       .then((featureInfo) => {
-        this.setState({ featureInfo: featureInfo });
+        this.setState({ infoBox: this.renderCustomInfoBox(featureInfo) });
       });
+  };
+
+  getDefaultInfoBox = () => {
+    this.setState({ infoBox: this.renderDefaultInfoBox() });
   };
 
   renderTableCell = (content, position) => {
     const { classes } = this.props;
     const textToRender = Array.isArray(content) ? content.join(", ") : content;
     return (
-      <TableCell align={position} className={classes.tableCell}>
+      <TableCell
+        align={position}
+        style={position === "right" ? { paddingRight: 0 } : null}
+        className={classes.tableCell}
+      >
         {textToRender}
       </TableCell>
     );
@@ -108,15 +130,13 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     );
   };
 
-  renderCustomInfoBox = () => {
-    if (this.state.featureInfo) {
-      return this.state.featureInfo.map((element, index) => {
-        if (typeof element == "string") {
-          return <Typography key={index}>{element}</Typography>;
-        }
-        return <React.Fragment key={index}>{element}</React.Fragment>;
-      });
-    }
+  renderCustomInfoBox = (featureInfo) => {
+    return featureInfo.map((element, index) => {
+      if (typeof element == "string") {
+        return <Typography key={index}>{element}</Typography>;
+      }
+      return <React.Fragment key={index}>{element}</React.Fragment>;
+    });
   };
 
   getFeatureFromCollectionByIndex = (featureIndex) => {
@@ -125,13 +145,9 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   handleTogglerPressed = (nextFeatureIndex) => {
-    const { feature, localObserver, featureCollection } = this.props;
+    const { setActiveFeature } = this.props;
     const nextFeature = this.getFeatureFromCollectionByIndex(nextFeatureIndex);
-    localObserver.publish("searchResultList.handleFeatureTogglerClicked", {
-      currentFeature: feature,
-      nextFeature: nextFeature,
-      source: featureCollection.source,
-    });
+    setActiveFeature(nextFeature);
   };
 
   getNumFeaturesInCollection = (featureCollection) => {
@@ -237,6 +253,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
 
   render() {
     const { classes, featureCollection } = this.props;
+    const { infoBox } = this.state;
     const shouldRenderToggler =
       this.getNumFeaturesInCollection(featureCollection) > 1;
     return (
@@ -255,14 +272,9 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
             </Grid>
           )}
         </Grid>
-        {this.state.featureInfo && (
+        {infoBox && (
           <Grid item xs={12}>
-            {this.renderCustomInfoBox()}
-          </Grid>
-        )}
-        {!this.state.featureInfo && (
-          <Grid item xs={12}>
-            {this.renderDefaultInfoBox()}
+            {infoBox}
           </Grid>
         )}
       </Grid>

@@ -17,7 +17,12 @@ const styles = (theme) => ({
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
-    const { feature, source, visibleInMap, showClickResultInMap } = this.props;
+    const {
+      feature,
+      source,
+      visibleInMap,
+      handleFeatureSelectionToggled,
+    } = this.props;
     const helpText = !visibleInMap ? "Visa i kartan" : "Dölj från kartan";
 
     return (
@@ -28,7 +33,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             disableRipple
             checked={visibleInMap}
             onClick={(e) => e.stopPropagation()}
-            onChange={() => showClickResultInMap(feature, source, "userSelect")}
+            onChange={() => handleFeatureSelectionToggled(feature, source)}
           />
         </Tooltip>
       </Grid>

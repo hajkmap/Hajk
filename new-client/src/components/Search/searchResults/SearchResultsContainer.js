@@ -158,6 +158,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   showFeatureDetails = (featureIds) => {
     const { toggleCollapseSearchResults } = this.props;
+    const { activeFeature } = this.state;
     const featureId = featureIds[0]; // Do we want to handle stacked features?
 
     // If searchResultContainer is collapsed, open it.
@@ -174,6 +175,14 @@ class SearchResultsContainer extends React.PureComponent {
       const feature = featureCollection.value.features.find(
         (feature) => feature.id === featureId
       );
+
+      this.handleActiveFeatureChange(
+        activeFeature,
+        feature,
+        featureCollection?.source,
+        "infoClick"
+      );
+
       // Set active collection and feature accordingly
       this.setState({
         activeFeatureCollection: featureCollection,
@@ -509,7 +518,27 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   setActiveFeature = (feature) => {
+    this.handleActiveFeatureChange(
+      this.state.activeFeature,
+      feature,
+      this.state.activeFeatureCollection?.source
+    );
     this.setState({ activeFeature: feature, filterInputFieldOpen: false });
+  };
+
+  handleActiveFeatureChange = (
+    currentFeature,
+    nextFeature,
+    nextSource,
+    initiator
+  ) => {
+    const { localObserver } = this.props;
+    localObserver.publish("searchResultList.handleActiveFeatureChange", {
+      currentFeature: currentFeature,
+      nextFeature: nextFeature,
+      nextSource: nextSource,
+      initiator: initiator,
+    });
   };
 
   setActiveFeatureCollection = (featureCollection) => {
@@ -521,6 +550,7 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   resetFeatureAndCollection = () => {
+    this.handleActiveFeatureChange(this.state.activeFeature);
     this.setState({
       activeFeatureCollection: undefined,
       activeFeature: undefined,

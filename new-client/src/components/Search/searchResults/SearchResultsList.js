@@ -35,15 +35,15 @@ class SearchResultsList extends React.PureComponent {
       this.clearAllSelectedFeatures
     );
     localObserver.subscribe(
-      "searchResultList.handleFeatureTogglerClicked",
-      this.handleFeatureTogglerClicked
+      "searchResultList.handleActiveFeatureChange",
+      this.handleActiveFeatureChange
     );
   };
 
   componentWillUnmount = () => {
     const { localObserver } = this.props;
     localObserver.unsubscribe("searchResultList.clearAllSelectedFeatures");
-    localObserver.unsubscribe("searchResultList.handleFeatureTogglerClicked");
+    localObserver.unsubscribe("searchResultList.handleActiveFeatureChange");
   };
 
   componentDidMount = () => {
@@ -62,48 +62,6 @@ class SearchResultsList extends React.PureComponent {
     }
     const selectedItem = selectedItems[currentFeatureIndex];
     return selectedItem?.from !== "userSelect";
-  };
-
-  handleFeatureTogglerClicked = (currenAndNextInfo) => {
-    const { setActiveFeature, localObserver } = this.props;
-    const displayFields = currenAndNextInfo?.source?.displayFields ?? [];
-    const currentFeatureIndex = this.getFeatureSelectedIndex(
-      currenAndNextInfo.currentFeature
-    );
-    const nextFeatureIndex = this.getFeatureSelectedIndex(
-      currenAndNextInfo.nextFeature
-    );
-    const selectedItems = [...this.state.selectedItems];
-
-    if (this.shouldRemoveSelectionFromCurrent(currentFeatureIndex)) {
-      selectedItems.splice(currentFeatureIndex, 1);
-    }
-    if (nextFeatureIndex === -1) {
-      selectedItems.push({
-        featureId: currenAndNextInfo.nextFeature.id,
-        displayFields: displayFields,
-        from: "toggler",
-      });
-    }
-    this.setState(
-      {
-        selectedItems: selectedItems,
-      },
-      () => {
-        if (this.props.width === "xs" || this.props.width === "sm") {
-          localObserver.publish("minimizeSearchResultList");
-        }
-        localObserver.publish(
-          "map.highlightFeaturesByIds",
-          this.state.selectedItems
-        );
-        localObserver.publish(
-          "map.zoomToFeaturesByIds",
-          this.state.selectedItems
-        );
-        setActiveFeature(currenAndNextInfo.nextFeature);
-      }
-    );
   };
 
   handleSingleSearchResult = () => {
@@ -149,50 +107,117 @@ class SearchResultsList extends React.PureComponent {
   };
 
   getFeatureSelectedIndex = (feature) => {
-    return this.state.selectedItems.findIndex(
-      (item) => item.featureId === feature.id
-    );
+    return !feature
+      ? -1
+      : this.state.selectedItems.findIndex(
+          (item) => item.featureId === feature.id
+        );
   };
 
-  showClickResultInMap = (feature, source, from) => {
+  handleFeatureSelectionToggled = (feature, source) => {
     const { localObserver } = this.props;
     const currentIndex = this.getFeatureSelectedIndex(feature);
-
     const selectedItems = [...this.state.selectedItems];
-    const displayFields = source.displayFields ? source.displayFields : [];
 
-    if (currentIndex === -1) {
+    if (currentIndex !== -1) {
+      selectedItems.splice(currentIndex, 1);
+    } else {
+      const displayFields = source.displayFields ? source.displayFields : [];
       selectedItems.push({
         featureId: feature.id,
         displayFields: displayFields,
-        from: from,
+        from: "userSelect",
       });
-    } else {
-      selectedItems.splice(currentIndex, 1);
     }
 
-    this.setState(
-      {
-        selectedItems: selectedItems,
-      },
-      () => {
-        if (this.props.width === "xs" || this.props.width === "sm") {
-          localObserver.publish("minimizeSearchResultList");
-        }
-        localObserver.publish(
-          "map.highlightFeaturesByIds",
-          this.state.selectedItems
-        );
-        localObserver.publish(
-          "map.zoomToFeaturesByIds",
-          this.state.selectedItems
-        );
-      }
+    this.setState({ selectedItems: selectedItems });
+    localObserver.publish("map.highlightFeaturesByIds", selectedItems);
+    localObserver.publish("map.zoomToFeaturesByIds", selectedItems);
+  };
+
+  handleActiveFeatureChange = (update) => {
+    const { currentFeature, nextFeature, nextSource, initiator } = update;
+    const { localObserver } = this.props;
+    const shouldZoomToFeature = initiator !== "infoClick";
+
+    if (!nextFeature) {
+      return this.handleCurrentFeatureReset(currentFeature);
+    }
+
+    const selectedItems = this.removeCurrentAndAddNextToSelection(
+      currentFeature,
+      nextFeature,
+      nextSource
+    );
+
+    this.setState({ selectedItems: selectedItems });
+    if (shouldZoomToFeature) {
+      localObserver.publish("map.zoomToFeaturesByIds", [
+        selectedItems[selectedItems.length - 1],
+      ]);
+    }
+    localObserver.publish("map.highlightFeaturesByIds", selectedItems);
+  };
+
+  removeCurrentAndAddNextToSelection = (
+    currentFeature,
+    nextFeature,
+    nextSource
+  ) => {
+    const selectedItems = [...this.state.selectedItems];
+    const currentIndex = this.getFeatureSelectedIndex(currentFeature);
+    const displayFields = nextSource?.displayFields
+      ? nextSource.displayFields
+      : [];
+
+    if (this.currentAndNextFeatureIsSame(currentFeature, nextFeature)) {
+      return selectedItems;
+    }
+    if (this.shouldRemoveCurrentFromSelection(currentIndex)) {
+      selectedItems.splice(currentIndex, 1);
+    }
+    if (this.shouldAddNextToCollection(nextFeature)) {
+      selectedItems.push({
+        featureId: nextFeature.id,
+        displayFields: displayFields,
+        from: "showDetails",
+      });
+    }
+    return selectedItems;
+  };
+
+  currentAndNextFeatureIsSame = (currentFeature, nextFeature) => {
+    const currentIndex = this.getFeatureSelectedIndex(currentFeature);
+    const nextIndex = this.getFeatureSelectedIndex(nextFeature);
+    return nextIndex !== -1 && currentIndex === nextIndex;
+  };
+
+  shouldAddNextToCollection = (nextFeature) => {
+    const nextIndex = this.getFeatureSelectedIndex(nextFeature);
+    return nextFeature && nextIndex === -1;
+  };
+
+  shouldRemoveCurrentFromSelection = (currentIndex) => {
+    const { selectedItems } = this.state;
+    return (
+      currentIndex !== -1 && selectedItems[currentIndex].from !== "userSelect"
     );
   };
 
+  handleCurrentFeatureReset = (currentFeature) => {
+    const { localObserver } = this.props;
+    const currentFeatureIndex = this.getFeatureSelectedIndex(currentFeature);
+    const selectedItems = [...this.state.selectedItems];
+    if (this.shouldRemoveCurrentFromSelection(currentFeatureIndex)) {
+      selectedItems.splice(currentFeatureIndex, 1);
+    }
+    this.setState({ selectedItems: selectedItems });
+    localObserver.publish("map.highlightFeaturesByIds", selectedItems);
+    localObserver.publish("map.zoomToFeaturesByIds", selectedItems);
+  };
+
   handleOnFeatureClick = (feature) => {
-    const { app, setActiveFeature, activeFeatureCollection } = this.props;
+    const { app, setActiveFeature } = this.props;
     if (feature.onClickName) {
       app.globalObserver.publish(
         `search.featureClicked.${feature.onClickName}`,
@@ -200,13 +225,6 @@ class SearchResultsList extends React.PureComponent {
       );
     } else {
       setActiveFeature(feature);
-      if (this.getFeatureSelectedIndex(feature) === -1) {
-        this.showClickResultInMap(
-          feature,
-          activeFeatureCollection.source,
-          "showDetails"
-        );
-      }
     }
   };
 
@@ -257,7 +275,7 @@ class SearchResultsList extends React.PureComponent {
         featureCollection={featureCollection}
         getOriginBasedIcon={getOriginBasedIcon}
         selectedItems={this.state.selectedItems}
-        showClickResultInMap={this.showClickResultInMap}
+        handleFeatureSelectionToggled={this.handleFeatureSelectionToggled}
         activeFeatureCollection={activeFeatureCollection}
         activeFeature={activeFeature}
         handleFeatureCollectionClick={handleFeatureCollectionClick}
