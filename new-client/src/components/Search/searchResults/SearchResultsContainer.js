@@ -660,7 +660,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderHeaderInfoBar = (featureCollectionTitle) => {
     const { activeFeatureCollection } = this.state;
-    const { classes, getOriginBasedIcon } = this.props;
+    const { classes } = this.props;
     return (
       <Grid
         container
@@ -677,8 +677,6 @@ class SearchResultsContainer extends React.PureComponent {
           alignItems="center"
           xs={this.state.showTools ? 5 : 11}
         >
-          {activeFeatureCollection &&
-            getOriginBasedIcon(activeFeatureCollection.origin)}
           <Tooltip
             title={
               activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
