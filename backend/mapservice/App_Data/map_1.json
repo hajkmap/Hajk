@@ -91,8 +91,6 @@
         "title": "Sök",
         "position": "left",
         "visibleAtStart": true,
-        "width": 450,
-        "height": 350,
         "mapColors": {
           "searchFillColor": {
             "r": 220,
@@ -486,7 +484,7 @@
         "renderElsewhere": true,
         "tooltip": "Sök i kartlager",
         "searchWithinButtonText": "Markera i kartan",
-        "maxFeatures": 100,
+        "maxResultsPerDataset": 5000,
         "delayBeforeAutoSearch": 500,
         "selectedSources": ["8", "7", "30", "27", "32", "34", "33", "14", "18"],
         "layers": [
