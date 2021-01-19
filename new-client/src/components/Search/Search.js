@@ -75,7 +75,7 @@ class Search extends React.PureComponent {
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök med yta",
+      name: "Sök med objekt",
       icon: <TouchAppIcon />,
       type: "Select",
       disabled: this.props.options.selectSearchDisabled ?? false,
