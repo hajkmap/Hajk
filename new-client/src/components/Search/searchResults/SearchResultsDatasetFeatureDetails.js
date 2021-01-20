@@ -10,48 +10,48 @@ import {
   Typography,
   Grid,
   Button,
-  Tooltip,
+  Tooltip
 } from "@material-ui/core";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 
-const styles = (theme) => ({
+const styles = theme => ({
   tableCell: {
     paddingLeft: 0,
     wordBreak: "break-all",
-    width: "50%",
+    width: "50%"
   },
   allFeatureDetailsContainer: {
     maxWidth: "100%",
     paddingLeft: theme.spacing(1),
-    paddingRight: theme.spacing(1),
+    paddingRight: theme.spacing(1)
   },
   headerTypography: {
     maxWidth: "100%",
-    fontSize: 18,
+    fontSize: 18
   },
   headerContainer: {
-    paddingTop: theme.spacing(1),
+    paddingTop: theme.spacing(1)
   },
   togglerButton: {
     minWidth: 26,
-    padding: 0,
+    padding: 0
   },
   togglerButtonIcon: {
-    color: theme.palette.text.primary,
-  },
+    color: theme.palette.text.primary
+  }
 });
 
 class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   state = {
-    infoBox: null,
+    infoBox: null
   };
 
   constructor(props) {
     super(props);
 
     this.featurePropsParsing = new FeaturePropsParsing({
-      globalObserver: props.app.globalObserver,
+      globalObserver: props.app.globalObserver
     });
   }
 
@@ -59,7 +59,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     this.getInfoBox();
   };
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     const { feature } = this.props;
     const prevFeature = prevProps.feature;
     if (feature !== prevFeature) {
@@ -87,7 +87,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     );
     this.featurePropsParsing
       .mergeFeaturePropsWithMarkdown(source.infobox, feature.properties)
-      .then((featureInfo) => {
+      .then(featureInfo => {
         this.setState({ infoBox: this.renderCustomInfoBox(featureInfo) });
       });
   };
@@ -130,7 +130,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     );
   };
 
-  renderCustomInfoBox = (featureInfo) => {
+  renderCustomInfoBox = featureInfo => {
     return featureInfo.map((element, index) => {
       if (typeof element == "string") {
         return <Typography key={index}>{element}</Typography>;
@@ -139,7 +139,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     });
   };
 
-  handleTogglerPressed = (nextFeatureIndex) => {
+  handleTogglerPressed = nextFeatureIndex => {
     const { setActiveFeature, features } = this.props;
     const nextFeature = features[nextFeatureIndex];
     setActiveFeature(nextFeature);
@@ -147,7 +147,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
 
   getFeatureIndex = (feature, features) => {
     return (
-      features?.findIndex((f) => {
+      features?.findIndex(f => {
         return f.id === feature.id;
       }) ?? -1
     );
@@ -238,9 +238,10 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   render() {
-    const { classes, features } = this.props;
+    const { classes, features, enableFeatureToggler } = this.props;
     const { infoBox } = this.state;
-    const shouldRenderToggler = features?.length > 1;
+    const shouldRenderToggler =
+      (enableFeatureToggler ?? true) && features?.length > 1;
     return (
       <Grid container className={classes.allFeatureDetailsContainer}>
         <Grid container alignItems="center" className={classes.headerContainer}>
