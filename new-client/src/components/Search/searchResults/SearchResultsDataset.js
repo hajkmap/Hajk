@@ -30,6 +30,15 @@ class SearchResultsDataset extends React.PureComponent {
   delayBeforeShowingPreview = 800; //Delay before showing preview popper in ms
   previewTimer = null; // Timer to keep track of when delay has passed
 
+  componentDidUpdate = (prevProps) => {
+    const { featureFilter } = this.props;
+    const prevFeatureFilter = prevProps.featureFilter;
+    if (featureFilter !== prevFeatureFilter) {
+      clearTimeout(this.previewTimer);
+      this.setState({ previewAnchorEl: undefined, previewFeature: undefined });
+    }
+  };
+
   setPreviewFeature = (e, feature) => {
     const target = e.currentTarget;
     clearTimeout(this.previewTimer);
@@ -66,10 +75,10 @@ class SearchResultsDataset extends React.PureComponent {
             .includes(featureFilter.toLowerCase());
         }
       );
-      return filteredFeatures;
+      return filteredFeatures ?? [];
     }
     // Filter length is zero? Return all features
-    return featureCollection.value.features;
+    return featureCollection.value.features ?? [];
   };
 
   getSortedFeatures = (features) => {
@@ -88,7 +97,7 @@ class SearchResultsDataset extends React.PureComponent {
     }
   };
 
-  renderFeatureDetails = () => {
+  renderFeatureDetails = (features) => {
     const {
       featureCollection,
       app,
@@ -101,6 +110,7 @@ class SearchResultsDataset extends React.PureComponent {
     return (
       <SearchResultsDatasetFeatureDetails
         feature={activeFeature}
+        features={features}
         setActiveFeature={setActiveFeature}
         featureTitle={getFeatureTitle(activeFeature)}
         featureCollection={featureCollection}
@@ -111,7 +121,7 @@ class SearchResultsDataset extends React.PureComponent {
     );
   };
 
-  renderFeatureList = () => {
+  renderFeatureList = (features) => {
     const {
       featureCollection,
       classes,
@@ -125,7 +135,7 @@ class SearchResultsDataset extends React.PureComponent {
       getFeatureTitle,
     } = this.props;
 
-    const features = this.getFilteredFeatures();
+    //const features = this.getFilteredFeatures();
     const sortedFeatures = this.getSortedFeatures(features);
     return (
       <>
@@ -188,9 +198,11 @@ class SearchResultsDataset extends React.PureComponent {
       // will be taken care of somewhere else.
       activeFeature && !activeFeature.onClickName;
 
+    const features = this.getFilteredFeatures();
+
     return shouldRenderFeatureDetails
-      ? this.renderFeatureDetails()
-      : this.renderFeatureList();
+      ? this.renderFeatureDetails(features)
+      : this.renderFeatureList(features);
   };
 
   renderSearchResultPreview = () => {

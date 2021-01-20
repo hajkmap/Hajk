@@ -100,7 +100,10 @@ class MapViewModel {
       "map.addAndHighlightFeatureInSearchResultLayer",
       this.addAndHighlightFeatureInSearchResultLayer
     );
-
+    this.localObserver.subscribe(
+      "map.updateFeaturesAfterFilterChange",
+      this.updateFeaturesAfterFilterChange
+    );
     // Global subscriptions
     this.app.globalObserver.subscribe(
       "search.spatialSearchActivated",
@@ -114,6 +117,20 @@ class MapViewModel {
         }
       }
     );
+  };
+
+  updateFeaturesAfterFilterChange = (featureInfo) => {
+    const { features, featureIds } = featureInfo;
+    this.resultSource.forEachFeature((feature) => {
+      if (featureIds.indexOf(feature.getId()) === -1) {
+        this.resultSource.removeFeature(feature);
+      }
+    });
+    features.forEach((feature) => {
+      if (!this.resultSource.getFeatureById(feature.id)) {
+        this.resultSource.addFeature(new GeoJSON().readFeature(feature));
+      }
+    });
   };
 
   fitMapToSearchResult = () => {

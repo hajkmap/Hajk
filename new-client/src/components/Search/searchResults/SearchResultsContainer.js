@@ -92,6 +92,12 @@ class SearchResultsContainer extends React.PureComponent {
     showTools: false,
   };
 
+  // Used for setTimeout/clearTimeout, in order to delay filter update when user is typing
+  filterInputTimer = null;
+
+  // Amount of time before filter changes is committed
+  delayBeforeFilterCommit = 300;
+
   searchResultTools = [
     {
       name: "Filtrera",
@@ -187,6 +193,7 @@ class SearchResultsContainer extends React.PureComponent {
       this.setState({
         activeFeatureCollection: featureCollection,
         activeFeature: feature,
+        filterInputFieldOpen: false,
       });
     });
   };
@@ -229,18 +236,28 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   handleFilterTextFieldInputChange = (e) => {
+    const filterInput = e.target.value;
+    this.updateViewFilters(filterInput);
+
+    clearTimeout(this.filterInputTimer);
+    this.filterInputTimer = setTimeout(() => {
+      this.handleFilterUpdate();
+    }, this.delayBeforeFilterCommit);
+  };
+
+  updateViewFilters = (filterInput) => {
     // If we don't have a collection active, we know
     // that the filter is intended for the collections
     if (!this.state.activeFeatureCollection) {
       this.setState({
-        featureCollectionFilter: e.target.value,
+        featureCollectionFilter: filterInput,
       });
     } else {
       // If we DO have a collection active, we know that
       // the filter is intended for the features in the active
       // collection
       this.setState({
-        featureFilter: e.target.value,
+        featureFilter: filterInput,
       });
     }
   };
@@ -542,19 +559,30 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   setActiveFeatureCollection = (featureCollection) => {
-    this.setState({
-      activeFeatureCollection: featureCollection,
-      filterInputFieldOpen: false,
-      featureFilter: "",
-    });
+    this.setState(
+      {
+        activeFeatureCollection: featureCollection,
+        filterInputFieldOpen: false,
+        featureFilter: "",
+      },
+      () => {
+        this.handleFilterUpdate();
+      }
+    );
   };
 
   resetFeatureAndCollection = () => {
     this.handleActiveFeatureChange(this.state.activeFeature);
-    this.setState({
-      activeFeatureCollection: undefined,
-      activeFeature: undefined,
-    });
+    this.setState(
+      {
+        activeFeatureCollection: undefined,
+        activeFeature: undefined,
+        featureFilter: "",
+      },
+      () => {
+        this.handleFilterUpdate();
+      }
+    );
   };
 
   handleFeatureCollectionClick = (featureCollection) => {
@@ -618,6 +646,43 @@ class SearchResultsContainer extends React.PureComponent {
 
   keyPressIsEnter = (event) => {
     return event.which === 13 || event.keyCode === 13;
+  };
+
+  getFilteredFeatures = (featureCollections) => {
+    const { activeFeatureCollection, featureFilter } = this.state;
+    return featureCollections
+      .map((fc) => {
+        if (activeFeatureCollection) {
+          if (fc.source.id === activeFeatureCollection.source.id) {
+            return fc.value.features.filter((f) => {
+              const featureTitle = this.getFeatureTitle(f);
+              return featureTitle
+                .toLowerCase()
+                .includes(featureFilter.toLowerCase());
+            });
+          }
+        }
+        return fc.value.features;
+      })
+      .flat();
+  };
+
+  handleFilterUpdate = () => {
+    const { localObserver, featureCollections } = this.props;
+    const filteredFeatureCollections = this.getFilteredFeatureCollections(
+      featureCollections
+    );
+    const currentFeatures = this.getFilteredFeatures(
+      filteredFeatureCollections
+    );
+    const currentFeatureIds = currentFeatures.map((feature) => {
+      return feature.id;
+    });
+
+    localObserver.publish("map.updateFeaturesAfterFilterChange", {
+      features: currentFeatures,
+      featureIds: currentFeatureIds,
+    });
   };
 
   renderBreadCrumbs = (featureCollectionTitle, featureTitle) => {
