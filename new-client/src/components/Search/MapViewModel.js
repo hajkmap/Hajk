@@ -24,6 +24,10 @@ class MapViewModel {
 
   ctrlKeyPressed = false;
 
+  // An object holding the last highlightInformation.
+  // We use this to restore highlight after filter changes.
+  lastFeaturesInfo = [];
+
   getDefaultStyle = () => {
     const fill = new Fill({
       color: "rgba(255,255,255,0.4)",
@@ -131,6 +135,7 @@ class MapViewModel {
         this.resultSource.addFeature(new GeoJSON().readFeature(feature));
       }
     });
+    this.highlightFeaturesInMap(this.lastFeaturesInfo);
   };
 
   fitMapToSearchResult = () => {
@@ -189,12 +194,13 @@ class MapViewModel {
   };
 
   highlightFeaturesInMap = (featuresInfo) => {
+    this.lastFeaturesInfo = featuresInfo;
     this.resetStyleForFeaturesInResultSource();
     featuresInfo.map((featureInfo) => {
       const feature = this.getFeatureFromResultSourceById(
         featureInfo.featureId
       );
-      return feature.setStyle(
+      return feature?.setStyle(
         this.featureStyle.getHighlightedStyle(
           feature,
           featureInfo.displayFields
@@ -220,14 +226,19 @@ class MapViewModel {
     let extent = createEmpty();
 
     //BoundingExtent-function gave wrong coordinates for some
-    featuresInfo.forEach((featureInfo) =>
-      extend(
-        extent,
-        this.getFeatureFromResultSourceById(featureInfo.featureId)
-          .getGeometry()
-          .getExtent()
-      )
-    );
+    featuresInfo.forEach((featureInfo) => {
+      const feature = this.getFeatureFromResultSourceById(
+        featureInfo.featureId
+      );
+      if (feature) {
+        extend(
+          extent,
+          this.getFeatureFromResultSourceById(featureInfo.featureId)
+            .getGeometry()
+            .getExtent()
+        );
+      }
+    });
     const extentToZoomTo = isEmpty(extent)
       ? this.resultSource.getExtent()
       : extent;
