@@ -9,6 +9,7 @@ import SortIcon from "@material-ui/icons/Sort";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import CloseIcon from "@material-ui/icons/Close";
 import DeleteIcon from "@material-ui/icons/Delete";
+import ClearIcon from "@material-ui/icons/Clear";
 import {
   Paper,
   Button,
@@ -20,6 +21,7 @@ import {
   Menu,
   MenuItem,
   Grow,
+  IconButton,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
@@ -262,6 +264,28 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
+  clearViewFilters = () => {
+    if (!this.state.activeFeatureCollection) {
+      this.setState(
+        {
+          featureCollectionFilter: "",
+        },
+        () => {
+          this.handleFilterUpdate();
+        }
+      );
+    } else {
+      this.setState(
+        {
+          featureFilter: "",
+        },
+        () => {
+          this.handleFilterUpdate();
+        }
+      );
+    }
+  };
+
   renderFilterInputField = () => {
     const { classes } = this.props;
     const {
@@ -269,6 +293,8 @@ class SearchResultsContainer extends React.PureComponent {
       featureFilter,
       featureCollectionFilter,
     } = this.state;
+    const showClearFilterButton =
+      featureFilter.length > 0 || featureCollectionFilter.length > 0;
     return (
       <Grid item className={classes.filterInputFieldContainer} xs={12}>
         <Typography variant="srOnly">
@@ -284,6 +310,16 @@ class SearchResultsContainer extends React.PureComponent {
           size="small"
           variant="outlined"
           label="Filtrera sökresultaten"
+          InputProps={{
+            endAdornment: showClearFilterButton && (
+              <Tooltip title="Rensa filtret">
+                <IconButton onClick={this.clearViewFilters} size="small">
+                  <Typography variant="srOnly">Rensa filtret</Typography>
+                  <ClearIcon />
+                </IconButton>
+              </Tooltip>
+            ),
+          }}
         ></TextField>
       </Grid>
     );
