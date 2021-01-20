@@ -496,22 +496,6 @@ class ConfigService {
     }
   }
 
-  async getAvailableADGroups() {
-    try {
-      return ad.getAvailableADGroups();
-    } catch (error) {
-      return { error };
-    }
-  }
-
-  async findCommonADGroupsForUsers(users) {
-    try {
-      return ad.findCommonADGroupsForUsers(users);
-    } catch (error) {
-      return { error };
-    }
-  }
-
   /**
    * @summary Duplicate a specified map
    *

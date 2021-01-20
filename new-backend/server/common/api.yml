@@ -383,7 +383,7 @@ paths:
         200:
           description: Success
           content: {}
-  /config/availableadgroups:
+  /ad/availableadgroups:
     get:
       tags:
         - Admin - ActiveDirectory
@@ -392,7 +392,7 @@ paths:
         200:
           description: Success
           content: {}
-  /config/findcommonadgroupsforusers:
+  /ad/findcommonadgroupsforusers:
     get:
       tags:
         - Admin - ActiveDirectory

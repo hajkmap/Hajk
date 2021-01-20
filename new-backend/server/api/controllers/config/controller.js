@@ -36,17 +36,5 @@ export class Controller {
       ad.getUserFromRequestHeader(req)
     ).then((data) => handleStandardResponse(res, data));
   }
-
-  availableADGroups(req, res) {
-    ConfigService.getAvailableADGroups().then((data) =>
-      handleStandardResponse(res, data)
-    );
-  }
-
-  findCommonADGroupsForUsers(req, res) {
-    ConfigService.findCommonADGroupsForUsers(req.query.users).then((data) =>
-      handleStandardResponse(res, data)
-    );
-  }
 }
 export default new Controller();
