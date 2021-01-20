@@ -88,7 +88,7 @@
         "target": "toolbar",
         "searchImplemented": true,
         "abstract": "VTSEARCH",
-        "title": "Sök",
+        "title": "Sökverktyg",
         "position": "left",
         "visibleAtStart": true,
         "mapColors": {
@@ -463,8 +463,41 @@
     {
       "type": "search",
       "options": {
+        "layers": [
+          {
+            "id": "101",
+            "visibleForGroups": []
+          },
+          {
+            "id": "102",
+            "visibleForGroups": []
+          }
+        ],
+        "visibleForGroups": [],
+        "maxResultsPerDataset": 5000,
         "anchor": [16, 32],
         "scale": 0.15,
+        "markerImg": "marker.png",
+        "delayBeforeAutoSearch": 500,
+        "searchBarPlaceholder": "Skriv här för att söka...",
+        "enablePolygonSearch": true,
+        "enableRadiusSearch": true,
+        "enableSelectSearch": false,
+        "enableExtentSearch": false,
+        "enableResultsFiltering": true,
+        "enableResultsSorting": true,
+        "enableResultsSelectionClearing": true,
+        "enableResultsDownloading": true,
+        "enableFeaturePreview": true,
+        "enableLabelOnHighlight": true,
+        "showResultFeaturesInMap": true,
+        "enableFeatureToggler": true,
+        "highlightTextStroke": "rgba(0, 0, 0, 1)",
+        "highlightTextFill": "rgba(255, 255, 255, 1)",
+        "highlightFillColor": "rgba(200, 0, 0, 0.5)",
+        "highlightStrokeColor": "rgba(200, 0, 0, 0.7)",
+        "drawFillColor": "rgba(0, 150, 238, 0.2)",
+        "drawStrokeColor": "rgba(0, 60, 94, 0.5)",
         "strokeColor": {
           "r": 244,
           "g": 83,
@@ -484,20 +517,7 @@
         "renderElsewhere": true,
         "tooltip": "Sök i kartlager",
         "searchWithinButtonText": "Markera i kartan",
-        "maxResultsPerDataset": 5000,
-        "delayBeforeAutoSearch": 500,
-        "selectedSources": ["8", "7", "30", "27", "32", "34", "33", "14", "18"],
-        "layers": [
-          {
-            "id": "101",
-            "visibleForGroups": []
-          },
-          {
-            "id": "102",
-            "visibleForGroups": []
-          }
-        ],
-        "visibleForGroups": []
+        "selectedSources": ["8", "7", "30", "27", "32", "34", "33", "14", "18"]
       },
       "index": 11
     },
@@ -603,8 +623,8 @@
     "center": [319378, 6398504],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 3,
-    "maxZoom": 10,
+    "zoom": 4,
+    "maxZoom": 9,
     "minZoom": 0,
     "resolutions": [
       4096.0,
