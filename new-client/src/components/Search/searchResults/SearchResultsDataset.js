@@ -96,10 +96,12 @@ class SearchResultsDataset extends React.PureComponent {
       activeFeature,
       getFeatureTitle,
       localObserver,
+      setActiveFeature,
     } = this.props;
     return (
       <SearchResultsDatasetFeatureDetails
         feature={activeFeature}
+        setActiveFeature={setActiveFeature}
         featureTitle={getFeatureTitle(activeFeature)}
         featureCollection={featureCollection}
         app={app}
@@ -115,7 +117,7 @@ class SearchResultsDataset extends React.PureComponent {
       classes,
       app,
       selectedItems,
-      showClickResultInMap,
+      handleFeatureSelectionToggled,
       activeFeature,
       handleOnFeatureClick,
       handleOnFeatureKeyPress,
@@ -164,7 +166,7 @@ class SearchResultsDataset extends React.PureComponent {
                     selectedItems.findIndex((item) => item.featureId === f.id) >
                     -1
                   }
-                  showClickResultInMap={showClickResultInMap}
+                  handleFeatureSelectionToggled={handleFeatureSelectionToggled}
                   activeFeature={activeFeature}
                   getOriginBasedIcon={getOriginBasedIcon}
                 />

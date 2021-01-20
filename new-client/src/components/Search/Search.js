@@ -75,7 +75,7 @@ class Search extends React.PureComponent {
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök med yta",
+      name: "Sök med objekt",
       icon: <TouchAppIcon />,
       type: "Select",
       disabled: this.props.options.selectSearchDisabled ?? false,
@@ -136,17 +136,6 @@ class Search extends React.PureComponent {
   };
 
   bindSubscriptions = () => {
-    this.localObserver.subscribe("on-draw-end", (feature) => {
-      this.props.closeSnackbar(this.snackbarKey);
-      this.setFeaturesToFilter([feature]);
-      this.doSearch();
-    });
-    this.localObserver.subscribe("search-with-features", (features) => {
-      this.props.closeSnackbar(this.snackbarKey);
-      this.setFeaturesToFilter(features);
-      this.doSearch();
-      this.setState({ searchActive: "draw" });
-    });
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
@@ -167,6 +156,9 @@ class Search extends React.PureComponent {
       }
       this.setState({ searchActive: "draw" });
     });
+    this.localObserver.subscribe("on-draw-end", (feature) => {
+      this.doFeaturesSearch([feature]);
+    });
     this.localObserver.subscribe("on-select-search-start", () => {
       this.snackbarKey = this.props.enqueueSnackbar(
         "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
@@ -176,7 +168,14 @@ class Search extends React.PureComponent {
         }
       );
 
-      this.setState({ searchActive: "draw" });
+      this.setState({ searchActive: "selectSearch" });
+    });
+    this.localObserver.subscribe("on-search-selection-done", (features) => {
+      this.doFeaturesSearch(features);
+    });
+    this.localObserver.subscribe("search-within-extent", (features) => {
+      this.setState({ searchActive: "extentSearch" });
+      this.doFeaturesSearch(features);
     });
     this.localObserver.subscribe("minimizeSearchResultList", () => {
       this.setState({ resultPanelCollapsed: false });
@@ -190,6 +189,12 @@ class Search extends React.PureComponent {
         }
       );
     });
+  };
+
+  doFeaturesSearch = (features) => {
+    this.props.closeSnackbar(this.snackbarKey);
+    this.setFeaturesToFilter(features);
+    this.doSearch();
   };
 
   getPluginsConfToUseSearchInterface = () => {
