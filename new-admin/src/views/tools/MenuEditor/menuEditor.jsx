@@ -577,7 +577,7 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="drawerTitle">
-              Panel titel{" "}
+              Paneltitel{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
@@ -597,7 +597,7 @@ class ToolOptions extends Component {
 
           <div>
             <label htmlFor="drawerButtonTitle">
-              Knapp titel{" "}
+              Knapptitel{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
@@ -654,8 +654,8 @@ class ToolOptions extends Component {
               checked={this.state.closePanelOnMapLinkOpen}
             />
             &nbsp;
-            <label htmlFor="closePanelOnMapLinkOpen">
-              Stäng panel vid kartlänk klick
+            <label style={{ width: "200px" }} htmlFor="closePanelOnMapLinkOpen">
+              Stäng dokumentfönster vid klick på kartlänk
             </label>
           </div>
 
@@ -679,7 +679,7 @@ class ToolOptions extends Component {
               checked={this.state.tableOfContents.active}
             />
             &nbsp;
-            <label htmlFor="tableOfContentsActive">Active</label>
+            <label htmlFor="tableOfContentsActive">Aktiverad</label>
           </div>
 
           <div>
@@ -700,7 +700,7 @@ class ToolOptions extends Component {
               checked={this.state.tableOfContents.expanded}
             />
             &nbsp;
-            <label htmlFor="tableOfContentsExpanded">Expanderat</label>
+            <label htmlFor="tableOfContentsExpanded">Expanderad</label>
           </div>
 
           <div>
@@ -730,7 +730,7 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="chapterLevelsToShow">
-              Kaptitel nivåer{" "}
+              Antal kapitelnivåer{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
@@ -758,7 +758,7 @@ class ToolOptions extends Component {
           <div className="separator">Utseende inställningar</div>
           <div>
             <label htmlFor="textAreaBackgroundColor">
-              Textområde bakgrundfärg{" "}
+              Bakgrundsfärg på faktaruta{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
@@ -786,7 +786,7 @@ class ToolOptions extends Component {
 
           <div>
             <label htmlFor="textAreaDividerColor">
-              Textområde skiljelinje färg{" "}
+              Kantfärg på faktaruta{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
@@ -837,8 +837,8 @@ class ToolOptions extends Component {
                   </Grid>
                 </Grid>
               ) : (
-                  <></>
-                )}
+                <></>
+              )}
             </Modal>
           </section>
         </form>
