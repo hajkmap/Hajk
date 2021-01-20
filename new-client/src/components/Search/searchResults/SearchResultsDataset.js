@@ -10,27 +10,27 @@ const styles = () => ({
   featureList: {
     padding: 0,
     width: "100%",
-    transition: "none"
+    transition: "none",
   },
   featureListItem: {
     width: "100%",
     display: "flex",
     padding: 0,
-    transition: "none"
-  }
+    transition: "none",
+  },
 });
 
 class SearchResultsDataset extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
   state = {
     previewFeature: undefined, // Feature to show in preview
-    popOverAnchorEl: undefined // The element which the preview popper will anchor to
+    popOverAnchorEl: undefined, // The element which the preview popper will anchor to
   };
 
   delayBeforeShowingPreview = 800; //Delay before showing preview popper in ms
   previewTimer = null; // Timer to keep track of when delay has passed
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     const { featureFilter } = this.props;
     const prevFeatureFilter = prevProps.featureFilter;
     if (featureFilter !== prevFeatureFilter) {
@@ -45,7 +45,7 @@ class SearchResultsDataset extends React.PureComponent {
     this.previewTimer = setTimeout(() => {
       this.setState({
         previewAnchorEl: target,
-        previewFeature: feature
+        previewFeature: feature,
       });
     }, this.delayBeforeShowingPreview);
   };
@@ -55,7 +55,7 @@ class SearchResultsDataset extends React.PureComponent {
     if (this.state.previewFeature)
       this.setState({
         previewAnchorEl: undefined,
-        previewFeature: undefined
+        previewFeature: undefined,
       });
   };
 
@@ -66,7 +66,7 @@ class SearchResultsDataset extends React.PureComponent {
     if (featureFilter.length > 0) {
       // Filter all features in the collection
       const filteredFeatures = featureCollection.value.features.filter(
-        feature => {
+        (feature) => {
           // Returning the features having a title including
           // the filter string
           const featureTitle = getFeatureTitle(feature);
@@ -81,7 +81,7 @@ class SearchResultsDataset extends React.PureComponent {
     return featureCollection.value.features ?? [];
   };
 
-  getSortedFeatures = features => {
+  getSortedFeatures = (features) => {
     const { featureSortingStrategy, getFeatureTitle } = this.props;
 
     const featuresAtoZSorted = features.sort((a, b) =>
@@ -97,7 +97,7 @@ class SearchResultsDataset extends React.PureComponent {
     }
   };
 
-  renderFeatureDetails = features => {
+  renderFeatureDetails = (features) => {
     const {
       featureCollection,
       app,
@@ -106,7 +106,7 @@ class SearchResultsDataset extends React.PureComponent {
       getFeatureTitle,
       localObserver,
       setActiveFeature,
-      enableFeatureToggler
+      enableFeatureToggler,
     } = this.props;
     return (
       <SearchResultsDatasetFeatureDetails
@@ -123,7 +123,7 @@ class SearchResultsDataset extends React.PureComponent {
     );
   };
 
-  renderFeatureList = features => {
+  renderFeatureList = (features) => {
     const {
       featureCollection,
       classes,
@@ -134,7 +134,7 @@ class SearchResultsDataset extends React.PureComponent {
       handleOnFeatureClick,
       handleOnFeatureKeyPress,
       getOriginBasedIcon,
-      getFeatureTitle
+      getFeatureTitle,
     } = this.props;
 
     //const features = this.getFilteredFeatures();
@@ -145,7 +145,7 @@ class SearchResultsDataset extends React.PureComponent {
           className={classes.featureList}
           id={`search-result-dataset-details-${featureCollection.source.id}`}
         >
-          {sortedFeatures.map(f => {
+          {sortedFeatures.map((f) => {
             const featureTitle = getFeatureTitle(f);
             return (
               <ListItem
@@ -158,9 +158,9 @@ class SearchResultsDataset extends React.PureComponent {
                   this.resetPreview();
                   handleOnFeatureClick(f);
                 }}
-                onKeyDown={event => handleOnFeatureKeyPress(event, f)}
+                onKeyDown={(event) => handleOnFeatureKeyPress(event, f)}
                 onMouseEnter={
-                  !isMobile ? e => this.setPreviewFeature(e, f) : null
+                  !isMobile ? (e) => this.setPreviewFeature(e, f) : null
                 }
                 onMouseLeave={!isMobile ? this.resetPreview : null}
               >
@@ -175,7 +175,7 @@ class SearchResultsDataset extends React.PureComponent {
                   source={featureCollection.source}
                   origin={featureCollection.origin}
                   visibleInMap={
-                    selectedItems.findIndex(item => item.featureId === f.id) >
+                    selectedItems.findIndex((item) => item.featureId === f.id) >
                     -1
                   }
                   handleFeatureSelectionToggled={handleFeatureSelectionToggled}
@@ -212,7 +212,7 @@ class SearchResultsDataset extends React.PureComponent {
     const {
       activeFeatureCollection,
       getFeatureTitle,
-      enableFeaturePreview
+      enableFeaturePreview,
     } = this.props;
     const shouldShowPreview =
       enableFeaturePreview && !isMobile && !previewFeature?.onClickName

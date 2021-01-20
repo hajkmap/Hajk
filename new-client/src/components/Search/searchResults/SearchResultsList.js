@@ -8,14 +8,14 @@ const styles = () => ({
   searchResultList: {
     padding: 0,
     width: "100%",
-    transition: "none"
+    transition: "none",
   },
   searchResultListItem: {
     width: "100%",
     display: "flex",
     padding: 0,
-    transition: "none"
-  }
+    transition: "none",
+  },
 });
 
 class SearchResultsList extends React.PureComponent {
@@ -25,7 +25,7 @@ class SearchResultsList extends React.PureComponent {
   }
 
   state = {
-    selectedItems: []
+    selectedItems: [],
   };
 
   bindSubscriptions = () => {
@@ -55,7 +55,7 @@ class SearchResultsList extends React.PureComponent {
     }
   };
 
-  shouldRemoveSelectionFromCurrent = currentFeatureIndex => {
+  shouldRemoveSelectionFromCurrent = (currentFeatureIndex) => {
     const { selectedItems } = this.state;
     if (currentFeatureIndex === -1) {
       return false;
@@ -69,7 +69,7 @@ class SearchResultsList extends React.PureComponent {
       app,
       activeFeature,
       activeFeatureCollection,
-      localObserver
+      localObserver,
     } = this.props;
 
     if (activeFeature.onClickName) {
@@ -85,11 +85,11 @@ class SearchResultsList extends React.PureComponent {
         featureId: activeFeature.id,
         sourceId: source?.id,
         displayFields: displayFields,
-        from: "showDetails"
+        from: "showDetails",
       });
       this.setState(
         {
-          selectedItems: selectedItems
+          selectedItems: selectedItems,
         },
         () => {
           if (this.props.width === "xs" || this.props.width === "sm") {
@@ -99,7 +99,7 @@ class SearchResultsList extends React.PureComponent {
             "map.addAndHighlightFeatureInSearchResultLayer",
             {
               feature: activeFeature,
-              displayFields: displayFields
+              displayFields: displayFields,
             }
           );
         }
@@ -107,11 +107,11 @@ class SearchResultsList extends React.PureComponent {
     }
   };
 
-  getFeatureSelectedIndex = feature => {
+  getFeatureSelectedIndex = (feature) => {
     return !feature
       ? -1
       : this.state.selectedItems.findIndex(
-          item => item.featureId === feature.id
+          (item) => item.featureId === feature.id
         );
   };
 
@@ -128,7 +128,7 @@ class SearchResultsList extends React.PureComponent {
         featureId: feature.id,
         sourceId: source.id,
         displayFields: displayFields,
-        from: "userSelect"
+        from: "userSelect",
       });
     }
 
@@ -137,7 +137,7 @@ class SearchResultsList extends React.PureComponent {
     localObserver.publish("map.zoomToFeaturesByIds", selectedItems);
   };
 
-  handleActiveFeatureChange = update => {
+  handleActiveFeatureChange = (update) => {
     const { currentFeature, nextFeature, nextSource, initiator } = update;
     const { localObserver } = this.props;
     const shouldZoomToFeature = initiator !== "infoClick";
@@ -155,7 +155,7 @@ class SearchResultsList extends React.PureComponent {
     this.setState({ selectedItems: selectedItems });
     if (shouldZoomToFeature) {
       localObserver.publish("map.zoomToFeaturesByIds", [
-        selectedItems[selectedItems.length - 1]
+        selectedItems[selectedItems.length - 1],
       ]);
     }
     localObserver.publish("map.highlightFeaturesByIds", selectedItems);
@@ -183,7 +183,7 @@ class SearchResultsList extends React.PureComponent {
         featureId: nextFeature.id,
         sourceId: nextSource?.id,
         displayFields: displayFields,
-        from: "showDetails"
+        from: "showDetails",
       });
     }
     return selectedItems;
@@ -195,19 +195,19 @@ class SearchResultsList extends React.PureComponent {
     return nextIndex !== -1 && currentIndex === nextIndex;
   };
 
-  shouldAddNextToCollection = nextFeature => {
+  shouldAddNextToCollection = (nextFeature) => {
     const nextIndex = this.getFeatureSelectedIndex(nextFeature);
     return nextFeature && nextIndex === -1;
   };
 
-  shouldRemoveCurrentFromSelection = currentIndex => {
+  shouldRemoveCurrentFromSelection = (currentIndex) => {
     const { selectedItems } = this.state;
     return (
       currentIndex !== -1 && selectedItems[currentIndex].from !== "userSelect"
     );
   };
 
-  handleCurrentFeatureReset = currentFeature => {
+  handleCurrentFeatureReset = (currentFeature) => {
     if (!currentFeature) {
       return;
     }
@@ -222,7 +222,7 @@ class SearchResultsList extends React.PureComponent {
     localObserver.publish("map.zoomToFeaturesByIds", selectedItems);
   };
 
-  handleOnFeatureClick = feature => {
+  handleOnFeatureClick = (feature) => {
     const { app, setActiveFeature } = this.props;
     if (feature.onClickName) {
       app.globalObserver.publish(
@@ -246,7 +246,7 @@ class SearchResultsList extends React.PureComponent {
 
     const selectedItems = !sourceId
       ? []
-      : [...this.state.selectedItems].filter(selectedItem => {
+      : [...this.state.selectedItems].filter((selectedItem) => {
           return selectedItem.sourceId !== sourceId;
         });
     // Remove all selected items from array, then publish to
@@ -256,7 +256,7 @@ class SearchResultsList extends React.PureComponent {
     });
   };
 
-  renderSearchResultDatasetSummary = featureCollection => {
+  renderSearchResultDatasetSummary = (featureCollection) => {
     const { getOriginBasedIcon } = this.props;
     return (
       <SearchResultsDatasetSummary
@@ -266,7 +266,7 @@ class SearchResultsList extends React.PureComponent {
     );
   };
 
-  renderSearchResultDataset = featureCollection => {
+  renderSearchResultDataset = (featureCollection) => {
     const {
       getOriginBasedIcon,
       app,
@@ -280,7 +280,7 @@ class SearchResultsList extends React.PureComponent {
       enableFeaturePreview,
       getFeatureTitle,
       localObserver,
-      enableFeatureToggler
+      enableFeatureToggler,
     } = this.props;
     return (
       <SearchResultsDataset
@@ -310,11 +310,11 @@ class SearchResultsList extends React.PureComponent {
     const {
       featureCollections,
       classes,
-      handleFeatureCollectionClick
+      handleFeatureCollectionClick,
     } = this.props;
     return (
       <List className={classes.searchResultList}>
-        {featureCollections.map(featureCollection => (
+        {featureCollections.map((featureCollection) => (
           <ListItem
             disableTouchRipple
             key={featureCollection.source.id}

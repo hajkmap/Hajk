@@ -28,7 +28,7 @@ export default class FeatureStyle {
       strokeColor: strokeColor,
       fillColor: fillColor,
       textFillColor: textFillColor,
-      textStrokeColor: textStrokeColor
+      textStrokeColor: textStrokeColor,
     };
   };
 
@@ -40,35 +40,35 @@ export default class FeatureStyle {
     const offsetY = isPoint ? -50 : -10;
     return new Style({
       fill: new Fill({
-        color: this.#defaultHighlightStyleSettings.fillColor
+        color: this.#defaultHighlightStyleSettings.fillColor,
       }),
       stroke: new Stroke({
         color: this.#defaultHighlightStyleSettings.strokeColor,
-        width: 4
+        width: 4,
       }),
       image: new Icon({
         anchor: [anchor[0] ?? 0.5, anchor[1] ?? 1],
         scale: markerImg ? scale ?? 0.15 : 0.5,
-        src: markerImg ?? defaultMarker
+        src: markerImg ?? defaultMarker,
       }),
       text: new Text({
         textAlign: textAlign,
         textBaseline: "middle",
         font: "12pt sans-serif",
         fill: new Fill({
-          color: this.#defaultHighlightStyleSettings.textFillColor
+          color: this.#defaultHighlightStyleSettings.textFillColor,
         }),
         text: this.#getHighlightLabelValueFromFeature(feature, displayFields),
         overflow: true,
         stroke: new Stroke({
           color: this.#defaultHighlightStyleSettings.textStrokeColor,
-          width: 3
+          width: 3,
         }),
         offsetX: 0,
         offsetY: offsetY,
         rotation: 0,
-        scale: 1
-      })
+        scale: 1,
+      }),
     });
   };
 

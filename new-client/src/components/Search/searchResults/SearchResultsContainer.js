@@ -21,69 +21,69 @@ import {
   Menu,
   MenuItem,
   Grow,
-  IconButton
+  IconButton,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 
-const styles = theme => ({
+const styles = (theme) => ({
   hidden: {
-    display: "none"
+    display: "none",
   },
   searchResultListWrapper: {
     [theme.breakpoints.down("xs")]: {
-      maxHeight: "78vh"
+      maxHeight: "78vh",
     },
     [theme.breakpoints.up("sm")]: {
-      maxHeight: "82vh"
-    }
+      maxHeight: "82vh",
+    },
   },
   root: {
     maxHeight: "80vh",
     overflow: "auto",
     minWidth: 200,
     [theme.breakpoints.up("sm")]: {
-      maxWidth: 520
+      maxWidth: 520,
     },
     [theme.breakpoints.down("xs")]: {
       minWidth: "100%",
       maxWidth: "100%",
       position: "absolute",
       left: 0,
-      borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`
-    }
+      borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    },
   },
   filterInputFieldContainer: {
     padding: theme.spacing(1),
-    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`
+    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
   },
   headerContainer: {
     paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1)
+    paddingLeft: theme.spacing(1),
   },
   tallHeaderContainer: {
     minHeight: 42,
     paddingRight: theme.spacing(1),
     paddingLeft: theme.spacing(1),
-    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`
+    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
   },
   headerTypography: {
     maxWidth: "100%",
-    fontSize: 18
+    fontSize: 18,
   },
   headerButtons: {
-    minWidth: 30
+    minWidth: 30,
   },
   breadCrumbLinks: {
     border: "none",
-    cursor: "pointer"
-  }
+    cursor: "pointer",
+  },
 });
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
     sumOfResults: this.props.searchResults.featureCollections
-      .map(fc => fc.value.totalFeatures)
+      .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
     filterInputFieldOpen: false,
     featureCollectionFilter: "", // String used to filter featureCollections
@@ -91,7 +91,7 @@ class SearchResultsContainer extends React.PureComponent {
     sortingMenuAnchorEl: null,
     featureCollectionSortingStrategy: "AtoZ", // AtoZ representing alphabetical order
     featureSortingStrategy: "AtoZ",
-    showTools: false
+    showTools: false,
   };
 
   // Used for setTimeout/clearTimeout, in order to delay filter update when user is typing
@@ -105,52 +105,52 @@ class SearchResultsContainer extends React.PureComponent {
       name: "Filtrera",
       type: "filter",
       render: () => this.renderFilterTool(),
-      enabled: this.props.options.enableResultsFiltering ?? true
+      enabled: this.props.options.enableResultsFiltering ?? true,
     },
     {
       name: "Sortera",
       type: "sort",
       render: () => this.renderSortTool(),
-      enabled: this.props.options.enableResultsSorting ?? true
+      enabled: this.props.options.enableResultsSorting ?? true,
     },
     {
       name: "Rensa",
       type: "clear",
       render: () => this.renderClearTool(),
-      enabled: this.props.options.enableResultsSelectionClearing ?? true
+      enabled: this.props.options.enableResultsSelectionClearing ?? true,
     },
     {
       name: "Ladda ner",
       type: "download",
       render: () => this.renderDownloadTool(),
-      enabled: this.props.options.enableResultsDownloading ?? true
-    }
+      enabled: this.props.options.enableResultsDownloading ?? true,
+    },
   ];
 
   sortingStrategies = [
     {
       type: "AtoZ",
       name: "alfabetisk stigande",
-      appliesTo: ["featureCollections", "features"]
+      appliesTo: ["featureCollections", "features"],
     },
     {
       type: "ZtoA",
       name: "alfabetisk fallande",
-      appliesTo: ["featureCollections", "features"]
+      appliesTo: ["featureCollections", "features"],
     },
     {
       type: "numHits",
       name: "antal träffar",
-      appliesTo: ["featureCollections"]
-    }
+      appliesTo: ["featureCollections"],
+    },
   ];
 
   componentDidMount = () => {
     const { app } = this.props;
     app.globalObserver.subscribe(
       "infoClick.searchResultLayerClick",
-      features => {
-        const featureIds = features.map(feature => {
+      (features) => {
+        const featureIds = features.map((feature) => {
           return feature.getId();
         });
         this.showFeatureDetails(featureIds);
@@ -164,7 +164,7 @@ class SearchResultsContainer extends React.PureComponent {
     app.globalObserver.unsubscribe("infoClick.searchResultLayerClick");
   };
 
-  showFeatureDetails = featureIds => {
+  showFeatureDetails = (featureIds) => {
     const { toggleCollapseSearchResults } = this.props;
     const { activeFeature } = this.state;
     const featureId = featureIds[0]; // Do we want to handle stacked features?
@@ -181,7 +181,7 @@ class SearchResultsContainer extends React.PureComponent {
       );
       // Get the clicked feature
       const feature = featureCollection.value.features.find(
-        feature => feature.id === featureId
+        (feature) => feature.id === featureId
       );
 
       this.handleActiveFeatureChange(
@@ -195,17 +195,17 @@ class SearchResultsContainer extends React.PureComponent {
       this.setState({
         activeFeatureCollection: featureCollection,
         activeFeature: feature,
-        filterInputFieldOpen: false
+        filterInputFieldOpen: false,
       });
     });
   };
 
-  getFeatureCollectionFromFeatureId = featureId => {
+  getFeatureCollectionFromFeatureId = (featureId) => {
     const { featureCollections } = this.props;
-    return featureCollections.find(featureCollection => {
+    return featureCollections.find((featureCollection) => {
       return (
         featureCollection.value.features.findIndex(
-          feature => feature.id === featureId
+          (feature) => feature.id === featureId
         ) > -1
       );
     });
@@ -232,12 +232,12 @@ class SearchResultsContainer extends React.PureComponent {
     if (shouldSetActiveFeatureOrCollection) {
       this.setState({
         activeFeatureCollection: activeFeatureCollection,
-        activeFeature: activeFeature
+        activeFeature: activeFeature,
       });
     }
   };
 
-  handleFilterTextFieldInputChange = e => {
+  handleFilterTextFieldInputChange = (e) => {
     const filterInput = e.target.value;
     this.updateViewFilters(filterInput);
 
@@ -247,19 +247,19 @@ class SearchResultsContainer extends React.PureComponent {
     }, this.delayBeforeFilterCommit);
   };
 
-  updateViewFilters = filterInput => {
+  updateViewFilters = (filterInput) => {
     // If we don't have a collection active, we know
     // that the filter is intended for the collections
     if (!this.state.activeFeatureCollection) {
       this.setState({
-        featureCollectionFilter: filterInput
+        featureCollectionFilter: filterInput,
       });
     } else {
       // If we DO have a collection active, we know that
       // the filter is intended for the features in the active
       // collection
       this.setState({
-        featureFilter: filterInput
+        featureFilter: filterInput,
       });
     }
   };
@@ -268,7 +268,7 @@ class SearchResultsContainer extends React.PureComponent {
     if (!this.state.activeFeatureCollection) {
       this.setState(
         {
-          featureCollectionFilter: ""
+          featureCollectionFilter: "",
         },
         () => {
           this.handleFilterUpdate();
@@ -277,7 +277,7 @@ class SearchResultsContainer extends React.PureComponent {
     } else {
       this.setState(
         {
-          featureFilter: ""
+          featureFilter: "",
         },
         () => {
           this.handleFilterUpdate();
@@ -291,7 +291,7 @@ class SearchResultsContainer extends React.PureComponent {
     const {
       activeFeatureCollection,
       featureFilter,
-      featureCollectionFilter
+      featureCollectionFilter,
     } = this.state;
     const showClearFilterButton =
       featureFilter.length > 0 || featureCollectionFilter.length > 0;
@@ -318,7 +318,7 @@ class SearchResultsContainer extends React.PureComponent {
                   <ClearIcon />
                 </IconButton>
               </Tooltip>
-            )
+            ),
           }}
         ></TextField>
       </Grid>
@@ -331,7 +331,7 @@ class SearchResultsContainer extends React.PureComponent {
     // Do we have a filter value?
     if (featureCollectionFilter.length > 0) {
       // Filter all collections
-      return featureCollections.filter(featureCollection => {
+      return featureCollections.filter((featureCollection) => {
         // Returning collections where the filter is included in caption
         return featureCollection?.source?.caption
           .toLowerCase()
@@ -349,7 +349,7 @@ class SearchResultsContainer extends React.PureComponent {
     const {
       activeFeatureCollection,
       featureFilter,
-      featureCollectionFilter
+      featureCollectionFilter,
     } = this.state;
     // If we have an active featureCollection (meaning that we are
     // viewing _features_, and the featureFilter-value is set, the
@@ -365,24 +365,24 @@ class SearchResultsContainer extends React.PureComponent {
         false;
   };
 
-  getSortingStrategiesApplyingToView = view => {
-    return this.sortingStrategies.filter(strategy =>
+  getSortingStrategiesApplyingToView = (view) => {
+    return this.sortingStrategies.filter((strategy) =>
       strategy.appliesTo.includes(view)
     );
   };
 
-  handleSortingMenuItemClick = type => {
+  handleSortingMenuItemClick = (type) => {
     const { activeFeatureCollection } = this.state;
 
     if (activeFeatureCollection) {
       this.setState({
         featureSortingStrategy: type,
-        sortingMenuAnchorEl: null
+        sortingMenuAnchorEl: null,
       });
     } else {
       this.setState({
         featureCollectionSortingStrategy: type,
-        sortingMenuAnchorEl: null
+        sortingMenuAnchorEl: null,
       });
     }
   };
@@ -392,7 +392,7 @@ class SearchResultsContainer extends React.PureComponent {
       featureCollectionSortingStrategy,
       featureSortingStrategy,
       sortingMenuAnchorEl,
-      activeFeatureCollection
+      activeFeatureCollection,
     } = this.state;
 
     const currentSortingStrategies = this.getSortingStrategiesApplyingToView(
@@ -437,7 +437,7 @@ class SearchResultsContainer extends React.PureComponent {
           className={classes.headerButtons}
           onClick={() =>
             this.setState({
-              filterInputFieldOpen: !this.state.filterInputFieldOpen
+              filterInputFieldOpen: !this.state.filterInputFieldOpen,
             })
           }
         >
@@ -459,14 +459,14 @@ class SearchResultsContainer extends React.PureComponent {
     const {
       activeFeatureCollection,
       featureCollectionSortingStrategy,
-      featureSortingStrategy
+      featureSortingStrategy,
     } = this.state;
 
     const sortHelpText = `Sortera resultatet, sorterar nu enligt ${
       // Get current sorting strategy from the array of strategies
       this.sortingStrategies.find(
         // by finding...
-        strategy =>
+        (strategy) =>
           // the strategy with the "type"-value...
           strategy.type ===
           // corresponding to either the current feature or featureCollection
@@ -481,7 +481,9 @@ class SearchResultsContainer extends React.PureComponent {
       <Tooltip title={sortHelpText}>
         <Button
           className={classes.headerButtons}
-          onClick={e => this.setState({ sortingMenuAnchorEl: e.currentTarget })}
+          onClick={(e) =>
+            this.setState({ sortingMenuAnchorEl: e.currentTarget })
+          }
         >
           <SortIcon />
         </Button>
@@ -523,7 +525,7 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   allToolsDisabled = () => {
-    return this.searchResultTools.filter(tool => tool.enabled).length === 0;
+    return this.searchResultTools.filter((tool) => tool.enabled).length === 0;
   };
 
   renderSearchResultListTools = () => {
@@ -556,7 +558,7 @@ class SearchResultsContainer extends React.PureComponent {
                 onClick={() =>
                   this.setState({
                     showTools: !this.state.showTools,
-                    filterInputFieldOpen: false
+                    filterInputFieldOpen: false,
                   })
                 }
               >
@@ -569,7 +571,7 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
-  setActiveFeature = feature => {
+  setActiveFeature = (feature) => {
     this.handleActiveFeatureChange(
       this.state.activeFeature,
       feature,
@@ -589,16 +591,16 @@ class SearchResultsContainer extends React.PureComponent {
       currentFeature: currentFeature,
       nextFeature: nextFeature,
       nextSource: nextSource,
-      initiator: initiator
+      initiator: initiator,
     });
   };
 
-  setActiveFeatureCollection = featureCollection => {
+  setActiveFeatureCollection = (featureCollection) => {
     this.setState(
       {
         activeFeatureCollection: featureCollection,
         filterInputFieldOpen: false,
-        featureFilter: ""
+        featureFilter: "",
       },
       () => {
         this.handleFilterUpdate();
@@ -612,7 +614,7 @@ class SearchResultsContainer extends React.PureComponent {
       {
         activeFeatureCollection: undefined,
         activeFeature: undefined,
-        featureFilter: ""
+        featureFilter: "",
       },
       () => {
         this.handleFilterUpdate();
@@ -620,7 +622,7 @@ class SearchResultsContainer extends React.PureComponent {
     );
   };
 
-  handleFeatureCollectionClick = featureCollection => {
+  handleFeatureCollectionClick = (featureCollection) => {
     const { app } = this.props;
     const onClickName = featureCollection?.source?.onClickName;
     if (onClickName) {
@@ -633,7 +635,7 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
-  sortFeatureCollections = featureCollections => {
+  sortFeatureCollections = (featureCollections) => {
     const { featureCollectionSortingStrategy } = this.state;
 
     const featureCollectionsAtoZSorted = featureCollections.sort((a, b) =>
@@ -653,7 +655,7 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
-  getFeatureTitle = feature => {
+  getFeatureTitle = (feature) => {
     const { activeFeatureCollection } = this.state;
 
     return activeFeatureCollection.source.displayFields.reduce(
@@ -679,17 +681,17 @@ class SearchResultsContainer extends React.PureComponent {
     );
   };
 
-  keyPressIsEnter = event => {
+  keyPressIsEnter = (event) => {
     return event.which === 13 || event.keyCode === 13;
   };
 
-  getFilteredFeatures = featureCollections => {
+  getFilteredFeatures = (featureCollections) => {
     const { activeFeatureCollection, featureFilter } = this.state;
     return featureCollections
-      .map(fc => {
+      .map((fc) => {
         if (activeFeatureCollection) {
           if (fc.source.id === activeFeatureCollection.source.id) {
-            return fc.value.features.filter(f => {
+            return fc.value.features.filter((f) => {
               const featureTitle = this.getFeatureTitle(f);
               return featureTitle
                 .toLowerCase()
@@ -710,13 +712,13 @@ class SearchResultsContainer extends React.PureComponent {
     const currentFeatures = this.getFilteredFeatures(
       filteredFeatureCollections
     );
-    const currentFeatureIds = currentFeatures.map(feature => {
+    const currentFeatureIds = currentFeatures.map((feature) => {
       return feature.id;
     });
 
     localObserver.publish("map.updateFeaturesAfterFilterChange", {
       features: currentFeatures,
-      featureIds: currentFeatureIds
+      featureIds: currentFeatureIds,
     });
   };
 
@@ -736,11 +738,11 @@ class SearchResultsContainer extends React.PureComponent {
               tabIndex={0}
               color="textPrimary"
               variant="caption"
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 this.resetFeatureAndCollection();
               }}
-              onKeyDown={event => {
+              onKeyDown={(event) => {
                 if (this.keyPressIsEnter(event)) {
                   this.resetFeatureAndCollection();
                 }
@@ -756,11 +758,11 @@ class SearchResultsContainer extends React.PureComponent {
               tabIndex={0}
               color="textPrimary"
               variant="caption"
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 this.setActiveFeature(undefined);
               }}
-              onKeyDown={event => {
+              onKeyDown={(event) => {
                 if (this.keyPressIsEnter(event)) {
                   this.setActiveFeature(undefined);
                 }
@@ -788,7 +790,7 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
-  renderHeaderInfoBar = featureCollectionTitle => {
+  renderHeaderInfoBar = (featureCollectionTitle) => {
     const { activeFeatureCollection } = this.state;
     const { classes } = this.props;
     return (
@@ -876,7 +878,7 @@ class SearchResultsContainer extends React.PureComponent {
       getOriginBasedIcon,
       localObserver,
       panelCollapsed,
-      options
+      options,
     } = this.props;
     const {
       sumOfResults,
@@ -885,7 +887,7 @@ class SearchResultsContainer extends React.PureComponent {
       filterInputFieldOpen,
       featureFilter,
       featureCollectionSortingStrategy,
-      featureSortingStrategy
+      featureSortingStrategy,
     } = this.state;
 
     const featureCollections =
