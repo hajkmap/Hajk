@@ -522,6 +522,7 @@ class SearchResultsContainer extends React.PureComponent {
                 onClick={() =>
                   this.setState({
                     showTools: !this.state.showTools,
+                    filterInputFieldOpen: false,
                   })
                 }
               >
