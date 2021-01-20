@@ -23,7 +23,7 @@ class ConfigService {
    *
    * @param {String} map Name of the map configuration
    * @param {String} user User name that must have explicit access to the map
-   * @param {boolean} washContent If true, map config will be examinated and
+   * @param {boolean} washContent If true, map config will be examined and
    * only those layers/groups/tools that user has access to will be returned.
    * @returns Map config contents in JSON
    * @memberof ConfigService
@@ -34,10 +34,19 @@ class ConfigService {
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = await JSON.parse(text);
 
+      if (washContent === false) {
+        logger.trace(
+          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire  the entire %s map config.",
+          user,
+          map
+        );
+        return json;
+      }
+
       // If we haven't enabled AD restrictions, just return the entire map config
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
         logger.trace(
-          "[getMapConfig] AD auth disabled. Getting the entire %s map config",
+          "[getMapConfig] AD auth disabled. Getting the entire %s map config.",
           map
         );
         return json;
@@ -267,7 +276,7 @@ class ConfigService {
     return mapConfig;
   }
 
-  async getLayersStore(user) {
+  async getLayersStore(user, washContent = true) {
     logger.trace("[getLayersStore] for user %o", user);
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
@@ -281,6 +290,13 @@ class ConfigService {
       // current map. This would obviously lead to drastically smaller response, but
       // also be a security measure, as user would not be able to find out which layers
       // exist in the store.
+
+      if (washContent === false) {
+        logger.trace(
+          "[getLayersStore] invoked with 'washContent=false'. Returning the entire contents of layers store."
+        );
+        return json;
+      }
 
       // If we haven't enabled AD restrictions, just return the entire layers store
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
@@ -349,7 +365,7 @@ class ConfigService {
 
     // If we got this far, we now need to grab the contents of
     // the requested map config.
-    const mapConfig = await this.getMapConfig(map, user);
+    const mapConfig = await this.getMapConfig(map, user, false);
 
     // Some clumsy error handling
     if (mapConfig.error) {

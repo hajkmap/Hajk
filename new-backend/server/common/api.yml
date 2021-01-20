@@ -206,7 +206,7 @@ paths:
         200:
           description: All layers were fetched successfully
           content: {}
-  /config/list:
+  /mapconfig/list:
     get:
       tags:
         - Admin - Maps and layers
@@ -214,6 +214,28 @@ paths:
       responses:
         200:
           description: Available maps were fetched successfully
+          content: {}
+  /mapconfig/{map}:
+    get:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map to fetch
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      description: Fetch contents of a map configuration
+      responses:
+        200:
+          description: Success
           content: {}
   /config/{map}:
     get:
@@ -237,7 +259,7 @@ paths:
         200:
           description: Success
           content: {}
-  /config/export/{map}/{format}:
+  /mapconfig/export/{map}/{format}:
     get:
       tags:
         - Admin - Maps and layers
@@ -259,7 +281,7 @@ paths:
         200:
           description: Success
           content: {}
-  /config/create/{name}:
+  /mapconfig/create/{name}:
     get:
       deprecated: true
       tags:
@@ -291,7 +313,7 @@ paths:
         200:
           description: Success
           content: {}
-  /config/delete/{name}:
+  /mapconfig/delete/{name}:
     get:
       deprecated: true
       tags:
@@ -323,7 +345,7 @@ paths:
         200:
           description: Success
           content: {}
-  /config/duplicate/{nameFrom}/{nameTo}:
+  /mapconfig/duplicate/{nameFrom}/{nameTo}:
     put:
       tags:
         - Admin - Maps and layers
