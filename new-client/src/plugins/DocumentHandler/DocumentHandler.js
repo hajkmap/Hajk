@@ -145,7 +145,6 @@ class DocumentHandler extends React.PureComponent {
   };
 
   showDocument = (documentFileName) => {
-    console.log(documentFileName, "documentFileName");
     const { app } = this.props;
 
     return this.setActiveDocument(documentFileName).then(() => {
