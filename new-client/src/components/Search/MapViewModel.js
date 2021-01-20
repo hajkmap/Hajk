@@ -255,6 +255,7 @@ class MapViewModel {
     }
     this.removeDrawInteraction();
     this.removeSelectListeners();
+    this.lastFeaturesInfo = [];
   };
 
   removeDrawInteraction = () => {
