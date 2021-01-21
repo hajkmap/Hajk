@@ -216,6 +216,7 @@
         "enableResultsDownloading": true,
         "enableFeaturePreview": true,
         "enableLabelOnHighlight": true,
+        "enableSelectedFeaturesCollection": true,
         "showResultFeaturesInMap": true,
         "enableFeatureToggler": true,
         "highlightTextStroke": "rgba(0,0,0,1)",
