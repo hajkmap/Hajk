@@ -48,8 +48,8 @@ export default class FeatureStyle {
       }),
       image: new Icon({
         anchor: [anchor[0] ?? 0.5, anchor[1] ?? 1],
-        scale: markerImg ? scale ?? 0.15 : 0.5,
-        src: markerImg ?? defaultMarker,
+        scale: markerImg && markerImg.length > 0 ? scale ?? 0.5 : 0.5,
+        src: markerImg && markerImg.length > 0 ? markerImg : defaultMarker,
       }),
       text: new Text({
         textAlign: textAlign,
