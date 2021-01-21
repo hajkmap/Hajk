@@ -55,6 +55,7 @@ export default class KmlExport {
 
   #getStyledFeature = (feature, displayFields) => {
     const gjFeature = new GeoJSON().readFeature(feature);
+    gjFeature.setStyle(); // We must reset the current style before applying new...
     gjFeature.setStyle(
       this.#featureStyle.getHighlightedStyle(gjFeature, displayFields)
     );
