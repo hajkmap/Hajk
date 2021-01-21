@@ -27,12 +27,14 @@ class SearchResultsDownloadMenu extends React.PureComponent {
         name: "Ladda ner till Excel",
         icon: <DescriptionIcon />,
         type: "Excel",
+        enabled: false,
         onClick: this.handleXLSXDownloadClick,
       },
       {
         name: "Ladda ner till KML",
         icon: <PublicIcon />,
         type: "kml",
+        enabled: true,
         onClick: this.handleKMLDownloadClick,
       },
     ];
@@ -77,13 +79,16 @@ class SearchResultsDownloadMenu extends React.PureComponent {
   renderDownloadMenu = () => {
     const { classes } = this.props;
     const { anchorEl } = this.state;
+    const enabledDownloadOptions = this.downloadOptions.filter((option) => {
+      return option.enabled;
+    });
     return (
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={() => this.setState({ anchorEl: null })}
       >
-        {this.downloadOptions.map((downloadOption, index) => {
+        {enabledDownloadOptions.map((downloadOption, index) => {
           return (
             <MenuItem key={index} onClick={downloadOption.onClick}>
               <Grid container>
