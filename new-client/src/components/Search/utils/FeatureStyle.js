@@ -32,7 +32,7 @@ export default class FeatureStyle {
     };
   };
 
-  getHighlightedStyle = (feature, displayFields) => {
+  getHighlightedStyle = (feature, featureTitle) => {
     const { scale, markerImg } = this.#options;
     const anchor = this.#options.anchor ?? [];
     const isPoint = feature?.getGeometry() instanceof Point;
@@ -58,7 +58,7 @@ export default class FeatureStyle {
         fill: new Fill({
           color: this.#defaultHighlightStyleSettings.textFillColor,
         }),
-        text: this.#getHighlightLabelValueFromFeature(feature, displayFields),
+        text: this.#getHighlightLabelValueFromFeature(featureTitle),
         overflow: true,
         stroke: new Stroke({
           color: this.#defaultHighlightStyleSettings.textStrokeColor,
@@ -72,32 +72,13 @@ export default class FeatureStyle {
     });
   };
 
-  #getHighlightLabelValueFromFeature = (feature, displayFields) => {
+  #getHighlightLabelValueFromFeature = (featureTitle) => {
     if (this.#enableLabelOnHighlight) {
-      if (!displayFields || displayFields.length < 1) {
+      if (!featureTitle) {
         return `Visningsfält saknas`;
       } else {
-        return this.#getFeatureTitle(feature, displayFields);
+        return featureTitle;
       }
     }
-  };
-
-  #getFeatureTitle = (feature, displayFields) => {
-    return displayFields.reduce((featureTitleString, df) => {
-      let displayField = feature.get(df);
-      if (Array.isArray(displayField)) {
-        displayField = displayField.join(", ");
-      }
-
-      if (displayField) {
-        if (featureTitleString.length > 0) {
-          featureTitleString = featureTitleString.concat(` | ${displayField}`);
-        } else {
-          featureTitleString = displayField;
-        }
-      }
-
-      return featureTitleString;
-    }, "");
   };
 }

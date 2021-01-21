@@ -17,12 +17,7 @@ const styles = (theme) => ({
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
-    const {
-      feature,
-      source,
-      visibleInMap,
-      handleFeatureSelectionToggled,
-    } = this.props;
+    const { visibleInMap } = this.props;
     const helpText = !visibleInMap ? "Visa i kartan" : "Dölj från kartan";
 
     return (
@@ -33,11 +28,33 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             disableRipple
             checked={visibleInMap}
             onClick={(e) => e.stopPropagation()}
-            onChange={() => handleFeatureSelectionToggled(feature, source)}
+            onChange={this.handleCheckboxToggle}
           />
         </Tooltip>
       </Grid>
     );
+  };
+
+  handleCheckboxToggle = () => {
+    const {
+      feature,
+      featureTitle,
+      source,
+      visibleInMap,
+      addFeatureToSelected,
+      removeFeatureFromSelected,
+    } = this.props;
+    if (visibleInMap) {
+      removeFeatureFromSelected(feature);
+    } else {
+      feature.source = source;
+      addFeatureToSelected({
+        feature: feature,
+        sourceId: source?.id,
+        featureTitle: featureTitle,
+        initiator: "userSelect",
+      });
+    }
   };
 
   renderOriginBasedIcon = () => {

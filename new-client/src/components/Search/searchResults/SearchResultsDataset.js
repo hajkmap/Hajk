@@ -20,23 +20,34 @@ const styles = () => ({
   },
 });
 
-class SearchResultsDataset extends React.PureComponent {
+class SearchResultsDataset extends React.Component {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
   state = {
-    previewFeature: undefined, // Feature to show in preview
-    popOverAnchorEl: undefined, // The element which the preview popper will anchor to
+    previewFeature: null, // Feature to show in preview
+    previewAnchorEl: null, // The element which the preview popper will anchor to
   };
 
   delayBeforeShowingPreview = 800; //Delay before showing preview popper in ms
   previewTimer = null; // Timer to keep track of when delay has passed
 
-  componentDidUpdate = (prevProps) => {
-    const { featureFilter } = this.props;
+  shouldComponentUpdate = (prevProps) => {
+    const { featureFilter, featureCollection } = this.props;
     const prevFeatureFilter = prevProps.featureFilter;
-    if (featureFilter !== prevFeatureFilter) {
+    const numFeatures = featureCollection.value.features.length;
+    const prevNumFeatures = prevProps.featureCollection.value.features.length;
+    if (
+      featureFilter !== prevFeatureFilter ||
+      numFeatures !== prevNumFeatures
+    ) {
       clearTimeout(this.previewTimer);
       this.setState({ previewAnchorEl: undefined, previewFeature: undefined });
+      return false;
     }
+    return true;
+  };
+
+  componentWillUnmount = () => {
+    clearTimeout(this.previewTimer);
   };
 
   setPreviewFeature = (e, feature) => {
@@ -128,16 +139,16 @@ class SearchResultsDataset extends React.PureComponent {
       featureCollection,
       classes,
       app,
-      selectedItems,
-      handleFeatureSelectionToggled,
+      selectedFeatures,
       activeFeature,
       handleOnFeatureClick,
       handleOnFeatureKeyPress,
       getOriginBasedIcon,
       getFeatureTitle,
+      addFeatureToSelected,
+      removeFeatureFromSelected,
     } = this.props;
 
-    //const features = this.getFilteredFeatures();
     const sortedFeatures = this.getSortedFeatures(features);
     return (
       <>
@@ -175,10 +186,12 @@ class SearchResultsDataset extends React.PureComponent {
                   source={featureCollection.source}
                   origin={featureCollection.origin}
                   visibleInMap={
-                    selectedItems.findIndex((item) => item.featureId === f.id) >
-                    -1
+                    selectedFeatures.findIndex(
+                      (item) => item.feature.id === f.id
+                    ) > -1
                   }
-                  handleFeatureSelectionToggled={handleFeatureSelectionToggled}
+                  addFeatureToSelected={addFeatureToSelected}
+                  removeFeatureFromSelected={removeFeatureFromSelected}
                   activeFeature={activeFeature}
                   getOriginBasedIcon={getOriginBasedIcon}
                 />

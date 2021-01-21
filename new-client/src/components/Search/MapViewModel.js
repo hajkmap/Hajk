@@ -88,16 +88,13 @@ class MapViewModel {
   bindSubscriptions = () => {
     // Local subscriptions
     this.localObserver.subscribe("clearMapView", this.clearMap);
-    this.localObserver.subscribe(
-      "map.zoomToFeaturesByIds",
-      this.zoomToFeatureIds
-    );
+    this.localObserver.subscribe("map.zoomToFeatures", this.zoomToFeatures);
     this.localObserver.subscribe(
       "map.addFeaturesToResultsLayer",
       this.addFeaturesToResultsLayer
     );
     this.localObserver.subscribe(
-      "map.highlightFeaturesByIds",
+      "map.highlightFeatures",
       this.highlightFeaturesInMap
     );
     this.localObserver.subscribe(
@@ -198,13 +195,10 @@ class MapViewModel {
     this.resetStyleForFeaturesInResultSource();
     featuresInfo.map((featureInfo) => {
       const feature = this.getFeatureFromResultSourceById(
-        featureInfo.featureId
+        featureInfo.feature.id
       );
       return feature?.setStyle(
-        this.featureStyle.getHighlightedStyle(
-          feature,
-          featureInfo.displayFields
-        )
+        this.featureStyle.getHighlightedStyle(feature, featureInfo.featureTitle)
       );
     });
   };
@@ -212,7 +206,7 @@ class MapViewModel {
   addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
     const feature = new GeoJSON().readFeature(featureInfo.feature);
     feature.setStyle(
-      this.featureStyle.getHighlightedStyle(feature, featureInfo.displayFields)
+      this.featureStyle.getHighlightedStyle(feature, featureInfo.featureTitle)
     );
     this.resultSource.addFeature(feature);
     this.fitMapToSearchResult();
@@ -222,18 +216,18 @@ class MapViewModel {
     return this.resultSource.getFeatureById(fid);
   };
 
-  zoomToFeatureIds = (featuresInfo) => {
+  zoomToFeatures = (featuresInfo) => {
     let extent = createEmpty();
 
     //BoundingExtent-function gave wrong coordinates for some
     featuresInfo.forEach((featureInfo) => {
       const feature = this.getFeatureFromResultSourceById(
-        featureInfo.featureId
+        featureInfo.feature.id
       );
       if (feature) {
         extend(
           extent,
-          this.getFeatureFromResultSourceById(featureInfo.featureId)
+          this.getFeatureFromResultSourceById(featureInfo.feature.id)
             .getGeometry()
             .getExtent()
         );

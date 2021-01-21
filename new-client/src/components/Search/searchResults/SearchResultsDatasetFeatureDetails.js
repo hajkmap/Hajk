@@ -76,12 +76,14 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   shouldRenderCustomInfoBox = () => {
-    const { source } = this.props;
+    const { feature } = this.props;
+    const source = feature.source ?? this.props.source;
     return source.infobox && source.infobox !== "";
   };
 
   getHtmlItemInfoBox = () => {
-    const { source, feature } = this.props;
+    const { feature } = this.props;
+    const source = feature.source ?? this.props.source;
     feature.properties = this.featurePropsParsing.extractPropertiesFromJson(
       feature.properties
     );
