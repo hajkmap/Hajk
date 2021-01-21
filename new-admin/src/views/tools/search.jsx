@@ -63,6 +63,7 @@ const defaultState = {
   enableResultsDownloading: true,
   enableFeaturePreview: true,
   enableLabelOnHighlight: true,
+  enableSelectedFeaturesCollection: true,
   showResultFeaturesInMap: true,
   enableFeatureToggler: true,
 
@@ -172,6 +173,9 @@ class ToolOptions extends Component {
           enableLabelOnHighlight:
             tool.options.enableLabelOnHighlight ??
             this.state.enableLabelOnHighlight,
+          enableSelectedFeaturesCollection:
+            tool.options.enableSelectedFeaturesCollection ??
+            this.state.enableSelectedFeaturesCollection,
           showResultFeaturesInMap:
             tool.options.showResultFeaturesInMap ??
             this.state.showResultFeaturesInMap,
@@ -316,6 +320,8 @@ class ToolOptions extends Component {
         enableResultsDownloading: this.state.enableResultsDownloading,
         enableFeaturePreview: this.state.enableFeaturePreview,
         enableLabelOnHighlight: this.state.enableLabelOnHighlight,
+        enableSelectedFeaturesCollection: this.state
+          .enableSelectedFeaturesCollection,
         showResultFeaturesInMap: this.state.showResultFeaturesInMap,
         enableFeatureToggler: this.state.enableFeatureToggler,
 
@@ -825,6 +831,27 @@ class ToolOptions extends Component {
             &nbsp;
             <label className="long-label" htmlFor="enableLabelOnHighlight">
               Visa etikett för valda resultat i kartan
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableSelectedFeaturesCollection"
+              value={this.state.enableSelectedFeaturesCollection}
+              type="checkbox"
+              name="enableSelectedFeaturesCollection"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableSelectedFeaturesCollection}
+            />
+            &nbsp;
+            <label
+              className="long-label"
+              htmlFor="enableSelectedFeaturesCollection"
+            >
+              Samla selekterade resultat i en egen kollektion ("Markerade
+              resultat")
             </label>
           </div>
 
