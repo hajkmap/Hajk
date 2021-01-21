@@ -32,7 +32,7 @@ export default class FeatureStyle {
     };
   };
 
-  getHighlightedStyle = (feature, featureTitle) => {
+  getHighlightedStyle = (feature, featureTitle, displayFields) => {
     const { scale, markerImg } = this.#options;
     const anchor = this.#options.anchor ?? [];
     const isPoint = feature?.getGeometry() instanceof Point;
@@ -58,7 +58,11 @@ export default class FeatureStyle {
         fill: new Fill({
           color: this.#defaultHighlightStyleSettings.textFillColor,
         }),
-        text: this.#getHighlightLabelValueFromFeature(featureTitle),
+        text: this.#getHighlightLabelValueFromFeature(
+          feature,
+          featureTitle,
+          displayFields
+        ),
         overflow: true,
         stroke: new Stroke({
           color: this.#defaultHighlightStyleSettings.textStrokeColor,
@@ -72,13 +76,39 @@ export default class FeatureStyle {
     });
   };
 
-  #getHighlightLabelValueFromFeature = (featureTitle) => {
+  #getHighlightLabelValueFromFeature = (
+    feature,
+    featureTitle,
+    displayFields
+  ) => {
     if (this.#enableLabelOnHighlight) {
-      if (!featureTitle) {
-        return `Visningsfält saknas`;
+      if (!featureTitle || featureTitle.length === 0) {
+        if (!displayFields || displayFields.length === 0) {
+          return `Visningsfält saknas`;
+        }
+        return this.#getFeatureTitle(feature, displayFields);
       } else {
         return featureTitle;
       }
     }
+  };
+
+  #getFeatureTitle = (feature, displayFields) => {
+    return displayFields.reduce((featureTitleString, df) => {
+      let displayField = feature.get(df);
+      if (Array.isArray(displayField)) {
+        displayField = displayField.join(", ");
+      }
+
+      if (displayField) {
+        if (featureTitleString.length > 0) {
+          featureTitleString = featureTitleString.concat(` | ${displayField}`);
+        } else {
+          featureTitleString = displayField;
+        }
+      }
+
+      return featureTitleString;
+    }, "");
   };
 }

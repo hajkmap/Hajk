@@ -55,7 +55,7 @@ const styles = (theme) => ({
   },
   filterInputFieldContainer: {
     padding: theme.spacing(1),
-    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
   },
   headerContainer: {
     paddingRight: theme.spacing(1),
@@ -84,6 +84,8 @@ class SearchResultsContainer extends React.PureComponent {
   state = {
     activeFeature: null,
     activeFeatureCollection: null,
+    filteredFeatureCollections: null,
+    filteredFeatures: null,
     sumOfResults: this.props.searchResults.featureCollections
       .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
@@ -590,18 +592,41 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderDownloadTool = () => {
-    const { featureCollections } = this.props;
-    const { activeFeatureCollection } = this.state;
+    const collectionsToDownload = this.getCollectionsToDownload();
     return (
       <SearchResultsDownloadMenu
-        featureCollections={
-          activeFeatureCollection
-            ? [activeFeatureCollection]
-            : featureCollections
-        }
+        featureCollections={collectionsToDownload}
         localObserver={this.props.localObserver}
       />
     );
+  };
+
+  getCollectionsToDownload = () => {
+    const {
+      activeFeatureCollection,
+      filteredFeatureCollections,
+      filteredFeatures,
+    } = this.state;
+    const { featureCollections } = this.props;
+
+    if (activeFeatureCollection) {
+      if (activeFeatureCollection.source.id === "userSelected") {
+        return [activeFeatureCollection];
+      }
+      if (!filteredFeatures) {
+        return [activeFeatureCollection];
+      }
+      const collectionToDownload = {
+        ...activeFeatureCollection,
+        value: { features: filteredFeatures },
+      };
+      return [collectionToDownload];
+    }
+    if (filteredFeatureCollections) {
+      return filteredFeatureCollections;
+    }
+
+    return featureCollections;
   };
 
   allToolsDisabled = () => {
@@ -679,12 +704,18 @@ class SearchResultsContainer extends React.PureComponent {
           this.getNextFeatureInfo(nextFeature, nextCollection, initiator)
         );
     }
-    this.setState({
-      selectedFeatures: selectedFeatures,
-      activeFeatureCollection: nextCollection,
-      activeFeature: nextFeature,
-      filterInputFieldOpen: false,
-    });
+    this.setState(
+      {
+        selectedFeatures: selectedFeatures,
+        activeFeatureCollection: nextCollection,
+        activeFeature: nextFeature,
+        filterInputFieldOpen: false,
+        featureFilter: !nextCollection ? "" : this.state.featureFilter,
+      },
+      () => {
+        !nextCollection && this.handleFilterUpdate();
+      }
+    );
     if (shouldZoomToFeature) {
       if (nextFeature) {
         localObserver.publish("map.zoomToFeatures", [{ feature: nextFeature }]);
@@ -816,15 +847,20 @@ class SearchResultsContainer extends React.PureComponent {
     const filteredFeatureCollections = this.getFilteredFeatureCollections(
       featureCollections
     );
-    const currentFeatures = this.getFilteredFeatures(
+    const filteredFeatures = this.getFilteredFeatures(
       filteredFeatureCollections
     );
-    const currentFeatureIds = currentFeatures.map((feature) => {
+    const currentFeatureIds = filteredFeatures.map((feature) => {
       return feature.id;
     });
 
+    this.setState({
+      filteredFeatureCollections: filteredFeatureCollections,
+      filteredFeatures: filteredFeatures,
+    });
+
     localObserver.publish("map.updateFeaturesAfterFilterChange", {
-      features: currentFeatures,
+      features: filteredFeatures,
       featureIds: currentFeatureIds,
     });
   };

@@ -48,6 +48,7 @@ class SearchResultsList extends React.PureComponent {
       const featureTitle = getFeatureTitle(activeFeature, source);
 
       activeFeature.source = source;
+      activeFeature.featureTitle = featureTitle;
       addFeatureToSelected({
         feature: activeFeature,
         sourceId: source?.id,

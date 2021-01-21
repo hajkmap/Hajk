@@ -133,6 +133,7 @@ class MapViewModel {
       }
     });
     this.highlightFeaturesInMap(this.lastFeaturesInfo);
+    this.zoomToFeatures(this.lastFeaturesInfo);
   };
 
   fitMapToSearchResult = () => {
