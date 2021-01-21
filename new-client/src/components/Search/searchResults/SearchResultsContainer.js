@@ -450,6 +450,27 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
+  clearAllSelectedFeaturesInView = () => {
+    const { localObserver } = this.props;
+    const { activeFeatureCollection } = this.state;
+    const sourceId = activeFeatureCollection?.source?.id;
+    const onSelectedFeaturesView = sourceId === "userSelected";
+
+    const selectedFeatures =
+      !sourceId || onSelectedFeaturesView
+        ? []
+        : [...this.state.selectedFeatures].filter((featureInfo) => {
+            return featureInfo.feature?.source.id !== sourceId;
+          });
+    this.setState({
+      selectedFeatures: selectedFeatures,
+      activeFeatureCollection: onSelectedFeaturesView
+        ? null
+        : activeFeatureCollection,
+    });
+    localObserver.publish("map.highlightFeatures", selectedFeatures);
+  };
+
   renderSortingMenu = () => {
     const {
       featureCollectionSortingStrategy,
@@ -560,11 +581,7 @@ class SearchResultsContainer extends React.PureComponent {
       <Tooltip title="Rensa alla selekterade objekt">
         <Button
           className={classes.headerButtons}
-          onClick={() => {
-            this.props.localObserver.publish(
-              "searchResultList.clearAllSelectedFeatures"
-            );
-          }}
+          onClick={this.clearAllSelectedFeaturesInView}
         >
           <DeleteIcon />
         </Button>

@@ -19,24 +19,6 @@ const styles = () => ({
 });
 
 class SearchResultsList extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.bindSubscriptions();
-  }
-
-  bindSubscriptions = () => {
-    const { localObserver } = this.props;
-    localObserver.subscribe(
-      "searchResultList.clearAllSelectedFeatures",
-      this.clearAllSelectedFeatures
-    );
-  };
-
-  componentWillUnmount = () => {
-    const { localObserver } = this.props;
-    localObserver.unsubscribe("searchResultList.clearAllSelectedFeatures");
-  };
-
   componentDidMount = () => {
     const { activeFeature } = this.props;
     //If the search results in exactly one hit (meaning that activeFeature is set on first render),
@@ -98,24 +80,6 @@ class SearchResultsList extends React.PureComponent {
     if (event.which === 13 || event.keyCode === 13) {
       this.handleOnFeatureClick(feature);
     }
-  };
-
-  clearAllSelectedFeatures = () => {
-    const { localObserver, activeFeatureCollection } = this.props;
-    const sourceId = activeFeatureCollection?.source?.id;
-
-    const selectedItems =
-      !sourceId || sourceId === "userSelected"
-        ? []
-        : [...this.state.selectedItems].filter((selectedItem) => {
-            return selectedItem.sourceId !== sourceId;
-          });
-    //handleSelectedListClear(selectedItems);
-    // Remove all selected items from array, then publish to
-    // mapViewModel to reset style (clearing highlight).
-    this.setState({ selectedItems: selectedItems }, () => {
-      localObserver.publish("map.highlightFeaturesByIds", selectedItems);
-    });
   };
 
   renderSearchResultDatasetSummary = (featureCollection) => {
