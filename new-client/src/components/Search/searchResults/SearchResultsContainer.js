@@ -1089,6 +1089,7 @@ class SearchResultsContainer extends React.PureComponent {
                   addFeatureToSelected={this.addFeatureToSelected}
                   removeFeatureFromSelected={this.removeFeatureFromSelected}
                   selectedFeatures={this.state.selectedFeatures}
+                  options={options}
                 />
               </Grid>
             </Grid>
