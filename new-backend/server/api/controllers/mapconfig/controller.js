@@ -41,7 +41,7 @@ export class Controller {
       req.params.format,
       ad.getUserFromRequestHeader(req),
       next
-    ).then((r) => res.send(r));
+    ).then((data) => handleStandardResponse(res, data));
   }
 
   /**

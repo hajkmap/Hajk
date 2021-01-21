@@ -84,7 +84,7 @@ class SettingsService {
         newLayer,
       };
     } catch (error) {
-      return error;
+      return { error };
     }
   }
 
@@ -250,7 +250,7 @@ class SettingsService {
 
       return { mapConfig };
     } catch (error) {
-      return error;
+      return { error };
     }
   }
 }

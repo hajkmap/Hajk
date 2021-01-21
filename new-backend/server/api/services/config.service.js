@@ -319,7 +319,9 @@ class ConfigService {
         throw e;
       }
 
-      // TODO: replace with something like:
+      // TODO:  Currently there is no option in admin to set permission on a per-layer-basis,
+      // but eventually it should be there. This means that we should write some washing function
+      // and replace the return below with something like this:
       // return this.washLayersStore(json);
       return json;
     } catch (error) {
@@ -364,7 +366,8 @@ class ConfigService {
     if (map === "layers") return Object.fromEntries(layersById); // TODO: Perhaps sort on layer name?
 
     // If we got this far, we now need to grab the contents of
-    // the requested map config.
+    // the requested map config. Note that content washing is disabled:
+    // we will export the entire map config as-is.
     const mapConfig = await this.getMapConfig(map, user, false);
 
     // Some clumsy error handling
