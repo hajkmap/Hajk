@@ -1,8 +1,6 @@
 import { Stroke, Style, Circle, Fill, Text, Icon } from "ol/style";
 import { Point } from "ol/geom.js";
 
-const defaultMarker =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAADpElEQVR4Ae3aA9DsSBQF4DNa2+ZvZNL3lNa2d0tr24W1bdu2bdu2beO5l8/InX/6JpmqfKdcgz4dA4VCoVAohNQ7mSwrB8k5cjOf4gcyiL/zA3lcbpZzeIAsyxpyrMLV5Ab+Tj+J/C7XcTVUkDcLTCG7yWf0ushnsnvb5MiNqtuZX9I3mC+5A6rIHtfme/QDzHtuTWSqIifSNxc5IbMtgtPLffTNR+7j9EhffW6+TR8ob0XzIF2cTz6nDxf5nPMhPV0z8336wHm/a2akgzU+TW+Qp1M6TvMieqNcBHvcgN4wG8BW2+TyuWUB+dz4FEP2obeN7Gt76PrNvMBvhoc1OZbePnKM2e5TfqVPIb8Y7U5lHf0gZJBc5TaJ43iGvxO7TeQqGUT9t9eBBblKPYR73PwYh5ufd6sLXA0DJf6kHMCRmLCSHE6vyk8oIbR4MeXsHY5JcEfQaxIvhtDcnrqVJ2HuSryHXpG9EJqcr9l0k8/r++ZVbc7nITR5RFHgMijIZYpfegSh8YNQp2Ka00H5EKHxe/qkRJ1QiDoVU/E9QpMR9EnpnBYKndMqlsBwhMY/6JPSNh0U2qajT8wfCI2f0CfF9UDB9SgKfILQ+EKaGzFfQGiqA9AVUOAVqgNiaHK66kC2IBJEC2oOZHI6QpPNdLcJk04ldLcjZTOEVu9Vn4tOAo+i16Tei+DK/KPJ89GSHEavyh8oIzy5o5kLmv6FeI/2+3InLHCrRi8pXT2egdO7uttEruIQenW2MrqlKyPo7SMjemeCDT5An0IegBW3XSoFtoeVaGoZZD18GcSpYEcuNC9wISzFi1oXiBeFLb5tOv/vwppsZlpgM5irykdmBT5GFfbcFlYF3BYwYr8M7OfffjuQzZGaMt8MXuAtlJEet17oAm49pEteClrgFaTNLR/0+LsC0sdrgxW4FlnonSPMU0v5tW92ZIPb257/2yvJ403P/xMoITtRJ4c1VWBY1IlsydFNzf/RyNo8U/KTARf4dJ4pkb14rQHv/ddCPvCKARW4AnnRNh2/aHj4X7RNh/yIl260gFsK+dLYW9RyEvKGNXlOXeB51pA/9bn5nWr437u5kE/x0jI8+RG2WxL5JQcmFjgQuVbmU5Ms8DTKyLe+eeWHic7+j9E8yD+uOOEtQYZzRbQG2W2CBXaDHfsX1OR8tJSKPDnW8J9EBa0lmk2+HjX8r6PZ0Hoo/z8bHkJBa5Kt6ella7QuHsWjYKZQKBQKhb8AaFXSW3c/idsAAAAASUVORK5CYII=";
 export default class FeatureStyle {
   #options;
   #defaultDisplayStyleSettings;
@@ -71,15 +69,28 @@ export default class FeatureStyle {
   };
 
   getFeatureStyle = (feature, featureTitle, displayFields, type) => {
+    // Helper for the cumbersome type check: scale and anchor values, when unset in admin,
+    // will consist of empty strings, perfectly legal but unusable in our case. So we must ensure
+    // that the value we get can be parsed to a finite number, else fallback to something else.
+    const isValidNumber = (n) => Number.isFinite(parseInt(n));
+
     const { scale, markerImg } = this.#options;
     const anchor = this.#options.anchor ?? [];
+
     const isPoint = feature?.getGeometry() instanceof Point;
     const textAlign = isPoint ? "left" : "center";
     const offsetY = isPoint ? -50 : -10;
+
     const settings =
       !type || type === "selection"
         ? this.#defaultSelectionStyleSettings
         : this.#defaultHighlightStyleSettings;
+
+    // Default SVG icon to be used as marker. Placed here so we can grab the current style's fill color.
+    const defaultMarker = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32pt" height="32pt" fill="${settings.fillColor}"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
+    // For the 'highlight' style, we want the marker icon to be 30% larger than other styles
+    const multiplier = type === "highlight" ? 1.3 : 1;
+
     return new Style({
       fill: new Fill({
         color: settings.fillColor,
@@ -89,9 +100,12 @@ export default class FeatureStyle {
         width: 2,
       }),
       image: new Icon({
-        anchor: [anchor[0] ?? 0.5, anchor[1] ?? 1],
-        scale: markerImg && markerImg.length > 0 ? scale ?? 0.5 : 0.5,
-        src: markerImg && markerImg.length > 0 ? markerImg : defaultMarker,
+        anchor: [
+          isValidNumber(anchor[0]) ? anchor[0] : 0.5,
+          isValidNumber(anchor[1]) ? anchor[1] : 1,
+        ],
+        scale: (isValidNumber(scale) ? scale : 1) * multiplier,
+        src: markerImg?.length > 0 ? markerImg : defaultMarker,
       }),
       text: new Text({
         textAlign: textAlign,

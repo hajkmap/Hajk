@@ -181,7 +181,7 @@ class MapViewModel {
         mapFeature,
         feature.featureTitle,
         [],
-        "highLight"
+        "highlight"
       )
     );
   };
@@ -224,7 +224,7 @@ class MapViewModel {
         feature,
         featureInfo.featureTitle,
         [],
-        "highLight"
+        "highlight"
       )
     );
     this.resultSource.addFeature(feature);
