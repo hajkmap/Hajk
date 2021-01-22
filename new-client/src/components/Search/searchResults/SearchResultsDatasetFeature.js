@@ -1,6 +1,8 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { Checkbox, Typography, Tooltip, Grid } from "@material-ui/core";
+import Favorite from "@material-ui/icons/Favorite";
+import FavoriteBorder from "@material-ui/icons/FavoriteBorder";
 
 const styles = (theme) => ({
   root: {
@@ -29,6 +31,8 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             checked={visibleInMap}
             onClick={(e) => e.stopPropagation()}
             onChange={this.handleCheckboxToggle}
+            icon={<FavoriteBorder />}
+            checkedIcon={<Favorite />}
           />
         </Tooltip>
       </Grid>
