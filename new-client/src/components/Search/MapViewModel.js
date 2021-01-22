@@ -315,6 +315,7 @@ class MapViewModel {
         throw new Error("Current extent could not be calculated correctly.");
       }
       const feature = new Feature(fromExtent(currentExtent));
+      this.drawSource.addFeature(feature);
       this.localObserver.publish("search-within-extent", [feature]);
     } catch (error) {
       this.handleSearchInCurrentExtentError(error);
