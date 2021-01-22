@@ -68,27 +68,25 @@ const defaultState = {
   enableFeatureToggler: true,
 
   // Used to style the spatial search polygon/circle feature
-  drawFillColor: "rgba(50, 50, 50, 0.6)",
-  drawStrokeColor: "rgba(50, 50, 50, 0.2)",
+  drawFillColor: "rgba(255,255,255,0.07)",
+  drawStrokeColor: "rgba(74,74,74,0.5)",
 
   // Used to draw all features that came in the results feature collection,
   // only used if 'showResultFeaturesInMap' is true
-  displayTextStroke: "rgba(225,225,225,1)",
-  displayTextFill: "rgba(74,74,74,1)",
-  displayFillColor: "rgba(74, 144, 226, 0.5)",
-  displayStrokeColor: "rgba(74, 144, 226, 0.7)",
+  displayFillColor: "rgba(74,144,226,0.15)",
+  displayStrokeColor: "rgba(74,144,226,0.4)",
 
   // Styles the selected features (the ones that user has marked as favorites)
-  selectionTextStroke: "rgba(0,0,0,1)",
-  selectionTextFill: "rgba(255,255,255,1)",
-  selectionFillColor: "rgba(245, 166, 35, 0.5)",
-  selectionStrokeColor: "rgba(245, 166, 35, 0.7)",
+  selectionTextStroke: "rgba(255,255,255,1)",
+  selectionTextFill: "rgba(63,122,190,1)",
+  selectionFillColor: "rgba(74,144,226,0.7)",
+  selectionStrokeColor: "rgba(74,144,226,0.8)",
 
   // Styles the currently highligheted feature (the one that user clicked in map or highlighted by showing in search info window)
-  highlightTextStroke: "rgba(0,0,0,1)",
-  highlightTextFill: "rgba(255,255,255,1)",
-  highlightFillColor: "rgba(208, 2, 27, 0.5)",
-  highlightStrokeColor: "rgba(208, 2, 27, 0.7)",
+  highlightTextStroke: "rgba(255,255,255,1)",
+  highlightTextFill: "rgba(214,143,28,1)",
+  highlightFillColor: "rgba(245,166,35,0.7)",
+  highlightStrokeColor: "rgba(245,166,35,0.8)",
 
   // Only local state, not used in save()
   validationErrors: [],
@@ -203,10 +201,6 @@ class ToolOptions extends Component {
           drawStrokeColor:
             tool.options.drawStrokeColor || this.state.drawStrokeColor,
 
-          displayTextStroke:
-            tool.options.displayTextStroke || this.state.displayTextStroke,
-          displayTextFill:
-            tool.options.displayTextFill || this.state.displayTextFill,
           displayFillColor:
             tool.options.displayFillColor || this.state.displayFillColor,
           displayStrokeColor:
@@ -365,8 +359,6 @@ class ToolOptions extends Component {
         drawFillColor: this.state.drawFillColor,
         drawStrokeColor: this.state.drawStrokeColor,
 
-        displayTextStroke: this.state.displayTextStroke,
-        displayTextFill: this.state.displayTextFill,
         displayFillColor: this.state.displayFillColor,
         displayStrokeColor: this.state.displayStrokeColor,
 
@@ -1001,36 +993,6 @@ class ToolOptions extends Component {
             <span className="pull-left" style={{ marginLeft: "10px" }}>
               <div>
                 <div>
-                  <label className="long-label" htmlFor="displayTextFill">
-                    Textfyllnad
-                  </label>
-                </div>
-                <SketchPicker
-                  color={RGBA.parse(this.state.displayTextFill)}
-                  onChangeComplete={(color) =>
-                    this.handleColorChange("displayTextFill", color)
-                  }
-                />
-              </div>
-            </span>
-            <span className="pull-left" style={{ marginLeft: "10px" }}>
-              <div>
-                <div>
-                  <label className="long-label" htmlFor="displayTextStroke">
-                    Textram
-                  </label>
-                </div>
-                <SketchPicker
-                  color={RGBA.parse(this.state.displayTextStroke)}
-                  onChangeComplete={(color) =>
-                    this.handleColorChange("displayTextStroke", color)
-                  }
-                />
-              </div>
-            </span>
-            <span className="pull-left" style={{ marginLeft: "10px" }}>
-              <div>
-                <div>
                   <label className="long-label" htmlFor="displayFillColor">
                     Markeringsfyllnad
                   </label>
@@ -1126,7 +1088,7 @@ class ToolOptions extends Component {
           </div>
 
           <div className="separator">
-            Utseende för det aktiva ("highlighetade") resultatet
+            Utseende för det aktiva ("highlightade") resultatet
           </div>
 
           <div className="clearfix">

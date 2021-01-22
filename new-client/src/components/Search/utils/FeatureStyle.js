@@ -59,7 +59,7 @@ export default class FeatureStyle {
       this.#options.highlightTextFill ?? "rgba(255, 255, 255, 1)";
     const textStrokeColor =
       this.#options.highlightTextStroke ?? "rgba(0, 0, 0, 0.5)";
-    const fontSize = 14;
+    const fontSize = 15;
 
     return {
       strokeColor: strokeColor,
@@ -96,7 +96,7 @@ export default class FeatureStyle {
       text: new Text({
         textAlign: textAlign,
         textBaseline: "middle",
-        font: `${settings.fontSize}pt sans-serif`,
+        font: `${settings.fontSize}pt "Roboto", sans-serif`,
         fill: new Fill({
           color: settings.textFillColor,
         }),
