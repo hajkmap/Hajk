@@ -20,7 +20,7 @@ const styles = (theme) => ({
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
     const { visibleInMap } = this.props;
-    const helpText = !visibleInMap ? "Visa i kartan" : "Dölj från kartan";
+    const helpText = !visibleInMap ? "Lägg till i urval" : "Ta bort från urval";
 
     return (
       <Grid item align="center">
