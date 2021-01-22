@@ -111,6 +111,7 @@ class SearchResultsList extends React.PureComponent {
       selectedFeatures,
       addFeatureToSelected,
       removeFeatureFromSelected,
+      shouldRenderSelectedCollection,
     } = this.props;
     return (
       <SearchResultsDataset
@@ -132,6 +133,7 @@ class SearchResultsList extends React.PureComponent {
         enableFeatureToggler={enableFeatureToggler}
         addFeatureToSelected={addFeatureToSelected}
         removeFeatureFromSelected={removeFeatureFromSelected}
+        shouldRenderSelectedCollection={shouldRenderSelectedCollection}
       />
     );
   };

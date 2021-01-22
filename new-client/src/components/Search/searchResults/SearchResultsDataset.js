@@ -147,6 +147,7 @@ class SearchResultsDataset extends React.Component {
       getFeatureTitle,
       addFeatureToSelected,
       removeFeatureFromSelected,
+      shouldRenderSelectedCollection,
     } = this.props;
 
     const sortedFeatures = this.getSortedFeatures(features);
@@ -194,6 +195,9 @@ class SearchResultsDataset extends React.Component {
                   removeFeatureFromSelected={removeFeatureFromSelected}
                   activeFeature={activeFeature}
                   getOriginBasedIcon={getOriginBasedIcon}
+                  shouldRenderSelectedCollection={
+                    shouldRenderSelectedCollection
+                  }
                 />
               </ListItem>
             );
