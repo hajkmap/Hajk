@@ -201,8 +201,11 @@
         "layers": [],
         "visibleForGroups": [],
         "maxResultsPerDataset": 100,
-        "anchor": [0.5, 1],
-        "scale": 0.15,
+        "anchor": [
+          "",
+          ""
+        ],
+        "scale": "",
         "markerImg": "marker.png",
         "delayBeforeAutoSearch": 300,
         "searchBarPlaceholder": "Sök...",
@@ -219,12 +222,18 @@
         "enableSelectedFeaturesCollection": true,
         "showResultFeaturesInMap": true,
         "enableFeatureToggler": true,
-        "highlightTextStroke": "rgba(0,0,0,1)",
-        "highlightTextFill": "rgba(255,255,255,1)",
-        "highlightFillColor": "rgba(200, 0, 0, 0.5)",
-        "highlightStrokeColor": "rgba(200, 0, 0, 0.7)",
-        "drawFillColor": "rgba(93,142,255,0.6)",
-        "drawStrokeColor": "rgba(0,15,255,0.76)"
+        "drawFillColor": "rgba(255,255,255,0.07)",
+        "drawStrokeColor": "rgba(74,74,74,0.5)",
+        "displayFillColor": "rgba(74,144,226,0.15)",
+        "displayStrokeColor": "rgba(74,144,226,0.4)",
+        "selectionTextStroke": "rgba(255,255,255,1)",
+        "selectionTextFill": "rgba(63,122,190,1)",
+        "selectionFillColor": "rgba(74,144,226,0.7)",
+        "selectionStrokeColor": "rgba(74,144,226,0.8)",
+        "highlightTextStroke": "rgba(255,255,255,1)",
+        "highlightTextFill": "rgba(214,143,28,1)",
+        "highlightFillColor": "rgba(245,166,35,0.7)",
+        "highlightStrokeColor": "rgba(245,166,35,0.8)"
       },
       "index": 11
     },
