@@ -93,10 +93,7 @@ class MapViewModel {
       "map.addFeaturesToResultsLayer",
       this.addFeaturesToResultsLayer
     );
-    this.localObserver.subscribe(
-      "map.highlightFeatures",
-      this.highlightFeaturesInMap
-    );
+    this.localObserver.subscribe("map.setSelectedStyle", this.setSelectedStyle);
     this.localObserver.subscribe(
       "map.addAndHighlightFeatureInSearchResultLayer",
       this.addAndHighlightFeatureInSearchResultLayer
@@ -105,6 +102,11 @@ class MapViewModel {
       "map.updateFeaturesAfterFilterChange",
       this.updateFeaturesAfterFilterChange
     );
+    this.localObserver.subscribe(
+      "map.setHighLightedStyle",
+      this.setHighLightedStyle
+    );
+    this.localObserver.subscribe("map.zoomToFeature", this.zoomToFeature);
     // Global subscriptions
     this.app.globalObserver.subscribe(
       "search.spatialSearchActivated",
@@ -132,7 +134,7 @@ class MapViewModel {
         this.resultSource.addFeature(new GeoJSON().readFeature(feature));
       }
     });
-    this.highlightFeaturesInMap(this.lastFeaturesInfo);
+    this.setSelectedStyle(this.lastFeaturesInfo);
     this.zoomToFeatures(this.lastFeaturesInfo);
   };
 
@@ -191,7 +193,35 @@ class MapViewModel {
     });
   };
 
-  highlightFeaturesInMap = (featuresInfo) => {
+  setHighLightedStyle = (feature) => {
+    if (!feature) {
+      return;
+    }
+    const mapFeature = this.getFeatureFromResultSourceById(feature.id);
+    return mapFeature?.setStyle(
+      this.featureStyle.getFeatureStyle(
+        mapFeature,
+        feature.featureTitle,
+        [],
+        "highLight"
+      )
+    );
+  };
+
+  zoomToFeature = (feature) => {
+    if (!feature) {
+      return;
+    }
+    const extent = createEmpty();
+    const mapFeature = this.getFeatureFromResultSourceById(feature.id);
+    extend(extent, mapFeature?.getGeometry().getExtent());
+    const extentToZoomTo = isEmpty(extent)
+      ? this.resultSource.getExtent()
+      : extent;
+    this.fitMapToExtent(extentToZoomTo);
+  };
+
+  setSelectedStyle = (featuresInfo) => {
     this.lastFeaturesInfo = featuresInfo;
     this.resetStyleForFeaturesInResultSource();
     featuresInfo.map((featureInfo) => {
@@ -199,7 +229,12 @@ class MapViewModel {
         featureInfo.feature.id
       );
       return feature?.setStyle(
-        this.featureStyle.getHighlightedStyle(feature, featureInfo.featureTitle)
+        this.featureStyle.getFeatureStyle(
+          feature,
+          featureInfo.featureTitle,
+          [],
+          "selection"
+        )
       );
     });
   };
@@ -207,7 +242,12 @@ class MapViewModel {
   addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
     const feature = new GeoJSON().readFeature(featureInfo.feature);
     feature.setStyle(
-      this.featureStyle.getHighlightedStyle(feature, featureInfo.featureTitle)
+      this.featureStyle.getFeatureStyle(
+        feature,
+        featureInfo.featureTitle,
+        [],
+        "highLight"
+      )
     );
     this.resultSource.addFeature(feature);
     this.fitMapToSearchResult();

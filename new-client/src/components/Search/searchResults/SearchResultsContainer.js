@@ -274,7 +274,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   updateMapView = (selectedFeatures) => {
     const { localObserver } = this.props;
-    localObserver.publish("map.highlightFeatures", selectedFeatures);
+    localObserver.publish("map.setSelectedStyle", selectedFeatures);
     localObserver.publish("map.zoomToFeatures", selectedFeatures);
   };
 
@@ -470,7 +470,7 @@ class SearchResultsContainer extends React.PureComponent {
         ? null
         : activeFeatureCollection,
     });
-    localObserver.publish("map.highlightFeatures", selectedFeatures);
+    localObserver.publish("map.setSelectedStyle", selectedFeatures);
   };
 
   renderSortingMenu = () => {
@@ -695,6 +695,7 @@ class SearchResultsContainer extends React.PureComponent {
         );
       });
       featureIndex !== -1 && selectedFeatures.splice(featureIndex, 1);
+      localObserver.publish("map.setSelectedStyle", selectedFeatures);
     }
 
     if (nextFeature) {
@@ -716,14 +717,14 @@ class SearchResultsContainer extends React.PureComponent {
         !nextCollection && this.handleFilterUpdate();
       }
     );
-    if (shouldZoomToFeature) {
-      if (nextFeature) {
-        localObserver.publish("map.zoomToFeatures", [{ feature: nextFeature }]);
-      } else {
-        localObserver.publish("map.zoomToFeatures", selectedFeatures);
+    if (nextFeature) {
+      if (shouldZoomToFeature) {
+        localObserver.publish("map.zoomToFeature", nextFeature);
       }
+      localObserver.publish("map.setHighLightedStyle", nextFeature);
+    } else {
+      localObserver.publish("map.setSelectedStyle", selectedFeatures);
     }
-    localObserver.publish("map.highlightFeatures", selectedFeatures);
   };
 
   featureIsSelected = (feature) => {
@@ -737,9 +738,12 @@ class SearchResultsContainer extends React.PureComponent {
     if (!nextFeature.source) {
       nextFeature.source = nextCollection.source;
     }
+    const featureTitle = this.getFeatureTitle(nextFeature);
+    nextFeature.featureTitle = featureTitle;
+
     return {
       feature: nextFeature,
-      featureTitle: this.getFeatureTitle(nextFeature),
+      featureTitle: featureTitle,
       sourceId: nextFeature.source ?? nextCollection.source.id,
       initiator: initiator,
     };
