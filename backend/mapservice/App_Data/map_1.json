@@ -198,40 +198,33 @@
     {
       "type": "search",
       "options": {
-        "anchor": [16, 32],
+        "layers": [],
+        "visibleForGroups": [],
+        "maxResultsPerDataset": 100,
+        "anchor": [0.5, 1],
         "scale": 0.15,
-        "strokeColor": {
-          "r": 244,
-          "g": 83,
-          "b": 63,
-          "a": 1
-        },
-        "strokeWidth": 4,
-        "fillColor": {
-          "r": 244,
-          "g": 83,
-          "b": 63,
-          "a": 0.2
-        },
-        "polygonSearch": true,
-        "radiusSearch": true,
-        "selectionSearch": true,
-        "tooltip": "Sök i kartlager",
-        "searchWithinButtonText": "Markera i kartan",
-        "maxFeatures": 100,
-        "delayBeforeAutoSearch": 500,
-        "selectedSources": ["8", "7", "30", "27", "32", "34", "33", "14", "18"],
-        "layers": [
-          {
-            "id": "9",
-            "visibleForGroups": []
-          },
-          {
-            "id": "10",
-            "visibleForGroups": []
-          }
-        ],
-        "visibleForGroups": []
+        "markerImg": "marker.png",
+        "delayBeforeAutoSearch": 300,
+        "searchBarPlaceholder": "Sök...",
+        "enablePolygonSearch": true,
+        "enableRadiusSearch": true,
+        "enableSelectSearch": true,
+        "enableExtentSearch": true,
+        "enableResultsFiltering": true,
+        "enableResultsSorting": true,
+        "enableResultsSelectionClearing": true,
+        "enableResultsDownloading": true,
+        "enableFeaturePreview": true,
+        "enableLabelOnHighlight": true,
+        "enableSelectedFeaturesCollection": true,
+        "showResultFeaturesInMap": true,
+        "enableFeatureToggler": true,
+        "highlightTextStroke": "rgba(0,0,0,1)",
+        "highlightTextFill": "rgba(255,255,255,1)",
+        "highlightFillColor": "rgba(200, 0, 0, 0.5)",
+        "highlightStrokeColor": "rgba(200, 0, 0, 0.7)",
+        "drawFillColor": "rgba(93,142,255,0.6)",
+        "drawStrokeColor": "rgba(0,15,255,0.76)"
       },
       "index": 11
     },

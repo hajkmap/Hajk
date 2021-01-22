@@ -11,6 +11,13 @@ const styles = (theme) => ({
   typography: {
     maxWidth: "100%",
   },
+  warningChip: {
+    color: theme.palette.warning.contrastText,
+    backgroundColor:
+      theme.palette.type === "dark"
+        ? theme.palette.warning.dark
+        : theme.palette.warning.light,
+  },
 });
 
 class SearchResultsDatasetSummary extends React.PureComponent {
@@ -22,9 +29,17 @@ class SearchResultsDatasetSummary extends React.PureComponent {
 
   renderDatasetSummary = () => {
     const { numberOfResultsToDisplay } = this.state;
-    const { featureCollection, getOriginBasedIcon, classes } = this.props;
+    const {
+      featureCollection,
+      getOriginBasedIcon,
+      maxResultsPerDataset,
+      classes,
+    } = this.props;
 
-    const toolTipTitle = `Visar ${numberOfResultsToDisplay} resultat`;
+    const displayWarning = maxResultsPerDataset <= numberOfResultsToDisplay;
+    const toolTipTitle = displayWarning
+      ? `Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas.`
+      : `Visar ${numberOfResultsToDisplay} resultat`;
 
     return (
       <>
@@ -51,7 +66,10 @@ class SearchResultsDatasetSummary extends React.PureComponent {
               <Chip
                 size="small"
                 color="default"
-                label={numberOfResultsToDisplay}
+                className={displayWarning ? classes.warningChip : null}
+                label={`${numberOfResultsToDisplay}${
+                  displayWarning ? "+" : ""
+                }`}
               />
             </Tooltip>
           </Grid>

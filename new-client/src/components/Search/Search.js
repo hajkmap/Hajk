@@ -61,7 +61,7 @@ class Search extends React.PureComponent {
       name: "Sök med polygon",
       icon: <EditIcon />,
       type: "Polygon",
-      disabled: this.props.options.polygonSearchDisabled ?? false,
+      enabled: this.props.options.enablePolygonSearch ?? true,
       toolTipTitle:
         "Genomför en sökning i ett område genom att rita en polygon.",
       onClickEventName: "search.spatialSearchActivated",
@@ -70,7 +70,7 @@ class Search extends React.PureComponent {
       name: "Sök med radie",
       icon: <RadioButtonUncheckedIcon />,
       type: "Circle",
-      disabled: this.props.options.radiusSearchDisabled ?? false,
+      enabled: this.props.options.enableRadiusSearch ?? true,
       toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
       onClickEventName: "search.spatialSearchActivated",
     },
@@ -78,7 +78,7 @@ class Search extends React.PureComponent {
       name: "Sök med objekt",
       icon: <TouchAppIcon />,
       type: "Select",
-      disabled: this.props.options.selectSearchDisabled ?? false,
+      enabled: this.props.options.enableSelectSearch ?? true,
       toolTipTitle:
         "Genomför en sökning genom att välja en eller flera områden i kartan.",
       onClickEventName: "search.spatialSearchActivated",
@@ -87,7 +87,7 @@ class Search extends React.PureComponent {
       name: "Sök i området",
       icon: <Crop54Icon />,
       type: "Extent",
-      disabled: this.props.options.extentSearchDisabled ?? false,
+      enabled: this.props.options.enableExtentSearch ?? true,
       toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
       onClickEventName: "search.spatialSearchActivated",
     },
@@ -335,6 +335,7 @@ class Search extends React.PureComponent {
       searchResults: { featureCollections: [], errors: [] },
       failedWFSFetchMessage: "",
       resultPanelCollapsed: false,
+      loading: false,
     });
     this.resetFeaturesToFilter();
     this.localObserver.publish("clearMapView");

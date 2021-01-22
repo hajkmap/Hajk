@@ -40,7 +40,7 @@ class SearchTools extends React.PureComponent {
 
   getEnabledTools = () => {
     const { searchTools } = this.props;
-    return searchTools.filter((tool) => !tool.disabled);
+    return searchTools.filter((tool) => tool.enabled ?? true);
   };
 
   renderSettingsDialog = () => {

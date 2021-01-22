@@ -8,7 +8,7 @@
  * @param {*} res The HTTP response object
  * @param {*} data The data Promise that our various services return
  */
-export default function handleStandardResponse(res, data) {
+export default function handleStandardResponse(res, data, successStatus = 200) {
   if (data.error) res.status(500).send(data.error.toString());
-  else res.json(data);
+  else res.status(successStatus).json(data);
 }

@@ -6,6 +6,7 @@ import withWidth from "@material-ui/core/withWidth";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import SearchIcon from "@material-ui/icons/Search";
 import RoomIcon from "@material-ui/icons/Room";
+import CheckIcon from "@material-ui/icons/Check";
 import DescriptionIcon from "@material-ui/icons/Description";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -109,6 +110,9 @@ class SearchBar extends React.PureComponent {
         break;
       case "DOCUMENT":
         icon = <DescriptionIcon color="disabled" />;
+        break;
+      case "USERSELECT":
+        icon = <CheckIcon color="disabled" />;
         break;
       default:
         icon = <RoomIcon color="disabled" />;

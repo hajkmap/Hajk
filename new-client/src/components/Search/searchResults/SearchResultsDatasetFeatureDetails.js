@@ -76,12 +76,14 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   shouldRenderCustomInfoBox = () => {
-    const { source } = this.props;
+    const { feature } = this.props;
+    const source = feature.source ?? this.props.source;
     return source.infobox && source.infobox !== "";
   };
 
   getHtmlItemInfoBox = () => {
-    const { source, feature } = this.props;
+    const { feature } = this.props;
+    const source = feature.source ?? this.props.source;
     feature.properties = this.featurePropsParsing.extractPropertiesFromJson(
       feature.properties
     );
@@ -139,38 +141,24 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     });
   };
 
-  getFeatureFromCollectionByIndex = (featureIndex) => {
-    const { featureCollection } = this.props;
-    return featureCollection?.value?.features[featureIndex];
-  };
-
   handleTogglerPressed = (nextFeatureIndex) => {
-    const { setActiveFeature } = this.props;
-    const nextFeature = this.getFeatureFromCollectionByIndex(nextFeatureIndex);
+    const { setActiveFeature, features } = this.props;
+    const nextFeature = features[nextFeatureIndex];
     setActiveFeature(nextFeature);
   };
 
-  getNumFeaturesInCollection = (featureCollection) => {
-    return featureCollection?.value?.features?.length ?? -1;
-  };
-
-  getFeatureIndexInCollection = (feature, featureCollection) => {
+  getFeatureIndex = (feature, features) => {
     return (
-      featureCollection?.value?.features?.findIndex((f) => {
+      features?.findIndex((f) => {
         return f.id === feature.id;
       }) ?? -1
     );
   };
 
   renderFeatureToggler = () => {
-    const { feature, featureCollection, classes } = this.props;
-    const numFeaturesInCollection = this.getNumFeaturesInCollection(
-      featureCollection
-    );
-    const currentFeatureIndex = this.getFeatureIndexInCollection(
-      feature,
-      featureCollection
-    );
+    const { feature, classes, features } = this.props;
+    const numFeaturesInCollection = features.length;
+    const currentFeatureIndex = this.getFeatureIndex(feature, features);
 
     const buttonLeftDisabled = currentFeatureIndex - 1 < 0;
     const buttonRightDisabled =
@@ -252,10 +240,10 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   render() {
-    const { classes, featureCollection } = this.props;
+    const { classes, features, enableFeatureToggler } = this.props;
     const { infoBox } = this.state;
     const shouldRenderToggler =
-      this.getNumFeaturesInCollection(featureCollection) > 1;
+      (enableFeatureToggler ?? true) && features?.length > 1;
     return (
       <Grid container className={classes.allFeatureDetailsContainer}>
         <Grid container alignItems="center" className={classes.headerContainer}>

@@ -46,17 +46,27 @@ export default class KmlExport {
         .map((featureCollection) => {
           const displayFields = featureCollection?.source?.displayFields ?? [];
           return featureCollection.value.features.map((feature) => {
-            return this.#getStyledFeature(feature, displayFields);
+            return this.#getStyledFeature(
+              feature,
+              feature.featureTitle ?? "",
+              displayFields
+            );
           });
         })
         .flat();
     }
   };
 
-  #getStyledFeature = (feature, displayFields) => {
+  #getStyledFeature = (feature, featureTitle, displayFields) => {
     const gjFeature = new GeoJSON().readFeature(feature);
+    gjFeature.setStyle(); // We must reset the current style before applying new...
     gjFeature.setStyle(
-      this.#featureStyle.getHighlightedStyle(gjFeature, displayFields)
+      this.#featureStyle.getFeatureStyle(
+        gjFeature,
+        featureTitle,
+        displayFields,
+        "selection"
+      )
     );
     return gjFeature;
   };

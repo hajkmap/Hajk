@@ -25,11 +25,6 @@ import {
   DialogContentText,
 } from "@material-ui/core";
 
-const getIndentationValue = (fontSize, multiplier, negative) => {
-  let value = multiplier * fontSize.substring(0, fontSize.length - 3);
-  return negative ? `${value * -1}rem` : `${value}rem`;
-};
-
 const styles = (theme) => ({
   gridContainer: {
     padding: theme.spacing(4),

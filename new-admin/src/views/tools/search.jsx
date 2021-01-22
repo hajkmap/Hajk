@@ -63,15 +63,30 @@ const defaultState = {
   enableResultsDownloading: true,
   enableFeaturePreview: true,
   enableLabelOnHighlight: true,
+  enableSelectedFeaturesCollection: true,
   showResultFeaturesInMap: true,
   enableFeatureToggler: true,
 
-  highlightTextStroke: "rgba(0,0,0,1)",
-  highlightTextFill: "rgba(255,255,255,1)",
-  highlightFillColor: "rgba(200, 0, 0, 0.5)",
-  highlightStrokeColor: "rgba(200, 0, 0, 0.7)",
-  drawFillColor: "rgba(50, 50, 50, 0.6)",
-  drawStrokeColor: "rgba(50, 50, 50, 0.2)",
+  // Used to style the spatial search polygon/circle feature
+  drawFillColor: "rgba(255,255,255,0.07)",
+  drawStrokeColor: "rgba(74,74,74,0.5)",
+
+  // Used to draw all features that came in the results feature collection,
+  // only used if 'showResultFeaturesInMap' is true
+  displayFillColor: "rgba(74,144,226,0.15)",
+  displayStrokeColor: "rgba(74,144,226,0.4)",
+
+  // Styles the selected features (the ones that user has marked as favorites)
+  selectionTextStroke: "rgba(255,255,255,1)",
+  selectionTextFill: "rgba(63,122,190,1)",
+  selectionFillColor: "rgba(74,144,226,0.7)",
+  selectionStrokeColor: "rgba(74,144,226,0.8)",
+
+  // Styles the currently highligheted feature (the one that user clicked in map or highlighted by showing in search info window)
+  highlightTextStroke: "rgba(255,255,255,1)",
+  highlightTextFill: "rgba(214,143,28,1)",
+  highlightFillColor: "rgba(245,166,35,0.7)",
+  highlightStrokeColor: "rgba(245,166,35,0.8)",
 
   // Only local state, not used in save()
   validationErrors: [],
@@ -172,12 +187,35 @@ class ToolOptions extends Component {
           enableLabelOnHighlight:
             tool.options.enableLabelOnHighlight ??
             this.state.enableLabelOnHighlight,
+          enableSelectedFeaturesCollection:
+            tool.options.enableSelectedFeaturesCollection ??
+            this.state.enableSelectedFeaturesCollection,
           showResultFeaturesInMap:
             tool.options.showResultFeaturesInMap ??
             this.state.showResultFeaturesInMap,
           enableFeatureToggler:
             tool.options.enableFeatureToggler ??
             this.state.enableFeatureToggler,
+
+          drawFillColor: tool.options.drawFillColor || this.state.drawFillColor,
+          drawStrokeColor:
+            tool.options.drawStrokeColor || this.state.drawStrokeColor,
+
+          displayFillColor:
+            tool.options.displayFillColor || this.state.displayFillColor,
+          displayStrokeColor:
+            tool.options.displayStrokeColor || this.state.displayStrokeColor,
+
+          selectionTextStroke:
+            tool.options.selectionTextStroke || this.state.selectionTextStroke,
+          selectionTextFill:
+            tool.options.selectionTextFill || this.state.selectionTextFill,
+          selectionFillColor:
+            tool.options.selectionFillColor || this.state.selectionFillColor,
+          selectionStrokeColor:
+            tool.options.selectionStrokeColor ||
+            this.state.selectionStrokeColor,
+
           highlightTextStroke:
             tool.options.highlightTextStroke || this.state.highlightTextStroke,
           highlightTextFill:
@@ -187,9 +225,6 @@ class ToolOptions extends Component {
           highlightStrokeColor:
             tool.options.highlightStrokeColor ||
             this.state.highlightStrokeColor,
-          drawFillColor: tool.options.drawFillColor || this.state.drawFillColor,
-          drawStrokeColor:
-            tool.options.drawStrokeColor || this.state.drawStrokeColor,
         },
         () => {
           this.loadLayers();
@@ -316,15 +351,26 @@ class ToolOptions extends Component {
         enableResultsDownloading: this.state.enableResultsDownloading,
         enableFeaturePreview: this.state.enableFeaturePreview,
         enableLabelOnHighlight: this.state.enableLabelOnHighlight,
+        enableSelectedFeaturesCollection: this.state
+          .enableSelectedFeaturesCollection,
         showResultFeaturesInMap: this.state.showResultFeaturesInMap,
         enableFeatureToggler: this.state.enableFeatureToggler,
+
+        drawFillColor: this.state.drawFillColor,
+        drawStrokeColor: this.state.drawStrokeColor,
+
+        displayFillColor: this.state.displayFillColor,
+        displayStrokeColor: this.state.displayStrokeColor,
+
+        selectionTextStroke: this.state.selectionTextStroke,
+        selectionTextFill: this.state.selectionTextFill,
+        selectionFillColor: this.state.selectionFillColor,
+        selectionStrokeColor: this.state.selectionStrokeColor,
 
         highlightTextStroke: this.state.highlightTextStroke,
         highlightTextFill: this.state.highlightTextFill,
         highlightFillColor: this.state.highlightFillColor,
         highlightStrokeColor: this.state.highlightStrokeColor,
-        drawFillColor: this.state.drawFillColor,
-        drawStrokeColor: this.state.drawStrokeColor,
       },
     };
 
@@ -830,6 +876,27 @@ class ToolOptions extends Component {
 
           <div>
             <input
+              id="enableSelectedFeaturesCollection"
+              value={this.state.enableSelectedFeaturesCollection}
+              type="checkbox"
+              name="enableSelectedFeaturesCollection"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableSelectedFeaturesCollection}
+            />
+            &nbsp;
+            <label
+              className="long-label"
+              htmlFor="enableSelectedFeaturesCollection"
+            >
+              Samla selekterade resultat i en egen kollektion ("Markerade
+              resultat")
+            </label>
+          </div>
+
+          <div>
+            <input
               id="enableFeatureToggler"
               value={this.state.enableFeatureToggler}
               type="checkbox"
@@ -916,6 +983,112 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+
+          <div className="separator">
+            Standardutseende för resultat i kartan
+          </div>
+
+          <div className="clearfix">
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="displayFillColor">
+                    Markeringsfyllnad
+                  </label>
+                </div>
+                <SketchPicker
+                  color={RGBA.parse(this.state.displayFillColor)}
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("displayFillColor", color)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="displayStrokeColor">
+                    Markeringsram
+                  </label>
+                </div>
+                <SketchPicker
+                  color={RGBA.parse(this.state.displayStrokeColor)}
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("displayStrokeColor", color)
+                  }
+                />
+              </div>
+            </span>
+          </div>
+
+          <div className="separator">Utseende för markerade resultat</div>
+
+          <div className="clearfix">
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="selectionTextFill">
+                    Textfyllnad
+                  </label>
+                </div>
+                <SketchPicker
+                  color={RGBA.parse(this.state.selectionTextFill)}
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("selectionTextFill", color)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="selectionTextStroke">
+                    Textram
+                  </label>
+                </div>
+                <SketchPicker
+                  color={RGBA.parse(this.state.selectionTextStroke)}
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("selectionTextStroke", color)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="selectionFillColor">
+                    Markeringsfyllnad
+                  </label>
+                </div>
+                <SketchPicker
+                  color={RGBA.parse(this.state.selectionFillColor)}
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("selectionFillColor", color)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="selectionStrokeColor">
+                    Markeringsram
+                  </label>
+                </div>
+                <SketchPicker
+                  color={RGBA.parse(this.state.selectionStrokeColor)}
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("selectionStrokeColor", color)
+                  }
+                />
+              </div>
+            </span>
+          </div>
+
+          <div className="separator">
+            Utseende för det aktiva ("highlightade") resultatet
           </div>
 
           <div className="clearfix">
