@@ -17,7 +17,13 @@ export default class DocumentSearchModel {
         {
           documentFileName: document.documentFileName,
           documentTitle: document.documentTitle,
-          features: this.getFeatures(document.chapters, document),
+          features: [
+            ...this.getFeatures(document.chapters, document),
+            this.getSpecialTitleFeature(
+              document
+            ) /*We need to add a special feature that is not working the same way 
+            when autocomplete is initiated and when a search is initiated.*/,
+          ],
         },
       ];
     }, []);
@@ -37,6 +43,31 @@ export default class DocumentSearchModel {
       ];
       return features;
     }, []);
+  };
+
+  /*We add a special feature to with only document.title as searchfield.
+  this feature is used when user is getting an autocomplete. 
+  See method handleSpecialCaseWithTitleHit for more information.
+  */
+
+  getSpecialTitleFeature = (document) => {
+    let properties = {
+      header: document.documentTitle,
+      geoids: [],
+      headerIdentifier: document.documentTitle,
+      documentTitle: document.documentTitle,
+      documentFileName: document.documentFileName,
+    };
+
+    return {
+      type: "Feature",
+      titleFeature: true,
+      geometry: null,
+      searchValues: [document.title],
+      id: `${document.documentTitle}${Math.floor(Math.random() * 1000)}`,
+      onClickName: "documentHandlerSearchResultClicked",
+      properties: properties,
+    };
   };
 
   createFeatureFromChapter = (chapter, document) => {
@@ -60,6 +91,7 @@ export default class DocumentSearchModel {
     return {
       type: "Feature",
       geometry: null,
+      titleFeature: false,
       searchValues: searchValues,
       id: `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`,
       onClickName: "documentHandlerSearchResultClicked",
@@ -94,7 +126,7 @@ export default class DocumentSearchModel {
   getResults = (searchString, searchOptions) => {
     this.matchSearch = new MatchSearch(searchOptions);
     this.searchOptions = searchOptions;
-
+    console.log(searchOptions, "searchOptions");
     return this.getDocumentHandlerResults(searchString);
   };
 
@@ -143,11 +175,39 @@ export default class DocumentSearchModel {
     }, []);
   };
 
+  /*When a search is initiated for autocomplete we search for the title of the document
+  only in the special features created in getSpecialTitleFeature. When the user then
+  clicks this feature in the searchresultlist, we add the documenttitle as a searchfield
+  for all chapters/features in that document because we want to show the user all
+  the chapters in that document*/
+
+  handleSpecialCaseWithTitleHit = (feature, documentTitle) => {
+    if (this.searchOptions.initiator === "search" && !feature.titleFeature) {
+      feature.searchValues.push(documentTitle);
+    }
+
+    if (
+      this.searchOptions.initiator === "autocomplete" &&
+      !feature.titleFeature
+    ) {
+      const index = feature.searchValues.indexOf(documentTitle);
+      console.log(index, "index");
+      if (index > -1) {
+        feature.searchValues.splice(index, 1);
+      }
+    }
+    return feature;
+  };
+
   getMatchedFeatures = (docFeatureCollection, possibleSearchCombinations) => {
     return docFeatureCollection.features.reduce((matchedFeatures, feature) => {
+      feature = this.handleSpecialCaseWithTitleHit(
+        feature,
+        docFeatureCollection.documentTitle
+      );
+
       feature.matchedSearchValues = this.getMatchedSearchValues(
         possibleSearchCombinations,
-        feature.properties.documentTitle,
         feature.searchValues
       );
 
@@ -201,6 +261,7 @@ export default class DocumentSearchModel {
           documentCollection
         );
 
+        console.log(featureCollection, "featureCollection");
         return featureCollection
           ? [...featureCollections, featureCollection]
           : featureCollections;
@@ -217,21 +278,14 @@ export default class DocumentSearchModel {
     }, []);
   };
 
-  documentTitleInSearchCombination = (searchCombination, documentTitle) => {
-    return searchCombination.every((word) => {
-      if (!this.searchOptions.matchCase) {
-        return documentTitle.toLowerCase().search(word.toLowerCase()) !== -1;
-      }
-      return documentTitle.search(word) !== -1;
-    });
-  };
-
   getAllMatchedSearchValues = (word, searchValues) => {
     const allMatched = new Set();
     const matchedSearchValues = this.getMatched(word, searchValues);
+
     matchedSearchValues.forEach((matched) => {
       allMatched.add(matched);
     });
+    console.log(allMatched, "allmathc");
     return allMatched;
   };
 
@@ -241,28 +295,16 @@ export default class DocumentSearchModel {
    * a searchCombination can be a hit if the documentTitle is present in the combination, results in adding all as matched
    * a searchCombination can be hit if every combination has a searchhit
    */
-  getMatchedSearchValues = (
-    searchCombinations,
-    documentTitle,
-    searchValues
-  ) => {
+  getMatchedSearchValues = (searchCombinations, searchValues) => {
     let allMatched = new Set();
     let match = searchCombinations.some((searchCombination) => {
-      if (
-        documentTitle &&
-        this.documentTitleInSearchCombination(searchCombination, documentTitle)
-      ) {
-        searchValues.forEach(allMatched.add, allMatched);
-        return true;
-      } else {
-        return searchCombination.every((word) => {
-          let matchedSet = this.getAllMatchedSearchValues(word, searchValues);
-          allMatched = [...allMatched, ...matchedSet];
-          return matchedSet.size > 0;
-        });
-      }
+      return searchCombination.every((word) => {
+        let matchedSet = this.getAllMatchedSearchValues(word, searchValues);
+        allMatched = new Set([...allMatched, ...matchedSet]);
+        return matchedSet.size > 0;
+      });
     });
-
+    console.log(allMatched, "allMatcvhed");
     return match ? Array.from(allMatched) : [];
   };
 
