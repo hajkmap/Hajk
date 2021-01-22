@@ -14,7 +14,6 @@ class MapViewModel {
     this.map = settings.map;
     this.app = settings.app;
     this.options = settings.options;
-    this.defaultStyle = this.getDefaultStyle();
     this.drawStyleSettings = this.getDrawStyleSettings();
     this.featureStyle = new FeatureStyle(settings.options);
     this.localObserver = settings.localObserver;
@@ -27,28 +26,6 @@ class MapViewModel {
   // An object holding the last highlightInformation.
   // We use this to restore highlight after filter changes.
   lastFeaturesInfo = [];
-
-  getDefaultStyle = () => {
-    const fill = new Fill({
-      color: "rgba(255,255,255,0.4)",
-    });
-    const stroke = new Stroke({
-      color: "#3399CC",
-      width: 1.25,
-    });
-
-    return [
-      new Style({
-        image: new Circle({
-          fill: fill,
-          stroke: stroke,
-          radius: 5,
-        }),
-        fill: fill,
-        stroke: stroke,
-      }),
-    ];
-  };
 
   getDrawStyleSettings = () => {
     const strokeColor =
@@ -71,9 +48,10 @@ class MapViewModel {
 
   initMapLayers = () => {
     this.resultSource = this.getNewVectorSource();
+    const defaultStyle = this.featureStyle.getDefaultSearchResultStyle();
     this.resultsLayer = this.getNewVectorLayer(
       this.resultSource,
-      this.options.showResultFeaturesInMap ?? true ? this.defaultStyle : null
+      this.options.showResultFeaturesInMap ?? true ? defaultStyle : null
     );
     this.resultsLayer.set("type", "searchResultLayer");
     this.drawSource = this.getNewVectorSource();
