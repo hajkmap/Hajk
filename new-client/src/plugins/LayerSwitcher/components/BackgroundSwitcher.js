@@ -60,6 +60,20 @@ class BackgroundSwitcher extends React.PureComponent {
       zIndex: -1,
     });
     this.props.map.addLayer(this.osmLayer);
+
+    // Update selected background layer if it is changed outside layerswitcher
+    this.props.app.globalObserver.subscribe(
+      "layerswitcher.wmsLayerLoadStatus",
+      (d) => {
+        const backgroundUpdated = this.props.layers.find(
+          (layer) => d.id === layer.name
+        );
+        backgroundUpdated &&
+          this.setState({
+            selectedLayer: backgroundUpdated.name,
+          });
+      }
+    );
   }
   /**
    * @summary Hides previously selected background and shows current selection.
