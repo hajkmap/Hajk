@@ -27,7 +27,6 @@ class SearchResultsDatasetFeature extends React.PureComponent {
         <Tooltip title={helpText}>
           <Checkbox
             color="default"
-            disableRipple
             checked={visibleInMap}
             onClick={(e) => e.stopPropagation()}
             onChange={this.handleCheckboxToggle}
