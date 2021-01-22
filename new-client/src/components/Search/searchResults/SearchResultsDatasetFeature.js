@@ -26,7 +26,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
       <Grid item align="center">
         <Tooltip title={helpText}>
           <Checkbox
-            color="primary"
+            color="default"
             disableRipple
             checked={visibleInMap}
             onClick={(e) => e.stopPropagation()}
