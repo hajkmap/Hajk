@@ -335,6 +335,7 @@ class Search extends React.PureComponent {
       searchResults: { featureCollections: [], errors: [] },
       failedWFSFetchMessage: "",
       resultPanelCollapsed: false,
+      loading: false,
     });
     this.resetFeaturesToFilter();
     this.localObserver.publish("clearMapView");
