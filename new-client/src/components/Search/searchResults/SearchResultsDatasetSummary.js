@@ -12,6 +12,7 @@ const styles = (theme) => ({
     maxWidth: "100%",
   },
   warningChip: {
+    color: theme.palette.warning.contrastText,
     backgroundColor:
       theme.palette.type === "dark"
         ? theme.palette.warning.dark
