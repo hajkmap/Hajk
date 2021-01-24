@@ -111,7 +111,7 @@ export default class KmlExport {
     });
 
     if (features.length > 0) {
-      const postData = createXML(transformed, "ritobjekt");
+      const postData = createXML(transformed, "Sökexport");
       saveAs(
         new Blob([postData], {
           type: "application/vnd.google-earth.kml+xml;charset=utf-8",
