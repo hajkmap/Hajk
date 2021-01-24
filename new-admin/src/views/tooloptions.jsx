@@ -44,7 +44,7 @@ import Dummy from "./tools/dummy.jsx";
 import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 
 var defaultState = {
-  activeTool: ""
+  activeTool: "",
 };
 
 class ToolOptions extends Component {
@@ -73,11 +73,11 @@ class ToolOptions extends Component {
   onUrlMapConfigChanged() {
     const t = this.state.activeTool;
     this.setState({
-      activeTool: ""
+      activeTool: "",
     });
     setTimeout(() => {
       this.setState({
-        activeTool: t
+        activeTool: t,
       });
     }, 20);
   }
@@ -131,14 +131,14 @@ class ToolOptions extends Component {
 
   toggleTool(tool) {
     this.setState({
-      activeTool: tool
+      activeTool: tool,
     });
   }
 
   getIndexForTool(tool) {
     var found = false;
     if (Array.isArray(this.props.model.get("toolConfig"))) {
-      found = this.props.model.get("toolConfig").filter(t => t.type === tool);
+      found = this.props.model.get("toolConfig").filter((t) => t.type === tool);
     }
 
     if (found[0]) {
@@ -152,8 +152,8 @@ class ToolOptions extends Component {
     var found = false;
     if (Array.isArray(this.props.model.get("toolConfig"))) {
       found =
-        this.props.model.get("toolConfig").filter(t => t.type === tool).length >
-        0;
+        this.props.model.get("toolConfig").filter((t) => t.type === tool)
+          .length > 0;
     }
     return found ? "fa fa-check-square-o" : "fa fa-square-o";
   }
@@ -185,7 +185,7 @@ class ToolOptions extends Component {
       routing: "Navigation",
       collector: "Tyck till",
       dummy: "Dummy plugin",
-      documenthandler: "Menyhantering"
+      documenthandler: "Dokumenthanterare 2.0",
     };
 
     return (

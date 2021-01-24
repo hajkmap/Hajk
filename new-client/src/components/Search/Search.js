@@ -429,6 +429,7 @@ class Search extends React.PureComponent {
     fetchSettings = {
       ...fetchSettings,
       getPossibleCombinations: true,
+      initiator: "autocomplete",
     };
     return fetchSettings;
   };
@@ -726,7 +727,10 @@ class Search extends React.PureComponent {
   };
 
   getSearchResultsFetchSettings = () => {
-    return this.getUserCustomFetchSettings(this.searchModel.getSearchOptions());
+    return {
+      ...this.getUserCustomFetchSettings(this.searchModel.getSearchOptions()),
+      initiator: "search",
+    };
   };
 
   removeCollectionsWithoutFeatures = (results) => {
