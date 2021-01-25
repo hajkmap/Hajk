@@ -164,7 +164,7 @@ class LayerGroup extends React.PureComponent {
 
   isToggled() {
     const { group } = this.props;
-    return this.isAllGroupAndSubGroupToggled(group);
+    return this.areAllGroupsAndSubGroupsToggled(group);
   }
 
   isSemiToggled() {
@@ -199,10 +199,10 @@ class LayerGroup extends React.PureComponent {
     }
   };
 
-  isAllGroupAndSubGroupToggled = (group) => {
+  areAllGroupsAndSubGroupsToggled = (group) => {
     if (this.hasSubGroups(group)) {
       return group.groups.every((g) => {
-        return this.isAllGroupAndSubGroupToggled(g);
+        return this.areAllGroupsAndSubGroupsToggled(g);
       });
     }
 
