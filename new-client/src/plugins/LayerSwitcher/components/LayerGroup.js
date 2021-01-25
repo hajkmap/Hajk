@@ -163,34 +163,57 @@ class LayerGroup extends React.PureComponent {
   };
 
   isToggled() {
-    var layers = this.props.app.getMap().getLayers().getArray();
     const { group } = this.props;
-    return group.layers.some((layer) => {
-      let foundMapLayer = layers.find((mapLayer) => {
-        return mapLayer.get("name") === layer.id;
-      });
-      if (foundMapLayer && foundMapLayer.getVisible()) {
-        return true;
-      } else {
-        return false;
-      }
-    });
+    return this.isAllGroupAndSubGroupToggled(group);
   }
 
   isSemiToggled() {
-    var layers = this.props.app.getMap().getLayers().getArray();
     const { group } = this.props;
-    return group.layers.every((layer) => {
-      let foundMapLayer = layers.find((mapLayer) => {
-        return mapLayer.get("name") === layer.id;
-      });
-      if (foundMapLayer && foundMapLayer.getVisible()) {
-        return true;
-      } else {
-        return false;
-      }
-    });
+    return this.areSubGroupsAndLayersSemiToggled(group);
   }
+
+  layerInMap = (layer) => {
+    const layers = this.props.app.getMap().getLayers().getArray();
+    let foundMapLayer = layers.find((mapLayer) => {
+      return mapLayer.get("name") === layer.id;
+    });
+    if (foundMapLayer && foundMapLayer.getVisible()) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  areSubGroupsAndLayersSemiToggled = (group) => {
+    if (this.hasSubGroups(group)) {
+      return group.groups.every((g) => {
+        return this.areSubGroupsAndLayersSemiToggled(g);
+      });
+    }
+
+    if (group.layers.length > 0) {
+      return group.layers.every((layer) => {
+        return this.layerInMap(layer);
+      });
+    }
+  };
+
+  isAllGroupAndSubGroupToggled = (group) => {
+    if (this.hasSubGroups(group)) {
+      return group.groups.some((g) => {
+        return this.isAllGroupAndSubGroupToggled(g);
+      });
+    }
+    if (group.layers.length > 0) {
+      return group.layers.some((layer) => {
+        return this.layerInMap(layer);
+      });
+    }
+  };
+
+  hasSubGroups = (group) => {
+    return group.groups && group.groups.length > 0;
+  };
   /**
    * @summary Loops through groups of objects and changes visibility for all layers within group.
    *
