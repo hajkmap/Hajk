@@ -65,6 +65,7 @@ const defaultState = {
   enableLabelOnHighlight: true,
   enableSelectedFeaturesCollection: true,
   showResultFeaturesInMap: true,
+  showResultsLimitReachedWarning: true,
   enableFeatureToggler: true,
 
   // Used to style the spatial search polygon/circle feature
@@ -193,6 +194,9 @@ class ToolOptions extends Component {
           showResultFeaturesInMap:
             tool.options.showResultFeaturesInMap ??
             this.state.showResultFeaturesInMap,
+          showResultsLimitReachedWarning:
+            tool.options.showResultsLimitReachedWarning ??
+            this.state.showResultsLimitReachedWarning,
           enableFeatureToggler:
             tool.options.enableFeatureToggler ??
             this.state.enableFeatureToggler,
@@ -354,6 +358,8 @@ class ToolOptions extends Component {
         enableSelectedFeaturesCollection: this.state
           .enableSelectedFeaturesCollection,
         showResultFeaturesInMap: this.state.showResultFeaturesInMap,
+        showResultsLimitReachedWarning: this.state
+          .showResultsLimitReachedWarning,
         enableFeatureToggler: this.state.enableFeatureToggler,
 
         drawFillColor: this.state.drawFillColor,
@@ -633,6 +639,27 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+
+          <div>
+            <input
+              id="showResultsLimitReachedWarning"
+              value={this.state.showResultsLimitReachedWarning}
+              type="checkbox"
+              name="showResultsLimitReachedWarning"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.showResultsLimitReachedWarning}
+            />
+            &nbsp;
+            <label
+              className="long-label"
+              htmlFor="showResultsLimitReachedWarning"
+            >
+              Visa info bredvid varje dataset när antalet träffar överstiger
+              värdet från inställningen ovan
+            </label>
           </div>
 
           <div>
