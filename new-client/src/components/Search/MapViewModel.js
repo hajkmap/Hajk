@@ -291,18 +291,19 @@ class MapViewModel {
       this.map.clickLock.add("search");
       this.map.addInteraction(this.draw);
       this.drawSource.clear();
-
-      this.drawSource.on("addfeature", (e) => {
-        this.map.removeInteraction(this.draw);
-        this.map.clickLock.delete("search");
-        this.localObserver.publish("on-draw-end", e.feature);
-      });
+      this.drawSource.on("addfeature", this.handleDrawFeatureAdded);
     } else {
       this.map.removeInteraction(this.draw);
       this.map.clickLock.delete("search");
 
       this.drawSource.clear();
     }
+  };
+
+  handleDrawFeatureAdded = (e) => {
+    this.map.removeInteraction(this.draw);
+    this.map.clickLock.delete("search");
+    this.localObserver.publish("on-draw-end", e.feature);
   };
 
   searchInCurrentExtent = () => {
@@ -332,6 +333,7 @@ class MapViewModel {
   };
 
   enableSelectFeaturesSearch = () => {
+    this.drawSource.un("addfeature", this.handleDrawFeatureAdded);
     this.ctrlKeyPressed = false;
     this.localObserver.publish("on-select-search-start");
     this.addSelectListeners();
