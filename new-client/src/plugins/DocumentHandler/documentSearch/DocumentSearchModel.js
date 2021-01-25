@@ -126,7 +126,6 @@ export default class DocumentSearchModel {
   getResults = (searchString, searchOptions) => {
     this.matchSearch = new MatchSearch(searchOptions);
     this.searchOptions = searchOptions;
-    console.log(searchOptions, "searchOptions");
     return this.getDocumentHandlerResults(searchString);
   };
 
@@ -181,26 +180,22 @@ export default class DocumentSearchModel {
   for all chapters/features in that document because we want to show the user all
   the chapters in that document*/
 
-  handleSpecialCaseWithTitleHit = (feature, documentTitle) => {
-    const { initiator } = this.searchOptions;
-    if (initiator === "search" && !feature.isTitleFeature) {
-      feature.searchValues.push(documentTitle);
-    }
-
-    if (initiator === "autocomplete" && !feature.isTitleFeature) {
-      feature.searchValues = feature.searchValues.filter((searchValue) => {
-        return searchValue !== documentTitle;
-      });
-    }
-    return feature;
-  };
-
   getMatchedFeatures = (docFeatureCollection, possibleSearchCombinations) => {
+    const { initiator } = this.searchOptions;
     return docFeatureCollection.features.reduce((matchedFeatures, feature) => {
-      feature = this.handleSpecialCaseWithTitleHit(
-        feature,
-        docFeatureCollection.documentTitle
-      );
+      if (initiator === "search") {
+        if (feature.isTitleFeature) {
+          //If feature is a special titleFeature and we are making a search, it is not supposed to be in the resultlist
+          return matchedFeatures;
+        }
+        feature.searchValues.push(docFeatureCollection.documentTitle);
+      }
+
+      if (initiator === "autocomplete" && !feature.isTitleFeature) {
+        feature.searchValues = feature.searchValues.filter((searchValue) => {
+          return searchValue !== docFeatureCollection.documentTitle;
+        });
+      }
 
       feature.matchedSearchValues = this.getMatchedSearchValues(
         possibleSearchCombinations,
