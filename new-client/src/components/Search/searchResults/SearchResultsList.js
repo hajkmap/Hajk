@@ -90,6 +90,9 @@ class SearchResultsList extends React.PureComponent {
         featureCollection={featureCollection}
         getOriginBasedIcon={getOriginBasedIcon}
         maxResultsPerDataset={this.props.options.maxResultsPerDataset ?? 100}
+        showResultsLimitReachedWarning={
+          this.props.options.showResultsLimitReachedWarning ?? true
+        }
       />
     );
   };
