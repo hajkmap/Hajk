@@ -61,7 +61,7 @@ export default class DocumentSearchModel {
 
     return {
       type: "Feature",
-      titleFeature: true,
+      isTitleFeature: true,
       geometry: null,
       searchValues: [document.title],
       id: `${document.documentTitle}${Math.floor(Math.random() * 1000)}`,
@@ -91,7 +91,7 @@ export default class DocumentSearchModel {
     return {
       type: "Feature",
       geometry: null,
-      titleFeature: false,
+      isTitleFeature: false,
       searchValues: searchValues,
       id: `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`,
       onClickName: "documentHandlerSearchResultClicked",
@@ -182,19 +182,15 @@ export default class DocumentSearchModel {
   the chapters in that document*/
 
   handleSpecialCaseWithTitleHit = (feature, documentTitle) => {
-    if (this.searchOptions.initiator === "search" && !feature.titleFeature) {
+    const { initiator } = this.searchOptions;
+    if (initiator === "search" && !feature.isTitleFeature) {
       feature.searchValues.push(documentTitle);
     }
 
-    if (
-      this.searchOptions.initiator === "autocomplete" &&
-      !feature.titleFeature
-    ) {
-      const index = feature.searchValues.indexOf(documentTitle);
-      console.log(index, "index");
-      if (index > -1) {
-        feature.searchValues.splice(index, 1);
-      }
+    if (initiator === "autocomplete" && !feature.isTitleFeature) {
+      feature.searchValues = feature.searchValues.filter((searchValue) => {
+        return searchValue !== documentTitle;
+      });
     }
     return feature;
   };
@@ -261,7 +257,6 @@ export default class DocumentSearchModel {
           documentCollection
         );
 
-        console.log(featureCollection, "featureCollection");
         return featureCollection
           ? [...featureCollections, featureCollection]
           : featureCollections;
@@ -285,7 +280,7 @@ export default class DocumentSearchModel {
     matchedSearchValues.forEach((matched) => {
       allMatched.add(matched);
     });
-    console.log(allMatched, "allmathc");
+
     return allMatched;
   };
 
@@ -304,7 +299,6 @@ export default class DocumentSearchModel {
         return matchedSet.size > 0;
       });
     });
-    console.log(allMatched, "allMatcvhed");
     return match ? Array.from(allMatched) : [];
   };
 
