@@ -101,6 +101,8 @@ class SearchResultsContainer extends React.PureComponent {
 
   // Used for setTimeout/clearTimeout, in order to delay filter update when user is typing
   filterInputTimer = null;
+  lastFeatureFilter = "";
+  lastFeatureCollectionFilter = "";
 
   // Amount of time before filter changes is committed
   delayBeforeFilterCommit = 300;
@@ -391,10 +393,10 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   getFilteredFeatureCollections = () => {
-    const { featureCollectionFilter } = this.state;
+    const { featureCollectionFilter, filteredFeatureCollections } = this.state;
     const { featureCollections } = this.props;
     // Do we have a filter value?
-    if (featureCollectionFilter.length > 0) {
+    if (this.lastFeatureCollectionFilter !== featureCollectionFilter) {
       // Filter all collections
       return featureCollections.filter((featureCollection) => {
         // Returning collections where the filter is included in caption
@@ -403,7 +405,10 @@ class SearchResultsContainer extends React.PureComponent {
           .includes(featureCollectionFilter.toLowerCase());
       });
     } else {
-      // No filter? Return all collections
+      // No filter update? Return all collections or last filtered.
+      if (filteredFeatureCollections?.length > 0) {
+        return filteredFeatureCollections;
+      }
       return featureCollections;
     }
   };
@@ -605,6 +610,7 @@ class SearchResultsContainer extends React.PureComponent {
     const {
       activeFeatureCollection,
       filteredFeatureCollections,
+      featureFilter,
       filteredFeatures,
     } = this.state;
     const { featureCollections } = this.props;
@@ -613,7 +619,7 @@ class SearchResultsContainer extends React.PureComponent {
       if (activeFeatureCollection.source.id === "userSelected") {
         return [activeFeatureCollection];
       }
-      if (!filteredFeatures) {
+      if (featureFilter === "") {
         return [activeFeatureCollection];
       }
       const collectionToDownload = {
@@ -847,7 +853,16 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   handleFilterUpdate = () => {
+    const { featureCollectionFilter, featureFilter } = this.state;
     const { localObserver, featureCollections } = this.props;
+
+    if (
+      this.lastFeatureFilter === featureFilter &&
+      this.lastFeatureCollectionFilter === featureCollectionFilter
+    ) {
+      return;
+    }
+
     const filteredFeatureCollections = this.getFilteredFeatureCollections(
       featureCollections
     );
@@ -862,6 +877,9 @@ class SearchResultsContainer extends React.PureComponent {
       filteredFeatureCollections: filteredFeatureCollections,
       filteredFeatures: filteredFeatures,
     });
+
+    this.lastFeatureFilter = featureFilter;
+    this.lastFeatureCollectionFilter = featureCollectionFilter;
 
     localObserver.publish("map.updateFeaturesAfterFilterChange", {
       features: filteredFeatures,

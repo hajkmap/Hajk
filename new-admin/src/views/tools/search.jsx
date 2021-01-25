@@ -46,10 +46,10 @@ const defaultState = {
   layers: [],
   visibleForGroups: [],
   maxResultsPerDataset: 100,
-  anchorX: 0.5,
-  anchorY: 1,
-  scale: 0.15,
-  markerImg: "marker.png",
+  anchorX: "",
+  anchorY: "",
+  scale: "",
+  markerImg: "",
   delayBeforeAutoSearch: 500,
   searchBarPlaceholder: "Sök...",
 
@@ -913,15 +913,17 @@ class ToolOptions extends Component {
           </div>
 
           <div className="separator">
-            Träffikon och markering av resultat i karta
+            Träffikon och markering av resultat i karta (lämnas tomt för
+            default)
           </div>
           <div>
             <label htmlFor="markerImg">
-              Ikon för markering av sökträffar i kartan
+              URL till ikon för markering av punktsökträffar
             </label>
             <input
               id="markerImg"
               value={this.state.markerImg}
+              placeholder="Lämnas tomt för standardikon"
               type="text"
               name="markerImg"
               onChange={(e) => {
@@ -935,7 +937,7 @@ class ToolOptions extends Component {
             <input
               value={this.state.anchorX}
               type="number"
-              placeholder={defaultState.anchorX}
+              placeholder="0.5"
               min="0"
               max="100"
               step="0.1"
@@ -952,7 +954,7 @@ class ToolOptions extends Component {
             <input
               value={this.state.anchorY}
               type="number"
-              placeholder={defaultState.anchorY}
+              placeholder="1"
               min="0"
               max="100"
               step="0.1"
@@ -968,12 +970,12 @@ class ToolOptions extends Component {
             <label htmlFor="scale">
               Skala för ikon
               <br />
-              (flyttal, 0-1)
+              (flyttal, 0-10)
             </label>
             <input
               value={this.state.scale}
               type="number"
-              placeholder={defaultState.scale}
+              placeholder="1"
               step="0.01"
               min="0.01"
               max="10"
