@@ -882,7 +882,6 @@ class MapOptions extends Component {
                   this.setState({ drawerVisibleMobile: e.target.checked });
                 }}
                 checked={this.state.drawerVisibleMobile}
-                disabled={this.state.drawerVisibleMobile !== true}
               />
               &nbsp;
               <label className="long-label" htmlFor="input_drawerVisibleMobile">
