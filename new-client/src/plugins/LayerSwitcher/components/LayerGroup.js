@@ -177,6 +177,7 @@ class LayerGroup extends React.PureComponent {
     let foundMapLayer = layers.find((mapLayer) => {
       return mapLayer.get("name") === layer.id;
     });
+
     if (foundMapLayer && foundMapLayer.getVisible()) {
       return true;
     } else {
@@ -186,13 +187,13 @@ class LayerGroup extends React.PureComponent {
 
   areSubGroupsAndLayersSemiToggled = (group) => {
     if (this.hasSubGroups(group)) {
-      return group.groups.every((g) => {
+      return group.groups.some((g) => {
         return this.areSubGroupsAndLayersSemiToggled(g);
       });
     }
 
     if (group.layers.length > 0) {
-      return group.layers.every((layer) => {
+      return group.layers.some((layer) => {
         return this.layerInMap(layer);
       });
     }
@@ -200,12 +201,13 @@ class LayerGroup extends React.PureComponent {
 
   isAllGroupAndSubGroupToggled = (group) => {
     if (this.hasSubGroups(group)) {
-      return group.groups.some((g) => {
+      return group.groups.every((g) => {
         return this.isAllGroupAndSubGroupToggled(g);
       });
     }
+
     if (group.layers.length > 0) {
-      return group.layers.some((layer) => {
+      return group.layers.every((layer) => {
         return this.layerInMap(layer);
       });
     }
@@ -265,6 +267,22 @@ class LayerGroup extends React.PureComponent {
         mapLayer.setVisible(visibility);
       });
   }
+
+  getCheckbox = () => {
+    const { classes } = this.props;
+    if (this.isToggled()) {
+      return <CheckBoxIcon className={classes.checkBoxIcon} />;
+    }
+    if (this.isSemiToggled()) {
+      return (
+        <CheckBoxIcon
+          style={{ color: "gray" }}
+          className={classes.checkBoxIcon}
+        />
+      );
+    }
+    return <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />;
+  };
   /**
    * If Group has "togglable" property enabled, render the toggle all checkbox.
    *
@@ -273,8 +291,8 @@ class LayerGroup extends React.PureComponent {
    */
   renderToggleAll() {
     const { classes } = this.props;
-
     // The property below should be renamed to "togglable" or something…
+
     if (this.props.group.toggled) {
       return (
         <div
@@ -291,20 +309,7 @@ class LayerGroup extends React.PureComponent {
             }
           }}
         >
-          <div>
-            {this.isToggled(this.props.group) ? (
-              this.isSemiToggled(this.props.group) ? (
-                <CheckBoxIcon className={classes.checkBoxIcon} />
-              ) : (
-                <CheckBoxIcon
-                  style={{ color: "gray" }}
-                  className={classes.checkBoxIcon}
-                />
-              )
-            ) : (
-              <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
-            )}
-          </div>
+          <div>{this.getCheckbox()}</div>
           <Typography className={classes.heading}>{this.state.name}</Typography>
         </div>
       );
