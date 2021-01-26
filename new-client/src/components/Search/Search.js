@@ -10,6 +10,7 @@ import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
 import KmlExport from "./utils/KmlExport";
+import XLSXExport from "./utils/XLSXExport";
 
 const styles = () => ({
   inputRoot: {
@@ -124,6 +125,10 @@ class Search extends React.PureComponent {
       options: this.props.options,
       localObserver: this.localObserver,
       map: this.map,
+    });
+    this.XLSXExport = new XLSXExport({
+      options: this.props.options,
+      localObserver: this.localObserver,
     });
   };
 

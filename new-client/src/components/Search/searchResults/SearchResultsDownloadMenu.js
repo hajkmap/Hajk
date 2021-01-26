@@ -27,7 +27,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
         name: "Ladda ner till Excel",
         icon: <DescriptionIcon />,
         type: "Excel",
-        enabled: false,
+        enabled: true,
         onClick: this.handleXLSXDownloadClick,
       },
       {

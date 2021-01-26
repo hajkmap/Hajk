@@ -611,7 +611,6 @@ class SearchResultsContainer extends React.PureComponent {
       activeFeatureCollection,
       filteredFeatureCollections,
       featureFilter,
-      filteredFeatures,
     } = this.state;
     const { featureCollections } = this.props;
 
@@ -622,6 +621,9 @@ class SearchResultsContainer extends React.PureComponent {
       if (featureFilter === "") {
         return [activeFeatureCollection];
       }
+      const filteredFeatures = this.getFilteredFeatures([
+        activeFeatureCollection,
+      ]);
       const collectionToDownload = {
         ...activeFeatureCollection,
         value: { features: filteredFeatures },
