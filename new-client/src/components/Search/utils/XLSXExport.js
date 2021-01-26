@@ -15,6 +15,14 @@ export default class XLSXExport {
       const { featureCollections } = exportItems;
       const workBook = XLSX.utils.book_new();
       const fileName = this.#getFileName(featureCollections);
+
+      if (
+        featureCollections?.length === 1 &&
+        featureCollections[0].origin === "USERSELECT"
+      ) {
+        return this.#createUserSelectedExport(featureCollections[0], fileName);
+      }
+
       featureCollections.forEach((fc) => {
         const sheet = this.#createXLSXSheet(fc);
         if (sheet) {
@@ -23,7 +31,7 @@ export default class XLSXExport {
         }
       });
 
-      XLSX.writeFile(workBook, fileName);
+      return XLSX.writeFile(workBook, fileName);
     } catch (error) {
       console.warn("Failed to export xlsx...", error);
     }
@@ -35,6 +43,44 @@ export default class XLSXExport {
           featureCollections[0]
         )}-${new Date().toLocaleString()}.xlsx`
       : `Sökexport-${new Date().toLocaleString()}.xlsx`;
+  };
+
+  #createUserSelectedExport = (featureCollection, fileName) => {
+    try {
+      const workBook = XLSX.utils.book_new();
+      const groupedFeatures = this.#getGroupedFeatures(featureCollection);
+
+      Object.keys(groupedFeatures).forEach((key) => {
+        const sheetName = key;
+        const exportArray = this.#getUserSelectedExportArray(
+          groupedFeatures[key]
+        );
+        const sheet = XLSX.utils.aoa_to_sheet(exportArray);
+        XLSX.utils.book_append_sheet(workBook, sheet, sheetName);
+      });
+
+      return XLSX.writeFile(workBook, fileName);
+    } catch (error) {
+      console.warn("Failed to export user selected xlsx...", error);
+    }
+  };
+
+  #getGroupedFeatures = (featureCollection) => {
+    return featureCollection.value.features.reduce((result, f) => {
+      (result[f.source.caption] ?? (result[f.source.caption] = [])).push(f);
+      return result;
+    }, {});
+  };
+
+  #getUserSelectedExportArray = (features) => {
+    const exportArray = [];
+    // Keys from first feature. We assume that all features in the collections has the same keys.
+    const keys = Object.keys(features[0].properties);
+    exportArray.push(keys);
+    features.forEach((feature) => {
+      exportArray.push(Object.values(feature.properties));
+    });
+    return exportArray;
   };
 
   #createXLSXSheet = (featureCollection) => {
