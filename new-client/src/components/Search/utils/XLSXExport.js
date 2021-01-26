@@ -51,7 +51,7 @@ export default class XLSXExport {
       const groupedFeatures = this.#getGroupedFeatures(featureCollection);
 
       Object.keys(groupedFeatures).forEach((key) => {
-        const sheetName = key;
+        const sheetName = key.slice(0, 30);
         const exportArray = this.#getUserSelectedExportArray(
           groupedFeatures[key]
         );
