@@ -205,6 +205,9 @@ export default class DocumentHandlerModel {
 
       return document;
     } catch (err) {
+      console.warn(
+        `Kunde inte parsa JSON-dokumentet ${document}, kontrollera så att filen finns och är en .json-fil `
+      );
       throw new Error(err);
     }
   }
