@@ -23,8 +23,8 @@ const ImageComponent = (props) => {
 
   const { src } = entity.getData();
   const data = entity.getData();
-  const imageWidth = data["data-image-width"];
-  const imageHeight = data["data-image-height"];
+  const imageWidth = parseInt(data["data-image-width"]);
+  const imageHeight = parseInt(data["data-image-height"]);
   const dataCaption = data["data-caption"];
   const dataSource = data["data-source"];
   const dataPopup = data["data-image-popup"] === undefined ? false : true;
@@ -85,8 +85,8 @@ const ImageComponent = (props) => {
     const { imageData } = props.blockProps;
     let data = {
       src: src,
-      "data-image-width": width,
-      "data-image-height": height,
+      "data-image-width": width + "px",
+      "data-image-height": height + "px",
       "data-caption": caption,
       "data-source": source,
       "data-image-position": imagePosition,
@@ -121,19 +121,29 @@ const ImageComponent = (props) => {
   };
 
   const calculateHeight = (width) => {
+    width = parseInt(width); //Convert string to number
+
     let aspectRatio = defaultHeight / defaultWidth;
     let height = width * aspectRatio;
 
-    setWidth(Math.trunc(width));
-    setHeight(Math.trunc(height));
+    width = Math.trunc(width);
+    height = Math.trunc(height);
+
+    setWidth(width);
+    setHeight(height);
   };
 
   const calculateWidth = (height) => {
+    height = parseInt(height); //Convert string to number
+
     let aspectRatio = defaultWidth / defaultHeight;
     let width = height * aspectRatio;
 
-    setHeight(Math.trunc(height));
-    setWidth(Math.trunc(width));
+    height = Math.trunc(height);
+    width = Math.trunc(width);
+
+    setHeight(height);
+    setWidth(width);
   };
 
   const body = (
