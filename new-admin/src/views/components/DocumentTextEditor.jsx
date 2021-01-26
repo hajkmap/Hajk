@@ -770,13 +770,13 @@ export default class DocumentTextEditor extends React.Component {
                 )}
               />
               <p>Förhandsvisning:</p>
-              <figure>
-                <img
-                  src={this.state.urlValue}
-                  onLoad={this.onImgLoad}
-                  alt="Förhandsvisning"
-                />
-              </figure>
+              <img
+                src={this.state.urlValue}
+                onLoad={this.onImgLoad}
+                width={this.state.mediaWidth}
+                height={this.state.mediaHeight}
+                alt="Förhandsvisning"
+              />
             </Grid>
             <Grid item>
               <input
