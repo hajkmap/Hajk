@@ -164,6 +164,7 @@ class LayersSwitcherView extends React.PureComponent {
               backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
               enableOSM={this.options.enableOSM}
               map={this.props.map}
+              app={this.props.app}
             />
           </div>
         </div>

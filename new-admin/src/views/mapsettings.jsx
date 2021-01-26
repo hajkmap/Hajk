@@ -309,6 +309,7 @@ class Menu extends Component {
       maps: [],
       active: true,
       visibleAtStart: true,
+      visibleAtStartMobile: false,
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       enableOSM: false,
@@ -348,6 +349,8 @@ class Menu extends Component {
           active: this.props.model.get("layerMenuConfig").active,
           visibleAtStart: this.props.model.get("layerMenuConfig")
             .visibleAtStart,
+          visibleAtStartMobile: this.props.model.get("layerMenuConfig")
+            .visibleAtStartMobile,
           backgroundSwitcherBlack: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
@@ -562,6 +565,7 @@ class Menu extends Component {
       baselayers: [],
       active: this.state.active,
       visibleAtStart: this.state.visibleAtStart,
+      visibleAtStartMobile: this.state.visibleAtStartMobile,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
@@ -1524,6 +1528,19 @@ class Menu extends Component {
                 &nbsp;
                 <label className="long-label" htmlFor="visibleAtStart">
                   Synlig vid start
+                </label>
+              </div>
+              <div>
+                <input
+                  id="visibleAtStartMobile"
+                  name="visibleAtStartMobile"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.visibleAtStartMobile}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="visibleAtStartMobile">
+                  Synlig vid start - Mobil
                 </label>
               </div>
               <div>
