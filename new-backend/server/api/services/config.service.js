@@ -466,12 +466,7 @@ class ConfigService {
         // we getMapConfig will return only those maps that current
         // user has access to, so there's no need to "wash" the result
         // later on.
-        //
-        // The optional, third, parameter tells getMapConfig not to
-        // wash the content (layers/groups/tools). We just need to know
-        // if user has access to map as a whole, washing for purpose of
-        // this method would introduce unnecessary overhead.
-        const mapConfig = await this.getMapConfig(map, user, false);
+        const mapConfig = await this.getMapConfig(map, user);
 
         // If we encounter errors, access to current map is restricted for current user
         // so let's just continue with next element in available maps.
@@ -484,7 +479,7 @@ class ConfigService {
           (t) => t.type === "layerswitcher"
         );
 
-        // If map config says is configured to be exposed in MapSwitcher,
+        // If map config says it's configured to be exposed in MapSwitcher,
         // push the current map into the return object.
         if (lsConfig?.options.dropdownThemeMaps === true) {
           output.push({
