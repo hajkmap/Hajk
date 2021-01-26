@@ -27,16 +27,31 @@ class SearchResultsDatasetSummary extends React.PureComponent {
       .length,
   };
 
-  renderDatasetSummary = () => {
+  shouldDisplayWarning = () => {
     const { numberOfResultsToDisplay } = this.state;
     const {
-      featureCollection,
-      getOriginBasedIcon,
       maxResultsPerDataset,
-      classes,
+      featureCollection,
+      showResultsLimitReachedWarning,
     } = this.props;
+    const { numberMatched, numberReturned } = featureCollection.value;
 
-    const displayWarning = maxResultsPerDataset <= numberOfResultsToDisplay;
+    if (!showResultsLimitReachedWarning) {
+      return false;
+    }
+
+    if (numberReturned < numberMatched) {
+      return true;
+    }
+
+    return maxResultsPerDataset <= numberOfResultsToDisplay;
+  };
+
+  renderDatasetSummary = () => {
+    const { numberOfResultsToDisplay } = this.state;
+    const { featureCollection, getOriginBasedIcon, classes } = this.props;
+
+    const displayWarning = this.shouldDisplayWarning();
     const toolTipTitle = displayWarning
       ? `Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas.`
       : `Visar ${numberOfResultsToDisplay} resultat`;
