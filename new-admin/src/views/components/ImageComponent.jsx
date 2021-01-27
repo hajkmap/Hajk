@@ -121,29 +121,39 @@ const ImageComponent = props => {
   };
 
   const calculateHeight = width => {
-    width = parseInt(width); //Convert string to number
+    if (width) {
+      width = parseInt(width); //Convert string to number
 
-    let aspectRatio = defaultHeight / defaultWidth;
-    let height = width * aspectRatio;
+      let aspectRatio = defaultHeight / defaultWidth;
+      let height = width * aspectRatio;
 
-    width = Math.trunc(width);
-    height = Math.trunc(height);
+      width = Math.trunc(width);
+      height = Math.trunc(height);
 
-    setWidth(width);
-    setHeight(height);
+      setWidth(width);
+      setHeight(height);
+    } else {
+      setWidth(0);
+      setHeight(0);
+    }
   };
 
   const calculateWidth = height => {
-    height = parseInt(height); //Convert string to number
+    if (height) {
+      height = parseInt(height); //Convert string to number
 
-    let aspectRatio = defaultWidth / defaultHeight;
-    let width = height * aspectRatio;
+      let aspectRatio = defaultWidth / defaultHeight;
+      let width = height * aspectRatio;
 
-    height = Math.trunc(height);
-    width = Math.trunc(width);
+      height = Math.trunc(height);
+      width = Math.trunc(width);
 
-    setHeight(height);
-    setWidth(width);
+      setHeight(height);
+      setWidth(width);
+    } else {
+      setHeight(0);
+      setWidth(0);
+    }
   };
 
   const body = (
