@@ -186,31 +186,39 @@ class LayerGroup extends React.PureComponent {
   };
 
   areSubGroupsAndLayersSemiToggled = (group) => {
-    if (this.hasSubGroups(group)) {
-      return group.groups.some((g) => {
+    let someSubItemToggled = false;
+    if (this.hasLayers(group)) {
+      someSubItemToggled = group.layers.some((layer) => {
+        return this.layerInMap(layer);
+      });
+    }
+
+    if (this.hasSubGroups(group) && !someSubItemToggled) {
+      someSubItemToggled = group.groups.some((g) => {
         return this.areSubGroupsAndLayersSemiToggled(g);
       });
     }
-
-    if (group.layers.length > 0) {
-      return group.layers.some((layer) => {
-        return this.layerInMap(layer);
-      });
-    }
+    return someSubItemToggled;
   };
 
   areAllGroupsAndSubGroupsToggled = (group) => {
+    let allGroupsToggled = true;
+    let allLayersToggled = true;
     if (this.hasSubGroups(group)) {
-      return group.groups.every((g) => {
+      allGroupsToggled = group.groups.every((g) => {
         return this.areAllGroupsAndSubGroupsToggled(g);
       });
     }
-
-    if (group.layers.length > 0) {
-      return group.layers.every((layer) => {
+    if (this.hasLayers(group)) {
+      allLayersToggled = group.layers.every((layer) => {
         return this.layerInMap(layer);
       });
     }
+    return allGroupsToggled && allLayersToggled;
+  };
+
+  hasLayers = (group) => {
+    return group.layers && group.layers.length > 0;
   };
 
   hasSubGroups = (group) => {
