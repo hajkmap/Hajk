@@ -33,7 +33,7 @@ class Search extends React.PureComponent {
       wildcardAtStart: false,
       wildcardAtEnd: true,
       matchCase: false,
-      activeSpatialFilter: "within",
+      activeSpatialFilter: "intersects",
       maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
         ? this.props.options.maxResultsPerDataset
         : 100,
