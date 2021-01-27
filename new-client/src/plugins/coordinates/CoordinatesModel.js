@@ -136,6 +136,19 @@ class CoordinatesModel {
   }
 
   handleInput = (event) => {
+    // Validate that the changed data is a finite number
+    var updatedValue = parseFloat(event.target.value);
+    // Save the position of the cursor so it can be restored later
+    this.updatedTransformId = event.target.id;
+    this.updatedTransformIdx = event.target.selectionStart;
+    if (isNaN(event.target.value) || !isFinite(event.target.value)) {
+      this.localObserver.publish("errorInOnChange", {
+        errorField: event.target.id,
+        errorValue: event.target.value,
+      });
+      return;
+    }
+
     // Gets the transform that was specified on the TextField
     // it is used to transform the coordinates to the map projection which is the one updateTransforms expects
     var transformCode =
@@ -144,7 +157,7 @@ class CoordinatesModel {
     var axis =
       event.target.parentElement.parentElement.attributes["axis"].value;
     var updatedCoordinates =
-      axis === "X" ? [event.target.value, 0] : [0, event.target.value];
+      axis === "X" ? [updatedValue, 0] : [0, updatedValue];
 
     // We need to look in grand grand parent's children to find the other input field and pick the one
     // which does not have the same transform. From there, we can get the other input field
@@ -159,7 +172,7 @@ class CoordinatesModel {
             if (child.localName === "div") {
               child.children.forEach((grandchild) => {
                 if (grandchild.localName === "input") {
-                  updatedCoordinates[idx] = grandchild.value;
+                  updatedCoordinates[idx] = parseFloat(grandchild.value);
                 }
               });
             }
@@ -167,19 +180,7 @@ class CoordinatesModel {
         }
       }
     );
-    // transform the coordinations if needed
-    updatedCoordinates = [
-      parseFloat(updatedCoordinates[0]),
-      parseFloat(updatedCoordinates[1]),
-    ];
-    if (
-      isNaN(updatedCoordinates[0]) ||
-      isNaN(updatedCoordinates[1]) ||
-      !isFinite(updatedCoordinates[0]) ||
-      !isFinite(updatedCoordinates[1])
-    ) {
-      return;
-    }
+
     if (transformCode !== this.map.getView().getProjection()._code) {
       updatedCoordinates = transform(
         updatedCoordinates,
@@ -189,9 +190,6 @@ class CoordinatesModel {
     }
     // Set the coordinates field and run the update function so all values are updated
     this.coordinates = updatedCoordinates;
-    // Save the position of the cursor so it can be restored later
-    this.updatedTransformId = event.target.id;
-    this.updatedTransformIdx = event.target.selectionStart;
     this.updateTransforms();
   };
 

@@ -36,6 +36,8 @@ const styles = (theme) => ({
 class CoordinatesView extends React.PureComponent {
   state = {
     transformedCoordinates: [],
+    errorField: "",
+    errorValue: "",
   };
 
   constructor(props) {
@@ -50,6 +52,8 @@ class CoordinatesView extends React.PureComponent {
         this.setState(
           {
             transformedCoordinates: transformedCoordinates,
+            errorField: "",
+            errorValue: "",
           },
           () => {
             // React moves the cursor to the end for the field that was modified so we restore the position here
@@ -69,6 +73,25 @@ class CoordinatesView extends React.PureComponent {
         );
       }
     );
+
+    this.localObserver.subscribe("errorInOnChange", (data) => {
+      this.setState(
+        {
+          errorField: data.errorField,
+          errorValue: data.errorValue,
+        },
+        () => {
+          // React moves the cursor to the end for the field that was modified so we restore the position here
+
+          document.getElementById(
+            this.state.errorField
+          ).selectionStart = this.props.model.updatedTransformIdx;
+          document.getElementById(
+            this.state.errorField
+          ).selectionEnd = this.props.model.updatedTransformIdx;
+        }
+      );
+    });
 
     /**
      * Setup listeners that will show/hide snackbar. The Model will publish
@@ -105,6 +128,22 @@ class CoordinatesView extends React.PureComponent {
     return (
       <>
         {this.state.transformedCoordinates.map((transformation, i) => {
+          // Create the values for xCoord and yCoord where one might have a faulty format
+          var xCoord = transformation.inverseAxis
+            ? transformation.coordinates[0]
+            : transformation.coordinates[1];
+          var yCoord = transformation.inverseAxis
+            ? transformation.coordinates[1]
+            : transformation.coordinates[0];
+
+          if (this.state.errorField === "coordinates-transforms-X-" + i) {
+            xCoord = this.state.errorValue;
+          } else if (
+            this.state.errorField ===
+            "coordinates-transforms-Y-" + i
+          ) {
+            yCoord = this.state.errorValue;
+          }
           return (
             <TableRow key={i}>
               <TableCell>
@@ -122,14 +161,18 @@ class CoordinatesView extends React.PureComponent {
                   id={"coordinates-transforms-X-" + i}
                   margin="dense"
                   variant="outlined"
-                  value={
-                    transformation.inverseAxis
-                      ? transformation.coordinates[0]
-                      : transformation.coordinates[1]
-                  }
+                  value={xCoord}
                   onChange={this.model.handleInput}
                   transform={transformation.code}
                   axis={transformation.inverseAxis ? "X" : "Y"}
+                  error={
+                    this.state.errorField === "coordinates-transforms-X-" + i
+                  }
+                  helperText={
+                    this.state.errorField === "coordinates-transforms-X-" + i
+                      ? "Ange ett decimaltal"
+                      : ""
+                  }
                 />
                 <TextField
                   label={transformation.xtitle}
@@ -137,14 +180,18 @@ class CoordinatesView extends React.PureComponent {
                   id={"coordinates-transforms-Y-" + i}
                   margin="dense"
                   variant="outlined"
-                  value={
-                    transformation.inverseAxis
-                      ? transformation.coordinates[1]
-                      : transformation.coordinates[0]
-                  }
+                  value={yCoord}
                   onChange={this.model.handleInput}
                   transform={transformation.code}
                   axis={transformation.inverseAxis ? "Y" : "X"}
+                  error={
+                    this.state.errorField === "coordinates-transforms-Y-" + i
+                  }
+                  helperText={
+                    this.state.errorField === "coordinates-transforms-Y-" + i
+                      ? "Ange ett decimaltal"
+                      : ""
+                  }
                 />
               </TableCell>
             </TableRow>
