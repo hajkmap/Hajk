@@ -87,7 +87,7 @@ class SearchResultsContainer extends React.PureComponent {
     filteredFeatureCollections: null,
     filteredFeatures: null,
     sumOfResults: this.props.searchResults.featureCollections
-      .map((fc) => fc.value.totalFeatures)
+      .map((fc) => fc?.value?.features.length ?? 0)
       .reduce((a, b) => a + b, 0),
     filterInputFieldOpen: false,
     featureCollectionFilter: "", // String used to filter featureCollections
