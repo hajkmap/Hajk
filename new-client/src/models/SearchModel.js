@@ -7,6 +7,7 @@ import Within from "ol/format/filter/Within";
 import { fromCircle } from "ol/geom/Polygon";
 
 import { arraySort } from "../utils/ArraySort";
+import { decodeCommas } from "../utils/StringCommaCoder";
 
 const ESCAPE_CHAR = "!";
 const SINGLE_CHAR = ".";
@@ -256,6 +257,13 @@ class SearchModel {
     const wordsInTextField = this.#getStringArray(searchString);
     const numWords = wordsInTextField.length;
 
+    // If the string contains a comma, we must add the string as is
+    // otherwise we might miss cases where the user wants to search
+    // for a property with a comma.
+    if (searchString.includes(",")) {
+      possibleSearchCombinations.add([searchString]);
+    }
+
     // If the user has typed more than five words, we only create
     // one string containing all words to avoid sending humongous
     // requests to geoServer.
@@ -316,10 +324,10 @@ class SearchModel {
     return word;
   };
 
-  #decodePotentialCommasFromFeatureProps = (searchCombinations) => {
+  #decodePotentialSpecialChars = (searchCombinations) => {
     return searchCombinations.map((combination) => {
       return combination.map((word) => {
-        return decodeURIComponent(word);
+        return decodeCommas(word).replaceAll("\\", "\\\\");
       });
     });
   };
@@ -345,7 +353,7 @@ class SearchModel {
         );
       }
 
-      possibleSearchCombinations = this.#decodePotentialCommasFromFeatureProps(
+      possibleSearchCombinations = this.#decodePotentialSpecialChars(
         possibleSearchCombinations
       );
 
