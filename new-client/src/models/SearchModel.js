@@ -32,6 +32,7 @@ class SearchModel {
 
   #controllers = []; // Holder Array for Promises' AbortControllers
   #wfsParser = new WFS();
+  #possibleSearchCombinations = new Map(); // Will hold a set of possible search combinations, so we don't have to re-create them for each source
 
   constructor(searchPluginOptions, map, app) {
     // Validate
@@ -47,13 +48,21 @@ class SearchModel {
     this.#searchSources = this.#componentOptions.sources;
   }
 
+  /**
+   * @summary The main public method of the Search model. Ensures that the search string
+   * is trimmed form whitespace and that the return value is standardized (object of collections and errors).
+   *
+   * @returns {Object} Contains feature collections and error
+   *
+   * @memberof SearchModel
+   */
   getResults = async (
     searchString,
     searchSources = this.getSources(),
     searchOptions = this.getSearchOptions()
   ) => {
     const { featureCollections, errors } = await this.#getRawResults(
-      searchString,
+      searchString.trim(), // Ensure that the search string isn't surrounded by whitespace
       searchSources,
       searchOptions
     );
@@ -230,11 +239,19 @@ class SearchModel {
     });
   };
 
-  escapeSpecialChars = (string) => {
+  #escapeSpecialChars = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "!$&"); // $& means the whole matched string
   };
 
   getPossibleSearchCombinations = (searchString) => {
+    // See if we've already created possible search combos for the specified string,
+    // if so, do an early return
+    if (this.#possibleSearchCombinations.has(searchString)) {
+      return Array.from(this.#possibleSearchCombinations.get(searchString));
+    }
+
+    // Looks like the specified string hasn't been requested yet: let's create
+    // an array of possible combos.
     const possibleSearchCombinations = new Set();
     const wordsInTextField = this.#getStringArray(searchString);
     const numWords = wordsInTextField.length;
@@ -259,6 +276,13 @@ class SearchModel {
         );
       }
     }
+
+    // Let's save the results for later use - we don't want to re-create
+    // the possible combos array for the same search string
+    this.#possibleSearchCombinations.set(
+      searchString,
+      possibleSearchCombinations
+    );
 
     return Array.from(possibleSearchCombinations);
   };
@@ -313,8 +337,7 @@ class SearchModel {
     if (searchString !== "") {
       if (searchOptions.getPossibleCombinations) {
         possibleSearchCombinations = this.getPossibleSearchCombinations(
-          searchString,
-          searchOptions
+          searchString
         );
       } else {
         possibleSearchCombinations.push(
@@ -328,7 +351,7 @@ class SearchModel {
 
       let searchFilters = possibleSearchCombinations.map((combination) => {
         let searchWordsForCombination = combination.map((wordInCombination) => {
-          wordInCombination = this.escapeSpecialChars(wordInCombination);
+          wordInCombination = this.#escapeSpecialChars(wordInCombination);
           wordInCombination = this.#addPotentialWildCards(
             wordInCombination,
             searchOptions

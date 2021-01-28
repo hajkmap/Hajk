@@ -113,22 +113,43 @@ class PrintWindow extends React.PureComponent {
     if (this.isContentHeaderTag(content)) {
       return this.getAvailableHeight() >= 0.4 * maxHeight;
     }
-    let contentHeight = content.clientHeight;
+    let contentHeight = content.getBoundingClientRect().height;
+
     let availableHeight = this.getAvailableHeight();
+
     return contentHeight <= availableHeight;
   };
 
+  isContentFloatingPicture = (content) => {
+    if (content) {
+      const type = content.attributes.getNamedItem("data-position")?.value;
+      if (type === "floatRight" || type === "floatLeft") {
+        return true;
+      }
+    }
+    return false;
+  };
+
   addContentToNewPage = (content, maxHeight, type) => {
+    let height = content.getBoundingClientRect().height;
+
+    if (this.isContentFloatingPicture(content)) {
+      height = 0;
+    }
     this.printPages.push({
       type: type,
-      availableHeight: maxHeight - content.clientHeight,
+      availableHeight: maxHeight - height,
       content: [content],
     });
   };
 
   addContentToCurrentPage = (content) => {
-    this.printPages[this.printPages.length - 1].availableHeight -=
-      content.clientHeight;
+    let height = content.getBoundingClientRect().height;
+
+    if (this.isContentFloatingPicture(content)) {
+      height = 0;
+    }
+    this.printPages[this.printPages.length - 1].availableHeight -= height;
     this.printPages[this.printPages.length - 1].content.push(content);
   };
 
@@ -145,7 +166,9 @@ class PrintWindow extends React.PureComponent {
   };
 
   hasChildren = (content) => {
-    return content.children && content.children.length > 0;
+    return (
+      content.children && content.children.length > 0 && content.tagName !== "P"
+    );
   };
 
   isContentTextArea = (content) => {
@@ -176,11 +199,16 @@ class PrintWindow extends React.PureComponent {
    */
 
   //if-else-chaos, sorry :)
-  distributeContentOnPages = (content, type) => {
+  distributeContentOnPages = (content, type, previousContent) => {
     if (content.tagName === "BR") {
       this.handleBrTags(content);
     }
 
+    if (content.nodeName === "UL") {
+      for (let child of content.children) {
+        child.style.paddingLeft = "8px";
+      }
+    }
     if (this.isContentTextArea(content)) {
       if (this.contentFitsCurrentPage(content)) {
         this.addContentToCurrentPage(content);
@@ -188,8 +216,10 @@ class PrintWindow extends React.PureComponent {
         this.addContentToNewPage(content, maxHeight, type);
       }
     } else {
-      if (this.checkIfContentIsChapterTitle(content)) {
-        console.log(content, "content");
+      if (
+        this.checkIfContentIsChapterTitle(content) &&
+        !this.isContentFloatingPicture(previousContent)
+      ) {
         this.addContentToNewPage(content, maxHeight, type);
       } else {
         if (this.contentFitsCurrentPage(content)) {
@@ -201,8 +231,10 @@ class PrintWindow extends React.PureComponent {
           ) {
             this.addContentToNewPage(content, maxHeight, type);
           } else {
-            [...content.children].forEach((child) => {
-              this.distributeContentOnPages(child, type);
+            [...content.children].forEach((child, index, children) => {
+              const previousContent = index === 0 ? null : children[index - 1];
+
+              this.distributeContentOnPages(child, type, previousContent);
             });
           }
         }
@@ -272,12 +304,12 @@ class PrintWindow extends React.PureComponent {
   };
 
   resizeImage = (img) => {
-    img.height = img.clientHeight * imageResizeRatio;
+    img.height = img.getBoundingClientRect().height * imageResizeRatio;
     img.width = img.clientWidth * imageResizeRatio;
   };
 
   imageFitsOnePage = (img) => {
-    return img.clientHeight < maxHeight * 0.9;
+    return img.getBoundingClientRect().height < maxHeight * 0.9;
   };
 
   loadImage = (img) => {
@@ -386,8 +418,9 @@ class PrintWindow extends React.PureComponent {
       this.areAllImagesLoaded().then(() => {
         this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
         this.distributeContentOnPages(this.toc, "TOC");
-        this.content.children.forEach((child) => {
-          this.distributeContentOnPages(child, "CONTENT");
+        this.content.children.forEach((child, index, children) => {
+          const previousContent = index === 0 ? null : children[index - 1];
+          this.distributeContentOnPages(child, "CONTENT", previousContent);
         });
 
         let canvasPromises = this.printPages.map((page, index) => {

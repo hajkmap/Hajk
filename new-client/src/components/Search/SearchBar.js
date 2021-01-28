@@ -6,6 +6,7 @@ import withWidth from "@material-ui/core/withWidth";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import SearchIcon from "@material-ui/icons/Search";
 import RoomIcon from "@material-ui/icons/Room";
+import CheckIcon from "@material-ui/icons/Check";
 import DescriptionIcon from "@material-ui/icons/Description";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -77,6 +78,18 @@ const CustomPopper = (props) => {
   );
 };
 
+const CustomPaper = (props) => {
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
+  const style = smallScreen
+    ? {
+        margin: 0,
+        borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+      }
+    : { margin: 0 };
+  return <Paper {...props} style={style} />;
+};
+
 class SearchBar extends React.PureComponent {
   state = {
     drawActive: false,
@@ -101,6 +114,9 @@ class SearchBar extends React.PureComponent {
         break;
       case "DOCUMENT":
         icon = <DescriptionIcon color="disabled" />;
+        break;
+      case "USERSELECT":
+        icon = <CheckIcon color="disabled" />;
         break;
       default:
         icon = <RoomIcon color="disabled" />;
@@ -192,6 +208,15 @@ class SearchBar extends React.PureComponent {
     );
   };
 
+  getPlaceholder = () => {
+    const { options, searchActive } = this.props;
+    return searchActive === "selectSearch" || searchActive === "draw"
+      ? "Söker med objekt..."
+      : searchActive === "extentSearch"
+      ? "Söker i området..."
+      : options.searchBarPlaceholder ?? "Sök...";
+  };
+
   renderSearchResultList = () => {
     const {
       searchResults,
@@ -235,11 +260,16 @@ class SearchBar extends React.PureComponent {
         freeSolo
         size={"small"}
         classes={{
-          inputRoot: classes.inputRoot, // class name, e.g. `classes-nesting-root-x`
+          inputRoot: classes.inputRoot,
         }}
         PopperComponent={CustomPopper}
+        PaperComponent={CustomPaper}
         clearOnEscape
-        disabled={searchActive === "draw"}
+        disabled={
+          searchActive === "extentSearch" ||
+          searchActive === "selectSearch" ||
+          searchActive === "draw"
+        }
         autoComplete
         value={decodeURIComponent(searchString)}
         selectOnFocus
@@ -314,7 +344,6 @@ class SearchBar extends React.PureComponent {
       handleOnClickOrKeyboardSearch,
       setSearchSources,
       failedWFSFetchMessage,
-      options,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
@@ -322,12 +351,13 @@ class SearchBar extends React.PureComponent {
     const expandMessage = resultPanelCollapsed
       ? "Visa sökresultat"
       : "Dölj sökresultat";
+    const placeholder = this.getPlaceholder();
     return (
       <TextField
         {...params}
         label={undefined}
         variant={width === "xs" ? "standard" : "outlined"}
-        placeholder={options.searchBarPlaceholder ?? "Sök..."}
+        placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
         InputProps={{
           ...params.InputProps,
@@ -395,15 +425,22 @@ class SearchBar extends React.PureComponent {
   };
 
   render() {
+    console.log("app ", this.props.app);
+
     const { classes, showSearchResults, width } = this.props;
     const { panelCollapsed } = this.state;
-    const { renderElsewhere } = this.props.app.plugins.search.options;
+    const { renderElsewhere } = this.props.options;
 
     return (
       <Grid
-        className={cslx(renderElsewhere ? classes.searchContainerRenderElsewhere : classes.searchContainer, {
-          [classes.searchCollapsed]: panelCollapsed,
-        })}
+        className={cslx(
+          renderElsewhere
+            ? classes.searchContainerRenderElsewhere
+            : classes.searchContainer,
+          {
+            [classes.searchCollapsed]: panelCollapsed,
+          }
+        )}
       >
         <Grid item>
           <Paper elevation={width === "xs" ? 0 : 1}>

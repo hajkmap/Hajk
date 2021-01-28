@@ -111,7 +111,9 @@ export default class DocumentHandlerModel {
   getAllChapterInfo() {
     if (this.chapterInfo.length === 0) {
       this.allDocuments.forEach((document, index) => {
-        this.setChapterInfo(document.chapters[0], 0, document.documentColor);
+        document.chapters.forEach((mainChapter) => {
+          this.setChapterInfo(mainChapter, 0, document.documentColor);
+        });
       });
       this.mergeChapterInfo();
     }
@@ -203,6 +205,9 @@ export default class DocumentHandlerModel {
 
       return document;
     } catch (err) {
+      console.warn(
+        `Kunde inte parsa JSON-dokumentet ${document}, kontrollera så att filen finns och är en .json-fil `
+      );
       throw new Error(err);
     }
   }

@@ -1,6 +1,8 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { Checkbox, Typography, Tooltip, Grid } from "@material-ui/core";
+import StarIcon from "@material-ui/icons/Star";
+import StarBorderIcon from "@material-ui/icons/StarBorder";
 
 const styles = (theme) => ({
   root: {
@@ -17,22 +19,45 @@ const styles = (theme) => ({
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
-    const { feature, source, visibleInMap, showClickResultInMap } = this.props;
-    const helpText = !visibleInMap ? "Visa i kartan" : "Dölj från kartan";
+    const { visibleInMap } = this.props;
+    const helpText = !visibleInMap ? "Lägg till i urval" : "Ta bort från urval";
 
     return (
       <Grid item align="center">
         <Tooltip title={helpText}>
           <Checkbox
-            color="primary"
-            disableRipple
+            color="default"
             checked={visibleInMap}
             onClick={(e) => e.stopPropagation()}
-            onChange={() => showClickResultInMap(feature, source)}
+            onChange={this.handleCheckboxToggle}
+            icon={<StarBorderIcon />}
+            checkedIcon={<StarIcon />}
           />
         </Tooltip>
       </Grid>
     );
+  };
+
+  handleCheckboxToggle = () => {
+    const {
+      feature,
+      featureTitle,
+      source,
+      visibleInMap,
+      addFeatureToSelected,
+      removeFeatureFromSelected,
+    } = this.props;
+    if (visibleInMap) {
+      removeFeatureFromSelected(feature);
+    } else {
+      feature.source = source;
+      addFeatureToSelected({
+        feature: feature,
+        sourceId: source?.id,
+        featureTitle: featureTitle,
+        initiator: "userSelect",
+      });
+    }
   };
 
   renderOriginBasedIcon = () => {
@@ -45,11 +70,18 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   render() {
-    const { feature, featureTitle, classes } = this.props;
+    const {
+      feature,
+      featureTitle,
+      classes,
+      shouldRenderSelectedCollection,
+    } = this.props;
+    const shouldRenderCheckbox =
+      feature.geometry && shouldRenderSelectedCollection;
     if (featureTitle.length > 0) {
       return (
         <Grid container alignItems="center" className={classes.root}>
-          {feature.geometry
+          {shouldRenderCheckbox
             ? this.renderShowInMapCheckbox()
             : this.renderOriginBasedIcon()}
           <Grid item xs={9}>

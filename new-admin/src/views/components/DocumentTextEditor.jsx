@@ -24,6 +24,9 @@ import ImageIcon from "@material-ui/icons/Image";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
+import Grid from "@material-ui/core/Grid";
+import TextField from "@material-ui/core/TextField";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 import TextAreaInput from "./TextAreaInput";
 import addLinkPlugin from "./addLinkPlugin";
@@ -50,6 +53,9 @@ export default class DocumentTextEditor extends React.Component {
       onReadOnly: false,
       currentImage: "",
       imageData: {},
+      urlValue: "",
+      defaultWidth: null,
+      defaultHeight: null,
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -63,8 +69,6 @@ export default class DocumentTextEditor extends React.Component {
     this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
     this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
     this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
-    this.onWidthChange = (e) => this.setState({ mediaWidth: e.target.value });
-    this.onHeightChange = (e) => this.setState({ mediaHeight: e.target.value });
     this.onDataCaptionChange = (e) =>
       this.setState({ mediaCaption: e.target.value });
     this.onDataSourceChange = (e) =>
@@ -97,6 +101,7 @@ export default class DocumentTextEditor extends React.Component {
     this.toggleBlockType = this._toggleBlockType.bind(this);
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
     this.blockRenderer = this._blockRenderer.bind(this);
+    this.onImgLoad = this.onImgLoad.bind(this);
   }
 
   _stateFromHtmlWithOptions = (html) => {
@@ -153,20 +158,28 @@ export default class DocumentTextEditor extends React.Component {
       mediaPosition,
     } = this.state;
     const contentState = editorState.getCurrentContent();
+    let contentStateWithEntity;
 
-    const contentStateWithEntity = contentState.createEntity(
-      urlType,
-      "MUTABLE",
-      {
+    if (mediaPopup) {
+      contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
         src: urlValue,
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
-        "data-popup": mediaPopup,
+        "data-image-popup": "",
         "data-image-position": mediaPosition,
-      }
-    );
+      });
+    } else {
+      contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
+        src: urlValue,
+        "data-image-width": mediaWidth ? mediaWidth + "px" : null,
+        "data-image-height": mediaHeight ? mediaHeight + "px" : null,
+        "data-caption": mediaCaption,
+        "data-source": mediaSource,
+        "data-image-position": mediaPosition,
+      });
+    }
 
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.push(
@@ -453,7 +466,7 @@ export default class DocumentTextEditor extends React.Component {
 
         return {
           component: ImageComponent,
-          editable: true,
+          editable: false,
           props: {
             readOnlyMode: this.toggleReadOnly,
             currentImage: (img) => this.setState({ currentImage: img }),
@@ -530,7 +543,7 @@ export default class DocumentTextEditor extends React.Component {
       const entity = contentState.getEntity(entityKey);
 
       if (entity && entity.getType().toUpperCase() === "IMAGE") {
-        const newContentState = contentState.mergeEntityData(entityKey, data);
+        const newContentState = contentState.replaceEntityData(entityKey, data);
         return EditorState.push(editorState, newContentState, "apply-entity");
       }
     }
@@ -681,6 +694,35 @@ export default class DocumentTextEditor extends React.Component {
     });
   };
 
+  onImgLoad({ target: img }) {
+    this.setState({
+      defaultWidth: img.offsetWidth,
+      defaultHeight: img.offsetHeight,
+      mediaWidth: img.offsetWidth,
+      mediaHeight: img.offsetHeight,
+    });
+  }
+
+  calculateHeight = (width) => {
+    let aspectRatio = this.state.defaultHeight / this.state.defaultWidth;
+    let height = width * aspectRatio;
+
+    this.setState({
+      mediaWidth: Math.trunc(width),
+      mediaHeight: Math.trunc(height),
+    });
+  };
+
+  calculateWidth = (height) => {
+    let aspectRatio = this.state.defaultWidth / this.state.defaultHeight;
+    let width = height * aspectRatio;
+
+    this.setState({
+      mediaHeight: Math.trunc(height),
+      mediaWidth: Math.trunc(width),
+    });
+  };
+
   render() {
     const { editorState, imageList, documents } = this.state;
 
@@ -695,89 +737,115 @@ export default class DocumentTextEditor extends React.Component {
     let urlInput;
     if (this.state.showURLInput) {
       urlInput = (
-        <div style={styles.urlInputContainer}>
-          <span>Lägg till bild</span>
-          <input
-            onChange={this.onURLChange}
-            ref="url"
-            style={styles.urlInput}
-            type="text"
-            value={this.state.urlValue || ""}
-            onKeyDown={this.onURLInputKeyDown}
-          />
-          <select onChange={this.onURLChange}>
-            {imageList
-              ? imageList.map((image, i) => {
-                  return (
-                    <option
-                      key={i}
-                      type="text"
-                      name="url"
-                      value={"../Upload/" + image}
-                    >
-                      {image}
-                    </option>
-                  );
-                })
-              : null}
-          </select>
-          <input
-            onChange={this.onWidthChange}
-            ref="data-image-width"
-            type="number"
-            value={this.state.mediaWidth || ""}
-            onKeyDown={this.onURLInputKeyDown}
-            placeholder="data-image-width"
-          />
-          <input
-            onChange={this.onHeightChange}
-            ref="data-image-height"
-            type="number"
-            value={this.state.mediaHeight || ""}
-            onKeyDown={this.onURLInputKeyDown}
-            placeholder="data-image-height"
-          />
-          <input
-            onChange={this.onDataCaptionChange}
-            ref="data-caption"
-            type="text"
-            value={this.state.mediaCaption || ""}
-            onKeyDown={this.onURLInputKeyDown}
-            placeholder="data-caption"
-          />
-          <input
-            onChange={this.onDataSourceChange}
-            ref="data-source"
-            type="text"
-            value={this.state.mediaSource || ""}
-            onKeyDown={this.onURLInputKeyDown}
-            placeholder="data-source"
-          />
-          <input
-            id="data-popup"
-            onChange={this.onDataPopupChange}
-            ref="data-popup"
-            type="checkbox"
-            value={this.state.mediaPopup || ""}
-            onKeyDown={this.onURLInputKeyDown}
-            placeholder="data-popup"
-          />
-          <label>Popup</label>
-          <select
-            value={this.state.mediaPosition}
-            ref="data-image-position"
-            onChange={this.onDataPositionChange}
-            placeholder="data-image-position"
-          >
-            <option value="left">Vänster</option>
-            <option value="center">Center</option>
-            <option value="right">Höger</option>
-            <option value="floatRight">Höger med text</option>
-            <option value="floatLeft">Vänster med text</option>
-          </select>
-          <button onMouseDown={this.confirmMedia}>OK</button>
-          <button onMouseDown={this.closeURLInput}>Avbryt</button>
-        </div>
+        <Grid container>
+          <Grid container spacing={2} item xs={5}>
+            <Grid item>
+              <p>Lägg till bild</p>
+              <Autocomplete
+                id="disabled-options-demo"
+                freeSolo
+                onChange={(event, newValue) => {
+                  this.setState({ urlValue: newValue });
+                }}
+                onInputChange={(event, newValue) => {
+                  this.setState({ urlValue: newValue });
+                }}
+                ref="url"
+                name="url"
+                options={
+                  imageList
+                    ? imageList.map((image, i) => {
+                        const imageUrl = "../Upload/" + image;
+                        return imageUrl;
+                      })
+                    : null
+                }
+                style={{ width: 300 }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Ange URL eller välj en bild"
+                    variant="outlined"
+                  />
+                )}
+              />
+              <p>Förhandsvisning:</p>
+              <figure>
+                <img
+                  src={this.state.urlValue}
+                  onLoad={this.onImgLoad}
+                  alt="Förhandsvisning"
+                />
+              </figure>
+            </Grid>
+            <Grid item>
+              <input
+                onChange={(e) => this.calculateHeight(e.target.value)}
+                ref="data-image-width"
+                type="number"
+                value={this.state.mediaWidth || ""}
+                onKeyDown={this.onURLInputKeyDown}
+                placeholder="data-image-width"
+              />
+              <input
+                onChange={(e) => this.calculateWidth(e.target.value)}
+                ref="data-image-height"
+                type="number"
+                value={this.state.mediaHeight || ""}
+                onKeyDown={this.onURLInputKeyDown}
+                placeholder="data-image-height"
+              />
+            </Grid>
+            <Grid item>
+              <input
+                onChange={this.onDataCaptionChange}
+                ref="data-caption"
+                type="text"
+                value={this.state.mediaCaption || ""}
+                onKeyDown={this.onURLInputKeyDown}
+                placeholder="data-caption"
+              />
+              <input
+                onChange={this.onDataSourceChange}
+                ref="data-source"
+                type="text"
+                value={this.state.mediaSource || ""}
+                onKeyDown={this.onURLInputKeyDown}
+                placeholder="data-source"
+              />
+            </Grid>
+            <Grid item>
+              <input
+                id="data-image-popup"
+                onChange={this.onDataPopupChange}
+                ref="data-image-popup"
+                type="checkbox"
+                value={this.state.mediaPopup}
+                onKeyDown={this.onURLInputKeyDown}
+                placeholder="data-image-popup"
+              />
+              <label>Popup</label>
+            </Grid>
+            <Grid item>
+              <select
+                value={this.state.mediaPosition}
+                ref="data-image-position"
+                onChange={this.onDataPositionChange}
+                placeholder="data-image-position"
+              >
+                <option value="left">Vänster</option>
+                <option value="center">Center</option>
+                <option value="right">Höger</option>
+                <option value="floatRight">Höger med text</option>
+                <option value="floatLeft">Vänster med text</option>
+              </select>
+            </Grid>
+            <Grid item>
+              <button onMouseDown={this.confirmMedia}>OK</button>
+              <button onMouseDown={this.closeURLInput}>Avbryt</button>
+            </Grid>
+          </Grid>
+        </Grid>
       );
     }
 

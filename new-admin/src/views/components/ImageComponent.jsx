@@ -13,6 +13,7 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
+import Checkbox from "@material-ui/core/Checkbox";
 
 const ImageComponent = (props) => {
   const classes = useStyles();
@@ -26,10 +27,12 @@ const ImageComponent = (props) => {
   const imageHeight = data["data-image-height"];
   const dataCaption = data["data-caption"];
   const dataSource = data["data-source"];
-  const dataPopup = data["data-popup"];
+  const dataPopup = data["data-image-popup"] === undefined ? false : true;
   const dataImagePosition = data["data-image-position"];
 
   const [open, setOpen] = useState(false);
+  const [defaultWidth, setDefaultWidth] = useState();
+  const [defaultHeight, setDefaultHeight] = useState();
   const [width, setWidth] = useState(imageWidth);
   const [height, setHeight] = useState(imageHeight);
   const [caption, setCaption] = useState(dataCaption);
@@ -80,21 +83,57 @@ const ImageComponent = (props) => {
 
   const handleSubmit = () => {
     const { imageData } = props.blockProps;
-    const data = {
+    let data = {
       src: src,
       "data-image-width": width,
       "data-image-height": height,
       "data-caption": caption,
       "data-source": source,
-      "data-popup": popup,
-      "data-image-right": "floatLeft",
       "data-image-position": imagePosition,
     };
+    if (popup) {
+      data["data-image-popup"] = "";
+    }
     imageData(data);
   };
 
   const handleChange = (event) => {
     setImagePosition(event.target.value);
+  };
+
+  const handlePopupChange = (event) => {
+    setPopup(event.target.checked);
+  };
+
+  const onImgLoad = ({ target: img }) => {
+    const defaultWidth = img.offsetWidth;
+    const defaultHeight = img.offsetHeight;
+
+    setDefaultWidth(defaultWidth);
+    setDefaultHeight(defaultHeight);
+
+    if (width === undefined) {
+      setWidth(defaultWidth);
+    }
+    if (height === undefined) {
+      setHeight(defaultHeight);
+    }
+  };
+
+  const calculateHeight = (width) => {
+    let aspectRatio = defaultHeight / defaultWidth;
+    let height = width * aspectRatio;
+
+    setWidth(Math.trunc(width));
+    setHeight(Math.trunc(height));
+  };
+
+  const calculateWidth = (height) => {
+    let aspectRatio = defaultWidth / defaultHeight;
+    let width = height * aspectRatio;
+
+    setHeight(Math.trunc(height));
+    setWidth(Math.trunc(width));
   };
 
   const body = (
@@ -109,8 +148,8 @@ const ImageComponent = (props) => {
             <Grid item>
               <TextField
                 id="image-width"
-                defaultValue={width}
-                onChange={(e) => setWidth(e.target.value)}
+                value={width}
+                onChange={(e) => calculateHeight(e.target.value)}
                 label="Bredd"
               />
             </Grid>
@@ -122,8 +161,8 @@ const ImageComponent = (props) => {
             <Grid item>
               <TextField
                 id="image-height"
-                defaultValue={height}
-                onChange={(e) => setHeight(e.target.value)}
+                value={height}
+                onChange={(e) => calculateWidth(e.target.value)}
                 label="Höjd"
               />
             </Grid>
@@ -154,17 +193,13 @@ const ImageComponent = (props) => {
               />
             </Grid>
           </Grid>
-          <Grid container spacing={1} alignItems="flex-end">
-            <Grid item>
-              <input
-                type="checkbox"
-                id="image-popup"
-                value={popup}
-                onChange={(e) => setPopup(e.target.checked)}
-              />
-              <label>Popup</label>
-            </Grid>
-          </Grid>
+          <Checkbox
+            id="image-popup"
+            checked={popup}
+            onChange={handlePopupChange}
+            inputProps={{ "aria-label": "primary checkbox" }}
+          />
+          <label>Popup</label>
           <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
               <button
@@ -236,7 +271,7 @@ const ImageComponent = (props) => {
     </Modal>
   );
 
-  if (dataPopup) {
+  if (popup) {
     return (
       <div className={classes.imgContainer}>
         <img
@@ -248,9 +283,10 @@ const ImageComponent = (props) => {
           data-image-height={height}
           data-caption={caption}
           data-source={source}
-          data-popup
+          data-image-popup=""
           data-image-position={imagePosition}
           onClick={handleOpen}
+          onLoad={onImgLoad}
         />
         <button
           type="button"
@@ -277,6 +313,7 @@ const ImageComponent = (props) => {
           data-caption={caption}
           data-image-position={imagePosition}
           onClick={handleOpen}
+          onLoad={onImgLoad}
         />
         <button
           type="button"

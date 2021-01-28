@@ -6,6 +6,7 @@ import PrintWindow from "../printMenu/PrintWindow";
 import MenuBookIcon from "@material-ui/icons/MenuBook";
 import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
+import { withSnackbar } from "notistack";
 import PrintIcon from "@material-ui/icons/Print";
 
 class DocumentWindowBase extends React.PureComponent {
@@ -62,12 +63,17 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   showHeaderInDocument = ({ documentName, headerIdentifier }) => {
+    const { enqueueSnackbar } = this.props;
     if (documentName) {
       this.props.showDocument(documentName).then(
         () => {
           this.scrollInDocument(headerIdentifier);
         },
         () => {
+          enqueueSnackbar("Kunde inte öppna dokumentet", {
+            variant: "warning",
+          });
+
           console.warn(
             "Could not fetch document, link to document probably reference a document not present in panelmenu"
           );
@@ -265,4 +271,4 @@ class DocumentWindowBase extends React.PureComponent {
   }
 }
 
-export default DocumentWindowBase;
+export default withSnackbar(DocumentWindowBase);

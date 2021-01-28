@@ -163,34 +163,67 @@ class LayerGroup extends React.PureComponent {
   };
 
   isToggled() {
-    var layers = this.props.app.getMap().getLayers().getArray();
     const { group } = this.props;
-    return group.layers.some((layer) => {
-      let foundMapLayer = layers.find((mapLayer) => {
-        return mapLayer.get("name") === layer.id;
-      });
-      if (foundMapLayer && foundMapLayer.getVisible()) {
-        return true;
-      } else {
-        return false;
-      }
-    });
+    return this.areAllGroupsAndSubGroupsToggled(group);
   }
 
   isSemiToggled() {
-    var layers = this.props.app.getMap().getLayers().getArray();
     const { group } = this.props;
-    return group.layers.every((layer) => {
-      let foundMapLayer = layers.find((mapLayer) => {
-        return mapLayer.get("name") === layer.id;
-      });
-      if (foundMapLayer && foundMapLayer.getVisible()) {
-        return true;
-      } else {
-        return false;
-      }
-    });
+    return this.areSubGroupsAndLayersSemiToggled(group);
   }
+
+  layerInMap = (layer) => {
+    const layers = this.props.app.getMap().getLayers().getArray();
+    let foundMapLayer = layers.find((mapLayer) => {
+      return mapLayer.get("name") === layer.id;
+    });
+
+    if (foundMapLayer && foundMapLayer.getVisible()) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  areSubGroupsAndLayersSemiToggled = (group) => {
+    let someSubItemToggled = false;
+    if (this.hasLayers(group)) {
+      someSubItemToggled = group.layers.some((layer) => {
+        return this.layerInMap(layer);
+      });
+    }
+
+    if (this.hasSubGroups(group) && !someSubItemToggled) {
+      someSubItemToggled = group.groups.some((g) => {
+        return this.areSubGroupsAndLayersSemiToggled(g);
+      });
+    }
+    return someSubItemToggled;
+  };
+
+  areAllGroupsAndSubGroupsToggled = (group) => {
+    let allGroupsToggled = true;
+    let allLayersToggled = true;
+    if (this.hasSubGroups(group)) {
+      allGroupsToggled = group.groups.every((g) => {
+        return this.areAllGroupsAndSubGroupsToggled(g);
+      });
+    }
+    if (this.hasLayers(group)) {
+      allLayersToggled = group.layers.every((layer) => {
+        return this.layerInMap(layer);
+      });
+    }
+    return allGroupsToggled && allLayersToggled;
+  };
+
+  hasLayers = (group) => {
+    return group.layers && group.layers.length > 0;
+  };
+
+  hasSubGroups = (group) => {
+    return group.groups && group.groups.length > 0;
+  };
   /**
    * @summary Loops through groups of objects and changes visibility for all layers within group.
    *
@@ -242,6 +275,22 @@ class LayerGroup extends React.PureComponent {
         mapLayer.setVisible(visibility);
       });
   }
+
+  getCheckbox = () => {
+    const { classes } = this.props;
+    if (this.isToggled()) {
+      return <CheckBoxIcon className={classes.checkBoxIcon} />;
+    }
+    if (this.isSemiToggled()) {
+      return (
+        <CheckBoxIcon
+          style={{ color: "gray" }}
+          className={classes.checkBoxIcon}
+        />
+      );
+    }
+    return <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />;
+  };
   /**
    * If Group has "togglable" property enabled, render the toggle all checkbox.
    *
@@ -250,8 +299,8 @@ class LayerGroup extends React.PureComponent {
    */
   renderToggleAll() {
     const { classes } = this.props;
-
     // The property below should be renamed to "togglable" or something…
+
     if (this.props.group.toggled) {
       return (
         <div
@@ -268,20 +317,7 @@ class LayerGroup extends React.PureComponent {
             }
           }}
         >
-          <div>
-            {this.isToggled(this.props.group) ? (
-              this.isSemiToggled(this.props.group) ? (
-                <CheckBoxIcon className={classes.checkBoxIcon} />
-              ) : (
-                <CheckBoxIcon
-                  style={{ color: "gray" }}
-                  className={classes.checkBoxIcon}
-                />
-              )
-            ) : (
-              <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
-            )}
-          </div>
+          <div>{this.getCheckbox()}</div>
           <Typography className={classes.heading}>{this.state.name}</Typography>
         </div>
       );

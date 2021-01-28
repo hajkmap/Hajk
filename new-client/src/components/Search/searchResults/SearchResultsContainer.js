@@ -9,6 +9,7 @@ import SortIcon from "@material-ui/icons/Sort";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import CloseIcon from "@material-ui/icons/Close";
 import DeleteIcon from "@material-ui/icons/Delete";
+import ClearIcon from "@material-ui/icons/Clear";
 import {
   Paper,
   Button,
@@ -20,6 +21,7 @@ import {
   Menu,
   MenuItem,
   Grow,
+  IconButton,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
@@ -48,11 +50,12 @@ const styles = (theme) => ({
       maxWidth: "100%",
       position: "absolute",
       left: 0,
+      borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
     },
   },
   filterInputFieldContainer: {
     padding: theme.spacing(1),
-    borderTop: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
   },
   headerContainer: {
     paddingRight: theme.spacing(1),
@@ -79,6 +82,10 @@ const styles = (theme) => ({
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
+    activeFeature: null,
+    activeFeatureCollection: null,
+    filteredFeatureCollections: null,
+    filteredFeatures: null,
     sumOfResults: this.props.searchResults.featureCollections
       .map((fc) => fc.value.totalFeatures)
       .reduce((a, b) => a + b, 0),
@@ -89,32 +96,41 @@ class SearchResultsContainer extends React.PureComponent {
     featureCollectionSortingStrategy: "AtoZ", // AtoZ representing alphabetical order
     featureSortingStrategy: "AtoZ",
     showTools: false,
+    selectedFeatures: [],
   };
+
+  // Used for setTimeout/clearTimeout, in order to delay filter update when user is typing
+  filterInputTimer = null;
+  lastFeatureFilter = "";
+  lastFeatureCollectionFilter = "";
+
+  // Amount of time before filter changes is committed
+  delayBeforeFilterCommit = 300;
 
   searchResultTools = [
     {
       name: "Filtrera",
       type: "filter",
       render: () => this.renderFilterTool(),
-      disabled: this.props.options.filterDisabled ?? false,
+      enabled: this.props.options.enableResultsFiltering ?? true,
     },
     {
       name: "Sortera",
       type: "sort",
       render: () => this.renderSortTool(),
-      disabled: this.props.options.sortDisabled ?? false,
+      enabled: this.props.options.enableResultsSorting ?? true,
     },
     {
       name: "Rensa",
       type: "clear",
       render: () => this.renderClearTool(),
-      disabled: this.props.options.clearDisabled ?? false,
+      enabled: this.props.options.enableResultsSelectionClearing ?? true,
     },
     {
       name: "Ladda ner",
       type: "download",
       render: () => this.renderDownloadTool(),
-      disabled: this.props.options.downloadDisabled ?? false,
+      enabled: this.props.options.enableResultsDownloading ?? true,
     },
   ];
 
@@ -162,23 +178,25 @@ class SearchResultsContainer extends React.PureComponent {
     // If searchResultContainer is collapsed, open it.
     if (this.props.panelCollapsed) toggleCollapseSearchResults();
 
-    // We first have to make sure that the list with all searchResults is mounted,
-    // e.g. that activeFeature is unset.
-    this.setState({ activeFeature: undefined }, () => {
-      // Get the featureCollection which the clicked feature belongs to
-      const featureCollection = this.getFeatureCollectionFromFeatureId(
-        featureId
-      );
-      // Get the clicked feature
-      const feature = featureCollection.value.features.find(
-        (feature) => feature.id === featureId
-      );
-      // Set active collection and feature accordingly
-      this.setState({
-        activeFeatureCollection: featureCollection,
-        activeFeature: feature,
-      });
-    });
+    // Get the featureCollection which the clicked feature belongs to
+    const featureCollection = this.getFeatureCollectionFromFeatureId(featureId);
+
+    // If the collection has onClickName set we won't show the details
+    if (featureCollection.source.onClickName) {
+      return;
+    }
+
+    // Get the clicked feature
+    const feature = featureCollection.value.features.find(
+      (feature) => feature.id === featureId
+    );
+
+    // If the feature has onClickName set we won't show the details
+    if (feature.onClickName) {
+      return;
+    }
+
+    this.handleActiveFeatureChange(feature, featureCollection, "infoClick");
   };
 
   getFeatureCollectionFromFeatureId = (featureId) => {
@@ -219,19 +237,119 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   handleFilterTextFieldInputChange = (e) => {
+    const filterInput = e.target.value;
+    this.updateViewFilters(filterInput);
+
+    clearTimeout(this.filterInputTimer);
+    this.filterInputTimer = setTimeout(() => {
+      this.handleFilterUpdate();
+    }, this.delayBeforeFilterCommit);
+  };
+
+  addFeatureToSelected = (feature) => {
+    const selectedFeatures = [...this.state.selectedFeatures];
+    selectedFeatures.push(feature);
+    this.setState({ selectedFeatures: selectedFeatures });
+    this.updateMapView(selectedFeatures);
+  };
+
+  removeFeatureFromSelected = (feature) => {
+    const { activeFeatureCollection } = this.state;
+    const selectedFeatures = [...this.state.selectedFeatures];
+
+    const featureIndex = this.getSelectedFeatureIndex(feature.id);
+    selectedFeatures.splice(featureIndex, 1);
+
+    if (activeFeatureCollection?.origin === "USERSELECT") {
+      this.setState({
+        selectedFeatures: selectedFeatures,
+        activeFeatureCollection:
+          selectedFeatures.length === 0
+            ? null
+            : this.getSelectedCollection(selectedFeatures),
+      });
+    } else {
+      this.setState({ selectedFeatures: selectedFeatures });
+    }
+    this.updateMapView(selectedFeatures);
+  };
+
+  updateMapView = (selectedFeatures) => {
+    const { localObserver } = this.props;
+    localObserver.publish("map.setSelectedStyle", selectedFeatures);
+    localObserver.publish("map.zoomToFeatures", selectedFeatures);
+  };
+
+  getSelectedFeatureIndex = (featureId) => {
+    return this.state.selectedFeatures.findIndex((featureInfo) => {
+      return featureInfo.feature.id === featureId;
+    });
+  };
+
+  appendSelectedFeaturesCollection = (featureCollections) => {
+    const { selectedFeatures } = this.state;
+    if (this.state.selectedFeatures.length === 0) {
+      return featureCollections;
+    }
+    const updatedCollections = [...featureCollections];
+    updatedCollections.filter((fc) => {
+      return fc.origin !== "USERSELECT";
+    });
+    updatedCollections.unshift(this.getSelectedCollection(selectedFeatures));
+    return updatedCollections;
+  };
+
+  getSelectedCollection = (selectedFeatures) => {
+    const features = selectedFeatures.reduce(
+      (features, featureInfo) => [...features, featureInfo.feature],
+      []
+    );
+    return {
+      origin: "USERSELECT",
+      source: { id: "userSelected", caption: "Markerade objekt" },
+      value: {
+        type: "featureCollection",
+        features: features,
+      },
+    };
+  };
+
+  updateViewFilters = (filterInput) => {
     // If we don't have a collection active, we know
     // that the filter is intended for the collections
     if (!this.state.activeFeatureCollection) {
       this.setState({
-        featureCollectionFilter: e.target.value,
+        featureCollectionFilter: filterInput,
       });
     } else {
       // If we DO have a collection active, we know that
       // the filter is intended for the features in the active
       // collection
       this.setState({
-        featureFilter: e.target.value,
+        featureFilter: filterInput,
       });
+    }
+  };
+
+  clearViewFilters = () => {
+    if (!this.state.activeFeatureCollection) {
+      this.setState(
+        {
+          featureCollectionFilter: "",
+        },
+        () => {
+          this.handleFilterUpdate();
+        }
+      );
+    } else {
+      this.setState(
+        {
+          featureFilter: "",
+        },
+        () => {
+          this.handleFilterUpdate();
+        }
+      );
     }
   };
 
@@ -242,6 +360,8 @@ class SearchResultsContainer extends React.PureComponent {
       featureFilter,
       featureCollectionFilter,
     } = this.state;
+    const showClearFilterButton =
+      featureFilter.length > 0 || featureCollectionFilter.length > 0;
     return (
       <Grid item className={classes.filterInputFieldContainer} xs={12}>
         <Typography variant="srOnly">
@@ -257,16 +377,26 @@ class SearchResultsContainer extends React.PureComponent {
           size="small"
           variant="outlined"
           label="Filtrera sökresultaten"
+          InputProps={{
+            endAdornment: showClearFilterButton && (
+              <Tooltip title="Rensa filtret">
+                <IconButton onClick={this.clearViewFilters} size="small">
+                  <Typography variant="srOnly">Rensa filtret</Typography>
+                  <ClearIcon />
+                </IconButton>
+              </Tooltip>
+            ),
+          }}
         ></TextField>
       </Grid>
     );
   };
 
   getFilteredFeatureCollections = () => {
-    const { featureCollectionFilter } = this.state;
+    const { featureCollectionFilter, filteredFeatureCollections } = this.state;
     const { featureCollections } = this.props;
     // Do we have a filter value?
-    if (featureCollectionFilter.length > 0) {
+    if (this.lastFeatureCollectionFilter !== featureCollectionFilter) {
       // Filter all collections
       return featureCollections.filter((featureCollection) => {
         // Returning collections where the filter is included in caption
@@ -275,7 +405,10 @@ class SearchResultsContainer extends React.PureComponent {
           .includes(featureCollectionFilter.toLowerCase());
       });
     } else {
-      // No filter? Return all collections
+      // No filter update? Return all collections or last filtered.
+      if (filteredFeatureCollections?.length > 0) {
+        return filteredFeatureCollections;
+      }
       return featureCollections;
     }
   };
@@ -322,6 +455,27 @@ class SearchResultsContainer extends React.PureComponent {
         sortingMenuAnchorEl: null,
       });
     }
+  };
+
+  clearAllSelectedFeaturesInView = () => {
+    const { localObserver } = this.props;
+    const { activeFeatureCollection } = this.state;
+    const sourceId = activeFeatureCollection?.source?.id;
+    const onSelectedFeaturesView = sourceId === "userSelected";
+
+    const selectedFeatures =
+      !sourceId || onSelectedFeaturesView
+        ? []
+        : [...this.state.selectedFeatures].filter((featureInfo) => {
+            return featureInfo.feature?.source.id !== sourceId;
+          });
+    this.setState({
+      selectedFeatures: selectedFeatures,
+      activeFeatureCollection: onSelectedFeaturesView
+        ? null
+        : activeFeatureCollection,
+    });
+    localObserver.publish("map.setSelectedStyle", selectedFeatures);
   };
 
   renderSortingMenu = () => {
@@ -434,11 +588,7 @@ class SearchResultsContainer extends React.PureComponent {
       <Tooltip title="Rensa alla selekterade objekt">
         <Button
           className={classes.headerButtons}
-          onClick={() => {
-            this.props.localObserver.publish(
-              "searchResultList.clearAllSelectedFeatures"
-            );
-          }}
+          onClick={this.clearAllSelectedFeaturesInView}
         >
           <DeleteIcon />
         </Button>
@@ -447,22 +597,48 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderDownloadTool = () => {
-    const { featureCollections } = this.props;
-    const { activeFeatureCollection } = this.state;
+    const collectionsToDownload = this.getCollectionsToDownload();
     return (
       <SearchResultsDownloadMenu
-        featureCollections={
-          activeFeatureCollection
-            ? [activeFeatureCollection]
-            : featureCollections
-        }
+        featureCollections={collectionsToDownload}
         localObserver={this.props.localObserver}
       />
     );
   };
 
+  getCollectionsToDownload = () => {
+    const {
+      activeFeatureCollection,
+      filteredFeatureCollections,
+      featureFilter,
+    } = this.state;
+    const { featureCollections } = this.props;
+
+    if (activeFeatureCollection) {
+      if (activeFeatureCollection.source.id === "userSelected") {
+        return [activeFeatureCollection];
+      }
+      if (featureFilter === "") {
+        return [activeFeatureCollection];
+      }
+      const filteredFeatures = this.getFilteredFeatures([
+        activeFeatureCollection,
+      ]);
+      const collectionToDownload = {
+        ...activeFeatureCollection,
+        value: { features: filteredFeatures },
+      };
+      return [collectionToDownload];
+    }
+    if (filteredFeatureCollections) {
+      return filteredFeatureCollections;
+    }
+
+    return featureCollections;
+  };
+
   allToolsDisabled = () => {
-    return this.searchResultTools.filter((tool) => !tool.disabled).length === 0;
+    return this.searchResultTools.filter((tool) => tool.enabled).length === 0;
   };
 
   renderSearchResultListTools = () => {
@@ -479,7 +655,7 @@ class SearchResultsContainer extends React.PureComponent {
             >
               {this.searchResultTools.map((tool, index) => {
                 return (
-                  !tool.disabled && (
+                  tool.enabled && (
                     <React.Fragment key={index}>{tool.render()}</React.Fragment>
                   )
                 );
@@ -495,6 +671,7 @@ class SearchResultsContainer extends React.PureComponent {
                 onClick={() =>
                   this.setState({
                     showTools: !this.state.showTools,
+                    filterInputFieldOpen: false,
                   })
                 }
               >
@@ -508,22 +685,89 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   setActiveFeature = (feature) => {
-    this.setState({ activeFeature: feature });
+    const { activeFeatureCollection } = this.state;
+    this.handleActiveFeatureChange(feature, activeFeatureCollection);
+  };
+
+  handleActiveFeatureChange = (nextFeature, nextCollection, initiator) => {
+    const { localObserver } = this.props;
+    const { activeFeature } = this.state;
+    const selectedFeatures = [...this.state.selectedFeatures];
+    const shouldZoomToFeature = initiator !== "infoClick";
+
+    if (activeFeature) {
+      const featureIndex = selectedFeatures.findIndex((featureInfo) => {
+        return (
+          featureInfo.feature.id === activeFeature.id &&
+          featureInfo.initiator !== "userSelect"
+        );
+      });
+      featureIndex !== -1 && selectedFeatures.splice(featureIndex, 1);
+      localObserver.publish("map.setSelectedStyle", selectedFeatures);
+    }
+
+    if (nextFeature) {
+      const nextFeatureSelected = this.featureIsSelected(nextFeature);
+      !nextFeatureSelected &&
+        selectedFeatures.push(
+          this.getNextFeatureInfo(nextFeature, nextCollection, initiator)
+        );
+    }
+    this.setState(
+      {
+        selectedFeatures: selectedFeatures,
+        activeFeatureCollection: nextCollection,
+        activeFeature: nextFeature,
+        filterInputFieldOpen: false,
+        featureFilter: !nextCollection ? "" : this.state.featureFilter,
+      },
+      () => {
+        !nextCollection && this.handleFilterUpdate();
+      }
+    );
+    if (nextFeature) {
+      if (shouldZoomToFeature) {
+        localObserver.publish("map.zoomToFeature", nextFeature);
+      }
+      localObserver.publish("map.setHighLightedStyle", nextFeature);
+    } else {
+      localObserver.publish("map.setSelectedStyle", selectedFeatures);
+    }
+  };
+
+  featureIsSelected = (feature) => {
+    const { selectedFeatures } = this.state;
+    return selectedFeatures.some((featureInfo) => {
+      return featureInfo.feature.id === feature.id;
+    });
+  };
+
+  getNextFeatureInfo = (nextFeature, nextCollection, initiator) => {
+    if (!nextFeature.source) {
+      nextFeature.source = nextCollection.source;
+    }
+    const featureTitle = this.getFeatureTitle(nextFeature);
+    nextFeature.featureTitle = featureTitle;
+
+    return {
+      feature: nextFeature,
+      featureTitle: featureTitle,
+      sourceId: nextFeature.source ?? nextCollection.source.id,
+      initiator: initiator,
+    };
   };
 
   setActiveFeatureCollection = (featureCollection) => {
-    this.setState({
-      activeFeatureCollection: featureCollection,
-      filterInputFieldOpen: false,
-      featureFilter: "",
-    });
-  };
-
-  resetFeatureAndCollection = () => {
-    this.setState({
-      activeFeatureCollection: undefined,
-      activeFeature: undefined,
-    });
+    this.setState(
+      {
+        activeFeatureCollection: featureCollection,
+        filterInputFieldOpen: false,
+        featureFilter: "",
+      },
+      () => {
+        this.handleFilterUpdate();
+      }
+    );
   };
 
   handleFeatureCollectionClick = (featureCollection) => {
@@ -562,31 +806,87 @@ class SearchResultsContainer extends React.PureComponent {
   getFeatureTitle = (feature) => {
     const { activeFeatureCollection } = this.state;
 
-    return activeFeatureCollection.source.displayFields.reduce(
-      (featureTitleString, df) => {
-        let displayField = feature.properties[df];
-        if (Array.isArray(displayField)) {
-          displayField = displayField.join(", ");
-        }
+    if (feature.featureTitle) {
+      return feature.featureTitle;
+    }
 
-        if (displayField) {
-          if (featureTitleString.length > 0) {
-            featureTitleString = featureTitleString.concat(
-              ` | ${displayField}`
-            );
-          } else {
-            featureTitleString = displayField.toString();
-          }
-        }
+    const source = feature.source ?? activeFeatureCollection.source;
 
-        return featureTitleString;
-      },
-      ""
-    );
+    return source.displayFields.reduce((featureTitleString, df) => {
+      let displayField = feature.properties[df];
+      if (Array.isArray(displayField)) {
+        displayField = displayField.join(", ");
+      }
+
+      if (displayField) {
+        if (featureTitleString.length > 0) {
+          featureTitleString = featureTitleString.concat(` | ${displayField}`);
+        } else {
+          featureTitleString = displayField.toString();
+        }
+      }
+
+      feature.featureTitle = featureTitleString;
+      return featureTitleString;
+    }, "");
   };
 
   keyPressIsEnter = (event) => {
     return event.which === 13 || event.keyCode === 13;
+  };
+
+  getFilteredFeatures = (featureCollections) => {
+    const { activeFeatureCollection, featureFilter } = this.state;
+    return featureCollections
+      .map((fc) => {
+        if (activeFeatureCollection) {
+          if (fc.source.id === activeFeatureCollection.source.id) {
+            return fc.value.features.filter((f) => {
+              const featureTitle = this.getFeatureTitle(f);
+              return featureTitle
+                .toLowerCase()
+                .includes(featureFilter.toLowerCase());
+            });
+          }
+        }
+        return fc.value.features;
+      })
+      .flat();
+  };
+
+  handleFilterUpdate = () => {
+    const { featureCollectionFilter, featureFilter } = this.state;
+    const { localObserver, featureCollections } = this.props;
+
+    if (
+      this.lastFeatureFilter === featureFilter &&
+      this.lastFeatureCollectionFilter === featureCollectionFilter
+    ) {
+      return;
+    }
+
+    const filteredFeatureCollections = this.getFilteredFeatureCollections(
+      featureCollections
+    );
+    const filteredFeatures = this.getFilteredFeatures(
+      filteredFeatureCollections
+    );
+    const currentFeatureIds = filteredFeatures.map((feature) => {
+      return feature.id;
+    });
+
+    this.setState({
+      filteredFeatureCollections: filteredFeatureCollections,
+      filteredFeatures: filteredFeatures,
+    });
+
+    this.lastFeatureFilter = featureFilter;
+    this.lastFeatureCollectionFilter = featureCollectionFilter;
+
+    localObserver.publish("map.updateFeaturesAfterFilterChange", {
+      features: filteredFeatures,
+      featureIds: currentFeatureIds,
+    });
   };
 
   renderBreadCrumbs = (featureCollectionTitle, featureTitle) => {
@@ -607,14 +907,14 @@ class SearchResultsContainer extends React.PureComponent {
               variant="caption"
               onClick={(e) => {
                 e.stopPropagation();
-                this.resetFeatureAndCollection();
+                this.handleActiveFeatureChange();
               }}
               onKeyDown={(event) => {
                 if (this.keyPressIsEnter(event)) {
-                  this.resetFeatureAndCollection();
+                  this.handleActiveFeatureChange();
                 }
               }}
-              onChange={this.resetFeatureAndCollection}
+              onChange={this.handleActiveFeatureChange}
             >
               Sökresultat
             </Link>
@@ -659,7 +959,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderHeaderInfoBar = (featureCollectionTitle) => {
     const { activeFeatureCollection } = this.state;
-    const { classes, getOriginBasedIcon } = this.props;
+    const { classes } = this.props;
     return (
       <Grid
         container
@@ -676,8 +976,6 @@ class SearchResultsContainer extends React.PureComponent {
           alignItems="center"
           xs={this.state.showTools ? 5 : 11}
         >
-          {activeFeatureCollection &&
-            getOriginBasedIcon(activeFeatureCollection.origin)}
           <Tooltip
             title={
               activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
@@ -771,6 +1069,15 @@ class SearchResultsContainer extends React.PureComponent {
       featureCollections
     );
 
+    const shouldRenderSelectedCollection =
+      options.enableSelectedFeaturesCollection ?? true;
+
+    const collectionsToRender = activeFeatureCollection
+      ? [activeFeatureCollection]
+      : shouldRenderSelectedCollection
+      ? this.appendSelectedFeaturesCollection(sortedFeatureCollections)
+      : sortedFeatureCollections;
+
     return (
       <Collapse in={!panelCollapsed}>
         {sumOfResults === 0 ? (
@@ -787,13 +1094,12 @@ class SearchResultsContainer extends React.PureComponent {
                 <SearchResultsList
                   localObserver={localObserver}
                   getOriginBasedIcon={getOriginBasedIcon}
-                  featureCollections={sortedFeatureCollections}
+                  featureCollections={collectionsToRender}
                   app={app}
                   handleFeatureCollectionClick={
                     this.handleFeatureCollectionClick
                   }
                   setActiveFeature={this.setActiveFeature}
-                  resetFeatureAndCollection={this.resetFeatureAndCollection}
                   activeFeatureCollection={activeFeatureCollection}
                   activeFeature={activeFeature}
                   featureFilter={featureFilter}
@@ -801,8 +1107,16 @@ class SearchResultsContainer extends React.PureComponent {
                     featureCollectionSortingStrategy
                   }
                   featureSortingStrategy={featureSortingStrategy}
-                  showFeaturePreview={options.showFeaturePreview}
+                  enableFeaturePreview={options.enableFeaturePreview ?? true}
+                  enableFeatureToggler={options.enableFeatureToggler ?? true}
                   getFeatureTitle={this.getFeatureTitle}
+                  addFeatureToSelected={this.addFeatureToSelected}
+                  removeFeatureFromSelected={this.removeFeatureFromSelected}
+                  selectedFeatures={this.state.selectedFeatures}
+                  shouldRenderSelectedCollection={
+                    shouldRenderSelectedCollection
+                  }
+                  options={options}
                 />
               </Grid>
             </Grid>

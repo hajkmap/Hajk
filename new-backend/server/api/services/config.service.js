@@ -23,7 +23,7 @@ class ConfigService {
    *
    * @param {String} map Name of the map configuration
    * @param {String} user User name that must have explicit access to the map
-   * @param {boolean} washContent If true, map config will be examinated and
+   * @param {boolean} washContent If true, map config will be examined and
    * only those layers/groups/tools that user has access to will be returned.
    * @returns Map config contents in JSON
    * @memberof ConfigService
@@ -34,10 +34,19 @@ class ConfigService {
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = await JSON.parse(text);
 
+      if (washContent === false) {
+        logger.trace(
+          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire  the entire %s map config.",
+          user,
+          map
+        );
+        return json;
+      }
+
       // If we haven't enabled AD restrictions, just return the entire map config
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
         logger.trace(
-          "[getMapConfig] AD auth disabled. Getting the entire %s map config",
+          "[getMapConfig] AD auth disabled. Getting the entire %s map config.",
           map
         );
         return json;
@@ -267,7 +276,7 @@ class ConfigService {
     return mapConfig;
   }
 
-  async getLayersStore(user) {
+  async getLayersStore(user, washContent = true) {
     logger.trace("[getLayersStore] for user %o", user);
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
@@ -281,6 +290,13 @@ class ConfigService {
       // current map. This would obviously lead to drastically smaller response, but
       // also be a security measure, as user would not be able to find out which layers
       // exist in the store.
+
+      if (washContent === false) {
+        logger.trace(
+          "[getLayersStore] invoked with 'washContent=false'. Returning the entire contents of layers store."
+        );
+        return json;
+      }
 
       // If we haven't enabled AD restrictions, just return the entire layers store
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
@@ -303,7 +319,9 @@ class ConfigService {
         throw e;
       }
 
-      // TODO: replace with something like:
+      // TODO:  Currently there is no option in admin to set permission on a per-layer-basis,
+      // but eventually it should be there. This means that we should write some washing function
+      // and replace the return below with something like this:
       // return this.washLayersStore(json);
       return json;
     } catch (error) {
@@ -348,8 +366,9 @@ class ConfigService {
     if (map === "layers") return Object.fromEntries(layersById); // TODO: Perhaps sort on layer name?
 
     // If we got this far, we now need to grab the contents of
-    // the requested map config.
-    const mapConfig = await this.getMapConfig(map, user);
+    // the requested map config. Note that content washing is disabled:
+    // we will export the entire map config as-is.
+    const mapConfig = await this.getMapConfig(map, user, false);
 
     // Some clumsy error handling
     if (mapConfig.error) {
@@ -447,12 +466,7 @@ class ConfigService {
         // we getMapConfig will return only those maps that current
         // user has access to, so there's no need to "wash" the result
         // later on.
-        //
-        // The optional, third, parameter tells getMapConfig not to
-        // wash the content (layers/groups/tools). We just need to know
-        // if user has access to map as a whole, washing for purpose of
-        // this method would introduce unnecessary overhead.
-        const mapConfig = await this.getMapConfig(map, user, false);
+        const mapConfig = await this.getMapConfig(map, user);
 
         // If we encounter errors, access to current map is restricted for current user
         // so let's just continue with next element in available maps.
@@ -465,7 +479,7 @@ class ConfigService {
           (t) => t.type === "layerswitcher"
         );
 
-        // If map config says is configured to be exposed in MapSwitcher,
+        // If map config says it's configured to be exposed in MapSwitcher,
         // push the current map into the return object.
         if (lsConfig?.options.dropdownThemeMaps === true) {
           output.push({
@@ -475,22 +489,6 @@ class ConfigService {
         }
       }
       return output;
-    } catch (error) {
-      return { error };
-    }
-  }
-
-  async getAvailableADGroups() {
-    try {
-      return ad.getAvailableADGroups();
-    } catch (error) {
-      return { error };
-    }
-  }
-
-  async findCommonADGroupsForUsers(users) {
-    try {
-      return ad.findCommonADGroupsForUsers(users);
     } catch (error) {
       return { error };
     }
