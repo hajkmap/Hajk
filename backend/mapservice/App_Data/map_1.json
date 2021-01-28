@@ -206,7 +206,7 @@
           ""
         ],
         "scale": "",
-        "markerImg": "marker.png",
+        "markerImg": "",
         "delayBeforeAutoSearch": 300,
         "searchBarPlaceholder": "Sök...",
         "enablePolygonSearch": true,
