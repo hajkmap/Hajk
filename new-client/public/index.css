@@ -68,3 +68,7 @@ body {
   text-align: center;
   margin-top: 5%;
 }
+
+.introjs-tooltip {
+  min-width: 280px !important;
+}

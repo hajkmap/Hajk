@@ -1,3 +1,4 @@
+import SearchModel from "./SearchModel";
 import Plugin from "./Plugin.js";
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
@@ -131,9 +132,10 @@ class AppModel {
    * @returns {Array} - List of promises to be resolved for.
    */
   loadPlugins(plugins) {
-    var promises = [];
+    const promises = [];
     plugins.forEach((plugin) => {
-      var prom = import(`../plugins/${plugin}/${plugin}.js`)
+      const dir = ["Search"].includes(plugin) ? "components" : "plugins";
+      const prom = import(`../${dir}/${plugin}/${plugin}.js`)
         .then((module) => {
           const toolConfig =
             this.config.mapConfig.tools.find(
@@ -152,7 +154,8 @@ class AppModel {
               new Plugin({
                 map: this.map,
                 app: this,
-                type: plugin,
+                type: plugin.toLowerCase(),
+                searchInterface: {},
                 sortOrder: sortOrder,
                 options: toolOptions,
                 component: module.default,
@@ -212,9 +215,43 @@ class AppModel {
     // Add Snap Helper to the Map
     this.map.snapHelper = new SnapHelper(this);
 
+    // Add the clickLock set. Its primary use is to disable infoclick action
+    // when some other plugin (such as Draw or Measure) is active (in that case
+    // we want the plugin to handle click - not to show infoclick).
+    // It's easy to think that this is only needed if Infoclick plugin is active
+    // in map config - but that is not the case:
+    // A lot of plugins rely on the 'clickLock' property to exist on Map,
+    // and to be a Set (we use .has()).
+    // So, we create the Set no matter what:
+    this.map.clickLock = new Set();
+
+    // But we register the Infoclick handler only if the plugin exists in map config:
     if (config.tools.some((tool) => tool.type === "infoclick")) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
-        this.globalObserver.publish("core.mapClick", mapClickDataResult);
+        // We have to separate features coming from the searchResult-layer
+        // from the rest, since we want to render this information in the
+        // search-component rather than in the featureInfo-component.
+        const searchResultFeatures = mapClickDataResult.features.filter(
+          (feature) => {
+            return feature?.layer.get("type") === "searchResultLayer";
+          }
+        );
+
+        // If we have features coming from the searchResult-layer, we don't want
+        // to invoke core.mapClick, since this could potentially (say if we have
+        // searchResult-features stacked on wms-features) lead to the user getting
+        // prompted with both the searchResult-featureInfo as well as the "standard"
+        // featureInfo-component.
+        if (searchResultFeatures.length > 0) {
+          // Clicked features sent to the search-component for display
+          this.globalObserver.publish(
+            "infoClick.searchResultLayerClick",
+            searchResultFeatures
+          );
+        } else {
+          // Clicked features sent to the featureInfo-component for display
+          this.globalObserver.publish("infoClick.mapClick", mapClickDataResult);
+        }
       });
     }
     return this;
@@ -222,6 +259,27 @@ class AppModel {
 
   getMap() {
     return this.map;
+  }
+
+  addSearchModel() {
+    // TODO: Move configuration somewhere else, shouldn't be plugin-dependent.
+
+    // See if Search is configured in map config
+    const searchConfigIndex = this.config.mapConfig.tools.findIndex(
+      (t) => t.type === "search"
+    );
+
+    // If it is, go on and add the search model to App model
+    if (searchConfigIndex !== -1) {
+      this.searchModel = new SearchModel(
+        this.config.mapConfig.tools[searchConfigIndex].options,
+        this.getMap(),
+        this
+      );
+    }
+
+    // Either way, return self, so we can go on and chain more methods on App model
+    return this;
   }
 
   clear() {

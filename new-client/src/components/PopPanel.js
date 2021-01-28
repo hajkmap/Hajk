@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Popper from "@material-ui/core/Popper";
 import Paper from "@material-ui/core/Paper";

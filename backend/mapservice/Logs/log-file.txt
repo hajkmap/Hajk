@@ -28,3 +28,22 @@ FATAL 2019-07-01 07:06:43 Can't get configuration file: System.Web.HttpException
    at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
 FATAL 2019-07-29 14:07:30 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
    at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2020-03-18 16:09:02 Can't get configuration file: Newtonsoft.Json.JsonReaderException: Invalid property identifier character: <. Path 'tools[0].options.groups[0].layers[0]', line 117, position 0.
+   vid Newtonsoft.Json.JsonTextReader.ParseProperty()
+   vid Newtonsoft.Json.JsonWriter.WriteToken(JsonReader reader, Boolean writeChildren, Boolean writeDateConstructorAsDate, Boolean writeComments)
+   vid Newtonsoft.Json.JsonWriter.WriteToken(JsonReader reader, Boolean writeChildren)
+   vid Newtonsoft.Json.Serialization.JsonSerializerInternalReader.CreateJToken(JsonReader reader, JsonContract contract)
+   vid Newtonsoft.Json.Serialization.JsonSerializerInternalReader.Deserialize(JsonReader reader, Type objectType, Boolean checkAdditionalContent)
+   vid Newtonsoft.Json.JsonSerializer.DeserializeInternal(JsonReader reader, Type objectType)
+   vid Newtonsoft.Json.JsonConvert.DeserializeObject(String value, Type type, JsonSerializerSettings settings)
+   vid Newtonsoft.Json.JsonConvert.DeserializeObject[T](String value, JsonSerializerSettings settings)
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations() i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 133
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 370
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 724 
+<<<<<<< HEAD
+=======
+FATAL 2020-12-03 07:55:41 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 539 
+FATAL 2020-12-03 07:55:51 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\hajk-fork\backend\mapservice\Controllers\ConfigController.cs:rad 539 
+>>>>>>> feature/legend-summary-icon

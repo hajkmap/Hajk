@@ -1,0 +1,1331 @@
+{
+  "version": "1.0.5",
+  "projections": [
+    {
+      "code": "EPSG:3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      "units": "m"
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      "units": "m"
+    }
+  ],
+  "tools": [
+    {
+      "type": "layerswitcher",
+      "options": {
+        "baselayers": [
+          {
+            "id": "1",
+            "visibleAtStart": true,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": ""
+          },
+          {
+            "id": "2",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": ""
+          }
+        ],
+        "groups": [
+          {
+            "id": "cbead9d5-6982-ae7c-6163-120e10a26463",
+            "parent": "-1",
+            "name": "Användning",
+            "toggled": false,
+            "expanded": true,
+            "layers": [],
+            "groups": [
+              {
+                "id": "6310b695-457f-9c5a-a86a-dd189910aad9",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Parker och naturområden",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "19",
+                    "visibleAtStart": false,
+                    "drawOrder": 26,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "29",
+                    "visibleAtStart": true,
+                    "drawOrder": 19,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "7",
+                    "visibleAtStart": false,
+                    "drawOrder": 16,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "8",
+                    "visibleAtStart": false,
+                    "drawOrder": 57,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "28",
+                    "visibleAtStart": false,
+                    "drawOrder": 15,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "24",
+                    "visibleAtStart": false,
+                    "drawOrder": 18,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "33",
+                    "visibleAtStart": false,
+                    "drawOrder": 17,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "8a4e91a0-249d-6d80-c582-1177bbfac7cf",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Blandad stadsbebyggelse",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "12",
+                    "visibleAtStart": false,
+                    "drawOrder": 22,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "47",
+                    "visibleAtStart": false,
+                    "drawOrder": 24,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "31",
+                    "visibleAtStart": false,
+                    "drawOrder": 23,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "26",
+                    "visibleAtStart": false,
+                    "drawOrder": 25,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "41",
+                    "visibleAtStart": false,
+                    "drawOrder": 61,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "13",
+                    "visibleAtStart": false,
+                    "drawOrder": 28,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "32",
+                    "visibleAtStart": false,
+                    "drawOrder": 29,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "27",
+                    "visibleAtStart": false,
+                    "drawOrder": 30,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "42",
+                    "visibleAtStart": false,
+                    "drawOrder": 41,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "b655f35e-4e41-fccc-f3b6-2d39461201ab",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Verksamheter",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "11",
+                    "visibleAtStart": false,
+                    "drawOrder": 21,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "10",
+                    "visibleAtStart": false,
+                    "drawOrder": 20,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "52",
+                    "visibleAtStart": false,
+                    "drawOrder": 31,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "39",
+                    "visibleAtStart": false,
+                    "drawOrder": 60,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "5",
+                    "visibleAtStart": false,
+                    "drawOrder": 34,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "38",
+                    "visibleAtStart": false,
+                    "drawOrder": 33,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "46",
+                    "visibleAtStart": false,
+                    "drawOrder": 42,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "5550a988-db44-edb7-f154-0113e5601023",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Infrastruktur",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "21",
+                    "visibleAtStart": false,
+                    "drawOrder": 38,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "37",
+                    "visibleAtStart": false,
+                    "drawOrder": 48,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "6",
+                    "visibleAtStart": false,
+                    "drawOrder": 53,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "35",
+                    "visibleAtStart": false,
+                    "drawOrder": 37,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "36",
+                    "visibleAtStart": false,
+                    "drawOrder": 36,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "14",
+                    "visibleAtStart": false,
+                    "drawOrder": 58,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "16",
+                    "visibleAtStart": false,
+                    "drawOrder": 55,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "15",
+                    "visibleAtStart": false,
+                    "drawOrder": 35,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "17",
+                    "visibleAtStart": false,
+                    "drawOrder": 54,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "48",
+                    "visibleAtStart": false,
+                    "drawOrder": 52,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "49",
+                    "visibleAtStart": false,
+                    "drawOrder": 32,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "20",
+                    "visibleAtStart": false,
+                    "drawOrder": 56,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "45",
+                    "visibleAtStart": false,
+                    "drawOrder": 43,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "44",
+                    "visibleAtStart": false,
+                    "drawOrder": 59,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "37d3869e-8e08-d992-29b7-64294ab1d756",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Vattenområden",
+                "toggled": true,
+                "expanded": false,
+                "layers": [],
+                "groups": []
+              },
+              {
+                "id": "0f3f9bd7-7fe7-f84f-15ea-4e79084ed9f3",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Landsbygd",
+                "toggled": true,
+                "expanded": false,
+                "layers": [],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "cd576119-a09d-eeb1-d90c-5035ae12f870",
+            "parent": "-1",
+            "name": "Värden och hänsyn",
+            "toggled": false,
+            "expanded": true,
+            "layers": [],
+            "groups": [
+              {
+                "id": "0b439bd2-fbc2-57ad-2d11-cee71563e57a",
+                "parent": "cd576119-a09d-eeb1-d90c-5035ae12f870",
+                "name": "Areella näringar",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "18",
+                    "visibleAtStart": false,
+                    "drawOrder": 27,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "49cd6bb7-efef-f955-d3e6-431f5fb5a9ee",
+                "parent": "cd576119-a09d-eeb1-d90c-5035ae12f870",
+                "name": "Miljö, hälsa säkerhet",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "22",
+                    "visibleAtStart": false,
+                    "drawOrder": 44,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "40",
+                    "visibleAtStart": false,
+                    "drawOrder": 45,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "23",
+                    "visibleAtStart": false,
+                    "drawOrder": 46,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "25",
+                    "visibleAtStart": false,
+                    "drawOrder": 47,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "34",
+                    "visibleAtStart": false,
+                    "drawOrder": 51,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "9",
+                    "visibleAtStart": false,
+                    "drawOrder": 49,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "52a7005a-3f1e-1f5b-375c-6130b9936ecd",
+                "parent": "cd576119-a09d-eeb1-d90c-5035ae12f870",
+                "name": "Natur och kulturvärden",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "50",
+                    "visibleAtStart": false,
+                    "drawOrder": 40,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "877023c2-ff5b-40d4-8e4c-aea35542db82",
+                "parent": "cd576119-a09d-eeb1-d90c-5035ae12f870",
+                "name": "Bebyggelse",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "30",
+                    "visibleAtStart": false,
+                    "drawOrder": 50,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "60b915bc-7535-de85-4cc1-f619287cd2d2",
+                "parent": "cd576119-a09d-eeb1-d90c-5035ae12f870",
+                "name": "Vattenområden",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "51",
+                    "visibleAtStart": false,
+                    "drawOrder": 39,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "3617d545-6a5e-7b58-1f05-36819c66e196",
+                "parent": "cd576119-a09d-eeb1-d90c-5035ae12f870",
+                "name": "Samhällsviktiga funktioner",
+                "toggled": true,
+                "expanded": false,
+                "layers": [],
+                "groups": []
+              },
+              {
+                "id": "97faaff9-4178-ee1a-e7a9-561fb512976b",
+                "parent": "cd576119-a09d-eeb1-d90c-5035ae12f870",
+                "name": "Hänsyn enligt annan lagstiftning",
+                "toggled": true,
+                "expanded": false,
+                "layers": [],
+                "groups": [
+                  {
+                    "id": "18965bca-45f0-5617-1aaa-bdc6ee8e1f8a",
+                    "parent": "97faaff9-4178-ee1a-e7a9-561fb512976b",
+                    "name": "Naturvärden",
+                    "toggled": true,
+                    "expanded": false,
+                    "layers": [
+                      {
+                        "id": "82",
+                        "visibleAtStart": false,
+                        "drawOrder": 13,
+                        "visibleForGroups": null,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "e6154204-9c07-8c4b-bef4-a23905ea5e17",
+                    "parent": "97faaff9-4178-ee1a-e7a9-561fb512976b",
+                    "name": "Kulturvärden",
+                    "toggled": true,
+                    "expanded": false,
+                    "layers": [
+                      {
+                        "id": "81",
+                        "visibleAtStart": false,
+                        "drawOrder": 14,
+                        "visibleForGroups": null,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "100eeaf5-becf-f1d1-ae41-0da23bc63e22",
+                    "parent": "97faaff9-4178-ee1a-e7a9-561fb512976b",
+                    "name": "Övrigt",
+                    "toggled": true,
+                    "expanded": false,
+                    "layers": [],
+                    "groups": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "80700e5f-f58e-eee4-18e5-98e85a63d7e7",
+            "parent": "-1",
+            "name": "Riksintressen",
+            "toggled": false,
+            "expanded": true,
+            "layers": [],
+            "groups": [
+              {
+                "id": "7ed1da14-fcba-e4f6-7407-7852c8f61267",
+                "parent": "80700e5f-f58e-eee4-18e5-98e85a63d7e7",
+                "name": "Riksintressen",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "78",
+                    "visibleAtStart": false,
+                    "drawOrder": 3,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "73",
+                    "visibleAtStart": false,
+                    "drawOrder": 4,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "80",
+                    "visibleAtStart": false,
+                    "drawOrder": 11,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "77",
+                    "visibleAtStart": false,
+                    "drawOrder": 5,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "74",
+                    "visibleAtStart": false,
+                    "drawOrder": 6,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "71",
+                    "visibleAtStart": false,
+                    "drawOrder": 7,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "83",
+                    "visibleAtStart": false,
+                    "drawOrder": 10,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "72",
+                    "visibleAtStart": false,
+                    "drawOrder": 8,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "76",
+                    "visibleAtStart": false,
+                    "drawOrder": 1,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "79",
+                    "visibleAtStart": false,
+                    "drawOrder": 12,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "75",
+                    "visibleAtStart": false,
+                    "drawOrder": 2,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "70",
+                    "visibleAtStart": false,
+                    "drawOrder": 9,
+                    "visibleForGroups": null,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "a41e12fb-69ba-7be3-5f4a-1326b34f9349",
+            "parent": "-1",
+            "name": "Fördjupningar",
+            "toggled": false,
+            "expanded": true,
+            "layers": [
+              {
+                "id": "43",
+                "visibleAtStart": false,
+                "drawOrder": 62,
+                "visibleForGroups": null,
+                "infobox": ""
+              }
+            ],
+            "groups": [
+              {
+                "id": "fb238afd-cb02-5e17-8a40-7b7c1d47b01a",
+                "parent": "a41e12fb-69ba-7be3-5f4a-1326b34f9349",
+                "name": "FÖP - Centrala Göteborg",
+                "toggled": true,
+                "expanded": false,
+                "layers": [],
+                "groups": []
+              },
+              {
+                "id": "eae93962-0639-2c6b-8970-2aecd1aa67b2",
+                "parent": "a41e12fb-69ba-7be3-5f4a-1326b34f9349",
+                "name": "FÖP - Frölunda Högsbo",
+                "toggled": true,
+                "expanded": false,
+                "layers": [],
+                "groups": [
+                  {
+                    "id": "87f82dc0-aa7f-1fcd-dba8-67affbe9b598",
+                    "parent": "eae93962-0639-2c6b-8970-2aecd1aa67b2",
+                    "name": "Inriktningar",
+                    "toggled": false,
+                    "expanded": false,
+                    "layers": [],
+                    "groups": []
+                  },
+                  {
+                    "id": "7f13f3a8-1e09-77e0-5c20-dc4dbc94dea4",
+                    "parent": "eae93962-0639-2c6b-8970-2aecd1aa67b2",
+                    "name": "Användning",
+                    "toggled": false,
+                    "expanded": false,
+                    "layers": [],
+                    "groups": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "active": true,
+        "visibleAtStart": false,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
+        "enableOSM": false,
+        "showBreadcrumbs": false,
+        "target": "control",
+        "position": "right",
+        "width": 0,
+        "height": 0,
+        "title": "Lagerhanterare",
+        "description": "",
+        "dropdownThemeMaps": false,
+        "themeMapHeaderCaption": "",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "print",
+      "options": {
+        "target": "toolbar",
+        "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
+        "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+        "instruction": "",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 2
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "title": "Information om lager",
+        "width": "",
+        "height": "",
+        "anchor": [0.5, 1],
+        "scale": 1,
+        "src": "assets/icons/marker.png",
+        "strokeColor": {
+          "r": 0,
+          "g": 118,
+          "b": 188,
+          "a": 0.7
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 0,
+          "g": 118,
+          "b": 188,
+          "a": 0.1
+        },
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "simple_layerswitcher",
+      "options": {
+        "target": "toolbar",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 1
+    },
+    {
+      "type": "documenthandler",
+      "options": {
+        "title": "Tryck inte här",
+        "target": "hidden",
+        "showScrollButtonLimit": 400,
+        "customThemeUrl": "/documentHandlerTheme.json",
+        "closePanelOnMapLinkOpen": true,
+        "documentOnStart": "start",
+        "drawerTitle": "Översiktsplan",
+        "drawerButtonTitle": "Meny",
+        "defaultDocumentColorSettings": {
+          "textAreaBackgroundColor": "#ccc",
+          "textAreaDividerColor": "#6A0DAD"
+        },
+        "tableOfContents": {
+          "expanded": false,
+          "active": true,
+          "chapterLevelsToShow": 2,
+          "title": ""
+        },
+        "dynamicImportUrls": {
+          "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
+          "openSans": "https://fonts.googleapis.com/css?family=Open+Sans"
+        },
+        "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
+        "width": 800,
+        "height": "90vh",
+        "searchImplemented": true,
+        "enablePrint": true,
+        "menuConfig": {
+          "menu": [
+            {
+              "title": "Markanvändningskarta",
+              "document": "",
+              "color": "#ffffff",
+              "description": "",
+              "icon": {
+                "materialUiIconName": "map",
+                "fontSize": "large"
+              },
+              "maplink": "?m=oversiktsplan&x=149000&y=6400000&z=1&l=1,28,7,33,24,29,10,11,12,31,47,26,19,13,32,27,52,49,38,5,15,36,35,21,42,46,45,37,48,6,17,16,20,8,14,44,39,41,43",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Om översiktsplanen",
+              "document": "start",
+              "color": "#0076bc",
+              "description": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": " ",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Utgångspunkter",
+              "document": "utgangspunkter",
+              "color": "#e0d0e7",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Utvecklingsinriktning",
+              "document": "",
+              "color": "#b7e1c8",
+              "description": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": [
+                {
+                  "title": "Geografiska inriktningar",
+                  "document": "geografiska_inriktningar",
+                  "color": "#bfe4f2",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            },
+            {
+              "title": "Tematiska inriktningar",
+              "document": "",
+              "color": "#fff2b0",
+              "expandedSubMenu": false,
+              "description": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": [
+                {
+                  "title": "Allmänna intressen",
+                  "document": "ti_allmanna_intressen",
+                  "color": "#fff2b0",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Gestaltad livsmiljö",
+                  "document": "ti_gestaltad_livsmiljo",
+                  "color": "#fff2b0",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Parker, natur och vatten",
+                  "document": "ti_parker_natur_och_vatten",
+                  "color": "#fff2b0",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Mobilitet och infrastruktur",
+                  "document": "ti_mobilitet_och_infrastruktur",
+                  "color": "#fff2b0",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Bostäder, samhällsservice och teknisk försörjning",
+                  "document": "ti_bostader_samhallsservice_och_teknisk_forsorjning",
+                  "color": "#fff2b0",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Näringsliv och handel",
+                  "document": "ti_naringsliv_och_handel",
+                  "color": "#fff2b0",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Hälsa och säkerhet",
+                  "document": "ti_halsa_och_sakerhet",
+                  "color": "#fff2b0",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Regionala och mellankommunala intressen",
+                  "document": "ti_regionala_och_mellankommunala_intressen",
+                  "color": "#fff2b0",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            },
+            {
+              "title": "Riksintressen",
+              "document": "ri",
+              "color": "#f8ccdc",
+              "description": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Hållbarhetsbedömning",
+              "document": "hallbarhetsbedomning",
+              "color": "#d1d9dc",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Samrådsredogörelse",
+              "document": "samradsredogorelse",
+              "color": "#faceb9",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Fördjupning Centrala Göteborg",
+              "document": "",
+              "color": "#3f5564",
+              "description": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": [
+                {
+                  "title": "Kartlager för fördjupning",
+                  "document": "",
+                  "color": "#3f5564",
+                  "description": "",
+                  "icon": {
+                    "materialUiIconName": "map",
+                    "fontSize": "large"
+                  },
+                  "maplink": "?m=oversiktsplan&x=147000&y=6399000&z=3&l=1,28,7,33,24,29,10,11,12,31,47,26,19,13,32,27,52,49,38,5,15,36,35,21,42,46,45,37,48,6,17,16,20,8,14,44,39,41,43",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Inledning",
+                  "document": "cg_inledning",
+                  "color": "#3f5564",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Utgångspunkter",
+                  "document": "cg_utgangspunkter",
+                  "color": "#3f5564",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Planerings-inriktningar",
+                  "document": "",
+                  "color": "#3f5564",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": [
+                    {
+                      "title": "Samanfattning",
+                      "document": "cg_pi_sammanfattning",
+                      "color": "#3f5564",
+                      "icon": {
+                        "materialUiIconName": "",
+                        "fontSize": "large"
+                      },
+                      "maplink": "",
+                      "link": "",
+                      "menu": []
+                    },
+                    {
+                      "title": "Utvecklingsstrategi för centrala Göteborg",
+                      "document": "cg_pi_utvecklingsstrategi",
+                      "color": "#3f5564",
+                      "icon": {
+                        "materialUiIconName": "",
+                        "fontSize": "large"
+                      },
+                      "maplink": "",
+                      "link": "",
+                      "menu": []
+                    },
+                    {
+                      "title": "Centrala Göteborg som gestaltad livsmiljö",
+                      "document": "cg_pi_gestaltad_livsmiljo",
+                      "color": "#3f5564",
+                      "icon": {
+                        "materialUiIconName": "",
+                        "fontSize": "large"
+                      },
+                      "maplink": "",
+                      "link": "",
+                      "menu": []
+                    },
+                    {
+                      "title": "Stadsrummen",
+                      "document": "cg_pi_stadsrummen",
+                      "color": "#3f5564",
+                      "icon": {
+                        "materialUiIconName": "",
+                        "fontSize": "large"
+                      },
+                      "maplink": "",
+                      "link": "",
+                      "menu": []
+                    },
+                    {
+                      "title": "Bebyggelsen",
+                      "document": "cg_pi_bebyggelsen",
+                      "color": "#3f5564",
+                      "icon": {
+                        "materialUiIconName": "",
+                        "fontSize": "large"
+                      },
+                      "maplink": "",
+                      "link": "",
+                      "menu": []
+                    },
+                    {
+                      "title": "Vatten och Klimat",
+                      "document": "cg_pi_vatten_klimat",
+                      "color": "#3f5564",
+                      "icon": {
+                        "materialUiIconName": "",
+                        "fontSize": "large"
+                      },
+                      "maplink": "",
+                      "link": "",
+                      "menu": []
+                    },
+                    {
+                      "title": "Hälsa, risker och säkerhet",
+                      "document": "cg_pi_halsa_risker_sakerhet",
+                      "color": "#3f5564",
+                      "icon": {
+                        "materialUiIconName": "",
+                        "fontSize": "large"
+                      },
+                      "maplink": "",
+                      "link": "",
+                      "menu": []
+                    },
+                    {
+                      "title": "Teknisk försörjning",
+                      "document": "cg_pi_teknisk_forsorjning",
+                      "color": "#3f5564",
+                      "icon": {
+                        "materialUiIconName": "",
+                        "fontSize": "large"
+                      },
+                      "maplink": "",
+                      "link": "",
+                      "menu": []
+                    }
+                  ]
+                },
+                {
+                  "title": "Områdesvisa inriktningar",
+                  "document": "cg_omradesvisa_inriktningar",
+                  "color": "#3f5564",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Genomförande",
+                  "document": "cg_genomforande",
+                  "color": "#3f5564",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Hållbarhetsbedömning",
+                  "document": "cg_hallbarhetsbedomning",
+                  "color": "#3f5564",
+                  "icon": {
+                    "materialUiIconName": "",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            },
+            {
+              "title": "Fördjupning Frölunda Högsbo",
+              "document": "frolunda_hogsbo",
+              "color": "#008767",
+              "description": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            }
+          ]
+        }
+      },
+      "index": 8
+    },
+    {
+      "type": "search",
+      "options": {
+        "anchor": [0.5, 1],
+        "scale": 1,
+        "src": "assets/icons/marker_red.png",
+        "strokeColor": {
+          "r": 244,
+          "g": 83,
+          "b": 63,
+          "a": 1
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 244,
+          "g": 83,
+          "b": 63,
+          "a": 0.2
+        },
+        "radiusSearch": true,
+        "tooltip": "Sök...",
+        "searchWithinButtonText": "Markera i kartan",
+        "maxFeatures": 100,
+        "delayBeforeAutoSearch": 500,
+        "selectedSources": [],
+        "layers": [
+          {
+            "id": "101",
+            "visibleForGroups": []
+          },
+          {
+            "id": "656",
+            "visibleForGroups": []
+          },
+          {
+            "id": "104",
+            "visibleForGroups": []
+          }
+        ],
+        "visibleForGroups": []
+      },
+      "index": 7
+    }
+  ],
+  "map": {
+    "target": "map",
+    "center": [136500, 6400000],
+    "title": "Arbetsmaterial!",
+    "projection": "EPSG:3007",
+    "zoom": 1,
+    "maxZoom": 6,
+    "minZoom": 0,
+    "resolutions": [
+      70.00022,
+      42.0,
+      28.00009,
+      14.00004,
+      7.000022,
+      2.800009,
+      1.400004
+    ],
+    "origin": [0.0, 0.0],
+    "extent": [105000.0, 6355000.0, 185000.0, 6435000.0],
+    "constrainOnlyCenter": true,
+    "constrainResolution": true,
+    "enableDownloadLink": false,
+    "logo": "/logo.png",
+    "geoserverLegendOptions": "",
+    "mapselector": false,
+    "mapcleaner": true,
+    "drawerVisible": true,
+    "drawerPermanent": true,
+    "colors": {
+      "primaryColor": "#0076bc",
+      "secondaryColor": "#ffffff"
+    },
+    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+    "crossOrigin": "anonymous",
+    "showCookieNotice": false
+  }
+}

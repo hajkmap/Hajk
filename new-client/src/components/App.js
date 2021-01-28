@@ -5,9 +5,9 @@ import { withStyles } from "@material-ui/core/styles";
 import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
-import { isMobile } from "./../utils/IsMobile.js";
+import { isMobile } from "../utils/IsMobile";
 
-import AppModel from "./../models/AppModel.js";
+import AppModel from "../models/AppModel.js";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
@@ -15,6 +15,8 @@ import Introduction from "./Introduction";
 import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
+
+import Search from "./Search/Search.js";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
@@ -43,6 +45,7 @@ import {
 import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import MapIcon from "@material-ui/icons/Map";
+import ThemeToggler from "../controls/ThemeToggler";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -98,7 +101,7 @@ const styles = (theme) => {
         marginTop: -theme.spacing(2),
         maxHeight: theme.spacing(6),
         boxShadow: theme.shadows[3],
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.paper,
       },
     },
     main: {
@@ -116,7 +119,6 @@ const styles = (theme) => {
     controlsColumn: {
       display: "flex",
       flexDirection: "column",
-      marginTop: theme.spacing(7),
       [theme.breakpoints.down("xs")]: {
         marginTop: theme.spacing(2),
       },
@@ -155,8 +157,11 @@ const styles = (theme) => {
     },
     drawerGrid: {
       padding: theme.spacing(0, 2),
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
       minHeight: theme.spacing(6),
+    },
+    drawerLiveContent: {
+      backgroundColor: theme.palette.background.default,
     },
     backdrop: {
       zIndex: theme.zIndex.drawer - 1, // Carefully selected to be above Window but below Drawer
@@ -209,25 +214,30 @@ class App extends React.PureComponent {
       mapClickDataResult: {},
 
       // Drawer-related states
-      // If cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-      // else fall back to value from config, or finally don't show Drawer.
+      //If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
+      //Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
+      //If there a no cookie settings, use the config drawVisible setting.
+      //Finally, don't show the drawer.
+
       drawerVisible:
-        drawerPermanentFromLocalStorage !== null
+        isMobile && props.config.mapConfig.map.drawerVisibleMobile !== undefined
+          ? props.config.mapConfig.map.drawerVisibleMobile
+          : drawerPermanentFromLocalStorage !== null
           ? drawerPermanentFromLocalStorage
           : props.config.mapConfig.map.drawerVisible || false,
 
-      // To check whether drawer is permanent, first take a look at the cookie.
+      // If on a mobile device, the drawer should never be permanent.
+      // If not on mobile, if cookie is not null, use it to show/hide Drawer.
       // If cookie is not null, use it to show/hide Drawer.
       // If cookie however is null, fall back to the values from config.
       // Finally, fall back to "false" if no cookie or config is found.
-      // The drawer should not be permanent on mobile devices.
-      drawerPermanent:
-        drawerPermanentFromLocalStorage !== null && !isMobile
-          ? drawerPermanentFromLocalStorage
-          : (props.config.mapConfig.map.drawerVisible &&
-              props.config.mapConfig.map.drawerPermanent &&
-              !isMobile) ||
-            false,
+      drawerPermanent: isMobile
+        ? false
+        : drawerPermanentFromLocalStorage !== null
+        ? drawerPermanentFromLocalStorage
+        : (props.config.mapConfig.map.drawerVisible &&
+            props.config.mapConfig.map.drawerPermanent) ||
+          false,
 
       //First check the cookie for activeDrawerContent
       //If cookie is not null, use it set the drawer content.
@@ -248,6 +258,7 @@ class App extends React.PureComponent {
   componentDidMount() {
     var promises = this.appModel
       .createMap()
+      .addSearchModel()
       .addLayers()
       .loadPlugins(this.props.activeTools);
     Promise.all(promises).then(() => {
@@ -263,6 +274,7 @@ class App extends React.PureComponent {
               value: "plugins",
               ButtonIcon: MapIcon,
               caption: "Kartverktyg",
+              drawerTitle: "Kartverktyg",
               order: 0,
               renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
@@ -280,7 +292,7 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
-    this.globalObserver.subscribe("core.mapClick", (results) => {
+    this.globalObserver.subscribe("infoClick.mapClick", (results) => {
       this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: results,
@@ -365,7 +377,7 @@ class App extends React.PureComponent {
     //     });
     //   });
 
-    // TODO: More plugins could use this - currently only SNap helper registers though
+    // TODO: More plugins could use this - currently only Snap helper registers though
     this.appModel
       .getMap()
       .getLayers()
@@ -471,16 +483,19 @@ class App extends React.PureComponent {
     this.setState({ drawerMouseOverLock: false });
   };
 
-  renderSearchPlugin() {
-    const searchPlugin = this.appModel.plugins.search;
-    // Renders the configured search plugin (if one is configured)
-    return searchPlugin ? (
-      <searchPlugin.component
-        map={searchPlugin.map}
-        app={searchPlugin.app}
-        options={searchPlugin.options}
-      />
-    ) : null;
+  renderSearchComponent() {
+    // FIXME: We should get config from somewhere else now when Search is part of Core
+    if (this.appModel.plugins.search) {
+      return (
+        <Search
+          map={this.appModel.getMap()}
+          app={this}
+          options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
+        />
+      );
+    } else {
+      return null;
+    }
   }
 
   renderInformationPlugin() {
@@ -500,9 +515,9 @@ class App extends React.PureComponent {
 
   renderDrawerHeader = () => {
     const { classes, config } = this.props;
-    const caption = this.state.drawerButtons.find(
+    const drawerTitle = this.state.drawerButtons.find(
       (db) => db.value === this.state.activeDrawerContent
-    )?.caption;
+    )?.drawerTitle;
 
     return (
       <>
@@ -523,7 +538,7 @@ class App extends React.PureComponent {
           alignItems="center"
         >
           <Grid item>
-            <Typography variant="button">{caption}</Typography>
+            <Typography variant="button">{drawerTitle}</Typography>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>
@@ -663,7 +678,7 @@ class App extends React.PureComponent {
                   }
                 />
               )}
-              {this.renderSearchPlugin()}
+              {clean === false && this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div
@@ -694,6 +709,14 @@ class App extends React.PureComponent {
                 {clean === false && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
+                {clean === false && (
+                  <ThemeToggler
+                    showThemeToggler={
+                      this.appModel.config.mapConfig.map.showThemeToggler
+                    }
+                    toggleMUITheme={this.props.toggleMUITheme}
+                  />
+                )}
                 {clean === false && this.renderInformationPlugin()}
                 {clean === true && (
                   <MapResetter

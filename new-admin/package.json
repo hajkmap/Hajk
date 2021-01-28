@@ -6,10 +6,13 @@
   "dependencies": {
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.57",
+    "antd": "^4.1.4",
     "backbone": "^1.4.0",
     "draft-js": "^0.11.7",
     "draft-js-export-html": "^1.4.1",
     "draft-js-import-html": "^1.4.1",
+    "draft-js-plugins-editor": "^3.0.0",
     "jquery": "^3.5.1",
     "jquery-sortable": "^0.9.13",
     "ol": "^5.3.3",
@@ -37,10 +40,12 @@
     "pretty-quick": "^1.11.1"
   },
   "browserslist": [
-    ">1% in SE",
+    ">0.5% in SE",
+    "last 2 versions",
+    "Firefox ESR",
     "not dead",
-    "not ie <= 10",
-    "not op_mini all"
+    "ie 11",
+    "last 100 edge versions"
   ],
   "husky": {
     "hooks": {

@@ -41,9 +41,10 @@ import Measure from "./tools/measure.jsx";
 import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
+import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 
 var defaultState = {
-  activeTool: ""
+  activeTool: "",
 };
 
 class ToolOptions extends Component {
@@ -72,11 +73,11 @@ class ToolOptions extends Component {
   onUrlMapConfigChanged() {
     const t = this.state.activeTool;
     this.setState({
-      activeTool: ""
+      activeTool: "",
     });
     setTimeout(() => {
       this.setState({
-        activeTool: t
+        activeTool: t,
       });
     }, 20);
   }
@@ -121,6 +122,8 @@ class ToolOptions extends Component {
         return <Routing parent={this} model={this.props.model} />;
       case "collector":
         return <Collector parent={this} model={this.props.model} />;
+      case "documenthandler":
+        return <MenuEditor parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -128,14 +131,14 @@ class ToolOptions extends Component {
 
   toggleTool(tool) {
     this.setState({
-      activeTool: tool
+      activeTool: tool,
     });
   }
 
   getIndexForTool(tool) {
     var found = false;
     if (Array.isArray(this.props.model.get("toolConfig"))) {
-      found = this.props.model.get("toolConfig").filter(t => t.type === tool);
+      found = this.props.model.get("toolConfig").filter((t) => t.type === tool);
     }
 
     if (found[0]) {
@@ -149,8 +152,8 @@ class ToolOptions extends Component {
     var found = false;
     if (Array.isArray(this.props.model.get("toolConfig"))) {
       found =
-        this.props.model.get("toolConfig").filter(t => t.type === tool).length >
-        0;
+        this.props.model.get("toolConfig").filter((t) => t.type === tool)
+          .length > 0;
     }
     return found ? "fa fa-check-square-o" : "fa fa-square-o";
   }
@@ -181,7 +184,8 @@ class ToolOptions extends Component {
       location: "Visa min position",
       routing: "Navigation",
       collector: "Tyck till",
-      dummy: "Dummy plugin"
+      dummy: "Dummy plugin",
+      documenthandler: "Dokumenthanterare 2.0",
     };
 
     return (
