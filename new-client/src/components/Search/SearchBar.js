@@ -213,6 +213,14 @@ class SearchBar extends React.PureComponent {
       : options.searchBarPlaceholder ?? "Sök...";
   };
 
+  // Must handle if user has typed % on their own...
+  decodeURIComponentSafe = (string) => {
+    if (!string) {
+      return string;
+    }
+    return decodeURIComponent(string.replace(/%(?![0-9][0-9a-fA-F]+)/g, "%25"));
+  };
+
   renderSearchResultList = () => {
     const {
       searchResults,
@@ -267,7 +275,7 @@ class SearchBar extends React.PureComponent {
           searchActive === "draw"
         }
         autoComplete
-        value={decodeURIComponent(searchString)}
+        value={this.decodeURIComponentSafe(searchString)}
         selectOnFocus
         open={autoCompleteOpen}
         disableClearable
