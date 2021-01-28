@@ -50,7 +50,7 @@ export default async function (req, res, next) {
       user,
       adminGroup
     );
-    res.statusStatus(403);
+    res.sendStatus(403);
     // Here we aren't calling next() so no following middlewares will run
   }
 }
