@@ -104,6 +104,7 @@ export default class MapViewModel {
 
     this.localObserver.subscribe("vtsearch-result-done", (result) => {
       this.clearDrawLayer();
+      this.map.on("singleclick", this.onFeaturesClickedInMap);
     });
   };
 
@@ -138,6 +139,7 @@ export default class MapViewModel {
   };
   deactivateSearch = () => {
     this.map.removeInteraction(this.draw);
+    this.map.un("singleclick", this.onFeaturesClickedInMap);
   };
 
   getWktFromUser = (value, geometryFunction) => {
