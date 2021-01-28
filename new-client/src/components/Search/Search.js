@@ -11,6 +11,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
 import KmlExport from "./utils/KmlExport";
 import XLSXExport from "./utils/XLSXExport";
+import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
 
 const styles = () => ({
   inputRoot: {
@@ -497,11 +498,11 @@ class Search extends React.PureComponent {
     feature.searchFieldOrder.map((sf, index) => {
       if (index === feature.searchFieldOrder.length - 1) {
         return (autocompleteEntry = autocompleteEntry.concat(
-          encodeURIComponent(feature.properties[sf])
+          encodeCommas(feature.properties[sf])
         ));
       } else {
         return (autocompleteEntry = autocompleteEntry.concat(
-          `${encodeURIComponent(feature.properties[sf])}, `
+          `${encodeCommas(feature.properties[sf])}, `
         ));
       }
     });
@@ -551,8 +552,8 @@ class Search extends React.PureComponent {
 
   sortAutocompleteList = (flatAutocompleteArray) => {
     return flatAutocompleteArray.sort((a, b) =>
-      decodeURIComponent(a.autocompleteEntry).localeCompare(
-        decodeURIComponent(b.autocompleteEntry),
+      decodeCommas(a.autocompleteEntry).localeCompare(
+        decodeCommas(b.autocompleteEntry),
         "sv"
       )
     );

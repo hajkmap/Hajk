@@ -14,6 +14,7 @@ import WarningIcon from "@material-ui/icons/Warning";
 import SearchResultsContainer from "./searchResults/SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
+import { decodeCommas } from "../../utils/StringCommaCoder";
 import {
   CircularProgress,
   IconButton,
@@ -213,14 +214,6 @@ class SearchBar extends React.PureComponent {
       : options.searchBarPlaceholder ?? "Sök...";
   };
 
-  // Must handle if user has typed % on their own...
-  decodeURIComponentSafe = (string) => {
-    if (!string) {
-      return string;
-    }
-    return decodeURIComponent(string.replace(/%(?![0-9][0-9a-fA-F]+)/g, "%25"));
-  };
-
   renderSearchResultList = () => {
     const {
       searchResults,
@@ -275,7 +268,7 @@ class SearchBar extends React.PureComponent {
           searchActive === "draw"
         }
         autoComplete
-        value={this.decodeURIComponentSafe(searchString)}
+        value={decodeCommas(searchString)}
         selectOnFocus
         open={autoCompleteOpen}
         disableClearable
@@ -295,7 +288,7 @@ class SearchBar extends React.PureComponent {
                   <Grid item xs={12}>
                     {this.getHighlightedACE(
                       searchString,
-                      decodeURIComponent(option.autocompleteEntry)
+                      decodeCommas(option.autocompleteEntry)
                     )}
                   </Grid>
                   <Grid item xs={12}>
@@ -308,7 +301,7 @@ class SearchBar extends React.PureComponent {
         }}
         getOptionLabel={(option) => {
           return option?.autocompleteEntry?.length > 0
-            ? decodeURIComponent(option?.autocompleteEntry)
+            ? decodeCommas(option?.autocompleteEntry)
             : option;
         }}
         options={autocompleteList}
