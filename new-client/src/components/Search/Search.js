@@ -10,6 +10,8 @@ import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MapViewModel from "./MapViewModel";
 import KmlExport from "./utils/KmlExport";
+import XLSXExport from "./utils/XLSXExport";
+import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
 
 const styles = () => ({
   inputRoot: {
@@ -32,7 +34,7 @@ class Search extends React.PureComponent {
       wildcardAtStart: false,
       wildcardAtEnd: true,
       matchCase: false,
-      activeSpatialFilter: "within",
+      activeSpatialFilter: "intersects",
       maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
         ? this.props.options.maxResultsPerDataset
         : 100,
@@ -61,7 +63,7 @@ class Search extends React.PureComponent {
       name: "Sök med polygon",
       icon: <EditIcon />,
       type: "Polygon",
-      disabled: this.props.options.polygonSearchDisabled ?? false,
+      enabled: this.props.options.enablePolygonSearch ?? true,
       toolTipTitle:
         "Genomför en sökning i ett område genom att rita en polygon.",
       onClickEventName: "search.spatialSearchActivated",
@@ -70,15 +72,15 @@ class Search extends React.PureComponent {
       name: "Sök med radie",
       icon: <RadioButtonUncheckedIcon />,
       type: "Circle",
-      disabled: this.props.options.radiusSearchDisabled ?? false,
+      enabled: this.props.options.enableRadiusSearch ?? true,
       toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök med yta",
+      name: "Sök med objekt",
       icon: <TouchAppIcon />,
       type: "Select",
-      disabled: this.props.options.selectSearchDisabled ?? false,
+      enabled: this.props.options.enableSelectSearch ?? true,
       toolTipTitle:
         "Genomför en sökning genom att välja en eller flera områden i kartan.",
       onClickEventName: "search.spatialSearchActivated",
@@ -87,7 +89,7 @@ class Search extends React.PureComponent {
       name: "Sök i området",
       icon: <Crop54Icon />,
       type: "Extent",
-      disabled: this.props.options.extentSearchDisabled ?? false,
+      enabled: this.props.options.enableExtentSearch ?? true,
       toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
       onClickEventName: "search.spatialSearchActivated",
     },
@@ -128,6 +130,10 @@ class Search extends React.PureComponent {
       localObserver: this.localObserver,
       map: this.map,
     });
+    this.XLSXExport = new XLSXExport({
+      options: this.props.options,
+      localObserver: this.localObserver,
+    });
   };
 
   resetFeaturesToFilter = () => {
@@ -139,16 +145,6 @@ class Search extends React.PureComponent {
   };
 
   bindSubscriptions = () => {
-    this.localObserver.subscribe("on-draw-end", (feature) => {
-      this.props.closeSnackbar(this.snackbarKey);
-      this.setFeaturesToFilter([feature]);
-      this.doSearch();
-    });
-    this.localObserver.subscribe("search-with-features", (features) => {
-      this.props.closeSnackbar(this.snackbarKey);
-      this.setFeaturesToFilter(features);
-      this.doSearch();
-    });
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
@@ -169,6 +165,9 @@ class Search extends React.PureComponent {
       }
       this.setState({ searchActive: "draw" });
     });
+    this.localObserver.subscribe("on-draw-end", (feature) => {
+      this.doFeaturesSearch([feature]);
+    });
     this.localObserver.subscribe("on-select-search-start", () => {
       this.snackbarKey = this.props.enqueueSnackbar(
         "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
@@ -178,7 +177,14 @@ class Search extends React.PureComponent {
         }
       );
 
-      this.setState({ searchActive: "draw" });
+      this.setState({ searchActive: "selectSearch" });
+    });
+    this.localObserver.subscribe("on-search-selection-done", (features) => {
+      this.doFeaturesSearch(features);
+    });
+    this.localObserver.subscribe("search-within-extent", (features) => {
+      this.setState({ searchActive: "extentSearch" });
+      this.doFeaturesSearch(features);
     });
     this.localObserver.subscribe("minimizeSearchResultList", () => {
       this.setState({ resultPanelCollapsed: false });
@@ -192,6 +198,12 @@ class Search extends React.PureComponent {
         }
       );
     });
+  };
+
+  doFeaturesSearch = (features) => {
+    this.props.closeSnackbar(this.snackbarKey);
+    this.setFeaturesToFilter(features);
+    this.doSearch();
   };
 
   getPluginsConfToUseSearchInterface = () => {
@@ -336,6 +348,7 @@ class Search extends React.PureComponent {
       searchResults: { featureCollections: [], errors: [] },
       failedWFSFetchMessage: "",
       resultPanelCollapsed: false,
+      loading: false,
     });
     this.resetFeaturesToFilter();
     this.localObserver.publish("clearMapView");
@@ -429,6 +442,7 @@ class Search extends React.PureComponent {
     fetchSettings = {
       ...fetchSettings,
       getPossibleCombinations: true,
+      initiator: "autocomplete",
     };
     return fetchSettings;
   };
@@ -491,11 +505,11 @@ class Search extends React.PureComponent {
     feature.searchFieldOrder.map((sf, index) => {
       if (index === feature.searchFieldOrder.length - 1) {
         return (autocompleteEntry = autocompleteEntry.concat(
-          encodeURIComponent(feature.properties[sf])
+          encodeCommas(feature.properties[sf])
         ));
       } else {
         return (autocompleteEntry = autocompleteEntry.concat(
-          `${encodeURIComponent(feature.properties[sf])}, `
+          `${encodeCommas(feature.properties[sf])}, `
         ));
       }
     });
@@ -545,8 +559,8 @@ class Search extends React.PureComponent {
 
   sortAutocompleteList = (flatAutocompleteArray) => {
     return flatAutocompleteArray.sort((a, b) =>
-      decodeURIComponent(a.autocompleteEntry).localeCompare(
-        decodeURIComponent(b.autocompleteEntry),
+      decodeCommas(a.autocompleteEntry).localeCompare(
+        decodeCommas(b.autocompleteEntry),
         "sv"
       )
     );
@@ -726,7 +740,10 @@ class Search extends React.PureComponent {
   };
 
   getSearchResultsFetchSettings = () => {
-    return this.getUserCustomFetchSettings(this.searchModel.getSearchOptions());
+    return {
+      ...this.getUserCustomFetchSettings(this.searchModel.getSearchOptions()),
+      initiator: "search",
+    };
   };
 
   removeCollectionsWithoutFeatures = (results) => {

@@ -6,6 +6,18 @@ import log4js from "log4js";
 const ael = log4js.getLogger("adminEvent");
 
 export class Controller {
+  availableADGroups(req, res) {
+    ActiveDirectoryService.getAvailableADGroups().then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
+
+  findCommonADGroupsForUsers(req, res) {
+    ActiveDirectoryService.findCommonADGroupsForUsers(
+      req.query.users
+    ).then((data) => handleStandardResponse(res, data));
+  }
+
   getStore(req, res) {
     // Extract the store name from request's path
     const store = req.route.path.substring(1);

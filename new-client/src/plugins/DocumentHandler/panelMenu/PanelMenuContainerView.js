@@ -1,5 +1,6 @@
 import React from "react";
 import PanelList from "./PanelList";
+import { isMobile } from "../../../utils/IsMobile";
 
 class PanelMenuView extends React.PureComponent {
   state = {
@@ -110,6 +111,13 @@ class PanelMenuView extends React.PureComponent {
     });
 
     localObserver.subscribe("maplink-clicked", (item) => {
+      if (!isMobile && this.props.options.closePanelOnMapLinkOpen) {
+        localObserver.publish("set-active-document", {
+          documentName: null,
+          headerIdentifier: null,
+        });
+        this.props.app.globalObserver.publish("documentviewer.closeWindow");
+      }
       localObserver.publish("fly-to", item.maplink);
     });
   };

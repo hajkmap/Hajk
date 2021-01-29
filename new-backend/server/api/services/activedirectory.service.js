@@ -503,20 +503,20 @@ class ActiveDirectoryService {
 
   _getGroupMembershipForUser(userPrincipalName) {
     return new Promise((resolve, reject) => {
-      this._ad.getGroupMembershipForUser(userPrincipalName, function (
-        err,
-        groups
-      ) {
-        if (err) {
-          return reject(err);
-        }
+      this._ad.getGroupMembershipForUser(
+        userPrincipalName,
+        function (err, groups) {
+          if (err) {
+            return reject(err);
+          }
 
-        if (!groups)
-          reject(
-            new ActiveDirectoryError(`User ${userPrincipalName} not found.`)
-          );
-        else resolve(groups);
-      });
+          if (!groups)
+            reject(
+              new ActiveDirectoryError(`User ${userPrincipalName} not found.`)
+            );
+          else resolve(groups);
+        }
+      );
     });
   }
 

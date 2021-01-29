@@ -72,7 +72,9 @@ class MapOptions extends Component {
         enableDownloadLink: config.enableDownloadLink,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
+        showThemeToggler: config.showThemeToggler,
         drawerVisible: config.drawerVisible,
+        drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
         title: config.title ? config.title : "",
         geoserverLegendOptions: config.geoserverLegendOptions
@@ -124,8 +126,13 @@ class MapOptions extends Component {
       enableDownloadLink: mapConfig.enableDownloadLink,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
+      showThemeToggler: mapConfig.showThemeToggler,
       drawerVisible: mapConfig.drawerVisible,
+      drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
+      activeDrawerOnStart: mapConfig.activeDrawerOnStart
+        ? mapConfig.activeDrawerOnStart
+        : "plugins",
       geoserverLegendOptions: mapConfig.geoserverLegendOptions,
       defaultCookieNoticeMessage: mapConfig.defaultCookieNoticeMessage
         ? mapConfig.defaultCookieNoticeMessage
@@ -260,7 +267,9 @@ class MapOptions extends Component {
       case "enableDownloadLink":
       case "mapselector":
       case "mapcleaner":
+      case "showThemeToggler":
       case "drawerVisible":
+      case "drawVisibleMobile":
       case "drawerPermanent":
         if (value !== true && value !== false) {
           valid = false;
@@ -306,8 +315,11 @@ class MapOptions extends Component {
         config.enableDownloadLink = this.getValue("enableDownloadLink");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
+        config.showThemeToggler = this.getValue("showThemeToggler");
         config.drawerVisible = this.getValue("drawerVisible");
+        config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
+        config.activeDrawerOnStart = this.getValue("activeDrawerOnStart");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
         config.defaultCookieNoticeMessage = this.getValue(
           "defaultCookieNoticeMessage"
@@ -814,6 +826,26 @@ class MapOptions extends Component {
                 />
               </label>
             </div>
+            <div>
+              <input
+                id="input_showThemeToggler"
+                type="checkbox"
+                ref="input_showThemeToggler"
+                onChange={(e) => {
+                  this.setState({ showThemeToggler: e.target.checked });
+                }}
+                checked={this.state.showThemeToggler}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_showThemeToggler">
+                Visa knapp för att byta mellan ljust och mörkt tema{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer en knapp som möjliggör temaväxling att visas"
+                />
+              </label>
+            </div>
             <div className="separator">Inställningar för sidopanel</div>
             <div>
               <input
@@ -843,6 +875,26 @@ class MapOptions extends Component {
             </div>
             <div>
               <input
+                id="input_drawerVisibleMobile"
+                type="checkbox"
+                ref="input_drawerVisibleMobile"
+                onChange={(e) => {
+                  this.setState({ drawerVisibleMobile: e.target.checked });
+                }}
+                checked={this.state.drawerVisibleMobile}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_drawerVisibleMobile">
+                Starta med sidopanelen synlig i mobilläge{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer sidopanelen att vara öppen - men inte låst -  vid skärmens kant vid start"
+                />
+              </label>
+            </div>
+            <div>
+              <input
                 id="input_drawerPermanent"
                 type="checkbox"
                 ref="input_drawerPermanent"
@@ -861,6 +913,27 @@ class MapOptions extends Component {
                   title="Om aktiv kommer sidopanelen att vara låst vid skärmens kant vid start (gäller ej mobila enheter)"
                 />
               </label>
+            </div>
+            <div>
+              <label>
+                Aktiv drawer innehåll{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styra drawer innehåll som ska vara aktiv vid start. Gäller om flera verktyg som aktiveras via drawer knapp användas."
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_activeDrawerOnStart"
+                value={this.state.activeDrawerOnStart}
+                className={this.getValidationClass("activeDrawerOnStart")}
+                onChange={(e) => {
+                  this.setState({ activeDrawerOnStart: e.target.value }, () =>
+                    this.validateField("activeDrawerOnStart")
+                  );
+                }}
+              />
             </div>
             <div className="separator">Färginställningar för kartan</div>
             <div>

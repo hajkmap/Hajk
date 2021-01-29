@@ -14,7 +14,6 @@ class MapViewModel {
     this.map = settings.map;
     this.app = settings.app;
     this.options = settings.options;
-    this.defaultStyle = this.getDefaultStyle();
     this.drawStyleSettings = this.getDrawStyleSettings();
     this.featureStyle = new FeatureStyle(settings.options);
     this.localObserver = settings.localObserver;
@@ -24,27 +23,9 @@ class MapViewModel {
 
   ctrlKeyPressed = false;
 
-  getDefaultStyle = () => {
-    const fill = new Fill({
-      color: "rgba(255,255,255,0.4)",
-    });
-    const stroke = new Stroke({
-      color: "#3399CC",
-      width: 1.25,
-    });
-
-    return [
-      new Style({
-        image: new Circle({
-          fill: fill,
-          stroke: stroke,
-          radius: 5,
-        }),
-        fill: fill,
-        stroke: stroke,
-      }),
-    ];
-  };
+  // An object holding the last highlightInformation.
+  // We use this to restore highlight after filter changes.
+  lastFeaturesInfo = [];
 
   getDrawStyleSettings = () => {
     const strokeColor =
@@ -67,9 +48,10 @@ class MapViewModel {
 
   initMapLayers = () => {
     this.resultSource = this.getNewVectorSource();
+    const defaultStyle = this.featureStyle.getDefaultSearchResultStyle();
     this.resultsLayer = this.getNewVectorLayer(
       this.resultSource,
-      this.options.showInMapOnSearchResult ? this.defaultStyle : null
+      this.options.showResultFeaturesInMap ?? true ? defaultStyle : null
     );
     this.resultsLayer.set("type", "searchResultLayer");
     this.drawSource = this.getNewVectorSource();
@@ -84,27 +66,25 @@ class MapViewModel {
   bindSubscriptions = () => {
     // Local subscriptions
     this.localObserver.subscribe("clearMapView", this.clearMap);
-    this.localObserver.subscribe(
-      "map.zoomToFeaturesByIds",
-      this.zoomToFeatureIds
-    );
+    this.localObserver.subscribe("map.zoomToFeatures", this.zoomToFeatures);
     this.localObserver.subscribe(
       "map.addFeaturesToResultsLayer",
       this.addFeaturesToResultsLayer
     );
-    this.localObserver.subscribe(
-      "map.highlightFeaturesByIds",
-      this.highlightFeaturesInMap
-    );
+    this.localObserver.subscribe("map.setSelectedStyle", this.setSelectedStyle);
     this.localObserver.subscribe(
       "map.addAndHighlightFeatureInSearchResultLayer",
       this.addAndHighlightFeatureInSearchResultLayer
     );
     this.localObserver.subscribe(
-      "map.resetStyleForFeaturesInResultSource",
-      this.resetStyleForFeaturesInResultSource
+      "map.updateFeaturesAfterFilterChange",
+      this.updateFeaturesAfterFilterChange
     );
-
+    this.localObserver.subscribe(
+      "map.setHighLightedStyle",
+      this.setHighLightedStyle
+    );
+    this.localObserver.subscribe("map.zoomToFeature", this.zoomToFeature);
     // Global subscriptions
     this.app.globalObserver.subscribe(
       "search.spatialSearchActivated",
@@ -118,6 +98,22 @@ class MapViewModel {
         }
       }
     );
+  };
+
+  updateFeaturesAfterFilterChange = (featureInfo) => {
+    const { features, featureIds } = featureInfo;
+    this.resultSource.forEachFeature((feature) => {
+      if (featureIds.indexOf(feature.getId()) === -1) {
+        this.resultSource.removeFeature(feature);
+      }
+    });
+    features.forEach((feature) => {
+      if (!this.resultSource.getFeatureById(feature.id)) {
+        this.resultSource.addFeature(new GeoJSON().readFeature(feature));
+      }
+    });
+    this.setSelectedStyle(this.lastFeaturesInfo);
+    this.zoomToFeatures(this.lastFeaturesInfo);
   };
 
   fitMapToSearchResult = () => {
@@ -143,7 +139,7 @@ class MapViewModel {
       })
     );
 
-    if (this.options.showInMapOnSearchResult) {
+    if (this.options.showResultFeaturesInMap) {
       this.fitMapToSearchResult();
     }
   };
@@ -175,16 +171,47 @@ class MapViewModel {
     });
   };
 
-  highlightFeaturesInMap = (featuresInfo) => {
+  setHighLightedStyle = (feature) => {
+    if (!feature) {
+      return;
+    }
+    const mapFeature = this.getFeatureFromResultSourceById(feature.id);
+    return mapFeature?.setStyle(
+      this.featureStyle.getFeatureStyle(
+        mapFeature,
+        feature.featureTitle,
+        [],
+        "highlight"
+      )
+    );
+  };
+
+  zoomToFeature = (feature) => {
+    if (!feature) {
+      return;
+    }
+    const extent = createEmpty();
+    const mapFeature = this.getFeatureFromResultSourceById(feature.id);
+    extend(extent, mapFeature?.getGeometry().getExtent());
+    const extentToZoomTo = isEmpty(extent)
+      ? this.resultSource.getExtent()
+      : extent;
+    this.fitMapToExtent(extentToZoomTo);
+  };
+
+  setSelectedStyle = (featuresInfo) => {
+    this.lastFeaturesInfo = featuresInfo;
     this.resetStyleForFeaturesInResultSource();
     featuresInfo.map((featureInfo) => {
       const feature = this.getFeatureFromResultSourceById(
-        featureInfo.featureId
+        featureInfo.feature.id
       );
-      return feature.setStyle(
-        this.featureStyle.getHighlightedStyle(
+      return feature?.setStyle(
+        this.featureStyle.getFeatureStyle(
           feature,
-          featureInfo.displayFields
+          featureInfo.featureTitle,
+          [],
+          "selection"
         )
       );
     });
@@ -193,7 +220,12 @@ class MapViewModel {
   addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
     const feature = new GeoJSON().readFeature(featureInfo.feature);
     feature.setStyle(
-      this.featureStyle.getHighlightedStyle(feature, featureInfo.displayFields)
+      this.featureStyle.getFeatureStyle(
+        feature,
+        featureInfo.featureTitle,
+        [],
+        "highlight"
+      )
     );
     this.resultSource.addFeature(feature);
     this.fitMapToSearchResult();
@@ -203,18 +235,23 @@ class MapViewModel {
     return this.resultSource.getFeatureById(fid);
   };
 
-  zoomToFeatureIds = (featuresInfo) => {
+  zoomToFeatures = (featuresInfo) => {
     let extent = createEmpty();
 
     //BoundingExtent-function gave wrong coordinates for some
-    featuresInfo.forEach((featureInfo) =>
-      extend(
-        extent,
-        this.getFeatureFromResultSourceById(featureInfo.featureId)
-          .getGeometry()
-          .getExtent()
-      )
-    );
+    featuresInfo.forEach((featureInfo) => {
+      const feature = this.getFeatureFromResultSourceById(
+        featureInfo.feature.id
+      );
+      if (feature) {
+        extend(
+          extent,
+          this.getFeatureFromResultSourceById(featureInfo.feature.id)
+            .getGeometry()
+            .getExtent()
+        );
+      }
+    });
     const extentToZoomTo = isEmpty(extent)
       ? this.resultSource.getExtent()
       : extent;
@@ -231,6 +268,7 @@ class MapViewModel {
     }
     this.removeDrawInteraction();
     this.removeSelectListeners();
+    this.lastFeaturesInfo = [];
   };
 
   removeDrawInteraction = () => {
@@ -253,18 +291,19 @@ class MapViewModel {
       this.map.clickLock.add("search");
       this.map.addInteraction(this.draw);
       this.drawSource.clear();
-
-      this.drawSource.on("addfeature", (e) => {
-        this.map.removeInteraction(this.draw);
-        this.map.clickLock.delete("search");
-        this.localObserver.publish("on-draw-end", e.feature);
-      });
+      this.drawSource.on("addfeature", this.handleDrawFeatureAdded);
     } else {
       this.map.removeInteraction(this.draw);
       this.map.clickLock.delete("search");
 
       this.drawSource.clear();
     }
+  };
+
+  handleDrawFeatureAdded = (e) => {
+    this.map.removeInteraction(this.draw);
+    this.map.clickLock.delete("search");
+    this.localObserver.publish("on-draw-end", e.feature);
   };
 
   searchInCurrentExtent = () => {
@@ -277,7 +316,8 @@ class MapViewModel {
         throw new Error("Current extent could not be calculated correctly.");
       }
       const feature = new Feature(fromExtent(currentExtent));
-      this.localObserver.publish("search-with-features", [feature]);
+      this.drawSource.addFeature(feature);
+      this.localObserver.publish("search-within-extent", [feature]);
     } catch (error) {
       this.handleSearchInCurrentExtentError(error);
     }
@@ -293,6 +333,7 @@ class MapViewModel {
   };
 
   enableSelectFeaturesSearch = () => {
+    this.drawSource.un("addfeature", this.handleDrawFeatureAdded);
     this.ctrlKeyPressed = false;
     this.localObserver.publish("on-select-search-start");
     this.addSelectListeners();
@@ -321,7 +362,7 @@ class MapViewModel {
       this.drawSource.addFeatures(response.features);
       if (!this.ctrlKeyPressed) {
         const allFeatures = this.drawSource.getFeatures();
-        this.localObserver.publish("search-with-features", allFeatures);
+        this.localObserver.publish("on-search-selection-done", allFeatures);
         this.removeSelectListeners();
       }
     });
@@ -340,7 +381,7 @@ class MapViewModel {
       this.ctrlKeyPressed = false;
       if (this.drawSourceHasFeatures()) {
         const features = this.drawSource.getFeatures();
-        this.localObserver.publish("search-with-features", features);
+        this.localObserver.publish("on-search-selection-done", features);
         this.removeSelectListeners();
       }
     }

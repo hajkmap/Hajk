@@ -352,8 +352,7 @@ class Journeys extends React.PureComponent {
         isPolygonActive: false,
       },
       () => {
-        if (this.state.isRectangleActive && this.state.spatialToolsEnabled)
-          this.activateSearch("Box");
+        if (this.state.isRectangleActive) this.activateSearch("Box");
       }
     );
   };

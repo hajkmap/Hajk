@@ -23,19 +23,21 @@ const ThemeToggler = React.memo((props) => {
   const classes = useStyles();
 
   return (
-    <Tooltip title="Växla mellan mörkt och ljust färgtema">
-      <Paper className={classes.paper}>
-        <Button
-          aria-label="Växla färgtema"
-          className={classes.button}
-          onClick={(e) => {
-            props.toggleMUITheme();
-          }}
-        >
-          <Brightness4Icon />
-        </Button>
-      </Paper>
-    </Tooltip>
+    props.showThemeToggler && (
+      <Tooltip title="Växla mellan mörkt och ljust färgtema">
+        <Paper className={classes.paper}>
+          <Button
+            aria-label="Växla färgtema"
+            className={classes.button}
+            onClick={(e) => {
+              props.toggleMUITheme();
+            }}
+          >
+            <Brightness4Icon />
+          </Button>
+        </Paper>
+      </Tooltip>
+    )
   );
 });
 

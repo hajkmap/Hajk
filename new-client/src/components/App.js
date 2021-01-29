@@ -717,7 +717,12 @@ class App extends React.PureComponent {
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
                 {clean === false && (
-                  <ThemeToggler toggleMUITheme={this.props.toggleMUITheme} />
+                  <ThemeToggler
+                    showThemeToggler={
+                      this.appModel.config.mapConfig.map.showThemeToggler
+                    }
+                    toggleMUITheme={this.props.toggleMUITheme}
+                  />
                 )}
                 {clean === false && this.renderInformationPlugin()}
                 {clean === true && (

@@ -562,7 +562,7 @@ namespace MapService.Controllers
             foreach (string file in files)
             {
                 string fileName = String.Empty;
-                if (Path.GetExtension(file).ToLower() == ".png" || Path.GetExtension(file).ToLower() == ".jpg")
+                if (Path.GetExtension(file).ToLower() == ".png" || Path.GetExtension(file).ToLower() == ".jpg" || Path.GetExtension(file).ToLower() == ".jpeg")
                 {
                     fileName = Path.GetFileName(file);
                     if (fileName != "layers")

@@ -68,7 +68,12 @@ class BaseWindowPlugin extends React.PureComponent {
       this.showWindow(opts);
     });
 
-    this.localObserver = this.props.localObserver;
+    // Same as above, but to close the window.
+    const closeEventName = `${this.type}.closeWindow`;
+
+    props.app.globalObserver.subscribe(closeEventName, () => {
+      this.closeWindow();
+    });
   }
 
   // Runs on initial render.

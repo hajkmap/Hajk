@@ -7,6 +7,7 @@ import Within from "ol/format/filter/Within";
 import { fromCircle } from "ol/geom/Polygon";
 
 import { arraySort } from "../utils/ArraySort";
+import { decodeCommas } from "../utils/StringCommaCoder";
 
 const ESCAPE_CHAR = "!";
 const SINGLE_CHAR = ".";
@@ -32,6 +33,7 @@ class SearchModel {
 
   #controllers = []; // Holder Array for Promises' AbortControllers
   #wfsParser = new WFS();
+  #possibleSearchCombinations = new Map(); // Will hold a set of possible search combinations, so we don't have to re-create them for each source
 
   constructor(searchPluginOptions, map, app) {
     // Validate
@@ -47,13 +49,21 @@ class SearchModel {
     this.#searchSources = this.#componentOptions.sources;
   }
 
+  /**
+   * @summary The main public method of the Search model. Ensures that the search string
+   * is trimmed form whitespace and that the return value is standardized (object of collections and errors).
+   *
+   * @returns {Object} Contains feature collections and error
+   *
+   * @memberof SearchModel
+   */
   getResults = async (
     searchString,
     searchSources = this.getSources(),
     searchOptions = this.getSearchOptions()
   ) => {
     const { featureCollections, errors } = await this.#getRawResults(
-      searchString,
+      searchString.trim(), // Ensure that the search string isn't surrounded by whitespace
       searchSources,
       searchOptions
     );
@@ -230,14 +240,29 @@ class SearchModel {
     });
   };
 
-  escapeSpecialChars = (string) => {
+  #escapeSpecialChars = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "!$&"); // $& means the whole matched string
   };
 
   getPossibleSearchCombinations = (searchString) => {
+    // See if we've already created possible search combos for the specified string,
+    // if so, do an early return
+    if (this.#possibleSearchCombinations.has(searchString)) {
+      return Array.from(this.#possibleSearchCombinations.get(searchString));
+    }
+
+    // Looks like the specified string hasn't been requested yet: let's create
+    // an array of possible combos.
     const possibleSearchCombinations = new Set();
     const wordsInTextField = this.#getStringArray(searchString);
     const numWords = wordsInTextField.length;
+
+    // If the string contains a comma, we must add the string as is
+    // otherwise we might miss cases where the user wants to search
+    // for a property with a comma.
+    if (searchString.includes(",")) {
+      possibleSearchCombinations.add([searchString]);
+    }
 
     // If the user has typed more than five words, we only create
     // one string containing all words to avoid sending humongous
@@ -259,6 +284,13 @@ class SearchModel {
         );
       }
     }
+
+    // Let's save the results for later use - we don't want to re-create
+    // the possible combos array for the same search string
+    this.#possibleSearchCombinations.set(
+      searchString,
+      possibleSearchCombinations
+    );
 
     return Array.from(possibleSearchCombinations);
   };
@@ -292,10 +324,10 @@ class SearchModel {
     return word;
   };
 
-  #decodePotentialCommasFromFeatureProps = (searchCombinations) => {
+  #decodePotentialSpecialChars = (searchCombinations) => {
     return searchCombinations.map((combination) => {
       return combination.map((word) => {
-        return decodeURIComponent(word);
+        return decodeCommas(word).replaceAll("\\", "\\\\");
       });
     });
   };
@@ -313,8 +345,7 @@ class SearchModel {
     if (searchString !== "") {
       if (searchOptions.getPossibleCombinations) {
         possibleSearchCombinations = this.getPossibleSearchCombinations(
-          searchString,
-          searchOptions
+          searchString
         );
       } else {
         possibleSearchCombinations.push(
@@ -322,13 +353,13 @@ class SearchModel {
         );
       }
 
-      possibleSearchCombinations = this.#decodePotentialCommasFromFeatureProps(
+      possibleSearchCombinations = this.#decodePotentialSpecialChars(
         possibleSearchCombinations
       );
 
       let searchFilters = possibleSearchCombinations.map((combination) => {
         let searchWordsForCombination = combination.map((wordInCombination) => {
-          wordInCombination = this.escapeSpecialChars(wordInCombination);
+          wordInCombination = this.#escapeSpecialChars(wordInCombination);
           wordInCombination = this.#addPotentialWildCards(
             wordInCombination,
             searchOptions

@@ -220,8 +220,8 @@ class VTSearch extends React.PureComponent {
     const { app } = this.props;
     switch (this.state.activeSearchTool) {
       case searchTypes.SEARCH: {
-        this.props.app.appModel = this.props.app; // Fixa till
-        this.props.app.appModel.appLoadedFromRenderElsewhere = this.state.appLoaded;
+        this.props.app.appModel = this.props.app; // Gör så för att Sökmodellen laddas inte från ComponentDidMount.
+        this.props.app.appLoadedFromRenderElsewhere = this.state.appLoaded;
         return (
           <Search
             map={this.props.app.getMap()}

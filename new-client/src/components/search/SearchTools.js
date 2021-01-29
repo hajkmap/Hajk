@@ -40,7 +40,7 @@ class SearchTools extends React.PureComponent {
 
   getEnabledTools = () => {
     const { searchTools } = this.props;
-    return searchTools.filter((tool) => !tool.disabled);
+    return searchTools.filter((tool) => tool.enabled ?? true);
   };
 
   renderSettingsDialog = () => {
@@ -86,12 +86,13 @@ class SearchTools extends React.PureComponent {
     const { anchorEl } = this.state;
     const enabledTools = this.getEnabledTools();
     return (
-      <div>
+      <>
         {this.renderSettingsDialog()}
         <Tooltip title="Fler sökverktyg och inställningar">
           <IconButton
             aria-haspopup="true"
             aria-controls="lock-menu"
+            name="searchOptions"
             size="small"
             onClick={(e) =>
               this.setState({
@@ -142,7 +143,7 @@ class SearchTools extends React.PureComponent {
             ))}
           </Menu>
         </Paper>
-      </div>
+      </>
     );
   }
 }

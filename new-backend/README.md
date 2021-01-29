@@ -4,7 +4,7 @@ Hajk backend
 
 ## Quick start
 
-1. Review settings in .env
+1. Review settings in `.env`
 2. Install dependencies
 
 ```shell
@@ -22,6 +22,21 @@ npm run dev
 
 npm run dev:debug
 ```
+
+4. Ensure that client and admin are using the new backend
+   This is pretty obvious, but it's worth to be reminded of. Make sure that `client/appConfig.json` and `admin/config.json` point to the new API (which be default would be running on http://localhost:3002/api/v1/).
+
+   A note regarding admin: some endpoints have changed, to ensure that admin-specific methods can't be accessed from any client. In short, you need to replace `/config` with `/mapconfig` in your `admin/config.json`. For example:
+
+   ```json
+   // Before:
+   "url_map_list": "http://localhost:55630/config/list",
+
+   // After:
+   "url_map_list": "http://localhost:3002/api/v1/mapconfig/list",
+   ```
+
+   The `/config` endpoints is still there, but in a scenario where ActiveDirectory authentication is active, the response sent by `/config` will be "washed" to respect any restrictions on layers and map configurations. We want the admin UI to always show the entire contents of our data store, and therefore another endpoint is now used for those requests.
 
 ## Deploy
 

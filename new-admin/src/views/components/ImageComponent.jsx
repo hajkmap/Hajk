@@ -13,8 +13,9 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
+import Checkbox from "@material-ui/core/Checkbox";
 
-const ImageComponent = (props) => {
+const ImageComponent = props => {
   const classes = useStyles();
 
   const { readOnlyMode } = props.blockProps;
@@ -22,14 +23,16 @@ const ImageComponent = (props) => {
 
   const { src } = entity.getData();
   const data = entity.getData();
-  const imageWidth = data["data-image-width"];
-  const imageHeight = data["data-image-height"];
+  const imageWidth = parseInt(data["data-image-width"]) || "";
+  const imageHeight = parseInt(data["data-image-height"]) || "";
   const dataCaption = data["data-caption"];
   const dataSource = data["data-source"];
-  const dataPopup = data["data-popup"];
+  const dataPopup = data["data-image-popup"] === undefined ? false : true;
   const dataImagePosition = data["data-image-position"];
 
   const [open, setOpen] = useState(false);
+  const [defaultWidth, setDefaultWidth] = useState();
+  const [defaultHeight, setDefaultHeight] = useState();
   const [width, setWidth] = useState(imageWidth);
   const [height, setHeight] = useState(imageHeight);
   const [caption, setCaption] = useState(dataCaption);
@@ -63,16 +66,16 @@ const ImageComponent = (props) => {
     dataPopup,
     popup,
     dataImagePosition,
-    imagePosition,
+    imagePosition
   ]);
 
-  const handleOpen = (e) => {
+  const handleOpen = e => {
     e.preventDefault();
     setOpen(true);
     readOnlyMode();
   };
 
-  const handleClose = (e) => {
+  const handleClose = e => {
     //e.preventDefault();
     setOpen(false);
     readOnlyMode();
@@ -80,21 +83,67 @@ const ImageComponent = (props) => {
 
   const handleSubmit = () => {
     const { imageData } = props.blockProps;
-    const data = {
+    let data = {
       src: src,
-      "data-image-width": width,
-      "data-image-height": height,
+      "data-image-width": width + "px",
+      "data-image-height": height + "px",
       "data-caption": caption,
       "data-source": source,
-      "data-popup": popup,
-      "data-image-right": "floatLeft",
-      "data-image-position": imagePosition,
+      "data-image-position": imagePosition
     };
+    if (popup) {
+      data["data-image-popup"] = "";
+    }
     imageData(data);
   };
 
-  const handleChange = (event) => {
+  const handleChange = event => {
     setImagePosition(event.target.value);
+  };
+
+  const handlePopupChange = event => {
+    setPopup(event.target.checked);
+  };
+
+  const onImgLoad = ({ target: img }) => {
+    const defaultWidth = img.offsetWidth;
+    const defaultHeight = img.offsetHeight;
+
+    setDefaultWidth(defaultWidth);
+    setDefaultHeight(defaultHeight);
+
+    if (width === undefined) {
+      setWidth(defaultWidth);
+    }
+    if (height === undefined) {
+      setHeight(defaultHeight);
+    }
+  };
+
+  const calculateHeight = width => {
+    width = parseInt(width); //Convert string to number
+
+    let aspectRatio = defaultHeight / defaultWidth;
+    let height = width * aspectRatio;
+
+    width = Math.trunc(width);
+    height = Math.trunc(height);
+
+    setWidth(width);
+    setHeight(height);
+  };
+
+  const calculateWidth = height => {
+    height = parseInt(height); //Convert string to number
+
+    let aspectRatio = defaultWidth / defaultHeight;
+    let width = height * aspectRatio;
+
+    height = Math.trunc(height);
+    width = Math.trunc(width);
+
+    setHeight(height);
+    setWidth(width);
   };
 
   const body = (
@@ -109,8 +158,8 @@ const ImageComponent = (props) => {
             <Grid item>
               <TextField
                 id="image-width"
-                defaultValue={width}
-                onChange={(e) => setWidth(e.target.value)}
+                value={width}
+                onChange={e => calculateHeight(e.target.value)}
                 label="Bredd"
               />
             </Grid>
@@ -122,8 +171,8 @@ const ImageComponent = (props) => {
             <Grid item>
               <TextField
                 id="image-height"
-                defaultValue={height}
-                onChange={(e) => setHeight(e.target.value)}
+                value={height}
+                onChange={e => calculateWidth(e.target.value)}
                 label="Höjd"
               />
             </Grid>
@@ -136,7 +185,7 @@ const ImageComponent = (props) => {
               <TextField
                 id="image-caption"
                 defaultValue={caption}
-                onChange={(e) => setCaption(e.target.value)}
+                onChange={e => setCaption(e.target.value)}
                 label="Bildtext"
               />
             </Grid>
@@ -149,22 +198,18 @@ const ImageComponent = (props) => {
               <TextField
                 id="image-source"
                 defaultValue={source}
-                onChange={(e) => setSource(e.target.value)}
+                onChange={e => setSource(e.target.value)}
                 label="Källa"
               />
             </Grid>
           </Grid>
-          <Grid container spacing={1} alignItems="flex-end">
-            <Grid item>
-              <input
-                type="checkbox"
-                id="image-popup"
-                value={popup}
-                onChange={(e) => setPopup(e.target.checked)}
-              />
-              <label>Popup</label>
-            </Grid>
-          </Grid>
+          <Checkbox
+            id="image-popup"
+            checked={popup}
+            onChange={handlePopupChange}
+            inputProps={{ "aria-label": "primary checkbox" }}
+          />
+          <label>Popup</label>
           <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
               <button
@@ -229,14 +274,14 @@ const ImageComponent = (props) => {
       id="edit-image-modal"
       aria-labelledby="image-modal-title"
       aria-describedby="image-modal-description"
-      onClick={(event) => event.stopPropagation()}
-      onMouseDown={(event) => event.stopPropagation()}
+      onClick={event => event.stopPropagation()}
+      onMouseDown={event => event.stopPropagation()}
     >
       {body}
     </Modal>
   );
 
-  if (dataPopup) {
+  if (popup) {
     return (
       <div className={classes.imgContainer}>
         <img
@@ -248,9 +293,10 @@ const ImageComponent = (props) => {
           data-image-height={height}
           data-caption={caption}
           data-source={source}
-          data-popup
+          data-image-popup=""
           data-image-position={imagePosition}
           onClick={handleOpen}
+          onLoad={onImgLoad}
         />
         <button
           type="button"
@@ -277,6 +323,7 @@ const ImageComponent = (props) => {
           data-caption={caption}
           data-image-position={imagePosition}
           onClick={handleOpen}
+          onLoad={onImgLoad}
         />
         <button
           type="button"
@@ -294,38 +341,38 @@ const ImageComponent = (props) => {
 };
 
 /* CSS styling */
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     fontFamily: "'Georgia', serif",
     padding: 20,
-    width: 1000,
+    width: 1000
   },
   buttons: {
-    marginBottom: 10,
+    marginBottom: 10
   },
   margin: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   urlInputContainer: {
-    marginBottom: 10,
+    marginBottom: 10
   },
   urlInput: {
     fontFamily: "'Georgia', serif",
     marginRight: 10,
-    padding: 3,
+    padding: 3
   },
   editor: {
     border: "1px solid #ccc",
     cursor: "text",
     minHeight: 80,
-    padding: 10,
+    padding: 10
   },
   button: {
     marginTop: 10,
-    textAlign: "center",
+    textAlign: "center"
   },
   media: {
-    whiteSpace: "initial",
+    whiteSpace: "initial"
   },
   paper: {
     position: "absolute",
@@ -334,7 +381,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "1rem",
     backgroundColor: theme.palette.background.paper,
     border: "2px solid #000",
-    boxShadow: theme.shadows[5],
+    boxShadow: theme.shadows[5]
   },
   imgContainer: {
     position: "relative",
@@ -351,16 +398,16 @@ const useStyles = makeStyles((theme) => ({
       border: "none",
       cursor: "pointer",
       borderRadius: "5px",
-      textAlign: "center",
+      textAlign: "center"
     },
     "& > .btn:hover": {
-      backgroundColor: "black",
-    },
+      backgroundColor: "black"
+    }
   },
   form: {
     width: 300,
-    float: "left",
-  },
+    float: "left"
+  }
 }));
 
 export default ImageComponent;
