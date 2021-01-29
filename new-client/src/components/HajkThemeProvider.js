@@ -130,7 +130,7 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
       <App
         activeTools={activeTools}
         config={config}
-        customTheme={customTheme}
+        theme={muiTheme}
         toggleMUITheme={toggleMUITheme} // Pass the toggle handler, so we can call it from another component later on
       />
     </MuiThemeProvider>

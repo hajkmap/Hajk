@@ -519,14 +519,19 @@ class App extends React.PureComponent {
       (db) => db.value === this.state.activeDrawerContent
     )?.drawerTitle;
 
+    // We need to be able to grab different logos depending
+    // on light/dark mode theme
+    const logoUrl =
+      (this.props.theme.palette.type === "light" // If light theme active…
+        ? config.mapConfig.map.logoLight // …grab light logo,
+        : config.mapConfig.map.logoDark) || // …else grab dark logo.
+      config.mapConfig.map.logo || // If neither was set, try to see if we have the legacy admin parameter.
+      "logo.png"; // If we didn't have this either, fallback to hard-coded value.
+
     return (
       <>
         <Box className={classes.logoBox}>
-          <img
-            alt="Logo"
-            src={config.mapConfig.map.logo}
-            className={classes.logo}
-          />
+          <img alt="Logo" src={logoUrl} className={classes.logo} />
         </Box>
         <Divider />
         <Grid

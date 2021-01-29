@@ -63,7 +63,8 @@ class MapOptions extends Component {
         maxZoom: config.maxZoom,
         minZoom: config.minZoom,
         center: config.center,
-        logo: config.logo,
+        logoLight: config.logoLight || "logoLight.png",
+        logoDark: config.logoDark || "logoDark.png",
         resolutions: config.resolutions,
         extent: config.extent,
         origin: config.origin,
@@ -117,7 +118,8 @@ class MapOptions extends Component {
       maxZoom: mapConfig.maxZoom,
       minZoom: mapConfig.minZoom,
       center: mapConfig.center,
-      logo: mapConfig.logo,
+      logoLight: mapConfig.logoLight || "logoLight.png",
+      logoDark: mapConfig.logoDark || "logoDark.png",
       resolutions: mapConfig.resolutions,
       extent: mapConfig.extent,
       origin: mapConfig.origin,
@@ -306,7 +308,8 @@ class MapOptions extends Component {
         config.maxZoom = this.getValue("maxZoom");
         config.minZoom = this.getValue("minZoom");
         config.center = this.getValue("center");
-        config.logo = this.getValue("logo");
+        config.logoLight = this.getValue("logoLight");
+        config.logoDark = this.getValue("logoDark");
         config.resolutions = this.getValue("resolutions");
         config.extent = this.getValue("extent");
         config.origin = this.getValue("origin");
@@ -656,7 +659,7 @@ class MapOptions extends Component {
             <div className="separator">Extra inställningar</div>
             <div>
               <label>
-                Logo{" "}
+                Logo för ljust tema{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
@@ -665,12 +668,33 @@ class MapOptions extends Component {
               </label>
               <input
                 type="text"
-                ref="input_logo"
-                value={this.state.logo}
-                className={this.getValidationClass("logo")}
+                ref="input_logoLight"
+                value={this.state.logoLight}
+                className={this.getValidationClass("logoLight")}
                 onChange={(e) => {
-                  this.setState({ logo: e.target.value }, () =>
-                    this.validateField("logo")
+                  this.setState({ logoLight: e.target.value }, () =>
+                    this.validateField("logoLight")
+                  );
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Logo för mörkt tema{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Sökväg till logga att använda i <img>-taggen. Kan vara relativ Hajk-root eller absolut."
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_logoDark"
+                value={this.state.logoDark}
+                className={this.getValidationClass("logoDark")}
+                onChange={(e) => {
+                  this.setState({ logoDark: e.target.value }, () =>
+                    this.validateField("logoDark")
                   );
                 }}
               />
