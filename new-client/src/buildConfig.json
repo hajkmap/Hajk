@@ -1,5 +1,6 @@
 {
   "activeTools": [
+    "Anchor",
     "Buffer",
     "Collector",
     "Coordinates",
@@ -16,6 +17,7 @@
     "vtsearch"
   ],
   "allTools": [
+    "Anchor",
     "Buffer",
     "Collector",
     "Coordinates",
