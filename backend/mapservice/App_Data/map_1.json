@@ -1,4 +1,4 @@
-{
+﻿{
   "version": "3.2.0",
   "projections": [
     {
@@ -14,41 +14,100 @@
       "units": null
     }
   ],
-  "tools": [
+  "version": null,
+  "projections": [
     {
-      "type": "layerswitcher",
-      "options": {
-        "baselayers": [
-          {
-            "id": "4",
-            "visibleAtStart": true,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          }
-        ],
-        "groups": [],
-        "active": true,
-        "visibleAtStart": false,
-        "visibleAtStartMobile": false,
-        "backgroundSwitcherBlack": false,
-        "backgroundSwitcherWhite": true,
-        "enableOSM": false,
-        "showBreadcrumbs": false,
-        "target": "toolbar",
-        "position": "right",
-        "width": 0,
-        "height": 0,
-        "title": "",
-        "description": "",
-        "enableTransparencySlider": true,
-        "dropdownThemeMaps": true,
-        "themeMapHeaderCaption": "Rubrik temakarta",
-        "instruction": "",
-        "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
-      },
-      "index": 1
+      "code": "EPSG:3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
+      "units": null
     },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
+      "units": null
+    },
+    {
+      "code": "EPSG:3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      "units": null
+    },
+    {
+      "code": "EPSG:3008",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [60857.4994, 6120098.8505, 223225.0217, 6906693.7888],
+      "units": null
+    },
+    {
+      "code": "EPSG:3009",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [56294.0365, 6203542.5282, 218719.0581, 6835499.2391],
+      "units": null
+    },
+    {
+      "code": "EPSG:3010",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [97213.6352, 6228930.1419, 225141.8681, 6916524.0785],
+      "units": null
+    },
+    {
+      "code": "EPSG:3011",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [96664.5565, 6509617.2232, 220146.6914, 6727103.5879],
+      "units": null
+    },
+    {
+      "code": "EPSG:3012",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [30462.5263, 6829647.9842, 216416.1584, 7154168.0208],
+      "units": null
+    },
+    {
+      "code": "EPSG:3013",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [34056.6264, 6710433.2884, 218692.0214, 7224144.732],
+      "units": null
+    },
+    {
+      "code": "EPSG:3014",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [-1420.28, 6888655.5779, 212669.1333, 7459585.3378],
+      "units": null
+    },
+    {
+      "code": "EPSG:3015",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [58479.4774, 6304213.2147, 241520.5226, 7276832.4419],
+      "units": null
+    },
+    {
+      "code": "EPSG:3016",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [-93218.3385, 7034909.8738, 261434.6246, 7676279.8691],
+      "units": null
+    },
+    {
+      "code": "EPSG:3016",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [67451.0699, 7211342.8483, 145349.5699, 7254837.254],
+      "units": null
+    },
+    {
+      "code": "EPSG:3018",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [38920.7048, 7267405.2323, 193050.246, 7597992.2419],
+      "units": null
+    },
+    {
+      "code": "EPSG:3021",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
+      "extent": [1392811.0743, 6208496.7665, 1570600.8906, 7546077.6984],
+      "units": null
+    }
+  ],
+  "tools": [
     {
       "type": "infoclick",
       "options": {
@@ -69,7 +128,315 @@
         },
         "visibleForGroups": []
       },
-      "index": 2
+      "index": 0
+    },
+    {
+      "type": "layerswitcher",
+      "options": {
+        "baselayers": [
+          {
+            "id": "49",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "50",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "4",
+            "visibleAtStart": true,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "51",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "36",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "041d10b4-445a-b985-b4de-ed11756c4ea3",
+            "parent": "-1",
+            "name": "Etiketter",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "44",
+                "visibleAtStart": false,
+                "drawOrder": 25,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "53",
+                "visibleAtStart": false,
+                "drawOrder": 24,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "48",
+                "visibleAtStart": false,
+                "drawOrder": 23,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+            "parent": "-1",
+            "name": "Verksamhetslager",
+            "toggled": false,
+            "expanded": true,
+            "layers": [],
+            "groups": [
+              {
+                "id": "05abd158-b1c6-c8d4-b99e-3ec42209efcc",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Hållplatser",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "52",
+                    "visibleAtStart": false,
+                    "drawOrder": 2,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "47",
+                    "visibleAtStart": false,
+                    "drawOrder": 3,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "48eefc8e-f579-9978-f022-bda58e14056c",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Linjer",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "42",
+                    "visibleAtStart": false,
+                    "drawOrder": 4,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "43",
+                    "visibleAtStart": false,
+                    "drawOrder": 5,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "d53a77d0-3312-8976-8968-7b3e0dc75332",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Gränser",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "40",
+                    "visibleAtStart": false,
+                    "drawOrder": 6,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "39",
+                    "visibleAtStart": false,
+                    "drawOrder": 7,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "41",
+                    "visibleAtStart": false,
+                    "drawOrder": 8,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "62",
+                    "visibleAtStart": false,
+                    "drawOrder": 19,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "64",
+                    "visibleAtStart": false,
+                    "drawOrder": 20,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "994e35b8-4541-1595-725d-3b4a30dca7f7",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Adresser",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "46",
+                    "visibleAtStart": false,
+                    "drawOrder": 9,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "9fa1ae3a-29a5-92bb-5a41-fa5b02598340",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Närtrafik",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "57",
+                    "visibleAtStart": false,
+                    "drawOrder": 21,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "59",
+                    "visibleAtStart": false,
+                    "drawOrder": 10,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "56",
+                    "visibleAtStart": false,
+                    "drawOrder": 12,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "61",
+                    "visibleAtStart": false,
+                    "drawOrder": 11,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "60",
+                    "visibleAtStart": false,
+                    "drawOrder": 13,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "38",
+                    "visibleAtStart": false,
+                    "drawOrder": 14,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "a10ee17e-211c-6245-b9b3-05e44396f16a",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Övrig verksamhetsdata",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "54",
+                    "visibleAtStart": false,
+                    "drawOrder": 15,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "55",
+                    "visibleAtStart": false,
+                    "drawOrder": 16,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "37",
+                    "visibleAtStart": false,
+                    "drawOrder": 1,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "45",
+                    "visibleAtStart": false,
+                    "drawOrder": 17,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "58",
+                    "visibleAtStart": false,
+                    "drawOrder": 18,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          }
+        ],
+        "active": true,
+        "visibleAtStart": true,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
+        "showBreadcrumbs": false,
+        "target": "toolbar",
+        "position": "right",
+        "width": 0,
+        "height": 0,
+        "title": "",
+        "description": "",
+        "dropdownThemeMaps": true,
+        "themeMapHeaderCaption": "Rubrik temakarta",
+        "instruction": "",
+        "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
+      },
+      "index": 1
     },
     {
       "type": "simple_layerswitcher",
@@ -80,13 +447,12 @@
         "visibleAtStart": false,
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 1
     },
     {
       "type": "vtsearch",
       "options": {
         "target": "toolbar",
-        "searchImplemented": true,
         "abstract": "VTSEARCH",
         "title": "Sökverktyg",
         "position": "left",
@@ -363,25 +729,68 @@
               {
                 "displayName": "BÖRJAR GÄLLA",
                 "key": "AppliesFromDate",
-                "displayFormat": "YYYY-MM-DD hh:mm"
+                "displayFormat": "YYYY-MM-DD"
               },
               {
                 "displayName": "SLUTAR GÄLLA",
                 "key": "AppliesUptoDate",
-                "displayFormat": "YYYY-MM-DD hh:mm"
+                "displayFormat": "YYYY-MM-DD"
               }
             ]
           }
         }
       },
-      "index": 18
+      "index": 2
+    },
+    {
+      "type": "search",
+      "options": {
+        "layers": [],
+        "visibleForGroups": [],
+        "maxResultsPerDataset": 5000,
+        "anchor": [16, 32],
+        "scale": 0.15,
+        "markerImg": "marker.png",
+        "delayBeforeAutoSearch": 300,
+        "searchBarPlaceholder": "Sök...",
+        "enablePolygonSearch": true,
+        "enableRadiusSearch": true,
+        "enableSelectSearch": true,
+        "enableExtentSearch": true,
+        "enableResultsFiltering": true,
+        "enableResultsSorting": true,
+        "enableResultsSelectionClearing": false,
+        "enableResultsDownloading": false,
+        "enableFeaturePreview": true,
+        "enableLabelOnHighlight": true,
+        "enableSelectedFeaturesCollection": true,
+        "showResultFeaturesInMap": true,
+        "enableFeatureToggler": true,
+        "renderElsewhere": true,
+        "tooltip": "Sök i kartlager",
+        "searchWithinButtonText": "Markera i kartan",
+        "selectedSources": ["8", "7", "30", "27", "32", "34", "33", "14", "18"]
+      },
+      "index": 2
+    },
+    {
+      "type": "buffer",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "varbergVer": false,
+        "geoserverUrl": "",
+        "notFeatureLayers": [],
+        "visibleForGroups": []
+      },
+      "index": 3
     },
     {
       "type": "draw",
       "options": {
         "target": "toolbar",
-        "exportUrl": "/mapservice/export/kml",
-        "importUrl": "/mapservice/import/kml",
+        "exportUrl": "http://localhost:55630/export/kml",
+        "importUrl": "http://localhost:55630/import/kml",
         "base64Encode": false,
         "instruction": "",
         "icons": "",
@@ -400,191 +809,6 @@
       "index": 4
     },
     {
-      "type": "streetview",
-      "options": {
-        "target": "toolbar",
-        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 5
-    },
-    {
-      "type": "anchor",
-      "options": {
-        "target": "right",
-        "position": "right",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 7
-    },
-    {
-      "type": "informative",
-      "options": {
-        "target": "toolbar",
-        "position": "right",
-        "tocExpanded": false,
-        "title": "Översiktsplan",
-        "caption": "Översiktsplan",
-        "serviceUrl": "/mapservice/informative/load",
-        "exportUrl": "/mapservice/export/document",
-        "abstract": "Läs mer om vad som planeras i kommunen",
-        "html": "<div>HTML som beskriver dokumentets innehåll</div>",
-        "document": "oversiktsplan",
-        "visibleAtStart": false,
-        "visibleForGroups": []
-      },
-      "index": 8
-    },
-    {
-      "type": "information",
-      "options": {
-        "headerText": "Om kartan",
-        "text": "Här kan man konfigurera och lägga in information om kartan.",
-        "buttonText": "",
-        "title": "",
-        "visibleAtStart": false,
-        "showInfoOnce": false,
-        "visibleForGroups": []
-      },
-      "index": 9
-    },
-    {
-      "type": "edit",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "activeServices": ["25"],
-        "visibleForGroups": []
-      },
-      "index": 10
-    },
-    {
-      "type": "search",
-      "options": {
-        "layers": [],
-        "visibleForGroups": [],
-        "maxResultsPerDataset": 100,
-        "anchor": ["", ""],
-        "scale": "",
-        "markerImg": "marker.png",
-        "delayBeforeAutoSearch": 300,
-        "searchBarPlaceholder": "Sök...",
-        "enablePolygonSearch": true,
-        "enableRadiusSearch": true,
-        "enableSelectSearch": true,
-        "enableExtentSearch": true,
-        "enableResultsFiltering": true,
-        "enableResultsSorting": true,
-        "enableResultsSelectionClearing": true,
-        "enableResultsDownloading": true,
-        "enableFeaturePreview": true,
-        "enableLabelOnHighlight": true,
-        "enableSelectedFeaturesCollection": true,
-        "showResultFeaturesInMap": true,
-        "enableFeatureToggler": true,
-        "renderElsewhere": true,
-        "drawFillColor": "rgba(255,255,255,0.07)",
-        "drawStrokeColor": "rgba(74,74,74,0.5)",
-        "displayFillColor": "rgba(74,144,226,0.15)",
-        "displayStrokeColor": "rgba(74,144,226,0.4)",
-        "selectionTextStroke": "rgba(255,255,255,1)",
-        "selectionTextFill": "rgba(63,122,190,1)",
-        "selectionFillColor": "rgba(74,144,226,0.7)",
-        "selectionStrokeColor": "rgba(74,144,226,0.8)",
-        "highlightTextStroke": "rgba(255,255,255,1)",
-        "highlightTextFill": "rgba(214,143,28,1)",
-        "highlightFillColor": "rgba(245,166,35,0.7)",
-        "highlightStrokeColor": "rgba(245,166,35,0.8)"
-      },
-      "index": 11
-    },
-    {
-      "type": "routing",
-      "options": {
-        "target": "toolbar",
-        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 12
-    },
-    {
-      "type": "location",
-      "options": {
-        "target": "toolbar",
-        "visibleForGroups": []
-      },
-      "index": 13
-    },
-    {
-      "type": "preset",
-      "options": {
-        "presetList": [
-          {
-            "name": "Stockholm",
-            "presetUrl": "?m=map_1&x=673328.9918851338&y=6578549.249285473&z=9"
-          },
-          {
-            "name": "Göteborg",
-            "presetUrl": "?m=map_1&x=319842.7256730069&y=6402228.345506725&z=9"
-          },
-          {
-            "name": "Malmö",
-            "presetUrl": "?m=map_1&x=375728.86787375447&y=6163237.373553972&z=9"
-          },
-          {
-            "name": "Öland (kulturmiljövård)",
-            "presetUrl": "?m=map_1&x=601661.9935919463&y=6292161.042054954&z=5.22002529329714&l=4,5"
-          }
-        ],
-        "visibleForGroups": []
-      },
-      "index": 14
-    },
-    {
-      "type": "coordinates",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "transformations": [
-          {
-            "code": "EPSG:3006",
-            "default": true,
-            "hint": "Sweref99 TM",
-            "title": "Sweref99 TM",
-            "xtitle": "E",
-            "ytitle": "N",
-            "inverseAxis": false
-          }
-        ],
-        "visibleForGroups": []
-      },
-      "index": 15
-    },
-    {
-      "type": "bookmark",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 16
-    },
-    {
-      "type": "buffer",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "varbergVer": false,
-        "geoserverUrl": "",
-        "notFeatureLayers": [],
-        "visibleForGroups": []
-      },
-      "index": 17
-    },
-    {
       "type": "print",
       "options": {
         "target": "toolbar",
@@ -594,7 +818,17 @@
         "visibleAtStart": false,
         "visibleForGroups": []
       },
-      "index": 2
+      "index": 5
+    },
+    {
+      "type": "anchor",
+      "options": {
+        "target": "toolbar",
+        "position": "left",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 6
     }
   ],
   "map": {
@@ -602,8 +836,8 @@
     "center": [319378, 6398504],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 4,
-    "maxZoom": 9,
+    "zoom": 7,
+    "maxZoom": 0,
     "minZoom": 0,
     "resolutions": [
       4096.0,
@@ -615,26 +849,26 @@
       64.0,
       32.0,
       16.0,
-      8.0
+      8.0,
+      4.0,
+      2.0,
+      1.0,
+      0.5
     ],
-    "origin": [-1200000.0, 8500000.0],
-    "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
+    "origin": [0.0, 0.0],
+    "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
     "constrainOnlyCenter": false,
-    "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+    "logo": "",
     "geoserverLegendOptions": "",
     "mapselector": false,
-    "mapcleaner": true,
-    "drawerVisible": true,
-    "drawerPermanent": true,
-    "drawerVisibleMobile": false,
-    "activeDrawerOnStart": "plugins",
+    "mapcleaner": false,
+    "drawerVisible": false,
+    "drawerPermanent": false,
     "colors": {
-      "primaryColor": "#0096ed",
-      "secondaryColor": "#f0faf9",
-      "preferredColorScheme": "user"
+      "primaryColor": "#0096ED",
+      "secondaryColor": "#F0FAF9"
     },
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
-    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-    "crossOrigin": "anonymous"
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
   }
 }
