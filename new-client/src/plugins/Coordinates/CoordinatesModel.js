@@ -137,7 +137,7 @@ class CoordinatesModel {
 
   handleInput = (event) => {
     // Validate that the changed data is a finite number
-    var updatedValue = parseFloat(event.target.value);
+    const updatedValue = parseFloat(event.target.value);
     // Save the position of the cursor so it can be restored later
     this.updatedTransformId = event.target.id;
     this.updatedTransformIdx = event.target.selectionStart;
@@ -151,12 +151,12 @@ class CoordinatesModel {
 
     // Gets the transform that was specified on the TextField
     // it is used to transform the coordinates to the map projection which is the one updateTransforms expects
-    var transformCode =
+    const transformCode =
       event.target.parentElement.parentElement.attributes["transform"].value;
     // Gets the axis so we can know whether this is for the X or Y axis
-    var axis =
+    const axis =
       event.target.parentElement.parentElement.attributes["axis"].value;
-    var updatedCoordinates =
+    let updatedCoordinates =
       axis === "X" ? [updatedValue, 0] : [0, updatedValue];
 
     // We need to look in grand grand parent's children to find the other input field and pick the one
@@ -165,7 +165,7 @@ class CoordinatesModel {
       (item) => {
         if (axis !== item.attributes["axis"].value) {
           // Index to update
-          var idx = item.attributes["axis"].value === "X" ? 0 : 1;
+          const idx = item.attributes["axis"].value === "X" ? 0 : 1;
 
           // Need to collect the value which is inside an input grandchild
           item.children.forEach((child) => {

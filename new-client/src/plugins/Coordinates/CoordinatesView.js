@@ -129,10 +129,10 @@ class CoordinatesView extends React.PureComponent {
       <>
         {this.state.transformedCoordinates.map((transformation, i) => {
           // Create the values for xCoord and yCoord where one might have a faulty format
-          var xCoord = transformation.inverseAxis
+          let xCoord = transformation.inverseAxis
             ? transformation.coordinates[0]
             : transformation.coordinates[1];
-          var yCoord = transformation.inverseAxis
+          let yCoord = transformation.inverseAxis
             ? transformation.coordinates[1]
             : transformation.coordinates[0];
 
