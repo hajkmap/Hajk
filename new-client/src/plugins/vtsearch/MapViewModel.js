@@ -62,6 +62,7 @@ export default class MapViewModel {
       this.map.removeLayer(this.getSearchResultLayerFromId(searchResultId));
     });
     this.localObserver.subscribe("deactivate-search", this.deactivateSearch);
+    this.localObserver.subscribe("activate-search", this.activateSearch);
 
     this.localObserver.subscribe("hide-all-layers", () => {
       this.hideAllLayers();
@@ -137,8 +138,14 @@ export default class MapViewModel {
         );
       })[0];
   };
-  deactivateSearch = () => {
+
+  activateSearch = () => {
+    this.clearDrawLayer();
     this.map.removeInteraction(this.draw);
+    this.map.on("singleclick", this.onFeaturesClickedInMap);
+  };
+
+  deactivateSearch = () => {
     this.map.un("singleclick", this.onFeaturesClickedInMap);
   };
 

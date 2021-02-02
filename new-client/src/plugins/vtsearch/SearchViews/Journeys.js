@@ -340,6 +340,9 @@ class Journeys extends React.PureComponent {
         if (this.state.isPolygonActive) this.activateSearch("Polygon");
       }
     );
+    if (this.state.isPolygonActive) {
+      this.localObserver.publish("activate-search", () => {});
+    }
   };
 
   handleRectangleClick = () => {
@@ -355,6 +358,9 @@ class Journeys extends React.PureComponent {
         if (this.state.isRectangleActive) this.activateSearch("Box");
       }
     );
+    if (this.state.isRectangleActive) {
+      this.localObserver.publish("activate-search", () => {});
+    }
   };
 
   deactivateSearch = () => {

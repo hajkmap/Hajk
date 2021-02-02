@@ -149,9 +149,9 @@ class Stops extends React.PureComponent {
   handlePolygonClick = () => {
     const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
     if (!this.state.isPolygonActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("activate-search", () => {});
     }
-    if (this.state.isPolygonActive && this.state.isRectangleActive) {
+    if (this.state.isPolygonActive || this.state.isRectangleActive) {
       this.localObserver.publish("deactivate-search", () => {});
       this.setState({ isRectangleActive: false });
     }
@@ -168,9 +168,9 @@ class Stops extends React.PureComponent {
   };
   handleRectangleClick = () => {
     if (!this.state.isRectangleActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("activate-search", () => {});
     }
-    if (this.state.isPolygonActive && this.state.isRectangleActive) {
+    if (this.state.isPolygonActive || this.state.isRectangleActive) {
       this.localObserver.publish("deactivate-search", () => {});
       this.setState({ isPolygonActive: false });
     }

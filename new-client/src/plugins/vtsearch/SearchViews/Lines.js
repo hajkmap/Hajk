@@ -142,9 +142,9 @@ class Lines extends React.PureComponent {
       throughStopArea,
     } = this.state;
     if (!this.state.isPolygonActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("activate-search", () => {});
     }
-    if (this.state.isPolygonActive && this.state.isRectangleActive) {
+    if (this.state.isPolygonActive || this.state.isRectangleActive) {
       this.localObserver.publish("deactivate-search", () => {});
       this.setState({ isRectangleActive: false });
     }
@@ -170,9 +170,9 @@ class Lines extends React.PureComponent {
       throughStopArea,
     } = this.state;
     if (!this.state.isRectangleActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("activate-search", () => {});
     }
-    if (this.state.isRectangleActive && this.state.isPolygonActive) {
+    if (this.state.isRectangleActive || this.state.isPolygonActive) {
       this.localObserver.publish("deactivate-search", () => {});
       this.setState({ isPolygonActive: false });
     }
