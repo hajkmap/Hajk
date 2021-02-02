@@ -586,7 +586,7 @@ class App extends React.PureComponent {
             this.state.activeDrawerContent === "plugins" ? "unset" : "none"
           }
         >
-          <div id="plugin-buttons" />
+          <nav role="navigation" id="plugin-buttons" />
         </Box>
         {this.state.drawerButtons.map((db) => {
           return (
@@ -735,6 +735,7 @@ class App extends React.PureComponent {
           </div>
           <div
             id="map"
+            role="application"
             className={cslx(classes.map, {
               [classes.shiftedLeft]:
                 this.state.drawerPermanent && clean === false,
