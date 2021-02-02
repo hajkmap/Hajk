@@ -764,7 +764,7 @@
         "enableFeaturePreview": true,
         "enableLabelOnHighlight": true,
         "enableSelectedFeaturesCollection": true,
-        "showResultFeaturesInMap": true,
+        "showResultFeaturesInMap": false,
         "enableFeatureToggler": true,
         "renderElsewhere": true,
         "tooltip": "Sök i kartlager",
