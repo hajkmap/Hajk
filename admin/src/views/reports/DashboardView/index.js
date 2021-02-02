@@ -10,6 +10,8 @@ import TotalCustomers from "./TotalCustomers";
 import TotalProfit from "./TotalProfit";
 import TrafficByDevice from "./TrafficByDevice";
 
+import ConfigContext from "../../../utils/ConfigContext";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.dark,
@@ -21,6 +23,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Dashboard = () => {
   const classes = useStyles();
+  const config = React.useContext(ConfigContext);
+  console.log("config: ", config);
 
   return (
     <Page className={classes.root} title="Dashboard">
