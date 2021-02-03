@@ -121,6 +121,7 @@ class VTSearch extends React.PureComponent {
     activeSearchTool: searchTypes.DEFAULT,
     loading: false,
     appLoaded: false,
+    draggingEnabled: true,
   };
 
   static propTypes = {
@@ -172,6 +173,10 @@ class VTSearch extends React.PureComponent {
         activeSearchTool: typeOfSearch,
         expanded: typeOfSearch === searchTypes.DEFAULT ? false : true,
       });
+    });
+
+    this.localObserver.subscribe("vtsearch-dragging-enabled", (enabled) => {
+      this.setState({ draggingEnabled: enabled });
     });
 
     this.globalObserver.subscribe(
@@ -298,7 +303,7 @@ class VTSearch extends React.PureComponent {
           (clsx(classes.expand, {
             [classes.expandOpen]: this.state.expanded,
           }),
-          classes.dropDownIconButton)
+            classes.dropDownIconButton)
         }
         onClick={this.handleExpandClick}
         aria-expanded={this.state.expanded}
@@ -355,6 +360,7 @@ class VTSearch extends React.PureComponent {
           left: undefined,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
+          draggingEnabled: this.state.draggingEnabled,
         }}
       >
         <>

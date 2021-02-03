@@ -341,7 +341,7 @@ class Journeys extends React.PureComponent {
       }
     );
     if (this.state.isPolygonActive) {
-      this.localObserver.publish("activate-search", () => {});
+      this.localObserver.publish("activate-search", () => { });
     }
   };
 
@@ -359,7 +359,7 @@ class Journeys extends React.PureComponent {
       }
     );
     if (this.state.isRectangleActive) {
-      this.localObserver.publish("activate-search", () => {});
+      this.localObserver.publish("activate-search", () => { });
     }
   };
 
@@ -376,6 +376,14 @@ class Journeys extends React.PureComponent {
       selectedFormType: spatialType,
       searchCallback: this.inactivateSpatialSearchButtons,
     });
+  };
+
+  disableDrag = () => {
+    this.localObserver.publish("vtsearch-dragging-enabled", false);
+  };
+
+  enableDrag = () => {
+    this.localObserver.publish("vtsearch-dragging-enabled", true);
   };
 
   renderFromDateSection = () => {
@@ -397,6 +405,8 @@ class Journeys extends React.PureComponent {
             KeyboardButtonProps={{
               "aria-label": "change time",
             }}
+            onOpen={this.disableDrag}
+            onClose={this.enableDrag}
           />
         </Grid>
         <KeyboardDatePicker
@@ -410,6 +420,8 @@ class Journeys extends React.PureComponent {
           KeyboardButtonProps={{
             "aria-label": "change date",
           }}
+          onOpen={this.disableDrag}
+          onClose={this.enableDrag}
         />
       </>
     );
@@ -433,6 +445,8 @@ class Journeys extends React.PureComponent {
             KeyboardButtonProps={{
               "aria-label": "change time",
             }}
+            onOpen={this.disableDrag}
+            onClose={this.enableDrag}
           />
         </Grid>
         <KeyboardDatePicker
@@ -445,6 +459,8 @@ class Journeys extends React.PureComponent {
           KeyboardButtonProps={{
             "aria-label": "change date",
           }}
+          onOpen={this.disableDrag}
+          onClose={this.enableDrag}
         />
         {this.showErrorMessage()}
       </>
