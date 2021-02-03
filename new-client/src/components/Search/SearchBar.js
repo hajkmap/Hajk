@@ -254,7 +254,6 @@ class SearchBar extends React.PureComponent {
       loading,
       handleOnAutocompleteInputChange,
       handleSearchInput,
-      handleOnClear,
     } = this.props;
     return (
       <Autocomplete
@@ -279,7 +278,6 @@ class SearchBar extends React.PureComponent {
         disableClearable
         onChange={handleSearchInput}
         onInputChange={handleOnAutocompleteInputChange}
-        onBlur={handleOnClear}
         getOptionSelected={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
