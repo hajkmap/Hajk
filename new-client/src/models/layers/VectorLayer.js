@@ -12,7 +12,7 @@ import * as SLDReader from "@nieuwlandgeo/sldreader";
 import LayerInfo from "./LayerInfo.js";
 
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 const vectorLayerProperties = {
@@ -24,16 +24,16 @@ const vectorLayerProperties = {
     typename: "",
     outputFormat: "GML3",
     srsname: "",
-    bbox: ""
+    bbox: "",
   },
-  showLabels: true
+  showLabels: true,
 };
 
 class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
     this.config = {
       ...vectorLayerProperties,
-      ...config
+      ...config,
     };
     this.proxyUrl = proxyUrl;
     this.map = map;
@@ -58,7 +58,7 @@ class WFSVectorLayer {
       // The loading strategy to use. By default the BBox strategy is used,
       // loading features based on the view's extent and resolution.
       strategy:
-        this.config?.loadingStrategy === "all" ? strategyAll : bboxStrategy
+        this.config?.loadingStrategy === "all" ? strategyAll : bboxStrategy,
     });
 
     // if (config.legend[0].url === "") {
@@ -84,7 +84,7 @@ class WFSVectorLayer {
       url: config.url,
       featureType: config.params.typename.split(":")[1],
       minZoom: config?.minZoom >= 0 ? config.minZoom : undefined,
-      maxZoom: config?.maxZoom >= 0 ? config.maxZoom : undefined
+      maxZoom: config?.maxZoom >= 0 ? config.maxZoom : undefined,
     });
 
     // Styling section starts here.
@@ -96,8 +96,8 @@ class WFSVectorLayer {
     // Try fetching the URL, if specified, and style with the resulting SLD
     if (typeof this.sldUrl === "string" && this.sldUrl.trim().length > 0) {
       fetch(this.sldUrl)
-        .then(response => response.text())
-        .then(text => this.applySldTextOnLayer(text));
+        .then((response) => response.text())
+        .then((text) => this.applySldTextOnLayer(text));
     }
     // …else used supplied SLD text to style
     else if (
@@ -108,7 +108,7 @@ class WFSVectorLayer {
     } // …or just fall back to OpenLayer's default styling if no SLD/SLD URL was specified.
   }
 
-  applySldTextOnLayer = text => {
+  applySldTextOnLayer = (text) => {
     const sldObject = SLDReader.Reader(text);
     const sldLayer = SLDReader.getLayer(sldObject);
     const style = SLDReader.getStyle(sldLayer, this.sldStyle);
@@ -117,7 +117,7 @@ class WFSVectorLayer {
     const viewProjection = this.map.getView().getProjection();
     const olFunction = SLDReader.createOlStyleFunction(featureTypeStyle, {
       // Use the convertResolution option to calculate a more accurate resolution.
-      convertResolution: viewResolution => {
+      convertResolution: (viewResolution) => {
         const viewCenter = this.map.getView().getCenter();
         return getPointResolution(viewProjection, viewResolution, viewCenter);
       },
@@ -126,14 +126,14 @@ class WFSVectorLayer {
       // If you do not do this, the image will only become visible after the next pan/zoom of the layer.
       imageLoadedCallback: () => {
         this.layer.changed();
-      }
+      },
     });
     this.layer.setStyle(olFunction);
   };
 
   reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
-      features.forEach(feature => {
+      features.forEach((feature) => {
         if (feature.getGeometry() && feature.getGeometry().getCoordinates) {
           let coords = feature.getGeometry().getCoordinates();
           try {
@@ -147,14 +147,14 @@ class WFSVectorLayer {
                 feature
                   .getGeometry()
                   .setCoordinates(
-                    coords.map(coord => transform(coord, from, to))
+                    coords.map((coord) => transform(coord, from, to))
                   );
                 break;
               case "Polygon":
                 feature
                   .getGeometry()
                   .setCoordinates([
-                    coords[0].map(coord => transform(coord, from, to))
+                    coords[0].map((coord) => transform(coord, from, to)),
                   ]);
                 break;
               default:
@@ -171,10 +171,7 @@ class WFSVectorLayer {
   getAllFeatures(data) {
     let features = [];
     let parser = null;
-    const to = this.map
-      .getView()
-      .getProjection()
-      .getCode();
+    const to = this.map.getView().getProjection().getCode();
     const from = this.config.projection;
     const outputFormat = this.config.params.outputFormat;
 
@@ -184,7 +181,7 @@ class WFSVectorLayer {
       // else GML3.
       parser = new WFS({
         gmlFormat:
-          this.config.params.version === "1.0.0" ? new GML2() : new GML3()
+          this.config.params.version === "1.0.0" ? new GML2() : new GML3(),
       });
     }
 
@@ -212,7 +209,7 @@ class WFSVectorLayer {
    */
   getFilteredFeatures(f) {
     if (this.layer.get("filterAttribute") && this.layer.get("filterValue")) {
-      return f.filter(feature => this.filterMethod(feature));
+      return f.filter((feature) => this.filterMethod(feature));
     } else {
       return f;
     }
@@ -284,8 +281,8 @@ class WFSVectorLayer {
   loadData(url) {
     url = this.proxyUrl + url;
 
-    fetch(url, fetchConfig).then(response => {
-      response.text().then(features => {
+    fetch(url, fetchConfig).then((response) => {
+      response.text().then((features) => {
         // Load all features (no filter active - only bbox limitation)
         this.allFeatures = this.getAllFeatures(features);
 

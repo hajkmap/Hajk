@@ -7,7 +7,7 @@ class LayerList extends Component {
     super(props);
     this.state = {
       layers: [],
-      checkedLayers: props.chapter.layers || []
+      checkedLayers: props.chapter.layers || [],
     };
   }
 
@@ -37,13 +37,13 @@ class LayerList extends Component {
   getLayers(layers, callback) {
     callback(
       layers
-        .map(layer => {
+        .map((layer) => {
           return {
             id: layer.id,
-            name: this.lookup(layer.id)
+            name: this.lookup(layer.id),
           };
         })
-        .filter(layer => layer.name !== undefined)
+        .filter((layer) => layer.name !== undefined)
     );
   }
 
@@ -66,21 +66,21 @@ class LayerList extends Component {
 
     function readMapConfig(mapConfig) {
       var layerSwitcherConfig = mapConfig.tools.find(
-          tool => tool.type === "layerswitcher"
+          (tool) => tool.type === "layerswitcher"
         ),
         layers = this.flattern(layerSwitcherConfig.options.groups);
 
-      this.getLayers(layers, lookedUpLayers => {
+      this.getLayers(layers, (lookedUpLayers) => {
         this.setState({
-          layers: lookedUpLayers
+          layers: lookedUpLayers,
         });
       });
     }
 
-    getJson(this.props.config.url_layers).then(layersConfig => {
+    getJson(this.props.config.url_layers).then((layersConfig) => {
       this.layersConfig = layersConfig;
       getJson(this.props.config.url_map + "/" + this.props.map).then(
-        mapConfig => {
+        (mapConfig) => {
           readMapConfig.call(this, mapConfig);
           this.props.onLoaded(layersConfig);
         }
@@ -95,12 +95,12 @@ class LayerList extends Component {
     if (checked) {
       checkedLayers = [...checkedLayers, layer.id];
     } else {
-      checkedLayers = checkedLayers.filter(layerId => layerId !== layer.id);
+      checkedLayers = checkedLayers.filter((layerId) => layerId !== layer.id);
     }
 
     this.setState(
       {
-        checkedLayers: checkedLayers
+        checkedLayers: checkedLayers,
       },
       () => this.props.onUpdate(this.state.checkedLayers)
     );
@@ -109,11 +109,11 @@ class LayerList extends Component {
   render() {
     return (
       <ul className="layer-list-container">
-        {this.state.layers.map(layer => {
+        {this.state.layers.map((layer) => {
           var checked = false;
           if (Array.isArray(this.props.chapter.layers)) {
             checked = !!this.props.chapter.layers.find(
-              layerId => Number(layerId) === Number(layer.id)
+              (layerId) => Number(layerId) === Number(layer.id)
             );
           }
           return (
@@ -121,7 +121,7 @@ class LayerList extends Component {
               checked={checked}
               key={layer.id}
               layer={layer}
-              onChange={checked => {
+              onChange={(checked) => {
                 this.onLayerListItemChanged(checked, layer);
               }}
             />

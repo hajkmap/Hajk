@@ -48,7 +48,7 @@ var defaultState = {
   alertMessage: "",
   content: "",
   confirmAction: () => {},
-  denyAction: () => {}
+  denyAction: () => {},
 };
 /**
  *
@@ -66,12 +66,12 @@ class Application extends Component {
    */
   componentDidMount() {
     this.setState({
-      content: this.props.model.get("content")
+      content: this.props.model.get("content"),
     });
 
     this.props.model.on("change:content", () => {
       this.setState({
-        content: this.props.model.get("content")
+        content: this.props.model.get("content"),
       });
     });
   }
@@ -81,7 +81,7 @@ class Application extends Component {
   resetAlert() {
     this.setState({
       alert: false,
-      alertMessage: ""
+      alertMessage: "",
     });
   }
   /**
@@ -97,7 +97,7 @@ class Application extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       denyAction: () => {
@@ -105,15 +105,15 @@ class Application extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ""
+          alertMessage: "",
         });
-      }
+      },
     };
   }
   /**
@@ -202,7 +202,7 @@ class Application extends Component {
     return React.createElement(content, {
       model: model,
       config: this.props.config[this.state.content],
-      application: this
+      application: this,
     });
   }
   /**

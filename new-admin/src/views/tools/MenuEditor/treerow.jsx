@@ -27,14 +27,14 @@ const getTextField = (value, onChangeFunction, variant) => {
 const styles = () => ({
   treeRowRoot: {
     border: "1px solid rgba(153,164,161,0.5)",
-    borderRadius: "8px"
-  }
+    borderRadius: "8px",
+  },
 });
 
 class TreeRow extends React.Component {
   state = {
     menuItemTitle: this.props.menuItem.title,
-    showWarning: false
+    showWarning: false,
   };
 
   dynamicallyImportIconFonts = () => {
@@ -42,7 +42,7 @@ class TreeRow extends React.Component {
     return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
   };
 
-  getIcon = icon => {
+  getIcon = (icon) => {
     return <Icon>{icon.materialUiIconName}</Icon>;
   };
 
@@ -57,7 +57,7 @@ class TreeRow extends React.Component {
       treeNodeId,
       updateMenuItem,
       availableDocuments,
-      menuItem
+      menuItem,
     } = this.props;
 
     return (
@@ -94,9 +94,9 @@ class TreeRow extends React.Component {
     );
   };
 
-  openSettingsMenu = e => {
+  openSettingsMenu = (e) => {
     this.setState({
-      settingsMenuAnchorEl: e.currentTarget
+      settingsMenuAnchorEl: e.currentTarget,
     });
   };
 
@@ -135,7 +135,7 @@ class TreeRow extends React.Component {
   renderMenuTitle = () => {
     return getTextField(
       this.state.menuItemTitle,
-      e => {
+      (e) => {
         this.setState({ menuItemTitle: e.target.value });
       },
       "standard"
