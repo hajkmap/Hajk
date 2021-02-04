@@ -7,9 +7,6 @@ import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 import AspectRatioIcon from "@material-ui/icons/AspectRatio";
 import { Hidden, Typography, IconButton } from "@material-ui/core";
 
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-
 const styles = (theme) => {
   return {
     header: {
@@ -24,13 +21,6 @@ const styles = (theme) => {
   };
 };
 
-const searchTypes = {
-  DEFAULT: "",
-  JOURNEYS: "Sök Turer",
-  LINES: "Sök Linjer",
-  STOPS: "Sök Hållplatser",
-};
-
 class PanelHeader extends Component {
   static propTypes = {
     allowMaximizedWindow: propTypes.bool.isRequired,
@@ -42,12 +32,6 @@ class PanelHeader extends Component {
     onMinimize: propTypes.func.isRequired,
     title: propTypes.string.isRequired,
   };
-
-  constructor(props) {
-    super(props);
-
-    this.localObserver = this.props.localObserver;
-  }
 
   renderCustomHeaderButtons = () => {
     const { customHeaderButtons } = this.props;

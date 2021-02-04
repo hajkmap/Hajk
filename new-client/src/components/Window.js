@@ -504,13 +504,11 @@ class Window extends React.PureComponent {
             color={color}
             customHeaderButtons={customPanelHeaderButtons}
             globalObserver={this.props.globalObserver}
-            localObserver={this.props.localObserver}
             onClose={this.close}
             onMaximize={this.maximize}
             onMinimize={this.minimize}
             mode={this.state.mode}
             title={title}
-            vtsearch={this.props.vtsearch}
           />
           <section
             className={clsx(
