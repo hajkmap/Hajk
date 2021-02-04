@@ -179,6 +179,7 @@ class TableOfContents extends React.PureComponent {
           className={classes.collapseContainer}
           in={expanded}
           id="expansion-panel-content"
+          aria-hidden={!expanded}
         >
           <Grid container spacing={0}>
             {this.renderChapters(activeDocument)}
