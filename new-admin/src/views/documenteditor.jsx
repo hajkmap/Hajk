@@ -11,6 +11,7 @@ import RemoveIcon from "@material-ui/icons/Remove";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import CancelIcon from "@material-ui/icons/Cancel";
 import NoteAddIcon from "@material-ui/icons/NoteAdd";
+import EditIcon from "@material-ui/icons/Edit";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
 import Chip from "@material-ui/core/Chip";
@@ -79,9 +80,11 @@ class DocumentEditor extends Component {
       newTableOfContentsLevels: undefined,
       newTableOfContentsTitle: undefined,
       tableOfContentsModal: false,
-      tableOfContents: {}
+      tableOfContents: {},
+      editTitle: false
     };
     this.editors = [];
+    this.documentTitle = React.createRef();
   }
 
   load(document) {
@@ -92,6 +95,7 @@ class DocumentEditor extends Component {
             {
               data: data,
               documents: documents,
+              documentTitle: data.title,
               selectedDocument: document || documents[0],
               tableOfContents: {
                 expanded: data.tableOfContents
@@ -833,6 +837,62 @@ class DocumentEditor extends Component {
     );
   }
 
+  toggleTitleEdit = () => {
+    this.setState({
+      editTitle: !this.state.editTitle
+    });
+  };
+
+  saveTitle() {
+    this.setState({
+      data: {
+        ...this.state.data,
+        title: this.state.documentTitle
+      },
+      editTitle: false
+    });
+  }
+
+  renderEditTitle() {
+    return (
+      <>
+        <h2>Titel på dokument</h2>
+        <TextField
+          id="documentTitle"
+          style={{ margin: "4px" }}
+          type="text"
+          value={this.state.documentTitle}
+          InputProps={{
+            readOnly: !this.state.editTitle
+          }}
+          variant={this.state.editTitle ? "outlined" : "filled"}
+          onChange={e => {
+            this.setState({
+              documentTitle: e.target.value
+            });
+          }}
+        />
+        {this.state.editTitle ? (
+          <Button
+            variant="contained"
+            style={{ margin: "4px" }}
+            onClick={() => this.saveTitle()}
+          >
+            <DoneIcon />
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            style={{ margin: "4px" }}
+            onClick={() => this.toggleTitleEdit()}
+          >
+            <EditIcon />
+          </Button>
+        )}
+      </>
+    );
+  }
+
   render() {
     return (
       <div>
@@ -883,6 +943,7 @@ class DocumentEditor extends Component {
             Ta bort
           </ColorButtonRed>
         </div>
+        <div className="margined">{this.renderEditTitle()}</div>
         <div className="chapters">{this.renderData()}</div>
       </div>
     );
