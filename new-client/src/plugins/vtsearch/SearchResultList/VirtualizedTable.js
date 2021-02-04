@@ -8,11 +8,11 @@ import { SortIndicator } from "react-virtualized";
 import "react-virtualized/styles.css";
 import { Typography, Tooltip } from "@material-ui/core";
 
-const styles = theme => ({
+const styles = (theme) => ({
   flexContainer: {
     display: "flex",
     alignItems: "center",
-    boxSizing: "border-box"
+    boxSizing: "border-box",
   },
 
   table: {
@@ -24,24 +24,24 @@ const styles = theme => ({
       borderBottom: `1px solid ${theme.palette.common.black}`,
       textTransform: "none",
       padding: theme.spacing(0),
-      paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
-    }
+      paddingRight: theme.direction === "rtl" ? "0px !important" : undefined,
+    },
   },
 
   tableRowHover: {
     "&:hover": {
-      backgroundColor: theme.palette.grey[200]
-    }
+      backgroundColor: theme.palette.grey[200],
+    },
   },
 
   tableRow: {
     cursor: "pointer",
     border: `1px solid ${theme.palette.grey[200]}`,
     whiteSpace: "wrap",
-    outline: "none"
+    outline: "none",
   },
   tableRowSelected: {
-    background: theme.palette.primary.main
+    background: theme.palette.primary.main,
   },
   headerColumn: {
     whiteSpace: "pre-wrap",
@@ -55,7 +55,7 @@ const styles = theme => ({
     paddingBottom: theme.spacing(0),
     minWidth: theme.spacing(0),
     lineHeight: 1,
-    borderBottom: theme.spacing(0)
+    borderBottom: theme.spacing(0),
   },
   columnStyle: {
     whiteSpace: "pre-wrap",
@@ -64,15 +64,15 @@ const styles = theme => ({
     justifyContent: "center",
     cursor: "pointer",
     wordBreak: "break-all",
-    borderBottom: theme.spacing(0)
+    borderBottom: theme.spacing(0),
   },
   rowCell: {
     marginRight: 0,
     border: "none",
     borderBottom: 0,
     textAlign: "center",
-    flex: 1
-  }
+    flex: 1,
+  },
 });
 
 const headerRowIndex = -1;
@@ -89,7 +89,7 @@ class VirtualizedTable extends React.PureComponent {
     headerHeight: 40,
     rowHeight: 30,
     sortable: true,
-    selectedRow: headerRowIndex
+    selectedRow: headerRowIndex,
   };
 
   getRowClassName = ({ index }) => {
@@ -182,10 +182,10 @@ class VirtualizedTable extends React.PureComponent {
                 dataKey !== "id" && (
                   <Column
                     key={dataKey}
-                    headerRenderer={headerProps =>
+                    headerRenderer={(headerProps) =>
                       this.headerRenderer({
                         ...headerProps,
-                        columnIndex: index
+                        columnIndex: index,
                       })
                     }
                     className={classes.columnStyle}

@@ -3,8 +3,8 @@ import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import VirtualizedTable from "./VirtualizedTable";
 
-const styles = theme => ({
-  paper: { height: 240, boxShadow: "none" }
+const styles = (theme) => ({
+  paper: { height: 240, boxShadow: "none" },
 });
 
 /**
@@ -16,7 +16,7 @@ const styles = theme => ({
  */
 class SummaryTable extends React.Component {
   state = {
-    rows: this.props.rows
+    rows: this.props.rows,
   };
 
   render = () => {

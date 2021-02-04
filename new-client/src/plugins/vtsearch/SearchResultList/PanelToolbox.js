@@ -16,30 +16,30 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
  * @extends {React.PureComponent}
  */
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     iconButtonRoot: {
       color: theme.palette.common.white,
-      padding: 0
+      padding: 0,
     },
     expandOpen: {
-      transform: "rotate(180deg)"
-    }
+      transform: "rotate(180deg)",
+    },
   };
 };
 class PanelToolbox extends React.PureComponent {
   state = {
     minimizeVisible: true,
     maximizeVisible: true,
-    normalVisible: false
+    normalVisible: false,
   };
 
   static propTypes = {
-    options: PropTypes.object.isRequired
+    options: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
-    options: {}
+    options: {},
   };
 
   minimize = () => {
@@ -47,7 +47,7 @@ class PanelToolbox extends React.PureComponent {
     this.setState({
       maximizeVisible: true,
       minimizeVisible: false,
-      normalVisible: true
+      normalVisible: true,
     });
     localObserver.publish("search-result-list-minimized");
   };
@@ -57,7 +57,7 @@ class PanelToolbox extends React.PureComponent {
     this.setState({
       maximizeVisible: false,
       minimizeVisible: true,
-      normalVisible: true
+      normalVisible: true,
     });
     localObserver.publish("search-result-list-maximized");
   };
@@ -67,7 +67,7 @@ class PanelToolbox extends React.PureComponent {
     this.setState({
       maximizeVisible: true,
       minimizeVisible: true,
-      normalVisible: false
+      normalVisible: false,
     });
     localObserver.publish("search-result-list-normal");
   };
@@ -77,7 +77,7 @@ class PanelToolbox extends React.PureComponent {
     this.setState({
       maximizeVisible: false,
       minimizeVisible: false,
-      normalVisible: true
+      normalVisible: true,
     });
     localObserver.publish("search-result-list-close");
   };
