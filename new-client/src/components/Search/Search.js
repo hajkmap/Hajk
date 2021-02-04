@@ -86,7 +86,7 @@ class Search extends React.PureComponent {
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök i området",
+      name: "Sök inom vyn",
       icon: <Crop54Icon />,
       type: "Extent",
       enabled: this.props.options.enableExtentSearch ?? true,

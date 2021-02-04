@@ -744,7 +744,7 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label className="long-label" htmlFor="enableExtentSearch">
-              Sök i området
+              Sök inom vyn
             </label>
           </div>
 
