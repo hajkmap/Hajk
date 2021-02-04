@@ -31,7 +31,6 @@ import PresetLinks from "../controls/PresetLinks";
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
 import {
-  Backdrop,
   Box,
   Divider,
   Drawer,
@@ -162,9 +161,6 @@ const styles = (theme) => {
     },
     drawerLiveContent: {
       backgroundColor: theme.palette.background.default,
-    },
-    backdrop: {
-      zIndex: theme.zIndex.drawer - 1, // Carefully selected to be above Window but below Drawer
     },
     widgetItem: {
       width: "220px",
@@ -764,11 +760,22 @@ class App extends React.PureComponent {
           {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
             <Drawer
               open={this.state.drawerVisible}
-              // NB: we can't simply toggle between permanent|temporary,
-              // as the temporary mode unmounts element from DOM and
-              // re-mounts it the next time, so we would re-rendering
-              // our plugins all the time.
-              variant="persistent"
+              ModalProps={{
+                hideBackdrop: this.state.drawerPermanent, //Don't show backdrop if drawer is permanent
+                disableEnforceFocus: true, //Dont enforce focus to be able to handle elements underneath modal
+                onEscapeKeyDown: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                },
+                style: {
+                  //Needs to be set to be able to handle elements underneath modal
+                  position: this.state.drawerPermanent ? "initial" : "fixed",
+                },
+                keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
+                onBackdropClick: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                },
+              }}
+              variant="temporary"
               classes={{
                 paper: classes.drawerBackground,
               }}
@@ -777,15 +784,6 @@ class App extends React.PureComponent {
               <Divider />
               {this.renderAllDrawerContent()}
             </Drawer>
-          )}
-          {clean === false && (
-            <Backdrop
-              open={this.state.drawerVisible && !this.state.drawerPermanent}
-              className={classes.backdrop}
-              onClick={(e) => {
-                this.globalObserver.publish("core.hideDrawer");
-              }}
-            />
           )}
           {clean === false && (
             <Introduction
