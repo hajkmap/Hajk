@@ -5,7 +5,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import FullscreenIcon from "@material-ui/icons/Fullscreen";
 import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 import AspectRatioIcon from "@material-ui/icons/AspectRatio";
-import { Hidden, Typography, IconButton } from "@material-ui/core";
+import { Hidden, Typography, IconButton, Box } from "@material-ui/core";
 
 const styles = (theme) => {
   return {
@@ -66,7 +66,7 @@ class PanelHeader extends Component {
         <Typography component="h1" variant="button" align="left" noWrap={true}>
           {this.props.title}
         </Typography>
-        <nav>
+        <Box display="flex" component="nav">
           {this.shouldRenderCustomHeaderButtons() &&
             this.renderCustomHeaderButtons()}
           {mode !== "maximized" && // If window isn't in fit screen mode currently…
@@ -96,7 +96,7 @@ class PanelHeader extends Component {
             <Typography variant="srOnly">Stäng fönster</Typography>
             <CloseIcon />
           </IconButton>
-        </nav>
+        </Box>
       </header>
     );
   }
