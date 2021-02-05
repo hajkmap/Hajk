@@ -10,9 +10,6 @@ import InactivePolygon from "../img/polygonmarkering.png";
 import InactiveRectangle from "../img/rektangelmarkering.png";
 import ActivePolygon from "../img/polygonmarkering-blue.png";
 import ActiveRectangle from "../img/rektangelmarkering-blue.png";
-import DisabledPolygon from "../img/polygonmarkering-lightgrey.png";
-import DisabledRectangle from "../img/rektangelmarkering-ligthgrey.png";
-import CardMedia from "@material-ui/core/CardMedia";
 
 import {
   MuiPickersUtilsProvider,
@@ -341,7 +338,7 @@ class Journeys extends React.PureComponent {
       }
     );
     if (this.state.isPolygonActive) {
-      this.localObserver.publish("activate-search", () => { });
+      this.localObserver.publish("activate-search", () => {});
     }
   };
 
@@ -359,7 +356,7 @@ class Journeys extends React.PureComponent {
       }
     );
     if (this.state.isRectangleActive) {
-      this.localObserver.publish("activate-search", () => { });
+      this.localObserver.publish("activate-search", () => {});
     }
   };
 

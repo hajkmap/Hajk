@@ -196,6 +196,16 @@ class VTSearch extends React.PureComponent {
         this.localObserver.publish("vtsearch-result-done", searchResult);
       }
     );
+
+    this.globalObserver.subscribe("window-minimize", (title) => {
+      if (title === this.props.options.title)
+        this.globalObserver.publish("clear-autocomplete");
+    });
+
+    this.globalObserver.subscribe("window-close", (title) => {
+      if (title === this.props.options.title)
+        this.globalObserver.publish("clear-autocomplete");
+    });
   };
 
   handleExpandClick = () => {
@@ -303,7 +313,7 @@ class VTSearch extends React.PureComponent {
           (clsx(classes.expand, {
             [classes.expandOpen]: this.state.expanded,
           }),
-            classes.dropDownIconButton)
+          classes.dropDownIconButton)
         }
         onClick={this.handleExpandClick}
         aria-expanded={this.state.expanded}

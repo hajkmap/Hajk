@@ -334,6 +334,7 @@ export default class SearchModel {
             attributesToDisplayFormat.key
           )
             return true;
+        return false;
       }
     );
 

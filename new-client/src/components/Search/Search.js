@@ -145,6 +145,8 @@ class Search extends React.PureComponent {
   };
 
   bindSubscriptions = () => {
+    const { globalObserver } = this.props.app.appModel;
+
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
@@ -197,6 +199,10 @@ class Search extends React.PureComponent {
           anchorOrigin: { vertical: "top", horizontal: "center" },
         }
       );
+    });
+
+    globalObserver.subscribe("clear-autocomplete", () => {
+      this.handleOnClear();
     });
   };
 

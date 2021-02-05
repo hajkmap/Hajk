@@ -38,6 +38,7 @@ class AttributeTable extends React.Component {
           sortBy: sortAttribute,
           sortDirection: SortDirection.ASC,
         });
+        return null;
       });
     }
   }
@@ -249,9 +250,8 @@ class AttributeTable extends React.Component {
   };
 
   // Lägg in en label från toolconfig i searchresult
-
   render() {
-    const { height, searchResult, rowHeight, toolConfig } = this.props;
+    const { height, searchResult, rowHeight } = this.props;
     const features = this.getFeaturesFromSearchResult(searchResult);
     return (
       <Paper style={{ height: height }}>
