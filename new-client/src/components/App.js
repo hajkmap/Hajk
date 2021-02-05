@@ -6,7 +6,7 @@ import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
-
+import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import AppModel from "../models/AppModel.js";
 
 import Window from "./Window.js";
@@ -656,6 +656,7 @@ class App extends React.PureComponent {
             parent={this}
             title="Meddelande"
           />
+          <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
           <div
             id="appBox"
             className={cslx(classes.flexBox, {

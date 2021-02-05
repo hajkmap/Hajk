@@ -86,7 +86,12 @@ function DrawerToggleButtons({
 
     // Caption should be hidden on small screens
     return (
-      <ToggleButton key={value} value={value} className={classes.button}>
+      <ToggleButton
+        id={value}
+        key={value}
+        value={value}
+        className={classes.button}
+      >
         {icon}
         <Hidden smDown>{caption}</Hidden>
       </ToggleButton>
