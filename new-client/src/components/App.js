@@ -616,11 +616,6 @@ class App extends React.PureComponent {
         ? config.mapConfig.map.showCookieNotice
         : true;
 
-    const searchPlugins = [
-      this.appModel.plugins.search,
-      this.appModel.plugins.vtsearch,
-    ];
-
     const defaultCookieNoticeMessage = this.isString(
       this.props.config.mapConfig.map.defaultCookieNoticeMessage
     )
