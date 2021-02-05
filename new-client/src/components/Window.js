@@ -274,9 +274,11 @@ class Window extends React.PureComponent {
   }
 
   close = (e) => {
-    const { onClose } = this.props;
+    const { onClose, globalObserver, title } = this.props;
     this.latestWidth = this.rnd.getSelfElement().clientWidth;
     if (onClose) onClose();
+
+    globalObserver.publish("window-close", title);
   };
 
   fit = (target) => {
@@ -332,7 +334,13 @@ class Window extends React.PureComponent {
   };
 
   maximize = () => {
-    const { onMaximize, onResize, allowMaximizedWindow } = this.props;
+    const {
+      globalObserver,
+      onMaximize,
+      onResize,
+      allowMaximizedWindow,
+      title,
+    } = this.props;
 
     getIsMobile() && this.rnd.updatePosition({ y: 0 });
 
@@ -360,10 +368,12 @@ class Window extends React.PureComponent {
     // Run callbacks
     typeof onMaximize === "function" && onMaximize();
     typeof onResize === "function" && onResize();
+
+    globalObserver.publish("window-maximize", title);
   };
 
   minimize = () => {
-    const { onMinimize, onResize } = this.props;
+    const { globalObserver, onMinimize, onResize, title } = this.props;
 
     getIsMobile() &&
       this.rnd.updatePosition({
@@ -380,6 +390,8 @@ class Window extends React.PureComponent {
     // Run callbacks
     typeof onMinimize === "function" && onMinimize();
     typeof onResize === "function" && onResize();
+
+    globalObserver.publish("window-minimize", title);
   };
 
   bringToFront() {

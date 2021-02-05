@@ -133,6 +133,7 @@
     {
       "type": "layerswitcher",
       "options": {
+        "enableOSM": true,
         "baselayers": [
           {
             "id": "49",

@@ -10,9 +10,6 @@ import InactivePolygon from "../img/polygonmarkering.png";
 import InactiveRectangle from "../img/rektangelmarkering.png";
 import ActivePolygon from "../img/polygonmarkering-blue.png";
 import ActiveRectangle from "../img/rektangelmarkering-blue.png";
-import DisabledPolygon from "../img/polygonmarkering-lightgrey.png";
-import DisabledRectangle from "../img/rektangelmarkering-ligthgrey.png";
-import CardMedia from "@material-ui/core/CardMedia";
 
 import {
   MuiPickersUtilsProvider,
@@ -378,6 +375,14 @@ class Journeys extends React.PureComponent {
     });
   };
 
+  disableDrag = () => {
+    this.localObserver.publish("vtsearch-dragging-enabled", false);
+  };
+
+  enableDrag = () => {
+    this.localObserver.publish("vtsearch-dragging-enabled", true);
+  };
+
   renderFromDateSection = () => {
     const { classes } = this.props;
     return (
@@ -397,6 +402,8 @@ class Journeys extends React.PureComponent {
             KeyboardButtonProps={{
               "aria-label": "change time",
             }}
+            onOpen={this.disableDrag}
+            onClose={this.enableDrag}
           />
         </Grid>
         <KeyboardDatePicker
@@ -410,6 +417,8 @@ class Journeys extends React.PureComponent {
           KeyboardButtonProps={{
             "aria-label": "change date",
           }}
+          onOpen={this.disableDrag}
+          onClose={this.enableDrag}
         />
       </>
     );
@@ -433,6 +442,8 @@ class Journeys extends React.PureComponent {
             KeyboardButtonProps={{
               "aria-label": "change time",
             }}
+            onOpen={this.disableDrag}
+            onClose={this.enableDrag}
           />
         </Grid>
         <KeyboardDatePicker
@@ -445,6 +456,8 @@ class Journeys extends React.PureComponent {
           KeyboardButtonProps={{
             "aria-label": "change date",
           }}
+          onOpen={this.disableDrag}
+          onClose={this.enableDrag}
         />
         {this.showErrorMessage()}
       </>

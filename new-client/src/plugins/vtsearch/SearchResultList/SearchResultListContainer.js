@@ -425,7 +425,6 @@ class SearchResultListContainer extends React.Component {
     const { classes, windowContainerId } = this.props;
     let searchResults = this.getSearchResults();
     this.handleMapResizeWhenRendering();
-
     return (
       <Rnd
         style={{
@@ -477,10 +476,12 @@ class SearchResultListContainer extends React.Component {
           topRight: false,
         }}
       >
-        {this.renderTabsHeader(searchResults)}
-        {searchResults.map((searchResult) => {
-          return this.renderSearchResultAsTabContent(searchResult);
-        })}
+        <section>
+          {this.renderTabsHeader(searchResults)}
+          {searchResults.map((searchResult) => {
+            return this.renderSearchResultAsTabContent(searchResult);
+          })}
+        </section>
       </Rnd>
     );
   };

@@ -121,6 +121,7 @@ class VTSearch extends React.PureComponent {
     activeSearchTool: searchTypes.DEFAULT,
     loading: false,
     appLoaded: false,
+    draggingEnabled: true,
   };
 
   static propTypes = {
@@ -174,6 +175,10 @@ class VTSearch extends React.PureComponent {
       });
     });
 
+    this.localObserver.subscribe("vtsearch-dragging-enabled", (enabled) => {
+      this.setState({ draggingEnabled: enabled });
+    });
+
     this.globalObserver.subscribe(
       "search.featureCollectionClicked",
       (searchResult) => {
@@ -191,6 +196,16 @@ class VTSearch extends React.PureComponent {
         this.localObserver.publish("vtsearch-result-done", searchResult);
       }
     );
+
+    this.globalObserver.subscribe("window-minimize", (title) => {
+      if (title === this.props.options.title)
+        this.globalObserver.publish("clear-autocomplete");
+    });
+
+    this.globalObserver.subscribe("window-close", (title) => {
+      if (title === this.props.options.title)
+        this.globalObserver.publish("clear-autocomplete");
+    });
   };
 
   handleExpandClick = () => {
@@ -355,6 +370,7 @@ class VTSearch extends React.PureComponent {
           left: undefined,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
+          draggingEnabled: this.state.draggingEnabled,
         }}
       >
         <>
