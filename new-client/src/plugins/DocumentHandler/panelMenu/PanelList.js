@@ -37,7 +37,7 @@ class PanelList extends React.PureComponent {
   render() {
     const { menu } = this.props;
     return (
-      <List disablePadding component="nav">
+      <List disablePadding role="navigation" component="nav">
         {menu.map((item) => {
           return (
             <React.Fragment key={item.id}>

@@ -93,13 +93,13 @@ class PrintWindow extends React.PureComponent {
   checkIfContentIsHtag = () => {};
 
   checkIfContentIsChapterTitle = (node) => {
-    if (node.id === "chapter-header") {
+    if (node.getAttribute("data-type") === "chapter-header") {
       return true;
     } else {
       return [...node.children].some((child) => {
         return (
           ["H1", "H2", "H3", "H4", "H5"].includes(child.tagName) &&
-          child.id === "chapter-header"
+          node.getAttribute("data-type") === "chapter-header"
         );
       });
     }

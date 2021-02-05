@@ -63,7 +63,7 @@ class PanelHeader extends Component {
         className={classes.header}
         style={{ borderColor: this.props.color }} // Allow for dynamic override of accent border color
       >
-        <Typography variant="button" align="left" noWrap={true}>
+        <Typography component="h1" variant="button" align="left" noWrap={true}>
           {this.props.title}
         </Typography>
         <nav>
