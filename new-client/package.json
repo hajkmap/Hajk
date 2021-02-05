@@ -1,6 +1,6 @@
 {
   "name": "hajk-client",
-  "version": "3.3.0",
+  "version": "3.5.0",
   "homepage": ".",
   "private": true,
   "scripts": {
@@ -67,8 +67,8 @@
     "html-react-parser": "^0.14.3",
     "html2canvas": "^1.0.0-rc.7",
     "html2json": "^1.0.2",
-    "intro.js": "^2.9.3",
-    "intro.js-react": "^0.2.0",
+    "intro.js": "^3.2.1",
+    "intro.js-react": "^0.3.0",
     "jspdf": "^1.5.3",
     "jsts": "^2.5.0",
     "load-google-maps-api": "^2.0.2",

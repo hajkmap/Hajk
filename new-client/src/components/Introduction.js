@@ -3,6 +3,7 @@ import { Steps } from "intro.js-react";
 import PropTypes from "prop-types";
 
 import "intro.js/introjs.css";
+import "intro.js/themes/introjs-modern.css";
 
 /**
  * @summary Renders a guide that introduces new users to features present in Hajk.
@@ -33,34 +34,40 @@ class Introduction extends React.PureComponent {
 
   predefinedSteps = [
     {
-      element: "#map",
+      title: "Välkommen till Hajk! 👋",
       intro:
-        "<b>Välkommen till Hajk!</b> <br /><br />Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!",
+        "Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!",
     },
     {
+      title: "Verktygspanel",
       element: "header > div:first-child",
-      intro: "Med hjälp av knappen här uppe tar du fram sidopanelen.",
+      intro: "Med hjälp av knappen här uppe tar du fram verktygspanelen.",
     },
     {
-      element: "#searchbox",
+      title: "Sökruta",
+      element: '[class*="searchContainer"]',
       intro:
         "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt ställe i kartan.",
     },
     {
-      element: "#spatialSearchMenu",
+      title: "Fler sökverktyg",
+      element: '[name="searchOptions"]',
       intro: "Under den här knappen hittar du fler avancerade sökalternativ.",
     },
     {
+      title: "Kartkontroller",
       element: "#controls-column",
       intro:
         "Längst ut i den högra delen av skärmen finns olika kontroller som du använder för att navigera i kartan.",
     },
     {
+      title: "Fönster",
       element: '#windows-container > div[style*="display: block"]', // My favorite selector. Selects the first visible Window, so if there's a plugin Window open, we can add intro text to it.
       intro:
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
+      title: "Widget-knapp",
       element: "#left-column > div > button",
       intro:
         "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!",
@@ -77,18 +84,25 @@ class Introduction extends React.PureComponent {
      * which wouldn't be nice.
      */
     this.props.globalObserver.subscribe("core.appLoaded", () => {
-      // First check if we have any steps in our config
-      const { experimentalIntroductionSteps } = this.props;
-      // We must have at least 2 elements in the array in order to properly show intro guide
-      const steps =
-        experimentalIntroductionSteps.length >= 2
-          ? experimentalIntroductionSteps
-          : this.predefinedSteps;
+      // Allow a short wait so that everything renders first
+      setTimeout(() => {
+        // First check if we have any steps in our config
+        const { experimentalIntroductionSteps } = this.props;
+        // We must have at least 2 elements in the array in order to properly show intro guide
+        const steps =
+          experimentalIntroductionSteps.length >= 2
+            ? experimentalIntroductionSteps
+            : this.predefinedSteps;
 
-      const filteredSteps = steps.filter(
-        (s) => document.querySelector(s?.element) !== null
-      );
-      this.setState({ steps: filteredSteps });
+        const filteredSteps = steps.filter((s) => {
+          return (
+            s.element === undefined ||
+            document.querySelector(s?.element) !== null
+          );
+        });
+
+        this.setState({ steps: filteredSteps });
+      }, 100);
     });
 
     this.props.globalObserver.subscribe("core.showIntroduction", () => {
@@ -101,7 +115,6 @@ class Introduction extends React.PureComponent {
   }
 
   disableSteps = () => {
-    this.setState({ stepsEnabled: false, forceShow: false });
     // Upon completion/closing, set a flag that won't show this guide again
     window.localStorage.setItem("introductionShown", 1);
   };
@@ -123,33 +136,11 @@ class Introduction extends React.PureComponent {
           steps={steps}
           initialStep={initialStep}
           onExit={this.disableSteps}
-          ref={(steps) => (this.localSteps = steps)}
-          onBeforeChange={(nextStepIndex) => {
-            // Ensure that we always use the updated list of steps, necessary for dynamic elements
-            if (nextStepIndex) {
-              this.localSteps.updateStepElement(nextStepIndex);
-            }
-          }}
-          onAfterChange={(nextStepIndex) => {
-            // TODO: When https://github.com/HiDeoo/intro.js-react/issues/35 is solved, we can remove this nasty hack.
-            // It should be easier to hide prev/next buttons, but this works for now.
-            if (nextStepIndex === this.localSteps?.props.steps.length - 1) {
-              document
-                .querySelector(".introjs-donebutton")
-                .classList.remove("introjs-skipbutton");
-              document.querySelector(".introjs-prevbutton").style.display =
-                "none";
-              document.querySelector(".introjs-nextbutton").style.display =
-                "none";
-              document.querySelector(".introjs-bullets").style.display = "none";
-            }
-          }}
           options={{
             exitOnOverlayClick: false,
             nextLabel: "Nästa",
             prevLabel: "Föregående",
-            skipLabel: "Hoppa över",
-            doneLabel: "Klart",
+            doneLabel: "Klart!",
           }}
         />
       )

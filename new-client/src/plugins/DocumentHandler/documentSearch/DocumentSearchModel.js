@@ -1,6 +1,7 @@
 import MatchSearch from "./MatchSearch";
 import { v4 as uuidv4 } from "uuid";
 import { splitAndTrimOnCommas } from "../utils/helpers";
+import { decodeCommas } from "../../../utils/StringCommaCoder";
 
 export default class DocumentSearchModel {
   constructor(settings) {
@@ -157,7 +158,7 @@ export default class DocumentSearchModel {
   decodePotentialSpecialCharsFromFeatureProps = (searchCombinations) => {
     return searchCombinations.map((combination) => {
       return combination.map((word) => {
-        return decodeURIComponent(word);
+        return decodeCommas(word);
       });
     });
   };

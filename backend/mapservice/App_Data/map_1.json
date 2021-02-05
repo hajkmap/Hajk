@@ -173,19 +173,6 @@
       "index": 8
     },
     {
-      "type": "information",
-      "options": {
-        "headerText": "Om kartan",
-        "text": "Här kan man konfigurera och lägga in information om kartan.",
-        "buttonText": "",
-        "title": "",
-        "visibleAtStart": false,
-        "showInfoOnce": false,
-        "visibleForGroups": []
-      },
-      "index": 9
-    },
-    {
       "type": "edit",
       "options": {
         "target": "toolbar",
@@ -206,7 +193,7 @@
           ""
         ],
         "scale": "",
-        "markerImg": "marker.png",
+        "markerImg": "",
         "delayBeforeAutoSearch": 300,
         "searchBarPlaceholder": "Sök...",
         "enablePolygonSearch": true,

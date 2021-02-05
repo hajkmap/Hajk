@@ -14,6 +14,7 @@ import WarningIcon from "@material-ui/icons/Warning";
 import SearchResultsContainer from "./searchResults/SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
+import { decodeCommas } from "../../utils/StringCommaCoder";
 import {
   CircularProgress,
   IconButton,
@@ -267,7 +268,7 @@ class SearchBar extends React.PureComponent {
           searchActive === "draw"
         }
         autoComplete
-        value={decodeURIComponent(searchString)}
+        value={decodeCommas(searchString)}
         selectOnFocus
         open={autoCompleteOpen}
         disableClearable
@@ -287,7 +288,7 @@ class SearchBar extends React.PureComponent {
                   <Grid item xs={12}>
                     {this.getHighlightedACE(
                       searchString,
-                      decodeURIComponent(option.autocompleteEntry)
+                      decodeCommas(option.autocompleteEntry)
                     )}
                   </Grid>
                   <Grid item xs={12}>
@@ -300,7 +301,7 @@ class SearchBar extends React.PureComponent {
         }}
         getOptionLabel={(option) => {
           return option?.autocompleteEntry?.length > 0
-            ? decodeURIComponent(option?.autocompleteEntry)
+            ? decodeCommas(option?.autocompleteEntry)
             : option;
         }}
         options={autocompleteList}
