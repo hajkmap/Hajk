@@ -352,13 +352,16 @@ class SearchBar extends React.PureComponent {
     return (
       <TextField
         {...params}
-        label={undefined}
+        label={<Typography variant="srOnly">Sök</Typography>}
         variant={width === "xs" ? "standard" : "outlined"}
         placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
+        InputLabelProps={{ shrink: true }}
         InputProps={{
           ...params.InputProps,
           ...disableUnderline,
+          style: { margin: 0 },
+          notched: width === "xs" ? null : false,
           endAdornment: (
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}

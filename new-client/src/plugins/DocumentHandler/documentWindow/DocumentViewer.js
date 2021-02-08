@@ -61,7 +61,7 @@ class DocumentViewer extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.scrollElementRef = React.createRef();
+    this.documentViewerRef = React.createRef();
     this.setScrollButtonLimit();
     this.bindSubscriptions();
   }
@@ -82,11 +82,13 @@ class DocumentViewer extends React.PureComponent {
       tried using react life cycle methods but is, for some reason, not working*/
       setTimeout(() => {
         chapter.scrollRef.current.scrollIntoView();
+        this.documentViewerRef.current.focus();
       }, 100);
     });
 
     localObserver.subscribe("scroll-to-top", () => {
       this.scrollToTop();
+      this.documentViewerRef.current.focus();
     });
   };
 
@@ -112,7 +114,7 @@ class DocumentViewer extends React.PureComponent {
   };
 
   scrollToTop = () => {
-    this.scrollElementRef.current.scrollTop = 0;
+    this.documentViewerRef.current.scrollTop = 0;
   };
 
   renderScrollToTopButton = () => {
@@ -134,7 +136,7 @@ class DocumentViewer extends React.PureComponent {
 
   selectAllText = () => {
     let range = document.createRange();
-    range.selectNode(this.scrollElementRef.current);
+    range.selectNode(this.documentViewerRef.current);
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
   };
@@ -234,7 +236,7 @@ class DocumentViewer extends React.PureComponent {
             }
           }}
           onScroll={this.onScroll}
-          ref={this.scrollElementRef}
+          ref={this.documentViewerRef}
           className={classes.gridContainer}
           container
         >

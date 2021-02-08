@@ -375,7 +375,7 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
     <Box data-position={image.position} className={positioningClass}>
       <CardMedia
         onClick={onClickCallback}
-        alt={image.altValue}
+        alt={image.altValue || ""}
         classes={{ media: classes.media }}
         aria-describedby={getDescribedByAttribute()}
         component="img"

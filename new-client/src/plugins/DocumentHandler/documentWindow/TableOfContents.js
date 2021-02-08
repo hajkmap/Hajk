@@ -5,6 +5,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { withTheme } from "@material-ui/core/styles";
 import {
   Grid,
+  Button,
   List,
   ListItem,
   ListItemText,
@@ -43,6 +44,7 @@ function NestedListItemRaw(props) {
   return (
     <ListItem
       component="li"
+      button
       size="small"
       dense
       onClick={props.onCLick}
@@ -52,11 +54,7 @@ function NestedListItemRaw(props) {
         paddingLeft: props.theme.spacing(props.level * 3),
       }}
     >
-      <ListItemText
-        className={classes.listItemText}
-        role="link"
-        onClick={props.onCLick}
-      >
+      <ListItemText className={classes.listItemText}>
         {props.children}
       </ListItemText>
     </ListItem>
@@ -179,6 +177,7 @@ class TableOfContents extends React.PureComponent {
           className={classes.collapseContainer}
           in={expanded}
           id="expansion-panel-content"
+          aria-hidden={!expanded}
         >
           <Grid container spacing={0}>
             {this.renderChapters(activeDocument)}
