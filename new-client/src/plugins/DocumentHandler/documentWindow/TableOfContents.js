@@ -5,7 +5,6 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { withTheme } from "@material-ui/core/styles";
 import {
   Grid,
-  Button,
   List,
   ListItem,
   ListItemText,
