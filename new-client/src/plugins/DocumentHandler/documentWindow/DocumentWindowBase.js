@@ -177,7 +177,6 @@ class DocumentWindowBase extends React.PureComponent {
         this.bindSubscriptions();
 
         if (this.shouldShowDocumentOnStart()) {
-          console.log(this.props.options, "options");
           localObserver.publish("set-active-document", {
             documentName: this.props.options.documentOnStart,
             headerIdentifier: null,

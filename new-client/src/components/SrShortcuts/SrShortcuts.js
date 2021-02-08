@@ -3,7 +3,7 @@ import { List, ListItem, Link } from "@material-ui/core";
 
 /*
  * @summary Small component to render a shortcut-menu high up in the DOM for screen readers
- * @description The purpose of the comonent is to make the site more accessible by giving screen readers
+ * @description The purpose of the component is to make the site more accessible by giving screen readers
  * the option to skip "forward" to any interesting sections instead of reading the DOM from the top
  *
  * Using globalobserver anyone can add shortcuts for screen readers high up in the DOM

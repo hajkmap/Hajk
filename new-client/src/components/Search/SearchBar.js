@@ -352,7 +352,7 @@ class SearchBar extends React.PureComponent {
     return (
       <TextField
         {...params}
-        label={<Typography variant="srOnly">dsadsad</Typography>}
+        label={<Typography variant="srOnly">Sök</Typography>}
         variant={width === "xs" ? "standard" : "outlined"}
         placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
