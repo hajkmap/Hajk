@@ -17,6 +17,10 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     border: 0,
+    color:
+      theme.palette.type === "dark"
+        ? theme.palette.common.white
+        : theme.palette.action.active,
   },
   icon: {
     [theme.breakpoints.up("md")]: {
@@ -82,7 +86,12 @@ function DrawerToggleButtons({
 
     // Caption should be hidden on small screens
     return (
-      <ToggleButton key={value} value={value} className={classes.button}>
+      <ToggleButton
+        id={value}
+        key={value}
+        value={value}
+        className={classes.button}
+      >
         {icon}
         <Hidden smDown>{caption}</Hidden>
       </ToggleButton>
