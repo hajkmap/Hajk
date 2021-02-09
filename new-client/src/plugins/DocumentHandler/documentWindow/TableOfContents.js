@@ -9,6 +9,7 @@ import {
   ListItem,
   ListItemText,
   Typography,
+  Button,
   Collapse,
 } from "@material-ui/core";
 
@@ -21,6 +22,10 @@ const styles = (theme) => {
       paddingRight: theme.spacing(2),
       paddingTop: theme.spacing(1),
       paddingBottom: theme.spacing(1),
+    },
+
+    test: {
+      backgroundColor: "rgba(0, 0, 0, 0.04)",
     },
     collapseContainer: {
       width: "100%",
@@ -146,25 +151,26 @@ class TableOfContents extends React.PureComponent {
 
     return (
       <Grid className={classes.tableOfContents} container>
-        <Grid
-          onClick={toggleCollapse}
-          xs={12}
-          alignItems="center"
-          justify="space-between"
-          container
-          item
-        >
-          <Grid item>
-            <Typography variant="h2">{title}</Typography>
-          </Grid>
-          <Grid item>
-            {expanded ? (
+        <Button
+          disableRipple
+          focusVisibleClassName={classes.test}
+          style={{
+            paddingLeft: "0px",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+          fullWidth
+          endIcon={
+            expanded ? (
               <ExpandLessIcon></ExpandLessIcon>
             ) : (
               <ExpandMoreIcon></ExpandMoreIcon>
-            )}
-          </Grid>
-        </Grid>
+            )
+          }
+          onClick={toggleCollapse}
+        >
+          {title}
+        </Button>
         <Collapse
           className={classes.collapseContainer}
           in={expanded}
