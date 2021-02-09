@@ -38,6 +38,7 @@ var FirModelProperties = {
     kmlExportUrl: '',
     firSelectionTools: false,
     //displayPopup: false,
+    moveablePopup: false,
     //displayPopupBar: false,
     hits: [],
     popupOffsetY: 0,

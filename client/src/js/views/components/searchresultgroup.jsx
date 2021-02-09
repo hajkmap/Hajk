@@ -151,6 +151,75 @@ SearchResultGroup = {
         }
       }
     }
+
+    if(this.props.model.get("moveablePopup")) {
+      // Make the popup moveable
+      const ovl = this.props.model.get('map').getOverlayById('popup-0');
+
+      //moveablePopup - if popup is set to moveable, make it moveable.
+      //if(this.get("moveablePopup")){
+      this.makeMoveable(this.props.model.get('map'), ovl);
+      //}
+    }
+  },
+
+  makeMoveable: function(map, overlay) {
+    //clear attributes from previous popup moves.
+    if (this.props.model.get('originalDownPosition')) {this.props.model.unset('originalDownPosition')};
+    if (this.props.model.get('originalOverlayPosition')) {this.props.model.unset('originalOverlayPosition')};
+    if (this.props.model.get('movedOverlayPosition')) {this.props.model.unset('movedOverlayPosition')};
+    const element = overlay.getElement();
+    const viewport = map.getViewport();
+
+
+    this.props.model.set('moveListener', this.movePopup).bind(this);
+    this.props.model.set('endMoveListener', this.endMovePopup).bind(this);
+
+    element.addEventListener('mousedown', function (event) {
+      this.props.model.set('originalDownPosition', this.props.model.get('map').getEventCoordinate(event));
+      this.props.model.set('originalOverlayPosition', overlay.getPosition());
+
+      if (event.target === element) { //don't want events on children such as popup-content.
+        viewport.addEventListener('mousemove', this.props.model.get('moveListener'));
+        viewport.addEventListener('mouseup', this.props.model.get('endMoveListener'));
+      }
+    }.bind(this));
+  },
+
+  movePopup: function(event) {
+    const originalClickedPosition = this.props.model.get('originalDownPosition');
+    const originalOverlayPosition = this.props.model.get('originalOverlayPosition');
+
+    const originalClickedX = originalClickedPosition[0];
+    const originalClickedY = originalClickedPosition[1];
+
+    //work out the changes to the original clicked position.
+    var currentX = this.props.model.get('map').getEventCoordinate(event)[0];
+    var currentY = this.props.model.get('map').getEventCoordinate(event)[1];
+
+    var xChange = originalClickedX - currentX;
+    var yChange = originalClickedY - currentY;
+
+    //apply these changes to the popup position.
+    var overlayX = originalOverlayPosition[0];
+    var overlayY = originalOverlayPosition[1];
+
+    newPopupX = overlayX - xChange;
+    newPopupY = overlayY - yChange;
+    var newOverlayPosition  = [newPopupX, newPopupY];
+
+    //set the new popup position.
+    overlay.setPosition(newOverlayPosition);
+  },
+
+  endMovePopup: function(event) {
+    this.removePopupListeners();
+    this.props.model.set("movedOverlayPosition", this.props.model.get('map').getOverlayById("popup-0").getPosition());
+  },
+
+  removePopupListeners: function() {
+    this.props.model.get('map').getViewport().removeEventListener('mousemove', this.props.model.get('moveListener'));
+    this.props.model.get('map').getViewport().removeEventListener('mouseup', this.props.model.get('endMoveListener'));
   },
 
   render: function () {
