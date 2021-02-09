@@ -114,6 +114,7 @@ const styles = (theme) => {
       right: 0,
       flexDirection: "column",
       userSelect: "none",
+      outline: "none",
     },
     content: {
       flex: "1",
@@ -159,6 +160,7 @@ class Window extends React.PureComponent {
   constructor(props) {
     super(props);
     document.windows.push(this);
+    this.windowRef = React.createRef();
     this.state = {
       left: 0,
       top: 0,
@@ -174,6 +176,16 @@ class Window extends React.PureComponent {
       }
     });
   }
+
+  componentDidUpdate = (prevProps, prevState) => {
+    if (prevProps.open !== this.props.open && this.props.open) {
+      //This is ugly but there is a timing problem further down somewhere (i suppose?).
+      //componentDidUpdate is run before the render is actually fully completed and the DOM is ready
+      setTimeout(() => {
+        this.windowRef.current.focus();
+      }, 200);
+    }
+  };
 
   componentDidMount() {
     const { globalObserver } = this.props;
@@ -483,7 +495,7 @@ class Window extends React.PureComponent {
           height: height,
         }}
       >
-        <div className={classes.panelContent}>
+        <div tabIndex="0" ref={this.windowRef} className={classes.panelContent}>
           <PanelHeader
             allowMaximizedWindow={allowMaximizedWindow}
             color={color}
