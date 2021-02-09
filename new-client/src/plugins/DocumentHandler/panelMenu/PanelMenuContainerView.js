@@ -117,8 +117,11 @@ class PanelMenuView extends React.PureComponent {
           headerIdentifier: null,
         });
         this.props.app.globalObserver.publish("documentviewer.closeWindow");
+        localObserver.publish("maplink-loading");
       }
-      localObserver.publish("fly-to", item.maplink);
+      setTimeout(() => {
+        localObserver.publish("fly-to", item.maplink);
+      }, 100);
     });
   };
 
