@@ -5,7 +5,6 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { withTheme } from "@material-ui/core/styles";
 import {
   Grid,
-  Button,
   List,
   ListItem,
   ListItemText,
@@ -26,11 +25,7 @@ const styles = (theme) => {
     collapseContainer: {
       width: "100%",
     },
-    listItemText: {
-      "&:hover": {
-        backgroundColor: theme.palette.grey[300],
-      },
-    },
+
     root: {
       width: "100%",
       padding: theme.spacing(0),
@@ -40,7 +35,6 @@ const styles = (theme) => {
 };
 
 function NestedListItemRaw(props) {
-  const { classes } = props;
   return (
     <ListItem
       component="li"
@@ -54,9 +48,7 @@ function NestedListItemRaw(props) {
         paddingLeft: props.theme.spacing(props.level * 3),
       }}
     >
-      <ListItemText className={classes.listItemText}>
-        {props.children}
-      </ListItemText>
+      <ListItemText>{props.children}</ListItemText>
     </ListItem>
   );
 }

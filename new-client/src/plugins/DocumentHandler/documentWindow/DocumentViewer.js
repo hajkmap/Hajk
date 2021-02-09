@@ -81,8 +81,8 @@ class DocumentViewer extends React.PureComponent {
       /*scrollIntoView is buggy without dirty fix - 
       tried using react life cycle methods but is, for some reason, not working*/
       setTimeout(() => {
-        chapter.scrollRef.current.scrollIntoView();
         this.documentViewerRef.current.focus();
+        chapter.scrollRef.current.scrollIntoView();
       }, 100);
     });
 
