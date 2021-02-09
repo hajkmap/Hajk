@@ -1344,18 +1344,18 @@
       "layers": ["vt:PointOfInterest"],
       "searchFields": [
         "Name",
-        "Category1",
-        "Category2",
-        "Category3",
+        "SwedishCategory1",
+        "SwedishCategory2",
+        "SwedishCategory3",
         "Municipality"
       ],
       "infobox": "**Plats:** {plats}  ",
       "aliasDict": "",
       "displayFields": [
         "Name",
-        "Category1",
-        "Category2",
-        "Category3",
+        "SwedishCategory1",
+        "SwedishCategory2",
+        "SwedishCategory3",
         "Municipality"
       ],
       "geometryField": "geom",
