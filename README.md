@@ -1,4 +1,7 @@
 # Hajk 3
+
+[Welcome to Hajk, please visit our welcome page for more information about Hajk (Swedish only)](https://hajkmap.github.io/Hajk)
+
 _An open source web GIS solution based on OpenLayers_
 
 ![alt text](https://user-images.githubusercontent.com/110222/96265856-42960000-0fc6-11eb-805e-9e41ec5d77f9.png "Hajk 3 with all tools visible")
