@@ -37,6 +37,14 @@ body {
   fill: white;
 }
 
+.sr-only {
+  /*Same styleattributes as MaterialUI SrOnly*/
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+}
+
 .app-start div {
   font-size: 3rem;
   font-style: italic;
