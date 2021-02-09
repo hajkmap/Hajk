@@ -38,6 +38,7 @@ var defaultState = {
   instruction: '',
   filterVisible: true,
   displayPopup: true,
+  moveablePopup: false,
   maxZoom: 14,
   excelExportUrl: '/mapservice/export/excel',
   kmlExportUrl: '/mapservice/export/kml',
@@ -84,6 +85,7 @@ class ToolOptions extends Component {
         instruction: tool.options.instruction,
         filterVisible: tool.options.filterVisible,
         displayPopup: tool.options.displayPopup,
+        moveablePopup: tool.options.moveablePopup,
         maxZoom: tool.options.maxZoom,
         excelExportUrl: tool.options.excelExportUrl,
         kmlExportUrl: tool.options.kmlExportUrl,
@@ -210,6 +212,7 @@ class ToolOptions extends Component {
         kmlExportUrl: this.state.kmlExportUrl,
         excelExportUrl: this.state.excelExportUrl,
         displayPopup: this.state.displayPopup,
+        moveablePopup: this.state.moveablePopup,
         selectionTools: this.state.selectionTools,
         displayMultiAreaSelectButton: this.state.displayMultiAreaSelectButton,
         base64Encode: this.state.base64Encode,
@@ -404,6 +407,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               checked={this.state.displayPopup} />&nbsp;
             <label htmlFor='displayPopup'>Visa popup</label>
+          </div>
+          <div>
+            <input
+                id='moveablePopup'
+                name='moveablePopup'
+                type='checkbox'
+                onChange={(e) => { this.handleInputChange(e); }}
+                checked={this.state.moveablePopup} />&nbsp;
+            <label htmlFor='moveablePopup'>Flyttbar popup</label>
           </div>
           <div>
             <input

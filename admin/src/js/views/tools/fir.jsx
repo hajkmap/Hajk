@@ -34,6 +34,7 @@ var defaultState = {
     instruction: '',
     filterVisible: false, //ta bort?
     displayPopup: true,
+    moveablePopup: false,
     firSelectionTools: true, // has only been tested with set to true
     maxZoom: 14,
     excelExportUrl: '/mapservice/export/excel',
@@ -95,6 +96,7 @@ class ToolOptions extends Component {
                 filterVisible: tool.options.filterVisible,
                 firSelectionTools: tool.options.firSelectionTools,
                 displayPopup: tool.options.displayPopup,
+                moveablePopup: tool.options.moveablePopup,
                 maxZoom: tool.options.maxZoom,
                 excelExportUrl: tool.options.excelExportUrl,
                 kmlImportUrl:tool.options.kmlImportUrl,
@@ -231,6 +233,7 @@ class ToolOptions extends Component {
                 kmlImportUrl: this.state.kmlImportUrl,
                 excelExportUrl: this.state.excelExportUrl,
                 displayPopup: this.state.displayPopup,
+                moveablePopup: this.state.moveablePopup,
                 base64Encode: this.state.base64Encode,
                 instruction: this.state.instruction,
                 instructionSokning: this.state.instructionSokning,
@@ -401,11 +404,16 @@ class ToolOptions extends Component {
                       onChange={this.handleInputChange.bind(this)} checked={this.state.active} />
                     <label htmlFor='active'>Aktiverad</label>
                   </div>
-                  <div className="col-md-2">
-                    <input id="displayPopup" name='displayPopup' type='checkbox'
-                      onChange={this.handleInputChange.bind(this)} checked={this.state.displayPopup} />
-                    <label htmlFor='displayPopup'>Visa popup</label>
-                  </div>
+                    <div className="col-md-2">
+                        <input id="displayPopup" name='displayPopup' type='checkbox'
+                               onChange={this.handleInputChange.bind(this)} checked={this.state.displayPopup} />
+                        <label htmlFor='displayPopup'>Visa popup</label>
+                    </div>
+                    <div className="col-md-2">
+                        <input id="moveablePopup" name='moveablePopup' type='checkbox'
+                               onChange={this.handleInputChange.bind(this)} checked={this.state.moveablePopup} />
+                        <label htmlFor='moveablePopup'>Flyttbar popup</label>
+                    </div>
                   <div className="col-md-6">
                     <input id='filterVisible' name='filterVisible' type='checkbox'
                       onChange={this.handleInputChange.bind(this)} checked={this.state.filterVisible} />

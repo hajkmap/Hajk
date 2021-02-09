@@ -41,6 +41,7 @@ var SearchModelProperties = {
   selectionTools: false,
   displayMultiAreaSelectButton: true,
   displayPopup: false,
+  moveablePopup: false,
   displayPopupBar: true,
   hits: [],
   popupOffsetY: 0,
