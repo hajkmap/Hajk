@@ -8,7 +8,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  Typography,
   Button,
   Collapse,
 } from "@material-ui/core";

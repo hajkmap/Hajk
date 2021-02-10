@@ -214,16 +214,6 @@ class DocumentViewer extends React.PureComponent {
     );
   };
 
-  removeExistingMainRole = () => {
-    document.querySelectorAll('[role="main"]').forEach(function (el) {
-      console.warn(
-        "DocumentViewer did remove the tag role='main' from element ${el} "
-      );
-      console.log(el, "el");
-      el.removeAttribute("role");
-    });
-  };
-
   render() {
     const {
       classes,
@@ -233,8 +223,6 @@ class DocumentViewer extends React.PureComponent {
       model,
       options,
     } = this.props;
-
-    this.removeExistingMainRole();
 
     const { showScrollButton } = this.state;
     const showTableOfContents = this.getShouldShowTableOfContents();
