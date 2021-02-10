@@ -519,7 +519,7 @@ class App extends React.PureComponent {
       <>
         <Box className={classes.logoBox}>
           <img
-            alt="Logo"
+            alt=""
             src={config.mapConfig.map.logo}
             className={classes.logo}
           />
