@@ -3,7 +3,7 @@ import {
   ContentBlock,
   EditorState,
   genKey as generateRandomKey,
-  Modifier
+  Modifier,
 } from "draft-js";
 import { List } from "immutable";
 
@@ -21,8 +21,8 @@ export default function insertNewLine(editorState) {
       key: generateRandomKey(),
       type: "unstyled",
       text: "",
-      characterList: List()
-    })
+      characterList: List(),
+    }),
   ];
 
   const fragment = BlockMapBuilder.createFromArray(fragmentArray);
@@ -34,7 +34,7 @@ export default function insertNewLine(editorState) {
   );
 
   const newContent = withUnstyledBlock.merge({
-    selectionAfter: withUnstyledBlock.getSelectionAfter().set("hasFocus", true)
+    selectionAfter: withUnstyledBlock.getSelectionAfter().set("hasFocus", true),
   });
 
   return EditorState.push(newEditorState, newContent, "insert-fragment");
