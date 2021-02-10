@@ -46,10 +46,10 @@ class SearchSettings extends React.PureComponent {
           <FormControl component="fieldset">
             <FormLabel component="legend">Generella sökinställningar</FormLabel>
             <FormGroup>
-              <FormControlLabel
-                label="Begränsa sökkällor"
-                control={
-                  <Tooltip title="Aktivera för att precisera vilka datakällor som sökningen kommer göras i">
+              <Tooltip title="Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor.">
+                <FormControlLabel
+                  label="Begränsa sökkällor"
+                  control={
                     <Switch
                       checked={this.state.showSearchSourcesFilter}
                       onChange={(e) => {
@@ -68,9 +68,9 @@ class SearchSettings extends React.PureComponent {
                       }}
                       color="primary"
                     />
-                  </Tooltip>
-                }
-              />
+                  }
+                />
+              </Tooltip>
               {this.state.showSearchSourcesFilter && (
                 <Grid container spacing={2}>
                   <Grid item xs>
@@ -118,10 +118,10 @@ class SearchSettings extends React.PureComponent {
               Inställningar för textsökning
             </FormLabel>
             <FormGroup>
-              <FormControlLabel
-                label="Wildcard före"
-                control={
-                  <Tooltip title="Om aktivit kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'">
+              <Tooltip title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'.">
+                <FormControlLabel
+                  label="Wildcard före"
+                  control={
                     <Switch
                       checked={searchOptions.wildcardAtStart}
                       onChange={() =>
@@ -132,13 +132,13 @@ class SearchSettings extends React.PureComponent {
                       }
                       color="primary"
                     />
-                  </Tooltip>
-                }
-              />
-              <FormControlLabel
-                label="Wildcard efter"
-                control={
-                  <Tooltip title="Om aktivit kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'">
+                  }
+                />
+              </Tooltip>
+              <Tooltip title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'.">
+                <FormControlLabel
+                  label="Wildcard efter"
+                  control={
                     <Switch
                       checked={searchOptions.wildcardAtEnd}
                       onChange={() =>
@@ -149,13 +149,13 @@ class SearchSettings extends React.PureComponent {
                       }
                       color="primary"
                     />
-                  </Tooltip>
-                }
-              />
-              <FormControlLabel
-                label="Skiftlägeskänslighet"
-                control={
-                  <Tooltip title="Om aktivit kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler.">
+                  }
+                />
+              </Tooltip>
+              <Tooltip title="Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler.">
+                <FormControlLabel
+                  label="Skiftlägeskänslighet"
+                  control={
                     <Switch
                       checked={searchOptions.matchCase}
                       onChange={() =>
@@ -166,9 +166,9 @@ class SearchSettings extends React.PureComponent {
                       }
                       color="primary"
                     />
-                  </Tooltip>
-                }
-              />
+                  }
+                />
+              </Tooltip>
             </FormGroup>
           </FormControl>
         </Grid>
@@ -177,10 +177,10 @@ class SearchSettings extends React.PureComponent {
           <FormControl component="fieldset">
             <FormLabel component="legend">Spatiala sökinställningar</FormLabel>
             <FormGroup>
-              <FormControlLabel
-                label="Kräv att hela objektet rymms inom sökområde"
-                control={
-                  <Tooltip title="Om aktivit kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet rymms inom sökområdet.">
+              <Tooltip title="Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet.">
+                <FormControlLabel
+                  label="Kräv att hela objektet ryms inom sökområde"
+                  control={
                     <Switch
                       checked={searchOptions.activeSpatialFilter === "within"}
                       onChange={() =>
@@ -193,9 +193,9 @@ class SearchSettings extends React.PureComponent {
                       }
                       color="primary"
                     />
-                  </Tooltip>
-                }
-              />
+                  }
+                />
+              </Tooltip>
             </FormGroup>
           </FormControl>
         </Grid>

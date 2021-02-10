@@ -144,9 +144,7 @@ class LayersSwitcherView extends React.PureComponent {
           >
             <Tabs
               action={this.handleTabsMounted}
-              indicatorColor="primary"
               onChange={this.handleChangeTabs}
-              textColor="primary"
               value={this.state.activeTab}
               variant="fullWidth"
             >

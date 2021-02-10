@@ -364,7 +364,7 @@ class LayerGroup extends React.PureComponent {
           <AccordionDetails classes={{ root: classes.root }}>
             <div className={classes.Accordion}>
               {this.state.layers.map((layer, i) => {
-                var mapLayer = this.model.layerMap[Number(layer.id)];
+                const mapLayer = this.model.layerMap[layer.id];
 
                 if (mapLayer) {
                   return (
