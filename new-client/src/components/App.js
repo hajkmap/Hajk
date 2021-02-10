@@ -546,7 +546,6 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
-                  aria-label="pin"
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
