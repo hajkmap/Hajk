@@ -10,6 +10,8 @@ import { withSnackbar } from "notistack";
 import PrintIcon from "@material-ui/icons/Print";
 
 class DocumentWindowBase extends React.PureComponent {
+  snackbarKey = null;
+
   //Could be rewritten
   findMenuItem(menuItem, documentNameToFind) {
     if (menuItem.document === documentNameToFind) {
@@ -82,6 +84,21 @@ class DocumentWindowBase extends React.PureComponent {
     }
   };
 
+  displayMaplinkLoadingBar = () => {
+    const { enqueueSnackbar } = this.props;
+    this.snackbarKey = enqueueSnackbar("kartlager laddar...", {
+      variant: "information",
+      autoHideDuration: 3000,
+      preventDuplicate: true,
+      anchorOrigin: { vertical: "bottom", horizontal: "left" },
+    });
+  };
+
+  closeMaplinkLoadingBar = () => {
+    const { closeSnackbar } = this.props;
+    closeSnackbar(this.snackbarKey);
+  };
+
   togglePrintWindow = () => {
     this.setState({
       showPrintWindow: !this.state.showPrintWindow,
@@ -145,12 +162,18 @@ class DocumentWindowBase extends React.PureComponent {
       "core.info-click-documenthandler",
       this.handleInfoClickRequest
     );
+
+    app.globalObserver.subscribe(
+      "core.map-display-loaded",
+      this.closeMaplinkLoadingBar
+    );
   };
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     this.bindListenForSearchResultClick();
     localObserver.subscribe("set-active-document", this.showHeaderInDocument);
+    localObserver.subscribe("maplink-loading", this.displayMaplinkLoadingBar);
   };
 
   setChapterLevels(chapter, level) {

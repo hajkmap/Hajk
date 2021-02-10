@@ -117,8 +117,16 @@ class PanelMenuView extends React.PureComponent {
           headerIdentifier: null,
         });
         this.props.app.globalObserver.publish("documentviewer.closeWindow");
+        if (this.props.options.showLoadingOnMapLinkOpen) {
+          localObserver.publish("maplink-loading");
+        }
       }
-      localObserver.publish("fly-to", item.maplink);
+      /*otherwise the application freezes when loading slow maplinks
+      before the window closes. 
+      */
+      setTimeout(() => {
+        localObserver.publish("fly-to", item.maplink);
+      }, 100);
     });
   };
 

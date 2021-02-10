@@ -788,6 +788,7 @@
         "showScrollButtonLimit": 400,
         "customThemeUrl": "/documentHandlerTheme.json",
         "closePanelOnMapLinkOpen": true,
+        "showLoadingOnMapLinkOpen": false,
         "documentOnStart": "start",
         "drawerTitle": "Översiktsplan",
         "drawerButtonTitle": "Meny",
