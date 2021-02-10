@@ -107,8 +107,6 @@ class DocumentViewer extends React.PureComponent {
 
   componentDidUpdate = (prevProps) => {
     if (prevProps.activeDocument !== this.props.activeDocument) {
-      //this.documentViewerRef.current.focus();
-      this.scrollToTop();
       this.setState({
         expandedTableOfContents: expandedTocOnStart(this.props),
       });
@@ -116,7 +114,10 @@ class DocumentViewer extends React.PureComponent {
   };
 
   scrollToTop = () => {
-    this.documentViewerRef.current.scrollTop = 0;
+    //Buggy firefox makes scroll not work properly, dirty fix with setTimeout
+    setTimeout(() => {
+      this.documentViewerRef.current.scrollTop = 0;
+    }, 100);
   };
 
   renderScrollToTopButton = () => {
