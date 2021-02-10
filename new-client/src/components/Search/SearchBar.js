@@ -352,7 +352,9 @@ class SearchBar extends React.PureComponent {
     return (
       <TextField
         {...params}
-        label={<Typography variant="srOnly">Sök</Typography>}
+        label={
+          <Typography variant="srOnly">Sök i webbplatsens innehåll</Typography>
+        }
         variant={width === "xs" ? "standard" : "outlined"}
         placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}

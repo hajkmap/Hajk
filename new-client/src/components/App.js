@@ -519,7 +519,7 @@ class App extends React.PureComponent {
       <>
         <Box className={classes.logoBox}>
           <img
-            alt="Logo"
+            alt=""
             src={config.mapConfig.map.logo}
             className={classes.logo}
           />
@@ -546,7 +546,6 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
-                  aria-label="pin"
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
