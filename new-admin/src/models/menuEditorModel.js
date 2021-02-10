@@ -1,7 +1,7 @@
 import { Model } from "backbone";
 
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 var menuEditorModel = Model.extend({
@@ -12,13 +12,13 @@ var menuEditorModel = Model.extend({
   async listAllAvailableDocuments() {
     try {
       return fetch(this.config.url_document_list, fetchConfig).then(
-        response => {
-          return response.text().then(text => {
+        (response) => {
+          return response.text().then((text) => {
             return JSON.parse(text);
           });
         }
       );
-    } catch (err) { }
+    } catch (err) {}
   },
 
   isParentRootOfTree: function (parent) {
@@ -91,7 +91,7 @@ var menuEditorModel = Model.extend({
 
   getNodeFromTree: function (tree, key) {
     let foundNode = null;
-    tree.forEach(treeNode => {
+    tree.forEach((treeNode) => {
       let found = this.findNode(treeNode, key);
       if (found) {
         foundNode = found;
@@ -120,7 +120,7 @@ var menuEditorModel = Model.extend({
   setParent: function (treeNode, parent) {
     treeNode.parent = parent;
     if (treeNode.children.length > 0) {
-      treeNode.children.forEach(child => {
+      treeNode.children.forEach((child) => {
         this.setParent(child, treeNode);
       });
     }
@@ -131,7 +131,7 @@ var menuEditorModel = Model.extend({
   },
 
   setParentForAllTreeNodes: function (tree) {
-    tree.forEach(treeNode => {
+    tree.forEach((treeNode) => {
       this.setParent(treeNode, undefined);
     });
   },
@@ -152,7 +152,7 @@ var menuEditorModel = Model.extend({
   },
 
   createMenuFromTreeStructure: function (menu, tree) {
-    tree.forEach(treeNode => {
+    tree.forEach((treeNode) => {
       if (treeNode.children.length > 0) {
         menu.push(treeNode.menuItem);
         treeNode.menuItem.menu = [];
@@ -172,7 +172,7 @@ var menuEditorModel = Model.extend({
   },
 
   hasTreeInvalidTreeNodes: function (tree) {
-    return tree.some(treeNode => {
+    return tree.some((treeNode) => {
       return this.hasInvalidTreeNodes(treeNode);
     });
   },
@@ -195,22 +195,22 @@ var menuEditorModel = Model.extend({
       color: "",
       icon: {
         materialUiIconName: "",
-        fontSize: "large"
+        fontSize: "large",
       },
       maplink: "",
       link: "",
-      menu: []
+      menu: [],
     };
   },
 
   //Can this recursion be written better????
   findInTree: function (tree, key) {
     return tree
-      .map(treeNode => {
+      .map((treeNode) => {
         var found = this.findTreeNode(treeNode, key);
         return found;
       })
-      .filter(res => {
+      .filter((res) => {
         return res !== undefined;
       })[0];
   },
@@ -234,15 +234,15 @@ var menuEditorModel = Model.extend({
 
   loadMenuConfigForMap: function (map) {
     var url = this.config.url_map + "/" + map;
-    return fetch(url, { credentials: "same-origin" }).then(response => {
-      return response.json().then(data => {
-        let documentHandler = data.tools.find(tool => {
+    return fetch(url, { credentials: "same-origin" }).then((response) => {
+      return response.json().then((data) => {
+        let documentHandler = data.tools.find((tool) => {
           return tool.type === "documenthandler";
         });
         return documentHandler;
       });
     });
-  }
+  },
 });
 
 export default menuEditorModel;
