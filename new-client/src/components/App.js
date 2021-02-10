@@ -680,7 +680,8 @@ class App extends React.PureComponent {
                   }
                 />
               )}
-              {clean === false && this.renderSearchComponent()}
+              {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
+              {this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div
