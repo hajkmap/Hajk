@@ -527,11 +527,7 @@ class App extends React.PureComponent {
     return (
       <>
         <Box className={classes.logoBox}>
-          <img
-            alt=""
-            src={config.mapConfig.map.logo}
-            className={classes.logo}
-          />
+          <img alt="" src={logoUrl} className={classes.logo} />
         </Box>
         <Divider />
         <Grid
