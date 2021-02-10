@@ -68,7 +68,6 @@ export default class MapViewModel {
     );
 
     this.flyTo(this.map.getView(), mapSettings.center, mapSettings.zoom);
-    this.globalObserver.publish("core.map-display-loaded");
   }
 
   flyTo(view, center, zoom) {
@@ -77,5 +76,6 @@ export default class MapViewModel {
       zoom: zoom,
       duration: 1500,
     });
+    this.localObserver.publish("map-animation-complete");
   }
 }

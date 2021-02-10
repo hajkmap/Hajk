@@ -90,6 +90,7 @@ class DocumentWindowBase extends React.PureComponent {
       variant: "information",
       autoHideDuration: 3000,
       preventDuplicate: true,
+      transitionDuration: { enter: 0, exit: 0 },
       anchorOrigin: { vertical: "bottom", horizontal: "left" },
     });
   };
@@ -163,8 +164,8 @@ class DocumentWindowBase extends React.PureComponent {
       this.handleInfoClickRequest
     );
 
-    app.globalObserver.subscribe(
-      "core.map-display-loaded",
+    localObserver.subscribe(
+      "map-animation-complete",
       this.closeMaplinkLoadingBar
     );
   };
