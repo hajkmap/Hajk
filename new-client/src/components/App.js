@@ -527,7 +527,11 @@ class App extends React.PureComponent {
     return (
       <>
         <Box className={classes.logoBox}>
-          <img alt="Logo" src={logoUrl} className={classes.logo} />
+          <img
+            alt=""
+            src={config.mapConfig.map.logo}
+            className={classes.logo}
+          />
         </Box>
         <Divider />
         <Grid
@@ -551,7 +555,6 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
-                  aria-label="pin"
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
