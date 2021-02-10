@@ -427,6 +427,7 @@ class SearchBar extends React.PureComponent {
   render() {
     const { classes, showSearchResults, width } = this.props;
     const { panelCollapsed } = this.state;
+    console.log("Yello");
 
     return (
       <Grid
