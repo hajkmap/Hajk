@@ -117,7 +117,7 @@ class PanelMenuView extends React.PureComponent {
           headerIdentifier: null,
         });
         this.props.app.globalObserver.publish("documentviewer.closeWindow");
-        if (!isMobile && this.props.options.showLoadingOnMapLinkOpen) {
+        if (this.props.options.showLoadingOnMapLinkOpen) {
           localObserver.publish("maplink-loading");
         }
       }
