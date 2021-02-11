@@ -524,7 +524,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         key="map-link"
         component="button"
         onClick={() => {
-          localObserver.publish("fly-to", mapLink);
+          localObserver.publish("document-maplink-clicked", mapLink);
         }}
       >
         {getFormattedComponentFromTag(aTag)}

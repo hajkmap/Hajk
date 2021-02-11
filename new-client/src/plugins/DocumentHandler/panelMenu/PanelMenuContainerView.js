@@ -110,6 +110,11 @@ class PanelMenuView extends React.PureComponent {
       window.open(item.link, "_blank");
     });
 
+    localObserver.subscribe("document-maplink-clicked", (maplink) => {
+      localObserver.publish("maplink-loading");
+      this.delayAndFlyToMapLink(maplink);
+    });
+
     localObserver.subscribe("maplink-clicked", (item) => {
       if (!isMobile && this.props.options.closePanelOnMapLinkOpen) {
         localObserver.publish("set-active-document", {
@@ -117,15 +122,21 @@ class PanelMenuView extends React.PureComponent {
           headerIdentifier: null,
         });
         this.props.app.globalObserver.publish("documentviewer.closeWindow");
-        localObserver.publish("maplink-loading");
       }
-      /*otherwise the application freezes when loading slow maplinks
-      before the window closes. 
-      */
-      setTimeout(() => {
-        localObserver.publish("fly-to", item.maplink);
-      }, 100);
+      localObserver.publish("maplink-loading");
+      this.delayAndFlyToMapLink(item.maplink);
     });
+  };
+
+  /*
+  Large maplinks can be slow and cause the application to hang. This delay is a workaround in order
+  allow the other tasks such as closing the document and displaying a snackbar to run before the
+  application hangs.
+  */
+  delayAndFlyToMapLink = (maplink) => {
+    setTimeout(() => {
+      this.props.localObserver.publish("fly-to", maplink);
+    }, 100);
   };
 
   #setInternalId = (menuItem) => {

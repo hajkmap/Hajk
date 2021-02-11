@@ -88,10 +88,10 @@ class DocumentWindowBase extends React.PureComponent {
     const { enqueueSnackbar } = this.props;
     this.snackbarKey = enqueueSnackbar("kartlager laddar...", {
       variant: "information",
-      autoHideDuration: 3000,
+      persist: true,
       preventDuplicate: true,
       transitionDuration: { enter: 0, exit: 0 },
-      anchorOrigin: { vertical: "bottom", horizontal: "left" },
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
   };
 
@@ -163,11 +163,6 @@ class DocumentWindowBase extends React.PureComponent {
       "core.info-click-documenthandler",
       this.handleInfoClickRequest
     );
-
-    localObserver.subscribe(
-      "map-animation-complete",
-      this.closeMaplinkLoadingBar
-    );
   };
 
   bindSubscriptions = () => {
@@ -175,6 +170,10 @@ class DocumentWindowBase extends React.PureComponent {
     this.bindListenForSearchResultClick();
     localObserver.subscribe("set-active-document", this.showHeaderInDocument);
     localObserver.subscribe("maplink-loading", this.displayMaplinkLoadingBar);
+    localObserver.subscribe(
+      "map-animation-complete",
+      this.closeMaplinkLoadingBar
+    );
   };
 
   setChapterLevels(chapter, level) {
