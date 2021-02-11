@@ -86,7 +86,7 @@ class DocumentWindowBase extends React.PureComponent {
 
   displayMaplinkLoadingBar = () => {
     const { enqueueSnackbar } = this.props;
-    this.snackbarKey = enqueueSnackbar("kartlager laddar...", {
+    this.snackbarKey = enqueueSnackbar("Kartan laddar... ", {
       variant: "information",
       persist: true,
       preventDuplicate: true,
