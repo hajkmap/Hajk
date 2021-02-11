@@ -206,6 +206,19 @@ class VTSearch extends React.PureComponent {
       if (title === this.props.options.title)
         this.globalObserver.publish("clear-autocomplete");
     });
+
+    this.globalObserver.subscribe("core.drawerContentChanged", () => {
+      this.globalObserver.publish("clear-autocomplete");
+    });
+
+    this.globalObserver.subscribe("core.hideDrawer", () => {
+      this.globalObserver.publish("clear-autocomplete");
+    });
+
+    this.globalObserver.subscribe("windows.onDragStart", (title) => {
+      if (title === this.props.options.title)
+        this.globalObserver.publish("clear-autocomplete");
+    });
   };
 
   handleExpandClick = () => {
