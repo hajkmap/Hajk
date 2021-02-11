@@ -150,8 +150,9 @@ class VectorLayerForm extends React.Component {
     const input = this.refs["input_" + fieldName];
     let value = input ? input.value : "";
 
-    if (fieldName === "sldUrl") {
-      console.log(fieldName, input, value);
+    // We must cast the following to Number, as String won't be accepted for those:
+    if (["maxZoom", "minZoom", "opacity"].includes(fieldName)) {
+      value = Number(value);
     }
 
     if (fieldName === "date") value = create_date();
