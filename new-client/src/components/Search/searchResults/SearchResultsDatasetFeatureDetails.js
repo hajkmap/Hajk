@@ -37,9 +37,6 @@ const styles = (theme) => ({
     minWidth: 26,
     padding: 0,
   },
-  togglerButtonIcon: {
-    color: theme.palette.text.primary,
-  },
 });
 
 class SearchResultsDatasetFeatureDetails extends React.PureComponent {
@@ -188,7 +185,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
               >
                 <ArrowLeftIcon
                   fontSize="small"
-                  className={classes.togglerButtonIcon}
+                  color={buttonLeftDisabled ? "disabled" : "action"}
                 />
               </Button>
             </span>
@@ -214,7 +211,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
               >
                 <ArrowRightIcon
                   fontSize="small"
-                  className={classes.togglerButtonIcon}
+                  color={buttonRightDisabled ? "disabled" : "action"}
                 />
               </Button>
             </span>

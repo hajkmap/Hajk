@@ -23,9 +23,9 @@ import buildConfig from "./buildConfig.json";
 import ErrorIcon from "@material-ui/icons/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
 
-const networkErrorMessage =
+let networkErrorMessage =
   "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
-const parseErrorMessage =
+let parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
 
 const fetchOpts = {
@@ -43,6 +43,12 @@ const fetchOpts = {
 fetch("appConfig.json", fetchOpts)
   .then((appConfigResponse) => {
     appConfigResponse.json().then((appConfig) => {
+      // See if we have site-specific error messages
+      if (appConfig.networkErrorMessage)
+        networkErrorMessage = appConfig.networkErrorMessage;
+      if (appConfig.parseErrorMessage)
+        parseErrorMessage = appConfig.parseErrorMessage;
+
       // Grab URL params using the new URL API, save for later
       const urlParams = new URL(window.location).searchParams;
 

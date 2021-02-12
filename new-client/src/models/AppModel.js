@@ -225,7 +225,10 @@ class AppModel {
     // So, we create the Set no matter what:
     this.map.clickLock = new Set();
 
+    // FIXME: Potential miss here: don't we want to register click on search results
     // But we register the Infoclick handler only if the plugin exists in map config:
+    // even if Infoclick plugin is inactive? Currently search won't register clicks in
+    // map without infoclick, which seems as an unnecessary limitation.
     if (config.tools.some((tool) => tool.type === "infoclick")) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
@@ -236,21 +239,27 @@ class AppModel {
             return feature?.layer.get("type") === "searchResultLayer";
           }
         );
+        const infoclickFeatures = mapClickDataResult.features.filter(
+          (feature) => {
+            return feature?.layer.get("type") !== "searchResultLayer";
+          }
+        );
 
-        // If we have features coming from the searchResult-layer, we don't want
-        // to invoke core.mapClick, since this could potentially (say if we have
-        // searchResult-features stacked on wms-features) lead to the user getting
-        // prompted with both the searchResult-featureInfo as well as the "standard"
-        // featureInfo-component.
+        // If there are any results from search layer, send an event about that.
         if (searchResultFeatures.length > 0) {
-          // Clicked features sent to the search-component for display
           this.globalObserver.publish(
             "infoClick.searchResultLayerClick",
-            searchResultFeatures
+            searchResultFeatures // Clicked features sent to the search-component for display
           );
-        } else {
-          // Clicked features sent to the featureInfo-component for display
-          this.globalObserver.publish("infoClick.mapClick", mapClickDataResult);
+        }
+
+        // Do the same for regular infoclick results from WMS layers
+        if (infoclickFeatures.length > 0) {
+          // Note that infoclick.mapClick seems to have a different interface…
+          this.globalObserver.publish("infoClick.mapClick", {
+            ...mapClickDataResult, // as it requires the entire object, not just "features", like infoClick.searchResultLayerClick.
+            features: infoclickFeatures, // Hence, we send everything from mapClickDataResult, but replace the features property.
+          });
         }
       });
     }

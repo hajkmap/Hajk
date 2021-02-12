@@ -1,6 +1,6 @@
 {
   "name": "hajk-client",
-  "version": "3.3.0",
+  "version": "3.5.0",
   "homepage": ".",
   "private": true,
   "scripts": {
@@ -75,7 +75,7 @@
     "jspdf": "^1.5.3",
     "jsts": "^2.5.0",
     "load-google-maps-api": "^2.0.2",
-    "marked": "^1.2.7",
+    "marked": "^2.0.0",
     "notistack": "^0.9.17",
     "ol": "^6.5.0",
     "pdfjs-dist": "^2.5.207",

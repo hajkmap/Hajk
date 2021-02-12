@@ -11,8 +11,16 @@ import { deepMerge } from "../utils/DeepMerge";
  * @param {*} preferredColorSchemeFromMapConfig
  * @returns {String} "dark" or "light"
  */
-function getColorScheme(preferredColorSchemeFromMapConfig) {
-  // First, check if there already is a user preferred value in local storage
+function getColorScheme(preferredColorSchemeFromMapConfig, customTheme) {
+  // First of all, see if admins have provided a customTheme.json, where
+  // the light/dark mode value is set. If it is, this will override any
+  // other logic, which means we're not interested in user's or OS's preference.
+  if (["light", "dark"].includes(customTheme?.palette?.type)) {
+    return customTheme.palette.type;
+  }
+
+  // If there's no global override, we can go on and
+  // check if there already is a user preferred value in local storage.
   const userPreferredColorScheme = window.localStorage.getItem(
     "userPreferredColorScheme"
   );
@@ -59,10 +67,17 @@ function getColorScheme(preferredColorSchemeFromMapConfig) {
  * @returns {Object} A complete, ready to used theme object
  */
 function getTheme(config, customTheme) {
+  const colorScheme = getColorScheme(
+    config.mapConfig.map.colors?.preferredColorScheme,
+    customTheme
+  );
   // Setup some app-wide defaults that differ from MUI's defaults:
   const hardCodedDefaults = {
     palette: {
-      type: getColorScheme(config.mapConfig.map.colors?.preferredColorScheme),
+      type: colorScheme,
+      action: {
+        active: colorScheme === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)",
+      },
     },
     shape: {
       borderRadius: 2,
@@ -97,6 +112,9 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
 
   // Handles theme toggling
   const toggleMUITheme = () => {
+    // If there's a override in customTheme.json, toggling is not possible.
+    if (customTheme?.palette?.type) return;
+
     // Toggle the current value from theme's palette
     let userPreferredColorScheme =
       theme.palette.type === "light" ? "dark" : "light";
@@ -112,6 +130,12 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
     const newTheme = deepMerge(theme, {
       palette: {
         type: userPreferredColorScheme,
+        action: {
+          active:
+            userPreferredColorScheme === "dark"
+              ? "#fff"
+              : "rgba(0, 0, 0, 0.87)",
+        },
       },
     });
 
@@ -130,7 +154,7 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
       <App
         activeTools={activeTools}
         config={config}
-        customTheme={customTheme}
+        theme={muiTheme}
         toggleMUITheme={toggleMUITheme} // Pass the toggle handler, so we can call it from another component later on
       />
     </MuiThemeProvider>

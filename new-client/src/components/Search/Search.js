@@ -86,7 +86,7 @@ class Search extends React.PureComponent {
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök i området",
+      name: "Sök inom vyn",
       icon: <Crop54Icon />,
       type: "Extent",
       enabled: this.props.options.enableExtentSearch ?? true,
@@ -656,17 +656,60 @@ class Search extends React.PureComponent {
       resultPanelCollapsed: false,
     });
 
-    let features = this.extractFeatureWithFromFeatureCollections(
+    let features = this.extractFeaturesFromFeatureCollections(
       searchResults.featureCollections
     );
 
     features = this.filterFeaturesWithGeometry(features);
 
-    // If we get a single search-result, we add it to the map in the searchResultList-component instead.
+    // If we got more than 1 result, publish event below
     if (features.length !== 1) {
       this.localObserver.publish("map.addFeaturesToResultsLayer", features);
     }
+    // If we get a single search-result, we add it to the map in the searchResultList-component instead,
+    // unless clean mode is true. In that case, there's another event we want to publish.
+    else if (this.props.app.appModel.config.mapConfig.map.clean === true) {
+      const feature = features[0];
+      const featureTitle = this.getFeatureTitle(
+        feature,
+        searchResults.featureCollections[0].source
+      );
+
+      this.localObserver.publish(
+        "map.addAndHighlightFeatureInSearchResultLayer",
+        {
+          feature,
+          featureTitle,
+        }
+      );
+    }
   }
+
+  // FIXME: Obtain featureTitle directly in extractFeaturesFromFeatureCollections,
+  // set title as property on feature, and remove this.
+  getFeatureTitle = (feature, source) => {
+    if (feature.featureTitle) {
+      return feature.featureTitle;
+    }
+
+    return source.displayFields.reduce((featureTitleString, df) => {
+      let displayField = feature.properties[df];
+      if (Array.isArray(displayField)) {
+        displayField = displayField.join(", ");
+      }
+
+      if (displayField) {
+        if (featureTitleString.length > 0) {
+          featureTitleString = featureTitleString.concat(` | ${displayField}`);
+        } else {
+          featureTitleString = displayField.toString();
+        }
+      }
+
+      feature.featureTitle = featureTitleString;
+      return featureTitleString;
+    }, "");
+  };
 
   filterFeaturesWithGeometry = (features) => {
     return features.filter((feature) => {
@@ -674,7 +717,7 @@ class Search extends React.PureComponent {
     });
   };
 
-  extractFeatureWithFromFeatureCollections = (featureCollections) => {
+  extractFeaturesFromFeatureCollections = (featureCollections) => {
     return featureCollections
       .map((fc) => {
         return fc.value.features;
@@ -879,7 +922,8 @@ class Search extends React.PureComponent {
     } = this.state;
 
     return (
-      this.state.searchImplementedPluginsLoaded && (
+      this.state.searchImplementedPluginsLoaded &&
+      this.props.app.appModel.config.mapConfig.map.clean === false && (
         <SearchBar
           classes={{
             root: classes.inputRoot,

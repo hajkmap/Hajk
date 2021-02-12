@@ -6,7 +6,7 @@ import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
-
+import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import AppModel from "../models/AppModel.js";
 
 import Window from "./Window.js";
@@ -31,7 +31,6 @@ import PresetLinks from "../controls/PresetLinks";
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
 import {
-  Backdrop,
   Box,
   Divider,
   Drawer,
@@ -162,9 +161,6 @@ const styles = (theme) => {
     },
     drawerLiveContent: {
       backgroundColor: theme.palette.background.default,
-    },
-    backdrop: {
-      zIndex: theme.zIndex.drawer - 1, // Carefully selected to be above Window but below Drawer
     },
     widgetItem: {
       width: "220px",
@@ -521,14 +517,19 @@ class App extends React.PureComponent {
       (db) => db.value === this.state.activeDrawerContent
     )?.drawerTitle;
 
+    // We need to be able to grab different logos depending
+    // on light/dark mode theme
+    const logoUrl =
+      (this.props.theme.palette.type === "light" // If light theme active…
+        ? config.mapConfig.map.logoLight // …grab light logo,
+        : config.mapConfig.map.logoDark) || // …else grab dark logo.
+      config.mapConfig.map.logo || // If neither was set, try to see if we have the legacy admin parameter.
+      "logo.png"; // If we didn't have this either, fallback to hard-coded value.
+
     return (
       <>
         <Box className={classes.logoBox}>
-          <img
-            alt="Logo"
-            src={config.mapConfig.map.logo}
-            className={classes.logo}
-          />
+          <img alt="" src={logoUrl} className={classes.logo} />
         </Box>
         <Divider />
         <Grid
@@ -552,7 +553,6 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
-                  aria-label="pin"
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
@@ -588,7 +588,7 @@ class App extends React.PureComponent {
             this.state.activeDrawerContent === "plugins" ? "unset" : "none"
           }
         >
-          <div id="plugin-buttons" />
+          <nav role="navigation" id="plugin-buttons" />
         </Box>
         {this.state.drawerButtons.map((db) => {
           return (
@@ -658,6 +658,7 @@ class App extends React.PureComponent {
             parent={this}
             title="Meddelande"
           />
+          <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
           <div
             id="appBox"
             className={cslx(classes.flexBox, {
@@ -680,7 +681,8 @@ class App extends React.PureComponent {
                   }
                 />
               )}
-              {clean === false && this.renderSearchComponent()}
+              {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
+              {this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div
@@ -737,6 +739,7 @@ class App extends React.PureComponent {
           </div>
           <div
             id="map"
+            role="application"
             className={cslx(classes.map, {
               [classes.shiftedLeft]:
                 this.state.drawerPermanent && clean === false,
@@ -761,11 +764,22 @@ class App extends React.PureComponent {
           {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
             <Drawer
               open={this.state.drawerVisible}
-              // NB: we can't simply toggle between permanent|temporary,
-              // as the temporary mode unmounts element from DOM and
-              // re-mounts it the next time, so we would re-rendering
-              // our plugins all the time.
-              variant="persistent"
+              ModalProps={{
+                hideBackdrop: this.state.drawerPermanent, //Don't show backdrop if drawer is permanent
+                disableEnforceFocus: true, //Dont enforce focus to be able to handle elements underneath modal
+                onEscapeKeyDown: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                },
+                style: {
+                  //Needs to be set to be able to handle elements underneath modal
+                  position: this.state.drawerPermanent ? "initial" : "fixed",
+                },
+                keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
+                onBackdropClick: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                },
+              }}
+              variant="temporary"
               classes={{
                 paper: classes.drawerBackground,
               }}
@@ -774,15 +788,6 @@ class App extends React.PureComponent {
               <Divider />
               {this.renderAllDrawerContent()}
             </Drawer>
-          )}
-          {clean === false && (
-            <Backdrop
-              open={this.state.drawerVisible && !this.state.drawerPermanent}
-              className={classes.backdrop}
-              onClick={(e) => {
-                this.globalObserver.publish("core.hideDrawer");
-              }}
-            />
           )}
           {clean === false && (
             <Introduction
