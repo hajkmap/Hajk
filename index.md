@@ -1,4 +1,4 @@
-![HAJKLogo](https://github.com/hajkmap/Hajk/blob/master/design/logo_small.png)
+![HAJKLogo](https://raw.githubusercontent.com/hajkmap/Hajk/master/design/logo_small.png)
 # Välkommen till HAJK!
 
 Vi är ett antal kommuner och organisationer baserade framförallt i Västsverige som tagit fram ett avancerat open source webbGIS-verktyg baserat på Openlayers. 
@@ -11,9 +11,13 @@ HAJK är fritt att använda och förändra, källkoden är fritt tillgänglig oc
 
 ### Exempel på karttjänster med HAJK: 
 Halmstad – [https://karta.halmstad.se/](https://karta.halmstad.se/)
+
 Kungsbacka – [https://karta.kungsbacka.se/](https://karta.kungsbacka.se/)
+
 Uddevalla – [https://karta.uddevalla.se/](https://karta.uddevalla.se/)
+
 Varberg – [https://karta.varberg.se/](https://karta.varberg.se/)
+
 
 ## Organisationen
 Aktiva kommuner är Halmstad, Göteborg, Kungsbacka, Uddevalla, Varberg, m.fl. Andra organisationer som använder (och utvecklar) HAJK är bl. a. Västtrafik och Göteborgsregionen. 
@@ -37,4 +41,4 @@ Kontakta oss om din organisation är intresserad av att medverka,
 Vi finns på [Slack](https://hajk.slack.com/) utöver Github, med en öppen inbjudan på denna länk: 
 [Inbjudan](https://Inbjudan.slack.com)
 
-Om du vill komma igång med HAJK snabbt så kan du hoppa över till vår [GitHub-sida](https://github.com/hajkmap/Hajk/) där vi har en Quick start längst ner. 
+Om du vill komma igång med HAJK snabbt så kan du hoppa över till vår [GitHub-sida](https://github.com/hajkmap/Hajk/) där vi har en Quick start längst ner.
