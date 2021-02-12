@@ -1,9 +1,80 @@
+import React from "react";
+// import ReactDOM, { render } from "react-dom";
+import { renderToString } from "react-dom/server";
+import {
+  Divider,
+  Link,
+  Paper,
+  Table,
+  TableBody,
+  // TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@material-ui/core";
 import marked from "marked";
 import ReactHtmlParser from "react-html-parser";
 
 export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
+
+    // Prepare an object that holds our overrides for the different
+    // Marked types, see https://marked.js.org/using_pro#renderer for a complete list.
+    const renderer = {
+      table(header, body) {
+        console.log("TABLE header FROM TR: ", header);
+        console.log("TABLE body FROM TR: ", body);
+
+        return renderToString(
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead dangerouslySetInnerHTML={{ __html: header }} />
+              <TableBody dangerouslySetInnerHTML={{ __html: body }} />
+            </Table>
+          </TableContainer>
+        );
+      },
+      tablerow(content) {
+        console.log("TABLEROW content from TD:", content);
+        return renderToString(
+          <TableRow dangerouslySetInnerHTML={{ __html: content }} />
+        );
+      },
+      tablecell(content, flags) {
+        console.log("TABLECELL inner content:", content);
+
+        // FIXME: Problem 1: We can't use TableCell here as it throws an error from MUI. Why?!
+        return `<td align="${flags.align || ""}">${content}</td>`;
+        // return renderToString(
+        //   <TableCell
+        //     align={flags.align}
+        //     variant={flags.header === true ? "head" : "body"}
+        //     dangerouslySetInnerHTML={{ __html: content }}
+        //   />
+        // );
+      },
+      heading(text, level) {
+        return renderToString(
+          <Typography variant={`h${level}`}>{text}</Typography>
+        );
+      },
+      hr() {
+        return renderToString(<Divider />);
+      },
+      link(href, title, text) {
+        return renderToString(
+          <Link href={href} title={title}>
+            {text}
+          </Link>
+        );
+      },
+    };
+
+    // FIXME: Problem 2: All MUI components rendered from Marked are rendered
+    // outside our ThemeProvider, hence we don't get the correct colors.
+    marked.use({ renderer });
   }
 
   #valueFromJson = (str) => {
