@@ -20446,11 +20446,12 @@ object-assign
           return f(e).hasIn(["servers", 0]);
         }),
         m = s(
-          Object(r.createSelector)(o.specJsonWithResolvedSubtrees, function (
-            e
-          ) {
-            return e.getIn(["components", "securitySchemes"]) || null;
-          })
+          Object(r.createSelector)(
+            o.specJsonWithResolvedSubtrees,
+            function (e) {
+              return e.getIn(["components", "securitySchemes"]) || null;
+            }
+          )
         ),
         v = c,
         g = c,

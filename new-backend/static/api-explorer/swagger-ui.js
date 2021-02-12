@@ -7175,11 +7175,12 @@
           return f(e).hasIn(["servers", 0]);
         }),
         m = u(
-          Object(r.createSelector)(o.specJsonWithResolvedSubtrees, function (
-            e
-          ) {
-            return e.getIn(["components", "securitySchemes"]) || null;
-          })
+          Object(r.createSelector)(
+            o.specJsonWithResolvedSubtrees,
+            function (e) {
+              return e.getIn(["components", "securitySchemes"]) || null;
+            }
+          )
         ),
         v = s,
         g = s,
