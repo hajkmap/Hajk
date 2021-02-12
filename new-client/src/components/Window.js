@@ -515,7 +515,9 @@ class Window extends React.PureComponent {
           height: height,
         }}
       >
-        <div tabIndex="0" ref={this.windowRef} 
+        <div
+          tabIndex="0"
+          ref={this.windowRef}
           className={clsx(
             classes.panelContent,
             this.props.height === "dynamic"
