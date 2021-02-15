@@ -616,6 +616,7 @@ figure img {
 
 .chapters {
   display: inline-block;
+  background-color: #f4f4f4;
 }
 
 .chapter {
@@ -824,9 +825,11 @@ figure img {
 }
 
 .document-chapter {
-  background-color: #f1f1f1;
+  background-color: #fff;
   margin-bottom: 15px;
-  padding: 4px;
+  margin: 18px;
+  padding: 8px;
+  border: 1px solid #dddddd;
 }
 
 .document-chapter .btn {
@@ -845,7 +848,6 @@ figure img {
   margin: 0;
   padding-bottom: 10px;
   margin-bottom: 5px;
-  max-width: 1000px;
   min-height: 60px;
   cursor: pointer;
   border-bottom: 3px solid #dedede;
@@ -891,7 +893,7 @@ figure img {
 
 .document-edit-menu {
   min-height: 60px;
-  background-color: #f2f2f2;
+  background-color: #fff;
   padding: 10px;
   text-align: right;
 }
@@ -946,6 +948,10 @@ figure img {
   top: 30%;
   left: 50%;
   margin-left: -250px;
+}
+
+.document-title {
+  background-color: #fff;
 }
 
 .document-link-input {
@@ -1023,7 +1029,7 @@ figure img {
   margin-bottom: 0.5em;
 }
 
-.toc-modal {
+.modal-settings {
   position: absolute;
   width: 500px;
   top: 20%;
@@ -1031,4 +1037,8 @@ figure img {
   padding: 1rem;
   background-color: #fff;
   border: 2px solid #000;
+}
+
+.editor-container {
+  max-width: 1600px;
 }
