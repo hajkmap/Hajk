@@ -37,34 +37,34 @@ import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
 
-const ColorButtonRed = withStyles((theme) => ({
+const ColorButtonRed = withStyles(theme => ({
   root: {
     color: theme.palette.getContrastText(red[500]),
     backgroundColor: red[500],
     "&:hover": {
-      backgroundColor: red[700],
-    },
-  },
+      backgroundColor: red[700]
+    }
+  }
 }))(Button);
 
-const ColorButtonGreen = withStyles((theme) => ({
+const ColorButtonGreen = withStyles(theme => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700],
-    },
-  },
+      backgroundColor: green[700]
+    }
+  }
 }))(Button);
 
-const ColorButtonBlue = withStyles((theme) => ({
+const ColorButtonBlue = withStyles(theme => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700],
-    },
-  },
+      backgroundColor: blue[700]
+    }
+  }
 }))(Button);
 
 class Chapter {
@@ -86,33 +86,33 @@ class InformativeEditor extends Component {
       newChapterName: "",
       newDocumentName: "",
       newDocumentMap: "",
-      documents: [],
+      documents: []
     };
     this.editors = [];
   }
 
   load(document) {
-    this.props.model.loadDocuments((documents) => {
+    this.props.model.loadDocuments(documents => {
       if (documents.length > 0) {
-        this.props.model.load(document || documents[0], (data) => {
+        this.props.model.load(document || documents[0], data => {
           this.setState(
             {
               data: data,
               documents: documents,
-              selectedDocument: document || documents[0],
+              selectedDocument: document || documents[0]
             },
             () => {
-              this.props.model.loadMaps((maps) => {
+              this.props.model.loadMaps(maps => {
                 this.setState(
                   {
                     maps: maps,
                     map: data.map,
-                    newDocumentMap: maps[0],
+                    newDocumentMap: maps[0]
                   },
                   () => {
-                    this.props.model.loadMapSettings(data.map, (settings) => {
+                    this.props.model.loadMapSettings(data.map, settings => {
                       this.setState({
-                        mapSettings: settings,
+                        mapSettings: settings
                       });
                     });
                   }
@@ -122,10 +122,10 @@ class InformativeEditor extends Component {
           );
         });
       } else {
-        this.props.model.loadMaps((maps) => {
+        this.props.model.loadMaps(maps => {
           this.setState({
             maps: maps,
-            newDocumentMap: maps[0],
+            newDocumentMap: maps[0]
           });
         });
       }
@@ -141,7 +141,7 @@ class InformativeEditor extends Component {
     this.props.model.save(
       this.state.selectedDocument,
       this.state.data,
-      (result) => {
+      result => {
         if (result === "File saved") {
           result = "Filen sparades utan problem.";
         }
@@ -149,7 +149,7 @@ class InformativeEditor extends Component {
           showModal: true,
           modalContent: result,
           showAbortButton: false,
-          modalConfirmCallback: () => {},
+          modalConfirmCallback: () => {}
         });
       }
     );
@@ -166,10 +166,10 @@ class InformativeEditor extends Component {
       ),
       showAbortButton: true,
       modalConfirmCallback: () => {
-        this.props.model.delete(this.state.selectedDocument, (result) => {
+        this.props.model.delete(this.state.selectedDocument, result => {
           this.load();
         });
-      },
+      }
     });
   }
 
@@ -177,11 +177,11 @@ class InformativeEditor extends Component {
     this.state.data.chapters.push(
       new Chapter({
         header: title,
-        mapSettings: this.state.mapSettings,
+        mapSettings: this.state.mapSettings
       })
     );
     this.setState({
-      data: this.state.data,
+      data: this.state.data
     });
   }
 
@@ -194,7 +194,7 @@ class InformativeEditor extends Component {
       modalConfirmCallback: () => {
         parentChapters.splice(index, 1);
         this.forceUpdate();
-      },
+      }
     });
   }
 
@@ -203,17 +203,17 @@ class InformativeEditor extends Component {
       showModal: false,
       modalStyle: {},
       okButtonText: "OK",
-      modalConfirmCallback: () => {},
+      modalConfirmCallback: () => {}
     });
   }
 
   renderMapDialog(chapter) {
     var mapState = {},
       checkedLayers = [],
-      updateMapSettings = (state) => {
+      updateMapSettings = state => {
         mapState = state;
       },
-      updateLayersSettings = (state) => {
+      updateLayersSettings = state => {
         checkedLayers = state;
       };
 
@@ -226,8 +226,8 @@ class InformativeEditor extends Component {
           map={this.state.map}
           chapter={chapter}
           mapSettings={this.state.mapSettings}
-          onMapUpdate={(state) => updateMapSettings(state)}
-          onLayersUpdate={(state) => updateLayersSettings(state)}
+          onMapUpdate={state => updateMapSettings(state)}
+          onLayersUpdate={state => updateLayersSettings(state)}
         />
       ),
       modalConfirmCallback: () => {
@@ -235,7 +235,7 @@ class InformativeEditor extends Component {
         chapter.mapSettings = {
           center: mapState.center,
           zoom: mapState.zoom,
-          extent: mapState.extent,
+          extent: mapState.extent
         };
         chapter.layers = checkedLayers;
       },
@@ -247,14 +247,14 @@ class InformativeEditor extends Component {
           right: "30px",
           bottom: "30px",
           width: "auto",
-          margin: 0,
-        },
-      },
+          margin: 0
+        }
+      }
     });
   }
 
   renderToc(currentChapter, chapters, parentChapters, index) {
-    var renderChapters = (subchapters) => {
+    var renderChapters = subchapters => {
       var renderableChapters = subchapters ? subchapters : chapters;
       return renderableChapters.map((chapter, i) => {
         if (chapter !== currentChapter) {
@@ -328,9 +328,9 @@ class InformativeEditor extends Component {
           right: "30px",
           bottom: "30px",
           width: "auto",
-          margin: 0,
-        },
-      },
+          margin: 0
+        }
+      }
     });
   }
 
@@ -343,7 +343,7 @@ class InformativeEditor extends Component {
     }, 50);
     return (
       <form
-        onSubmit={(e) => {
+        onSubmit={e => {
           this.state.modalConfirmCallback();
           e.preventDefault();
         }}
@@ -352,9 +352,9 @@ class InformativeEditor extends Component {
         <input
           defaultValue={this.state.newChapterName}
           type="text"
-          onChange={(e) => {
+          onChange={e => {
             this.setState({
-              newChapterName: e.target.value,
+              newChapterName: e.target.value
             });
           }}
         />
@@ -365,7 +365,7 @@ class InformativeEditor extends Component {
   renderChangeNameDialog(chapter) {
     this.setState(
       {
-        newChapterName: chapter.header,
+        newChapterName: chapter.header
       },
       () => {
         this.setState({
@@ -375,7 +375,7 @@ class InformativeEditor extends Component {
           modalConfirmCallback: () => {
             chapter.header = this.state.newChapterName;
             this.hideModal();
-          },
+          }
         });
       }
     );
@@ -419,11 +419,11 @@ class InformativeEditor extends Component {
           {chapter.header}
         </h1>
         <ChapterAdder
-          onAddChapter={(title) => {
+          onAddChapter={title => {
             chapter.chapters.push(
               new Chapter({
                 header: title,
-                mapSettings: this.state.mapSettings,
+                mapSettings: this.state.mapSettings
               })
             );
             this.forceUpdate();
@@ -495,7 +495,7 @@ class InformativeEditor extends Component {
         <RichEditor
           display={chapter.expanded}
           html={chapter.html}
-          onUpdate={(html) => {
+          onUpdate={html => {
             chapter.html = html;
           }}
         />
@@ -534,7 +534,7 @@ class InformativeEditor extends Component {
       <ColorButtonRed
         variant="contained"
         className="btn"
-        onClick={(e) => this.hideModal()}
+        onClick={e => this.hideModal()}
         startIcon={<CancelIcon />}
       >
         Avbryt
@@ -557,7 +557,7 @@ class InformativeEditor extends Component {
             style={{
               height: "100%",
               paddingBottom: "45px",
-              marginBottom: "-35px",
+              marginBottom: "-35px"
             }}
           >
             {this.state.modalContent}
@@ -565,7 +565,7 @@ class InformativeEditor extends Component {
           <ColorButtonGreen
             variant="contained"
             className="btn"
-            onClick={(e) => {
+            onClick={e => {
               if (this.state.modalConfirmCallback) {
                 this.state.modalConfirmCallback();
               }
@@ -612,7 +612,7 @@ class InformativeEditor extends Component {
     }, 50);
     return (
       <form
-        onSubmit={(e) => {
+        onSubmit={e => {
           this.state.modalConfirmCallback();
           e.preventDefault();
         }}
@@ -623,15 +623,15 @@ class InformativeEditor extends Component {
             type="text"
             id="new-document-name"
             value={this.state.newDocumentName}
-            onChange={(e) => {
+            onChange={e => {
               if (this.validateNewDocumentName(e.target.value)) {
                 this.setState(
                   {
-                    newDocumentName: e.target.value,
+                    newDocumentName: e.target.value
                   },
                   () => {
                     this.setState({
-                      modalContent: this.renderCreateForm(),
+                      modalContent: this.renderCreateForm()
                     });
                   }
                 );
@@ -642,9 +642,9 @@ class InformativeEditor extends Component {
         <div className="inset-form">
           <label>Välj karta:&nbsp;</label>
           <select
-            onChange={(e) => {
+            onChange={e => {
               this.setState({
-                newDocumentMap: e.target.value,
+                newDocumentMap: e.target.value
               });
             }}
           >
@@ -664,15 +664,15 @@ class InformativeEditor extends Component {
       modalConfirmCallback: () => {
         var data = {
           documentName: this.state.newDocumentName,
-          mapName: this.state.newDocumentMap,
+          mapName: this.state.newDocumentMap
         };
         if (data.documentName !== "") {
-          this.props.model.createDocument(data, (response) => {
+          this.props.model.createDocument(data, response => {
             this.load(data.documentName);
           });
           this.hideModal();
         }
-      },
+      }
     });
   }
 
@@ -694,7 +694,7 @@ class InformativeEditor extends Component {
           <label>Välj dokument:&nbsp;</label>
           <select
             className="control-fixed-width"
-            onChange={(e) => {
+            onChange={e => {
               this.load(e.target.value);
             }}
             value={this.state.selectedDocument}
@@ -712,7 +712,7 @@ class InformativeEditor extends Component {
             Spara
           </ColorButtonBlue>
           &nbsp;
-          <ChapterAdder onAddChapter={(title) => this.addChapter(title)} />
+          <ChapterAdder onAddChapter={title => this.addChapter(title)} />
           &nbsp;
           <ColorButtonRed
             variant="contained"

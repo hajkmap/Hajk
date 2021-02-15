@@ -188,10 +188,7 @@
         "layers": [],
         "visibleForGroups": [],
         "maxResultsPerDataset": 100,
-        "anchor": [
-          "",
-          ""
-        ],
+        "anchor": ["", ""],
         "scale": "",
         "markerImg": "",
         "delayBeforeAutoSearch": 300,

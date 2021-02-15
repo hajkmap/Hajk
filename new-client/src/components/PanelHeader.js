@@ -7,7 +7,7 @@ import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 import AspectRatioIcon from "@material-ui/icons/AspectRatio";
 import { Hidden, Typography, IconButton, Box } from "@material-ui/core";
 
-const styles = (theme) => {
+const styles = theme => {
   return {
     header: {
       padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
@@ -16,8 +16,8 @@ const styles = (theme) => {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      minHeight: 46,
-    },
+      minHeight: 46
+    }
   };
 };
 
@@ -30,7 +30,7 @@ class PanelHeader extends Component {
     onClose: propTypes.func.isRequired,
     onMaximize: propTypes.func.isRequired,
     onMinimize: propTypes.func.isRequired,
-    title: propTypes.string.isRequired,
+    title: propTypes.string.isRequired
   };
 
   renderCustomHeaderButtons = () => {

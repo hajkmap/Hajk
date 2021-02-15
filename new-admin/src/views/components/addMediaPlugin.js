@@ -10,17 +10,17 @@ export const mediaBlockRenderer = (block, { getEditorState }) => {
     if (type === "image") {
       return {
         component: Image,
-        editable: false,
+        editable: false
       };
     } else if (type === "video") {
       return {
         component: Video,
-        editable: false,
+        editable: false
       };
     } else if (type === "audio") {
       return {
         component: Audio,
-        editable: false,
+        editable: false
       };
     }
   }

@@ -26,7 +26,7 @@ import SaveIcon from "@material-ui/icons/Save";
 
 var defaultState = {
   validationErrors: [],
-  transformations: [],
+  transformations: []
 };
 
 class ToolOptions extends Component {
@@ -44,11 +44,11 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
-        transformations: this.getTool().options.transformations || [],
+        transformations: this.getTool().options.transformations || []
       });
     } else {
       this.setState({
-        active: false,
+        active: false
       });
     }
   }
@@ -61,14 +61,14 @@ class ToolOptions extends Component {
 
   activeChanged(e) {
     this.setState({
-      active: e.target.checked,
+      active: e.target.checked
     });
   }
 
   getTool() {
     return this.props.model
       .get("toolConfig")
-      .find((tool) => tool.type === this.type);
+      .find(tool => tool.type === this.type);
   }
 
   add(tool) {
@@ -79,12 +79,12 @@ class ToolOptions extends Component {
     this.props.model.set({
       toolConfig: this.props.model
         .get("toolConfig")
-        .filter((tool) => tool.type !== this.type),
+        .filter(tool => tool.type !== this.type)
     });
   }
 
   replace(tool) {
-    this.props.model.get("toolConfig").forEach((t) => {
+    this.props.model.get("toolConfig").forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -97,8 +97,8 @@ class ToolOptions extends Component {
       type: this.type,
       index: this.state.index,
       options: {
-        transformations: this.state.transformations,
-      },
+        transformations: this.state.transformations
+      }
     };
 
     var existing = this.getTool();
@@ -109,7 +109,7 @@ class ToolOptions extends Component {
         () => {
           this.props.parent.props.parent.setState({
             alert: true,
-            alertMessage: "Uppdateringen lyckades",
+            alertMessage: "Uppdateringen lyckades"
           });
         }
       );
@@ -126,9 +126,9 @@ class ToolOptions extends Component {
             this.remove();
             update.call(this);
             this.setState({
-              transformations: [],
+              transformations: []
             });
-          },
+          }
         });
       } else {
         this.remove();
@@ -161,7 +161,7 @@ class ToolOptions extends Component {
             id="active"
             name="active"
             type="checkbox"
-            onChange={(e) => {
+            onChange={e => {
               this.activeChanged(e);
             }}
             checked={this.state.active}
@@ -176,7 +176,7 @@ class ToolOptions extends Component {
             name="index"
             type="number"
             min="0"
-            onChange={(e) => {
+            onChange={e => {
               this.handleInputChange(e);
             }}
             value={this.state.index}

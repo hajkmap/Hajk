@@ -22,26 +22,26 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
+  DialogContentText
 } from "@material-ui/core";
 
-const styles = (theme) => ({
+const styles = theme => ({
   gridContainer: {
     padding: theme.spacing(4),
-    height: "100%",
+    height: "100%"
   },
   middleContainer: {
     overflowX: "auto",
     flexBasis: "100%",
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(2)
   },
   headerContainer: {
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(2)
   },
   footerContainer: {
     flexBasis: "10%",
-    borderTop: "1px solid grey",
-  },
+    borderTop: "1px solid grey"
+  }
 });
 
 const maxHeight = 950;
@@ -55,24 +55,24 @@ class PrintWindow extends React.PureComponent {
     allDocumentsToggled: false,
     chapterInformation: this.setChapterInfo(),
     printContent: undefined,
-    pdfLoading: false,
+    pdfLoading: false
   };
 
   constructor(props) {
     super(props);
 
     this.printPages = [
-      { type: "TOC", availableHeight: maxHeight, content: [] },
+      { type: "TOC", availableHeight: maxHeight, content: [] }
     ];
   }
 
   componentDidMount = () => {
     this.props.localObserver.subscribe(
       "chapter-components-appended",
-      (renderedChapters) => {
+      renderedChapters => {
         this.setState(
           {
-            printContent: renderedChapters,
+            printContent: renderedChapters
           },
           () => {
             this.printContents();
@@ -92,11 +92,11 @@ class PrintWindow extends React.PureComponent {
 
   checkIfContentIsHtag = () => {};
 
-  checkIfContentIsChapterTitle = (node) => {
+  checkIfContentIsChapterTitle = node => {
     if (node.getAttribute("data-type") === "chapter-header") {
       return true;
     } else {
-      return [...node.children].some((child) => {
+      return [...node.children].some(child => {
         return (
           ["H1", "H2", "H3", "H4", "H5"].includes(child.tagName) &&
           node.getAttribute("data-type") === "chapter-header"
@@ -105,11 +105,11 @@ class PrintWindow extends React.PureComponent {
     }
   };
 
-  isContentHeaderTag = (content) => {
+  isContentHeaderTag = content => {
     return ["H1", "H2", "H3", "H4", "H5"].includes(content.tagName);
   };
 
-  contentFitsCurrentPage = (content) => {
+  contentFitsCurrentPage = content => {
     if (this.isContentHeaderTag(content)) {
       return this.getAvailableHeight() >= 0.4 * maxHeight;
     }
@@ -120,7 +120,7 @@ class PrintWindow extends React.PureComponent {
     return contentHeight <= availableHeight;
   };
 
-  isContentFloatingPicture = (content) => {
+  isContentFloatingPicture = content => {
     if (content) {
       const type = content.attributes.getNamedItem("data-position")?.value;
       if (type === "floatRight" || type === "floatLeft") {
@@ -139,11 +139,11 @@ class PrintWindow extends React.PureComponent {
     this.printPages.push({
       type: type,
       availableHeight: maxHeight - height,
-      content: [content],
+      content: [content]
     });
   };
 
-  addContentToCurrentPage = (content) => {
+  addContentToCurrentPage = content => {
     let height = content.getBoundingClientRect().height;
 
     if (this.isContentFloatingPicture(content)) {
@@ -157,7 +157,7 @@ class PrintWindow extends React.PureComponent {
     this.printPages.push({
       type: type,
       availableHeight: maxHeight,
-      content: [],
+      content: []
     });
   };
 
@@ -165,13 +165,13 @@ class PrintWindow extends React.PureComponent {
     return type === "TOC" && content.tagName === "LI";
   };
 
-  hasChildren = (content) => {
+  hasChildren = content => {
     return (
       content.children && content.children.length > 0 && content.tagName !== "P"
     );
   };
 
-  isContentTextArea = (content) => {
+  isContentTextArea = content => {
     return content.id === "text-area-content";
   };
 
@@ -242,13 +242,13 @@ class PrintWindow extends React.PureComponent {
     }
   };
 
-  handleBrTags = (content) => {
+  handleBrTags = content => {
     let brHeight = window.getComputedStyle(content).lineHeight;
     this.printPages[this.printPages.length - 1].availableHeight -=
       brHeight.substr(0, brHeight.length - 2) * 1.2;
   };
 
-  getCanvasFromContent = (page) => {
+  getCanvasFromContent = page => {
     let sWidth = Math.round((210 * 96) / 25.4);
     let sHeight = Math.round((297 * 96) / 25.4);
     let dWidth = Math.round((210 * 96) / 25.4);
@@ -264,14 +264,14 @@ class PrintWindow extends React.PureComponent {
 
     document.body.appendChild(onePageDiv);
 
-    page.content.forEach((child) => {
+    page.content.forEach(child => {
       onePageDiv.appendChild(child);
     });
 
     return html2canvas(onePageDiv, {
       allowTaint: false,
-      logging: false,
-    }).then((canvas) => {
+      logging: false
+    }).then(canvas => {
       let onePageCanvas = document.createElement("canvas");
 
       onePageCanvas.width = Math.round((210 * 96) / 25.4);
@@ -303,16 +303,16 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  resizeImage = (img) => {
+  resizeImage = img => {
     img.height = img.getBoundingClientRect().height * imageResizeRatio;
     img.width = img.clientWidth * imageResizeRatio;
   };
 
-  imageFitsOnePage = (img) => {
+  imageFitsOnePage = img => {
     return img.getBoundingClientRect().height < maxHeight * 0.9;
   };
 
-  loadImage = (img) => {
+  loadImage = img => {
     return new Promise((resolve, reject) => {
       img.onload = () => {
         if (this.imageFitsOnePage(img)) {
@@ -339,7 +339,7 @@ class PrintWindow extends React.PureComponent {
           pdf.internal.pageSize.width / 2,
           pdf.internal.pageSize.height - 20,
           {
-            align: "center",
+            align: "center"
           }
         );
       } else if (i > numToc) {
@@ -348,7 +348,7 @@ class PrintWindow extends React.PureComponent {
           pdf.internal.pageSize.width / 2,
           pdf.internal.pageSize.height - 20,
           {
-            align: "center",
+            align: "center"
           }
         );
       }
@@ -357,20 +357,20 @@ class PrintWindow extends React.PureComponent {
   };
 
   customRender = (element, container) => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       ReactDOM.render(
         <ThemeProvider theme={this.props.customTheme || this.props.theme}>
           {element}
         </ThemeProvider>,
         container,
-        (e) => {
+        e => {
           resolve();
         }
       );
     });
   };
 
-  createPrintElement = (id) => {
+  createPrintElement = id => {
     let div = document.createElement("div");
     div.style = "position : absolute; left : -10000px; width : 210mm";
     div.id = id;
@@ -396,7 +396,7 @@ class PrintWindow extends React.PureComponent {
 
   areAllImagesLoaded = () => {
     return Promise.allSettled(
-      [...this.content.getElementsByTagName("img")].map((img) => {
+      [...this.content.getElementsByTagName("img")].map(img => {
         return this.loadImage(img);
       })
     );
@@ -404,9 +404,9 @@ class PrintWindow extends React.PureComponent {
 
   //Bug in html2canvas so we need to delay
   delayCanvasCreate = (page, index) => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
-        this.getCanvasFromContent(page).then((x) => {
+        this.getCanvasFromContent(page).then(x => {
           resolve(x);
         });
       }, 500 * index + 1);
@@ -427,9 +427,9 @@ class PrintWindow extends React.PureComponent {
           return this.delayCanvasCreate(page, index);
         });
 
-        Promise.all(canvasPromises).then((canvases) => {
+        Promise.all(canvasPromises).then(canvases => {
           let pdf = new jsPDF("p", "pt");
-          let numToc = this.printPages.filter((page) => page.type === "TOC")
+          let numToc = this.printPages.filter(page => page.type === "TOC")
             .length;
           canvases.forEach((canvas, index) => {
             if (index > 0) {
@@ -451,14 +451,14 @@ class PrintWindow extends React.PureComponent {
           this.setState({
             pdfLoading: false,
             printContent: undefined,
-            printMaps: false,
+            printMaps: false
           });
         });
       });
     });
   };
 
-  handleCheckboxChange = (chapter) => {
+  handleCheckboxChange = chapter => {
     const { model } = this.props;
     let newChapterInformation = [...this.state.chapterInformation];
 
@@ -471,13 +471,13 @@ class PrintWindow extends React.PureComponent {
 
     this.setState({
       chapterInformation: newChapterInformation,
-      allDocumentsToggled: false,
+      allDocumentsToggled: false
     });
   };
 
   toggleSubChapters(chapter, checked) {
     if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
-      chapter.chapters.forEach((subChapter) => {
+      chapter.chapters.forEach(subChapter => {
         subChapter.chosenForPrint = checked;
         this.toggleSubChapters(subChapter, checked);
       });
@@ -489,7 +489,7 @@ class PrintWindow extends React.PureComponent {
     let chapterInformation = model.getAllChapterInfo();
 
     let topChapter = chapterInformation.find(
-      (topChapter) =>
+      topChapter =>
         topChapter.headerIdentifier ===
         activeDocument.chapters[0].headerIdentifier
     );
@@ -500,18 +500,18 @@ class PrintWindow extends React.PureComponent {
     return chapterInformation;
   }
 
-  toggleAllDocuments = (toggled) => {
-    this.state.chapterInformation.forEach((chapter) => {
+  toggleAllDocuments = toggled => {
+    this.state.chapterInformation.forEach(chapter => {
       chapter.chosenForPrint = toggled;
       this.toggleSubChapters(chapter, toggled);
     });
 
     this.setState({
-      allDocumentsToggled: toggled,
+      allDocumentsToggled: toggled
     });
   };
 
-  removeTagsNotSelectedForPrint = (chapter) => {
+  removeTagsNotSelectedForPrint = chapter => {
     const { printImages, printText } = this.state;
 
     let elementsToRemove = [];
@@ -519,17 +519,17 @@ class PrintWindow extends React.PureComponent {
     div.innerHTML = chapter.html;
 
     //A-tags should always be removed before printing
-    Array.from(div.getElementsByTagName("a")).forEach((element) => {
+    Array.from(div.getElementsByTagName("a")).forEach(element => {
       elementsToRemove.push(element);
     });
     if (!printImages) {
-      Array.from(div.getElementsByTagName("figure")).forEach((element) => {
+      Array.from(div.getElementsByTagName("figure")).forEach(element => {
         elementsToRemove.push(element);
       });
     }
     if (!printText) {
       Array.from(div.querySelectorAll("p, h1, h2, h3, h4, h5, h6")).forEach(
-        (element) => {
+        element => {
           elementsToRemove.push(element);
         }
       );
@@ -544,9 +544,9 @@ class PrintWindow extends React.PureComponent {
     return chapter;
   };
 
-  prepareChapterForPrint = (chapter) => {
+  prepareChapterForPrint = chapter => {
     if (chapter.chapters && chapter.chapters.length > 0) {
-      chapter.chapters.forEach((subChapter) => {
+      chapter.chapters.forEach(subChapter => {
         if (subChapter.chapters && subChapter.chapters.length > 0) {
           return this.prepareChapterForPrint(subChapter);
         }
@@ -571,14 +571,14 @@ class PrintWindow extends React.PureComponent {
     let chaptersToPrint = JSON.parse(
       JSON.stringify(this.state.chapterInformation)
     );
-    chaptersToPrint.forEach((chapter) => {
+    chaptersToPrint.forEach(chapter => {
       chapter = this.prepareChapterForPrint(chapter);
     });
 
     return chaptersToPrint;
   };
 
-  checkIfChaptersSelected = (chapter) => {
+  checkIfChaptersSelected = chapter => {
     let subChapters = chapter.chapters;
     if (chapter.chosenForPrint) {
       return true;
@@ -609,7 +609,7 @@ class PrintWindow extends React.PureComponent {
         "Du måste välja minst ett kapitel för att kunna skapa en PDF.",
         {
           variant: "warning",
-          persist: false,
+          persist: false
         }
       );
     } else {
@@ -638,7 +638,7 @@ class PrintWindow extends React.PureComponent {
                   checked={this.state.printText}
                   onChange={() => {
                     this.setState({
-                      printText: !this.state.printText,
+                      printText: !this.state.printText
                     });
                   }}
                 />
@@ -656,7 +656,7 @@ class PrintWindow extends React.PureComponent {
                   checked={this.state.printImages}
                   onChange={() => {
                     this.setState({
-                      printImages: !this.state.printImages,
+                      printImages: !this.state.printImages
                     });
                   }}
                 />
@@ -674,7 +674,7 @@ class PrintWindow extends React.PureComponent {
                   checked={this.state.printMaps}
                   onChange={() => {
                     this.setState({
-                      printMaps: !this.state.printMaps,
+                      printMaps: !this.state.printMaps
                     });
                   }}
                 />
@@ -748,7 +748,7 @@ class PrintWindow extends React.PureComponent {
       classes,
       togglePrintWindow,
       localObserver,
-      documentWindowMaximized,
+      documentWindowMaximized
     } = this.props;
     const { chapterInformation } = this.state;
     return (

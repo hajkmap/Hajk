@@ -27,14 +27,14 @@ class DocumentWindowBase extends React.PureComponent {
     return null;
   }
 
-  hasSubMenu = (menuItem) => {
+  hasSubMenu = menuItem => {
     return menuItem.menu && menuItem.menu.length > 0;
   };
 
-  findReferringMenuItem = (documentNameToFind) => {
+  findReferringMenuItem = documentNameToFind => {
     const { options } = this.props;
     let foundMenuItem = null;
-    options.menuConfig.menu.forEach((rootItemToSearch) => {
+    options.menuConfig.menu.forEach(rootItemToSearch => {
       let found = this.findMenuItem(rootItemToSearch, documentNameToFind);
       if (found != null) {
         foundMenuItem = found;
@@ -48,7 +48,7 @@ class DocumentWindowBase extends React.PureComponent {
     return options.documentOnStart ? true : false;
   };
 
-  scrollInDocument = (headerIdentifier) => {
+  scrollInDocument = headerIdentifier => {
     const { localObserver, model, document } = this.props;
 
     if (headerIdentifier) {
@@ -73,7 +73,7 @@ class DocumentWindowBase extends React.PureComponent {
         },
         () => {
           enqueueSnackbar("Kunde inte öppna dokumentet", {
-            variant: "warning",
+            variant: "warning"
           });
 
           console.warn(
@@ -91,7 +91,7 @@ class DocumentWindowBase extends React.PureComponent {
       persist: true,
       preventDuplicate: true,
       transitionDuration: { enter: 0, exit: 0 },
-      anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      anchorOrigin: { vertical: "bottom", horizontal: "center" }
     });
   };
 
@@ -102,29 +102,29 @@ class DocumentWindowBase extends React.PureComponent {
 
   togglePrintWindow = () => {
     this.setState({
-      showPrintWindow: !this.state.showPrintWindow,
+      showPrintWindow: !this.state.showPrintWindow
     });
   };
 
-  canHandleInfoClickEvent = (infoClickEvent) => {
+  canHandleInfoClickEvent = infoClickEvent => {
     if (infoClickEvent.payload.type !== "a") {
       return false;
     }
-    return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
+    return Object.keys(infoClickEvent.payload.dataAttributes).every(key => {
       return [
         "data-maplink",
         "data-document",
-        "data-header-identifier",
+        "data-header-identifier"
       ].includes(key);
     });
   };
 
-  handleInfoClickRequest = (infoClickEvent) => {
+  handleInfoClickRequest = infoClickEvent => {
     if (this.canHandleInfoClickEvent(infoClickEvent)) {
       var htmlObject = document.createElement(infoClickEvent.payload.type);
       htmlObject.innerHTML = infoClickEvent.payload.children[0];
       Object.entries(infoClickEvent.payload.dataAttributes).forEach(
-        (dataAttributeEntry) => {
+        dataAttributeEntry => {
           var att = document.createAttribute(dataAttributeEntry[0]);
           att.value = dataAttributeEntry[1];
           htmlObject.setAttributeNode(att);
@@ -151,10 +151,10 @@ class DocumentWindowBase extends React.PureComponent {
     // to search.featureClicked.onClickName to catch the event.
     app.globalObserver.subscribe(
       "search.featureClicked.documentHandlerSearchResultClicked",
-      (searchResultClick) => {
+      searchResultClick => {
         localObserver.publish("set-active-document", {
           documentName: searchResultClick.properties.documentFileName,
-          headerIdentifier: searchResultClick.properties.headerIdentifier,
+          headerIdentifier: searchResultClick.properties.headerIdentifier
         });
       }
     );
@@ -180,7 +180,7 @@ class DocumentWindowBase extends React.PureComponent {
     chapter.level = level;
     if (chapter.chapters && chapter.chapters.length > 0) {
       level = level + 1;
-      chapter.chapters.forEach((subChapter) => {
+      chapter.chapters.forEach(subChapter => {
         subChapter = this.setChapterLevels(subChapter, level);
       });
     }
@@ -202,7 +202,7 @@ class DocumentWindowBase extends React.PureComponent {
         if (this.shouldShowDocumentOnStart()) {
           localObserver.publish("set-active-document", {
             documentName: this.props.options.documentOnStart,
-            headerIdentifier: null,
+            headerIdentifier: null
           });
         }
       }
@@ -233,7 +233,7 @@ class DocumentWindowBase extends React.PureComponent {
       showPrintWindow,
       customTheme,
       onMinimize,
-      onMaximize,
+      onMaximize
     } = this.props;
     const modelReady = this.isModelReady();
     const customHeaderButtons = options.enablePrint
@@ -241,8 +241,8 @@ class DocumentWindowBase extends React.PureComponent {
           {
             icon: <PrintIcon />,
             description: "Öppna utskrift",
-            onClickCallback: togglePrintWindow,
-          },
+            onClickCallback: togglePrintWindow
+          }
         ]
       : [];
     return (
@@ -263,7 +263,7 @@ class DocumentWindowBase extends React.PureComponent {
           onWindowHide: onWindowHide,
           draggingEnabled: false,
           resizingEnabled: false,
-          allowMaximizedWindow: false,
+          allowMaximizedWindow: false
         }}
       >
         {document != null && modelReady ? (

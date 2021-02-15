@@ -1,19 +1,19 @@
 import { Model } from "backbone";
 
 const fetchConfig = {
-  credentials: "same-origin",
+  credentials: "same-origin"
 };
 
 var menuEditorModel = Model.extend({
-  constructor: function (settings) {
+  constructor: function(settings) {
     this.config = settings.config;
   },
 
   async listAllAvailableDocuments() {
     try {
       return fetch(this.config.url_document_list, fetchConfig).then(
-        (response) => {
-          return response.text().then((text) => {
+        response => {
+          return response.text().then(text => {
             return JSON.parse(text);
           });
         }
@@ -21,26 +21,26 @@ var menuEditorModel = Model.extend({
     } catch (err) {}
   },
 
-  isParentRootOfTree: function (parent) {
+  isParentRootOfTree: function(parent) {
     return parent === undefined ? true : false;
   },
 
-  insertBeforeDropNode: function (foundDropNode, foundDragNode, tree) {
+  insertBeforeDropNode: function(foundDropNode, foundDragNode, tree) {
     var children = foundDropNode.parent ? foundDropNode.parent.children : tree;
     children.splice(children.indexOf(foundDropNode), 0, foundDragNode);
   },
 
-  insertAfterDropNode: function (foundDropNode, foundDragNode, tree) {
+  insertAfterDropNode: function(foundDropNode, foundDragNode, tree) {
     var children = foundDropNode.parent ? foundDropNode.parent.children : tree;
     children.splice(children.indexOf(foundDropNode) + 1, 0, foundDragNode);
   },
 
-  addToDropNode: function (newTree, foundDragNode, foundDropNode) {
+  addToDropNode: function(newTree, foundDragNode, foundDropNode) {
     this.updateDragNode(newTree, foundDragNode, foundDropNode);
     this.addToNode(foundDropNode, foundDragNode);
   },
 
-  addToGap: function (newTree, foundDragNode, foundDropNode, info) {
+  addToGap: function(newTree, foundDragNode, foundDropNode, info) {
     this.removeNodeFromParent(foundDragNode, newTree);
     this.setParentOfNode(foundDragNode, foundDropNode.parent);
 
@@ -52,7 +52,7 @@ var menuEditorModel = Model.extend({
     }
   },
 
-  addToTreeRoot: function (newTree, foundDragNode, foundDropNode, info) {
+  addToTreeRoot: function(newTree, foundDragNode, foundDropNode, info) {
     this.removeNodeFromParent(foundDragNode, newTree);
     this.setParentOfNode(foundDragNode, foundDropNode.parent);
 
@@ -64,7 +64,7 @@ var menuEditorModel = Model.extend({
     }
   },
 
-  removeNodeFromParent: function (node, newTree) {
+  removeNodeFromParent: function(node, newTree) {
     if (node.parent) {
       node.parent.children.splice(node.parent.children.indexOf(node), 1);
     } else {
@@ -72,11 +72,11 @@ var menuEditorModel = Model.extend({
     }
   },
 
-  addToNode: function (nodeToBeAddedTo, nodeToAdd) {
+  addToNode: function(nodeToBeAddedTo, nodeToAdd) {
     nodeToBeAddedTo.children.push(nodeToAdd);
   },
 
-  setParentOfNode: function (node, newParentNode) {
+  setParentOfNode: function(node, newParentNode) {
     if (newParentNode) {
       node.parent = { ...newParentNode };
     } else {
@@ -84,14 +84,14 @@ var menuEditorModel = Model.extend({
     }
   },
 
-  updateDragNode: function (newTree, dragNode, dropNode) {
+  updateDragNode: function(newTree, dragNode, dropNode) {
     this.removeNodeFromParent(dragNode, newTree);
     this.setParentOfNode(dragNode, dropNode);
   },
 
-  getNodeFromTree: function (tree, key) {
+  getNodeFromTree: function(tree, key) {
     let foundNode = null;
-    tree.forEach((treeNode) => {
+    tree.forEach(treeNode => {
       let found = this.findNode(treeNode, key);
       if (found) {
         foundNode = found;
@@ -100,7 +100,7 @@ var menuEditorModel = Model.extend({
     return foundNode;
   },
 
-  findNode: function (treeNode, key) {
+  findNode: function(treeNode, key) {
     if (treeNode.key === key) {
       return treeNode;
     } else {
@@ -111,36 +111,36 @@ var menuEditorModel = Model.extend({
   },
 
   //We remove children of menuItem and uses structure of tree as hierarchy for menu instead
-  getMenuItemWithoutChildren: function (menuItem) {
+  getMenuItemWithoutChildren: function(menuItem) {
     let strippedMenuitem = { ...menuItem };
     strippedMenuitem.menu = [];
     return strippedMenuitem;
   },
 
-  setParent: function (treeNode, parent) {
+  setParent: function(treeNode, parent) {
     treeNode.parent = parent;
     if (treeNode.children.length > 0) {
-      treeNode.children.forEach((child) => {
+      treeNode.children.forEach(child => {
         this.setParent(child, treeNode);
       });
     }
   },
 
-  canSave: function (tree) {
+  canSave: function(tree) {
     return !this.hasTreeInvalidTreeNodes(tree);
   },
 
-  setParentForAllTreeNodes: function (tree) {
-    tree.forEach((treeNode) => {
+  setParentForAllTreeNodes: function(tree) {
+    tree.forEach(treeNode => {
       this.setParent(treeNode, undefined);
     });
   },
 
-  isSameNode: function (foundDropNode, foundDragNode) {
+  isSameNode: function(foundDropNode, foundDragNode) {
     return foundDropNode.key === foundDragNode.key;
   },
 
-  isSelectionValid: function (menuItem, children) {
+  isSelectionValid: function(menuItem, children) {
     if (
       (menuItem.maplink || menuItem.document || menuItem.link) &&
       children.length > 0
@@ -151,8 +151,8 @@ var menuEditorModel = Model.extend({
     return true;
   },
 
-  createMenuFromTreeStructure: function (menu, tree) {
-    tree.forEach((treeNode) => {
+  createMenuFromTreeStructure: function(menu, tree) {
+    tree.forEach(treeNode => {
       if (treeNode.children.length > 0) {
         menu.push(treeNode.menuItem);
         treeNode.menuItem.menu = [];
@@ -167,17 +167,17 @@ var menuEditorModel = Model.extend({
     return menu;
   },
 
-  removeHeaderTreeRow: function (tree) {
+  removeHeaderTreeRow: function(tree) {
     tree.shift();
   },
 
-  hasTreeInvalidTreeNodes: function (tree) {
-    return tree.some((treeNode) => {
+  hasTreeInvalidTreeNodes: function(tree) {
+    return tree.some(treeNode => {
       return this.hasInvalidTreeNodes(treeNode);
     });
   },
 
-  hasInvalidTreeNodes: function (treeNode) {
+  hasInvalidTreeNodes: function(treeNode) {
     if (!treeNode.title.props.valid) {
       return true;
     } else {
@@ -188,34 +188,34 @@ var menuEditorModel = Model.extend({
     }
   },
 
-  getNewMenuItemObject: function () {
+  getNewMenuItemObject: function() {
     return {
       title: "",
       document: "",
       color: "",
       icon: {
         materialUiIconName: "",
-        fontSize: "large",
+        fontSize: "large"
       },
       maplink: "",
       link: "",
-      menu: [],
+      menu: []
     };
   },
 
   //Can this recursion be written better????
-  findInTree: function (tree, key) {
+  findInTree: function(tree, key) {
     return tree
-      .map((treeNode) => {
+      .map(treeNode => {
         var found = this.findTreeNode(treeNode, key);
         return found;
       })
-      .filter((res) => {
+      .filter(res => {
         return res !== undefined;
       })[0];
   },
   //Can this recursion be written better????
-  findTreeNode: function (treeNode, key) {
+  findTreeNode: function(treeNode, key) {
     if (treeNode.key === key) {
       return treeNode;
     } else {
@@ -225,24 +225,24 @@ var menuEditorModel = Model.extend({
     }
   },
 
-  exportTreeAsMenuJson: function (tree, menuConfig) {
+  exportTreeAsMenuJson: function(tree, menuConfig) {
     this.removeHeaderTreeRow(tree);
     menuConfig.menu = this.createMenuFromTreeStructure([], tree);
     console.log(menuConfig.menu, "menu");
     return menuConfig;
   },
 
-  loadMenuConfigForMap: function (map) {
+  loadMenuConfigForMap: function(map) {
     var url = this.config.url_map + "/" + map;
-    return fetch(url, { credentials: "same-origin" }).then((response) => {
-      return response.json().then((data) => {
-        let documentHandler = data.tools.find((tool) => {
+    return fetch(url, { credentials: "same-origin" }).then(response => {
+      return response.json().then(data => {
+        let documentHandler = data.tools.find(tool => {
           return tool.type === "documenthandler";
         });
         return documentHandler;
       });
     });
-  },
+  }
 });
 
 export default menuEditorModel;

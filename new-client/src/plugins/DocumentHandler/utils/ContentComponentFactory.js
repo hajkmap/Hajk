@@ -12,7 +12,7 @@ import {
   CardMedia,
   List,
   ListItem,
-  Grid,
+  Grid
 } from "@material-ui/core";
 
 const ELEMENT_NODE = 1;
@@ -26,10 +26,10 @@ const getIndentationValue = (fontSize, multiplier, negative) => {
   return negative ? `${value * -1}rem` : `${value}rem`;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   documentImage: {
     objectFit: "contain",
-    objectPosition: "left",
+    objectPosition: "left"
   },
 
   pictureRightFloatingText: {},
@@ -37,68 +37,68 @@ const useStyles = makeStyles((theme) => ({
 
   floatRight: {
     float: "right",
-    marginLeft: theme.spacing(1),
+    marginLeft: theme.spacing(1)
   },
   floatLeft: {
     float: "left",
-    marginRight: theme.spacing(1),
+    marginRight: theme.spacing(1)
   },
 
   pictureRight: {
     alignItems: "flex-end",
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column"
   },
   pictureLeft: {
     alignItems: "flex-start",
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column"
   },
   pictureCenter: {
     alignItems: "center",
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column"
   },
 
   popupActivatedImage: {
     marginBottom: theme.spacing(1),
-    cursor: "pointer",
+    cursor: "pointer"
   },
   naturalDocumentImageProportions: {
     marginTop: theme.spacing(1),
-    width: "100%",
+    width: "100%"
   },
   imageText: {
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(1)
   },
   imageInformationWrapper: {
     marginBottom: theme.spacing(1),
-    maxWidth: "100%",
+    maxWidth: "100%"
   },
   startIcon: {
-    marginLeft: theme.spacing(0),
+    marginLeft: theme.spacing(0)
   },
   linkIcon: {
-    verticalAlign: "middle",
+    verticalAlign: "middle"
   },
   heading: {
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(1)
   },
   media: {
     width: "auto",
-    maxWidth: "100%",
+    maxWidth: "100%"
   },
   listItemOneDigit: {
     marginRight: getIndentationValue(theme.typography.body1.fontSize, 1), //MAGIC
-    padding: theme.spacing(0),
+    padding: theme.spacing(0)
   },
   listItemTwoDigit: {
     marginBottom: theme.spacing(1),
     padding: theme.spacing(0),
-    marginRight: getIndentationValue(theme.typography.body1.fontSize, 0.5), //MAGIC
+    marginRight: getIndentationValue(theme.typography.body1.fontSize, 0.5) //MAGIC
   },
   olListItem: {
-    padding: theme.spacing(0),
+    padding: theme.spacing(0)
   },
   ulList: {
     listStyle: "initial",
@@ -112,22 +112,22 @@ const useStyles = makeStyles((theme) => ({
       1.375,
       true
     ), //MAGIC
-    padding: theme.spacing(0),
+    padding: theme.spacing(0)
   },
   olList: {
     padding: theme.spacing(0),
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(1)
   },
   bottomMargin: {
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(1)
   },
   linkButton: {
     padding: theme.spacing(0),
-    color: theme.palette.info.main,
-  },
+    color: theme.palette.info.main
+  }
 }));
 
-const renderChild = (child) => {
+const renderChild = child => {
   if (child.nodeType === TEXT_NODE) {
     return child.data;
   }
@@ -137,7 +137,7 @@ const renderChild = (child) => {
   }
 };
 
-const getFormattedComponentFromTag = (tag) => {
+const getFormattedComponentFromTag = tag => {
   const childNodes = [...tag.childNodes];
   return childNodes.map((child, index) => {
     return <React.Fragment key={index}>{renderChild(child)}</React.Fragment>;
@@ -271,7 +271,7 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
   };
 
-  const getImageStyle = (image) => {
+  const getImageStyle = image => {
     let className = image.popup
       ? clsx(
           classes.documentImage,
@@ -290,7 +290,7 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
     return className;
   };
 
-  const getImagePositionClass = (position) => {
+  const getImagePositionClass = position => {
     if (position === "right") {
       return classes.pictureRight;
     }
@@ -314,7 +314,7 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
     return;
   };
 
-  const getImageDescription = (image) => {
+  const getImageDescription = image => {
     return (
       <Box
         style={{ width: image.width }}
@@ -349,7 +349,7 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
     width: imgTag.attributes.getNamedItem("data-image-width")?.value,
     position: imgTag.attributes.getNamedItem("data-image-position")?.value,
     captionId: getUniqueIntegerNumber(),
-    sourceId: getUniqueIntegerNumber(),
+    sourceId: getUniqueIntegerNumber()
   };
 
   let onClickCallback = image.popup
@@ -408,7 +408,7 @@ export const Strong = ({ strongTag }) => {
   return [
     <React.Fragment key={0}>
       <strong>{strongTag.textContent}</strong>
-    </React.Fragment>,
+    </React.Fragment>
   ];
 };
 export const Underline = ({ uTag }) => {
@@ -427,7 +427,7 @@ export const Underline = ({ uTag }) => {
   return [
     <React.Fragment key={0}>
       <u>{uTag.textContent}</u>
-    </React.Fragment>,
+    </React.Fragment>
   ];
 };
 export const Italic = ({ emTag }) => {
@@ -446,7 +446,7 @@ export const Italic = ({ emTag }) => {
   return [
     <React.Fragment key={0}>
       <em>{emTag.textContent}</em>
-    </React.Fragment>,
+    </React.Fragment>
   ];
 };
 
@@ -470,25 +470,25 @@ export const LineBreak = () => {
 export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   const classes = useStyles();
 
-  const getLinkDataPerType = (attributes) => {
+  const getLinkDataPerType = attributes => {
     const {
       0: mapLink,
       1: headerIdentifier,
       2: documentLink,
-      3: externalLink,
+      3: externalLink
     } = [
       "data-maplink",
       "data-header-identifier",
       "data-document",
-      "data-link",
-    ].map((attributeKey) => {
+      "data-link"
+    ].map(attributeKey => {
       return attributes.getNamedItem(attributeKey)?.value;
     });
 
     return { mapLink, headerIdentifier, documentLink, externalLink };
   };
 
-  const getExternalLink = (externalLink) => {
+  const getExternalLink = externalLink => {
     return (
       <Button
         color="default"
@@ -552,7 +552,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         onClick={() => {
           localObserver.publish("set-active-document", {
             documentName: documentLink,
-            headerIdentifier: headerIdentifier,
+            headerIdentifier: headerIdentifier
           });
         }}
       >
@@ -565,7 +565,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     mapLink,
     headerIdentifier,
     documentLink,
-    externalLink,
+    externalLink
   } = getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {

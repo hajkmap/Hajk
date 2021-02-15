@@ -16,25 +16,25 @@ import {
   Underline,
   Img,
   BlockQuote,
-  LineBreak,
+  LineBreak
 } from "../utils/ContentComponentFactory";
 
-const styles = (theme) => {
+const styles = theme => {
   return {
     typography: {
-      overflowWrap: "break-word",
+      overflowWrap: "break-word"
     },
     chapter: {
       cursor: "text",
-      display: "block",
-    },
+      display: "block"
+    }
   };
 };
 
 class Contents extends React.PureComponent {
   state = {
     popupImage: null,
-    activeContent: null,
+    activeContent: null
   };
 
   constructor(props) {
@@ -48,7 +48,7 @@ class Contents extends React.PureComponent {
     return id;
   };
 
-  flattenChaptersTree = (chapters) => {
+  flattenChaptersTree = chapters => {
     return chapters.reduce((acc, chapter) => {
       if (chapter.html && chapter.header) {
         let chapterStrippedFromSubChapters = { ...chapter };
@@ -67,9 +67,9 @@ class Contents extends React.PureComponent {
     this.appendParsedComponentsToDocument();
     localObserver.unsubscribe("append-chapter-components");
     localObserver.subscribe("image-popup", this.showPopupModal);
-    localObserver.subscribe("append-chapter-components", (chapters) => {
+    localObserver.subscribe("append-chapter-components", chapters => {
       console.log(chapters, "chapters");
-      chapters.forEach((chapter) => {
+      chapters.forEach(chapter => {
         this.appendComponentsToChapter(chapter);
       });
 
@@ -85,7 +85,7 @@ class Contents extends React.PureComponent {
     localObserver.unsubscribe("chapter-components-appended");
   };
 
-  getCustomLink = (e) => {
+  getCustomLink = e => {
     return (
       <CustomLink
         aTag={e}
@@ -106,76 +106,76 @@ class Contents extends React.PureComponent {
       tagType: "br",
       callback: () => {
         return <LineBreak></LineBreak>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "ul",
-      callback: (e) => {
+      callback: e => {
         return <ULComponent ulComponent={e}></ULComponent>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "ol",
-      callback: (e) => <OLComponent olComponent={e}></OLComponent>,
+      callback: e => <OLComponent olComponent={e}></OLComponent>
     });
     allowedHtmlTags.push({
       tagType: "li",
-      callback: () => {},
+      callback: () => {}
     });
     allowedHtmlTags.push({
       tagType: "blockquote",
-      callback: (e) => {
+      callback: e => {
         return (
           <BlockQuote
             blockQuoteTag={e}
             defaultColors={this.props.options.defaultDocumentColorSettings}
           ></BlockQuote>
         );
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "h1",
-      callback: (e) => {
+      callback: e => {
         return <Heading headingTag={e}></Heading>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "h2",
-      callback: (e) => {
+      callback: e => {
         return <Heading headingTag={e}></Heading>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "h3",
-      callback: (e) => {
+      callback: e => {
         return <Heading headingTag={e}></Heading>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "h4",
-      callback: (e) => {
+      callback: e => {
         return <Heading headingTag={e}></Heading>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "h5",
-      callback: (e) => {
+      callback: e => {
         return <Heading headingTag={e}></Heading>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "h6",
-      callback: (e) => {
+      callback: e => {
         return <Heading headingTag={e}></Heading>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "a",
-      callback: this.getCustomLink.bind(this),
+      callback: this.getCustomLink.bind(this)
     });
     allowedHtmlTags.push({
       tagType: "img",
-      callback: (e) => {
+      callback: e => {
         return (
           <Img
             getUniqueIntegerNumber={this.getUniqueIntegerNumber}
@@ -183,42 +183,42 @@ class Contents extends React.PureComponent {
             localObserver={this.props.localObserver}
           ></Img>
         );
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "p",
-      callback: (e) => {
+      callback: e => {
         return <Paragraph pTag={e}></Paragraph>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "figure",
-      callback: (e) => {
+      callback: e => {
         return <Figure figureTag={e}></Figure>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "strong",
-      callback: (e) => {
+      callback: e => {
         return <Strong strongTag={e}></Strong>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "u",
-      callback: (e) => {
+      callback: e => {
         return <Underline uTag={e}></Underline>;
-      },
+      }
     });
     allowedHtmlTags.push({
       tagType: "em",
-      callback: (e) => {
+      callback: e => {
         return <Italic emTag={e}></Italic>;
-      },
+      }
     });
     return allowedHtmlTags;
   };
 
-  getMaterialUIComponentsForChapter = (chapter) => {
+  getMaterialUIComponentsForChapter = chapter => {
     return htmlToMaterialUiParser(
       chapter.html,
       this.getTagSpecificCallbacks()
@@ -227,13 +227,13 @@ class Contents extends React.PureComponent {
     });
   };
 
-  hasSubChapters = (chapter) => {
+  hasSubChapters = chapter => {
     return chapter.chapters && chapter.chapters.length > 0;
   };
 
-  appendComponentsToChapter = (chapter) => {
+  appendComponentsToChapter = chapter => {
     if (this.hasSubChapters(chapter)) {
-      chapter.chapters.forEach((subChapter) => {
+      chapter.chapters.forEach(subChapter => {
         subChapter.components = this.getMaterialUIComponentsForChapter(
           subChapter
         );
@@ -265,7 +265,7 @@ class Contents extends React.PureComponent {
     this.setState({ popupImage: null });
   };
 
-  showPopupModal = (image) => {
+  showPopupModal = image => {
     this.setState({ popupImage: image });
   };
 
@@ -287,9 +287,9 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderChapters = (chapters) => {
+  renderChapters = chapters => {
     return Array.isArray(chapters)
-      ? chapters.map((chapter) => this.renderChapter(chapter))
+      ? chapters.map(chapter => this.renderChapter(chapter))
       : null;
   };
 
@@ -299,19 +299,19 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderChapter = (chapter) => {
+  renderChapter = chapter => {
     return (
       <React.Fragment key={chapter.id}>
         {this.renderHeadline(chapter)}
         {chapter.components}
         {Array.isArray(chapter.chapters)
-          ? chapter.chapters.map((subChapter) => this.renderChapter(subChapter))
+          ? chapter.chapters.map(subChapter => this.renderChapter(subChapter))
           : null}
       </React.Fragment>
     );
   };
 
-  getHeaderVariant = (chapter) => {
+  getHeaderVariant = chapter => {
     let headerSize = 2; //Chapters start with h2
     while (chapter.parent) {
       headerSize++;
@@ -326,7 +326,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderHeadline = (chapter) => {
+  renderHeadline = chapter => {
     const { classes } = this.props;
 
     return (

@@ -1,6 +1,5 @@
 import React from "react";
 import { Component } from "react";
-import ReactModal from "react-modal";
 import DocumentTextEditor from "./components/DocumentTextEditor.jsx";
 import DocumentChapter from "./components/DocumentChapter.jsx";
 import AddKeyword from "./components/AddKeyword.jsx";
@@ -9,43 +8,56 @@ import Button from "@material-ui/core/Button";
 import DoneIcon from "@material-ui/icons/Done";
 import RemoveIcon from "@material-ui/icons/Remove";
 import SaveIcon from "@material-ui/icons/SaveSharp";
-import CancelIcon from "@material-ui/icons/Cancel";
 import NoteAddIcon from "@material-ui/icons/NoteAdd";
+import EditIcon from "@material-ui/icons/Edit";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
 import Chip from "@material-ui/core/Chip";
 import Switch from "@material-ui/core/Switch";
 import TextField from "@material-ui/core/TextField";
-import Modal from "@material-ui/core/Modal";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import FormGroup from "@material-ui/core/FormGroup";
+import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import DescriptionIcon from "@material-ui/icons/Description";
+import OpenWithIcon from "@material-ui/icons/OpenWith";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 
-const ColorButtonRed = withStyles((theme) => ({
+const ColorButtonRed = withStyles(theme => ({
   root: {
     color: theme.palette.getContrastText(red[500]),
     backgroundColor: red[500],
     "&:hover": {
-      backgroundColor: red[700],
-    },
-  },
+      backgroundColor: red[700]
+    }
+  }
 }))(Button);
 
-const ColorButtonGreen = withStyles((theme) => ({
+const ColorButtonGreen = withStyles(theme => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700],
-    },
-  },
+      backgroundColor: green[700]
+    }
+  }
 }))(Button);
 
-const ColorButtonBlue = withStyles((theme) => ({
+const ColorButtonBlue = withStyles(theme => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700],
-    },
-  },
+      backgroundColor: blue[700]
+    }
+  }
 }))(Button);
 
 class Chapter {
@@ -80,18 +92,21 @@ class DocumentEditor extends Component {
       newTableOfContentsTitle: undefined,
       tableOfContentsModal: false,
       tableOfContents: {},
+      editTitle: false
     };
     this.editors = [];
+    this.documentTitle = React.createRef();
   }
 
   load(document) {
-    this.props.model.loadDocuments((documents) => {
+    this.props.model.loadDocuments(documents => {
       if (documents.length > 0) {
-        this.props.model.load(document || documents[0], (data) => {
+        this.props.model.load(document || documents[0], data => {
           this.setState(
             {
               data: data,
               documents: documents,
+              documentTitle: data.title,
               selectedDocument: document || documents[0],
               tableOfContents: {
                 expanded: data.tableOfContents
@@ -105,7 +120,7 @@ class DocumentEditor extends Component {
                   : 100,
                 title: data.tableOfContents
                   ? data.tableOfContents.title
-                  : "Innehållsförteckning",
+                  : "Innehållsförteckning"
               },
               newTableOfContentsExpanded: data.tableOfContents
                 ? data.tableOfContents.expanded
@@ -118,24 +133,24 @@ class DocumentEditor extends Component {
                 : 100,
               newTableOfContentsTitle: data.tableOfContents
                 ? data.tableOfContents.title
-                : "Innehållsförteckning",
+                : "Innehållsförteckning"
             },
             () => {
-              this.props.model.loadMaps((maps) => {
+              this.props.model.loadMaps(maps => {
                 this.setState({
                   maps: maps,
                   map: data.map,
-                  newDocumentMap: maps[0],
+                  newDocumentMap: maps[0]
                 });
               });
             }
           );
         });
       } else {
-        this.props.model.loadMaps((maps) => {
+        this.props.model.loadMaps(maps => {
           this.setState({
             maps: maps,
-            newDocumentMap: maps[0],
+            newDocumentMap: maps[0]
           });
         });
       }
@@ -143,9 +158,9 @@ class DocumentEditor extends Component {
   }
 
   loadImageList() {
-    this.props.model.listImages((data) => {
+    this.props.model.listImages(data => {
       this.setState({
-        imageList: data,
+        imageList: data
       });
     });
   }
@@ -160,15 +175,16 @@ class DocumentEditor extends Component {
     this.props.model.save(
       this.state.selectedDocument,
       this.state.data,
-      (result) => {
+      result => {
         if (result === "File saved") {
           result = "Filen sparades utan problem.";
         }
         this.setState({
           showModal: true,
-          modalContent: result,
+          modalTitle: result,
+          modalContent: "",
           showAbortButton: false,
-          modalConfirmCallback: () => {},
+          modalConfirmCallback: () => {}
         });
       }
     );
@@ -185,10 +201,10 @@ class DocumentEditor extends Component {
       ),
       showAbortButton: true,
       modalConfirmCallback: () => {
-        this.props.model.delete(this.state.selectedDocument, (result) => {
+        this.props.model.delete(this.state.selectedDocument, result => {
           this.load();
         });
-      },
+      }
     });
   }
 
@@ -196,24 +212,25 @@ class DocumentEditor extends Component {
     this.state.data.chapters.push(
       new Chapter({
         header: title,
-        headerIdentifier: titleID,
+        headerIdentifier: titleID
       })
     );
     this.setState({
-      data: this.state.data,
+      data: this.state.data
     });
   }
 
   removeChapter(parentChapters, index) {
     this.setState({
       showModal: true,
+      modalTitle: "Ta bort kapitel",
       modalContent:
         "Detta kapitel och dess underkapitel kommer att tas bort, det går inte att ångra ditt val. Vill du verkställa ändringen?",
       showAbortButton: true,
       modalConfirmCallback: () => {
         parentChapters.splice(index, 1);
         this.forceUpdate();
-      },
+      }
     });
   }
 
@@ -222,12 +239,12 @@ class DocumentEditor extends Component {
       showModal: false,
       modalStyle: {},
       okButtonText: "OK",
-      modalConfirmCallback: () => {},
+      modalConfirmCallback: () => {}
     });
   }
 
   renderToc(currentChapter, chapters, parentChapters, index) {
-    var renderChapters = (subchapters) => {
+    var renderChapters = subchapters => {
       var renderableChapters = subchapters ? subchapters : chapters;
       return renderableChapters.map((chapter, i) => {
         if (chapter !== currentChapter) {
@@ -301,9 +318,9 @@ class DocumentEditor extends Component {
           right: "30px",
           bottom: "30px",
           width: "auto",
-          margin: 0,
-        },
-      },
+          margin: 0
+        }
+      }
     });
   }
 
@@ -315,33 +332,35 @@ class DocumentEditor extends Component {
       }
     }, 50);
     return (
-      <form
-        onSubmit={(e) => {
-          this.state.modalConfirmCallback();
-          e.preventDefault();
-        }}
-      >
-        <label>Ange nytt namn</label>&nbsp;
-        <input
+      <>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="name"
+          label="Ange nytt namn"
+          type="text"
           defaultValue={this.state.newChapterName}
-          type="text"
-          onChange={(e) => {
+          onChange={e => {
             this.setState({
-              newChapterName: e.target.value,
+              newChapterName: e.target.value
             });
           }}
+          fullWidth
         />
-        <label>Ange nytt ID</label>
-        <input
+        <TextField
+          margin="dense"
+          id="name"
+          label="Ange nytt ID"
+          type="text"
           defaultValue={this.state.newHeaderIdentifier}
-          type="text"
-          onChange={(e) => {
+          onChange={e => {
             this.setState({
-              newHeaderIdentifier: e.target.value,
+              newHeaderIdentifier: e.target.value
             });
           }}
+          fullWidth
         />
-      </form>
+      </>
     );
   }
 
@@ -349,18 +368,19 @@ class DocumentEditor extends Component {
     this.setState(
       {
         newChapterName: chapter.header,
-        newHeaderIdentifier: chapter.headerIdentifier,
+        newHeaderIdentifier: chapter.headerIdentifier
       },
       () => {
         this.setState({
           showModal: true,
           showAbortButton: true,
+          modalTitle: "Ändra titel",
           modalContent: this.renderNameInput(),
           modalConfirmCallback: () => {
             chapter.header = this.state.newChapterName;
             chapter.headerIdentifier = this.state.newHeaderIdentifier;
             this.hideModal();
-          },
+          }
         });
       }
     );
@@ -407,7 +427,7 @@ class DocumentEditor extends Component {
                 this.renderTocDialog(chapter, parentChapters, index);
               }}
             >
-              Flytta
+              <OpenWithIcon />
             </Button>
             <Button
               variant="contained"
@@ -416,7 +436,7 @@ class DocumentEditor extends Component {
                 this.moveChapter("up", parentChapters, index);
               }}
             >
-              Upp
+              <ArrowUpwardIcon />
             </Button>
             <Button
               variant="contained"
@@ -425,7 +445,7 @@ class DocumentEditor extends Component {
                 this.moveChapter("down", parentChapters, index);
               }}
             >
-              Ner
+              <ArrowDownwardIcon />
             </Button>
             <Button
               variant="contained"
@@ -436,15 +456,16 @@ class DocumentEditor extends Component {
             >
               Byt namn
             </Button>
-            <Button
+            <ColorButtonRed
               variant="contained"
-              className="btn btn-default"
+              className="btn btn-danger"
               onClick={() => {
                 this.removeChapter(parentChapters, index);
               }}
+              startIcon={<RemoveIcon />}
             >
               Ta bort
-            </Button>
+            </ColorButtonRed>
             <Button
               variant="contained"
               className="btn btn-default"
@@ -464,7 +485,7 @@ class DocumentEditor extends Component {
               chapter.chapters.push(
                 new Chapter({
                   header: title,
-                  headerIdentifier: titleID,
+                  headerIdentifier: titleID
                 })
               );
               this.forceUpdate();
@@ -472,19 +493,19 @@ class DocumentEditor extends Component {
           />
 
           <AddKeyword
-            onAddKeyword={(keyword) => {
+            onAddKeyword={keyword => {
               chapter.keywords.push(keyword);
               this.setState({
-                keywords: chapter.keywords,
+                keywords: chapter.keywords
               });
               this.forceUpdate();
             }}
           />
 
           <AddGeoObject
-            onAddGeoObject={(geoObject) => {
+            onAddGeoObject={geoObject => {
               this.setState({
-                geoObjects: chapter.geoObjects,
+                geoObjects: chapter.geoObjects
               });
               chapter.geoObjects.push(geoObject);
               this.forceUpdate();
@@ -498,13 +519,13 @@ class DocumentEditor extends Component {
                 <Chip
                   key={i}
                   label={keyword}
-                  onDelete={(i) => {
+                  onDelete={i => {
                     const index = chapter.keywords.indexOf(keyword);
                     if (index > -1) {
                       chapter.keywords.splice(index, 1);
                     }
                     this.setState({
-                      keywords: chapter.keywords,
+                      keywords: chapter.keywords
                     });
                   }}
                 />
@@ -518,13 +539,13 @@ class DocumentEditor extends Component {
                 <Chip
                   key={i}
                   label={geoObject}
-                  onDelete={(i) => {
+                  onDelete={i => {
                     const index = chapter.geoObjects.indexOf(geoObject);
                     if (index > -1) {
                       chapter.geoObjects.splice(index, 1);
                     }
                     this.setState({
-                      geoObjects: chapter.geoObjects,
+                      geoObjects: chapter.geoObjects
                     });
                   }}
                 />
@@ -535,7 +556,7 @@ class DocumentEditor extends Component {
         <DocumentTextEditor
           display={chapter.expanded}
           html={chapter.html}
-          onUpdate={(html) => {
+          onUpdate={html => {
             chapter.html = html;
           }}
           imageList={this.state.imageList}
@@ -560,20 +581,79 @@ class DocumentEditor extends Component {
     if (this.state.data) {
       return (
         <div>
-          <p>
-            Detta dokument tillhör följande karta: <b>{this.state.data.map}</b>
-          </p>
-          <Button
-            variant="contained"
-            className="btn btn-default"
-            onClick={() => {
-              this.setState({
-                tableOfContentsModal: !this.state.tableOfContentsModal,
-              });
-            }}
-          >
-            Redigera innehållsförteckning
-          </Button>
+          <div className="document-title">
+            <p>
+              Detta dokument tillhör följande karta:{" "}
+              <b>{this.state.data.map}</b>
+            </p>
+            <div className="padded">
+              <DescriptionIcon />
+              <TextField
+                id="documentTitle"
+                style={{ margin: "4px" }}
+                type="text"
+                value={this.state.documentTitle}
+                InputProps={{
+                  readOnly: !this.state.editTitle
+                }}
+                variant={this.state.editTitle ? "outlined" : "filled"}
+                onChange={e => {
+                  this.setState({
+                    documentTitle: e.target.value
+                  });
+                }}
+              />
+              {this.state.editTitle ? (
+                <Button
+                  variant="contained"
+                  style={{ margin: "4px" }}
+                  onClick={() => this.saveTitle()}
+                >
+                  <DoneIcon />
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  style={{ margin: "4px" }}
+                  onClick={() => this.toggleTitleEdit()}
+                >
+                  <EditIcon />
+                </Button>
+              )}
+              <div className="document-menu-buttons">
+                <Button
+                  variant="contained"
+                  className="btn btn-default"
+                  onClick={() => {
+                    this.renderTableOfContentsModal();
+                  }}
+                >
+                  Redigera innehållsförteckning
+                </Button>
+                <DocumentChapter
+                  onAddChapter={(title, titleID) =>
+                    this.addChapter(title, titleID)
+                  }
+                />
+                <ColorButtonRed
+                  variant="contained"
+                  className="btn btn-danger"
+                  onClick={() => this.delete()}
+                  startIcon={<RemoveIcon />}
+                >
+                  Ta bort
+                </ColorButtonRed>
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={() => this.save()}
+                  startIcon={<SaveIcon />}
+                >
+                  Spara
+                </ColorButtonBlue>
+              </div>
+            </div>
+          </div>
           {this.state.data.chapters.map((chapter, index) =>
             this.renderChapter(this.state.data.chapters, chapter, index)
           )}
@@ -583,62 +663,49 @@ class DocumentEditor extends Component {
   }
 
   renderModal() {
-    var abortButton = this.state.showAbortButton ? (
-      <ColorButtonRed
-        variant="contained"
-        className="btn"
-        onClick={(e) => this.hideModal()}
-        startIcon={<CancelIcon />}
-      >
-        Avbryt
-      </ColorButtonRed>
-    ) : (
-      ""
-    );
-
     return (
-      <ReactModal
-        isOpen={this.state.showModal}
-        contentLabel="Bekräfta"
-        className="Modal"
-        overlayClassName="Overlay"
-        style={this.state.modalStyle}
-        appElement={document.getElementById("root")}
-      >
-        <div style={{ height: "100%", padding: "15px" }}>
-          <div
-            style={{
-              height: "100%",
-              marginBottom: "150px",
-              float: "left",
-            }}
-          >
-            {this.state.modalContent}
-          </div>
-          <ColorButtonGreen
-            variant="contained"
-            className="btn"
-            onClick={(e) => {
-              if (this.state.modalConfirmCallback) {
-                this.state.modalConfirmCallback();
-              }
-              this.hideModal();
-            }}
-            startIcon={<DoneIcon />}
-          >
-            {this.state.okButtonText || "OK"}
-          </ColorButtonGreen>
-          &nbsp;
-          {abortButton}
-        </div>
-      </ReactModal>
+      <div>
+        <Dialog
+          open={this.state.showModal}
+          onClose={() => this.hideModal()}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {this.state.modalTitle}
+          </DialogTitle>
+          <DialogContent>{this.state.modalContent}</DialogContent>
+          <DialogActions>
+            <Button onClick={() => this.hideModal()} color="primary">
+              Avbryt
+            </Button>
+            <ColorButtonGreen
+              variant="contained"
+              className="btn"
+              onClick={e => {
+                if (this.state.modalConfirmCallback) {
+                  this.state.modalConfirmCallback();
+                }
+                this.hideModal();
+              }}
+              startIcon={<DoneIcon />}
+            >
+              {this.state.okButtonText || "OK"}
+            </ColorButtonGreen>
+          </DialogActions>
+        </Dialog>
+      </div>
     );
   }
 
   renderMaps() {
     if (this.state.maps) {
       return this.state.maps.map((map, i) => {
-        return <option key={i}>{map}</option>;
+        return (
+          <MenuItem key={i} value={map}>
+            {map}
+          </MenuItem>
+        );
       });
     } else {
       return null;
@@ -664,47 +731,43 @@ class DocumentEditor extends Component {
       }
     }, 50);
     return (
-      <form
-        onSubmit={(e) => {
-          this.state.modalConfirmCallback();
-          e.preventDefault();
-        }}
-      >
-        <div>
-          <label>Namn</label>&nbsp;
-          <input
-            type="text"
-            id="new-document-name"
-            value={this.state.newDocumentName}
-            onChange={(e) => {
-              if (this.validateNewDocumentName(e.target.value)) {
-                this.setState(
-                  {
-                    newDocumentName: e.target.value,
-                  },
-                  () => {
-                    this.setState({
-                      modalContent: this.renderCreateForm(),
-                    });
-                  }
-                );
-              }
-            }}
-          />
-        </div>
-        <div className="inset-form">
-          <label>Välj karta:&nbsp;</label>
-          <select
-            onChange={(e) => {
+      <>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="new-document-name"
+          label="Dokumentnamn"
+          type="text"
+          defaultValue={this.state.newDocumentName}
+          onChange={e => {
+            if (this.validateNewDocumentName(e.target.value)) {
+              this.setState(
+                {
+                  newDocumentName: e.target.value
+                },
+                () => {
+                  this.setState({
+                    modalContent: this.renderCreateForm()
+                  });
+                }
+              );
+            }
+          }}
+          fullWidth
+        />
+        <FormControl>
+          <InputLabel>Välj karta</InputLabel>
+          <Select
+            onChange={e => {
               this.setState({
-                newDocumentMap: e.target.value,
+                newDocumentMap: e.target.value
               });
             }}
           >
             {this.renderMaps()}
-          </select>
-        </div>
-      </form>
+          </Select>
+        </FormControl>
+      </>
     );
   }
 
@@ -712,20 +775,21 @@ class DocumentEditor extends Component {
     this.setState({
       showModal: true,
       showAbortButton: true,
+      modalTitle: "Skapa nytt dokument",
       modalContent: this.renderCreateForm(),
       okButtonText: "Spara",
       modalConfirmCallback: () => {
         var data = {
           documentName: this.state.newDocumentName,
-          mapName: this.state.newDocumentMap,
+          mapName: this.state.newDocumentMap
         };
         if (data.documentName !== "") {
-          this.props.model.createDocument(data, (response) => {
+          this.props.model.createDocument(data, response => {
             this.load(data.documentName);
           });
           this.hideModal();
         }
-      },
+      }
     });
   }
 
@@ -734,110 +798,152 @@ class DocumentEditor extends Component {
       expanded: this.state.newTableOfContentsExpanded,
       active: this.state.newTableOfContentsActive,
       chapterLevelsToShow: this.state.newTableOfContentsLevels,
-      title: this.state.newTableOfContentsTitle,
+      title: this.state.newTableOfContentsTitle
     };
 
     this.setState({
       data: {
         ...this.state.data,
-        tableOfContents: tableOfContents,
+        tableOfContents: tableOfContents
       },
-      tableOfContentsModal: false,
+      tableOfContentsModal: false
     });
   }
 
   renderTableOfContentsModal() {
-    return (
-      <Modal
-        open={this.state.tableOfContentsModal}
-        onClose={() => this.saveTableOfContents()}
-        id="edit-image-modal"
-        aria-labelledby="image-modal-title"
-        aria-describedby="image-modal-description"
-        onClick={(event) => event.stopPropagation()}
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        {this.renderTableOfContentsInput()}
-      </Modal>
-    );
+    this.setState({
+      showModal: true,
+      modalTitle: "Innehållsförteckning",
+      modalContent: this.renderTableOfContentsInput(),
+      showAbortButton: true,
+
+      modalConfirmCallback: () => {}
+    });
   }
 
   renderTableOfContentsInput() {
     return (
-      <div className="toc-modal">
-        <h3>Innehållsförteckning</h3>
-        <div>
-          <b>Aktiverad:</b>
-          <Switch
-            checked={this.state.newTableOfContentsActive}
-            onChange={(e) => {
-              this.setState({
-                newTableOfContentsActive: e.target.checked,
-              });
-            }}
-            color="primary"
-            name="tableOfContents"
-            inputProps={{ "aria-label": "secondary checkbox" }}
-          />
-        </div>
-        <div>
-          <b>Expanderad:</b>
-          <Switch
-            checked={this.state.newTableOfContentsExpanded}
-            onChange={(e) => {
-              this.setState({
-                newTableOfContentsExpanded: e.target.checked,
-              });
-            }}
-            color="primary"
-            name="tableOfContentsExpanded"
-            inputProps={{ "aria-label": "secondary checkbox" }}
-          />
-        </div>
-        <div>
-          <b>Nivåer:</b>
-          <TextField
-            id="tableOfContentsChapters"
-            type="number"
-            value={this.state.newTableOfContentsLevels}
-            onChange={(e) => {
-              this.setState({
-                newTableOfContentsLevels: parseInt(e.target.value),
-              });
-            }}
-          />
-        </div>
-        <div>
-          <b>Titel:</b>
-          <TextField
-            id="tableOfContentsTitle"
-            type="text"
-            value={this.state.newTableOfContentsTitle}
-            onChange={(e) => {
-              this.setState({
-                newTableOfContentsTitle: e.target.value,
-              });
-            }}
-          />
-        </div>
+      <FormGroup row>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={this.state.newTableOfContentsActive}
+              onChange={e => {
+                this.setState({
+                  [e.target.name]: e.target.checked
+                });
+              }}
+              name="newTableOfContentsActive"
+              color="primary"
+            />
+          }
+          label="Aktiverad"
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={this.state.newTableOfContentsExpanded}
+              onChange={e => {
+                this.setState({
+                  [e.target.name]: e.target.checked
+                });
+              }}
+              name="newTableOfContentsExpanded"
+              color="primary"
+            />
+          }
+          label="Expanderad"
+        />
+        <TextField
+          margin="dense"
+          id="tableOfContentsTitle"
+          label="Titel"
+          type="text"
+          defaultValue={this.state.newTableOfContentsTitle}
+          onChange={e => {
+            this.setState({
+              newTableOfContentsTitle: e.target.value
+            });
+          }}
+          fullWidth
+        />
+        <TextField
+          margin="dense"
+          id="tableOfContentsChapters"
+          label="Nivåer"
+          type="number"
+          defaultValue={this.state.newTableOfContentsLevels}
+          onChange={e => {
+            this.setState({
+              newTableOfContentsLevels: parseInt(e.target.value)
+            });
+          }}
+          fullWidth
+        />
+      </FormGroup>
+    );
+  }
 
-        <ColorButtonRed
-          variant="contained"
-          className="btn btn-danger"
-          onClick={() => this.saveTableOfContents()}
-          style={{ float: "right" }}
-        >
-          Stäng
-        </ColorButtonRed>
-      </div>
+  toggleTitleEdit = () => {
+    this.setState({
+      editTitle: !this.state.editTitle
+    });
+  };
+
+  saveTitle() {
+    this.setState({
+      data: {
+        ...this.state.data,
+        title: this.state.documentTitle
+      },
+      editTitle: false
+    });
+  }
+
+  renderEditTitle() {
+    return (
+      <>
+        <h2>Titel på dokument</h2>
+        <TextField
+          id="documentTitle"
+          style={{ margin: "4px" }}
+          type="text"
+          value={this.state.documentTitle}
+          InputProps={{
+            readOnly: !this.state.editTitle
+          }}
+          variant={this.state.editTitle ? "outlined" : "filled"}
+          onChange={e => {
+            this.setState({
+              documentTitle: e.target.value
+            });
+          }}
+        />
+        {this.state.editTitle ? (
+          <Button
+            variant="contained"
+            style={{ margin: "4px" }}
+            onClick={() => this.saveTitle()}
+          >
+            <DoneIcon />
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            style={{ margin: "4px" }}
+            onClick={() => this.toggleTitleEdit()}
+          >
+            <EditIcon />
+          </Button>
+        )}
+      </>
     );
   }
 
   render() {
     return (
-      <div>
+      <div className="editor-container">
         {this.renderModal()}
-        {this.renderTableOfContentsModal()}
         <div className="margined">
           <ColorButtonGreen
             variant="contained"
@@ -852,36 +958,13 @@ class DocumentEditor extends Component {
           <label>Välj dokument:&nbsp;</label>
           <select
             className="control-fixed-width"
-            onChange={(e) => {
+            onChange={e => {
               this.load(e.target.value);
             }}
             value={this.state.selectedDocument}
           >
             {this.renderDocuments()}
           </select>
-        </div>
-        <div className="padded">
-          <ColorButtonBlue
-            variant="contained"
-            className="btn"
-            onClick={() => this.save()}
-            startIcon={<SaveIcon />}
-          >
-            Spara
-          </ColorButtonBlue>
-          &nbsp;
-          <DocumentChapter
-            onAddChapter={(title, titleID) => this.addChapter(title, titleID)}
-          />
-          &nbsp;
-          <ColorButtonRed
-            variant="contained"
-            className="btn btn-danger"
-            onClick={() => this.delete()}
-            startIcon={<RemoveIcon />}
-          >
-            Ta bort
-          </ColorButtonRed>
         </div>
         <div className="chapters">{this.renderData()}</div>
       </div>

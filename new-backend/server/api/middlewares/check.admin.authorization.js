@@ -3,7 +3,7 @@ import ad from "../services/activedirectory.service";
 
 const logger = log4js.getLogger("router");
 
-export default async function (req, res, next) {
+export default async function(req, res, next) {
   logger.trace("Attempt to access admin methods");
 
   // If AD lookup isn't active, there's no way for us to find

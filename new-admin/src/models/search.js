@@ -27,23 +27,23 @@ import { prepareProxyUrl } from "../utils/ProxyHelper";
 
 var search = Model.extend({
   defaults: {
-    layers: [],
+    layers: []
   },
 
-  getConfig: function (url) {
+  getConfig: function(url) {
     $.ajax(url, {
-      success: (data) => {
+      success: data => {
         data.wfslayers.sort((a, b) => {
           var d1 = parseInt(a.date, 10),
             d2 = parseInt(b.date, 10);
           return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
         });
         this.set("layers", data.wfslayers);
-      },
+      }
     });
   },
 
-  addLayer: function (layer, callback) {
+  addLayer: function(layer, callback) {
     $.ajax({
       url: this.get("config").url_layer_settings,
       method: "POST",
@@ -54,11 +54,11 @@ var search = Model.extend({
       },
       error: () => {
         callback(false);
-      },
+      }
     });
   },
 
-  updateLayer: function (layer, callback) {
+  updateLayer: function(layer, callback) {
     $.ajax({
       url: this.get("config").url_layer_settings,
       method: "PUT",
@@ -69,11 +69,11 @@ var search = Model.extend({
       },
       error: () => {
         callback(false);
-      },
+      }
     });
   },
 
-  removeLayer: function (layer, callback) {
+  removeLayer: function(layer, callback) {
     $.ajax({
       url: this.get("config").url_layer_settings + "/" + layer.id,
       method: "DELETE",
@@ -83,11 +83,11 @@ var search = Model.extend({
       },
       error: () => {
         callback(false);
-      },
+      }
     });
   },
 
-  getArcGISLayerDescription: function (url, layer, callback) {
+  getArcGISLayerDescription: function(url, layer, callback) {
     url = prepareProxyUrl(url, this.get("config").url_proxy);
     url += "/" + layer.id;
 
@@ -96,15 +96,15 @@ var search = Model.extend({
     $.ajax(url, {
       dataType: "json",
       data: {
-        f: "json",
+        f: "json"
       },
-      success: (data) => {
+      success: data => {
         callback(data);
-      },
+      }
     });
   },
 
-  getLayerDescription: function (url, layer, arcgis, callback) {
+  getLayerDescription: function(url, layer, arcgis, callback) {
     url = prepareProxyUrl(url, this.get("config").url_proxy);
     if (arcgis) {
       this.getArcGISLayerDescription(url, layer, callback);
@@ -112,9 +112,9 @@ var search = Model.extend({
       $.ajax(url, {
         data: {
           request: "describeFeatureType",
-          typename: layer.name,
+          typename: layer.name
         },
-        success: (data) => {
+        success: data => {
           var parser = new X2JS(),
             xmlstr = data.xml
               ? data.xml
@@ -122,12 +122,12 @@ var search = Model.extend({
             apa = parser.xml2js(xmlstr);
           try {
             var props = apa.schema.complexType.complexContent.extension.sequence.element.map(
-              (a) => {
+              a => {
                 return {
                   name: a._name,
                   localType: a._type
                     ? a._type.replace(a.__prefix + ":", "")
-                    : "",
+                    : ""
                 };
               }
             );
@@ -139,12 +139,12 @@ var search = Model.extend({
           } catch (e) {
             callback(false);
           }
-        },
+        }
       });
     }
   },
 
-  parseWFSCapabilitesTypes: function (data) {
+  parseWFSCapabilitesTypes: function(data) {
     var types = [],
       typeElements = $(data).find("FeatureType");
 
@@ -159,25 +159,35 @@ var search = Model.extend({
         crs = "";
 
       if ($(featureType).find("DefaultCRS").length > 0) {
-        crs = $(featureType).find("DefaultCRS").first().get(0).textContent;
+        crs = $(featureType)
+          .find("DefaultCRS")
+          .first()
+          .get(0).textContent;
       }
       if ($(featureType).find("DefaultSRS").length > 0) {
-        crs = $(featureType).find("DefaultSRS").first().get(0).textContent;
+        crs = $(featureType)
+          .find("DefaultSRS")
+          .first()
+          .get(0).textContent;
       }
       if ($(featureType).find("wfs\\:DefaultCRS").length > 0) {
-        crs = $(featureType).find("wfs\\:DefaultCRS").first().get(0)
-          .textContent;
+        crs = $(featureType)
+          .find("wfs\\:DefaultCRS")
+          .first()
+          .get(0).textContent;
       }
       if ($(featureType).find("wfs\\:DefaultSRS").length > 0) {
-        crs = $(featureType).find("wfs\\:DefaultSRS").first().get(0)
-          .textContent;
+        crs = $(featureType)
+          .find("wfs\\:DefaultSRS")
+          .first()
+          .get(0).textContent;
       }
       if (crs && typeof crs === "string") {
         crs = crs.split(":");
       }
 
       if (Array.isArray(crs)) {
-        crs.forEach((part) => {
+        crs.forEach(part => {
           if (/EPSG/.test(part)) {
             projection += part + ":";
           }
@@ -195,42 +205,54 @@ var search = Model.extend({
       }
 
       if ($(featureType).find("Name").length > 0) {
-        name = $(featureType).find("Name").first().get(0).textContent;
+        name = $(featureType)
+          .find("Name")
+          .first()
+          .get(0).textContent;
       }
       if ($(featureType).find("wfs\\:Name").length > 0) {
-        name = $(featureType).find("wfs\\:Name").first().get(0).textContent;
+        name = $(featureType)
+          .find("wfs\\:Name")
+          .first()
+          .get(0).textContent;
       }
       if ($(featureType).find("Title").length > 0) {
-        title = $(featureType).find("Title").first().get(0).textContent;
+        title = $(featureType)
+          .find("Title")
+          .first()
+          .get(0).textContent;
       }
       if ($(featureType).find("wfs\\:Title").length > 0) {
-        title = $(featureType).find("wfs\\:Title").first().get(0).textContent;
+        title = $(featureType)
+          .find("wfs\\:Title")
+          .first()
+          .get(0).textContent;
       }
 
       types.push({
         name: name,
         title: title,
-        projection: projection,
+        projection: projection
       });
     });
     return types;
   },
 
-  getWMSCapabilities: function (url, callback) {
+  getWMSCapabilities: function(url, callback) {
     $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       data: {
         service: "WFS",
-        request: "GetCapabilities",
+        request: "GetCapabilities"
       },
-      success: (data) => {
+      success: data => {
         var response = this.parseWFSCapabilitesTypes(data);
         callback(response);
       },
-      error: (data) => {
+      error: data => {
         callback(false);
-      },
+      }
     });
-  },
+  }
 
   /**
    * Hämtar sökbara lager från backend

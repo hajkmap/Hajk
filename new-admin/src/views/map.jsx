@@ -37,9 +37,9 @@ class Map extends Component {
     HAJK2.start(
       {
         configPath: "/mapservice/settings/config/map_1",
-        layersPath: "/mapservice/settings/config/layers",
+        layersPath: "/mapservice/settings/config/layers"
       },
-      function (status, message) {
+      function(status, message) {
         if (!status) {
           document.write(message);
         }
