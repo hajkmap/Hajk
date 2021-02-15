@@ -1,80 +1,60 @@
 import React from "react";
-// import ReactDOM, { render } from "react-dom";
-import { renderToString } from "react-dom/server";
+import ReactMarkdown from "react-markdown";
+import { withStyles } from "@material-ui/core";
+import gfm from "remark-gfm";
 import {
   Divider,
   Link,
   Paper,
   Table,
   TableBody,
-  // TableCell,
+  TableCell,
   TableContainer,
   TableHead,
   TableRow,
   Typography,
 } from "@material-ui/core";
-import marked from "marked";
-import ReactHtmlParser from "react-html-parser";
+
+const StyledTableRow = withStyles((theme) => ({
+  root: {
+    "&:nth-of-type(even)": {
+      backgroundColor: theme.palette.action.hover,
+    },
+  },
+}))(TableRow);
 
 export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
 
-    // Prepare an object that holds our overrides for the different
-    // Marked types, see https://marked.js.org/using_pro#renderer for a complete list.
-    const renderer = {
-      table(header, body) {
-        console.log("TABLE header FROM TR: ", header);
-        console.log("TABLE body FROM TR: ", body);
-
-        return renderToString(
+    this.renderers = {
+      thematicBreak: () => <Divider />,
+      link: (a) => {
+        return <Link href={a.href}>{a.children}</Link>;
+      },
+      heading: ({ level, children }) => {
+        return <Typography variant={`h${level}`}>{children}</Typography>;
+      },
+      table: (a) => {
+        return (
           <TableContainer component={Paper}>
-            <Table>
-              <TableHead dangerouslySetInnerHTML={{ __html: header }} />
-              <TableBody dangerouslySetInnerHTML={{ __html: body }} />
-            </Table>
+            <Table size="small">{a.children}</Table>
           </TableContainer>
         );
       },
-      tablerow(content) {
-        console.log("TABLEROW content from TD:", content);
-        return renderToString(
-          <TableRow dangerouslySetInnerHTML={{ __html: content }} />
-        );
+      tableHead: (a) => {
+        return <TableHead>{a.children}</TableHead>;
       },
-      tablecell(content, flags) {
-        console.log("TABLECELL inner content:", content);
-
-        // FIXME: Problem 1: We can't use TableCell here as it throws an error from MUI. Why?!
-        return `<td align="${flags.align || ""}">${content}</td>`;
-        // return renderToString(
-        //   <TableCell
-        //     align={flags.align}
-        //     variant={flags.header === true ? "head" : "body"}
-        //     dangerouslySetInnerHTML={{ __html: content }}
-        //   />
-        // );
+      tableBody: (a) => {
+        return <TableBody>{a.children}</TableBody>;
       },
-      heading(text, level) {
-        return renderToString(
-          <Typography variant={`h${level}`}>{text}</Typography>
-        );
+      tableRow: (a) => {
+        return <StyledTableRow>{a.children}</StyledTableRow>;
       },
-      hr() {
-        return renderToString(<Divider />);
-      },
-      link(href, title, text) {
-        return renderToString(
-          <Link href={href} title={title}>
-            {text}
-          </Link>
-        );
+      tableCell: (a) => {
+        return <TableCell align={a.align || "inherit"}>{a.children}</TableCell>;
       },
     };
-
-    // FIXME: Problem 2: All MUI components rendered from Marked are rendered
-    // outside our ThemeProvider, hence we don't get the correct colors.
-    marked.use({ renderer });
   }
 
   #valueFromJson = (str) => {
@@ -195,33 +175,33 @@ export default class FeaturePropsParsing {
     }
   };
 
-  #renderHtmlAsReactComponents = async (html) => {
-    const reactElementFromHtml = ReactHtmlParser(html);
-    const injectIfExternalComponents = async (children) => {
-      children.forEach(async (child, index) => {
-        if (this.#isChildTextOnly(child)) {
-          if (this.#isMarkupForExternalElement(child)) {
-            this.#removeChildFromChildren(children, index);
-            return;
-          }
-          return;
-        }
-        if (
-          this.#arrayHasMoreChildren(children, index) &&
-          this.#nodeShouldBeFetchedExternally(children[index + 1])
-        ) {
-          this.#exchangeChildForExternalComponent(child, children, index);
+  // #renderHtmlAsReactComponents = async (html) => {
+  //   const reactElementFromHtml = ReactHtmlParser(html);
+  //   const injectIfExternalComponents = async (children) => {
+  //     children.forEach(async (child, index) => {
+  //       if (this.#isChildTextOnly(child)) {
+  //         if (this.#isMarkupForExternalElement(child)) {
+  //           this.#removeChildFromChildren(children, index);
+  //           return;
+  //         }
+  //         return;
+  //       }
+  //       if (
+  //         this.#arrayHasMoreChildren(children, index) &&
+  //         this.#nodeShouldBeFetchedExternally(children[index + 1])
+  //       ) {
+  //         this.#exchangeChildForExternalComponent(child, children, index);
 
-          return;
-        }
-        if (this.#hasChildren(child)) {
-          injectIfExternalComponents(child.props.children);
-        }
-      });
-    };
-    await injectIfExternalComponents(reactElementFromHtml[0].props.children);
-    return reactElementFromHtml;
-  };
+  //         return;
+  //       }
+  //       if (this.#hasChildren(child)) {
+  //         injectIfExternalComponents(child.props.children);
+  //       }
+  //     });
+  //   };
+  //   await injectIfExternalComponents(reactElementFromHtml[0].props.children);
+  //   return reactElementFromHtml;
+  // };
 
   #getAttributePlaceholderInformation = (attributePlaceholder, isExternal) => {
     if (isExternal) {
@@ -285,11 +265,13 @@ export default class FeaturePropsParsing {
    * @returns {object}
    */
   mergeFeaturePropsWithMarkdown = async (markdown, properties) => {
-    markdown = markdown.replace(/export:/g, "");
+    // "markdown" will now contain placeholders for our value that we get
+    // from features. They'll be between { and }.
+    // Lets' extract them and replace with value from "properties"
     if (markdown && typeof markdown === "string") {
       (markdown.match(/{(.*?)}/g) || []).forEach((property) => {
-        let propertyIsExternal = this.#isMarkupForExternalElement(property);
-        let attributePlaceholder = property.replace("{", "").replace("}", "");
+        const propertyIsExternal = this.#isMarkupForExternalElement(property);
+        const attributePlaceholder = property.replace("{", "").replace("}", "");
         markdown = markdown.replace(
           property,
           this.#getPropertyForPlaceholder(
@@ -301,7 +283,16 @@ export default class FeaturePropsParsing {
       });
     }
 
-    let html = `<div id="wrapper">${marked(markdown)}</div>`;
-    return await this.#renderHtmlAsReactComponents(html);
+    // let html = `<div id="wrapper">${marked(markdown)}</div>`;
+    // return await this.#renderHtmlAsReactComponents(html);
+
+    return (
+      <ReactMarkdown
+        plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+        allowDangerousHtml={false} // Normally we won't accept HTML in MD as it defines MD's purpose…
+        renderers={this.renderers} // Custom renderers, see definition in this.renderers
+        children={markdown} // Our MD, as a text string
+      />
+    );
   };
 }

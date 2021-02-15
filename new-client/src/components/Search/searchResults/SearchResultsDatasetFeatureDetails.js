@@ -86,8 +86,8 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     );
     this.featurePropsParsing
       .mergeFeaturePropsWithMarkdown(source.infobox, feature.properties)
-      .then((featureInfo) => {
-        this.setState({ infoBox: this.renderCustomInfoBox(featureInfo) });
+      .then((MarkdownComponent) => {
+        this.setState({ infoBox: MarkdownComponent });
       });
   };
 
@@ -114,28 +114,19 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     return (
       <TableContainer>
         <Table size="small">
-          {Object.entries(feature.properties).map((row, index) => {
-            return (
-              <TableBody key={index}>
+          <TableBody>
+            {Object.entries(feature.properties).map((row) => {
+              return (
                 <TableRow key={row[0]}>
                   {this.renderTableCell(row[0])}
                   {this.renderTableCell(row[1], "right")}
                 </TableRow>
-              </TableBody>
-            );
-          })}
+              );
+            })}
+          </TableBody>
         </Table>
       </TableContainer>
     );
-  };
-
-  renderCustomInfoBox = (featureInfo) => {
-    return featureInfo.map((element, index) => {
-      if (typeof element == "string") {
-        return <Typography key={index}>{element}</Typography>;
-      }
-      return <React.Fragment key={index}>{element}</React.Fragment>;
-    });
   };
 
   handleTogglerPressed = (nextFeatureIndex) => {

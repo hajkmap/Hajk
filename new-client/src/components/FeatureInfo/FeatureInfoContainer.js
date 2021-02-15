@@ -312,7 +312,7 @@ class FeatureInfoContainer extends React.PureComponent {
 
   renderFeatureInformation = () => {
     // const { caption, value, shortcodes, markdown } = this.state;
-    const { caption, value, markdown } = this.state;
+    const { caption, value } = this.state;
     const { classes } = this.props;
 
     return (
@@ -320,19 +320,7 @@ class FeatureInfoContainer extends React.PureComponent {
         <Typography variant="button" align="center" component="h6">
           {caption}
         </Typography>
-        {markdown ? (
-          value.map((element, index) => {
-            return <React.Fragment key={index}>{element}</React.Fragment>;
-          })
-        ) : (
-          <React.Fragment>{value}</React.Fragment>
-        )}
-
-        {/* {shortcodes.length > 0 &&
-          this.renderShortcodes(
-            shortcodes,
-            this.props.features[this.state.selectedIndex - 1]
-          )} */}
+        {value}
       </Grid>
     );
   };
