@@ -13,8 +13,6 @@ const getPopoverMenuItemTitle = label => {
   return <Typography variant="h6">{label}: </Typography>;
 };
 
-const presetColors = [];
-
 const getTextField = (value, onChangeFunction, variant) => {
   return (
     <TextField

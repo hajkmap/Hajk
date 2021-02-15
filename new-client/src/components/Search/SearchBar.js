@@ -14,6 +14,7 @@ import WarningIcon from "@material-ui/icons/Warning";
 import SearchResultsContainer from "./searchResults/SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
+import { decodeCommas } from "../../utils/StringCommaCoder";
 import {
   CircularProgress,
   IconButton,
@@ -23,35 +24,35 @@ import {
   FormHelperText,
   useMediaQuery,
   Popper,
-  Tooltip,
+  Tooltip
 } from "@material-ui/core";
 
-const styles = (theme) => ({
+const styles = theme => ({
   searchContainer: {
     width: 400,
-    height: theme.spacing(6),
+    height: theme.spacing(6)
   },
   searchCollapsed: {
-    left: -440,
+    left: -440
   },
 
   autocompleteTypography: {
-    maxWidth: "100%",
+    maxWidth: "100%"
   },
 
   inputRoot: {
-    height: theme.spacing(6),
+    height: theme.spacing(6)
   },
   originIconWrapper: {
     display: "flex",
     flexWrap: "wrap",
-    paddingRight: theme.spacing(1),
-  },
+    paddingRight: theme.spacing(1)
+  }
 });
 
 //Needed to make a CustomPopper with inline styling to be able to override width,
 //Popper.js didn't work as expected
-const CustomPopper = (props) => {
+const CustomPopper = props => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
   const style = smallScreen ? { width: "100%" } : { width: 400 };
@@ -64,23 +65,23 @@ const CustomPopper = (props) => {
           computeStyle: { gpuAcceleration: false },
           preventOverflow: {
             enabled: smallScreen,
-            boundariesElement: "root",
+            boundariesElement: "root"
           },
-          hide: { enabled: smallScreen },
-        },
+          hide: { enabled: smallScreen }
+        }
       }}
       placement="bottom-end"
     />
   );
 };
 
-const CustomPaper = (props) => {
+const CustomPaper = props => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
   const style = smallScreen
     ? {
         margin: 0,
-        borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+        borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`
       }
     : { margin: 0 };
   return <Paper {...props} style={style} />;
@@ -92,7 +93,7 @@ class SearchBar extends React.PureComponent {
     panelCollapsed: false,
     moreOptionsId: undefined,
     moreOptionsOpen: false,
-    selectSourcesOpen: false,
+    selectSourcesOpen: false
   };
 
   updateSearchOptions = (name, value) => {
@@ -101,7 +102,7 @@ class SearchBar extends React.PureComponent {
     this.props.updateSearchOptions(searchOptions);
   };
 
-  getOriginBasedIcon = (origin) => {
+  getOriginBasedIcon = origin => {
     const { classes } = this.props;
     let icon;
     switch (origin) {
@@ -120,7 +121,7 @@ class SearchBar extends React.PureComponent {
     return <div className={classes.originIconWrapper}>{icon}</div>;
   };
 
-  removeCommasAndSpaces = (string) => {
+  removeCommasAndSpaces = string => {
     return string.replace(/,/g, "").replace(/ /g, "");
   };
 
@@ -139,7 +140,7 @@ class SearchBar extends React.PureComponent {
   getAllStartingIndexForOccurencesInString = (toSearchFor, toSearchIn) => {
     let regexp = new RegExp(this.props.escapeRegExp(toSearchIn), "gi");
     let matches = this.getMatches(toSearchFor, regexp);
-    let matchedIndexes = matches.map((match) => match.index);
+    let matchedIndexes = matches.map(match => match.index);
     return matchedIndexes;
   };
 
@@ -179,14 +180,14 @@ class SearchBar extends React.PureComponent {
     const stringArraySS = getArrayWithSearchWords(searchString);
 
     let highlightInformation = stringArraySS
-      .map((searchWord) => {
+      .map(searchWord => {
         return this.getAllStartingIndexForOccurencesInString(
           autocompleteEntry,
           searchWord
-        ).map((index) => {
+        ).map(index => {
           return {
             index: index,
-            length: searchWord.length,
+            length: searchWord.length
           };
         });
       })
@@ -221,7 +222,7 @@ class SearchBar extends React.PureComponent {
       localObserver,
       resultPanelCollapsed,
       toggleCollapseSearchResults,
-      options,
+      options
     } = this.props;
 
     return (
@@ -248,7 +249,7 @@ class SearchBar extends React.PureComponent {
       classes,
       loading,
       handleOnAutocompleteInputChange,
-      handleSearchInput,
+      handleSearchInput
     } = this.props;
     return (
       <Autocomplete
@@ -256,7 +257,7 @@ class SearchBar extends React.PureComponent {
         freeSolo
         size={"small"}
         classes={{
-          inputRoot: classes.inputRoot,
+          inputRoot: classes.inputRoot
         }}
         PopperComponent={CustomPopper}
         PaperComponent={CustomPaper}
@@ -267,7 +268,7 @@ class SearchBar extends React.PureComponent {
           searchActive === "draw"
         }
         autoComplete
-        value={decodeURIComponent(searchString)}
+        value={decodeCommas(searchString)}
         selectOnFocus
         open={autoCompleteOpen}
         disableClearable
@@ -276,7 +277,7 @@ class SearchBar extends React.PureComponent {
         getOptionSelected={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
-        renderOption={(option) => {
+        renderOption={option => {
           if (searchString.length > 0) {
             return (
               <Grid container alignItems="center">
@@ -287,7 +288,7 @@ class SearchBar extends React.PureComponent {
                   <Grid item xs={12}>
                     {this.getHighlightedACE(
                       searchString,
-                      decodeURIComponent(option.autocompleteEntry)
+                      decodeCommas(option.autocompleteEntry)
                     )}
                   </Grid>
                   <Grid item xs={12}>
@@ -298,9 +299,9 @@ class SearchBar extends React.PureComponent {
             );
           }
         }}
-        getOptionLabel={(option) => {
+        getOptionLabel={option => {
           return option?.autocompleteEntry?.length > 0
-            ? decodeURIComponent(option?.autocompleteEntry)
+            ? decodeCommas(option?.autocompleteEntry)
             : option;
         }}
         options={autocompleteList}
@@ -310,7 +311,7 @@ class SearchBar extends React.PureComponent {
     );
   };
 
-  renderFailedWFSFetchWarning = (errorMessage) => {
+  renderFailedWFSFetchWarning = errorMessage => {
     return (
       <Tooltip title={errorMessage}>
         <WarningIcon color="error">
@@ -320,7 +321,7 @@ class SearchBar extends React.PureComponent {
     );
   };
 
-  renderAutoCompleteInputField = (params) => {
+  renderAutoCompleteInputField = params => {
     const {
       searchString,
       loading,
@@ -339,7 +340,7 @@ class SearchBar extends React.PureComponent {
       searchModel,
       handleOnClickOrKeyboardSearch,
       setSearchSources,
-      failedWFSFetchMessage,
+      failedWFSFetchMessage
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
@@ -351,13 +352,18 @@ class SearchBar extends React.PureComponent {
     return (
       <TextField
         {...params}
-        label={undefined}
+        label={
+          <Typography variant="srOnly">Sök i webbplatsens innehåll</Typography>
+        }
         variant={width === "xs" ? "standard" : "outlined"}
         placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
+        InputLabelProps={{ shrink: true }}
         InputProps={{
           ...params.InputProps,
           ...disableUnderline,
+          style: { margin: 0 },
+          notched: width === "xs" ? null : false,
           endAdornment: (
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}
@@ -377,7 +383,7 @@ class SearchBar extends React.PureComponent {
               ) : (
                 <Tooltip title={expandMessage}>
                   <IconButton
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       toggleCollapseSearchResults();
                     }}
@@ -414,7 +420,7 @@ class SearchBar extends React.PureComponent {
                 />
               )}
             </>
-          ),
+          )
         }}
       />
     );
@@ -427,7 +433,7 @@ class SearchBar extends React.PureComponent {
     return (
       <Grid
         className={cslx(classes.searchContainer, {
-          [classes.searchCollapsed]: panelCollapsed,
+          [classes.searchCollapsed]: panelCollapsed
         })}
       >
         <Grid item>

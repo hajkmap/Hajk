@@ -154,9 +154,7 @@ var manager = Model.extend({
           if (addedLayers.indexOf(legendLayer.layerId) !== -1) {
             legendLayer.legend.forEach(legend => {
               legends.push(
-                `data:${legend.contentType};base64,${legend.imageData}&${
-                  legendLayer.layerName
-                }`
+                `data:${legend.contentType};base64,${legend.imageData}&${legendLayer.layerName}`
               );
             });
           }

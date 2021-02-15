@@ -9,18 +9,18 @@ import {
   MenuItem,
   Paper,
   Tooltip,
-  Typography,
+  Typography
 } from "@material-ui/core";
 
 import Dialog from "../Dialog.js";
 import SearchSettings from "./SearchSettings";
 
-const styles = (theme) => ({});
+const styles = theme => ({});
 
 class SearchTools extends React.PureComponent {
   state = {
     anchorEl: undefined,
-    settingsDialog: false,
+    settingsDialog: false
   };
 
   constructor(props) {
@@ -40,7 +40,7 @@ class SearchTools extends React.PureComponent {
 
   getEnabledTools = () => {
     const { searchTools } = this.props;
-    return searchTools.filter((tool) => tool.enabled ?? true);
+    return searchTools.filter(tool => tool.enabled ?? true);
   };
 
   renderSettingsDialog = () => {
@@ -50,7 +50,7 @@ class SearchTools extends React.PureComponent {
       searchSources,
       updateSearchOptions,
       searchModel,
-      setSearchSources,
+      setSearchSources
     } = this.props;
     if (settingsDialog) {
       return createPortal(
@@ -66,12 +66,12 @@ class SearchTools extends React.PureComponent {
               />
             ),
             headerText: "Sökinställningar",
-            buttonText: "OK",
+            buttonText: "OK"
           }}
           open={settingsDialog}
           onClose={() => {
             this.setState({
-              settingsDialog: false,
+              settingsDialog: false
             });
           }}
         ></Dialog>,
@@ -86,16 +86,17 @@ class SearchTools extends React.PureComponent {
     const { anchorEl } = this.state;
     const enabledTools = this.getEnabledTools();
     return (
-      <div>
+      <>
         {this.renderSettingsDialog()}
         <Tooltip title="Fler sökverktyg och inställningar">
           <IconButton
             aria-haspopup="true"
             aria-controls="lock-menu"
+            name="searchOptions"
             size="small"
-            onClick={(e) =>
+            onClick={e =>
               this.setState({
-                anchorEl: e.currentTarget,
+                anchorEl: e.currentTarget
               })
             }
           >
@@ -117,14 +118,14 @@ class SearchTools extends React.PureComponent {
             open={Boolean(anchorEl)}
             onClose={() =>
               this.setState({
-                anchorEl: undefined,
+                anchorEl: undefined
               })
             }
           >
             {enabledTools.map((option, index) => (
               <Tooltip key={index} title={option.toolTipTitle ?? ""}>
                 <MenuItem
-                  onClick={(event) =>
+                  onClick={event =>
                     this.handleMenuItemClick(event, index, option)
                   }
                 >
@@ -142,7 +143,7 @@ class SearchTools extends React.PureComponent {
             ))}
           </Menu>
         </Paper>
-      </div>
+      </>
     );
   }
 }

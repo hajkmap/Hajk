@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -11,30 +12,32 @@ import TextField from "@material-ui/core/TextField";
 
 import { withSnackbar } from "notistack";
 
-const styles = (theme) => ({
+const styles = theme => ({
   root: {
     display: "flex",
     flexGrow: 1,
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   text: {
     "& .ol-mouse-position": {
       top: "unset",
       right: "unset",
-      position: "unset",
-    },
+      position: "unset"
+    }
   },
   table: {},
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
-    marginTop: theme.spacing(2),
-  },
+    marginTop: theme.spacing(2)
+  }
 });
 
 class CoordinatesView extends React.PureComponent {
   state = {
     transformedCoordinates: [],
+    errorField: "",
+    errorValue: ""
   };
 
   constructor(props) {
@@ -45,12 +48,50 @@ class CoordinatesView extends React.PureComponent {
 
     this.localObserver.subscribe(
       "setTransformedCoordinates",
-      (transformedCoordinates) => {
-        this.setState({
-          transformedCoordinates: transformedCoordinates,
-        });
+      transformedCoordinates => {
+        this.setState(
+          {
+            transformedCoordinates: transformedCoordinates,
+            errorField: "",
+            errorValue: ""
+          },
+          () => {
+            // React moves the cursor to the end for the field that was modified so we restore the position here
+            if (
+              this.props.model.updatedTransformId !== "" &&
+              document.getElementById(this.props.model.updatedTransformId) !==
+                null
+            ) {
+              document.getElementById(
+                this.props.model.updatedTransformId
+              ).selectionStart = this.props.model.updatedTransformIdx;
+              document.getElementById(
+                this.props.model.updatedTransformId
+              ).selectionEnd = this.props.model.updatedTransformIdx;
+            }
+          }
+        );
       }
     );
+
+    this.localObserver.subscribe("errorInOnChange", data => {
+      this.setState(
+        {
+          errorField: data.errorField,
+          errorValue: data.errorValue
+        },
+        () => {
+          // React moves the cursor to the end for the field that was modified so we restore the position here
+
+          document.getElementById(
+            this.state.errorField
+          ).selectionStart = this.props.model.updatedTransformIdx;
+          document.getElementById(
+            this.state.errorField
+          ).selectionEnd = this.props.model.updatedTransformIdx;
+        }
+      );
+    });
 
     /**
      * Setup listeners that will show/hide snackbar. The Model will publish
@@ -66,8 +107,8 @@ class CoordinatesView extends React.PureComponent {
           persist: true,
           anchorOrigin: {
             vertical: "bottom",
-            horizontal: "center",
-          },
+            horizontal: "center"
+          }
         }
       );
     });
@@ -86,38 +127,70 @@ class CoordinatesView extends React.PureComponent {
 
     return (
       <>
-        {this.state.transformedCoordinates.map((transformations, i) => {
+        {this.state.transformedCoordinates.map((transformation, i) => {
+          // Create the values for xCoord and yCoord where one might have a faulty format
+          let xCoord = transformation.inverseAxis
+            ? transformation.coordinates[0]
+            : transformation.coordinates[1];
+          let yCoord = transformation.inverseAxis
+            ? transformation.coordinates[1]
+            : transformation.coordinates[0];
+
+          if (this.state.errorField === "coordinates-transforms-X-" + i) {
+            xCoord = this.state.errorValue;
+          } else if (
+            this.state.errorField ===
+            "coordinates-transforms-Y-" + i
+          ) {
+            yCoord = this.state.errorValue;
+          }
           return (
             <TableRow key={i}>
               <TableCell>
                 <Typography variant="body1" style={{ display: "flex" }}>
-                  {transformations.title}
+                  {transformation.title}
                 </Typography>
                 <Typography variant="body2" style={{ display: "flex" }}>
-                  ({transformations.code})
+                  ({transformation.code})
                 </Typography>
               </TableCell>
               <TableCell>
                 <TextField
-                  label={transformations.ytitle}
+                  label={transformation.ytitle}
                   className={classes.textField}
+                  id={"coordinates-transforms-X-" + i}
                   margin="dense"
                   variant="outlined"
-                  value={
-                    transformations.inverseAxis
-                      ? transformations.coordinates[0]
-                      : transformations.coordinates[1]
+                  value={xCoord}
+                  onChange={this.model.handleInput}
+                  transform={transformation.code}
+                  axis={transformation.inverseAxis ? "X" : "Y"}
+                  error={
+                    this.state.errorField === "coordinates-transforms-X-" + i
+                  }
+                  helperText={
+                    this.state.errorField === "coordinates-transforms-X-" + i
+                      ? "Ange ett decimaltal"
+                      : ""
                   }
                 />
                 <TextField
-                  label={transformations.xtitle}
+                  label={transformation.xtitle}
                   className={classes.textField}
+                  id={"coordinates-transforms-Y-" + i}
                   margin="dense"
                   variant="outlined"
-                  value={
-                    transformations.inverseAxis
-                      ? transformations.coordinates[1]
-                      : transformations.coordinates[0]
+                  value={yCoord}
+                  onChange={this.model.handleInput}
+                  transform={transformation.code}
+                  axis={transformation.inverseAxis ? "Y" : "X"}
+                  error={
+                    this.state.errorField === "coordinates-transforms-Y-" + i
+                  }
+                  helperText={
+                    this.state.errorField === "coordinates-transforms-Y-" + i
+                      ? "Ange ett decimaltal"
+                      : ""
                   }
                 />
               </TableCell>
@@ -143,6 +216,20 @@ class CoordinatesView extends React.PureComponent {
             </TableHead>
             <TableBody>{this.renderProjections()}</TableBody>
           </Table>
+          <Button
+            onClick={() => {
+              this.props.model.zoomOnMarker();
+            }}
+          >
+            Zooma
+          </Button>
+          <Button
+            onClick={() => {
+              this.props.model.centerOnMarker();
+            }}
+          >
+            Panorera
+          </Button>
         </Paper>
       </>
     );

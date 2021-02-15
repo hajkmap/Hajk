@@ -7,6 +7,7 @@ import Within from "ol/format/filter/Within";
 import { fromCircle } from "ol/geom/Polygon";
 
 import { arraySort } from "../utils/ArraySort";
+import { decodeCommas } from "../utils/StringCommaCoder";
 
 const ESCAPE_CHAR = "!";
 const SINGLE_CHAR = ".";
@@ -22,7 +23,7 @@ class SearchModel {
     maxResultsPerDataset: 100, // how many results to get (at most), per dataset
     matchCase: false, // should search be case sensitive?
     wildcardAtStart: false, // should the search string start with the wildcard character?
-    wildcardAtEnd: true, // should the search string be end with the wildcard character?
+    wildcardAtEnd: true // should the search string be end with the wildcard character?
   };
 
   #componentOptions;
@@ -72,7 +73,7 @@ class SearchModel {
 
   abort = () => {
     if (this.#controllers.length > 0) {
-      this.#controllers.forEach((controller) => {
+      this.#controllers.forEach(controller => {
         controller.abort();
       });
     }
@@ -116,7 +117,7 @@ class SearchModel {
     this.#controllers = [];
 
     // Loop through all defined search sources
-    searchSources.forEach((searchSource) => {
+    searchSources.forEach(searchSource => {
       // Expect the Promise and an AbortController from each Source
       const { promise, controller } = this.#lookup(
         searchString,
@@ -136,7 +137,7 @@ class SearchModel {
     // fetchedResponses will be an array of Promises in object form.
     // Each object will have a "status" and a "value" property.
     const jsonResponses = await Promise.allSettled(
-      fetchResponses.map((fetchResponse) => {
+      fetchResponses.map(fetchResponse => {
         // We look at the status and filter out only those that fulfilled.
         if (fetchResponse.status === "rejected")
           return Promise.reject("Could not fetch");
@@ -158,7 +159,7 @@ class SearchModel {
         r.source = searchSources[i];
         r.origin = "WFS";
         featureCollections.push(r);
-      } else if ((r) => r.status === "rejected") {
+      } else if (r => r.status === "rejected") {
         r.source = searchSources[i];
         r.origin = "WFS";
         errors.push(r);
@@ -171,7 +172,7 @@ class SearchModel {
         // FIXME: Investigate if this sorting is really needed, and if so, if we can find some Unicode variant and not only for Swedish characters
         arraySort({
           array: featureCollection.value.features,
-          index: featureCollection.source.searchFields[0],
+          index: featureCollection.source.searchFields[0]
         });
       }
     });
@@ -184,7 +185,7 @@ class SearchModel {
 
   #getOrFilter = (word, searchSource, searchOptions) => {
     let orFilter = new Or(
-      ...searchSource.searchFields.map((searchField) => {
+      ...searchSource.searchFields.map(searchField => {
         return this.#getIsLikeFilter(searchField, word, searchOptions);
       })
     );
@@ -204,7 +205,7 @@ class SearchModel {
 
   #getSearchFilters = (wordsArray, searchSource, searchOptions) => {
     if (searchSource.searchFields.length > 1) {
-      let OrFilters = wordsArray.map((word) => {
+      let OrFilters = wordsArray.map(word => {
         return this.#getOrFilter(word, searchSource, searchOptions);
       });
       if (OrFilters.length > 1) {
@@ -213,7 +214,7 @@ class SearchModel {
         return OrFilters[0];
       }
     } else {
-      let isLikeFilters = wordsArray.map((word) => {
+      let isLikeFilters = wordsArray.map(word => {
         return this.#getIsLikeFilter(
           searchSource.searchFields[0],
           word,
@@ -228,22 +229,22 @@ class SearchModel {
     }
   };
 
-  #getStringArray = (searchString) => {
+  #getStringArray = searchString => {
     let tempStringArray = this.#splitAndTrimOnCommas(searchString);
     return tempStringArray.join(" ").split(" ");
   };
 
-  #splitAndTrimOnCommas = (searchString) => {
-    return searchString.split(",").map((string) => {
+  #splitAndTrimOnCommas = searchString => {
+    return searchString.split(",").map(string => {
       return string.trim();
     });
   };
 
-  #escapeSpecialChars = (string) => {
+  #escapeSpecialChars = string => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "!$&"); // $& means the whole matched string
   };
 
-  getPossibleSearchCombinations = (searchString) => {
+  getPossibleSearchCombinations = searchString => {
     // See if we've already created possible search combos for the specified string,
     // if so, do an early return
     if (this.#possibleSearchCombinations.has(searchString)) {
@@ -255,6 +256,13 @@ class SearchModel {
     const possibleSearchCombinations = new Set();
     const wordsInTextField = this.#getStringArray(searchString);
     const numWords = wordsInTextField.length;
+
+    // If the string contains a comma, we must add the string as is
+    // otherwise we might miss cases where the user wants to search
+    // for a property with a comma.
+    if (searchString.includes(",")) {
+      possibleSearchCombinations.add([searchString]);
+    }
 
     // If the user has typed more than five words, we only create
     // one string containing all words to avoid sending humongous
@@ -305,7 +313,7 @@ class SearchModel {
       possibleSearchCombinations.add([
         ...wordsBeforeCurrent,
         currentWord,
-        ...wordsAfterCurrent,
+        ...wordsAfterCurrent
       ]);
     }
   };
@@ -316,16 +324,19 @@ class SearchModel {
     return word;
   };
 
-  #decodePotentialCommasFromFeatureProps = (searchCombinations) => {
-    return searchCombinations.map((combination) => {
-      return combination.map((word) => {
-        return decodeURIComponent(word);
+  #decodePotentialSpecialChars = searchCombinations => {
+    return searchCombinations.map(combination => {
+      return combination.map(word => {
+        return decodeCommas(word).replaceAll("\\", "\\\\");
       });
     });
   };
 
   #lookup = (searchString, searchSource, searchOptions) => {
-    const srsName = this.#map.getView().getProjection().getCode();
+    const srsName = this.#map
+      .getView()
+      .getProjection()
+      .getCode();
     const geometryName =
       searchSource.geometryField || searchSource.geometryName || "geom";
     const maxFeatures = searchOptions.maxResultsPerDataset;
@@ -345,12 +356,12 @@ class SearchModel {
         );
       }
 
-      possibleSearchCombinations = this.#decodePotentialCommasFromFeatureProps(
+      possibleSearchCombinations = this.#decodePotentialSpecialChars(
         possibleSearchCombinations
       );
 
-      let searchFilters = possibleSearchCombinations.map((combination) => {
-        let searchWordsForCombination = combination.map((wordInCombination) => {
+      let searchFilters = possibleSearchCombinations.map(combination => {
+        let searchWordsForCombination = combination.map(wordInCombination => {
           wordInCombination = this.#escapeSpecialChars(wordInCombination);
           wordInCombination = this.#addPotentialWildCards(
             wordInCombination,
@@ -376,7 +387,7 @@ class SearchModel {
       const activeSpatialFilter =
         searchOptions.activeSpatialFilter === "within" ? Within : Intersects;
       // Next, loop through supplied features and create the desired filter
-      spatialFilters = searchOptions.featuresToFilter.map((feature) => {
+      spatialFilters = searchOptions.featuresToFilter.map(feature => {
         // Convert circle feature to polygon
         let geometry = feature.getGeometry();
         if (geometry.getType() === "Circle") {
@@ -411,7 +422,7 @@ class SearchModel {
       outputFormat: "JSON", //source.outputFormat,
       geometryName: geometryName,
       maxFeatures: maxFeatures,
-      filter: finalFilters,
+      filter: finalFilters
     };
 
     const node = this.#wfsParser.writeGetFeature(options);
@@ -425,9 +436,9 @@ class SearchModel {
       signal: signal,
       method: "POST",
       headers: {
-        "Content-Type": "text/xml",
+        "Content-Type": "text/xml"
       },
-      body: xmlString,
+      body: xmlString
     };
     const promise = fetch(
       this.#app.config.appConfig.searchProxy + searchSource.url,

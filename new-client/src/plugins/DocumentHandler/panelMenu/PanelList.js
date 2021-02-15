@@ -22,7 +22,7 @@ class PanelList extends React.PureComponent {
     );
   };
 
-  #renderMenuItem = (item) => {
+  #renderMenuItem = item => {
     if (item.menu.length > 0) {
       return this.getMenuItemType(item, "submenu");
     } else if (item.document) {
@@ -37,8 +37,8 @@ class PanelList extends React.PureComponent {
   render() {
     const { menu } = this.props;
     return (
-      <List disablePadding component="nav">
-        {menu.map((item) => {
+      <List disablePadding id="panelmenu" role="navigation" component="nav">
+        {menu.map(item => {
           return (
             <React.Fragment key={item.id}>
               {this.#renderMenuItem(item, item.id)}

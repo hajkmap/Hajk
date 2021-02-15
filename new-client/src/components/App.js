@@ -6,7 +6,7 @@ import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
-
+import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import AppModel from "../models/AppModel.js";
 
 import Window from "./Window.js";
@@ -31,7 +31,6 @@ import PresetLinks from "../controls/PresetLinks";
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
 import {
-  Backdrop,
   Box,
   Divider,
   Drawer,
@@ -39,7 +38,7 @@ import {
   Hidden,
   IconButton,
   Tooltip,
-  Typography,
+  Typography
 } from "@material-ui/core";
 
 import LockIcon from "@material-ui/icons/Lock";
@@ -52,7 +51,7 @@ document.windows = [];
 
 const DRAWER_WIDTH = 250;
 
-const styles = (theme) => {
+const styles = theme => {
   return {
     map: {
       zIndex: 1,
@@ -60,7 +59,7 @@ const styles = (theme) => {
       left: 0,
       right: 0,
       bottom: 0,
-      top: 0,
+      top: 0
     },
     flexBox: {
       position: "absolute",
@@ -71,19 +70,19 @@ const styles = (theme) => {
       padding: theme.spacing(2),
       display: "flex",
       flexDirection: "column",
-      pointerEvents: "none",
+      pointerEvents: "none"
     },
     windowsContainer: {
       position: "absolute",
       left: 0,
       right: 0,
       bottom: 0,
-      top: 0,
+      top: 0
     },
     pointerEventsOnChildren: {
       "& > *": {
-        pointerEvents: "auto",
-      },
+        pointerEvents: "auto"
+      }
     },
     header: {
       zIndex: theme.zIndex.appBar,
@@ -92,7 +91,7 @@ const styles = (theme) => {
       justifyContent: "space-between",
       alignItems: "flex-start",
       "& > *": {
-        marginBottom: theme.spacing(2),
+        marginBottom: theme.spacing(2)
       },
       [theme.breakpoints.down("xs")]: {
         zIndex: 3,
@@ -101,27 +100,27 @@ const styles = (theme) => {
         marginTop: -theme.spacing(2),
         maxHeight: theme.spacing(6),
         boxShadow: theme.shadows[3],
-        backgroundColor: theme.palette.background.paper,
-      },
+        backgroundColor: theme.palette.background.paper
+      }
     },
     main: {
       zIndex: 2,
       flex: 1,
-      display: "flex",
+      display: "flex"
     },
     leftColumn: {
-      flex: 1,
+      flex: 1
     },
     rightColumn: {
       paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
+      paddingRight: theme.spacing(2)
     },
     controlsColumn: {
       display: "flex",
       flexDirection: "column",
       [theme.breakpoints.down("xs")]: {
-        marginTop: theme.spacing(2),
-      },
+        marginTop: theme.spacing(2)
+      }
     },
     footer: {
       zIndex: 3,
@@ -129,12 +128,12 @@ const styles = (theme) => {
       justifyContent: "flex-end",
       height: 25,
       "& > *": {
-        marginLeft: theme.spacing(1),
-      },
+        marginLeft: theme.spacing(1)
+      }
     },
     drawerBackground: {
       width: DRAWER_WIDTH,
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: theme.palette.background.default
     },
     drawerHeader: {
       display: "flex",
@@ -142,37 +141,34 @@ const styles = (theme) => {
       padding: theme.spacing(0, 2),
       ...theme.mixins.toolbar,
       justifyContent: "space-between",
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: theme.palette.background.paper
     },
     drawerContent: {
       backgroundColor: theme.palette.background.paper,
-      overflow: "auto",
+      overflow: "auto"
     },
     logoBox: {
       padding: theme.spacing(1, 2),
-      height: theme.spacing(6),
+      height: theme.spacing(6)
     },
     logo: {
-      height: theme.spacing(4),
+      height: theme.spacing(4)
     },
     drawerGrid: {
       padding: theme.spacing(0, 2),
       backgroundColor: theme.palette.background.paper,
-      minHeight: theme.spacing(6),
+      minHeight: theme.spacing(6)
     },
     drawerLiveContent: {
-      backgroundColor: theme.palette.background.default,
-    },
-    backdrop: {
-      zIndex: theme.zIndex.drawer - 1, // Carefully selected to be above Window but below Drawer
+      backgroundColor: theme.palette.background.default
     },
     widgetItem: {
-      width: "220px",
+      width: "220px"
     },
     // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
     shiftedLeft: {
-      left: DRAWER_WIDTH,
-    },
+      left: DRAWER_WIDTH
+    }
   };
 };
 
@@ -189,7 +185,7 @@ class App extends React.PureComponent {
     /** CSS class declarations used in this component */
     classes: PropTypes.object.isRequired,
     /** Contains activeMap, layersConfig as well as objects that hold appConfig and mapConfig*/
-    config: PropTypes.object.isRequired,
+    config: PropTypes.object.isRequired
   };
 
   constructor(props) {
@@ -249,7 +245,7 @@ class App extends React.PureComponent {
           ? activeDrawerContentFromLocalStorage
           : props.config.mapConfig.map.activeDrawerOnStart || "plugins",
 
-      drawerMouseOverLock: false,
+      drawerMouseOverLock: false
     };
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
@@ -264,7 +260,7 @@ class App extends React.PureComponent {
     Promise.all(promises).then(() => {
       this.setState(
         {
-          tools: this.appModel.getPlugins(),
+          tools: this.appModel.getPlugins()
         },
         () => {
           // If there's at least one plugin that renders in the Drawer Map Tools List,
@@ -276,9 +272,9 @@ class App extends React.PureComponent {
               caption: "Kartverktyg",
               drawerTitle: "Kartverktyg",
               order: 0,
-              renderDrawerContent: function () {
+              renderDrawerContent: function() {
                 return null; // Nothing specific should be rendered - this is a special case!
-              },
+              }
             });
 
           // Tell everyone that we're done loading (in case someone listens)
@@ -292,17 +288,17 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
-    this.globalObserver.subscribe("infoClick.mapClick", (results) => {
+    this.globalObserver.subscribe("infoClick.mapClick", results => {
       this.appModel.highlight(false);
       this.setState({
-        mapClickDataResult: results,
+        mapClickDataResult: results
       });
     });
 
-    this.globalObserver.subscribe("core.alert", (message) => {
+    this.globalObserver.subscribe("core.alert", message => {
       this.setState({
         alert: true,
-        alertMessage: message,
+        alertMessage: message
       });
     });
 
@@ -337,7 +333,7 @@ class App extends React.PureComponent {
       }
     });
 
-    this.globalObserver.subscribe("core.drawerContentChanged", (v) => {
+    this.globalObserver.subscribe("core.drawerContentChanged", v => {
       if (v !== null) {
         this.setState({ drawerVisible: true, activeDrawerContent: v });
       } else {
@@ -345,7 +341,7 @@ class App extends React.PureComponent {
       }
     });
 
-    this.globalObserver.subscribe("core.addDrawerToggleButton", (button) => {
+    this.globalObserver.subscribe("core.addDrawerToggleButton", button => {
       const newState = [...this.state.drawerButtons, button];
       this.setState({ drawerButtons: newState });
     });
@@ -382,8 +378,8 @@ class App extends React.PureComponent {
       .getMap()
       .getLayers()
       .getArray()
-      .forEach((layer) => {
-        layer.on("change:visible", (e) => {
+      .forEach(layer => {
+        layer.on("change:visible", e => {
           this.globalObserver.publish("core.layerVisibilityChanged", e);
         });
       });
@@ -392,7 +388,7 @@ class App extends React.PureComponent {
   renderInfoclickWindow() {
     // Check if admin wants Infoclick to be active
     const infoclickOptions = this.props.config.mapConfig.tools.find(
-      (t) => t.type === "infoclick"
+      t => t.type === "infoclick"
     )?.options;
 
     // The 'open' prop, below, will control whether the Window is
@@ -427,13 +423,13 @@ class App extends React.PureComponent {
           height={infoclickOptions.height || 300}
           features={this.state.mapClickDataResult?.features}
           map={this.appModel.getMap()}
-          onDisplay={(feature) => {
+          onDisplay={feature => {
             this.appModel.highlight(feature);
           }}
           onClose={() => {
             this.appModel.highlight(false);
             this.setState({
-              mapClickDataResult: undefined,
+              mapClickDataResult: undefined
             });
           }}
         />
@@ -448,7 +444,7 @@ class App extends React.PureComponent {
    *
    * @memberof App
    */
-  togglePermanent = (e) => {
+  togglePermanent = e => {
     this.setState({ drawerPermanent: !this.state.drawerPermanent }, () => {
       // Viewport size has changed, hence we must tell OL
       // to refresh canvas size.
@@ -475,11 +471,11 @@ class App extends React.PureComponent {
     });
   };
 
-  handleMouseEnter = (e) => {
+  handleMouseEnter = e => {
     this.setState({ drawerMouseOverLock: true });
   };
 
-  handleMouseLeave = (e) => {
+  handleMouseLeave = e => {
     this.setState({ drawerMouseOverLock: false });
   };
 
@@ -500,7 +496,7 @@ class App extends React.PureComponent {
 
   renderInformationPlugin() {
     const c = this.appModel.config.mapConfig.tools.find(
-      (t) => t.type === "information"
+      t => t.type === "information"
     );
 
     return (
@@ -516,14 +512,14 @@ class App extends React.PureComponent {
   renderDrawerHeader = () => {
     const { classes, config } = this.props;
     const drawerTitle = this.state.drawerButtons.find(
-      (db) => db.value === this.state.activeDrawerContent
+      db => db.value === this.state.activeDrawerContent
     )?.drawerTitle;
 
     return (
       <>
         <Box className={classes.logoBox}>
           <img
-            alt="Logo"
+            alt=""
             src={config.mapConfig.map.logo}
             className={classes.logo}
           />
@@ -550,7 +546,6 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
-                  aria-label="pin"
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
@@ -586,9 +581,9 @@ class App extends React.PureComponent {
             this.state.activeDrawerContent === "plugins" ? "unset" : "none"
           }
         >
-          <div id="plugin-buttons" />
+          <nav role="navigation" id="plugin-buttons" />
         </Box>
-        {this.state.drawerButtons.map((db) => {
+        {this.state.drawerButtons.map(db => {
           return (
             <Box
               key={db.value}
@@ -631,7 +626,7 @@ class App extends React.PureComponent {
         maxSnack={3}
         anchorOrigin={{
           vertical: "top",
-          horizontal: "center",
+          horizontal: "center"
         }}
       >
         <>
@@ -656,11 +651,12 @@ class App extends React.PureComponent {
             parent={this}
             title="Meddelande"
           />
+          <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
           <div
             id="appBox"
             className={cslx(classes.flexBox, {
               [classes.shiftedLeft]:
-                this.state.drawerPermanent && clean === false,
+                this.state.drawerPermanent && clean === false
             })}
           >
             <header
@@ -735,9 +731,10 @@ class App extends React.PureComponent {
           </div>
           <div
             id="map"
+            role="application"
             className={cslx(classes.map, {
               [classes.shiftedLeft]:
-                this.state.drawerPermanent && clean === false,
+                this.state.drawerPermanent && clean === false
             })}
           ></div>
           <div
@@ -747,7 +744,7 @@ class App extends React.PureComponent {
               classes.windowsContainer,
               {
                 [classes.shiftedLeft]:
-                  this.state.drawerPermanent && clean === false,
+                  this.state.drawerPermanent && clean === false
               }
             )}
           >
@@ -759,28 +756,30 @@ class App extends React.PureComponent {
           {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
             <Drawer
               open={this.state.drawerVisible}
-              // NB: we can't simply toggle between permanent|temporary,
-              // as the temporary mode unmounts element from DOM and
-              // re-mounts it the next time, so we would re-rendering
-              // our plugins all the time.
-              variant="persistent"
+              ModalProps={{
+                hideBackdrop: this.state.drawerPermanent, //Don't show backdrop if drawer is permanent
+                disableEnforceFocus: true, //Dont enforce focus to be able to handle elements underneath modal
+                onEscapeKeyDown: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                },
+                style: {
+                  //Needs to be set to be able to handle elements underneath modal
+                  position: this.state.drawerPermanent ? "initial" : "fixed"
+                },
+                keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
+                onBackdropClick: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                }
+              }}
+              variant="temporary"
               classes={{
-                paper: classes.drawerBackground,
+                paper: classes.drawerBackground
               }}
             >
               {this.renderDrawerHeader()}
               <Divider />
               {this.renderAllDrawerContent()}
             </Drawer>
-          )}
-          {clean === false && (
-            <Backdrop
-              open={this.state.drawerVisible && !this.state.drawerPermanent}
-              className={classes.backdrop}
-              onClick={(e) => {
-                this.globalObserver.publish("core.hideDrawer");
-              }}
-            />
           )}
           {clean === false && (
             <Introduction

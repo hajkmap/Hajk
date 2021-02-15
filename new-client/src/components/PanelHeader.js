@@ -5,9 +5,9 @@ import CloseIcon from "@material-ui/icons/Close";
 import FullscreenIcon from "@material-ui/icons/Fullscreen";
 import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 import AspectRatioIcon from "@material-ui/icons/AspectRatio";
-import { Hidden, Typography, IconButton } from "@material-ui/core";
+import { Hidden, Typography, IconButton, Box } from "@material-ui/core";
 
-const styles = (theme) => {
+const styles = theme => {
   return {
     header: {
       padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
@@ -16,8 +16,8 @@ const styles = (theme) => {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      minHeight: 46,
-    },
+      minHeight: 46
+    }
   };
 };
 
@@ -30,7 +30,7 @@ class PanelHeader extends Component {
     onClose: propTypes.func.isRequired,
     onMaximize: propTypes.func.isRequired,
     onMinimize: propTypes.func.isRequired,
-    title: propTypes.string.isRequired,
+    title: propTypes.string.isRequired
   };
 
   renderCustomHeaderButtons = () => {
@@ -63,10 +63,10 @@ class PanelHeader extends Component {
         className={classes.header}
         style={{ borderColor: this.props.color }} // Allow for dynamic override of accent border color
       >
-        <Typography variant="button" align="left" noWrap={true}>
+        <Typography component="h1" variant="button" align="left" noWrap={true}>
           {this.props.title}
         </Typography>
-        <nav>
+        <Box display="flex" component="nav">
           {this.shouldRenderCustomHeaderButtons() &&
             this.renderCustomHeaderButtons()}
           {mode !== "maximized" && // If window isn't in fit screen mode currently…
@@ -96,7 +96,7 @@ class PanelHeader extends Component {
             <Typography variant="srOnly">Stäng fönster</Typography>
             <CloseIcon />
           </IconButton>
-        </nav>
+        </Box>
       </header>
     );
   }

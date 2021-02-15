@@ -59,26 +59,33 @@ function getColorScheme(preferredColorSchemeFromMapConfig) {
  * @returns {Object} A complete, ready to used theme object
  */
 function getTheme(config, customTheme) {
+  const colorScheme = getColorScheme(
+    config.mapConfig.map.colors?.preferredColorScheme
+  );
   // Setup some app-wide defaults that differ from MUI's defaults:
   const hardCodedDefaults = {
     palette: {
-      type: getColorScheme(config.mapConfig.map.colors?.preferredColorScheme),
+      type: colorScheme,
+      action: {
+        active: colorScheme === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)"
+        //Type dark is not automatically changing color when overriding defaults - had to do it manually??
+      }
     },
     shape: {
-      borderRadius: 2,
-    },
+      borderRadius: 2
+    }
   };
 
   // Allow even more customization by reading values from each map config
   const themeFromMapConfig = {
     palette: {
       primary: {
-        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
+        main: config.mapConfig.map.colors.primaryColor // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
       },
       secondary: {
-        main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
-      },
-    },
+        main: config.mapConfig.map.colors.secondaryColor // secondary: { main: "#11cb5f" } // <- Or like this
+      }
+    }
   };
 
   // Create the merged theme object by:
@@ -111,8 +118,8 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
     // and merging with the latest theme type value
     const newTheme = deepMerge(theme, {
       palette: {
-        type: userPreferredColorScheme,
-      },
+        type: userPreferredColorScheme
+      }
     });
 
     // Finally, save the new theme object in state. This will cause re-render,
