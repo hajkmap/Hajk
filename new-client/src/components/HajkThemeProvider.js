@@ -11,8 +11,16 @@ import { deepMerge } from "../utils/DeepMerge";
  * @param {*} preferredColorSchemeFromMapConfig
  * @returns {String} "dark" or "light"
  */
-function getColorScheme(preferredColorSchemeFromMapConfig) {
-  // First, check if there already is a user preferred value in local storage
+function getColorScheme(preferredColorSchemeFromMapConfig, customTheme) {
+  // First of all, see if admins have provided a customTheme.json, where
+  // the light/dark mode value is set. If it is, this will override any
+  // other logic, which means we're not interested in user's or OS's preference.
+  if (["light", "dark"].includes(customTheme?.palette?.type)) {
+    return customTheme.palette.type;
+  }
+
+  // If there's no global override, we can go on and
+  // check if there already is a user preferred value in local storage.
   const userPreferredColorScheme = window.localStorage.getItem(
     "userPreferredColorScheme"
   );
@@ -60,32 +68,32 @@ function getColorScheme(preferredColorSchemeFromMapConfig) {
  */
 function getTheme(config, customTheme) {
   const colorScheme = getColorScheme(
-    config.mapConfig.map.colors?.preferredColorScheme
+    config.mapConfig.map.colors?.preferredColorScheme,
+    customTheme
   );
   // Setup some app-wide defaults that differ from MUI's defaults:
   const hardCodedDefaults = {
     palette: {
       type: colorScheme,
       action: {
-        active: colorScheme === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)"
-        //Type dark is not automatically changing color when overriding defaults - had to do it manually??
-      }
+        active: colorScheme === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)",
+      },
     },
     shape: {
-      borderRadius: 2
-    }
+      borderRadius: 2,
+    },
   };
 
   // Allow even more customization by reading values from each map config
   const themeFromMapConfig = {
     palette: {
       primary: {
-        main: config.mapConfig.map.colors.primaryColor // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
+        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
       },
       secondary: {
-        main: config.mapConfig.map.colors.secondaryColor // secondary: { main: "#11cb5f" } // <- Or like this
-      }
-    }
+        main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
+      },
+    },
   };
 
   // Create the merged theme object by:
@@ -104,6 +112,9 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
 
   // Handles theme toggling
   const toggleMUITheme = () => {
+    // If there's a override in customTheme.json, toggling is not possible.
+    if (customTheme?.palette?.type) return;
+
     // Toggle the current value from theme's palette
     let userPreferredColorScheme =
       theme.palette.type === "light" ? "dark" : "light";
@@ -118,8 +129,14 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
     // and merging with the latest theme type value
     const newTheme = deepMerge(theme, {
       palette: {
-        type: userPreferredColorScheme
-      }
+        type: userPreferredColorScheme,
+        action: {
+          active:
+            userPreferredColorScheme === "dark"
+              ? "#fff"
+              : "rgba(0, 0, 0, 0.87)",
+        },
+      },
     });
 
     // Finally, save the new theme object in state. This will cause re-render,
@@ -137,7 +154,7 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
       <App
         activeTools={activeTools}
         config={config}
-        customTheme={customTheme}
+        theme={muiTheme}
         toggleMUITheme={toggleMUITheme} // Pass the toggle handler, so we can call it from another component later on
       />
     </MuiThemeProvider>
