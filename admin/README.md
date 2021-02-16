@@ -1,1 +1,0 @@
-# Hajk Administration UI

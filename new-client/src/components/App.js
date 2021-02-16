@@ -527,7 +527,7 @@ class App extends React.PureComponent {
     return (
       <>
         <Box className={classes.logoBox}>
-          <img alt="Logo" src={logoUrl} className={classes.logo} />
+          <img alt="" src={logoUrl} className={classes.logo} />
         </Box>
         <Divider />
         <Grid
@@ -551,7 +551,6 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
-                  aria-label="pin"
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
@@ -680,7 +679,8 @@ class App extends React.PureComponent {
                   }
                 />
               )}
-              {clean === false && this.renderSearchComponent()}
+              {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
+              {this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div

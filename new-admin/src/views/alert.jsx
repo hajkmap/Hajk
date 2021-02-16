@@ -29,24 +29,24 @@ import DoneIcon from "@material-ui/icons/Done";
 import { withStyles } from "@material-ui/core/styles";
 import { green, blue } from "@material-ui/core/colors";
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 class LayerAlert extends Component {
@@ -56,7 +56,7 @@ class LayerAlert extends Component {
       queryable: props.options.queryable || false,
       style:
         props.options.style ||
-        (props.options.styles.length > 0 ? props.options.styles[0].Name : "")
+        (props.options.styles.length > 0 ? props.options.styles[0].Name : ""),
     };
   }
 
@@ -84,7 +84,7 @@ class LayerAlert extends Component {
                       type="checkbox"
                       ref="input_queryable"
                       checked={this.state.queryable}
-                      onChange={e => this._onQueryableChange(e)}
+                      onChange={(e) => this._onQueryableChange(e)}
                     />
                   </div>
                 </div>
@@ -96,7 +96,7 @@ class LayerAlert extends Component {
                     <select
                       className="form-control"
                       defaultValue={this.state.style}
-                      onChange={e => this._onStyleChange(e)}
+                      onChange={(e) => this._onStyleChange(e)}
                     >
                       {styles}
                     </select>
@@ -108,7 +108,7 @@ class LayerAlert extends Component {
               <ColorButtonBlue
                 variant="contained"
                 className="btn"
-                onClick={e => this._onCancelClick(e)}
+                onClick={(e) => this._onCancelClick(e)}
                 startIcon={<CancelIcon />}
               >
                 Avbryt
@@ -116,7 +116,7 @@ class LayerAlert extends Component {
               <ColorButtonBlue
                 variant="contained"
                 className="btn"
-                onClick={e => this._onSaveClick(e)}
+                onClick={(e) => this._onSaveClick(e)}
                 startIcon={<SaveIcon />}
               >
                 Spara
@@ -130,13 +130,13 @@ class LayerAlert extends Component {
 
   _onStyleChange(e) {
     this.setState({
-      style: e.target.value
+      style: e.target.value,
     });
   }
 
   _onQueryableChange(e) {
     this.setState({
-      queryable: e.target.checked
+      queryable: e.target.checked,
     });
   }
 
@@ -212,7 +212,7 @@ class Alert extends Component {
                   options.message
                 ) : (
                   <p>
-                    {options.message.split("\n").map(function(text, i) {
+                    {options.message.split("\n").map(function (text, i) {
                       return (
                         <span key={i}>
                           <span>{text}</span>
