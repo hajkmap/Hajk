@@ -257,14 +257,67 @@ export default class FeaturePropsParsing {
   };
 
   /**
-   * Used markdown and matches it to the properties.
-   * The markdown is used as a template and we inject the correct properties
-   * at specified placeholders. The method is returning featureInformation as React elements
+   * @summary Use Markdown from settings, apply conditional rendering and
+   * values from properties, and return a React component.
    *
-   * @param {str} properties
-   * @returns {object}
+   * @description There are three things going on here:
+   * 1. The markdown is used as a template, anything between { and } gets replaced
+   * with the real value from properties object, or is left empty.
+   * 2. Next we apply conditional rendering (where statements are between < and >).
+   * Currently, if-condition is the only one supported, but more might become available.
+   * Depending on the condition value, replacing can occur within our markdown string.
+   * 3. The final markdown string is passed to the ReactMarkdown component.
+   *
+   * @param {str} markdown
+   * @param {object} properties
+   * @returns {object} ReactMarkdown component
    */
   mergeFeaturePropsWithMarkdown = async (markdown, properties) => {
+    // Helper for RegEx replace
+    const replacer = (...args) => {
+      // Extract the regex named capture groups, they will be the last argument
+      // when .replace() calls this helper.
+      // Expect matched to contain 'condition', 'attributes' and 'content'.
+      const matched = args[args.length - 1];
+
+      // Do different things, depending on 'condition'
+      switch (matched.condition) {
+        case "if":
+          // Append a new line to the content that (perhaps)
+          // will be returned. If we return a content, we must
+          // ensure that new line is added, because we stripped
+          // all ending new lines (after </if>) in the regex.
+          matched.content += "\n";
+
+          // Handle <if foo="bar"> or <if foo=bar>
+          if (matched.attributes?.includes("=")) {
+            // Turn "FOO=\"BAR\"" into k = "FOO" and v = "BAR"
+            let [k, v] = matched.attributes
+              .split("=") // Create an array
+              .map((e) => e.replaceAll('"', "").trim()); // Remove double quotes and whitespace
+
+            // Using truthy equal below, we want 2 and "2" to be seen as equal.
+            // eslint-disable-next-line eqeqeq
+            if (k == v) {
+              return matched.content;
+            } else {
+              return "";
+            }
+          }
+          // Handle <if foo> - if it exits, evaluate to true and show content
+          else if (matched.attributes?.trim().length > 0) {
+            return matched.content;
+          }
+          // Handle <if > (i.e. do not render because the attribute to evaluate is falsy)
+          else {
+            return "";
+          }
+        // For any other condition, leave as-is (could be HTML tag)
+        default:
+          return args[0];
+      }
+    };
+
     // "markdown" will now contain placeholders for our value that we get
     // from features. They'll be between { and }.
     // Lets' extract them and replace with value from "properties"
@@ -281,6 +334,16 @@ export default class FeaturePropsParsing {
           )
         );
       });
+
+      // Grab the following into 3 named capture groups (example string <if foo="bar">Baz</if>)
+      // - condition: the word between < and whitespace, "if" in this example
+      // - attributes: whatever follows the condition, until we see a >, 'foo="bar"'
+      // - content: anything after > but before </ and whatever was the result in group one, "Baz"
+      // We also strip any ending new lines.
+      markdown = markdown.replace(
+        /<(?<condition>\w+)[\s/]?(?<attributes>[^>]+)?>(?<content>[^<]+)?(?:<\/\1>\n*)?/gi,
+        replacer
+      );
     }
 
     // let html = `<div id="wrapper">${marked(markdown)}</div>`;
