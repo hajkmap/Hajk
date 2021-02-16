@@ -54,6 +54,7 @@ export default class DocumentTextEditor extends React.Component {
       currentImage: "",
       imageData: {},
       urlValue: "",
+      imageAlt: "",
       defaultWidth: null,
       defaultHeight: null
     };
@@ -67,6 +68,7 @@ export default class DocumentTextEditor extends React.Component {
     };
     this.onChange = this._onChange.bind(this);
     this.onURLChange = e => this.setState({ urlValue: e.target.value });
+    this.onImageAltChange = e => this.setState({ imageAlt: e.target.value });
     this.onTitleChange = e => this.setState({ urlTitle: e.target.value });
     this.onTitleIdChange = e => this.setState({ urlTitleId: e.target.value });
     this.onDataCaptionChange = e =>
@@ -149,6 +151,7 @@ export default class DocumentTextEditor extends React.Component {
     const {
       editorState,
       urlValue,
+      imageAlt,
       urlType,
       mediaWidth,
       mediaHeight,
@@ -163,6 +166,7 @@ export default class DocumentTextEditor extends React.Component {
     if (mediaPopup) {
       contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
         src: urlValue,
+        alt: imageAlt ? imageAlt : "",
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
@@ -173,6 +177,7 @@ export default class DocumentTextEditor extends React.Component {
     } else {
       contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
         src: urlValue,
+        alt: imageAlt ? imageAlt : "",
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
@@ -198,6 +203,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: "",
+        imageAlt: "",
         mediaWidth: "",
         mediaHeight: "",
         mediaCaption: "",
@@ -221,6 +227,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: "",
+        imageAlt: "",
         mediaWidth: "",
         mediaHeight: "",
         mediaCaption: "",
@@ -235,9 +242,17 @@ export default class DocumentTextEditor extends React.Component {
 
   _confirmLink(e) {
     e.preventDefault();
-    const { editorState, urlValue, urlType, urlTitle, urlTitleId } = this.state;
+    const {
+      editorState,
+      urlValue,
+      imageAlt,
+      urlType,
+      urlTitle,
+      urlTitleId
+    } = this.state;
     const data = {
       url: urlValue,
+      alt: imageAlt,
       type: urlType
     };
 
@@ -272,6 +287,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: "",
+        imageAlt: "",
         urlTitle: "",
         urlTitleId: ""
       },
@@ -291,6 +307,7 @@ export default class DocumentTextEditor extends React.Component {
       {
         showLinkInput: false,
         urlValue: "",
+        imageAlt: "",
         urlTitle: "",
         urlTitleId: ""
       },
@@ -333,6 +350,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: this.state.urlValue,
+        imageAlt: this.state.imageAlt,
         urlType: type,
         mediaWidth: this.state.mediaWidth,
         mediaHeight: this.state.mediaHeight,
@@ -352,6 +370,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: true,
         showTextAreaInput: false,
         urlValue: this.state.urlValue,
+        imageAlt: this.state.imageAlt,
         urlType: type,
         urlTitle: "",
         urlTitleId: ""
@@ -777,10 +796,10 @@ export default class DocumentTextEditor extends React.Component {
               <p>Förhandsvisning:</p>
               <img
                 src={this.state.urlValue}
+                alt={this.state.imageAlt}
                 onLoad={this.onImgLoad}
                 width={this.state.mediaWidth}
                 height={this.state.mediaHeight}
-                alt="Förhandsvisning"
               />
             </Grid>
             <Grid item>
@@ -799,6 +818,16 @@ export default class DocumentTextEditor extends React.Component {
                 value={this.state.mediaHeight || ""}
                 onKeyDown={this.onURLInputKeyDown}
                 placeholder="Höjd"
+              />
+            </Grid>
+            <Grid item>
+              <input
+                onChange={this.onImageAltChange}
+                ref="image-alt"
+                type="text"
+                value={this.state.imageAlt || ""}
+                onKeyDown={this.onURLInputKeyDown}
+                placeholder="Alternativ text"
               />
             </Grid>
             <Grid item>
