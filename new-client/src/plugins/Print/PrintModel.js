@@ -376,7 +376,7 @@ export default class PrintModel {
   // the backgroundColor of the mapCanvas has changed. We must keep track of this
   // to make sure that the print-results has the same appearance.
   getMapBackgroundColor = () => {
-    return document.getElementById("map").style.backgroundColor ?? "black";
+    return document.getElementById("map").style.backgroundColor ?? "white";
   };
 
   print = (options) => {
