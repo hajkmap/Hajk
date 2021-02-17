@@ -352,7 +352,7 @@ export default class FeaturePropsParsing {
     return (
       <ReactMarkdown
         plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
-        allowDangerousHtml={false} // Normally we won't accept HTML in MD as it defines MD's purpose…
+        allowDangerousHtml={true} // TODO: Get value from mapconfig's infoclick.options.allowDangerousHtml
         renderers={this.renderers} // Custom renderers, see definition in this.renderers
         children={markdown} // Our MD, as a text string
       />
