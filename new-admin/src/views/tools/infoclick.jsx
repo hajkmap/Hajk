@@ -36,7 +36,6 @@ var defaultState = {
   position: "right",
   width: 400,
   height: 300,
-
   src: "marker.png",
   scale: 0.15,
   strokeColor: { r: 200, b: 0, g: 0, a: 0.7 },
@@ -44,6 +43,7 @@ var defaultState = {
   fillColor: { r: 255, b: 0, g: 0, a: 0.1 },
   anchorX: 0.5,
   anchorY: 1,
+  allowDangerousHtml: true,
 };
 
 const ColorButtonBlue = withStyles((theme) => ({
@@ -83,6 +83,8 @@ class ToolOptions extends Component {
         fillColor: tool.options.fillColor || this.state.fillColor,
         anchorX: tool.options.anchor[0] || this.state.anchorX,
         anchorY: tool.options.anchor[1] || this.state.anchorY,
+        allowDangerousHtml:
+          tool.options.allowDangerousHtml || this.state.allowDangerousHtml,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -154,6 +156,7 @@ class ToolOptions extends Component {
         strokeColor: this.state.strokeColor,
         strokeWidth: this.state.strokeWidth,
         fillColor: this.state.fillColor,
+        allowDangerousHtml: this.state.allowDangerousHtml,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -368,7 +371,21 @@ class ToolOptions extends Component {
               value={this.state.height}
             />
           </div>
+          <div className="separator">Generella inställningar</div>
           {this.renderVisibleForGroups()}
+          <div>
+            <input
+              id="allowDangerousHtml"
+              name="allowDangerousHtml"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.allowDangerousHtml}
+            />
+            &nbsp;
+            <label htmlFor="allowDangerousHtml">Tillåt HTML i infoclick</label>
+          </div>
           <div className="separator">Ikon och markering</div>
           <div>
             <label htmlFor="src">URL till bild</label>
