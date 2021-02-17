@@ -54,7 +54,7 @@ class ToolOptions extends Component {
   constructor() {
     super();
     this.state = defaultState;
-    this.type = "bookmark";
+    this.type = "bookmarks";
     this.handleAuthGrpsChange = this.handleAuthGrpsChange.bind(this);
   }
 
