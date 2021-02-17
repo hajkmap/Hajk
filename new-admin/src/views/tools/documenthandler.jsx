@@ -39,7 +39,7 @@ var defaultState = {
   showScrollButtonLimit: 400,
   dynamicImportUrls: {
     iconFonts: "https://fonts.googleapis.com/icon?family=Material+Icons",
-    openSans: "https://fonts.googleapis.com/css?family=Open+Sans",
+    customFont: "https://fonts.googleapis.com/css?family=Open+Sans",
   },
   iconLibraryLink: "https://material.io/resources/icons/?style=baseline",
   width: 600,
