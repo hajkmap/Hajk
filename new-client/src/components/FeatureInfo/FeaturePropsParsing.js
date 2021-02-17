@@ -256,6 +256,50 @@ export default class FeaturePropsParsing {
     }
   };
 
+  #conditionalReplacer = (...args) => {
+    // Extract the regex named capture groups, they will be the last argument
+    // when .replace() calls this helper.
+    // Expect matched to contain 'condition', 'attributes' and 'content'.
+    const matched = args[args.length - 1];
+
+    // Do different things, depending on 'condition'
+    switch (matched.condition) {
+      case "if":
+        // Append a new line to the content that (perhaps)
+        // will be returned. If we return a content, we must
+        // ensure that new line is added, because we stripped
+        // all ending new lines (after </if>) in the regex.
+        matched.content += "\n";
+
+        // Handle <if foo="bar"> or <if foo=bar>
+        if (matched.attributes?.includes("=")) {
+          // Turn "FOO=\"BAR\"" into k = "FOO" and v = "BAR"
+          let [k, v] = matched.attributes
+            .split("=") // Create an array
+            .map((e) => e.replaceAll('"', "").trim()); // Remove double quotes and whitespace
+
+          // Using truthy equal below, we want 2 and "2" to be seen as equal.
+          // eslint-disable-next-line eqeqeq
+          if (k == v) {
+            return matched.content;
+          } else {
+            return "";
+          }
+        }
+        // Handle <if foo> - if it exits, evaluate to true and show content
+        else if (matched.attributes?.trim().length > 0) {
+          return matched.content;
+        }
+        // Handle <if > (i.e. do not render because the attribute to evaluate is falsy)
+        else {
+          return "";
+        }
+      // For any other condition, leave as-is (could be HTML tag)
+      default:
+        return args[0];
+    }
+  };
+
   /**
    * @summary Use Markdown from settings, apply conditional rendering and
    * values from properties, and return a React component.
@@ -273,51 +317,6 @@ export default class FeaturePropsParsing {
    * @returns {object} ReactMarkdown component
    */
   mergeFeaturePropsWithMarkdown = async (markdown, properties) => {
-    // Helper for RegEx replace
-    const replacer = (...args) => {
-      // Extract the regex named capture groups, they will be the last argument
-      // when .replace() calls this helper.
-      // Expect matched to contain 'condition', 'attributes' and 'content'.
-      const matched = args[args.length - 1];
-
-      // Do different things, depending on 'condition'
-      switch (matched.condition) {
-        case "if":
-          // Append a new line to the content that (perhaps)
-          // will be returned. If we return a content, we must
-          // ensure that new line is added, because we stripped
-          // all ending new lines (after </if>) in the regex.
-          matched.content += "\n";
-
-          // Handle <if foo="bar"> or <if foo=bar>
-          if (matched.attributes?.includes("=")) {
-            // Turn "FOO=\"BAR\"" into k = "FOO" and v = "BAR"
-            let [k, v] = matched.attributes
-              .split("=") // Create an array
-              .map((e) => e.replaceAll('"', "").trim()); // Remove double quotes and whitespace
-
-            // Using truthy equal below, we want 2 and "2" to be seen as equal.
-            // eslint-disable-next-line eqeqeq
-            if (k == v) {
-              return matched.content;
-            } else {
-              return "";
-            }
-          }
-          // Handle <if foo> - if it exits, evaluate to true and show content
-          else if (matched.attributes?.trim().length > 0) {
-            return matched.content;
-          }
-          // Handle <if > (i.e. do not render because the attribute to evaluate is falsy)
-          else {
-            return "";
-          }
-        // For any other condition, leave as-is (could be HTML tag)
-        default:
-          return args[0];
-      }
-    };
-
     // "markdown" will now contain placeholders for our value that we get
     // from features. They'll be between { and }.
     // Lets' extract them and replace with value from "properties"
@@ -335,14 +334,19 @@ export default class FeaturePropsParsing {
         );
       });
 
-      // Grab the following into 3 named capture groups (example string <if foo="bar">Baz</if>)
-      // - condition: the word between < and whitespace, "if" in this example
-      // - attributes: whatever follows the condition, until we see a >, 'foo="bar"'
-      // - content: anything after > but before </ and whatever was the result in group one, "Baz"
-      // We also strip any ending new lines.
+      // Find all "conditional tags" (i.e. <if foo="bar">baz</if>) and apply the replacer function on
+      // all matches.
+      // The regex string below does the following:
+      // Split each match into 3 named capture groups:
+      // - "condition": the word between < and whitespace, "if" in this example
+      // - "attributes": whatever follows the condition, until we see a >, 'foo="bar"'
+      // - "content": anything after > but before </ and whatever was the result in group one, "Baz"
+      // Note that we include any ending new lines in the match. That's because _if_ we find a match
+      // and will remove it, we must remove the line ending too, otherwise we would break the Markdown
+      // formatting if only certain strings were to be removed, but all line endings would remain.
       markdown = markdown.replace(
         /<(?<condition>\w+)[\s/]?(?<attributes>[^>]+)?>(?<content>[^<]+)?(?:<\/\1>\n*)?/gi,
-        replacer
+        this.#conditionalReplacer
       );
     }
 
