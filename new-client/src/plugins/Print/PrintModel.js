@@ -372,6 +372,13 @@ export default class PrintModel {
     );
   };
 
+  // If the user has selected one of the "special" backgroundLayers (white or black)
+  // the backgroundColor of the mapCanvas has changed. We must keep track of this
+  // to make sure that the print-results has the same appearance.
+  getMapBackgroundColor = () => {
+    return document.getElementById("map").style.backgroundColor ?? "white";
+  };
+
   print = (options) => {
     const format = options.format;
     const orientation = options.orientation;
@@ -424,6 +431,9 @@ export default class PrintModel {
       mapCanvas.height = height;
 
       const mapContext = mapCanvas.getContext("2d");
+      const backgroundColor = this.getMapBackgroundColor(); // Make sure we use the same background-color as the map
+      mapContext.fillStyle = backgroundColor;
+      mapContext.fillRect(0, 0, width, height);
 
       // Each canvas element inside OpenLayer's viewport should get printed
       document.querySelectorAll(".ol-viewport canvas").forEach((canvas) => {
