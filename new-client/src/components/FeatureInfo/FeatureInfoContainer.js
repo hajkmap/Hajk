@@ -279,10 +279,9 @@ class FeatureInfoContainer extends React.PureComponent {
 
   getValue = async (markdown, properties, caption) => {
     if (markdown) {
-      return await this.featurePropsParsing.mergeFeaturePropsWithMarkdown(
-        markdown,
-        properties
-      );
+      return await this.featurePropsParsing
+        .setMarkdownAndProperties({ markdown, properties })
+        .mergeFeaturePropsWithMarkdown();
     } else {
       return this.getFeaturesAsDefaultTable(properties, caption);
     }

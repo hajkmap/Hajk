@@ -26,8 +26,22 @@ const StyledTableRow = withStyles((theme) => ({
 export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
+    this.markdown = null;
+    this.properties = null;
 
     this.renderers = {
+      // root: (a, b, c) => {
+      //   console.log("root: ", a, b, c);
+      //   return a.children;
+      // },
+      // text: (text) => {
+      //   let c = null;
+      //   if (text.value.match(/{.+@@.+}/gim)) {
+      //     c = text.children.replace(/{.+@@.+}/gim, <Link>Hej!</Link>);
+      //     console.log(text);
+      //   }
+      //   return c || text.children;
+      // },
       thematicBreak: () => <Divider />,
       link: (a) => {
         return <Link href={a.href}>{a.children}</Link>;
@@ -81,127 +95,9 @@ export default class FeaturePropsParsing {
     return result;
   };
 
-  #isChildTextOnly = (child) => {
-    return child && !child.props;
-  };
-
-  #nodeShouldBeFetchedExternally = (nextSibling) => {
-    return (
-      this.#isChildTextOnly(nextSibling) &&
-      this.#isMarkupForExternalElement(nextSibling)
-    );
-  };
-
-  #hasChildren = (child) => {
-    return child?.props?.children && child.props.children.length > 0
-      ? true
-      : false;
-  };
-
-  /**
-   * Converts a JSON-string of properties into a properties object
-   * @param {str} properties
-   * @returns {object}
-   */
-  extractPropertiesFromJson = (properties) => {
-    Object.keys(properties).forEach((property) => {
-      var jsonData = this.#valueFromJson(properties[property]);
-      if (jsonData) {
-        delete properties[property];
-        properties = { ...properties, ...jsonData };
-      }
-    });
-    return properties;
-  };
-
-  #createDataAttributesObjectFromEntriesArray = (entries) => {
-    return entries.reduce((dataAttributeObject, entry) => {
-      return {
-        ...dataAttributeObject,
-        ...{ [entry[0]]: this.#unescapeString(entry[1]) },
-      };
-    }, {});
-  };
-
-  #unescapeString = (string) => {
-    return string.replace(/\\"/g, "");
-  };
-
-  #extractDataAttributes = (props) => {
-    let entries = Object.entries(props).filter((entry) => {
-      return entry[0].search("data-") !== -1;
-    });
-    return this.#createDataAttributesObjectFromEntriesArray(entries);
-  };
-
-  #fetchExternal = (property, externalEvent) => {
-    if (
-      this.globalObserver.getListeners(`core.info-click-${externalEvent}`)
-        .length > 0
-    )
-      return new Promise((resolve) => {
-        let dataAttributes = this.#extractDataAttributes(property.props);
-        //Let subscription resolve the promise
-        this.globalObserver.publish(`core.info-click-${externalEvent}`, {
-          payload: {
-            type: property.type,
-            children: property.props.children,
-            dataAttributes: dataAttributes,
-          },
-          resolve: resolve,
-        });
-      });
-    return null;
-  };
-
   #isMarkupForExternalElement = (string) => {
     return string.match(/@@(.*?)/g);
   };
-
-  #removeChildFromChildren = (children, index) => {
-    children.splice(index, 1);
-  };
-
-  #arrayHasMoreChildren = (children, index) => {
-    return children.length > index + 1;
-  };
-
-  #exchangeChildForExternalComponent = async (child, children, index) => {
-    let externalEvent = children[index + 1].substr(2);
-    let externalElement = await this.#fetchExternal(child, externalEvent);
-
-    if (externalElement) {
-      children[index] = externalElement;
-    }
-  };
-
-  // #renderHtmlAsReactComponents = async (html) => {
-  //   const reactElementFromHtml = ReactHtmlParser(html);
-  //   const injectIfExternalComponents = async (children) => {
-  //     children.forEach(async (child, index) => {
-  //       if (this.#isChildTextOnly(child)) {
-  //         if (this.#isMarkupForExternalElement(child)) {
-  //           this.#removeChildFromChildren(children, index);
-  //           return;
-  //         }
-  //         return;
-  //       }
-  //       if (
-  //         this.#arrayHasMoreChildren(children, index) &&
-  //         this.#nodeShouldBeFetchedExternally(children[index + 1])
-  //       ) {
-  //         this.#exchangeChildForExternalComponent(child, children, index);
-
-  //         return;
-  //       }
-  //       if (this.#hasChildren(child)) {
-  //         injectIfExternalComponents(child.props.children);
-  //       }
-  //     });
-  //   };
-  //   await injectIfExternalComponents(reactElementFromHtml[0].props.children);
-  //   return reactElementFromHtml;
-  // };
 
   #getAttributePlaceholderInformation = (attributePlaceholder, isExternal) => {
     if (isExternal) {
@@ -250,7 +146,8 @@ export default class FeaturePropsParsing {
     }
 
     if (isExternal) {
-      return `${propertyValue}@@${renderWithPlugin}`;
+      // Don't get the value just yet - we want to keep this within "{}" at this stage!
+      return `{${attributePlaceholder.split("@@")[0]}@@${renderWithPlugin}}`;
     } else {
       return propertyValue;
     }
@@ -301,6 +198,28 @@ export default class FeaturePropsParsing {
   };
 
   /**
+   * Converts a JSON-string of properties into a properties object
+   * @param {str} properties
+   * @returns {object}
+   */
+  extractPropertiesFromJson = (properties) => {
+    Object.keys(properties).forEach((property) => {
+      var jsonData = this.#valueFromJson(properties[property]);
+      if (jsonData) {
+        delete properties[property];
+        properties = { ...properties, ...jsonData };
+      }
+    });
+    return properties;
+  };
+
+  setMarkdownAndProperties({ markdown, properties }) {
+    this.markdown = markdown;
+    this.properties = properties;
+    return this;
+  }
+
+  /**
    * @summary Use Markdown from settings, apply conditional rendering and
    * values from properties, and return a React component.
    *
@@ -316,18 +235,18 @@ export default class FeaturePropsParsing {
    * @param {object} properties
    * @returns {object} ReactMarkdown component
    */
-  mergeFeaturePropsWithMarkdown = async (markdown, properties) => {
+  mergeFeaturePropsWithMarkdown = async () => {
     // "markdown" will now contain placeholders for our value that we get
     // from features. They'll be between { and }.
     // Lets' extract them and replace with value from "properties"
-    if (markdown && typeof markdown === "string") {
-      (markdown.match(/{(.*?)}/g) || []).forEach((property) => {
+    if (this.markdown && typeof this.markdown === "string") {
+      (this.markdown.match(/{(.*?)}/g) || []).forEach((property) => {
         const propertyIsExternal = this.#isMarkupForExternalElement(property);
         const attributePlaceholder = property.replace("{", "").replace("}", "");
-        markdown = markdown.replace(
+        this.markdown = this.markdown.replace(
           property,
           this.#getPropertyForPlaceholder(
-            properties,
+            this.properties,
             attributePlaceholder,
             propertyIsExternal
           )
@@ -344,21 +263,18 @@ export default class FeaturePropsParsing {
       // Note that we include any ending new lines in the match. That's because _if_ we find a match
       // and will remove it, we must remove the line ending too, otherwise we would break the Markdown
       // formatting if only certain strings were to be removed, but all line endings would remain.
-      markdown = markdown.replace(
+      this.markdown = this.markdown.replace(
         /<(?<condition>\w+)[\s/]?(?<attributes>[^>]+)?>(?<content>[^<]+)?(?:<\/\1>\n*)?/gi,
         this.#conditionalReplacer
       );
     }
-
-    // let html = `<div id="wrapper">${marked(markdown)}</div>`;
-    // return await this.#renderHtmlAsReactComponents(html);
 
     return (
       <ReactMarkdown
         plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
         allowDangerousHtml={true} // TODO: Get value from mapconfig's infoclick.options.allowDangerousHtml
         renderers={this.renderers} // Custom renderers, see definition in this.renderers
-        children={markdown} // Our MD, as a text string
+        children={this.markdown} // Our MD, as a text string
       />
     );
   };

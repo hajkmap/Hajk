@@ -85,7 +85,11 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       feature.properties
     );
     this.featurePropsParsing
-      .mergeFeaturePropsWithMarkdown(source.infobox, feature.properties)
+      .setMarkdownAndProperties({
+        markdown: source.infobox,
+        properties: feature.properties,
+      })
+      .mergeFeaturePropsWithMarkdown()
       .then((MarkdownComponent) => {
         this.setState({ infoBox: MarkdownComponent });
       });
