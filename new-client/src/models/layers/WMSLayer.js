@@ -71,12 +71,6 @@ class WMSLayer {
       this.tileLoadOk();
     });
 
-    this.layer.on("change:visible", (e) => {
-      if (this.layer.get("visible")) {
-        this.tileLoadOk();
-      }
-    });
-
     this.layer.layersInfo = config.layersInfo;
     this.layer.subLayers = this.subLayers;
     this.layer.layerType = this.subLayers.length > 1 ? "group" : "layer";
@@ -163,20 +157,6 @@ class WMSLayer {
       id: this.layer.get("name"),
       status: "ok",
     });
-  }
-
-  /**
-   * Parse response and trigger registred feature information callback.
-   * @param {XMLDocument} respose
-   * @instance
-   */
-  getFeatureInformationReponse(response) {
-    try {
-      const features = new GeoJSON().readFeatures(response);
-      this.featureInformationCallback(features, this.getLayer());
-    } catch (e) {
-      console.error(e);
-    }
   }
 }
 
