@@ -61,17 +61,29 @@ class BackgroundSwitcher extends React.PureComponent {
     });
     this.props.map.addLayer(this.osmLayer);
 
-    // Update selected background layer if it is changed outside layerswitcher
+    // Ensure that BackgroundSwitcher correctly selects visible layer,
+    // by listening to a event that each layer will send when its visibility
+    // changes.
     this.props.app.globalObserver.subscribe(
-      "layerswitcher.wmsLayerLoadStatus",
-      (d) => {
-        const backgroundUpdated = this.props.layers.find(
-          (layer) => d.id === layer.name
-        );
-        backgroundUpdated &&
-          this.setState({
-            selectedLayer: backgroundUpdated.name,
-          });
+      "core.layerVisibilityChanged",
+      ({ target: layer }) => {
+        const name = layer.get("name");
+
+        // Early return if layer who's visibility was changed couldn't
+        // be found among the background layers, or if the visibility
+        // was changed to 'false'.
+        if (
+          this.props.layers.findIndex((l) => name === l.name) === -1 ||
+          layer.get("visible") === false
+        ) {
+          return;
+        }
+
+        // If we got this far, we have a background layer that just
+        // became visible. Let's notify the radio buttons by setting state!
+        this.setState({
+          selectedLayer: layer.get("name"),
+        });
       }
     );
   }
