@@ -5,7 +5,6 @@ import gfm from "remark-gfm";
 import {
   Divider,
   Link,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -51,7 +50,7 @@ export default class FeaturePropsParsing {
       },
       table: (a) => {
         return (
-          <TableContainer component={Paper}>
+          <TableContainer component="div">
             <Table size="small">{a.children}</Table>
           </TableContainer>
         );
