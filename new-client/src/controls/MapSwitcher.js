@@ -12,10 +12,6 @@ const styles = (theme) => ({
   },
 });
 
-const fetchConfig = {
-  credentials: "same-origin",
-};
-
 class MapSwitcher extends React.PureComponent {
   // Will hold map configs
   maps = [];
@@ -35,7 +31,8 @@ class MapSwitcher extends React.PureComponent {
     let { proxy, mapserviceBase } = this.appModel.config.appConfig;
     let { activeMap } = this.appModel.config;
 
-    fetch(`${proxy}${mapserviceBase}/config/userspecificmaps`, fetchConfig)
+    this.appModel
+      .hfetch(`${proxy}${mapserviceBase}/config/userspecificmaps`)
       .then((resp) => resp.json())
       .then((maps) => {
         // Save fetched map configs to global variable

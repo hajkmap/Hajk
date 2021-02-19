@@ -5,6 +5,7 @@ import ImageWMS from "ol/source/ImageWMS";
 import TileWMS from "ol/source/TileWMS";
 import GeoJSON from "ol/format/GeoJSON";
 import LayerInfo from "./LayerInfo.js";
+import { hfetch } from "utils/FetchWrapper";
 
 class WMSLayer {
   constructor(config, proxyUrl, globalObserver) {
@@ -109,7 +110,7 @@ class WMSLayer {
           url = encodeURIComponent(url);
         }
 
-        fetch(this.proxyUrl + url)
+        hfetch(this.proxyUrl + url)
           .then((response) => {
             response.json().then((data) => {
               var features = new GeoJSON().readFeatures(data);

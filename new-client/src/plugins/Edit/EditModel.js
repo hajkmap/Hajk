@@ -7,10 +7,8 @@ import { all as strategyAll } from "ol/loadingstrategy";
 import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
+import { hfetch } from "utils/FetchWrapper";
 
-const fetchConfig = {
-  credentials: "same-origin",
-};
 class EditModel {
   constructor(settings) {
     this.map = settings.map;
@@ -106,10 +104,9 @@ class EditModel {
       payload = node ? serializer.serializeToString(node) : undefined;
 
     if (payload) {
-      fetch(src.url, {
+      hfetch(src.url, {
         method: "POST",
         body: payload,
-        credentials: "same-origin",
         headers: {
           "Content-Type": "text/xml",
         },
@@ -348,7 +345,7 @@ class EditModel {
       typename: source.layers[0],
       srsname: source.projection,
     });
-    fetch(url, fetchConfig)
+    hfetch(url)
       .then((response) => {
         if (response.status !== 200) {
           return done("data-load-error");

@@ -22,15 +22,14 @@ import ReactDOM from "react-dom";
 import buildConfig from "./buildConfig.json";
 import ErrorIcon from "@material-ui/icons/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
+import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";
+
+initHFetch();
 
 let networkErrorMessage =
   "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
 let parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
-
-const fetchOpts = {
-  credentials: "same-origin",
-};
 
 /**
  * Entry point to Hajk.
@@ -40,9 +39,12 @@ const fetchOpts = {
  * appConfig.json includes URL to the backend application (called MapService),
  * as well as the default preferred map configuration's file name.
  */
-fetch("appConfig.json", fetchOpts)
+hfetch("appConfig.json")
   .then((appConfigResponse) => {
     appConfigResponse.json().then((appConfig) => {
+      // Init fetchWrapper with loaded config.
+      initFetchWrapper(appConfig);
+
       // See if we have site-specific error messages
       if (appConfig.networkErrorMessage)
         networkErrorMessage = appConfig.networkErrorMessage;
@@ -73,27 +75,24 @@ fetch("appConfig.json", fetchOpts)
         const configUrl = `${appConfig.proxy}${appConfig.mapserviceBase}/config`;
         try {
           // Try to fetch user-specified config. Return it if OK.
-          return await fetch(`${configUrl}/${activeMap}`, fetchOpts);
+          return await hfetch(`${configUrl}/${activeMap}`);
         } catch {
           // If the previous attempt fails reset "activeMap" to hard-coded value…
           activeMap = appConfig.defaultMap;
           // …and fetch again.
-          return await fetch(`${configUrl}/${activeMap}`, fetchOpts);
+          return await hfetch(`${configUrl}/${activeMap}`);
         }
       };
 
       // Next, we do 3 necessary requests to MapService
       Promise.all([
         // Get all layers defined in MapService
-        fetch(
-          `${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`,
-          fetchOpts
-        ),
+        hfetch(`${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`),
         // Get the specific, requested map configuration
         fetchMapConfig(),
         // Additionally, we fetch a custom theme that allows site admins to override
         // the default MUI theme without re-compiling the application.
-        fetch("customTheme.json", fetchOpts),
+        hfetch("customTheme.json"),
       ])
         .then(
           ([layersConfigResponse, mapConfigResponse, customThemeResponse]) => {

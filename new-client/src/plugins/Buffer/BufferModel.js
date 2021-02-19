@@ -13,6 +13,7 @@ import {
   MultiPolygon,
 } from "ol/geom.js";
 import * as jsts from "jsts";
+import { hfetch } from "utils/FetchWrapper";
 
 class BufferModel {
   constructor(settings) {
@@ -142,7 +143,7 @@ class BufferModel {
                 }
               );
 
-            const response = await fetch(url);
+            const response = await hfetch(url);
             const json = await response.json();
             const features = new GeoJSON().readFeatures(json); // Parse OL Features from returned JSON.
 
