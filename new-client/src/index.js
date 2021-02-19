@@ -15,13 +15,12 @@ import "elm-pep";
 import "ol/ol.css";
 import "./custom-ol.css";
 
-import * as serviceWorker from "./serviceWorker";
-
 import React from "react";
 import ReactDOM from "react-dom";
 import buildConfig from "./buildConfig.json";
 import ErrorIcon from "@material-ui/icons/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
+import reportWebVitals from "./reportWebVitals";
 
 let networkErrorMessage =
   "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
@@ -182,7 +181,7 @@ fetch("appConfig.json", fetchOpts)
     );
   });
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
