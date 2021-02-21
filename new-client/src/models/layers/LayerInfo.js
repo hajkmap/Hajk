@@ -10,11 +10,13 @@ export default class LayerInfo {
     this.infoVisible = properties.infoVisible;
     this.information = properties.information;
     this.legend = properties.legend;
+    this.legendIcon = properties.legendIcon;
     this.searchDisplayName = properties.searchDisplayName;
     this.searchGeometryField = properties.searchGeometryField;
     this.searchOutputFormat = properties.searchOutputFormat;
     this.searchPropertyName = properties.searchPropertyName;
     this.searchUrl = properties.searchUrl;
     this.layerType = properties.layerType;
+    this.hideExpandArrow = properties.hideExpandArrow;
   }
 }

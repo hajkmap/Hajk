@@ -5,8 +5,18 @@ body {
   overflow: hidden;
 }
 
+html {
+  position: fixed;
+  height: 100%;
+}
+
 body {
   font-family: "Roboto", sans-serif;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 .app-start {
   position: absolute;
@@ -25,6 +35,14 @@ body {
   background: rgb(63, 63, 63);
   color: white !important;
   fill: white;
+}
+
+.sr-only {
+  /*Same styleattributes as MaterialUI SrOnly*/
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
 }
 
 .app-start div {
@@ -57,4 +75,8 @@ body {
   width: 50%;
   text-align: center;
   margin-top: 5%;
+}
+
+.introjs-tooltip {
+  min-width: 280px !important;
 }

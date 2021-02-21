@@ -47,40 +47,40 @@ var defaultState = {
   content: "",
   maps: [],
   confirmAction: () => {},
-  denyAction: () => {}
+  denyAction: () => {},
 };
 
-const ColorButtonRed = withStyles(theme => ({
+const ColorButtonRed = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(red[500]),
     backgroundColor: red[500],
     "&:hover": {
-      backgroundColor: red[700]
-    }
-  }
+      backgroundColor: red[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
-$.fn.editable = function(component) {
+$.fn.editable = function (component) {
   function edit(node, e) {
     function reset() {
       ok.remove();
@@ -124,7 +124,7 @@ $.fn.editable = function(component) {
     var btnCSS = {
         marginLeft: "4px",
         position: "relative",
-        top: "-1px"
+        top: "-1px",
       },
       prev = node.html(),
       id = Math.floor(Math.random() * 1e5),
@@ -171,23 +171,23 @@ $.fn.editable = function(component) {
 
     layerOk2.css(btnCSS).click(saveLayer);
 
-    abort.css(btnCSS).click(e => {
+    abort.css(btnCSS).click((e) => {
       node.html(prev);
       reset();
     });
 
-    abort2.css(btnCSS).click(e => {
+    abort2.css(btnCSS).click((e) => {
       node.html(prev);
       reset();
     });
 
-    if (node.parent().attr("data-expanded") === "true") {
+    if (node.parent().attr("data-expanded")) {
       checkbox.attr("checked", "checked");
     }
-    if (node.parent().attr("data-toggled") === "true") {
+    if (node.parent().attr("data-toggled")) {
       checkbox2.attr("checked", "checked");
     }
-    if (node.parent().attr("data-visibleatstart") === "true") {
+    if (node.parent().attr("data-visibleatstart")) {
       checkbox3.attr("checked", "checked");
     }
     if (node.parent().attr("data-visibleforgroups")) {
@@ -213,7 +213,7 @@ $.fn.editable = function(component) {
     visible.append(label6, input4);
     editPreset.append(label4, checkbox4, input2);
 
-    remove.css({ color: "red", marginRight: "4px" }).click(e => {
+    remove.css({ color: "red", marginRight: "4px" }).click((e) => {
       component.setState({
         alert: true,
         confirm: true,
@@ -221,7 +221,7 @@ $.fn.editable = function(component) {
           "Objektet kommer att tas bort från lagermenyn, om det är en grupp som innehåller lager kommer alla undergrupper och ingående lager att tas bort. Är detta ok?",
         confirmAction: () => {
           node.parent().remove();
-        }
+        },
       });
     });
 
@@ -232,19 +232,19 @@ $.fn.editable = function(component) {
 
     input
       .val(inputValue)
-      .keydown(e => {
+      .keydown((e) => {
         if (e.keyCode === 13) {
           store();
         }
       })
       .css({
         marginButtom: "4px",
-        padding: "4px"
+        padding: "4px",
       });
 
     tools.css({
       marginLeft: "13px",
-      marginTop: "7px"
+      marginTop: "7px",
     });
 
     tools.append(ok, abort, toggled, expanded);
@@ -252,10 +252,7 @@ $.fn.editable = function(component) {
     presetTools.append(editPreset, layerOk2, abort2);
 
     if (node.hasClass("group-name")) {
-      node
-        .html(input)
-        .after(tools)
-        .before(remove);
+      node.html(input).after(tools).before(remove);
     }
 
     if (node.hasClass("layer-name") && !elem.editing) {
@@ -269,7 +266,7 @@ $.fn.editable = function(component) {
     }
   }
 
-  var enableEdit = e => {
+  var enableEdit = (e) => {
     var node = $(e.target);
 
     if (node.hasClass("group-name")) {
@@ -285,7 +282,7 @@ $.fn.editable = function(component) {
     }
   };
 
-  var onClick = e => {
+  var onClick = (e) => {
     enableEdit(e);
     e.stopPropagation();
   };
@@ -312,10 +309,12 @@ class Menu extends Component {
       maps: [],
       active: true,
       visibleAtStart: true,
+      visibleAtStartMobile: false,
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       enableOSM: false,
       showBreadcrumbs: false,
+      enableTransparencySlider: true,
       instruction: "",
       dropdownThemeMaps: false,
       themeMapHeaderCaption: "Temakartor",
@@ -326,7 +325,7 @@ class Menu extends Component {
       width: "",
       height: "",
       title: "Innehåll",
-      description: "Välj innehåll att visa i kartan"
+      description: "Välj innehåll att visa i kartan",
     };
   }
 
@@ -341,7 +340,7 @@ class Menu extends Component {
 
     this.props.model.on("change:urlMapConfig", () => {
       this.setState({
-        reset: true
+        reset: true,
       });
 
       this.load("layermenu", () => {
@@ -350,13 +349,17 @@ class Menu extends Component {
           active: this.props.model.get("layerMenuConfig").active,
           visibleAtStart: this.props.model.get("layerMenuConfig")
             .visibleAtStart,
+          visibleAtStartMobile: this.props.model.get("layerMenuConfig")
+            .visibleAtStartMobile,
           backgroundSwitcherBlack: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherWhite,
-          enableOSM: this.props.model.get("layerMenuConfig").enableOSM || false,
+          enableOSM: this.props.model.get("layerMenuConfig").enableOSM,
           showBreadcrumbs: this.props.model.get("layerMenuConfig")
             .showBreadcrumbs,
+          enableTransparencySlider: this.props.model.get("layerMenuConfig")
+            .enableTransparencySlider,
           instruction: this.props.model.get("layerMenuConfig").instruction,
           dropdownThemeMaps: this.props.model.get("layerMenuConfig")
             .dropdownThemeMaps,
@@ -371,7 +374,8 @@ class Menu extends Component {
           width: this.props.model.get("layerMenuConfig").width || "",
           height: this.props.model.get("layerMenuConfig").height || "",
           title: this.props.model.get("layerMenuConfig").title || "",
-          description: this.props.model.get("layerMenuConfig").description || ""
+          description:
+            this.props.model.get("layerMenuConfig").description || "",
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -380,18 +384,18 @@ class Menu extends Component {
 
     this.props.model.on("change:layers", () => {
       this.setState({
-        layers: this.props.model.get("layers")
+        layers: this.props.model.get("layers"),
       });
     });
 
     this.props.model.on("change:layerMenuConfig", () => {
       this.setState({
-        layerMenuConfig: this.props.model.get("layerMenuConfig")
+        layerMenuConfig: this.props.model.get("layerMenuConfig"),
       });
 
       setTimeout(() => {
         this.setState({
-          layers: this.props.model.get("layers")
+          layers: this.props.model.get("layers"),
         });
       }, 0);
 
@@ -463,14 +467,14 @@ class Menu extends Component {
   load(type, callback) {
     switch (type) {
       case "auth":
-        this.props.model.getAuthSetting(auth => {
+        this.props.model.getAuthSetting((auth) => {
           this.setState({ authActive: auth });
         });
         break;
       case "maps":
-        this.props.model.loadMaps(maps => {
+        this.props.model.loadMaps((maps) => {
           this.setState({
-            maps: maps
+            maps: maps,
           });
           if (callback) callback();
         });
@@ -478,18 +482,18 @@ class Menu extends Component {
       case "layers":
         this.props.model.getConfig(
           this.props.model.get("config").url_layers,
-          data => {
+          (data) => {
             var layers = [];
-            data.wmslayers.forEach(l => {
+            data.wmslayers.forEach((l) => {
               l.type = "WMS";
             });
-            data.wmtslayers.forEach(l => {
+            data.wmtslayers.forEach((l) => {
               l.type = "WMTS";
             });
-            data.arcgislayers.forEach(l => {
+            data.arcgislayers.forEach((l) => {
               l.type = "ArcGIS";
             });
-            data.vectorlayers.forEach(l => {
+            data.vectorlayers.forEach((l) => {
               l.type = "Vector";
             });
             layers = data.wmslayers
@@ -509,13 +513,13 @@ class Menu extends Component {
       case "layermenu":
         this.props.model.getConfig(
           this.props.model.get("urlMapConfig"),
-          data => {
+          (data) => {
             this.props.model.set("projectionConfig", data.projection);
             this.props.model.set("toolConfig", data.tools);
             this.props.model.set("mapConfig", data.map);
             this.props.model.set(
               "layerMenuConfig",
-              data.tools.find(tool => tool.type === "layerswitcher").options
+              data.tools.find((tool) => tool.type === "layerswitcher").options
             );
             if (callback) callback();
           }
@@ -531,7 +535,7 @@ class Menu extends Component {
    */
   filterLayers(e) {
     this.setState({
-      filter: e.target.value
+      filter: e.target.value,
     });
   }
 
@@ -539,7 +543,7 @@ class Menu extends Component {
    *
    */
   getLayersWithFilter(filter) {
-    return this.props.model.get("layers").filter(layer => {
+    return this.props.model.get("layers").filter((layer) => {
       return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
     });
   }
@@ -548,7 +552,7 @@ class Menu extends Component {
    *
    */
   getLayerNameFromId(id) {
-    var layer = this.props.model.get("layers").find(layer => layer.id === id);
+    var layer = this.props.model.get("layers").find((layer) => layer.id === id);
     return layer ? layer.caption : `---[layer id ${id} not found]---`;
   }
 
@@ -561,10 +565,12 @@ class Menu extends Component {
       baselayers: [],
       active: this.state.active,
       visibleAtStart: this.state.visibleAtStart,
+      visibleAtStartMobile: this.state.visibleAtStartMobile,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
+      enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
@@ -577,7 +583,7 @@ class Menu extends Component {
       width: this.state.width,
       height: this.state.height,
       title: this.state.title,
-      description: this.state.description
+      description: this.state.description,
     };
 
     var roots = $(".tree-view > ul > li");
@@ -586,7 +592,7 @@ class Menu extends Component {
       return $(node)
         .find("> ul > li.layer-node")
         .toArray()
-        .map(node => {
+        .map((node) => {
           let infobox = node.dataset.infobox ? node.dataset.infobox : "";
           if (that.state.authActive) {
             let visibleForGroups = node.dataset.visibleforgroups
@@ -602,20 +608,28 @@ class Menu extends Component {
             }
             return {
               id: node.dataset.id,
-              drawOrder: node.dataset.draworder ? node.dataset.draworder : 1000,
-              visibleAtStart: node.dataset.visibleatstart,
+              drawOrder: node.dataset.draworder
+                ? parseInt(node.dataset.draworder)
+                : 1000,
+              visibleAtStart: checkIfTrue(node.dataset.visibleatstart),
               visibleForGroups: visibleForGroups || [],
-              infobox: infobox || ""
+              infobox: infobox || "",
             };
           } else {
             return {
               id: node.dataset.id,
-              drawOrder: node.dataset.draworder ? node.dataset.draworder : 1000,
-              visibleAtStart: node.dataset.visibleatstart,
-              infobox: infobox || ""
+              drawOrder: node.dataset.draworder
+                ? parseInt(node.dataset.draworder)
+                : 1000,
+              visibleAtStart: checkIfTrue(node.dataset.visibleatstart),
+              infobox: infobox || "",
             };
           }
         });
+    }
+
+    function checkIfTrue(value) {
+      return value === "true";
     }
 
     function groups(node) {
@@ -623,7 +637,7 @@ class Menu extends Component {
       $(node)
         .find("> ul > li.group-node")
         .toArray()
-        .forEach(node => {
+        .forEach((node) => {
           groups.push(groupItem(node));
         });
       return groups;
@@ -631,9 +645,7 @@ class Menu extends Component {
 
     function groupItem(node) {
       function getParent(node) {
-        var parent = $(node)
-          .parents(".group-node")
-          .first();
+        var parent = $(node).parents(".group-node").first();
         if (parent.length === 1) {
           return parent[0].dataset.id;
         }
@@ -643,15 +655,15 @@ class Menu extends Component {
         id: node.dataset.id,
         type: node.dataset.type,
         name: node.dataset.name,
-        toggled: node.dataset.toggled,
-        expanded: node.dataset.expanded,
+        toggled: checkIfTrue(node.dataset.toggled),
+        expanded: checkIfTrue(node.dataset.expanded),
         parent: getParent(node),
         layers: layers(node),
-        groups: groups(node)
+        groups: groups(node),
       };
     }
 
-    roots.toArray().forEach(root => {
+    roots.toArray().forEach((root) => {
       let visibleForGroups = root.dataset.visibleforgroups
         ? root.dataset.visibleforgroups.split(",")
         : [];
@@ -668,19 +680,19 @@ class Menu extends Component {
         root.dataset.type === "layer"
           ? settings.baselayers.push({
               id: root.dataset.id,
-              visibleAtStart: root.dataset.visibleatstart,
+              visibleAtStart: checkIfTrue(root.dataset.visibleatstart),
               drawOrder: 0,
               visibleForGroups: visibleForGroups || [],
-              infobox: ""
+              infobox: "",
             })
           : settings.groups.push(groupItem(root));
       } else {
         root.dataset.type === "layer"
           ? settings.baselayers.push({
               id: root.dataset.id,
-              visibleAtStart: root.dataset.visibleatstart,
+              visibleAtStart: checkIfTrue(root.dataset.visibleatstart),
               drawOrder: 0,
-              infobox: ""
+              infobox: "",
             })
           : settings.groups.push(groupItem(root));
       }
@@ -697,12 +709,11 @@ class Menu extends Component {
     layers.each((i, layer) => {
       result.push({
         drawOrder: j,
-        id: $(layer)
-          .data("id")
-          .toString()
+        id: $(layer).data("id").toString(),
       });
       j--;
     });
+    console.log("result: ", result);
     return result;
   }
 
@@ -710,16 +721,16 @@ class Menu extends Component {
    *
    */
   save(settings) {
-    this.props.model.updateConfig(settings, success => {
+    this.props.model.updateConfig(settings, (success) => {
       if (success) {
         this.setState({
-          reset: true
+          reset: true,
         });
 
         this.props.model.set({ layerMenuConfig: settings });
 
         this.setState({
-          reset: false
+          reset: false,
         });
 
         $(".tree-view li").editable(this);
@@ -728,12 +739,12 @@ class Menu extends Component {
         this.setState({
           content: "mapsettings",
           alert: true,
-          alertMessage: "Uppdateringen lyckades."
+          alertMessage: "Uppdateringen lyckades.",
         });
       } else {
         this.setState({
           alert: true,
-          alertMessage: "Uppdateringen misslyckades."
+          alertMessage: "Uppdateringen misslyckades.",
         });
       }
     });
@@ -752,7 +763,7 @@ class Menu extends Component {
   saveDrawOrder() {
     var settings = this.parseDrawSettings();
 
-    settings.forEach(setting => {
+    settings.forEach((setting) => {
       var layer = this.props.model.findLayerInConfig(setting.id);
       if (layer) {
         layer.drawOrder = setting.drawOrder;
@@ -761,18 +772,18 @@ class Menu extends Component {
 
     var config = this.props.model.get("layerMenuConfig");
 
-    this.props.model.updateConfig(config, success => {
+    this.props.model.updateConfig(config, (success) => {
       if (success) {
         this.setState({
           content: "mapsettings",
           alert: true,
-          alertMessage: "Uppdateringen lyckades."
+          alertMessage: "Uppdateringen lyckades.",
         });
         this.forceUpdate();
       } else {
         this.setState({
           alert: true,
-          alertMessage: "Uppdateringen misslyckades."
+          alertMessage: "Uppdateringen misslyckades.",
         });
       }
     });
@@ -833,7 +844,7 @@ class Menu extends Component {
         confirm: false,
         alertMessage:
           "Detta lager är redan tillagt i lagerlistan. Klicka på lagret i lagerlistan och därefter på den röda symbolen för att ta bort det.",
-        confirmAction: () => {}
+        confirmAction: () => {},
       });
       return;
     }
@@ -852,19 +863,19 @@ class Menu extends Component {
     var alphabetically = [];
 
     if (this.state.filter) {
-      layers.forEach(layer => {
+      layers.forEach((layer) => {
         layer.caption.toLowerCase().indexOf(this.state.filter) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
-      startsWith.sort(function(a, b) {
+      startsWith.sort(function (a, b) {
         if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
         return 0;
       });
 
-      alphabetically.sort(function(a, b) {
+      alphabetically.sort(function (a, b) {
         if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
         return 0;
@@ -1035,13 +1046,13 @@ class Menu extends Component {
       drawOrder: true,
       layerMenu: false,
       mapOptions: false,
-      toolOptions: false
+      toolOptions: false,
     });
 
     setTimeout(() => {
       $(".tree-view > ul").sortable();
       this.setState({
-        drawOrder: true
+        drawOrder: true,
       });
     }, 0);
   }
@@ -1054,13 +1065,13 @@ class Menu extends Component {
       layerMenu: true,
       drawOrder: false,
       mapOptions: false,
-      toolOptions: false
+      toolOptions: false,
     });
 
     setTimeout(() => {
       this.update();
       this.setState({
-        layerMenu: true
+        layerMenu: true,
       });
     }, 0);
   }
@@ -1072,7 +1083,7 @@ class Menu extends Component {
       drawOrder: false,
       layerMenu: false,
       mapOptions: true,
-      toolOptions: false
+      toolOptions: false,
     });
   }
   /**
@@ -1083,7 +1094,7 @@ class Menu extends Component {
       drawOrder: false,
       layerMenu: false,
       mapOptions: false,
-      toolOptions: true
+      toolOptions: true,
     });
   }
 
@@ -1091,7 +1102,7 @@ class Menu extends Component {
     var url = this.props.model.get("config").url_map + "/" + e.target.value;
     this.props.model.set({
       urlMapConfig: url,
-      mapFile: e.target.value
+      mapFile: e.target.value,
     });
   }
 
@@ -1135,7 +1146,7 @@ class Menu extends Component {
     });
   }
 
-  handleInputChange = event => {
+  handleInputChange = (event) => {
     const target = event.target;
     const name = target.name;
     var value = target.type === "checkbox" ? target.checked : target.value;
@@ -1149,7 +1160,7 @@ class Menu extends Component {
     }
 
     this.setState({
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -1169,7 +1180,7 @@ class Menu extends Component {
     }
 
     this.setState({
-      visibleForGroups: value !== "" ? groups : []
+      visibleForGroups: value !== "" ? groups : [],
     });
   }
 
@@ -1179,7 +1190,7 @@ class Menu extends Component {
   toggleHidden() {
     if (this.state.authActive) {
       this.setState({
-        isHidden: !this.state.isHidden
+        isHidden: !this.state.isHidden,
       });
 
       this.state.isHidden
@@ -1193,7 +1204,7 @@ class Menu extends Component {
    */
   renderAdList() {
     if (this.state.authActive) {
-      this.props.model.fetchADGroups(grps => {
+      this.props.model.fetchADGroups((grps) => {
         this.setState({ adGroups: grps });
 
         this.setState({
@@ -1202,7 +1213,7 @@ class Menu extends Component {
               properties={this.state.adGroups}
               show={this.state.isHidden}
             />
-          )
+          ),
         });
       });
     }
@@ -1227,7 +1238,7 @@ class Menu extends Component {
             id="authGroups"
             name="authGroups"
             type="text"
-            onChange={e => {
+            onChange={(e) => {
               this.handleAuthGrpsChange(e);
             }}
             value={this.state.visibleForGroups}
@@ -1283,7 +1294,7 @@ class Menu extends Component {
             name="themeMapHeaderCaption"
             type="text"
             value={this.state.themeMapHeaderCaption}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({ themeMapHeaderCaption: e.target.value });
             }}
           />
@@ -1312,7 +1323,7 @@ class Menu extends Component {
               <ColorButtonBlue
                 variant="contained"
                 className="btn"
-                onClick={e => this.saveDrawOrder(e)}
+                onClick={(e) => this.saveDrawOrder(e)}
                 startIcon={<SaveIcon />}
               >
                 Spara
@@ -1322,7 +1333,7 @@ class Menu extends Component {
               <ColorButtonBlue
                 variant="contained"
                 className="btn"
-                onClick={e => this.saveDrawOrder(e)}
+                onClick={(e) => this.saveDrawOrder(e)}
                 startIcon={<SaveIcon />}
               >
                 Spara
@@ -1339,7 +1350,7 @@ class Menu extends Component {
             <input
               placeholder="filtrera"
               type="text"
-              onChange={e => this.filterLayers(e)}
+              onChange={(e) => this.filterLayers(e)}
             />
             <ul className="config-layer-list">
               {this.renderLayersFromConfig()}
@@ -1351,7 +1362,7 @@ class Menu extends Component {
               <ColorButtonBlue
                 variant="contained"
                 className="btn"
-                onClick={e => this.saveSettings(e)}
+                onClick={(e) => this.saveSettings(e)}
                 startIcon={<SaveIcon />}
               >
                 Spara
@@ -1385,7 +1396,7 @@ class Menu extends Component {
                     id="target"
                     name="target"
                     className="control-fixed-width"
-                    onChange={e => {
+                    onChange={(e) => {
                       this.handleInputChange(e);
                     }}
                     value={this.state.target}
@@ -1418,7 +1429,7 @@ class Menu extends Component {
                     id="position"
                     name="position"
                     className="control-fixed-width"
-                    onChange={e => {
+                    onChange={(e) => {
                       this.handleInputChange(e);
                     }}
                     value={this.state.position}
@@ -1521,6 +1532,19 @@ class Menu extends Component {
               </div>
               <div>
                 <input
+                  id="visibleAtStartMobile"
+                  name="visibleAtStartMobile"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.visibleAtStartMobile}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="visibleAtStartMobile">
+                  Synlig vid start - Mobil
+                </label>
+              </div>
+              <div>
+                <input
                   id="showBreadcrumbs"
                   name="showBreadcrumbs"
                   type="checkbox"
@@ -1534,6 +1558,27 @@ class Menu extends Component {
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas små kort längst ned på skärmen, ett för varje lager som är aktivt"
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="enableTransparencySlider"
+                  name="enableTransparencySlider"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableTransparencySlider}
+                />
+                &nbsp;
+                <label
+                  className="long-label"
+                  htmlFor="enableTransparencySlider"
+                >
+                  Visa transparensreglage{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Global inställning för att välja om transparensreglage ska vara aktiv eller inte. Om inställningen är aktiv går det då att konfigurera individer lager om transparensreglage ska visas till lagret.  Om denna ruta inte är ikryssad kommer transparensreglage inte visas till någon lager."
                   />
                 </label>
               </div>
@@ -1598,7 +1643,7 @@ class Menu extends Component {
                 <ColorButtonBlue
                   variant="contained"
                   className="btn"
-                  onClick={e => this.saveSettings(e)}
+                  onClick={(e) => this.saveSettings(e)}
                   startIcon={<SaveIcon />}
                 >
                   Spara
@@ -1607,7 +1652,7 @@ class Menu extends Component {
                 <ColorButtonGreen
                   variant="contained"
                   className="btn"
-                  onClick={e => this.createGroup("Ny grupp", false, false)}
+                  onClick={(e) => this.createGroup("Ny grupp", false, false)}
                   startIcon={<CreateNewFolderIcon />}
                 >
                   Ny grupp
@@ -1618,7 +1663,7 @@ class Menu extends Component {
                 <ColorButtonBlue
                   variant="contained"
                   className="btn"
-                  onClick={e => this.saveSettings(e)}
+                  onClick={(e) => this.saveSettings(e)}
                   startIcon={<SaveIcon />}
                 >
                   Spara
@@ -1645,7 +1690,7 @@ class Menu extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       denyAction: () => {
@@ -1653,15 +1698,15 @@ class Menu extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ""
+          alertMessage: "",
         });
-      }
+      },
     };
   }
 
@@ -1674,35 +1719,43 @@ class Menu extends Component {
         this.props.model.attributes.mapFile +
         "'?",
       confirmAction: () => {
-        this.props.model.deleteMap(err => {
+        this.props.model.deleteMap((err) => {
           var msg = err || "Kartan raderades";
           this.setState({
             content: "mapsettings",
             alert: true,
-            alertMessage: msg
+            alertMessage: msg,
           });
           this.load("maps");
         });
-      }
+      },
     });
   }
 
   createMap() {
     var name = this.refs.mapName.value;
     if (!/[^0-9a-zA-Z_]/.test(name) && name.trim().length > 0) {
-      this.props.model.createMap(name, () => {
-        this.setState({
-          content: "mapsettings",
-          alert: true,
-          alertMessage: "En ny karta skapades utan problem."
-        });
-        this.load("maps");
+      this.props.model.createMap(name, (d, s) => {
+        if (s === "success") {
+          this.setState({
+            content: "mapsettings",
+            alert: true,
+            alertMessage: "En ny karta skapades utan problem.",
+          });
+          this.load("maps");
+        } else {
+          this.setState({
+            alert: true,
+            alertMessage: "Karta kunde INTE skapas.",
+          });
+          console.error(d);
+        }
       });
     } else {
       this.setState({
         alert: true,
         alertMessage:
-          "Felaktigt namn på kartan \nInga eller ogiltiga tecken har angivits. \n\nGiltiga tecken: 0-9 a-z A-Z _"
+          "Felaktigt namn på kartan \nInga eller ogiltiga tecken har angivits. \n\nGiltiga tecken: 0-9 a-z A-Z _",
       });
     }
   }
@@ -1729,7 +1782,7 @@ class Menu extends Component {
               &nbsp;
               <select
                 className="control-fixed"
-                onChange={e => {
+                onChange={(e) => {
                   this.setSelectedConfig(e);
                 }}
                 ref="map-chooser"
@@ -1740,7 +1793,7 @@ class Menu extends Component {
               <ColorButtonRed
                 variant="contained"
                 className="btn"
-                onClick={e => this.deleteMap()}
+                onClick={(e) => this.deleteMap()}
                 startIcon={<DeleteIcon />}
               >
                 Ta bort karta
@@ -1751,7 +1804,7 @@ class Menu extends Component {
 
             <div className="inset-form map-management-margin-left margined">
               <form
-                onSubmit={e => {
+                onSubmit={(e) => {
                   e.preventDefault();
                   this.createMap(e);
                 }}
@@ -1779,7 +1832,7 @@ class Menu extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => this.toggleLayerMenu()}
+              onClick={(e) => this.toggleLayerMenu()}
               startIcon={<LayersIcon />}
             >
               Lagermeny
@@ -1788,7 +1841,7 @@ class Menu extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => this.toggleDrawOrderMenu()}
+              onClick={(e) => this.toggleDrawOrderMenu()}
               startIcon={<SwapVertIcon />}
             >
               Ritordning
@@ -1797,7 +1850,7 @@ class Menu extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => this.toggleMapOptionsMenu()}
+              onClick={(e) => this.toggleMapOptionsMenu()}
               startIcon={<SettingsIcon />}
             >
               Inställningar
@@ -1806,7 +1859,7 @@ class Menu extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => this.toggleToolMenu()}
+              onClick={(e) => this.toggleToolMenu()}
               startIcon={<BuildIcon />}
             >
               Verktyg

@@ -33,6 +33,8 @@ namespace MapService.Models.ToolOptions
 
         public bool visibleAtStart { get; set; }
 
+        public bool visibleAtStartMobile {get; set; }
+
         public bool backgroundSwitcherBlack { get; set; }
 
         public bool backgroundSwitcherWhite { get; set; }
@@ -40,6 +42,8 @@ namespace MapService.Models.ToolOptions
         public bool enableOSM { get; set; }
 
         public bool showBreadcrumbs { get; set; }
+
+        public bool enableTransparencySlider { get; set; }
 
         public string target { get; set; }
 

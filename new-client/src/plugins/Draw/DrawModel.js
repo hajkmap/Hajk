@@ -1,0 +1,1000 @@
+import {
+  Circle as CircleStyle,
+  Fill,
+  Stroke,
+  Style,
+  Text,
+  Icon,
+} from "ol/style.js";
+import { Vector as VectorSource } from "ol/source.js";
+import { Vector as VectorLayer } from "ol/layer.js";
+import { LineString, Polygon, Circle } from "ol/geom.js";
+import { fromCircle } from "ol/geom/Polygon.js";
+import Collection from "ol/Collection.js";
+import Draw, { createBox } from "ol/interaction/Draw.js";
+import { Modify, Translate, Select } from "ol/interaction.js";
+import Overlay from "ol/Overlay.js";
+import KML from "ol/format/KML.js";
+import { createXML } from "../../utils/KMLWriter.js";
+import { saveAs } from "file-saver";
+
+class DrawModel {
+  constructor(settings) {
+    this.map = settings.map;
+    this.app = settings.app;
+    this.options = settings.options;
+    this.localObserver = settings.localObserver;
+    this.globalObserver = settings.app.globalObserver;
+
+    this.source = new VectorSource();
+    this.vector = new VectorLayer({
+      source: this.source,
+      name: "drawLayer",
+    });
+
+    this.map.addLayer(this.vector);
+    this.type = "LineString";
+    this.displayText = false;
+    this.createDrawTooltip();
+
+    this.fontSize = "10";
+    this.fontTextColor = "#000000";
+    this.fontBackColor = "#FFFFFF";
+    this.fontStroke = false;
+
+    this.pointText = "Text";
+    this.pointColor = "#009CE0";
+    this.pointRadius = 7;
+
+    this.lineColor = "#009CE0";
+    this.lineWidth = 3;
+    this.lineStyle = "solid";
+
+    this.circleFillColor = "#FFF";
+    this.circleLineColor = "#009CE0";
+    this.circleFillOpacity = 0.5;
+    this.circleLineStyle = "solid";
+    this.circleLineWidth = 3;
+    this.circleRadius = 0;
+
+    this.polygonLineColor = "#009CE0";
+    this.polygonLineWidth = 3;
+    this.polygonLineStyle = "solid";
+    this.polygonFillColor = "#FFF";
+    this.polygonFillOpacity = 0.5;
+
+    this.squareFillColor = "#FFF";
+    this.squareLineColor = "#009CE0";
+    this.squareFillOpacity = 0.5;
+    this.squareLineStyle = "solid";
+    this.squareLineWidth = 3;
+
+    this.drawMethod = "add";
+    this.pointSettings = "point";
+
+    this.markerImg =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAADpElEQVR4Ae3aA9DsSBQF4DNa2+ZvZNL3lNa2d0tr24W1bdu2bdu2beO5l8/InX/6JpmqfKdcgz4dA4VCoVAohNQ7mSwrB8k5cjOf4gcyiL/zA3lcbpZzeIAsyxpyrMLV5Ab+Tj+J/C7XcTVUkDcLTCG7yWf0ushnsnvb5MiNqtuZX9I3mC+5A6rIHtfme/QDzHtuTWSqIifSNxc5IbMtgtPLffTNR+7j9EhffW6+TR8ob0XzIF2cTz6nDxf5nPMhPV0z8336wHm/a2akgzU+TW+Qp1M6TvMieqNcBHvcgN4wG8BW2+TyuWUB+dz4FEP2obeN7Gt76PrNvMBvhoc1OZbePnKM2e5TfqVPIb8Y7U5lHf0gZJBc5TaJ43iGvxO7TeQqGUT9t9eBBblKPYR73PwYh5ufd6sLXA0DJf6kHMCRmLCSHE6vyk8oIbR4MeXsHY5JcEfQaxIvhtDcnrqVJ2HuSryHXpG9EJqcr9l0k8/r++ZVbc7nITR5RFHgMijIZYpfegSh8YNQp2Ka00H5EKHxe/qkRJ1QiDoVU/E9QpMR9EnpnBYKndMqlsBwhMY/6JPSNh0U2qajT8wfCI2f0CfF9UDB9SgKfILQ+EKaGzFfQGiqA9AVUOAVqgNiaHK66kC2IBJEC2oOZHI6QpPNdLcJk04ldLcjZTOEVu9Vn4tOAo+i16Tei+DK/KPJ89GSHEavyh8oIzy5o5kLmv6FeI/2+3InLHCrRi8pXT2egdO7uttEruIQenW2MrqlKyPo7SMjemeCDT5An0IegBW3XSoFtoeVaGoZZD18GcSpYEcuNC9wISzFi1oXiBeFLb5tOv/vwppsZlpgM5irykdmBT5GFfbcFlYF3BYwYr8M7OfffjuQzZGaMt8MXuAtlJEet17oAm49pEteClrgFaTNLR/0+LsC0sdrgxW4FlnonSPMU0v5tW92ZIPb257/2yvJ403P/xMoITtRJ4c1VWBY1IlsydFNzf/RyNo8U/KTARf4dJ4pkb14rQHv/ddCPvCKARW4AnnRNh2/aHj4X7RNh/yIl260gFsK+dLYW9RyEvKGNXlOXeB51pA/9bn5nWr437u5kE/x0jI8+RG2WxL5JQcmFjgQuVbmU5Ms8DTKyLe+eeWHic7+j9E8yD+uOOEtQYZzRbQG2W2CBXaDHfsX1OR8tJSKPDnW8J9EBa0lmk2+HjX8r6PZ0Hoo/z8bHkJBa5Kt6ella7QuHsWjYKZQKBQKhb8AaFXSW3c/idsAAAAASUVORK5CYII=";
+
+    this.sketchStyle = [
+      new Style({
+        fill: new Fill({
+          color: "rgba(255, 255, 255, 0.5)",
+        }),
+        stroke: new Stroke({
+          color: "rgba(0, 0, 0, 0.5)",
+          width: 4,
+        }),
+        image: new CircleStyle({
+          radius: 6,
+          fill: new Fill({
+            color: "rgba(0, 0, 0, 0.5)",
+          }),
+          stroke: new Stroke({
+            color: "rgba(255, 255, 255, 0.5)",
+            width: 2,
+          }),
+        }),
+      }),
+    ];
+
+    this.localObserver.subscribe("update", () => {
+      this.redraw();
+    });
+  }
+
+  redraw() {
+    this.vector.changed();
+    this.source.getFeatures().forEach((feature) => {
+      this.updateText(feature);
+    });
+  }
+
+  updateText(feature) {
+    feature.getStyle()[1].getText().setText(this.getLabelText(feature));
+  }
+
+  getStyle = (feature, forcedProperties) => {
+    var geometryName = feature.getGeometryName();
+
+    function getLineDash() {
+      var scale = (a, f) => a.map((b) => f * b),
+        width = lookupWidth.call(this),
+        style = lookupStyle.call(this),
+        dash = [12, 7],
+        dot = [2, 7];
+      switch (style) {
+        case "dash":
+          return width > 3 ? scale(dash, 2) : dash;
+        case "dot":
+          return width > 3 ? scale(dot, 2) : dot;
+        default:
+          return undefined;
+      }
+    }
+
+    function getFill() {
+      function hexToRgb(hex) {
+        let c = hex.replace("#", "");
+        if (c.length === 3) {
+          let s = [...c];
+          c = s.reduce((r, i) => {
+            let n = i + i;
+            return r + n;
+          }, "");
+        }
+        const n = parseInt(c, 16);
+        const r = (n >> 16) & 255;
+        const g = (n >> 8) & 255;
+        const b = n & 255;
+        var rgb = `rgb(${r}, ${g}, ${b})`;
+        return rgb;
+      }
+
+      function rgba() {
+        switch (geometryName) {
+          case "Circle":
+            return hexToRgb(this.circleFillColor)
+              .replace("rgb", "rgba")
+              .replace(")", `, ${this.circleFillOpacity})`);
+
+          case "Polygon":
+            return hexToRgb(this.polygonFillColor)
+              .replace("rgb", "rgba")
+              .replace(")", `, ${this.polygonFillOpacity})`);
+
+          case "Square":
+            return hexToRgb(this.squareFillColor)
+              .replace("rgb", "rgba")
+              .replace(")", `, ${this.squareFillOpacity})`);
+          default:
+            return;
+        }
+      }
+
+      var color = forcedProperties
+        ? forcedProperties.fillColor
+        : rgba.call(this);
+
+      var fill = new Fill({
+        color: color,
+      });
+
+      return fill;
+    }
+
+    function lookupStyle() {
+      switch (geometryName) {
+        case "Polygon":
+          return this.polygonLineStyle;
+        case "Circle":
+          return this.circleLineStyle;
+        case "Square":
+          return this.squareLineStyle;
+        default:
+          return this.lineStyle;
+      }
+    }
+
+    function lookupWidth() {
+      switch (geometryName) {
+        case "Polygon":
+          return this.polygonLineWidth;
+        case "Circle":
+          return this.circleLineWidth;
+        case "Square":
+          return this.squareLineWidth;
+        default:
+          return this.lineWidth;
+      }
+    }
+
+    function lookupColor() {
+      if (forcedProperties) {
+        return forcedProperties.strokeColor;
+      }
+      switch (geometryName) {
+        case "Polygon":
+          return this.polygonLineColor;
+        case "Circle":
+          return this.circleLineColor;
+        case "Square":
+          return this.squareLineColor;
+        default:
+          return this.lineColor;
+      }
+    }
+
+    function getStroke() {
+      var color = forcedProperties
+        ? forcedProperties.strokeColor
+        : lookupColor.call(this);
+
+      var width = forcedProperties
+        ? forcedProperties.strokeWidth
+        : lookupWidth.call(this);
+
+      var lineDash = forcedProperties
+        ? forcedProperties.strokeDash
+        : getLineDash.call(this);
+
+      var stroke = new Stroke({
+        color: color,
+        width: width,
+        lineDash: lineDash,
+      });
+
+      return stroke;
+    }
+
+    function getImage() {
+      var radius =
+        type === "Text"
+          ? 0
+          : forcedProperties
+          ? forcedProperties.pointRadius
+          : this.pointRadius;
+      var iconSrc = forcedProperties
+        ? forcedProperties.image || this.markerImg
+        : this.markerImg;
+
+      var icon = new Icon({
+        anchor: [0.5, 1],
+        anchorXUnits: "fraction",
+        anchorYUnits: "fraction",
+        src: iconSrc,
+      });
+
+      var dot = new CircleStyle({
+        radius: radius,
+        fill: new Fill({
+          color: forcedProperties
+            ? forcedProperties.pointColor
+            : this.pointColor,
+        }),
+        stroke: new Stroke({
+          color: "rgb(255, 255, 255)",
+          width: 2,
+        }),
+      });
+
+      if (forcedProperties) {
+        if (forcedProperties.image) {
+          return icon;
+        } else {
+          return dot;
+        }
+      }
+
+      if (this.pointSymbol && type !== "Text") {
+        return icon;
+      } else {
+        return dot;
+      }
+    }
+
+    function getText() {
+      var offsetY = () => {
+        var offset = -15;
+
+        if (this.pointSymbol) {
+          offset = -40;
+        }
+
+        if (type === "Text") {
+          offset = 0;
+        }
+
+        return offset;
+      };
+
+      var labelText = forcedProperties
+        ? forcedProperties.text
+        : this.getLabelText(feature);
+
+      if (type === "Text") {
+        return new Text({
+          textAlign: "center",
+          textBaseline: "middle",
+          font: `${this.fontSize}px sans-serif`,
+          text: labelText,
+          fill: new Fill({ color: this.fontTextColor }),
+          stroke: !this.fontStroke
+            ? new Stroke({
+                color: this.fontBackColor,
+                width: 1,
+              })
+            : null,
+          offsetX: 0,
+          offsetY: offsetY(),
+          rotation: 0,
+          scale: 1.4,
+        });
+      } else {
+        return new Text({
+          textAlign: "center",
+          textBaseline: "middle",
+          font: "12pt sans-serif",
+          fill: new Fill({ color: "#FFF" }),
+          text: labelText,
+          overflow: true,
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 0.5)",
+            width: 3,
+          }),
+          offsetX: 0,
+          offsetY: -10,
+          rotation: 0,
+          scale: 1,
+        });
+      }
+    }
+
+    const type = feature.getGeometryName();
+
+    return [
+      new Style({
+        stroke: new Stroke({
+          color: "rgba(255, 255, 255, 0.5)",
+          width:
+            type === "Polygon" ? this.polygonLineWidth + 2 : this.lineWidth + 2,
+        }),
+      }),
+      new Style({
+        fill: getFill.call(this),
+        stroke: getStroke.call(this),
+        image: getImage.call(this),
+        text: getText.call(this),
+      }),
+    ];
+  };
+
+  createStyle = (feature, resolution) => {
+    const displayLabel = feature && feature.getProperties().type === "Text";
+    return [
+      new Style({
+        fill: new Fill({
+          color: "rgba(255, 255, 255, 0.3)",
+        }),
+        stroke: new Stroke({
+          color: "rgba(0, 0, 0, 0.5)",
+          width: 3,
+        }),
+        image: displayLabel
+          ? null
+          : new CircleStyle({
+              radius: 5,
+              stroke: new Stroke({
+                color: "rgba(0, 0, 0, 0.7)",
+              }),
+              fill: new Fill({
+                color: "rgba(255, 255, 255, 0.2)",
+              }),
+            }),
+        text: new Text({
+          textAlign: "center",
+          textBaseline: "middle",
+          font: "12pt sans-serif",
+          fill: new Fill({ color: "#FFF" }),
+          text: feature && this.getLabelText(feature),
+          overflow: true,
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 0.5)",
+            width: 3,
+          }),
+          offsetX: 0,
+          offsetY: 0,
+          rotation: 0,
+          scale: 1,
+        }),
+      }),
+    ];
+  };
+
+  clear = () => {
+    this.source.clear();
+    if (this.select) {
+      this.select.getFeatures().clear();
+    }
+    this.drawTooltip.setPosition(undefined);
+  };
+
+  handleDrawStart = (e) => {
+    if (this.circleRadius > 0 && e.feature.getGeometryName() === "Circle") {
+      e.feature.getGeometry().setRadius(this.circleRadius);
+      this.draw.finishDrawing();
+    }
+
+    e.feature.getGeometry().on("change", (evt) => {
+      var toolTip = "",
+        coord = undefined,
+        pointerCoord;
+
+      if (this.displayText) {
+        this.setFeaturePropertiesFromGeometry(e.feature);
+        if (this.drawMethod === "edit") {
+          this.updateText(e.feature);
+        }
+        if (this.drawMethod === "add") {
+          if (this.pointerPosition) {
+            pointerCoord = this.pointerPosition.coordinate;
+          }
+
+          if (evt.target instanceof LineString) {
+            toolTip = this.formatLabel("length", evt.target.getLength());
+            coord = evt.target.getLastCoordinate();
+          }
+
+          if (evt.target instanceof Polygon) {
+            toolTip = this.formatLabel("area", evt.target.getArea());
+            coord = pointerCoord || evt.target.getFirstCoordinate();
+          }
+
+          this.drawTooltipElement.innerHTML = toolTip;
+          this.drawTooltip.setPosition(coord);
+        }
+      }
+    });
+  };
+
+  handleDrawEnd = (e) => {
+    if (this.text) {
+      this.localObserver.publish("dialog", e.feature);
+    }
+    this.setFeaturePropertiesFromGeometry(e.feature);
+    this.drawTooltip.setPosition(undefined);
+    e.feature.setStyle(this.getStyle(e.feature));
+  };
+
+  removeSelected = (e) => {
+    var first = true;
+    this.map.forEachFeatureAtPixel(e.pixel, (feature) => {
+      if (feature.getProperties().user === true && first) {
+        this.source.removeFeature(feature);
+      }
+      first = false;
+    });
+  };
+
+  tanslateImportedFeature(feature) {
+    var coordinates = feature.getGeometry().getCoordinates(),
+      type = feature.getGeometry().getType(),
+      newCoordinates = [];
+    feature.setProperties({
+      user: true,
+    });
+
+    if (
+      feature.getProperties().geometryType &&
+      feature.getProperties().geometryType !== "Text"
+    ) {
+      feature.setProperties({
+        text: "",
+      });
+    }
+
+    if (type === "LineString") {
+      coordinates.forEach((c, i) => {
+        var pairs = [];
+        c.forEach((digit) => {
+          if (digit !== 0) {
+            pairs.push(digit);
+          }
+        });
+        newCoordinates.push(pairs);
+      });
+      feature.getGeometry().setCoordinates(newCoordinates);
+    } else if (type === "Polygon") {
+      coordinates.forEach((polygon, i) => {
+        newCoordinates[i] = [];
+        polygon.forEach((vertex, j) => {
+          var pairs = [];
+          vertex.forEach((digit) => {
+            if (digit !== 0) {
+              pairs.push(digit);
+            }
+          });
+          newCoordinates[i].push(pairs);
+        });
+      });
+      feature.getGeometry().setCoordinates(newCoordinates);
+    }
+
+    feature
+      .getGeometry()
+      .transform("EPSG:4326", this.map.getView().getProjection());
+
+    this.setStyleFromProperties(feature);
+    if (
+      feature.getProperties().geometryType === "Circle" &&
+      feature.getProperties().style
+    ) {
+      feature.setProperties({
+        radius: JSON.parse(feature.getProperties().style).radius,
+      });
+    }
+  }
+
+  import = (kmlString, errback) => {
+    var parser = new KML(),
+      features = [],
+      extent = false;
+
+    try {
+      features = parser.readFeatures(kmlString);
+    } catch (ex) {
+      return errback(ex);
+    }
+
+    if (features.length > 0) {
+      features.forEach((feature) => {
+        this.tanslateImportedFeature(feature);
+      });
+
+      this.source.addFeatures(features);
+      extent = this.calculateExtent(features);
+
+      if (extent) {
+        let size = this.map.getSize();
+        this.map.getView().fit(extent, size);
+      }
+    } else {
+      return errback("no-features-found");
+    }
+  };
+
+  export = () => {
+    // First do a safe check if Blobs are supported.
+    try {
+      new Blob();
+    } catch {
+      console.info("KML export not supported on current platform.");
+      return;
+    }
+
+    const features = this.source.getFeatures();
+    const transformed = [];
+    let postData;
+
+    features.forEach((feature) => {
+      const c = feature.clone();
+      let circleRadius = false;
+      if (c.getGeometry() instanceof Circle) {
+        const geom = fromCircle(feature.getGeometry(), 96);
+        c.setGeometry(geom);
+        circleRadius = feature.getGeometry().getRadius();
+      }
+      c.getGeometry().transform(
+        this.map.getView().getProjection(),
+        "EPSG:4326"
+      );
+
+      if (c.getStyle()[1]) {
+        c.setProperties({
+          style: JSON.stringify(
+            this.extractStyle(c.getStyle()[1] || c.getStyle()[0], circleRadius)
+          ),
+          geometryType:
+            c.getGeometryName() === "geometry"
+              ? c.getProperties().geometryType
+              : c.getGeometryName(),
+        });
+      }
+
+      transformed.push(c);
+    });
+
+    if (features.length > 0) {
+      postData = createXML(transformed, "ritobjekt");
+      // Call the saveAs method from file-saver
+      saveAs(
+        new Blob([postData], {
+          type: "application/vnd.google-earth.kml+xml;charset=utf-8",
+        }),
+        `Hajk - ${new Date().toLocaleString()}.kml`
+      );
+    }
+  };
+
+  extractStyle(style, circleRadius) {
+    var obj = {
+      text: "",
+      image: "",
+      pointRadius: 0,
+      pointColor: "",
+      fillColor: "",
+      strokeColor: "",
+      strokeWidth: "",
+      strokeDash: "",
+    };
+
+    obj.text = style.getText() ? style.getText().getText() : "";
+    obj.image =
+      style.getImage() instanceof Icon ? style.getImage().getSrc() : "";
+    obj.pointRadius =
+      style.getImage() instanceof CircleStyle
+        ? style.getImage().getRadius()
+        : "";
+    if (circleRadius) {
+      obj.radius = circleRadius;
+    }
+    obj.pointColor =
+      style.getImage() instanceof CircleStyle
+        ? style.getImage().getFill().getColor()
+        : "";
+    obj.fillColor = style.getFill().getColor();
+    obj.strokeColor = style.getStroke().getColor();
+    obj.strokeWidth = style.getStroke().getWidth();
+    obj.strokeDash = style.getStroke().getLineDash();
+    return obj;
+  }
+
+  setType(type) {
+    this.type = type;
+    this.removeInteraction();
+    this.addInteraction(type);
+  }
+
+  editText = (e) => {
+    this.map.forEachFeatureAtPixel(e.pixel, (feature) => {
+      if (
+        feature.getProperties().type &&
+        feature.getProperties().type === "Text"
+      ) {
+        this.localObserver.publish("dialog", feature);
+      }
+    });
+  };
+
+  setEditActive() {
+    let features = new Collection();
+    this.source.getFeatures().forEach((feature) => {
+      features.push(feature);
+    });
+    this.edit = new Modify({ features: features });
+    this.map.addInteraction(this.edit);
+    this.map.snapHelper.add("draw");
+  }
+
+  setMoveActive() {
+    this.select = new Select();
+    this.move = new Translate({ features: this.select.getFeatures() });
+    this.map.addInteraction(this.move);
+    this.map.addInteraction(this.select);
+    this.map.snapHelper.add("draw");
+  }
+
+  setDrawMethod(method) {
+    if (method) {
+      this.drawMethod = method;
+    }
+    this.removeInteraction();
+
+    if (this.drawMethod === "remove") {
+      this.map.on("singleclick", this.removeSelected);
+    }
+
+    if (this.drawMethod === "add") {
+      if (this.text) {
+        this.type = "Text";
+      }
+      this.setType(this.type);
+    }
+
+    if (this.drawMethod === "edit") {
+      this.setEditActive();
+      this.map.on("singleclick", this.editText);
+    }
+
+    if (this.drawMethod === "move") {
+      this.setMoveActive();
+    }
+  }
+
+  removeInteraction() {
+    this.drawTooltip.setPosition(undefined);
+    this.map.un("singleclick", this.removeSelected);
+    this.map.un("singleclick", this.editText);
+    if (this.draw) {
+      this.map.snapHelper.delete("draw");
+      this.map.removeInteraction(this.draw);
+    }
+    if (this.edit) {
+      this.map.snapHelper.delete("draw");
+      this.map.removeInteraction(this.edit);
+    }
+    if (this.move) {
+      this.map.snapHelper.delete("draw");
+      this.map.removeInteraction(this.move);
+    }
+    if (this.select) {
+      this.select.getFeatures().forEach((feature) => {
+        if (feature.get("_s")) {
+          feature.setStyle(feature.get("_s"));
+        }
+      });
+
+      this.map.snapHelper.delete("draw");
+      this.map.removeInteraction(this.select);
+    }
+  }
+
+  setFeaturePropertiesFromGeometry(feature) {
+    if (!feature) return;
+    var geom,
+      type = "",
+      length = 0,
+      radius = 0,
+      area = 0,
+      position = {
+        n: 0,
+        e: 0,
+      };
+    geom = feature.getGeometry();
+    type = geom.getType();
+
+    switch (type) {
+      case "Point":
+        position = {
+          n: Math.round(geom.getCoordinates()[1]),
+          e: Math.round(geom.getCoordinates()[0]),
+        };
+        break;
+      case "LineString":
+        if (geom.getLength() < 1000) {
+          length = Math.round(geom.getLength() * 10) / 10;
+        } else {
+          length = Math.round(geom.getLength());
+        }
+        break;
+      case "Polygon":
+        area = Math.round(geom.getArea());
+        break;
+      case "Circle":
+        radius = Math.round(geom.getRadius());
+        break;
+      default:
+        break;
+    }
+    feature.setProperties({
+      type: type,
+      user: true,
+      length: length,
+      area: area,
+      radius: radius,
+      position: position,
+    });
+  }
+
+  setFeaturePropertiesFromText(feature, text) {
+    if (!feature) return;
+    feature.setProperties({
+      type: "Text",
+      user: true,
+      text: text,
+    });
+  }
+
+  formatLabel(type, value) {
+    var label;
+    if (type === "text") {
+      label = value;
+    }
+
+    if (type === "point") {
+      label = "Nord: " + value.n + " Öst: " + value.e;
+    }
+
+    if (typeof value === "number") {
+      if (type === "length" && value < 1000) {
+        value = Math.round(value * 10) / 10;
+      } else {
+        value = Math.round(value);
+      }
+    }
+
+    if (type === "circle") {
+      let prefix = " m";
+      let prefixSq = " m²";
+      if (value >= 1e3) {
+        prefix = " km";
+        value = value / 1e3;
+      }
+      label =
+        "R = " +
+        value +
+        prefix +
+        " \nA = " +
+        Math.round(value * value * Math.PI * 1e3) / 1e3 +
+        prefixSq;
+    }
+
+    if (type === "area") {
+      let prefix = " m²";
+      if (value >= 1e6) {
+        prefix = " km²";
+        value = Math.round((value / 1e6) * 1e3) / 1e3;
+      }
+      label = value + prefix;
+    }
+
+    if (type === "length") {
+      let prefix = " m";
+      if (value >= 1e3) {
+        prefix = " km";
+        value = value / 1e3;
+      }
+      label = value + prefix;
+    }
+
+    return label;
+  }
+
+  createDrawTooltip() {
+    if (this.drawTooltipElement) {
+      this.drawTooltipElement.parentNode.removeChild(this.drawTooltipElement);
+    }
+    this.drawTooltipElement = document.createElement("div");
+    this.drawTooltipElement.className = "tooltip-draw tooltip-Draw";
+    this.drawTooltip = new Overlay({
+      element: this.drawTooltipElement,
+      offset: [0, -15],
+      positioning: "bottom-center",
+    });
+    this.map.addOverlay(this.drawTooltip);
+  }
+
+  getLabelText(feature) {
+    const props = feature.getProperties();
+    var type = feature.getGeometryName();
+    if (type === "geometry") {
+      type = feature.getProperties().geometryType;
+    }
+    switch (type) {
+      case "LineString":
+        return this.displayText
+          ? this.formatLabel("length", props.length)
+          : null;
+      case "Polygon":
+      case "Square":
+        return this.displayText ? this.formatLabel("area", props.area) : null;
+      case "Circle":
+        return this.displayText
+          ? this.formatLabel("circle", props.radius)
+          : null;
+      case "Point":
+        return this.displayText
+          ? this.formatLabel("point", props.position)
+          : null;
+      case "Text":
+        return this.formatLabel("text", props.text);
+      default:
+        return "";
+    }
+  }
+
+  setStyleFromProperties(feature) {
+    if (feature.getProperties().style) {
+      try {
+        const style = JSON.parse(feature.getProperties().style);
+        const isText = feature.getProperties().geometryType === "Text";
+        if (isText) {
+          this.setFeaturePropertiesFromText(feature, style.text);
+        } else {
+          this.setFeaturePropertiesFromGeometry(feature);
+        }
+        feature.setStyle(this.getStyle(feature, style));
+      } catch (ex) {
+        console.error("Style attribute could not be parsed.", ex);
+      }
+    } else {
+      const styleFunc = feature.getStyleFunction();
+      if (styleFunc) {
+        let style = styleFunc(feature, this.map.getView().getResolution());
+        if (style[0] && style[0].getFill && style[0].getFill() === null) {
+          style[0].setFill(
+            new Fill({
+              color: [0, 0, 0, 0],
+            })
+          );
+        }
+        feature.setStyle(style);
+      }
+    }
+  }
+
+  calculateExtent(features) {
+    var x = [];
+    features.forEach((feature, i) => {
+      var e = feature.getGeometry().getExtent(); // l b r t
+      if (i === 0) {
+        x = e;
+      } else {
+        let t = 0;
+        for (; t < 4; t++) {
+          if (t < 2) {
+            if (x[t] > e[t]) {
+              x[t] = e[t];
+            }
+          } else {
+            if (x[t] < e[t]) {
+              x[t] = e[t];
+            }
+          }
+        }
+      }
+    });
+    return x.every((c) => c) ? x : false;
+  }
+
+  addInteraction() {
+    var geometryFunction;
+    var geometryName = this.type.toString();
+    this.text = false;
+
+    var type = this.type;
+    this.interactionType = this.type;
+
+    if (type === "Text") {
+      type = "Point";
+      this.text = true;
+    }
+    if (type === "Square") {
+      type = "Circle";
+      geometryFunction = createBox();
+    }
+
+    this.draw = new Draw({
+      source: this.source,
+      type: type,
+      style: this.createStyle(),
+      geometryFunction: geometryFunction,
+      geometryName: geometryName,
+    });
+    this.draw.on("drawstart", this.handleDrawStart);
+    this.draw.on("drawend", this.handleDrawEnd);
+    this.map.addInteraction(this.draw);
+    this.map.snapHelper.add("draw");
+  }
+
+  setActive(active) {
+    if (active && !this.active) {
+      this.map.clickLock.add("draw");
+      this.addInteraction();
+    }
+    if (active === false) {
+      this.removeInteraction();
+      this.map.clickLock.delete("draw");
+    }
+    this.active = active;
+  }
+
+  getMap() {
+    return this.map;
+  }
+
+  openDialog(open) {
+    this.globalObserver.publish("core.dialogOpen", open);
+  }
+}
+
+export default DrawModel;

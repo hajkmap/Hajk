@@ -1,3 +1,4 @@
+import SearchModel from "./SearchModel";
 import Plugin from "./Plugin.js";
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
@@ -29,8 +30,7 @@ import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style.js";
-
-var map;
+import SnapHelper from "./SnapHelper";
 
 class AppModel {
   registerWindowPlugin(windowComponent) {
@@ -38,15 +38,15 @@ class AppModel {
   }
 
   invokeCloseOnAllWindowPlugins() {
-    this.windows.forEach(window => {
+    this.windows.forEach((window) => {
       window.closeWindow();
     });
   }
 
   onWindowOpen(currentWindow) {
     this.windows
-      .filter(window => window !== currentWindow)
-      .forEach(window => {
+      .filter((window) => window !== currentWindow)
+      .forEach((window) => {
         if (window.position === currentWindow.position || isMobile) {
           window.closeWindow();
         }
@@ -59,6 +59,7 @@ class AppModel {
    * @param Observer observer
    */
   constructor(config, globalObserver) {
+    this.map = undefined;
     this.windows = [];
     this.plugins = {};
     this.activeTool = undefined;
@@ -109,8 +110,8 @@ class AppModel {
    */
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
-      .filter(plugin => {
-        return ["toolbar", "left", "right", "control"].includes(
+      .filter((plugin) => {
+        return ["toolbar", "left", "right", "control", "hidden"].includes(
           plugin.options.target
         );
       })
@@ -119,7 +120,7 @@ class AppModel {
   }
 
   getDrawerPlugins() {
-    return this.getPlugins().filter(plugin => {
+    return this.getPlugins().filter((plugin) => {
       return ["toolbar"].includes(plugin.options.target);
     });
   }
@@ -132,13 +133,14 @@ class AppModel {
    * @returns {Array} - List of promises to be resolved for.
    */
   loadPlugins(plugins) {
-    var promises = [];
-    plugins.forEach(plugin => {
-      var prom = import(`../plugins/${plugin}/${plugin}.js`)
-        .then(module => {
+    const promises = [];
+    plugins.forEach((plugin) => {
+      const dir = ["Search"].includes(plugin) ? "components" : "plugins";
+      const prom = import(`../${dir}/${plugin}/${plugin}.js`)
+        .then((module) => {
           const toolConfig =
             this.config.mapConfig.tools.find(
-              plug => plug.type.toLowerCase() === plugin.toLowerCase()
+              (plug) => plug.type.toLowerCase() === plugin.toLowerCase()
             ) || {};
 
           const toolOptions =
@@ -151,17 +153,18 @@ class AppModel {
           if (Object.keys(toolConfig).length > 0) {
             this.addPlugin(
               new Plugin({
-                map: map,
+                map: this.map,
                 app: this,
-                type: plugin,
+                type: plugin.toLowerCase(),
+                searchInterface: {},
                 sortOrder: sortOrder,
                 options: toolOptions,
-                component: module.default
+                component: module.default,
               })
             );
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
         });
       promises.push(prom);
@@ -174,8 +177,8 @@ class AppModel {
    * @return {ol.Map} map
    */
   createMap() {
-    var config = this.translateConfig();
-    map = new Map({
+    const config = this.translateConfig();
+    this.map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
         // new Rotate({ target: document.getElementById("controls-column") }),
@@ -203,32 +206,99 @@ class AppModel {
         projection: config.map.projection,
         resolutions: config.map.resolutions,
         units: "m",
-        zoom: config.map.zoom
-      })
+        zoom: config.map.zoom,
+      }),
     });
     setTimeout(() => {
-      map.updateSize();
+      this.map.updateSize();
     }, 0);
 
-    if (config.tools.some(tool => tool.type === "infoclick")) {
-      bindMapClickEvent(map, mapClickDataResult => {
-        this.globalObserver.publish("core.mapClick", mapClickDataResult);
+    // Add Snap Helper to the Map
+    this.map.snapHelper = new SnapHelper(this);
+
+    // Add the clickLock set. Its primary use is to disable infoclick action
+    // when some other plugin (such as Draw or Measure) is active (in that case
+    // we want the plugin to handle click - not to show infoclick).
+    // It's easy to think that this is only needed if Infoclick plugin is active
+    // in map config - but that is not the case:
+    // A lot of plugins rely on the 'clickLock' property to exist on Map,
+    // and to be a Set (we use .has()).
+    // So, we create the Set no matter what:
+    this.map.clickLock = new Set();
+
+    // FIXME: Potential miss here: don't we want to register click on search results
+    // But we register the Infoclick handler only if the plugin exists in map config:
+    // even if Infoclick plugin is inactive? Currently search won't register clicks in
+    // map without infoclick, which seems as an unnecessary limitation.
+    if (config.tools.some((tool) => tool.type === "infoclick")) {
+      bindMapClickEvent(this.map, (mapClickDataResult) => {
+        // We have to separate features coming from the searchResult-layer
+        // from the rest, since we want to render this information in the
+        // search-component rather than in the featureInfo-component.
+        const searchResultFeatures = mapClickDataResult.features.filter(
+          (feature) => {
+            return feature?.layer.get("type") === "searchResultLayer";
+          }
+        );
+        const infoclickFeatures = mapClickDataResult.features.filter(
+          (feature) => {
+            return feature?.layer.get("type") !== "searchResultLayer";
+          }
+        );
+
+        // If there are any results from search layer, send an event about that.
+        if (searchResultFeatures.length > 0) {
+          this.globalObserver.publish(
+            "infoClick.searchResultLayerClick",
+            searchResultFeatures // Clicked features sent to the search-component for display
+          );
+        }
+
+        // Do the same for regular infoclick results from WMS layers
+        if (infoclickFeatures.length > 0) {
+          // Note that infoclick.mapClick seems to have a different interface…
+          this.globalObserver.publish("infoClick.mapClick", {
+            ...mapClickDataResult, // as it requires the entire object, not just "features", like infoClick.searchResultLayerClick.
+            features: infoclickFeatures, // Hence, we send everything from mapClickDataResult, but replace the features property.
+          });
+        }
       });
     }
     return this;
   }
 
   getMap() {
-    return map;
+    return this.map;
+  }
+
+  addSearchModel() {
+    // TODO: Move configuration somewhere else, shouldn't be plugin-dependent.
+
+    // See if Search is configured in map config
+    const searchConfigIndex = this.config.mapConfig.tools.findIndex(
+      (t) => t.type === "search"
+    );
+
+    // If it is, go on and add the search model to App model
+    if (searchConfigIndex !== -1) {
+      this.searchModel = new SearchModel(
+        this.config.mapConfig.tools[searchConfigIndex].options,
+        this.getMap(),
+        this
+      );
+    }
+
+    // Either way, return self, so we can go on and chain more methods on App model
+    return this;
   }
 
   clear() {
     this.clearing = true;
     this.highlight(false);
-    map
+    this.map
       .getLayers()
       .getArray()
-      .forEach(layer => {
+      .forEach((layer) => {
         if (
           layer.getProperties &&
           layer.getProperties().layerInfo &&
@@ -257,25 +327,25 @@ class AppModel {
           this.config.appConfig.proxy,
           this.globalObserver
         );
-        map.addLayer(layerItem.layer);
+        this.map.addLayer(layerItem.layer);
         break;
       case "wmts":
         layerConfig = configMapper.mapWMTSConfig(layer, this.config);
         layerItem = new WMTSLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
-          map
+          this.map
         );
-        map.addLayer(layerItem.layer);
+        this.map.addLayer(layerItem.layer);
         break;
       case "vector":
         layerConfig = configMapper.mapVectorConfig(layer);
         layerItem = new WFSVectorLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
-          map
+          this.map
         );
-        map.addLayer(layerItem.layer);
+        this.map.addLayer(layerItem.layer);
         break;
       case "wfs":
         layerConfig = configMapper.mapWFSConfig(layer);
@@ -301,9 +371,9 @@ class AppModel {
 
   lookup(layers, type) {
     var matchedLayers = [];
-    layers.forEach(layer => {
+    layers.forEach((layer) => {
       const layerConfig = this.config.layersConfig.find(
-        lookupLayer => lookupLayer.id === layer.id
+        (lookupLayer) => lookupLayer.id === layer.id
       );
       layer.layerType = type;
       // Use the general value for infobox if not present in map config.
@@ -314,7 +384,7 @@ class AppModel {
       }
       matchedLayers.push({
         ...layerConfig,
-        ...layer
+        ...layer,
       });
     });
     return matchedLayers;
@@ -322,7 +392,7 @@ class AppModel {
 
   expand(groups) {
     var result = [];
-    groups.forEach(group => {
+    groups.forEach((group) => {
       result = [...result, ...group.layers];
       if (group.groups) {
         result = [...result, ...this.expand(group.groups)];
@@ -334,7 +404,7 @@ class AppModel {
   flattern(layerSwitcherConfig) {
     const layers = [
       ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
-      ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer")
+      ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer"),
     ];
 
     return layers;
@@ -342,21 +412,21 @@ class AppModel {
 
   addLayers() {
     const layerSwitcherConfig = this.config.mapConfig.tools.find(
-        tool => tool.type === "layerswitcher"
+        (tool) => tool.type === "layerswitcher"
       ),
       infoclickConfig = this.config.mapConfig.tools.find(
-        t => t.type === "infoclick"
+        (t) => t.type === "infoclick"
       );
 
     // Prepare layers
     this.layers = this.flattern(layerSwitcherConfig);
     Object.keys(this.layers)
       .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
-      .map(sortedKey => this.layers[sortedKey])
-      .forEach(layer => {
+      .map((sortedKey) => this.layers[sortedKey])
+      .forEach((layer) => {
         if (this.layersFromParams.length > 0) {
           layer.visibleAtStart = this.layersFromParams.some(
-            layerId => layerId === layer.id
+            (layerId) => layerId === layer.id
           );
         }
         layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
@@ -376,13 +446,13 @@ class AppModel {
       strokeColor.r,
       strokeColor.g,
       strokeColor.b,
-      strokeColor.a
+      strokeColor.a,
     ];
     const fillColorAsArray = fillColor && [
       fillColor.r,
       fillColor.g,
       fillColor.b,
-      fillColor.a
+      fillColor.a,
     ];
     this.highlightSource = new VectorSource();
     this.highlightLayer = new VectorLayer({
@@ -390,19 +460,19 @@ class AppModel {
       style: new Style({
         stroke: new Stroke({
           color: strokeColorAsArray || [200, 0, 0, 0.7],
-          width: strokeWidth || 4
+          width: strokeWidth || 4,
         }),
         fill: new Fill({
-          color: fillColorAsArray || [255, 0, 0, 0.1]
+          color: fillColorAsArray || [255, 0, 0, 0.1],
         }),
         image: new Icon({
           anchor: [anchor[0] || 0.5, anchor[1] || 1],
           scale: scale || 0.15,
-          src: src || "marker.png"
-        })
-      })
+          src: src || "marker.png",
+        }),
+      }),
     });
-    map.addLayer(this.highlightLayer);
+    this.map.addLayer(this.highlightLayer);
   }
 
   getCenter(e) {
@@ -416,18 +486,22 @@ class AppModel {
         this.highlightSource.addFeature(feature);
         if (window.innerWidth < 600) {
           let geom = feature.getGeometry();
-          map.getView().setCenter(this.getCenter(geom.getExtent()));
+          this.map.getView().setCenter(this.getCenter(geom.getExtent()));
         }
       }
     }
   }
 
+  /**
+   * TODO: Obsolete, replaced by new app-wide solution using URL APIs, see #568.
+   * Ensure that this gets removed too.
+   */
   parseQueryParams() {
     var o = {};
     document.location.search
       .replace(/(^\?)/, "")
       .split("&")
-      .forEach(param => {
+      .forEach((param) => {
         var a = param.split("=");
         o[a[0]] = a[1];
       });
@@ -484,15 +558,6 @@ class AppModel {
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
     }
 
-    // If 'v' query param is specified, it looks like we will want to search on load
-    if (b.v !== undefined && b.v.length > 0) {
-      a.map.searchOnStart = {
-        v: this.returnStringOrUndefined(b.v), // Search Value (will NOT search on start if null)
-        s: this.returnStringOrUndefined(b.s), // Search Service (will search in all, if null)
-        t: this.returnStringOrUndefined(b.t) // Search Type (controls which search plugin is used, default search if null)
-      };
-    }
-
     return a;
   }
   /**
@@ -508,8 +573,8 @@ class AppModel {
 
   overrideGlobalSearchConfig(searchTool, data) {
     var configSpecificSearchLayers = searchTool.options.layers;
-    var searchLayers = data.wfslayers.filter(layer => {
-      if (configSpecificSearchLayers.find(x => x.id === layer.id)) {
+    var searchLayers = data.wfslayers.filter((layer) => {
+      if (configSpecificSearchLayers.find((x) => x.id === layer.id)) {
         return layer;
       } else {
         return undefined;
@@ -526,15 +591,15 @@ class AppModel {
       document.title = this.config.mapConfig.map.title; // TODO: add opt-out in admin to cancel this override behaviour.
     }
 
-    const layerSwitcherTool = this.config.mapConfig.tools.find(tool => {
+    const layerSwitcherTool = this.config.mapConfig.tools.find((tool) => {
       return tool.type === "layerswitcher";
     });
 
-    const searchTool = this.config.mapConfig.tools.find(tool => {
+    const searchTool = this.config.mapConfig.tools.find((tool) => {
       return tool.type === "search";
     });
 
-    const editTool = this.config.mapConfig.tools.find(tool => {
+    const editTool = this.config.mapConfig.tools.find((tool) => {
       return tool.type === "edit";
     });
 
@@ -548,12 +613,12 @@ class AppModel {
       layers.vectorlayers = this.config.layersConfig.vectorlayers || [];
       layers.arcgislayers = this.config.layersConfig.arcgislayers || [];
 
-      layers.wmslayers.forEach(l => (l.type = "wms"));
-      layers.wmtslayers.forEach(l => (l.type = "wmts"));
-      layers.wfslayers.forEach(l => (l.type = "wfs"));
-      layers.wfstlayers.forEach(l => (l.type = "edit"));
-      layers.vectorlayers.forEach(l => (l.type = "vector"));
-      layers.arcgislayers.forEach(l => (l.type = "arcgis"));
+      layers.wmslayers.forEach((l) => (l.type = "wms"));
+      layers.wmtslayers.forEach((l) => (l.type = "wmts"));
+      layers.wfslayers.forEach((l) => (l.type = "wfs"));
+      layers.wfstlayers.forEach((l) => (l.type = "edit"));
+      layers.vectorlayers.forEach((l) => (l.type = "vector"));
+      layers.arcgislayers.forEach((l) => (l.type = "arcgis"));
 
       let allLayers = [
         ...layers.wmslayers,
@@ -561,7 +626,7 @@ class AppModel {
         ...layers.vectorlayers,
         ...layers.wfslayers,
         ...layers.wfstlayers,
-        ...layers.arcgislayers
+        ...layers.arcgislayers,
       ];
 
       this.config.layersConfig = allLayers;

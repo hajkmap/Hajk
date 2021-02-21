@@ -3,17 +3,17 @@ import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
 
-const styles = theme => ({
+const styles = (theme) => ({
   paper: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   button: {
-    minWidth: "unset"
-  }
+    minWidth: "unset",
+  },
 });
 
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 class MapSwitcher extends React.PureComponent {
@@ -22,7 +22,7 @@ class MapSwitcher extends React.PureComponent {
 
   state = {
     anchorEl: null,
-    selectedIndex: null
+    selectedIndex: null,
   };
 
   constructor(props) {
@@ -36,18 +36,18 @@ class MapSwitcher extends React.PureComponent {
     let { activeMap } = this.appModel.config;
 
     fetch(`${proxy}${mapserviceBase}/config/userspecificmaps`, fetchConfig)
-      .then(resp => resp.json())
-      .then(maps => {
+      .then((resp) => resp.json())
+      .then((maps) => {
         // Save fetched map configs to global variable
         this.maps = maps;
 
         // Set selectedIndex to currently selected map
-        let selectedIndex = this.maps.findIndex(map => {
+        let selectedIndex = this.maps.findIndex((map) => {
           return map.mapConfigurationName === activeMap;
         });
         this.setState({ selectedIndex });
       })
-      .catch(err => {
+      .catch((err) => {
         throw new Error(err);
       });
   }
@@ -60,7 +60,7 @@ class MapSwitcher extends React.PureComponent {
           key={index}
           // disabled={index === this.state.selectedIndex}
           selected={index === this.state.selectedIndex}
-          onClick={event => this.handleMenuItemClick(event, index)}
+          onClick={(event) => this.handleMenuItemClick(event, index)}
         >
           {item.mapConfigurationTitle}
         </MenuItem>
@@ -70,7 +70,7 @@ class MapSwitcher extends React.PureComponent {
   };
 
   // Show dropdown menu, anchored to the element clicked
-  handleClick = event => {
+  handleClick = (event) => {
     this.setState({ anchorEl: event.currentTarget });
   };
 

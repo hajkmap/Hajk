@@ -31,6 +31,7 @@ import MapSettings from "../views/mapsettings.jsx";
 import Info from "../views/info.jsx";
 import Release from "../views/release.jsx";
 import Search from "../views/search.jsx";
+import DocumentEditor from "../views/documenteditor.jsx";
 
 import editModel from "../models/edit.js";
 import layerManagerModel from "../models/layermanager.js";
@@ -39,6 +40,7 @@ import mapSettingsModel from "../models/mapsettings.js";
 import infoModel from "../models/info.js";
 import releaseModel from "../models/release.js";
 import searchModel from "../models/search.js";
+import documentEditorModel from "../models/documenteditor.js";
 
 var defaultState = {
   alert: false,
@@ -46,7 +48,7 @@ var defaultState = {
   alertMessage: "",
   content: "",
   confirmAction: () => {},
-  denyAction: () => {}
+  denyAction: () => {},
 };
 /**
  *
@@ -64,12 +66,12 @@ class Application extends Component {
    */
   componentDidMount() {
     this.setState({
-      content: this.props.model.get("content")
+      content: this.props.model.get("content"),
     });
 
     this.props.model.on("change:content", () => {
       this.setState({
-        content: this.props.model.get("content")
+        content: this.props.model.get("content"),
       });
     });
   }
@@ -79,7 +81,7 @@ class Application extends Component {
   resetAlert() {
     this.setState({
       alert: false,
-      alertMessage: ""
+      alertMessage: "",
     });
   }
   /**
@@ -95,7 +97,7 @@ class Application extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       denyAction: () => {
@@ -103,15 +105,15 @@ class Application extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ""
+          alertMessage: "",
         });
-      }
+      },
     };
   }
   /**
@@ -152,6 +154,8 @@ class Application extends Component {
         return Release;
       case "search":
         return Search;
+      case "documenthandler":
+        return DocumentEditor;
       default:
         return null;
     }
@@ -173,6 +177,8 @@ class Application extends Component {
         return new releaseModel();
       case "search":
         return new searchModel();
+      case "documenthandler":
+        return new documentEditorModel();
       default:
         return undefined;
     }
@@ -193,11 +199,10 @@ class Application extends Component {
       console.error(e);
       return <div>{e.message}</div>;
     }
-
     return React.createElement(content, {
       model: model,
       config: this.props.config[this.state.content],
-      application: this
+      application: this,
     });
   }
   /**

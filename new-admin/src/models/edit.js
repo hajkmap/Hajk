@@ -26,12 +26,12 @@ import { prepareProxyUrl } from "../utils/ProxyHelper";
 
 var edit = Model.extend({
   defaults: {
-    layers: []
+    layers: [],
   },
 
-  getConfig: function(url, callback) {
+  getConfig: function (url, callback) {
     $.ajax(url, {
-      success: data => {
+      success: (data) => {
         if (data.wfstlayers) {
           data.wfstlayers.sort((a, b) => {
             var d1 = parseInt(a.date, 10),
@@ -43,11 +43,11 @@ var edit = Model.extend({
         if (callback) {
           callback(this.get("layers"));
         }
-      }
+      },
     });
   },
 
-  addLayer: function(layer, callback) {
+  addLayer: function (layer, callback) {
     $.ajax({
       url: this.get("config").url_layer_settings,
       method: "POST",
@@ -58,11 +58,11 @@ var edit = Model.extend({
       },
       error: () => {
         callback(false);
-      }
+      },
     });
   },
 
-  updateLayer: function(layer, callback) {
+  updateLayer: function (layer, callback) {
     $.ajax({
       url: this.get("config").url_layer_settings,
       method: "PUT",
@@ -73,11 +73,11 @@ var edit = Model.extend({
       },
       error: () => {
         callback(false);
-      }
+      },
     });
   },
 
-  removeLayer: function(layer, callback) {
+  removeLayer: function (layer, callback) {
     $.ajax({
       url: this.get("config").url_layer_settings + "/" + layer.id,
       method: "DELETE",
@@ -87,62 +87,56 @@ var edit = Model.extend({
       },
       error: () => {
         callback(false);
-      }
+      },
     });
   },
 
-  getLayerDescription: function(url, layer, callback) {
+  getLayerDescription: function (url, layer, callback) {
     url = prepareProxyUrl(url, this.get("config").url_proxy);
     $.ajax(url, {
       data: {
         request: "describeFeatureType",
         outputFormat: "application/json",
-        typename: layer
+        typename: layer,
       },
-      success: data => {
+      success: (data) => {
         if (data.featureTypes && data.featureTypes[0]) {
           callback(data.featureTypes[0].properties);
         } else {
           callback(false);
         }
-      }
+      },
     });
   },
 
-  parseWFSCapabilitesTypes: function(data) {
+  parseWFSCapabilitesTypes: function (data) {
     var types = [];
     $(data)
       .find("FeatureType")
       .each((i, featureType) => {
         types.push({
-          name: $(featureType)
-            .find("Name")
-            .first()
-            .get(0).textContent,
-          title: $(featureType)
-            .find("Title")
-            .first()
-            .get(0).textContent
+          name: $(featureType).find("Name").first().get(0).textContent,
+          title: $(featureType).find("Title").first().get(0).textContent,
         });
       });
     return types;
   },
 
-  getWMSCapabilities: function(url, callback) {
+  getWMSCapabilities: function (url, callback) {
     $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       data: {
         service: "WFS",
-        request: "GetCapabilities"
+        request: "GetCapabilities",
       },
-      success: data => {
+      success: (data) => {
         var response = this.parseWFSCapabilitesTypes(data);
         callback(response);
       },
-      error: data => {
+      error: (data) => {
         callback(false);
-      }
+      },
     });
-  }
+  },
 });
 
 export default edit;

@@ -4,13 +4,13 @@ import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 import { makeStyles } from "@material-ui/styles";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   button: {
-    minWidth: "unset"
-  }
+    minWidth: "unset",
+  },
 }));
 
 /**
@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
  * @param {object} props
  * @returns {object} React
  */
-const MapCleaner = React.memo(props => {
+const MapCleaner = React.memo((props) => {
   const classes = useStyles();
 
   return (
@@ -29,7 +29,7 @@ const MapCleaner = React.memo(props => {
           <Button
             aria-label="Rensa kartan"
             className={classes.button}
-            onClick={e => {
+            onClick={(e) => {
               props.appModel.clear();
             }}
           >

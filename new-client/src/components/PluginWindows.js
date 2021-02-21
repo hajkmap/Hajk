@@ -2,7 +2,7 @@ import React from "react";
 import { array } from "prop-types";
 
 PluginWindows.propTypes = {
-  plugins: array.isRequired
+  plugins: array.isRequired,
 };
 
 /**
@@ -18,6 +18,7 @@ function PluginWindows({ plugins }) {
         key={i}
         map={tool.map}
         app={tool.app}
+        searchInterface={tool.searchInterface}
         options={tool.options}
       />
     );

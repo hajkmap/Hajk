@@ -48,15 +48,15 @@ import "./index.css";
 //find.shim();
 
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
-(function() {
+(function () {
   function create_routes(routes, application_model) {
     var route_settings = {
-      routes: {}
+      routes: {},
     };
-    routes.forEach(route => {
+    routes.forEach((route) => {
       if (route.default) {
         route_settings.routes[""] = route.name;
       }
@@ -70,11 +70,10 @@ const fetchConfig = {
 
   function load(config) {
     var application_model = new ApplicationModel();
-
     var application_element = React.createElement(ApplicationView, {
       model: application_model,
       tabs: config.router,
-      config: config
+      config: config,
     });
 
     var router = Router.extend(create_routes(config.router, application_model));
@@ -84,8 +83,8 @@ const fetchConfig = {
     ReactDOM.render(application_element, document.getElementById("root"));
   }
 
-  fetch("config.json", fetchConfig).then(response => {
-    response.json().then(config => {
+  fetch("config.json", fetchConfig).then((response) => {
+    response.json().then((config) => {
       try {
         load(config);
       } catch (error) {
