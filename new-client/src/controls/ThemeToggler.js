@@ -23,7 +23,7 @@ const ThemeToggler = React.memo((props) => {
   const classes = useStyles();
 
   return (
-    props.showThemeToggler && (
+    (props.showThemeToggler && (
       <Tooltip title="Växla mellan mörkt och ljust färgtema">
         <Paper className={classes.paper}>
           <Button
@@ -37,7 +37,8 @@ const ThemeToggler = React.memo((props) => {
           </Button>
         </Paper>
       </Tooltip>
-    )
+    )) ||
+    null
   );
 });
 
