@@ -15,21 +15,21 @@ import "elm-pep";
 import "ol/ol.css";
 import "./custom-ol.css";
 
-import * as serviceWorker from "./serviceWorker";
-
 import React from "react";
 import ReactDOM from "react-dom";
 import buildConfig from "./buildConfig.json";
 import ErrorIcon from "@material-ui/icons/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
-import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";
-
-initHFetch();
+import reportWebVitals from "./reportWebVitals";
 
 let networkErrorMessage =
   "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
 let parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
+
+const fetchOpts = {
+  credentials: "same-origin",
+};
 
 /**
  * Entry point to Hajk.
@@ -39,12 +39,9 @@ let parseErrorMessage =
  * appConfig.json includes URL to the backend application (called MapService),
  * as well as the default preferred map configuration's file name.
  */
-hfetch("appConfig.json")
+fetch("appConfig.json", fetchOpts)
   .then((appConfigResponse) => {
     appConfigResponse.json().then((appConfig) => {
-      // Init fetchWrapper with loaded config.
-      initFetchWrapper(appConfig);
-
       // See if we have site-specific error messages
       if (appConfig.networkErrorMessage)
         networkErrorMessage = appConfig.networkErrorMessage;
@@ -59,6 +56,11 @@ hfetch("appConfig.json")
       let activeMap = urlParams.has("m")
         ? urlParams.get("m")
         : appConfig.defaultMap;
+
+      // Check if mapserviceBase is set in appConfig. If it is not, we will
+      // fall back on the simple map and layer configurations found in /public.
+      const useMapService =
+        appConfig.mapserviceBase && appConfig.mapserviceBase.trim().length > 0;
 
       // Declare fetchMapConfig() that we'll use later on.
       //
@@ -75,24 +77,33 @@ hfetch("appConfig.json")
         const configUrl = `${appConfig.proxy}${appConfig.mapserviceBase}/config`;
         try {
           // Try to fetch user-specified config. Return it if OK.
-          return await hfetch(`${configUrl}/${activeMap}`);
+          return await fetch(`${configUrl}/${activeMap}`, fetchOpts);
         } catch {
           // If the previous attempt fails reset "activeMap" to hard-coded value…
           activeMap = appConfig.defaultMap;
           // …and fetch again.
-          return await hfetch(`${configUrl}/${activeMap}`);
+          return await fetch(`${configUrl}/${activeMap}`, fetchOpts);
         }
       };
 
-      // Next, we do 3 necessary requests to MapService
+      // Next, we do 3 necessary requests to get the map, layers, and customTheme configurations.
       Promise.all([
-        // Get all layers defined in MapService
-        hfetch(`${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`),
-        // Get the specific, requested map configuration
-        fetchMapConfig(),
+        // Get the layers configuration from mapService (if mapService is not active, we fall back on the local
+        // "simpleLayerConfig" configuration file
+        useMapService
+          ? fetch(
+              `${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`,
+              fetchOpts
+            )
+          : fetch("simpleLayersConfig.json", fetchOpts),
+        // Get the specific, requested map configuration (if mapService is not active, we fall back on the local
+        // "simpleMapConfig" configuration file).
+        useMapService
+          ? fetchMapConfig()
+          : fetch("simpleMapConfig.json", fetchOpts),
         // Additionally, we fetch a custom theme that allows site admins to override
         // the default MUI theme without re-compiling the application.
-        hfetch("customTheme.json"),
+        fetch("customTheme.json", fetchOpts),
       ])
         .then(
           ([layersConfigResponse, mapConfigResponse, customThemeResponse]) => {
@@ -105,7 +116,7 @@ hfetch("appConfig.json")
                 // The fetched files are decoded to Objects and placed in
                 // another object, @name config.
                 const config = {
-                  activeMap: activeMap,
+                  activeMap: useMapService ? activeMap : "simpleMapConfig", // If we are not utilizing mapService, we know that the active map must be "simpleMapConfig".
                   appConfig: appConfig,
                   layersConfig: layersConfig,
                   mapConfig: mapConfig,
@@ -181,7 +192,7 @@ hfetch("appConfig.json")
     );
   });
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
