@@ -22,6 +22,10 @@ import ErrorIcon from "@material-ui/icons/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
 import reportWebVitals from "./reportWebVitals";
 
+import { initHFetch, hfetch } from "utils/FetchWrapper";
+
+initHFetch();
+
 let networkErrorMessage =
   "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
 let parseErrorMessage =
@@ -39,7 +43,8 @@ const fetchOpts = {
  * appConfig.json includes URL to the backend application (called MapService),
  * as well as the default preferred map configuration's file name.
  */
-fetch("appConfig.json", fetchOpts)
+
+hfetch("appConfig.json", { cacheBuster: true })
   .then((appConfigResponse) => {
     appConfigResponse.json().then((appConfig) => {
       // See if we have site-specific error messages
@@ -103,7 +108,7 @@ fetch("appConfig.json", fetchOpts)
           : fetch("simpleMapConfig.json", fetchOpts),
         // Additionally, we fetch a custom theme that allows site admins to override
         // the default MUI theme without re-compiling the application.
-        fetch("customTheme.json", fetchOpts),
+        hfetch("customTheme.json", { cacheBuster: true }),
       ])
         .then(
           ([layersConfigResponse, mapConfigResponse, customThemeResponse]) => {

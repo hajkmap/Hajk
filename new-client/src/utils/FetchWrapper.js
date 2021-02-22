@@ -28,6 +28,8 @@ class FetchWrapper {
     this.config = config;
     this.url = "";
     this.options = {};
+    // eslint-disable-next-line no-undef
+    this.hash = process.env.REACT_APP_HASH || "";
   }
 
   applyDomainOverrides() {
@@ -62,6 +64,12 @@ class FetchWrapper {
     if (this.isJqueryAjax) {
       // handle $.ajax() specific things.
       this.translateToJqueryAjaxOptions();
+    }
+    if (this.options.cacheBuster === true) {
+      let cacheBust = `${this.url.indexOf("?") === -1 ? "?" : "&"}cacheBuster=${
+        this.hash
+      }`;
+      this.url = `${this.url}${cacheBust}`;
     }
   }
 
