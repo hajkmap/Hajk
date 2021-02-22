@@ -18,13 +18,13 @@ const SrShortcuts = ({ globalObserver }) => {
     globalObserver.subscribe("core.addSrShortcuts", addShortCuts);
   });
 
-  const addShortCuts = shortcutsArray => {
+  const addShortCuts = (shortcutsArray) => {
     setShortcuts([...shortcuts, ...shortcutsArray]);
   };
 
   return (
     <List className="sr-only">
-      {shortcuts.map(shortcut => {
+      {shortcuts.map((shortcut) => {
         return (
           <ListItem key={shortcut.link}>
             <Link href={shortcut.link}>{shortcut.title}</Link>
