@@ -31,7 +31,9 @@ const useStyles = makeStyles((theme) => ({
     objectFit: "contain",
     objectPosition: "left",
   },
-
+  customLabel: {
+    textAlign: "left",
+  },
   pictureRightFloatingText: {},
   pictureLeftFloatingText: {},
 
@@ -504,7 +506,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         key="external-link"
         href={externalLink}
       >
-        {getFormattedComponentFromTag(aTag)}
+        <Box component="span">{getFormattedComponentFromTag(aTag)}</Box>
       </Button>
     );
   };
@@ -518,7 +520,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
             : classes.linkButton
         )}
         startIcon={<MapIcon className={classes.linkIcon}></MapIcon>}
-        classes={{ startIcon: classes.startIcon }}
+        classes={{ startIcon: classes.startIcon, label: classes.customLabel }}
         target="_blank"
         href={externalLink}
         key="map-link"
@@ -527,7 +529,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
           localObserver.publish("document-maplink-clicked", mapLink);
         }}
       >
-        {getFormattedComponentFromTag(aTag)}
+        <Box component="span">{getFormattedComponentFromTag(aTag)}</Box>
       </Button>
     );
   };
@@ -556,7 +558,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
           });
         }}
       >
-        {getFormattedComponentFromTag(aTag)}
+        <Box component="span">{getFormattedComponentFromTag(aTag)}</Box>
       </Button>
     );
   };
