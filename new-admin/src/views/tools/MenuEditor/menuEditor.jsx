@@ -35,12 +35,19 @@ class ToolOptions extends Component {
     active: false,
     index: 0,
     title: "Visa informationsruta",
+    target: "hidden",
     showScrollButtonLimit: 400,
+    dynamicImportUrls: {
+      iconFonts: "https://fonts.googleapis.com/icon?family=Material+Icons",
+      customFont: "https://fonts.googleapis.com/css?family=Open+Sans",
+    },
     width: 600,
     height: "90vh",
-    menuConfig: {},
+    menuConfig: {
+      menu: [],
+    },
     iconLibraryLink: "https://material.io/resources/icons/?style=baseline",
-    customThemeUrl: "",
+    customThemeUrl: "/documentHandlerTheme.json",
     openMenuEditor: false,
     validationErrors: [],
     documentOnStart: "",
@@ -49,6 +56,7 @@ class ToolOptions extends Component {
     searchImplemented: true,
     enablePrint: true,
     closePanelOnMapLinkOpen: false,
+    displayLoadingOnMapLinkOpen: false,
     tableOfContents: {
       active: false,
       expanded: false,
@@ -61,7 +69,9 @@ class ToolOptions extends Component {
     },
   };
   treeKeys = [];
-  menuConfig = null;
+  menuConfig = {
+    menu: [],
+  };
   availableDocuments = [];
 
   constructor(props) {
@@ -104,6 +114,7 @@ class ToolOptions extends Component {
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
+        displayLoadingOnMapLinkOpen: tool.options.displayLoadingOnMapLinkOpen,
         tableOfContents: tool.options.tableOfContents,
         defaultDocumentColorSettings: tool.options.defaultDocumentColorSettings,
       });
@@ -153,13 +164,17 @@ class ToolOptions extends Component {
     });
   }
 
-  save(savedFromMenuEditor) {
-    if (savedFromMenuEditor) {
-      this.menuConfig = this.menuEditorModel.exportTreeAsMenuJson(
-        this.state.tree,
-        this.menuConfig
-      );
-    }
+  saveFromMenuEditor() {
+    this.menuConfig = this.menuEditorModel.exportTreeAsMenuJson(
+      this.state.tree,
+      this.menuConfig
+    );
+    this.setState({ menuConfig: this.menuConfig }, () => {
+      this.save();
+    });
+  }
+
+  save() {
     var tool = {
       type: this.type,
       index: this.state.index,
@@ -175,14 +190,13 @@ class ToolOptions extends Component {
         searchImplemented: this.state.searchImplemented,
         enablePrint: this.state.enablePrint,
         closePanelOnMapLinkOpen: this.state.closePanelOnMapLinkOpen,
+        displayLoadingOnMapLinkOpen: this.state.displayLoadingOnMapLinkOpen,
         documentOnStart: this.state.documentOnStart,
         drawerTitle: this.state.drawerTitle,
         drawerButtonTitle: this.state.drawerButtonTitle,
         tableOfContents: this.state.tableOfContents,
         defaultDocumentColorSettings: this.state.defaultDocumentColorSettings,
-        menuConfig: savedFromMenuEditor
-          ? this.menuConfig
-          : this.state.menuConfig,
+        menuConfig: this.state.menuConfig,
       },
     };
 
@@ -236,7 +250,7 @@ class ToolOptions extends Component {
   onSaveMenuEditsClick = (e) => {
     e.preventDefault();
     this.setState({ openMenuEditor: false }, () => {
-      this.save(true);
+      this.saveFromMenuEditor();
     });
   };
 
@@ -326,8 +340,10 @@ class ToolOptions extends Component {
   getTreeView = () => {
     return this.menuEditorModel
       .loadMenuConfigForMap(this.mapSettingsModel.get("mapFile"))
-      .then((menuConfig) => {
-        this.menuConfig = menuConfig.options.menuConfig;
+      .then((toolConfig) => {
+        if (toolConfig && toolConfig?.options?.menuConfig) {
+          this.menuConfig = toolConfig.options.menuConfig;
+        }
         let treeData = this.createTreeStructure(this.menuConfig.menu);
         return treeData;
       });
@@ -544,6 +560,19 @@ class ToolOptions extends Component {
               Spara
             </ColorButtonBlue>
           </p>
+          <div>
+            <input
+              id="active"
+              name="active"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.active}
+            />
+            &nbsp;
+            <label htmlFor="active">Aktiverad</label>
+          </div>
           <div className="separator">Meny Ändringar</div>
           <p>
             <ColorButtonBlue
@@ -656,6 +685,25 @@ class ToolOptions extends Component {
             &nbsp;
             <label style={{ width: "200px" }} htmlFor="closePanelOnMapLinkOpen">
               Stäng dokumentfönster vid klick på kartlänk
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="displayLoadingOnMapLinkOpen"
+              name="displayLoadingOnMapLinkOpen"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.displayLoadingOnMapLinkOpen}
+            />
+            &nbsp;
+            <label
+              style={{ width: "200px" }}
+              htmlFor="displayLoadingOnMapLinkOpen"
+            >
+              Visa 'Kartan laddar' dialog vid klick på kartlänk
             </label>
           </div>
 
