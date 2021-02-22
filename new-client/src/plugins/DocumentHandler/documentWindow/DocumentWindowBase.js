@@ -113,6 +113,7 @@ class DocumentWindowBase extends React.PureComponent {
     return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
       return [
         "data-maplink",
+        "data-link",
         "data-document",
         "data-header-identifier",
       ].includes(key);
