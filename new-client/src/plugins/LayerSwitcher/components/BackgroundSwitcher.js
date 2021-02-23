@@ -97,14 +97,14 @@ class BackgroundSwitcher extends React.PureComponent {
     // Hide previously selected layers. The if > 0 is needed because we have our
     // special cases (black and white backgrounds), that don't exist in our layerMap,
     // and that would cause problem when we try to call .setVisible() on them.
-    Number(this.state.selectedLayer) > 0 &&
+    Number(this.state.selectedLayer) >= 0 &&
       this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);
 
     // Also, take care of hiding our OSM layer
     this.osmLayer.setVisible(false);
 
     // Make the currently clicked layer visible, but also handle our special cases.
-    Number(selectedLayer) > 0 &&
+    Number(selectedLayer) >= 0 &&
       this.props.layerMap[Number(selectedLayer)].setVisible(true);
 
     // Take care of our special cases: negative values are reserved for them
