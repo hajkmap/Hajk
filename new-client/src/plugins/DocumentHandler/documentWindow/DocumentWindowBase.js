@@ -12,37 +12,6 @@ import PrintIcon from "@material-ui/icons/Print";
 class DocumentWindowBase extends React.PureComponent {
   snackbarKey = null;
 
-  //Could be rewritten
-  findMenuItem(menuItem, documentNameToFind) {
-    if (menuItem.document === documentNameToFind) {
-      return menuItem;
-    } else if (this.hasSubMenu(menuItem)) {
-      let i,
-        result = null;
-      for (i = 0; result == null && i < menuItem.menu.length; i++) {
-        result = this.findMenuItem(menuItem.menu[i], documentNameToFind);
-      }
-      return result;
-    }
-    return null;
-  }
-
-  hasSubMenu = (menuItem) => {
-    return menuItem.menu && menuItem.menu.length > 0;
-  };
-
-  findReferringMenuItem = (documentNameToFind) => {
-    const { options } = this.props;
-    let foundMenuItem = null;
-    options.menuConfig.menu.forEach((rootItemToSearch) => {
-      let found = this.findMenuItem(rootItemToSearch, documentNameToFind);
-      if (found != null) {
-        foundMenuItem = found;
-      }
-    });
-    return foundMenuItem;
-  };
-
   shouldShowDocumentOnStart = () => {
     const { options } = this.props;
     return options.documentOnStart ? true : false;
@@ -176,17 +145,6 @@ class DocumentWindowBase extends React.PureComponent {
       this.closeMaplinkLoadingBar
     );
   };
-
-  setChapterLevels(chapter, level) {
-    chapter.level = level;
-    if (chapter.chapters && chapter.chapters.length > 0) {
-      level = level + 1;
-      chapter.chapters.forEach((subChapter) => {
-        subChapter = this.setChapterLevels(subChapter, level);
-      });
-    }
-    return chapter;
-  }
 
   isModelReady = () => {
     const { model } = this.props;
