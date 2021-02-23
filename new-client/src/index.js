@@ -15,13 +15,12 @@ import "elm-pep";
 import "ol/ol.css";
 import "./custom-ol.css";
 
-import * as serviceWorker from "./serviceWorker";
-
 import React from "react";
 import ReactDOM from "react-dom";
 import buildConfig from "./buildConfig.json";
 import ErrorIcon from "@material-ui/icons/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
+import reportWebVitals from "./reportWebVitals";
 
 let networkErrorMessage =
   "Nätverksfel. Prova att ladda om applikationen genom att trycka på F5 på ditt tangentbord.";
@@ -58,6 +57,11 @@ fetch("appConfig.json", fetchOpts)
         ? urlParams.get("m")
         : appConfig.defaultMap;
 
+      // Check if mapserviceBase is set in appConfig. If it is not, we will
+      // fall back on the simple map and layer configurations found in /public.
+      const useMapService =
+        appConfig.mapserviceBase && appConfig.mapserviceBase.trim().length > 0;
+
       // Declare fetchMapConfig() that we'll use later on.
       //
       // The name of map config to fetch comes from appConfig.json's "defaultMap"
@@ -82,15 +86,21 @@ fetch("appConfig.json", fetchOpts)
         }
       };
 
-      // Next, we do 3 necessary requests to MapService
+      // Next, we do 3 necessary requests to get the map, layers, and customTheme configurations.
       Promise.all([
-        // Get all layers defined in MapService
-        fetch(
-          `${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`,
-          fetchOpts
-        ),
-        // Get the specific, requested map configuration
-        fetchMapConfig(),
+        // Get the layers configuration from mapService (if mapService is not active, we fall back on the local
+        // "simpleLayerConfig" configuration file
+        useMapService
+          ? fetch(
+              `${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`,
+              fetchOpts
+            )
+          : fetch("simpleLayersConfig.json", fetchOpts),
+        // Get the specific, requested map configuration (if mapService is not active, we fall back on the local
+        // "simpleMapConfig" configuration file).
+        useMapService
+          ? fetchMapConfig()
+          : fetch("simpleMapConfig.json", fetchOpts),
         // Additionally, we fetch a custom theme that allows site admins to override
         // the default MUI theme without re-compiling the application.
         fetch("customTheme.json", fetchOpts),
@@ -106,7 +116,7 @@ fetch("appConfig.json", fetchOpts)
                 // The fetched files are decoded to Objects and placed in
                 // another object, @name config.
                 const config = {
-                  activeMap: activeMap,
+                  activeMap: useMapService ? activeMap : "simpleMapConfig", // If we are not utilizing mapService, we know that the active map must be "simpleMapConfig".
                   appConfig: appConfig,
                   layersConfig: layersConfig,
                   mapConfig: mapConfig,
@@ -182,7 +192,7 @@ fetch("appConfig.json", fetchOpts)
     );
   });
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
