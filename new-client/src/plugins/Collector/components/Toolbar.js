@@ -5,6 +5,7 @@ import ScatterPlotIcon from "@material-ui/icons/ScatterPlot";
 import BorderStyleIcon from "@material-ui/icons/BorderStyle";
 import LinearScaleIcon from "@material-ui/icons/LinearScale";
 import Typography from "@material-ui/core/Typography/Typography";
+import WKT from "ol/format/WKT";
 
 const styles = (theme) => ({
   button: {
@@ -37,6 +38,23 @@ class Toolbar extends Component {
         activeTool: undefined,
       });
     });
+
+    // Clear layer and attempt to read saved values
+    if (this.props.model.wkt) {
+      this.props.model.vectorSource.clear();
+
+      try {
+        var format = new WKT();
+        var features = format.readFeaturesFromText(
+          this.props.model.formValues[this.props.field]
+        );
+        features.map((feature) => {
+          this.props.model.vectorSource.addFeature(feature);
+        });
+      } catch (e) {
+        // This error will happen when the page is visited for the first time so we just ignore it
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -174,6 +192,27 @@ class Toolbar extends Component {
     return style;
   }
 
+  storeValues() {
+    // Stores any potential features found on the map as WKT before taking the next or previous step
+    // Create WKT
+    if (!this.props.model.wkt) {
+      return;
+    }
+    var format = new WKT();
+    var wkt = format.writeFeatures(this.props.model.vectorSource.getFeatures());
+
+    if (this.props.model.vectorSource.getFeatures().length === 0) {
+      wkt = "";
+    }
+
+    // Store in model
+    var formValues = Object.assign({}, this.props.model.formValues);
+    formValues[this.props.field] = wkt;
+    this.props.model.formValues = formValues;
+    // Clear layer
+    this.props.model.vectorSource.clear();
+  }
+
   render() {
     const source = this.props.serviceConfig;
     var disabled = !this.props.enabled,
@@ -181,7 +220,13 @@ class Toolbar extends Component {
       editPolygon = false,
       editLine = false;
 
-    if (source) {
+    if (this.props.model.wkt) {
+      // WKT gets the information from the tag since there is support for multiple toolbars
+      // Different toolbars can therefore support different types of geometries
+      editPoint = this.props.geotype.indexOf("point") !== -1;
+      editPolygon = this.props.geotype.indexOf("polygon") !== -1;
+      editLine = this.props.geotype.indexOf("line") !== -1;
+    } else if (source) {
       editPoint = source.editPoint;
       editLine = source.editLine;
       editPolygon = source.editPolygon;
