@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
+import { hfetch } from "utils/FetchWrapper";
 
 const styles = (theme) => ({
   paper: {
@@ -27,26 +28,36 @@ class MapSwitcher extends React.PureComponent {
     this.map = this.props.appModel.getMap();
   }
 
+  handleLoading(maps) {
+    let { activeMap } = this.appModel.config;
+    // Save fetched map configs to global variable
+    this.maps = maps;
+
+    // Set selectedIndex to currently selected map
+    let selectedIndex = this.maps.findIndex((map) => {
+      return map.mapConfigurationName === activeMap;
+    });
+    this.setState({ selectedIndex });
+  }
+
   componentDidMount() {
     let { proxy, mapserviceBase } = this.appModel.config.appConfig;
-    let { activeMap } = this.appModel.config;
 
-    this.appModel
-      .hfetch(`${proxy}${mapserviceBase}/config/userspecificmaps`)
-      .then((resp) => resp.json())
-      .then((maps) => {
-        // Save fetched map configs to global variable
-        this.maps = maps;
-
-        // Set selectedIndex to currently selected map
-        let selectedIndex = this.maps.findIndex((map) => {
-          return map.mapConfigurationName === activeMap;
+    // If user specific maps already exist in config, there's no need
+    // to fetch again (the new API provides this). Please note that
+    // it will be null if map doesn't want to show the map selector -
+    // hence we look for undefined specifically: the old API will not
+    // provide this property at all.
+    if (this.appModel.config.userSpecificMaps !== undefined) {
+      this.handleLoading(this.appModel.config.userSpecificMaps);
+    } else {
+      hfetch(`${proxy}${mapserviceBase}/config/userspecificmaps`)
+        .then((resp) => resp.json())
+        .then((maps) => this.handleLoading(maps))
+        .catch((err) => {
+          throw new Error(err);
         });
-        this.setState({ selectedIndex });
-      })
-      .catch((err) => {
-        throw new Error(err);
-      });
+    }
   }
 
   renderMenuItems = () => {

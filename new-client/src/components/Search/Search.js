@@ -411,6 +411,8 @@ class Search extends React.PureComponent {
   handleOnClickOrKeyboardSearch = () => {
     if (this.hasEnoughCharsForSearch()) {
       this.setState({ searchFromAutoComplete: false }, () => {
+        // Get rid of the on-screen keyboard on mobile devices
+        document.activeElement.blur();
         this.doSearch();
       });
     }
