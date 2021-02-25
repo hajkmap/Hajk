@@ -43,7 +43,7 @@ class WMSLayer {
     }
 
     if (config.singleTile) {
-      source.ratio = config.ratio;
+      source.ratio = config.ratio || 1.5;
       this.layer = new ImageLayer({
         name: config.name,
         visible: config.visible,
