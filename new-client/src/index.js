@@ -27,6 +27,19 @@ let networkErrorMessage =
 let parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
 
+const renderError = (message, err) => {
+  console.error(err);
+  ReactDOM.render(
+    <div className="start-error">
+      <div>
+        <ErrorIcon />
+      </div>
+      <div>{message}</div>
+    </div>,
+    document.getElementById("root")
+  );
+};
+
 const fetchOpts = {
   credentials: "same-origin",
 };
@@ -62,6 +75,8 @@ fetch("appConfig.json", fetchOpts)
       const useMapService =
         appConfig.mapserviceBase && appConfig.mapserviceBase.trim().length > 0;
 
+      const useNewApi = appConfig.experimentalNewApi === true;
+
       // Declare fetchMapConfig() that we'll use later on.
       //
       // The name of map config to fetch comes from appConfig.json's "defaultMap"
@@ -73,8 +88,15 @@ fetch("appConfig.json", fetchOpts)
       // To avoid this, we first try to fetch the user-specified file,
       // but if that fails, we fall back to the hard-coded "defaultMap".
       const fetchMapConfig = async () => {
+        // If the optional, experimental, consolidated loading process is active,
+        // change the API from v1 to v2:
+        const mapserviceBase =
+          useNewApi === true
+            ? appConfig.mapserviceBase.replace("v1", "v2")
+            : appConfig.mapserviceBase;
+
         // This saves us some keystrokes later on…
-        const configUrl = `${appConfig.proxy}${appConfig.mapserviceBase}/config`;
+        const configUrl = `${appConfig.proxy}${mapserviceBase}/config`;
         try {
           // Try to fetch user-specified config. Return it if OK.
           return await fetch(`${configUrl}/${activeMap}`, fetchOpts);
@@ -86,55 +108,19 @@ fetch("appConfig.json", fetchOpts)
         }
       };
 
-      // Next, we do 3 necessary requests to get the map, layers, and customTheme configurations.
-      Promise.all([
-        // Get the layers configuration from mapService (if mapService is not active, we fall back on the local
-        // "simpleLayerConfig" configuration file
-        useMapService
-          ? fetch(
-              `${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`,
-              fetchOpts
-            )
-          : fetch("simpleLayersConfig.json", fetchOpts),
-        // Get the specific, requested map configuration (if mapService is not active, we fall back on the local
-        // "simpleMapConfig" configuration file).
-        useMapService
-          ? fetchMapConfig()
-          : fetch("simpleMapConfig.json", fetchOpts),
-        // Additionally, we fetch a custom theme that allows site admins to override
-        // the default MUI theme without re-compiling the application.
-        fetch("customTheme.json", fetchOpts),
-      ])
-        .then(
-          ([layersConfigResponse, mapConfigResponse, customThemeResponse]) => {
-            Promise.all([
-              layersConfigResponse.json(),
-              mapConfigResponse.json(),
-              customThemeResponse.json(),
-            ])
-              .then(([layersConfig, mapConfig, customTheme]) => {
-                // The fetched files are decoded to Objects and placed in
-                // another object, @name config.
+      if (useNewApi === true) {
+        Promise.all([fetchMapConfig(), fetch("customTheme.json")])
+          .then(([mapConfigResponse, customThemeResponse]) => {
+            Promise.all([mapConfigResponse.json(), customThemeResponse.json()])
+              .then(([mapConfig, customTheme]) => {
                 const config = {
                   activeMap: useMapService ? activeMap : "simpleMapConfig", // If we are not utilizing mapService, we know that the active map must be "simpleMapConfig".
                   appConfig: appConfig,
-                  layersConfig: layersConfig,
-                  mapConfig: mapConfig,
+                  layersConfig: mapConfig.layersConfig,
+                  mapConfig: mapConfig.mapConfig,
+                  userSpecificMaps: mapConfig.userSpecificMaps,
                   urlParams,
                 };
-
-                // Make sure that the current user is allowed to display the current map
-                const layerSwitcherConfig = config.mapConfig.tools.find(
-                  (tool) => tool.type === "layerswitcher"
-                );
-                if (layerSwitcherConfig === undefined) {
-                  throw new Error(
-                    "noLayerSwitcher: " +
-                      (config.appConfig.noLayerSwitcherMessage === undefined
-                        ? "This map has no layerSwitcher indicating that you are not allowed to use this map!"
-                        : config.appConfig.noLayerSwitcherMessage)
-                  );
-                }
 
                 // Invoke React's renderer. Render Theme. Theme will render App.
                 ReactDOM.render(
@@ -146,50 +132,92 @@ fetch("appConfig.json", fetchOpts)
                   document.getElementById("root")
                 );
               })
-              .catch((err) => {
-                console.error("Parse error: ", err.message);
-                let errMsg = parseErrorMessage;
-                if (err.message.startsWith("noLayerSwitcher:")) {
-                  errMsg = err.message.substr(err.message.indexOf(":") + 2);
-                }
-                const html = { __html: errMsg };
-                ReactDOM.render(
-                  <div className="start-error">
-                    <div>
-                      <ErrorIcon />
-                    </div>
-                    <div dangerouslySetInnerHTML={html} />
-                  </div>,
-                  document.getElementById("root")
-                );
-              });
-          }
-        )
-        .catch((err) => {
-          console.error("Network error: ", err);
-          ReactDOM.render(
-            <div className="start-error">
-              <div>
-                <ErrorIcon />
-              </div>
-              <div>{networkErrorMessage}</div>
-            </div>,
-            document.getElementById("root")
-          );
-        });
+              .catch((err) => renderError(parseErrorMessage, err));
+          })
+          .catch((err) => renderError(networkErrorMessage, err));
+      } else {
+        // Next, we do 3 necessary requests to get the map, layers, and customTheme configurations.
+        Promise.all([
+          // Get the layers configuration from mapService (if mapService is not active, we fall back on the local
+          // "simpleLayerConfig" configuration file
+          useMapService
+            ? fetch(
+                `${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`,
+                fetchOpts
+              )
+            : fetch("simpleLayersConfig.json", fetchOpts),
+          // Get the specific, requested map configuration (if mapService is not active, we fall back on the local
+          // "simpleMapConfig" configuration file).
+          useMapService
+            ? fetchMapConfig()
+            : fetch("simpleMapConfig.json", fetchOpts),
+          // Additionally, we fetch a custom theme that allows site admins to override
+          // the default MUI theme without re-compiling the application.
+          fetch("customTheme.json", fetchOpts),
+        ])
+          .then(
+            ([
+              layersConfigResponse,
+              mapConfigResponse,
+              customThemeResponse,
+            ]) => {
+              Promise.all([
+                layersConfigResponse.json(),
+                mapConfigResponse.json(),
+                customThemeResponse.json(),
+              ])
+                .then(([layersConfig, mapConfig, customTheme]) => {
+                  // The fetched files are decoded to Objects and placed in
+                  // another object, @name config.
+                  const config = {
+                    activeMap: useMapService ? activeMap : "simpleMapConfig", // If we are not utilizing mapService, we know that the active map must be "simpleMapConfig".
+                    appConfig: appConfig,
+                    layersConfig: layersConfig,
+                    mapConfig: mapConfig,
+                    urlParams,
+                  };
+
+                  // Make sure that the current user is allowed to display the current map
+                  const layerSwitcherConfig = config.mapConfig.tools.find(
+                    (tool) => tool.type === "layerswitcher"
+                  );
+                  if (layerSwitcherConfig === undefined) {
+                    throw new Error(
+                      "noLayerSwitcher: " +
+                        (config.appConfig.noLayerSwitcherMessage === undefined
+                          ? "This map has no layerSwitcher indicating that you are not allowed to use this map!"
+                          : config.appConfig.noLayerSwitcherMessage)
+                    );
+                  }
+
+                  // Invoke React's renderer. Render Theme. Theme will render App.
+                  ReactDOM.render(
+                    <HajkThemeProvider
+                      activeTools={buildConfig.activeTools}
+                      config={config}
+                      customTheme={customTheme}
+                    />,
+                    document.getElementById("root")
+                  );
+                })
+                .catch((err) => {
+                  console.error("Parse error: ", err.message);
+                  let errMsg = parseErrorMessage;
+                  if (err.message.startsWith("noLayerSwitcher:")) {
+                    errMsg = err.message.substr(err.message.indexOf(":") + 2);
+                  }
+                  renderError(errMsg, err);
+                });
+            }
+          )
+          .catch((err) => {
+            renderError(networkErrorMessage, err);
+          });
+      }
     });
   })
   .catch((err) => {
-    console.error("Network error: ", err);
-    ReactDOM.render(
-      <div className="start-error">
-        <div>
-          <ErrorIcon />
-        </div>
-        <div>{networkErrorMessage}</div>
-      </div>,
-      document.getElementById("root")
-    );
+    renderError(networkErrorMessage, err);
   });
 
 // If you want to start measuring performance in your app, pass a function
