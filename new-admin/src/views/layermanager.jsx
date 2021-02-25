@@ -309,6 +309,8 @@ class Manager extends Component {
           opacity: layer.opacity,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
+          hidpi: layer.hidpi,
+          ratio: layer.ratio,
           imageFormat: layer.imageFormat,
           version: layer.version,
           serverType: layer.serverType,

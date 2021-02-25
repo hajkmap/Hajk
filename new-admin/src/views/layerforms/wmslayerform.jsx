@@ -44,6 +44,8 @@ const defaultState = {
   opacity: 1.0,
   tiled: false,
   singleTile: false,
+  hidpi: true,
+  ratio: 1.5,
   imageFormat: "",
   serverType: "geoserver",
   drawOrder: 1,
@@ -918,6 +920,8 @@ class WMSLayerForm extends Component {
       tiled: this.getValue("tiled"),
       opacity: this.getValue("opacity"),
       singleTile: this.getValue("singleTile"),
+      hidpi: this.getValue("hidpi"),
+      ratio: this.getValue("ratio"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
       attribution: this.getValue("attribution"),
@@ -963,6 +967,8 @@ class WMSLayerForm extends Component {
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
+    if (fieldName === "hidpi") value = input.checked;
+    if (fieldName === "ratio") value = value || null;
     if (fieldName === "tiled") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
@@ -1012,7 +1018,11 @@ class WMSLayerForm extends Component {
           valid = false;
         }
         break;
-
+      case "ratio":
+        if (isNaN(Number(value)) || value < 0 || value > 5) {
+          valid = false;
+        }
+        break;
       case "opacity":
         if (isNaN(Number(value)) || value < 0 || value > 1) {
           valid = false;
@@ -1236,6 +1246,58 @@ class WMSLayerForm extends Component {
           />
           &nbsp;
           <label htmlFor="input_singleTile">Single tile</label>
+          <div
+            style={{
+              paddingLeft: "20px",
+              marginLeft: "4px",
+              borderLeft: "2px double #1f1c1c",
+            }}
+          >
+            <input
+              type="checkbox"
+              ref="input_hidpi"
+              id="input_hidpi"
+              disabled={!this.state.singleTile}
+              onChange={(e) => this.setState({ hidpi: e.target.checked })}
+              checked={this.state.hidpi}
+            />
+            &nbsp;
+            <label htmlFor="input_hidpi">
+              Efterfråga hög DPI{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Inställning för hidpi i OL-klassen ImageWMS. Sätt till false för att inte automatiskt hämta bilder med hög upplösning vid skärmar som stödjer detta"
+              />
+            </label>
+          </div>
+          <div
+            style={{
+              paddingLeft: "20px",
+              marginLeft: "4px",
+              borderLeft: "2px double #1f1c1c",
+            }}
+          >
+            <label htmlFor="input_ratio">
+              Ratio{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Inställning för ratio i OL-klassen ImageWMS. Bestämmer storlek på bilden vid varje request där 1 är viewportens storlek och 2 är dubbelt så stor osv"
+              />
+            </label>
+            <input
+              type="text"
+              ref="input_ratio"
+              value={this.state.ratio}
+              disabled={!this.state.singleTile}
+              onChange={(e) => {
+                this.setState({ ratio: e.target.value });
+                this.validateField("ratio");
+              }}
+              className={this.getValidationClass("ratio")}
+            />
+          </div>
         </div>
         <div>
           <input
