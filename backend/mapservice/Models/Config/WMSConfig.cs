@@ -73,6 +73,10 @@ namespace MapService.Models.Config
 
         public string searchUrl { get; set; }
 
+        public double ratio { get; set; }
+
+        public bool hidpi { get; set; }
+
         public string searchPropertyName { get; set; }
 
         public string searchDisplayName { get; set; }

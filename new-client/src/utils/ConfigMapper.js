@@ -114,6 +114,8 @@ export default class ConfigMapper {
         origin: properties.mapConfig.map.origin,
         extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
+        hidpi: args.hidpi,
+        ratio: args.ratio,
         imageFormat: args.imageFormat || "image/png",
         serverType: args.serverType || "geoserver",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
