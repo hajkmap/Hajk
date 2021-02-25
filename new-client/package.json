@@ -9,8 +9,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "createdocs": "jsdoc src -r -d docs",
-    "prestart": "node hash.js",
-    "prebuild": "node hash.js"
+    "prestart": "node prebuild.js",
+    "prebuild": "node prebuild.js"
   },
   "eslintConfig": {
     "extends": [

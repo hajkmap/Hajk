@@ -29,7 +29,7 @@ class FetchWrapper {
     this.url = "";
     this.options = {};
     // eslint-disable-next-line no-undef
-    this.hash = process.env.REACT_APP_HASH || "";
+    this.hash = process.env.REACT_APP_GITHASH || "";
   }
 
   applyDomainOverrides() {
