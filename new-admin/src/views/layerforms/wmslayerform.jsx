@@ -1239,6 +1239,24 @@ class WMSLayerForm extends Component {
         <div>
           <input
             type="checkbox"
+            ref="input_hidpi"
+            id="input_hidpi"
+            onChange={(e) => this.setState({ hidpi: e.target.checked })}
+            checked={this.state.hidpi}
+          />
+          &nbsp;
+          <label htmlFor="input_hidpi">
+            Efterfråga hög DPI{" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="Hämta 'kartbilder' med hög upplösning vid skärmar som stödjer detta (Inställning hidpi i OL-klasserna ImageWMS/TileWMS)"
+            />
+          </label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
             ref="input_singleTile"
             id="input_singleTile"
             onChange={(e) => this.setState({ singleTile: e.target.checked })}
@@ -1253,37 +1271,12 @@ class WMSLayerForm extends Component {
               borderLeft: "2px double #1f1c1c",
             }}
           >
-            <input
-              type="checkbox"
-              ref="input_hidpi"
-              id="input_hidpi"
-              disabled={!this.state.singleTile}
-              onChange={(e) => this.setState({ hidpi: e.target.checked })}
-              checked={this.state.hidpi}
-            />
-            &nbsp;
-            <label htmlFor="input_hidpi">
-              Efterfråga hög DPI{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Inställning för hidpi i OL-klassen ImageWMS. Sätt till false för att inte automatiskt hämta bilder med hög upplösning vid skärmar som stödjer detta"
-              />
-            </label>
-          </div>
-          <div
-            style={{
-              paddingLeft: "20px",
-              marginLeft: "4px",
-              borderLeft: "2px double #1f1c1c",
-            }}
-          >
             <label htmlFor="input_ratio">
               Ratio{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Inställning för ratio i OL-klassen ImageWMS. Bestämmer storlek på bilden vid varje request där 1 är viewportens storlek och 2 är dubbelt så stor osv"
+                title="Bestämmer storlek på bilden vid varje request där 1 är viewportens storlek och 2 är dubbelt så stor osv (Inställning för ratio i OL-klassen ImageWMS)"
               />
             </label>
             <input
