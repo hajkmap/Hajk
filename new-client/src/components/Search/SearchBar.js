@@ -270,6 +270,7 @@ class SearchBar extends React.PureComponent {
         autoComplete
         value={decodeCommas(searchString)}
         selectOnFocus
+        blurOnSelect
         open={autoCompleteOpen}
         disableClearable
         onChange={handleSearchInput}
