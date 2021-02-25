@@ -327,7 +327,10 @@ class SearchModel {
   #decodePotentialSpecialChars = (searchCombinations) => {
     return searchCombinations.map((combination) => {
       return combination.map((word) => {
-        return decodeCommas(word).replaceAll("\\", "\\\\");
+        // Replace all occurrences of a backslash with 2 backslashes (which will be seen
+        // by GeoServer as "one escaped backslash"). Hence the 4 backslashes in replacement string,
+        // they are basically two escaped backslashes after each other.
+        return decodeCommas(word).replace(/\\/g, "\\\\");
       });
     });
   };
