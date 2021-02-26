@@ -28,9 +28,8 @@ class MapViewModel {
   lastFeaturesInfo = [];
 
   getDrawStyleSettings = () => {
-    const strokeColor =
-      this.options.drawStrokeColor ?? "rgba(255, 214, 91, 0.6)";
-    const fillColor = this.options.drawFillColor ?? "rgba(255, 214, 91, 0.2)";
+    const strokeColor = this.options.drawStrokeColor ?? "rgba(74,74,74,0.5)";
+    const fillColor = this.options.drawFillColor ?? "rgba(255,255,255,0.07)";
 
     return { strokeColor: strokeColor, fillColor: fillColor };
   };
