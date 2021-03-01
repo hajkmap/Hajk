@@ -75,7 +75,7 @@ namespace MapService.Models.Config
 
         public double ratio { get; set; }
 
-        public bool hidpi { get; set; }
+        public bool hidpi { get; set; } = true;
 
         public string searchPropertyName { get; set; }
 
