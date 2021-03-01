@@ -45,7 +45,7 @@ const defaultState = {
   tiled: false,
   singleTile: false,
   hidpi: true,
-  ratio: 1.5,
+  customRatio: 0,
   imageFormat: "",
   serverType: "geoserver",
   drawOrder: 1,
@@ -921,7 +921,7 @@ class WMSLayerForm extends Component {
       opacity: this.getValue("opacity"),
       singleTile: this.getValue("singleTile"),
       hidpi: this.getValue("hidpi"),
-      ratio: this.getValue("ratio"),
+      customRatio: this.getValue("customRatio"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
       attribution: this.getValue("attribution"),
@@ -968,7 +968,8 @@ class WMSLayerForm extends Component {
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
     if (fieldName === "hidpi") value = input.checked;
-    if (fieldName === "ratio") value = value;
+    if (fieldName === "customRatio")
+      value = parseFloat(Number(value).toFixed(2));
     if (fieldName === "tiled") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
@@ -1011,14 +1012,13 @@ class WMSLayerForm extends Component {
   validateField(fieldName, forcedValue, updateState) {
     var value = this.getValue(fieldName),
       valid = true;
-
     switch (fieldName) {
       case "layers":
         if (value.length === 0) {
           valid = false;
         }
         break;
-      case "ratio":
+      case "customRatio":
         if (isNaN(Number(value)) || value < 1 || value > 5) {
           valid = false;
         }
@@ -1271,8 +1271,8 @@ class WMSLayerForm extends Component {
               borderLeft: "2px double #1f1c1c",
             }}
           >
-            <label htmlFor="input_ratio">
-              Ratio{" "}
+            <label htmlFor="input_customRatio">
+              Custom ratio (Lämna som 0 för OL-default){" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
@@ -1281,14 +1281,14 @@ class WMSLayerForm extends Component {
             </label>
             <input
               type="text"
-              ref="input_ratio"
-              value={this.state.ratio}
+              ref="input_customRatio"
+              value={this.state.customRatio}
               disabled={!this.state.singleTile}
               onChange={(e) => {
-                this.setState({ ratio: e.target.value });
-                this.validateField("ratio");
+                this.setState({ customRatio: e.target.value });
+                this.validateField("customRatio");
               }}
-              className={this.getValidationClass("ratio")}
+              className={this.getValidationClass("customRatio")}
             />
           </div>
         </div>
