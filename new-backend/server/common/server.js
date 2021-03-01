@@ -1,6 +1,7 @@
 import Express from "express";
 import * as path from "path";
 import * as http from "http";
+import fs from "fs";
 
 import helmet from "helmet";
 import cors from "cors";
@@ -13,6 +14,7 @@ import oas from "./oas";
 
 import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
 import checkAdminAuthorization from "../api/middlewares/check.admin.authorization";
+import restrictStatic from "../api/middlewares/restrict.static";
 // import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
 
 const app = new Express();
@@ -167,13 +169,6 @@ export default class ExpressServer {
     app.use(cookieParser(process.env.SESSION_SECRET));
 
     // Serve some static files if requested to:
-    // - The API Explorer is useful but we should be able to disable it
-    process.env.EXPOSE_API_EXPLORER === "true" &&
-      app.use(
-        "/api-explorer",
-        Express.static(path.join(process.cwd(), "static", "api-explorer"))
-      );
-
     // - Hajk consists of 3 apps: backend (this API), client and admin.
     //   Client should be accessible directly under /…
     process.env.EXPOSE_CLIENT === "true" &&
@@ -188,7 +183,96 @@ export default class ExpressServer {
         checkAdminAuthorization,
         Express.static(path.join(process.cwd(), "static", "admin")),
       ]);
-    // app.use(detailedRequestLogger);
+
+    // Optionally, other directories placed in "static" can be exposed.
+    this.setupStaticDirs();
+  }
+
+  setupStaticDirs() {
+    // This will run only once
+    const l = log4js.getLogger("hajk.static");
+
+    l.trace("Setting up access to static directories…");
+    try {
+      const dir = path.join(process.cwd(), "static");
+      // List dir contents, the second parameter will ensure we get Dirent objects
+      const staticDirs = fs
+        .readdirSync(dir, {
+          withFileTypes: true,
+        })
+        .filter((entry) => {
+          // Filter out only files (we're not interested in directories).
+          if (entry.isDirectory() === false) return false;
+          // Filter out the special cases that are handled separately
+          switch (entry.name) {
+            // client and admin are special cases, handled separately. Exclude
+            // them from here.
+            case "client":
+            case "admin":
+              return false;
+
+            default:
+              return true;
+          }
+        })
+        // Create an array using name of each Dirent object, remove file extension
+        .map((entry) => entry.name);
+
+      if (staticDirs.length > 0) {
+        l.trace(
+          "Found following directories in 'static': %s",
+          staticDirs.join(", ")
+        );
+      } else {
+        l.trace(
+          "No directories found in 'static' - not exposing anything except the backend's API itself."
+        );
+      }
+
+      // For each found dir, see if there's a corresponding entry in .env. We require
+      // admins to explicitly expose (and optionally restrict) those directories.
+      staticDirs.forEach((dir) => {
+        // See if there's a corresponding key for current dir in .env,
+        // the following notation is assumed: foo-bar -> EXPOSE_AND_RESTRICT_STATIC_FOO_BAR, hence replace below.
+        const dotEnvKeyName = `EXPOSE_AND_RESTRICT_STATIC_${dir
+          .toUpperCase()
+          .replace(/-/g, "_")}`;
+        const restrictedToGroups = process.env[dotEnvKeyName];
+
+        if (restrictedToGroups === "") {
+          // If the key is set (which is indicated with the value of an empty string),
+          // it means that access to dir is unrestricted.
+          l.info(`Exposing '%s' as unrestricted static directory.`, dir);
+          app.use(
+            `/${dir}`,
+            Express.static(path.join(process.cwd(), "static", dir))
+          );
+        } else if (
+          typeof restrictedToGroups === "string" &&
+          restrictedToGroups.length > 0
+        ) {
+          l.info(
+            `Exposing '%s' as a restricted directory. Allowed groups: %s`,
+            dir,
+            restrictedToGroups
+          );
+          // If there are restrictions, run a middleware that will enforce the restrictions,
+          // if okay, expose - else return 403.
+          app.use(`/${dir}`, [
+            restrictStatic,
+            Express.static(path.join(process.cwd(), "static", dir)),
+          ]);
+        } else {
+          l.warn(
+            "The directory '%s' was found in static, but no setting could be found in .env. The directory will NOT be exposed. If you wish to expose it, add the key '%s' to your .env.",
+            dir,
+            dotEnvKeyName
+          );
+        }
+      });
+    } catch (error) {
+      return { error };
+    }
   }
 
   router(routes) {
