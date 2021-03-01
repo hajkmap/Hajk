@@ -28,7 +28,7 @@ class WMSLayer {
       transition: this.subLayers.length > 1 ? 0 : 100,
     };
 
-    if (config.hidpi) {
+    if (config.hidpi !== null) {
       source.hidpi = config.hidpi;
     }
     if (
