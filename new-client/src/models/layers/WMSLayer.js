@@ -26,9 +26,11 @@ class WMSLayer {
       attributions: config.attribution,
       cacheSize: this.subLayers.length > 1 ? 32 : 2048,
       transition: this.subLayers.length > 1 ? 0 : 100,
-      hidpi: config.hidpi,
     };
 
+    if (config.hidpi) {
+      source.hidpi = config.hidpi;
+    }
     if (
       config.resolutions &&
       config.resolutions.length > 0 &&
@@ -43,7 +45,9 @@ class WMSLayer {
     }
 
     if (config.singleTile) {
-      source.ratio = config.ratio || 1.5;
+      if (config.ratio >= 1) {
+        source.ratio = config.ratio;
+      }
       this.layer = new ImageLayer({
         name: config.name,
         visible: config.visible,

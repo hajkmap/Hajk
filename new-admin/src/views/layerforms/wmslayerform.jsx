@@ -968,7 +968,7 @@ class WMSLayerForm extends Component {
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
     if (fieldName === "hidpi") value = input.checked;
-    if (fieldName === "ratio") value = value || null;
+    if (fieldName === "ratio") value = value;
     if (fieldName === "tiled") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
@@ -1019,7 +1019,7 @@ class WMSLayerForm extends Component {
         }
         break;
       case "ratio":
-        if (isNaN(Number(value)) || value < 0 || value > 5) {
+        if (isNaN(Number(value)) || value < 1 || value > 5) {
           valid = false;
         }
         break;
