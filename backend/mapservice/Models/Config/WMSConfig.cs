@@ -73,7 +73,7 @@ namespace MapService.Models.Config
 
         public string searchUrl { get; set; }
 
-        public double ratio { get; set; }
+        public double customRatio { get; set; }
 
         public bool hidpi { get; set; } = true;
 
