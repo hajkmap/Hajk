@@ -102,20 +102,24 @@ class DocumentHandler extends React.PureComponent {
       });
   };
 
-  dynamicallyImportOpenSans = () => {
+  dynamicallyImportCustomFont = () => {
     const { dynamicImportUrls } = this.props.options;
-    return (
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href={dynamicImportUrls.customFont}
-      />
-    );
+    if (dynamicImportUrls.customFont) {
+      return (
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href={dynamicImportUrls.customFont}
+        />
+      );
+    } else return null;
   };
 
   dynamicallyImportIconFonts = () => {
     const { dynamicImportUrls } = this.props.options;
-    return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
+    if (dynamicImportUrls.iconFonts) {
+      return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
+    } else return null;
   };
 
   renderDrawerContent = () => {
@@ -203,7 +207,7 @@ class DocumentHandler extends React.PureComponent {
   render() {
     return (
       <>
-        {this.dynamicallyImportOpenSans()}
+        {this.dynamicallyImportCustomFont()}
         {this.dynamicallyImportIconFonts()}
         <DocumentWindowBase
           {...this.props}
