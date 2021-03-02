@@ -17,10 +17,9 @@ export default class FeatureStyle {
   }
 
   #getDefaultDisplayStyleSettings = () => {
-    const fillColor =
-      this.#options.displayFillColor ?? "rgba(255, 255, 255, 0.4)";
+    const fillColor = this.#options.displayFillColor ?? "rgba(74,144,226,0.15)";
     const strokeColor =
-      this.#options.displayStrokeColor ?? "rgba(50, 150, 200, 1)";
+      this.#options.displayStrokeColor ?? "rgba(74,144,226,0.4)";
 
     return {
       strokeColor: strokeColor,
@@ -30,13 +29,13 @@ export default class FeatureStyle {
 
   #getDefaultSelectionStyleSettings = () => {
     const strokeColor =
-      this.#options.selectionStrokeColor ?? "rgba(0, 0, 255, 0.6)";
+      this.#options.selectionStrokeColor ?? "rgba(74,144,226,0.8)";
     const fillColor =
-      this.#options.selectionFillColor ?? "rgba(0, 0, 255, 0.2)";
+      this.#options.selectionFillColor ?? "rgba(74,144,226,0.3)";
     const textFillColor =
-      this.#options.selectionTextFill ?? "rgba(255, 255, 255, 1)";
+      this.#options.selectionTextFill ?? "rgba(63,122,190,1)";
     const textStrokeColor =
-      this.#options.selectionTextStroke ?? "rgba(0, 0, 0, 0.5)";
+      this.#options.selectionTextStroke ?? "rgba(255,255,255,1)";
     const fontSize = 12;
 
     return {
@@ -50,13 +49,12 @@ export default class FeatureStyle {
 
   #getDefaultHighlightStyleSettings = () => {
     const strokeColor =
-      this.#options.highlightStrokeColor ?? "rgba(255, 0, 0, 0.6)";
-    const fillColor =
-      this.#options.highlightFillColor ?? "rgba(255, 0, 0, 0.2)";
+      this.#options.highlightStrokeColor ?? "rgba(245,166,35,0.8)";
+    const fillColor = this.#options.highlightFillColor ?? "rgba(245,166,35,0)";
     const textFillColor =
-      this.#options.highlightTextFill ?? "rgba(255, 255, 255, 1)";
+      this.#options.highlightTextFill ?? "rgba(214,143,28,1)";
     const textStrokeColor =
-      this.#options.highlightTextStroke ?? "rgba(0, 0, 0, 0.5)";
+      this.#options.highlightTextStroke ?? "rgba(255,255,255,1)";
     const fontSize = 15;
 
     return {

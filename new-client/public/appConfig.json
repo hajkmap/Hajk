@@ -1,7 +1,7 @@
 {
   "appName": "Hajk",
   "version": "3.5.0",
-  "mapserviceBase": "http://localhost:55630",
+  "mapserviceBase": "http://localhost:3002/api/v1",
   "proxy": "",
   "searchProxy": "",
   "defaultMap": "map_1",
