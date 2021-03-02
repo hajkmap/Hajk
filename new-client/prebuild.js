@@ -1,20 +1,36 @@
-const { exec } = require("child_process");
+const { execSync } = require("child_process");
 const fs = require("fs");
-const encLocalFile = ".env.local";
 
-let data = fs.readFileSync(encLocalFile, { flag: "a+" }).toString();
+const envLocalFile = ".env.local";
+
+function cleanUpNewlines() {
+  data = data.replace(/[\n]{2,}/g, "\n");
+}
+
+let data =
+  fs.readFileSync(envLocalFile, { flag: "a+" }).toString().trim() + "\n";
+cleanUpNewlines();
 
 function updateGitHash(params) {
-  const key = "REACT_APP_GITHASH";
+  const key = "REACT_APP_GIT_HASH";
   const regex = new RegExp(`${key}=.*`);
 
-  exec("git rev-parse HEAD", (error, stdout, stderr) => {
-    if (data.indexOf(key) === -1) {
-      data += `${key}=0`;
-    }
-    data = data.replace(regex, `${key}=${stdout}`);
-    fs.writeFileSync(encLocalFile, data.trim() + "\n");
-  });
+  let gitHash = execSync("git rev-parse HEAD").toString();
+
+  if (data.indexOf(key) === -1) {
+    data += `${key}=0`;
+  }
+
+  data = data.replace(regex, `${key}=${gitHash}\n`);
+}
+
+function updateBuildDate() {
+  const key = "REACT_APP_BUILD_DATE";
+  const regex = new RegExp(`${key}=.*`);
+  if (data.indexOf(key) === -1) {
+    data += `${key}=0`;
+  }
+  data = data.replace(regex, `${key}=${new Date().toISOString()}\n`);
 }
 
 function updateAppVersion() {
@@ -31,6 +47,13 @@ function updateAppName() {
   }
 }
 
+function writeToEnvLocal() {
+  cleanUpNewlines();
+  fs.writeFileSync(envLocalFile, data);
+}
+
 updateAppName();
 updateAppVersion();
+updateBuildDate();
 updateGitHash();
+writeToEnvLocal();

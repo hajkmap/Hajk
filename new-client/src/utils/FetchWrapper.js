@@ -1,7 +1,10 @@
 // We need som default options before we
+
+import { Object } from "ol";
+
 // get the real default options from appConfig
 let config = {
-  fetch: {
+  hfetch: {
     defaultOptions: { credentials: "same-origin" },
   },
 };
@@ -23,25 +26,43 @@ class FetchWrapper {
   // Had to disable.... eslint does not like my regex for som reason.
   // eslint-disable-next-line no-useless-escape
   domainRegex = /^(http:|https:|.*)(\/\/)([^\/]+)/gi;
+  // eslint-disable-next-line no-useless-escape
+  urlRegex = /([.*+?^=!:${}()|\[\]\/\\])/g;
+
   constructor(options = {}, config = {}) {
     this.isJqueryAjax = options.isJqueryAjax === true;
     this.config = config;
     this.url = "";
     this.options = {};
     // eslint-disable-next-line no-undef
-    this.hash = process.env.REACT_APP_GITHASH || "";
+    this.hash = process.env.REACT_APP_GIT_HASH || "";
+
+    console.log(this.matchesDomain("http://www.apa.com", "*apan*"));
+  }
+
+  matchesDomain(url, ruleWithWildCard) {
+    var escapeRegex = (url) => url.replace(this.urlRegex, "\\$1");
+    return new RegExp(
+      "^" + ruleWithWildCard.split("*").map(escapeRegex).join(".*") + "$"
+    ).test(url);
   }
 
   applyDomainOverrides() {
-    this.domainRegex.lastIndex = 0;
-    let matches = this.domainRegex.exec(this.url);
-    if (matches && matches.length === 4) {
-      let domain = matches[3];
-      let overrides = this.config.fetch.domainOverrides[domain] || {};
-      this.options = Object.assign(this.options, overrides);
-    }
-    matches = null;
+    Object.keys(this.config.hfetch.domainOverrides).forEach((key) => {
+      console.log(key);
+    });
   }
+
+  // applyDomainOverridesOLD() {
+  //   this.domainRegex.lastIndex = 0;
+  //   let matches = this.domainRegex.exec(this.url);
+  //   if (matches && matches.length === 4) {
+  //     let domain = matches[3];
+  //     let overrides = this.config.hfetch.domainOverrides[domain] || {};
+  //     this.options = Object.assign(this.options, overrides);
+  //   }
+  //   matches = null;
+  // }
 
   translateToJqueryAjaxOptions() {
     // translate credentials to work with $.ajax(), old admin UI.
@@ -53,11 +74,11 @@ class FetchWrapper {
 
   overrideOptions() {
     this.options = Object.assign(
-      { ...this.config.fetch.defaultOptions },
+      { ...this.config.hfetch.defaultOptions },
       this.options
     );
 
-    if (this.config.fetch.useDomainOverrides) {
+    if (this.config.hfetch.useDomainOverrides) {
       this.applyDomainOverrides();
     }
 

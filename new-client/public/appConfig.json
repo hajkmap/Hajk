@@ -7,7 +7,7 @@
   "defaultMap": "map_1",
   "experimentalIntroductionEnabled": true,
   "experimentalIntroductionSteps": [],
-  "experimentalNewApi": true,
+  "experimentalNewApi": false,
   "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
   "networkErrorMessage": "Nätverksfel. Försök att ladda om sidan genom att trycka på F5.",
   "parseErrorMessage": "Konfigurationsfel. Försök att ladda om sidan genom att trycka på F5.",
@@ -32,5 +32,19 @@
       "type": "warning",
       "browsers": ["ie"]
     }
-  ]
+  ],
+  "hfetch": {
+    "useDomainOverrides": true,
+    "defaultOptions": {
+      "credentials": "same-origin"
+    },
+    "domainOverrides": {
+      "*wms-utv.varberg.se*": {
+        "credentials": "include"
+      },
+      "*www.requires-credentials.com*": {
+        "credentials": "include"
+      }
+    }
+  } 
 }
