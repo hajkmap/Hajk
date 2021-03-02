@@ -328,6 +328,7 @@ class AppModel {
           this.config.appConfig.proxy,
           this.globalObserver
         );
+
         this.map.addLayer(layerItem.layer);
         break;
       case "wmts":

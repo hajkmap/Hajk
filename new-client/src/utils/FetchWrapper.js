@@ -48,7 +48,7 @@ class FetchWrapper {
     // *nk* matches monkey
     // *key matches monkey
 
-    var escapeRegex = (url) => url.replace(this.urlRegex, "\\$1");
+    const escapeRegex = (url) => url.replace(this.urlRegex, "\\$1");
     return new RegExp(
       "^" + ruleWithWildCard.split("*").map(escapeRegex).join(".*") + "$"
     ).test(url);
@@ -57,6 +57,7 @@ class FetchWrapper {
   applyOptionOverrides() {
     if (!this.partKeys) {
       this.partKeys = Object.keys(this.config.hfetch.optionOverrides);
+      this.partKeys.sort((a, b) => b.length - a.length);
     }
 
     const key = this.partKeys.find((key) => {
@@ -95,10 +96,10 @@ class FetchWrapper {
       this.translateToJqueryAjaxOptions();
     }
     if (this.options.cacheBuster === true) {
-      let cacheBust = `${
+      let cacheBuster = `${
         this.url.indexOf("?") === -1 ? "?" : "&"
       }${cacheBusterParamName}=${this.hash}`;
-      this.url = `${this.url}${cacheBust}`;
+      this.url = `${this.url}${cacheBuster}`;
     }
 
     this.overrideUrl();
@@ -158,6 +159,20 @@ function initHFetch() {
   return hfetch;
 }
 
+function overrideLayerSourceParams(source) {
+  let fw = fetchWrapper;
+  fw.reset();
+  fw.url = source.url;
+  fw.options = { ...source };
+  fw.applyOptionOverrides();
+  if (fw.options.credentials && fw.options.credentials === "include") {
+    if (source.crossOrigin) {
+      // handle crossOrigin in tile images etc
+      source.crossOrigin = "use-credentials";
+    }
+  }
+}
+
 function hfetch(...args) {
   let fw = fetchWrapper;
   fw.reset();
@@ -200,4 +215,10 @@ function xJqueryAjax(...args) {
   return originalJqueryAjax(jw.url, jw.options);
 }
 
-export { initFetchWrapper, initHFetch, hfetch, wrapJqueryAjax };
+export {
+  initFetchWrapper,
+  initHFetch,
+  hfetch,
+  wrapJqueryAjax,
+  overrideLayerSourceParams,
+};
