@@ -29,7 +29,7 @@ export default async function restrictStatic(req, res, next) {
   }
 
   // Grab dir name, required to find the correct .env variable
-  const dir = req.baseUrl.replaceAll("/", "");
+  const dir = req.baseUrl.replace(/\//g, "");
 
   // Get allowed groups from the .env variable, split string to array
   const restrictedToGroups = process.env[
