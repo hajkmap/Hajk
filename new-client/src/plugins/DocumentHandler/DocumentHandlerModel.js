@@ -17,9 +17,6 @@ export default class DocumentHandlerModel {
   internalId = 0;
 
   constructor(settings) {
-    this.mapServiceUrl =
-      settings.app.config.appConfig.proxy +
-      settings.app.config.appConfig.mapserviceBase;
     this.settings = settings;
     this.app = settings.app;
     this.allDocuments = [];
@@ -181,9 +178,7 @@ export default class DocumentHandlerModel {
   async fetchJsonDocument(title) {
     let response;
     try {
-      response = await hfetch(
-        `${this.mapServiceUrl}/informative/load/${title}`
-      );
+      response = await hfetch(`/informative/load/${title}`);
       const text = await response.text();
       if (text === "File not found") {
         throw new Error(

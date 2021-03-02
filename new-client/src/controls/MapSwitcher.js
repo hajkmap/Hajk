@@ -41,8 +41,6 @@ class MapSwitcher extends React.PureComponent {
   }
 
   componentDidMount() {
-    let { proxy, mapserviceBase } = this.appModel.config.appConfig;
-
     // If user specific maps already exist in config, there's no need
     // to fetch again (the new API provides this). Please note that
     // it will be null if map doesn't want to show the map selector -
@@ -51,7 +49,7 @@ class MapSwitcher extends React.PureComponent {
     if (this.appModel.config.userSpecificMaps !== undefined) {
       this.handleLoading(this.appModel.config.userSpecificMaps);
     } else {
-      hfetch(`${proxy}${mapserviceBase}/config/userspecificmaps`)
+      hfetch(`/config/userspecificmaps`)
         .then((resp) => resp.json())
         .then((maps) => this.handleLoading(maps))
         .catch((err) => {

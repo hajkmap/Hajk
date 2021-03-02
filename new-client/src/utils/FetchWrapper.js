@@ -5,6 +5,7 @@ let config = {
     defaultOptions: { credentials: "same-origin" },
   },
 };
+const cacheBusterParamName = "cacheBuster";
 
 // From appConfig it looks approx like this.
 // "hfetch": {
@@ -35,11 +36,18 @@ class FetchWrapper {
     this.config = config;
     this.url = "";
     this.options = {};
+
+    // Hash is used for cacheBuster function.
     // eslint-disable-next-line no-undef
     this.hash = process.env.REACT_APP_GIT_HASH || "";
   }
 
   matchesUrlPart(url, ruleWithWildCard) {
+    // Works with *, example:
+    // monk* matches monkey
+    // *nk* matches monkey
+    // *key matches monkey
+
     var escapeRegex = (url) => url.replace(this.urlRegex, "\\$1");
     return new RegExp(
       "^" + ruleWithWildCard.split("*").map(escapeRegex).join(".*") + "$"
@@ -56,6 +64,7 @@ class FetchWrapper {
     });
 
     if (key) {
+      // We've found a match!
       let overrides = this.config.hfetch.optionOverrides[key] || {};
       this.options = Object.assign(this.options, overrides);
     }
@@ -63,6 +72,7 @@ class FetchWrapper {
 
   translateToJqueryAjaxOptions() {
     // translate credentials to work with $.ajax(), old admin UI.
+    // Will be used in admin later.
     if (this.options.credentials && this.options.credentials === "include") {
       this.options.xhrFields = { withCredentials: true };
       delete this.options.credentials; // clean up.
@@ -81,18 +91,42 @@ class FetchWrapper {
 
     if (this.isJqueryAjax) {
       // handle $.ajax() specific things.
+      // Will be used in admin later.
       this.translateToJqueryAjaxOptions();
     }
     if (this.options.cacheBuster === true) {
-      let cacheBust = `${this.url.indexOf("?") === -1 ? "?" : "&"}cacheBuster=${
-        this.hash
-      }`;
+      let cacheBust = `${
+        this.url.indexOf("?") === -1 ? "?" : "&"
+      }${cacheBusterParamName}=${this.hash}`;
       this.url = `${this.url}${cacheBust}`;
     }
+
+    this.overrideUrl();
+  }
+
+  overrideUrl() {
+    // Maybe incorrect... but could not find evidence against it:
+    // We assume the urls that starts with "/" needs proxy and mapserviceBase
+    if (!this.url.startsWith("/")) {
+      return;
+    }
+
+    // It is possible to specify a specific proxy and mapserviceBase.
+    this.url = `
+      ${this.options.proxy || this.proxy}${
+      this.options.mapserviceBase || this.mapserviceBase
+    }${this.url}`;
   }
 
   updateConfig(config) {
     this.config = config;
+    this.mapserviceBase = this.config.mapserviceBase || "";
+    this.proxy = this.config.proxy || "";
+
+    if (this.config.experimentalNewApi) {
+      // TODO: Remove temporary logic for experimentalNewApi
+      this.mapserviceBase = this.mapserviceBase.replace("v1", "v2");
+    }
   }
 
   reset() {

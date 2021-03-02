@@ -92,13 +92,8 @@ hfetch("appConfig.json", { cacheBuster: true })
       const fetchMapConfig = async () => {
         // If the optional, experimental, consolidated loading process is active,
         // change the API from v1 to v2:
-        const mapserviceBase =
-          useNewApi === true
-            ? appConfig.mapserviceBase.replace("v1", "v2")
-            : appConfig.mapserviceBase;
 
-        // This saves us some keystrokes later on…
-        const configUrl = `${appConfig.proxy}${mapserviceBase}/config`;
+        const configUrl = `/config`;
         try {
           // Try to fetch user-specified config. Return it if OK.
           return await hfetch(`${configUrl}/${activeMap}`);
@@ -146,9 +141,7 @@ hfetch("appConfig.json", { cacheBuster: true })
           // Get the layers configuration from mapService (if mapService is not active, we fall back on the local
           // "simpleLayerConfig" configuration file
           useMapService
-            ? hfetch(
-                `${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`
-              )
+            ? hfetch(`/config/layers`)
             : hfetch("simpleLayersConfig.json", { cacheBuster: true }),
           // Get the specific, requested map configuration (if mapService is not active, we fall back on the local
           // "simpleMapConfig" configuration file).

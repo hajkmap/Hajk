@@ -440,6 +440,8 @@ class SearchModel {
       },
       body: xmlString,
     };
+    // TODO: This special proxy is not handled in FetchWrapper.
+    // Maybe it could be configured i hfetch config section in appConfig?
     const promise = hfetch(
       this.#app.config.appConfig.searchProxy + searchSource.url,
       request
