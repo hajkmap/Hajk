@@ -5,7 +5,7 @@ const logger = log4js.getLogger("hajk.static.restrict");
 /**
  * @summary Determine if current user is member in any of the required groups in order to access a given path.
  *
- * @description Given the req.baseUrl, see if there's a coresponding setting in .env.
+ * @description Given the req.baseUrl, see if there's a corresponding setting in .env.
  * The setting for baseUrl "/foo-bar" should be named "EXPOSE_AND_RESTRICT_STATIC_FOO_BAR".
  * Split the value of that key to an array and check if the current user is member
  * in any of those groups. As soon as a match is found, grant access and quit the loop. If the loop

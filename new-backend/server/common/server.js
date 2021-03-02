@@ -13,9 +13,8 @@ import clfDate from "clf-date";
 import oas from "./oas";
 
 import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
-import checkAdminAuthorization from "../api/middlewares/check.admin.authorization";
 import restrictStatic from "../api/middlewares/restrict.static";
-// import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
+import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
 
 const app = new Express();
 
@@ -129,6 +128,9 @@ export default class ExpressServer {
       })
     );
 
+    process.env.LOG_DETAILED_REQUEST_LOGGER === "true" &&
+      app.use(detailedRequestLogger);
+
     app.use(
       helmet({
         contentSecurityPolicy: false, // If active, we get errors loading inline <script>
@@ -168,28 +170,18 @@ export default class ExpressServer {
     app.use(Express.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(cookieParser(process.env.SESSION_SECRET));
 
-    // Serve some static files if requested to:
-    // - Hajk consists of 3 apps: backend (this API), client and admin.
-    //   Client should be accessible directly under /…
+    // Optionally, expose the Hajk client app directly under root (/)
     process.env.EXPOSE_CLIENT === "true" &&
       app.use(
         "/",
         Express.static(path.join(process.cwd(), "static", "client"))
       );
 
-    //   …while admin app should be under /admin. Notice access restriction middleware.
-    process.env.EXPOSE_ADMIN === "true" &&
-      app.use("/admin", [
-        checkAdminAuthorization,
-        Express.static(path.join(process.cwd(), "static", "admin")),
-      ]);
-
     // Optionally, other directories placed in "static" can be exposed.
     this.setupStaticDirs();
   }
 
   setupStaticDirs() {
-    // This will run only once
     const l = log4js.getLogger("hajk.static");
 
     l.trace("Setting up access to static directories…");
@@ -202,17 +194,11 @@ export default class ExpressServer {
         })
         .filter((entry) => {
           // Filter out only files (we're not interested in directories).
-          if (entry.isDirectory() === false) return false;
-          // Filter out the special cases that are handled separately
-          switch (entry.name) {
-            // client and admin are special cases, handled separately. Exclude
-            // them from here.
-            case "client":
-            case "admin":
-              return false;
-
-            default:
-              return true;
+          // Also, "client" is a special cases, handled separately.
+          if (entry.isDirectory() === false || entry.name === "client") {
+            return false;
+          } else {
+            return true;
           }
         })
         // Create an array using name of each Dirent object, remove file extension
