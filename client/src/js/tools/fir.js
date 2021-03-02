@@ -916,8 +916,8 @@ var FirModel = {
         }
 
         exportItems.forEach(hit => {
-            if(nycklar.indexOf(hit.get(this.get("realEstateLayer").fnrField) > -1)){
-                nycklar.push(hit.get(this.get("realEstateLayer").fnrField));
+            if(nycklar.indexOf(hit.get(this.get("realEstateLayer").fnrField) > -1) && hit.get(this.get("realEstateLayer").fnrField) !== undefined){
+                nycklar.push(hit.get(this.get("realEstateLayer").fnrField))
             }
         });
 
