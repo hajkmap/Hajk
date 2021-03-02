@@ -1,7 +1,4 @@
 // We need som default options before we
-
-import { Object } from "ol";
-
 // get the real default options from appConfig
 let config = {
   hfetch: {
@@ -10,22 +7,26 @@ let config = {
 };
 
 // From appConfig it looks approx like this.
-// let config = {
-//   fetch: {
-//     useDomainOverrides: true,
-//     defaultOptions: { credentials: "same-origin" },
-//     domainOverrides: {
-//       "www.requires-credentials.com": {
-//         credentials: "include",
-//       },
-//     },
+// "hfetch": {
+//   "defaultOptions": {
+//     "credentials": "same-origin"
 //   },
-// };
+//   "useOptionOverrides": true,
+//   "optionOverrides": {
+//     "*www.cachebuster.com*": {
+//       "cacheBuster": true
+//     },
+//     "*wms-utv.varberg.se*": {
+//       "credentials": "include"
+//     },
+//     "*www.requires-credentials.com*": {
+//       "credentials": "include"
+//     }
+//   }
+// }
 
 class FetchWrapper {
   // Had to disable.... eslint does not like my regex for som reason.
-  // eslint-disable-next-line no-useless-escape
-  domainRegex = /^(http:|https:|.*)(\/\/)([^\/]+)/gi;
   // eslint-disable-next-line no-useless-escape
   urlRegex = /([.*+?^=!:${}()|\[\]\/\\])/g;
 
@@ -36,33 +37,29 @@ class FetchWrapper {
     this.options = {};
     // eslint-disable-next-line no-undef
     this.hash = process.env.REACT_APP_GIT_HASH || "";
-
-    console.log(this.matchesDomain("http://www.apa.com", "*apan*"));
   }
 
-  matchesDomain(url, ruleWithWildCard) {
+  matchesUrlPart(url, ruleWithWildCard) {
     var escapeRegex = (url) => url.replace(this.urlRegex, "\\$1");
     return new RegExp(
       "^" + ruleWithWildCard.split("*").map(escapeRegex).join(".*") + "$"
     ).test(url);
   }
 
-  applyDomainOverrides() {
-    Object.keys(this.config.hfetch.domainOverrides).forEach((key) => {
-      console.log(key);
-    });
-  }
+  applyOptionOverrides() {
+    if (!this.partKeys) {
+      this.partKeys = Object.keys(this.config.hfetch.optionOverrides);
+    }
 
-  // applyDomainOverridesOLD() {
-  //   this.domainRegex.lastIndex = 0;
-  //   let matches = this.domainRegex.exec(this.url);
-  //   if (matches && matches.length === 4) {
-  //     let domain = matches[3];
-  //     let overrides = this.config.hfetch.domainOverrides[domain] || {};
-  //     this.options = Object.assign(this.options, overrides);
-  //   }
-  //   matches = null;
-  // }
+    const key = this.partKeys.find((key) => {
+      return this.matchesUrlPart(this.url, key);
+    });
+
+    if (key) {
+      let overrides = this.config.hfetch.optionOverrides[key] || {};
+      this.options = Object.assign(this.options, overrides);
+    }
+  }
 
   translateToJqueryAjaxOptions() {
     // translate credentials to work with $.ajax(), old admin UI.
@@ -78,8 +75,8 @@ class FetchWrapper {
       this.options
     );
 
-    if (this.config.hfetch.useDomainOverrides) {
-      this.applyDomainOverrides();
+    if (this.config.hfetch.useOptionOverrides) {
+      this.applyOptionOverrides();
     }
 
     if (this.isJqueryAjax) {
