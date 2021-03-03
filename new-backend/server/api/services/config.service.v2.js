@@ -217,13 +217,17 @@ class ConfigServiceV2 {
    */
   async getMapWithLayers(map, user, washContent = true) {
     logger.trace(
-      "[getMapWithLayers] invoked with 'washContent=%s' for user %s. Grabbing %s map config and all layers.",
+      "[getMapWithLayers] invoked with 'washContent=%s' for user %s. Grabbing '%s' map config and all layers.",
       washContent,
       user,
       map
     );
 
     try {
+      if (map === "layers")
+        throw new Error(
+          `"layers" is not a valid map config name. It looks like you are trying to access a v1 endpoint on the v2 API. Try adding "experimentalNewApi": true to Client's appConfig.json.`
+        );
       // First, let's get the map config. From there we will be able
       // to figure out which layers are needed, and if UserSpecificMaps
       // should be present.
