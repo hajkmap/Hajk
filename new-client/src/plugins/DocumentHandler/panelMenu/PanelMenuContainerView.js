@@ -97,7 +97,7 @@ class PanelMenuView extends React.PureComponent {
   };
 
   #bindSubscriptions = () => {
-    const { localObserver } = this.props;
+    const { localObserver, options } = this.props;
 
     localObserver.subscribe("document-clicked", (item) => {
       localObserver.publish("set-active-document", {
@@ -111,21 +111,21 @@ class PanelMenuView extends React.PureComponent {
     });
 
     localObserver.subscribe("document-maplink-clicked", (maplink) => {
-      if (this.props.options.displayLoadingOnMapLinkOpen) {
+      if (options.displayLoadingOnMapLinkOpen) {
         localObserver.publish("maplink-loading");
       }
       this.delayAndFlyToMapLink(maplink);
     });
 
     localObserver.subscribe("maplink-clicked", (item) => {
-      if (!isMobile && this.props.options.closePanelOnMapLinkOpen) {
+      if (!isMobile && options.closePanelOnMapLinkOpen) {
         localObserver.publish("set-active-document", {
           documentName: null,
           headerIdentifier: null,
         });
         this.props.app.globalObserver.publish("documentviewer.closeWindow");
       }
-      if (this.props.options.displayLoadingOnMapLinkOpen) {
+      if (options.displayLoadingOnMapLinkOpen) {
         localObserver.publish("maplink-loading");
       }
       this.delayAndFlyToMapLink(item.maplink);
