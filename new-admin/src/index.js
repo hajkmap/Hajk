@@ -18,10 +18,20 @@ import Backbone from "backbone";
 import { Router } from "backbone";
 import ApplicationView from "./views/application.jsx";
 import ApplicationModel from "./models/application.js";
+import {
+  initHFetch,
+  hfetch,
+  initFetchWrapper,
+  wrapJqueryAjax,
+} from "./utils/FetchWrapper";
 
 import "./index.css";
-//import $ from 'jquery';
+import $ from "jquery";
 //import find from 'array.prototype.find';
+
+initHFetch();
+// Wrap and forget until jquery is gone.
+wrapJqueryAjax($);
 
 // Copyright (C) 2016 Göteborgs Stad
 //
@@ -46,10 +56,6 @@ import "./index.css";
 // https://github.com/hajkmap/Hajk
 
 //find.shim();
-
-const fetchConfig = {
-  credentials: "same-origin",
-};
 
 (function () {
   function create_routes(routes, application_model) {
@@ -83,9 +89,11 @@ const fetchConfig = {
     ReactDOM.render(application_element, document.getElementById("root"));
   }
 
-  fetch("config.json", fetchConfig).then((response) => {
+  hfetch("config.json").then((response) => {
     response.json().then((config) => {
       try {
+        // Update hfetch with loaded config.
+        initFetchWrapper(config);
         load(config);
       } catch (error) {
         console.log("error", error);

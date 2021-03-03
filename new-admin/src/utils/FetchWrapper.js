@@ -212,7 +212,7 @@ function xJqueryAjax(...args) {
     jw.options = args[1];
   }
   jw.overrideOptions();
-  //console.log("xJqueryAjax", jw.url, jw.options);
+  // console.log("xJqueryAjax", jw.url, jw.options);
   return originalJqueryAjax(jw.url, jw.options);
 }
 
