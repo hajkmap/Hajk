@@ -232,11 +232,14 @@ class ConfigServiceV2 {
       // to figure out which layers are needed, and if UserSpecificMaps
       // should be present.
       const mapConfig = await this.getMapConfig(map, user, washContent);
+      if (mapConfig.error) throw mapConfig.error;
 
+      const layersStore = await this.getLayersStore(user, true);
+      if (layersStore.error) throw layersStore.error;
       // Invoke the "cleaner" helper, expect only used layers in return.
       const layersConfig = this.#removeUnusedLayersFromStore(
         mapConfig,
-        await this.getLayersStore(user, true)
+        layersStore
       );
 
       // Finally, take a look in LayerSwitcher.options and see
@@ -416,6 +419,9 @@ class ConfigServiceV2 {
       const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = await JSON.parse(text);
+
+      if (text.error) throw text.error;
+      if (json.error) throw json.error;
 
       // TODO:
       // /config/layers should be way smarter than it is today. We should modify client
