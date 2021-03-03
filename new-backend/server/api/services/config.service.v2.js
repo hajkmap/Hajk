@@ -39,7 +39,7 @@ class ConfigServiceV2 {
 
       if (washContent === false) {
         logger.trace(
-          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire  the entire %s map config.",
+          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire%s map config.",
           user,
           map
         );
