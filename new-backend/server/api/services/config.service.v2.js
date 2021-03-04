@@ -217,27 +217,34 @@ class ConfigServiceV2 {
    */
   async getMapWithLayers(map, user, washContent = true) {
     logger.trace(
-      "[getMapWithLayers] invoked with 'washContent=%s' for user %s. Grabbing %s map config and all layers.",
+      "[getMapWithLayers] invoked with 'washContent=%s' for user %s. Grabbing '%s' map config and all layers.",
       washContent,
       user,
       map
     );
 
     try {
+      if (map === "layers")
+        throw new Error(
+          `"layers" is not a valid map config name. It looks like you are trying to access a v1 endpoint on the v2 API. Try adding "experimentalNewApi": true to Client's appConfig.json.`
+        );
       // First, let's get the map config. From there we will be able
       // to figure out which layers are needed, and if UserSpecificMaps
       // should be present.
       const mapConfig = await this.getMapConfig(map, user, washContent);
+      if (mapConfig.error) throw mapConfig.error;
 
+      const layersStore = await this.getLayersStore(user, true);
+      if (layersStore.error) throw layersStore.error;
       // Invoke the "cleaner" helper, expect only used layers in return.
       const layersConfig = this.#removeUnusedLayersFromStore(
         mapConfig,
-        await this.getLayersStore(user, true)
+        layersStore
       );
 
       // Finally, take a look in LayerSwitcher.options and see
       // whether user specific maps are needed. If so, grab them.
-      let userSpecificMaps = null; // Set to null, client looks for this key!
+      let userSpecificMaps = []; // Set to empty array, client will do .map() on it.
       if (mapConfig.map.mapselector === true) {
         userSpecificMaps = await this.getUserSpecificMaps(user);
       }
@@ -412,6 +419,9 @@ class ConfigServiceV2 {
       const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = await JSON.parse(text);
+
+      if (text.error) throw text.error;
+      if (json.error) throw json.error;
 
       // TODO:
       // /config/layers should be way smarter than it is today. We should modify client
