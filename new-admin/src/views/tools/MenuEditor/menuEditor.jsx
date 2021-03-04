@@ -28,6 +28,9 @@ const styles = (theme) => ({
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(1),
   },
+  warningText: {
+    color: theme.palette.error.main,
+  },
 });
 
 class ToolOptions extends Component {
@@ -573,7 +576,7 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
-          <div className="separator">Meny Ändringar</div>
+          <div className="separator">Menyinställningar</div>
           <p>
             <ColorButtonBlue
               variant="contained"
@@ -584,7 +587,7 @@ class ToolOptions extends Component {
               <Typography variant="button">Redigera meny</Typography>
             </ColorButtonBlue>
           </p>
-          <div className="separator">Generalla inställningar</div>
+          <div className="separator">Generella inställningar</div>
           <div>
             <label htmlFor="documentOnStart">
               Startdokument{" "}
@@ -707,7 +710,7 @@ class ToolOptions extends Component {
             </label>
           </div>
 
-          <div className="separator">Innehållsförteckning inställningar</div>
+          <div className="separator">Innehållsförteckning</div>
 
           <div>
             <input
@@ -803,10 +806,18 @@ class ToolOptions extends Component {
               value={this.state.tableOfContents.chapterLevelsToShow}
             />
           </div>
-          <div className="separator">Utseende inställningar</div>
+          <div className="separator">Faktaruta</div>
+          <div>
+            <p className={classes.warningText}>
+              <b>
+                Vid användning av dessa inställningar riskeras dark/light-mode
+                sättas ur spel
+              </b>
+            </p>
+          </div>
           <div>
             <label htmlFor="textAreaBackgroundColor">
-              Bakgrundsfärg på faktaruta{" "}
+              Bakgrundsfärg{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
@@ -834,7 +845,7 @@ class ToolOptions extends Component {
 
           <div>
             <label htmlFor="textAreaDividerColor">
-              Kantfärg på faktaruta{" "}
+              Kantfärg{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
