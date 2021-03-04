@@ -178,7 +178,7 @@ class Window extends React.PureComponent {
   }
 
   componentDidUpdate = (prevProps, prevState) => {
-    if (prevProps.open !== this.props.open && this.props.open) {
+    if (this.props.open) {
       //This is ugly but there is a timing problem further down somewhere (i suppose?).
       //componentDidUpdate is run before the render is actually fully completed and the DOM is ready
       setTimeout(() => {

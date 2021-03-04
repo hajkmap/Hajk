@@ -57,6 +57,12 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
         </Grid>
         <Grid spacing={2} item container>
           <Grid item>
+            <p className={classes.warningText}>
+              <b>
+                Vid användning av dessa inställningar riskeras dark/light-mode
+                sättas ur spel
+              </b>
+            </p>
             <Grid item>
               <label style={{ margin: 0 }}>data-background-color</label>
             </Grid>
@@ -129,6 +135,9 @@ const useStyles = makeStyles((theme) => ({
   },
   textAreaButton: {
     marginRight: theme.spacing(1),
+  },
+  warningText: {
+    color: theme.palette.error.main,
   },
 }));
 
