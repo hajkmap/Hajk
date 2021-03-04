@@ -30,6 +30,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style.js";
 import SnapHelper from "./SnapHelper";
+import { hfetch } from "utils/FetchWrapper";
 
 class AppModel {
   registerWindowPlugin(windowComponent) {
@@ -70,6 +71,7 @@ class AppModel {
     this.layersFromParams = [];
     this.cqlFiltersFromParams = {};
     register(this.coordinateSystemLoader.getProj4());
+    this.hfetch = hfetch;
   }
   /**
    * Add plugin to this tools property of loaded plugins.
@@ -327,6 +329,7 @@ class AppModel {
           this.config.appConfig.proxy,
           this.globalObserver
         );
+
         this.map.addLayer(layerItem.layer);
         break;
       case "wmts":

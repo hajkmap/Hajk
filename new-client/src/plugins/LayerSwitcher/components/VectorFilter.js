@@ -8,6 +8,7 @@ import Input from "@material-ui/core/Input";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { Vector as VectorLayer } from "ol/layer";
+import { hfetch } from "utils/FetchWrapper";
 
 const styles = (theme) => ({
   formControl: {
@@ -38,7 +39,7 @@ class VectorFilter extends React.PureComponent {
    */
   loadFeatureInfo = () => {
     const { url, featureType } = this.props.layer.getProperties();
-    fetch(
+    hfetch(
       url +
         `?request=describeFeatureType&outputFormat=application/json&typename=${featureType}`
     ).then((response) => {

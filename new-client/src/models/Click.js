@@ -3,10 +3,7 @@ import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 //import GML from "ol/format/GML";
 import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
-
-const fetchConfig = {
-  credentials: "same-origin",
-};
+import { hfetch } from "utils/FetchWrapper";
 
 function query(map, layer, evt) {
   const coordinate = evt.coordinate;
@@ -37,7 +34,7 @@ function query(map, layer, evt) {
     const url = layer
       .getSource()
       .getFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
-    return fetch(url, fetchConfig);
+    return hfetch(url);
   } else {
     return false;
   }
