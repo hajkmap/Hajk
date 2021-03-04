@@ -1,6 +1,6 @@
 import log4js from "log4js";
 
-const logger = log4js.getLogger("hajk");
+const logger = log4js.getLogger("detailed.request.logger");
 
 export default function detailedRequestLogger(req, res, next) {
   logger.trace("req.ip: %o", req.ip);

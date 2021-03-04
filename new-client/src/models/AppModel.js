@@ -208,6 +208,7 @@ class AppModel {
         zoom: config.map.zoom,
       }),
     });
+    // FIXME: Remove?
     setTimeout(() => {
       this.map.updateSize();
     }, 0);
@@ -410,6 +411,7 @@ class AppModel {
 
     // Prepare layers
     this.layers = this.flattern(layerSwitcherConfig);
+    // FIXME: Use map instead?
     Object.keys(this.layers)
       .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
       .map((sortedKey) => this.layers[sortedKey])
@@ -423,6 +425,7 @@ class AppModel {
         this.addMapLayer(layer);
       });
 
+    // FIXME: Move to infoClick instead. All other plugins create their own layers.
     if (infoclickConfig !== undefined) {
       this.addHighlightLayer(infoclickConfig.options);
     }
