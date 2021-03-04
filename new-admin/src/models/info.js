@@ -23,9 +23,9 @@
 import { Model } from "backbone";
 
 var info = Model.extend({
-  hello: function() {
+  hello: function () {
     console.log("hello");
-  }
+  },
 });
 
 export default info;

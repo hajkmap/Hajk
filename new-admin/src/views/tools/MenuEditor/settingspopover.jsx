@@ -9,7 +9,7 @@ import Link from "@material-ui/core/Link";
 import { ColorButtonGreen, ColorButtonRed } from "./custombuttons";
 import Checkbox from "@material-ui/core/Checkbox";
 
-const getPopoverMenuItemTitle = label => {
+const getPopoverMenuItemTitle = (label) => {
   return <Typography variant="h6">{label}: </Typography>;
 };
 
@@ -26,37 +26,37 @@ const getTextField = (value, onChangeFunction, variant) => {
   );
 };
 
-const styles = theme => ({
-  paper: { width: "20%", padding: "20px" }
+const styles = (theme) => ({
+  paper: { width: "20%", padding: "20px" },
 });
 
 class SettingsPopover extends React.Component {
   state = {
     color: this.props.menuItem.color,
     icon: this.props.menuItem.icon,
-    expandedSubMenu: this.props.menuItem.expandedSubMenu
+    expandedSubMenu: this.props.menuItem.expandedSubMenu,
   };
 
-  updateColorState = e => {
+  updateColorState = (e) => {
     this.setState({ color: e.target.value });
   };
 
-  updateIconState = e => {
+  updateIconState = (e) => {
     let value = e.target.value;
-    this.setState(prevState => {
+    this.setState((prevState) => {
       prevState.icon.materialUiIconName = value;
       return {
-        icon: prevState.icon
+        icon: prevState.icon,
       };
     });
   };
 
-  updateDescriptiveIconText = e => {
+  updateDescriptiveIconText = (e) => {
     let value = e.target.value;
-    this.setState(prevState => {
+    this.setState((prevState) => {
       prevState.icon.descriptiveText = value;
       return {
-        icon: prevState.icon
+        icon: prevState.icon,
       };
     });
   };
@@ -89,7 +89,7 @@ class SettingsPopover extends React.Component {
     );
   };
 
-  handleColorPickerChange = color => {
+  handleColorPickerChange = (color) => {
     this.setState({ color: color.hex });
   };
 
@@ -174,11 +174,11 @@ class SettingsPopover extends React.Component {
           anchorEl={anchorEl}
           anchorOrigin={{
             vertical: "bottom",
-            horizontal: "right"
+            horizontal: "right",
           }}
           transformOrigin={{
             vertical: "top",
-            horizontal: "left"
+            horizontal: "left",
           }}
         >
           {this.renderSettings()}
