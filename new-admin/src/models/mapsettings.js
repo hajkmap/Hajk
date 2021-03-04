@@ -23,7 +23,6 @@
 import { Model } from "backbone";
 import { prepareProxyUrl } from "../utils/ProxyHelper";
 import X2JS from "x2js";
-import { hfetch } from "utils/FetchWrapper";
 
 const $ = require("jquery");
 const jQuery = $;
@@ -41,7 +40,7 @@ var menu = Model.extend({
       this.get("config").url_map_list,
       this.get("config").url_proxy
     );
-    hfetch(url).then((response) => {
+    fetch(url).then((response) => {
       response.json().then((data) => {
         var name = data[0];
         if (name === undefined) {

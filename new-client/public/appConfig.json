@@ -11,20 +11,6 @@
   "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
   "networkErrorMessage": "Nätverksfel. Försök att ladda om sidan genom att trycka på F5.",
   "parseErrorMessage": "Konfigurationsfel. Försök att ladda om sidan genom att trycka på F5.",
-  "hfetch": {
-    "defaultOptions": {
-      "credentials": "same-origin"
-    },
-    "useOptionOverrides": false,
-    "optionOverrides": {
-      "https://wms-utv.varberg.se/*": {
-        "credentials": "include"
-      },
-      "https://wms-utv.varberg.se/geoserver/*": {
-        "credentials": "include"
-      }
-    }
-  },
   "announcements": [
     {
       "id": 1,

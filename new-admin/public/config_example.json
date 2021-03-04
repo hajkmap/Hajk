@@ -61,19 +61,5 @@
     { "name": "edit", "title": "Redigeringstjänster" },
     { "name": "mapsettings", "title": "Kartor" },
     { "name": "informative", "title": "Dokumenthanterare" }
-  ],
-  "hfetch": {
-    "defaultOptions": {
-      "credentials": "same-origin"
-    },
-    "useOptionOverrides": false,
-    "optionOverrides": {
-      "https://wms-utv.varberg.se/*": {
-        "credentials": "include"
-      },
-      "https://wms-utv.varberg.se/geoserver/*": {
-        "credentials": "include"
-      }
-    }
-  }
+  ]
 }

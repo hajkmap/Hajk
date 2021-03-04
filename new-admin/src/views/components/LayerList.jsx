@@ -1,7 +1,6 @@
 import React from "react";
 import { Component } from "react";
 import LayerListItem from "./LayerListItem.jsx";
-import { hfetch } from "utils/FetchWrapper";
 
 class LayerList extends Component {
   constructor(props) {
@@ -60,7 +59,7 @@ class LayerList extends Component {
 
   componentDidMount() {
     async function getJson(url) {
-      var reponse = await hfetch(url);
+      var reponse = await fetch(url);
       var json = await reponse.json();
       return json;
     }

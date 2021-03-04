@@ -1,7 +1,6 @@
 import React from "react";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
-import { hfetch } from "utils/FetchWrapper";
 
 /**
  * @summary  DocumentHandler model that doesn't do much.
@@ -13,10 +12,17 @@ import { hfetch } from "utils/FetchWrapper";
  * @class DocumentHandlerModel
  */
 
+const fetchConfig = {
+  credentials: "same-origin",
+};
+
 export default class DocumentHandlerModel {
   internalId = 0;
 
   constructor(settings) {
+    this.mapServiceUrl =
+      settings.app.config.appConfig.proxy +
+      settings.app.config.appConfig.mapserviceBase;
     this.settings = settings;
     this.app = settings.app;
     this.allDocuments = [];
@@ -178,7 +184,10 @@ export default class DocumentHandlerModel {
   async fetchJsonDocument(title) {
     let response;
     try {
-      response = await hfetch(`/informative/load/${title}`);
+      response = await fetch(
+        `${this.mapServiceUrl}/informative/load/${title}`,
+        fetchConfig
+      );
       const text = await response.text();
       if (text === "File not found") {
         throw new Error(

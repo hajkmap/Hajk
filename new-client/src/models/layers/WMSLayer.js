@@ -5,7 +5,6 @@ import ImageWMS from "ol/source/ImageWMS";
 import TileWMS from "ol/source/TileWMS";
 import GeoJSON from "ol/format/GeoJSON";
 import LayerInfo from "./LayerInfo.js";
-import { hfetch, overrideLayerSourceParams } from "utils/FetchWrapper";
 
 class WMSLayer {
   constructor(config, proxyUrl, globalObserver) {
@@ -28,8 +27,6 @@ class WMSLayer {
       cacheSize: this.subLayers.length > 1 ? 32 : 2048,
       transition: this.subLayers.length > 1 ? 0 : 100,
     };
-
-    overrideLayerSourceParams(source);
 
     if (
       config.resolutions &&
@@ -112,7 +109,7 @@ class WMSLayer {
           url = encodeURIComponent(url);
         }
 
-        hfetch(this.proxyUrl + url)
+        fetch(this.proxyUrl + url)
           .then((response) => {
             response.json().then((data) => {
               var features = new GeoJSON().readFeatures(data);

@@ -8,7 +8,6 @@ import { fromCircle } from "ol/geom/Polygon";
 
 import { arraySort } from "../utils/ArraySort";
 import { decodeCommas } from "../utils/StringCommaCoder";
-import { hfetch } from "utils/FetchWrapper";
 
 const ESCAPE_CHAR = "!";
 const SINGLE_CHAR = ".";
@@ -433,6 +432,7 @@ class SearchModel {
     const signal = controller.signal;
 
     const request = {
+      credentials: "same-origin",
       signal: signal,
       method: "POST",
       headers: {
@@ -440,9 +440,7 @@ class SearchModel {
       },
       body: xmlString,
     };
-    // TODO: This special proxy is not handled in FetchWrapper.
-    // Maybe it could be configured i hfetch config section in appConfig?
-    const promise = hfetch(
+    const promise = fetch(
       this.#app.config.appConfig.searchProxy + searchSource.url,
       request
     );
