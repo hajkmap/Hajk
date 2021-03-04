@@ -46,11 +46,10 @@ class MapSwitcher extends React.PureComponent {
   componentDidMount() {
     let { proxy, mapserviceBase } = this.appModel.config.appConfig;
 
-    // If user specific maps already exist in config, there's no need
-    // to fetch again (the new API provides this). Please note that
-    // it will be null if map doesn't want to show the map selector -
-    // hence we look for undefined specifically: the old API will not
-    // provide this property at all.
+    // If user specific maps is provided by the new API, the key will
+    // already exist in config and there's no need to fetch again.
+    // However, if it's undefined, it looks like we're using the old API
+    // and MapSwitcher must do the fetch by itself.
     if (this.appModel.config.userSpecificMaps !== undefined) {
       this.handleLoading(this.appModel.config.userSpecificMaps);
     } else {

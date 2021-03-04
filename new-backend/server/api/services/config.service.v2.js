@@ -244,7 +244,7 @@ class ConfigServiceV2 {
 
       // Finally, take a look in LayerSwitcher.options and see
       // whether user specific maps are needed. If so, grab them.
-      let userSpecificMaps = null; // Set to null, client looks for this key!
+      let userSpecificMaps = []; // Set to empty array, client will do .map() on it.
       if (mapConfig.map.mapselector === true) {
         userSpecificMaps = await this.getUserSpecificMaps(user);
       }
