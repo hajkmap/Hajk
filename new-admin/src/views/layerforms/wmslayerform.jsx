@@ -23,7 +23,6 @@
 import React from "react";
 import { Component } from "react";
 import $ from "jquery";
-import { hfetch } from "utils/FetchWrapper";
 var solpop;
 
 const defaultState = {
@@ -1050,7 +1049,7 @@ class WMSLayerForm extends Component {
     //
     url = url.substring(0, url.lastIndexOf("/")) + "/rest/workspaces";
     //
-    const res = await hfetch(url);
+    const res = await fetch(url);
     //
     const json = await res.json();
     //

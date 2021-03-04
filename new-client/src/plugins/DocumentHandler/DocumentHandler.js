@@ -9,7 +9,10 @@ import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
 import { withTheme, createMuiTheme } from "@material-ui/core/styles";
 import { deepMerge } from "../../utils/DeepMerge";
-import { hfetch } from "utils/FetchWrapper";
+
+const fetchOpts = {
+  credentials: "same-origin",
+};
 
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
@@ -80,7 +83,7 @@ class DocumentHandler extends React.PureComponent {
 
   fetchCustomThemeJson = () => {
     const { options } = this.props;
-    return hfetch(options.customThemeUrl)
+    return fetch(options.customThemeUrl, fetchOpts)
       .then((res) => {
         return res.json().then((documentHandlerTheme) => {
           if (documentHandlerTheme.typography) {
