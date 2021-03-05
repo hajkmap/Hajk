@@ -28,15 +28,14 @@ class PanelList extends React.PureComponent {
   };
 
   #getSubMenuItems = (item) => {
-    return item.menuItemIds.reduce((acc, subItemId) => {
+    return item.menuItemIds.reduce((subMenuItems, subItemId) => {
       const subItem = Object.values(this.props.items).find((i) => {
         return i.id === subItemId;
       });
       if (subItem.menuItemIds.length > 0) {
-        acc = [...acc, ...this.#getSubMenuItems(subItem)];
+        subMenuItems = [...subMenuItems, ...this.#getSubMenuItems(subItem)];
       }
-      acc = [...acc, subItem];
-      return acc;
+      return [...subMenuItems, subItem];
     }, []);
   };
 
@@ -58,7 +57,7 @@ class PanelList extends React.PureComponent {
       <List disablePadding id="panelmenu" role="navigation" component="nav">
         {Object.values(items)
           .filter((item) => {
-            return item.level == level;
+            return item.level === level;
           })
           .map((item) => {
             return (

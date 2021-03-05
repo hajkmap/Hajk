@@ -17,77 +17,72 @@ class PanelMenuView extends React.PureComponent {
   };
 
   handleExpandClick = (id) => {
+    this.updateColorAndExpandedState(id);
+  };
+
+  #setInternalReferences = () => {
+    const { options } = this.props;
+    this.internalId = 0;
+    options.menuConfig.menu.forEach((menuItem) => {
+      this.#setInternalId(menuItem);
+    });
+
+    this.setState({
+      items: this.#getNormalizedResultState(options.menuConfig.menu),
+    });
+  };
+
+  getTopLevelItem = (clickedItem, newItems) => {
+    if (!clickedItem.parentId) {
+      return clickedItem;
+    } else {
+      return Object.values(newItems).find((item) => {
+        return item.allChildren.indexOf(clickedItem.id) > -1;
+      });
+    }
+  };
+
+  updateColorAndExpandedState = (idClicked) => {
     const newItems = { ...this.state.items };
-    newItems[id].expandedSubMenu = !newItems[id].expandedSubMenu;
-    newItems[id].colored = newItems[id].expandedSubMenu;
+    const clickedItem = newItems[idClicked];
+
+    let selectedItem = Object.values(newItems).find((item) => {
+      return item.selected;
+    });
+
+    const topLevelItem = this.getTopLevelItem(clickedItem, newItems);
+    let idsToColor = [topLevelItem.id, ...topLevelItem.allChildren];
+
     Object.values(newItems).forEach((item) => {
-      if (item.parentId === id) {
-        item.colored = true;
+      item.colored = idsToColor.indexOf(item.id) !== -1;
+      if (clickedItem.allParents.indexOf(item.id) !== -1) {
+        item.expandedSubMenu = true;
+      }
+      if (item.id === idClicked) {
+        if (item.hasSubMenu) {
+          item.expandedSubMenu = !item.expandedSubMenu;
+          item.selected = false;
+        } else {
+          if (selectedItem) {
+            selectedItem.selected = false;
+          }
+
+          item.selected = true;
+        }
       }
     });
 
     this.setState({ items: newItems });
   };
 
-  isTopLevelMenuItemColored = () => {
-    const { options } = this.props;
-    return options.menuConfig.menu.some((item) => {
-      return (
-        item.menu.length === 0 && this.state.coloredIndex.indexOf(item.id) > -1
-      );
-    });
-  };
-
-  /*
-  setActiveMenuItems = (documentName, item) => {
-    console.log(documentName, "docuemtnNema");
-    if (!documentName) {
-      if (this.isTopLevelMenuItemColored()) {
-        this.setState({
-          selectedIndex: null,
-          coloredIndex: [],
-        });
-      } else {
-        this.setState({
-          selectedIndex: null,
-        });
-      }
-    }
-    if (documentName === item.document) {
-      this.setState({
-        selectedIndex: item.id,
-        coloredIndex: this.#getItemIdsToColor(item),
-        expandedIndex: this.#getItemIdsToExpand(item),
-      });
-    }
-  };*/
-
-  #setInternalReferences = () => {
-    const { options } = this.props;
-    this.internalId = 0;
-    options.menuConfig.menu.forEach((menuItem) => {
-      this.#setItemProperties(menuItem);
-      this.internalId = this.internalId + 1;
-    });
-
-    const test = this.#getNormalizedResultState(options.menuConfig.menu);
-    this.setState({
-      items: test,
-    });
-  };
-
   #bindSubscriptions = () => {
     const { localObserver, options } = this.props;
 
     localObserver.subscribe("set-active-document", ({ documentName }) => {
-      console.log(documentName, "documentName");
-      const newItems = { ...this.state.items };
-      Object.values(newItems).forEach((item) => {
-        item.selected = item.document === documentName;
-        item.colored = item.document === documentName;
+      const itemClicked = Object.values(this.state.items).find((item) => {
+        return item.document === documentName;
       });
-
-      this.setState({ items: newItems });
+      this.updateColorAndExpandedState(itemClicked.id);
     });
 
     localObserver.subscribe("document-clicked", (id) => {
@@ -134,16 +129,38 @@ class PanelMenuView extends React.PureComponent {
     }, 100);
   };
 
-  #getNormalizedResultState = (menu, parentId = null, level = 0) => {
+  getAllChildrenIds = (menu) => {
+    return menu.reduce((allChildren, item) => {
+      if (item.menu && item.menu.length > 0) {
+        allChildren = [...allChildren, ...this.getAllChildrenIds(item.menu)];
+      }
+      return [...allChildren, item.id];
+    }, []);
+  };
+
+  #getNormalizedResultState = (
+    menu,
+    parentId = null,
+    level = 0,
+    parentIds = []
+  ) => {
     let normalized = menu.reduce((acc, menuItem) => {
       menuItem.parentId = parentId;
       menuItem.level = level;
       menuItem.selected = false;
       menuItem.colored = false;
       menuItem.menuItemIds = [];
+      menuItem.allChildren = [];
+      menuItem.allParents = parentIds;
+      menuItem.hasSubMenu = false;
       acc = { ...acc, ...{ [menuItem.id]: menuItem } };
 
       if (menuItem.menu && menuItem.menu.length > 0) {
+        menuItem.hasSubMenu = true;
+        menuItem.allChildren = [
+          ...menuItem.allChildren,
+          ...this.getAllChildrenIds(menuItem.menu),
+        ];
         menuItem.menuItemIds = [
           ...menuItem.menuItemIds,
           ...menuItem.menu.map((menuItem) => {
@@ -156,7 +173,8 @@ class PanelMenuView extends React.PureComponent {
           ...this.#getNormalizedResultState(
             menuItem.menu,
             menuItem.id,
-            level + 1
+            level + 1,
+            [...parentIds, menuItem.id]
           ),
         };
       }
@@ -168,74 +186,19 @@ class PanelMenuView extends React.PureComponent {
     return normalized;
   };
 
-  #setItemProperties = (menuItem) => {
-    menuItem.id = this.internalId;
+  #getNextUniqueId = () => {
+    this.internalId += 1;
+    return this.internalId;
+  };
 
+  #setInternalId = (menuItem) => {
+    menuItem.id = this.#getNextUniqueId();
     if (menuItem.menu && menuItem.menu.length > 0) {
       menuItem.menu.forEach((subMenuItem) => {
-        this.internalId = this.internalId + 1;
-        this.#setItemProperties(subMenuItem, menuItem);
+        this.#setInternalId(subMenuItem, menuItem);
       });
     }
   };
-  /*
-  #getAllAncestors = (item) => {
-    const ancestors = [];
-    let parent = item.parent;
-    while (parent) {
-      ancestors.push(parent);
-      parent = parent.parent;
-    }
-    return ancestors;
-  };
-
-  #extractIdsFromItems = (items) => {
-    return items.map((item) => {
-      return item.id;
-    });
-  };
-*/
-  getItemList = () => {
-    const { options } = this.props;
-    console.log(options.menuConfig.menu, "Menu");
-    return options.menuConfig.menu;
-  };
-  /*
-  #getAllSubMenuIds = (menu) => {
-    let itemIds = [];
-    menu.forEach((menuItem) => {
-      if (menuItem.menu.length > 0) {
-        itemIds.push(menuItem.id);
-        itemIds = itemIds.concat(this.#getAllSubMenuIds(menuItem.menu));
-      } else {
-        itemIds.push(menuItem.id);
-      }
-    });
-    return itemIds;
-  };
-
-  #getItemIdsToColor = (item) => {
-    const ancestors = [item, ...this.#getAllAncestors(item)];
-    const ancestorIds = this.#extractIdsFromItems(ancestors);
-    const allSubMenuItemIds = ancestors.reduce((acc, ancestor) => {
-      acc = acc.concat(this.#getAllSubMenuIds(ancestor.menu));
-      return acc;
-    }, []);
-    const topAncestor = ancestors.find((ancestor) => {
-      return ancestor.parent === undefined;
-    });
-    const isTopAncestor = topAncestor.id === item.id;
-    const allIds = [...ancestorIds, ...allSubMenuItemIds];
-    const isExpanded = this.state.expandedIndex.some((id) => {
-      return ancestorIds.indexOf(id) > -1;
-    });
-
-    if (isExpanded && isTopAncestor) {
-      return [];
-    }
-
-    return allIds;
-  };*/
 
   render() {
     const { localObserver, app } = this.props;
