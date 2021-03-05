@@ -85,8 +85,10 @@ export default class FeatureStyle {
         : this.#defaultHighlightStyleSettings;
 
     // Create new color to be used for icons: start with fill color but make sure that it's
-    // _not_ transparent by setting the alpha channel value to 0.8.
-    const iconColor = settings.fillColor.replace(/(?<=,)[\d.]*(?=\))/, "0.8");
+    // _not_ transparent by setting the alpha channel value to 0.8. Unfortunately Safari doesn't
+    // support lookbehind, so we must do it this way. Basically we do:
+    // "rgba(x,y,z,ź)" => "rgba(x,y,z,0.8)"
+    const iconColor = settings.fillColor.replace(/,[\d.]*\)/, ",0.8)");
 
     // Default SVG icon to be used as marker. Placed here so we can grab the current style's fill color.
     const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32pt" height="32pt" fill="${iconColor}"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
