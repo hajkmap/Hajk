@@ -97,6 +97,9 @@ class FetchWrapper {
       this.translateToJqueryAjaxOptions();
     }
     if (this.options.cacheBuster === true) {
+      // cacheBuster will force browser to reload the file.
+      // In this case it's using git commit hash.
+      // So every new Hajk version that's build will force reload.
       let cacheBuster = `${
         this.url.indexOf("?") === -1 ? "?" : "&"
       }${cacheBusterParamName}=${this.hash}`;
@@ -166,9 +169,9 @@ function overrideLayerSourceParams(source) {
   fw.url = source.url;
   fw.options = { ...source };
   if (fw.config.hfetch.useOptionOverrides) {
-    this.applyOptionOverrides();
+    fw.applyOptionOverrides();
   }
-  if (fw.options.credentials && fw.options.credentials === "include") {
+  if (fw.options?.credentials === "include") {
     if (source.crossOrigin) {
       // handle crossOrigin in tile images etc
       source.crossOrigin = "use-credentials";
@@ -181,7 +184,7 @@ function hfetch(...args) {
   fw.reset();
   fw.url = args[0];
 
-  fw.options = args[1];
+  fw.options = args[1] || {};
   fw.overrideOptions();
   //console.log("hfetch", fw.url, fw.options);
   return originalFetch(fw.url, fw.options);
