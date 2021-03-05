@@ -8,22 +8,40 @@ class PanelList extends React.PureComponent {
 
     return (
       <PanelMenuListItem
-        setActiveMenuItems={this.props.setActiveMenuItems}
-        selectedIndex={this.props.selectedIndex}
-        expandedIndex={this.props.expandedIndex}
         handleExpandClick={this.props.handleExpandClick}
         type={type}
-        coloredIndex={this.props.coloredIndex}
+        menu={item.menu}
+        icon={item.icon}
+        id={item.id}
+        level={item.level}
+        color={item.color}
+        title={item.title}
+        subMenuItems={this.#getSubMenuItems(item)}
+        expanded={item.expandedSubMenu}
+        colored={item.colored}
+        selected={item.selected}
         handleMenuButtonClick={this.handleMenuButtonClick}
         localObserver={localObserver}
         globalObserver={globalObserver}
-        item={item}
       ></PanelMenuListItem>
     );
   };
 
+  #getSubMenuItems = (item) => {
+    return item.menuItemIds.reduce((acc, subItemId) => {
+      const subItem = Object.values(this.props.items).find((i) => {
+        return i.id === subItemId;
+      });
+      if (subItem.menuItemIds.length > 0) {
+        acc = [...acc, ...this.#getSubMenuItems(subItem)];
+      }
+      acc = [...acc, subItem];
+      return acc;
+    }, []);
+  };
+
   #renderMenuItem = (item) => {
-    if (item.menu.length > 0) {
+    if (item.menuItemIds && item.menuItemIds.length > 0) {
       return this.getMenuItemType(item, "submenu");
     } else if (item.document) {
       return this.getMenuItemType(item, "document");
@@ -35,16 +53,20 @@ class PanelList extends React.PureComponent {
   };
 
   render() {
-    const { menu } = this.props;
+    const { items, level } = this.props;
     return (
       <List disablePadding id="panelmenu" role="navigation" component="nav">
-        {menu.map((item) => {
-          return (
-            <React.Fragment key={item.id}>
-              {this.#renderMenuItem(item, item.id)}
-            </React.Fragment>
-          );
-        })}
+        {Object.values(items)
+          .filter((item) => {
+            return item.level == level;
+          })
+          .map((item) => {
+            return (
+              <React.Fragment key={item.id}>
+                {this.#renderMenuItem(item, item.id)}
+              </React.Fragment>
+            );
+          })}
       </List>
     );
   }

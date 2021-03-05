@@ -3,38 +3,30 @@ import PanelList from "./PanelList";
 import { isMobile } from "../../../utils/IsMobile";
 
 class PanelMenuView extends React.PureComponent {
-  state = {
-    selectedIndex: null,
-    coloredIndex: [],
-    expandedIndex: [],
-  };
-
   constructor(props) {
     super(props);
-    this.#setInternalReferences();
     this.#bindSubscriptions();
   }
 
-  componentDidMount = () => {
-    const { options } = this.props;
-    this.setState({
-      expandedIndex: this.getDefaultExpanded(options.menuConfig.menu),
-    });
+  state = {
+    items: {},
   };
 
-  handleExpandClick = (item) => {
-    const indexOfItemId = this.state.expandedIndex.indexOf(item.id);
-    let newExpandedState = [...this.state.expandedIndex];
+  componentDidMount = () => {
+    this.#setInternalReferences();
+  };
 
-    if (indexOfItemId === -1) {
-      newExpandedState.push(item.id);
-    } else {
-      newExpandedState.splice(indexOfItemId);
-    }
-    this.setState({
-      expandedIndex: newExpandedState,
-      coloredIndex: this.#getItemIdsToColor(item),
+  handleExpandClick = (id) => {
+    const newItems = { ...this.state.items };
+    newItems[id].expandedSubMenu = !newItems[id].expandedSubMenu;
+    newItems[id].colored = newItems[id].expandedSubMenu;
+    Object.values(newItems).forEach((item) => {
+      if (item.parentId === id) {
+        item.colored = true;
+      }
     });
+
+    this.setState({ items: newItems });
   };
 
   isTopLevelMenuItemColored = () => {
@@ -46,7 +38,9 @@ class PanelMenuView extends React.PureComponent {
     });
   };
 
+  /*
   setActiveMenuItems = (documentName, item) => {
+    console.log(documentName, "docuemtnNema");
     if (!documentName) {
       if (this.isTopLevelMenuItemColored()) {
         this.setState({
@@ -66,48 +60,45 @@ class PanelMenuView extends React.PureComponent {
         expandedIndex: this.#getItemIdsToExpand(item),
       });
     }
-  };
-
-  #hasSubMenu = (menuItem) => {
-    return menuItem.menu && menuItem.menu.length > 0;
-  };
-
-  getDefaultExpanded = (menu) => {
-    return menu.reduce((acc, menuItem) => {
-      const hasSubMenu = this.#hasSubMenu(menuItem);
-      if (menuItem.expandedSubMenu && hasSubMenu) {
-        acc = [...acc, menuItem.id];
-      }
-      if (hasSubMenu) {
-        acc = [...acc, ...this.getDefaultExpanded(menuItem.menu)];
-      }
-      return acc;
-    }, []);
-  };
+  };*/
 
   #setInternalReferences = () => {
     const { options } = this.props;
     this.internalId = 0;
     options.menuConfig.menu.forEach((menuItem) => {
-      this.#setMenuItemLevel(menuItem, 0);
-      this.#setInternalId(menuItem);
-      this.#setParentMenuItem(menuItem, undefined);
+      this.#setItemProperties(menuItem);
       this.internalId = this.internalId + 1;
+    });
+
+    const test = this.#getNormalizedResultState(options.menuConfig.menu);
+    this.setState({
+      items: test,
     });
   };
 
   #bindSubscriptions = () => {
     const { localObserver, options } = this.props;
 
-    localObserver.subscribe("document-clicked", (item) => {
+    localObserver.subscribe("set-active-document", ({ documentName }) => {
+      console.log(documentName, "documentName");
+      const newItems = { ...this.state.items };
+      Object.values(newItems).forEach((item) => {
+        item.selected = item.document === documentName;
+        item.colored = item.document === documentName;
+      });
+
+      this.setState({ items: newItems });
+    });
+
+    localObserver.subscribe("document-clicked", (id) => {
       localObserver.publish("set-active-document", {
-        documentName: item.document,
+        documentName: this.state.items[id].document,
         headerIdentifier: null,
       });
     });
 
-    localObserver.subscribe("link-clicked", (item) => {
-      window.open(item.link, "_blank");
+    localObserver.subscribe("link-clicked", (id) => {
+      window.open(this.state.items[id].link, "_blank");
     });
 
     localObserver.subscribe("document-maplink-clicked", (maplink) => {
@@ -117,7 +108,7 @@ class PanelMenuView extends React.PureComponent {
       this.delayAndFlyToMapLink(maplink);
     });
 
-    localObserver.subscribe("maplink-clicked", (item) => {
+    localObserver.subscribe("maplink-clicked", (id) => {
       if (!isMobile && options.closePanelOnMapLinkOpen) {
         localObserver.publish("set-active-document", {
           documentName: null,
@@ -128,7 +119,7 @@ class PanelMenuView extends React.PureComponent {
       if (options.displayLoadingOnMapLinkOpen) {
         localObserver.publish("maplink-loading");
       }
-      this.delayAndFlyToMapLink(item.maplink);
+      this.delayAndFlyToMapLink(this.state.items[id].maplink);
     });
   };
 
@@ -143,46 +134,51 @@ class PanelMenuView extends React.PureComponent {
     }, 100);
   };
 
-  #setInternalId = (menuItem) => {
+  #getNormalizedResultState = (menu, parentId = null, level = 0) => {
+    let normalized = menu.reduce((acc, menuItem) => {
+      menuItem.parentId = parentId;
+      menuItem.level = level;
+      menuItem.selected = false;
+      menuItem.colored = false;
+      menuItem.menuItemIds = [];
+      acc = { ...acc, ...{ [menuItem.id]: menuItem } };
+
+      if (menuItem.menu && menuItem.menu.length > 0) {
+        menuItem.menuItemIds = [
+          ...menuItem.menuItemIds,
+          ...menuItem.menu.map((menuItem) => {
+            return menuItem.id;
+          }),
+        ];
+
+        acc = {
+          ...acc,
+          ...this.#getNormalizedResultState(
+            menuItem.menu,
+            menuItem.id,
+            level + 1
+          ),
+        };
+      }
+      return acc;
+    }, {});
+    Object.values(normalized).forEach((n) => {
+      delete n.menu;
+    });
+    return normalized;
+  };
+
+  #setItemProperties = (menuItem) => {
     menuItem.id = this.internalId;
-    if (menuItem.menu.length > 0) {
-      menuItem.menu.forEach((child) => {
-        this.internalId = this.internalId + 1;
-        this.#setInternalId(child);
-      });
-    }
-  };
 
-  #setParentMenuItem = (menuItem, parent) => {
-    menuItem.parent = parent;
-    if (menuItem.menu.length > 0) {
-      menuItem.menu.forEach((child) => {
-        this.#setParentMenuItem(child, menuItem);
-      });
-    }
-  };
-
-  #setMenuItemLevel = (menuItem, level) => {
-    menuItem.level = level;
-    level = level + 1;
     if (menuItem.menu && menuItem.menu.length > 0) {
       menuItem.menu.forEach((subMenuItem) => {
-        this.#setMenuItemLevel(subMenuItem, level);
+        this.internalId = this.internalId + 1;
+        this.#setItemProperties(subMenuItem, menuItem);
       });
     }
   };
-
-  #getItemIdsToExpand = (item) => {
-    const shoudBeExpanded = this.#extractIdsFromItems(
-      this.#getAllAncestors(item)
-    );
-
-    const currentlyNoExpanded = shoudBeExpanded.filter(() => {
-      return this.state.expandedIndex.indexOf(item.id) === -1;
-    });
-    return [...this.state.expandedIndex, ...currentlyNoExpanded];
-  };
-
+  /*
   #getAllAncestors = (item) => {
     const ancestors = [];
     let parent = item.parent;
@@ -198,7 +194,13 @@ class PanelMenuView extends React.PureComponent {
       return item.id;
     });
   };
-
+*/
+  getItemList = () => {
+    const { options } = this.props;
+    console.log(options.menuConfig.menu, "Menu");
+    return options.menuConfig.menu;
+  };
+  /*
   #getAllSubMenuIds = (menu) => {
     let itemIds = [];
     menu.forEach((menuItem) => {
@@ -233,21 +235,19 @@ class PanelMenuView extends React.PureComponent {
     }
 
     return allIds;
-  };
+  };*/
 
   render() {
-    const { localObserver, app, options } = this.props;
-    const { expandedIndex, coloredIndex, selectedIndex } = this.state;
+    const { localObserver, app } = this.props;
+
     return (
       <PanelList
         localObserver={localObserver}
         handleExpandClick={this.handleExpandClick}
         setActiveMenuItems={this.setActiveMenuItems}
-        expandedIndex={expandedIndex}
-        coloredIndex={coloredIndex}
-        selectedIndex={selectedIndex}
         globalObserver={app.globalObserver}
-        menu={options.menuConfig.menu}
+        level={0}
+        items={this.state.items}
       ></PanelList>
     );
   }
