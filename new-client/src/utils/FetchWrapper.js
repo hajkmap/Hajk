@@ -165,7 +165,9 @@ function overrideLayerSourceParams(source) {
   fw.reset();
   fw.url = source.url;
   fw.options = { ...source };
-  fw.applyOptionOverrides();
+  if (fw.config.hfetch.useOptionOverrides) {
+    this.applyOptionOverrides();
+  }
   if (fw.options.credentials && fw.options.credentials === "include") {
     if (source.crossOrigin) {
       // handle crossOrigin in tile images etc
