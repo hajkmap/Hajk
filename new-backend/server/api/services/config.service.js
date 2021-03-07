@@ -260,7 +260,6 @@ class ConfigService {
 
     if (searchIndexInTools !== -1) {
       let { layers } = mapConfig.tools[searchIndexInTools].options;
-
       // Wash WFS search layers
       layers = await asyncFilter(
         layers,
@@ -278,14 +277,11 @@ class ConfigService {
     const editIndexInTools = mapConfig.tools.findIndex(
       (t) => t.type === "edit"
     );
-    logger.trace("[Edit] editIndexInTools: %i", editIndexInTools);
 
-    let { layers } = mapConfig.tools[editIndexInTools].options;
+    let { activeServices } = mapConfig.tools[editIndexInTools].options;
     if (editIndexInTools !== -1) {
-      logger.trace("[Edit] layers %s", layers);
-
       // Wash WFST edit layers
-      layers = await asyncFilter(
+      activeServices = await asyncFilter(
         activeServices, // layers in edit tool are named activeServices
         async (layer) =>
           await this.filterByGroupVisibility(
@@ -294,7 +290,7 @@ class ConfigService {
             `WFST edit layer "${layer.id}"`
           )
       );
-      mapConfig.tools[editIndexInTools].options.activeServices = layers;
+      mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
     }
 
     //
