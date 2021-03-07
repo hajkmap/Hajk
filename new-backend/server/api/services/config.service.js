@@ -36,7 +36,7 @@ class ConfigService {
 
       if (washContent === false) {
         logger.trace(
-          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire %s map config.",
+          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire  the entire %s map config.",
           user,
           map
         );
@@ -172,12 +172,13 @@ class ConfigService {
 
   /**
    * @summary Take a map config as JSON object and return
-   * only those parts of itthat the current user has access to.
+   * only those parts of it that the current user has access to.
    *
    * @description The following content will be washed:
    *  - Part 1: tools (access to each of them can be restricted)
    *  - Part 2: groups and layers (in LayerSwitcher's options)
    *  - Part 3: WFS search services (in Search's options)
+   *  - Part 4: WFST edit services (in Edit's options)
    *
    * @param {*} mapConfig
    * @param {*} user
@@ -273,6 +274,30 @@ class ConfigService {
       mapConfig.tools[searchIndexInTools].options.layers = layers;
     }
 
+    // Part 4: Wash WFST edit services
+    const editIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "edit"
+    );
+    logger.trace("[Edit] editIndexInTools: %i", editIndexInTools);
+
+    let { layers } = mapConfig.tools[editIndexInTools].options;
+    if (editIndexInTools !== -1) {
+      logger.trace("[Edit] layers %s", layers);
+
+      // Wash WFST edit layers
+      layers = await asyncFilter(
+        activeServices, // layers in edit tool are named activeServices
+        async (layer) =>
+          await this.filterByGroupVisibility(
+            layer.visibleForGroups,
+            user,
+            `WFST edit layer "${layer.id}"`
+          )
+      );
+      mapConfig.tools[editIndexInTools].options.activeServices = layers;
+    }
+
+    //
     return mapConfig;
   }
 
@@ -466,7 +491,12 @@ class ConfigService {
         // we getMapConfig will return only those maps that current
         // user has access to, so there's no need to "wash" the result
         // later on.
-        const mapConfig = await this.getMapConfig(map, user);
+        //
+        // The optional, third, parameter tells getMapConfig not to
+        // wash the content (layers/groups/tools). We just need to know
+        // if user has access to map as a whole, washing for purpose of
+        // this method would introduce unnecessary overhead.
+        const mapConfig = await this.getMapConfig(map, user, false);
 
         // If we encounter errors, access to current map is restricted for current user
         // so let's just continue with next element in available maps.
@@ -479,7 +509,7 @@ class ConfigService {
           (t) => t.type === "layerswitcher"
         );
 
-        // If map config says it's configured to be exposed in MapSwitcher,
+        // If map config says is configured to be exposed in MapSwitcher,
         // push the current map into the return object.
         if (lsConfig?.options.dropdownThemeMaps === true) {
           output.push({

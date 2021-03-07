@@ -27,6 +27,7 @@ import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
+import Tree from "../treeEdit.jsx";
 
 const ColorButtonBlue = withStyles((theme) => ({
   root: {
@@ -45,8 +46,11 @@ var defaultState = {
   target: "toolbar",
   instruction: "",
   visibleAtStart: false,
-  visibleForGroups: [],
+  //layers: [],
   activeServices: [],
+  visibleForGroups: [],
+  editableLayers: {},
+  tree: "",
 };
 
 class ToolOptions extends Component {
@@ -58,29 +62,42 @@ class ToolOptions extends Component {
     this.state = defaultState;
     this.type = "edit";
     this.editModel = new EditModel();
+
+    this.handleAddEditableLayer = this.handleAddEditableLayer.bind(this);
+    this.loadLayers = this.loadLayers.bind(this);
   }
 
   componentDidMount() {
+    this.loadEditableLayers();
     var tool = this.getTool();
     var layersUrl =
       this.props.model && this.props.model.get("config").url_layers
         ? this.props.model.get("config").url_layers
         : "";
     if (tool) {
-      this.setState({
-        active: true,
-        index: tool.index,
-        target: tool.options.target || "toolbar",
-        position: tool.options.position,
-        width: tool.options.width,
-        height: tool.options.height,
-        instruction: tool.options.instruction,
-        activeServices: tool.options.activeServices || [],
-        visibleAtStart: tool.options.visibleAtStart,
-        visibleForGroups: tool.options.visibleForGroups
-          ? tool.options.visibleForGroups
-          : [],
-      });
+      this.setState(
+        {
+          active: true,
+          index: tool.index,
+          activeServices: tool.options.activeServices || [],
+          // layers: tool.options.layers || [],
+          visibleForGroups:
+            tool.options.visibleForGroups || this.state.visibleForGroups,
+
+          //visibleForGroups: tool.options.visibleForGroups
+          //  ? tool.options.visibleForGroups
+          //  : [],
+          target: tool.options.target || "toolbar",
+          position: tool.options.position,
+          width: tool.options.width,
+          height: tool.options.height,
+          instruction: tool.options.instruction,
+          visibleAtStart: tool.options.visibleAtStart,
+        },
+        () => {
+          this.loadLayers();
+        }
+      );
     } else {
       this.setState({
         active: false,
@@ -101,7 +118,7 @@ class ToolOptions extends Component {
    */
   componentWillMount() {}
 
-  handleInputChange(event) {
+  handleLayerInputChange(event) {
     var target = event.target;
     var name = target.name;
     var value = target.type === "checkbox" ? target.checked : target.value;
@@ -116,6 +133,72 @@ class ToolOptions extends Component {
       [name]: value,
     });
   }
+  /* ------------------------- zzz */
+
+  /**
+   * Anropas från tree.jsx i componentDidMount som passar med refs.
+   * Sätter checkboxar och inputfält för editlager.
+   * @param {*} childRefs
+   */
+  loadLayers(childRefs) {
+    console.log("loadLayers: " + childRefs);
+    // checka checkboxar, visa textfält
+    // och sätt text från kartkonfig.json
+    let ids = [];
+
+    for (let id of this.state.activeServices) {
+      //for (let id of this.state.layers) {
+      ids.push(id);
+    }
+
+    if (typeof childRefs !== "undefined") {
+      for (let i of ids) {
+        childRefs["cb_" + i.id] && (childRefs["cb_" + i.id].checked = true);
+        childRefs[i.id] && (childRefs[i.id].hidden = false);
+        childRefs[i.id] && (childRefs[i.id].value = i.visibleForGroups.join());
+      }
+    }
+  }
+
+  handleInputChange(event) {
+    const t = event.target;
+    const name = t.name;
+    let value = t.type === "checkbox" ? t.checked : t.value;
+    if (typeof value === "string" && value.trim() !== "") {
+      value = !isNaN(Number(value)) ? Number(value) : value;
+    }
+    this.setState({
+      [name]: value,
+    });
+  }
+
+  loadEditableLayers() {
+    console.log("loadEditableLayers");
+    this.props.model.getConfig(
+      this.props.model.get("config").url_layers,
+      (layers) => {
+        this.setState({
+          editableLayers: layers.wfstlayers,
+        });
+
+        console.log(this.state.editableLayers); /* zzz */
+
+        this.setState({
+          tree: (
+            <Tree
+              model={this}
+              activeServices={this.state.editableLayers} //layers={this.state.editableLayers}
+              handleAddEditableLayer={this.handleAddEditableLayer}
+              loadLayers={this.loadLayers}
+              authActive={this.props.parent.props.parent.state.authActive}
+            />
+          ),
+        });
+        console.log("tree:" + this.state.tree); /* zzz */
+      }
+    );
+  }
+  /* ---------------------- zzz */
 
   getTool() {
     return this.props.model
@@ -156,11 +239,12 @@ class ToolOptions extends Component {
         height: this.state.height,
         instruction: this.state.instruction,
         activeServices: this.state.activeServices,
-        visibleAtStart: this.state.visibleAtStart,
+        //layers: this.state.layers,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
         ),
+        visibleAtStart: this.state.visibleAtStart,
       },
     };
 
@@ -242,46 +326,65 @@ class ToolOptions extends Component {
     }
   }
 
-  renderServices() {
-    const { services } = this.state;
-    if (services) {
-      return services.map((service, i) => {
-        var active = this.state.activeServices.find(
-          (serviceId) => serviceId === service.id
+  /**
+   * anropas från editTree.jsx som eventhandler. Hantering för checkboxar och
+   * inmatning av AD-grupper för wfs:er
+   * @param {*} e
+   * @param {*} layer
+   */
+  handleAddEditableLayer(e, layer) {
+    if (e.target.type.toLowerCase() === "checkbox") {
+      if (e.target.checked) {
+        let toAdd = {
+          id: layer.id.toString(),
+          visibleForGroups: [],
+        };
+        this.setState({
+          activeServices: [...this.state.activeServices, toAdd], //layers: [...this.state.layers, toAdd],
+        });
+      } else {
+        let newArray = this.state.activeServices.filter(
+          (o) => o.id !== layer.id.toString()
         );
-        if (active === undefined) {
-          active = false;
+
+        this.setState({
+          activeServices: newArray, //layers: newArray,
+        });
+      }
+    }
+    if (e.target.type.toLowerCase() === "text") {
+      let obj = this.state.activeServices.find(
+        (o) => o.id === layer.id.toString()
+      );
+      let newArray = this.state.activeServices.filter(
+        (o) => o.id !== layer.id.toString()
+      );
+
+      // Skapar array och trimmar whitespace från start och slut av varje cell
+      if (typeof obj !== "undefined") {
+        obj.visibleForGroups = e.target.value.split(",");
+        obj.visibleForGroups = obj.visibleForGroups.map((el) => el.trim());
+      }
+
+      newArray.push(obj);
+
+      // Sätter visibleForGroups till [] istället för [""] om inputfältet är tomt.
+      if (newArray.length === 1) {
+        if (
+          newArray[0].visibleForGroups.length === 1 &&
+          newArray[0].visibleForGroups[0] === ""
+        ) {
+          newArray[0].visibleForGroups = [];
         }
-        return (
-          <li key={i}>
-            <input
-              id={service.id}
-              name={service.caption}
-              type="checkbox"
-              checked={active}
-              onChange={(e) => {
-                var actives = [...this.state.activeServices];
-                if (e.target.checked) {
-                  actives.push(service.id);
-                } else {
-                  actives = actives.filter(
-                    (serviceId) => serviceId !== service.id
-                  );
-                }
-                this.setState({
-                  activeServices: actives,
-                });
-              }}
-            />
-            &nbsp;
-            <label htmlFor={service.id}>{service.caption}</label>
-          </li>
-        );
+      }
+
+      console.log("newArray:" + newArray);
+      this.setState({
+        activeServices: newArray,
       });
-    } else {
-      return null;
     }
   }
+
   /**
    *
    */
@@ -444,18 +547,12 @@ class ToolOptions extends Component {
               value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+          <div>{this.renderVisibleForGroups()}</div>
           <div>
-            <label>Tjänster</label>
-            <ul
-              style={{
-                display: "inline-block",
-                padding: 0,
-              }}
-            >
-              {this.renderServices()}
-            </ul>
+            <div className="separator">Editeringstjänster</div>
+
+            {this.state.tree}
           </div>
-          {this.renderVisibleForGroups()}
         </form>
       </div>
     );
