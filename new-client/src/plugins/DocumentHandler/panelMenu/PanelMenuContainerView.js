@@ -8,6 +8,8 @@ class PanelMenuView extends React.PureComponent {
     this.#bindSubscriptions();
   }
 
+  internalId = 0;
+
   state = {
     items: {},
   };
@@ -22,7 +24,7 @@ class PanelMenuView extends React.PureComponent {
 
   #setInternalReferences = () => {
     const { options } = this.props;
-    this.internalId = 0;
+
     options.menuConfig.menu.forEach((menuItem) => {
       this.#setInternalId(menuItem);
     });
@@ -131,7 +133,7 @@ class PanelMenuView extends React.PureComponent {
 
   getAllChildrenIds = (menu) => {
     return menu.reduce((allChildren, item) => {
-      if (item.menu && item.menu.length > 0) {
+      if (this.#hasSubMenu(item)) {
         allChildren = [...allChildren, ...this.getAllChildrenIds(item.menu)];
       }
       return [...allChildren, item.id];
@@ -144,16 +146,20 @@ class PanelMenuView extends React.PureComponent {
     level = 0,
     parentIds = []
   ) => {
-    let normalized = menu.reduce((acc, menuItem) => {
-      menuItem.parentId = parentId;
-      menuItem.level = level;
-      menuItem.selected = false;
-      menuItem.colored = false;
-      menuItem.menuItemIds = [];
-      menuItem.allChildren = [];
-      menuItem.allParents = parentIds;
-      menuItem.hasSubMenu = false;
-      acc = { ...acc, ...{ [menuItem.id]: menuItem } };
+    let normalizedItemList = menu.reduce((items, menuItem) => {
+      menuItem = {
+        ...menuItem,
+        ...{
+          parentId,
+          level,
+          selected: false,
+          colored: false,
+          menuItemIds: [],
+          allChildren: [],
+          allParents: parentIds,
+          hasSubMenu: false,
+        },
+      };
 
       if (menuItem.menu && menuItem.menu.length > 0) {
         menuItem.hasSubMenu = true;
@@ -168,8 +174,8 @@ class PanelMenuView extends React.PureComponent {
           }),
         ];
 
-        acc = {
-          ...acc,
+        items = {
+          ...items,
           ...this.#getNormalizedResultState(
             menuItem.menu,
             menuItem.id,
@@ -178,14 +184,17 @@ class PanelMenuView extends React.PureComponent {
           ),
         };
       }
-      return acc;
+      return { ...items, ...{ [menuItem.id]: menuItem } };
     }, {});
-    Object.values(normalized).forEach((n) => {
+    Object.values(normalizedItemList).forEach((n) => {
       delete n.menu;
     });
-    return normalized;
+    return normalizedItemList;
   };
 
+  #hasSubMenu = (item) => {
+    return item.menu && item.menu.length > 0;
+  };
   #getNextUniqueId = () => {
     this.internalId += 1;
     return this.internalId;
@@ -193,7 +202,7 @@ class PanelMenuView extends React.PureComponent {
 
   #setInternalId = (menuItem) => {
     menuItem.id = this.#getNextUniqueId();
-    if (menuItem.menu && menuItem.menu.length > 0) {
+    if (this.#hasSubMenu(menuItem)) {
       menuItem.menu.forEach((subMenuItem) => {
         this.#setInternalId(subMenuItem, menuItem);
       });
@@ -201,14 +210,11 @@ class PanelMenuView extends React.PureComponent {
   };
 
   render() {
-    const { localObserver, app } = this.props;
-
     return (
       <PanelList
-        localObserver={localObserver}
+        {...this.props}
         handleExpandClick={this.handleExpandClick}
         setActiveMenuItems={this.setActiveMenuItems}
-        globalObserver={app.globalObserver}
         level={0}
         items={this.state.items}
       ></PanelList>

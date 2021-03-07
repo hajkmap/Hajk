@@ -4,11 +4,9 @@ import PanelMenuListItem from "./PanelMenuListItem";
 
 class PanelList extends React.PureComponent {
   getMenuItemType = (item, type) => {
-    const { localObserver, globalObserver } = this.props;
-
     return (
       <PanelMenuListItem
-        handleExpandClick={this.props.handleExpandClick}
+        {...this.props}
         type={type}
         menu={item.menu}
         icon={item.icon}
@@ -20,9 +18,6 @@ class PanelList extends React.PureComponent {
         expanded={item.expandedSubMenu}
         colored={item.colored}
         selected={item.selected}
-        handleMenuButtonClick={this.handleMenuButtonClick}
-        localObserver={localObserver}
-        globalObserver={globalObserver}
       ></PanelMenuListItem>
     );
   };

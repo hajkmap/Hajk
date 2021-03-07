@@ -70,11 +70,11 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   #handleMenuButtonClick = (type, id) => {
-    const { localObserver, globalObserver } = this.props;
+    const { app, localObserver } = this.props;
     localObserver.publish(`${type}-clicked`, id);
 
     if (type !== "submenu") {
-      globalObserver.publish("core.onlyHideDrawerIfNeeded");
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     } else {
       this.props.handleExpandClick(id);
     }
@@ -97,9 +97,6 @@ class PanelMenuListItem extends React.PureComponent {
     const {
       classes,
       type,
-      localObserver,
-      globalObserver,
-      handleExpandClick,
       selected,
       subMenuItems,
       expanded,
@@ -135,11 +132,9 @@ class PanelMenuListItem extends React.PureComponent {
         {hasSubMenu && (
           <Collapse id={`submenu_${id}`} in={expanded} timeout="auto">
             <PanelList
-              localObserver={localObserver}
-              globalObserver={globalObserver}
+              {...this.props}
               level={level + 1}
               items={subMenuItems}
-              handleExpandClick={handleExpandClick}
             ></PanelList>
           </Collapse>
         )}
