@@ -278,8 +278,8 @@ class ConfigService {
       (t) => t.type === "edit"
     );
 
-    let { activeServices } = mapConfig.tools[editIndexInTools].options;
     if (editIndexInTools !== -1) {
+      let { activeServices } = mapConfig.tools[editIndexInTools].options;
       // Wash WFST edit layers
       activeServices = await asyncFilter(
         activeServices, // layers in edit tool are named activeServices
