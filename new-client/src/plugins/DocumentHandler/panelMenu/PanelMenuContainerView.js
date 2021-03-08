@@ -6,6 +6,7 @@ class PanelMenuView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.#bindSubscriptions();
+    this.listScrollRef = React.createRef();
   }
 
   internalId = 0;
@@ -16,10 +17,6 @@ class PanelMenuView extends React.PureComponent {
 
   componentDidMount = () => {
     this.#setInternalReferences();
-  };
-
-  handleExpandClick = (id) => {
-    this.updateColorAndExpandedState(id);
   };
 
   #setInternalReferences = () => {
@@ -45,6 +42,7 @@ class PanelMenuView extends React.PureComponent {
   };
 
   updateColorAndExpandedState = (idClicked) => {
+    const { localObserver } = this.props;
     const newItems = { ...this.state.items };
     const clickedItem = newItems[idClicked];
 
@@ -74,44 +72,66 @@ class PanelMenuView extends React.PureComponent {
       }
     });
 
-    this.setState({ items: newItems });
+    this.setState({ items: newItems }, () => {
+      //Handle scroll for submenu separately, see onEnter
+      if (!clickedItem.hasSubMenu) {
+        this.scrollToMenuItem(
+          this.state.items[clickedItem.id].itemRef.current.offsetTop
+        );
+      }
+    });
+  };
+
+  scrollToMenuItem = (scrollOffset) => {
+    setTimeout(() => {
+      this.listScrollRef.current.scrollTop = scrollOffset;
+    }, 300);
   };
 
   #bindSubscriptions = () => {
-    const { localObserver, options } = this.props;
+    const { localObserver, options, app } = this.props;
+
+    localObserver.subscribe("submenu-clicked", ({ id, offset }) => {
+      this.updateColorAndExpandedState(id);
+    });
 
     localObserver.subscribe("set-active-document", ({ documentName }) => {
       const itemClicked = Object.values(this.state.items).find((item) => {
         return item.document === documentName;
       });
+      console.log(itemClicked, "setActiveDocuemnt");
       this.updateColorAndExpandedState(itemClicked.id);
     });
 
-    localObserver.subscribe("document-clicked", (id) => {
+    localObserver.subscribe("document-clicked", ({ id, offset }) => {
       localObserver.publish("set-active-document", {
         documentName: this.state.items[id].document,
         headerIdentifier: null,
       });
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     });
 
-    localObserver.subscribe("link-clicked", (id) => {
+    localObserver.subscribe("link-clicked", ({ id, offset }) => {
       window.open(this.state.items[id].link, "_blank");
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     });
 
     localObserver.subscribe("document-maplink-clicked", (maplink) => {
       if (options.displayLoadingOnMapLinkOpen) {
         localObserver.publish("maplink-loading");
       }
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
       this.delayAndFlyToMapLink(maplink);
     });
 
-    localObserver.subscribe("maplink-clicked", (id) => {
+    localObserver.subscribe("maplink-clicked", ({ id, offset }) => {
       if (!isMobile && options.closePanelOnMapLinkOpen) {
         localObserver.publish("set-active-document", {
           documentName: null,
           headerIdentifier: null,
         });
-        this.props.app.globalObserver.publish("documentviewer.closeWindow");
+        app.globalObserver.publish("documentviewer.closeWindow");
+        app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
       }
       if (options.displayLoadingOnMapLinkOpen) {
         localObserver.publish("maplink-loading");
@@ -158,6 +178,7 @@ class PanelMenuView extends React.PureComponent {
           allChildren: [],
           allParents: parentIds,
           hasSubMenu: false,
+          itemRef: React.createRef(),
         },
       };
 
@@ -209,15 +230,29 @@ class PanelMenuView extends React.PureComponent {
     }
   };
 
+  onEnter = (id) => {
+    this.scrollToMenuItem(this.state.items[id].itemRef.current.offsetTop);
+  };
+
   render() {
     return (
-      <PanelList
-        {...this.props}
-        handleExpandClick={this.handleExpandClick}
-        setActiveMenuItems={this.setActiveMenuItems}
-        level={0}
-        items={this.state.items}
-      ></PanelList>
+      <div
+        ref={this.listScrollRef}
+        style={{
+          overflow: "auto",
+          scrollBehavior: "smooth",
+          position: "relative",
+          maxHeight: "100%",
+        }}
+        id="test"
+      >
+        <PanelList
+          {...this.props}
+          onEnter={this.onEnter}
+          level={0}
+          items={this.state.items}
+        ></PanelList>
+      </div>
     );
   }
 }

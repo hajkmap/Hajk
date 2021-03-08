@@ -70,14 +70,11 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   #handleMenuButtonClick = (type, id) => {
-    const { app, localObserver } = this.props;
-    localObserver.publish(`${type}-clicked`, id);
-
-    if (type !== "submenu") {
-      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-    } else {
-      this.props.handleExpandClick(id);
-    }
+    const { localObserver } = this.props;
+    localObserver.publish(`${type}-clicked`, {
+      id: id,
+      offset: this.props.itemRef.current.offsetTop,
+    });
   };
 
   #getMenuItemStyle = () => {
@@ -102,6 +99,7 @@ class PanelMenuListItem extends React.PureComponent {
       expanded,
       icon,
       level,
+      localObserver,
       title,
       id,
     } = this.props;
@@ -112,6 +110,7 @@ class PanelMenuListItem extends React.PureComponent {
           divider
           selected={selected}
           button
+          ref={this.props.itemRef}
           size="small"
           classes={{
             root: classes.root,
@@ -130,7 +129,14 @@ class PanelMenuListItem extends React.PureComponent {
           {hasSubMenu && this.#getCollapseIcon()}
         </ListItem>
         {hasSubMenu && (
-          <Collapse id={`submenu_${id}`} in={expanded} timeout="auto">
+          <Collapse
+            id={`submenu_${id}`}
+            in={expanded}
+            onEnter={() => {
+              this.props.onEnter(id);
+            }}
+            timeout={200}
+          >
             <PanelList
               {...this.props}
               level={level + 1}

@@ -12,8 +12,10 @@ class PanelList extends React.PureComponent {
         icon={item.icon}
         id={item.id}
         level={item.level}
+        onEnter={this.props.onEnter}
         color={item.color}
         title={item.title}
+        itemRef={item.itemRef}
         subMenuItems={this.#getSubMenuItems(item)}
         expanded={item.expandedSubMenu}
         colored={item.colored}
@@ -49,7 +51,13 @@ class PanelList extends React.PureComponent {
   render() {
     const { items, level } = this.props;
     return (
-      <List disablePadding id="panelmenu" role="navigation" component="nav">
+      <List
+        style={{ position: "static" }}
+        disablePadding
+        id="panelmenu"
+        role="navigation"
+        component="nav"
+      >
         {Object.values(items)
           .filter((item) => {
             return item.level === level;
