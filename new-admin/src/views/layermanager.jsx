@@ -295,7 +295,6 @@ class Manager extends Component {
         mode: "edit",
         layerType: "WMS",
       });
-
       setTimeout(() => {
         this.refs["WMSLayerForm"].setState({
           id: layer.id,
@@ -309,6 +308,8 @@ class Manager extends Component {
           opacity: layer.opacity,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
+          hidpi: layer.hidpi,
+          customRatio: layer.customRatio,
           imageFormat: layer.imageFormat,
           version: layer.version,
           serverType: layer.serverType,

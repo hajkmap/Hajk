@@ -28,9 +28,8 @@ class MapViewModel {
   lastFeaturesInfo = [];
 
   getDrawStyleSettings = () => {
-    const strokeColor =
-      this.options.drawStrokeColor ?? "rgba(255, 214, 91, 0.6)";
-    const fillColor = this.options.drawFillColor ?? "rgba(255, 214, 91, 0.2)";
+    const strokeColor = this.options.drawStrokeColor ?? "rgba(74,74,74,0.5)";
+    const fillColor = this.options.drawFillColor ?? "rgba(255,255,255,0.07)";
 
     return { strokeColor: strokeColor, fillColor: fillColor };
   };
@@ -96,6 +95,12 @@ class MapViewModel {
         } else {
           this.toggleDraw(true, options.type);
         }
+
+        // At this stage, the Search input field could be in focus. On
+        // mobile devices the on-screen keyboard will show up. We don't
+        // need it here (as these search options are purely click/touch-based)
+        // so we ensure that it's hidden by blurring the focus.
+        document.activeElement.blur();
       }
     );
   };

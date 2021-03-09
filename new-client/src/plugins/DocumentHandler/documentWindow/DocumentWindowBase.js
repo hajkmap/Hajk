@@ -10,36 +10,7 @@ import { withSnackbar } from "notistack";
 import PrintIcon from "@material-ui/icons/Print";
 
 class DocumentWindowBase extends React.PureComponent {
-  //Could be rewritten
-  findMenuItem(menuItem, documentNameToFind) {
-    if (menuItem.document === documentNameToFind) {
-      return menuItem;
-    } else if (this.hasSubMenu(menuItem)) {
-      let i,
-        result = null;
-      for (i = 0; result == null && i < menuItem.menu.length; i++) {
-        result = this.findMenuItem(menuItem.menu[i], documentNameToFind);
-      }
-      return result;
-    }
-    return null;
-  }
-
-  hasSubMenu = (menuItem) => {
-    return menuItem.menu && menuItem.menu.length > 0;
-  };
-
-  findReferringMenuItem = (documentNameToFind) => {
-    const { options } = this.props;
-    let foundMenuItem = null;
-    options.menuConfig.menu.forEach((rootItemToSearch) => {
-      let found = this.findMenuItem(rootItemToSearch, documentNameToFind);
-      if (found != null) {
-        foundMenuItem = found;
-      }
-    });
-    return foundMenuItem;
-  };
+  snackbarKey = null;
 
   shouldShowDocumentOnStart = () => {
     const { options } = this.props;
@@ -82,6 +53,22 @@ class DocumentWindowBase extends React.PureComponent {
     }
   };
 
+  displayMaplinkLoadingBar = () => {
+    const { enqueueSnackbar } = this.props;
+    this.snackbarKey = enqueueSnackbar("Kartan laddar... ", {
+      variant: "information",
+      persist: true,
+      preventDuplicate: true,
+      transitionDuration: { enter: 0, exit: 0 },
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
+    });
+  };
+
+  closeMaplinkLoadingBar = () => {
+    const { closeSnackbar } = this.props;
+    closeSnackbar(this.snackbarKey);
+  };
+
   togglePrintWindow = () => {
     this.setState({
       showPrintWindow: !this.state.showPrintWindow,
@@ -95,6 +82,7 @@ class DocumentWindowBase extends React.PureComponent {
     return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
       return [
         "data-maplink",
+        "data-link",
         "data-document",
         "data-header-identifier",
       ].includes(key);
@@ -151,18 +139,12 @@ class DocumentWindowBase extends React.PureComponent {
     const { localObserver } = this.props;
     this.bindListenForSearchResultClick();
     localObserver.subscribe("set-active-document", this.showHeaderInDocument);
+    localObserver.subscribe("maplink-loading", this.displayMaplinkLoadingBar);
+    localObserver.subscribe(
+      "map-animation-complete",
+      this.closeMaplinkLoadingBar
+    );
   };
-
-  setChapterLevels(chapter, level) {
-    chapter.level = level;
-    if (chapter.chapters && chapter.chapters.length > 0) {
-      level = level + 1;
-      chapter.chapters.forEach((subChapter) => {
-        subChapter = this.setChapterLevels(subChapter, level);
-      });
-    }
-    return chapter;
-  }
 
   isModelReady = () => {
     const { model } = this.props;

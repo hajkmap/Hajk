@@ -10,6 +10,7 @@ namespace MapService.Models
     {
         public string primaryColor { get; set; }
         public string secondaryColor { get; set; }
+        public string preferredColorScheme { get; set; }
     }
 
     public class MapSetting
@@ -65,5 +66,7 @@ namespace MapService.Models
         public string crossOrigin { get; set; }
 
         public bool showCookieNotice { get; set; }
+
+        public bool showThemeToggler { get; set; }
     }
 }

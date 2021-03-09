@@ -1,10 +1,10 @@
 import * as express from "express";
 import controller from "./controller";
-import checkAdminAuthorization from "../../middlewares/check.admin.authorization";
+import restrictAdmin from "../../middlewares/restrict.admin";
 
 export default express
   .Router()
-  .use(checkAdminAuthorization) // We will not allow any of the following routes unless user is admin
+  .use(restrictAdmin) // We will not allow any of the following routes unless user is admin
   // First we handle _specific_ routes, so we can catch them…
   .get("/create/:name", controller.createNewMap) // FIXME: Replace with a PUT when Admin is ready
   .put("/create/:name", controller.createNewMap)

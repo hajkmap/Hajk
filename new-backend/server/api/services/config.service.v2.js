@@ -6,7 +6,7 @@ import log4js from "log4js";
 
 const logger = log4js.getLogger("service.config");
 
-class ConfigService {
+class ConfigServiceV2 {
   constructor() {
     // TODO: As reading files is expansive, we can read all
     // JSON files on init and keep then in-memory. Subsequent
@@ -14,7 +14,7 @@ class ConfigService {
     // We should also implement an update-store method, perhaps
     // have a global bus (using EventEmitter?), so we can trigger
     // re-reads from FS into our in-memory store.
-    logger.trace("Initiating ConfigService");
+    logger.trace("Initiating ConfigServiceV2");
   }
 
   /**
@@ -34,9 +34,12 @@ class ConfigService {
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = await JSON.parse(text);
 
+      // Ensure that we print the correct API version to output
+      json.version = 2;
+
       if (washContent === false) {
         logger.trace(
-          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire %s map config.",
+          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire%s map config.",
           user,
           map
         );
@@ -119,6 +122,140 @@ class ConfigService {
   }
 
   /**
+   * @summary Takes a look at which layers are used in mapConfig and removes the
+   * unused ones from layersConfig.
+   *
+   * @param {object} mapConfig
+   * @param {object} layersConfig
+   * @returns {object} streamlinedLayersConfig that only contains used layers
+   * @memberof ConfigServiceV2
+   */
+  #removeUnusedLayersFromStore(mapConfig, layersConfig) {
+    // Helper - recursively extract IDs of layers from all groups
+    const getLayerIdsFromGroup = (group) => {
+      return [
+        ...group.layers.map((l) => l.id),
+        ...group.groups.flatMap((g) => getLayerIdsFromGroup(g)),
+      ];
+    };
+
+    // The idea is simple: we take a look everywhere references to layers
+    // can exist in map config, and grab the IDs of used layers.
+    // Next, we collect those IDs into a Set (to get rid of duplicates).
+    // Finally, we loop through the entire layers config and keep only
+    // those layers whose IDs can be found in the Set.
+
+    // Keep in mind: we can not be sure that _any_ of these plugins, nor
+    // their options exist, but we _must_ ensure that we get an Array to
+    // each of the following constants. Hence the frequent use of '?.' and '||'.
+
+    // Grab layers and baselayers from LayerSwitcher
+    const lsOptions = mapConfig.tools.find((t) => t.type === "layerswitcher")
+      ?.options;
+    const baseLayerIds = lsOptions?.baselayers.map((bl) => bl.id) || [];
+    const layerIds =
+      lsOptions?.groups.flatMap((g) => getLayerIdsFromGroup(g)) || [];
+
+    // Grab layers from Search
+    const searchOptions = mapConfig.tools.find((t) => t.type === "search")
+      ?.options;
+    const searchLayerIds = searchOptions?.layers.map((l) => l.id) || [];
+
+    // Grab layers from Edit
+    const editOptions = mapConfig.tools.find((t) => t.type === "edit")?.options;
+    // This one is different from the others: activeServices is already an array of IDs
+    const editLayerIds = editOptions?.activeServices || [];
+
+    // We utilize Set to get rid of potential duplicates in the final list
+    const uniqueLayerIds = new Set([
+      ...baseLayerIds,
+      ...layerIds,
+      ...searchLayerIds,
+      ...editLayerIds,
+    ]);
+
+    // Prepare a new layers config object that will hold all keys
+    // from the original object, but the values are empty arrays.
+    const streamlinedLayersConfig = {};
+    for (let key of Object.keys(layersConfig)) {
+      streamlinedLayersConfig[key] = [];
+    }
+
+    // Loop the layersConfig and see if current layer exists in our Set.
+    // If it does, push it into our duplicate.
+    Object.keys(layersConfig).forEach((type) => {
+      layersConfig[type].forEach((layer) => {
+        // If layer ID exists in the Set, push layer object
+        // into the collection that will be returned.
+        uniqueLayerIds.has(layer.id) &&
+          streamlinedLayersConfig[type].push(layer);
+      });
+    });
+
+    return streamlinedLayersConfig;
+  }
+  /**
+   * @summary Gets the map config, together with all needed layers and list of
+   * user specific maps.
+   *
+   * @description This is the main endpoint of V2 of this API. In V1 client did
+   * 3 requests that could have been (and now has been) consolidated into one:
+   * - map config
+   * - the entire layers store (with both used and unused layers)
+   * - list of user specific maps
+   *
+   * This was less than ideal. The new way to do this is simple: take a look inside
+   * the map config, determine which layers are needed, grab them, check if user
+   * specific maps are needed, if so, grab the list too, pack everything into one
+   * object and return it to the client.
+   *
+   * @param {string} map The map file to be retrieved
+   * @param {string | undefined} user The ID of user that makes request - if auth is active
+   * @param {boolean} [washContent=true] Determines whether the permission restrictions will be respected
+   * @returns {object} An object with layers config, map config and a list of user specific maps.
+   * @memberof ConfigServiceV2
+   */
+  async getMapWithLayers(map, user, washContent = true) {
+    logger.trace(
+      "[getMapWithLayers] invoked with 'washContent=%s' for user %s. Grabbing '%s' map config and all layers.",
+      washContent,
+      user,
+      map
+    );
+
+    try {
+      if (map === "layers")
+        throw new Error(
+          `"layers" is not a valid map config name. It looks like you are trying to access a v1 endpoint on the v2 API. Try adding "experimentalNewApi": true to Client's appConfig.json.`
+        );
+      // First, let's get the map config. From there we will be able
+      // to figure out which layers are needed, and if UserSpecificMaps
+      // should be present.
+      const mapConfig = await this.getMapConfig(map, user, washContent);
+      if (mapConfig.error) throw mapConfig.error;
+
+      const layersStore = await this.getLayersStore(user, true);
+      if (layersStore.error) throw layersStore.error;
+      // Invoke the "cleaner" helper, expect only used layers in return.
+      const layersConfig = this.#removeUnusedLayersFromStore(
+        mapConfig,
+        layersStore
+      );
+
+      // Finally, take a look in LayerSwitcher.options and see
+      // whether user specific maps are needed. If so, grab them.
+      let userSpecificMaps = []; // Set to empty array, client will do .map() on it.
+      if (mapConfig.map.mapselector === true) {
+        userSpecificMaps = await this.getUserSpecificMaps(user);
+      }
+
+      return { mapConfig, layersConfig, userSpecificMaps };
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
    * @summary Determine whether a specified user has access to an object.
    *
    * @param {Array} visibleForGroups List of groups that have access, or empty if access unrestricted
@@ -172,7 +309,7 @@ class ConfigService {
 
   /**
    * @summary Take a map config as JSON object and return
-   * only those parts of itthat the current user has access to.
+   * only those parts of that the current user has access to.
    *
    * @description The following content will be washed:
    *  - Part 1: tools (access to each of them can be restricted)
@@ -282,6 +419,9 @@ class ConfigService {
       const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = await JSON.parse(text);
+
+      if (text.error) throw text.error;
+      if (json.error) throw json.error;
 
       // TODO:
       // /config/layers should be way smarter than it is today. We should modify client
@@ -557,4 +697,4 @@ class ConfigService {
   }
 }
 
-export default new ConfigService();
+export default new ConfigServiceV2();
