@@ -15,7 +15,7 @@ import {
 const styles = (theme) => {
   return {
     tableOfContents: {
-      backgroundColor: theme.palette.grey[200],
+      backgroundColor: theme.palette.action.selected,
       cursor: "pointer",
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
@@ -23,9 +23,10 @@ const styles = (theme) => {
       paddingBottom: theme.spacing(1),
     },
 
-    test: {
-      backgroundColor: "rgba(0, 0, 0, 0.04)",
+    focusBackground: {
+      backgroundColor: theme.palette.action.selected,
     },
+
     collapseContainer: {
       width: "100%",
     },
@@ -33,7 +34,6 @@ const styles = (theme) => {
     root: {
       width: "100%",
       padding: theme.spacing(0),
-      backgroundColor: theme.palette.grey[200],
     },
   };
 };
@@ -152,7 +152,7 @@ class TableOfContents extends React.PureComponent {
       <Grid className={classes.tableOfContents} container>
         <Button
           disableRipple
-          focusVisibleClassName={classes.test}
+          focusVisibleClassName={classes.focusBackground}
           style={{
             paddingLeft: "0px",
             display: "flex",
