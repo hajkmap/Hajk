@@ -71,10 +71,7 @@ class PanelMenuListItem extends React.PureComponent {
 
   #handleMenuButtonClick = (type, id) => {
     const { localObserver } = this.props;
-    localObserver.publish(`${type}-clicked`, {
-      id: id,
-      offset: this.props.itemRef.current.offsetTop,
-    });
+    localObserver.publish(`${type}-clicked`, id);
   };
 
   #getMenuItemStyle = () => {

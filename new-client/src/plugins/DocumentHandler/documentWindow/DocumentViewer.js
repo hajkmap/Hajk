@@ -7,6 +7,7 @@ import TableOfContents from "./TableOfContents";
 import clsx from "clsx";
 import Contents from "./Contents";
 import { Typography } from "@material-ui/core";
+import { delay } from "../../../utils/Delay";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -113,11 +114,10 @@ class DocumentViewer extends React.PureComponent {
     }
   };
 
-  scrollToTop = () => {
+  scrollToTop = async () => {
     //Buggy firefox makes scroll not work properly, dirty fix with setTimeout
-    setTimeout(() => {
-      this.documentViewerRef.current.scrollTop = 0;
-    }, 100);
+    await delay(100);
+    this.documentViewerRef.current.scrollTo({ top: 0 });
   };
 
   renderScrollToTopButton = () => {

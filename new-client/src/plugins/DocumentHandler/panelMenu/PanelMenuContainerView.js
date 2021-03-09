@@ -1,19 +1,27 @@
 import React from "react";
 import PanelList from "./PanelList";
 import { isMobile } from "../../../utils/IsMobile";
+import { delay } from "../../../utils/Delay";
+import { animateScroll as scroll } from "react-scroll";
+import { withStyles } from "@material-ui/core/styles";
+
+const styles = (theme) => ({
+  test: {
+    maxHeight: "100%",
+    position: "relative",
+    overflow: "auto",
+  },
+});
 
 class PanelMenuView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.#bindSubscriptions();
-    this.listScrollRef = React.createRef();
   }
 
   internalId = 0;
 
-  state = {
-    items: {},
-  };
+  state = {};
 
   componentDidMount = () => {
     this.#setInternalReferences();
@@ -21,14 +29,10 @@ class PanelMenuView extends React.PureComponent {
 
   #setInternalReferences = () => {
     const { options } = this.props;
-
     options.menuConfig.menu.forEach((menuItem) => {
       this.#setInternalId(menuItem);
     });
-
-    this.setState({
-      items: this.#getNormalizedResultState(options.menuConfig.menu),
-    });
+    this.setState(this.#getNormalizedResultState(options.menuConfig.menu));
   };
 
   getTopLevelItem = (clickedItem, newItems) => {
@@ -41,78 +45,82 @@ class PanelMenuView extends React.PureComponent {
     }
   };
 
-  updateColorAndExpandedState = (idClicked) => {
-    const { localObserver } = this.props;
-    const newItems = { ...this.state.items };
-    const clickedItem = newItems[idClicked];
-
-    let selectedItem = Object.values(newItems).find((item) => {
-      return item.selected;
-    });
-
+  #getItemIdsToColor = (clickedItem, newItems) => {
     const topLevelItem = this.getTopLevelItem(clickedItem, newItems);
-    let idsToColor = [topLevelItem.id, ...topLevelItem.allChildren];
+    return [topLevelItem.id, ...topLevelItem.allChildren];
+  };
 
+  #setClickedItemProperties = (clickedItem) => {
+    clickedItem.colored = true;
+    clickedItem.selected = !clickedItem.hasSubMenu;
+    clickedItem.expandedSubMenu = clickedItem.hasSubMenu
+      ? !clickedItem.expandedSubMenu
+      : clickedItem.expandedSubMenu;
+  };
+
+  #setNonClickedItemProperties = (clickedItem, newItems) => {
+    const idsToColor = this.#getItemIdsToColor(clickedItem, newItems);
     Object.values(newItems).forEach((item) => {
-      item.colored = idsToColor.indexOf(item.id) !== -1;
-      if (clickedItem.allParents.indexOf(item.id) !== -1) {
-        item.expandedSubMenu = true;
-      }
-      if (item.id === idClicked) {
-        if (item.hasSubMenu) {
-          item.expandedSubMenu = !item.expandedSubMenu;
+      if (item.id !== clickedItem.id) {
+        item.colored = idsToColor.indexOf(item.id) !== -1;
+        if (clickedItem.allParents.indexOf(item.id) !== -1) {
+          item.expandedSubMenu = true;
+        }
+        if (!clickedItem.hasSubMenu) {
           item.selected = false;
-        } else {
-          if (selectedItem) {
-            selectedItem.selected = false;
-          }
-
-          item.selected = true;
         }
       }
     });
+  };
 
-    this.setState({ items: newItems }, () => {
-      //Handle scroll for submenu separately, see onEnter
+  setItemStateProperties = (idClicked) => {
+    const newItems = { ...this.state };
+    const clickedItem = newItems[idClicked];
+    this.#setClickedItemProperties(clickedItem);
+    this.#setNonClickedItemProperties(clickedItem, newItems);
+
+    this.setState({ newItems }, () => {
       if (!clickedItem.hasSubMenu) {
         this.scrollToMenuItem(
-          this.state.items[clickedItem.id].itemRef.current.offsetTop
+          this.state[clickedItem.id].itemRef.current.offsetTop
         );
       }
     });
   };
 
-  scrollToMenuItem = (scrollOffset) => {
-    setTimeout(() => {
-      this.listScrollRef.current.scrollTop = scrollOffset;
-    }, 300);
+  scrollToMenuItem = async (scrollOffset) => {
+    scroll.scrollTo(scrollOffset, {
+      containerId: "panelListWrapper",
+      smooth: false,
+      isDynamic: true,
+      delay: 0,
+    });
   };
 
   #bindSubscriptions = () => {
     const { localObserver, options, app } = this.props;
 
-    localObserver.subscribe("submenu-clicked", ({ id, offset }) => {
-      this.updateColorAndExpandedState(id);
+    localObserver.subscribe("submenu-clicked", (id) => {
+      this.setItemStateProperties(id);
     });
 
     localObserver.subscribe("set-active-document", ({ documentName }) => {
-      const itemClicked = Object.values(this.state.items).find((item) => {
+      const itemClicked = Object.values(this.state).find((item) => {
         return item.document === documentName;
       });
-      console.log(itemClicked, "setActiveDocuemnt");
-      this.updateColorAndExpandedState(itemClicked.id);
+      this.setItemStateProperties(itemClicked.id);
     });
 
-    localObserver.subscribe("document-clicked", ({ id, offset }) => {
+    localObserver.subscribe("document-clicked", (id) => {
       localObserver.publish("set-active-document", {
-        documentName: this.state.items[id].document,
+        documentName: this.state[id].document,
         headerIdentifier: null,
       });
       app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     });
 
-    localObserver.subscribe("link-clicked", ({ id, offset }) => {
-      window.open(this.state.items[id].link, "_blank");
+    localObserver.subscribe("link-clicked", (id) => {
+      window.open(this.state[id].link, "_blank");
       app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     });
 
@@ -124,7 +132,7 @@ class PanelMenuView extends React.PureComponent {
       this.delayAndFlyToMapLink(maplink);
     });
 
-    localObserver.subscribe("maplink-clicked", ({ id, offset }) => {
+    localObserver.subscribe("maplink-clicked", (id) => {
       if (!isMobile && options.closePanelOnMapLinkOpen) {
         localObserver.publish("set-active-document", {
           documentName: null,
@@ -136,7 +144,7 @@ class PanelMenuView extends React.PureComponent {
       if (options.displayLoadingOnMapLinkOpen) {
         localObserver.publish("maplink-loading");
       }
-      this.delayAndFlyToMapLink(this.state.items[id].maplink);
+      this.delayAndFlyToMapLink(this.state[id].maplink);
     });
   };
 
@@ -145,10 +153,9 @@ class PanelMenuView extends React.PureComponent {
   allow the other tasks such as closing the document and displaying a snackbar to run before the
   application hangs.
   */
-  delayAndFlyToMapLink = (maplink) => {
-    setTimeout(() => {
-      this.props.localObserver.publish("fly-to", maplink);
-    }, 100);
+  delayAndFlyToMapLink = async (maplink) => {
+    await delay(100);
+    this.props.localObserver.publish("fly-to", maplink);
   };
 
   getAllChildrenIds = (menu) => {
@@ -160,6 +167,13 @@ class PanelMenuView extends React.PureComponent {
     }, []);
   };
 
+  /**
+   * Function takes the hierarchial menu and flattens it into a normalized state where
+   * the objects key is the id of the menu-item. The structure is now flat and every
+   * object has references to parents, children etc.
+   * While we are normalizing, we are also setting internal properties we later use
+   * to make items selected, colored etc.
+   */
   #getNormalizedResultState = (
     menu,
     parentId = null,
@@ -231,30 +245,23 @@ class PanelMenuView extends React.PureComponent {
   };
 
   onEnter = (id) => {
-    this.scrollToMenuItem(this.state.items[id].itemRef.current.offsetTop);
+    this.scrollToMenuItem(this.state[id].itemRef.current.offsetTop);
   };
 
   render() {
+    const { classes, app, localObserver } = this.props;
     return (
-      <div
-        ref={this.listScrollRef}
-        style={{
-          overflow: "auto",
-          scrollBehavior: "smooth",
-          position: "relative",
-          maxHeight: "100%",
-        }}
-        id="test"
-      >
+      <div className={classes.test} id="panelListWrapper">
         <PanelList
-          {...this.props}
+          app={app}
+          localObserver={localObserver}
           onEnter={this.onEnter}
           level={0}
-          items={this.state.items}
+          items={this.state}
         ></PanelList>
       </div>
     );
   }
 }
 
-export default PanelMenuView;
+export default withStyles(styles)(PanelMenuView);
