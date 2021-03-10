@@ -12,3 +12,17 @@ export const getStringArray = (searchString) => {
 export const hasSubMenu = (item) => {
   return item.menu && item.menu.length > 0;
 };
+
+export const flattenChaptersTree = (chapters) => {
+  return chapters.reduce((acc, chapter) => {
+    if (chapter.html && chapter.header) {
+      let chapterStrippedFromSubChapters = { ...chapter };
+      chapterStrippedFromSubChapters.chapters = [];
+      acc = [...acc, chapterStrippedFromSubChapters];
+    }
+    if (chapter.chapters && chapter.chapters.length > 0) {
+      return [...acc, ...flattenChaptersTree(chapter.chapters)];
+    }
+    return acc;
+  }, []);
+};

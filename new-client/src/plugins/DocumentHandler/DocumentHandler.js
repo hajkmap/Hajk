@@ -47,6 +47,7 @@ class DocumentHandler extends React.PureComponent {
         map: props.map,
         menu: props.options.menuConfig.menu,
         resolveSearchInterface: resolve,
+        options: props.options,
       })
         .init()
         .then((loadedDocumentModel) => {
