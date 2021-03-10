@@ -8,6 +8,7 @@ import clsx from "clsx";
 import Contents from "./Contents";
 import { Typography } from "@material-ui/core";
 import { delay } from "../../../utils/Delay";
+import { animateScroll as scroll } from "react-scroll";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -80,13 +81,11 @@ class DocumentViewer extends React.PureComponent {
   bindSubscriptions = () => {
     const { localObserver } = this.props;
 
-    localObserver.subscribe("scroll-to-chapter", (chapter) => {
+    localObserver.subscribe("scroll-to-chapter", async (chapter) => {
       /*scrollIntoView is buggy without dirty fix - 
       tried using react life cycle methods but is, for some reason, not working*/
-
-      setTimeout(() => {
-        chapter.scrollRef.current.scrollIntoView();
-      }, 100);
+      await delay(100);
+      chapter.scrollRef.current.scrollIntoView();
     });
 
     localObserver.subscribe("scroll-to-top", () => {
@@ -115,9 +114,12 @@ class DocumentViewer extends React.PureComponent {
   };
 
   scrollToTop = async () => {
-    //Buggy firefox makes scroll not work properly, dirty fix with setTimeout
-    await delay(100);
-    this.documentViewerRef.current.scrollTo({ top: 0 });
+    scroll.scrollTo(0, {
+      containerId: "documentViewer",
+      smooth: false,
+      duration: 0,
+      delay: 100,
+    });
   };
 
   renderScrollToTopButton = () => {
@@ -231,6 +233,7 @@ class DocumentViewer extends React.PureComponent {
       <>
         <Grid
           onScroll={this.onScroll}
+          id="documentViewer"
           ref={this.documentViewerRef}
           className={classes.gridContainer}
           container
