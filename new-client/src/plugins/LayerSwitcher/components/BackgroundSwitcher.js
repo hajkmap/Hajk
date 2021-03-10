@@ -50,16 +50,18 @@ class BackgroundSwitcher extends React.PureComponent {
         selectedLayer: backgroundVisibleFromStart.name,
       });
 
-    // Initiate our special case layer, OpenStreetMap
-    const osmSource = new OSM({
-      reprojectionErrorThreshold: 5,
-    });
-    this.osmLayer = new TileLayer({
-      visible: false,
-      source: osmSource,
-      zIndex: -1,
-    });
-    this.props.map.addLayer(this.osmLayer);
+    if (this.props.enableOSM) {
+      // Initiate our special case layer, OpenStreetMap
+      const osmSource = new OSM({
+        reprojectionErrorThreshold: 5,
+      });
+      this.osmLayer = new TileLayer({
+        visible: false,
+        source: osmSource,
+        zIndex: -1,
+      });
+      this.props.map.addLayer(this.osmLayer);
+    }
 
     // Ensure that BackgroundSwitcher correctly selects visible layer,
     // by listening to a event that each layer will send when its visibility
@@ -100,9 +102,6 @@ class BackgroundSwitcher extends React.PureComponent {
     Number(this.state.selectedLayer) >= 0 &&
       this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);
 
-    // Also, take care of hiding our OSM layer
-    this.osmLayer.setVisible(false);
-
     // Make the currently clicked layer visible, but also handle our special cases.
     Number(selectedLayer) >= 0 &&
       this.props.layerMap[Number(selectedLayer)].setVisible(true);
@@ -114,7 +113,10 @@ class BackgroundSwitcher extends React.PureComponent {
       (document.getElementById("map").style.backgroundColor = "#FFF");
 
     // Another special case is the OSM layer
-    selectedLayer === "-3" && this.osmLayer.setVisible(true);
+    // show/hide OSM
+    if (this.osmLayer) {
+      this.osmLayer.setVisible(selectedLayer === "-3");
+    }
 
     // Finally, store current selection in state
     this.setState({
