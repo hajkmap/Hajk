@@ -76,14 +76,16 @@ class PanelMenuListItem extends React.PureComponent {
 
   #getMenuItemStyle = () => {
     const { theme, level, color, colored } = this.props;
-
+    const hasSubMenu = this.#hasSubMenu();
     return colored
       ? {
           paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
           borderLeft: `${theme.spacing(1)}px solid ${color}`,
+          paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         }
       : {
           paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
+          paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         };
   };
 
@@ -96,7 +98,6 @@ class PanelMenuListItem extends React.PureComponent {
       expanded,
       icon,
       level,
-      localObserver,
       title,
       id,
     } = this.props;

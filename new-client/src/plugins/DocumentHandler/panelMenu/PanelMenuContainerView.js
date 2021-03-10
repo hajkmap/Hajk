@@ -4,6 +4,8 @@ import { isMobile } from "../../../utils/IsMobile";
 import { delay } from "../../../utils/Delay";
 import { animateScroll as scroll } from "react-scroll";
 import { withStyles } from "@material-ui/core/styles";
+import { hasSubMenu } from "../utils/helpers";
+import { getNormalizedMenuState } from "../utils/stateConverter";
 
 const styles = (theme) => ({
   test: {
@@ -32,10 +34,10 @@ class PanelMenuView extends React.PureComponent {
     options.menuConfig.menu.forEach((menuItem) => {
       this.#setInternalId(menuItem);
     });
-    this.setState(this.#getNormalizedResultState(options.menuConfig.menu));
+    this.setState(getNormalizedMenuState(options.menuConfig.menu));
   };
 
-  getTopLevelItem = (clickedItem, newItems) => {
+  #getTopLevelItem = (clickedItem, newItems) => {
     if (!clickedItem.parentId) {
       return clickedItem;
     } else {
@@ -46,12 +48,16 @@ class PanelMenuView extends React.PureComponent {
   };
 
   #getItemIdsToColor = (clickedItem, newItems) => {
-    const topLevelItem = this.getTopLevelItem(clickedItem, newItems);
+    const topLevelItem = this.#getTopLevelItem(clickedItem, newItems);
     return [topLevelItem.id, ...topLevelItem.allChildren];
   };
 
+  #isExpandedTopLevelItem = (item) => {
+    return item.hasSubMenu && item.expandedSubMenu && item.level === 0;
+  };
+
   #setClickedItemProperties = (clickedItem) => {
-    clickedItem.colored = true;
+    clickedItem.colored = !this.#isExpandedTopLevelItem(clickedItem);
     clickedItem.selected = !clickedItem.hasSubMenu;
     clickedItem.expandedSubMenu = clickedItem.hasSubMenu
       ? !clickedItem.expandedSubMenu
@@ -158,78 +164,6 @@ class PanelMenuView extends React.PureComponent {
     this.props.localObserver.publish("fly-to", maplink);
   };
 
-  getAllChildrenIds = (menu) => {
-    return menu.reduce((allChildren, item) => {
-      if (this.#hasSubMenu(item)) {
-        allChildren = [...allChildren, ...this.getAllChildrenIds(item.menu)];
-      }
-      return [...allChildren, item.id];
-    }, []);
-  };
-
-  /**
-   * Function takes the hierarchial menu and flattens it into a normalized state where
-   * the objects key is the id of the menu-item. The structure is now flat and every
-   * object has references to parents, children etc.
-   * While we are normalizing, we are also setting internal properties we later use
-   * to make items selected, colored etc.
-   */
-  #getNormalizedResultState = (
-    menu,
-    parentId = null,
-    level = 0,
-    parentIds = []
-  ) => {
-    let normalizedItemList = menu.reduce((items, menuItem) => {
-      menuItem = {
-        ...menuItem,
-        ...{
-          parentId,
-          level,
-          selected: false,
-          colored: false,
-          menuItemIds: [],
-          allChildren: [],
-          allParents: parentIds,
-          hasSubMenu: false,
-          itemRef: React.createRef(),
-        },
-      };
-
-      if (menuItem.menu && menuItem.menu.length > 0) {
-        menuItem.hasSubMenu = true;
-        menuItem.allChildren = [
-          ...menuItem.allChildren,
-          ...this.getAllChildrenIds(menuItem.menu),
-        ];
-        menuItem.menuItemIds = [
-          ...menuItem.menuItemIds,
-          ...menuItem.menu.map((menuItem) => {
-            return menuItem.id;
-          }),
-        ];
-
-        items = {
-          ...items,
-          ...this.#getNormalizedResultState(
-            menuItem.menu,
-            menuItem.id,
-            level + 1,
-            [...parentIds, menuItem.id]
-          ),
-        };
-      }
-      return { ...items, ...{ [menuItem.id]: menuItem } };
-    }, {});
-    Object.values(normalizedItemList).forEach((n) => {
-      delete n.menu;
-    });
-    return normalizedItemList;
-  };
-
-  #hasSubMenu = (item) => {
-    return item.menu && item.menu.length > 0;
-  };
   #getNextUniqueId = () => {
     this.internalId += 1;
     return this.internalId;
@@ -237,7 +171,7 @@ class PanelMenuView extends React.PureComponent {
 
   #setInternalId = (menuItem) => {
     menuItem.id = this.#getNextUniqueId();
-    if (this.#hasSubMenu(menuItem)) {
+    if (hasSubMenu(menuItem)) {
       menuItem.menu.forEach((subMenuItem) => {
         this.#setInternalId(subMenuItem, menuItem);
       });
