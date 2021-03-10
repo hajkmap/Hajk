@@ -142,7 +142,6 @@ class Contents extends React.PureComponent {
   };
 
   render = () => {
-    console.log(this.props.activeDocument, "activedoc");
     if (this.props.activeDocument) {
       return (
         <Box style={{ display: "block", maxWidth: "100%" }}>
