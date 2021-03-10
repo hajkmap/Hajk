@@ -77,6 +77,7 @@
     "react-html-parser": "^2.0.2",
     "react-rnd": "^10.2.4",
     "react-scripts": "4.0.3",
+    "react-scroll": "^1.8.2",
     "recharts": "^2.0.7",
     "web-vitals": "^1.1.0",
     "x2js": "^3.4.0",
