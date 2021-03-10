@@ -1,4 +1,6 @@
-import { hfetch } from "utils/FetchWrapper";
+const fetchConfig = {
+  credentials: "same-origin",
+};
 
 class InformativeModel {
   constructor(settings) {
@@ -71,7 +73,7 @@ class InformativeModel {
           l.getVisible()
       );
 
-    hfetch(this.exportUrl, {
+    fetch(this.exportUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -139,7 +141,7 @@ class InformativeModel {
   async load(callback) {
     let response;
     try {
-      response = await hfetch(this.url);
+      response = await fetch(this.url, fetchConfig);
       const text = await response.text();
       const data = await JSON.parse(text);
 

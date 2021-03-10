@@ -23,7 +23,6 @@
 import React from "react";
 import { Component } from "react";
 import $ from "jquery";
-import { hfetch } from "utils/FetchWrapper";
 var solpop;
 
 const defaultState = {
@@ -45,6 +44,8 @@ const defaultState = {
   opacity: 1.0,
   tiled: false,
   singleTile: false,
+  hidpi: true,
+  customRatio: 0,
   imageFormat: "",
   serverType: "geoserver",
   drawOrder: 1,
@@ -919,6 +920,8 @@ class WMSLayerForm extends Component {
       tiled: this.getValue("tiled"),
       opacity: this.getValue("opacity"),
       singleTile: this.getValue("singleTile"),
+      hidpi: this.getValue("hidpi"),
+      customRatio: this.getValue("customRatio"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
       attribution: this.getValue("attribution"),
@@ -964,6 +967,9 @@ class WMSLayerForm extends Component {
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
+    if (fieldName === "hidpi") value = input.checked;
+    if (fieldName === "customRatio")
+      value = parseFloat(Number(value).toFixed(2));
     if (fieldName === "tiled") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
@@ -1006,14 +1012,17 @@ class WMSLayerForm extends Component {
   validateField(fieldName, forcedValue, updateState) {
     var value = this.getValue(fieldName),
       valid = true;
-
     switch (fieldName) {
       case "layers":
         if (value.length === 0) {
           valid = false;
         }
         break;
-
+      case "customRatio":
+        if (isNaN(Number(value)) || value < 1 || value > 5) {
+          valid = false;
+        }
+        break;
       case "opacity":
         if (isNaN(Number(value)) || value < 0 || value > 1) {
           valid = false;
@@ -1050,7 +1059,7 @@ class WMSLayerForm extends Component {
     //
     url = url.substring(0, url.lastIndexOf("/")) + "/rest/workspaces";
     //
-    const res = await hfetch(url);
+    const res = await fetch(url);
     //
     const json = await res.json();
     //
@@ -1230,6 +1239,24 @@ class WMSLayerForm extends Component {
         <div>
           <input
             type="checkbox"
+            ref="input_hidpi"
+            id="input_hidpi"
+            onChange={(e) => this.setState({ hidpi: e.target.checked })}
+            checked={this.state.hidpi}
+          />
+          &nbsp;
+          <label htmlFor="input_hidpi">
+            Efterfråga hög DPI{" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="Hämta 'kartbilder' med hög upplösning vid skärmar som stödjer detta (Inställning hidpi i OL-klasserna ImageWMS/TileWMS)"
+            />
+          </label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
             ref="input_singleTile"
             id="input_singleTile"
             onChange={(e) => this.setState({ singleTile: e.target.checked })}
@@ -1237,6 +1264,33 @@ class WMSLayerForm extends Component {
           />
           &nbsp;
           <label htmlFor="input_singleTile">Single tile</label>
+          <div
+            style={{
+              paddingLeft: "20px",
+              marginLeft: "4px",
+              borderLeft: "2px double #1f1c1c",
+            }}
+          >
+            <label htmlFor="input_customRatio">
+              Custom ratio (Lämna som 0 för OL-default){" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Bestämmer storlek på bilden vid varje request där 1 är viewportens storlek och 2 är dubbelt så stor osv (Inställning för ratio i OL-klassen ImageWMS)"
+              />
+            </label>
+            <input
+              type="text"
+              ref="input_customRatio"
+              value={this.state.customRatio}
+              disabled={!this.state.singleTile}
+              onChange={(e) => {
+                this.setState({ customRatio: e.target.value });
+                this.validateField("customRatio");
+              }}
+              className={this.getValidationClass("customRatio")}
+            />
+          </div>
         </div>
         <div>
           <input

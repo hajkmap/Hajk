@@ -15,13 +15,14 @@ const styles = (theme) => ({
     overflowX: "hidden",
     userSelect: "text",
     outline: "none",
-    scrollBehavior: "smooth",
+    //scrollBehavior: "smooth",
   },
 
   contentContainer: {
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
+    outline: "none",
   },
   margin: {
     marginTop: theme.spacing(2),
@@ -77,18 +78,18 @@ class DocumentViewer extends React.PureComponent {
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
+
     localObserver.subscribe("scroll-to-chapter", (chapter) => {
       /*scrollIntoView is buggy without dirty fix - 
       tried using react life cycle methods but is, for some reason, not working*/
+
       setTimeout(() => {
         chapter.scrollRef.current.scrollIntoView();
-        this.documentViewerRef.current.focus();
       }, 100);
     });
 
     localObserver.subscribe("scroll-to-top", () => {
       this.scrollToTop();
-      this.documentViewerRef.current.focus();
     });
   };
 
@@ -106,7 +107,6 @@ class DocumentViewer extends React.PureComponent {
 
   componentDidUpdate = (prevProps) => {
     if (prevProps.activeDocument !== this.props.activeDocument) {
-      this.scrollToTop();
       this.setState({
         expandedTableOfContents: expandedTocOnStart(this.props),
       });
@@ -114,7 +114,10 @@ class DocumentViewer extends React.PureComponent {
   };
 
   scrollToTop = () => {
-    this.documentViewerRef.current.scrollTop = 0;
+    //Buggy firefox makes scroll not work properly, dirty fix with setTimeout
+    setTimeout(() => {
+      this.documentViewerRef.current.scrollTop = 0;
+    }, 100);
   };
 
   renderScrollToTopButton = () => {
@@ -227,14 +230,6 @@ class DocumentViewer extends React.PureComponent {
     return (
       <>
         <Grid
-          tabIndex="0" //Focus grid to be able to use onKeyDown
-          onKeyDown={(e) => {
-            //If ctrl-a or command-a is pressed
-            if ((e.ctrlKey || e.metaKey) && e.keyCode === 65) {
-              this.selectAllText();
-              e.preventDefault();
-            }
-          }}
           onScroll={this.onScroll}
           ref={this.documentViewerRef}
           className={classes.gridContainer}
@@ -247,6 +242,14 @@ class DocumentViewer extends React.PureComponent {
           )}
 
           <Grid
+            tabIndex="0" //Focus grid to be able to use onKeyDown
+            onKeyDown={(e) => {
+              //If ctrl-a or command-a is pressed
+              if ((e.ctrlKey || e.metaKey) && e.keyCode === 65) {
+                this.selectAllText();
+                e.preventDefault();
+              }
+            }}
             className={clsx(
               showTableOfContents
                 ? classes.contentContainer

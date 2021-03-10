@@ -1006,7 +1006,6 @@ const InlineStyleControls = (props) => {
 const styles = {
   root: {
     fontFamily: "'Georgia', serif",
-    width: 1000,
     border: "1px solid #ddd",
   },
 

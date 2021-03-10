@@ -86,19 +86,5 @@
     { "name": "mapsettings", "title": "Kartor" },
     { "name": "informative", "title": "Dokumenthanterare" },
     { "name": "documenthandler", "title": "Dokumenthanterare 2.0" }
-  ],
-  "hfetch": {
-    "defaultOptions": {
-      "credentials": "same-origin"
-    },
-    "useOptionOverrides": false,
-    "optionOverrides": {
-      "https://wms-utv.varberg.se/*": {
-        "credentials": "include"
-      },
-      "https://wms-utv.varberg.se/geoserver/*": {
-        "credentials": "include"
-      }
-    }
-  }
+  ]
 }

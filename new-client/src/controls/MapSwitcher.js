@@ -2,7 +2,6 @@ import React from "react";
 import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
-import { hfetch } from "utils/FetchWrapper";
 
 const styles = (theme) => ({
   paper: {
@@ -12,6 +11,10 @@ const styles = (theme) => ({
     minWidth: "unset",
   },
 });
+
+const fetchConfig = {
+  credentials: "same-origin",
+};
 
 class MapSwitcher extends React.PureComponent {
   // Will hold map configs
@@ -41,15 +44,16 @@ class MapSwitcher extends React.PureComponent {
   }
 
   componentDidMount() {
-    // If user specific maps already exist in config, there's no need
-    // to fetch again (the new API provides this). Please note that
-    // it will be null if map doesn't want to show the map selector -
-    // hence we look for undefined specifically: the old API will not
-    // provide this property at all.
+    let { proxy, mapserviceBase } = this.appModel.config.appConfig;
+
+    // If user specific maps is provided by the new API, the key will
+    // already exist in config and there's no need to fetch again.
+    // However, if it's undefined, it looks like we're using the old API
+    // and MapSwitcher must do the fetch by itself.
     if (this.appModel.config.userSpecificMaps !== undefined) {
       this.handleLoading(this.appModel.config.userSpecificMaps);
     } else {
-      hfetch(`/config/userspecificmaps`)
+      fetch(`${proxy}${mapserviceBase}/config/userspecificmaps`, fetchConfig)
         .then((resp) => resp.json())
         .then((maps) => this.handleLoading(maps))
         .catch((err) => {

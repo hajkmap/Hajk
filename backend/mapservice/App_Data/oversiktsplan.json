@@ -788,6 +788,7 @@
         "showScrollButtonLimit": 400,
         "customThemeUrl": "/documentHandlerTheme.json",
         "closePanelOnMapLinkOpen": true,
+        "displayLoadingOnMapLinkOpen": true,
         "documentOnStart": "start",
         "drawerTitle": "Översiktsplan",
         "drawerButtonTitle": "Meny",
@@ -803,7 +804,7 @@
         },
         "dynamicImportUrls": {
           "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
-          "openSans": "https://fonts.googleapis.com/css?family=Open+Sans"
+          "customFont": "https://fonts.googleapis.com/css?family=Open+Sans"
         },
         "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
         "width": 800,

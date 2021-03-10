@@ -9,7 +9,10 @@ import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
 import { withTheme, createMuiTheme } from "@material-ui/core/styles";
 import { deepMerge } from "../../utils/DeepMerge";
-import { hfetch } from "utils/FetchWrapper";
+
+const fetchOpts = {
+  credentials: "same-origin",
+};
 
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
@@ -80,7 +83,7 @@ class DocumentHandler extends React.PureComponent {
 
   fetchCustomThemeJson = () => {
     const { options } = this.props;
-    return hfetch(options.customThemeUrl)
+    return fetch(options.customThemeUrl, fetchOpts)
       .then((res) => {
         return res.json().then((documentHandlerTheme) => {
           if (documentHandlerTheme.typography) {
@@ -99,20 +102,24 @@ class DocumentHandler extends React.PureComponent {
       });
   };
 
-  dynamicallyImportOpenSans = () => {
+  dynamicallyImportCustomFont = () => {
     const { dynamicImportUrls } = this.props.options;
-    return (
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href={dynamicImportUrls.openSans}
-      />
-    );
+    if (dynamicImportUrls.customFont) {
+      return (
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href={dynamicImportUrls.customFont}
+        />
+      );
+    } else return null;
   };
 
   dynamicallyImportIconFonts = () => {
     const { dynamicImportUrls } = this.props.options;
-    return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
+    if (dynamicImportUrls.iconFonts) {
+      return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
+    } else return null;
   };
 
   renderDrawerContent = () => {
@@ -132,7 +139,7 @@ class DocumentHandler extends React.PureComponent {
   addDrawerToggleButton = () => {
     const { app, options } = this.props;
     app.globalObserver.publish("core.addSrShortcuts", [
-      { title: "Till huvudmeny för webbplatsen", link: "#menu" },
+      { title: "Till huvudmeny för webbplatsen", link: "#panelmenu" },
     ]);
     app.globalObserver.publish("core.addDrawerToggleButton", {
       value: "menu",
@@ -200,7 +207,7 @@ class DocumentHandler extends React.PureComponent {
   render() {
     return (
       <>
-        {this.dynamicallyImportOpenSans()}
+        {this.dynamicallyImportCustomFont()}
         {this.dynamicallyImportIconFonts()}
         <DocumentWindowBase
           {...this.props}

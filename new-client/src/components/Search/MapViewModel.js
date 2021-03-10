@@ -95,6 +95,12 @@ class MapViewModel {
         } else {
           this.toggleDraw(true, options.type);
         }
+
+        // At this stage, the Search input field could be in focus. On
+        // mobile devices the on-screen keyboard will show up. We don't
+        // need it here (as these search options are purely click/touch-based)
+        // so we ensure that it's hidden by blurring the focus.
+        document.activeElement.blur();
       }
     );
   };

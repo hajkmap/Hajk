@@ -3,7 +3,6 @@ import TileLayer from "ol/layer/Tile";
 import WMTS from "ol/source/WMTS";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
 import LayerInfo from "./LayerInfo.js";
-import { overrideLayerSourceParams } from "utils/FetchWrapper";
 
 var wmtsLayerProperties = {
   url: "",
@@ -45,34 +44,29 @@ class WMTSLayer {
       Number(r)
     );
     this.projection = config.projection;
-
-    let source = {
-      attributions: config.attribution,
-      format: "image/png",
-      wrapX: false,
-      url: config.url,
-      crossOrigin: config.crossOrigin,
-      axisMode: config.axisMode,
-      layer: config.layer,
-      matrixSet: config.matrixSet,
-      style: config.style,
-      projection: this.projection,
-      tileGrid: new WMTSTileGrid({
-        origin: config.origin.map((o) => Number(o)),
-        resolutions: this.resolutions,
-        matrixIds: config.matrixIds,
-        extent: config.extent,
-      }),
-    };
-
-    overrideLayerSourceParams(source);
-
     this.layer = new TileLayer({
       name: config.name,
       visible: config.visible,
       queryable: config.queryable,
       opacity: config.opacity,
-      source: new WMTS(source),
+      source: new WMTS({
+        attributions: config.attribution,
+        format: "image/png",
+        wrapX: false,
+        url: config.url,
+        crossOrigin: config.crossOrigin,
+        axisMode: config.axisMode,
+        layer: config.layer,
+        matrixSet: config.matrixSet,
+        style: config.style,
+        projection: this.projection,
+        tileGrid: new WMTSTileGrid({
+          origin: config.origin.map((o) => Number(o)),
+          resolutions: this.resolutions,
+          matrixIds: config.matrixIds,
+          extent: config.extent,
+        }),
+      }),
       layerInfo: new LayerInfo(config),
     });
     this.updateMapViewResolutions();
