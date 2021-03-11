@@ -1,7 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import Fab from "@material-ui/core/Fab";
-import NavigationIcon from "@material-ui/icons/Navigation";
+
 import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import clsx from "clsx";
@@ -9,6 +8,7 @@ import Contents from "./Contents";
 import { Typography } from "@material-ui/core";
 import { delay } from "../../../utils/Delay";
 import { animateScroll as scroll } from "react-scroll";
+import ScrollToTop from "./ScrollToTop";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -17,9 +17,7 @@ const styles = (theme) => ({
     overflowX: "hidden",
     userSelect: "text",
     outline: "none",
-    //scrollBehavior: "smooth",
   },
-
   contentContainer: {
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(2),
@@ -29,11 +27,7 @@ const styles = (theme) => ({
   margin: {
     marginTop: theme.spacing(2),
   },
-  scrollToTopButton: {
-    position: "fixed",
-    bottom: theme.spacing(2),
-    right: theme.spacing(3),
-  },
+
   toc: {
     marginBottom: theme.spacing(2),
   },
@@ -120,23 +114,6 @@ class DocumentViewer extends React.PureComponent {
       duration: 0,
       delay: 100,
     });
-  };
-
-  renderScrollToTopButton = () => {
-    const { classes } = this.props;
-    return (
-      <Fab
-        className={classes.scrollToTopButton}
-        size="small"
-        color="primary"
-        onClick={this.scrollToTop}
-      >
-        <Typography variant="srOnly">
-          Scrolla till toppen av dokumentet
-        </Typography>
-        <NavigationIcon />
-      </Fab>
-    );
   };
 
   selectAllText = () => {
@@ -269,9 +246,9 @@ class DocumentViewer extends React.PureComponent {
             />
           </Grid>
         </Grid>
-        {showScrollButton &&
-          documentWindowMaximized &&
-          this.renderScrollToTopButton()}
+        {showScrollButton && documentWindowMaximized && (
+          <ScrollToTop onClick={this.scrollToTop}></ScrollToTop>
+        )}
       </>
     );
   }
