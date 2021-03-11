@@ -54,7 +54,7 @@ class PanelList extends React.PureComponent {
       <List
         style={{ position: "static" }}
         disablePadding
-        id="panelmenu"
+        id={`panellist_${level}`}
         role="navigation"
         component="nav"
       >
