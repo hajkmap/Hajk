@@ -7,7 +7,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prestart": "node prebuild.js",
+    "prebuild": "node prebuild.js"
   },
   "eslintConfig": {
     "extends": [
