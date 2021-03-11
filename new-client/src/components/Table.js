@@ -1,5 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import { hfetch } from "utils/FetchWrapper";
 
 const styles = (theme) => ({
   table: {
@@ -55,7 +56,7 @@ class TableView extends React.PureComponent {
   }
 
   load(url) {
-    fetch(url).then((response) => {
+    hfetch(url).then((response) => {
       response.json().then((rsp) => {
         const data = rsp.features.map((feature) => {
           return {

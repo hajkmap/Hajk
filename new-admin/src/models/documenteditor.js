@@ -1,4 +1,5 @@
 import { Model } from "backbone";
+import { hfetch } from "utils/FetchWrapper";
 
 const $ = require("jquery");
 const jQuery = $;
@@ -26,8 +27,7 @@ var documentEditor = Model.extend({
 
   delete: function (documentName, callback) {
     var url = this.get("config").url_delete + "/" + documentName;
-    fetch(url, {
-      credentials: "same-origin",
+    hfetch(url, {
       method: "delete",
     }).then((response) => {
       callback(response);
@@ -39,8 +39,7 @@ var documentEditor = Model.extend({
     data.chapters.forEach((chapter) => {
       this.deleteParentChapter(chapter, data.chapters);
     });
-    fetch(url, {
-      credentials: "same-origin",
+    hfetch(url, {
       method: "post",
       body: JSON.stringify(data),
     }).then((response) => {
@@ -53,7 +52,7 @@ var documentEditor = Model.extend({
   loadDocuments: async function (callback) {
     var url = this.get("config").url_document_list;
     try {
-      const response = await fetch(url, { credentials: "same-origin" });
+      const response = await hfetch(url);
       const text = await response.text();
       const data = JSON.parse(text);
       callback(data);
@@ -67,10 +66,9 @@ var documentEditor = Model.extend({
 
   createDocument(data, callback) {
     var url = this.get("config").url_create;
-    fetch(url, {
+    hfetch(url, {
       method: "post",
       body: JSON.stringify(data),
-      credentials: "same-origin",
     }).then((response) => {
       response.text().then((text) => {
         callback(text);
@@ -80,7 +78,7 @@ var documentEditor = Model.extend({
 
   load: function (documentName, callback) {
     var url = this.get("config").url_load + "/" + documentName;
-    fetch(url, { credentials: "same-origin" }).then((response) => {
+    hfetch(url).then((response) => {
       response.json().then((data) => {
         data.chapters.forEach((chapter) => {
           this.setParentChapter(chapter, data.chapters);
@@ -92,7 +90,7 @@ var documentEditor = Model.extend({
 
   loadMaps: function (callback) {
     var url = this.get("config").url_map_list;
-    fetch(url, { credentials: "same-origin" }).then((response) => {
+    hfetch(url).then((response) => {
       response.json().then((data) => {
         callback(data);
       });
@@ -101,7 +99,7 @@ var documentEditor = Model.extend({
 
   loadMapSettings: function (map, callback) {
     var url = this.get("config").url_map + "/" + map;
-    fetch(url, { credentials: "same-origin" }).then((response) => {
+    hfetch(url).then((response) => {
       response.json().then((data) => {
         callback(data.map);
       });
@@ -110,7 +108,7 @@ var documentEditor = Model.extend({
 
   listImages: function (callback) {
     var url = this.get("config").list_images;
-    fetch(url, { credentials: "same-origin" }).then((response) => {
+    hfetch(url).then((response) => {
       response.json().then((data) => {
         callback(data);
       });
