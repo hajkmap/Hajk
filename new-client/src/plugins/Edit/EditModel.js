@@ -567,8 +567,15 @@ class EditModel {
   }
 
   getSources() {
+    //console.log("getSources sources: %o", this.sources);
+    //console.log("getSources activeServices %o", this.activeServices);
+    var allowedServices = [];
+    for (var i = 0; i < this.activeServices.length; i++) {
+      allowedServices.push(this.activeServices[i].id);
+    }
     return this.sources.filter((source) => {
-      return this.activeServices.some((serviceId) => serviceId === source.id);
+      //return this.activeServices.some((serviceId) => serviceId === source.id);
+      return allowedServices.some((serviceId) => serviceId === source.id);
     });
   }
 }
