@@ -33,27 +33,11 @@ function updateBuildDate() {
   data = data.replace(regex, `${key}=${new Date().toISOString()}\n`);
 }
 
-function updateAppVersion() {
-  const key = "REACT_APP_VERSION=$npm_package_version\n";
-  if (data.indexOf(key) === -1) {
-    data += key;
-  }
-}
-
-function updateAppName() {
-  const key = "REACT_APP_NAME=$npm_package_name\n";
-  if (data.indexOf(key) === -1) {
-    data += key;
-  }
-}
-
 function writeToEnvLocal() {
   cleanUpNewlines();
   fs.writeFileSync(envLocalFile, data);
 }
 
-updateAppName();
-updateAppVersion();
 updateBuildDate();
 updateGitHash();
 writeToEnvLocal();
