@@ -66,6 +66,27 @@ export default class DocumentHandlerModel {
       });
   };
 
+  warnNoCustomThemeUrl = () => {
+    console.warn(
+      "Could not find valid url for custom theme in documenthandler, check customThemeUrl"
+    );
+  };
+
+  fetchCustomThemeJson = () => {
+    if (!this.options.customThemeUrl) {
+      this.warnNoCustomThemeUrl();
+      return Promise.resolve("");
+    }
+    return fetch(this.options.customThemeUrl, fetchConfig)
+      .then((res) => {
+        return res.json();
+      })
+      .catch(() => {
+        this.warnNoCustomThemeUrl();
+        return null;
+      });
+  };
+
   flattenMenu = (menuItems) => {
     return menuItems.reduce((menu, menuItem) => {
       if (menuItem.menu && menuItem.menu.length > 0) {
