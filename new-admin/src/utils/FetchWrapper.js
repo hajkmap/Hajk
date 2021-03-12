@@ -197,17 +197,16 @@ function xJqueryAjax(...args) {
   jw.url = args[0];
 
   if (args.length === 1) {
-    // Assume $.ajax(object with url) and convert it.
-    jw.url = args[0].url;
-    jw.options = args;
-    delete jw.options.url; // clean up.
+    // Assume $.ajax(object with url)
+    jw.options = Object.assign({}, args[0]);
+    jw.overrideOptions();
+    return originalJqueryAjax(jw.options);
   } else if (args.length === 2) {
     // Assume $.ajax(url, options)
     jw.options = args[1];
+    jw.overrideOptions();
+    return originalJqueryAjax(jw.url, jw.options);
   }
-  jw.overrideOptions();
-  // console.log("xJqueryAjax", jw.url, jw.options);
-  return originalJqueryAjax(jw.url, jw.options);
 }
 
 export {
