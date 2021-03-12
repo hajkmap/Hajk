@@ -5,7 +5,6 @@ import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import clsx from "clsx";
 import Contents from "./Contents";
-import { Typography } from "@material-ui/core";
 import { delay } from "../../../utils/Delay";
 import { animateScroll as scroll } from "react-scroll";
 import ScrollToTop from "./ScrollToTop";
