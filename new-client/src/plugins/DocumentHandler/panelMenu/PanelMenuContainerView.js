@@ -7,8 +7,8 @@ import { withStyles } from "@material-ui/core/styles";
 import { hasSubMenu } from "../utils/helpers";
 import { getNormalizedMenuState } from "../utils/stateConverter";
 
-const styles = (theme) => ({
-  test: {
+const styles = () => ({
+  panelListWrapper: {
     maxHeight: "100%",
     position: "relative",
     overflow: "auto",
@@ -29,11 +29,93 @@ class PanelMenuView extends React.PureComponent {
     this.#initializeItems();
   };
 
+  #bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("submenu-clicked", this.#handleSubMenuClicked);
+    localObserver.subscribe(
+      "document-link-clicked",
+      this.#handleOpenDocumentFromLink
+    );
+    localObserver.subscribe(
+      "document-clicked",
+      this.#handleOpenDocumentFromPanelMenu
+    );
+    localObserver.subscribe("link-clicked", this.#handleExternalLinkClicked);
+    localObserver.subscribe(
+      "document-maplink-clicked",
+      this.#handleShowMapLayersFromLink
+    );
+    localObserver.subscribe(
+      "maplink-clicked",
+      this.#handleShowMapLayersFromPanel
+    );
+  };
+
   #initializeItems = () => {
     const { options } = this.props;
     options.menuConfig.menu.forEach(this.#setInitialMenuItemProperties);
     this.setState(getNormalizedMenuState(options.menuConfig.menu));
   };
+
+  //------------------Handle events-------------------------
+
+  #findPanelMenuWithDocumentName = (documentName) => {
+    return Object.values(this.state).find((item) => {
+      return item.document === documentName;
+    });
+  };
+
+  #handleOpenDocumentFromLink = ({ documentName, headerIdentifier }) => {
+    this.#setDocument(documentName, headerIdentifier);
+    const itemClicked = this.#findPanelMenuWithDocumentName(documentName);
+    this.#setItemStateProperties(itemClicked.id).then(() => {
+      this.#scrollToMenuItem(
+        this.state[itemClicked.id].itemRef.current.offsetTop
+      );
+    });
+  };
+
+  #handleOpenDocumentFromPanelMenu = (id) => {
+    const { app } = this.props;
+    this.#setDocument(this.state[id].document, null);
+    this.#setItemStateProperties(id).then(() => {
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    });
+  };
+
+  #handleShowMapLayersFromLink = (maplink) => {
+    const { options, localObserver, app } = this.props;
+    if (options.displayLoadingOnMapLinkOpen) {
+      localObserver.publish("maplink-loading");
+    }
+    app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    this.#delayAndFlyToMapLink(maplink);
+  };
+
+  #handleShowMapLayersFromPanel = (id) => {
+    const { options, app, localObserver } = this.props;
+    if (!isMobile && options.closePanelOnMapLinkOpen) {
+      this.#setDocument();
+      app.globalObserver.publish("documentviewer.closeWindow");
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    }
+    if (options.displayLoadingOnMapLinkOpen) {
+      localObserver.publish("maplink-loading");
+    }
+    this.#delayAndFlyToMapLink(this.state[id].maplink);
+  };
+
+  #handleSubMenuClicked = (id) => {
+    this.#setItemStateProperties(id);
+  };
+
+  #handleExternalLinkClicked = (id) => {
+    const { app } = this.props;
+    window.open(this.state[id].link, "_blank");
+    app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+  };
+
+  //---------------------------------------------------
 
   #getTopLevelItem = (clickedItem, newItems) => {
     if (!clickedItem.parentId) {
@@ -77,22 +159,17 @@ class PanelMenuView extends React.PureComponent {
     });
   };
 
-  setItemStateProperties = (idClicked) => {
-    const newItems = { ...this.state };
-    const clickedItem = newItems[idClicked];
-    this.#setClickedItemProperties(clickedItem);
-    this.#setNonClickedItemProperties(clickedItem, newItems);
-
-    this.setState({ newItems }, () => {
-      if (!clickedItem.hasSubMenu) {
-        this.scrollToMenuItem(
-          this.state[clickedItem.id].itemRef.current.offsetTop
-        );
-      }
+  #setItemStateProperties = (idClicked) => {
+    return new Promise((resolve) => {
+      const newItems = { ...this.state };
+      const clickedItem = newItems[idClicked];
+      this.#setClickedItemProperties(clickedItem);
+      this.#setNonClickedItemProperties(clickedItem, newItems);
+      this.setState({ newItems }, resolve);
     });
   };
 
-  scrollToMenuItem = async (scrollOffset) => {
+  #scrollToMenuItem = async (scrollOffset) => {
     scroll.scrollTo(scrollOffset, {
       containerId: "panelListWrapper",
       smooth: false,
@@ -101,53 +178,11 @@ class PanelMenuView extends React.PureComponent {
     });
   };
 
-  #bindSubscriptions = () => {
-    const { localObserver, options, app } = this.props;
-    localObserver.subscribe("submenu-clicked", (id) => {
-      this.setItemStateProperties(id);
-    });
-
-    localObserver.subscribe("set-active-document", ({ documentName }) => {
-      const itemClicked = Object.values(this.state).find((item) => {
-        return item.document === documentName;
-      });
-      this.setItemStateProperties(itemClicked.id);
-    });
-
-    localObserver.subscribe("document-clicked", (id) => {
-      localObserver.publish("set-active-document", {
-        documentName: this.state[id].document,
-        headerIdentifier: null,
-      });
-      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-    });
-
-    localObserver.subscribe("link-clicked", (id) => {
-      window.open(this.state[id].link, "_blank");
-      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-    });
-
-    localObserver.subscribe("document-maplink-clicked", (maplink) => {
-      if (options.displayLoadingOnMapLinkOpen) {
-        localObserver.publish("maplink-loading");
-      }
-      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-      this.delayAndFlyToMapLink(maplink);
-    });
-
-    localObserver.subscribe("maplink-clicked", (id) => {
-      if (!isMobile && options.closePanelOnMapLinkOpen) {
-        localObserver.publish("set-active-document", {
-          documentName: null,
-          headerIdentifier: null,
-        });
-        app.globalObserver.publish("documentviewer.closeWindow");
-        app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-      }
-      if (options.displayLoadingOnMapLinkOpen) {
-        localObserver.publish("maplink-loading");
-      }
-      this.delayAndFlyToMapLink(this.state[id].maplink);
+  #setDocument = (documentName = null, headerIdentifier = null) => {
+    const { localObserver } = this.props;
+    localObserver.publish("set-active-document", {
+      documentName: documentName,
+      headerIdentifier: headerIdentifier,
     });
   };
 
@@ -156,7 +191,7 @@ class PanelMenuView extends React.PureComponent {
   allow the other tasks such as closing the document and displaying a snackbar to run before the
   application hangs.
   */
-  delayAndFlyToMapLink = async (maplink) => {
+  #delayAndFlyToMapLink = async (maplink) => {
     await delay(100);
     this.props.localObserver.publish("fly-to", maplink);
   };
@@ -184,18 +219,13 @@ class PanelMenuView extends React.PureComponent {
     }
   };
 
-  onEnter = (id) => {
-    this.scrollToMenuItem(this.state[id].itemRef.current.offsetTop);
-  };
-
   render() {
     const { classes, app, localObserver } = this.props;
     return (
-      <div className={classes.test} id="panelListWrapper">
+      <div className={classes.panelListWrapper} id="panelListWrapper">
         <PanelList
           app={app}
           localObserver={localObserver}
-          onEnter={this.onEnter}
           level={0}
           items={this.state}
         ></PanelList>
