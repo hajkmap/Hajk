@@ -9,7 +9,7 @@ const styles = (theme) => {
       overflowWrap: "break-word",
     },
     containerContent: {
-      backgroundColor: "#eeeeee",
+      backgroundColor: theme.palette.action.selected,
     },
     typographyContainer: {
       padding: theme.spacing(1),
@@ -18,7 +18,7 @@ const styles = (theme) => {
       marginBottom: theme.spacing(1),
     },
     divider: {
-      backgroundColor: "#786aaf",
+      backgroundColor: theme.palette.divider,
       height: "2px",
     },
   };

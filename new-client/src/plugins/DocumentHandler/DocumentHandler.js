@@ -44,18 +44,22 @@ class DocumentHandler extends React.PureComponent {
         map: props.map,
         menu: props.options.menuConfig.menu,
         resolveSearchInterface: resolve,
+        options: props.options,
       })
         .init()
         .then((loadedDocumentModel) => {
-          this.fetchCustomThemeJson().then((customTheme) => {
-            this.setState({
-              model: loadedDocumentModel,
-              customTheme: customTheme,
-            });
+          return this.fetchCustomThemeJson().then((customTheme) => {
+            this.setState(
+              {
+                model: loadedDocumentModel,
+                customTheme: customTheme,
+              },
+              () => {
+                this.addDrawerToggleButton();
+              }
+            );
           });
         });
-
-      this.addDrawerToggleButton();
     });
   }
 
@@ -78,8 +82,19 @@ class DocumentHandler extends React.PureComponent {
     });
   };
 
+  warnNoCustomThemeUrl = () => {
+    console.warn(
+      "Could not find valid url for custom theme in documenthandler, check customThemeUrl"
+    );
+  };
+
   fetchCustomThemeJson = () => {
     const { options } = this.props;
+
+    if (!options.customThemeUrl) {
+      this.warnNoCustomThemeUrl();
+      return Promise.resolve("");
+    }
     return hfetch(options.customThemeUrl)
       .then((res) => {
         return res.json().then((documentHandlerTheme) => {
@@ -92,9 +107,7 @@ class DocumentHandler extends React.PureComponent {
         });
       })
       .catch(() => {
-        console.warn(
-          "Could not find custom theme for documenthandler, check customThemeUrl"
-        );
+        this.warnNoCustomThemeUrl();
         return null;
       });
   };

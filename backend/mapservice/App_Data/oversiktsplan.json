@@ -793,8 +793,8 @@
         "drawerTitle": "Översiktsplan",
         "drawerButtonTitle": "Meny",
         "defaultDocumentColorSettings": {
-          "textAreaBackgroundColor": "#ccc",
-          "textAreaDividerColor": "#6A0DAD"
+          "textAreaBackgroundColor": "",
+          "textAreaDividerColor": ""
         },
         "tableOfContents": {
           "expanded": false,
