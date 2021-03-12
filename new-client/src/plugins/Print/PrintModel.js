@@ -398,6 +398,9 @@ export default class PrintModel {
     const size = this.map.getSize();
     const originalResolution = this.map.getView().getResolution();
     const originalCenter = this.map.getView().getCenter();
+    const originalConstrainResolution = this.map
+      .getView()
+      .getConstrainResolution();
     const scaleResolution =
       scale /
       getPointResolution(
@@ -412,6 +415,7 @@ export default class PrintModel {
       originalCenter,
       originalResolution,
       scaleResolution,
+      originalConstrainResolution,
     };
 
     this.map.once("rendercomplete", async () => {
@@ -566,6 +570,9 @@ export default class PrintModel {
         })
         .finally(() => {
           // Reset map to how it was before print
+          this.map
+            .getView()
+            .setConstrainResolution(originalConstrainResolution);
           this.previewLayer.setVisible(true);
           this.map.setSize(size);
           this.map.getView().setResolution(originalResolution);
@@ -586,6 +593,7 @@ export default class PrintModel {
     this.previewLayer.setVisible(false);
 
     // Set map size and resolution
+    this.map.getView().setConstrainResolution(false);
     this.map.setSize(printSize);
     this.map.getView().setCenter(printCenter);
     this.map.getView().setResolution(scaleResolution);
@@ -639,6 +647,11 @@ export default class PrintModel {
     this.pdfCreationCancelled = true;
 
     // Reset map to how it was before print
+    this.map
+      .getView()
+      .setConstrainResolution(
+        this.valuesToRestoreFrom.originalConstrainResolution
+      );
     this.previewLayer.setVisible(true);
     this.map.setSize(this.valuesToRestoreFrom.size);
     this.map
