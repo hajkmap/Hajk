@@ -103,13 +103,11 @@ class PanelMenuView extends React.PureComponent {
 
   #bindSubscriptions = () => {
     const { localObserver, options, app } = this.props;
-    console.log("BINDING");
     localObserver.subscribe("submenu-clicked", (id) => {
       this.setItemStateProperties(id);
     });
 
     localObserver.subscribe("set-active-document", ({ documentName }) => {
-      console.log("set-active");
       const itemClicked = Object.values(this.state).find((item) => {
         return item.document === documentName;
       });
