@@ -6,6 +6,11 @@ import { animateScroll as scroll } from "react-scroll";
 import { withStyles } from "@material-ui/core/styles";
 import { hasSubMenu } from "../utils/helpers";
 import { getNormalizedMenuState } from "../utils/stateConverter";
+import {
+  isExpandedTopLevelItem,
+  getItemIdsToColor,
+  findMenuItemWithDocumentName,
+} from "../panelMenu/panelMenuUtils";
 
 const styles = () => ({
   panelListWrapper: {
@@ -47,7 +52,7 @@ class PanelMenuView extends React.PureComponent {
     );
     localObserver.subscribe(
       "maplink-clicked",
-      this.#handleShowMapLayersFromPanel
+      this.#handleShowMapLayersFromPanelMenu
     );
   };
 
@@ -57,21 +62,31 @@ class PanelMenuView extends React.PureComponent {
     this.setState(getNormalizedMenuState(options.menuConfig.menu));
   };
 
-  //------------------Handle events-------------------------
-
-  #findPanelMenuWithDocumentName = (documentName) => {
-    return Object.values(this.state).find((item) => {
-      return item.document === documentName;
+  #setInitialMenuItemProperties = (menuItem) => {
+    const { document } = this.props;
+    const itemMatchesOpenDocument =
+      menuItem.document === document.documentFileName;
+    //Do not use spread because we are mutating original item
+    Object.assign(menuItem, {
+      id: this.#getNextUniqueId(),
+      selected: itemMatchesOpenDocument,
+      colored: itemMatchesOpenDocument,
     });
+    if (hasSubMenu(menuItem)) {
+      menuItem.hasSubMenu = true;
+      menuItem.menu.forEach((subMenuItem) => {
+        this.#setInitialMenuItemProperties(subMenuItem, menuItem);
+      });
+    }
   };
 
+  //------------------Handle events-------------------------
+
   #handleOpenDocumentFromLink = ({ documentName, headerIdentifier }) => {
+    const itemClicked = findMenuItemWithDocumentName(documentName, this.state);
     this.#setDocument(documentName, headerIdentifier);
-    const itemClicked = this.#findPanelMenuWithDocumentName(documentName);
     this.#setItemStateProperties(itemClicked.id).then(() => {
-      this.#scrollToMenuItem(
-        this.state[itemClicked.id].itemRef.current.offsetTop
-      );
+      this.#scrollToMenuItem(itemClicked.itemRef.current.offsetTop);
     });
   };
 
@@ -92,7 +107,7 @@ class PanelMenuView extends React.PureComponent {
     this.#delayAndFlyToMapLink(maplink);
   };
 
-  #handleShowMapLayersFromPanel = (id) => {
+  #handleShowMapLayersFromPanelMenu = (id) => {
     const { options, app, localObserver } = this.props;
     if (!isMobile && options.closePanelOnMapLinkOpen) {
       this.#setDocument();
@@ -117,36 +132,17 @@ class PanelMenuView extends React.PureComponent {
 
   //---------------------------------------------------
 
-  #getTopLevelItem = (clickedItem, newItems) => {
-    if (!clickedItem.parentId) {
-      return clickedItem;
-    } else {
-      return Object.values(newItems).find((item) => {
-        return item.allChildren.indexOf(clickedItem.id) > -1;
-      });
-    }
-  };
-
-  #getItemIdsToColor = (clickedItem, newItems) => {
-    const topLevelItem = this.#getTopLevelItem(clickedItem, newItems);
-    return [topLevelItem.id, ...topLevelItem.allChildren];
-  };
-
-  #isExpandedTopLevelItem = (item) => {
-    return item.hasSubMenu && item.expandedSubMenu && item.level === 0;
-  };
-
   #setClickedItemProperties = (clickedItem) => {
-    clickedItem.colored = !this.#isExpandedTopLevelItem(clickedItem);
+    clickedItem.colored = !isExpandedTopLevelItem(clickedItem);
     clickedItem.selected = !clickedItem.hasSubMenu;
     clickedItem.expandedSubMenu = clickedItem.hasSubMenu
       ? !clickedItem.expandedSubMenu
       : clickedItem.expandedSubMenu;
   };
 
-  #setNonClickedItemProperties = (clickedItem, newItems) => {
-    const idsToColor = this.#getItemIdsToColor(clickedItem, newItems);
-    Object.values(newItems).forEach((item) => {
+  #setNonClickedItemProperties = (clickedItem, mutableState) => {
+    const idsToColor = getItemIdsToColor(clickedItem, mutableState);
+    Object.values(mutableState).forEach((item) => {
       if (item.id !== clickedItem.id) {
         item.colored = idsToColor.indexOf(item.id) !== -1;
         if (clickedItem.allParents.indexOf(item.id) !== -1) {
@@ -161,11 +157,11 @@ class PanelMenuView extends React.PureComponent {
 
   #setItemStateProperties = (idClicked) => {
     return new Promise((resolve) => {
-      const newItems = { ...this.state };
-      const clickedItem = newItems[idClicked];
+      const mutableState = { ...this.state };
+      const clickedItem = mutableState[idClicked];
       this.#setClickedItemProperties(clickedItem);
-      this.#setNonClickedItemProperties(clickedItem, newItems);
-      this.setState({ newItems }, resolve);
+      this.#setNonClickedItemProperties(clickedItem, mutableState);
+      this.setState({ mutableState }, resolve);
     });
   };
 
@@ -199,24 +195,6 @@ class PanelMenuView extends React.PureComponent {
   #getNextUniqueId = () => {
     this.internalId += 1;
     return this.internalId;
-  };
-
-  #setInitialMenuItemProperties = (menuItem) => {
-    const { document } = this.props;
-    const itemMatchesOpenDocument =
-      menuItem.document === document.documentFileName;
-    //Do not use spread because we are mutating original item
-    Object.assign(menuItem, {
-      id: this.#getNextUniqueId(),
-      selected: itemMatchesOpenDocument,
-      colored: itemMatchesOpenDocument,
-    });
-    if (hasSubMenu(menuItem)) {
-      menuItem.hasSubMenu = true;
-      menuItem.menu.forEach((subMenuItem) => {
-        this.#setInitialMenuItemProperties(subMenuItem, menuItem);
-      });
-    }
   };
 
   render() {
