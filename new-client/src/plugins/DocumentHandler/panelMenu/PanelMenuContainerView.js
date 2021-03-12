@@ -26,14 +26,12 @@ class PanelMenuView extends React.PureComponent {
   state = {};
 
   componentDidMount = () => {
-    this.#setInternalReferences();
+    this.#initializeItems();
   };
 
-  #setInternalReferences = () => {
+  #initializeItems = () => {
     const { options } = this.props;
-    options.menuConfig.menu.forEach((menuItem) => {
-      this.#setInternalId(menuItem);
-    });
+    options.menuConfig.menu.forEach(this.#setInitialMenuItemProperties);
     this.setState(getNormalizedMenuState(options.menuConfig.menu));
   };
 
@@ -105,12 +103,13 @@ class PanelMenuView extends React.PureComponent {
 
   #bindSubscriptions = () => {
     const { localObserver, options, app } = this.props;
-
+    console.log("BINDING");
     localObserver.subscribe("submenu-clicked", (id) => {
       this.setItemStateProperties(id);
     });
 
     localObserver.subscribe("set-active-document", ({ documentName }) => {
+      console.log("set-active");
       const itemClicked = Object.values(this.state).find((item) => {
         return item.document === documentName;
       });
@@ -169,11 +168,20 @@ class PanelMenuView extends React.PureComponent {
     return this.internalId;
   };
 
-  #setInternalId = (menuItem) => {
-    menuItem.id = this.#getNextUniqueId();
+  #setInitialMenuItemProperties = (menuItem) => {
+    const { document } = this.props;
+    const itemMatchesOpenDocument =
+      menuItem.document === document.documentFileName;
+    //Do not use spread because we are mutating original item
+    Object.assign(menuItem, {
+      id: this.#getNextUniqueId(),
+      selected: itemMatchesOpenDocument,
+      colored: itemMatchesOpenDocument,
+    });
     if (hasSubMenu(menuItem)) {
+      menuItem.hasSubMenu = true;
       menuItem.menu.forEach((subMenuItem) => {
-        this.#setInternalId(subMenuItem, menuItem);
+        this.#setInitialMenuItemProperties(subMenuItem, menuItem);
       });
     }
   };
