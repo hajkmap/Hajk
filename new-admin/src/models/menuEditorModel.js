@@ -1,5 +1,8 @@
 import { Model } from "backbone";
-import { hfetch } from "utils/FetchWrapper";
+
+const fetchConfig = {
+  credentials: "same-origin",
+};
 
 var menuEditorModel = Model.extend({
   constructor: function (settings) {
@@ -8,11 +11,13 @@ var menuEditorModel = Model.extend({
 
   async listAllAvailableDocuments() {
     try {
-      return hfetch(this.config.url_document_list).then((response) => {
-        return response.text().then((text) => {
-          return JSON.parse(text);
-        });
-      });
+      return fetch(this.config.url_document_list, fetchConfig).then(
+        (response) => {
+          return response.text().then((text) => {
+            return JSON.parse(text);
+          });
+        }
+      );
     } catch (err) {}
   },
 
@@ -228,7 +233,7 @@ var menuEditorModel = Model.extend({
 
   loadMenuConfigForMap: function (map) {
     var url = this.config.url_map + "/" + map;
-    return hfetch(url).then((response) => {
+    return fetch(url, { credentials: "same-origin" }).then((response) => {
       return response.json().then((data) => {
         let documentHandler = data.tools.find((tool) => {
           return tool.type === "documenthandler";

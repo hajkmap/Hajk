@@ -8,7 +8,6 @@ import { fromCircle } from "ol/geom/Polygon";
 
 import { arraySort } from "../utils/ArraySort";
 import { decodeCommas } from "../utils/StringCommaCoder";
-import { hfetch } from "utils/FetchWrapper";
 
 const ESCAPE_CHAR = "!";
 const SINGLE_CHAR = ".";
@@ -441,7 +440,7 @@ class SearchModel {
       },
       body: xmlString,
     };
-    const promise = hfetch(
+    const promise = fetch(
       this.#app.config.appConfig.searchProxy + searchSource.url,
       request
     );

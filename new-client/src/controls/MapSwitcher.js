@@ -2,7 +2,6 @@ import React from "react";
 import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
-import { hfetch } from "utils/FetchWrapper";
 
 const styles = (theme) => ({
   paper: {
@@ -12,6 +11,10 @@ const styles = (theme) => ({
     minWidth: "unset",
   },
 });
+
+const fetchConfig = {
+  credentials: "same-origin",
+};
 
 class MapSwitcher extends React.PureComponent {
   // Will hold map configs
@@ -50,7 +53,7 @@ class MapSwitcher extends React.PureComponent {
     if (this.appModel.config.userSpecificMaps !== undefined) {
       this.handleLoading(this.appModel.config.userSpecificMaps);
     } else {
-      hfetch(`${proxy}${mapserviceBase}/config/userspecificmaps`)
+      fetch(`${proxy}${mapserviceBase}/config/userspecificmaps`, fetchConfig)
         .then((resp) => resp.json())
         .then((maps) => this.handleLoading(maps))
         .catch((err) => {

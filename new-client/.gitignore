@@ -33,9 +33,3 @@ test.html
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-*.local.*
-*.*.local
-
-# REM a file....
-\#*.*

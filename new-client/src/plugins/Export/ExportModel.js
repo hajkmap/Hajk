@@ -13,7 +13,6 @@ import { Translate } from "ol/interaction.js";
 import WMTS from "ol/source/WMTS";
 import TileArcGISRest from "ol/source/TileArcGISRest";
 import Collection from "ol/Collection";
-import { hfetch } from "utils/FetchWrapper";
 
 var toHex = function (str) {
   if (/^#/.test(str)) return str;
@@ -527,7 +526,7 @@ class ExportModel {
     data.format = options.format;
     data.scale = options.scale;
 
-    hfetch(url, {
+    fetch(url, {
       method: "POST",
       credentials: "same-origin",
       headers: {

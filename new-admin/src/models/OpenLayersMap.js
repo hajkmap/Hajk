@@ -12,7 +12,10 @@ import { all as strategyAll } from "ol/loadingstrategy";
 import "ol/ol.css";
 import CoordinateSystemLoader from "./CoordinateSystemLoader.js";
 import { register } from "ol/proj/proj4";
-import { hfetch } from "utils/FetchWrapper";
+
+const fetchConfig = {
+  credentials: "same-origin",
+};
 
 function createStyle(layer, feature) {
   const icon = layer.icon || "";
@@ -309,7 +312,7 @@ class OpenLayersMap {
   }
 
   loadData(layer, url, source) {
-    hfetch(url).then((response) => {
+    fetch(url, fetchConfig).then((response) => {
       response.text().then((features) => {
         this.addFeatures(layer, features, source);
       });
