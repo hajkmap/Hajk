@@ -156,6 +156,7 @@ class DocumentHandler extends React.PureComponent {
       documentName: null,
       headerIdentifier: null,
     });
+    this.localObserver.publish("document-window-closed");
     return;
   };
 

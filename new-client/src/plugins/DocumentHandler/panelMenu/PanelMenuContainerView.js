@@ -54,6 +54,7 @@ class PanelMenuView extends React.PureComponent {
       "maplink-clicked",
       this.#handleShowMapLayersFromPanelMenu
     );
+    localObserver.subscribe("document-window-closed", this.#clearPanel);
   };
 
   #initializeItems = () => {
@@ -133,36 +134,67 @@ class PanelMenuView extends React.PureComponent {
   //---------------------------------------------------
 
   #setClickedItemProperties = (clickedItem) => {
-    clickedItem.colored = !isExpandedTopLevelItem(clickedItem);
-    clickedItem.selected = !clickedItem.hasSubMenu;
-    clickedItem.expandedSubMenu = clickedItem.hasSubMenu
-      ? !clickedItem.expandedSubMenu
-      : clickedItem.expandedSubMenu;
+    let newItem = { ...clickedItem }; //
+    return {
+      ...clickedItem,
+      colored: !isExpandedTopLevelItem(newItem),
+      selected: !newItem.hasSubMenu,
+      expandedSubMenu: newItem.hasSubMenu
+        ? !newItem.expandedSubMenu
+        : newItem.expandedSubMenu,
+    };
   };
 
-  #setNonClickedItemProperties = (clickedItem, mutableState) => {
-    const idsToColor = getItemIdsToColor(clickedItem, mutableState);
-    Object.values(mutableState).forEach((item) => {
-      if (item.id !== clickedItem.id) {
-        item.colored = idsToColor.indexOf(item.id) !== -1;
-        if (clickedItem.allParents.indexOf(item.id) !== -1) {
-          item.expandedSubMenu = true;
-        }
-        if (!clickedItem.hasSubMenu) {
-          item.selected = false;
-        }
-      }
-    });
+  #setNonClickedItemProperties = (item, currentState, clickedItem) => {
+    const idsToColor = getItemIdsToColor(clickedItem, currentState);
+    return {
+      ...item,
+      colored: idsToColor.indexOf(item.id) !== -1,
+      expandedSubMenu:
+        clickedItem.allParents.indexOf(item.id) !== -1
+          ? true
+          : item.expandedSubMenu,
+      selected: clickedItem.hasSubMenu ? item.selected : false,
+    };
   };
 
+  //Important to create new state and items to not mutate state directly
   #setItemStateProperties = (idClicked) => {
     return new Promise((resolve) => {
-      const mutableState = { ...this.state };
-      const clickedItem = mutableState[idClicked];
-      this.#setClickedItemProperties(clickedItem);
-      this.#setNonClickedItemProperties(clickedItem, mutableState);
-      this.setState({ mutableState }, resolve);
+      const currentState = { ...this.state };
+      const clickedItem = currentState[idClicked];
+      const newState = Object.values(currentState).reduce((items, item) => {
+        const isClickedItem = item.id === idClicked;
+        if (isClickedItem) {
+          return {
+            ...items,
+            [item.id]: this.#setClickedItemProperties(item),
+          };
+        } else {
+          return {
+            ...items,
+            [item.id]: this.#setNonClickedItemProperties(
+              item,
+              currentState,
+              clickedItem
+            ),
+          };
+        }
+      }, {});
+
+      this.setState(newState, resolve);
     });
+  };
+
+  #clearPanel = () => {
+    let newState = Object.values({ ...this.state }).reduce((state, item) => {
+      let newItem = { ...item };
+      newItem.colored = false;
+      newItem.selected = false;
+      return { ...state, [newItem.id]: newItem };
+    }, {});
+
+    this.setState(newState);
   };
 
   #scrollToMenuItem = async (scrollOffset) => {
