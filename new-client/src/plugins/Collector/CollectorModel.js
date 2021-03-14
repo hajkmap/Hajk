@@ -363,6 +363,8 @@ class CollectorModel {
     });
 
     this.draw.on("drawend", (event) => {
+      // WKT supports insertion of multiple features and clear should therefore
+      // not be executed in this case
       if (!this.wkt) {
         this.vectorSource.clear();
       }

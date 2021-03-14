@@ -44,15 +44,16 @@ class Toolbar extends Component {
       this.props.model.vectorSource.clear();
 
       try {
-        var format = new WKT();
-        var features = format.readFeaturesFromText(
+        const format = new WKT();
+        let features = format.readFeaturesFromText(
           this.props.model.formValues[this.props.field]
         );
-        features.map((feature) => {
+        features.forEach((feature) => {
           this.props.model.vectorSource.addFeature(feature);
         });
       } catch (e) {
-        // This error will happen when the page is visited for the first time so we just ignore it
+        // This error will happen when the page has not hade any features stored
+        // so we just continue with no restored features since non existed
       }
     }
   }
@@ -193,20 +194,21 @@ class Toolbar extends Component {
   }
 
   storeValues() {
-    // Stores any potential features found on the map as WKT before taking the next or previous step
-    // Create WKT
+    // Stores any potential features found on the map as WKT before taking the next or previous step.
+    //These are later pushed to the server on submission.
+    //They are also put on the map again if the user comes back to this step.
     if (!this.props.model.wkt) {
       return;
     }
-    var format = new WKT();
-    var wkt = format.writeFeatures(this.props.model.vectorSource.getFeatures());
+    const format = new WKT();
+    let wkt = "";
 
-    if (this.props.model.vectorSource.getFeatures().length === 0) {
-      wkt = "";
+    if (this.props.model.vectorSource.getFeatures().length > 0) {
+      wkt = format.writeFeatures(this.props.model.vectorSource.getFeatures());
     }
 
-    // Store in model
-    var formValues = Object.assign({}, this.props.model.formValues);
+    // Store the converted features in the model
+    let formValues = Object.assign({}, this.props.model.formValues);
     formValues[this.props.field] = wkt;
     this.props.model.formValues = formValues;
     // Clear layer
@@ -227,6 +229,7 @@ class Toolbar extends Component {
       editPolygon = this.props.geotype.indexOf("polygon") !== -1;
       editLine = this.props.geotype.indexOf("line") !== -1;
     } else if (source) {
+      // Non-WKT only supports insertion of one geometry so it can be retrieved from the source
       editPoint = source.editPoint;
       editLine = source.editLine;
       editPolygon = source.editPolygon;

@@ -151,13 +151,6 @@ class LayerItem extends React.PureComponent {
     this.setState({
       visible,
     });
-    if (
-      visible &&
-      typeof this.props["layer"].getSource().loader_ !== "undefined"
-    ) {
-      // reload the features in case new features has been added
-      this.props["layer"].getSource().loader_.call();
-    }
     layer.setVisible(visible);
   };
 

@@ -8,7 +8,6 @@ import { isMobile } from "./../utils/IsMobile.js";
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
-import WFSLayer from "./layers/WFSLayer";
 import { bindMapClickEvent } from "./Click.js";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { Map, View } from "ol";
@@ -347,15 +346,6 @@ class AppModel {
         );
         this.map.addLayer(layerItem.layer);
         break;
-      case "wfs":
-        layerConfig = configMapper.mapWFSConfig(layer);
-        layerItem = new WFSLayer(
-          layerConfig.options,
-          this.config.appConfig.proxy,
-          this.map
-        );
-        this.map.addLayer(layerItem.layer);
-        break;
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);
       //   layer = new ArcGISLayer(layerConfig);
@@ -615,7 +605,6 @@ class AppModel {
 
       layers.wmslayers.forEach((l) => (l.type = "wms"));
       layers.wmtslayers.forEach((l) => (l.type = "wmts"));
-      layers.wfslayers.forEach((l) => (l.type = "wfs"));
       layers.wfstlayers.forEach((l) => (l.type = "edit"));
       layers.vectorlayers.forEach((l) => (l.type = "vector"));
       layers.arcgislayers.forEach((l) => (l.type = "arcgis"));
@@ -623,7 +612,6 @@ class AppModel {
       let allLayers = [
         ...layers.wmslayers,
         ...layers.wmtslayers,
-        ...layers.wfslayers,
         ...layers.vectorlayers,
         ...layers.wfstlayers,
         ...layers.arcgislayers,
