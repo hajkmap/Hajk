@@ -44,6 +44,8 @@ const defaultState = {
   owner: "",
   url: "",
   opacity: 1.0,
+  maxZoom: -1,
+  minZoom: -1,
   tiled: false,
   singleTile: false,
   hidpi: true,
@@ -112,8 +114,9 @@ const supportedImageFormats = [
  */
 class WMSLayerForm extends Component {
   componentDidMount() {
-    defaultState.url = this.props.url;
-    this.setState(defaultState);
+    let _state = { ...defaultState };
+    _state.url = this.props.url;
+    this.setState(_state);
     this.props.model.on("change:select-image", () => {
       this.setState({
         legend: this.props.model.get("select-image"),
@@ -135,12 +138,12 @@ class WMSLayerForm extends Component {
 
   constructor() {
     super();
-    this.state = defaultState;
+    this.state = { ...defaultState };
     this.layer = {};
   }
 
   reset() {
-    this.setState(defaultState);
+    this.setState({ ...defaultState });
   }
 
   loadLegend(e) {
@@ -921,6 +924,8 @@ class WMSLayerForm extends Component {
       visibleAtStart: this.getValue("visibleAtStart"),
       tiled: this.getValue("tiled"),
       opacity: this.getValue("opacity"),
+      maxZoom: this.getValue("maxZoom"),
+      minZoom: this.getValue("minZoom"),
       singleTile: this.getValue("singleTile"),
       hidpi: this.getValue("hidpi"),
       customRatio: this.getValue("customRatio"),
@@ -966,6 +971,11 @@ class WMSLayerForm extends Component {
 
     const input = this.refs["input_" + fieldName];
     let value = input ? input.value : "";
+
+    // We must cast the following to Number, as String won't be accepted for those:
+    if (["maxZoom", "minZoom"].includes(fieldName)) {
+      return Number(value);
+    }
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
@@ -1014,6 +1024,19 @@ class WMSLayerForm extends Component {
   validateField(fieldName, forcedValue, updateState) {
     var value = this.getValue(fieldName),
       valid = true;
+
+    function number(v) {
+      return !empty(v) && !isNaN(Number(v));
+    }
+
+    function empty(v) {
+      return typeof v === "string"
+        ? v.trim() === ""
+        : Array.isArray(v)
+        ? v[0] === ""
+        : false;
+    }
+
     switch (fieldName) {
       case "layers":
         if (value.length === 0) {
@@ -1027,6 +1050,12 @@ class WMSLayerForm extends Component {
         break;
       case "opacity":
         if (isNaN(Number(value)) || value < 0 || value > 1) {
+          valid = false;
+        }
+        break;
+      case "minZoom":
+      case "maxZoom":
+        if (!number(value) || empty(value)) {
           valid = false;
         }
         break;
@@ -1419,6 +1448,50 @@ class WMSLayerForm extends Component {
             onChange={(e) => {
               this.setState({ opacity: e.target.value });
               this.validateField("opacity");
+            }}
+          />
+        </div>
+        <div>
+          <label>
+            Min zoom{" "}
+            <abbr title="Lägsta zoomnivå som krävs för att lagret ska vara synligt. '-1' betyder att lagret är synligt från lägsta zoomnivå. Se även nästa inställning.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="number"
+            step="1"
+            min="-1"
+            max="100"
+            ref="input_minZoom"
+            value={this.state.minZoom}
+            className={this.getValidationClass("minZoom")}
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ minZoom: v });
+            }}
+          />
+        </div>
+        <div>
+          <label>
+            Max zoom{" "}
+            <abbr title="Högsta zoomnivå vid vilket lagret visas. '-1' betyder att lagret är synligt hela vägen till den sista zoomnivån. Se även nästa inställning.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="number"
+            step="1"
+            min="-1"
+            max="100"
+            ref="input_maxZoom"
+            value={this.state.maxZoom}
+            className={this.getValidationClass("maxZoom")}
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ maxZoom: v }, () =>
+                this.validateField("maxZoom")
+              );
             }}
           />
         </div>
