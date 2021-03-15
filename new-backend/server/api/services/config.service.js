@@ -290,7 +290,18 @@ class ConfigService {
             `WFST edit layer "${layer.id}"`
           )
       );
-      mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
+      let allowedServices = [];
+      for (const i in activeServices) {
+        //if (Object.hasOwnProperty.call(activeServices, id)) {
+        logger.trace("allowed.id=" + activeServices[i].id);
+        allowedServices.push(activeServices[i].id);
+        //}
+      }
+      //logger.trace("washed activeServices: %o", allowedServices);
+      //mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
+      mapConfig.tools[
+        editIndexInTools
+      ].options.activeServices = allowedServices;
     }
 
     //
