@@ -575,6 +575,24 @@ class Search extends React.PureComponent {
   };
 
   fetchResultFromSearchModel = async (fetchOptions) => {
+    // Check if the searchString is encapsuled with quotation marks
+    const searchStringIsEncapsuled = this.searchStringEncapsuled();
+
+    // If the searchString is encapsuled with quotation marks (meaning that the user is
+    // searching for an exacts phrase, we want to disable potential wildcards in the
+    // fetchOptions.
+    if (searchStringIsEncapsuled) {
+      fetchOptions = {
+        ...fetchOptions,
+        wildcardAtStart: false,
+        wildcardAtEnd: false,
+      };
+    }
+
+    // Potential quotation marks in the searchString must be removed before
+    // we perform the search.
+    const searchString = this.getCleanedSearchString();
+
     let { searchSources } = this.state;
 
     if (searchSources.length === 0) {
@@ -583,7 +601,7 @@ class Search extends React.PureComponent {
 
     let active = true;
     const promise = this.searchModel.getResults(
-      this.state.searchString,
+      searchString,
       searchSources,
       fetchOptions
     );
@@ -612,6 +630,18 @@ class Search extends React.PureComponent {
           });
         }
       });
+  };
+
+  // Returns true if the searchString is encapsuled in quotation marks.
+  searchStringEncapsuled = () => {
+    const { searchString } = this.state;
+    return searchString.startsWith('"') && searchString.endsWith('"');
+  };
+
+  // Removes potential quotation marks from the searchString
+  getCleanedSearchString = () => {
+    const { searchString } = this.state;
+    return searchString.replace(/"/g, "");
   };
 
   getPotentialWFSErrorMessage = (searchResults) => {
