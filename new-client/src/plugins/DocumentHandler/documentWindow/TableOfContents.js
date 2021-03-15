@@ -16,6 +16,8 @@ const styles = (theme) => {
   return {
     tableOfContents: {
       backgroundColor: theme.palette.action.selected,
+      tapHighlightColor: "transparent",
+
       cursor: "pointer",
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
