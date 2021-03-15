@@ -89,7 +89,7 @@ namespace MapService.Controllers
             if (identity.ImpersonationLevel != TokenImpersonationLevel.Impersonation || string.IsNullOrEmpty(parameters["ADuser"]) || string.IsNullOrEmpty(parameters["ADpassword"]))
             {
                 _log.Debug("Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config.");
-                // ZZZ return false;
+                return false;
             }
             _log.Debug("Using AD lookup");
             return true;
@@ -259,10 +259,10 @@ namespace MapService.Controllers
             var editTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
             var layersInEditTool = editTool.SelectToken("$.options.activeServices");
             var userGroups = adLookup.GetGroups(activeUser);
-            _log.Debug("layersInEditTool:" + layersInEditTool);
+            _log.Debug("\nlayersInEditTool:" + layersInEditTool);
             if (layersInEditTool == null)
             {
-                _log.Warn("EditTool is missing the layersobject");
+                _log.Warn("EditTool is missing the activeServices object");
                 return mapConfiguration.ToString();
             }
             else
@@ -271,13 +271,13 @@ namespace MapService.Controllers
                 {
                     var visibleForGroups = child.SelectToken("$.visibleForGroups");
                     _log.Debug("   child: " + child);
-                    _log.Debug("   visibleForGroups" + visibleForGroups);
 
                     bool allowed = false;
 
                     if (HasValidVisibleForGroups(visibleForGroups))
                     {
                         allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                        _log.Debug("edit IsGroupAllowedAccess: " + visibleForGroups + "\nallowed: " + allowed);
                     }
                     else
                     {
@@ -288,7 +288,6 @@ namespace MapService.Controllers
                     _log.Debug("   allowed:" + allowed);
                     if (!allowed)
                     {
-                        _log.Debug("   childToRemove:" + child);
                         childrenToRemove.Add(child.SelectToken("$.id").ToString());
                     }
                 }
@@ -296,15 +295,30 @@ namespace MapService.Controllers
                 foreach (string id in childrenToRemove)
                 {
                     _log.Debug("   remove edit layer:" + id);
-                    _log.Debug("   " + layersInEditTool.SelectToken("$.[?(@.id=='" + id + "')]").ToString());
+                    //_log.Debug("   " + layersInEditTool.SelectToken("$.[?(@.id=='" + id + "')]").ToString());
                     layersInEditTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();  
                 }
 
+                JArray allowedLayers = new JArray();
+                foreach (JToken child in layersInEditTool.Children())
+                {
+                    var id = child.SelectToken("$.id");
+                    _log.Debug("   edit layer allowed: " + id);
+                    allowedLayers.Add(id);
+                }
+                _log.Debug("   allowedLayers: " + allowedLayers); // + " = " + JArray.Parse((string)allowedLayers));
+                //layersInEditTool.Replace(JArray.Parse(allowedLayers));
+                //layersInEditTool = allowedLayers; // JArray.Parse(allowedLayers.ToString());
+                layersInEditTool.Replace(allowedLayers);
+
+                _log.Debug("  washed layersInEditTool:" + layersInEditTool);
+                
                 //NULL if User is not allowed to any editlayer because empty array means use of global editconfig
                 //if (!layersInEditTool.HasValues)
                 //{
                 //    layersInEditTool.Replace(null);
                 //}
+                _log.Debug("return edit mapConfiguration:\n" + mapConfiguration.ToString());
                 return mapConfiguration.ToString();
             }
         }
@@ -315,9 +329,11 @@ namespace MapService.Controllers
             var childrenToRemove = new List<string>();
             mapConfiguration = JObject.Parse(mapConfiguration.ToString());
             var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
-            _log.Debug("   searchTool:" + searchTool);
+            //_log.Debug("   searchTool:" + searchTool);
+            var editTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
+            _log.Debug("   editTool in searchTool:" + editTool);
             var layersInSearchTool = searchTool.SelectToken("$.options.layers");
-            _log.Debug("layersInSearchTool:" + layersInSearchTool);
+            //_log.Debug("layersInSearchTool:" + layersInSearchTool);
             var userGroups = adLookup.GetGroups(activeUser);
 
             if (layersInSearchTool == null)
@@ -350,17 +366,17 @@ namespace MapService.Controllers
 
                 foreach (string id in childrenToRemove)
                 {
-                    _log.Debug("   remove search layer:" + id);
-                    _log.Debug("   " + layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").ToString());
+                    //_log.Debug("   remove search layer:" + id);
+                    //_log.Debug("   " + layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").ToString());
                     layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
                 }
 
-                //NULL if User is not allowed to any searchlayer because empty array means use of global searchconfig
-                //if (!layersInSearchTool.HasValues)
-                //{
-                //    layersInSearchTool.Replace(null);
-                //}
-                return mapConfiguration.ToString();
+                    //NULL if User is not allowed to any searchlayer because empty array means use of global searchconfig
+                    //if (!layersInSearchTool.HasValues)
+                    //{
+                    //    layersInSearchTool.Replace(null);
+                    //}
+                    return mapConfiguration.ToString();
             }
         }
 
@@ -562,9 +578,7 @@ namespace MapService.Controllers
                     var parameters = GetLookupParameters();
                     var adLookup = GetAdLookup();
                     var activeUser = adLookup.GetActiveUser();
-                    activeUser = "KBA\\persod";   // ZZZ
-                    //var isRequestFromAdmin = true;  // ZZZ
-                    var isRequestFromAdmin = false;  // ZZZ
+                    var isRequestFromAdmin = true;  
 
                     if (Request.UrlReferrer != null && Request.UrlReferrer.ToString().IndexOf("/admin") == -1)
                     {
@@ -595,7 +609,7 @@ namespace MapService.Controllers
 
                         if (searchTool != null)
                         {
-                            _log.DebugFormat("filterSearchLayers...");
+                            _log.DebugFormat("\nfilterSearchLayers...");
                             filteredMapConfiguration = FilterSearchLayersByAD(adLookup, filteredMapConfiguration, activeUser);
                         }
                         //else zzz

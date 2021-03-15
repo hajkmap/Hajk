@@ -574,8 +574,8 @@ class EditModel {
       allowedServices.push(this.activeServices[i].id);
     }
     return this.sources.filter((source) => {
-      //return this.activeServices.some((serviceId) => serviceId === source.id);
-      return allowedServices.some((serviceId) => serviceId === source.id);
+      return this.activeServices.some((serviceId) => serviceId === source.id);
+      //return allowedServices.some((serviceId) => serviceId === source.id);
     });
   }
 }
