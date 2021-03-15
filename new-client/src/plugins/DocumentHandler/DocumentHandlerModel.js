@@ -56,6 +56,8 @@ export default class DocumentHandlerModel {
         this.documentSearchmodel = new DocumentSearchModel({
           allDocuments: allDocuments,
           globalSearchModel: this.app.searchModel,
+          app: this.app,
+          localObserver: this.localObserver,
         });
         this.settings.resolveSearchInterface(
           this.documentSearchmodel.implementSearchInterface()
