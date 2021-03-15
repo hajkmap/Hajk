@@ -98,6 +98,13 @@ export default class ConfigMapper {
     // In the GetMap operation the srs parameter is called crs in 1.3.0,
     // see: https://docs.geoserver.org/latest/en/user/services/wms/basics.html#differences-between-wms-versions
     const srsOrCrs = args.version === "1.3.0" ? "CRS" : "SRS";
+
+    if (args.minZoom === 0 && args.maxZoom === 0) {
+      // backend returns 0 if not set in past
+      args.minZoom = undefined;
+      args.maxZoom = undefined;
+    }
+
     let config = {
       type: "wms",
       options: {
@@ -108,6 +115,8 @@ export default class ConfigMapper {
         caption: args.caption,
         visible: args.visibleAtStart,
         opacity: args.opacity || 1,
+        maxZoom: args.maxZoom,
+        minZoom: args.minZoom,
         //information: args.infobox,
         resolutions: properties.mapConfig.map.resolutions,
         projection: projection || "EPSG:3006",
@@ -167,6 +176,11 @@ export default class ConfigMapper {
   }
 
   mapWMTSConfig(args, properties) {
+    if (args.minZoom === 0 && args.maxZoom === 0) {
+      args.minZoom = undefined;
+      args.maxZoom = undefined;
+    }
+
     var config = {
       type: "wmts",
       options: {
@@ -178,6 +192,8 @@ export default class ConfigMapper {
         extent: properties.mapConfig.map.extent,
         queryable: false,
         opacity: args.opacity || 1,
+        maxZoom: args.maxZoom,
+        minZoom: args.minZoom,
         format: "image/png",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         wrapX: false,

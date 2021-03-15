@@ -213,6 +213,9 @@ class AppModel {
     // FIXME: Remove?
     setTimeout(() => {
       this.map.updateSize();
+      this.map.on("moveend", (e) => {
+        console.log(this.map.getView().getZoom());
+      });
     }, 0);
 
     // Add Snap Helper to the Map
