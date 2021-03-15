@@ -758,13 +758,6 @@ class Search extends React.PureComponent {
       fetchOptions
     );
 
-    // If we get zero results we do a new search to try
-    // to fill the autocomplete with wildCardAtStart active.
-    if (this.getNumResults(autoCompleteResult) < 1) {
-      fetchOptions.wildcardAtStart = true;
-      autoCompleteResult = await this.fetchResultFromSearchModel(fetchOptions);
-    }
-
     this.setState({
       autocompleteList: this.prepareAutocompleteList(autoCompleteResult),
       loading: false,
