@@ -50,28 +50,42 @@ class BackgroundSwitcher extends React.PureComponent {
         selectedLayer: backgroundVisibleFromStart.name,
       });
 
-    // Initiate our special case layer, OpenStreetMap
-    const osmSource = new OSM({
-      reprojectionErrorThreshold: 5,
-    });
-    this.osmLayer = new TileLayer({
-      visible: false,
-      source: osmSource,
-      zIndex: -1,
-    });
-    this.props.map.addLayer(this.osmLayer);
+    if (this.props.enableOSM) {
+      // Initiate our special case layer, OpenStreetMap
+      const osmSource = new OSM({
+        reprojectionErrorThreshold: 5,
+      });
+      this.osmLayer = new TileLayer({
+        visible: false,
+        source: osmSource,
+        zIndex: -1,
+      });
+      this.props.map.addLayer(this.osmLayer);
+    }
 
-    // Update selected background layer if it is changed outside layerswitcher
+    // Ensure that BackgroundSwitcher correctly selects visible layer,
+    // by listening to a event that each layer will send when its visibility
+    // changes.
     this.props.app.globalObserver.subscribe(
-      "layerswitcher.wmsLayerLoadStatus",
-      (d) => {
-        const backgroundUpdated = this.props.layers.find(
-          (layer) => d.id === layer.name
-        );
-        backgroundUpdated &&
-          this.setState({
-            selectedLayer: backgroundUpdated.name,
-          });
+      "core.layerVisibilityChanged",
+      ({ target: layer }) => {
+        const name = layer.get("name");
+
+        // Early return if layer who's visibility was changed couldn't
+        // be found among the background layers, or if the visibility
+        // was changed to 'false'.
+        if (
+          this.props.layers.findIndex((l) => name === l.name) === -1 ||
+          layer.get("visible") === false
+        ) {
+          return;
+        }
+
+        // If we got this far, we have a background layer that just
+        // became visible. Let's notify the radio buttons by setting state!
+        this.setState({
+          selectedLayer: layer.get("name"),
+        });
       }
     );
   }
@@ -85,14 +99,11 @@ class BackgroundSwitcher extends React.PureComponent {
     // Hide previously selected layers. The if > 0 is needed because we have our
     // special cases (black and white backgrounds), that don't exist in our layerMap,
     // and that would cause problem when we try to call .setVisible() on them.
-    Number(this.state.selectedLayer) > 0 &&
+    Number(this.state.selectedLayer) >= 0 &&
       this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);
 
-    // Also, take care of hiding our OSM layer
-    this.osmLayer.setVisible(false);
-
     // Make the currently clicked layer visible, but also handle our special cases.
-    Number(selectedLayer) > 0 &&
+    Number(selectedLayer) >= 0 &&
       this.props.layerMap[Number(selectedLayer)].setVisible(true);
 
     // Take care of our special cases: negative values are reserved for them
@@ -102,7 +113,10 @@ class BackgroundSwitcher extends React.PureComponent {
       (document.getElementById("map").style.backgroundColor = "#FFF");
 
     // Another special case is the OSM layer
-    selectedLayer === "-3" && this.osmLayer.setVisible(true);
+    // show/hide OSM
+    if (this.osmLayer) {
+      this.osmLayer.setVisible(selectedLayer === "-3");
+    }
 
     // Finally, store current selection in state
     this.setState({

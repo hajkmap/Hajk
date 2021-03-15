@@ -7,7 +7,7 @@ import {
   getDefaultKeyBinding,
   KeyBindingUtil,
   convertToRaw,
-  SelectionState
+  SelectionState,
 } from "draft-js";
 import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
@@ -56,7 +56,7 @@ export default class DocumentTextEditor extends React.Component {
       urlValue: "",
       imageAlt: "",
       defaultWidth: null,
-      defaultHeight: null
+      defaultHeight: null,
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -67,21 +67,21 @@ export default class DocumentTextEditor extends React.Component {
       console.log(convertToRaw(content));
     };
     this.onChange = this._onChange.bind(this);
-    this.onURLChange = e => this.setState({ urlValue: e.target.value });
-    this.onImageAltChange = e => this.setState({ imageAlt: e.target.value });
-    this.onTitleChange = e => this.setState({ urlTitle: e.target.value });
-    this.onTitleIdChange = e => this.setState({ urlTitleId: e.target.value });
-    this.onDataCaptionChange = e =>
+    this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
+    this.onImageAltChange = (e) => this.setState({ imageAlt: e.target.value });
+    this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
+    this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
+    this.onDataCaptionChange = (e) =>
       this.setState({ mediaCaption: e.target.value });
-    this.onDataSourceChange = e =>
+    this.onDataSourceChange = (e) =>
       this.setState({ mediaSource: e.target.value });
-    this.onDataPopupChange = e =>
+    this.onDataPopupChange = (e) =>
       this.setState({ mediaPopup: !this.state.mediaPopup });
-    this.onDataPositionChange = e =>
+    this.onDataPositionChange = (e) =>
       this.setState({ mediaPosition: e.target.value });
-    this.onBlockBackgroundChange = e =>
+    this.onBlockBackgroundChange = (e) =>
       this.setState({ blockBackground: e.target.value });
-    this.onBlockDividerChange = e =>
+    this.onBlockDividerChange = (e) =>
       this.setState({ blockDivider: e.target.value });
     this.addAudio = this._addAudio.bind(this);
     this.addImage = this._addImage.bind(this);
@@ -106,8 +106,8 @@ export default class DocumentTextEditor extends React.Component {
     this.onImgLoad = this.onImgLoad.bind(this);
   }
 
-  _stateFromHtmlWithOptions = html => {
-    const customBlockFn = element => {
+  _stateFromHtmlWithOptions = (html) => {
+    const customBlockFn = (element) => {
       let { tagName } = element;
       if (tagName === "BLOCKQUOTE") {
         return {
@@ -119,8 +119,8 @@ export default class DocumentTextEditor extends React.Component {
               "data-background-color"
             )?.value,
             textSection:
-              element.attributes.getNamedItem("data-text-section")?.value || ""
-          }
+              element.attributes.getNamedItem("data-text-section")?.value || "",
+          },
         };
       }
     };
@@ -158,7 +158,7 @@ export default class DocumentTextEditor extends React.Component {
       mediaCaption,
       mediaSource,
       mediaPopup,
-      mediaPosition
+      mediaPosition,
     } = this.state;
     const contentState = editorState.getCurrentContent();
     let contentStateWithEntity;
@@ -172,7 +172,7 @@ export default class DocumentTextEditor extends React.Component {
         "data-caption": mediaCaption,
         "data-source": mediaSource,
         "data-image-popup": "",
-        "data-image-position": mediaPosition
+        "data-image-position": mediaPosition,
       });
     } else {
       contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
@@ -182,7 +182,7 @@ export default class DocumentTextEditor extends React.Component {
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
-        "data-image-position": mediaPosition
+        "data-image-position": mediaPosition,
       });
     }
 
@@ -208,7 +208,7 @@ export default class DocumentTextEditor extends React.Component {
         mediaHeight: "",
         mediaCaption: "",
         mediaSource: "",
-        mediaPopup: false
+        mediaPopup: false,
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -232,7 +232,7 @@ export default class DocumentTextEditor extends React.Component {
         mediaHeight: "",
         mediaCaption: "",
         mediaSource: "",
-        mediaPopup: false
+        mediaPopup: false,
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -248,12 +248,12 @@ export default class DocumentTextEditor extends React.Component {
       imageAlt,
       urlType,
       urlTitle,
-      urlTitleId
+      urlTitleId,
     } = this.state;
     const data = {
       url: urlValue,
       alt: imageAlt,
-      type: urlType
+      type: urlType,
     };
 
     if (urlType === "urllink") {
@@ -273,7 +273,7 @@ export default class DocumentTextEditor extends React.Component {
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.set(editorState, {
-      currentContent: contentStateWithEntity
+      currentContent: contentStateWithEntity,
     });
     this.setState(
       {
@@ -289,7 +289,7 @@ export default class DocumentTextEditor extends React.Component {
         urlValue: "",
         imageAlt: "",
         urlTitle: "",
-        urlTitleId: ""
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -309,7 +309,7 @@ export default class DocumentTextEditor extends React.Component {
         urlValue: "",
         imageAlt: "",
         urlTitle: "",
-        urlTitleId: ""
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -322,13 +322,13 @@ export default class DocumentTextEditor extends React.Component {
 
     if (evt.shiftKey) {
       this.setState({
-        editorState: RichUtils.insertSoftNewline(this.state.editorState)
+        editorState: RichUtils.insertSoftNewline(this.state.editorState),
       });
       return "handled";
     }
     if (this.isImageBlockInSelection(editorState)) {
       this.setState({
-        editorState: insertNewLine(editorState)
+        editorState: insertNewLine(editorState),
       });
       return "handled";
     }
@@ -340,7 +340,7 @@ export default class DocumentTextEditor extends React.Component {
     this.setState({
       showURLInput: false,
       showLinkInput: false,
-      showTextAreaInput: true
+      showTextAreaInput: true,
     });
   }
   _promptForMedia(type) {
@@ -356,7 +356,7 @@ export default class DocumentTextEditor extends React.Component {
         mediaHeight: this.state.mediaHeight,
         mediaCaption: this.state.mediaCaption,
         mediaSource: this.state.mediaSource,
-        mediaPopup: this.state.mediaPopup
+        mediaPopup: this.state.mediaPopup,
       },
       () => {
         setTimeout(() => this.refs.url.focus(), 0);
@@ -373,7 +373,7 @@ export default class DocumentTextEditor extends React.Component {
         imageAlt: this.state.imageAlt,
         urlType: type,
         urlTitle: "",
-        urlTitleId: ""
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.refs.link.focus(), 0);
@@ -488,8 +488,8 @@ export default class DocumentTextEditor extends React.Component {
           editable: false,
           props: {
             readOnlyMode: this.toggleReadOnly,
-            currentImage: img => this.setState({ currentImage: img }),
-            imageData: data =>
+            currentImage: (img) => this.setState({ currentImage: img }),
+            imageData: (data) =>
               this.updateSelectedImageData(contentBlockKey, editorState, data),
             isFocused: () =>
               selection.getAnchorKey() === contentBlockKey &&
@@ -497,8 +497,8 @@ export default class DocumentTextEditor extends React.Component {
             onClick: () =>
               EditorState.push(
                 this.selectImageWithBlockKey(editorState, contentBlockKey)
-              )
-          }
+              ),
+          },
         };
       }
     }
@@ -524,7 +524,7 @@ export default class DocumentTextEditor extends React.Component {
       anchorKey: key,
       anchorOffset: 0,
       focusKey: key,
-      focusOffset: 0
+      focusOffset: 0,
     });
     return EditorState.forceSelection(editorState, sel);
   }
@@ -537,7 +537,7 @@ export default class DocumentTextEditor extends React.Component {
       anchorOffset: selection.anchorOffset,
       focusKey: anchorKey,
       focusOffset: selection.focusOffset,
-      isBackward: false
+      isBackward: false,
     });
     let newEditorState = EditorState.acceptSelection(
       editorState,
@@ -545,7 +545,7 @@ export default class DocumentTextEditor extends React.Component {
     );
 
     this.setState({
-      editorState: newEditorState
+      editorState: newEditorState,
     });
 
     let newSelection = newEditorState.getSelection();
@@ -572,20 +572,20 @@ export default class DocumentTextEditor extends React.Component {
   getHtml() {
     const contentState = this.state.editorState.getCurrentContent();
 
-    const blockStyleFn = block => {
+    const blockStyleFn = (block) => {
       const blockType = block.getType().toLowerCase();
       if (blockType === "blockquote") {
         return {
           attributes: {
             "data-divider-color": block.getData().get("dividerColor"),
             "data-background-color": block.getData().get("backgroundColor"),
-            "data-text-section": block.getData().get("textSection")
-          }
+            "data-text-section": block.getData().get("textSection"),
+          },
         };
       }
     };
 
-    const entityStyleFn = entity => {
+    const entityStyleFn = (entity) => {
       const entityType = entity.getType().toUpperCase();
       if (entityType === "LINK") {
         // Add styling here
@@ -597,7 +597,7 @@ export default class DocumentTextEditor extends React.Component {
 
     const options = {
       blockStyleFn,
-      entityStyleFn
+      entityStyleFn,
     };
     return stateToHTML(contentState, options);
   }
@@ -606,7 +606,7 @@ export default class DocumentTextEditor extends React.Component {
     var htmlString = this.getHtml().replace(/<p><br><\/p>/gm, "");
     this.props.onUpdate(htmlString);
     this.setState({
-      html: htmlString
+      html: htmlString,
     });
   }
 
@@ -694,10 +694,10 @@ export default class DocumentTextEditor extends React.Component {
     return this.isImageBlock(contentBlock, contentState);
   }
 
-  toggleReadOnly = e => {
+  toggleReadOnly = (e) => {
     const { onReadOnly } = this.state;
     this.setState({
-      onReadOnly: !onReadOnly
+      onReadOnly: !onReadOnly,
     });
   };
 
@@ -709,7 +709,7 @@ export default class DocumentTextEditor extends React.Component {
       readOnly = false;
     }
     this.setState({
-      readOnly: readOnly
+      readOnly: readOnly,
     });
   };
 
@@ -718,27 +718,27 @@ export default class DocumentTextEditor extends React.Component {
       defaultWidth: img.offsetWidth,
       defaultHeight: img.offsetHeight,
       mediaWidth: img.offsetWidth,
-      mediaHeight: img.offsetHeight
+      mediaHeight: img.offsetHeight,
     });
   }
 
-  calculateHeight = width => {
+  calculateHeight = (width) => {
     let aspectRatio = this.state.defaultHeight / this.state.defaultWidth;
     let height = width * aspectRatio;
 
     this.setState({
       mediaWidth: Math.trunc(width),
-      mediaHeight: Math.trunc(height)
+      mediaHeight: Math.trunc(height),
     });
   };
 
-  calculateWidth = height => {
+  calculateWidth = (height) => {
     let aspectRatio = this.state.defaultWidth / this.state.defaultHeight;
     let width = height * aspectRatio;
 
     this.setState({
       mediaHeight: Math.trunc(height),
-      mediaWidth: Math.trunc(width)
+      mediaWidth: Math.trunc(width),
     });
   };
 
@@ -748,12 +748,7 @@ export default class DocumentTextEditor extends React.Component {
     let editorContainer = styles.editor;
     var contentState = editorState.getCurrentContent();
     if (!contentState.hasText()) {
-      if (
-        contentState
-          .getBlockMap()
-          .first()
-          .getType() !== "unstyled"
-      ) {
+      if (contentState.getBlockMap().first().getType() !== "unstyled") {
         editorContainer = " RichEditor-hidePlaceholder";
       }
     }
@@ -785,7 +780,7 @@ export default class DocumentTextEditor extends React.Component {
                     : null
                 }
                 style={{ width: 300 }}
-                renderInput={params => (
+                renderInput={(params) => (
                   <TextField
                     {...params}
                     label="Ange URL eller välj en bild"
@@ -804,7 +799,7 @@ export default class DocumentTextEditor extends React.Component {
             </Grid>
             <Grid item>
               <input
-                onChange={e => this.calculateHeight(e.target.value)}
+                onChange={(e) => this.calculateHeight(e.target.value)}
                 ref="data-image-width"
                 type="number"
                 value={this.state.mediaWidth || ""}
@@ -812,7 +807,7 @@ export default class DocumentTextEditor extends React.Component {
                 placeholder="Bredd"
               />
               <input
-                onChange={e => this.calculateWidth(e.target.value)}
+                onChange={(e) => this.calculateWidth(e.target.value)}
                 ref="data-image-height"
                 type="number"
                 value={this.state.mediaHeight || ""}
@@ -888,7 +883,7 @@ export default class DocumentTextEditor extends React.Component {
             onCancelClick={() => {
               this.setState({ showTextAreaInput: false });
             }}
-            updateEditorState={newEditorState => {
+            updateEditorState={(newEditorState) => {
               this.setState({ editorState: newEditorState }, () => {
                 const selection = editorState.getSelection();
                 const blockType = editorState
@@ -987,10 +982,10 @@ const BLOCK_TYPES = [
   //{ label: "H1", style: "header-one" },
 
   { label: <FormatListBulletedIcon />, style: "unordered-list-item" },
-  { label: <FormatListNumberedIcon />, style: "ordered-list-item" }
+  { label: <FormatListNumberedIcon />, style: "ordered-list-item" },
 ];
 
-const BlockStyleControls = props => {
+const BlockStyleControls = (props) => {
   const { editorState } = props;
   const selection = editorState.getSelection();
   const blockType = editorState
@@ -1000,7 +995,7 @@ const BlockStyleControls = props => {
 
   return (
     <div style={styles.buttons}>
-      {BLOCK_TYPES.map(type => (
+      {BLOCK_TYPES.map((type) => (
         <StyleButton
           key={type.style}
           active={type.style === blockType}
@@ -1017,13 +1012,13 @@ const BlockStyleControls = props => {
 const INLINE_STYLES = [
   { label: <FormatBoldIcon />, style: "BOLD" },
   { label: <FormatItalicIcon />, style: "ITALIC" },
-  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" }
+  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" },
 ];
-const InlineStyleControls = props => {
+const InlineStyleControls = (props) => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
   return (
     <div style={styles.buttons}>
-      {INLINE_STYLES.map(type => (
+      {INLINE_STYLES.map((type) => (
         <StyleButton
           key={type.style}
           active={currentStyle.has(type.style)}
@@ -1040,45 +1035,45 @@ const InlineStyleControls = props => {
 const styles = {
   root: {
     fontFamily: "'Georgia', serif",
-    border: "1px solid #ddd"
+    border: "1px solid #ddd",
   },
 
   buttonContainer: {
     height: 40,
-    borderBottom: "1px solid #ddd"
+    borderBottom: "1px solid #ddd",
   },
   buttons: {
     borderRight: "1px solid #ccc",
-    float: "left"
+    float: "left",
   },
   urlInputContainer: {
-    marginBottom: 10
+    marginBottom: 10,
   },
   urlInput: {
     fontFamily: "'Georgia', serif",
     marginRight: 10,
-    padding: 3
+    padding: 3,
   },
   editorContainer: {
     border: "1px solid #ccc",
     cursor: "text",
     minHeight: 80,
-    fontSize: 16
+    fontSize: 16,
   },
   editor: {
     backgroundColor: "#fff",
-    padding: "18px"
+    padding: "18px",
   },
   button: {
     marginTop: 10,
-    textAlign: "center"
+    textAlign: "center",
   },
   media: {
-    whiteSpace: "initial"
+    whiteSpace: "initial",
   },
   paper: {
     position: "absolute",
     width: 400,
-    border: "2px solid #000"
-  }
+    border: "2px solid #000",
+  },
 };

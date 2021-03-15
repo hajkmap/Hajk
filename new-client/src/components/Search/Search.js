@@ -15,8 +15,8 @@ import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
 
 const styles = () => ({
   inputRoot: {
-    width: "100%"
-  }
+    width: "100%",
+  },
 });
 
 class Search extends React.PureComponent {
@@ -37,10 +37,10 @@ class Search extends React.PureComponent {
       activeSpatialFilter: "intersects",
       maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
         ? this.props.options.maxResultsPerDataset
-        : 100
+        : 100,
     },
     failedWFSFetchMessage: "",
-    resultPanelCollapsed: false
+    resultPanelCollapsed: false,
   };
 
   // Used for setTimeout/clearTimeout, in order to delay update of autocomplete when user is typing
@@ -66,7 +66,7 @@ class Search extends React.PureComponent {
       enabled: this.props.options.enablePolygonSearch ?? true,
       toolTipTitle:
         "Genomför en sökning i ett område genom att rita en polygon.",
-      onClickEventName: "search.spatialSearchActivated"
+      onClickEventName: "search.spatialSearchActivated",
     },
     {
       name: "Sök med radie",
@@ -74,7 +74,7 @@ class Search extends React.PureComponent {
       type: "Circle",
       enabled: this.props.options.enableRadiusSearch ?? true,
       toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
-      onClickEventName: "search.spatialSearchActivated"
+      onClickEventName: "search.spatialSearchActivated",
     },
     {
       name: "Sök med objekt",
@@ -83,23 +83,23 @@ class Search extends React.PureComponent {
       enabled: this.props.options.enableSelectSearch ?? true,
       toolTipTitle:
         "Genomför en sökning genom att välja en eller flera områden i kartan.",
-      onClickEventName: "search.spatialSearchActivated"
+      onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök i området",
+      name: "Sök inom vyn",
       icon: <Crop54Icon />,
       type: "Extent",
       enabled: this.props.options.enableExtentSearch ?? true,
       toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
-      onClickEventName: "search.spatialSearchActivated"
+      onClickEventName: "search.spatialSearchActivated",
     },
     {
       name: "Sökinställningar",
       icon: <SettingsIcon />,
       type: "SETTINGS",
       toolTipTitle: "Ändra sökinställningarna.",
-      onClickEventName: ""
-    }
+      onClickEventName: "",
+    },
   ];
 
   constructor(props) {
@@ -117,7 +117,7 @@ class Search extends React.PureComponent {
       options: this.props.options,
       localObserver: this.localObserver,
       map: this.map,
-      app: app
+      app: app,
     });
   };
 
@@ -125,11 +125,11 @@ class Search extends React.PureComponent {
     this.kmlExport = new KmlExport({
       options: this.props.options,
       localObserver: this.localObserver,
-      map: this.map
+      map: this.map,
     });
     this.XLSXExport = new XLSXExport({
       options: this.props.options,
-      localObserver: this.localObserver
+      localObserver: this.localObserver,
     });
   };
 
@@ -137,18 +137,18 @@ class Search extends React.PureComponent {
     this.featuresToFilter = [];
   };
 
-  setFeaturesToFilter = arrayOfFeatures => {
+  setFeaturesToFilter = (arrayOfFeatures) => {
     this.featuresToFilter = arrayOfFeatures;
   };
 
   bindSubscriptions = () => {
-    this.localObserver.subscribe("on-draw-start", type => {
+    this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
           "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp.",
           {
             variant: "information",
-            anchorOrigin: { vertical: "bottom", horizontal: "center" }
+            anchorOrigin: { vertical: "bottom", horizontal: "center" },
           }
         );
       } else if (type === "Polygon") {
@@ -156,13 +156,13 @@ class Search extends React.PureComponent {
           "Tryck en gång i kartan för varje nod i polygonen.",
           {
             variant: "information",
-            anchorOrigin: { vertical: "bottom", horizontal: "center" }
+            anchorOrigin: { vertical: "bottom", horizontal: "center" },
           }
         );
       }
       this.setState({ searchActive: "draw" });
     });
-    this.localObserver.subscribe("on-draw-end", feature => {
+    this.localObserver.subscribe("on-draw-end", (feature) => {
       this.doFeaturesSearch([feature]);
     });
     this.localObserver.subscribe("on-select-search-start", () => {
@@ -170,16 +170,16 @@ class Search extends React.PureComponent {
         "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
         {
           variant: "information",
-          anchorOrigin: { vertical: "bottom", horizontal: "center" }
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
         }
       );
 
       this.setState({ searchActive: "selectSearch" });
     });
-    this.localObserver.subscribe("on-search-selection-done", features => {
+    this.localObserver.subscribe("on-search-selection-done", (features) => {
       this.doFeaturesSearch(features);
     });
-    this.localObserver.subscribe("search-within-extent", features => {
+    this.localObserver.subscribe("search-within-extent", (features) => {
       this.setState({ searchActive: "extentSearch" });
       this.doFeaturesSearch(features);
     });
@@ -191,13 +191,13 @@ class Search extends React.PureComponent {
         "Ett problem uppstod vid sökning i området. Kontakta systemadministratören.",
         {
           variant: "warning",
-          anchorOrigin: { vertical: "top", horizontal: "center" }
+          anchorOrigin: { vertical: "top", horizontal: "center" },
         }
       );
     });
   };
 
-  doFeaturesSearch = features => {
+  doFeaturesSearch = (features) => {
     this.props.closeSnackbar(this.snackbarKey);
     this.setFeaturesToFilter(features);
     this.doSearch();
@@ -205,7 +205,7 @@ class Search extends React.PureComponent {
 
   getPluginsConfToUseSearchInterface = () => {
     const { app } = this.props;
-    return Object.values(app.appModel.plugins).filter(plugin => {
+    return Object.values(app.appModel.plugins).filter((plugin) => {
       return (
         plugin.options.searchImplemented &&
         plugin.searchInterface.getSearchMethods
@@ -213,9 +213,9 @@ class Search extends React.PureComponent {
     });
   };
 
-  tryBindSearchMethods = plugins => {
-    return plugins.map(plugin => {
-      return plugin.searchInterface.getSearchMethods.then(methods => {
+  tryBindSearchMethods = (plugins) => {
+    return plugins.map((plugin) => {
+      return plugin.searchInterface.getSearchMethods.then((methods) => {
         plugin.searchInterface.getFunctionality = methods?.getFunctionality;
         plugin.searchInterface.getResults = methods?.getResults;
         return plugin;
@@ -223,8 +223,8 @@ class Search extends React.PureComponent {
     });
   };
 
-  pluginsHavingCorrectSearchMethods = plugins => {
-    return plugins.filter(plugin => {
+  pluginsHavingCorrectSearchMethods = (plugins) => {
+    return plugins.filter((plugin) => {
       const getResults = plugin.searchInterface.getResults;
       const getFunctionality = plugin.searchInterface.getFunctionality;
       if (!getResults || !getFunctionality) {
@@ -234,10 +234,11 @@ class Search extends React.PureComponent {
     });
   };
 
-  displayPluginMissingCrucialMethodsWarning = plugin => {
+  displayPluginMissingCrucialMethodsWarning = (plugin) => {
     console.warn(
-      `${plugin.type ??
-        "<Plugin type missing>"} is marked as a search-plugin, but is missing the getResults() and/or getFunctionality() method(s) in it's searchInterface.
+      `${
+        plugin.type ?? "<Plugin type missing>"
+      } is marked as a search-plugin, but is missing the getResults() and/or getFunctionality() method(s) in it's searchInterface.
 
       Because of this, the search component will not make use of this plugin. 
       
@@ -257,27 +258,27 @@ class Search extends React.PureComponent {
     const searchBoundPlugins = this.tryBindSearchMethods(
       pluginsConfToUseSearchInterface
     );
-    return Promise.all(searchBoundPlugins).then(plugins => {
+    return Promise.all(searchBoundPlugins).then((plugins) => {
       return this.pluginsHavingCorrectSearchMethods(plugins);
     });
   };
 
-  getExternalSearchTools = searchImplementedSearchTools => {
+  getExternalSearchTools = (searchImplementedSearchTools) => {
     // TODO (To discuss)
     // We demand that getFunctionality is implemented, but we do not demand that
     // the method returns a "correct" object. If the method return a null-ish
     // value we simply discard the extra functionality. Maybe we shouldn't demand that
     // getFunctionality is implemented?
     return searchImplementedSearchTools
-      .filter(searchImplementedPlugin => {
+      .filter((searchImplementedPlugin) => {
         return searchImplementedPlugin.searchInterface.getFunctionality();
       })
-      .map(toolWithFunctionality => {
+      .map((toolWithFunctionality) => {
         return toolWithFunctionality.searchInterface.getFunctionality();
       });
   };
 
-  getSearchTools = searchImplementedSearchTools => {
+  getSearchTools = (searchImplementedSearchTools) => {
     return this.defaultSearchTools.concat(
       this.getExternalSearchTools(searchImplementedSearchTools)
     );
@@ -286,12 +287,12 @@ class Search extends React.PureComponent {
   componentDidMount = () => {
     const { app } = this.props;
     app.globalObserver.subscribe("core.appLoaded", () => {
-      this.getSearchImplementedPlugins().then(searchImplementedPlugins => {
+      this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
         this.setState(
           {
             searchImplementedPluginsLoaded: true,
             searchImplementedPlugins: searchImplementedPlugins,
-            searchTools: this.getSearchTools(searchImplementedPlugins)
+            searchTools: this.getSearchTools(searchImplementedPlugins),
           },
           () => {
             this.handlePotentialUrlQuerySearch();
@@ -301,10 +302,10 @@ class Search extends React.PureComponent {
     });
   };
 
-  getSourcesByIds = sourceIds => {
+  getSourcesByIds = (sourceIds) => {
     return this.searchModel
       .getSources()
-      .filter(source => sourceIds.indexOf(source.id) > -1);
+      .filter((source) => sourceIds.indexOf(source.id) > -1);
   };
 
   handlePotentialUrlQuerySearch = () => {
@@ -340,7 +341,7 @@ class Search extends React.PureComponent {
       searchResults: { featureCollections: [], errors: [] },
       failedWFSFetchMessage: "",
       resultPanelCollapsed: false,
-      loading: false
+      loading: false,
     });
     this.resetFeaturesToFilter();
     this.localObserver.publish("clearMapView");
@@ -354,7 +355,7 @@ class Search extends React.PureComponent {
         {
           searchString: searchString,
           searchFromAutoComplete: true,
-          searchActive: "input"
+          searchActive: "input",
         },
         () => {
           this.doSearch();
@@ -362,7 +363,7 @@ class Search extends React.PureComponent {
       );
     } else {
       this.setState({
-        searchString: searchString
+        searchString: searchString,
       });
     }
   };
@@ -387,14 +388,14 @@ class Search extends React.PureComponent {
             loading: searchString.length >= 3,
             showSearchResults: false,
             searchString: searchString,
-            resultPanelCollapsed: false
+            resultPanelCollapsed: false,
           },
           () => {
             if (this.state.searchString.length >= 3) {
               this.updateAutocompleteList(this.state.searchString);
             } else {
               this.setState({
-                autocompleteList: []
+                autocompleteList: [],
               });
             }
           }
@@ -403,25 +404,27 @@ class Search extends React.PureComponent {
     }
   };
 
-  updateSearchOptions = searchOptions => {
+  updateSearchOptions = (searchOptions) => {
     this.setState(searchOptions);
   };
 
   handleOnClickOrKeyboardSearch = () => {
     if (this.hasEnoughCharsForSearch()) {
       this.setState({ searchFromAutoComplete: false }, () => {
+        // Get rid of the on-screen keyboard on mobile devices
+        document.activeElement.blur();
         this.doSearch();
       });
     }
   };
 
-  setSearchSources = sources => {
+  setSearchSources = (sources) => {
     this.setState({
-      searchSources: sources
+      searchSources: sources,
     });
   };
 
-  handleSearchBarKeyPress = event => {
+  handleSearchBarKeyPress = (event) => {
     if (event.which === 13 || event.keyCode === 13) {
       if (event.target.id === "searchInputField") {
         this.handleOnClickOrKeyboardSearch();
@@ -434,23 +437,23 @@ class Search extends React.PureComponent {
     fetchSettings = {
       ...fetchSettings,
       getPossibleCombinations: true,
-      initiator: "autocomplete"
+      initiator: "autocomplete",
     };
     return fetchSettings;
   };
 
-  getArrayWithSearchWords = searchString => {
+  getArrayWithSearchWords = (searchString) => {
     let tempStringArray = this.splitAndTrimOnCommas(searchString);
     return tempStringArray.join(" ").split(" ");
   };
 
-  splitAndTrimOnCommas = searchString => {
-    return searchString.split(",").map(string => {
+  splitAndTrimOnCommas = (searchString) => {
+    return searchString.split(",").map((string) => {
       return string.trim();
     });
   };
 
-  escapeRegExp = string => {
+  escapeRegExp = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
   };
 
@@ -459,12 +462,12 @@ class Search extends React.PureComponent {
 
     // We loop over each word in the input field first to ensure
     // that we don't mess upp the order of the displayFields...
-    wordsInTextField.forEach(word => {
+    wordsInTextField.forEach((word) => {
       // then we get the searchFields that has not been matched yet
       searchFields
-        .filter(sf => !matchedSearchFields.includes(sf))
+        .filter((sf) => !matchedSearchFields.includes(sf))
         // and loop over these...
-        .forEach(sf => {
+        .forEach((sf) => {
           // to find searchFields matching the current word...
           const searchFieldMatch = RegExp(
             `^${this.escapeRegExp(word)}\\W*`,
@@ -486,13 +489,13 @@ class Search extends React.PureComponent {
     // they have been matched or not. Therefore we get the searchFields
     // that have not been matched)...
     const unMatchedSearchFields = searchFields.filter(
-      sf => !matchedSearchFields.includes(sf) && feature.properties[sf]
+      (sf) => !matchedSearchFields.includes(sf) && feature.properties[sf]
     );
     // And concatenate the matched searchFields with the unMatched searchFields.
     return matchedSearchFields.concat(unMatchedSearchFields);
   };
 
-  getSortedAutocompleteEntry = feature => {
+  getSortedAutocompleteEntry = (feature) => {
     let autocompleteEntry = "";
     feature.searchFieldOrder.map((sf, index) => {
       if (index === feature.searchFieldOrder.length - 1) {
@@ -508,21 +511,21 @@ class Search extends React.PureComponent {
     return autocompleteEntry;
   };
 
-  getAutocompleteDataset = featureCollection => {
-    return featureCollection.value.features.map(feature => {
+  getAutocompleteDataset = (featureCollection) => {
+    return featureCollection.value.features.map((feature) => {
       const dataset = featureCollection.source.caption;
       const origin = featureCollection.origin;
       const autocompleteEntry = this.getSortedAutocompleteEntry(feature);
       return {
         dataset,
         autocompleteEntry,
-        origin: origin
+        origin: origin,
       };
     });
   };
 
   sortSearchFieldsOnFeatures = (featureCollection, wordsInTextField) => {
-    featureCollection.value.features.forEach(feature => {
+    featureCollection.value.features.forEach((feature) => {
       feature.searchFieldOrder = this.sortSearchFieldsOnFeature(
         featureCollection.source.searchFields,
         feature,
@@ -531,13 +534,13 @@ class Search extends React.PureComponent {
     });
   };
 
-  flattenAndSortAutoCompleteList = searchResults => {
+  flattenAndSortAutoCompleteList = (searchResults) => {
     let wordsInTextField = this.getArrayWithSearchWords(
       this.state.searchString
     );
 
     const resultsPerDataset = searchResults.featureCollections.map(
-      featureCollection => {
+      (featureCollection) => {
         this.sortSearchFieldsOnFeatures(featureCollection, wordsInTextField);
         return this.getAutocompleteDataset(featureCollection);
       }
@@ -549,7 +552,7 @@ class Search extends React.PureComponent {
     return this.sortAutocompleteList(resultsPerDataset.flat());
   };
 
-  sortAutocompleteList = flatAutocompleteArray => {
+  sortAutocompleteList = (flatAutocompleteArray) => {
     return flatAutocompleteArray.sort((a, b) =>
       decodeCommas(a.autocompleteEntry).localeCompare(
         decodeCommas(b.autocompleteEntry),
@@ -558,7 +561,7 @@ class Search extends React.PureComponent {
     );
   };
 
-  getMergeResultsFromAllSources = results => {
+  getMergeResultsFromAllSources = (results) => {
     return results.reduce(
       (searchResults, result) => {
         searchResults.featureCollections = searchResults.featureCollections.concat(
@@ -571,7 +574,7 @@ class Search extends React.PureComponent {
     );
   };
 
-  fetchResultFromSearchModel = async fetchOptions => {
+  fetchResultFromSearchModel = async (fetchOptions) => {
     let { searchSources } = this.state;
 
     if (searchSources.length === 0) {
@@ -587,10 +590,10 @@ class Search extends React.PureComponent {
 
     return Promise.allSettled([
       promise,
-      ...this.fetchResultsFromPlugins(fetchOptions)
+      ...this.fetchResultsFromPlugins(fetchOptions),
     ])
-      .then(results => {
-        results = results.filter(result => result.status !== "rejected");
+      .then((results) => {
+        results = results.filter((result) => result.status !== "rejected");
         results = this.removeCollectionsWithoutFeatures(results);
         let searchResults = this.getMergeResultsFromAllSources(results);
         // It's possible to handle any errors in the UI by checking if Search Model returned any
@@ -598,20 +601,20 @@ class Search extends React.PureComponent {
           console.error("Autocomplete error: ", searchResults.errors);
         return searchResults;
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Autocomplete error: ", error);
 
         // Also, set "open" state variable to false, which
         // abort the "loading" state of Autocomplete.
         if (active) {
           this.setState({
-            open: false
+            open: false,
           });
         }
       });
   };
 
-  getPotentialWFSErrorMessage = searchResults => {
+  getPotentialWFSErrorMessage = (searchResults) => {
     return searchResults.errors.length === 0
       ? ``
       : `OBS: Kunde inte hämta data från: `.concat(
@@ -639,38 +642,81 @@ class Search extends React.PureComponent {
       loading: false,
       autoCompleteOpen: false,
       failedWFSFetchMessage,
-      resultPanelCollapsed: false
+      resultPanelCollapsed: false,
     });
 
-    let features = this.extractFeatureWithFromFeatureCollections(
+    let features = this.extractFeaturesFromFeatureCollections(
       searchResults.featureCollections
     );
 
     features = this.filterFeaturesWithGeometry(features);
 
-    // If we get a single search-result, we add it to the map in the searchResultList-component instead.
+    // If we got more than 1 result, publish event below
     if (features.length !== 1) {
       this.localObserver.publish("map.addFeaturesToResultsLayer", features);
     }
+    // If we get a single search-result, we add it to the map in the searchResultList-component instead,
+    // unless clean mode is true. In that case, there's another event we want to publish.
+    else if (this.props.app.appModel.config.mapConfig.map.clean === true) {
+      const feature = features[0];
+      const featureTitle = this.getFeatureTitle(
+        feature,
+        searchResults.featureCollections[0].source
+      );
+
+      this.localObserver.publish(
+        "map.addAndHighlightFeatureInSearchResultLayer",
+        {
+          feature,
+          featureTitle,
+        }
+      );
+    }
   }
 
-  filterFeaturesWithGeometry = features => {
-    return features.filter(feature => {
+  // FIXME: Obtain featureTitle directly in extractFeaturesFromFeatureCollections,
+  // set title as property on feature, and remove this.
+  getFeatureTitle = (feature, source) => {
+    if (feature.featureTitle) {
+      return feature.featureTitle;
+    }
+
+    return source.displayFields.reduce((featureTitleString, df) => {
+      let displayField = feature.properties[df];
+      if (Array.isArray(displayField)) {
+        displayField = displayField.join(", ");
+      }
+
+      if (displayField) {
+        if (featureTitleString.length > 0) {
+          featureTitleString = featureTitleString.concat(` | ${displayField}`);
+        } else {
+          featureTitleString = displayField.toString();
+        }
+      }
+
+      feature.featureTitle = featureTitleString;
+      return featureTitleString;
+    }, "");
+  };
+
+  filterFeaturesWithGeometry = (features) => {
+    return features.filter((feature) => {
       return feature.geometry != null;
     });
   };
 
-  extractFeatureWithFromFeatureCollections = featureCollections => {
+  extractFeaturesFromFeatureCollections = (featureCollections) => {
     return featureCollections
-      .map(fc => {
+      .map((fc) => {
         return fc.value.features;
       })
       .flat();
   };
 
-  getNumResults = searchResults => {
+  getNumResults = (searchResults) => {
     let numResults = 0;
-    searchResults.featureCollections.forEach(fc => {
+    searchResults.featureCollections.forEach((fc) => {
       numResults += fc.value.features.length;
     });
     return numResults;
@@ -691,7 +737,7 @@ class Search extends React.PureComponent {
 
     this.setState({
       autocompleteList: this.prepareAutocompleteList(autoCompleteResult),
-      loading: false
+      loading: false,
     });
   };
 
@@ -702,7 +748,7 @@ class Search extends React.PureComponent {
     );
   };
 
-  fetchResultsFromPlugins = fetchOptions => {
+  fetchResultsFromPlugins = (fetchOptions) => {
     const { searchString } = this.state;
     if (this.anySearchImplementedPlugins()) {
       return [];
@@ -713,10 +759,10 @@ class Search extends React.PureComponent {
         promises.push(
           plugin.searchInterface
             .getResults(searchString, fetchOptions)
-            .then(res => {
+            .then((res) => {
               return {
                 errors: res.errors,
-                featureCollections: res.featureCollections
+                featureCollections: res.featureCollections,
               };
             })
         );
@@ -734,14 +780,14 @@ class Search extends React.PureComponent {
   getSearchResultsFetchSettings = () => {
     return {
       ...this.getUserCustomFetchSettings(this.searchModel.getSearchOptions()),
-      initiator: "search"
+      initiator: "search",
     };
   };
 
-  removeCollectionsWithoutFeatures = results => {
-    return results.map(res => {
+  removeCollectionsWithoutFeatures = (results) => {
+    return results.map((res) => {
       let featureCollections = res.value.featureCollections.filter(
-        featureCollection => {
+        (featureCollection) => {
           return featureCollection.value.features.length > 0;
         }
       );
@@ -759,7 +805,7 @@ class Search extends React.PureComponent {
     return featureCollections.slice(0, maxSlots);
   };
 
-  prepareAutocompleteList = searchResults => {
+  prepareAutocompleteList = (searchResults) => {
     let maxSlots = 7;
     let numSourcesWithResults = searchResults.featureCollections.length;
 
@@ -775,7 +821,7 @@ class Search extends React.PureComponent {
     }
 
     let numResults = 0;
-    searchResults.featureCollections.forEach(fc => {
+    searchResults.featureCollections.forEach((fc) => {
       numResults += fc.value.features.length;
     });
 
@@ -807,7 +853,7 @@ class Search extends React.PureComponent {
     for (const group in groupedAutoComplete) {
       shortenedAutoComplete = [
         ...shortenedAutoComplete,
-        ...groupedAutoComplete[group].slice(0, spacesPerSource)
+        ...groupedAutoComplete[group].slice(0, spacesPerSource),
       ];
     }
     return shortenedAutoComplete;
@@ -823,13 +869,13 @@ class Search extends React.PureComponent {
     }, {});
   };
 
-  getUserCustomFetchSettings = searchOptionsFromModel => {
+  getUserCustomFetchSettings = (searchOptionsFromModel) => {
     const {
       activeSpatialFilter,
       matchCase,
       wildcardAtEnd,
       wildcardAtStart,
-      maxResultsPerDataset
+      maxResultsPerDataset,
     } = this.state.searchOptions;
     return {
       ...searchOptionsFromModel,
@@ -839,7 +885,7 @@ class Search extends React.PureComponent {
       matchCase: matchCase,
       wildcardAtStart: wildcardAtStart,
       wildcardAtEnd: wildcardAtEnd,
-      maxResultsPerDataset: maxResultsPerDataset
+      maxResultsPerDataset: maxResultsPerDataset,
     };
   };
 
@@ -861,14 +907,15 @@ class Search extends React.PureComponent {
       searchSources,
       searchTools,
       failedWFSFetchMessage,
-      resultPanelCollapsed
+      resultPanelCollapsed,
     } = this.state;
 
     return (
-      this.state.searchImplementedPluginsLoaded && (
+      this.state.searchImplementedPluginsLoaded &&
+      this.props.app.appModel.config.mapConfig.map.clean === false && (
         <SearchBar
           classes={{
-            root: classes.inputRoot
+            root: classes.inputRoot,
           }}
           escapeRegExp={this.escapeRegExp}
           localObserver={this.localObserver}

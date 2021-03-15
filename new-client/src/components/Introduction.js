@@ -17,61 +17,61 @@ class Introduction extends React.PureComponent {
     forceShow: false, // Used to force showing the Intro, overrides the LocalStorage value
     initialStep: 0,
     stepsEnabled: true,
-    steps: []
+    steps: [],
   };
 
   static propTypes = {
     experimentalIntroductionEnabled: PropTypes.bool.isRequired,
     experimentalIntroductionSteps: PropTypes.array,
-    globalObserver: PropTypes.object.isRequired
+    globalObserver: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
     experimentalIntroductionEnabled: false,
     experimentalIntroductionSteps: [],
-    globalObserver: {}
+    globalObserver: {},
   };
 
   predefinedSteps = [
     {
       title: "Välkommen till Hajk! 👋",
       intro:
-        "Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!"
+        "Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!",
     },
     {
       title: "Verktygspanel",
       element: "header > div:first-child",
-      intro: "Med hjälp av knappen här uppe tar du fram verktygspanelen."
+      intro: "Med hjälp av knappen här uppe tar du fram verktygspanelen.",
     },
     {
       title: "Sökruta",
       element: '[class*="searchContainer"]',
       intro:
-        "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt ställe i kartan."
+        "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt ställe i kartan.",
     },
     {
       title: "Fler sökverktyg",
       element: '[name="searchOptions"]',
-      intro: "Under den här knappen hittar du fler avancerade sökalternativ."
+      intro: "Under den här knappen hittar du fler avancerade sökalternativ.",
     },
     {
       title: "Kartkontroller",
       element: "#controls-column",
       intro:
-        "Längst ut i den högra delen av skärmen finns olika kontroller som du använder för att navigera i kartan."
+        "Längst ut i den högra delen av skärmen finns olika kontroller som du använder för att navigera i kartan.",
     },
     {
       title: "Fönster",
       element: '#windows-container > div[style*="display: block"]', // My favorite selector. Selects the first visible Window, so if there's a plugin Window open, we can add intro text to it.
       intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor."
+        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
       title: "Widget-knapp",
       element: "#left-column > div > button",
       intro:
-        "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!"
-    }
+        "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!",
+    },
   ];
 
   constructor(props) {
@@ -94,7 +94,7 @@ class Introduction extends React.PureComponent {
             ? experimentalIntroductionSteps
             : this.predefinedSteps;
 
-        const filteredSteps = steps.filter(s => {
+        const filteredSteps = steps.filter((s) => {
           return (
             s.element === undefined ||
             document.querySelector(s?.element) !== null
@@ -109,7 +109,7 @@ class Introduction extends React.PureComponent {
       this.setState({
         initialStep: 0,
         stepsEnabled: true,
-        forceShow: true
+        forceShow: true,
       });
     });
   }
@@ -140,7 +140,7 @@ class Introduction extends React.PureComponent {
             exitOnOverlayClick: false,
             nextLabel: "Nästa",
             prevLabel: "Föregående",
-            doneLabel: "Klart!"
+            doneLabel: "Klart!",
           }}
         />
       )

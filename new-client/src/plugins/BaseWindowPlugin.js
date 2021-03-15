@@ -38,12 +38,18 @@ class BaseWindowPlugin extends React.PureComponent {
     // There will be defaults in props.custom, so that each plugin has own default title/description
     this.description = props.options.description || props.custom.description;
 
+    // Should Window be visible at start?
+    const visibleAtStart =
+      (isMobile
+        ? props.options.visibleAtStartMobile
+        : props.options.visibleAtStart) || false;
+
     // Title and Color are kept in state and not as class properties. Keeping them in state
     // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
     this.state = {
       title: props.options.title || props.custom.title || "Unnamed plugin",
       color: props.options.color || props.custom.color || null,
-      windowVisible: false, // Does not have anything to do with color or title, but must also be set initially
+      windowVisible: visibleAtStart,
     };
 
     // Title is a special case: we want to use the state.title and pass on to Window in order
@@ -74,24 +80,6 @@ class BaseWindowPlugin extends React.PureComponent {
     props.app.globalObserver.subscribe(closeEventName, () => {
       this.closeWindow();
     });
-  }
-
-  // Runs on initial render.
-  componentDidMount() {
-    //If on a mobile, and there is a specific visibleAtStart setting for mobile, check the mobile setting.
-    //visibleAtStart is false by default. Change to true only if visibleAtStartMobile really is 'true'.
-    //Otherwise, if not on mobile, or there is no specific mobile setting, change to true only if visibleAtStart option really is 'true'.
-    if (isMobile && this.props.options.visibleAtStartMobile !== undefined) {
-      if (this.props.options.visibleAtStartMobile === true) {
-        this.setState({
-          windowVisible: true,
-        });
-      }
-    } else if (this.props.options.visibleAtStart === true) {
-      this.setState({
-        windowVisible: true,
-      });
-    }
   }
 
   // Does not run on initial render, but runs on subsequential re-renders.
@@ -252,8 +240,8 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   render() {
+    // Don't render if "clean" query param is specified, otherwise go on
     return (
-      // Don't render if "clean" query param is specified, otherwise go on
       this.props.app.config.mapConfig.map.clean !== true && this.renderWindow()
     );
   }

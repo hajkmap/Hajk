@@ -1,46 +1,41 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import Fab from "@material-ui/core/Fab";
-import NavigationIcon from "@material-ui/icons/Navigation";
+
 import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import clsx from "clsx";
 import Contents from "./Contents";
-import { Typography } from "@material-ui/core";
+import { delay } from "../../../utils/Delay";
+import { animateScroll as scroll } from "react-scroll";
+import ScrollToTop from "./ScrollToTop";
 
-const styles = theme => ({
+const styles = (theme) => ({
   gridContainer: {
     maxHeight: "100%",
     overflowY: "auto",
     overflowX: "hidden",
     userSelect: "text",
     outline: "none",
-    scrollBehavior: "smooth"
   },
-
   contentContainer: {
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
-    outline: "none"
+    outline: "none",
   },
   margin: {
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
   },
-  scrollToTopButton: {
-    position: "fixed",
-    bottom: theme.spacing(2),
-    right: theme.spacing(3)
-  },
+
   toc: {
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(2),
   },
   printButton: {
-    paddingBottom: theme.spacing(1)
-  }
+    paddingBottom: theme.spacing(1),
+  },
 });
 
-const expandedTocOnStart = props => {
+const expandedTocOnStart = (props) => {
   const { activeDocument, options } = props;
   const mapConfigSetting = options?.tableOfContents?.expanded;
   const documentSetting = activeDocument?.tableOfContents?.expanded;
@@ -57,7 +52,7 @@ class DocumentViewer extends React.PureComponent {
   state = {
     showScrollButton: false,
     showPrintWindow: false,
-    expandedTableOfContents: expandedTocOnStart(this.props)
+    expandedTableOfContents: expandedTocOnStart(this.props),
   };
 
   constructor(props) {
@@ -79,13 +74,11 @@ class DocumentViewer extends React.PureComponent {
   bindSubscriptions = () => {
     const { localObserver } = this.props;
 
-    localObserver.subscribe("scroll-to-chapter", chapter => {
+    localObserver.subscribe("scroll-to-chapter", async (chapter) => {
       /*scrollIntoView is buggy without dirty fix - 
       tried using react life cycle methods but is, for some reason, not working*/
-
-      setTimeout(() => {
-        chapter.scrollRef.current.scrollIntoView();
-      }, 100);
+      await delay(100);
+      chapter.scrollRef.current.scrollIntoView();
     });
 
     localObserver.subscribe("scroll-to-top", () => {
@@ -93,48 +86,33 @@ class DocumentViewer extends React.PureComponent {
     });
   };
 
-  onScroll = e => {
+  onScroll = (e) => {
     if (e.target.scrollTop > this.scrollLimit) {
       this.setState({
-        showScrollButton: true
+        showScrollButton: true,
       });
     } else {
       this.setState({
-        showScrollButton: false
+        showScrollButton: false,
       });
     }
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     if (prevProps.activeDocument !== this.props.activeDocument) {
       this.setState({
-        expandedTableOfContents: expandedTocOnStart(this.props)
+        expandedTableOfContents: expandedTocOnStart(this.props),
       });
     }
   };
 
-  scrollToTop = () => {
-    //Buggy firefox makes scroll not work properly, dirty fix with setTimeout
-    setTimeout(() => {
-      this.documentViewerRef.current.scrollTop = 0;
-    }, 100);
-  };
-
-  renderScrollToTopButton = () => {
-    const { classes } = this.props;
-    return (
-      <Fab
-        className={classes.scrollToTopButton}
-        size="small"
-        color="primary"
-        onClick={this.scrollToTop}
-      >
-        <Typography variant="srOnly">
-          Scrolla till toppen av dokumentet
-        </Typography>
-        <NavigationIcon />
-      </Fab>
-    );
+  scrollToTop = async () => {
+    scroll.scrollTo(0, {
+      containerId: "documentViewer",
+      smooth: false,
+      duration: 0,
+      delay: 100,
+    });
   };
 
   selectAllText = () => {
@@ -144,9 +122,9 @@ class DocumentViewer extends React.PureComponent {
     window.getSelection().addRange(range);
   };
 
-  toggleCollapse = e => {
+  toggleCollapse = (e) => {
     this.setState({
-      expandedTableOfContents: !this.state.expandedTableOfContents
+      expandedTableOfContents: !this.state.expandedTableOfContents,
     });
   };
 
@@ -222,7 +200,7 @@ class DocumentViewer extends React.PureComponent {
       localObserver,
       documentWindowMaximized,
       model,
-      options
+      options,
     } = this.props;
 
     const { showScrollButton } = this.state;
@@ -231,6 +209,7 @@ class DocumentViewer extends React.PureComponent {
       <>
         <Grid
           onScroll={this.onScroll}
+          id="documentViewer"
           ref={this.documentViewerRef}
           className={classes.gridContainer}
           container
@@ -243,7 +222,7 @@ class DocumentViewer extends React.PureComponent {
 
           <Grid
             tabIndex="0" //Focus grid to be able to use onKeyDown
-            onKeyDown={e => {
+            onKeyDown={(e) => {
               //If ctrl-a or command-a is pressed
               if ((e.ctrlKey || e.metaKey) && e.keyCode === 65) {
                 this.selectAllText();
@@ -266,9 +245,9 @@ class DocumentViewer extends React.PureComponent {
             />
           </Grid>
         </Grid>
-        {showScrollButton &&
-          documentWindowMaximized &&
-          this.renderScrollToTopButton()}
+        {showScrollButton && documentWindowMaximized && (
+          <ScrollToTop onClick={this.scrollToTop}></ScrollToTop>
+        )}
       </>
     );
   }

@@ -1,11 +1,11 @@
 import * as express from "express";
 import controller from "./controller";
-import checkAdminAuthorization from "../../middlewares/check.admin.authorization";
+import restrictAdmin from "../../middlewares/restrict.admin";
 
 export default express
   .Router()
   .get("/load/:name", controller.getByName)
-  .use(checkAdminAuthorization) // All routes that follow are admin-only!
+  .use(restrictAdmin) // All routes that follow are admin-only!
   .post("/create", controller.create) // FIXME: Remove POST
   .put("/create", controller.create) // PUT is correct here, as this operation is idempotent
   .delete("/delete/:name", controller.deleteByName)

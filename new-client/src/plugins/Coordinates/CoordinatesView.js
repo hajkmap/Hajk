@@ -12,32 +12,32 @@ import TextField from "@material-ui/core/TextField";
 
 import { withSnackbar } from "notistack";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex",
     flexGrow: 1,
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   text: {
     "& .ol-mouse-position": {
       top: "unset",
       right: "unset",
-      position: "unset"
-    }
+      position: "unset",
+    },
   },
   table: {},
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
-    marginTop: theme.spacing(2)
-  }
+    marginTop: theme.spacing(2),
+  },
 });
 
 class CoordinatesView extends React.PureComponent {
   state = {
     transformedCoordinates: [],
     errorField: "",
-    errorValue: ""
+    errorValue: "",
   };
 
   constructor(props) {
@@ -48,12 +48,12 @@ class CoordinatesView extends React.PureComponent {
 
     this.localObserver.subscribe(
       "setTransformedCoordinates",
-      transformedCoordinates => {
+      (transformedCoordinates) => {
         this.setState(
           {
             transformedCoordinates: transformedCoordinates,
             errorField: "",
-            errorValue: ""
+            errorValue: "",
           },
           () => {
             // React moves the cursor to the end for the field that was modified so we restore the position here
@@ -74,11 +74,11 @@ class CoordinatesView extends React.PureComponent {
       }
     );
 
-    this.localObserver.subscribe("errorInOnChange", data => {
+    this.localObserver.subscribe("errorInOnChange", (data) => {
       this.setState(
         {
           errorField: data.errorField,
-          errorValue: data.errorValue
+          errorValue: data.errorValue,
         },
         () => {
           // React moves the cursor to the end for the field that was modified so we restore the position here
@@ -107,8 +107,8 @@ class CoordinatesView extends React.PureComponent {
           persist: true,
           anchorOrigin: {
             vertical: "bottom",
-            horizontal: "center"
-          }
+            horizontal: "center",
+          },
         }
       );
     });

@@ -1,6 +1,6 @@
-# Hajk 3
+[![Netlify Status](https://api.netlify.com/api/v1/badges/fa0760e3-fd3a-43bf-a704-27e05cb901cc/deploy-status)](https://app.netlify.com/sites/hajk-demo/deploys)
 
-[Welcome to Hajk, please visit our welcome page for more information about Hajk (Swedish only)](https://hajkmap.github.io/Hajk)
+# Hajk 3
 
 _An open source web GIS solution based on OpenLayers_
 
@@ -8,7 +8,11 @@ _An open source web GIS solution based on OpenLayers_
 
 **For developer info, see [CONTRIBUTING.md](https://github.com/hajkmap/Hajk/blob/master/CONTRIBUTING.md).**
 
-**The old [Hajk 2 documentation](https://github.com/hajkmap/Hajk/blob/master/HAJK2_README.md) with detailed installation instructions (Swedish only) is now in a separate readme.**
+For user info, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk)
+
+## Demo
+
+For a live demo of the latest version, go to https://hajk-demo.netlify.app/.
 
 ## Quick start
 

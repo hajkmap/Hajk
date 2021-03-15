@@ -1,10 +1,10 @@
 import * as express from "express";
 import controller from "./controller";
-import checkAdminAuthorization from "../../middlewares/check.admin.authorization";
+import restrictAdmin from "../../middlewares/restrict.admin";
 
 export default express
   .Router()
-  .use(checkAdminAuthorization) // We will not allow any of the following routes unless user is admin
+  .use(restrictAdmin) // We will not allow any of the following routes unless user is admin
   // We use the same controller method to handle these 3
   // PUT requests, as they all write into the same file,
   // only different portions of it.

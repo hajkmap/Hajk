@@ -30,34 +30,34 @@ import OpenWithIcon from "@material-ui/icons/OpenWith";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 
-const ColorButtonRed = withStyles(theme => ({
+const ColorButtonRed = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(red[500]),
     backgroundColor: red[500],
     "&:hover": {
-      backgroundColor: red[700]
-    }
-  }
+      backgroundColor: red[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 class Chapter {
@@ -92,16 +92,16 @@ class DocumentEditor extends Component {
       newTableOfContentsTitle: undefined,
       tableOfContentsModal: false,
       tableOfContents: {},
-      editTitle: false
+      editTitle: false,
     };
     this.editors = [];
     this.documentTitle = React.createRef();
   }
 
   load(document) {
-    this.props.model.loadDocuments(documents => {
+    this.props.model.loadDocuments((documents) => {
       if (documents.length > 0) {
-        this.props.model.load(document || documents[0], data => {
+        this.props.model.load(document || documents[0], (data) => {
           this.setState(
             {
               data: data,
@@ -120,7 +120,7 @@ class DocumentEditor extends Component {
                   : 100,
                 title: data.tableOfContents
                   ? data.tableOfContents.title
-                  : "Innehållsförteckning"
+                  : "Innehållsförteckning",
               },
               newTableOfContentsExpanded: data.tableOfContents
                 ? data.tableOfContents.expanded
@@ -133,24 +133,24 @@ class DocumentEditor extends Component {
                 : 100,
               newTableOfContentsTitle: data.tableOfContents
                 ? data.tableOfContents.title
-                : "Innehållsförteckning"
+                : "Innehållsförteckning",
             },
             () => {
-              this.props.model.loadMaps(maps => {
+              this.props.model.loadMaps((maps) => {
                 this.setState({
                   maps: maps,
                   map: data.map,
-                  newDocumentMap: maps[0]
+                  newDocumentMap: maps[0],
                 });
               });
             }
           );
         });
       } else {
-        this.props.model.loadMaps(maps => {
+        this.props.model.loadMaps((maps) => {
           this.setState({
             maps: maps,
-            newDocumentMap: maps[0]
+            newDocumentMap: maps[0],
           });
         });
       }
@@ -158,9 +158,9 @@ class DocumentEditor extends Component {
   }
 
   loadImageList() {
-    this.props.model.listImages(data => {
+    this.props.model.listImages((data) => {
       this.setState({
-        imageList: data
+        imageList: data,
       });
     });
   }
@@ -175,7 +175,7 @@ class DocumentEditor extends Component {
     this.props.model.save(
       this.state.selectedDocument,
       this.state.data,
-      result => {
+      (result) => {
         if (result === "File saved") {
           result = "Filen sparades utan problem.";
         }
@@ -184,7 +184,7 @@ class DocumentEditor extends Component {
           modalTitle: result,
           modalContent: "",
           showAbortButton: false,
-          modalConfirmCallback: () => {}
+          modalConfirmCallback: () => {},
         });
       }
     );
@@ -201,10 +201,10 @@ class DocumentEditor extends Component {
       ),
       showAbortButton: true,
       modalConfirmCallback: () => {
-        this.props.model.delete(this.state.selectedDocument, result => {
+        this.props.model.delete(this.state.selectedDocument, (result) => {
           this.load();
         });
-      }
+      },
     });
   }
 
@@ -212,11 +212,11 @@ class DocumentEditor extends Component {
     this.state.data.chapters.push(
       new Chapter({
         header: title,
-        headerIdentifier: titleID
+        headerIdentifier: titleID,
       })
     );
     this.setState({
-      data: this.state.data
+      data: this.state.data,
     });
   }
 
@@ -230,7 +230,7 @@ class DocumentEditor extends Component {
       modalConfirmCallback: () => {
         parentChapters.splice(index, 1);
         this.forceUpdate();
-      }
+      },
     });
   }
 
@@ -239,12 +239,12 @@ class DocumentEditor extends Component {
       showModal: false,
       modalStyle: {},
       okButtonText: "OK",
-      modalConfirmCallback: () => {}
+      modalConfirmCallback: () => {},
     });
   }
 
   renderToc(currentChapter, chapters, parentChapters, index) {
-    var renderChapters = subchapters => {
+    var renderChapters = (subchapters) => {
       var renderableChapters = subchapters ? subchapters : chapters;
       return renderableChapters.map((chapter, i) => {
         if (chapter !== currentChapter) {
@@ -318,9 +318,9 @@ class DocumentEditor extends Component {
           right: "30px",
           bottom: "30px",
           width: "auto",
-          margin: 0
-        }
-      }
+          margin: 0,
+        },
+      },
     });
   }
 
@@ -340,9 +340,9 @@ class DocumentEditor extends Component {
           label="Ange nytt namn"
           type="text"
           defaultValue={this.state.newChapterName}
-          onChange={e => {
+          onChange={(e) => {
             this.setState({
-              newChapterName: e.target.value
+              newChapterName: e.target.value,
             });
           }}
           fullWidth
@@ -353,9 +353,9 @@ class DocumentEditor extends Component {
           label="Ange nytt ID"
           type="text"
           defaultValue={this.state.newHeaderIdentifier}
-          onChange={e => {
+          onChange={(e) => {
             this.setState({
-              newHeaderIdentifier: e.target.value
+              newHeaderIdentifier: e.target.value,
             });
           }}
           fullWidth
@@ -368,7 +368,7 @@ class DocumentEditor extends Component {
     this.setState(
       {
         newChapterName: chapter.header,
-        newHeaderIdentifier: chapter.headerIdentifier
+        newHeaderIdentifier: chapter.headerIdentifier,
       },
       () => {
         this.setState({
@@ -380,7 +380,7 @@ class DocumentEditor extends Component {
             chapter.header = this.state.newChapterName;
             chapter.headerIdentifier = this.state.newHeaderIdentifier;
             this.hideModal();
-          }
+          },
         });
       }
     );
@@ -485,7 +485,7 @@ class DocumentEditor extends Component {
               chapter.chapters.push(
                 new Chapter({
                   header: title,
-                  headerIdentifier: titleID
+                  headerIdentifier: titleID,
                 })
               );
               this.forceUpdate();
@@ -493,19 +493,19 @@ class DocumentEditor extends Component {
           />
 
           <AddKeyword
-            onAddKeyword={keyword => {
+            onAddKeyword={(keyword) => {
               chapter.keywords.push(keyword);
               this.setState({
-                keywords: chapter.keywords
+                keywords: chapter.keywords,
               });
               this.forceUpdate();
             }}
           />
 
           <AddGeoObject
-            onAddGeoObject={geoObject => {
+            onAddGeoObject={(geoObject) => {
               this.setState({
-                geoObjects: chapter.geoObjects
+                geoObjects: chapter.geoObjects,
               });
               chapter.geoObjects.push(geoObject);
               this.forceUpdate();
@@ -519,13 +519,13 @@ class DocumentEditor extends Component {
                 <Chip
                   key={i}
                   label={keyword}
-                  onDelete={i => {
+                  onDelete={(i) => {
                     const index = chapter.keywords.indexOf(keyword);
                     if (index > -1) {
                       chapter.keywords.splice(index, 1);
                     }
                     this.setState({
-                      keywords: chapter.keywords
+                      keywords: chapter.keywords,
                     });
                   }}
                 />
@@ -539,13 +539,13 @@ class DocumentEditor extends Component {
                 <Chip
                   key={i}
                   label={geoObject}
-                  onDelete={i => {
+                  onDelete={(i) => {
                     const index = chapter.geoObjects.indexOf(geoObject);
                     if (index > -1) {
                       chapter.geoObjects.splice(index, 1);
                     }
                     this.setState({
-                      geoObjects: chapter.geoObjects
+                      geoObjects: chapter.geoObjects,
                     });
                   }}
                 />
@@ -556,7 +556,7 @@ class DocumentEditor extends Component {
         <DocumentTextEditor
           display={chapter.expanded}
           html={chapter.html}
-          onUpdate={html => {
+          onUpdate={(html) => {
             chapter.html = html;
           }}
           imageList={this.state.imageList}
@@ -594,12 +594,12 @@ class DocumentEditor extends Component {
                 type="text"
                 value={this.state.documentTitle}
                 InputProps={{
-                  readOnly: !this.state.editTitle
+                  readOnly: !this.state.editTitle,
                 }}
                 variant={this.state.editTitle ? "outlined" : "filled"}
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({
-                    documentTitle: e.target.value
+                    documentTitle: e.target.value,
                   });
                 }}
               />
@@ -682,7 +682,7 @@ class DocumentEditor extends Component {
             <ColorButtonGreen
               variant="contained"
               className="btn"
-              onClick={e => {
+              onClick={(e) => {
                 if (this.state.modalConfirmCallback) {
                   this.state.modalConfirmCallback();
                 }
@@ -739,15 +739,15 @@ class DocumentEditor extends Component {
           label="Dokumentnamn"
           type="text"
           defaultValue={this.state.newDocumentName}
-          onChange={e => {
+          onChange={(e) => {
             if (this.validateNewDocumentName(e.target.value)) {
               this.setState(
                 {
-                  newDocumentName: e.target.value
+                  newDocumentName: e.target.value,
                 },
                 () => {
                   this.setState({
-                    modalContent: this.renderCreateForm()
+                    modalContent: this.renderCreateForm(),
                   });
                 }
               );
@@ -758,9 +758,9 @@ class DocumentEditor extends Component {
         <FormControl>
           <InputLabel>Välj karta</InputLabel>
           <Select
-            onChange={e => {
+            onChange={(e) => {
               this.setState({
-                newDocumentMap: e.target.value
+                newDocumentMap: e.target.value,
               });
             }}
           >
@@ -781,15 +781,15 @@ class DocumentEditor extends Component {
       modalConfirmCallback: () => {
         var data = {
           documentName: this.state.newDocumentName,
-          mapName: this.state.newDocumentMap
+          mapName: this.state.newDocumentMap,
         };
         if (data.documentName !== "") {
-          this.props.model.createDocument(data, response => {
+          this.props.model.createDocument(data, (response) => {
             this.load(data.documentName);
           });
           this.hideModal();
         }
-      }
+      },
     });
   }
 
@@ -798,15 +798,15 @@ class DocumentEditor extends Component {
       expanded: this.state.newTableOfContentsExpanded,
       active: this.state.newTableOfContentsActive,
       chapterLevelsToShow: this.state.newTableOfContentsLevels,
-      title: this.state.newTableOfContentsTitle
+      title: this.state.newTableOfContentsTitle,
     };
 
     this.setState({
       data: {
         ...this.state.data,
-        tableOfContents: tableOfContents
+        tableOfContents: tableOfContents,
       },
-      tableOfContentsModal: false
+      tableOfContentsModal: false,
     });
   }
 
@@ -817,7 +817,7 @@ class DocumentEditor extends Component {
       modalContent: this.renderTableOfContentsInput(),
       showAbortButton: true,
 
-      modalConfirmCallback: () => {}
+      modalConfirmCallback: () => {},
     });
   }
 
@@ -828,9 +828,9 @@ class DocumentEditor extends Component {
           control={
             <Switch
               checked={this.state.newTableOfContentsActive}
-              onChange={e => {
+              onChange={(e) => {
                 this.setState({
-                  [e.target.name]: e.target.checked
+                  [e.target.name]: e.target.checked,
                 });
               }}
               name="newTableOfContentsActive"
@@ -843,9 +843,9 @@ class DocumentEditor extends Component {
           control={
             <Switch
               checked={this.state.newTableOfContentsExpanded}
-              onChange={e => {
+              onChange={(e) => {
                 this.setState({
-                  [e.target.name]: e.target.checked
+                  [e.target.name]: e.target.checked,
                 });
               }}
               name="newTableOfContentsExpanded"
@@ -860,9 +860,9 @@ class DocumentEditor extends Component {
           label="Titel"
           type="text"
           defaultValue={this.state.newTableOfContentsTitle}
-          onChange={e => {
+          onChange={(e) => {
             this.setState({
-              newTableOfContentsTitle: e.target.value
+              newTableOfContentsTitle: e.target.value,
             });
           }}
           fullWidth
@@ -873,9 +873,9 @@ class DocumentEditor extends Component {
           label="Nivåer"
           type="number"
           defaultValue={this.state.newTableOfContentsLevels}
-          onChange={e => {
+          onChange={(e) => {
             this.setState({
-              newTableOfContentsLevels: parseInt(e.target.value)
+              newTableOfContentsLevels: parseInt(e.target.value),
             });
           }}
           fullWidth
@@ -886,7 +886,7 @@ class DocumentEditor extends Component {
 
   toggleTitleEdit = () => {
     this.setState({
-      editTitle: !this.state.editTitle
+      editTitle: !this.state.editTitle,
     });
   };
 
@@ -894,9 +894,9 @@ class DocumentEditor extends Component {
     this.setState({
       data: {
         ...this.state.data,
-        title: this.state.documentTitle
+        title: this.state.documentTitle,
       },
-      editTitle: false
+      editTitle: false,
     });
   }
 
@@ -910,12 +910,12 @@ class DocumentEditor extends Component {
           type="text"
           value={this.state.documentTitle}
           InputProps={{
-            readOnly: !this.state.editTitle
+            readOnly: !this.state.editTitle,
           }}
           variant={this.state.editTitle ? "outlined" : "filled"}
-          onChange={e => {
+          onChange={(e) => {
             this.setState({
-              documentTitle: e.target.value
+              documentTitle: e.target.value,
             });
           }}
         />
@@ -958,7 +958,7 @@ class DocumentEditor extends Component {
           <label>Välj dokument:&nbsp;</label>
           <select
             className="control-fixed-width"
-            onChange={e => {
+            onChange={(e) => {
               this.load(e.target.value);
             }}
             value={this.state.selectedDocument}
