@@ -417,10 +417,9 @@ class ConfigServiceV2 {
     );
 
     if (editIndexInTools !== -1) {
-      let { layers } = mapConfig.tools[editIndexInTools].options;
-
+      let { activeServices } = mapConfig.tools[editIndexInTools].options;
       // Wash WFST edit layers
-      layers = await asyncFilter(
+      activeServices = await asyncFilter(
         activeServices, // layers in edit tool are named activeServices
         async (layer) =>
           await this.filterByGroupVisibility(
@@ -429,7 +428,18 @@ class ConfigServiceV2 {
             `WFST edit layer "${layer.id}"`
           )
       );
-      mapConfig.tools[editIndexInTools].options.activeServices = layers;
+      let allowedServices = [];
+      for (const i in activeServices) {
+        //if (Object.hasOwnProperty.call(activeServices, id)) {
+        logger.trace("allowed.id=" + activeServices[i].id);
+        allowedServices.push(activeServices[i].id);
+        //}
+      }
+      //logger.trace("washed activeServices: %o", allowedServices);
+      //mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
+      mapConfig.tools[
+        editIndexInTools
+      ].options.activeServices = allowedServices;
     }
 
     return mapConfig;

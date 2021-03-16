@@ -304,7 +304,6 @@ class ConfigService {
       ].options.activeServices = allowedServices;
     }
 
-    //
     return mapConfig;
   }
 
