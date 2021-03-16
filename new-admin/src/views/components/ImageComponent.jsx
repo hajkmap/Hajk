@@ -14,6 +14,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import ImageIcon from "@material-ui/icons/Image";
 
 const ImageComponent = (props) => {
   const classes = useStyles();
@@ -23,14 +24,16 @@ const ImageComponent = (props) => {
 
   const { src } = entity.getData();
   const data = entity.getData();
+  const dataSource = data["data-source"];
+  const imageAlt = data.alt;
   const imageWidth = parseInt(data["data-image-width"]) || "";
   const imageHeight = parseInt(data["data-image-height"]) || "";
   const dataCaption = data["data-caption"];
-  const dataSource = data["data-source"];
   const dataPopup = data["data-image-popup"] === undefined ? false : true;
   const dataImagePosition = data["data-image-position"];
 
   const [open, setOpen] = useState(false);
+  const [alt, setAlt] = useState(imageAlt === undefined ? "" : imageAlt);
   const [defaultWidth, setDefaultWidth] = useState();
   const [defaultHeight, setDefaultHeight] = useState();
   const [width, setWidth] = useState(imageWidth);
@@ -43,10 +46,11 @@ const ImageComponent = (props) => {
 
   useEffect(() => {
     if (
+      dataSource !== source ||
+      imageAlt !== alt ||
       imageWidth !== width ||
       imageHeight !== height ||
       dataCaption !== caption ||
-      dataSource !== source ||
       dataPopup !== popup ||
       dataImagePosition !== imagePosition
     ) {
@@ -55,14 +59,16 @@ const ImageComponent = (props) => {
       showSaveButton(true);
     }
   }, [
+    dataSource,
+    source,
+    imageAlt,
+    alt,
     imageWidth,
     width,
     imageHeight,
     height,
     dataCaption,
     caption,
-    dataSource,
-    source,
     dataPopup,
     popup,
     dataImagePosition,
@@ -85,8 +91,9 @@ const ImageComponent = (props) => {
     const { imageData } = props.blockProps;
     let data = {
       src: src,
-      "data-image-width": width + "px",
-      "data-image-height": height + "px",
+      alt: alt === undefined ? setAlt("") : alt,
+      "data-image-width": width ? width + "px" : null,
+      "data-image-height": height ? height + "px" : null,
       "data-caption": caption,
       "data-source": source,
       "data-image-position": imagePosition,
@@ -184,6 +191,19 @@ const ImageComponent = (props) => {
                 value={height}
                 onChange={(e) => calculateWidth(e.target.value)}
                 label="Höjd"
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={1} alignItems="flex-end">
+            <Grid item>
+              <ImageIcon />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="image-alt"
+                value={alt}
+                onChange={(e) => setAlt(e.target.value)}
+                label="Alternativ text"
               />
             </Grid>
           </Grid>
@@ -296,9 +316,9 @@ const ImageComponent = (props) => {
       <div className={classes.imgContainer}>
         <img
           src={src}
+          alt={alt}
           width={width}
           height={height}
-          alt={caption}
           data-image-width={width}
           data-image-height={height}
           data-caption={caption}
@@ -325,9 +345,9 @@ const ImageComponent = (props) => {
       <div className={classes.imgContainer}>
         <img
           src={src}
+          alt={alt}
           width={width}
           height={height}
-          alt={caption}
           data-image-width={width}
           data-image-height={height}
           data-caption={caption}
