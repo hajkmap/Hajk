@@ -69,8 +69,8 @@ class ToolOptions extends Component {
       title: "Innehållsförteckning",
     },
     defaultDocumentColorSettings: {
-      textAreaBackgroundColor: "#ccc",
-      textAreaDividerColor: "#6A0DAD",
+      textAreaBackgroundColor: "",
+      textAreaDividerColor: "",
     },
   };
   treeKeys = [];
@@ -130,7 +130,11 @@ class ToolOptions extends Component {
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
         displayLoadingOnMapLinkOpen: tool.options.displayLoadingOnMapLinkOpen,
         tableOfContents: tool.options.tableOfContents,
-        defaultDocumentColorSettings: tool.options.defaultDocumentColorSettings,
+        defaultDocumentColorSettings: tool.options
+          .defaultDocumentColorSettings || {
+          textAreaBackgroundColor: "",
+          textAreaDividerColor: "",
+        },
       });
     } else {
       this.setState({
@@ -826,7 +830,7 @@ class ToolOptions extends Component {
               </b>
             </p>
           </div>
-          <div>
+          <div className="clearfix">
             <span className="pull-left">
               <div>
                 <label className="long-label" htmlFor="textAreaBackgroundColor">
@@ -834,7 +838,7 @@ class ToolOptions extends Component {
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
-                    title="Färg till textområde bakgrund"
+                    title="Färg till textområdets bakgrund"
                   />
                 </label>
               </div>
@@ -857,7 +861,7 @@ class ToolOptions extends Component {
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
-                    title="Färg till textområde skiljelinje"
+                    title="Färg till textområdets skiljelinje"
                   />
                 </label>
               </div>
