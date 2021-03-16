@@ -7,6 +7,8 @@ import Modal from "@material-ui/core/Modal";
 import DragHandle from "@material-ui/icons/DragHandle";
 import TreeRow from "./treerow.jsx";
 import { withStyles } from "@material-ui/core/styles";
+import { SketchPicker } from "react-color";
+
 import { Typography } from "@material-ui/core";
 
 import {
@@ -86,6 +88,15 @@ class ToolOptions extends Component {
       this.availableDocuments = list;
     });
   }
+
+  handleColorChange = (target, color) => {
+    this.setState((prevState) => ({
+      defaultDocumentColorSettings: {
+        ...prevState.defaultDocumentColorSettings,
+        [target]: color.hex,
+      },
+    }));
+  };
 
   getMenuEditorModel = () => {
     return new MenuEditorModel({
@@ -548,7 +559,7 @@ class ToolOptions extends Component {
     });
 
     return (
-      <div>
+      <div style={{ marginBottom: "10px" }}>
         <form>
           <p>
             <ColorButtonBlue
@@ -816,59 +827,51 @@ class ToolOptions extends Component {
             </p>
           </div>
           <div>
-            <label htmlFor="textAreaBackgroundColor">
-              Bakgrundsfärg{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Färg till textområde bakgrund"
-              />
-            </label>
-            <input
-              id="textAreaBackgroundColor"
-              value={
-                this.state.defaultDocumentColorSettings.textAreaBackgroundColor
-              }
-              type="text"
-              name="textAreaBackgroundColor"
-              onChange={(e) => {
-                const value = e.target.value;
-                this.setState((prevState) => ({
-                  defaultDocumentColorSettings: {
-                    ...prevState.defaultDocumentColorSettings,
-                    textAreaBackgroundColor: value,
-                  },
-                }));
-              }}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="textAreaDividerColor">
-              Kantfärg{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Färg till textområde skiljelinje"
-              />
-            </label>
-            <input
-              id="textAreaDividerColor"
-              value={
-                this.state.defaultDocumentColorSettings.textAreaDividerColor
-              }
-              type="text"
-              name="textAreaDividerColor"
-              onChange={(e) => {
-                const value = e.target.value;
-                this.setState((prevState) => ({
-                  defaultDocumentColorSettings: {
-                    ...prevState.defaultDocumentColorSettings,
-                    textAreaDividerColor: value,
-                  },
-                }));
-              }}
-            />
+            <span className="pull-left">
+              <div>
+                <label className="long-label" htmlFor="textAreaBackgroundColor">
+                  Bakgrundsfärg{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Färg till textområde bakgrund"
+                  />
+                </label>
+              </div>
+              <div>
+                <SketchPicker
+                  color={
+                    this.state.defaultDocumentColorSettings
+                      .textAreaBackgroundColor
+                  }
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("textAreaBackgroundColor", color)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <label htmlFor="textAreaDividerColor">
+                  Kantfärg{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Färg till textområde skiljelinje"
+                  />
+                </label>
+              </div>
+              <div>
+                <SketchPicker
+                  color={
+                    this.state.defaultDocumentColorSettings.textAreaDividerColor
+                  }
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("textAreaDividerColor", color)
+                  }
+                />
+              </div>
+            </span>
           </div>
 
           <section className="tab-pane active">
