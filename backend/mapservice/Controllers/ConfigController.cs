@@ -259,7 +259,6 @@ namespace MapService.Controllers
             var editTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
             var layersInEditTool = editTool.SelectToken("$.options.activeServices");
             var userGroups = adLookup.GetGroups(activeUser);
-            _log.Debug("\nlayersInEditTool:" + layersInEditTool);
             if (layersInEditTool == null)
             {
                 _log.Warn("EditTool is missing the activeServices object");
@@ -270,14 +269,12 @@ namespace MapService.Controllers
                 foreach (JToken child in layersInEditTool.Children())
                 {
                     var visibleForGroups = child.SelectToken("$.visibleForGroups");
-                    _log.Debug("   child: " + child);
 
                     bool allowed = false;
 
                     if (HasValidVisibleForGroups(visibleForGroups))
                     {
                         allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
-                        _log.Debug("edit IsGroupAllowedAccess: " + visibleForGroups + "\nallowed: " + allowed);
                     }
                     else
                     {
@@ -285,7 +282,6 @@ namespace MapService.Controllers
                         _log.Info("Can't filter edit layers because the key 'visibleForGroups' is missing, incorrect or empty");
                     }
 
-                    _log.Debug("   allowed:" + allowed);
                     if (!allowed)
                     {
                         childrenToRemove.Add(child.SelectToken("$.id").ToString());
@@ -294,8 +290,6 @@ namespace MapService.Controllers
 
                 foreach (string id in childrenToRemove)
                 {
-                    _log.Debug("   remove edit layer:" + id);
-                    //_log.Debug("   " + layersInEditTool.SelectToken("$.[?(@.id=='" + id + "')]").ToString());
                     layersInEditTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();  
                 }
 
@@ -303,37 +297,26 @@ namespace MapService.Controllers
                 foreach (JToken child in layersInEditTool.Children())
                 {
                     var id = child.SelectToken("$.id");
-                    _log.Debug("   edit layer allowed: " + id);
                     allowedLayers.Add(id);
                 }
-                _log.Debug("   allowedLayers: " + allowedLayers); // + " = " + JArray.Parse((string)allowedLayers));
-                //layersInEditTool.Replace(JArray.Parse(allowedLayers));
-                //layersInEditTool = allowedLayers; // JArray.Parse(allowedLayers.ToString());
                 layersInEditTool.Replace(allowedLayers);
 
-                _log.Debug("  washed layersInEditTool:" + layersInEditTool);
-                
                 //NULL if User is not allowed to any editlayer because empty array means use of global editconfig
                 //if (!layersInEditTool.HasValues)
                 //{
                 //    layersInEditTool.Replace(null);
                 //}
-                _log.Debug("return edit mapConfiguration:\n" + mapConfiguration.ToString());
                 return mapConfiguration.ToString();
             }
         }
 
         private string FilterSearchLayersByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
         {
-            //_log.Debug("FilterSearchLayers..: " + mapConfiguration);
             var childrenToRemove = new List<string>();
             mapConfiguration = JObject.Parse(mapConfiguration.ToString());
             var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
-            //_log.Debug("   searchTool:" + searchTool);
             var editTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
-            _log.Debug("   editTool in searchTool:" + editTool);
             var layersInSearchTool = searchTool.SelectToken("$.options.layers");
-            //_log.Debug("layersInSearchTool:" + layersInSearchTool);
             var userGroups = adLookup.GetGroups(activeUser);
 
             if (layersInSearchTool == null)
@@ -366,8 +349,6 @@ namespace MapService.Controllers
 
                 foreach (string id in childrenToRemove)
                 {
-                    //_log.Debug("   remove search layer:" + id);
-                    //_log.Debug("   " + layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").ToString());
                     layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
                 }
 
@@ -585,7 +566,6 @@ namespace MapService.Controllers
                         isRequestFromAdmin = false;
                     }
 
-                    _log.Debug("activeUser: " + activeUser + " name: " + name );
                     if (activeUser.Length != 0 && name != "layers" && !isRequestFromAdmin)
                     {
                         _log.DebugFormat("Filtering map configuration '{0}' for user '{1}'.", name, activeUser);
@@ -597,25 +577,20 @@ namespace MapService.Controllers
                         filteredMapConfiguration = FilterToolsByAD(adLookup, filteredMapConfiguration, activeUser);
 
                         var searchTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
-                        _log.Debug("searchTool: " + searchTool);
                         var editTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
-                        _log.Debug("editTool: " + editTool);
                         if (editTool != null)
                         {
-                            _log.DebugFormat("filterEditLayers...");
+                            _log.DebugFormat("\nfilterEditLayers...");
                             filteredMapConfiguration = FilterEditLayersByAD(adLookup, filteredMapConfiguration, activeUser);
                         }
-                        //_log.Debug("editTool - filteredMapConfiguration\n" + filteredMapConfiguration);
 
                         if (searchTool != null)
                         {
                             _log.DebugFormat("\nfilterSearchLayers...");
                             filteredMapConfiguration = FilterSearchLayersByAD(adLookup, filteredMapConfiguration, activeUser);
                         }
-                        //else zzz
-                        //{
-                            return filteredMapConfiguration.ToString();
-                        //}
+
+                        return filteredMapConfiguration.ToString();
 
                     }
                     else
