@@ -345,27 +345,37 @@ class Informative extends React.PureComponent {
   };
 
   print = () => {
-    this.setState({
-      loading: true,
-      url: false,
-    });
-    this.props.parent.informativeModel.print(this.state.chapter, (url) => {
-      if (undefined !== this.props.options.exportRoot) {
-        url = this.props.options.exportRoot + url;
-      }
-      if (url === "error") {
-        this.setState({
-          loading: false,
-          url: false,
-          alert: true,
-        });
-      } else {
-        this.setState({
-          url: url,
-          loading: false,
-        });
-      }
-    });
+    // There are situations (See #705) where dynamic PDF generation is problematic.
+    // In those cases, we want admins to have the options to set exportUrl
+    // to a specific PDF file, and then let user download that file.
+    if (
+      typeof this.props.options.exportUrl === "string" &&
+      this.props.options.exportUrl.endsWith(".pdf")
+    ) {
+      document.location = this.props.options.exportUrl;
+    } else {
+      this.setState({
+        loading: true,
+        url: false,
+      });
+      this.props.parent.informativeModel.print(this.state.chapter, (url) => {
+        if (undefined !== this.props.options.exportRoot) {
+          url = this.props.options.exportRoot + url;
+        }
+        if (url === "error") {
+          this.setState({
+            loading: false,
+            url: false,
+            alert: true,
+          });
+        } else {
+          this.setState({
+            url: url,
+            loading: false,
+          });
+        }
+      });
+    }
   };
 
   toggleLegend = () => {
