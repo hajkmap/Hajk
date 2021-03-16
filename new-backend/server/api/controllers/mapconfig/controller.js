@@ -71,6 +71,12 @@ export class Controller {
     );
   }
 
+  // FIXME: implement a real solution
+  listimage(req, res) {
+    // Return an empty array as a mockup
+    handleStandardResponse(res, []);
+  }
+
   createNewMap(req, res) {
     ConfigService.createNewMap(req.params.name).then((data) => {
       handleStandardResponse(res, data);
