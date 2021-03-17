@@ -727,12 +727,6 @@ export default class DocumentTextEditor extends React.Component {
     const { editorState, imageList, documents } = this.state;
 
     let editorContainer = styles.editor;
-    var contentState = editorState.getCurrentContent();
-    if (!contentState.hasText()) {
-      if (contentState.getBlockMap().first().getType() !== "unstyled") {
-        editorContainer = " RichEditor-hidePlaceholder";
-      }
-    }
 
     let urlInput;
     if (this.state.showURLInput) {

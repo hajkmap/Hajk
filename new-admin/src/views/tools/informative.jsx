@@ -48,8 +48,6 @@ var defaultState = {
   abstract: "Läs mer om vad som planeras i kommunen",
   caption: "Översiktsplan",
   html: "<div>HTML som beskriver dokumentets innehåll</div>",
-  serviceUrl: "http://localhost:55630/informative/load",
-  exportUrl: "http://localhost:55630/export/document",
   exportRoot: "",
   documentList: [],
   document: "",
