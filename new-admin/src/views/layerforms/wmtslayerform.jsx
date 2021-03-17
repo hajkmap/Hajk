@@ -373,7 +373,9 @@ class WMTSLayerForm extends Component {
             max="100"
             ref="input_minZoom"
             value={this.state.minZoom}
-            className={this.getValidationClass("minZoom")}
+            className={
+              (this.getValidationClass("minZoom"), "control-fixed-width")
+            }
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ minZoom: v });
@@ -394,7 +396,9 @@ class WMTSLayerForm extends Component {
             max="100"
             ref="input_maxZoom"
             value={this.state.maxZoom}
-            className={this.getValidationClass("maxZoom")}
+            className={
+              (this.getValidationClass("minZoom"), "control-fixed-width")
+            }
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ maxZoom: v }, () =>
