@@ -181,6 +181,7 @@
           msg = HAJK2.noMapMessage;
         }
         done(false, msg);
+        return;
       }
       
       var layers = $.getJSON(config.layersPath || layersPath);

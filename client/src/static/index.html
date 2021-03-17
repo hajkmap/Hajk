@@ -36,6 +36,7 @@
         }, function (status, message) {
           if (!status) {
             document.write(message);
+            document.close();
           }
         });
       }());
