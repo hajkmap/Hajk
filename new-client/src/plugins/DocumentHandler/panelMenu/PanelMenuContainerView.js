@@ -66,7 +66,7 @@ class PanelMenuView extends React.PureComponent {
   #setInitialMenuItemProperties = (menuItem) => {
     const { document } = this.props;
     const itemMatchesOpenDocument =
-      menuItem.document === document.documentFileName;
+      document && menuItem.document === document.documentFileName;
     //Do not use spread because we are mutating original item
     Object.assign(menuItem, {
       id: this.#getNextUniqueId(),
