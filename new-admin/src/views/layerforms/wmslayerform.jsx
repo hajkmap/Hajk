@@ -973,8 +973,9 @@ class WMSLayerForm extends Component {
     let value = input ? input.value : "";
 
     // We must cast the following to Number, as String won't be accepted for those:
-    if (["maxZoom", "minZoom"].includes(fieldName)) {
-      return Number(value);
+    if (["maxZoom", "minZoom"].indexOf(fieldName) > -1) {
+      value = Number(value || -1);
+      return value === 0 ? -1 : value;
     }
 
     if (fieldName === "date") value = create_date();

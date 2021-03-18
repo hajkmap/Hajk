@@ -154,8 +154,9 @@ class WMTSLayerForm extends Component {
       value = input ? input.value : "";
 
     // We must cast the following to Number, as String won't be accepted for those:
-    if (["maxZoom", "minZoom"].includes(fieldName)) {
+    if (["maxZoom", "minZoom"].indexOf(fieldName) > -1) {
       value = Number(value);
+      return value === 0 ? -1 : value;
     }
 
     if (fieldName === "date") value = create_date();
