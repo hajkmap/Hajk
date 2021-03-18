@@ -7,6 +7,7 @@ import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
 import { Draw } from "ol/interaction";
 import X2JS from "x2js";
+import { hfetch } from "utils/FetchWrapper";
 
 class CollectorModel {
   constructor(settings) {
@@ -135,7 +136,7 @@ class CollectorModel {
 
     if (payload && this.saving === false) {
       this.saving = true;
-      fetch(src.url, {
+      hfetch(src.url, {
         method: "POST",
         body: payload,
         credentials: "same-origin",

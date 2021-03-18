@@ -7,7 +7,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prestart": "node prebuild.js",
+    "prebuild": "node prebuild.js"
   },
   "eslintConfig": {
     "extends": [
@@ -58,7 +60,7 @@
     "husky": "^5.1.1",
     "intro.js": "^3.3.1",
     "intro.js-react": "^0.3.0",
-    "jspdf": "^1.5.3",
+    "jspdf": "^2.3.1",
     "jsts": "^2.6.1",
     "load-google-maps-api": "^2.0.2",
     "marked": "^2.0.0",
@@ -78,6 +80,7 @@
     "react-markdown": "^5.0.3",
     "react-rnd": "^10.2.4",
     "react-scripts": "4.0.3",
+    "react-scroll": "^1.8.2",
     "recharts": "^2.0.7",
     "remark-gfm": "^1.0.0",
     "web-vitals": "^1.1.0",

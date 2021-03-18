@@ -1,134 +1,156 @@
 import React from "react";
 import PanelList from "./PanelList";
 import { isMobile } from "../../../utils/IsMobile";
+import { delay } from "../../../utils/Delay";
+import { animateScroll as scroll } from "react-scroll";
+import { withStyles } from "@material-ui/core/styles";
+import { hasSubMenu } from "../utils/helpers";
+import { getNormalizedMenuState } from "../utils/stateConverter";
+
+const styles = (theme) => ({
+  test: {
+    maxHeight: "100%",
+    position: "relative",
+    overflow: "auto",
+  },
+});
 
 class PanelMenuView extends React.PureComponent {
-  state = {
-    selectedIndex: null,
-    coloredIndex: [],
-    expandedIndex: [],
-  };
-
   constructor(props) {
     super(props);
-    this.#setInternalReferences();
     this.#bindSubscriptions();
   }
 
+  internalId = 0;
+
+  state = {};
+
   componentDidMount = () => {
-    const { options } = this.props;
-    this.setState({
-      expandedIndex: this.getDefaultExpanded(options.menuConfig.menu),
-    });
-  };
-
-  handleExpandClick = (item) => {
-    const indexOfItemId = this.state.expandedIndex.indexOf(item.id);
-    let newExpandedState = [...this.state.expandedIndex];
-
-    if (indexOfItemId === -1) {
-      newExpandedState.push(item.id);
-    } else {
-      newExpandedState.splice(indexOfItemId);
-    }
-    this.setState({
-      expandedIndex: newExpandedState,
-      coloredIndex: this.#getItemIdsToColor(item),
-    });
-  };
-
-  isTopLevelMenuItemColored = () => {
-    const { options } = this.props;
-    return options.menuConfig.menu.some((item) => {
-      return (
-        item.menu.length === 0 && this.state.coloredIndex.indexOf(item.id) > -1
-      );
-    });
-  };
-
-  setActiveMenuItems = (documentName, item) => {
-    if (!documentName) {
-      if (this.isTopLevelMenuItemColored()) {
-        this.setState({
-          selectedIndex: null,
-          coloredIndex: [],
-        });
-      } else {
-        this.setState({
-          selectedIndex: null,
-        });
-      }
-    }
-    if (documentName === item.document) {
-      this.setState({
-        selectedIndex: item.id,
-        coloredIndex: this.#getItemIdsToColor(item),
-        expandedIndex: this.#getItemIdsToExpand(item),
-      });
-    }
-  };
-
-  #hasSubMenu = (menuItem) => {
-    return menuItem.menu && menuItem.menu.length > 0;
-  };
-
-  getDefaultExpanded = (menu) => {
-    return menu.reduce((acc, menuItem) => {
-      const hasSubMenu = this.#hasSubMenu(menuItem);
-      if (menuItem.expandedSubMenu && hasSubMenu) {
-        acc = [...acc, menuItem.id];
-      }
-      if (hasSubMenu) {
-        acc = [...acc, ...this.getDefaultExpanded(menuItem.menu)];
-      }
-      return acc;
-    }, []);
+    this.#setInternalReferences();
   };
 
   #setInternalReferences = () => {
     const { options } = this.props;
-    this.internalId = 0;
     options.menuConfig.menu.forEach((menuItem) => {
-      this.#setMenuItemLevel(menuItem, 0);
       this.#setInternalId(menuItem);
-      this.#setParentMenuItem(menuItem, undefined);
-      this.internalId = this.internalId + 1;
+    });
+    this.setState(getNormalizedMenuState(options.menuConfig.menu));
+  };
+
+  #getTopLevelItem = (clickedItem, newItems) => {
+    if (!clickedItem.parentId) {
+      return clickedItem;
+    } else {
+      return Object.values(newItems).find((item) => {
+        return item.allChildren.indexOf(clickedItem.id) > -1;
+      });
+    }
+  };
+
+  #getItemIdsToColor = (clickedItem, newItems) => {
+    const topLevelItem = this.#getTopLevelItem(clickedItem, newItems);
+    return [topLevelItem.id, ...topLevelItem.allChildren];
+  };
+
+  #isExpandedTopLevelItem = (item) => {
+    return item.hasSubMenu && item.expandedSubMenu && item.level === 0;
+  };
+
+  #setClickedItemProperties = (clickedItem) => {
+    clickedItem.colored = !this.#isExpandedTopLevelItem(clickedItem);
+    clickedItem.selected = !clickedItem.hasSubMenu;
+    clickedItem.expandedSubMenu = clickedItem.hasSubMenu
+      ? !clickedItem.expandedSubMenu
+      : clickedItem.expandedSubMenu;
+  };
+
+  #setNonClickedItemProperties = (clickedItem, newItems) => {
+    const idsToColor = this.#getItemIdsToColor(clickedItem, newItems);
+    Object.values(newItems).forEach((item) => {
+      if (item.id !== clickedItem.id) {
+        item.colored = idsToColor.indexOf(item.id) !== -1;
+        if (clickedItem.allParents.indexOf(item.id) !== -1) {
+          item.expandedSubMenu = true;
+        }
+        if (!clickedItem.hasSubMenu) {
+          item.selected = false;
+        }
+      }
+    });
+  };
+
+  setItemStateProperties = (idClicked) => {
+    const newItems = { ...this.state };
+    const clickedItem = newItems[idClicked];
+    this.#setClickedItemProperties(clickedItem);
+    this.#setNonClickedItemProperties(clickedItem, newItems);
+
+    this.setState({ newItems }, () => {
+      if (!clickedItem.hasSubMenu) {
+        this.scrollToMenuItem(
+          this.state[clickedItem.id].itemRef.current.offsetTop
+        );
+      }
+    });
+  };
+
+  scrollToMenuItem = async (scrollOffset) => {
+    scroll.scrollTo(scrollOffset, {
+      containerId: "panelListWrapper",
+      smooth: false,
+      isDynamic: true,
+      delay: 0,
     });
   };
 
   #bindSubscriptions = () => {
-    const { localObserver, options } = this.props;
+    const { localObserver, options, app } = this.props;
 
-    localObserver.subscribe("document-clicked", (item) => {
-      localObserver.publish("set-active-document", {
-        documentName: item.document,
-        headerIdentifier: null,
-      });
+    localObserver.subscribe("submenu-clicked", (id) => {
+      this.setItemStateProperties(id);
     });
 
-    localObserver.subscribe("link-clicked", (item) => {
-      window.open(item.link, "_blank");
+    localObserver.subscribe("set-active-document", ({ documentName }) => {
+      const itemClicked = Object.values(this.state).find((item) => {
+        return item.document === documentName;
+      });
+      this.setItemStateProperties(itemClicked.id);
+    });
+
+    localObserver.subscribe("document-clicked", (id) => {
+      localObserver.publish("set-active-document", {
+        documentName: this.state[id].document,
+        headerIdentifier: null,
+      });
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    });
+
+    localObserver.subscribe("link-clicked", (id) => {
+      window.open(this.state[id].link, "_blank");
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     });
 
     localObserver.subscribe("document-maplink-clicked", (maplink) => {
       if (options.displayLoadingOnMapLinkOpen) {
         localObserver.publish("maplink-loading");
       }
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
       this.delayAndFlyToMapLink(maplink);
     });
 
-    localObserver.subscribe("maplink-clicked", (item) => {
+    localObserver.subscribe("maplink-clicked", (id) => {
       if (!isMobile && options.closePanelOnMapLinkOpen) {
         localObserver.publish("set-active-document", {
           documentName: null,
           headerIdentifier: null,
         });
-        this.props.app.globalObserver.publish("documentviewer.closeWindow");
+        app.globalObserver.publish("documentviewer.closeWindow");
+        app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
       }
       if (options.displayLoadingOnMapLinkOpen) {
         localObserver.publish("maplink-loading");
       }
-      this.delayAndFlyToMapLink(item.maplink);
+      this.delayAndFlyToMapLink(this.state[id].maplink);
     });
   };
 
@@ -137,120 +159,43 @@ class PanelMenuView extends React.PureComponent {
   allow the other tasks such as closing the document and displaying a snackbar to run before the
   application hangs.
   */
-  delayAndFlyToMapLink = (maplink) => {
-    setTimeout(() => {
-      this.props.localObserver.publish("fly-to", maplink);
-    }, 100);
+  delayAndFlyToMapLink = async (maplink) => {
+    await delay(100);
+    this.props.localObserver.publish("fly-to", maplink);
+  };
+
+  #getNextUniqueId = () => {
+    this.internalId += 1;
+    return this.internalId;
   };
 
   #setInternalId = (menuItem) => {
-    menuItem.id = this.internalId;
-    if (menuItem.menu.length > 0) {
-      menuItem.menu.forEach((child) => {
-        this.internalId = this.internalId + 1;
-        this.#setInternalId(child);
-      });
-    }
-  };
-
-  #setParentMenuItem = (menuItem, parent) => {
-    menuItem.parent = parent;
-    if (menuItem.menu.length > 0) {
-      menuItem.menu.forEach((child) => {
-        this.#setParentMenuItem(child, menuItem);
-      });
-    }
-  };
-
-  #setMenuItemLevel = (menuItem, level) => {
-    menuItem.level = level;
-    level = level + 1;
-    if (menuItem.menu && menuItem.menu.length > 0) {
+    menuItem.id = this.#getNextUniqueId();
+    if (hasSubMenu(menuItem)) {
       menuItem.menu.forEach((subMenuItem) => {
-        this.#setMenuItemLevel(subMenuItem, level);
+        this.#setInternalId(subMenuItem, menuItem);
       });
     }
   };
 
-  #getItemIdsToExpand = (item) => {
-    const shoudBeExpanded = this.#extractIdsFromItems(
-      this.#getAllAncestors(item)
-    );
-
-    const currentlyNoExpanded = shoudBeExpanded.filter(() => {
-      return this.state.expandedIndex.indexOf(item.id) === -1;
-    });
-    return [...this.state.expandedIndex, ...currentlyNoExpanded];
-  };
-
-  #getAllAncestors = (item) => {
-    const ancestors = [];
-    let parent = item.parent;
-    while (parent) {
-      ancestors.push(parent);
-      parent = parent.parent;
-    }
-    return ancestors;
-  };
-
-  #extractIdsFromItems = (items) => {
-    return items.map((item) => {
-      return item.id;
-    });
-  };
-
-  #getAllSubMenuIds = (menu) => {
-    let itemIds = [];
-    menu.forEach((menuItem) => {
-      if (menuItem.menu.length > 0) {
-        itemIds.push(menuItem.id);
-        itemIds = itemIds.concat(this.#getAllSubMenuIds(menuItem.menu));
-      } else {
-        itemIds.push(menuItem.id);
-      }
-    });
-    return itemIds;
-  };
-
-  #getItemIdsToColor = (item) => {
-    const ancestors = [item, ...this.#getAllAncestors(item)];
-    const ancestorIds = this.#extractIdsFromItems(ancestors);
-    const allSubMenuItemIds = ancestors.reduce((acc, ancestor) => {
-      acc = acc.concat(this.#getAllSubMenuIds(ancestor.menu));
-      return acc;
-    }, []);
-    const topAncestor = ancestors.find((ancestor) => {
-      return ancestor.parent === undefined;
-    });
-    const isTopAncestor = topAncestor.id === item.id;
-    const allIds = [...ancestorIds, ...allSubMenuItemIds];
-    const isExpanded = this.state.expandedIndex.some((id) => {
-      return ancestorIds.indexOf(id) > -1;
-    });
-
-    if (isExpanded && isTopAncestor) {
-      return [];
-    }
-
-    return allIds;
+  onEnter = (id) => {
+    this.scrollToMenuItem(this.state[id].itemRef.current.offsetTop);
   };
 
   render() {
-    const { localObserver, app, options } = this.props;
-    const { expandedIndex, coloredIndex, selectedIndex } = this.state;
+    const { classes, app, localObserver } = this.props;
     return (
-      <PanelList
-        localObserver={localObserver}
-        handleExpandClick={this.handleExpandClick}
-        setActiveMenuItems={this.setActiveMenuItems}
-        expandedIndex={expandedIndex}
-        coloredIndex={coloredIndex}
-        selectedIndex={selectedIndex}
-        globalObserver={app.globalObserver}
-        menu={options.menuConfig.menu}
-      ></PanelList>
+      <div className={classes.test} id="panelListWrapper">
+        <PanelList
+          app={app}
+          localObserver={localObserver}
+          onEnter={this.onEnter}
+          level={0}
+          items={this.state}
+        ></PanelList>
+      </div>
     );
   }
 }
 
-export default PanelMenuView;
+export default withStyles(styles)(PanelMenuView);

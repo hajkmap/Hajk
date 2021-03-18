@@ -1,6 +1,23 @@
 import React from "react";
+import htmlToMaterialUiParser from "./utils/htmlToMaterialUiParser";
+
+import {
+  Paragraph,
+  ULComponent,
+  OLComponent,
+  CustomLink,
+  Figure,
+  Heading,
+  Strong,
+  Italic,
+  Underline,
+  Img,
+  BlockQuote,
+  LineBreak,
+} from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
+import { hfetch } from "utils/FetchWrapper";
 
 /**
  * @summary  DocumentHandler model that doesn't do much.
@@ -11,10 +28,6 @@ import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
  *
  * @class DocumentHandlerModel
  */
-
-const fetchConfig = {
-  credentials: "same-origin",
-};
 
 export default class DocumentHandlerModel {
   internalId = 0;
@@ -29,6 +42,8 @@ export default class DocumentHandlerModel {
     this.chaptersMatchSearch = [];
     this.chapterInfo = [];
     this.chapterNumber = 0;
+    this.localObserver = settings.localObserver;
+    this.options = settings.options;
   }
 
   init = () => {
@@ -184,9 +199,8 @@ export default class DocumentHandlerModel {
   async fetchJsonDocument(title) {
     let response;
     try {
-      response = await fetch(
-        `${this.mapServiceUrl}/informative/load/${title}`,
-        fetchConfig
+      response = await hfetch(
+        `${this.mapServiceUrl}/informative/load/${title}`
       );
       const text = await response.text();
       if (text === "File not found") {
@@ -200,6 +214,7 @@ export default class DocumentHandlerModel {
         this.setParentChapter(chapter, undefined);
         this.setInternalId(chapter);
         this.setScrollReferences(chapter);
+        this.appendComponentsToChapter(chapter);
         this.internalId = this.internalId + 1;
       });
 
@@ -270,6 +285,175 @@ export default class DocumentHandlerModel {
       });
     }
   }
+
+  getCustomLink = (e) => {
+    return (
+      <CustomLink
+        aTag={e}
+        localObserver={this.localObserver}
+        bottomMargin
+      ></CustomLink>
+    );
+  };
+
+  /**
+   * Private help method that adds all allowed html tags.
+   *
+   * @memberof Contents
+   */
+  getTagSpecificCallbacks = () => {
+    let allowedHtmlTags = [];
+    allowedHtmlTags.push({
+      tagType: "br",
+      callback: () => {
+        return <LineBreak></LineBreak>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "ul",
+      callback: (e) => {
+        return <ULComponent ulComponent={e}></ULComponent>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "ol",
+      callback: (e) => <OLComponent olComponent={e}></OLComponent>,
+    });
+    allowedHtmlTags.push({
+      tagType: "li",
+      callback: () => {},
+    });
+    allowedHtmlTags.push({
+      tagType: "blockquote",
+      callback: (e) => {
+        return (
+          <BlockQuote
+            blockQuoteTag={e}
+            defaultColors={this.options.defaultDocumentColorSettings}
+          ></BlockQuote>
+        );
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "h1",
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "h2",
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "h3",
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "h4",
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "h5",
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "h6",
+      callback: (e) => {
+        return <Heading headingTag={e}></Heading>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "a",
+      callback: this.getCustomLink.bind(this),
+    });
+    allowedHtmlTags.push({
+      tagType: "img",
+      callback: (e) => {
+        return (
+          <Img
+            componentId={e.componentId}
+            imgTag={e}
+            localObserver={this.localObserver}
+          ></Img>
+        );
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "p",
+      callback: (e) => {
+        return <Paragraph pTag={e}></Paragraph>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "figure",
+      callback: (e) => {
+        return <Figure figureTag={e}></Figure>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "strong",
+      callback: (e) => {
+        return <Strong strongTag={e}></Strong>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "u",
+      callback: (e) => {
+        return <Underline uTag={e}></Underline>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "em",
+      callback: (e) => {
+        return <Italic emTag={e}></Italic>;
+      },
+    });
+    return allowedHtmlTags;
+  };
+
+  getMaterialUIComponentsForChapter = (chapter) => {
+    return htmlToMaterialUiParser(
+      chapter.html,
+      this.getTagSpecificCallbacks()
+    ).map((component, index) => {
+      return <React.Fragment key={index}>{component}</React.Fragment>;
+    });
+  };
+
+  hasSubChapters = (chapter) => {
+    return chapter.chapters && chapter.chapters.length > 0;
+  };
+
+  appendComponentsToChapter = (chapter) => {
+    if (this.hasSubChapters(chapter)) {
+      chapter.chapters.forEach((subChapter) => {
+        subChapter.components = this.getMaterialUIComponentsForChapter(
+          subChapter
+        );
+        if (this.hasSubChapters(subChapter)) {
+          this.appendComponentsToChapter(subChapter);
+        }
+      });
+    }
+    chapter.components = this.getMaterialUIComponentsForChapter(chapter);
+  };
+
+  appendParsedComponentsToDocument = () => {
+    const { activeDocument } = this.props;
+    let content = { ...activeDocument };
+    content.chapters.forEach((chapter, index) => {
+      this.appendComponentsToChapter(chapter);
+    });
+    this.setState({ activeContent: content });
+  };
 
   /**
    * @summary Dynamically adds a object to each chapter in fetched document.

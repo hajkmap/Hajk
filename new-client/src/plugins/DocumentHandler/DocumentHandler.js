@@ -9,10 +9,7 @@ import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
 import { withTheme, createMuiTheme } from "@material-ui/core/styles";
 import { deepMerge } from "../../utils/DeepMerge";
-
-const fetchOpts = {
-  credentials: "same-origin",
-};
+import { hfetch } from "utils/FetchWrapper";
 
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
@@ -47,18 +44,22 @@ class DocumentHandler extends React.PureComponent {
         map: props.map,
         menu: props.options.menuConfig.menu,
         resolveSearchInterface: resolve,
+        options: props.options,
       })
         .init()
         .then((loadedDocumentModel) => {
-          this.fetchCustomThemeJson().then((customTheme) => {
-            this.setState({
-              model: loadedDocumentModel,
-              customTheme: customTheme,
-            });
+          return this.fetchCustomThemeJson().then((customTheme) => {
+            this.setState(
+              {
+                model: loadedDocumentModel,
+                customTheme: customTheme,
+              },
+              () => {
+                this.addDrawerToggleButton();
+              }
+            );
           });
         });
-
-      this.addDrawerToggleButton();
     });
   }
 
@@ -81,9 +82,15 @@ class DocumentHandler extends React.PureComponent {
     });
   };
 
+  warnNoCustomThemeUrl = () => {
+    console.warn(
+      "Could not find valid url for custom theme in documenthandler, check customThemeUrl"
+    );
+  };
+
   fetchCustomThemeJson = () => {
     const { options } = this.props;
-    return fetch(options.customThemeUrl, fetchOpts)
+    return hfetch(options.customThemeUrl)
       .then((res) => {
         return res.json().then((documentHandlerTheme) => {
           if (documentHandlerTheme.typography) {
@@ -95,9 +102,7 @@ class DocumentHandler extends React.PureComponent {
         });
       })
       .catch(() => {
-        console.warn(
-          "Could not find custom theme for documenthandler, check customThemeUrl"
-        );
+        this.warnNoCustomThemeUrl();
         return null;
       });
   };

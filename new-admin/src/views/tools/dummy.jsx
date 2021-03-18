@@ -43,7 +43,7 @@ var defaultState = {
   index: 0,
   target: "toolbar",
   visibleAtStart: false,
-  templateJsonFilePath: "http://localhost:55630/informative/load/op",
+  templateJsonFilePath: "",
   visibleForGroups: [],
 };
 

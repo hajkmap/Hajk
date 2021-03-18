@@ -267,7 +267,7 @@ export const Figure = ({ figureTag }) => {
  *
  * @memberof Contents
  */
-export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
+export const Img = ({ imgTag, localObserver, componentId }) => {
   const classes = useStyles();
   const tagIsPresent = (imgTag, attribute) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
@@ -321,7 +321,6 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
       <Box
         style={{ width: image.width }}
         className={classes.imageInformationWrapper}
-        id={image.id}
       >
         {image.caption && (
           <Typography id={`image_${image.captionId}`} variant="subtitle2">
@@ -350,8 +349,9 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
     height: imgTag.attributes.getNamedItem("data-image-height")?.value,
     width: imgTag.attributes.getNamedItem("data-image-width")?.value,
     position: imgTag.attributes.getNamedItem("data-image-position")?.value,
-    captionId: getUniqueIntegerNumber(),
-    sourceId: getUniqueIntegerNumber(),
+    id: `image_${componentId}`,
+    captionId: `imagecaption_${componentId}`,
+    sourceId: `imagesource_${componentId}`,
   };
 
   let onClickCallback = image.popup
@@ -365,16 +365,20 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
   const getDescribedByAttribute = () => {
     let describedBy = [];
     if (image.caption) {
-      describedBy.push(`image_${image.captionId}`);
+      describedBy.push(`${image.captionId}`);
     }
     if (image.source) {
-      describedBy.push(`image_${image.sourceId}`);
+      describedBy.push(`${image.sourceId}`);
     }
     return describedBy.length > 0 ? describedBy.join(" ") : null;
   };
 
   return (
-    <Box data-position={image.position} className={positioningClass}>
+    <Box
+      key={`${image.id}`}
+      data-position={image.position}
+      className={positioningClass}
+    >
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue || ""}
