@@ -135,7 +135,7 @@ class DocumentChapter extends Component {
             onClick={() => this.toggleInputVisibility()}
             startIcon={<AddIcon />}
           >
-            Kapitel
+            {this.props.buttonCaption || "Kapitel"}
           </Button>
         </div>
       );
