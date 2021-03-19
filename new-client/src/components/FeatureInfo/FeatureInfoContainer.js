@@ -65,6 +65,7 @@ class FeatureInfoContainer extends React.PureComponent {
     super(props);
     this.featurePropsParsing = new FeaturePropsParsing({
       globalObserver: props.globalObserver,
+      options: props.options,
     });
   }
 

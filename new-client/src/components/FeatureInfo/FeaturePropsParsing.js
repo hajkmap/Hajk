@@ -25,8 +25,13 @@ const StyledTableRow = withStyles((theme) => ({
 export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
+    this.options = settings.options;
+
     this.markdown = null;
     this.properties = null;
+
+    // Default to true to ensure backwards compatibility with old configs that predominately use HTML
+    this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
 
     this.renderers = {
       // root: (a, b, c) => {
@@ -271,7 +276,7 @@ export default class FeaturePropsParsing {
     return (
       <ReactMarkdown
         plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
-        allowDangerousHtml={true} // TODO: Get value from mapconfig's infoclick.options.allowDangerousHtml
+        allowDangerousHtml={this.allowDangerousHtml}
         renderers={this.renderers} // Custom renderers, see definition in this.renderers
         children={this.markdown} // Our MD, as a text string
       />
