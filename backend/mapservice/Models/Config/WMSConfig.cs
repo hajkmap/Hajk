@@ -101,6 +101,12 @@ namespace MapService.Models.Config
 
         public string infoOwner { get; set; }
 
+        public string infoClickSortType { get; set; }
+
+        public bool infoClickSortDesc { get; set; }
+
+        public string infoClickSortProperty { get; set; }        
+
         public string version { get; set; }
 
         public string infoFormat { get; set; }

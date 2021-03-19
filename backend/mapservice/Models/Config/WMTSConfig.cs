@@ -54,6 +54,12 @@ namespace MapService.Models.Config
 
         public string infoOwner { get; set; }
 
+        public string infoClickSortType { get; set; }
+
+        public bool infoClickSortDesc { get; set; }
+
+        public string infoClickSortProperty { get; set; }        
+
         public int? zIndex { get; set; }
 
         public int minZoom { get; set; }
