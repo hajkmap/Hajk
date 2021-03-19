@@ -55,5 +55,10 @@ namespace MapService.Models.Config
         public string infoOwner { get; set; }
 
         public int? zIndex { get; set; }
+
+        public int minZoom { get; set; }
+
+        public int maxZoom { get; set; }
+
     }
 }

@@ -67,6 +67,9 @@ class WMTSLayer {
 
     overrideLayerSourceParams(source);
 
+    const minZoom = config?.minZoom >= 0 ? config.minZoom : undefined;
+    const maxZoom = config?.maxZoom >= 0 ? config.maxZoom : undefined;
+
     this.layer = new TileLayer({
       name: config.name,
       visible: config.visible,
@@ -74,6 +77,8 @@ class WMTSLayer {
       opacity: config.opacity,
       source: new WMTS(source),
       layerInfo: new LayerInfo(config),
+      minZoom: minZoom,
+      maxZoom: maxZoom,
     });
     this.updateMapViewResolutions();
     this.type = "wmts";

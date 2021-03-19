@@ -306,6 +306,8 @@ class Manager extends Component {
           owner: layer.owner,
           url: layer.url,
           opacity: layer.opacity,
+          minZoom: layer.minZoom,
+          maxZoom: layer.maxZoom,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
           hidpi: layer.hidpi,
@@ -368,6 +370,8 @@ class Manager extends Component {
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner,
+          minZoom: layer.minZoom,
+          maxZoom: layer.maxZoom,
         });
         setTimeout(() => {
           this.refs["WMTSLayerForm"].validate();

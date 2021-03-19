@@ -63,6 +63,10 @@ namespace MapService.Models.Config
 
         public double opacity { get; set; }
 
+        public int minZoom { get; set; }
+
+        public int maxZoom { get; set; }
+
         public bool singleTile { get; set; }
 
         public string imageFormat { get; set; }
