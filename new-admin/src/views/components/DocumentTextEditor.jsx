@@ -13,6 +13,7 @@ import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
 import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
 import { stateFromHTML } from "draft-js-import-html";
+import Tooltip from "@material-ui/core/Tooltip";
 
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
@@ -927,15 +928,31 @@ export default class DocumentTextEditor extends React.Component {
             />
             <StyleButton
               label={<FormatQuoteIcon />}
+              tooltip="Lägg till faktaruta"
               onToggle={this.addTextArea}
             />
-            <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
-            <StyleButton label={<LaunchIcon />} onToggle={this.addWebLink} />
+            <Tooltip title="HEj">
+              <StyleButton
+                tooltip="Infoga en bild"
+                label={<ImageIcon />}
+                onToggle={this.addImage}
+              />
+            </Tooltip>
             <StyleButton
+              tooltip="Lägg till en webblänk"
+              label={<LaunchIcon />}
+              onToggle={this.addWebLink}
+            />
+            <StyleButton
+              tooltip="Lägg till en dokumentlänk"
               label={<DescriptionIcon />}
               onToggle={this.addDocumentLink}
             />
-            <StyleButton label={<MapIcon />} onToggle={this.addMapLink} />
+            <StyleButton
+              tooltip="Lägg till en kartlänk"
+              label={<MapIcon />}
+              onToggle={this.addMapLink}
+            />
           </div>
         </div>
         {urlInput}

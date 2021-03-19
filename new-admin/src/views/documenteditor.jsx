@@ -8,10 +8,12 @@ import Button from "@material-ui/core/Button";
 import DoneIcon from "@material-ui/icons/Done";
 import RemoveIcon from "@material-ui/icons/Remove";
 import SaveIcon from "@material-ui/icons/SaveSharp";
-import EditIcon from "@material-ui/icons/Edit";
-import { Divider } from "@material-ui/core";
+
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+
 import { withStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import { Typography, Box } from "@material-ui/core";
 import { red, green, blue } from "@material-ui/core/colors";
 import Chip from "@material-ui/core/Chip";
 import Switch from "@material-ui/core/Switch";
@@ -73,13 +75,43 @@ const styles = (theme) => ({
     flexWrap: "wrap",
     paddingLeft: 20,
   },
+  root: {
+    width: "80%",
+  },
   row: {
     width: "100%",
     minHeight: 28,
     margin: 8,
   },
   gridItemContainer: {
-    paddingTop: "16px",
+    marginTop: "16px",
+  },
+  addHeadChapterButton: {
+    marginTop: "8px",
+    marginBottom: "8px",
+  },
+
+  gridItem: {
+    marginRight: "8px",
+  },
+
+  chapterPlacementControls: {
+    position: "absolute",
+    top: "4px",
+    right: "4px",
+  },
+
+  editorWrapper: {
+    width: "100%",
+  },
+
+  chapterWrapper: {
+    position: "relative",
+    padding: "8px",
+  },
+
+  chapterWrapperBoarder: {
+    borderTop: "2px solid #BFBFBF",
   },
 
   column: {
@@ -290,7 +322,8 @@ class DocumentEditor extends Component {
         if (chapter !== currentChapter) {
           return (
             <div key={i}>
-              <div
+              <Button
+                style={{ cursor: "pointer" }}
                 onClick={() => {
                   chapter.chapters.push(currentChapter);
                   parentChapters.splice(index, 1);
@@ -300,7 +333,7 @@ class DocumentEditor extends Component {
                 }}
               >
                 {chapter.header}
-              </div>
+              </Button>
               {chapter.chapters.length > 0
                 ? renderChapters(chapter.chapters)
                 : null}
@@ -318,7 +351,8 @@ class DocumentEditor extends Component {
           Flytta <b>{currentChapter.header}</b> till:{" "}
         </p>
         <div>
-          <div
+          <Button
+            style={{ cursor: "pointer" }}
             onClick={() => {
               chapters.push(currentChapter);
               parentChapters.splice(index, 1);
@@ -328,7 +362,7 @@ class DocumentEditor extends Component {
             }}
           >
             Huvudkategori
-          </div>
+          </Button>
           {renderChapters()}
         </div>
       </div>
@@ -336,7 +370,6 @@ class DocumentEditor extends Component {
   }
 
   renderTocDialog(chapter, parentChapters, index) {
-    console.log("RENDERTOC");
     this.setState({
       showModal: true,
       showAbortButton: true,
@@ -445,7 +478,7 @@ class DocumentEditor extends Component {
     }
   }
 
-  renderChapter(parentChapters, chapter, index) {
+  renderChapter(parentChapters, chapter, index, headChapter) {
     const { classes } = this.props;
 
     var arrowStyle = !!chapter.expanded
@@ -453,45 +486,82 @@ class DocumentEditor extends Component {
       : "fa fa-chevron-down pointer";
 
     return (
-      <Grid alignItems="center" key={Math.random() * 1e8}>
-        <Grid style={{ paddingRight: "8px" }} item>
-          <TextField
-            required
-            id="standard-required"
-            placeholder="Rubrik"
-            id="documentTitle"
-            helperText="Titel som visas i dokumentfönster"
-            defaultValue={chapter.header}
-            onClick={() => {
-              this.renderChangeNameDialog(chapter);
-            }}
-          />
-        </Grid>
-        <Grid item style={{ marginRight: "auto" }} container>
-          <Grid item>
-            <AddKeyword
-              onAddKeyword={(keyword) => {
-                chapter.keywords.push(keyword);
-                this.setState({
-                  keywords: chapter.keywords,
-                });
-                this.forceUpdate();
+      <Grid
+        className={
+          headChapter
+            ? `${classes.chapterWrapper}`
+            : `${classes.chapterWrapper} ${classes.chapterWrapperBoarder}`
+        }
+        container
+        alignItems="center"
+        key={Math.random() * 1e8}
+      >
+        <Box className={classes.chapterPlacementControls}>
+          <Grid container>
+            <Grid item>
+              <Tooltip title="Flytta ned kapitel">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    this.moveChapter("down", parentChapters, index);
+                  }}
+                >
+                  <ArrowDownwardIcon />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            <Grid item>
+              <Tooltip title="Flytta upp kapitel">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    this.moveChapter("up", parentChapters, index);
+                  }}
+                >
+                  <ArrowUpwardIcon />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            <Grid item>
+              <Tooltip title="Öppna dialog för att kunna flytta kapitel till ett specifikt ställe">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    this.renderTocDialog(chapter, parentChapters, index);
+                  }}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            <Grid item>
+              <Tooltip title="Öppna dialog för att kunna flytta kapitel till ett specifikt ställe">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    chapter.expanded = !chapter.expanded;
+                    this.forceUpdate();
+                  }}
+                >
+                  <span className={arrowStyle} />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        </Box>
+        <Grid className={classes.gridItemContianer} container item>
+          <Grid className={classes.gridItem}>
+            <TextField
+              required
+              placeholder="Rubrik"
+              helperText="Kapitelrubrik"
+              defaultValue={chapter.header}
+              onClick={() => {
+                this.renderChangeNameDialog(chapter);
               }}
             />
           </Grid>
-          <Grid item>
-            <AddGeoObject
-              onAddGeoObject={(geoObject) => {
-                this.setState({
-                  geoObjects: chapter.geoObjects,
-                });
-                chapter.geoObjects.push(geoObject);
-                this.forceUpdate();
-              }}
-            />
-          </Grid>
-          <Grid item>
-            {" "}
+          <Grid className={classes.gridItem} item>
             <DocumentChapter
               onAddChapter={(title, titleID) => {
                 chapter.chapters.push(
@@ -504,7 +574,7 @@ class DocumentEditor extends Component {
               }}
             />
           </Grid>
-          <Grid item>
+          <Grid className={classes.gridItem} item>
             <ColorButtonRed
               variant="contained"
               className="btn btn-danger"
@@ -516,53 +586,16 @@ class DocumentEditor extends Component {
               Ta bort
             </ColorButtonRed>
           </Grid>
-          <Grid item>
-            <Button
-              variant="contained"
-              className="btn btn-default"
-              onClick={() => {
-                this.moveChapter("down", parentChapters, index);
-              }}
-            >
-              <ArrowDownwardIcon />
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button
-              variant="contained"
-              className="btn btn-default"
-              onClick={() => {
-                this.moveChapter("up", parentChapters, index);
-              }}
-            >
-              <ArrowUpwardIcon />
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button
-              variant="contained"
-              className="btn btn-default"
-              onClick={() => {
-                this.renderTocDialog(chapter, parentChapters, index);
-              }}
-            >
-              <MoreVertIcon />
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button
-              variant="contained"
-              onClick={() => {
-                chapter.expanded = !chapter.expanded;
-                this.forceUpdate();
-              }}
-            >
-              <span className={arrowStyle} />
-            </Button>
-          </Grid>
         </Grid>
+        <Grid xs={6} item container></Grid>
 
-        <div style={{ paddingTop: "8px" }}>
+        <Grid
+          alignItems="center"
+          container
+          item
+          className={classes.gridItemContainer}
+        >
+          <Typography className={classes.gridItem}>Nyckelord</Typography>
           {chapter.keywords
             ? chapter.keywords.map((keyword, i) => (
                 <Chip
@@ -580,9 +613,20 @@ class DocumentEditor extends Component {
                 />
               ))
             : null}
-        </div>
-
-        <div style={{ paddingTop: "8px" }}>
+          <Grid item>
+            <AddKeyword
+              onAddKeyword={(keyword) => {
+                chapter.keywords.push(keyword);
+                this.setState({
+                  keywords: chapter.keywords,
+                });
+                this.forceUpdate();
+              }}
+            />
+          </Grid>
+        </Grid>
+        <Grid alignItems="center" container item className={classes.gridItem}>
+          <Typography className={classes.gridItem}>Geoobjekt</Typography>
           {chapter.geoObjects
             ? chapter.geoObjects.map((geoObject, i) => (
                 <Chip
@@ -600,40 +644,58 @@ class DocumentEditor extends Component {
                 />
               ))
             : null}
-        </div>
+          <Grid item>
+            <AddGeoObject
+              onAddGeoObject={(geoObject) => {
+                this.setState({
+                  geoObjects: chapter.geoObjects,
+                });
+                chapter.geoObjects.push(geoObject);
+                this.forceUpdate();
+              }}
+            />
+          </Grid>
+        </Grid>
+        <Grid className={classes.editorWrapper} item>
+          <DocumentTextEditor
+            display={chapter.expanded}
+            html={chapter.html}
+            onUpdate={(html) => {
+              chapter.html = html;
+            }}
+            imageList={this.state.imageList}
+            documents={this.state.documents}
+          />
+        </Grid>
 
-        <DocumentTextEditor
-          display={chapter.expanded}
-          html={chapter.html}
-          onUpdate={(html) => {
-            chapter.html = html;
+        <Grid
+          className={classes.gridItemContainer}
+          style={{
+            paddingLeft: (index + 1) * 16,
           }}
-          imageList={this.state.imageList}
-          documents={this.state.documents}
-        />
-        <div className={classes.container}>
+          container
+        >
           {chapter.expanded
             ? chapter.chapters.map((innerChapter, innerIndex) => {
                 return this.renderChapter(
                   chapter.chapters,
                   innerChapter,
-                  innerIndex
+                  innerIndex,
+                  false
                 );
               })
             : null}
-        </div>
+        </Grid>
       </Grid>
     );
   }
 
   renderData() {
-    const { classes } = this.props;
-
     if (this.state.data) {
       return (
         <div>
           {this.state.data.chapters.map((chapter, index) =>
-            this.renderChapter(this.state.data.chapters, chapter, index)
+            this.renderChapter(this.state.data.chapters, chapter, index, true)
           )}
         </div>
       );
@@ -893,11 +955,9 @@ class DocumentEditor extends Component {
   }
 
   renderEditTitle() {
-    console.log(this.state.documentTitle, "docuemtntitle");
     return (
       <TextField
         placeholder="Titel"
-        id="documentTitle"
         helperText="Titel som visas i dokumentfönster"
         value={this.state.documentTitle}
         onChange={(e) => {
@@ -913,7 +973,7 @@ class DocumentEditor extends Component {
     const { classes } = this.props;
 
     return (
-      <Grid id="documentEditor" container>
+      <Grid className={classes.root} id="documentEditor" container>
         <Grid className="inset-form" item container>
           <Typography>
             <strong>Generella dokumentinställningar</strong>
@@ -926,14 +986,10 @@ class DocumentEditor extends Component {
             container
             item
           >
-            <Grid style={{ paddingRight: "8px" }} item>
+            <Grid className={classes.gridItem} item>
               <FormControl>
                 <NativeSelect
                   value={10}
-                  inputProps={{
-                    name: "name",
-                    id: "select-document",
-                  }}
                   onChange={(e) => {
                     this.load(e.target.value);
                   }}
@@ -947,16 +1003,15 @@ class DocumentEditor extends Component {
                 <FormHelperText>Välj ett befintligt dokument</FormHelperText>
               </FormControl>
             </Grid>
-            <Grid style={{ paddingRight: "16px" }} item>
+            <Grid className={classes.gridItem} item>
               {this.renderEditTitle()}
             </Grid>
-
             <Grid container item>
               {/*this.renderMapName()*/}
             </Grid>
           </Grid>
           <Grid className={classes.gridItemContainer} item container>
-            <Grid style={{ paddingRight: "16px" }} item>
+            <Grid className={classes.gridItem} item>
               <ColorButtonGreen
                 variant="contained"
                 className="btn"
@@ -966,8 +1021,7 @@ class DocumentEditor extends Component {
                 Nytt dokument
               </ColorButtonGreen>
             </Grid>
-            <Grid style={{ paddingRight: "8px" }}>
-              {" "}
+            <Grid className={classes.gridItem}>
               <ColorButtonRed
                 variant="contained"
                 className="btn btn-danger"
@@ -977,7 +1031,7 @@ class DocumentEditor extends Component {
                 Ta bort
               </ColorButtonRed>
             </Grid>
-            <Grid style={{ paddingRight: "8px" }}>
+            <Grid className={classes.gridItem}>
               <ColorButtonBlue
                 variant="contained"
                 className="btn"
@@ -989,7 +1043,7 @@ class DocumentEditor extends Component {
             </Grid>
           </Grid>
           <Grid className={classes.gridItemContainer} container item>
-            <Grid style={{ paddingRight: "8px" }} item>
+            <Grid className={classes.gridItem} item>
               <Button
                 variant="contained"
                 className="btn btn-default"
@@ -1003,22 +1057,13 @@ class DocumentEditor extends Component {
             </Grid>
           </Grid>
         </Grid>
-        <Grid
-          style={{ paddingTop: "8px", paddingBottom: "8px" }}
-          container
-          item
-        >
+        <Grid className={classes.addHeadChapterButton} container item>
           <DocumentChapter
             buttonCaption={"Lägg till huvudkapitel"}
             onAddChapter={(title, titleID) => this.addChapter(title, titleID)}
           />
         </Grid>
-        <Grid
-          className="inset-form"
-          style={{ paddingTop: "16px" }}
-          container
-          item
-        >
+        <Grid className="inset-form" container item>
           {this.renderData()}
         </Grid>
       </Grid>
