@@ -37,14 +37,8 @@ class WMSLayer {
 
     overrideLayerSourceParams(source);
 
-    const minZoom =
-      config?.minZoom != null && config?.minZoom >= 0
-        ? config.minZoom
-        : undefined;
-    const maxZoom =
-      config?.maxZoom != null && config?.maxZoom >= 0
-        ? config.maxZoom
-        : undefined;
+    const minZoom = config?.minZoom >= 0 ? config.minZoom : undefined;
+    const maxZoom = config?.maxZoom >= 0 ? config.maxZoom : undefined;
 
     if (
       config.resolutions &&
