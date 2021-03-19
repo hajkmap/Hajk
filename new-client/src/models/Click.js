@@ -40,9 +40,59 @@ function query(map, layer, evt) {
   }
 }
 
+function getSortParser(sortType) {
+  if (sortType === "number") {
+    return parseInt;
+  } else if (sortType === "string") {
+    return (a) => {
+      return a ? a.trim() : "";
+    };
+  } else {
+    return (a) => {
+      return a;
+    };
+  }
+}
+
+function sortFeatures(layer, features) {
+  if (!features || features.length <= 1) {
+    return;
+  }
+  const layerInfo = layer.getProperties().layerInfo;
+  if (!layerInfo.infoClickSortProperty) {
+    return;
+  }
+
+  const sortType = layerInfo.infoClickSortType || "string";
+  const sortDesc = layerInfo.infoClickSortDesc || true;
+  const sortProp = layerInfo.infoClickSortProperty.trim();
+  const parser = getSortParser(sortType);
+
+  features.sort((a, b) => {
+    if (sortType === "number") {
+      return (
+        (sortDesc ? -1 : 1) *
+        (parser(a.getProperties()[sortProp]) -
+          parser(b.getProperties()[sortProp]))
+      );
+    } else {
+      return (
+        (sortDesc ? -1 : 1) *
+        parser(a.getProperties()[sortProp]).localeCompare(
+          parser(b.getProperties()[sortProp])
+        )
+      );
+    }
+  });
+}
+
 function getFeaturesFromJson(response, jsonData) {
   let parsed = new GeoJSON().readFeatures(jsonData);
-  if (parsed.length > 0) {
+  if (parsed && parsed.length > 0) {
+    parsed.forEach((f) => {
+      f.layer = response.layer;
+    });
+    sortFeatures(response.layer, parsed);
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
@@ -56,7 +106,7 @@ function getFeaturesFromGml(response, text) {
   let wmsGetFeatureInfo = new WMSGetFeatureInfo();
   //let doc = new DOMParser().parseFromString(text, "text/xml");
   let parsed = wmsGetFeatureInfo.readFeatures(text);
-  if (parsed.length > 0) {
+  if (parsed && parsed.length > 0) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
