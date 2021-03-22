@@ -54,6 +54,27 @@ function getSortParser(sortType) {
   }
 }
 
+function getSortMethod(options) {
+  if (options.type === "number") {
+    return (a, b) => {
+      return (
+        (options.desc ? -1 : 1) *
+        (options.parser(a.getProperties()[options.prop]) -
+          options.parser(b.getProperties()[options.prop]))
+      );
+    };
+  } else {
+    return (a, b) => {
+      return (
+        (options.desc ? -1 : 1) *
+        options
+          .parser(a.getProperties()[options.prop])
+          .localeCompare(options.parser(b.getProperties()[options.prop]))
+      );
+    };
+  }
+}
+
 function sortFeatures(layer, features) {
   if (!features || features.length <= 1) {
     return;
@@ -64,26 +85,14 @@ function sortFeatures(layer, features) {
   }
 
   const sortType = layerInfo.infoClickSortType || "string";
-  const sortDesc = layerInfo.infoClickSortDesc || true;
-  const sortProp = layerInfo.infoClickSortProperty.trim();
-  const parser = getSortParser(sortType);
+  const sortOptions = {
+    type: sortType,
+    desc: layerInfo.infoClickSortDesc ?? true,
+    prop: layerInfo.infoClickSortProperty.trim(),
+    parser: getSortParser(sortType),
+  };
 
-  features.sort((a, b) => {
-    if (sortType === "number") {
-      return (
-        (sortDesc ? -1 : 1) *
-        (parser(a.getProperties()[sortProp]) -
-          parser(b.getProperties()[sortProp]))
-      );
-    } else {
-      return (
-        (sortDesc ? -1 : 1) *
-        parser(a.getProperties()[sortProp]).localeCompare(
-          parser(b.getProperties()[sortProp])
-        )
-      );
-    }
-  });
+  features.sort(getSortMethod(sortOptions));
 }
 
 function getFeaturesFromJson(response, jsonData) {
@@ -93,9 +102,6 @@ function getFeaturesFromJson(response, jsonData) {
       f.layer = response.layer;
     });
     sortFeatures(response.layer, parsed);
-    parsed.forEach((f) => {
-      f.layer = response.layer;
-    });
     return parsed;
   } else {
     return [];
@@ -110,6 +116,7 @@ function getFeaturesFromGml(response, text) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
+    sortFeatures(response.layer, parsed);
     return parsed;
   } else {
     return [];
