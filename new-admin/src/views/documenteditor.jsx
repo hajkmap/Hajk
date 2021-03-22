@@ -4,37 +4,39 @@ import DocumentTextEditor from "./components/DocumentTextEditor.jsx";
 import DocumentChapter from "./components/DocumentChapter.jsx";
 import AddKeyword from "./components/AddKeyword.jsx";
 import AddGeoObject from "./components/AddGeoObject.jsx";
-import Button from "@material-ui/core/Button";
 import DoneIcon from "@material-ui/icons/Done";
 import RemoveIcon from "@material-ui/icons/Remove";
 import SaveIcon from "@material-ui/icons/SaveSharp";
-
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
-
-import { withStyles } from "@material-ui/core/styles";
-import { Typography, Box } from "@material-ui/core";
 import { red, green, blue } from "@material-ui/core/colors";
-import Chip from "@material-ui/core/Chip";
-import Switch from "@material-ui/core/Switch";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControl from "@material-ui/core/FormControl";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import Create from "@material-ui/icons/Create";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import TocIcon from "@material-ui/icons/Toc";
-import NativeSelect from "@material-ui/core/NativeSelect";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import FormHelperText from "@material-ui/core/FormHelperText";
+import { withStyles } from "@material-ui/core/styles";
+import {
+  Typography,
+  Tooltip,
+  IconButton,
+  Box,
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormGroup,
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  NativeSelect,
+  Select,
+  Switch,
+  Chip,
+} from "@material-ui/core";
 
 import { Grid } from "@material-ui/core";
 
@@ -69,42 +71,27 @@ const ColorButtonBlue = withStyles((theme) => ({
 }))(Button);
 
 const styles = (theme) => ({
-  container: {
-    width: 1500,
-    display: "flex",
-    flexWrap: "wrap",
-    paddingLeft: 20,
-  },
   root: {
     width: "80%",
-  },
-  row: {
-    width: "100%",
-    minHeight: 28,
-    margin: 8,
-  },
-  gridItemContainer: {
-    marginTop: "16px",
   },
   addHeadChapterButton: {
     marginTop: "8px",
     marginBottom: "8px",
   },
-
+  gridItemContainer: {
+    marginTop: "16px",
+  },
   gridItem: {
     marginRight: "8px",
   },
-
   chapterPlacementControls: {
     position: "absolute",
     top: "4px",
     right: "4px",
   },
-
   editorWrapper: {
     width: "100%",
   },
-
   chapterWrapper: {
     position: "relative",
     padding: "8px",
@@ -112,23 +99,6 @@ const styles = (theme) => ({
 
   chapterWrapperBoarder: {
     borderTop: "2px solid #BFBFBF",
-  },
-
-  column: {
-    width: "50%",
-  },
-  columnLeft: {
-    float: "left",
-    textAlign: "left",
-  },
-  columnRight: {
-    float: "right",
-    textAlign: "left",
-  },
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    width: 200,
   },
 });
 
@@ -535,7 +505,13 @@ class DocumentEditor extends Component {
               </Tooltip>
             </Grid>
             <Grid item>
-              <Tooltip title="Öppna dialog för att kunna flytta kapitel till ett specifikt ställe">
+              <Tooltip
+                title={
+                  chapter.expanded
+                    ? "Fäll ihop underliggande kapitel"
+                    : "Expandera underliggande kapitel"
+                }
+              >
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -549,42 +525,52 @@ class DocumentEditor extends Component {
             </Grid>
           </Grid>
         </Box>
-        <Grid className={classes.gridItemContianer} container item>
-          <Grid className={classes.gridItem}>
-            <TextField
-              required
-              placeholder="Rubrik"
-              helperText="Kapitelrubrik"
-              defaultValue={chapter.header}
-              onClick={() => {
-                this.renderChangeNameDialog(chapter);
-              }}
-            />
+        <Grid container item>
+          <Grid container alignItems="center" item>
+            <Grid className={classes.gridItem} item>
+              <Typography variant="h5">
+                <strong>{`Kapitelrubrik : ${chapter.header}`}</strong>
+              </Typography>
+            </Grid>
+            <Grid item>
+              <Tooltip title="Redigera kapitelrubrik och kapitelId">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    this.renderChangeNameDialog(chapter);
+                  }}
+                >
+                  <Create />
+                </IconButton>
+              </Tooltip>
+            </Grid>
           </Grid>
-          <Grid className={classes.gridItem} item>
-            <DocumentChapter
-              onAddChapter={(title, titleID) => {
-                chapter.chapters.push(
-                  new Chapter({
-                    header: title,
-                    headerIdentifier: titleID,
-                  })
-                );
-                this.forceUpdate();
-              }}
-            />
-          </Grid>
-          <Grid className={classes.gridItem} item>
-            <ColorButtonRed
-              variant="contained"
-              className="btn btn-danger"
-              onClick={() => {
-                this.removeChapter(parentChapters, index);
-              }}
-              startIcon={<RemoveIcon />}
-            >
-              Ta bort
-            </ColorButtonRed>
+          <Grid className={classes.gridItemContainer} item container>
+            <Grid className={classes.gridItem} item>
+              <DocumentChapter
+                onAddChapter={(title, titleID) => {
+                  chapter.chapters.push(
+                    new Chapter({
+                      header: title,
+                      headerIdentifier: titleID,
+                    })
+                  );
+                  this.forceUpdate();
+                }}
+              />
+            </Grid>
+            <Grid className={classes.gridItem} item>
+              <ColorButtonRed
+                variant="contained"
+                className="btn btn-danger"
+                onClick={() => {
+                  this.removeChapter(parentChapters, index);
+                }}
+                startIcon={<RemoveIcon />}
+              >
+                Ta bort
+              </ColorButtonRed>
+            </Grid>
           </Grid>
         </Grid>
         <Grid xs={6} item container></Grid>
@@ -702,6 +688,7 @@ class DocumentEditor extends Component {
     }
   }
 
+  /*
   renderMapName() {
     const { classes } = this.props;
 
@@ -714,7 +701,7 @@ class DocumentEditor extends Component {
         </div>
       );
     }
-  }
+  }*/
 
   renderModal() {
     return (
@@ -958,6 +945,7 @@ class DocumentEditor extends Component {
     return (
       <TextField
         placeholder="Titel"
+        fullWidth
         helperText="Titel som visas i dokumentfönster"
         value={this.state.documentTitle}
         onChange={(e) => {
@@ -971,6 +959,7 @@ class DocumentEditor extends Component {
 
   render() {
     const { classes } = this.props;
+    const { selectedDocument, data } = this.state;
 
     return (
       <Grid className={classes.root} id="documentEditor" container>
@@ -993,7 +982,7 @@ class DocumentEditor extends Component {
                   onChange={(e) => {
                     this.load(e.target.value);
                   }}
-                  value={this.state.selectedDocument}
+                  value={selectedDocument}
                 >
                   <option value="" disabled>
                     Välj ett dokument
@@ -1003,9 +992,12 @@ class DocumentEditor extends Component {
                 <FormHelperText>Välj ett befintligt dokument</FormHelperText>
               </FormControl>
             </Grid>
-            <Grid className={classes.gridItem} item>
-              {this.renderEditTitle()}
-            </Grid>
+            {selectedDocument && (
+              <Grid className={classes.gridItem} item>
+                {this.renderEditTitle()}
+              </Grid>
+            )}
+
             <Grid container item>
               {/*this.renderMapName()*/}
             </Grid>
@@ -1021,53 +1013,64 @@ class DocumentEditor extends Component {
                 Nytt dokument
               </ColorButtonGreen>
             </Grid>
-            <Grid className={classes.gridItem}>
-              <ColorButtonRed
-                variant="contained"
-                className="btn btn-danger"
-                onClick={() => this.delete()}
-                startIcon={<RemoveIcon />}
-              >
-                Ta bort
-              </ColorButtonRed>
-            </Grid>
-            <Grid className={classes.gridItem}>
-              <ColorButtonBlue
-                variant="contained"
-                className="btn"
-                onClick={() => this.save()}
-                startIcon={<SaveIcon />}
-              >
-                Spara
-              </ColorButtonBlue>
-            </Grid>
+            {selectedDocument && (
+              <Grid className={classes.gridItem}>
+                <ColorButtonRed
+                  variant="contained"
+                  className="btn btn-danger"
+                  onClick={() => this.delete()}
+                  startIcon={<RemoveIcon />}
+                >
+                  Ta bort
+                </ColorButtonRed>
+              </Grid>
+            )}
+
+            {selectedDocument && (
+              <Grid className={classes.gridItem}>
+                {" "}
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={() => this.save()}
+                  startIcon={<SaveIcon />}
+                >
+                  Spara
+                </ColorButtonBlue>
+              </Grid>
+            )}
           </Grid>
-          <Grid className={classes.gridItemContainer} container item>
-            <Grid className={classes.gridItem} item>
-              <Button
-                variant="contained"
-                className="btn btn-default"
-                onClick={() => {
-                  this.renderTableOfContentsModal();
-                }}
-                startIcon={<TocIcon />}
-              >
-                Innehållsförteckning
-              </Button>
+          {selectedDocument && (
+            <Grid className={classes.gridItemContainer} container item>
+              <Grid className={classes.gridItem} item>
+                <Button
+                  variant="contained"
+                  className="btn btn-default"
+                  onClick={() => {
+                    this.renderTableOfContentsModal();
+                  }}
+                  startIcon={<TocIcon />}
+                >
+                  Innehållsförteckning
+                </Button>
+              </Grid>
             </Grid>
+          )}
+        </Grid>
+        {selectedDocument && (
+          <Grid className={classes.addHeadChapterButton} container item>
+            <DocumentChapter
+              buttonCaption={"Lägg till huvudkapitel"}
+              onAddChapter={(title, titleID) => this.addChapter(title, titleID)}
+            />
           </Grid>
-        </Grid>
-        <Grid className={classes.addHeadChapterButton} container item>
-          <DocumentChapter
-            buttonCaption={"Lägg till huvudkapitel"}
-            onAddChapter={(title, titleID) => this.addChapter(title, titleID)}
-          />
-        </Grid>
-        <Grid className="inset-form" container item>
-          {this.renderData()}
-        </Grid>
+        )}
+        {selectedDocument && data.chapters && data.chapters.length > 0 && (
+          <Grid className="inset-form" container item>
+            {this.renderData()}
+          </Grid>
+        )}
       </Grid>
-      //
     );
   }
 }
