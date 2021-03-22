@@ -1465,9 +1465,7 @@ class WMSLayerForm extends Component {
           />
         </div>
         <div>
-          <label>
-            Infoklick sorterings-typ ({this.state.infoClickSortType})
-          </label>
+          <label>Infoklick sorterings-typ</label>
           <select
             name=""
             id=""
