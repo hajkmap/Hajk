@@ -264,6 +264,9 @@ export default class ConfigMapper {
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
         infoVisible: args.infoVisible || false,
+        infoClickSortType: args.infoClickSortType,
+        infoClickSortDesc: args.infoClickSortDesc,
+        infoClickSortProperty: args.infoClickSortProperty,
         layerType: args.layerType,
         legend: [
           {
