@@ -26,10 +26,7 @@ class CollectorModel {
     this.filty = false;
     this.saving = false;
     this.geometryName = "geom";
-    this.wkt =
-      typeof settings.options.wkt === "undefined"
-        ? false
-        : settings.options.wkt;
+    this.wkt = settings.options.wkt ?? false;
     this.serviceConfig = settings.options.serviceConfig;
     if (this.serviceConfig) {
       this.setFormValuesFromConfig();

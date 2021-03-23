@@ -43,17 +43,13 @@ class Toolbar extends Component {
     if (this.props.model.wkt) {
       this.props.model.vectorSource.clear();
 
-      try {
-        const format = new WKT();
-        let features = format.readFeaturesFromText(
-          this.props.model.formValues[this.props.field]
-        );
+      const format = new WKT();
+      const WKTString = this.props.model.formValues[this.props.field];
+      if (WKTString && WKTString.length > 0) {
+        let features = format.readFeatures(WKTString);
         features.forEach((feature) => {
           this.props.model.vectorSource.addFeature(feature);
         });
-      } catch (e) {
-        // This error will happen when the page has not hade any features stored
-        // so we just continue with no restored features since non existed
       }
     }
   }
