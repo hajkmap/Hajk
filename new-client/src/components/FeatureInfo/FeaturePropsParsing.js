@@ -38,14 +38,13 @@ export default class FeaturePropsParsing {
       //   console.log("root: ", a, b, c);
       //   return a.children;
       // },
-      // text: (text) => {
-      //   let c = null;
-      //   if (text.value.match(/{.+@@.+}/gim)) {
-      //     c = text.children.replace(/{.+@@.+}/gim, <Link>Hej!</Link>);
-      //     console.log(text);
-      //   }
-      //   return c || text.children;
-      // },
+      text: (text) => {
+        // If our textnode includes @@, we want to fetch an external Component
+        if (text.value.match(/{.+@@.+}/gim)) {
+          console.log("Text node that includes '@@'", text);
+          return <Typography variant="button">Some @@ component</Typography>;
+        } else return text.children;
+      },
       thematicBreak: () => <Divider />,
       link: (a) => {
         return <Link href={a.href}>{a.children}</Link>;
