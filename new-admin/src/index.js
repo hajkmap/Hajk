@@ -53,7 +53,7 @@ const fetchConfig = {
 
 (function () {
   function create_routes(routes, application_model) {
-    var route_settings = {
+    const route_settings = {
       routes: {},
     };
     routes.forEach((route) => {
