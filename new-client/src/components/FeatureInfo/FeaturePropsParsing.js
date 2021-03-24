@@ -40,6 +40,8 @@ export default class FeaturePropsParsing {
       //   console.log("root: ", a, b, c);
       //   return a.children;
       // },
+      // FIXME: We shouldn't assume that external placeholders will come only in
+      // text nodes. TODO: Move this renderer to 'root' (above) and make sure it works.
       text: (text) => {
         // This helper is passed to ReactMarkdown at render. At this stage,
         // we expect that the only remaining {stuff} will contain digits, and
