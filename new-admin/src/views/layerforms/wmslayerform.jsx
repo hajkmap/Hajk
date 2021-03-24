@@ -71,6 +71,9 @@ const defaultState = {
   version: "1.1.0",
   projection: "",
   infoFormat: "",
+  infoClickSortProperty: "",
+  infoClickSortType: "string",
+  infoClickSortDesc: true,
   style: [],
   workspaceList: [],
 };
@@ -682,6 +685,8 @@ class WMSLayerForm extends Component {
           projection: layer.projection,
           version: capabilities.version,
           infoFormat: layer.infoFormat,
+          infoClickSortProperty: layer.infoClickSortProperty ?? "",
+          infoClickSortType: layer.infoClickSortType ?? "string",
         },
         () => {
           this.setServerType();
@@ -947,6 +952,9 @@ class WMSLayerForm extends Component {
       // solpopup: this.getValue("solpopup"),
       version: this.state.version,
       infoFormat: this.getValue("infoFormat"),
+      infoClickSortProperty: this.getValue("infoClickSortProperty"),
+      infoClickSortDesc: this.getValue("infoClickSortDesc"),
+      infoClickSortType: this.getValue("infoClickSortType"),
       // style: this.getValue("style"),
 
       zIndex: this.getValue("zIndex"),
@@ -994,6 +1002,7 @@ class WMSLayerForm extends Component {
     if (fieldName === "displayFields") value = value || null;
     if (fieldName === "zIndex") value = value || null;
     if (fieldName === "opacity") value = parseFloat(Number(value).toFixed(2));
+    if (fieldName === "infoClickSortDesc") value = input.checked;
 
     return value;
   }
@@ -1433,7 +1442,44 @@ class WMSLayerForm extends Component {
             {this.setInfoFormats()}
           </select>
         </div>
-
+        <div>
+          <label>Infoklick sortera på attribut</label>
+          <input
+            type="text"
+            ref="input_infoClickSortProperty"
+            value={this.state.infoClickSortProperty}
+            onChange={(e) =>
+              this.setState({ infoClickSortProperty: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Infoklick sortera fallande</label>
+          <input
+            type="checkbox"
+            ref="input_infoClickSortDesc"
+            onChange={(e) =>
+              this.setState({ infoClickSortDesc: e.target.checked })
+            }
+            checked={this.state.infoClickSortDesc}
+          />
+        </div>
+        <div>
+          <label>Infoklick sorterings-typ</label>
+          <select
+            name=""
+            id=""
+            ref="input_infoClickSortType"
+            className="control-fixed-width"
+            value={this.state.infoClickSortType}
+            onChange={(e) =>
+              this.setState({ infoClickSortType: e.target.value })
+            }
+          >
+            <option value="string">string</option>
+            <option value="number">number</option>
+          </select>
+        </div>
         <div>
           <label>Opacitet*</label>
           <input
