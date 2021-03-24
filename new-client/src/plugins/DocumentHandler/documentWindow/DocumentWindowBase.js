@@ -76,6 +76,7 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   canHandleInfoClickEvent = (infoClickEvent) => {
+    return true;
     if (infoClickEvent.payload.type !== "a") {
       return false;
     }
@@ -90,27 +91,31 @@ class DocumentWindowBase extends React.PureComponent {
   };
 
   handleInfoClickRequest = (infoClickEvent) => {
-    if (this.canHandleInfoClickEvent(infoClickEvent)) {
-      var htmlObject = document.createElement(infoClickEvent.payload.type);
-      htmlObject.innerHTML = infoClickEvent.payload.children[0];
-      Object.entries(infoClickEvent.payload.dataAttributes).forEach(
-        (dataAttributeEntry) => {
-          var att = document.createAttribute(dataAttributeEntry[0]);
-          att.value = dataAttributeEntry[1];
-          htmlObject.setAttributeNode(att);
-        }
-      );
-      let link = (
-        <CustomLink
-          localObserver={this.props.localObserver}
-          aTag={htmlObject}
-          bottomMargin={false}
-        ></CustomLink>
-      );
-      infoClickEvent.resolve(link);
-    } else {
-      infoClickEvent.resolve();
-    }
+    console.log("infoClickEvent: ", infoClickEvent);
+    setTimeout(() => {
+      infoClickEvent.resolve(<span>{new Date().getTime()}</span>);
+    }, 2000);
+    // if (this.canHandleInfoClickEvent(infoClickEvent)) {
+    //   var htmlObject = document.createElement(infoClickEvent.payload.type);
+    //   htmlObject.innerHTML = infoClickEvent.payload.children[0];
+    //   Object.entries(infoClickEvent.payload.dataAttributes).forEach(
+    //     (dataAttributeEntry) => {
+    //       var att = document.createAttribute(dataAttributeEntry[0]);
+    //       att.value = dataAttributeEntry[1];
+    //       htmlObject.setAttributeNode(att);
+    //     }
+    //   );
+    //   let link = (
+    //     <CustomLink
+    //       localObserver={this.props.localObserver}
+    //       aTag={htmlObject}
+    //       bottomMargin={false}
+    //     ></CustomLink>
+    //   );
+    //   infoClickEvent.resolve(link);
+    // } else {
+    //   infoClickEvent.resolve();
+    // }
   };
 
   bindListenForSearchResultClick = () => {

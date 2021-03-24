@@ -13,6 +13,7 @@ import {
   TableRow,
   Typography,
 } from "@material-ui/core";
+import { delay } from "utils/Delay";
 
 const StyledTableRow = withStyles((theme) => ({
   root: {
@@ -26,6 +27,8 @@ export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
     this.options = settings.options;
+    this.asyncComponentsPromises = [];
+    this.resolvedPromises = [];
 
     this.markdown = null;
     this.properties = null;
@@ -39,10 +42,18 @@ export default class FeaturePropsParsing {
       //   return a.children;
       // },
       text: (text) => {
-        // If our textnode includes @@, we want to fetch an external Component
-        if (text.value.match(/{.+@@.+}/gim)) {
-          console.log("Text node that includes '@@'", text);
-          return <Typography variant="button">Some @@ component</Typography>;
+        // This helper is passed to ReactMarkdown at render. At this stage,
+        // we expect that the only remaining {stuff} will contain digits, and
+        // that those numbers represent element index in this.asyncComponentsPromises.
+        // So we want to replace all of them with the corresponding component from promises.
+        const match = text.value.match(/{(\d+)}/);
+        if (match) {
+          console.log("Text node that includes digit", text);
+          console.log(
+            "Returning this resolved promise",
+            this.resolvedPromises[match[1]]
+          );
+          return this.resolvedPromises[match[1]];
         } else return text.children;
       },
       thematicBreak: () => <Divider />,
@@ -133,6 +144,7 @@ export default class FeaturePropsParsing {
       isExternal
     );
 
+    // FIXME: Refactor?
     switch (placeholder.length) {
       case 1:
         propertyValue = properties[placeholder[0]] || "";
@@ -150,10 +162,35 @@ export default class FeaturePropsParsing {
 
     if (isExternal) {
       // Don't get the value just yet - we want to keep this within "{}" at this stage!
-      return `{${attributePlaceholder.split("@@")[0]}@@${renderWithPlugin}}`;
+
+      const property = properties[attributePlaceholder.split("@@")[0]];
+      const externalEvent = renderWithPlugin;
+
+      this.asyncComponentsPromises.push(
+        this.#fetchExternal(property, externalEvent)
+      );
+
+      // Return the ID of this element in the array
+      return `{${this.asyncComponentsPromises.length - 1}}`;
     } else {
       return propertyValue;
     }
+  };
+
+  #fetchExternal = (property, externalEvent) => {
+    if (
+      this.globalObserver.getListeners(`core.info-click-${externalEvent}`)
+        .length > 0
+    )
+      return new Promise((resolve, reject) => {
+        //Let subscription resolve the promise
+        this.globalObserver.publish(`core.info-click-${externalEvent}`, {
+          payload: property,
+          resolve,
+          reject,
+        });
+      });
+    return null;
   };
 
   #conditionalReplacer = (...args) => {
@@ -255,6 +292,7 @@ export default class FeaturePropsParsing {
           )
         );
       });
+      console.log("this.markdown: ", this.markdown);
 
       // Find all "conditional tags" (i.e. <if foo="bar">baz</if>) and apply the replacer function on
       // all matches.
@@ -271,7 +309,7 @@ export default class FeaturePropsParsing {
         this.#conditionalReplacer
       );
     }
-
+    this.resolvedPromises = await Promise.all(this.asyncComponentsPromises);
     return (
       <ReactMarkdown
         plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
