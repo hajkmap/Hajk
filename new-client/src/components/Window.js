@@ -526,7 +526,6 @@ class Window extends React.PureComponent {
             onMinimize={this.minimize}
             mode={this.state.mode}
             title={title}
-            vtsearch={this.props.vtsearch}
           />
           <section
             className={clsx(
