@@ -231,15 +231,6 @@ var search = Model.extend({
       },
     });
   },
-
-  /**
-   * Hämtar sökbara lager från backend
-   */
-  // getWFSLayers: function (url, callback) {
-  //   $.ajax(url), {
-  //     data:
-  //   }
-  // }
 });
 
 export default search;
