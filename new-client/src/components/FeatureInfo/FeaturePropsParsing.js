@@ -109,55 +109,54 @@ export default class FeaturePropsParsing {
     return result;
   };
 
-  #getPropertyForPlaceholder = (property, properties) => {
-    let returnValue = null;
-    // Strip the curly brackets
-    property = property.substring(1, property.length - 1);
+  #getPropertyForPlaceholder = (placeholder, properties) => {
+    // First strip the curly brackets, e.g. {foobar} -> foobar
+    placeholder = placeholder.substring(1, placeholder.length - 1);
 
-    // Properties to be fetch from external components will include "@@".
+    // Placeholders to be fetch from external components will include "@@", and
+    // they need to be treated differently from "normal" placeholders (sans @@).
+    //
     // Side note: /(?<!@)@@(?!@)/ would be a nice solution to only match those
     // with exactly 2 at signs. But at time of writing the browser support for
     // negative lookbehind wasn't there, so I opted with this less elegant solution:
-    if (property.includes("@@") && !property.includes("@@@")) {
-      const [propertyName, pluginName] = property.split("@@");
-      console.log("Will look for propertyName: ", propertyName);
-      console.log("In these properties: ", properties);
+    if (placeholder.includes("@@") && !placeholder.includes("@@@")) {
+      // Extract the property and plugins names from the placeholder.
+      const [propertyName, pluginName] = placeholder.split("@@");
 
-      // Grab the value from the properties collections
+      // Grab the actual value of this placeholder from the properties collections
       const propertyValue = properties[propertyName];
+
       // If they key was not found in the properties object, or the value is empty, we can't go on.
       if (
         propertyValue === undefined ||
         propertyValue === null ||
         propertyValue.trim() === ""
-      )
+      ) {
         return "";
-      console.log("Extracted propertyValue: ", propertyValue);
+      } else {
+        // Now we know 1) property value of the placeholder and 2) which plugin will take care of it.
+        // Next we want to call #fetchExternal, that immediately returns a Promise, and push that
+        // promise into an array of promises. Later on, we will want to get the value from this
+        // fulfilled promise, so one key aspect here is to keep track of which promise value should
+        // go where. We will do it the easy way: when the promise is pushed into an array, push
+        // returns the new array length. That means that this recently pushed element will have
+        // an index of n-1. We use this fact by returning a string, "{n-1}" back to the Markdown string.
+        // That way, in the final step of Markdown parsing, we will be able to replace each "{n-1}" with
+        // the contents of the correct element in the resolved promises array.
 
-      // Add a new Promise (which is the return value from #fetchExternal) to our
-      // array of Promises.
-      this.asyncComponentsPromises.push(
-        this.#fetchExternal(propertyValue, pluginName)
-      );
-
-      // Don't get the value just yet - we want to keep this within "{}" at this stage!
-      // Return the ID of this element in the array
-      returnValue = `{${this.asyncComponentsPromises.length - 1}}`;
+        return `{${
+          this.asyncComponentsPromises.push(
+            this.#fetchExternal(propertyValue, pluginName)
+          ) - 1
+        }}`;
+      }
     } else {
       // Grab the actual value from the Properties collection, if not found, fallback to empty string
-      returnValue = properties[property] || "";
+      return properties[placeholder] || "";
     }
-
-    console.log("returnValue: ", returnValue);
-    return returnValue;
   };
 
   #fetchExternal = (property, externalEvent) => {
-    console.log(
-      "fetchExternal: property, externalEvent ",
-      property,
-      externalEvent
-    );
     if (
       this.globalObserver.getListeners(`core.info-click-${externalEvent}`)
         .length > 0
@@ -170,8 +169,9 @@ export default class FeaturePropsParsing {
           reject,
         });
       });
+    } else {
+      return null;
     }
-    return null;
   };
 
   #conditionalReplacer = (...args) => {
@@ -257,29 +257,29 @@ export default class FeaturePropsParsing {
    * @returns {object} ReactMarkdown component
    */
   mergeFeaturePropsWithMarkdown = async () => {
-    console.log("MARKDOWN, pre property value replace", this.markdown);
-    // "markdown" will now contain placeholders for our value that we get
-    // from features. They'll be between { and }.
-    // Lets' extract them and replace with value from "properties".
     if (this.markdown && typeof this.markdown === "string") {
-      (this.markdown.match(/{(.*?)}/g) || []).forEach((property) => {
-        // property comes in as {intern_url_1@@documenthandler} or {foobar}
-
-        // const propertyIsExternal = this.#isMarkupForExternalElement(property);
-        // const attributePlaceholder = property.replace("{", "").replace("}", "");
-
-        // Let's replace all occurrences of the property with:
+      // this.markdown is a string that contains placeholders for our future values.
+      // The placeholders are surrounded by curly brackets ({ & }).
+      // The regex below will match all placeholders.
+      // The loop below extracts all placeholders and replaces them with actual values
+      // current feature's property collection.
+      (this.markdown.match(/{(.*?)}/g) || []).forEach((placeholder) => {
+        // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
+        // Let's replace all occurrences of the placeholder like this:
         // {foobar} -> Some nice FoobarValue
         // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
         this.markdown = this.markdown.replace(
-          property,
-          this.#getPropertyForPlaceholder(property, this.properties)
+          placeholder,
+          this.#getPropertyForPlaceholder(placeholder, this.properties)
         );
       });
-      console.log("MARKDOWN, pre conditional replace", this.markdown);
 
-      // Find all "conditional tags" (i.e. <if foo="bar">baz</if>) and apply the replacer function on
-      // all matches.
+      // this.markdown will now contain actual values instead of properties, OR
+      // references to elements in the this.resolvedPromises array. The latter will
+      // be the only remaining occurrences of numbers surrounded by curly brackets.
+
+      // Next step is to find all "conditional tags" (i.e. <if foo="bar">baz</if>)
+      // and apply the replacer function on all matches.
       // The regex string below does the following:
       // Split each match into 3 named capture groups:
       // - "condition": the word between < and whitespace, "if" in this example
@@ -293,16 +293,21 @@ export default class FeaturePropsParsing {
         this.#conditionalReplacer
       );
       console.log("MARKDOWN, final", this.markdown);
-      this.resolvedPromises = await Promise.all(this.asyncComponentsPromises);
-    }
 
-    return (
-      <ReactMarkdown
-        plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
-        allowDangerousHtml={this.allowDangerousHtml}
-        renderers={this.renderers} // Custom renderers, see definition in this.renderers
-        children={this.markdown} // Our MD, as a text string
-      />
-    );
+      // The final step is to await for all promises that might exist (if we fetch from
+      // external components) to fulfill. We can't render before that!
+      this.resolvedPromises = await Promise.all(this.asyncComponentsPromises);
+
+      // Now, when promises are fulfilled, we can render. One of the rendere's helpers
+      // will make use of the results in this.resolvedPromises, so that's why we had to wait.
+      return (
+        <ReactMarkdown
+          plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+          allowDangerousHtml={this.allowDangerousHtml}
+          renderers={this.renderers} // Custom renderers, see definition in this.renderers
+          children={this.markdown} // Our MD, as a text string
+        />
+      );
+    }
   };
 }
