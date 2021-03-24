@@ -46,13 +46,7 @@ export default class FeaturePropsParsing {
         // that those numbers represent element index in this.asyncComponentsPromises.
         // So we want to replace all of them with the corresponding component from promises.
         const match = text.value.match(/{(\d+)}/);
-        console.log("match: ", match);
         if (match) {
-          console.log("Text node that includes digit", text);
-          console.log(
-            "Returning this resolved promise",
-            this.resolvedPromises[match[1]]
-          );
           return this.resolvedPromises[match[1]];
         } else return text.children;
       },
@@ -298,7 +292,7 @@ export default class FeaturePropsParsing {
       // external components) to fulfill. We can't render before that!
       this.resolvedPromises = await Promise.all(this.asyncComponentsPromises);
 
-      // Now, when promises are fulfilled, we can render. One of the rendere's helpers
+      // Now, when promises are fulfilled, we can render. One of the render's helpers
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
       return (
         <ReactMarkdown

@@ -88,7 +88,13 @@ class DocumentWindowBase extends React.PureComponent {
         ></CustomLink>
       );
     } else {
-      infoClickEvent.resolve();
+      console.error(
+        "Could not render DocumentHandler link for payload:",
+        infoClickEvent.payload
+      );
+      // Must resolve with a value, even null will do, but something more helpful could be nice.
+      // The reason we must do it is because this value is used in React's render, and undefined will not render.
+      infoClickEvent.resolve(<b>Could not render DocumentHandler link</b>);
     }
   };
 
