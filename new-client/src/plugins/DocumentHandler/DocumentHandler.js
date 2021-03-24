@@ -64,6 +64,25 @@ class DocumentHandler extends React.PureComponent {
     });
   }
 
+  componentDidUpdate = (prevProps) => {
+    const { theme } = this.props;
+    //We need to update the palette.type in the nested customTheme with dark/light from the main theme
+    if (prevProps.theme.palette.type !== theme.palette.type) {
+      //Spread to not mutate
+      this.setState((prevState) => {
+        return {
+          customTheme: {
+            ...prevState.customTheme,
+            palette: {
+              ...prevState.customTheme.palette,
+              type: theme.palette.type,
+            },
+          },
+        };
+      });
+    }
+  };
+
   getThemeWithCustomThemeApplied = (customTheme) => {
     const { theme } = this.props;
     if (customTheme.typography) {
