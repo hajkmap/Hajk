@@ -75,47 +75,21 @@ class DocumentWindowBase extends React.PureComponent {
     });
   };
 
-  canHandleInfoClickEvent = (infoClickEvent) => {
-    return true;
-    if (infoClickEvent.payload.type !== "a") {
-      return false;
-    }
-    return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
-      return [
-        "data-maplink",
-        "data-link",
-        "data-document",
-        "data-header-identifier",
-      ].includes(key);
-    });
-  };
-
   handleInfoClickRequest = (infoClickEvent) => {
-    console.log("infoClickEvent: ", infoClickEvent);
-    setTimeout(() => {
-      infoClickEvent.resolve(<span>{new Date().getTime()}</span>);
-    }, 2000);
-    // if (this.canHandleInfoClickEvent(infoClickEvent)) {
-    //   var htmlObject = document.createElement(infoClickEvent.payload.type);
-    //   htmlObject.innerHTML = infoClickEvent.payload.children[0];
-    //   Object.entries(infoClickEvent.payload.dataAttributes).forEach(
-    //     (dataAttributeEntry) => {
-    //       var att = document.createAttribute(dataAttributeEntry[0]);
-    //       att.value = dataAttributeEntry[1];
-    //       htmlObject.setAttributeNode(att);
-    //     }
-    //   );
-    //   let link = (
-    //     <CustomLink
-    //       localObserver={this.props.localObserver}
-    //       aTag={htmlObject}
-    //       bottomMargin={false}
-    //     ></CustomLink>
-    //   );
-    //   infoClickEvent.resolve(link);
-    // } else {
-    //   infoClickEvent.resolve();
-    // }
+    const htmlObject = document.createElement("span");
+    htmlObject.innerHTML = infoClickEvent.payload.replace(/\\/g, "");
+    const aTag = htmlObject.getElementsByTagName("a")[0];
+    if (aTag) {
+      infoClickEvent.resolve(
+        <CustomLink
+          localObserver={this.props.localObserver}
+          aTag={aTag}
+          bottomMargin={false}
+        ></CustomLink>
+      );
+    } else {
+      infoClickEvent.resolve();
+    }
   };
 
   bindListenForSearchResultClick = () => {
