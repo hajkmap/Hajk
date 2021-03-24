@@ -3,7 +3,6 @@ import { Component } from "react";
 import DocumentTextEditor from "./components/DocumentTextEditor.jsx";
 import DocumentChapter from "./components/DocumentChapter.jsx";
 import AddKeyword from "./components/AddKeyword.jsx";
-import AddGeoObject from "./components/AddGeoObject.jsx";
 import DoneIcon from "@material-ui/icons/Done";
 import RemoveIcon from "@material-ui/icons/Remove";
 import SaveIcon from "@material-ui/icons/SaveSharp";
@@ -91,6 +90,7 @@ const styles = (theme) => ({
   },
   editorWrapper: {
     width: "100%",
+    marginTop: "16px",
   },
   chapterWrapper: {
     position: "relative",
@@ -611,37 +611,7 @@ class DocumentEditor extends Component {
             />
           </Grid>
         </Grid>
-        <Grid alignItems="center" container item className={classes.gridItem}>
-          <Typography className={classes.gridItem}>Geoobjekt</Typography>
-          {chapter.geoObjects
-            ? chapter.geoObjects.map((geoObject, i) => (
-                <Chip
-                  key={i}
-                  label={geoObject}
-                  onDelete={(i) => {
-                    const index = chapter.geoObjects.indexOf(geoObject);
-                    if (index > -1) {
-                      chapter.geoObjects.splice(index, 1);
-                    }
-                    this.setState({
-                      geoObjects: chapter.geoObjects,
-                    });
-                  }}
-                />
-              ))
-            : null}
-          <Grid item>
-            <AddGeoObject
-              onAddGeoObject={(geoObject) => {
-                this.setState({
-                  geoObjects: chapter.geoObjects,
-                });
-                chapter.geoObjects.push(geoObject);
-                this.forceUpdate();
-              }}
-            />
-          </Grid>
-        </Grid>
+
         <Grid className={classes.editorWrapper} item>
           <DocumentTextEditor
             display={chapter.expanded}
@@ -775,11 +745,15 @@ class DocumentEditor extends Component {
       <>
         <TextField
           autoFocus
-          margin="dense"
           id="new-document-name"
           label="Dokumentnamn"
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
           type="text"
           defaultValue={this.state.newDocumentName}
+          fullWidth
           onChange={(e) => {
             if (this.validateNewDocumentName(e.target.value)) {
               this.setState(
@@ -794,11 +768,12 @@ class DocumentEditor extends Component {
               );
             }
           }}
-          fullWidth
         />
-        <FormControl>
-          <InputLabel>Välj karta</InputLabel>
+
+        <FormControl fullWidth>
+          <InputLabel shrink>Välj Karta</InputLabel>
           <Select
+            value={this.state.newDocumentMap}
             onChange={(e) => {
               this.setState({
                 newDocumentMap: e.target.value,

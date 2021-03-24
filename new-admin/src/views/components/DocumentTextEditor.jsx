@@ -33,6 +33,7 @@ import addLinkPlugin from "./addLinkPlugin";
 import StyleButton from "./StyleButton";
 import ImageComponent from "./ImageComponent";
 import insertNewLine from "../utils/insertNewLine";
+import { Typography } from "@material-ui/core";
 
 export default class DocumentTextEditor extends React.Component {
   constructor(props) {
@@ -753,7 +754,7 @@ export default class DocumentTextEditor extends React.Component {
         <Grid container>
           <Grid container spacing={2} item xs={5}>
             <Grid item>
-              <p>Lägg till bild</p>
+              <Typography variant="h5">Lägg till bild</Typography>
               <Autocomplete
                 id="disabled-options-demo"
                 freeSolo
@@ -903,7 +904,9 @@ export default class DocumentTextEditor extends React.Component {
     if (this.state.showLinkInput) {
       urlInput = (
         <div style={styles.urlInputContainer}>
-          <h1>Lägg till {this.getUrlType(this.state.urlType)}</h1>
+          <Typography variant="h5">
+            Lägg till {this.getUrlType(this.state.urlType)}
+          </Typography>
           <p>Markera den text som ska bli en länk</p>
           {this.getUrlInput(this.state.urlType, documents)}
           {this.getUrlId(this.state.urlType)}
