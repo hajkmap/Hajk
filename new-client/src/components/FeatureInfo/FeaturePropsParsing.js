@@ -13,7 +13,6 @@ import {
   TableRow,
   Typography,
 } from "@material-ui/core";
-import { delay } from "utils/Delay";
 
 const StyledTableRow = withStyles((theme) => ({
   root: {
@@ -47,6 +46,7 @@ export default class FeaturePropsParsing {
         // that those numbers represent element index in this.asyncComponentsPromises.
         // So we want to replace all of them with the corresponding component from promises.
         const match = text.value.match(/{(\d+)}/);
+        console.log("match: ", match);
         if (match) {
           console.log("Text node that includes digit", text);
           console.log(
@@ -109,79 +109,59 @@ export default class FeaturePropsParsing {
     return result;
   };
 
-  #isMarkupForExternalElement = (string) => {
-    return string.match(/@@(.*?)/g);
-  };
+  #getPropertyForPlaceholder = (property, properties) => {
+    let returnValue = null;
+    // Strip the curly brackets
+    property = property.substring(1, property.length - 1);
 
-  #getAttributePlaceholderInformation = (attributePlaceholder, isExternal) => {
-    if (isExternal) {
-      let attributeInformation = attributePlaceholder.split("@@");
-      let placeholder = attributeInformation[0].split(".");
-      let pluginToUseForRenderAttribute = attributeInformation[1];
-      return {
-        placeholder: placeholder,
-        renderWithPlugin: pluginToUseForRenderAttribute,
-      };
-    }
-    return {
-      placeholder: attributePlaceholder.split("."),
-      renderWithPlugin: null,
-    };
-  };
+    // Properties to be fetch from external components will include "@@".
+    // Side note: /(?<!@)@@(?!@)/ would be a nice solution to only match those
+    // with exactly 2 at signs. But at time of writing the browser support for
+    // negative lookbehind wasn't there, so I opted with this less elegant solution:
+    if (property.includes("@@") && !property.includes("@@@")) {
+      const [propertyName, pluginName] = property.split("@@");
+      console.log("Will look for propertyName: ", propertyName);
+      console.log("In these properties: ", properties);
 
-  #getPropertyForPlaceholder = (
-    properties,
-    attributePlaceholder,
-    isExternal
-  ) => {
-    let propertyValue = "";
+      // Grab the value from the properties collections
+      const propertyValue = properties[propertyName];
+      // If they key was not found in the properties object, or the value is empty, we can't go on.
+      if (
+        propertyValue === undefined ||
+        propertyValue === null ||
+        propertyValue.trim() === ""
+      )
+        return "";
+      console.log("Extracted propertyValue: ", propertyValue);
 
-    const {
-      placeholder,
-      renderWithPlugin,
-    } = this.#getAttributePlaceholderInformation(
-      attributePlaceholder,
-      isExternal
-    );
-
-    // FIXME: Refactor?
-    switch (placeholder.length) {
-      case 1:
-        propertyValue = properties[placeholder[0]] || "";
-        break;
-      case 2:
-        propertyValue = properties[placeholder[0]][placeholder[1]] || "";
-        break;
-      case 3:
-        propertyValue =
-          properties[placeholder[0]][placeholder[1]][placeholder[2]] || "";
-        break;
-      default:
-        propertyValue = "";
-    }
-
-    if (isExternal) {
-      // Don't get the value just yet - we want to keep this within "{}" at this stage!
-
-      const property = properties[attributePlaceholder.split("@@")[0]];
-      const externalEvent = renderWithPlugin;
-
+      // Add a new Promise (which is the return value from #fetchExternal) to our
+      // array of Promises.
       this.asyncComponentsPromises.push(
-        this.#fetchExternal(property, externalEvent)
+        this.#fetchExternal(propertyValue, pluginName)
       );
 
+      // Don't get the value just yet - we want to keep this within "{}" at this stage!
       // Return the ID of this element in the array
-      return `{${this.asyncComponentsPromises.length - 1}}`;
+      returnValue = `{${this.asyncComponentsPromises.length - 1}}`;
     } else {
-      return propertyValue;
+      // Grab the actual value from the Properties collection, if not found, fallback to empty string
+      returnValue = properties[property] || "";
     }
+
+    console.log("returnValue: ", returnValue);
+    return returnValue;
   };
 
   #fetchExternal = (property, externalEvent) => {
+    console.log(
+      "fetchExternal: property, externalEvent ",
+      property,
+      externalEvent
+    );
     if (
       this.globalObserver.getListeners(`core.info-click-${externalEvent}`)
         .length > 0
-    )
+    ) {
       return new Promise((resolve, reject) => {
         //Let subscription resolve the promise
         this.globalObserver.publish(`core.info-click-${externalEvent}`, {
@@ -190,6 +170,7 @@ export default class FeaturePropsParsing {
           reject,
         });
       });
+    }
     return null;
   };
 
@@ -276,23 +257,26 @@ export default class FeaturePropsParsing {
    * @returns {object} ReactMarkdown component
    */
   mergeFeaturePropsWithMarkdown = async () => {
+    console.log("MARKDOWN, pre property value replace", this.markdown);
     // "markdown" will now contain placeholders for our value that we get
     // from features. They'll be between { and }.
-    // Lets' extract them and replace with value from "properties"
+    // Lets' extract them and replace with value from "properties".
     if (this.markdown && typeof this.markdown === "string") {
       (this.markdown.match(/{(.*?)}/g) || []).forEach((property) => {
-        const propertyIsExternal = this.#isMarkupForExternalElement(property);
-        const attributePlaceholder = property.replace("{", "").replace("}", "");
+        // property comes in as {intern_url_1@@documenthandler} or {foobar}
+
+        // const propertyIsExternal = this.#isMarkupForExternalElement(property);
+        // const attributePlaceholder = property.replace("{", "").replace("}", "");
+
+        // Let's replace all occurrences of the property with:
+        // {foobar} -> Some nice FoobarValue
+        // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
         this.markdown = this.markdown.replace(
           property,
-          this.#getPropertyForPlaceholder(
-            this.properties,
-            attributePlaceholder,
-            propertyIsExternal
-          )
+          this.#getPropertyForPlaceholder(property, this.properties)
         );
       });
-      console.log("this.markdown: ", this.markdown);
+      console.log("MARKDOWN, pre conditional replace", this.markdown);
 
       // Find all "conditional tags" (i.e. <if foo="bar">baz</if>) and apply the replacer function on
       // all matches.
@@ -308,8 +292,10 @@ export default class FeaturePropsParsing {
         /<(?<condition>\w+)[\s/]?(?<attributes>[^>]+)?>(?<content>[^<]+)?(?:<\/\1>\n*)?/gi,
         this.#conditionalReplacer
       );
+      console.log("MARKDOWN, final", this.markdown);
+      this.resolvedPromises = await Promise.all(this.asyncComponentsPromises);
     }
-    this.resolvedPromises = await Promise.all(this.asyncComponentsPromises);
+
     return (
       <ReactMarkdown
         plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
