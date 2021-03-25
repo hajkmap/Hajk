@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 
 import { EditorState, Modifier } from "draft-js";
+import { Typography } from "@material-ui/core";
 
 const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   const classes = useStyles();
@@ -47,22 +48,22 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
       >
         <Grid direction="column" container item>
           <Grid item>
-            <h1>Lägg till faktaruta</h1>
+            <Typography variant="h5">Lägg till faktaruta</Typography>
           </Grid>
           <Grid item>
-            <p>
+            <Typography variant="body1">
               Ställ markören där du vill skapa faktaruta eller editera faktaruta
-            </p>
+            </Typography>
           </Grid>
         </Grid>
         <Grid spacing={2} item container>
           <Grid item>
-            <p className={classes.warningText}>
-              <b>
+            <Typography variant="body2" className={classes.warningText}>
+              <strong>
                 Vid användning av dessa inställningar riskeras dark/light-mode
                 sättas ur spel
-              </b>
-            </p>
+              </strong>
+            </Typography>
             <Grid item>
               <label style={{ margin: 0 }}>data-background-color</label>
             </Grid>

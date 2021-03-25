@@ -4,7 +4,7 @@ body {
   color: #373d3f;
 }
 
-input[type="text"] {
+input[type="text"]:not(#documentEditor input) {
   border: 1px solid #ccc;
   padding: 5px;
   border-radius: 3px;
