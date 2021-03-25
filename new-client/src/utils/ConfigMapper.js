@@ -114,6 +114,8 @@ export default class ConfigMapper {
         origin: properties.mapConfig.map.origin,
         extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
+        hidpi: args.hidpi,
+        customRatio: args.customRatio,
         imageFormat: args.imageFormat || "image/png",
         serverType: args.serverType || "geoserver",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
@@ -124,6 +126,7 @@ export default class ConfigMapper {
         searchOutputFormat: args.searchOutputFormat,
         searchGeometryField: args.searchGeometryField,
         legend: getLegends(),
+        legendIcon: args.legendIcon,
         params: {
           LAYERS: args.layers.join(","),
           ...(args.cqlFilter && { CQL_FILTER: args.cqlFilter }), // nice way to add property only if needed
@@ -190,6 +193,7 @@ export default class ConfigMapper {
         matrixIds: args.matrixIds,
         attribution: args.attribution,
         legend: args.legend,
+        legendIcon: args.legendIcon,
         infoVisible: args.infoVisible || false,
         infoTitle: args.infoTitle,
         infoText: args.infoText,
@@ -252,6 +256,7 @@ export default class ConfigMapper {
             description: args.caption,
           },
         ],
+        legendIcon: args.legendIcon,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
         name: args.id,

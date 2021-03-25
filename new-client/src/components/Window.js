@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile, getIsMobile } from "../utils/IsMobile.js";
-import FeatureInfo from "./FeatureInfo.js";
+import FeatureInfoContainer from "./FeatureInfo/FeatureInfoContainer.js";
 import clsx from "clsx";
 
 const zIndexStart = 1000;
@@ -114,6 +114,7 @@ const styles = (theme) => {
       right: 0,
       flexDirection: "column",
       userSelect: "none",
+      outline: "none",
     },
     content: {
       flex: "1",
@@ -159,6 +160,7 @@ class Window extends React.PureComponent {
   constructor(props) {
     super(props);
     document.windows.push(this);
+    this.windowRef = React.createRef();
     this.state = {
       left: 0,
       top: 0,
@@ -174,6 +176,16 @@ class Window extends React.PureComponent {
       }
     });
   }
+
+  componentDidUpdate = (prevProps, prevState) => {
+    if (this.props.open) {
+      //This is ugly but there is a timing problem further down somewhere (i suppose?).
+      //componentDidUpdate is run before the render is actually fully completed and the DOM is ready
+      setTimeout(() => {
+        this.windowRef.current.focus();
+      }, 200);
+    }
+  };
 
   componentDidMount() {
     const { globalObserver } = this.props;
@@ -424,7 +436,6 @@ class Window extends React.PureComponent {
     }
 
     this.bringToFront();
-
     return (
       <Rnd
         onMouseDown={(e) => {
@@ -484,7 +495,7 @@ class Window extends React.PureComponent {
           height: height,
         }}
       >
-        <div className={classes.panelContent}>
+        <div tabIndex="0" ref={this.windowRef} className={classes.panelContent}>
           <PanelHeader
             allowMaximizedWindow={allowMaximizedWindow}
             color={color}
@@ -502,10 +513,11 @@ class Window extends React.PureComponent {
               this.props.scrollable ? null : classes.nonScrollable
             )}
           >
-            {features ? (
-              <FeatureInfo
+            {features && features.length > 0 ? (
+              <FeatureInfoContainer
                 features={this.props.features}
                 onDisplay={this.props.onDisplay}
+                globalObserver={this.props.globalObserver}
                 key={
                   Array.isArray(this.props.features) &&
                   this.props.features.length > 0

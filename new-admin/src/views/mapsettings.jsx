@@ -309,10 +309,12 @@ class Menu extends Component {
       maps: [],
       active: true,
       visibleAtStart: true,
+      visibleAtStartMobile: false,
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       enableOSM: false,
       showBreadcrumbs: false,
+      enableTransparencySlider: true,
       instruction: "",
       dropdownThemeMaps: false,
       themeMapHeaderCaption: "Temakartor",
@@ -347,6 +349,8 @@ class Menu extends Component {
           active: this.props.model.get("layerMenuConfig").active,
           visibleAtStart: this.props.model.get("layerMenuConfig")
             .visibleAtStart,
+          visibleAtStartMobile: this.props.model.get("layerMenuConfig")
+            .visibleAtStartMobile,
           backgroundSwitcherBlack: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
@@ -354,6 +358,8 @@ class Menu extends Component {
           enableOSM: this.props.model.get("layerMenuConfig").enableOSM,
           showBreadcrumbs: this.props.model.get("layerMenuConfig")
             .showBreadcrumbs,
+          enableTransparencySlider: this.props.model.get("layerMenuConfig")
+            .enableTransparencySlider,
           instruction: this.props.model.get("layerMenuConfig").instruction,
           dropdownThemeMaps: this.props.model.get("layerMenuConfig")
             .dropdownThemeMaps,
@@ -559,10 +565,12 @@ class Menu extends Component {
       baselayers: [],
       active: this.state.active,
       visibleAtStart: this.state.visibleAtStart,
+      visibleAtStartMobile: this.state.visibleAtStartMobile,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
+      enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
@@ -1524,6 +1532,19 @@ class Menu extends Component {
               </div>
               <div>
                 <input
+                  id="visibleAtStartMobile"
+                  name="visibleAtStartMobile"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.visibleAtStartMobile}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="visibleAtStartMobile">
+                  Synlig vid start - Mobil
+                </label>
+              </div>
+              <div>
+                <input
                   id="showBreadcrumbs"
                   name="showBreadcrumbs"
                   type="checkbox"
@@ -1537,6 +1558,27 @@ class Menu extends Component {
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas små kort längst ned på skärmen, ett för varje lager som är aktivt"
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="enableTransparencySlider"
+                  name="enableTransparencySlider"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableTransparencySlider}
+                />
+                &nbsp;
+                <label
+                  className="long-label"
+                  htmlFor="enableTransparencySlider"
+                >
+                  Visa transparensreglage{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Global inställning för att välja om transparensreglage ska vara aktiv eller inte. Om inställningen är aktiv går det då att konfigurera individer lager om transparensreglage ska visas till lagret.  Om denna ruta inte är ikryssad kommer transparensreglage inte visas till någon lager."
                   />
                 </label>
               </div>

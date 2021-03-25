@@ -12,6 +12,7 @@ namespace MapService.Models.Config
         public string id { get; set; }
         public string caption { get; set; }
         public string legend { get; set; }
+        public string legendIcon { get; set; }
         public string infobox { get; set; }
         public string style { get; set; }
         public bool queryable { get; set; }    
@@ -43,6 +44,9 @@ namespace MapService.Models.Config
 
         public string legend { get; set; }
 
+        public string legendIcon { get; set; }
+
+
         public string projection { get; set; }
 
         public string[] layers { get; set; }
@@ -68,6 +72,10 @@ namespace MapService.Models.Config
         public string attribution { get; set; }
 
         public string searchUrl { get; set; }
+
+        public double customRatio { get; set; }
+
+        public bool hidpi { get; set; } = true;
 
         public string searchPropertyName { get; set; }
 

@@ -165,6 +165,7 @@ namespace MapService.Models.Config
         public string timeSliderEnd { get; set; }
         public string layer { get; set; }
         public string legend { get; set; }
+        public string legendIcon { get; set; }
         public int    maxZoom { get; set; }
         public int    minZoom { get; set; }
         public double opacity { get; set; }

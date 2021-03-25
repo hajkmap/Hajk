@@ -51,6 +51,7 @@ class VectorLayerForm extends React.Component {
     layer: "",
     layerType: "Vector",
     legend: "",
+    legendIcon: "",
     load: false,
     maxZoom: -1,
     minZoom: -1,
@@ -66,18 +67,27 @@ class VectorLayerForm extends React.Component {
   };
 
   componentDidMount() {
-    this.props.model.on("change:legend", () => {
+    this.props.model.on("change:select-image", () => {
       this.setState(
         {
-          legend: this.props.model.get("legend"),
+          legend: this.props.model.get("select-image"),
         },
-        () => this.validateField("legend")
+        () => this.validateField("select-image")
+      );
+    });
+    this.props.model.on("change:select-legend-icon", () => {
+      this.setState(
+        {
+          legendIcon: this.props.model.get("select-legend-icon"),
+        },
+        () => this.validateField("select-legend-icon")
       );
     });
   }
 
   componentWillUnmount() {
     this.props.model.off("change:legend");
+    this.props.model.off("change:legendIcon");
   }
 
   describeLayer(layer) {
@@ -123,6 +133,7 @@ class VectorLayerForm extends React.Component {
       timeSliderEnd: this.getValue("timeSliderEnd"),
       layer: this.state.addedLayers[0],
       legend: this.getValue("legend"),
+      legendIcon: this.getValue("legendIcon"),
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
       opacity: this.getValue("opacity"),
@@ -145,8 +156,9 @@ class VectorLayerForm extends React.Component {
     const input = this.refs["input_" + fieldName];
     let value = input ? input.value : "";
 
-    if (fieldName === "sldUrl") {
-      console.log(fieldName, input, value);
+    // We must cast the following to Number, as String won't be accepted for those:
+    if (["maxZoom", "minZoom", "opacity"].includes(fieldName)) {
+      value = Number(value);
     }
 
     if (fieldName === "date") value = create_date();
@@ -276,6 +288,7 @@ class VectorLayerForm extends React.Component {
         capabilities: capabilities,
         projection: this.state.projection || projection || "",
         legend: this.state.legend || capabilities.legend || "",
+        legendIcon: this.state.legendIcon || "",
         load: false,
       });
 
@@ -293,8 +306,14 @@ class VectorLayerForm extends React.Component {
     });
   }
 
-  loadLegendImage(e) {
+  loadLegend(e) {
+    $("#select-image").attr("caller", "select-image");
     $("#select-image").trigger("click");
+  }
+
+  loadLegendIcon(e) {
+    $("#select-legend-icon").attr("caller", "select-legend-icon");
+    $("#select-legend-icon").trigger("click");
   }
 
   setLineWidth(e) {
@@ -786,14 +805,34 @@ class VectorLayerForm extends React.Component {
           />
           <span
             onClick={(e) => {
-              this.loadLegendImage(e);
+              this.loadLegend(e);
             }}
             className="btn btn-default"
           >
             Välj fil {imageLoader}
           </span>
         </div>
-
+        <div>
+          <label>
+            Teckenförklar
+            <br />
+            ingsikon
+          </label>
+          <input
+            type="text"
+            ref="input_legendIcon"
+            value={this.state.legendIcon}
+            onChange={(e) => this.setState({ legendIcon: e.target.value })}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegendIcon(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
         <div className="separator">Metadata</div>
         <div>
           <label>Innehåll</label>

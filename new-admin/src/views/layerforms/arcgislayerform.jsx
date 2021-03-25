@@ -271,7 +271,8 @@ class ArcGISLayerForm extends Component {
       : "";
   }
 
-  loadLegendImage(e) {
+  loadLegend(e) {
+    $("#select-image").attr("caller", "legend");
     $("#select-image").trigger("click");
   }
 
@@ -539,7 +540,7 @@ class ArcGISLayerForm extends Component {
           />
           <span
             onClick={(e) => {
-              this.loadLegendImage(e);
+              this.loadLegend(e);
             }}
             className="btn btn-default"
           >

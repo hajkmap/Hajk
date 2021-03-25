@@ -24,7 +24,7 @@ import React from "react";
 import { Component } from "react";
 import Anchor from "./tools/anchor.jsx";
 import Buffer from "./tools/buffer.jsx";
-import Bookmark from "./tools/bookmark.jsx";
+import Bookmarks from "./tools/bookmarks.jsx";
 import Coordinates from "./tools/coordinates.jsx";
 import Draw from "./tools/draw.jsx";
 import Edit from "./tools/edit.jsx";
@@ -88,8 +88,8 @@ class ToolOptions extends Component {
         return <Anchor parent={this} model={this.props.model} />;
       case "buffer":
         return <Buffer parent={this} model={this.props.model} />;
-      case "bookmark":
-        return <Bookmark parent={this} model={this.props.model} />;
+      case "bookmarks":
+        return <Bookmarks parent={this} model={this.props.model} />;
       case "coordinates":
         return <Coordinates parent={this} model={this.props.model} />;
       case "draw":
@@ -124,6 +124,8 @@ class ToolOptions extends Component {
         return <Collector parent={this} model={this.props.model} />;
       case "timeslider":
         return <TimeSlider parent={this} model={this.props.model} />;
+      case "documenthandler":
+        return <MenuEditor parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -168,7 +170,7 @@ class ToolOptions extends Component {
     var toolTypes = {
       anchor: "Länk till kartan",
       buffer: "Skapa buffertzon",
-      bookmark: "Bokmärken",
+      bookmarks: "Bokmärken",
       coordinates: "Fånga koordinat",
       draw: "Rita och mäta",
       edit: "Editering",
@@ -186,6 +188,7 @@ class ToolOptions extends Component {
       collector: "Tyck till",
       dummy: "Dummy plugin",
       timeslider: "Tidslinje",
+      documenthandler: "Dokumenthanterare 2.0",
     };
 
     return (

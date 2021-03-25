@@ -5,8 +5,9 @@ import { withStyles } from "@material-ui/core/styles";
 import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
-
-import AppModel from "./../models/AppModel.js";
+import { isMobile } from "../utils/IsMobile";
+import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
+import AppModel from "../models/AppModel.js";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
@@ -14,6 +15,8 @@ import Introduction from "./Introduction";
 import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
+
+import Search from "./Search/Search.js";
 
 import Zoom from "../controls/Zoom";
 import Rotate from "../controls/Rotate";
@@ -28,7 +31,6 @@ import PresetLinks from "../controls/PresetLinks";
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
 import {
-  Backdrop,
   Box,
   Divider,
   Drawer,
@@ -42,6 +44,7 @@ import {
 import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import MapIcon from "@material-ui/icons/Map";
+import ThemeToggler from "../controls/ThemeToggler";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -81,6 +84,9 @@ const styles = (theme) => {
         pointerEvents: "auto",
       },
     },
+    drawerContent: {
+      height: "inherit",
+    },
     header: {
       zIndex: theme.zIndex.appBar,
       maxHeight: theme.spacing(8),
@@ -97,7 +103,7 @@ const styles = (theme) => {
         marginTop: -theme.spacing(2),
         maxHeight: theme.spacing(6),
         boxShadow: theme.shadows[3],
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.paper,
       },
     },
     main: {
@@ -115,7 +121,6 @@ const styles = (theme) => {
     controlsColumn: {
       display: "flex",
       flexDirection: "column",
-      marginTop: theme.spacing(7),
       [theme.breakpoints.down("xs")]: {
         marginTop: theme.spacing(2),
       },
@@ -141,8 +146,9 @@ const styles = (theme) => {
       justifyContent: "space-between",
       backgroundColor: theme.palette.background.paper,
     },
-    drawerContent: {
+    drawerContentContainer: {
       backgroundColor: theme.palette.background.paper,
+      height: "100%",
       overflow: "auto",
     },
     logoBox: {
@@ -154,11 +160,11 @@ const styles = (theme) => {
     },
     drawerGrid: {
       padding: theme.spacing(0, 2),
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
       minHeight: theme.spacing(6),
     },
-    backdrop: {
-      zIndex: theme.zIndex.drawer - 1, // Carefully selected to be above Window but below Drawer
+    drawerLiveContent: {
+      backgroundColor: theme.palette.background.default,
     },
     widgetItem: {
       width: "220px",
@@ -208,24 +214,41 @@ class App extends React.PureComponent {
       mapClickDataResult: {},
 
       // Drawer-related states
-      // If cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-      // else fall back to value from config, or finally don't show Drawer.
+      //If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
+      //Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
+      //If there a no cookie settings, use the config drawVisible setting.
+      //Finally, don't show the drawer.
+
       drawerVisible:
-        drawerPermanentFromLocalStorage !== null
+        isMobile && props.config.mapConfig.map.drawerVisibleMobile !== undefined
+          ? props.config.mapConfig.map.drawerVisibleMobile
+          : drawerPermanentFromLocalStorage !== null
           ? drawerPermanentFromLocalStorage
           : props.config.mapConfig.map.drawerVisible || false,
 
-      // To check whether drawer is permanent, first take a look at the cookie.
+      // If on a mobile device, the drawer should never be permanent.
+      // If not on mobile, if cookie is not null, use it to show/hide Drawer.
       // If cookie is not null, use it to show/hide Drawer.
       // If cookie however is null, fall back to the values from config.
       // Finally, fall back to "false" if no cookie or config is found.
-      drawerPermanent:
-        drawerPermanentFromLocalStorage !== null
-          ? drawerPermanentFromLocalStorage
-          : (props.config.mapConfig.map.drawerVisible &&
-              props.config.mapConfig.map.drawerPermanent) ||
-            false,
-      activeDrawerContent: activeDrawerContentFromLocalStorage,
+      drawerPermanent: isMobile
+        ? false
+        : drawerPermanentFromLocalStorage !== null
+        ? drawerPermanentFromLocalStorage
+        : (props.config.mapConfig.map.drawerVisible &&
+            props.config.mapConfig.map.drawerPermanent) ||
+          false,
+
+      //First check the cookie for activeDrawerContent
+      //If cookie is not null, use it set the drawer content.
+      //If cookie is null, fall back to the values from config,
+      //Finally, fall back to 'plugins', the standard tools panel.
+      //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
+      activeDrawerContent:
+        activeDrawerContentFromLocalStorage !== null
+          ? activeDrawerContentFromLocalStorage
+          : props.config.mapConfig.map.activeDrawerOnStart || "plugins",
+
       drawerMouseOverLock: false,
     };
     this.globalObserver = new Observer();
@@ -235,6 +258,7 @@ class App extends React.PureComponent {
   componentDidMount() {
     var promises = this.appModel
       .createMap()
+      .addSearchModel()
       .addLayers()
       .loadPlugins(this.props.activeTools);
     Promise.all(promises).then(() => {
@@ -250,6 +274,7 @@ class App extends React.PureComponent {
               value: "plugins",
               ButtonIcon: MapIcon,
               caption: "Kartverktyg",
+              drawerTitle: "Kartverktyg",
               order: 0,
               renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
@@ -267,7 +292,7 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
-    this.globalObserver.subscribe("core.mapClick", (results) => {
+    this.globalObserver.subscribe("infoClick.mapClick", (results) => {
       this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: results,
@@ -352,7 +377,7 @@ class App extends React.PureComponent {
     //     });
     //   });
 
-    // TODO: More plugins could use this - currently only SNap helper registers though
+    // TODO: More plugins could use this - currently only Snap helper registers though
     this.appModel
       .getMap()
       .getLayers()
@@ -458,16 +483,19 @@ class App extends React.PureComponent {
     this.setState({ drawerMouseOverLock: false });
   };
 
-  renderSearchPlugin() {
-    const searchPlugin = this.appModel.plugins.search;
-    // Renders the configured search plugin (if one is configured)
-    return searchPlugin ? (
-      <searchPlugin.component
-        map={searchPlugin.map}
-        app={searchPlugin.app}
-        options={searchPlugin.options}
-      />
-    ) : null;
+  renderSearchComponent() {
+    // FIXME: We should get config from somewhere else now when Search is part of Core
+    if (this.appModel.plugins.search) {
+      return (
+        <Search
+          map={this.appModel.getMap()}
+          app={this}
+          options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
+        />
+      );
+    } else {
+      return null;
+    }
   }
 
   renderInformationPlugin() {
@@ -487,18 +515,23 @@ class App extends React.PureComponent {
 
   renderDrawerHeader = () => {
     const { classes, config } = this.props;
-    const caption = this.state.drawerButtons.find(
+    const drawerTitle = this.state.drawerButtons.find(
       (db) => db.value === this.state.activeDrawerContent
-    )?.caption;
+    )?.drawerTitle;
+
+    // We need to be able to grab different logos depending
+    // on light/dark mode theme
+    const logoUrl =
+      (this.props.theme.palette.type === "light" // If light theme active…
+        ? config.mapConfig.map.logoLight // …grab light logo,
+        : config.mapConfig.map.logoDark) || // …else grab dark logo.
+      config.mapConfig.map.logo || // If neither was set, try to see if we have the legacy admin parameter.
+      "logo.png"; // If we didn't have this either, fallback to hard-coded value.
 
     return (
       <>
         <Box className={classes.logoBox}>
-          <img
-            alt="Logo"
-            src={config.mapConfig.map.logo}
-            className={classes.logo}
-          />
+          <img alt="" src={logoUrl} className={classes.logo} />
         </Box>
         <Divider />
         <Grid
@@ -510,7 +543,7 @@ class App extends React.PureComponent {
           alignItems="center"
         >
           <Grid item>
-            <Typography variant="button">{caption}</Typography>
+            <Typography variant="button">{drawerTitle}</Typography>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>
@@ -522,7 +555,6 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
-                  aria-label="pin"
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
@@ -551,19 +583,21 @@ class App extends React.PureComponent {
     const { classes } = this.props;
 
     return (
-      <div id="drawer-content" className={classes.drawerContent}>
+      <div id="drawer-content" className={classes.drawerContentContainer}>
         <Box
           key="plugins"
+          className={classes.drawerContent}
           display={
             this.state.activeDrawerContent === "plugins" ? "unset" : "none"
           }
         >
-          <div id="plugin-buttons" />
+          <nav role="navigation" id="plugin-buttons" />
         </Box>
         {this.state.drawerButtons.map((db) => {
           return (
             <Box
               key={db.value}
+              className={classes.drawerContent}
               display={
                 this.state.activeDrawerContent === db.value ? "unset" : "none"
               }
@@ -581,6 +615,8 @@ class App extends React.PureComponent {
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
+    const showMapSwitcher =
+      clean === false && config.activeMap !== "simpleMapConfig";
     const showCookieNotice =
       config.mapConfig.map.showCookieNotice !== undefined
         ? config.mapConfig.map.showCookieNotice
@@ -628,6 +664,7 @@ class App extends React.PureComponent {
             parent={this}
             title="Meddelande"
           />
+          <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
           <div
             id="appBox"
             className={cslx(classes.flexBox, {
@@ -643,9 +680,15 @@ class App extends React.PureComponent {
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
+                  initialActiveButton={
+                    this.state.drawerVisible
+                      ? this.state.activeDrawerContent
+                      : null
+                  }
                 />
               )}
-              {this.renderSearchPlugin()}
+              {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
+              {this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div
@@ -673,9 +716,17 @@ class App extends React.PureComponent {
                 <Zoom map={this.appModel.getMap()} />
                 <div id="plugin-control-buttons"></div>
                 <Rotate map={this.appModel.getMap()} />
-                {clean === false && <MapSwitcher appModel={this.appModel} />}
+                {showMapSwitcher && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
+                {clean === false && (
+                  <ThemeToggler
+                    showThemeToggler={
+                      this.appModel.config.mapConfig.map.showThemeToggler
+                    }
+                    toggleMUITheme={this.props.toggleMUITheme}
+                  />
+                )}
                 {clean === false && this.renderInformationPlugin()}
                 {clean === true && (
                   <MapResetter
@@ -694,6 +745,7 @@ class App extends React.PureComponent {
           </div>
           <div
             id="map"
+            role="application"
             className={cslx(classes.map, {
               [classes.shiftedLeft]:
                 this.state.drawerPermanent && clean === false,
@@ -718,11 +770,22 @@ class App extends React.PureComponent {
           {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
             <Drawer
               open={this.state.drawerVisible}
-              // NB: we can't simply toggle between permanent|temporary,
-              // as the temporary mode unmounts element from DOM and
-              // re-mounts it the next time, so we would re-rendering
-              // our plugins all the time.
-              variant="persistent"
+              ModalProps={{
+                hideBackdrop: this.state.drawerPermanent, //Don't show backdrop if drawer is permanent
+                disableEnforceFocus: true, //Dont enforce focus to be able to handle elements underneath modal
+                onEscapeKeyDown: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                },
+                style: {
+                  //Needs to be set to be able to handle elements underneath modal
+                  position: this.state.drawerPermanent ? "initial" : "fixed",
+                },
+                keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
+                onBackdropClick: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                },
+              }}
+              variant="temporary"
               classes={{
                 paper: classes.drawerBackground,
               }}
@@ -731,15 +794,6 @@ class App extends React.PureComponent {
               <Divider />
               {this.renderAllDrawerContent()}
             </Drawer>
-          )}
-          {clean === false && (
-            <Backdrop
-              open={this.state.drawerVisible && !this.state.drawerPermanent}
-              className={classes.backdrop}
-              onClick={(e) => {
-                this.globalObserver.publish("core.hideDrawer");
-              }}
-            />
           )}
           {clean === false && (
             <Introduction

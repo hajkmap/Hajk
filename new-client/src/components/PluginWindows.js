@@ -18,6 +18,7 @@ function PluginWindows({ plugins }) {
         key={i}
         map={tool.map}
         app={tool.app}
+        searchInterface={tool.searchInterface}
         options={tool.options}
       />
     );

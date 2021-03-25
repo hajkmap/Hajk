@@ -38,11 +38,14 @@ const defaultState = {
   content: "",
   date: "Fylls i per automatik",
   legend: "",
+  legendIcon: "",
   owner: "",
   url: "",
   opacity: 1.0,
   tiled: false,
   singleTile: false,
+  hidpi: true,
+  customRatio: 0,
   imageFormat: "",
   serverType: "geoserver",
   drawOrder: 1,
@@ -112,16 +115,23 @@ class WMSLayerForm extends Component {
   componentDidMount() {
     defaultState.url = this.props.url;
     this.setState(defaultState);
-    this.props.model.on("change:legend", () => {
+    this.props.model.on("change:select-image", () => {
       this.setState({
-        legend: this.props.model.get("legend"),
+        legend: this.props.model.get("select-image"),
       });
-      this.validateField("legend");
+      this.validateField("select-image");
+    });
+    this.props.model.on("change:select-legend-icon", () => {
+      this.setState({
+        legendIcon: this.props.model.get("select-legend-icon"),
+      });
+      this.validateField("select-legend-icon");
     });
   }
 
   componentWillUnmount() {
     this.props.model.off("change:legend");
+    this.props.model.off("change:select-legend-icon");
   }
 
   constructor() {
@@ -134,8 +144,22 @@ class WMSLayerForm extends Component {
     this.setState(defaultState);
   }
 
-  loadLegendImage(e) {
+  loadLegend(e) {
+    $("#select-image").attr("caller", "select-image");
     $("#select-image").trigger("click");
+  }
+
+  loadLegendIcon(e) {
+    $("#select-legend-icon").attr("caller", "select-legend-icon");
+    $("#select-legend-icon").trigger("click");
+  }
+
+  loadLayersInfoLegendIcon(e) {
+    $("#select-layers-info-legend-icon").attr(
+      "caller",
+      "select-layers-info-legend-icon"
+    );
+    $("#select-layers-info-legend-icon").trigger("click");
   }
 
   renderLayerList() {
@@ -256,6 +280,7 @@ class WMSLayerForm extends Component {
         id: checkedLayer,
         caption: "",
         legend: "",
+        legendIcon: "",
         infobox: "",
         style: "",
         queryable: "",
@@ -308,6 +333,9 @@ class WMSLayerForm extends Component {
 
   renderLayerInfoInput(layerInfo) {
     var currentLayer = this.findInCapabilities(layerInfo.id);
+    var imageLoader = this.state.imageLoad ? (
+      <i className="fa fa-refresh fa-spin" />
+    ) : null;
 
     this.setState({
       style: currentLayer.Style || [],
@@ -372,6 +400,60 @@ class WMSLayerForm extends Component {
             type="text"
           />
         </div>
+        <div>
+          <div>
+            <label>Teckenförklaringsikon</label>
+          </div>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.legendIcon}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].legendIcon = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+          <span
+            onClick={(e) => {
+              this.props.model.on(
+                "change:select-layers-info-legend-icon",
+                () => {
+                  this.validateField("select-layers-info-legend-icon");
+                  let addedLayersInfo = this.state.addedLayersInfo;
+                  addedLayersInfo[
+                    layerInfo.id
+                  ].legendIcon = this.props.model.get(
+                    "select-layers-info-legend-icon"
+                  );
+                  this.setState(
+                    {
+                      addedLayersInfo: addedLayersInfo,
+                    },
+                    () => {
+                      this.renderLayerInfoDialog(layerInfo);
+                      this.props.model.off(
+                        "change:select-layers-info-legend-icon"
+                      );
+                    }
+                  );
+                }
+              );
+              this.loadLayersInfoLegendIcon(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+
         <div>
           <div>
             <label>Stil</label>
@@ -582,6 +664,7 @@ class WMSLayerForm extends Component {
             id: layer,
             caption: "",
             legend: "",
+            legendIcon: "",
             infobox: "",
             style: "",
             queryable: "",
@@ -830,6 +913,7 @@ class WMSLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
+      legendIcon: this.getValue("legendIcon"),
       projection: this.getValue("projection"),
       layers: this.getValue("layers"),
       layersInfo: this.getValue("layersInfo"),
@@ -839,6 +923,8 @@ class WMSLayerForm extends Component {
       tiled: this.getValue("tiled"),
       opacity: this.getValue("opacity"),
       singleTile: this.getValue("singleTile"),
+      hidpi: this.getValue("hidpi"),
+      customRatio: this.getValue("customRatio"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
       attribution: this.getValue("attribution"),
@@ -887,6 +973,9 @@ class WMSLayerForm extends Component {
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
+    if (fieldName === "hidpi") value = input.checked;
+    if (fieldName === "customRatio")
+      value = parseFloat(Number(value).toFixed(2));
     if (fieldName === "tiled") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
@@ -930,10 +1019,14 @@ class WMSLayerForm extends Component {
   validateField(fieldName, forcedValue, updateState) {
     var value = this.getValue(fieldName),
       valid = true;
-
     switch (fieldName) {
       case "layers":
         if (value.length === 0) {
+          valid = false;
+        }
+        break;
+      case "customRatio":
+        if (isNaN(Number(value)) || value < 1 || value > 5) {
           valid = false;
         }
         break;
@@ -1156,6 +1249,24 @@ class WMSLayerForm extends Component {
         <div>
           <input
             type="checkbox"
+            ref="input_hidpi"
+            id="input_hidpi"
+            onChange={(e) => this.setState({ hidpi: e.target.checked })}
+            checked={this.state.hidpi}
+          />
+          &nbsp;
+          <label htmlFor="input_hidpi">
+            Efterfråga hög DPI{" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="Hämta 'kartbilder' med hög upplösning vid skärmar som stödjer detta (Inställning hidpi i OL-klasserna ImageWMS/TileWMS)"
+            />
+          </label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
             ref="input_singleTile"
             id="input_singleTile"
             onChange={(e) => this.setState({ singleTile: e.target.checked })}
@@ -1163,6 +1274,33 @@ class WMSLayerForm extends Component {
           />
           &nbsp;
           <label htmlFor="input_singleTile">Single tile</label>
+          <div
+            style={{
+              paddingLeft: "20px",
+              marginLeft: "4px",
+              borderLeft: "2px double #1f1c1c",
+            }}
+          >
+            <label htmlFor="input_customRatio">
+              Custom ratio (Lämna som 0 för OL-default){" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Bestämmer storlek på bilden vid varje request där 1 är viewportens storlek och 2 är dubbelt så stor osv (Inställning för ratio i OL-klassen ImageWMS)"
+              />
+            </label>
+            <input
+              type="text"
+              ref="input_customRatio"
+              value={this.state.customRatio}
+              disabled={!this.state.singleTile}
+              onChange={(e) => {
+                this.setState({ customRatio: e.target.value });
+                this.validateField("customRatio");
+              }}
+              className={this.getValidationClass("customRatio")}
+            />
+          </div>
         </div>
         <div>
           <input
@@ -1233,7 +1371,28 @@ class WMSLayerForm extends Component {
           />
           <span
             onClick={(e) => {
-              this.loadLegendImage(e);
+              this.loadLegend(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+        <div>
+          <label>
+            Teckenförklar
+            <br />
+            ingsikon
+          </label>
+          <input
+            type="text"
+            ref="input_legendIcon"
+            value={this.state.legendIcon}
+            onChange={(e) => this.setState({ legendIcon: e.target.value })}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegendIcon(e);
             }}
             className="btn btn-default"
           >

@@ -9,24 +9,24 @@ import { green, red } from "@material-ui/core/colors";
 import AddIcon from "@material-ui/icons/Add";
 import CancelIcon from "@material-ui/icons/Cancel";
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonRed = withStyles(theme => ({
+const ColorButtonRed = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(red[700]),
     backgroundColor: red[500],
     "&:hover": {
-      backgroundColor: red[700]
-    }
-  }
+      backgroundColor: red[700],
+    },
+  },
 }))(Button);
 class FieldAdder extends Component {
   state = {
@@ -34,20 +34,20 @@ class FieldAdder extends Component {
     name: "",
     type: "text",
     value: "",
-    values: []
+    values: [],
   };
 
-  fieldTypeChanged = e => {
+  fieldTypeChanged = (e) => {
     this.setState({
       displayOptions: e.target.value === "option",
-      type: e.target.value
+      type: e.target.value,
     });
   };
 
-  addValue = e => {
+  addValue = (e) => {
     this.setState({
       values: [...this.state.values, this.refs["value"].value],
-      value: ""
+      value: "",
     });
   };
 
@@ -70,9 +70,9 @@ class FieldAdder extends Component {
         <div>
           <input
             value={this.state.value}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({
-                value: e.target.value
+                value: e.target.value,
               });
             }}
             type="text"
@@ -112,9 +112,9 @@ class FieldAdder extends Component {
           <input
             type="text"
             value={this.state.name}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({
-                name: e.target.value
+                name: e.target.value,
               });
             }}
           />
@@ -131,11 +131,11 @@ class FieldEditor extends Component {
     super(props);
     this.state = {
       showModal: false,
-      pages: this.props.form
+      pages: this.props.form,
     };
   }
 
-  addField = e => {
+  addField = (e) => {
     const { parent } = this.props;
     this.setState({
       showModal: true,
@@ -143,17 +143,17 @@ class FieldEditor extends Component {
       showAbortButton: true,
       modalConfirmCallback: () => {
         parent.setState({
-          form: [...parent.state.form, this.refs["fieldAdder"].state]
+          form: [...parent.state.form, this.refs["fieldAdder"].state],
         });
-      }
+      },
     });
   };
 
-  addPage = e => {
+  addPage = (e) => {
     const { onUpdate } = this.props;
     this.setState(
       {
-        pages: [{ id: Math.round(Math.random() * 1e12) }, ...this.state.pages]
+        pages: [{ id: Math.round(Math.random() * 1e12) }, ...this.state.pages],
       },
       () => {
         onUpdate(this.getForm());
@@ -166,7 +166,7 @@ class FieldEditor extends Component {
       showModal: false,
       modalStyle: {},
       okButtonText: "OK",
-      modalConfirmCallback: () => {}
+      modalConfirmCallback: () => {},
     });
   }
 
@@ -175,7 +175,7 @@ class FieldEditor extends Component {
       <ColorButtonRed
         variant="contained"
         className="btn"
-        onClick={e => this.hideModal()}
+        onClick={(e) => this.hideModal()}
         startIcon={<CancelIcon />}
       >
         Avbryt
@@ -198,14 +198,14 @@ class FieldEditor extends Component {
             style={{
               height: "100%",
               paddingBottom: "45px",
-              marginBottom: "-35px"
+              marginBottom: "-35px",
             }}
           >
             {this.state.modalContent}
           </div>
           <button
             className="btn btn-success"
-            onClick={e => {
+            onClick={(e) => {
               if (this.state.modalConfirmCallback) {
                 this.state.modalConfirmCallback();
               }
@@ -227,13 +227,13 @@ class FieldEditor extends Component {
     return (
       <Container
         nonDragAreaSelector=".nodrag"
-        onDrop={r => {
+        onDrop={(r) => {
           var pages = [...this.state.pages];
           const { removedIndex, addedIndex } = r;
           var removed = pages.splice(removedIndex, 1);
           pages.splice(addedIndex, 0, removed[0]);
           this.setState({
-            pages: pages
+            pages: pages,
           });
           onUpdate(this.getForm());
         }}
@@ -246,10 +246,10 @@ class FieldEditor extends Component {
               onUpdate={() => {
                 onUpdate(this.getForm());
               }}
-              onRemove={id => {
+              onRemove={(id) => {
                 this.setState(
                   {
-                    pages: this.state.pages.filter(p => p.id !== id)
+                    pages: this.state.pages.filter((p) => p.id !== id),
                   },
                   () => {
                     onUpdate(this.getForm());
@@ -268,7 +268,7 @@ class FieldEditor extends Component {
       id: page.id,
       order: i,
       header: this.refs[page.id].state.header,
-      text: this.refs[page.id].state.text
+      text: this.refs[page.id].state.text,
     }));
   }
 

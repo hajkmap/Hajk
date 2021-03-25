@@ -1,5 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
+import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withTheme } from "@material-ui/styles";
@@ -37,12 +38,18 @@ class BaseWindowPlugin extends React.PureComponent {
     // There will be defaults in props.custom, so that each plugin has own default title/description
     this.description = props.options.description || props.custom.description;
 
+    // Should Window be visible at start?
+    const visibleAtStart =
+      (isMobile
+        ? props.options.visibleAtStartMobile
+        : props.options.visibleAtStart) || false;
+
     // Title and Color are kept in state and not as class properties. Keeping them in state
     // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
     this.state = {
       title: props.options.title || props.custom.title || "Unnamed plugin",
       color: props.options.color || props.custom.color || null,
-      windowVisible: false, // Does not have anything to do with color or title, but must also be set initially
+      windowVisible: visibleAtStart,
     };
 
     // Title is a special case: we want to use the state.title and pass on to Window in order
@@ -66,15 +73,13 @@ class BaseWindowPlugin extends React.PureComponent {
     props.app.globalObserver.subscribe(eventName, (opts) => {
       this.showWindow(opts);
     });
-  }
 
-  // Runs on initial render.
-  componentDidMount() {
-    // visibleAtStart is false by default. Change to true only if option really is 'true'.
-    this.props.options.visibleAtStart === true &&
-      this.setState({
-        windowVisible: true,
-      });
+    // Same as above, but to close the window.
+    const closeEventName = `${this.type}.closeWindow`;
+
+    props.app.globalObserver.subscribe(closeEventName, () => {
+      this.closeWindow();
+    });
   }
 
   // Does not run on initial render, but runs on subsequential re-renders.
@@ -235,8 +240,8 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   render() {
+    // Don't render if "clean" query param is specified, otherwise go on
     return (
-      // Don't render if "clean" query param is specified, otherwise go on
       this.props.app.config.mapConfig.map.clean !== true && this.renderWindow()
     );
   }
