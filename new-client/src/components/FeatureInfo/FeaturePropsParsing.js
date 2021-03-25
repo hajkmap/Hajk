@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@material-ui/core";
 
+// Styled Component, makes every second row colored
 const StyledTableRow = withStyles((theme) => ({
   root: {
     "&:nth-of-type(even)": {
@@ -26,22 +27,19 @@ export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
     this.options = settings.options;
-    this.asyncComponentsPromises = [];
-    this.resolvedPromises = [];
+
+    // Two arrays that will hold pending promises and their resolved values, respectively.
+    this.pendingPromises = [];
+    this.resolvedPromisesWithComponents = [];
 
     this.markdown = null;
-    this.properties = null;
+    this.properties = null; // Will hold the property values from the clicked feature
 
     // Default to true to ensure backwards compatibility with old configs that predominately use HTML
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
 
+    // Here we define the renderers used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-node-types
     this.renderers = {
-      // root: (a, b, c) => {
-      //   console.log("root: ", a, b, c);
-      //   return a.children;
-      // },
-      // FIXME: We shouldn't assume that external placeholders will come only in
-      // text nodes. TODO: Move this renderer to 'root' (above) and make sure it works.
       text: (text) => {
         // This helper is passed to ReactMarkdown at render. At this stage,
         // we expect that the only remaining {stuff} will contain digits, and
@@ -49,7 +47,7 @@ export default class FeaturePropsParsing {
         // So we want to replace all of them with the corresponding component from promises.
         const match = text.value.match(/{(\d+)}/);
         if (match) {
-          return this.resolvedPromises[match[1]];
+          return this.resolvedPromisesWithComponents[match[1]];
         } else return text.children;
       },
       thematicBreak: () => <Divider />,
@@ -105,22 +103,18 @@ export default class FeaturePropsParsing {
     return result;
   };
 
-  #getPropertyForPlaceholder = (placeholder, properties) => {
+  #getPropertyValueForPlaceholder = (placeholder) => {
     // First strip the curly brackets, e.g. {foobar} -> foobar
     placeholder = placeholder.substring(1, placeholder.length - 1);
 
     // Placeholders to be fetch from external components will include "@@", and
     // they need to be treated differently from "normal" placeholders (sans @@).
-    //
-    // Side note: /(?<!@)@@(?!@)/ would be a nice solution to only match those
-    // with exactly 2 at signs. But at time of writing the browser support for
-    // negative lookbehind wasn't there, so I opted with this less elegant solution:
     if (placeholder.includes("@@") && !placeholder.includes("@@@")) {
       // Extract the property and plugins names from the placeholder.
       const [propertyName, pluginName] = placeholder.split("@@");
 
       // Grab the actual value of this placeholder from the properties collections
-      const propertyValue = properties[propertyName];
+      const propertyValue = this.properties[propertyName];
 
       // If they key was not found in the properties object, or the value is empty, we can't go on.
       if (
@@ -141,26 +135,31 @@ export default class FeaturePropsParsing {
         // the contents of the correct element in the resolved promises array.
 
         return `{${
-          this.asyncComponentsPromises.push(
+          this.pendingPromises.push(
             this.#fetchExternal(propertyValue, pluginName)
           ) - 1
         }}`;
       }
-    } else {
+    }
+    // Just a "normal" placeholder, e.g. {foobar}
+    else {
       // Grab the actual value from the Properties collection, if not found, fallback to empty string
-      return properties[placeholder] || "";
+      return this.properties[placeholder] || "";
     }
   };
 
-  #fetchExternal = (property, externalEvent) => {
+  #fetchExternal = (propertyValue, pluginName) => {
+    // If there are listeners for the current plugin that we parsed out here…
     if (
-      this.globalObserver.getListeners(`core.info-click-${externalEvent}`)
-        .length > 0
+      this.globalObserver.getListeners(`core.info-click-${pluginName}`).length >
+      0
     ) {
       return new Promise((resolve, reject) => {
-        //Let subscription resolve the promise
-        this.globalObserver.publish(`core.info-click-${externalEvent}`, {
-          payload: property,
+        // …let's return a Promise that will publish an event to the
+        // requested plugin. The listening plugin will use the payload,
+        // together with resolve/reject to fulfill the Promise.
+        this.globalObserver.publish(`core.info-click-${pluginName}`, {
+          payload: propertyValue,
           resolve,
           reject,
         });
@@ -169,7 +168,14 @@ export default class FeaturePropsParsing {
       return null;
     }
   };
-
+  /**
+   * @summary The evaluator helper used in the final stage of markdown string
+   * parsing. Extracts <if> tags and either keeps the content (if value evaluates)
+   * to true, or removes it from the markdown string.
+   *
+   * @param {*} args
+   * @returns {string} Value inside the <if> condition (if evaluated to true), or an empty string.
+   */
   #conditionalReplacer = (...args) => {
     // Extract the regex named capture groups, they will be the last argument
     // when .replace() calls this helper.
@@ -192,7 +198,7 @@ export default class FeaturePropsParsing {
             .split("=") // Create an array
             .map((e) => e.replaceAll('"', "").trim()); // Remove double quotes and whitespace
 
-          // Using truthy equal below, we want 2 and "2" to be seen as equal.
+          // Using truthy equal below: we want 2 and "2" to be seen as equal.
           // eslint-disable-next-line eqeqeq
           if (k == v) {
             return matched.content;
@@ -266,7 +272,7 @@ export default class FeaturePropsParsing {
         // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
         this.markdown = this.markdown.replace(
           placeholder,
-          this.#getPropertyForPlaceholder(placeholder, this.properties)
+          this.#getPropertyValueForPlaceholder(placeholder)
         );
       });
 
@@ -288,11 +294,12 @@ export default class FeaturePropsParsing {
         /<(?<condition>\w+)[\s/]?(?<attributes>[^>]+)?>(?<content>[^<]+)?(?:<\/\1>\n*)?/gi,
         this.#conditionalReplacer
       );
-      console.log("MARKDOWN, final", this.markdown);
 
       // The final step is to await for all promises that might exist (if we fetch from
       // external components) to fulfill. We can't render before that!
-      this.resolvedPromises = await Promise.all(this.asyncComponentsPromises);
+      this.resolvedPromisesWithComponents = await Promise.all(
+        this.pendingPromises
+      );
 
       // Now, when promises are fulfilled, we can render. One of the render's helpers
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
