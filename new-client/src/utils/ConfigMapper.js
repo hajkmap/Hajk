@@ -117,6 +117,9 @@ export default class ConfigMapper {
         opacity: args.opacity || 1,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
+        infoClickSortType: args.infoClickSortType,
+        infoClickSortDesc: args.infoClickSortDesc,
+        infoClickSortProperty: args.infoClickSortProperty,
         //information: args.infobox,
         resolutions: properties.mapConfig.map.resolutions,
         projection: projection || "EPSG:3006",
@@ -261,6 +264,9 @@ export default class ConfigMapper {
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
         infoVisible: args.infoVisible || false,
+        infoClickSortType: args.infoClickSortType,
+        infoClickSortDesc: args.infoClickSortDesc,
+        infoClickSortProperty: args.infoClickSortProperty,
         layerType: args.layerType,
         legend: [
           {

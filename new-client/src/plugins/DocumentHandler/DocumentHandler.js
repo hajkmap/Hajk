@@ -147,7 +147,7 @@ class DocumentHandler extends React.PureComponent {
       { title: "Till huvudmeny för webbplatsen", link: "#panelmenu" },
     ]);
     app.globalObserver.publish("core.addDrawerToggleButton", {
-      value: "menu",
+      value: "documenthandler",
       ButtonIcon: MenuIcon,
       caption: options.drawerButtonTitle || "Meny",
       drawerTitle: options.drawerTitle || "Översiktsplan",
