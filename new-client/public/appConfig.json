@@ -1,7 +1,7 @@
 {
   "appName": "Hajk",
   "version": "3.5.0",
-  "mapserviceBase": "http://testservergbg.northeurope.cloudapp.azure.com:82",
+  "mapserviceBase": "",
   "proxy": "",
   "searchProxy": "",
   "defaultMap": "map_1",
