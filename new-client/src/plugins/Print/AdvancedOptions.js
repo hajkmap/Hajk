@@ -4,6 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import {
   FormControl,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
@@ -113,6 +114,7 @@ class AdvancedOptions extends React.PureComponent {
       scaleBarPlacement,
       includeLogo,
       logoPlacement,
+      printOptionsOk,
     } = this.props;
     return (
       <>
@@ -168,7 +170,7 @@ class AdvancedOptions extends React.PureComponent {
             </FormControl>
           </Grid>
           <Grid item xs={12} className={classes.formControl}>
-            <FormControl fullWidth={true}>
+            <FormControl fullWidth={true} error={!printOptionsOk}>
               <InputLabel htmlFor="resolution">Upplösning (DPI)</InputLabel>
               <Select
                 value={resolution}
@@ -182,6 +184,12 @@ class AdvancedOptions extends React.PureComponent {
                 <MenuItem value={150}>150</MenuItem>
                 <MenuItem value={300}>300</MenuItem>
               </Select>
+              {!printOptionsOk && (
+                <FormHelperText>
+                  Bilden kommer inte kunna skrivas ut korrekt. Testa med en
+                  mindre upplösning eller större skala.
+                </FormHelperText>
+              )}
             </FormControl>
           </Grid>
           <Grid item xs={12} className={classes.formControl}>

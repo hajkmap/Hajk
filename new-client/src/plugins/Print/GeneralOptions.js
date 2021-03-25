@@ -2,7 +2,13 @@ import React from "react";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
+import {
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@material-ui/core";
 
 const styles = (theme) => ({
   root: {
@@ -54,6 +60,7 @@ class GeneralOptions extends React.PureComponent {
       handleChange,
       model,
       saveAsType,
+      printOptionsOk,
     } = this.props;
     return (
       <>
@@ -89,7 +96,7 @@ class GeneralOptions extends React.PureComponent {
             </Select>
           </FormControl>
 
-          <FormControl className={classes.formControl}>
+          <FormControl className={classes.formControl} error={!printOptionsOk}>
             <InputLabel htmlFor="scale">Skala</InputLabel>
             <Select
               value={scale}
@@ -108,6 +115,12 @@ class GeneralOptions extends React.PureComponent {
                 );
               })}
             </Select>
+            {!printOptionsOk && (
+              <FormHelperText>
+                Bilden kommer inte kunna skrivas ut korrekt. Testa med en mindre
+                upplösning eller större skala.
+              </FormHelperText>
+            )}
           </FormControl>
           <FormControl className={classes.formControl}>
             <InputLabel htmlFor="orientation">Spara som</InputLabel>
