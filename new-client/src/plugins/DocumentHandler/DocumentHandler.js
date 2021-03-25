@@ -9,7 +9,6 @@ import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
 import { withTheme, createMuiTheme } from "@material-ui/core/styles";
 import { deepMerge } from "../../utils/DeepMerge";
-import { hfetch } from "utils/FetchWrapper";
 
 class DocumentHandler extends React.PureComponent {
   static propTypes = {

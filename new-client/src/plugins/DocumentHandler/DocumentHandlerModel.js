@@ -76,7 +76,7 @@ export default class DocumentHandlerModel {
       this.warnNoCustomThemeUrl();
       return Promise.resolve("");
     }
-    return fetch(this.options.customThemeUrl, fetchConfig)
+    return hfetch(this.options.customThemeUrl)
       .then((res) => {
         return res.json();
       })
