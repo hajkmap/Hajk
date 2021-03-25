@@ -602,6 +602,9 @@ class DocumentEditor extends Component {
           <Grid item>
             <AddKeyword
               onAddKeyword={(keyword) => {
+                if (!chapter.keywords) {
+                  chapter.keywords = [];
+                }
                 chapter.keywords.push(keyword);
                 this.setState({
                   keywords: chapter.keywords,
