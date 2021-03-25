@@ -17,6 +17,7 @@ import {
 } from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
+import { hfetch } from "utils/FetchWrapper";
 
 /**
  * @summary  DocumentHandler model that doesn't do much.
@@ -27,10 +28,6 @@ import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
  *
  * @class DocumentHandlerModel
  */
-
-const fetchConfig = {
-  credentials: "same-origin",
-};
 
 export default class DocumentHandlerModel {
   internalId = 0;
@@ -225,9 +222,8 @@ export default class DocumentHandlerModel {
   async fetchJsonDocument(title) {
     let response;
     try {
-      response = await fetch(
-        `${this.mapServiceUrl}/informative/load/${title}`,
-        fetchConfig
+      response = await hfetch(
+        `${this.mapServiceUrl}/informative/load/${title}`
       );
       const text = await response.text();
       if (text === "File not found") {

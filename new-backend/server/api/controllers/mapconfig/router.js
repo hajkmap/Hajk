@@ -14,6 +14,7 @@ export default express
   .get("/export/:map/:format", controller.exportMapConfig) // Describe all available layers in a human-readable format
   .get("/layers", controller.layers) // Get all layers (from layers.json)
   .get("/list", controller.list) // List all available maps
+  .get("/listimage", controller.listimage) // List all available maps
 
   // …but if none of the above matched, let's assume the string
   // provided is a param that should be used as map config name.

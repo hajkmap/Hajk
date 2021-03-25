@@ -192,68 +192,122 @@ class App extends React.PureComponent {
     config: PropTypes.object.isRequired,
   };
 
+  canRenderCustomDrawer = (activeDrawerContentFromLocalStorage, tools) => {
+    if (!activeDrawerContentFromLocalStorage) {
+      return false;
+    }
+    const localStorageToolFoundInMapConfig = tools.some((tool) => {
+      return (
+        tool.type.toLowerCase() ===
+        activeDrawerContentFromLocalStorage.toLowerCase()
+      );
+    });
+
+    return (
+      localStorageToolFoundInMapConfig &&
+      activeDrawerContentFromLocalStorage &&
+      activeDrawerContentFromLocalStorage !== "plugins"
+    );
+  };
+
+  getDrawerPermanentFromLocalStorage = () => {
+    return window.localStorage.getItem("drawerPermanent") !== null
+      ? window.localStorage.getItem("drawerPermanent") === "true"
+        ? true
+        : false
+      : null;
+  };
+
+  getActiveDrawerContentFromLocalStorage = () => {
+    return window.localStorage.getItem("activeDrawerContent") !== null
+      ? window.localStorage.getItem("activeDrawerContent")
+      : null;
+  };
+
   constructor(props) {
     super(props);
 
-    const drawerPermanentFromLocalStorage =
-      window.localStorage.getItem("drawerPermanent") !== null
-        ? window.localStorage.getItem("drawerPermanent") === "true"
-          ? true
-          : false
-        : null;
+    const drawerPermanentFromLocalStorage = this.getDrawerPermanentFromLocalStorage();
+    const activeDrawerContentFromLocalStorage = this.getActiveDrawerContentFromLocalStorage();
+    const canRenderDefaultDrawer = this.hasAnyToolbarTools();
+    const canRenderCustomDrawer = this.canRenderCustomDrawer(
+      activeDrawerContentFromLocalStorage,
+      props.config.mapConfig.tools
+    );
 
-    const activeDrawerContentFromLocalStorage =
-      window.localStorage.getItem("activeDrawerContent") !== null
-        ? window.localStorage.getItem("activeDrawerContent")
-        : null;
+    //Check if we have customContent to render in drawer
+    //if we can render customContent, use it set the drawer content.
+    //if we cant render customContent fall back to mapconfig
+    //Finally, fall back to 'plugins', the standard tools panel.
+    //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
+
+    const activeDrawerContentState = canRenderCustomDrawer
+      ? activeDrawerContentFromLocalStorage
+      : props.config.mapConfig.map.activeDrawerOnStart || "plugins";
+
+    // First check if we have anything to render at all and in case we haven't -> do not show drawer
+    //If on a mobile device, the drawer should never be permanent.
+    // If not on mobile, if cookie is not null, use it to show/hide Drawer.
+    // If cookie is not null, use it to show/hide Drawer.
+    // If cookie however is null, fall back to the values from config.
+    // Finally, fall back to "false" if no cookie or config is found.
+    const drawerPermanent =
+      (canRenderCustomDrawer || canRenderDefaultDrawer) &&
+      (isMobile
+        ? false
+        : drawerPermanentFromLocalStorage !== null
+        ? drawerPermanentFromLocalStorage
+        : (props.config.mapConfig.map.drawerVisible &&
+            props.config.mapConfig.map.drawerPermanent) ||
+          false);
+
+    // First check if we have anything to render at all and in case we haven't -> do not show drawer
+    //If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
+    //Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
+    //If there a no cookie settings, use the config drawVisible setting.
+    //Finally, don't show the drawer.
+    const drawerVisible =
+      (canRenderCustomDrawer || canRenderDefaultDrawer) &&
+      (isMobile && props.config.mapConfig.map.drawerVisibleMobile !== undefined
+        ? props.config.mapConfig.map.drawerVisibleMobile
+        : drawerPermanentFromLocalStorage !== null
+        ? drawerPermanentFromLocalStorage
+        : props.config.mapConfig.map.drawerVisible || false);
 
     this.state = {
       alert: false,
       drawerButtons: [],
       loading: false,
       mapClickDataResult: {},
-
-      // Drawer-related states
-      //If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
-      //Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-      //If there a no cookie settings, use the config drawVisible setting.
-      //Finally, don't show the drawer.
-
-      drawerVisible:
-        isMobile && props.config.mapConfig.map.drawerVisibleMobile !== undefined
-          ? props.config.mapConfig.map.drawerVisibleMobile
-          : drawerPermanentFromLocalStorage !== null
-          ? drawerPermanentFromLocalStorage
-          : props.config.mapConfig.map.drawerVisible || false,
-
-      // If on a mobile device, the drawer should never be permanent.
-      // If not on mobile, if cookie is not null, use it to show/hide Drawer.
-      // If cookie is not null, use it to show/hide Drawer.
-      // If cookie however is null, fall back to the values from config.
-      // Finally, fall back to "false" if no cookie or config is found.
-      drawerPermanent: isMobile
-        ? false
-        : drawerPermanentFromLocalStorage !== null
-        ? drawerPermanentFromLocalStorage
-        : (props.config.mapConfig.map.drawerVisible &&
-            props.config.mapConfig.map.drawerPermanent) ||
-          false,
-
-      //First check the cookie for activeDrawerContent
-      //If cookie is not null, use it set the drawer content.
-      //If cookie is null, fall back to the values from config,
-      //Finally, fall back to 'plugins', the standard tools panel.
-      //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
-      activeDrawerContent:
-        activeDrawerContentFromLocalStorage !== null
-          ? activeDrawerContentFromLocalStorage
-          : props.config.mapConfig.map.activeDrawerOnStart || "plugins",
-
+      drawerVisible: drawerVisible,
+      drawerPermanent: drawerPermanent,
+      activeDrawerContent: activeDrawerContentState,
       drawerMouseOverLock: false,
     };
+
+    //if drawer is visible at start - ensure the activeDrawerContent is set to current content
+    if (drawerVisible && drawerPermanent) {
+      window.localStorage.setItem(
+        "activeDrawerContent",
+        activeDrawerContentState
+      );
+    }
+
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
   }
+
+  hasAnyToolbarTools = () => {
+    const { config, activeTools } = this.props;
+    return config.mapConfig.tools.some((tool) => {
+      return (
+        tool.options.target === "toolbar" &&
+        activeTools
+          .map((activeTool) => activeTool.toLowerCase())
+          .includes(tool.type.toLowerCase())
+      );
+    });
+  };
 
   componentDidMount() {
     var promises = this.appModel

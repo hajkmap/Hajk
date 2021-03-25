@@ -10,10 +10,7 @@ import { getPointResolution, transform } from "ol/proj";
 import * as SLDReader from "@nieuwlandgeo/sldreader";
 
 import LayerInfo from "./LayerInfo.js";
-
-const fetchConfig = {
-  credentials: "same-origin",
-};
+import { hfetch } from "utils/FetchWrapper";
 
 const vectorLayerProperties = {
   url: "",
@@ -95,7 +92,7 @@ class WFSVectorLayer {
 
     // Try fetching the URL, if specified, and style with the resulting SLD
     if (typeof this.sldUrl === "string" && this.sldUrl.trim().length > 0) {
-      fetch(this.sldUrl)
+      hfetch(this.sldUrl)
         .then((response) => response.text())
         .then((text) => this.applySldTextOnLayer(text));
     }
@@ -281,7 +278,7 @@ class WFSVectorLayer {
   loadData(url) {
     url = this.proxyUrl + url;
 
-    fetch(url, fetchConfig).then((response) => {
+    hfetch(url).then((response) => {
       response.text().then((features) => {
         // Load all features (no filter active - only bbox limitation)
         this.allFeatures = this.getAllFeatures(features);
@@ -303,7 +300,7 @@ class WFSVectorLayer {
 
   // generateLegend(callback) {
   //   var url = this.proxyUrl + this.createUrl();
-  //   fetch(url, fetchConfig).then((response) => {
+  //   fetch(url).then((response) => {
   //     response.text().then((gmlText) => {
   //       const parser = new GML2();
   //       const features = parser.readFeatures(gmlText);

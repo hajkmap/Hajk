@@ -1,7 +1,7 @@
 import { delay } from "../../utils/Delay";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
-import * as jsPDF from "jspdf";
+import jsPDF from "jspdf";
 import * as PDFjs from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 
@@ -299,7 +299,7 @@ export default class PrintModel {
   ) => {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
     pdf.setFontSize(6);
-    pdf.setFontStyle("bold");
+    pdf.setFont("helvetica", "bold");
     pdf.setTextColor(color);
     pdf.text(
       lengthText,

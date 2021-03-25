@@ -2,9 +2,10 @@ openapi: 3.0.3
 info:
   title: hajk-backend
   description: Hajk backend
-  version: 1.0.0
+  version: 1.1.0
 servers:
   - url: /api/v1
+  - url: /api/v2
 tags:
   - name: Client-accessible
     description: Resources necessary to load a working map in client
@@ -214,6 +215,15 @@ paths:
       responses:
         200:
           description: Available maps were fetched successfully
+          content: {}
+  /mapconfig/listimage:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available images in the upload folder
+      responses:
+        200:
+          description: Available images were fetched successfully
           content: {}
   /mapconfig/{map}:
     get:

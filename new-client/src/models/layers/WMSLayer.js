@@ -7,6 +7,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import LayerInfo from "./LayerInfo.js";
 import { equals } from "ol/extent";
 import { delay } from "../../utils/Delay";
+import { hfetch, overrideLayerSourceParams } from "utils/FetchWrapper";
 
 class WMSLayer {
   constructor(config, proxyUrl, globalObserver) {
@@ -33,6 +34,12 @@ class WMSLayer {
     if (config.hidpi !== null) {
       source.hidpi = config.hidpi;
     }
+
+    overrideLayerSourceParams(source);
+
+    const minZoom = config?.minZoom >= 0 ? config.minZoom : undefined;
+    const maxZoom = config?.maxZoom >= 0 ? config.maxZoom : undefined;
+
     if (
       config.resolutions &&
       config.resolutions.length > 0 &&
@@ -58,6 +65,8 @@ class WMSLayer {
         source: new ImageWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        minZoom: minZoom,
+        maxZoom: maxZoom,
       });
     } else {
       this.layer = new TileLayer({
@@ -68,6 +77,8 @@ class WMSLayer {
         source: new TileWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        minZoom: minZoom,
+        maxZoom: maxZoom,
       });
     }
 
@@ -163,7 +174,7 @@ class WMSLayer {
           url = encodeURIComponent(url);
         }
 
-        fetch(this.proxyUrl + url)
+        hfetch(this.proxyUrl + url)
           .then((response) => {
             response.json().then((data) => {
               var features = new GeoJSON().readFeatures(data);
