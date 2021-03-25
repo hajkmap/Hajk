@@ -197,12 +197,12 @@ class VTSearch extends React.PureComponent {
       }
     );
 
-    this.globalObserver.subscribe("window-minimize", (title) => {
+    this.globalObserver.subscribe("core.minimizeWindow", (title) => {
       if (title === this.props.options.title)
         this.globalObserver.publish("clear-autocomplete");
     });
 
-    this.globalObserver.subscribe("window-close", (title) => {
+    this.globalObserver.subscribe("core.closeWindow", (title) => {
       if (title === this.props.options.title)
         this.globalObserver.publish("clear-autocomplete");
     });

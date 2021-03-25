@@ -182,6 +182,16 @@ class Window extends React.PureComponent {
     this.localObserver = this.props.localObserver;
   }
 
+  componentDidUpdate = (prevProps, prevState) => {
+    if (this.props.open) {
+      //This is ugly but there is a timing problem further down somewhere (i suppose?).
+      //componentDidUpdate is run before the render is actually fully completed and the DOM is ready
+      setTimeout(() => {
+        this.windowRef.current.focus();
+      }, 200);
+    }
+  };
+
   componentDidMount() {
     const { globalObserver } = this.props;
     if (globalObserver) {
@@ -280,7 +290,7 @@ class Window extends React.PureComponent {
     this.latestWidth = this.rnd.getSelfElement().clientWidth;
     if (onClose) onClose();
 
-    globalObserver.publish("window-close", title);
+    globalObserver.publish("core.closeWindow", title);
   };
 
   fit = (target) => {
@@ -371,7 +381,7 @@ class Window extends React.PureComponent {
     typeof onMaximize === "function" && onMaximize();
     typeof onResize === "function" && onResize();
 
-    globalObserver.publish("window-maximize", title);
+    globalObserver.publish("core.maximizeWindow", title);
   };
 
   minimize = () => {
@@ -393,7 +403,7 @@ class Window extends React.PureComponent {
     typeof onMinimize === "function" && onMinimize();
     typeof onResize === "function" && onResize();
 
-    globalObserver.publish("window-minimize", title);
+    globalObserver.publish("core.minimizeWindow", title);
   };
 
   bringToFront() {
