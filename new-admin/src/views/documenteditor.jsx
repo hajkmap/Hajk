@@ -956,7 +956,6 @@ class DocumentEditor extends Component {
             <Grid className={classes.gridItem} item>
               <FormControl>
                 <NativeSelect
-                  value={10}
                   onChange={(e) => {
                     this.load(e.target.value);
                   }}
