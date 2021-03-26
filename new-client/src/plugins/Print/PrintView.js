@@ -63,6 +63,7 @@ class PrintView extends React.PureComponent {
     includeLogo: this.props.options.includeLogo ?? true,
     logoPlacement: this.props.options.logoPlacement || "topRight",
     saveAsType: "PDF",
+    printOptionsOk: false,
   };
 
   snackbarKey = null;
@@ -115,7 +116,9 @@ class PrintView extends React.PureComponent {
 
     props.localObserver.subscribe("showPrintPreview", () => {
       const scale = this.model.getFittingScale();
-      this.setState({ previewLayerVisible: true, scale: scale });
+      this.setState({ previewLayerVisible: true, scale: scale }, () => {
+        this.handlePotentialPrintOptionError();
+      });
     });
 
     props.localObserver.subscribe("hidePrintPreview", () => {
@@ -140,7 +143,12 @@ class PrintView extends React.PureComponent {
       snackbarKey: this.snackbarKey,
     };
 
-    let printOptions = {
+    const printOptions = this.getPrintOptions();
+    this.model.print(printOptions);
+  };
+
+  getPrintOptions = () => {
+    return {
       format: this.state.format,
       orientation: this.state.orientation,
       resolution: this.state.resolution,
@@ -156,8 +164,6 @@ class PrintView extends React.PureComponent {
       northArrowPlacement: this.state.northArrowPlacement,
       saveAsType: this.state.saveAsType,
     };
-
-    this.model.print(printOptions);
   };
 
   /**
@@ -179,9 +185,20 @@ class PrintView extends React.PureComponent {
   };
 
   handleChange = (event) => {
-    this.setState({
-      [event.target.name]: event.target.value,
-    });
+    this.setState(
+      {
+        [event.target.name]: event.target.value,
+      },
+      () => {
+        this.handlePotentialPrintOptionError();
+      }
+    );
+  };
+
+  handlePotentialPrintOptionError = () => {
+    const printOptions = this.getPrintOptions();
+    const printOptionsOk = this.model.desiredPrintOptionsOk(printOptions);
+    this.setState({ printOptionsOk: printOptionsOk });
   };
 
   setMapTextColor = (color) => {
@@ -200,7 +217,14 @@ class PrintView extends React.PureComponent {
 
   renderGeneralOptions = () => {
     const { scales } = this.props;
-    const { scale, format, orientation, resolution, saveAsType } = this.state;
+    const {
+      scale,
+      format,
+      orientation,
+      resolution,
+      saveAsType,
+      printOptionsOk,
+    } = this.state;
 
     return (
       <GeneralOptions
@@ -214,6 +238,7 @@ class PrintView extends React.PureComponent {
         }}
         model={this.model}
         saveAsType={saveAsType}
+        printOptionsOk={printOptionsOk}
       ></GeneralOptions>
     );
   };
@@ -230,6 +255,7 @@ class PrintView extends React.PureComponent {
       scaleBarPlacement,
       includeLogo,
       logoPlacement,
+      printOptionsOk,
     } = this.state;
 
     return (
@@ -248,6 +274,7 @@ class PrintView extends React.PureComponent {
         scaleBarPlacement={scaleBarPlacement}
         includeLogo={includeLogo}
         logoPlacement={logoPlacement}
+        printOptionsOk={printOptionsOk}
       ></AdvancedOptions>
     );
   };
