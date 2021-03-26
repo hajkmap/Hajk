@@ -49,6 +49,10 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
 
     this.featurePropsParsing = new FeaturePropsParsing({
       globalObserver: props.app.globalObserver,
+      options:
+        props.app.appModel.config.mapConfig.tools.find(
+          (t) => t.type === "infoclick"
+        )?.options || [], // featurePropsParsing needs to know if FeatureInfo is configured to allow HTML or not, so we pass on its' options
     });
   }
 
