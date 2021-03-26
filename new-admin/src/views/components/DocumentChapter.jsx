@@ -1,6 +1,7 @@
 import React from "react";
 import { Component } from "react";
 import Button from "@material-ui/core/Button";
+import AddIcon from "@material-ui/icons/Add";
 import DoneIcon from "@material-ui/icons/DoneOutline";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { withStyles } from "@material-ui/core/styles";
@@ -132,8 +133,9 @@ class DocumentChapter extends Component {
             variant="contained"
             className="btn btn-default"
             onClick={() => this.toggleInputVisibility()}
+            startIcon={<AddIcon />}
           >
-            Kapitel
+            {this.props.buttonCaption || "Kapitel"}
           </Button>
         </div>
       );

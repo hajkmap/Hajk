@@ -15,7 +15,13 @@ import {
 const styles = (theme) => {
   return {
     tableOfContents: {
-      backgroundColor: theme.palette.action.selected,
+      //Need to manually change color when switching between dark/light-mode
+      backgroundColor:
+        theme.palette.type === "dark"
+          ? theme.palette.grey[700]
+          : theme.palette.grey[200],
+      tapHighlightColor: "transparent",
+
       cursor: "pointer",
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
@@ -158,6 +164,7 @@ class TableOfContents extends React.PureComponent {
             display: "flex",
             justifyContent: "space-between",
           }}
+          color="inherit"
           fullWidth
           endIcon={
             expanded ? (
