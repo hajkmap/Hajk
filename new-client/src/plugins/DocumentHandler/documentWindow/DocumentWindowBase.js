@@ -75,41 +75,26 @@ class DocumentWindowBase extends React.PureComponent {
     });
   };
 
-  canHandleInfoClickEvent = (infoClickEvent) => {
-    if (infoClickEvent.payload.type !== "a") {
-      return false;
-    }
-    return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
-      return [
-        "data-maplink",
-        "data-link",
-        "data-document",
-        "data-header-identifier",
-      ].includes(key);
-    });
-  };
-
   handleInfoClickRequest = (infoClickEvent) => {
-    if (this.canHandleInfoClickEvent(infoClickEvent)) {
-      var htmlObject = document.createElement(infoClickEvent.payload.type);
-      htmlObject.innerHTML = infoClickEvent.payload.children[0];
-      Object.entries(infoClickEvent.payload.dataAttributes).forEach(
-        (dataAttributeEntry) => {
-          var att = document.createAttribute(dataAttributeEntry[0]);
-          att.value = dataAttributeEntry[1];
-          htmlObject.setAttributeNode(att);
-        }
-      );
-      let link = (
+    const htmlObject = document.createElement("span");
+    htmlObject.innerHTML = infoClickEvent.payload.replace(/\\/g, "");
+    const aTag = htmlObject.getElementsByTagName("a")[0];
+    if (aTag) {
+      infoClickEvent.resolve(
         <CustomLink
           localObserver={this.props.localObserver}
-          aTag={htmlObject}
+          aTag={aTag}
           bottomMargin={false}
         ></CustomLink>
       );
-      infoClickEvent.resolve(link);
     } else {
-      infoClickEvent.resolve();
+      console.error(
+        "Could not render DocumentHandler link for payload:",
+        infoClickEvent.payload
+      );
+      // Must resolve with a value, even null will do, but something more helpful could be nice.
+      // The reason we must do it is because this value is used in React's render, and undefined will not render.
+      infoClickEvent.resolve(<b>Could not render DocumentHandler link</b>);
     }
   };
 

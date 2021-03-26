@@ -480,6 +480,11 @@ class App extends React.PureComponent {
           width={infoclickOptions.width || 400}
           height={infoclickOptions.height || 300}
           features={this.state.mapClickDataResult?.features}
+          options={
+            this.appModel.config.mapConfig.tools.find(
+              (t) => t.type === "infoclick"
+            )?.options
+          }
           map={this.appModel.getMap()}
           onDisplay={(feature) => {
             this.appModel.highlight(feature);
