@@ -34,7 +34,7 @@ class SettingsPopover extends React.Component {
   state = {
     color: this.props.menuItem.color,
     icon: this.props.menuItem.icon,
-    expandedSubMenu: this.props.menuItem.expandedSubMenu,
+    expandedSubMenu: this.props.menuItem.expandedSubMenu || false,
   };
 
   updateColorState = (e) => {
@@ -44,9 +44,8 @@ class SettingsPopover extends React.Component {
   updateIconState = (e) => {
     let value = e.target.value;
     this.setState((prevState) => {
-      prevState.icon.materialUiIconName = value;
       return {
-        icon: prevState.icon,
+        icon: { ...prevState.icon, materialUiIconName: value },
       };
     });
   };
@@ -94,8 +93,8 @@ class SettingsPopover extends React.Component {
   };
 
   renderSettings = () => {
-    const { classes } = this.props;
-    const { closePopover } = this.props;
+    const { classes, menuItem } = this.props;
+
     return (
       <form
         className={classes.paper}
@@ -105,8 +104,8 @@ class SettingsPopover extends React.Component {
       >
         <Grid spacing={2} container>
           <Grid xs={12} item>
-            {this.props.menuItem.menu &&
-              this.props.menuItem.menu.length > 0 &&
+            {menuItem.menu &&
+              menuItem.menu.length > 0 &&
               this.renderExpandedByStartOption()}
           </Grid>
           <Grid xs={12} item>
@@ -155,13 +154,30 @@ class SettingsPopover extends React.Component {
               </ColorButtonGreen>
             </Grid>
             <Grid xs={2} container item>
-              <ColorButtonRed onClick={closePopover}>
+              <ColorButtonRed onClick={this.resetAndClosePopover}>
                 <Typography variant="button">AVBRYT</Typography>
               </ColorButtonRed>
             </Grid>
           </Grid>
         </Grid>
       </form>
+    );
+  };
+
+  resetAndClosePopover = () => {
+    const { closePopover, menuItem } = this.props;
+    this.setState(
+      {
+        color: menuItem.color,
+        icon: {
+          materialUiIconName: menuItem.icon.materialUiIconName,
+          fontSize: menuItem.icon.fontSize,
+        },
+        expandedSubMenu: menuItem.expandedSubMenu || false,
+      },
+      () => {
+        closePopover();
+      }
     );
   };
 

@@ -931,7 +931,8 @@ class ToolOptions extends Component {
                   <Grid xs={12} item>
                     <Tree
                       blockNode
-                      height="80vh"
+                      height={window.innerHeight - 200}
+                      virtual={false} //Makes scroll work when drag
                       switcherIcon={<></>}
                       onDrop={this.onDropNode}
                       expandedKeys={expandedKeys}
