@@ -33,10 +33,24 @@ const styles = (theme) => ({
   warningText: {
     color: theme.palette.error.main,
   },
+  textAreaSettings: {
+    position: "relative",
+  },
+  disabledDiv: {
+    position: "absolute",
+    top: 0,
+    backgroundColor: "white",
+    opacity: 0.5,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    zIndex: 10,
+  },
 });
 
 class ToolOptions extends Component {
   state = {
+    textAreacolorpickerEnabled: false,
     active: false,
     index: 0,
     title: "Visa informationsruta",
@@ -93,7 +107,7 @@ class ToolOptions extends Component {
     this.setState((prevState) => ({
       defaultDocumentColorSettings: {
         ...prevState.defaultDocumentColorSettings,
-        [target]: color.hex,
+        [target]: color,
       },
     }));
   };
@@ -111,6 +125,11 @@ class ToolOptions extends Component {
     var tool = this.getTool();
     if (tool) {
       this.setState({
+        textAreacolorpickerEnabled:
+          tool.options.defaultDocumentColorSettings.textAreaBackgroundColor ||
+          tool.options.defaultDocumentColorSettings.textAreaDividerColor
+            ? true
+            : false,
         active: true,
         index: tool.index,
         target: tool.options.target,
@@ -128,7 +147,8 @@ class ToolOptions extends Component {
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
-        displayLoadingOnMapLinkOpen: tool.options.displayLoadingOnMapLinkOpen,
+        displayLoadingOnMapLinkOpen:
+          tool.options.displayLoadingOnMapLinkOpen || false,
         tableOfContents: tool.options.tableOfContents,
         defaultDocumentColorSettings: tool.options
           .defaultDocumentColorSettings || {
@@ -172,6 +192,19 @@ class ToolOptions extends Component {
         .filter((tool) => tool.type !== this.type),
     });
   }
+
+  toggleTextAreaColorpickers = () => {
+    //React batches multiple setState in eventhandler so this should be fine
+    this.setState((prevState) => {
+      if (prevState.textAreacolorpickerEnabled) {
+        this.handleColorChange("textAreaBackgroundColor", "");
+        this.handleColorChange("textAreaDividerColor", "");
+      }
+      return {
+        textAreacolorpickerEnabled: !prevState.textAreacolorpickerEnabled,
+      };
+    });
+  };
 
   replace(tool) {
     this.props.model.get("toolConfig").forEach((t) => {
@@ -641,7 +674,6 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-
           <div>
             <label htmlFor="drawerButtonTitle">
               Knapptitel{" "}
@@ -661,7 +693,6 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-
           <div>
             <input
               id="searchImplemented"
@@ -675,7 +706,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="searchImplemented">Sökning aktiverad</label>
           </div>
-
           <div>
             <input
               id="enablePrint"
@@ -689,7 +719,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="enablePrint">Utskrift aktiverad</label>
           </div>
-
           <div>
             <input
               id="closePanelOnMapLinkOpen"
@@ -705,7 +734,6 @@ class ToolOptions extends Component {
               Stäng dokumentfönster vid klick på kartlänk
             </label>
           </div>
-
           <div>
             <input
               id="displayLoadingOnMapLinkOpen"
@@ -724,9 +752,7 @@ class ToolOptions extends Component {
               Visa 'Kartan laddar' dialog vid klick på kartlänk
             </label>
           </div>
-
           <div className="separator">Innehållsförteckning</div>
-
           <div>
             <input
               id="tableOfContentsActive"
@@ -747,7 +773,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="tableOfContentsActive">Aktiverad</label>
           </div>
-
           <div>
             <input
               id="tableOfContentsExpanded"
@@ -768,7 +793,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="tableOfContentsExpanded">Expanderad</label>
           </div>
-
           <div>
             <label htmlFor="tableOfContentsTitle">
               Titel{" "}
@@ -823,6 +847,17 @@ class ToolOptions extends Component {
           </div>
           <div className="separator">Faktaruta</div>
           <div>
+            <input
+              id="override_textarea_color"
+              name="override_textarea_color"
+              type="checkbox"
+              onChange={this.toggleTextAreaColorpickers}
+              checked={this.state.textAreacolorpickerEnabled}
+            />
+            &nbsp;
+            <label htmlFor="override_textarea_color">Aktiverad</label>
+          </div>
+          <div>
             <p className={classes.warningText}>
               <b>
                 Vid användning av dessa inställningar riskeras dark/light-mode
@@ -830,11 +865,15 @@ class ToolOptions extends Component {
               </b>
             </p>
           </div>
-          <div className="clearfix">
+          <div className={`${classes.textAreaSettings} clearfix`}>
+            {!this.state.textAreacolorpickerEnabled && (
+              //Add div on top of colorpickers to make them look disabled.
+              <div className={classes.disabledDiv}></div>
+            )}
             <span className="pull-left">
               <div>
                 <label className="long-label" htmlFor="textAreaBackgroundColor">
-                  Bakgrundsfärg{" "}
+                  Bakgrundsfärg
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
@@ -849,7 +888,7 @@ class ToolOptions extends Component {
                       .textAreaBackgroundColor
                   }
                   onChangeComplete={(color) =>
-                    this.handleColorChange("textAreaBackgroundColor", color)
+                    this.handleColorChange("textAreaBackgroundColor", color.hex)
                   }
                 />
               </div>
@@ -871,13 +910,12 @@ class ToolOptions extends Component {
                     this.state.defaultDocumentColorSettings.textAreaDividerColor
                   }
                   onChangeComplete={(color) =>
-                    this.handleColorChange("textAreaDividerColor", color)
+                    this.handleColorChange("textAreaDividerColor", color.hex)
                   }
                 />
               </div>
             </span>
           </div>
-
           <section className="tab-pane active">
             <Modal
               style={{
