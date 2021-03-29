@@ -1,0 +1,12 @@
+version: "3"
+services:
+  hajk:
+    image: hajk-backend-with-client-and-admin
+    expose:
+      - 3002
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:1337
+    depends_on:
+      - hajk
