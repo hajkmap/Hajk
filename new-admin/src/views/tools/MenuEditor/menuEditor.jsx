@@ -53,7 +53,7 @@ class ToolOptions extends Component {
     textAreacolorpickerEnabled: false,
     active: false,
     index: 0,
-    title: "Visa informationsruta",
+    title: "Dokumenthanterare",
     target: "hidden",
     showScrollButtonLimit: 400,
     dynamicImportUrls: {
