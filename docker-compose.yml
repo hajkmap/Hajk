@@ -30,11 +30,11 @@ services:
     healthcheck:
       test: "exit 0"
   geoserver:
-    image: kartoza/geoserver:latest
+    image: kartoza/geoserver:2.18.0
     volumes:
       - geoserver-data:/opt/geoserver/data_dir
-    expose:
-      - 8080
+    ports:
+      - "8080:8080"
     restart: on-failure
     environment:
       - GEOSERVER_DATA_DIR=/opt/geoserver/data_dir
