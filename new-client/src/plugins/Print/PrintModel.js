@@ -444,6 +444,7 @@ export default class PrintModel {
       originalCenter,
       originalResolution,
       scaleResolution,
+      resolutionConstrained,
     };
 
     this.map.once("rendercomplete", async () => {
@@ -679,6 +680,8 @@ export default class PrintModel {
       .getView()
       .setResolution(this.valuesToRestoreFrom.originalResolution);
     this.map.getView().setCenter(this.valuesToRestoreFrom.originalCenter);
+    this.valuesToRestoreFrom.resolutionConstrained &&
+      this.map.getView().setConstrainResolution(true);
   };
 
   /**

@@ -346,6 +346,23 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
+    // Register a handle to prevent pinch zoom on mobile devices.
+    document.body.addEventListener(
+      "touchmove",
+      (event) => {
+        // If this event would result in changing scale …
+        if (event.scale !== 1) {
+          // …cancel it.
+          event.preventDefault();
+        }
+        // Else, allow all non-scale-changing touch events, e.g.
+        // we still want scroll to work.
+      },
+      { passive: false } // Explicitly tell the browser that we will preventDefault inside this handler,
+      // which is important for smooth scrolling to work correctly.
+    );
+
+    // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
       this.appModel.highlight(false);
       this.setState({
