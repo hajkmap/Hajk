@@ -53,7 +53,7 @@ class ToolOptions extends Component {
     textAreacolorpickerEnabled: false,
     active: false,
     index: 0,
-    title: "Visa informationsruta",
+    title: "Dokumenthanterare",
     target: "hidden",
     showScrollButtonLimit: 400,
     dynamicImportUrls: {
@@ -61,7 +61,7 @@ class ToolOptions extends Component {
       customFont: "https://fonts.googleapis.com/css?family=Open+Sans",
     },
     width: 600,
-    height: "90vh",
+    height: "",
     menuConfig: {
       menu: [],
     },
@@ -636,6 +636,49 @@ class ToolOptions extends Component {
             </ColorButtonBlue>
           </p>
           <div className="separator">Generella inställningar</div>
+          <div>
+            <label htmlFor="width">
+              Fönsterbredd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
+              />
+            </label>
+            <input
+              id="width"
+              name="width"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.width}
+            />
+          </div>
+          <div>
+            <label htmlFor="height">
+              Fönsterhöjd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+              />
+            </label>
+            <input
+              id="height"
+              name="height"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.height}
+            />
+          </div>
+
           <div>
             <label htmlFor="documentOnStart">
               Startdokument{" "}
