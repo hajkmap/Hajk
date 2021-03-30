@@ -135,7 +135,7 @@ class ConfigServiceV2 {
     const getLayerIdsFromGroup = (group) => {
       return [
         ...group.layers.map((l) => l.id),
-        ...group.groups.flatMap((g) => getLayerIdsFromGroup(g)),
+        ...(group.groups?.flatMap((g) => getLayerIdsFromGroup(g)) || []),
       ];
     };
 
