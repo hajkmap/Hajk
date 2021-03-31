@@ -51,12 +51,15 @@ class AnchorModel {
     return this.map
       .getLayers()
       .getArray()
-      .filter(
-        (layer) =>
-          layer.getVisible() &&
-          layer.getProperties().name &&
-          !Number.isNaN(parseInt(layer.getProperties().name))
-      )
+      .filter((layer) => {
+        return (
+          // We consider a layer to be visible only if…
+          layer.getVisible() && // …it's visible…
+          layer.getProperties().name && // …has a specified name property…
+          (!Number.isNaN(parseInt(layer.getProperties().name)) || // …and the name is either a Number…
+            /^[a-f0-9]{32}$/i.test(layer.getProperties().name)) // … or an MD5 string (which is the new default for layers created in NodeJS backend)
+        );
+      })
       .map((layer) => layer.getProperties().name)
       .join(",");
   }
