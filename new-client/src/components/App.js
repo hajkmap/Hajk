@@ -19,6 +19,7 @@ import PluginWindows from "./PluginWindows";
 import Search from "./Search/Search.js";
 
 import Zoom from "../controls/Zoom";
+import User from "../controls/User";
 import Rotate from "../controls/Rotate";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
@@ -790,6 +791,9 @@ class App extends React.PureComponent {
                 )}
               >
                 <Zoom map={this.appModel.getMap()} />
+                {clean === false && (
+                  <User userDetails={this.appModel.config.userDetails} />
+                )}
                 <div id="plugin-control-buttons"></div>
                 <Rotate map={this.appModel.getMap()} />
                 {showMapSwitcher && <MapSwitcher appModel={this.appModel} />}
