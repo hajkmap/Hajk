@@ -169,6 +169,12 @@ const styles = (theme) => {
     widgetItem: {
       width: "220px",
     },
+    snackBarContainerRoot: {
+      pointerEvents: "none",
+      '& div[class^="SnackbarItem-root"]': {
+        pointerEvents: "auto",
+      },
+    },
     snackbarContainerBottom: {
       [theme.breakpoints.down("xs")]: {
         bottom: "35px",
@@ -726,6 +732,7 @@ class App extends React.PureComponent {
         classes={{
           anchorOriginBottomCenter: classes.snackbarContainerBottom,
           anchorOriginTopCenter: classes.snackbarContainerTop,
+          containerRoot: classes.snackBarContainerRoot,
         }}
         anchorOrigin={{
           vertical: "top",
