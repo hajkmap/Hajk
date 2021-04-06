@@ -11,11 +11,10 @@ class CoordinatesModel {
     this.app = settings.app;
     this.map = settings.map;
     this.localObserver = settings.localObserver;
-    this.prettyPrint = settings.prettyPrint ?? true;
-    this.showFieldsOnStart = settings.showFieldsOnStart ?? false;
+    this.thousandSeparator = settings.options.thousandSeparator ?? false;
+    this.showFieldsOnStart = settings.options.showFieldsOnStart ?? false;
 
     this.coordinates = undefined;
-    // TODO test the default value and remove unused properties
     this.transformations = settings.options.transformations;
     if (!this.transformations || this.transformations.length === 0) {
       this.transformations = [
@@ -39,11 +38,16 @@ class CoordinatesModel {
     });
     this.map.addLayer(this.vector);
     this.localObserver.subscribe("newCoordinates", (incomingCoords) => {
-      const transformedCoords = transform(
-        incomingCoords["coordinates"],
-        incomingCoords["proj"],
-        this.map.getView().getProjection()
-      );
+      let transformedCoords = incomingCoords["coordinates"];
+      if (
+        incomingCoords["proj"] !== this.map.getView().getProjection().getCode()
+      ) {
+        transformedCoords = transform(
+          incomingCoords["coordinates"],
+          incomingCoords["proj"],
+          this.map.getView().getProjection().getCode()
+        );
+      }
       this.addMarker(transformedCoords);
     });
   }
@@ -51,6 +55,13 @@ class CoordinatesModel {
   activate() {
     this.addInteraction();
     this.localObserver.publish("showSnackbar");
+    if (this.showFieldsOnStart) {
+      this.localObserver.publish("newCoordinates", {
+        coordinates: this.map.getView().getCenter(),
+        proj: this.map.getView().getProjection().getCode(),
+        force: true,
+      });
+    }
   }
 
   deactivate() {
@@ -66,7 +77,6 @@ class CoordinatesModel {
    */
   addMarker = (coordinates) => {
     // Prepare the feature
-    console.log("Adding marker");
     const feature = new Feature({
       geometry: new Point(coordinates),
     });
@@ -119,7 +129,7 @@ class CoordinatesModel {
   /**
    * @summary Gets the user's position and puts the marker there
    */
-  gotToUserLocation = () => {
+  goToUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((pos) => {
         const point = new Point([pos.coords.longitude, pos.coords.latitude]);
@@ -127,11 +137,10 @@ class CoordinatesModel {
           "EPSG:4326",
           this.map.getView().getProjection().getCode()
         );
-        console.log(point);
         this.coordinates = point.getCoordinates();
         this.localObserver.publish("newCoordinates", {
           coordinates: this.coordinates,
-          proj: this.props.transformation.code,
+          proj: this.map.getView().getProjection().getCode(),
           force: true,
         });
         this.map.getView().setCenter(point.getCoordinates());

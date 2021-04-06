@@ -67,7 +67,7 @@ var defaultState = {
   target: 0,
   instruction: "",
   visibleAtStart: false,
-  prettyPrint: false,
+  thousandSeparator: false,
   showFieldsOnStart: false,
   visibleForGroups: [],
 };
@@ -98,7 +98,7 @@ class ToolOptions extends Component {
         instruction: tool.options.instruction,
         transformations: tool.options.transformations || [],
         visibleAtStart: tool.options.visibleAtStart,
-        prettyPrint: tool.options.prettyPrint,
+        thousandSeparator: tool.options.thousandSeparator,
         showFieldsOnStart: tool.options.showFieldsOnStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
@@ -173,7 +173,7 @@ class ToolOptions extends Component {
         instruction: this.state.instruction,
         transformations: this.state.transformations,
         visibleAtStart: this.state.visibleAtStart,
-        prettyPrint: this.state.prettyPrint,
+        thousandSeparator: this.state.thousandSeparator,
         showFieldsOnStart: this.state.showFieldsOnStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
@@ -473,16 +473,16 @@ class ToolOptions extends Component {
           </div>
           <div>
             <input
-              id="prettyPrint"
-              name="prettyPrint"
+              id="thousandSeparator"
+              name="thousandSeparator"
               type="checkbox"
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
-              checked={this.state.prettyPrint}
+              checked={this.state.thousandSeparator}
             />
             &nbsp;
-            <label htmlFor="prettyPrint">
+            <label htmlFor="thousandSeparator">
               Formattera nummer (1000 -> 1 000)
             </label>
           </div>

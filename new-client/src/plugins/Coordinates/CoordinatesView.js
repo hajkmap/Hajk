@@ -117,7 +117,7 @@ class CoordinatesView extends React.PureComponent {
           </Button>
           <Button
             onClick={() => {
-              this.props.model.gotToUserLocation();
+              this.props.model.goToUserLocation();
             }}
           >
             Min position
@@ -127,7 +127,7 @@ class CoordinatesView extends React.PureComponent {
               this.props.model.resetCoords();
             }}
           >
-            Nollställ
+            Rensa fält
           </Button>
         </Paper>
       </>

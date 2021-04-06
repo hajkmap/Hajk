@@ -4,6 +4,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
+import NumberFormat from "react-number-format";
 import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
 
@@ -34,6 +35,10 @@ class CoordinatesTransformRow extends React.PureComponent {
     errorY: "",
     coordinateX: "",
     coordinateY: "",
+    coordinateXFloat: 0,
+    coordinateYFloat: 0,
+    wasLastChanged: false,
+    wasModified: false,
   };
 
   constructor(props) {
@@ -57,13 +62,19 @@ class CoordinatesTransformRow extends React.PureComponent {
         this.setState({
           errorX: "",
           errorY: "",
+          wasModified: true,
           coordinateX: transformedCoords[0].toFixed(
             this.transformation.precision
           ),
           coordinateY: transformedCoords[1].toFixed(
             this.transformation.precision
           ),
+          coordinateXFloat: transformedCoords[0],
+          coordinateYFloat: transformedCoords[1],
+          wasLastChanged: false,
         });
+      } else {
+        this.setState({ wasLastChanged: true, wasModified: true });
       }
     });
 
@@ -73,22 +84,34 @@ class CoordinatesTransformRow extends React.PureComponent {
         errorY: "",
         coordinateX: "",
         coordinateY: "",
+        coordinateXFloat: 0,
+        coordinateYFloat: 0,
       });
     });
   }
 
   handleInputX(event) {
+    if (event.value === this.state.coordinateX) {
+      // Nothing was changed so do nothing, this happens since the value is
+      // changed multiple times during formatting and we do not want to create
+      // infinite loops
+      return;
+    }
     // Validate that the changed data is a finite number
-    this.setState({ coordinateX: event.target.value });
-    if (isNaN(event.target.value) || !isFinite(event.target.value)) {
+    this.setState({
+      coordinateX: event.value,
+      coordinateXFloat: event.floatValue,
+      wasModified: true,
+    });
+    if (isNaN(event.floatValue) || !isFinite(event.floatValue)) {
       this.setState({ errorX: "Ange ett decimaltal" });
     } else {
       this.setState({ errorX: "" });
-      const updatedValue = parseFloat(event.target.value);
+      const updatedValue = event.floatValue;
 
       // publish the new value so all other transformations and the marker is updated
       this.localObserver.publish("newCoordinates", {
-        coordinates: [updatedValue, this.state.coordinateY],
+        coordinates: [updatedValue, this.state.coordinateYFloat],
         proj: this.props.transformation.code,
         force: false,
       });
@@ -96,17 +119,27 @@ class CoordinatesTransformRow extends React.PureComponent {
   }
 
   handleInputY(event) {
-    // Validate that the changed data is a finite number
-    this.setState({ coordinateY: event.target.value });
-    if (isNaN(event.target.value) || !isFinite(event.target.value)) {
+    if (event.value === this.state.coordinateY) {
+      // Nothing was changed so do nothing, this happens since the value is
+      // changed multiple times during formatting and we do not want to create
+      // infinite loops
+      return;
+    }
+    // Validate that the changed data is a finite number7
+    this.setState({
+      coordinateY: event.value,
+      coordinateYFloat: event.floatValue,
+      wasModified: true,
+    });
+    if (isNaN(event.floatValue) || !isFinite(event.floatValue)) {
       this.setState({ errorY: "Ange ett decimaltal" });
     } else {
       this.setState({ errorY: "" });
-      const updatedValue = parseFloat(event.target.value);
+      const updatedValue = event.floatValue;
 
       // publish the new value so all other transformations and the marker is updated
       this.localObserver.publish("newCoordinates", {
-        coordinates: [this.state.coordinateX, updatedValue],
+        coordinates: [this.state.coordinateXFloat, updatedValue],
         proj: this.props.transformation.code,
         force: false,
       });
@@ -116,7 +149,6 @@ class CoordinatesTransformRow extends React.PureComponent {
   componentWillUnmount() {}
 
   render() {
-    // TODO check that the size settings in admin panel are not destroyed
     const { classes } = this.props;
 
     let xCoord = this.props.inverseAxis
@@ -125,12 +157,8 @@ class CoordinatesTransformRow extends React.PureComponent {
     let yCoord = this.props.inverseAxis
       ? this.state.coordinateX
       : this.state.coordinateY;
-    if (this.model.prettyPrint && xCoord !== "" && yCoord !== "") {
-      xCoord = parseFloat(xCoord).toLocaleString();
-      yCoord = parseFloat(yCoord).toLocaleString();
-    }
 
-    if (this.model.showFieldsOnStart || xCoord !== "" || yCoord !== "") {
+    if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
         <TableRow key={this.props.transformation.code}>
           <TableCell>
@@ -142,27 +170,39 @@ class CoordinatesTransformRow extends React.PureComponent {
             </Typography>
           </TableCell>
           <TableCell>
-            <TextField
+            <NumberFormat
               label={this.props.transformation.ytitle}
               className={classes.textField}
               margin="dense"
               variant="outlined"
               value={xCoord}
-              onChange={this.handleInputX.bind(this)}
+              name="numberformatX"
+              type="text"
+              onValueChange={(values) => {
+                this.handleInputX(values);
+              }}
               axis={this.props.transformation.inverseAxis ? "X" : "Y"}
               error={this.state.errorX !== ""}
               helperText={this.state.errorX}
+              thousandSeparator={this.model.thousandSeparator ? " " : false}
+              customInput={TextField}
             />
-            <TextField
+            <NumberFormat
               label={this.props.transformation.xtitle}
               className={classes.textField}
               margin="dense"
               variant="outlined"
               value={yCoord}
-              onChange={this.handleInputY.bind(this)}
+              name="numberformatY"
+              type="text"
+              onValueChange={(values) => {
+                this.handleInputY(values);
+              }}
               axis={this.props.transformation.inverseAxis ? "Y" : "X"}
               error={this.state.errorY !== ""}
               helperText={this.state.errorY}
+              thousandSeparator={this.model.thousandSeparator ? " " : false}
+              customInput={TextField}
             />
           </TableCell>
         </TableRow>
