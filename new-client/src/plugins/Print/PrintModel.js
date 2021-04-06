@@ -329,6 +329,7 @@ export default class PrintModel {
     pdf.setFontSize(6);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(color);
+    pdf.setLineWidth(0.25);
     pdf.text(
       lengthText,
       scaleBarPosition.x + scaleBarLength + 1,
@@ -448,8 +449,8 @@ export default class PrintModel {
         ? [...this.dims[format]].reverse()
         : this.dims[format];
 
-    const width = Math.round(((dim[0] - this.margin) * resolution) / 25.4);
-    const height = Math.round(((dim[1] - this.margin) * resolution) / 25.4);
+    const width = Math.round((dim[0] * resolution) / 25.4);
+    const height = Math.round((dim[1] * resolution) / 25.4);
     const size = this.map.getSize();
     const originalResolution = this.map.getView().getResolution();
     const originalCenter = this.map.getView().getCenter();
@@ -528,14 +529,18 @@ export default class PrintModel {
       });
 
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
-      pdf.addImage(
-        mapCanvas,
-        "JPEG",
-        this.margin,
-        this.margin,
-        dim[0] - this.margin * 2,
-        dim[1] - this.margin * 2
-      );
+      pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
+
+      // Add potential margin around the image
+      if (this.margin > 0) {
+        // The lineWidth increases the line width equally to "both sides",
+        // therefore, we must have a line width two times the margin we want.
+        pdf.setLineWidth(this.margin * 2);
+        // We always want a white margin
+        pdf.setDrawColor("white");
+        // Draw the border (margin) around the entire image
+        pdf.rect(0, 0, dim[0], dim[1], "S");
+      }
 
       // If logo URL is provided, add the logo to the map
       if (options.includeLogo && this.logoUrl.trim().length >= 5) {
