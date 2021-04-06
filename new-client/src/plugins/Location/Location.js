@@ -1,7 +1,6 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import CenterFocusWeakIcon from "@material-ui/icons/CenterFocusWeak";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
 
 import LocationView from "./LocationView";
