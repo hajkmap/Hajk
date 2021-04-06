@@ -315,6 +315,7 @@ class ConfigServiceV2 {
    *  - Part 1: tools (access to each of them can be restricted)
    *  - Part 2: groups and layers (in LayerSwitcher's options)
    *  - Part 3: WFS search services (in Search's options)
+   *  - Part 4: WFST edit services (in Edit's options)
    *
    * @param {*} mapConfig
    * @param {*} user
@@ -415,6 +416,27 @@ class ConfigServiceV2 {
           )
       );
       mapConfig.tools[searchIndexInTools].options.layers = layers;
+    }
+
+    // Part 4: Wash WFST edit services
+    const editIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "edit"
+    );
+
+    if (editIndexInTools !== -1) {
+      let { activeServices } = mapConfig.tools[editIndexInTools].options;
+      // Wash WFST edit layers
+      activeServices = await asyncFilter(
+        activeServices, // layers in edit tool are named activeServices
+        async (layer) =>
+          await this.filterByGroupVisibility(
+            layer.visibleForGroups,
+            user,
+            `WFST edit layer "${layer.id}"`
+          )
+      );
+
+      mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
     }
 
     return mapConfig;
