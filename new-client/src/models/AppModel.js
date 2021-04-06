@@ -578,6 +578,18 @@ class AppModel {
     return searchLayers;
   }
 
+  overrideGlobalEditConfig(editTool, data) {
+    var configSpecificEditLayers = editTool.options.activeServices;
+    var editLayers = data.wfstlayers.filter((layer) => {
+      if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
+        return layer;
+      } else {
+        return undefined;
+      }
+    });
+    return editLayers;
+  }
+
   translateConfig() {
     if (
       this.config.mapConfig.hasOwnProperty("map") &&
@@ -643,7 +655,20 @@ class AppModel {
     }
 
     if (editTool) {
-      editTool.options.sources = layers.wfstlayers;
+      if (editTool.options.activeServices === null) {
+        editTool.options.sources = layers.wfstlayers;
+      } else {
+        if (
+          editTool.options.activeServices &&
+          editTool.options.activeServices.length !== 0
+        ) {
+          let wfstlayers = this.overrideGlobalEditConfig(editTool, layers);
+          editTool.options.sources = wfstlayers;
+          layers.wfstlayers = wfstlayers;
+        } else {
+          editTool.options.sources = layers.wfstlayers;
+        }
+      }
     }
 
     return this.mergeConfig(this.config.mapConfig, this.parseQueryParams());

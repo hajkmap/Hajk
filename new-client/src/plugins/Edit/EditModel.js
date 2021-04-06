@@ -565,9 +565,7 @@ class EditModel {
   }
 
   getSources() {
-    return this.sources.filter((source) => {
-      return this.activeServices.some((serviceId) => serviceId === source.id);
-    });
+    return this.options.sources;
   }
 }
 
