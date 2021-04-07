@@ -170,6 +170,22 @@ const styles = (theme) => {
     widgetItem: {
       width: "220px",
     },
+    snackBarContainerRoot: {
+      pointerEvents: "none",
+      '& div[class^="SnackbarItem-root"]': {
+        pointerEvents: "auto",
+      },
+    },
+    snackbarContainerBottom: {
+      [theme.breakpoints.down("xs")]: {
+        bottom: "35px",
+      },
+    },
+    snackbarContainerTop: {
+      [theme.breakpoints.down("xs")]: {
+        top: "18px",
+      },
+    },
     // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
     shiftedLeft: {
       left: DRAWER_WIDTH,
@@ -714,6 +730,11 @@ class App extends React.PureComponent {
     return (
       <SnackbarProvider
         maxSnack={3}
+        classes={{
+          anchorOriginBottomCenter: classes.snackbarContainerBottom,
+          anchorOriginTopCenter: classes.snackbarContainerTop,
+          containerRoot: classes.snackBarContainerRoot,
+        }}
         anchorOrigin={{
           vertical: "top",
           horizontal: "center",
