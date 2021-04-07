@@ -134,6 +134,8 @@ export default class PrintModel {
     this.margin = useMargin ? this.getMargin(dim) : 0;
 
     const inchInMillimeter = 25.4;
+    // We should take pixelRatio into account? What happens when we have
+    // pr=2? PixelSize will be 0.14?
     const defaultPixelSizeInMillimeter = 0.28;
     const dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
 
