@@ -526,10 +526,14 @@ class DocumentEditor extends Component {
           </Grid>
         </Box>
         <Grid container item>
-          <Grid container alignItems="center" item>
+          <Grid container alignItems="flex-start" item>
             <Grid className={classes.gridItem} item>
               <Typography variant="h5">
-                <strong>{`Kapitelrubrik : ${chapter.header}`}</strong>
+                <strong>{`${chapter.header}`}</strong>
+              </Typography>
+              <Typography variant="caption">
+                <strong>Id : </strong>
+                {`${chapter.headerIdentifier}`}
               </Typography>
             </Grid>
             <Grid item>
