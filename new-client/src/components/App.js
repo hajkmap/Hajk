@@ -151,6 +151,9 @@ const styles = (theme) => {
       height: "100%",
       overflow: "auto",
     },
+    drawerLockButton: {
+      margin: -12,
+    },
     logoBox: {
       padding: theme.spacing(1, 2),
       height: theme.spacing(6),
@@ -159,9 +162,13 @@ const styles = (theme) => {
       height: theme.spacing(4),
     },
     drawerGrid: {
-      padding: theme.spacing(0, 2),
+      padding: theme.spacing(1, 2),
       backgroundColor: theme.palette.background.paper,
       minHeight: theme.spacing(6),
+    },
+    drawerTitle: {
+      padding: theme.spacing(1, 0),
+      lineHeight: 0,
     },
     drawerLiveContent: {
       backgroundColor: theme.palette.background.default,
@@ -633,12 +640,15 @@ class App extends React.PureComponent {
           className={classes.drawerGrid}
           item
           container
+          wrap="nowrap"
           direction="row"
           justify="space-between"
           alignItems="center"
         >
           <Grid item>
-            <Typography variant="button">{drawerTitle}</Typography>
+            <Typography variant="button" className={classes.drawerTitle}>
+              {drawerTitle}
+            </Typography>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>
@@ -650,6 +660,7 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
+                  className={classes.drawerLockButton}
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
