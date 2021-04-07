@@ -163,8 +163,10 @@ class ConfigServiceV2 {
 
     // Grab layers from Edit
     const editOptions = mapConfig.tools.find((t) => t.type === "edit")?.options;
+    // Before AD-locking of edit layers:
     // This one is different from the others: activeServices is already an array of IDs
-    const editLayerIds = editOptions?.activeServices || [];
+    //const editLayerIds = editOptions?.activeServices || [];
+    const editLayerIds = editOptions?.activeServices.map((as) => as.id) || [];
 
     // We utilize Set to get rid of potential duplicates in the final list
     const uniqueLayerIds = new Set([
@@ -435,7 +437,6 @@ class ConfigServiceV2 {
             `WFST edit layer "${layer.id}"`
           )
       );
-
       mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
     }
 
