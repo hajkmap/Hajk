@@ -3,7 +3,6 @@ import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import {
-  Badge,
   FormControl,
   FormHelperText,
   InputLabel,
@@ -27,9 +26,6 @@ const styles = (theme) => ({
     width: "100%",
     margin: theme.spacing(1),
     display: "flex",
-  },
-  badge: {
-    backgroundColor: (props) => props.mapTextColor,
   },
 });
 
@@ -137,25 +133,20 @@ class AdvancedOptions extends React.PureComponent {
                   name: "mapTitle",
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Badge
-                        badgeContent=" "
-                        variant="dot"
-                        classes={{ badge: classes.badge }}
-                      >
-                        <Tooltip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
-                          <IconButton
-                            id="mapTextColor"
-                            onClick={this.toggleColorPicker}
-                            style={{
-                              marginRight: 4,
-                            }}
-                            edge="start"
-                            size="small"
-                          >
-                            <PaletteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </Badge>
+                      <Tooltip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
+                        <IconButton
+                          id="mapTextColor"
+                          onClick={this.toggleColorPicker}
+                          style={{
+                            backgroundColor: mapTextColor,
+                            marginRight: 4,
+                          }}
+                          edge="start"
+                          size="small"
+                        >
+                          <PaletteIcon />
+                        </IconButton>
+                      </Tooltip>
                     </InputAdornment>
                   ),
                 }}
