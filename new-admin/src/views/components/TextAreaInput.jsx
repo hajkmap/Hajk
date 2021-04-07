@@ -1,9 +1,30 @@
 import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-
+import { red, green } from "@material-ui/core/colors";
+import { withStyles } from "@material-ui/core/styles";
 import { EditorState, Modifier } from "draft-js";
-import { Typography } from "@material-ui/core";
+import { Typography, Button } from "@material-ui/core";
+
+const ColorButtonRed = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700],
+    },
+  },
+}))(Button);
+
+const ColorButtonGreen = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700],
+    },
+  },
+}))(Button);
 
 const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   const classes = useStyles();
@@ -37,15 +58,8 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   };
 
   return (
-    <Grid container>
-      <Grid
-        className={classes.textAreaInput}
-        alignItems="center"
-        container
-        spacing={2}
-        item
-        xs={7}
-      >
+    <Grid className={classes.textAreaInput} container>
+      <Grid alignItems="center" container spacing={2} item xs={7}>
         <Grid direction="column" container item>
           <Grid item>
             <Typography variant="h5">Lägg till faktaruta</Typography>
@@ -55,8 +69,6 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
               Ställ markören där du vill skapa faktaruta eller editera faktaruta
             </Typography>
           </Grid>
-        </Grid>
-        <Grid spacing={2} item container>
           <Grid item>
             <Typography variant="body2" className={classes.warningText}>
               <strong>
@@ -64,49 +76,59 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                 sättas ur spel
               </strong>
             </Typography>
-            <Grid item>
-              <label style={{ margin: 0 }}>data-background-color</label>
-            </Grid>
-            <Grid item>
-              <input
-                id="data-background-color"
-                onChange={(e) => {
-                  setBackgroundColor(e.target.value);
-                }}
-                type="text"
-                value={backgroundColor || ""}
-                placeholder="#ccc"
-              />
-            </Grid>
           </Grid>
-          <Grid item>
-            <Grid item>
-              <label style={{ margin: 0 }}>data-divider-color</label>
+          <Grid item container>
+            <Grid direction="column" container item>
+              <Grid item>
+                <label style={{ margin: 0 }}>
+                  Bakgrundsfärg (data-background-color)
+                </label>
+              </Grid>
+              <Grid item>
+                <input
+                  id="data-background-color"
+                  onChange={(e) => {
+                    setBackgroundColor(e.target.value);
+                  }}
+                  type="text"
+                  value={backgroundColor || ""}
+                  placeholder="#ccc"
+                />
+              </Grid>
+              <Grid item>
+                <label style={{ margin: 0 }}>
+                  Kantfärg (data-divider-color)
+                </label>
+              </Grid>
+              <Grid item>
+                <input
+                  id="data-divider-color"
+                  onChange={(e) => {
+                    setDividerColor(e.target.value);
+                  }}
+                  type="text"
+                  value={dividerColor || ""}
+                  placeholder="#6A0DAD"
+                />
+              </Grid>
             </Grid>
-            <Grid item>
-              <input
-                id="data-divider-color"
-                onChange={(e) => {
-                  setDividerColor(e.target.value);
-                }}
-                type="text"
-                value={dividerColor || ""}
-                placeholder="#6A0DAD"
-              />
-            </Grid>
+            <Grid container direction="column" item></Grid>
           </Grid>
         </Grid>
 
         <Grid item>
-          <button
+          <ColorButtonGreen
+            variant="contained"
             className={classes.textAreaButton}
             onMouseDown={onConfirmClick}
             disabled={!hasFocus}
           >
             OK
-          </button>
+          </ColorButtonGreen>
 
-          <button onMouseDown={onCancelClick}>Avbryt</button>
+          <ColorButtonRed variant="contained" onMouseDown={onCancelClick}>
+            Avbryt
+          </ColorButtonRed>
         </Grid>
       </Grid>
       <Grid className={classes.textAreaInput} item xs={4}>
