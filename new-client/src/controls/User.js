@@ -51,7 +51,7 @@ const User = React.memo(({ userDetails }) => {
   const classes = useStyles();
 
   return (
-    userDetails && (
+    (userDetails && (
       <Tooltip title={getTooltipString(userDetails)}>
         <Paper className={classes.paper}>
           <Button
@@ -64,7 +64,8 @@ const User = React.memo(({ userDetails }) => {
           </Button>
         </Paper>
       </Tooltip>
-    )
+    )) ||
+    null
   );
 });
 
