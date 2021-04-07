@@ -151,6 +151,9 @@ const styles = (theme) => {
       height: "100%",
       overflow: "auto",
     },
+    drawerLockButton: {
+      margin: -12,
+    },
     logoBox: {
       padding: theme.spacing(1, 2),
       height: theme.spacing(6),
@@ -159,15 +162,35 @@ const styles = (theme) => {
       height: theme.spacing(4),
     },
     drawerGrid: {
-      padding: theme.spacing(0, 2),
+      padding: theme.spacing(1, 2),
       backgroundColor: theme.palette.background.paper,
       minHeight: theme.spacing(6),
+    },
+    drawerTitle: {
+      padding: theme.spacing(1, 0),
+      lineHeight: 0,
     },
     drawerLiveContent: {
       backgroundColor: theme.palette.background.default,
     },
     widgetItem: {
       width: "220px",
+    },
+    snackBarContainerRoot: {
+      pointerEvents: "none",
+      '& div[class^="SnackbarItem-root"]': {
+        pointerEvents: "auto",
+      },
+    },
+    snackbarContainerBottom: {
+      [theme.breakpoints.down("xs")]: {
+        bottom: "35px",
+      },
+    },
+    snackbarContainerTop: {
+      [theme.breakpoints.down("xs")]: {
+        top: "18px",
+      },
     },
     // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
     shiftedLeft: {
@@ -346,6 +369,23 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
+    // Register a handle to prevent pinch zoom on mobile devices.
+    document.body.addEventListener(
+      "touchmove",
+      (event) => {
+        // If this event would result in changing scale …
+        if (event.scale !== 1) {
+          // …cancel it.
+          event.preventDefault();
+        }
+        // Else, allow all non-scale-changing touch events, e.g.
+        // we still want scroll to work.
+      },
+      { passive: false } // Explicitly tell the browser that we will preventDefault inside this handler,
+      // which is important for smooth scrolling to work correctly.
+    );
+
+    // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
       this.appModel.highlight(false);
       this.setState({
@@ -480,6 +520,11 @@ class App extends React.PureComponent {
           width={infoclickOptions.width || 400}
           height={infoclickOptions.height || 300}
           features={this.state.mapClickDataResult?.features}
+          options={
+            this.appModel.config.mapConfig.tools.find(
+              (t) => t.type === "infoclick"
+            )?.options
+          }
           map={this.appModel.getMap()}
           onDisplay={(feature) => {
             this.appModel.highlight(feature);
@@ -594,12 +639,15 @@ class App extends React.PureComponent {
           className={classes.drawerGrid}
           item
           container
+          wrap="nowrap"
           direction="row"
           justify="space-between"
           alignItems="center"
         >
           <Grid item>
-            <Typography variant="button">{drawerTitle}</Typography>
+            <Typography variant="button" className={classes.drawerTitle}>
+              {drawerTitle}
+            </Typography>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>
@@ -611,6 +659,7 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
+                  className={classes.drawerLockButton}
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
@@ -693,6 +742,11 @@ class App extends React.PureComponent {
     return (
       <SnackbarProvider
         maxSnack={3}
+        classes={{
+          anchorOriginBottomCenter: classes.snackbarContainerBottom,
+          anchorOriginTopCenter: classes.snackbarContainerTop,
+          containerRoot: classes.snackBarContainerRoot,
+        }}
         anchorOrigin={{
           vertical: "top",
           horizontal: "center",

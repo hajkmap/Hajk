@@ -246,7 +246,10 @@ class DocumentViewer extends React.PureComponent {
           </Grid>
         </Grid>
         {showScrollButton && documentWindowMaximized && (
-          <ScrollToTop onClick={this.scrollToTop}></ScrollToTop>
+          <ScrollToTop
+            color={activeDocument.documentColor}
+            onClick={this.scrollToTop}
+          ></ScrollToTop>
         )}
       </>
     );

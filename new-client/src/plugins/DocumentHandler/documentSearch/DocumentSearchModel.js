@@ -9,7 +9,25 @@ export default class DocumentSearchModel {
     this.documentCollections = this.createDocumentCollectionsToSearch(
       settings.allDocuments
     );
+    this.localObserver = settings.localObserver;
+    this.app = settings.app;
+    this.bindListenForSearchResultClick();
   }
+
+  bindListenForSearchResultClick = () => {
+    // The event published from the search component will be prepended
+    // with "search.featureClicked", therefore we have to subscribe
+    // to search.featureClicked.onClickName to catch the event.
+    this.app.globalObserver.subscribe(
+      "search.featureClicked.documentHandlerSearchResultClicked",
+      (searchResultClick) => {
+        this.localObserver.publish("document-link-clicked", {
+          documentName: searchResultClick.properties.documentFileName,
+          headerIdentifier: searchResultClick.properties.headerIdentifier,
+        });
+      }
+    );
+  };
 
   createDocumentCollectionsToSearch = (allDocuments) => {
     return allDocuments.reduce((documentCollection, document) => {

@@ -13,7 +13,7 @@ import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
 import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
 import { stateFromHTML } from "draft-js-import-html";
-
+import { withStyles } from "@material-ui/core/styles";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
@@ -27,12 +27,33 @@ import LaunchIcon from "@material-ui/icons/Launch";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-
+import { red, green } from "@material-ui/core/colors";
 import TextAreaInput from "./TextAreaInput";
 import addLinkPlugin from "./addLinkPlugin";
 import StyleButton from "./StyleButton";
 import ImageComponent from "./ImageComponent";
 import insertNewLine from "../utils/insertNewLine";
+import { Typography, Button } from "@material-ui/core";
+
+const ColorButtonRed = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700],
+    },
+  },
+}))(Button);
+
+const ColorButtonGreen = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700],
+    },
+  },
+}))(Button);
 
 export default class DocumentTextEditor extends React.Component {
   constructor(props) {
@@ -54,6 +75,7 @@ export default class DocumentTextEditor extends React.Component {
       currentImage: "",
       imageData: {},
       urlValue: "",
+      imageAlt: "",
       defaultWidth: null,
       defaultHeight: null,
     };
@@ -67,6 +89,7 @@ export default class DocumentTextEditor extends React.Component {
     };
     this.onChange = this._onChange.bind(this);
     this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
+    this.onImageAltChange = (e) => this.setState({ imageAlt: e.target.value });
     this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
     this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
     this.onDataCaptionChange = (e) =>
@@ -149,6 +172,7 @@ export default class DocumentTextEditor extends React.Component {
     const {
       editorState,
       urlValue,
+      imageAlt,
       urlType,
       mediaWidth,
       mediaHeight,
@@ -163,6 +187,7 @@ export default class DocumentTextEditor extends React.Component {
     if (mediaPopup) {
       contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
         src: urlValue,
+        alt: imageAlt ? imageAlt : "",
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
@@ -173,6 +198,7 @@ export default class DocumentTextEditor extends React.Component {
     } else {
       contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
         src: urlValue,
+        alt: imageAlt ? imageAlt : "",
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
@@ -198,6 +224,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: "",
+        imageAlt: "",
         mediaWidth: "",
         mediaHeight: "",
         mediaCaption: "",
@@ -221,6 +248,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: "",
+        imageAlt: "",
         mediaWidth: "",
         mediaHeight: "",
         mediaCaption: "",
@@ -235,9 +263,17 @@ export default class DocumentTextEditor extends React.Component {
 
   _confirmLink(e) {
     e.preventDefault();
-    const { editorState, urlValue, urlType, urlTitle, urlTitleId } = this.state;
+    const {
+      editorState,
+      urlValue,
+      imageAlt,
+      urlType,
+      urlTitle,
+      urlTitleId,
+    } = this.state;
     const data = {
       url: urlValue,
+      alt: imageAlt,
       type: urlType,
     };
 
@@ -272,6 +308,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: "",
+        imageAlt: "",
         urlTitle: "",
         urlTitleId: "",
       },
@@ -291,6 +328,7 @@ export default class DocumentTextEditor extends React.Component {
       {
         showLinkInput: false,
         urlValue: "",
+        imageAlt: "",
         urlTitle: "",
         urlTitleId: "",
       },
@@ -333,6 +371,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: this.state.urlValue,
+        imageAlt: this.state.imageAlt,
         urlType: type,
         mediaWidth: this.state.mediaWidth,
         mediaHeight: this.state.mediaHeight,
@@ -352,6 +391,7 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: true,
         showTextAreaInput: false,
         urlValue: this.state.urlValue,
+        imageAlt: this.state.imageAlt,
         urlType: type,
         urlTitle: "",
         urlTitleId: "",
@@ -628,7 +668,7 @@ export default class DocumentTextEditor extends React.Component {
           style={styles.urlInput}
           type="text"
           value={this.state.urlValue || ""}
-          placeholder="Webblänk"
+          placeholder={this.getUrlType(type)}
           onKeyDown={this.onLinkInputKeyDown}
         />
       );
@@ -639,14 +679,20 @@ export default class DocumentTextEditor extends React.Component {
     // Return input field for default URL or documents
     if (type === "documentlink") {
       return (
-        <input
-          onChange={this.onTitleIdChange}
-          ref="url"
+        <TextField
+          autoFocus
           style={styles.urlInput}
-          type="text"
           value={this.state.urlTitleId || ""}
           placeholder="data-header-identifier"
           onKeyDown={this.onLinkInputKeyDown}
+          helperText="Id-nummer för kapitlet som ska visas"
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          type="text"
+          onChange={this.onTitleIdChange}
+          ref="url"
         />
       );
     }
@@ -727,14 +773,13 @@ export default class DocumentTextEditor extends React.Component {
     const { editorState, imageList, documents } = this.state;
 
     let editorContainer = styles.editor;
-
     let urlInput;
     if (this.state.showURLInput) {
       urlInput = (
-        <Grid container>
-          <Grid container spacing={2} item xs={5}>
+        <Grid style={styles.gridItemContainer} container>
+          <Grid container direction="column" spacing={2} item xs={6}>
             <Grid item>
-              <p>Lägg till bild</p>
+              <Typography variant="h5">Lägg till bild</Typography>
               <Autocomplete
                 id="disabled-options-demo"
                 freeSolo
@@ -758,83 +803,123 @@ export default class DocumentTextEditor extends React.Component {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Ange URL eller välj en bild"
-                    variant="outlined"
+                    placeholder="Sökväg"
+                    helperText="Ange URL till en bild"
+                    variant="standard"
                   />
                 )}
               />
-              <p>Förhandsvisning:</p>
-              <img
-                src={this.state.urlValue}
-                onLoad={this.onImgLoad}
-                width={this.state.mediaWidth}
-                height={this.state.mediaHeight}
-                alt="Förhandsvisning"
-              />
+            </Grid>
+            <Grid container item>
+              <Grid style={styles.gridItem} item>
+                <input
+                  onChange={(e) => this.calculateHeight(e.target.value)}
+                  ref="data-image-width"
+                  type="number"
+                  value={this.state.mediaWidth || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Bredd"
+                />
+              </Grid>
+              <Grid item>
+                <input
+                  onChange={(e) => this.calculateWidth(e.target.value)}
+                  ref="data-image-height"
+                  type="number"
+                  value={this.state.mediaHeight || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Höjd"
+                />
+              </Grid>
             </Grid>
             <Grid item>
               <input
-                onChange={(e) => this.calculateHeight(e.target.value)}
-                ref="data-image-width"
-                type="number"
-                value={this.state.mediaWidth || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Bredd"
-              />
-              <input
-                onChange={(e) => this.calculateWidth(e.target.value)}
-                ref="data-image-height"
-                type="number"
-                value={this.state.mediaHeight || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Höjd"
-              />
-            </Grid>
-            <Grid item>
-              <input
-                onChange={this.onDataCaptionChange}
-                ref="data-caption"
+                onChange={this.onImageAltChange}
+                ref="image-alt"
                 type="text"
-                value={this.state.mediaCaption || ""}
+                value={this.state.imageAlt || ""}
                 onKeyDown={this.onURLInputKeyDown}
-                placeholder="Beskrivning"
-              />
-              <input
-                onChange={this.onDataSourceChange}
-                ref="data-source"
-                type="text"
-                value={this.state.mediaSource || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Källa"
+                placeholder="Alternativ text"
               />
             </Grid>
-            <Grid item>
-              <input
-                id="data-image-popup"
-                onChange={this.onDataPopupChange}
-                ref="data-image-popup"
-                type="checkbox"
-                value={this.state.mediaPopup}
-                onKeyDown={this.onURLInputKeyDown}
-              />
-              <label>Popup</label>
+            <Grid container item>
+              <Grid style={styles.gridItem} item>
+                <input
+                  onChange={this.onDataCaptionChange}
+                  ref="data-caption"
+                  type="text"
+                  value={this.state.mediaCaption || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Beskrivning"
+                />
+              </Grid>
+              <Grid item>
+                <input
+                  onChange={this.onDataSourceChange}
+                  ref="data-source"
+                  type="text"
+                  value={this.state.mediaSource || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Källa"
+                />
+              </Grid>
+            </Grid>
+            <Grid container item>
+              <Grid style={styles.gridItem} item>
+                <select
+                  value={this.state.mediaPosition}
+                  ref="data-image-position"
+                  onChange={this.onDataPositionChange}
+                >
+                  <option value="left">Vänster</option>
+                  <option value="center">Center</option>
+                  <option value="right">Höger</option>
+                  <option value="floatRight">Höger med text</option>
+                  <option value="floatLeft">Vänster med text</option>
+                </select>
+              </Grid>
+              <Grid item>
+                <input
+                  id="data-image-popup"
+                  onChange={this.onDataPopupChange}
+                  ref="data-image-popup"
+                  type="checkbox"
+                  value={this.state.mediaPopup}
+                  onKeyDown={this.onURLInputKeyDown}
+                />
+                <label>Popup</label>
+              </Grid>
             </Grid>
             <Grid item>
-              <select
-                value={this.state.mediaPosition}
-                ref="data-image-position"
-                onChange={this.onDataPositionChange}
+              <ColorButtonGreen
+                style={styles.button}
+                variant="contained"
+                onMouseDown={this.confirmMedia}
               >
-                <option value="left">Vänster</option>
-                <option value="center">Center</option>
-                <option value="right">Höger</option>
-                <option value="floatRight">Höger med text</option>
-                <option value="floatLeft">Vänster med text</option>
-              </select>
+                OK
+              </ColorButtonGreen>
+              <ColorButtonRed
+                variant="contained"
+                onMouseDown={this.closeURLInput}
+              >
+                Avbryt
+              </ColorButtonRed>
+            </Grid>
+          </Grid>
+          <Grid container direction="column" item xs={6}>
+            <Grid item>
+              <p>Förhandsvisning:</p>
             </Grid>
             <Grid item>
-              <button onMouseDown={this.confirmMedia}>OK</button>
-              <button onMouseDown={this.closeURLInput}>Avbryt</button>
+              {this.state.urlValue && (
+                <img
+                  src={this.state.urlValue}
+                  alt={this.state.imageAlt}
+                  onLoad={this.onImgLoad}
+                  width={this.state.mediaWidth}
+                  height={this.state.mediaHeight}
+                />
+              )}
             </Grid>
           </Grid>
         </Grid>
@@ -873,14 +958,35 @@ export default class DocumentTextEditor extends React.Component {
 
     if (this.state.showLinkInput) {
       urlInput = (
-        <div style={styles.urlInputContainer}>
-          <h1>Lägg till {this.getUrlType(this.state.urlType)}</h1>
-          <p>Markera den text som ska bli en länk</p>
-          {this.getUrlInput(this.state.urlType, documents)}
-          {this.getUrlId(this.state.urlType)}
-          <button onMouseDown={this.confirmLink}>OK</button>
-          <button onMouseDown={this.closeLinkInput}>Avbryt</button>
-        </div>
+        <Grid style={styles.gridItemContainer} direction="column" container>
+          <Grid item>
+            <Typography variant="h5">
+              Lägg till {this.getUrlType(this.state.urlType)}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="subtitle2">
+              Markera den text som ska bli en länk
+            </Typography>
+          </Grid>
+          <Grid item>{this.getUrlInput(this.state.urlType, documents)}</Grid>
+          <Grid item>{this.getUrlId(this.state.urlType)}</Grid>
+          <Grid item>
+            <ColorButtonGreen
+              style={styles.button}
+              variant="contained"
+              onMouseDown={this.confirmLink}
+            >
+              OK
+            </ColorButtonGreen>
+            <ColorButtonRed
+              variant="contained"
+              onMouseDown={this.closeLinkInput}
+            >
+              Avbryt
+            </ColorButtonRed>
+          </Grid>
+        </Grid>
       );
     }
 
@@ -898,15 +1004,31 @@ export default class DocumentTextEditor extends React.Component {
             />
             <StyleButton
               label={<FormatQuoteIcon />}
+              tooltip="Lägg till faktaruta"
               onToggle={this.addTextArea}
             />
-            <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
-            <StyleButton label={<LaunchIcon />} onToggle={this.addWebLink} />
+
             <StyleButton
+              tooltip="Lägg till en bild"
+              label={<ImageIcon />}
+              onToggle={this.addImage}
+            />
+
+            <StyleButton
+              tooltip="Lägg till en webblänk"
+              label={<LaunchIcon />}
+              onToggle={this.addWebLink}
+            />
+            <StyleButton
+              tooltip="Lägg till en dokumentlänk"
               label={<DescriptionIcon />}
               onToggle={this.addDocumentLink}
             />
-            <StyleButton label={<MapIcon />} onToggle={this.addMapLink} />
+            <StyleButton
+              tooltip="Lägg till en kartlänk"
+              label={<MapIcon />}
+              onToggle={this.addMapLink}
+            />
           </div>
         </div>
         {urlInput}
@@ -1002,7 +1124,12 @@ const styles = {
     fontFamily: "'Georgia', serif",
     border: "1px solid #ddd",
   },
-
+  gridItem: {
+    marginRight: "8px",
+  },
+  gridItemContainer: {
+    margin: "8px",
+  },
   buttonContainer: {
     height: 40,
     borderBottom: "1px solid #ddd",
@@ -1017,7 +1144,7 @@ const styles = {
   urlInput: {
     fontFamily: "'Georgia', serif",
     marginRight: 10,
-    padding: 3,
+    marginBottom: 8,
   },
   editorContainer: {
     border: "1px solid #ccc",
@@ -1030,8 +1157,7 @@ const styles = {
     padding: "18px",
   },
   button: {
-    marginTop: 10,
-    textAlign: "center",
+    marginRight: "8px",
   },
   media: {
     whiteSpace: "initial",

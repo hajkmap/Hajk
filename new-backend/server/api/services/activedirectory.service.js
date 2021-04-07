@@ -246,6 +246,18 @@ class ActiveDirectoryService {
         process.env.AD_TRUSTED_HEADER,
         user
       );
+      // Check if the user-value contains backslash (we might get DOMAIN\userName in the header, and if we do
+      // we want to remove the domain).
+      if (user?.match(/\\/)) {
+        logger.trace(
+          "[getUserFromRequestHeader] Username from header contains backslash. Removing everything before the last backslash."
+        );
+        // Split the string on \
+        const userParts = user.split("\\");
+        // Return the string after the last \
+        return userParts[userParts.length - 1];
+      }
+      // If not, remove the user as-is.
       return user;
     }
   }

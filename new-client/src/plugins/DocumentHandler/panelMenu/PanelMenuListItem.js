@@ -127,14 +127,7 @@ class PanelMenuListItem extends React.PureComponent {
           {hasSubMenu && this.#getCollapseIcon()}
         </ListItem>
         {hasSubMenu && (
-          <Collapse
-            id={`submenu_${id}`}
-            in={expanded}
-            onEnter={() => {
-              this.props.onEnter(id);
-            }}
-            timeout={200}
-          >
+          <Collapse id={`submenu_${id}`} in={expanded} timeout={200}>
             <PanelList
               {...this.props}
               level={level + 1}

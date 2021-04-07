@@ -372,6 +372,33 @@ export default class PrintModel {
     );
   };
 
+  // Make sure the desired resolution (depending on scale and dpi)
+  // works with the current map-setup.
+  desiredPrintOptionsOk = (options) => {
+    const resolution = options.resolution;
+    const scale = options.scale / 1000;
+    const desiredResolution = this.getScaleResolution(
+      scale,
+      resolution,
+      this.map.getView().getCenter()
+    );
+
+    // The desired options are OK if they result in a resolution bigger than the minimum
+    // resolution of the map.
+    return desiredResolution >= this.map.getView().getMinResolution();
+  };
+
+  getScaleResolution = (scale, resolution, center) => {
+    return (
+      scale /
+      getPointResolution(
+        this.map.getView().getProjection(),
+        resolution / 25.4,
+        center
+      )
+    );
+  };
+
   // If the user has selected one of the "special" backgroundLayers (white or black)
   // the backgroundColor of the mapCanvas has changed. We must keep track of this
   // to make sure that the print-results has the same appearance.
@@ -398,13 +425,18 @@ export default class PrintModel {
     const size = this.map.getSize();
     const originalResolution = this.map.getView().getResolution();
     const originalCenter = this.map.getView().getCenter();
-    const scaleResolution =
-      scale /
-      getPointResolution(
-        this.map.getView().getProjection(),
-        resolution / 25.4,
-        originalCenter
-      );
+
+    // We must check if the resolution is constrained, if it is, we must
+    // turn it off while printing so that the map can be zoomed to the correct extent.
+    // Saving the value so that we can put everything back to normal when done.
+    const resolutionConstrained = this.map.getView().getConstrainResolution();
+    resolutionConstrained && this.map.getView().setConstrainResolution(false);
+
+    const scaleResolution = this.getScaleResolution(
+      scale,
+      resolution,
+      originalCenter
+    );
 
     // Save some of our values that are necessary to use if user want to cancel the process
     this.valuesToRestoreFrom = {
@@ -412,6 +444,7 @@ export default class PrintModel {
       originalCenter,
       originalResolution,
       scaleResolution,
+      resolutionConstrained,
     };
 
     this.map.once("rendercomplete", async () => {
@@ -567,6 +600,8 @@ export default class PrintModel {
         .finally(() => {
           // Reset map to how it was before print
           this.previewLayer.setVisible(true);
+          resolutionConstrained &&
+            this.map.getView().setConstrainResolution(true);
           this.map.setSize(size);
           this.map.getView().setResolution(originalResolution);
           this.map.getView().setCenter(originalCenter);
@@ -645,6 +680,8 @@ export default class PrintModel {
       .getView()
       .setResolution(this.valuesToRestoreFrom.originalResolution);
     this.map.getView().setCenter(this.valuesToRestoreFrom.originalCenter);
+    this.valuesToRestoreFrom.resolutionConstrained &&
+      this.map.getView().setConstrainResolution(true);
   };
 
   /**

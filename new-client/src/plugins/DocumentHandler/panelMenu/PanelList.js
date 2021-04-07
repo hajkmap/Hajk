@@ -12,7 +12,6 @@ class PanelList extends React.PureComponent {
         icon={item.icon}
         id={item.id}
         level={item.level}
-        onEnter={this.props.onEnter}
         color={item.color}
         title={item.title}
         itemRef={item.itemRef}

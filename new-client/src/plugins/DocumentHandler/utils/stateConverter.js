@@ -28,18 +28,14 @@ export const getNormalizedMenuState = (
       ...{
         parentId,
         level,
-        selected: false,
-        colored: false,
         menuItemIds: [],
         allChildren: [],
         allParents: parentIds,
-        hasSubMenu: false,
         itemRef: React.createRef(),
       },
     };
 
     if (menuItem.menu && menuItem.menu.length > 0) {
-      menuItem.hasSubMenu = true;
       menuItem.allChildren = [
         ...menuItem.allChildren,
         ...getAllChildrenIds(menuItem.menu),

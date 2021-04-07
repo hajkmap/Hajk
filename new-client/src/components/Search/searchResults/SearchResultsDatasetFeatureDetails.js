@@ -49,6 +49,10 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
 
     this.featurePropsParsing = new FeaturePropsParsing({
       globalObserver: props.app.globalObserver,
+      options:
+        props.app.appModel.config.mapConfig.tools.find(
+          (t) => t.type === "infoclick"
+        )?.options || [], // featurePropsParsing needs to know if FeatureInfo is configured to allow HTML or not, so we pass on its' options
     });
   }
 
@@ -85,9 +89,13 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       feature.properties
     );
     this.featurePropsParsing
-      .mergeFeaturePropsWithMarkdown(source.infobox, feature.properties)
-      .then((featureInfo) => {
-        this.setState({ infoBox: this.renderCustomInfoBox(featureInfo) });
+      .setMarkdownAndProperties({
+        markdown: source.infobox,
+        properties: feature.properties,
+      })
+      .mergeFeaturePropsWithMarkdown()
+      .then((MarkdownComponent) => {
+        this.setState({ infoBox: MarkdownComponent });
       });
   };
 
@@ -114,28 +122,19 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     return (
       <TableContainer>
         <Table size="small">
-          {Object.entries(feature.properties).map((row, index) => {
-            return (
-              <TableBody key={index}>
+          <TableBody>
+            {Object.entries(feature.properties).map((row) => {
+              return (
                 <TableRow key={row[0]}>
                   {this.renderTableCell(row[0])}
                   {this.renderTableCell(row[1], "right")}
                 </TableRow>
-              </TableBody>
-            );
-          })}
+              );
+            })}
+          </TableBody>
         </Table>
       </TableContainer>
     );
-  };
-
-  renderCustomInfoBox = (featureInfo) => {
-    return featureInfo.map((element, index) => {
-      if (typeof element == "string") {
-        return <Typography key={index}>{element}</Typography>;
-      }
-      return <React.Fragment key={index}>{element}</React.Fragment>;
-    });
   };
 
   handleTogglerPressed = (nextFeatureIndex) => {
