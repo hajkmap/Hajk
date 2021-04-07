@@ -63,6 +63,10 @@ namespace MapService.Models.Config
 
         public double opacity { get; set; }
 
+        public int minZoom { get; set; }
+
+        public int maxZoom { get; set; }
+
         public bool singleTile { get; set; }
 
         public string imageFormat { get; set; }
@@ -96,6 +100,12 @@ namespace MapService.Models.Config
         public string infoUrlText { get; set; }
 
         public string infoOwner { get; set; }
+
+        public string infoClickSortType { get; set; }
+
+        public bool infoClickSortDesc { get; set; }
+
+        public string infoClickSortProperty { get; set; }        
 
         public string version { get; set; }
 

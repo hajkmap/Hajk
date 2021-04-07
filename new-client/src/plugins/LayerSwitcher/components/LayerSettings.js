@@ -7,7 +7,9 @@ import { withStyles } from "@material-ui/core/styles";
 
 const styles = (theme) => ({
   sliderContainer: {
-    overflow: "hidden",
+    display: "flex",
+    flexFlow: "row nowrap",
+    alignItems: "center",
   },
   icon: {
     cursor: "pointer",
@@ -23,12 +25,15 @@ const styles = (theme) => ({
     fontWeight: 500,
   },
   sliderItem: {
-    float: "left",
-    width: "120px",
-    padding: "10px",
+    padding: "0 16px",
+    flex: "1 1 auto",
+    "& > span": {
+      top: "4px",
+    },
   },
   sliderText: {
-    float: "left",
+    flex: "0 1 auto",
+    minWidth: "40px",
   },
 });
 

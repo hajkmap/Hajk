@@ -134,8 +134,8 @@ class ConfigServiceV2 {
     // Helper - recursively extract IDs of layers from all groups
     const getLayerIdsFromGroup = (group) => {
       return [
-        ...group.layers.map((l) => l.id),
-        ...group.groups.flatMap((g) => getLayerIdsFromGroup(g)),
+        ...(group.layers?.map((l) => l.id) || []),
+        ...(group.groups?.flatMap((g) => getLayerIdsFromGroup(g)) || []),
       ];
     };
 
@@ -325,25 +325,32 @@ class ConfigServiceV2 {
     // Helper function that will call itself recursively.
     // Necessary to handle the nested tree of groups from LayerSwitcher config.
     const recursivelyWashGroups = async (groups) => {
-      // Expect that we got an array of objects, and we must take
+      // Make sure that we can iterate 'groups', if not, exit.
+      if (Symbol.iterator in Object(groups) === false) return [];
+
+      // Looks like we've got an array and we must take
       // a look into each one of them separately.
       for (const group of groups) {
         // Notice that we modify the groups array in place!
         // Each group can have layers, take care of them. Remove any layers
         // to which user lacks access.
-        group.layers = await asyncFilter(
-          // Overwrite the previous value of layers property with return value
-          group.layers, // Array to be modified
-          async (layer) =>
-            await this.filterByGroupVisibility(
-              layer.visibleForGroups,
-              user,
-              `layer "${layer.id}"`
-            )
-        );
+        if (Symbol.iterator in Object(group.layers)) {
+          group.layers = await asyncFilter(
+            // Overwrite the previous value of layers property with return value
+            group.layers, // Array to be modified
+            async (layer) =>
+              await this.filterByGroupVisibility(
+                layer.visibleForGroups,
+                user,
+                `layer "${layer.id}"`
+              )
+          );
+        }
 
         // Now, recursively take care of groups
-        group.groups = await recursivelyWashGroups(group.groups);
+        if (Symbol.iterator in Object(group.groups)) {
+          group.groups = await recursivelyWashGroups(group.groups);
+        }
       }
 
       return groups;

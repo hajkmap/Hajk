@@ -556,7 +556,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         component="button"
         underline="hover"
         onClick={() => {
-          localObserver.publish("set-active-document", {
+          localObserver.publish("document-link-clicked", {
             documentName: documentLink,
             headerIdentifier: headerIdentifier,
           });

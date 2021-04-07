@@ -594,7 +594,7 @@ class VectorLayerForm extends React.Component {
         <div>
           <label>
             Min zoom{" "}
-            <abbr title="Lägsta zoomnivå som krävs för att lagret ska vara synligt. '-1' betyder att lagret är synligt från lägsta zoomnivå. Se även nästa inställning.">
+            <abbr title="Lägsta zoomnivå där lagret visas. OBS! Om man vill att lagret ska visas för skala 1:10 000, 1:5 000, 1:2 000 osv måste man ange den zoomnivå som skalsteget ovanför skala 1:10 000 har (t ex 1:20 000). Om 5 motsvarar 1:10 000 ska man då ange 4. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den lägsta zoomnivån. Se även inställning för Max zoom.">
               (?)
             </abbr>
           </label>
@@ -615,7 +615,7 @@ class VectorLayerForm extends React.Component {
         <div>
           <label>
             Max zoom{" "}
-            <abbr title="Högsta zoomnivå vid vilket lagret visas. '-1' betyder att lagret är synligt hela vägen till den sista zoomnivån. Se även nästa inställning.">
+            <abbr title="Högsta zoomnivå vid vilket lagret visas. Om man t ex anger 5 för skala 1:10 000 kommer lagret att visas för skala 1:10 000 men inte för skala 1:5000. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den sista zoomnivån. Se även inställning för Min zoom.">
               (?)
             </abbr>
           </label>

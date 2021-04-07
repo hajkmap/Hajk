@@ -68,6 +68,8 @@ const defaultState = {
   infoUrl: "",
   infoUrlText: "",
   infoOwner: "",
+  maxZoom: -1,
+  minZoom: -1,
 };
 
 /**
@@ -134,6 +136,8 @@ class WMTSLayerForm extends Component {
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
+      maxZoom: this.getValue("maxZoom"),
+      minZoom: this.getValue("minZoom"),
     };
   }
 
@@ -148,6 +152,12 @@ class WMTSLayerForm extends Component {
 
     var input = this.refs["input_" + fieldName],
       value = input ? input.value : "";
+
+    // We must cast the following to Number, as String won't be accepted for those:
+    if (["maxZoom", "minZoom"].indexOf(fieldName) > -1) {
+      value = Number(value);
+      return value === 0 ? -1 : value;
+    }
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
@@ -197,6 +207,18 @@ class WMTSLayerForm extends Component {
     var value = this.getValue(fieldName),
       valid = true;
 
+    function number(v) {
+      return !empty(v) && !isNaN(Number(v));
+    }
+
+    function empty(v) {
+      return typeof v === "string"
+        ? v.trim() === ""
+        : Array.isArray(v)
+        ? v[0] === ""
+        : false;
+    }
+
     switch (fieldName) {
       case "origin":
       case "resolutions":
@@ -212,6 +234,12 @@ class WMTSLayerForm extends Component {
       case "style":
       case "projection":
         if (value === "") {
+          valid = false;
+        }
+        break;
+      case "minZoom":
+      case "maxZoom":
+        if (!number(value) || empty(value)) {
           valid = false;
         }
         break;
@@ -331,6 +359,54 @@ class WMTSLayerForm extends Component {
           >
             Välj fil {imageLoader}
           </span>
+        </div>
+        <div>
+          <label>
+            Min zoom{" "}
+            <abbr title="Lägsta zoomnivå där lagret visas. OBS! Om man vill att lagret ska visas för skala 1:10 000, 1:5 000, 1:2 000 osv måste man ange den zoomnivå som skalsteget ovanför skala 1:10 000 har (t ex 1:20 000). Om 5 motsvarar 1:10 000 ska man då ange 4. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den lägsta zoomnivån. Se även inställning för Max zoom.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="number"
+            step="1"
+            min="-1"
+            max="100"
+            ref="input_minZoom"
+            value={this.state.minZoom}
+            className={
+              (this.getValidationClass("minZoom"), "control-fixed-width")
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ minZoom: v });
+            }}
+          />
+        </div>
+        <div>
+          <label>
+            Max zoom{" "}
+            <abbr title="Högsta zoomnivå vid vilket lagret visas. Om man t ex anger 5 för skala 1:10 000 kommer lagret att visas för skala 1:10 000 men inte för skala 1:5000. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den sista zoomnivån. Se även inställning för Min zoom.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="number"
+            step="1"
+            min="-1"
+            max="100"
+            ref="input_maxZoom"
+            value={this.state.maxZoom}
+            className={
+              (this.getValidationClass("minZoom"), "control-fixed-width")
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ maxZoom: v }, () =>
+                this.validateField("maxZoom")
+              );
+            }}
+          />
         </div>
         <div className="separator">Inställningar för request</div>
         <div>

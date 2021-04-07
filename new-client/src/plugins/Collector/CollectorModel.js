@@ -27,6 +27,7 @@ class CollectorModel {
     this.filty = false;
     this.saving = false;
     this.geometryName = "geom";
+    this.wkt = settings.options.wkt ?? false;
     this.serviceConfig = settings.options.serviceConfig;
     if (this.serviceConfig) {
       this.setFormValuesFromConfig();
@@ -360,7 +361,11 @@ class CollectorModel {
     });
 
     this.draw.on("drawend", (event) => {
-      this.vectorSource.clear();
+      // WKT supports insertion of multiple features and clear should therefore
+      // not be executed in this case
+      if (!this.wkt) {
+        this.vectorSource.clear();
+      }
       event.feature.modification = "added";
     });
     this.map.addInteraction(this.draw);

@@ -60,6 +60,7 @@ var defaultState = {
   featureNS: "",
   serviceId: "-1",
   showThankYou: true,
+  wkt: false,
   visibleAtStart: false,
   thankYou: "",
   form: [],
@@ -105,6 +106,7 @@ class ToolOptions extends Component {
         showThankYou: tool.options.showThankYou,
         thankYou: tool.options.thankYou,
         collectAgain: tool.options.collectAgain,
+        wkt: tool.options.wkt,
         form: tool.options.form || [],
         visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups || [],
@@ -199,6 +201,7 @@ class ToolOptions extends Component {
         featureNS: this.state.featureNS,
         showThankYou: this.state.showThankYou,
         collectAgain: this.state.collectAgain,
+        wkt: this.state.wkt,
         visibleAtStart: this.state.visibleAtStart,
         thankYou: this.state.thankYou,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -519,6 +522,26 @@ class ToolOptions extends Component {
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
                 title="'Stäng' och 'Tyck till igen' knappar visas på thank you sidan. 'Stäng' knapp stänger tyck till fönstret och 'tyck till igen' knapp börjar en ny tyck till."
+              />
+            </label>
+          </div>
+          <div>
+            <input
+              id="wkt"
+              name="wkt"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.wkt}
+            />
+            &nbsp;
+            <label htmlFor="wkt">
+              Aktivera WKT{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Aktiverar WKT-läget så att användarna kan fylla i flera olika geometrier för varje fråga samt på flera frågor."
               />
             </label>
           </div>

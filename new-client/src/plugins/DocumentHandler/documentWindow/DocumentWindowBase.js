@@ -75,69 +75,35 @@ class DocumentWindowBase extends React.PureComponent {
     });
   };
 
-  canHandleInfoClickEvent = (infoClickEvent) => {
-    if (infoClickEvent.payload.type !== "a") {
-      return false;
-    }
-    return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
-      return [
-        "data-maplink",
-        "data-link",
-        "data-document",
-        "data-header-identifier",
-      ].includes(key);
-    });
-  };
-
   handleInfoClickRequest = (infoClickEvent) => {
-    if (this.canHandleInfoClickEvent(infoClickEvent)) {
-      var htmlObject = document.createElement(infoClickEvent.payload.type);
-      htmlObject.innerHTML = infoClickEvent.payload.children[0];
-      Object.entries(infoClickEvent.payload.dataAttributes).forEach(
-        (dataAttributeEntry) => {
-          var att = document.createAttribute(dataAttributeEntry[0]);
-          att.value = dataAttributeEntry[1];
-          htmlObject.setAttributeNode(att);
-        }
-      );
-      let link = (
+    const htmlObject = document.createElement("span");
+    htmlObject.innerHTML = infoClickEvent.payload.replace(/\\/g, "");
+    const aTag = htmlObject.getElementsByTagName("a")[0];
+    if (aTag) {
+      infoClickEvent.resolve(
         <CustomLink
           localObserver={this.props.localObserver}
-          aTag={htmlObject}
+          aTag={aTag}
           bottomMargin={false}
         ></CustomLink>
       );
-      infoClickEvent.resolve(link);
     } else {
-      infoClickEvent.resolve();
+      console.error(
+        "Could not render DocumentHandler link for payload:",
+        infoClickEvent.payload
+      );
+      // Must resolve with a value, even null will do, but something more helpful could be nice.
+      // The reason we must do it is because this value is used in React's render, and undefined will not render.
+      infoClickEvent.resolve(<b>Could not render DocumentHandler link</b>);
     }
   };
 
-  bindListenForSearchResultClick = () => {
-    const { app, localObserver } = this.props;
-
-    // The event published from the search component will be prepended
-    // with "search.featureClicked", therefore we have to subscribe
-    // to search.featureClicked.onClickName to catch the event.
-    app.globalObserver.subscribe(
-      "search.featureClicked.documentHandlerSearchResultClicked",
-      (searchResultClick) => {
-        localObserver.publish("set-active-document", {
-          documentName: searchResultClick.properties.documentFileName,
-          headerIdentifier: searchResultClick.properties.headerIdentifier,
-        });
-      }
-    );
-
+  bindSubscriptions = () => {
+    const { localObserver, app } = this.props;
     app.globalObserver.subscribe(
       "core.info-click-documenthandler",
       this.handleInfoClickRequest
     );
-  };
-
-  bindSubscriptions = () => {
-    const { localObserver } = this.props;
-    this.bindListenForSearchResultClick();
     localObserver.subscribe("set-active-document", this.showHeaderInDocument);
     localObserver.subscribe("maplink-loading", this.displayMaplinkLoadingBar);
     localObserver.subscribe(

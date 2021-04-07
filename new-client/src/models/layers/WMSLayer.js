@@ -37,6 +37,9 @@ class WMSLayer {
 
     overrideLayerSourceParams(source);
 
+    const minZoom = config?.minZoom >= 0 ? config.minZoom : undefined;
+    const maxZoom = config?.maxZoom >= 0 ? config.maxZoom : undefined;
+
     if (
       config.resolutions &&
       config.resolutions.length > 0 &&
@@ -62,6 +65,8 @@ class WMSLayer {
         source: new ImageWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        minZoom: minZoom,
+        maxZoom: maxZoom,
       });
     } else {
       this.layer = new TileLayer({
@@ -72,6 +77,8 @@ class WMSLayer {
         source: new TileWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        minZoom: minZoom,
+        maxZoom: maxZoom,
       });
     }
 
