@@ -27,8 +27,9 @@ Det finns en produktägargrupp, en kodgrupp och en förvaltargrupp där medlemma
 * Kodgruppen utvecklar och har även ansvar för support.
 * Förvaltargruppen är närmare slutanvändaren och hjälper med first line-support. 
 
-Vi har stormöten där alla som är aktiva utvecklare, användare eller nyfikna är välkomna att delta. Dessa möten turas vi om att anordna, på plats eller digitalt. Slack används för kommunikation och alla frågor som rör HAJK-samarbetet, här informerar vi om kommande möten och dylikt. Tekniska frågor som rör kod ställs på GitHub. Här används Issues för att tackla eventuella problem och ny utveckling.  
-På GitHub har vi [Wiki-sidan](https://github.com/hajkmap/Hajk/wiki) där man kommer åt användardokumentation på svenska. Här finns också en Quick setup guide och annat läsvärt. 
+Vi har stormöten där alla som är aktiva utvecklare, användare eller nyfikna är välkomna att delta. Dessa möten turas vi om att anordna, på plats eller digitalt. Slack används för kommunikation och alla frågor som rör HAJK-samarbetet, här informerar vi om kommande möten och dylikt. Tekniska frågor som rör kod ställs på GitHub. Här används Issues för att tackla eventuella problem och ny utveckling. 
+Längst ner på denna sida har vi börjat lägga upp användardokumentation.
+På GitHub har vi [Wiki-sidan](https://github.com/hajkmap/Hajk/wiki) där man kommer åt administratörsdokumentation på svenska. Här finns också en Quick setup guide och annat läsvärt. 
 
 ## Historik
 HAJK är just nu inne på sin tredje generation. HAJK 1 utvecklades 2013, denna version krävde mer av administratören då all konfiguration sparades i JSON-filer som editerades manuellt. 
@@ -42,3 +43,6 @@ Vi finns på [Slack](https://hajk.slack.com/) utöver Github, med en öppen inbj
 [Inbjudan](https://Inbjudan.slack.com)
 
 Om du vill komma igång med HAJK snabbt så kan du hoppa över till vår [GitHub-sida](https://github.com/hajkmap/Hajk/) där vi har en Quick start längst ner.
+
+## Användardokumentation (guider)
+* [Sök](https://github.com/hajkmap/Hajk/files/6276475/Guide_sok_HenrikH.pdf)
