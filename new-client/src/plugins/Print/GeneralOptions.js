@@ -76,10 +76,13 @@ class GeneralOptions extends React.PureComponent {
                 id: "format",
               }}
             >
-              <MenuItem value={"a2"}>A2</MenuItem>
-              <MenuItem value={"a3"}>A3</MenuItem>
-              <MenuItem value={"a4"}>A4</MenuItem>
-              <MenuItem value={"a5"}>A5</MenuItem>
+              {this.props.options.paperFormats.map((value, index) => {
+                return (
+                  <MenuItem key={"paperFormat_" + index} value={value}>
+                    {value.toUpperCase()}
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
           <FormControl className={classes.formControl}>
@@ -132,8 +135,8 @@ class GeneralOptions extends React.PureComponent {
             </Select>
             {!printOptionsOk && (
               <FormHelperText>
-                Bilden kommer inte kunna skrivas ut korrekt. Testa med en mindre
-                upplösning eller större skala.
+                Bilden kommer inte kunna skrivas ut korrekt. Testa med en lägre
+                upplösning eller mindre skala.
               </FormHelperText>
             )}
           </FormControl>

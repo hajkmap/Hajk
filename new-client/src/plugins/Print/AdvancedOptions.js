@@ -189,14 +189,18 @@ class AdvancedOptions extends React.PureComponent {
                   id: "resolution",
                 }}
               >
-                <MenuItem value={72}>72</MenuItem>
-                <MenuItem value={150}>150</MenuItem>
-                <MenuItem value={300}>300</MenuItem>
+                {this.props.options.dpis.map((value, index) => {
+                  return (
+                    <MenuItem key={"dpis_" + index} value={value}>
+                      {value}
+                    </MenuItem>
+                  );
+                })}
               </Select>
               {!printOptionsOk && (
                 <FormHelperText>
                   Bilden kommer inte kunna skrivas ut korrekt. Testa med en
-                  mindre upplösning eller större skala.
+                  lägre upplösning eller mindre skala.
                 </FormHelperText>
               )}
             </FormControl>
