@@ -29,6 +29,13 @@ class CoordinatesModel {
           inverseAxis: true,
         },
       ];
+    } else {
+      // Check that there is a precision set, otherwise set the it to 3
+      this.transformations.forEach((t) => {
+        if (!t.precision) {
+          t.precision = 3;
+        }
+      });
     }
 
     this.source = new VectorSource();

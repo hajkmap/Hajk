@@ -73,10 +73,10 @@ class CoordinatesView extends React.PureComponent {
   renderProjections() {
     return (
       <>
-        {this.props.model.transformations.map((transformation) => {
+        {this.props.model.transformations.map((transformation, index) => {
           return (
             <CoordinatesTransformRow
-              key={transformation.code + "-element"}
+              key={transformation.code + index + "-element"}
               model={this.model}
               transformation={transformation}
             />
