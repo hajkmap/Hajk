@@ -86,7 +86,9 @@ class GeneralOptions extends React.PureComponent {
             </Select>
           </FormControl>
           <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="useMargin">Ram runt kartbilden</InputLabel>
+            <InputLabel htmlFor="useMargin">
+              Marginaler runt kartbilden
+            </InputLabel>
             <Select
               value={useMargin}
               onChange={handleChange}

@@ -47,7 +47,7 @@ class PrintView extends React.PureComponent {
 
   state = {
     format: "a4", // a0-a5
-    useMargin: false, // User can choose to have a margin around the map-image
+    useMargin: this.props.options.useMargin ?? false, // User can choose to have a margin around the map-image
     orientation: "landscape",
     resolution: 150, // 72, 150, 300,
     scale: this.props.scales[Math.round((this.props.scales.length - 1) / 2)], // 10000 means scale of 1:10000
