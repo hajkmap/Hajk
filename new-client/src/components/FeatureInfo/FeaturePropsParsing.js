@@ -265,7 +265,8 @@ export default class FeaturePropsParsing {
       // The regex below will match all placeholders.
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
-      (this.markdown.match(/{(.*?)}/g) || []).forEach((placeholder) => {
+      // Match any word character, @ sign, dash or dot
+      (this.markdown.match(/{[\w@\-.]+}/g) || []).forEach((placeholder) => {
         // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
         // Let's replace all occurrences of the placeholder like this:
         // {foobar} -> Some nice FoobarValue
@@ -291,7 +292,7 @@ export default class FeaturePropsParsing {
       // and will remove it, we must remove the line ending too, otherwise we would break the Markdown
       // formatting if only certain strings were to be removed, but all line endings would remain.
       this.markdown = this.markdown.replace(
-        /<(?<condition>\w+)[\s/]?(?<attributes>[^>]+)?>(?<content>[^<]+)?(?:<\/\1>\n*)?/gi,
+        /{{2}(?<condition>\w+)[\s\/]?(?<attributes>[^}{2}]+)?}{2}(?<content>[^{{2}]+)?(?:{{2}\/\1}{2}\n*)?/gi,
         this.#conditionalReplacer
       );
 
