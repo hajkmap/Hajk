@@ -140,8 +140,8 @@ export default class PrintModel {
     const dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
 
     const size = {
-      width: (dim[0] - this.margin) / 25.4,
-      height: (dim[1] - this.margin) / 25.4,
+      width: (dim[0] - this.margin * 2) / 25.4,
+      height: (dim[1] - this.margin * 2) / 25.4,
     };
 
     const paper = {
