@@ -18,6 +18,7 @@ Uddevalla – [https://karta.uddevalla.se/](https://karta.uddevalla.se/)
 
 Varberg – [https://karta.varberg.se/](https://karta.varberg.se/)
 
+Demo (senaste versionen) - [https://hajk-demo.netlify.app/](https://hajk-demo.netlify.app/)
 
 ## Organisationen
 Aktiva kommuner är Halmstad, Göteborg, Kungsbacka, Uddevalla, Varberg, m.fl. Andra organisationer som använder (och utvecklar) HAJK är bl. a. Västtrafik och Göteborgsregionen. 
