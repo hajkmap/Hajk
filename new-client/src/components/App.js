@@ -177,9 +177,12 @@ const styles = (theme) => {
       width: "220px",
     },
     snackBarContainerRoot: {
-      pointerEvents: "none",
-      '& div[class^="SnackbarItem-root"]': {
-        pointerEvents: "auto",
+      [theme.breakpoints.down("xs")]: {
+        pointerEvents: "none",
+        // Getting around notistack bug, can't reach snackItem.
+        "& div > div > div > div": {
+          pointerEvents: "auto",
+        },
       },
     },
     snackbarContainerBottom: {
