@@ -243,6 +243,7 @@ class PrintView extends React.PureComponent {
         model={this.model}
         saveAsType={saveAsType}
         printOptionsOk={printOptionsOk}
+        options={this.props.options}
       ></GeneralOptions>
     );
   };
@@ -279,6 +280,7 @@ class PrintView extends React.PureComponent {
         includeLogo={includeLogo}
         logoPlacement={logoPlacement}
         printOptionsOk={printOptionsOk}
+        options={this.props.options}
       ></AdvancedOptions>
     );
   };
