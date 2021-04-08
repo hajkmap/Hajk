@@ -30,11 +30,16 @@ class CoordinatesModel {
         },
       ];
     } else {
-      // Check that there is a precision set, otherwise set the it to 3
+      // Give default values in case none is set
       this.transformations.forEach((t) => {
-        if (!t.precision) {
-          t.precision = 3;
-        }
+        t.code = t.code ?? "";
+        t.precision = t.precision ?? 3;
+        t.default = t.default ?? false;
+        t.title = t.title ?? "";
+        t.xtitle = t.xtitle ?? "";
+        t.ytitle = t.ytitle ?? "";
+        t.inverseAxis = t.inverseAxis ?? "";
+        t.coordinates = t.coordinates ?? "";
       });
     }
 
