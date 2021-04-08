@@ -23,6 +23,34 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
+const StyledTypography = withStyles((theme) => ({
+  h1: {
+    fontSize: "1.6rem",
+    fontWeight: "500",
+  },
+  h2: {
+    fontSize: "1.4rem",
+    fontWeight: "500",
+  },
+  h3: {
+    fontSize: "1.2rem",
+    fontWeight: "500",
+  },
+  h4: {
+    fontSize: "1rem",
+    fontWeight: "500",
+  },
+  h5: {
+    fontSize: "0.875rem",
+    fontWeight: "500",
+  },
+  h6: {
+    fontSize: "0.875rem",
+    fontWeight: "400",
+    fontStyle: "italic",
+  },
+}))(Typography);
+
 export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
@@ -55,7 +83,9 @@ export default class FeaturePropsParsing {
         return <Link href={a.href}>{a.children}</Link>;
       },
       heading: ({ level, children }) => {
-        return <Typography variant={`h${level}`}>{children}</Typography>;
+        return (
+          <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
+        );
       },
       table: (a) => {
         return (
