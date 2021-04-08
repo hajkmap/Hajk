@@ -29,7 +29,7 @@ Det finns en produktägargrupp, en kodgrupp och en förvaltargrupp där medlemma
 
 Vi har stormöten där alla som är aktiva utvecklare, användare eller nyfikna är välkomna att delta. Dessa möten turas vi om att anordna, på plats eller digitalt. Slack används för kommunikation och alla frågor som rör HAJK-samarbetet, här informerar vi om kommande möten och dylikt. Tekniska frågor som rör kod ställs på GitHub. Här används Issues för att tackla eventuella problem och ny utveckling. 
 
-Längst ner på denna sida har vi börjat lägga upp användardokumentation.
+Längst ner på den här sidan har vi börjat lägga upp användardokumentation.
 På GitHub har vi [Wiki-sidan](https://github.com/hajkmap/Hajk/wiki) där man kommer åt administratörsdokumentation på svenska. Här finns också en Quick setup guide och annat läsvärt. 
 
 ## Historik
