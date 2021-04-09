@@ -638,18 +638,39 @@ export default class PrintModel {
       if (this.copyright.length > 0) {
         pdf.setFontSize(8);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(`© ${this.copyright}`, dim[0] / 2, dim[1] - 4 - this.margin, {
-          align: "center",
-        });
+        pdf.text(
+          `© ${this.copyright}`,
+          dim[0] - 4 - this.margin,
+          dim[1] - 4 - this.margin,
+          {
+            align: "right",
+          }
+        );
+        // pdf.text(`© ${this.copyright}`, dim[0] / 2, dim[1] - 4 - this.margin, {
+        //   align: "center",
+        // });
       }
 
       // Add potential disclaimer text
       if (this.disclaimer.length > 0) {
         pdf.setFontSize(8);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(this.disclaimer, dim[0] / 2, dim[1] - 8 - this.margin, {
-          align: "center",
-        });
+        let textLines = pdf.splitTextToSize(
+          this.disclaimer,
+          dim[0] / 2 - this.margin - 8
+        );
+        let textLinesDims = pdf.getTextDimensions(textLines, { fontSize: 8 });
+        pdf.text(
+          textLines,
+          dim[0] - 4 - this.margin,
+          dim[1] - 6 - this.margin - textLinesDims.h,
+          {
+            align: "right",
+          }
+        );
+        // pdf.text(this.disclaimer, dim[0] / 2, dim[1] - 8 - this.margin, {
+        //   align: "center",
+        // });
       }
 
       // Finally, save the PDF (or PNG)
