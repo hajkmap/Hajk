@@ -198,7 +198,7 @@ export default class PrintModel {
    * @param {*} url
    * @returns {Promise}
    */
-  getImageDataBlogFromUrl = (url) => {
+  getImageDataBlobFromUrl = (url) => {
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.setAttribute("crossOrigin", "anonymous"); //getting images from external domain
@@ -241,7 +241,7 @@ export default class PrintModel {
       data,
       width: sourceWidth,
       height: sourceHeight,
-    } = await this.getImageDataBlogFromUrl(url);
+    } = await this.getImageDataBlobFromUrl(url);
 
     // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
     const ratio = maxWidth / sourceWidth;
@@ -328,15 +328,16 @@ export default class PrintModel {
     scaleBarLengthMeters
   ) => {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
-    pdf.setFontSize(6);
+    pdf.setFontSize(8);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(color);
     pdf.setLineWidth(0.25);
     pdf.text(
       lengthText,
       scaleBarPosition.x + scaleBarLength + 1,
-      scaleBarPosition.y + 3.7
+      scaleBarPosition.y + 4
     );
+    pdf.setFontSize(10);
     pdf.text(
       `Skala: ${this.getUserFriendlyScale(scale)}`,
       scaleBarPosition.x,
