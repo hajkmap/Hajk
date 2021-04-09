@@ -69,6 +69,17 @@ class AdvancedOptions extends React.PureComponent {
     this.props.setMapTextColor(color);
   };
 
+  allowBottomRightPlacement = () => {
+    if (
+      (this.props.options.copyright ?? "").length > 0 ||
+      (this.props.options.disclaimer ?? "").length > 0
+    ) {
+      // no! This placement is now reserved for copyright and/or disclaimer.
+      return false;
+    }
+    return true;
+  };
+
   renderPlacementSelect = (value, name, changeHandler, disabled) => {
     return (
       <Select
@@ -82,7 +93,9 @@ class AdvancedOptions extends React.PureComponent {
       >
         <MenuItem value={"topLeft"}>Uppe till vänster</MenuItem>
         <MenuItem value={"topRight"}>Uppe till höger</MenuItem>
-        <MenuItem value={"bottomRight"}>Nere till höger</MenuItem>
+        {this.allowBottomRightPlacement() && (
+          <MenuItem value={"bottomRight"}>Nere till höger</MenuItem>
+        )}
         <MenuItem value={"bottomLeft"}>Nere till vänster</MenuItem>
       </Select>
     );
