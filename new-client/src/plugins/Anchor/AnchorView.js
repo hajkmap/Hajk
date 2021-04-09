@@ -67,11 +67,6 @@ class AnchorView extends React.PureComponent {
       });
   };
 
-  handleClickOpenNewWindow = (e) => {
-    const input = document.getElementById("anchorUrl");
-    window.open(input.value);
-  };
-
   render() {
     const { classes } = this.props;
     return (
@@ -97,7 +92,7 @@ class AnchorView extends React.PureComponent {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Öppna i nytt fönster">
-                    <IconButton onClick={this.handleClickOpenNewWindow}>
+                    <IconButton href={this.state.anchor} target="_blank">
                       <OpenInNewIcon />
                     </IconButton>
                   </Tooltip>
