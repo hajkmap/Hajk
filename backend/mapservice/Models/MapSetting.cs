@@ -43,10 +43,6 @@ namespace MapService.Models
 
         public string logo { get; set; }
 
-        public string logoLight { get; set; }
-
-        public string logoDark { get; set; }        
-
         public string geoserverLegendOptions { get; set; }
 
 		public bool mapselector { get; set; }
