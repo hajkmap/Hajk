@@ -296,6 +296,7 @@ class PrintView extends React.PureComponent {
       printInProgress,
       saveAsType,
       activeTab,
+      printOptionsOk,
     } = this.state;
 
     this.model.renderPreviewFeature(previewLayerVisible, {
@@ -336,7 +337,7 @@ class PrintView extends React.PureComponent {
                 fullWidth={true}
                 color="primary"
                 onClick={this.initiatePrint}
-                disabled={printInProgress}
+                disabled={printInProgress || !printOptionsOk}
               >
                 Skriv ut
               </Button>
