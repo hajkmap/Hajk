@@ -640,7 +640,7 @@ export default class PrintModel {
         pdf.setFontSize(8);
         pdf.setTextColor(options.mapTextColor);
         pdf.text(
-          `© ${this.copyright}`,
+          this.copyright,
           dim[0] - 4 - this.margin,
           dim[1] - 4 - this.margin,
           {
