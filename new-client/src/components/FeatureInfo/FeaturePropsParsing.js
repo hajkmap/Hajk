@@ -279,7 +279,8 @@ export default class FeaturePropsParsing {
    * @description There are three things going on here:
    * 1. The markdown is used as a template, anything between { and } gets replaced
    * with the real value from properties object, or is left empty.
-   * 2. Next we apply conditional rendering (where statements are between < and >).
+   * 2. Next we apply conditional rendering, where conditions are between {{ and }} while
+   * content is between {{condition}} and {{/condition}}.
    * Currently, if-condition is the only one supported, but more might become available.
    * Depending on the condition value, replacing can occur within our markdown string.
    * 3. The final markdown string is passed to the ReactMarkdown component.
@@ -311,14 +312,14 @@ export default class FeaturePropsParsing {
       // references to elements in the this.resolvedPromises array. The latter will
       // be the only remaining occurrences of numbers surrounded by curly brackets.
 
-      // Next step is to find all "conditional tags" (i.e. <if foo="bar">baz</if>)
+      // Next step is to find all "conditional tags" (i.e. {{if foo="bar"}}baz{{/if}})
       // and apply the replacer function on all matches.
       // The regex string below does the following:
       // Split each match into 3 named capture groups:
-      // - "condition": the word between < and whitespace, "if" in this example
-      // - "attributes": whatever follows the condition, until we see a >, 'foo="bar"'
-      // - "content": anything after > but before </ and whatever was the result in group one, "Baz"
-      // Note that we include any ending new lines in the match. That's because _if_ we find a match
+      // - "condition": the word between {{ and whitespace, "if" in this example
+      // - "attributes": whatever follows the condition, until we see a }}, 'foo="bar"'
+      // - "content": anything after }} but before {{/ and whatever was the result in group one, "baz"
+      // Note that the match will include one line ending. That's because _if_ we find a match
       // and will remove it, we must remove the line ending too, otherwise we would break the Markdown
       // formatting if only certain strings were to be removed, but all line endings would remain.
       this.markdown = this.markdown.replace(
