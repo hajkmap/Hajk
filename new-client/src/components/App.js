@@ -220,8 +220,9 @@ class App extends React.PureComponent {
 
     const localStorageToolFoundInMapConfig = tools.some((tool) => {
       return (
+        typeof activeDrawerContentFromLocalStorage === "string" &&
         tool.type.toLowerCase() ===
-        activeDrawerContentFromLocalStorage.toLowerCase()
+          activeDrawerContentFromLocalStorage.toLowerCase()
       );
     });
 
