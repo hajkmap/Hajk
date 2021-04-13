@@ -13,7 +13,7 @@ import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
 import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
 import { stateFromHTML } from "draft-js-import-html";
-
+import { withStyles } from "@material-ui/core/styles";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
@@ -27,13 +27,33 @@ import LaunchIcon from "@material-ui/icons/Launch";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-
+import { red, green } from "@material-ui/core/colors";
 import TextAreaInput from "./TextAreaInput";
 import addLinkPlugin from "./addLinkPlugin";
 import StyleButton from "./StyleButton";
 import ImageComponent from "./ImageComponent";
 import insertNewLine from "../utils/insertNewLine";
-import { Typography } from "@material-ui/core";
+import { Typography, Button } from "@material-ui/core";
+
+const ColorButtonRed = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700],
+    },
+  },
+}))(Button);
+
+const ColorButtonGreen = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700],
+    },
+  },
+}))(Button);
 
 export default class DocumentTextEditor extends React.Component {
   constructor(props) {
@@ -648,7 +668,7 @@ export default class DocumentTextEditor extends React.Component {
           style={styles.urlInput}
           type="text"
           value={this.state.urlValue || ""}
-          placeholder="Webblänk"
+          placeholder={this.getUrlType(type)}
           onKeyDown={this.onLinkInputKeyDown}
         />
       );
@@ -659,14 +679,20 @@ export default class DocumentTextEditor extends React.Component {
     // Return input field for default URL or documents
     if (type === "documentlink") {
       return (
-        <input
-          onChange={this.onTitleIdChange}
-          ref="url"
+        <TextField
+          autoFocus
           style={styles.urlInput}
-          type="text"
           value={this.state.urlTitleId || ""}
           placeholder="data-header-identifier"
           onKeyDown={this.onLinkInputKeyDown}
+          helperText="Id-nummer för kapitlet som ska visas"
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          type="text"
+          onChange={this.onTitleIdChange}
+          ref="url"
         />
       );
     }
@@ -747,12 +773,11 @@ export default class DocumentTextEditor extends React.Component {
     const { editorState, imageList, documents } = this.state;
 
     let editorContainer = styles.editor;
-
     let urlInput;
     if (this.state.showURLInput) {
       urlInput = (
-        <Grid container>
-          <Grid container spacing={2} item xs={5}>
+        <Grid style={styles.gridItemContainer} container>
+          <Grid container direction="column" spacing={2} item xs={6}>
             <Grid item>
               <Typography variant="h5">Lägg till bild</Typography>
               <Autocomplete
@@ -778,37 +803,34 @@ export default class DocumentTextEditor extends React.Component {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Ange URL eller välj en bild"
-                    variant="outlined"
+                    placeholder="Sökväg"
+                    helperText="Ange URL till en bild"
+                    variant="standard"
                   />
                 )}
               />
-              <p>Förhandsvisning:</p>
-              <img
-                src={this.state.urlValue}
-                alt={this.state.imageAlt}
-                onLoad={this.onImgLoad}
-                width={this.state.mediaWidth}
-                height={this.state.mediaHeight}
-              />
             </Grid>
-            <Grid item>
-              <input
-                onChange={(e) => this.calculateHeight(e.target.value)}
-                ref="data-image-width"
-                type="number"
-                value={this.state.mediaWidth || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Bredd"
-              />
-              <input
-                onChange={(e) => this.calculateWidth(e.target.value)}
-                ref="data-image-height"
-                type="number"
-                value={this.state.mediaHeight || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Höjd"
-              />
+            <Grid container item>
+              <Grid style={styles.gridItem} item>
+                <input
+                  onChange={(e) => this.calculateHeight(e.target.value)}
+                  ref="data-image-width"
+                  type="number"
+                  value={this.state.mediaWidth || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Bredd"
+                />
+              </Grid>
+              <Grid item>
+                <input
+                  onChange={(e) => this.calculateWidth(e.target.value)}
+                  ref="data-image-height"
+                  type="number"
+                  value={this.state.mediaHeight || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Höjd"
+                />
+              </Grid>
             </Grid>
             <Grid item>
               <input
@@ -820,51 +842,84 @@ export default class DocumentTextEditor extends React.Component {
                 placeholder="Alternativ text"
               />
             </Grid>
-            <Grid item>
-              <input
-                onChange={this.onDataCaptionChange}
-                ref="data-caption"
-                type="text"
-                value={this.state.mediaCaption || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Beskrivning"
-              />
-              <input
-                onChange={this.onDataSourceChange}
-                ref="data-source"
-                type="text"
-                value={this.state.mediaSource || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Källa"
-              />
+            <Grid container item>
+              <Grid style={styles.gridItem} item>
+                <input
+                  onChange={this.onDataCaptionChange}
+                  ref="data-caption"
+                  type="text"
+                  value={this.state.mediaCaption || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Beskrivning"
+                />
+              </Grid>
+              <Grid item>
+                <input
+                  onChange={this.onDataSourceChange}
+                  ref="data-source"
+                  type="text"
+                  value={this.state.mediaSource || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Källa"
+                />
+              </Grid>
+            </Grid>
+            <Grid container item>
+              <Grid style={styles.gridItem} item>
+                <select
+                  value={this.state.mediaPosition}
+                  ref="data-image-position"
+                  onChange={this.onDataPositionChange}
+                >
+                  <option value="left">Vänster</option>
+                  <option value="center">Center</option>
+                  <option value="right">Höger</option>
+                  <option value="floatRight">Höger med text</option>
+                  <option value="floatLeft">Vänster med text</option>
+                </select>
+              </Grid>
+              <Grid item>
+                <input
+                  id="data-image-popup"
+                  onChange={this.onDataPopupChange}
+                  ref="data-image-popup"
+                  type="checkbox"
+                  value={this.state.mediaPopup}
+                  onKeyDown={this.onURLInputKeyDown}
+                />
+                <label>Popup</label>
+              </Grid>
             </Grid>
             <Grid item>
-              <input
-                id="data-image-popup"
-                onChange={this.onDataPopupChange}
-                ref="data-image-popup"
-                type="checkbox"
-                value={this.state.mediaPopup}
-                onKeyDown={this.onURLInputKeyDown}
-              />
-              <label>Popup</label>
-            </Grid>
-            <Grid item>
-              <select
-                value={this.state.mediaPosition}
-                ref="data-image-position"
-                onChange={this.onDataPositionChange}
+              <ColorButtonGreen
+                style={styles.button}
+                variant="contained"
+                onMouseDown={this.confirmMedia}
               >
-                <option value="left">Vänster</option>
-                <option value="center">Center</option>
-                <option value="right">Höger</option>
-                <option value="floatRight">Höger med text</option>
-                <option value="floatLeft">Vänster med text</option>
-              </select>
+                OK
+              </ColorButtonGreen>
+              <ColorButtonRed
+                variant="contained"
+                onMouseDown={this.closeURLInput}
+              >
+                Avbryt
+              </ColorButtonRed>
+            </Grid>
+          </Grid>
+          <Grid container direction="column" item xs={6}>
+            <Grid item>
+              <p>Förhandsvisning:</p>
             </Grid>
             <Grid item>
-              <button onMouseDown={this.confirmMedia}>OK</button>
-              <button onMouseDown={this.closeURLInput}>Avbryt</button>
+              {this.state.urlValue && (
+                <img
+                  src={this.state.urlValue}
+                  alt={this.state.imageAlt}
+                  onLoad={this.onImgLoad}
+                  width={this.state.mediaWidth}
+                  height={this.state.mediaHeight}
+                />
+              )}
             </Grid>
           </Grid>
         </Grid>
@@ -903,16 +958,35 @@ export default class DocumentTextEditor extends React.Component {
 
     if (this.state.showLinkInput) {
       urlInput = (
-        <div style={styles.urlInputContainer}>
-          <Typography variant="h5">
-            Lägg till {this.getUrlType(this.state.urlType)}
-          </Typography>
-          <p>Markera den text som ska bli en länk</p>
-          {this.getUrlInput(this.state.urlType, documents)}
-          {this.getUrlId(this.state.urlType)}
-          <button onMouseDown={this.confirmLink}>OK</button>
-          <button onMouseDown={this.closeLinkInput}>Avbryt</button>
-        </div>
+        <Grid style={styles.gridItemContainer} direction="column" container>
+          <Grid item>
+            <Typography variant="h5">
+              Lägg till {this.getUrlType(this.state.urlType)}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="subtitle2">
+              Markera den text som ska bli en länk
+            </Typography>
+          </Grid>
+          <Grid item>{this.getUrlInput(this.state.urlType, documents)}</Grid>
+          <Grid item>{this.getUrlId(this.state.urlType)}</Grid>
+          <Grid item>
+            <ColorButtonGreen
+              style={styles.button}
+              variant="contained"
+              onMouseDown={this.confirmLink}
+            >
+              OK
+            </ColorButtonGreen>
+            <ColorButtonRed
+              variant="contained"
+              onMouseDown={this.closeLinkInput}
+            >
+              Avbryt
+            </ColorButtonRed>
+          </Grid>
+        </Grid>
       );
     }
 
@@ -1050,7 +1124,12 @@ const styles = {
     fontFamily: "'Georgia', serif",
     border: "1px solid #ddd",
   },
-
+  gridItem: {
+    marginRight: "8px",
+  },
+  gridItemContainer: {
+    margin: "8px",
+  },
   buttonContainer: {
     height: 40,
     borderBottom: "1px solid #ddd",
@@ -1065,7 +1144,7 @@ const styles = {
   urlInput: {
     fontFamily: "'Georgia', serif",
     marginRight: 10,
-    padding: 3,
+    marginBottom: 8,
   },
   editorContainer: {
     border: "1px solid #ccc",
@@ -1078,8 +1157,7 @@ const styles = {
     padding: "18px",
   },
   button: {
-    marginTop: 10,
-    textAlign: "center",
+    marginRight: "8px",
   },
   media: {
     whiteSpace: "initial",
