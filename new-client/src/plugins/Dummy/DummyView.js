@@ -4,7 +4,8 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Button from "@material-ui/core/Button";
 import BugReportIcon from "@material-ui/icons/BugReport";
-import { Box, Typography } from "@material-ui/core";
+import { Box, Select, MenuItem, Slider, Typography } from "@material-ui/core";
+import { getRenderPixel } from "ol/render";
 
 // Define JSS styles that will be used in this component.
 // Example below utilizes the very powerful "theme" object
@@ -22,7 +23,9 @@ const styles = (theme) => ({
 class DummyView extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
+    activeCompareLayer: "-100",
     counter: 0,
+    slider: 50,
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -57,6 +60,41 @@ class DummyView extends React.PureComponent {
       renderDrawerContent: this.renderDrawerContent,
     });
   }
+
+  // componentDidMount() {
+  //   const baseLayers = this.getBaseLayers();
+  //   console.log("baseLayers: ", baseLayers);
+  //   const l = this.props.app.map
+  //     .getLayers()
+  //     .getArray()
+  //     .filter((l) => l.get("name") === "72")[0];
+
+  //   l.setVisible(true);
+
+  //   l.on("prerender", (event) => {
+  //     var ctx = event.context;
+  //     var mapSize = this.props.app.map.getSize();
+  //     var width = mapSize[0] * (this.state.slider / 100);
+  //     var tl = getRenderPixel(event, [width, 0]);
+  //     var tr = getRenderPixel(event, [mapSize[0], 0]);
+  //     var bl = getRenderPixel(event, [width, mapSize[1]]);
+  //     var br = getRenderPixel(event, mapSize);
+
+  //     ctx.save();
+  //     ctx.beginPath();
+  //     ctx.moveTo(tl[0], tl[1]);
+  //     ctx.lineTo(bl[0], bl[1]);
+  //     ctx.lineTo(br[0], br[1]);
+  //     ctx.lineTo(tr[0], tr[1]);
+  //     ctx.closePath();
+  //     ctx.clip();
+  //   });
+
+  //   l.on("postrender", (event) => {
+  //     var ctx = event.context;
+  //     ctx.restore();
+  //   });
+  // }
 
   renderDrawerContent = () => {
     const { classes } = this.props;
@@ -180,10 +218,105 @@ class DummyView extends React.PureComponent {
     );
   };
 
+  getBaseLayers() {
+    return [
+      { name: "-100", caption: "None" },
+      ...this.props.app.map
+        .getLayers()
+        .getArray()
+        .filter((l) => l.getProperties().layerInfo?.layerType === "base")
+        .map((l) => l.getProperties()),
+    ];
+  }
+
+  renderCompareLayerOptions = () => {
+    return this.getBaseLayers().map((l, i) => (
+      <MenuItem value={l.name} key={i}>
+        {l.caption}
+      </MenuItem>
+    ));
+  };
+
+  prerenderHandler = (event) => {
+    console.log("event: ", event);
+    const ctx = event.context;
+    const mapSize = this.props.app.map.getSize();
+    const width = mapSize[0] * (this.state.slider / 100);
+    const tl = getRenderPixel(event, [width, 0]);
+    const tr = getRenderPixel(event, [mapSize[0], 0]);
+    const bl = getRenderPixel(event, [width, mapSize[1]]);
+    const br = getRenderPixel(event, mapSize);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(tl[0], tl[1]);
+    ctx.lineTo(bl[0], bl[1]);
+    ctx.lineTo(br[0], br[1]);
+    ctx.lineTo(tr[0], tr[1]);
+    ctx.closePath();
+    ctx.clip();
+  };
+
+  postrenderHandler = (event) => {
+    console.log("event: ", event);
+    const ctx = event.context;
+    ctx.restore();
+  };
+
+  handleCompareLayerChange = (e) => {
+    this.setState({ activeCompareLayer: e.target.value }, () => {
+      const mapLayers = this.props.app.map.getLayers().getArray();
+      // Grab previous compare layer and hide them
+      mapLayers
+        .filter((l) => l.get("isActiveCompareLayer") === true)
+        .forEach((l) => {
+          l.set("visible", false, true);
+          l.set("isActiveCompareLayer", false);
+          l.un("prerender", this.prerenderHandler);
+          l.un("postrender", this.postrenderHandler);
+          console.log("l for deactivation: ", l);
+        });
+
+      if (e.target.value === "-100") {
+        // Special value "None" was selected - deactive comparer functionality
+      } else {
+        // Activate selected later as comparer
+        const l = mapLayers.filter((l) => l.get("name") === e.target.value)[0];
+
+        l.set("visible", true, true);
+        l.set("isActiveCompareLayer", true);
+
+        l.on("prerender", this.prerenderHandler);
+        l.on("postrender", this.postrenderHandler);
+      }
+    });
+  };
+
+  handleSliderChange = (event, newValue) => {
+    this.setState({ slider: newValue }, () => {
+      this.props.app.map.render();
+    });
+  };
+
   render() {
     const { classes } = this.props;
     return (
       <>
+        {this.state.activeCompareLayer !== "-100" && (
+          <Slider
+            value={this.state.slider}
+            onChange={this.handleSliderChange}
+            aria-labelledby="continuous-slider"
+          />
+        )}
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={this.state.activeCompareLayer}
+          onChange={this.handleCompareLayerChange}
+        >
+          {this.renderCompareLayerOptions()}
+        </Select>
         <Button
           className={classes.buttonWithBottomMargin}
           variant="contained"
