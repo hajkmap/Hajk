@@ -61,41 +61,6 @@ class DummyView extends React.PureComponent {
     });
   }
 
-  // componentDidMount() {
-  //   const baseLayers = this.getBaseLayers();
-  //   console.log("baseLayers: ", baseLayers);
-  //   const l = this.props.app.map
-  //     .getLayers()
-  //     .getArray()
-  //     .filter((l) => l.get("name") === "72")[0];
-
-  //   l.setVisible(true);
-
-  //   l.on("prerender", (event) => {
-  //     var ctx = event.context;
-  //     var mapSize = this.props.app.map.getSize();
-  //     var width = mapSize[0] * (this.state.slider / 100);
-  //     var tl = getRenderPixel(event, [width, 0]);
-  //     var tr = getRenderPixel(event, [mapSize[0], 0]);
-  //     var bl = getRenderPixel(event, [width, mapSize[1]]);
-  //     var br = getRenderPixel(event, mapSize);
-
-  //     ctx.save();
-  //     ctx.beginPath();
-  //     ctx.moveTo(tl[0], tl[1]);
-  //     ctx.lineTo(bl[0], bl[1]);
-  //     ctx.lineTo(br[0], br[1]);
-  //     ctx.lineTo(tr[0], tr[1]);
-  //     ctx.closePath();
-  //     ctx.clip();
-  //   });
-
-  //   l.on("postrender", (event) => {
-  //     var ctx = event.context;
-  //     ctx.restore();
-  //   });
-  // }
-
   renderDrawerContent = () => {
     const { classes } = this.props;
     return (
@@ -302,13 +267,6 @@ class DummyView extends React.PureComponent {
     const { classes } = this.props;
     return (
       <>
-        {this.state.activeCompareLayer !== "-100" && (
-          <Slider
-            value={this.state.slider}
-            onChange={this.handleSliderChange}
-            aria-labelledby="continuous-slider"
-          />
-        )}
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
@@ -317,6 +275,13 @@ class DummyView extends React.PureComponent {
         >
           {this.renderCompareLayerOptions()}
         </Select>
+        {this.state.activeCompareLayer !== "-100" && (
+          <Slider
+            value={this.state.slider}
+            onChange={this.handleSliderChange}
+            aria-labelledby="continuous-slider"
+          />
+        )}
         <Button
           className={classes.buttonWithBottomMargin}
           variant="contained"
