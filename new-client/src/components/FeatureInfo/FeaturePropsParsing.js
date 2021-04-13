@@ -322,7 +322,7 @@ export default class FeaturePropsParsing {
       // and will remove it, we must remove the line ending too, otherwise we would break the Markdown
       // formatting if only certain strings were to be removed, but all line endings would remain.
       this.markdown = this.markdown.replace(
-        /{{2}(?<condition>\w+)[\s/]?(?<attributes>[^}{2}]+)?}{2}(?<content>[^{{2}]+)?(?:{{2}\/\1}{2}\n*)?/gi,
+        /{{(?<condition>\w+)[\s/]?(?<attributes>[^}}]+)?}}(?<content>[^{{]+)?(?:{{\/\1}}\n)?/gi,
         this.#conditionalReplacer
       );
 
