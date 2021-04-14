@@ -656,17 +656,33 @@ class AppModel {
 
     if (editTool) {
       if (editTool.options.activeServices === null) {
-        editTool.options.sources = layers.wfstlayers;
+        editTool.options.sources = [];
       } else {
         if (
           editTool.options.activeServices &&
           editTool.options.activeServices.length !== 0
         ) {
+          if (
+            typeof editTool.options.activeServices[0].visibleForGroups ===
+            "undefined"
+          ) {
+            // If activeService does not have visibleForGroups object, add it
+            let asNew = [];
+            for (let i = 0; i < editTool.options.activeServices.length; i++) {
+              let as = {
+                id: editTool.options.activeServices[i],
+                visibleForGroups: [],
+              };
+              asNew.push(as);
+            }
+            editTool.options.activeServices = asNew;
+          }
+
           let wfstlayers = this.overrideGlobalEditConfig(editTool, layers);
           editTool.options.sources = wfstlayers;
           layers.wfstlayers = wfstlayers;
         } else {
-          editTool.options.sources = layers.wfstlayers;
+          editTool.options.sources = [];
         }
       }
     }
