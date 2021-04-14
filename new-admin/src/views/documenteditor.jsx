@@ -526,10 +526,14 @@ class DocumentEditor extends Component {
           </Grid>
         </Box>
         <Grid container item>
-          <Grid container alignItems="center" item>
+          <Grid container alignItems="flex-start" item>
             <Grid className={classes.gridItem} item>
               <Typography variant="h5">
-                <strong>{`Kapitelrubrik : ${chapter.header}`}</strong>
+                <strong>{`${chapter.header}`}</strong>
+              </Typography>
+              <Typography variant="caption">
+                <strong>Id : </strong>
+                {`${chapter.headerIdentifier}`}
               </Typography>
             </Grid>
             <Grid item>
@@ -909,16 +913,6 @@ class DocumentEditor extends Component {
     });
   };
 
-  saveTitle() {
-    this.setState({
-      data: {
-        ...this.state.data,
-        title: this.state.documentTitle,
-      },
-      editTitle: false,
-    });
-  }
-
   renderEditTitle() {
     return (
       <TextField
@@ -929,6 +923,13 @@ class DocumentEditor extends Component {
         onChange={(e) => {
           this.setState({
             documentTitle: e.target.value,
+          });
+
+          this.setState({
+            data: {
+              ...this.state.data,
+              title: e.target.value,
+            },
           });
         }}
       />

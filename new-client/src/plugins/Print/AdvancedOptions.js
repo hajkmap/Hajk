@@ -3,6 +3,7 @@ import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import {
+  Badge,
   FormControl,
   FormHelperText,
   InputLabel,
@@ -26,6 +27,9 @@ const styles = (theme) => ({
     width: "100%",
     margin: theme.spacing(1),
     display: "flex",
+  },
+  badge: {
+    backgroundColor: (props) => props.mapTextColor,
   },
 });
 
@@ -65,6 +69,17 @@ class AdvancedOptions extends React.PureComponent {
     this.props.setMapTextColor(color);
   };
 
+  allowBottomRightPlacement = () => {
+    if (
+      (this.props.options.copyright ?? "").length > 0 ||
+      (this.props.options.disclaimer ?? "").length > 0
+    ) {
+      // no! This placement is now reserved for copyright and/or disclaimer.
+      return false;
+    }
+    return true;
+  };
+
   renderPlacementSelect = (value, name, changeHandler, disabled) => {
     return (
       <Select
@@ -78,7 +93,9 @@ class AdvancedOptions extends React.PureComponent {
       >
         <MenuItem value={"topLeft"}>Uppe till vänster</MenuItem>
         <MenuItem value={"topRight"}>Uppe till höger</MenuItem>
-        <MenuItem value={"bottomRight"}>Nere till höger</MenuItem>
+        {this.allowBottomRightPlacement() && (
+          <MenuItem value={"bottomRight"}>Nere till höger</MenuItem>
+        )}
         <MenuItem value={"bottomLeft"}>Nere till vänster</MenuItem>
       </Select>
     );
@@ -133,20 +150,25 @@ class AdvancedOptions extends React.PureComponent {
                   name: "mapTitle",
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Tooltip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
-                        <IconButton
-                          id="mapTextColor"
-                          onClick={this.toggleColorPicker}
-                          style={{
-                            backgroundColor: mapTextColor,
-                            marginRight: 4,
-                          }}
-                          edge="start"
-                          size="small"
-                        >
-                          <PaletteIcon />
-                        </IconButton>
-                      </Tooltip>
+                      <Badge
+                        badgeContent=" "
+                        variant="dot"
+                        classes={{ badge: classes.badge }}
+                      >
+                        <Tooltip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
+                          <IconButton
+                            id="mapTextColor"
+                            onClick={this.toggleColorPicker}
+                            style={{
+                              marginRight: 4,
+                            }}
+                            edge="start"
+                            size="small"
+                          >
+                            <PaletteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Badge>
                     </InputAdornment>
                   ),
                 }}
@@ -180,14 +202,18 @@ class AdvancedOptions extends React.PureComponent {
                   id: "resolution",
                 }}
               >
-                <MenuItem value={72}>72</MenuItem>
-                <MenuItem value={150}>150</MenuItem>
-                <MenuItem value={300}>300</MenuItem>
+                {this.props.options.dpis.map((value, index) => {
+                  return (
+                    <MenuItem key={"dpis_" + index} value={value}>
+                      {value}
+                    </MenuItem>
+                  );
+                })}
               </Select>
               {!printOptionsOk && (
                 <FormHelperText>
                   Bilden kommer inte kunna skrivas ut korrekt. Testa med en
-                  mindre upplösning eller större skala.
+                  lägre upplösning eller mindre skala.
                 </FormHelperText>
               )}
             </FormControl>

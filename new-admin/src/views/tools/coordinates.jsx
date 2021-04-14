@@ -67,6 +67,8 @@ var defaultState = {
   target: 0,
   instruction: "",
   visibleAtStart: false,
+  thousandSeparator: false,
+  showFieldsOnStart: false,
   visibleForGroups: [],
 };
 
@@ -96,6 +98,8 @@ class ToolOptions extends Component {
         instruction: tool.options.instruction,
         transformations: tool.options.transformations || [],
         visibleAtStart: tool.options.visibleAtStart,
+        thousandSeparator: tool.options.thousandSeparator,
+        showFieldsOnStart: tool.options.showFieldsOnStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -169,6 +173,8 @@ class ToolOptions extends Component {
         instruction: this.state.instruction,
         transformations: this.state.transformations,
         visibleAtStart: this.state.visibleAtStart,
+        thousandSeparator: this.state.thousandSeparator,
+        showFieldsOnStart: this.state.showFieldsOnStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -464,6 +470,36 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
+          <div>
+            <input
+              id="thousandSeparator"
+              name="thousandSeparator"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.thousandSeparator}
+            />
+            &nbsp;
+            <label htmlFor="thousandSeparator">
+              Formattera nummer (1000 -> 1 000)
+            </label>
+          </div>
+          <div>
+            <input
+              id="showFieldsOnStart"
+              name="showFieldsOnStart"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.showFieldsOnStart}
+            />
+            &nbsp;
+            <label htmlFor="showFieldsOnStart">
+              Visa projektionsfälten från start
+            </label>
           </div>
           <div>
             <label htmlFor="instruction">

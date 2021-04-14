@@ -151,6 +151,9 @@ const styles = (theme) => {
       height: "100%",
       overflow: "auto",
     },
+    drawerLockButton: {
+      margin: -12,
+    },
     logoBox: {
       padding: theme.spacing(1, 2),
       height: theme.spacing(6),
@@ -159,15 +162,38 @@ const styles = (theme) => {
       height: theme.spacing(4),
     },
     drawerGrid: {
-      padding: theme.spacing(0, 2),
+      padding: theme.spacing(1, 2),
       backgroundColor: theme.palette.background.paper,
       minHeight: theme.spacing(6),
+    },
+    drawerTitle: {
+      padding: theme.spacing(1, 0),
+      lineHeight: 0,
     },
     drawerLiveContent: {
       backgroundColor: theme.palette.background.default,
     },
     widgetItem: {
       width: "220px",
+    },
+    snackBarContainerRoot: {
+      [theme.breakpoints.down("xs")]: {
+        pointerEvents: "none",
+        // Getting around notistack bug, can't reach snackItem.
+        "& div > div > div > div": {
+          pointerEvents: "auto",
+        },
+      },
+    },
+    snackbarContainerBottom: {
+      [theme.breakpoints.down("xs")]: {
+        bottom: "35px",
+      },
+    },
+    snackbarContainerTop: {
+      [theme.breakpoints.down("xs")]: {
+        top: "18px",
+      },
     },
     // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
     shiftedLeft: {
@@ -193,13 +219,20 @@ class App extends React.PureComponent {
   };
 
   canRenderCustomDrawer = (activeDrawerContentFromLocalStorage, tools) => {
-    if (!activeDrawerContentFromLocalStorage) {
-      return false;
+    if (
+      !activeDrawerContentFromLocalStorage ||
+      activeDrawerContentFromLocalStorage === "plugins"
+    ) {
+      // If nothing was found in local storage, fall back to map config setting
+      activeDrawerContentFromLocalStorage = this.props.config.mapConfig.map
+        .activeDrawerOnStart;
     }
+
     const localStorageToolFoundInMapConfig = tools.some((tool) => {
       return (
+        typeof activeDrawerContentFromLocalStorage === "string" &&
         tool.type.toLowerCase() ===
-        activeDrawerContentFromLocalStorage.toLowerCase()
+          activeDrawerContentFromLocalStorage.toLowerCase()
       );
     });
 
@@ -230,6 +263,7 @@ class App extends React.PureComponent {
     const drawerPermanentFromLocalStorage = this.getDrawerPermanentFromLocalStorage();
     const activeDrawerContentFromLocalStorage = this.getActiveDrawerContentFromLocalStorage();
     const canRenderDefaultDrawer = this.hasAnyToolbarTools();
+
     const canRenderCustomDrawer = this.canRenderCustomDrawer(
       activeDrawerContentFromLocalStorage,
       props.config.mapConfig.tools
@@ -242,37 +276,45 @@ class App extends React.PureComponent {
     //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
 
     const activeDrawerContentState = canRenderCustomDrawer
-      ? activeDrawerContentFromLocalStorage
-      : props.config.mapConfig.map.activeDrawerOnStart || "plugins";
+      ? activeDrawerContentFromLocalStorage !== null &&
+        activeDrawerContentFromLocalStorage !== "plugins"
+        ? activeDrawerContentFromLocalStorage
+        : this.props.config.mapConfig.map.activeDrawerOnStart
+      : canRenderDefaultDrawer
+      ? "plugins"
+      : null;
 
     // First check if we have anything to render at all and in case we haven't -> do not show drawer
-    //If on a mobile device, the drawer should never be permanent.
+    // If on a mobile device, the drawer should never be permanent.
     // If not on mobile, if cookie is not null, use it to show/hide Drawer.
     // If cookie is not null, use it to show/hide Drawer.
     // If cookie however is null, fall back to the values from config.
     // Finally, fall back to "false" if no cookie or config is found.
     const drawerPermanent =
-      (canRenderCustomDrawer || canRenderDefaultDrawer) &&
-      (isMobile
+      activeDrawerContentState === null
+        ? false
+        : isMobile
         ? false
         : drawerPermanentFromLocalStorage !== null
         ? drawerPermanentFromLocalStorage
         : (props.config.mapConfig.map.drawerVisible &&
             props.config.mapConfig.map.drawerPermanent) ||
-          false);
+          false;
 
     // First check if we have anything to render at all and in case we haven't -> do not show drawer
-    //If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
-    //Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-    //If there a no cookie settings, use the config drawVisible setting.
-    //Finally, don't show the drawer.
+    // If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
+    // Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
+    // If there a no cookie settings, use the config drawVisible setting.
+    // Finally, don't show the drawer.
     const drawerVisible =
-      (canRenderCustomDrawer || canRenderDefaultDrawer) &&
-      (isMobile && props.config.mapConfig.map.drawerVisibleMobile !== undefined
+      activeDrawerContentState === null
+        ? false
+        : isMobile &&
+          props.config.mapConfig.map.drawerVisibleMobile !== undefined
         ? props.config.mapConfig.map.drawerVisibleMobile
         : drawerPermanentFromLocalStorage !== null
         ? drawerPermanentFromLocalStorage
-        : props.config.mapConfig.map.drawerVisible || false);
+        : props.config.mapConfig.map.drawerVisible || false;
 
     this.state = {
       alert: false,
@@ -286,7 +328,7 @@ class App extends React.PureComponent {
     };
 
     //if drawer is visible at start - ensure the activeDrawerContent is set to current content
-    if (drawerVisible && drawerPermanent) {
+    if (drawerVisible && drawerPermanent && activeDrawerContentState !== null) {
       window.localStorage.setItem(
         "activeDrawerContent",
         activeDrawerContentState
@@ -346,6 +388,23 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
+    // Register a handle to prevent pinch zoom on mobile devices.
+    document.body.addEventListener(
+      "touchmove",
+      (event) => {
+        // If this event would result in changing scale …
+        if (event.scale !== 1) {
+          // …cancel it.
+          event.preventDefault();
+        }
+        // Else, allow all non-scale-changing touch events, e.g.
+        // we still want scroll to work.
+      },
+      { passive: false } // Explicitly tell the browser that we will preventDefault inside this handler,
+      // which is important for smooth scrolling to work correctly.
+    );
+
+    // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
       this.appModel.highlight(false);
       this.setState({
@@ -597,12 +656,15 @@ class App extends React.PureComponent {
           className={classes.drawerGrid}
           item
           container
+          wrap="nowrap"
           direction="row"
           justify="space-between"
           alignItems="center"
         >
           <Grid item>
-            <Typography variant="button">{drawerTitle}</Typography>
+            <Typography variant="button" className={classes.drawerTitle}>
+              {drawerTitle}
+            </Typography>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>
@@ -614,6 +676,7 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
+                  className={classes.drawerLockButton}
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
@@ -696,6 +759,11 @@ class App extends React.PureComponent {
     return (
       <SnackbarProvider
         maxSnack={3}
+        classes={{
+          anchorOriginBottomCenter: classes.snackbarContainerBottom,
+          anchorOriginTopCenter: classes.snackbarContainerTop,
+          containerRoot: classes.snackBarContainerRoot,
+        }}
         anchorOrigin={{
           vertical: "top",
           horizontal: "center",
