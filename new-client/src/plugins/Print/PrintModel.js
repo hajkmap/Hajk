@@ -647,9 +647,6 @@ export default class PrintModel {
             align: "right",
           }
         );
-        // pdf.text(`© ${this.copyright}`, dim[0] / 2, dim[1] - 4 - this.margin, {
-        //   align: "center",
-        // });
       }
 
       // Add potential disclaimer text
@@ -669,9 +666,6 @@ export default class PrintModel {
             align: "right",
           }
         );
-        // pdf.text(this.disclaimer, dim[0] / 2, dim[1] - 8 - this.margin, {
-        //   align: "center",
-        // });
       }
 
       // Finally, save the PDF (or PNG)
