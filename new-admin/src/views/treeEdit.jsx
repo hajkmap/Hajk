@@ -30,8 +30,8 @@ export default class Tree extends Component {
     return (
       <div>
         <label>
-          Aktiva WFS-T-editeringstjänster (OBS: om ingen editeringstjänst är
-          markerad kommer alla editeringstjänster att vara aktiva i kartan)
+          Redigeringstjänster WFST. Markerade tjänster kommer att vara aktiva i
+          kartan.
         </label>
         <div className="layer-list">
           <ul>

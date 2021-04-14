@@ -141,20 +141,32 @@ class ToolOptions extends Component {
   }
 
   /**
-   * Anropas från tree.jsx i componentDidMount som passar med refs.
-   * Sätter checkboxar och inputfält för editlager.
+   * Called from treeEdit.jsx in componentDidMount and passes refs.
+   * Sets checkboxes and input fields for edit layers.
    * @param {*} childRefs
    */
   loadLayers(childRefs) {
-    // checka checkboxar, visa textfält
-    // och sätt text från kartkonfig.json
+    // check checkboxes, show input field
+    // and set text from map config
     let ids = [];
 
     for (let id of this.state.activeServices) {
-      //for (let id of this.state.layers) {
       ids.push(id);
     }
-
+    if (ids.length > 0 && typeof ids[0].visibleForGroups === "undefined") {
+      let idsNew = [];
+      for (let i = 0; i < ids.length; i++) {
+        let as = {
+          id: ids[i],
+          visibleForGroups: [],
+        };
+        idsNew.push(as);
+      }
+      ids = idsNew;
+      this.setState({
+        activeServices: idsNew,
+      });
+    }
     if (typeof childRefs !== "undefined") {
       for (let i of ids) {
         childRefs["cb_" + i.id] && (childRefs["cb_" + i.id].checked = true);
@@ -216,10 +228,12 @@ class ToolOptions extends Component {
   }
 
   save() {
-    // Sätter visibleForGroups till [] istället för [""] om inputfältet är tomt.
+    // Set visibleForGroups to [] instead of [""] if input field is empty.
     for (let aS of this.state.activeServices) {
-      if (aS.visibleForGroups.length === 1 && aS.visibleForGroups[0] === "") {
-        aS.visibleForGroups = [];
+      if (typeof aS.visibleForGroups !== "undefined") {
+        if (aS.visibleForGroups.length === 1 && aS.visibleForGroups[0] === "") {
+          aS.visibleForGroups = [];
+        }
       }
     }
     let tool = {
@@ -319,8 +333,8 @@ class ToolOptions extends Component {
   }
 
   /**
-   * anropas från editTree.jsx som eventhandler. Hantering för checkboxar och
-   * inmatning av AD-grupper för wfs:er
+   * Called from treeEdit.jsx as event handler. Handles checkboxes and
+   * input of AD-groups for wfst
    * @param {*} e
    * @param {*} layer
    */
@@ -340,7 +354,7 @@ class ToolOptions extends Component {
         );
 
         this.setState({
-          activeServices: newArray, //layers: newArray,
+          activeServices: newArray,
         });
       }
     }
@@ -352,7 +366,7 @@ class ToolOptions extends Component {
         (o) => o.id !== layer.id.toString()
       );
 
-      // Skapar array och trimmar whitespace från start och slut av varje cell
+      // Creates array and trims whitespace from start and end
       if (typeof obj !== "undefined") {
         obj.visibleForGroups = e.target.value.split(",");
         obj.visibleForGroups = obj.visibleForGroups.map((el) => el.trim());
@@ -530,7 +544,7 @@ class ToolOptions extends Component {
           </div>
           <div>{this.renderVisibleForGroups()}</div>
           <div>
-            <div className="separator">Editeringstjänster</div>
+            <div className="separator">Redigeringstjänster</div>
 
             {this.state.tree}
           </div>
