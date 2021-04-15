@@ -50,7 +50,7 @@ var defaultState = {
   dpis: "72, 150, 300",
   paperFormats: "A2, A3, A4",
   logo: "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
-  logoMaxWidth: 0,
+  logoMaxWidth: 40,
   northArrow: "",
   visibleForGroups: [],
   visibleAtStart: false,
@@ -668,7 +668,7 @@ class ToolOptions extends Component {
               checked={this.state.useMargin}
             />
             &nbsp;
-            <label htmlFor="useMargin">Lägg till ram</label>
+            <label htmlFor="useMargin">Marginal runt karta (förval)</label>
           </div>
           <div>
             <div>
