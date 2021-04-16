@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import ConfigService from "./config.service";
-const crypto = require("crypto");
 
 class SettingsService {
   /**
@@ -11,8 +10,33 @@ class SettingsService {
    * @returns {string} uniqueId
    * @memberof SettingsService
    */
-  generateId() {
-    return crypto.randomBytes(16).toString("hex");
+  async generateId() {
+    // Prepare the recursive part. It takes an array of existing layers
+    // as argument and returns a random string if it doesn't exist in
+    // the array yet.
+    const seedAndReturnIfUnique = (existingIds) => {
+      // The IDs is generated as follows: Math.random() returns a 0-13 characters number, usually around 12 characters.
+      // Calling toString with radix 36 will return a Base36 number (see https://en.wikipedia.org/wiki/Base36).
+      // The returned number is between 0 and 1, hence it starts with "0.". We remove the leading zero and
+      // limit the length to 6 using slice.
+      //
+      // The string return will have 36^6 possible combinations, which should do for a while.
+      const proposedId = Math.random().toString(36).slice(2, 8); // Create a new string, something like '3mu2zq'
+      return existingIds.has(proposedId) // If the newly created string exists in the array already…
+        ? seedAndReturnIfUnique(existingIds) // …try seeding a new one. Else…
+        : proposedId; // …just return generated string.
+    };
+
+    // Start with reading the store
+    const layersStore = await this.readFileAsJson("layers.json");
+
+    // Extract all IDs to a flat array
+    const existingIds = Object.values(layersStore)
+      .flat()
+      .map((l) => l.id);
+
+    // Invoke the recursive part, supply a Set of existing IDs, for comparison.
+    return seedAndReturnIfUnique(new Set(existingIds));
   }
 
   getFullPathToFile(file) {
@@ -62,8 +86,12 @@ class SettingsService {
         layersTypeWithChanges = layersType.filter((x) => x.id !== newLayer.id);
         status = 200;
       } else {
-        // ID was null, generate a new ID
-        newLayer.id = this.generateId();
+        // If ID was null, generate a new ID.
+        //
+        // IMPORTANT: Ignore the warning saying that "await has no effect on this type of expression".
+        // It does, as without it, we return a pending Promise, instead of its resolved value.
+        // eslint-disable-next-line
+        newLayer.id = await this.generateId();
         layersTypeWithChanges = layersType; // No need to clean up existing data, just use as is
         status = 201;
       }
