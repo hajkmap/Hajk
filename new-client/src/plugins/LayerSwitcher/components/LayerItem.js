@@ -12,6 +12,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink.js";
+import { withSnackbar } from "notistack";
 
 const styles = (theme) => ({
   button: {
@@ -82,8 +83,10 @@ const styles = (theme) => ({
   },
   checkBoxIcon: {
     cursor: "pointer",
-
     marginRight: "5px",
+  },
+  checkBoxIconWarning: {
+    fill: theme.palette.warning.dark,
   },
 });
 
@@ -110,17 +113,26 @@ class LayerItem extends React.PureComponent {
       instruction: layerInfo.instruction,
       open: false,
       toggleSettings: false,
+      usesMinMaxZoom: this.layerUsesMinMaxZoom(),
+      zoomVisible: true,
     };
   }
+
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
   componentDidMount() {
     this.props.layer.on("change:visible", (e) => {
+      let visible = !e.oldValue;
       this.setState({
-        visible: !e.oldValue,
+        visible: visible,
       });
+
+      if (this.state.usesMinMaxZoom) {
+        // only add zoomlistener if needed.
+        this.listenToZoomChange(visible);
+      }
     });
 
     // Set load status by subscribing to a global event. Expect ID (int) of layer
@@ -140,19 +152,77 @@ class LayerItem extends React.PureComponent {
     );
   }
 
+  layerUsesMinMaxZoom() {
+    const lprops = this.props.layer.getProperties();
+    const maxZ = lprops.maxZoom ?? 0;
+    const minZ = lprops.minZoom ?? 0;
+    // When reading min/max-Zoom from layer, its not consistent with the
+    // initial values from config. Suddenly Infinity is used.
+    return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
+  }
+
+  zoomEndHandler = (e) => {
+    const zoom = this.props.model.olMap.getView().getZoom();
+    const lprops = this.props.layer.getProperties();
+    const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+
+    this.setState({
+      zoomVisible: layerIsZoomVisible,
+    });
+    return layerIsZoomVisible;
+  };
+
+  listenToZoomChange(bListen) {
+    const eventName = "core.zoomEnd";
+    if (bListen) {
+      this.zoomEndListener = this.props.app.globalObserver.subscribe(
+        eventName,
+        this.zoomEndHandler
+      );
+    } else {
+      if (this.zoomEndListener) {
+        this.props.app.globalObserver.unsubscribe(
+          eventName,
+          this.zoomEndListener
+        );
+      }
+    }
+  }
+
+  triggerZoomCheck(visible) {
+    if (!this.state.usesMinMaxZoom) {
+      return;
+    }
+    if (visible) {
+      if (!this.zoomEndHandler()) {
+        this.zoomWarningSnack = this.props.enqueueSnackbar(
+          "Lagret visas endast vid specifika skalor.",
+          {
+            variant: "warning",
+          }
+        );
+      }
+    } else {
+      if (this.zoomWarningSnack) {
+        this.props.closeSnackbar(this.zoomWarningSnack);
+      }
+    }
+  }
+
   /**
    * Toggle visibility of this layer item.
    * Also, if layer is being hidden, reset "status" (if layer loading failed,
    * "status" is "loaderror", and it should be reset if user unchecks layer).
    * @instance
    */
-  toggleVisible = (layer) => (e) => {
+  toggleVisible() {
     const visible = !this.state.visible;
     this.setState({
       visible,
     });
-    layer.setVisible(visible);
-  };
+    this.props.layer.setVisible(visible);
+    this.triggerZoomCheck(visible);
+  }
 
   /**
    * Render the load information component.
@@ -399,10 +469,16 @@ class LayerItem extends React.PureComponent {
               wrap="nowrap"
               alignItems="center"
               container
-              onClick={this.toggleVisible(layer)}
+              onClick={() => this.toggleVisible()}
             >
               {visible ? (
-                <CheckBoxIcon className={classes.checkBoxIcon} />
+                <CheckBoxIcon
+                  className={`${classes.checkBoxIcon} ${
+                    !this.state.zoomVisible && this.state.visible
+                      ? classes.checkBoxIconWarning
+                      : ""
+                  }`}
+                />
               ) : (
                 <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
               )}
@@ -479,4 +555,4 @@ class LayerItem extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(LayerItem);
+export default withStyles(styles)(withSnackbar(LayerItem));
