@@ -30,6 +30,12 @@ import PresetLinks from "../controls/PresetLinks";
 
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
+import { withTranslation } from "react-i18next";
+
+// Had to disable eslint for next row since this must be imported for initiation to happen.
+// eslint-disable-next-line no-unused-vars
+import i18n from "i18n/i18n";
+
 import {
   Box,
   Divider,
@@ -369,8 +375,8 @@ class App extends React.PureComponent {
             this.globalObserver.publish("core.addDrawerToggleButton", {
               value: "plugins",
               ButtonIcon: MapIcon,
-              caption: "Kartverktyg",
-              drawerTitle: "Kartverktyg",
+              caption: this.props.t("core.drawerToggleButton.plugins"),
+              drawerTitle: this.props.t("core.drawerToggleButton.plugins"),
               order: 0,
               renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
@@ -939,4 +945,4 @@ class App extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(App);
+export default withTranslation()(withStyles(styles)(App));
