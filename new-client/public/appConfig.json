@@ -2,6 +2,7 @@
   "appName": "Hajk",
   "version": "3.5.0",
   "mapserviceBase": "",
+  "lang": "en",
   "proxy": "",
   "searchProxy": "",
   "defaultMap": "map_1",

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import App from "./App";
+import HajkLanguageProvider from "./HajkLanguageProvider";
 
 import { deepMerge } from "../utils/DeepMerge";
 
@@ -151,6 +152,7 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
   return (
     <MuiThemeProvider theme={muiTheme}>
       <CssBaseline />
+      <HajkLanguageProvider config={config} />
       <App
         activeTools={activeTools}
         config={config}

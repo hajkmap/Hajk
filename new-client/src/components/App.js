@@ -32,10 +32,6 @@ import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
 import { withTranslation } from "react-i18next";
 
-// Had to disable eslint for next row since this must be imported for initiation to happen.
-// eslint-disable-next-line no-unused-vars
-import i18n from "i18n/i18n";
-
 import {
   Box,
   Divider,
