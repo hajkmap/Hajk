@@ -26,6 +26,7 @@ import {
   Popper,
   Tooltip,
 } from "@material-ui/core";
+import { withTranslation } from "react-i18next";
 
 const styles = (theme) => ({
   searchContainer: {
@@ -211,7 +212,8 @@ class SearchBar extends React.PureComponent {
       ? "Söker med objekt..."
       : searchActive === "extentSearch"
       ? "Söker i området..."
-      : options.searchBarPlaceholder ?? "Sök...";
+      : options.searchBarPlaceholder ??
+        this.props.t("core.search.searchBar.placeHolder");
   };
 
   renderSearchResultList = () => {
@@ -448,4 +450,6 @@ class SearchBar extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(withWidth()(SearchBar)));
+export default withTranslation()(
+  withStyles(styles)(withTheme(withWidth()(SearchBar)))
+);

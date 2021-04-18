@@ -4,6 +4,11 @@
       "toggleButtons": {
         "plugins": "Tools"
       }
+    },
+    "search": {
+      "searchBar": {
+        "placeHolder": "Search..."
+      }
     }
   },
   "controls": {

@@ -4,6 +4,11 @@
       "toggleButtons": {
         "plugins": "Kartverktyg"
       }
+    },
+    "search": {
+      "searchBar": {
+        "placeHolder": "Sök..."
+      }
     }
   },
   "controls": {
