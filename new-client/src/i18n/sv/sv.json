@@ -5,5 +5,21 @@
         "plugins": "Kartverktyg"
       }
     }
+  },
+  "controls": {
+    "languageSwitcher": {
+      "menu": {
+        "menuItems": {
+          "swedish": "Svenska",
+          "english": "Engelska"
+        }
+      }
+    }
+  },
+  "plugins": {
+    "layerSwitcher": {
+      "title": "Lagerhanterare",
+      "description": "Välj vad du vill se i kartan"
+    }
   }
 }

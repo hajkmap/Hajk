@@ -5,5 +5,21 @@
         "plugins": "Tools"
       }
     }
+  },
+  "controls": {
+    "languageSwitcher": {
+      "menu": {
+        "menuItems": {
+          "swedish": "Swedish",
+          "english": "English"
+        }
+      }
+    }
+  },
+  "plugins": {
+    "layerSwitcher": {
+      "title": "Layer manager",
+      "description": "Choose what to show in the map"
+    }
   }
 }

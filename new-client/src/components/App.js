@@ -47,6 +47,7 @@ import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import MapIcon from "@material-ui/icons/Map";
 import ThemeToggler from "../controls/ThemeToggler";
+import LanguageSwitcher from "../controls/LanguageSwitcher";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -854,6 +855,14 @@ class App extends React.PureComponent {
                       this.appModel.config.mapConfig.map.showThemeToggler
                     }
                     toggleMUITheme={this.props.toggleMUITheme}
+                  />
+                )}
+                {clean === false && (
+                  <LanguageSwitcher
+                    showExperimentalLanguageSwitcher={
+                      this.appModel.config.appConfig
+                        .showExperimentalLanguageSwitcher
+                    }
                   />
                 )}
                 {clean === false && this.renderInformationPlugin()}

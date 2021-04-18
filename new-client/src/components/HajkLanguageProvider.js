@@ -13,27 +13,35 @@ const resources = {
   },
 };
 
-function getLanguage(config) {
-  const userPreferredLanguage = window.localStorage.getItem(
-    "userPreferredLanguage"
-  );
-  return userPreferredLanguage ?? config.appConfig.lang ?? "en";
-}
-
 const HajkLanguageProvider = ({ config }) => {
-  const initI18n = () => {
-    i18n.use(initReactI18next).init({
-      resources,
-      lng: getLanguage(config),
-      fallbackLng: "en",
-      keySeparator: ".",
-      interpolation: {
-        escapeValue: false,
-      },
-    });
+  const [i18nHasInitiated, setI18nHasInitiated] = React.useState(false);
+
+  const getLanguage = () => {
+    return (
+      window.localStorage.getItem("userPreferredLanguage") ??
+      config.appConfig.lang
+    );
   };
 
-  return <>{initI18n()}</>;
+  const initI18n = () => {
+    if (!i18nHasInitiated) {
+      setI18nHasInitiated(true);
+      i18n.use(initReactI18next).init({
+        resources,
+        lng: getLanguage(),
+        debug: true,
+        fallbackLng: "en",
+        keySeparator: ".",
+        interpolation: {
+          escapeValue: false,
+        },
+      });
+    }
+  };
+
+  initI18n();
+
+  return null;
 };
 
 export default HajkLanguageProvider;
