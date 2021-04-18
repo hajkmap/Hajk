@@ -163,7 +163,24 @@ class ConfigServiceV2 {
 
     // Grab layers from Edit
     const editOptions = mapConfig.tools.find((t) => t.type === "edit")?.options;
-    const editLayerIds = editOptions?.activeServices.map((as) => as.id) || [];
+    let editLayerIds = [];
+
+    if (typeof editOptions != "undefined") {
+      if (
+        editOptions.activeServices &&
+        editOptions.activeServices.length !== 0
+      ) {
+        if (
+          typeof editOptions.activeServices[0].visibleForGroups === "undefined"
+        ) {
+          // if visibleForGroups is undefined the activeServices is an array of id's
+          editLayerIds = editOptions?.activeServices.map((as) => as) || [];
+        } else {
+          // else the activeServices is an array of objects with "id" and "visibleForGroups"
+          editLayerIds = editOptions?.activeServices.map((as) => as.id) || [];
+        }
+      }
+    }
 
     // We utilize Set to get rid of potential duplicates in the final list
     const uniqueLayerIds = new Set([

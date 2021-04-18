@@ -666,7 +666,7 @@ class AppModel {
             typeof editTool.options.activeServices[0].visibleForGroups ===
             "undefined"
           ) {
-            // If activeService does not have visibleForGroups object, add it
+            // If activeService does not have an object with "id", "visibleForGroups", add it
             let asNew = [];
             for (let i = 0; i < editTool.options.activeServices.length; i++) {
               let as = {
