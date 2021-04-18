@@ -50,10 +50,10 @@ const LanguageSwitcher = React.memo((props) => {
   return (
     (props.showExperimentalLanguageSwitcher && (
       <>
-        <Tooltip title="Växla språk">
+        <Tooltip title={t("controls.languageSwitcher.iconButton.tooltip")}>
           <Paper className={classes.paper}>
             <Button
-              aria-label="Växla språk"
+              aria-label={t("controls.languageSwitcher.iconButton.ariaLabel")}
               className={classes.button}
               onClick={(e) => setAnchor(!anchor ? e.currentTarget : null)}
             >

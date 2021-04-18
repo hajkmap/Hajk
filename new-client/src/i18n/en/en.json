@@ -13,6 +13,10 @@
   },
   "controls": {
     "languageSwitcher": {
+      "iconButton": {
+        "ariaLabel": "Change language",
+        "tooltip": "Change language"
+      },
       "menu": {
         "menuItems": {
           "swedish": "Swedish",
