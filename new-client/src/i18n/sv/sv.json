@@ -1,3 +1,9 @@
 {
-  "core.drawerToggleButton.plugins": "Kartverktyg"
+  "core": {
+    "drawer": {
+      "toggleButtons": {
+        "plugins": "Kartverktyg"
+      }
+    }
+  }
 }

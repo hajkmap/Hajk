@@ -1,3 +1,9 @@
 {
-  "core.drawerToggleButton.plugins": "Tools"
+  "core": {
+    "drawer": {
+      "toggleButtons": {
+        "plugins": "Tools"
+      }
+    }
+  }
 }

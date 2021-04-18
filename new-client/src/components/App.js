@@ -375,8 +375,8 @@ class App extends React.PureComponent {
             this.globalObserver.publish("core.addDrawerToggleButton", {
               value: "plugins",
               ButtonIcon: MapIcon,
-              caption: this.props.t("core.drawerToggleButton.plugins"),
-              drawerTitle: this.props.t("core.drawerToggleButton.plugins"),
+              caption: this.props.t("core.drawer.toggleButtons.plugins"),
+              drawerTitle: this.props.t("core.drawer.toggleButtons.plugins"),
               order: 0,
               renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
