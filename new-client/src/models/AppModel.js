@@ -578,9 +578,9 @@ class AppModel {
     return searchLayers;
   }
 
-  overrideGlobalEditConfig(editTool, data) {
-    var configSpecificEditLayers = editTool.options.activeServices;
-    var editLayers = data.wfstlayers.filter((layer) => {
+  overrideGlobalEditConfig(editTool, wfstlayers) {
+    const configSpecificEditLayers = editTool.options.activeServices;
+    const editLayers = wfstlayers.filter((layer) => {
       if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
         return layer;
       } else {
@@ -647,6 +647,8 @@ class AppModel {
       searchTool.options.sources = wfslayers;
     }
 
+    // This is for backwards compatibility prior to adding locking WFST edit layers with AD.
+    // This code handles if activeServices does not have an object with "id", "visibleForGroups"
     if (editTool) {
       if (editTool.options.activeServices === null) {
         editTool.options.sources = [];
@@ -660,18 +662,21 @@ class AppModel {
             "undefined"
           ) {
             // If activeService does not have an object with "id", "visibleForGroups", add it
-            let asNew = [];
+            let as = [];
             for (let i = 0; i < editTool.options.activeServices.length; i++) {
-              let as = {
+              let service = {
                 id: editTool.options.activeServices[i],
                 visibleForGroups: [],
               };
-              asNew.push(as);
+              as.push(service);
             }
-            editTool.options.activeServices = asNew;
+            editTool.options.activeServices = as;
           }
 
-          let wfstlayers = this.overrideGlobalEditConfig(editTool, layers);
+          let wfstlayers = this.overrideGlobalEditConfig(
+            editTool,
+            layers.wfstlayers
+          );
           editTool.options.sources = wfstlayers;
           layers.wfstlayers = wfstlayers;
         } else {
