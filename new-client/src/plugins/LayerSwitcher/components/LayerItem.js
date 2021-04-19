@@ -129,11 +129,10 @@ class LayerItem extends React.PureComponent {
         visible: visible,
       });
 
-      if (this.state.usesMinMaxZoom) {
-        // only add zoomlistener if needed.
-        this.listenToZoomChange(visible);
-      }
+      this.listenToZoomChange(visible);
     });
+    this.triggerZoomCheck(this.state.visible);
+    this.listenToZoomChange(this.state.visible);
 
     // Set load status by subscribing to a global event. Expect ID (int) of layer
     // and status (string "ok"|"loaderror"). Also, once status was set to "loaderror",
@@ -166,6 +165,10 @@ class LayerItem extends React.PureComponent {
     const lprops = this.props.layer.getProperties();
     const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
 
+    if (this.state.zoomVisible && !layerIsZoomVisible) {
+      this.showZoomSnack();
+    }
+
     this.setState({
       zoomVisible: layerIsZoomVisible,
     });
@@ -173,8 +176,10 @@ class LayerItem extends React.PureComponent {
   };
 
   listenToZoomChange(bListen) {
+    if (!this.state.usesMinMaxZoom) return;
+
     const eventName = "core.zoomEnd";
-    if (bListen) {
+    if (bListen && !this.zoomEndListener) {
       this.zoomEndListener = this.props.app.globalObserver.subscribe(
         eventName,
         this.zoomEndHandler
@@ -185,27 +190,36 @@ class LayerItem extends React.PureComponent {
           eventName,
           this.zoomEndListener
         );
+        this.zoomEndListener = null;
       }
     }
   }
 
+  showZoomSnack() {
+    if (this.zoomWarningSnack) return;
+    this.zoomWarningSnack = this.props.enqueueSnackbar(
+      `Lagret "${this.state.caption}" visas endast vid specifika skalor.`,
+      {
+        variant: "warning",
+        preventDuplicate: true,
+        onClose: () => {
+          this.zoomWarningSnack = null;
+        },
+      }
+    );
+  }
+
   triggerZoomCheck(visible) {
-    if (!this.state.usesMinMaxZoom) {
-      return;
-    }
+    if (!this.state.usesMinMaxZoom) return;
+
     if (visible) {
       if (!this.zoomEndHandler()) {
-        this.zoomWarningSnack = this.props.enqueueSnackbar(
-          "Lagret visas endast vid specifika skalor.",
-          {
-            variant: "warning",
-          }
-        );
+        this.showZoomSnack();
       }
     } else {
-      if (this.zoomWarningSnack) {
-        this.props.closeSnackbar(this.zoomWarningSnack);
-      }
+      if (!this.zoomWarningSnack) return;
+      this.props.closeSnackbar(this.zoomWarningSnack);
+      this.zoomWarningSnack = null;
     }
   }
 
