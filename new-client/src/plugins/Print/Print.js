@@ -56,14 +56,28 @@ class Print extends React.PureComponent {
     }
 
     // Prepare dpis from admin options, fallback to default if needed
-    props.options.dpis = props.options.dpis?.length
-      ? props.options.dpis
-      : this.dpis;
+    if (props?.options?.dpis?.split(",").length > 1) {
+      props.options.dpis = props.options.dpis
+        .replace(/\s/g, "")
+        .split(",")
+        .map((el) => {
+          return parseInt(el);
+        });
+    } else {
+      props.options.dpis = this.dpis;
+    }
 
     // Prepare paperFormats from admin options, fallback to default if needed
-    props.options.paperFormats = props.options.paperFormats?.length
-      ? props.options.paperFormats
-      : this.paperFormats;
+    if (props?.options?.paperFormats?.split(",").length > 1) {
+      props.options.paperFormats = props.options.paperFormats
+        .replace(/\s/g, "")
+        .split(",")
+        .map((el) => {
+          return el.toLowerCase();
+        });
+    } else {
+      props.options.paperFormats = this.paperFormats;
+    }
 
     // If no valid max logo width is supplied, use a hard-coded default
     props.options.logoMaxWidth =
