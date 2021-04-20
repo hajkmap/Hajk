@@ -74,6 +74,7 @@ const defaultState = {
   infoClickSortProperty: "",
   infoClickSortType: "string",
   infoClickSortDesc: true,
+  hideExpandArrow: false,
   style: [],
   workspaceList: [],
 };
@@ -688,6 +689,7 @@ class WMSLayerForm extends Component {
           infoFormat: layer.infoFormat,
           infoClickSortProperty: layer.infoClickSortProperty ?? "",
           infoClickSortType: layer.infoClickSortType ?? "string",
+          hideExpandArrow: layer.hideExpandArrow ?? false,
         },
         () => {
           this.setServerType();
@@ -956,6 +958,7 @@ class WMSLayerForm extends Component {
       infoClickSortProperty: this.getValue("infoClickSortProperty"),
       infoClickSortDesc: this.getValue("infoClickSortDesc"),
       infoClickSortType: this.getValue("infoClickSortType"),
+      hideExpandArrow: this.getValue("hideExpandArrow"),
       // style: this.getValue("style"),
 
       zIndex: this.getValue("zIndex"),
@@ -1004,6 +1007,7 @@ class WMSLayerForm extends Component {
     if (fieldName === "zIndex") value = value || null;
     if (fieldName === "opacity") value = parseFloat(Number(value).toFixed(2));
     if (fieldName === "infoClickSortDesc") value = input.checked;
+    if (fieldName === "hideExpandArrow") value = input.checked;
 
     return value;
   }
@@ -1378,6 +1382,18 @@ class WMSLayerForm extends Component {
           >
             <ul>{this.renderSelectedLayers()}</ul>
           </div>
+        </div>
+        <div>
+          <label>Stäng av möjlighet att expandera</label>
+          <input
+            type="checkbox"
+            ref="input_hideExpandArrow"
+            id="input_hideExpandArrow"
+            onChange={(e) =>
+              this.setState({ hideExpandArrow: e.target.checked })
+            }
+            checked={this.state.hideExpandArrow}
+          />
         </div>
         <div>
           <label>Visningsnamn*</label>
