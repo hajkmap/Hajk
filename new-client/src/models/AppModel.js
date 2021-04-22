@@ -566,9 +566,9 @@ class AppModel {
     return typeof v === "string" && v.trim().length > 0 ? v : undefined;
   }
 
-  overrideGlobalSearchConfig(searchTool, data) {
-    var configSpecificSearchLayers = searchTool.options.layers;
-    var searchLayers = data.wfslayers.filter((layer) => {
+  overrideGlobalSearchConfig(searchTool, wfslayers) {
+    const configSpecificSearchLayers = searchTool.options.layers;
+    const searchLayers = wfslayers.filter((layer) => {
       if (configSpecificSearchLayers.find((x) => x.id === layer.id)) {
         return layer;
       } else {
@@ -626,20 +626,13 @@ class AppModel {
     }
 
     if (searchTool) {
-      if (searchTool.options.layers === null) {
-        searchTool.options.sources = layers.wfslayers;
-      } else {
-        if (
-          searchTool.options.layers &&
-          searchTool.options.layers.length !== 0
-        ) {
-          let wfslayers = this.overrideGlobalSearchConfig(searchTool, layers);
-          searchTool.options.sources = wfslayers;
-          layers.wfslayers = wfslayers;
-        } else {
-          searchTool.options.sources = layers.wfslayers;
-        }
-      }
+      // Take a look at all available wfslayers in layers repository,
+      // but let the search tool only see those that are specified in searchTool.options
+      const wfslayers = this.overrideGlobalSearchConfig(
+        searchTool,
+        layers.wfslayers
+      );
+      searchTool.options.sources = wfslayers;
     }
 
     if (editTool) {

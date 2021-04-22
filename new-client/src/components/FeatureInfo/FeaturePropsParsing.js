@@ -23,6 +23,34 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
+const StyledTypography = withStyles((theme) => ({
+  h1: {
+    fontSize: "1.6rem",
+    fontWeight: "500",
+  },
+  h2: {
+    fontSize: "1.4rem",
+    fontWeight: "500",
+  },
+  h3: {
+    fontSize: "1.2rem",
+    fontWeight: "500",
+  },
+  h4: {
+    fontSize: "1rem",
+    fontWeight: "500",
+  },
+  h5: {
+    fontSize: "0.875rem",
+    fontWeight: "500",
+  },
+  h6: {
+    fontSize: "0.875rem",
+    fontWeight: "400",
+    fontStyle: "italic",
+  },
+}))(Typography);
+
 export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
@@ -55,7 +83,9 @@ export default class FeaturePropsParsing {
         return <Link href={a.href}>{a.children}</Link>;
       },
       heading: ({ level, children }) => {
-        return <Typography variant={`h${level}`}>{children}</Typography>;
+        return (
+          <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
+        );
       },
       table: (a) => {
         return (
@@ -249,7 +279,8 @@ export default class FeaturePropsParsing {
    * @description There are three things going on here:
    * 1. The markdown is used as a template, anything between { and } gets replaced
    * with the real value from properties object, or is left empty.
-   * 2. Next we apply conditional rendering (where statements are between < and >).
+   * 2. Next we apply conditional rendering, where conditions are between {{ and }} while
+   * content is between {{condition}} and {{/condition}}.
    * Currently, if-condition is the only one supported, but more might become available.
    * Depending on the condition value, replacing can occur within our markdown string.
    * 3. The final markdown string is passed to the ReactMarkdown component.
@@ -265,7 +296,8 @@ export default class FeaturePropsParsing {
       // The regex below will match all placeholders.
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
-      (this.markdown.match(/{(.*?)}/g) || []).forEach((placeholder) => {
+      // Match any word character, @ sign, dash or dot
+      (this.markdown.match(/{[\w@\-.]+}/g) || []).forEach((placeholder) => {
         // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
         // Let's replace all occurrences of the placeholder like this:
         // {foobar} -> Some nice FoobarValue
@@ -280,18 +312,18 @@ export default class FeaturePropsParsing {
       // references to elements in the this.resolvedPromises array. The latter will
       // be the only remaining occurrences of numbers surrounded by curly brackets.
 
-      // Next step is to find all "conditional tags" (i.e. <if foo="bar">baz</if>)
+      // Next step is to find all "conditional tags" (i.e. {{if foo="bar"}}baz{{/if}})
       // and apply the replacer function on all matches.
       // The regex string below does the following:
       // Split each match into 3 named capture groups:
-      // - "condition": the word between < and whitespace, "if" in this example
-      // - "attributes": whatever follows the condition, until we see a >, 'foo="bar"'
-      // - "content": anything after > but before </ and whatever was the result in group one, "Baz"
-      // Note that we include any ending new lines in the match. That's because _if_ we find a match
+      // - "condition": the word between {{ and whitespace, "if" in this example
+      // - "attributes": whatever follows the condition, until we see a }}, 'foo="bar"'
+      // - "content": anything after }} but before {{/ and whatever was the result in group one, "baz"
+      // Note that the match will include one line ending. That's because _if_ we find a match
       // and will remove it, we must remove the line ending too, otherwise we would break the Markdown
       // formatting if only certain strings were to be removed, but all line endings would remain.
       this.markdown = this.markdown.replace(
-        /<(?<condition>\w+)[\s/]?(?<attributes>[^>]+)?>(?<content>[^<]+)?(?:<\/\1>\n*)?/gi,
+        /{{(?<condition>\w+)[\s/]?(?<attributes>[^}}]+)?}}(?<content>[^{{]+)?(?:{{\/\1}}\n?)/gi,
         this.#conditionalReplacer
       );
 

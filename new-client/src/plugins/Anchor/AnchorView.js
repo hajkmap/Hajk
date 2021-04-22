@@ -16,6 +16,7 @@ import {
 } from "@material-ui/core";
 
 import FileCopyIcon from "@material-ui/icons/FileCopy";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 
 const styles = (theme) => ({
   margin: {
@@ -88,6 +89,11 @@ class AnchorView extends React.PureComponent {
                   <Tooltip title="Kopiera länk till urklipp">
                     <IconButton onClick={this.handleClickOnCopyToClipboard}>
                       <FileCopyIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Öppna i nytt fönster">
+                    <IconButton href={this.state.anchor} target="_blank">
+                      <OpenInNewIcon />
                     </IconButton>
                   </Tooltip>
                 </InputAdornment>
