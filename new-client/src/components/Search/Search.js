@@ -498,13 +498,18 @@ class Search extends React.PureComponent {
   getSortedAutocompleteEntry = (feature) => {
     let autocompleteEntry = "";
     feature.searchFieldOrder.map((sf, index) => {
+      const featureProperty = feature.properties[sf];
+      const propertyAsString =
+        typeof featureProperty === "string"
+          ? featureProperty
+          : featureProperty.toString();
       if (index === feature.searchFieldOrder.length - 1) {
         return (autocompleteEntry = autocompleteEntry.concat(
-          encodeCommas(feature.properties[sf])
+          encodeCommas(propertyAsString)
         ));
       } else {
         return (autocompleteEntry = autocompleteEntry.concat(
-          `${encodeCommas(feature.properties[sf])}, `
+          `${encodeCommas(propertyAsString)}, `
         ));
       }
     });
