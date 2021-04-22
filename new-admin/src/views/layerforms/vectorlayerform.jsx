@@ -55,6 +55,7 @@ class VectorLayerForm extends React.Component {
     opacity: 1,
     projection: "",
     queryable: true,
+    hideExpandArrow: false,
     sldStyle: "Default Styler",
     sldText: "",
     sldUrl: "",
@@ -133,6 +134,7 @@ class VectorLayerForm extends React.Component {
       opacity: this.getValue("opacity"),
       projection: this.getValue("projection"),
       queryable: this.getValue("queryable"),
+      hideExpandArrow: this.getValue("hideExpandArrow"),
       sldStyle: this.getValue("sldStyle"),
       sldText: this.getValue("sldText"),
       sldUrl: this.getValue("sldUrl"),
@@ -159,6 +161,7 @@ class VectorLayerForm extends React.Component {
     if (fieldName === "queryable") value = input.checked;
     if (fieldName === "filterable") value = input.checked;
     if (fieldName === "infoVisible") value = input.checked;
+    if (fieldName === "hideExpandArrow") value = input.checked;
 
     return value;
   }
@@ -277,11 +280,13 @@ class VectorLayerForm extends React.Component {
       if (Array.isArray(capabilities) && capabilities.length > 0) {
         projection = capabilities[0].projection;
       }
+
       this.setState({
         capabilities: capabilities,
         projection: this.state.projection || projection || "",
         legend: this.state.legend || capabilities.legend || "",
         legendIcon: this.state.legendIcon || "",
+        hideExpandArrow: capabilities.hideExpandArrow ?? false,
         load: false,
       });
 
@@ -540,6 +545,18 @@ class VectorLayerForm extends React.Component {
           >
             <ul>{this.renderSelectedLayers()}</ul>
           </div>
+        </div>
+        <div>
+          <label>Stäng av möjlighet att expandera</label>
+          <input
+            type="checkbox"
+            ref="input_hideExpandArrow"
+            id="hideExpandArrow"
+            onChange={(e) => {
+              this.setState({ hideExpandArrow: e.target.checked });
+            }}
+            checked={this.state.hideExpandArrow}
+          />
         </div>
         <div>
           <label>Visningsnamn*</label>

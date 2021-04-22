@@ -59,6 +59,8 @@ namespace MapService.Models.Config
 
         public bool visibleAtStart { get; set; }
 
+        public bool hideExpandArrow { get; set; }
+
         public bool tiled { get; set; }
 
         public double opacity { get; set; }
