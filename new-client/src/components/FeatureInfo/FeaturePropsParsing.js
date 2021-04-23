@@ -98,8 +98,12 @@ export default class FeaturePropsParsing {
       p: ({ children }) => {
         return <Paragraph variant="body2">{children}</Paragraph>;
       },
-      a: ({ children, href }) => {
-        return <Link href={href}>{children}</Link>;
+      a: ({ children, href, target }) => {
+        return (
+          <Link href={href} target={target}>
+            {children}
+          </Link>
+        );
       },
       h1: this.#markdownHeaderComponent,
       h2: this.#markdownHeaderComponent,
