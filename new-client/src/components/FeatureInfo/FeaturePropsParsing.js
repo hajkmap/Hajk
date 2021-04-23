@@ -1,7 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
 import { withStyles } from "@material-ui/core";
 import gfm from "remark-gfm";
 import {
@@ -375,9 +374,7 @@ export default class FeaturePropsParsing {
 
       // If admin wants to allow HTML in Markdown, add rehypeRaw plugin.
       // Note that the gfm plugin is always added: it gives access to Table syntax.
-      const rehypePlugins = this.allowDangerousHtml
-        ? [rehypeRaw, rehypeSanitize]
-        : [];
+      const rehypePlugins = this.allowDangerousHtml ? [rehypeRaw] : [];
 
       // Now, when promises are fulfilled, we can render. One of the render's helpers
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
