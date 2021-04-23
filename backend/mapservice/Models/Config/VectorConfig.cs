@@ -177,6 +177,8 @@ namespace MapService.Models.Config
         public string url { get; set; }
         public string version { get; set; }
         public bool   visibleAtStart { get; set; }
+
+        public bool hideExpandArrow { get; set; }
         public int?   zIndex { get; set; }
 
     }

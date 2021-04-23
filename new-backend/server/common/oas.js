@@ -12,6 +12,9 @@ export default function oas(app, routes) {
   return new OpenApiValidator({
     apiSpec,
     validateResponses,
+    validateRequests: {
+      allowUnknownQueryParameters: true,
+    },
   })
     .install(app)
     .then(() => {
