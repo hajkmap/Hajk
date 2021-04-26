@@ -12,6 +12,11 @@ const WHITE_BACKROUND_LAYER_ID = "-1";
 const BLACK_BACKROUND_LAYER_ID = "-2";
 const OSM_BACKGROUND_LAYER_ID = "-3";
 
+const SPECIAL_BACKGROUND_COLORS = {
+  [WHITE_BACKROUND_LAYER_ID]: "#fff",
+  [BLACK_BACKROUND_LAYER_ID]: "#000",
+};
+
 const styles = (theme) => ({
   layerItemContainer: {
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
@@ -25,7 +30,7 @@ const styles = (theme) => ({
 
 class BackgroundSwitcher extends React.PureComponent {
   state = {
-    selectedLayer: -1, // By default, select special case "white background"
+    selectedLayerId: -1, // By default, select special case "white background"
   };
 
   osmLayer = undefined;
@@ -50,7 +55,7 @@ class BackgroundSwitcher extends React.PureComponent {
     );
     backgroundVisibleFromStart &&
       this.setState({
-        selectedLayer: backgroundVisibleFromStart.name,
+        selectedLayerId: backgroundVisibleFromStart.name,
       });
 
     if (this.props.enableOSM) {
@@ -87,22 +92,23 @@ class BackgroundSwitcher extends React.PureComponent {
         // If we got this far, we have a background layer that just
         // became visible. Let's notify the radio buttons by setting state!
         this.setState({
-          selectedLayer: layer.get("name"),
+          selectedLayerId: layer.get("name"),
         });
       }
     );
   }
 
   isSpecialBackgroundLayer = (id) => {
-    return id === WHITE_BACKROUND_LAYER_ID || id === BLACK_BACKROUND_LAYER_ID;
+    return [
+      WHITE_BACKROUND_LAYER_ID,
+      BLACK_BACKROUND_LAYER_ID,
+      OSM_BACKGROUND_LAYER_ID,
+    ].includes(id);
   };
 
-  setWhiteBackggroundLayer = () => {
-    document.getElementById("map").style.backgroundColor = "#FFF";
-  };
-
-  setBlackBackgroundLayer = () => {
-    document.getElementById("map").style.backgroundColor = "#000";
+  setSpecialBackground = (id) => {
+    document.getElementById("map").style.backgroundColor =
+      SPECIAL_BACKGROUND_COLORS[id];
   };
 
   /**
@@ -110,27 +116,21 @@ class BackgroundSwitcher extends React.PureComponent {
    * @param {Object} e The event object, contains target's value
    */
   onChange = (e) => {
-    const selectedLayerId = e.target.value;
-    const { selectedLayer } = this.state;
+    const newSelectedId = e.target.value;
+    const { selectedLayerId } = this.state;
     const { layerMap } = this.props;
 
-    if (!this.isSpecialBackgroundLayer(selectedLayerId)) {
-      layerMap[selectedLayer].setVisible(false);
-      layerMap[selectedLayerId].setVisible(true);
-    } else {
-      selectedLayerId === BLACK_BACKROUND_LAYER_ID &&
-        this.setBlackBackgroundLayer();
-      selectedLayerId === WHITE_BACKROUND_LAYER_ID &&
-        this.setWhiteBackggroundLayer();
-    }
+    this.isSpecialBackgroundLayer(newSelectedId)
+      ? this.setSpecialBackground(newSelectedId)
+      : layerMap[newSelectedId].setVisible(true);
 
-    if (this.osmLayer) {
-      this.osmLayer.setVisible(selectedLayerId === OSM_BACKGROUND_LAYER_ID);
-    }
+    !this.isSpecialBackgroundLayer(selectedLayerId) &&
+      layerMap[selectedLayerId].setVisible(false);
+    this.osmLayer &&
+      this.osmLayer.setVisible(newSelectedId === OSM_BACKGROUND_LAYER_ID);
 
-    // Finally, store current selection in state
     this.setState({
-      selectedLayerId,
+      selectedLayerId: newSelectedId,
     });
   };
 
@@ -144,7 +144,8 @@ class BackgroundSwitcher extends React.PureComponent {
    */
   renderRadioButton(config, index) {
     let caption;
-    let checked = this.state.selectedLayer === config.name;
+    let checked = this.state.selectedLayerId === config.name;
+
     const mapLayer = this.props.layerMap[config.name];
     const { classes } = this.props;
 
