@@ -1,13 +1,16 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import propTypes from "prop-types";
-
+import { isValidLayerId } from "utils/Validator";
 import Radio from "@material-ui/core/Radio";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
-
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
+
+const WHITE_BACKROUND_LAYER_ID = "-1";
+const BLACK_BACKROUND_LAYER_ID = "-2";
+const OSM_BACKGROUND_LAYER_ID = "-3";
 
 const styles = (theme) => ({
   layerItemContainer: {
@@ -89,38 +92,45 @@ class BackgroundSwitcher extends React.PureComponent {
       }
     );
   }
+
+  isSpecialBackgroundLayer = (id) => {
+    return id === WHITE_BACKROUND_LAYER_ID || id === BLACK_BACKROUND_LAYER_ID;
+  };
+
+  setWhiteBackggroundLayer = () => {
+    document.getElementById("map").style.backgroundColor = "#FFF";
+  };
+
+  setBlackBackgroundLayer = () => {
+    document.getElementById("map").style.backgroundColor = "#000";
+  };
+
   /**
    * @summary Hides previously selected background and shows current selection.
    * @param {Object} e The event object, contains target's value
    */
   onChange = (e) => {
-    const selectedLayer = e.target.value;
+    const selectedLayerId = e.target.value;
+    const { selectedLayer } = this.state;
+    const { layerMap } = this.props;
 
-    // Hide previously selected layers. The if > 0 is needed because we have our
-    // special cases (black and white backgrounds), that don't exist in our layerMap,
-    // and that would cause problem when we try to call .setVisible() on them.
-    Number(this.state.selectedLayer) >= 0 &&
-      this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);
+    if (!this.isSpecialBackgroundLayer(selectedLayerId)) {
+      layerMap[selectedLayer].setVisible(false);
+      layerMap[selectedLayerId].setVisible(true);
+    } else {
+      selectedLayerId === BLACK_BACKROUND_LAYER_ID &&
+        this.setBlackBackgroundLayer();
+      selectedLayerId === WHITE_BACKROUND_LAYER_ID &&
+        this.setWhiteBackggroundLayer();
+    }
 
-    // Make the currently clicked layer visible, but also handle our special cases.
-    Number(selectedLayer) >= 0 &&
-      this.props.layerMap[Number(selectedLayer)].setVisible(true);
-
-    // Take care of our special cases: negative values are reserved for them
-    selectedLayer === "-2" &&
-      (document.getElementById("map").style.backgroundColor = "#000");
-    selectedLayer === "-1" &&
-      (document.getElementById("map").style.backgroundColor = "#FFF");
-
-    // Another special case is the OSM layer
-    // show/hide OSM
     if (this.osmLayer) {
-      this.osmLayer.setVisible(selectedLayer === "-3");
+      this.osmLayer.setVisible(selectedLayerId === OSM_BACKGROUND_LAYER_ID);
     }
 
     // Finally, store current selection in state
     this.setState({
-      selectedLayer,
+      selectedLayerId,
     });
   };
 
@@ -135,7 +145,7 @@ class BackgroundSwitcher extends React.PureComponent {
   renderRadioButton(config, index) {
     let caption;
     let checked = this.state.selectedLayer === config.name;
-    const mapLayer = this.props.layerMap[Number(config.name)];
+    const mapLayer = this.props.layerMap[config.name];
     const { classes } = this.props;
 
     if (mapLayer) {
@@ -218,9 +228,18 @@ class BackgroundSwitcher extends React.PureComponent {
      */
     radioButtons = [
       ...defaults,
-      ...this.props.layers.map((layerConfig, i) =>
-        this.renderRadioButton(layerConfig, i)
-      ),
+      ...this.props.layers
+        .filter((layer) => {
+          //Remove layers not having a valid id
+          const validLayerId = isValidLayerId(layer.name);
+          if (!validLayerId) {
+            console.warn(
+              `Backgroundlayer with id ${layer.name} has a non-valid id`
+            );
+          }
+          return validLayerId;
+        })
+        .map((layerConfig, i) => this.renderRadioButton(layerConfig, i)),
     ];
 
     return radioButtons;
