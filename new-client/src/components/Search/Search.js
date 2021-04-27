@@ -12,6 +12,7 @@ import MapViewModel from "./MapViewModel";
 import KmlExport from "./utils/KmlExport";
 import XLSXExport from "./utils/XLSXExport";
 import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
 const styles = () => ({
   inputRoot: {
@@ -20,6 +21,17 @@ const styles = () => ({
 });
 
 class Search extends React.PureComponent {
+  defaultSearchOptions = {
+    enableLabelOnHighlight: true,
+    wildcardAtStart: false,
+    wildcardAtEnd: true,
+    matchCase: false,
+    activeSpatialFilter: "intersects",
+    maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
+      ? this.props.options.maxResultsPerDataset
+      : 100,
+  };
+
   state = {
     searchImplementedPluginsLoaded: false,
     searchSources: [],
@@ -30,15 +42,10 @@ class Search extends React.PureComponent {
     searchActive: "",
     autoCompleteOpen: false,
     loading: false,
-    searchOptions: {
-      wildcardAtStart: false,
-      wildcardAtEnd: true,
-      matchCase: false,
-      activeSpatialFilter: "intersects",
-      maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
-        ? this.props.options.maxResultsPerDataset
-        : 100,
-    },
+    searchOptions: LocalStorageHelper.get(
+      "searchOptions",
+      this.defaultSearchOptions
+    ),
     failedWFSFetchMessage: "",
     resultPanelCollapsed: false,
   };
@@ -114,7 +121,7 @@ class Search extends React.PureComponent {
   initMapViewModel = () => {
     const { app } = this.props;
     this.mapViewModel = new MapViewModel({
-      options: this.props.options,
+      options: { ...this.props.options, ...this.state.searchOptions }, // Init the MapViewModel using merged options from both admin ("options")and user's setting ("this.state.options")
       localObserver: this.localObserver,
       map: this.map,
       app: app,
@@ -405,7 +412,22 @@ class Search extends React.PureComponent {
   };
 
   updateSearchOptions = (searchOptions) => {
-    this.setState(searchOptions);
+    // We need to re-initiate the FeatureStyle only if some specific
+    // settings have changed (those that effect the style that renders
+    // result features to the OL searchResults source).
+    const isStyleRefreshNeeded =
+      searchOptions.enableLabelOnHighlight !==
+      this.state.searchOptions.enableLabelOnHighlight;
+
+    // Refresh the Feature Style, if needed
+    isStyleRefreshNeeded &&
+      this.mapViewModel.refreshFeatureStyle({
+        enableLabelOnHighlight: searchOptions.enableLabelOnHighlight,
+      });
+
+    // Always save the current settings to local storage, so it can be
+    // retrieved on app reload.
+    LocalStorageHelper.set("searchOptions", searchOptions);
   };
 
   handleOnClickOrKeyboardSearch = () => {

@@ -31,11 +31,17 @@ class SearchSettings extends React.PureComponent {
     showSearchSourcesFilter: this.props.searchSources.length > 0 ? true : false,
   };
 
-  updateSearchOptions = (name, value) => {
+  localUpdateSearchOptions = (name, value) => {
     const { searchOptions } = this.props;
+    // Send the new values up to the Search component's state
+    this.props.updateSearchOptions({ ...searchOptions, [name]: value });
+
+    // Update local state. Note that although we seem to "render from props" here,
+    // changes in this.props.searchOptions aren't reflected (because we have a nested
+    // state variable in Search.js's this.state.searchOptions). So we must keep
+    // track of it locally too, in order to reflect changes in the UI.
     searchOptions[name] = value;
     this.setState(searchOptions);
-    this.props.updateSearchOptions(searchOptions);
   };
 
   render() {
@@ -125,7 +131,7 @@ class SearchSettings extends React.PureComponent {
                     <Switch
                       checked={searchOptions.wildcardAtStart}
                       onChange={() =>
-                        this.updateSearchOptions(
+                        this.localUpdateSearchOptions(
                           "wildcardAtStart",
                           !searchOptions.wildcardAtStart
                         )
@@ -142,7 +148,7 @@ class SearchSettings extends React.PureComponent {
                     <Switch
                       checked={searchOptions.wildcardAtEnd}
                       onChange={() =>
-                        this.updateSearchOptions(
+                        this.localUpdateSearchOptions(
                           "wildcardAtEnd",
                           !searchOptions.wildcardAtEnd
                         )
@@ -159,7 +165,7 @@ class SearchSettings extends React.PureComponent {
                     <Switch
                       checked={searchOptions.matchCase}
                       onChange={() =>
-                        this.updateSearchOptions(
+                        this.localUpdateSearchOptions(
                           "matchCase",
                           !searchOptions.matchCase
                         )
@@ -184,11 +190,36 @@ class SearchSettings extends React.PureComponent {
                     <Switch
                       checked={searchOptions.activeSpatialFilter === "within"}
                       onChange={() =>
-                        this.updateSearchOptions(
+                        this.localUpdateSearchOptions(
                           "activeSpatialFilter",
                           searchOptions.activeSpatialFilter === "intersects"
                             ? "within"
                             : "intersects"
+                        )
+                      }
+                      color="primary"
+                    />
+                  }
+                />
+              </Tooltip>
+            </FormGroup>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs>
+          <FormControl component="fieldset">
+            <FormLabel component="legend">Visning av resultat</FormLabel>
+            <FormGroup>
+              <Tooltip title="Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet">
+                <FormControlLabel
+                  label="Visa textetikett i kartan"
+                  control={
+                    <Switch
+                      checked={searchOptions.enableLabelOnHighlight}
+                      onChange={() =>
+                        this.localUpdateSearchOptions(
+                          "enableLabelOnHighlight",
+                          !searchOptions.enableLabelOnHighlight
                         )
                       }
                       color="primary"
