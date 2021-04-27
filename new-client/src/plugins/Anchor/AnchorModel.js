@@ -1,3 +1,4 @@
+import { isValidLayerId } from "../../utils/Validator";
 class AnchorModel {
   constructor(settings) {
     this.app = settings.app;
@@ -55,10 +56,8 @@ class AnchorModel {
         return (
           // We consider a layer to be visible only if…
           layer.getVisible() && // …it's visible…
-          layer.getProperties().name && // …has a specified name property…
-          (!Number.isNaN(parseInt(layer.getProperties().name)) || // … and the name is either a Number…
-            /^[a-f0-9]{32}$/i.test(layer.getProperties().name) || // … or an MD5 string (which was used in the NodeJS backend)
-            /^[a-z0-9]{6}$/i.test(layer.getProperties().name)) // … or a 6 characters long alphanumeric string (which is the new default for layers created in NodeJS backend)
+          layer.getProperties().name &&
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
         );
       })
       .map((layer) => layer.getProperties().name)
