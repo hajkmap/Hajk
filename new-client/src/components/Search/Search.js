@@ -412,6 +412,9 @@ class Search extends React.PureComponent {
   };
 
   updateSearchOptions = (searchOptions) => {
+    // Ensure that the latest search options are in state
+    this.setState({ searchOptions });
+
     // We need to re-initiate the FeatureStyle only if some specific
     // settings have changed (those that effect the style that renders
     // result features to the OL searchResults source).

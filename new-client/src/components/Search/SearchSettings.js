@@ -27,7 +27,6 @@ const styles = (theme) => ({
 
 class SearchSettings extends React.PureComponent {
   state = {
-    searchOptions: this.props.searchOptions,
     showSearchSourcesFilter: this.props.searchSources.length > 0 ? true : false,
   };
 
@@ -35,13 +34,6 @@ class SearchSettings extends React.PureComponent {
     const { searchOptions } = this.props;
     // Send the new values up to the Search component's state
     this.props.updateSearchOptions({ ...searchOptions, [name]: value });
-
-    // Update local state. Note that although we seem to "render from props" here,
-    // changes in this.props.searchOptions aren't reflected (because we have a nested
-    // state variable in Search.js's this.state.searchOptions). So we must keep
-    // track of it locally too, in order to reflect changes in the UI.
-    searchOptions[name] = value;
-    this.setState(searchOptions);
   };
 
   render() {
