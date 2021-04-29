@@ -380,7 +380,7 @@ export default class FeaturePropsParsing {
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
       return (
         <ReactMarkdown
-          plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+          remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
           rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
           components={this.components} // Custom renderers for components, see definition in this.components
           children={this.markdown} // Our MD, as a text string
