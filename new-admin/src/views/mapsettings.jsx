@@ -158,7 +158,7 @@ $.fn.editable = function (component) {
         `<input id="${id5}" type="text" placeholder="Ny länk"/><br />`
       ),
       input3 = $(`<input id="${id6}" type="text" /><br />`),
-      input4 = $(`<textarea id="${id7}" type="text" /><br /><br />`),
+      input4 = $(`<textarea id="${id7}" type="text" /></textarea>`),
       expanded = $('<div class="expanded-at-start"></div>'),
       toggled = $('<div class="expanded-at-start"></div>'),
       visible = $('<div class=""></div>'),
