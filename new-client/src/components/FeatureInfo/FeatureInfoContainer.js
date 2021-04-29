@@ -317,7 +317,7 @@ class FeatureInfoContainer extends React.PureComponent {
 
     return (
       <Grid className={classes.featureInfo} item>
-        <Typography variant="button" align="center" component="h6" gutterBottom>
+        <Typography variant="button" align="center" component="h6">
           {caption}
         </Typography>
         {value}
