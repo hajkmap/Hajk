@@ -66,7 +66,7 @@ class LayerSettings extends React.PureComponent {
       <div className={classes.sliderContainer}>
         <div className={classes.sliderText}>
           <Typography className={classes.subtitle2} variant="subtitle2">
-            Transparens:
+            Opacitet:
           </Typography>
         </div>
         <div className={classes.sliderItem}>
@@ -74,13 +74,13 @@ class LayerSettings extends React.PureComponent {
             value={opacityValue}
             min={0}
             max={1}
-            step={0.1}
+            step={0.05}
             onChange={this.opacitySliderChanged}
           />
         </div>
         <div className={classes.sliderText}>
           <Typography className={classes.subtitle2} variant="subtitle2">
-            {Math.trunc(100 * (1 - opacityValue).toFixed(1))} %
+            {Math.trunc(100 * opacityValue.toFixed(2))} %
           </Typography>
         </div>
       </div>
