@@ -80,7 +80,11 @@ export default class FeaturePropsParsing {
       },
       thematicBreak: () => <Divider />,
       link: (a) => {
-        return <Link href={a.href}>{a.children}</Link>;
+        return (
+          <Link href={a.href} target="_blank">
+            {a.children}
+          </Link>
+        );
       },
       heading: ({ level, children }) => {
         return (
