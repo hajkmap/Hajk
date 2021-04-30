@@ -115,6 +115,9 @@ const styles = (theme) => {
       flexDirection: "column",
       userSelect: "none",
       outline: "none",
+      '& a:not([class*="MuiLink"])': {
+        color: theme.palette.primary.light,
+      },
     },
     content: {
       flex: "1",
