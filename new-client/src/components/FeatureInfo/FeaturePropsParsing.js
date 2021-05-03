@@ -382,7 +382,7 @@ export default class FeaturePropsParsing {
       // [This is a link](https://www.example.com/Some%20PDF%20file%20we%20link%20to.pdf)
       // The following regex does just that.
       this.markdown = this.markdown.replace(
-        /\[(?<text>[^\[]+)\](?<href>\(.*\))/gm,
+        /\[(?<text>[^[]+)\](?<href>\(.*\))/gm,
         this.#markdownHrefEncoder
       );
 
