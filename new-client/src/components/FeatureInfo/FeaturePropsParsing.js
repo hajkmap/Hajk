@@ -110,10 +110,12 @@ export default class FeaturePropsParsing {
       h4: this.#markdownHeaderComponent,
       h5: this.#markdownHeaderComponent,
       h6: this.#markdownHeaderComponent,
-      table: ({ children }) => {
+      table: ({ children, className, style }) => {
         return (
           <StyledTableContainer component="div">
-            <Table size="small">{children}</Table>
+            <Table size="small" className={className} style={style}>
+              {children}
+            </Table>
           </StyledTableContainer>
         );
       },
@@ -128,14 +130,26 @@ export default class FeaturePropsParsing {
       },
       td: this.#markdownTableCellComponent,
       th: this.#markdownTableCellComponent,
+      style: ({ children }) => {
+        return <style type="text/css">{children}</style>;
+      },
+      div: ({ children, className, style }) => {
+        return (
+          <div className={className} style={style}>
+            {children}
+          </div>
+        );
+      },
     };
   }
 
-  #markdownTableCellComponent = ({ children, style, isHeader }) => {
+  #markdownTableCellComponent = ({ children, style, isHeader, className }) => {
     return (
       <TableCell
         variant={isHeader ? "head" : "body"}
         align={style?.textAlign || "inherit"}
+        style={style}
+        className={className}
       >
         {children}
       </TableCell>
