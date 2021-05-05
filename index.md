@@ -39,12 +39,12 @@ Det var en av anledningarna till att man bestämde sig för att utveckla HAJK 2,
 För att säkerställa att HAJK låg i fronten för den tekniska utvecklingen påbörjades därför under slutet av 2018 en total omskrivning av client-delen som hösten 2019 resulterade i HAJK 3. 
 
 ## Komma igång
-För dig som är sugen på att vara med och bidra med kod, läs [Contributing](https://github.com/hajkmap/Hajk/blob/master/CONTRIBUTING.md). 
-Kontakta oss om din organisation är intresserad av att medverka,
-Vi finns på [Slack](https://hajk.slack.com/) utöver Github, med en öppen inbjudan på denna länk: 
-[Inbjudan](https://join.slack.com/t/hajk/shared_invite/zt-oo2lyiw6-kWN42Wpv62xKj6Ldq7Iqfw)
+För att snabbt komma igång med HAJK kan du hoppa över till vår [installationsguide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29) som förklarar var du hittar senaste release samt hur du installerar den. 
 
-Om du vill komma igång med HAJK snabbt så kan du hoppa över till vår [GitHub-sida](https://github.com/hajkmap/Hajk/) där vi har en Quick start längst ner.
+För dig som är sugen på att vara med och bidra med kod, läs [Contributing](https://github.com/hajkmap/Hajk/blob/master/CONTRIBUTING.md) samt vår [Quick Start](https://github.com/hajkmap/Hajk/) för utvecklare. Kontakta oss om din organisation är intresserad av att medverka! 
+
+Utöver GitHub finns vi på [Slack](https://hajk.slack.com/), med en öppen inbjudan på denna länk: [öppen inbjudan till Slack](https://join.slack.com/t/hajk/shared_invite/zt-oo2lyiw6-kWN42Wpv62xKj6Ldq7Iqfw).
+
 
 ## Användardokumentation (guider)
 * [Sök](https://github.com/hajkmap/Hajk/files/6276475/Guide_sok_HenrikH.pdf)
