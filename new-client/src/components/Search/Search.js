@@ -458,9 +458,11 @@ class Search extends React.PureComponent {
   };
 
   getAutoCompleteFetchSettings = () => {
+    const { options } = this.props;
     let fetchSettings = { ...this.searchModel.getSearchOptions() }; //Getting default-options when fetching auto
     fetchSettings = {
       ...fetchSettings,
+      wildcardAtStart: options.autocompleteWildcardAtStart || false,
       getPossibleCombinations: true,
       initiator: "autocomplete",
     };
