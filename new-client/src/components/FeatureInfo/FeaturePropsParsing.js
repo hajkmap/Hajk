@@ -1,6 +1,5 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
 import { withStyles } from "@material-ui/core";
 import gfm from "remark-gfm";
 import {
@@ -15,13 +14,7 @@ import {
   Typography,
 } from "@material-ui/core";
 
-const Paragraph = withStyles((theme) => ({
-  root: {
-    marginBottom: "1.1rem",
-  },
-}))(Typography);
-
-// Styled Table Row Component, makes every second row in a Table colored
+// Styled Component, makes every second row colored
 const StyledTableRow = withStyles((theme) => ({
   root: {
     "&:nth-of-type(even)": {
@@ -30,22 +23,14 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
-const StyledTableContainer = withStyles((theme) => ({
-  root: {
-    marginBottom: "1.1rem",
-  },
-}))(TableContainer);
-
 const StyledTypography = withStyles((theme) => ({
   h1: {
     fontSize: "1.6rem",
     fontWeight: "500",
-    marginBottom: "0.375rem",
   },
   h2: {
     fontSize: "1.4rem",
     fontWeight: "500",
-    marginBottom: "0.018rem",
   },
   h3: {
     fontSize: "1.2rem",
@@ -81,8 +66,8 @@ export default class FeaturePropsParsing {
     // Default to true to ensure backwards compatibility with old configs that predominately use HTML
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
 
-    // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
-    this.components = {
+    // Here we define the renderers used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-node-types
+    this.renderers = {
       text: (text) => {
         // This helper is passed to ReactMarkdown at render. At this stage,
         // we expect that the only remaining {stuff} will contain digits, and
@@ -93,74 +78,40 @@ export default class FeaturePropsParsing {
           return this.resolvedPromisesWithComponents[match[1]];
         } else return text.children;
       },
-      hr: () => <Divider />,
-      p: ({ children }) => {
-        return <Paragraph variant="body2">{children}</Paragraph>;
-      },
-      a: ({ children, href, target }) => {
+      thematicBreak: () => <Divider />,
+      link: (a) => {
         return (
-          <Link href={href} target={target}>
-            {children}
+          <Link href={a.href} target="_blank">
+            {a.children}
           </Link>
         );
       },
-      h1: this.#markdownHeaderComponent,
-      h2: this.#markdownHeaderComponent,
-      h3: this.#markdownHeaderComponent,
-      h4: this.#markdownHeaderComponent,
-      h5: this.#markdownHeaderComponent,
-      h6: this.#markdownHeaderComponent,
-      table: ({ children, className, style }) => {
+      heading: ({ level, children }) => {
         return (
-          <StyledTableContainer component="div">
-            <Table size="small" className={className} style={style}>
-              {children}
-            </Table>
-          </StyledTableContainer>
+          <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
         );
       },
-      thead: ({ children }) => {
-        return <TableHead>{children}</TableHead>;
-      },
-      tbody: ({ children }) => {
-        return <TableBody>{children}</TableBody>;
-      },
-      tr: ({ children }) => {
-        return <StyledTableRow>{children}</StyledTableRow>;
-      },
-      td: this.#markdownTableCellComponent,
-      th: this.#markdownTableCellComponent,
-      style: ({ children }) => {
-        return <style type="text/css">{children}</style>;
-      },
-      div: ({ children, className, style }) => {
+      table: (a) => {
         return (
-          <div className={className} style={style}>
-            {children}
-          </div>
+          <TableContainer component="div">
+            <Table size="small">{a.children}</Table>
+          </TableContainer>
         );
+      },
+      tableHead: (a) => {
+        return <TableHead>{a.children}</TableHead>;
+      },
+      tableBody: (a) => {
+        return <TableBody>{a.children}</TableBody>;
+      },
+      tableRow: (a) => {
+        return <StyledTableRow>{a.children}</StyledTableRow>;
+      },
+      tableCell: (a) => {
+        return <TableCell align={a.align || "inherit"}>{a.children}</TableCell>;
       },
     };
   }
-
-  #markdownTableCellComponent = ({ children, style, isHeader, className }) => {
-    return (
-      <TableCell
-        variant={isHeader ? "head" : "body"}
-        align={style?.textAlign || "inherit"}
-        style={style}
-        className={className}
-      >
-        {children}
-      </TableCell>
-    );
-  };
-
-  #markdownHeaderComponent = ({ level, children }) => {
-    return (
-      <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
-    );
-  };
 
   #valueFromJson = (str) => {
     if (typeof str !== "string") return false;
@@ -302,6 +253,45 @@ export default class FeaturePropsParsing {
         return args[0];
     }
   };
+  /**
+   * @summary Ensure that the href part in Markdown links is well-formatted
+   * @description Href in Markdown should be UTF8 formatted and have whitespace
+   * escaped (with %20). The easiest way to ensure proper formatting is using the
+   * URL object. But the constructor of URL will crash if the string provided is
+   * not a proper path (e.g. lacks the protocol part). So we use try-catch to
+   * catch such occurrences, and in those cases, we return the anchor pretty much unchanged.
+   *
+   * @param {*} args
+   * @returns
+   */
+  #markdownHrefEncoder = (...args) => {
+    // The named capture groups will be the last parameter
+    const matched = args[args.length - 1];
+
+    // Anchor text is simple
+    const text = matched.text;
+
+    // Anchor href will require some more work
+    let href = "";
+    try {
+      // Try creating a new URL from the matched href, removing the first
+      // and last character (which are "(" and ")").
+      // Invoking new URL will escape any special characters and ensure
+      // that we provide a well-formatted URL to the MarkDown.
+      href = new URL(matched.href.slice(1, -1)).href;
+    } catch (error) {
+      // If the URL creation failed for some reason (e.g. if a.href was empty,
+      // or if it was a relative path), fall back to using the provided
+      // string as-is, but remember to remove the leading and closing parentheses
+      // that our regex included in the match and encode the URL (i.e. still
+      // transform 'dir/file åäö.pdf' to 'dir/file%20%C3%A5%C3%A4%C3%B6.pdf').
+      href = encodeURI(matched.href.slice(1, -1));
+    }
+
+    // Prepare a nice MD Anchor string
+    const r = `[${text}](${href})`;
+    return r;
+  };
 
   /**
    * Converts a JSON-string of properties into a properties object
@@ -333,7 +323,7 @@ export default class FeaturePropsParsing {
    * 1. The markdown is used as a template, anything between { and } gets replaced
    * with the real value from properties object, or is left empty.
    * 2. Next we apply conditional rendering, where conditions are between {{ and }} while
-   * content is between {{condition}} and {{/condition}}.
+   * content is between {{condition}} and {{/condition}}.
    * Currently, if-condition is the only one supported, but more might become available.
    * Depending on the condition value, replacing can occur within our markdown string.
    * 3. The final markdown string is passed to the ReactMarkdown component.
@@ -380,23 +370,35 @@ export default class FeaturePropsParsing {
         this.#conditionalReplacer
       );
 
+      // Special precautious must be taken to accommodate white space in Markdown links. We can
+      // of course force our Hajk admins to write correctly formatted links (with URL encoded spaces),
+      // but many times we can not control the URL if it comes from outside source. E.g. imagine this
+      // infoclick setup:
+      // [{anchorText}]({anchorLink})
+      // Depending on values in the database, this can end up as something like this:
+      // [This is a link](https://www.example.com/Some PDF file we link to.pdf)
+      // This will not render correctly, only "https://www.example.com/Some" will become the
+      // href part of the anchor. What we want instead is our MarkDown to contain:
+      // [This is a link](https://www.example.com/Some%20PDF%20file%20we%20link%20to.pdf)
+      // The following regex does just that.
+      this.markdown = this.markdown.replace(
+        /\[(?<text>[^[]+)\](?<href>\(.*\))/gm,
+        this.#markdownHrefEncoder
+      );
+
       // The final step is to await for all promises that might exist (if we fetch from
       // external components) to fulfill. We can't render before that!
       this.resolvedPromisesWithComponents = await Promise.all(
         this.pendingPromises
       );
 
-      // If admin wants to allow HTML in Markdown, add rehypeRaw plugin.
-      // Note that the gfm plugin is always added: it gives access to Table syntax.
-      const rehypePlugins = this.allowDangerousHtml ? [rehypeRaw] : [];
-
       // Now, when promises are fulfilled, we can render. One of the render's helpers
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
       return (
         <ReactMarkdown
-          remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
-          rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
-          components={this.components} // Custom renderers for components, see definition in this.components
+          plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+          allowDangerousHtml={this.allowDangerousHtml}
+          renderers={this.renderers} // Custom renderers, see definition in this.renderers
           children={this.markdown} // Our MD, as a text string
         />
       );
