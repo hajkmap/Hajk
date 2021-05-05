@@ -42,7 +42,7 @@ För att säkerställa att HAJK låg i fronten för den tekniska utvecklingen p�
 För dig som är sugen på att vara med och bidra med kod, läs [Contributing](https://github.com/hajkmap/Hajk/blob/master/CONTRIBUTING.md). 
 Kontakta oss om din organisation är intresserad av att medverka,
 Vi finns på [Slack](https://hajk.slack.com/) utöver Github, med en öppen inbjudan på denna länk: 
-[Inbjudan](https://Inbjudan.slack.com)
+[Inbjudan](https://join.slack.com/t/hajk/shared_invite/zt-oo2lyiw6-kWN42Wpv62xKj6Ldq7Iqfw)
 
 Om du vill komma igång med HAJK snabbt så kan du hoppa över till vår [GitHub-sida](https://github.com/hajkmap/Hajk/) där vi har en Quick start längst ner.
 
