@@ -8,6 +8,7 @@ import { AppBar, Tab, Tabs } from "@material-ui/core";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
+import { withTranslation } from "react-i18next";
 
 const styles = (theme) => ({
   windowContent: {
@@ -133,7 +134,7 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, t } = this.props;
     return (
       <>
         <div className={classes.windowContent}>
@@ -148,8 +149,14 @@ class LayersSwitcherView extends React.PureComponent {
               value={this.state.activeTab}
               variant="fullWidth"
             >
-              <Tab label="Kartlager" />
-              <Tab label="Bakgrund" />
+              <Tab
+                label={t("plugins.layerSwitcher.window.appBar.tabMapLayers")}
+              />
+              <Tab
+                label={t(
+                  "plugins.layerSwitcher.window.appBar.tabBackgroundLayers"
+                )}
+              />
             </Tabs>
           </AppBar>
           <div className={classes.tabContent}>
@@ -172,4 +179,4 @@ class LayersSwitcherView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(LayersSwitcherView);
+export default withTranslation()(withStyles(styles)(LayersSwitcherView));

@@ -1,8 +1,8 @@
 {
   "common": {
+    "closeWindow": "Close",
     "maximizeWindow": "Maximize",
-    "minimizeWindow": "Minimize",
-    "closeWindow": "Close"
+    "minimizeWindow": "Minimize"
   },
   "core": {
     "drawer": {
@@ -24,16 +24,22 @@
       },
       "menu": {
         "menuItems": {
-          "swedish": "Swedish",
-          "english": "English"
+          "english": "English",
+          "swedish": "Swedish"
         }
       }
     }
   },
   "plugins": {
     "layerSwitcher": {
+      "description": "Choose what to show in the map",
       "title": "Layer manager",
-      "description": "Choose what to show in the map"
+      "window": {
+        "appBar": {
+          "tabMapLayers": "Map layers",
+          "tabBackgroundLayers": "Background"
+        }
+      }
     }
   }
 }

@@ -1,8 +1,8 @@
 {
   "common": {
+    "closeWindow": "Stäng fönstret",
     "maximizeWindow": "Maximera fönstret",
-    "minimizeWindow": "Minimera fönstret",
-    "closeWindow": "Stäng fönstret"
+    "minimizeWindow": "Minimera fönstret"
   },
   "core": {
     "drawer": {
@@ -24,16 +24,22 @@
       },
       "menu": {
         "menuItems": {
-          "swedish": "Svenska",
-          "english": "Engelska"
+          "english": "Engelska",
+          "swedish": "Svenska"
         }
       }
     }
   },
   "plugins": {
     "layerSwitcher": {
+      "description": "Välj vad du vill se i kartan",
       "title": "Lagerhanterare",
-      "description": "Välj vad du vill se i kartan"
+      "window": {
+        "appBar": {
+          "tabMapLayers": "Kartlager",
+          "tabBackgroundLayers": "Bakgrund"
+        }
+      }
     }
   }
 }
