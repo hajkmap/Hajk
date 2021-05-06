@@ -12,6 +12,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink.js";
+import { withSnackbar } from "notistack";
 
 const styles = (theme) => ({
   button: {
@@ -82,8 +83,10 @@ const styles = (theme) => ({
   },
   checkBoxIcon: {
     cursor: "pointer",
-
     marginRight: "5px",
+  },
+  checkBoxIconWarning: {
+    fill: theme.palette.warning.dark,
   },
 });
 
@@ -91,7 +94,7 @@ class LayerItem extends React.PureComponent {
   constructor(props) {
     super(props);
     const { layer } = props;
-    var layerInfo = layer.get("layerInfo");
+    const layerInfo = layer.get("layerInfo");
     this.state = {
       caption: layerInfo.caption,
       visible: layer.get("visible"),
@@ -110,18 +113,26 @@ class LayerItem extends React.PureComponent {
       instruction: layerInfo.instruction,
       open: false,
       toggleSettings: false,
+      usesMinMaxZoom: this.layerUsesMinMaxZoom(),
+      zoomVisible: true,
     };
   }
+
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
   componentDidMount() {
     this.props.layer.on("change:visible", (e) => {
+      const visible = !e.oldValue;
       this.setState({
-        visible: !e.oldValue,
+        visible,
       });
+
+      this.listenToZoomChange(visible);
     });
+    this.triggerZoomCheck(this.state.visible);
+    this.listenToZoomChange(this.state.visible);
 
     // Set load status by subscribing to a global event. Expect ID (int) of layer
     // and status (string "ok"|"loaderror"). Also, once status was set to "loaderror",
@@ -140,18 +151,91 @@ class LayerItem extends React.PureComponent {
     );
   }
 
+  layerUsesMinMaxZoom() {
+    const lprops = this.props.layer.getProperties();
+    const maxZ = lprops.maxZoom ?? 0;
+    const minZ = lprops.minZoom ?? 0;
+    // When reading min/max-Zoom from layer, its not consistent with the
+    // initial values from config. Suddenly Infinity is used.
+    return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
+  }
+
+  zoomEndHandler = (e) => {
+    const zoom = this.props.model.olMap.getView().getZoom();
+    const lprops = this.props.layer.getProperties();
+    const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+
+    if (this.state.zoomVisible && !layerIsZoomVisible) {
+      this.showZoomSnack();
+    }
+
+    this.setState({
+      zoomVisible: layerIsZoomVisible,
+    });
+    return layerIsZoomVisible;
+  };
+
+  listenToZoomChange(bListen) {
+    if (!this.state.usesMinMaxZoom) return;
+
+    const eventName = "core.zoomEnd";
+    if (bListen && !this.zoomEndListener) {
+      this.zoomEndListener = this.props.app.globalObserver.subscribe(
+        eventName,
+        this.zoomEndHandler
+      );
+    } else {
+      if (this.zoomEndListener) {
+        this.props.app.globalObserver.unsubscribe(
+          eventName,
+          this.zoomEndListener
+        );
+        this.zoomEndListener = null;
+      }
+    }
+  }
+
+  showZoomSnack() {
+    if (this.zoomWarningSnack) return;
+    this.zoomWarningSnack = this.props.enqueueSnackbar(
+      `Lagret "${this.state.caption}" visas endast vid specifika skalor.`,
+      {
+        variant: "warning",
+        preventDuplicate: true,
+        onClose: () => {
+          this.zoomWarningSnack = null;
+        },
+      }
+    );
+  }
+
+  triggerZoomCheck(visible) {
+    if (!this.state.usesMinMaxZoom) return;
+
+    if (visible) {
+      if (!this.zoomEndHandler()) {
+        this.showZoomSnack();
+      }
+    } else {
+      if (!this.zoomWarningSnack) return;
+      this.props.closeSnackbar(this.zoomWarningSnack);
+      this.zoomWarningSnack = null;
+    }
+  }
+
   /**
    * Toggle visibility of this layer item.
    * Also, if layer is being hidden, reset "status" (if layer loading failed,
    * "status" is "loaderror", and it should be reset if user unchecks layer).
    * @instance
    */
-  toggleVisible = (layer) => (e) => {
+  toggleVisible = () => {
     const visible = !this.state.visible;
     this.setState({
       visible,
     });
-    layer.setVisible(visible);
+    this.props.layer.setVisible(visible);
+    this.triggerZoomCheck(visible);
   };
 
   /**
@@ -331,17 +415,17 @@ class LayerItem extends React.PureComponent {
     }
   }
 
-  toggleSettings() {
+  toggleSettings = () => {
     this.setState({
       toggleSettings: !this.state.toggleSettings,
     });
-  }
+  };
 
-  toggleInfo() {
+  toggleInfo = () => {
     this.setState({
       infoVisible: !this.state.infoVisible,
     });
-  }
+  };
 
   renderLegendIcon() {
     const { classes } = this.props;
@@ -399,10 +483,16 @@ class LayerItem extends React.PureComponent {
               wrap="nowrap"
               alignItems="center"
               container
-              onClick={this.toggleVisible(layer)}
+              onClick={this.toggleVisible}
             >
               {visible ? (
-                <CheckBoxIcon className={classes.checkBoxIcon} />
+                <CheckBoxIcon
+                  className={`${classes.checkBoxIcon} ${
+                    !this.state.zoomVisible && this.state.visible
+                      ? classes.checkBoxIconWarning
+                      : ""
+                  }`}
+                />
               ) : (
                 <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
               )}
@@ -429,11 +519,11 @@ class LayerItem extends React.PureComponent {
                   {this.state.infoVisible ? (
                     <RemoveCircleIcon
                       className={classes.infoButton}
-                      onClick={() => this.toggleInfo()}
+                      onClick={this.toggleInfo}
                     />
                   ) : (
                     <InfoIcon
-                      onClick={() => this.toggleInfo()}
+                      onClick={this.toggleInfo}
                       className={classes.infoButton}
                       style={{
                         boxShadow: this.state.infoVisible
@@ -448,10 +538,10 @@ class LayerItem extends React.PureComponent {
             )}
             <div className={classes.layerButton}>
               {this.state.toggleSettings ? (
-                <CloseIcon onClick={() => this.toggleSettings()} />
+                <CloseIcon onClick={this.toggleSettings} />
               ) : (
                 <MoreHorizIcon
-                  onClick={() => this.toggleSettings()}
+                  onClick={this.toggleSettings}
                   className={classes.settingsButton}
                 />
               )}
@@ -479,4 +569,4 @@ class LayerItem extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(LayerItem);
+export default withStyles(styles)(withSnackbar(LayerItem));
