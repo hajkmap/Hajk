@@ -217,7 +217,7 @@ class AppModel {
     this.map.on("moveend", (e) => {
       // using moveend to create a throttled zoomEnd event
       // instead of using change:resolution to minimize events being fired.
-      var newZoom = this.map.getView().getZoom();
+      const newZoom = this.map.getView().getZoom();
       if (currentZoom !== newZoom) {
         this.globalObserver.publish("core.zoomEnd", { zoom: newZoom });
         currentZoom = newZoom;

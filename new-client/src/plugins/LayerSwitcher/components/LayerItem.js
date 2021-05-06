@@ -94,7 +94,7 @@ class LayerItem extends React.PureComponent {
   constructor(props) {
     super(props);
     const { layer } = props;
-    var layerInfo = layer.get("layerInfo");
+    const layerInfo = layer.get("layerInfo");
     this.state = {
       caption: layerInfo.caption,
       visible: layer.get("visible"),
@@ -124,9 +124,9 @@ class LayerItem extends React.PureComponent {
    */
   componentDidMount() {
     this.props.layer.on("change:visible", (e) => {
-      let visible = !e.oldValue;
+      const visible = !e.oldValue;
       this.setState({
-        visible: visible,
+        visible,
       });
 
       this.listenToZoomChange(visible);
@@ -229,14 +229,14 @@ class LayerItem extends React.PureComponent {
    * "status" is "loaderror", and it should be reset if user unchecks layer).
    * @instance
    */
-  toggleVisible() {
+  toggleVisible = () => {
     const visible = !this.state.visible;
     this.setState({
       visible,
     });
     this.props.layer.setVisible(visible);
     this.triggerZoomCheck(visible);
-  }
+  };
 
   /**
    * Render the load information component.
@@ -415,17 +415,17 @@ class LayerItem extends React.PureComponent {
     }
   }
 
-  toggleSettings() {
+  toggleSettings = () => {
     this.setState({
       toggleSettings: !this.state.toggleSettings,
     });
-  }
+  };
 
-  toggleInfo() {
+  toggleInfo = () => {
     this.setState({
       infoVisible: !this.state.infoVisible,
     });
-  }
+  };
 
   renderLegendIcon() {
     const { classes } = this.props;
@@ -483,7 +483,7 @@ class LayerItem extends React.PureComponent {
               wrap="nowrap"
               alignItems="center"
               container
-              onClick={() => this.toggleVisible()}
+              onClick={this.toggleVisible}
             >
               {visible ? (
                 <CheckBoxIcon
@@ -519,11 +519,11 @@ class LayerItem extends React.PureComponent {
                   {this.state.infoVisible ? (
                     <RemoveCircleIcon
                       className={classes.infoButton}
-                      onClick={() => this.toggleInfo()}
+                      onClick={this.toggleInfo}
                     />
                   ) : (
                     <InfoIcon
-                      onClick={() => this.toggleInfo()}
+                      onClick={this.toggleInfo}
                       className={classes.infoButton}
                       style={{
                         boxShadow: this.state.infoVisible
@@ -538,10 +538,10 @@ class LayerItem extends React.PureComponent {
             )}
             <div className={classes.layerButton}>
               {this.state.toggleSettings ? (
-                <CloseIcon onClick={() => this.toggleSettings()} />
+                <CloseIcon onClick={this.toggleSettings} />
               ) : (
                 <MoreHorizIcon
-                  onClick={() => this.toggleSettings()}
+                  onClick={this.toggleSettings}
                   className={classes.settingsButton}
                 />
               )}
