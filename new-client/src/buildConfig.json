@@ -40,6 +40,7 @@
     "Routing",
     "Search",
     "StreetView",
-    "Suggest"
+    "Suggest",
+    "vtsearch"
   ]
 }
