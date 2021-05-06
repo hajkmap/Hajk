@@ -76,7 +76,7 @@ const defaultState = {
 /**
  *
  */
-class Search extends Component {
+class Edit extends Component {
   /**
    *
    */
@@ -1019,4 +1019,4 @@ class Search extends Component {
   }
 }
 
-export default Search;
+export default Edit;

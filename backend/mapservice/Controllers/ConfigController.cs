@@ -253,10 +253,56 @@ namespace MapService.Controllers
             return mapConfiguration;
         }
 
+        private string FilterEditLayersByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+            var childrenToRemove = new List<string>();
+            var editTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
+            var layersInEditTool = editTool.SelectToken("$.options.activeServices");
+            var userGroups = adLookup.GetGroups(activeUser);
+            if (layersInEditTool == null)
+            {
+                _log.Warn("EditTool is missing the activeServices object");
+                return mapConfiguration.ToString();
+            }
+            else
+            {
+                foreach (JToken child in layersInEditTool.Children())
+                {
+                    var visibleForGroups = child.SelectToken("$.visibleForGroups");
+
+                    bool allowed = false;
+
+                    if (HasValidVisibleForGroups(visibleForGroups))
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    }
+                    else
+                    {
+                        allowed = true;
+                        _log.Info("Can't filter edit layers because the key 'visibleForGroups' is missing, incorrect or empty");
+                    }
+
+                    if (!allowed)
+                    {
+                        childrenToRemove.Add(child.SelectToken("$.id").ToString());
+                    }
+                }
+
+                foreach (string id in childrenToRemove)
+                {
+                    layersInEditTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+                }
+
+                return mapConfiguration.ToString();
+            }
+        }
+
         private string FilterSearchLayersByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
         {
             var childrenToRemove = new List<string>();
+            mapConfiguration = JObject.Parse(mapConfiguration.ToString());
             var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
+            var editTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
             var layersInSearchTool = searchTool.SelectToken("$.options.layers");
             var userGroups = adLookup.GetGroups(activeUser);
 
@@ -515,18 +561,21 @@ namespace MapService.Controllers
 
                         var filteredMapConfiguration = FilterLayersByAD(adLookup, mapConfiguration, activeUser);
 
-
                         filteredMapConfiguration = FilterToolsByAD(adLookup, filteredMapConfiguration, activeUser);
+
                         var searchTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
+                        var editTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'edit')]");
+                        if (editTool != null)
+                        {
+                            filteredMapConfiguration = FilterEditLayersByAD(adLookup, filteredMapConfiguration, activeUser);
+                        }
 
                         if (searchTool != null)
                         {
-                            return FilterSearchLayersByAD(adLookup, filteredMapConfiguration, activeUser);
+                            filteredMapConfiguration = FilterSearchLayersByAD(adLookup, filteredMapConfiguration, activeUser);
                         }
-                        else
-                        {
-                            return filteredMapConfiguration.ToString();
-                        }
+
+                        return filteredMapConfiguration.ToString();
 
                     }
                     else
