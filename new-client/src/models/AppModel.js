@@ -578,6 +578,18 @@ class AppModel {
     return searchLayers;
   }
 
+  overrideGlobalEditConfig(editTool, wfstlayers) {
+    const configSpecificEditLayers = editTool.options.activeServices;
+    const editLayers = wfstlayers.filter((layer) => {
+      if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
+        return layer;
+      } else {
+        return undefined;
+      }
+    });
+    return editLayers;
+  }
+
   translateConfig() {
     if (
       this.config.mapConfig.hasOwnProperty("map") &&
@@ -635,8 +647,42 @@ class AppModel {
       searchTool.options.sources = wfslayers;
     }
 
+    // This is for backwards compatibility prior to adding locking WFST edit layers with AD.
+    // This code handles if activeServices does not have an object with "id", "visibleForGroups"
     if (editTool) {
-      editTool.options.sources = layers.wfstlayers;
+      if (editTool.options.activeServices === null) {
+        editTool.options.sources = [];
+      } else {
+        if (
+          editTool.options.activeServices &&
+          editTool.options.activeServices.length !== 0
+        ) {
+          if (
+            typeof editTool.options.activeServices[0].visibleForGroups ===
+            "undefined"
+          ) {
+            // If activeService does not have an object with "id", "visibleForGroups", add it
+            let as = [];
+            for (let i = 0; i < editTool.options.activeServices.length; i++) {
+              let service = {
+                id: editTool.options.activeServices[i],
+                visibleForGroups: [],
+              };
+              as.push(service);
+            }
+            editTool.options.activeServices = as;
+          }
+
+          let wfstlayers = this.overrideGlobalEditConfig(
+            editTool,
+            layers.wfstlayers
+          );
+          editTool.options.sources = wfstlayers;
+          layers.wfstlayers = wfstlayers;
+        } else {
+          editTool.options.sources = [];
+        }
+      }
     }
 
     return this.mergeConfig(this.config.mapConfig, this.parseQueryParams());
