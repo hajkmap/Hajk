@@ -15,6 +15,8 @@ import {
 import Dialog from "../Dialog.js";
 import SearchSettings from "./SearchSettings";
 
+import { withTranslation } from "react-i18next";
+
 const styles = (theme) => ({});
 
 class SearchTools extends React.PureComponent {
@@ -83,12 +85,13 @@ class SearchTools extends React.PureComponent {
   };
 
   render() {
+    const { t } = this.props;
     const { anchorEl } = this.state;
     const enabledTools = this.getEnabledTools();
     return (
       <>
         {this.renderSettingsDialog()}
-        <Tooltip title="Fler sökverktyg och inställningar">
+        <Tooltip title={t("core.search.searchBar.moreButton.toolTip")}>
           <IconButton
             aria-haspopup="true"
             aria-controls="lock-menu"
@@ -101,7 +104,7 @@ class SearchTools extends React.PureComponent {
             }
           >
             <Typography variant="srOnly">
-              Öppna dialog med fler inställningar
+              {t("core.search.searchBar.moreButton.srText")}
             </Typography>
             <MoreVertIcon />
           </IconButton>
@@ -123,7 +126,7 @@ class SearchTools extends React.PureComponent {
             }
           >
             {enabledTools.map((option, index) => (
-              <Tooltip key={index} title={option.toolTipTitle ?? ""}>
+              <Tooltip key={index} title={t(option.toolTipTitle) ?? ""}>
                 <MenuItem
                   onClick={(event) =>
                     this.handleMenuItemClick(event, index, option)
@@ -133,10 +136,10 @@ class SearchTools extends React.PureComponent {
                     <ListItemIcon>{option.icon}</ListItemIcon>
                   ) : null}
                   <Typography variant="srOnly" noWrap>
-                    {option.name}
+                    {t(option.name)}
                   </Typography>
                   <Typography variant="inherit" noWrap>
-                    {option.name}
+                    {t(option.name)}
                   </Typography>
                 </MenuItem>
               </Tooltip>
@@ -148,4 +151,4 @@ class SearchTools extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchTools);
+export default withTranslation()(withStyles(styles)(SearchTools));

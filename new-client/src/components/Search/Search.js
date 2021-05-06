@@ -67,44 +67,42 @@ class Search extends React.PureComponent {
 
   defaultSearchTools = [
     {
-      name: "Sök med polygon",
+      name: "core.search.tools.polygonSearch.title",
       icon: <EditIcon />,
       type: "Polygon",
       enabled: this.props.options.enablePolygonSearch ?? true,
-      toolTipTitle:
-        "Genomför en sökning i ett område genom att rita en polygon.",
+      toolTipTitle: "core.search.tools.polygonSearch.toolTip",
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök med radie",
+      name: "core.search.tools.radiusSearch.title",
       icon: <RadioButtonUncheckedIcon />,
       type: "Circle",
       enabled: this.props.options.enableRadiusSearch ?? true,
-      toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
+      toolTipTitle: "core.search.tools.radiusSearch.toolTip",
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök med objekt",
+      name: "core.search.tools.objectSearch.title",
       icon: <TouchAppIcon />,
       type: "Select",
       enabled: this.props.options.enableSelectSearch ?? true,
-      toolTipTitle:
-        "Genomför en sökning genom att välja en eller flera områden i kartan.",
+      toolTipTitle: "core.search.tools.objectSearch.toolTip",
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök inom vyn",
+      name: "core.search.tools.extentSearch.title",
       icon: <Crop54Icon />,
       type: "Extent",
       enabled: this.props.options.enableExtentSearch ?? true,
-      toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
+      toolTipTitle: "core.search.tools.extentSearch.toolTip",
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sökinställningar",
+      name: "core.search.tools.searchSettings.title",
       icon: <SettingsIcon />,
       type: "SETTINGS",
-      toolTipTitle: "Ändra sökinställningarna.",
+      toolTipTitle: "core.search.tools.searchSettings.toolTip",
       onClickEventName: "",
     },
   ];

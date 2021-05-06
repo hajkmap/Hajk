@@ -16,6 +16,32 @@
           "defaultSearch": "Search...",
           "extentSearch": "Searching in the area...",
           "objectSearch": "Searching with objects..."
+        },
+        "moreButton": {
+          "toolTip": "More search tools and settings",
+          "srText": "Open dialog with more settings"
+        }
+      },
+      "tools": {
+        "extentSearch": {
+          "title": "View search",
+          "toolTip": "Perform a search throughout the current map area."
+        },
+        "objectSearch": {
+          "title": "Object search",
+          "toolTip": "Perform a search by selecting one or more areas in the map."
+        },
+        "radiusSearch": {
+          "title": "Radius search",
+          "toolTip": "Perform a search in an area by drawing a circle."
+        },
+        "polygonSearch": {
+          "title": "Polygon search",
+          "toolTip": "Perform a search in an area by drawing a polygon."
+        },
+        "searchSettings": {
+          "title": "Search settings",
+          "toolTip": "Change the search settings."
         }
       }
     }

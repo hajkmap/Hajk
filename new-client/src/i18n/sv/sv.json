@@ -16,6 +16,32 @@
           "defaultSearch": "Sök...",
           "extentSearch": "Söker i området...",
           "objectSearch": "Söker med objekt..."
+        },
+        "moreButton": {
+          "toolTip": "Fler sökverktyg och inställningar",
+          "srText": "Öppna dialog med fler inställningar"
+        }
+      },
+      "tools": {
+        "extentSearch": {
+          "title": "Sök i vyn",
+          "toolTip": "Genomför en sökning i hela det område som kartan visar."
+        },
+        "objectSearch": {
+          "title": "Sök med objekt",
+          "toolTip": "Genomför en sökning genom att välja en eller flera områden i kartan."
+        },
+        "radiusSearch": {
+          "title": "Sök med radie",
+          "toolTip": "Genomför en sökning i ett område genom att rita en cirkel."
+        },
+        "polygonSearch": {
+          "title": "Sök med polygon",
+          "toolTip": "Genomför en sökning i ett område genom att rita en polygon."
+        },
+        "searchSettings": {
+          "title": "Sökinställningar",
+          "toolTip": "Ändra sökinställningarna."
         }
       }
     }
