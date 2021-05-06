@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Paper, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
+import { useTranslation } from "react-i18next";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -18,11 +19,16 @@ export default function PluginControlButton({
   abstract,
 }) {
   const classes = useStyles();
+  const { t } = useTranslation();
 
   return (
-    <Tooltip title={`${title}: ${abstract}`}>
+    <Tooltip title={`${t(title)}: ${t(abstract)}`}>
       <Paper className={classes.paper}>
-        <Button aria-label={title} className={classes.button} onClick={onClick}>
+        <Button
+          aria-label={t(title)}
+          className={classes.button}
+          onClick={onClick}
+        >
           {icon}
         </Button>
       </Paper>
