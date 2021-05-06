@@ -181,8 +181,6 @@ class Window extends React.PureComponent {
         this.updatePosition();
       }
     });
-
-    this.localObserver = this.props.localObserver;
   }
 
   componentDidUpdate = (prevProps, prevState) => {
@@ -431,7 +429,6 @@ class Window extends React.PureComponent {
       draggingEnabled,
       allowMaximizedWindow,
       customPanelHeaderButtons,
-      globalObserver,
     } = this.props;
     const { left, top, width, height } = this.state;
 
@@ -471,9 +468,6 @@ class Window extends React.PureComponent {
         }}
         style={{
           display: open ? "block" : "none",
-        }}
-        onDragStart={() => {
-          globalObserver.publish("windows.onDragStart", title);
         }}
         onDragStop={(e, d) => {
           const rect = this.rnd.getSelfElement().getClientRects()[0];
