@@ -8,6 +8,8 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import CloseIcon from "@material-ui/icons/Close";
 import { Paper, Hidden } from "@material-ui/core";
 
+import { useTranslation } from "react-i18next";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     marginRight: theme.spacing(1),
@@ -40,6 +42,7 @@ function DrawerToggleButtons({
   initialActiveButton,
 }) {
   const classes = useStyles();
+  const { t } = useTranslation();
 
   //Set initial active button state based on the initially active drawer, received from App.js
   //This will either be a drawer button name such as "plugins" or null, depending on whether there
@@ -93,7 +96,7 @@ function DrawerToggleButtons({
         className={classes.button}
       >
         {icon}
-        <Hidden smDown>{caption}</Hidden>
+        <Hidden smDown>{t(caption)}</Hidden>
       </ToggleButton>
     );
   };

@@ -372,8 +372,8 @@ class App extends React.PureComponent {
             this.globalObserver.publish("core.addDrawerToggleButton", {
               value: "plugins",
               ButtonIcon: MapIcon,
-              caption: this.props.t("core.drawer.toggleButtons.plugins"),
-              drawerTitle: this.props.t("core.drawer.toggleButtons.plugins"),
+              caption: "core.drawer.toggleButtons.plugins",
+              drawerTitle: "core.drawer.toggleButtons.plugins",
               order: 0,
               renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
@@ -637,7 +637,7 @@ class App extends React.PureComponent {
   }
 
   renderDrawerHeader = () => {
-    const { classes, config } = this.props;
+    const { classes, config, t } = this.props;
     const drawerTitle = this.state.drawerButtons.find(
       (db) => db.value === this.state.activeDrawerContent
     )?.drawerTitle;
@@ -668,7 +668,7 @@ class App extends React.PureComponent {
         >
           <Grid item>
             <Typography variant="button" className={classes.drawerTitle}>
-              {drawerTitle}
+              {t(drawerTitle)}
             </Typography>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
