@@ -17,10 +17,11 @@ const HajkLanguageProvider = ({ config }) => {
   const [i18nHasInitiated, setI18nHasInitiated] = React.useState(false);
 
   const getLanguage = () => {
-    return (
-      window.localStorage.getItem("userPreferredLanguage") ??
-      config.appConfig.lang
-    );
+    // If the language switcher is active we try to get the user preferred language from localStorage
+    return config.appConfig.showExperimentalLanguageSwitcher
+      ? window.localStorage.getItem("userPreferredLanguage") ??
+          config.appConfig.lang // If userPreferredLanguage is not set in ls we fall back on config
+      : config.appConfig.lang; // If the language switcher is disabled we use the language from the config
   };
 
   const initI18n = () => {
@@ -30,7 +31,7 @@ const HajkLanguageProvider = ({ config }) => {
         resources,
         lng: getLanguage(),
         debug: true,
-        fallbackLng: "en",
+        fallbackLng: "sv",
         keySeparator: ".",
         interpolation: {
           escapeValue: false,
