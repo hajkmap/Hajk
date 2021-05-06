@@ -1,11 +1,21 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import propTypes from "prop-types";
+import { isValidLayerId } from "utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 import LayerItem from "./LayerItem.js";
 import Observer from "react-event-observer";
 import { set } from "ol/transform";
+
+const WHITE_BACKROUND_LAYER_ID = "-1";
+const BLACK_BACKROUND_LAYER_ID = "-2";
+const OSM_BACKGROUND_LAYER_ID = "-3";
+
+const SPECIAL_BACKGROUND_COLORS = {
+  [WHITE_BACKROUND_LAYER_ID]: "#fff",
+  [BLACK_BACKROUND_LAYER_ID]: "#000",
+};
 
 const styles = (theme) => ({
   layerItemContainer: {
@@ -20,7 +30,7 @@ const styles = (theme) => ({
 
 class BackgroundSwitcher extends React.PureComponent {
   state = {
-    selectedLayer: -1, // By default, select special case "white background"
+    selectedLayerId: -1, // By default, select special case "white background"
   };
   // A list is used since it is passed into LayerItem before the osmLayer is created (and thus no reference exists to it)
   osmLayer = [];
@@ -49,7 +59,7 @@ class BackgroundSwitcher extends React.PureComponent {
     );
     backgroundVisibleFromStart &&
       this.setState({
-        selectedLayer: backgroundVisibleFromStart.name,
+        selectedLayerId: backgroundVisibleFromStart.name,
       });
 
     if (this.props.enableOSM) {
@@ -66,7 +76,69 @@ class BackgroundSwitcher extends React.PureComponent {
       );
       this.props.map.addLayer(this.osmLayer[0]);
     }
+
+    // Ensure that BackgroundSwitcher correctly selects visible layer,
+    // by listening to a event that each layer will send when its visibility
+    // changes.
+    this.props.app.globalObserver.subscribe(
+      "core.layerVisibilityChanged",
+      ({ target: layer }) => {
+        const name = layer.get("name");
+
+        // Early return if layer who's visibility was changed couldn't
+        // be found among the background layers, or if the visibility
+        // was changed to 'false'.
+        if (
+          this.props.layers.findIndex((l) => name === l.name) === -1 ||
+          layer.get("visible") === false
+        ) {
+          return;
+        }
+
+        // If we got this far, we have a background layer that just
+        // became visible. Let's notify the radio buttons by setting state!
+        this.setState({
+          selectedLayerId: layer.get("name"),
+        });
+      }
+    );
   }
+
+  isSpecialBackgroundLayer = (id) => {
+    return [
+      WHITE_BACKROUND_LAYER_ID,
+      BLACK_BACKROUND_LAYER_ID,
+      OSM_BACKGROUND_LAYER_ID,
+    ].includes(id);
+  };
+
+  setSpecialBackground = (id) => {
+    document.getElementById("map").style.backgroundColor =
+      SPECIAL_BACKGROUND_COLORS[id];
+  };
+
+  /**
+   * @summary Hides previously selected background and shows current selection.
+   * @param {Object} e The event object, contains target's value
+   */
+  onChange = (e) => {
+    const newSelectedId = e.target.value;
+    const { selectedLayerId } = this.state;
+    const { layerMap } = this.props;
+
+    this.isSpecialBackgroundLayer(newSelectedId)
+      ? this.setSpecialBackground(newSelectedId)
+      : layerMap[newSelectedId].setVisible(true);
+
+    !this.isSpecialBackgroundLayer(selectedLayerId) &&
+      layerMap[selectedLayerId].setVisible(false);
+    this.osmLayer &&
+      this.osmLayer.setVisible(newSelectedId === OSM_BACKGROUND_LAYER_ID);
+
+    this.setState({
+      selectedLayerId: newSelectedId,
+    });
+  };
 
   /**
    * @summary Returns a <div> that contains a {React.Component} consisting of one Radio button.
@@ -77,8 +149,10 @@ class BackgroundSwitcher extends React.PureComponent {
    * @memberof BackgroundSwitcher
    */
   renderRadioButton(config, index) {
-    let checked = this.state.selectedLayer === config.name;
-    let mapLayer = this.props.layerMap[Number(config.name)];
+    let caption;
+    let checked = this.state.selectedLayerId === config.name;
+
+    let mapLayer = this.props.layerMap[config.name];
     const { classes } = this.props;
     let options = this.props.options || {};
     if (!("enableTransparencySlider" in options)) {
@@ -202,9 +276,18 @@ class BackgroundSwitcher extends React.PureComponent {
      */
     radioButtons = [
       ...defaults,
-      ...this.props.layers.map((layerConfig, i) =>
-        this.renderRadioButton(layerConfig, i)
-      ),
+      ...this.props.layers
+        .filter((layer) => {
+          //Remove layers not having a valid id
+          const validLayerId = isValidLayerId(layer.name);
+          if (!validLayerId) {
+            console.warn(
+              `Backgroundlayer with id ${layer.name} has a non-valid id`
+            );
+          }
+          return validLayerId;
+        })
+        .map((layerConfig, i) => this.renderRadioButton(layerConfig, i)),
     ];
 
     return radioButtons;

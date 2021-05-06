@@ -52,7 +52,7 @@ const defaultState = {
   markerImg: "",
   delayBeforeAutoSearch: 500,
   searchBarPlaceholder: "Sök...",
-
+  autocompleteWildcardAtStart: false,
   enablePolygonSearch: true,
   enableRadiusSearch: true,
   enableSelectSearch: true,
@@ -159,6 +159,9 @@ class ToolOptions extends Component {
           delayBeforeAutoSearch:
             tool.options.delayBeforeAutoSearch ||
             this.state.delayBeforeAutoSearch,
+          autocompleteWildcardAtStart:
+            tool.options.autocompleteWildcardAtStart ||
+            this.state.autocompleteWildcardAtStart,
           searchBarPlaceholder:
             tool.options.searchBarPlaceholder ||
             this.state.searchBarPlaceholder,
@@ -343,7 +346,7 @@ class ToolOptions extends Component {
         markerImg: this.state.markerImg,
         delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
         searchBarPlaceholder: this.state.searchBarPlaceholder,
-
+        autocompleteWildcardAtStart: this.state.autocompleteWildcardAtStart,
         enablePolygonSearch: this.state.enablePolygonSearch,
         enableRadiusSearch: this.state.enableRadiusSearch,
         enableSelectSearch: this.state.enableSelectSearch,
@@ -678,6 +681,21 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+          <div>
+            <input
+              id="autocompleteWildcardAtStart"
+              name="autocompleteWildcardAtStart"
+              value={this.state.autocompleteWildcardAtStart}
+              type="checkbox"
+              checked={this.state.autocompleteWildcardAtStart}
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />{" "}
+            <label className="long-label" htmlFor="autocompleteWildcardAtStart">
+              Använd wildcard före sökord för autocomplete
+            </label>
           </div>
 
           <div className="separator">Söktjänster</div>
