@@ -13,6 +13,7 @@ import {
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
+import { withTranslation } from "react-i18next";
 
 const styles = (theme) => {
   return {};
@@ -194,6 +195,7 @@ class BaseWindowPlugin extends React.PureComponent {
    * value on target should not render any button at all, but still load the plugin.
    */
   renderDrawerButton() {
+    const { t } = this.props;
     return this.props.options.target === "hidden"
       ? null
       : createPortal(
@@ -205,7 +207,7 @@ class BaseWindowPlugin extends React.PureComponent {
               onClick={this.handleButtonClick}
             >
               <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
-              <ListItemText primary={this.title} />
+              <ListItemText primary={t(this.title)} />
             </ListItem>
           </Hidden>,
           document.getElementById("plugin-buttons")
@@ -213,14 +215,15 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   renderWidgetButton(id) {
+    const { t } = this.props;
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
       <Hidden smDown>
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
-          title={this.title}
-          abstract={this.description}
+          title={t(this.title)}
+          abstract={t(this.description)}
         />
       </Hidden>,
       document.getElementById(id)
@@ -228,12 +231,13 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   renderControlButton() {
+    const { t } = this.props;
     return createPortal(
       <PluginControlButton
         icon={this.props.custom.icon}
         onClick={this.handleButtonClick}
-        title={this.title}
-        abstract={this.description}
+        title={t(this.title)}
+        abstract={t(this.description)}
       />,
       document.getElementById("plugin-control-buttons")
     );
@@ -247,4 +251,6 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(BaseWindowPlugin));
+export default withTranslation()(
+  withStyles(styles)(withTheme(BaseWindowPlugin))
+);

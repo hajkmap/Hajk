@@ -6,6 +6,7 @@ import FullscreenIcon from "@material-ui/icons/Fullscreen";
 import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 import AspectRatioIcon from "@material-ui/icons/AspectRatio";
 import { Hidden, Typography, IconButton, Box } from "@material-ui/core";
+import { withTranslation } from "react-i18next";
 
 const styles = (theme) => {
   return {
@@ -57,14 +58,14 @@ class PanelHeader extends Component {
   };
 
   render() {
-    const { allowMaximizedWindow, classes, mode } = this.props;
+    const { allowMaximizedWindow, classes, mode, t } = this.props;
     return (
       <header
         className={classes.header}
         style={{ borderColor: this.props.color }} // Allow for dynamic override of accent border color
       >
         <Typography component="h1" variant="button" align="left" noWrap={true}>
-          {this.props.title}
+          {t(this.props.title)}
         </Typography>
         <Box display="flex" component="nav">
           {this.shouldRenderCustomHeaderButtons() &&
@@ -72,28 +73,34 @@ class PanelHeader extends Component {
           {mode !== "maximized" && // If window isn't in fit screen mode currently…
             (mode === "minimized" ? ( // … but it's minimized…
               <IconButton size="small" onClick={this.props.onMaximize}>
-                <Typography variant="srOnly">Maximera fönster</Typography>
+                <Typography variant="srOnly">
+                  {t("common.maximizeWindow")}
+                </Typography>
                 <FullscreenIcon // …render the maximize icon.
                 />
               </IconButton>
             ) : (
               // If it's already in "window" mode though, render the minimize icon.
               <IconButton size="small" onClick={this.props.onMinimize}>
-                <Typography variant="srOnly">Minimera fönster</Typography>
+                <Typography variant="srOnly">
+                  {t("common.minimizeWindow")}
+                </Typography>
                 <FullscreenExitIcon />
               </IconButton>
             ))}
           <Hidden xsDown>
             {allowMaximizedWindow && ( // If we're not on mobile and config allows fit-to-screen…
               <IconButton size="small" onClick={this.props.onMaximize}>
-                <Typography variant="srOnly">Maximera fönster</Typography>
+                <Typography variant="srOnly">
+                  {t("common.maximizeWindow")}
+                </Typography>
                 <AspectRatioIcon // … render the action button. Note: it will remain the same…
                 />
               </IconButton>
             )}
           </Hidden>
           <IconButton size="small" onClick={this.props.onClose}>
-            <Typography variant="srOnly">Stäng fönster</Typography>
+            <Typography variant="srOnly">{t("common.closeWindow")}</Typography>
             <CloseIcon />
           </IconButton>
         </Box>
@@ -102,4 +109,4 @@ class PanelHeader extends Component {
   }
 }
 
-export default withStyles(styles)(PanelHeader);
+export default withTranslation()(withStyles(styles)(PanelHeader));
