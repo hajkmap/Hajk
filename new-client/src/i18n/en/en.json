@@ -12,7 +12,11 @@
     },
     "search": {
       "searchBar": {
-        "placeHolder": "Search..."
+        "placeHolders": {
+          "defaultSearch": "Search...",
+          "extentSearch": "Searching in the area...",
+          "objectSearch": "Searching with objects..."
+        }
       }
     }
   },

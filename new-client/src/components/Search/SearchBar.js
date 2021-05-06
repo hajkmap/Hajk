@@ -201,13 +201,16 @@ class SearchBar extends React.PureComponent {
   };
 
   getPlaceholder = () => {
-    const { options, searchActive } = this.props;
+    const { options, searchActive, t } = this.props;
+    // Depending on which search tool that is active we want different placeholders in the search bar.
+    // If the draw or select tool is active...
     return searchActive === "selectSearch" || searchActive === "draw"
-      ? "Söker med objekt..."
+      ? t("core.search.searchBar.placeHolders.objectSearch") // we want a text telling the user that they are searching with an object in the map...
       : searchActive === "extentSearch"
-      ? "Söker i området..."
-      : options.searchBarPlaceholder ??
-        this.props.t("core.search.searchBar.placeHolder");
+      ? t("core.search.searchBar.placeHolders.extentSearch") // and if the extent tool is active we want to tell the user that they are searching in the entire extent...
+      : options.searchBarPlaceholder?.length > 0 // If no tool is active and we've gotten a placeholder from the config...
+      ? options.searchBarPlaceholder // we use that...
+      : this.props.t("core.search.searchBar.placeHolders.defaultSearch"); // otherwise we fall back on the standard placeHolder.
   };
 
   renderSearchResultList = () => {

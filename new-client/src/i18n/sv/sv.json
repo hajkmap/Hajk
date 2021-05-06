@@ -12,7 +12,11 @@
     },
     "search": {
       "searchBar": {
-        "placeHolder": "Sök..."
+        "placeHolders": {
+          "defaultSearch": "Sök...",
+          "extentSearch": "Söker i området...",
+          "objectSearch": "Söker med objekt..."
+        }
       }
     }
   },
