@@ -120,7 +120,7 @@ export default class ConfigMapper {
         infoClickSortType: args.infoClickSortType,
         infoClickSortDesc: args.infoClickSortDesc,
         infoClickSortProperty: args.infoClickSortProperty,
-        //information: args.infobox,
+        information: args.infobox,
         resolutions: properties.mapConfig.map.resolutions,
         projection: projection || "EPSG:3006",
         origin: properties.mapConfig.map.origin,

@@ -80,7 +80,11 @@ export default class FeaturePropsParsing {
       },
       thematicBreak: () => <Divider />,
       link: (a) => {
-        return <Link href={a.href}>{a.children}</Link>;
+        return (
+          <Link href={a.href} target="_blank">
+            {a.children}
+          </Link>
+        );
       },
       heading: ({ level, children }) => {
         return (
@@ -249,6 +253,45 @@ export default class FeaturePropsParsing {
         return args[0];
     }
   };
+  /**
+   * @summary Ensure that the href part in Markdown links is well-formatted
+   * @description Href in Markdown should be UTF8 formatted and have whitespace
+   * escaped (with %20). The easiest way to ensure proper formatting is using the
+   * URL object. But the constructor of URL will crash if the string provided is
+   * not a proper path (e.g. lacks the protocol part). So we use try-catch to
+   * catch such occurrences, and in those cases, we return the anchor pretty much unchanged.
+   *
+   * @param {*} args
+   * @returns
+   */
+  #markdownHrefEncoder = (...args) => {
+    // The named capture groups will be the last parameter
+    const matched = args[args.length - 1];
+
+    // Anchor text is simple
+    const text = matched.text;
+
+    // Anchor href will require some more work
+    let href = "";
+    try {
+      // Try creating a new URL from the matched href, removing the first
+      // and last character (which are "(" and ")").
+      // Invoking new URL will escape any special characters and ensure
+      // that we provide a well-formatted URL to the MarkDown.
+      href = new URL(matched.href.slice(1, -1)).href;
+    } catch (error) {
+      // If the URL creation failed for some reason (e.g. if a.href was empty,
+      // or if it was a relative path), fall back to using the provided
+      // string as-is, but remember to remove the leading and closing parentheses
+      // that our regex included in the match and encode the URL (i.e. still
+      // transform 'dir/file åäö.pdf' to 'dir/file%20%C3%A5%C3%A4%C3%B6.pdf').
+      href = encodeURI(matched.href.slice(1, -1));
+    }
+
+    // Prepare a nice MD Anchor string
+    const r = `[${text}](${href})`;
+    return r;
+  };
 
   /**
    * Converts a JSON-string of properties into a properties object
@@ -280,7 +323,7 @@ export default class FeaturePropsParsing {
    * 1. The markdown is used as a template, anything between { and } gets replaced
    * with the real value from properties object, or is left empty.
    * 2. Next we apply conditional rendering, where conditions are between {{ and }} while
-   * content is between {{condition}} and {{/condition}}.
+   * content is between {{condition}} and {{/condition}}.
    * Currently, if-condition is the only one supported, but more might become available.
    * Depending on the condition value, replacing can occur within our markdown string.
    * 3. The final markdown string is passed to the ReactMarkdown component.
@@ -325,6 +368,22 @@ export default class FeaturePropsParsing {
       this.markdown = this.markdown.replace(
         /{{(?<condition>\w+)[\s/]?(?<attributes>[^}}]+)?}}(?<content>[^{{]+)?(?:{{\/\1}}\n?)/gi,
         this.#conditionalReplacer
+      );
+
+      // Special precautious must be taken to accommodate white space in Markdown links. We can
+      // of course force our Hajk admins to write correctly formatted links (with URL encoded spaces),
+      // but many times we can not control the URL if it comes from outside source. E.g. imagine this
+      // infoclick setup:
+      // [{anchorText}]({anchorLink})
+      // Depending on values in the database, this can end up as something like this:
+      // [This is a link](https://www.example.com/Some PDF file we link to.pdf)
+      // This will not render correctly, only "https://www.example.com/Some" will become the
+      // href part of the anchor. What we want instead is our MarkDown to contain:
+      // [This is a link](https://www.example.com/Some%20PDF%20file%20we%20link%20to.pdf)
+      // The following regex does just that.
+      this.markdown = this.markdown.replace(
+        /\[(?<text>[^[]+)\](?<href>\(.*\))/gm,
+        this.#markdownHrefEncoder
       );
 
       // The final step is to await for all promises that might exist (if we fetch from

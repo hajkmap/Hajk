@@ -27,6 +27,7 @@ import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
+import Tree from "../treeEdit.jsx";
 
 const ColorButtonBlue = withStyles((theme) => ({
   root: {
@@ -38,7 +39,7 @@ const ColorButtonBlue = withStyles((theme) => ({
   },
 }))(Button);
 
-var defaultState = {
+const defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
@@ -47,6 +48,8 @@ var defaultState = {
   visibleAtStart: false,
   visibleForGroups: [],
   activeServices: [],
+  editableLayers: {},
+  tree: "",
 };
 
 class ToolOptions extends Component {
@@ -58,29 +61,37 @@ class ToolOptions extends Component {
     this.state = defaultState;
     this.type = "edit";
     this.editModel = new EditModel();
+
+    this.handleAddEditableLayer = this.handleAddEditableLayer.bind(this);
+    this.loadLayers = this.loadLayers.bind(this);
   }
 
   componentDidMount() {
-    var tool = this.getTool();
-    var layersUrl =
+    this.loadEditableLayers();
+    let tool = this.getTool();
+    const layersUrl =
       this.props.model && this.props.model.get("config").url_layers
         ? this.props.model.get("config").url_layers
         : "";
     if (tool) {
-      this.setState({
-        active: true,
-        index: tool.index,
-        target: tool.options.target || "toolbar",
-        position: tool.options.position,
-        width: tool.options.width,
-        height: tool.options.height,
-        instruction: tool.options.instruction,
-        activeServices: tool.options.activeServices || [],
-        visibleAtStart: tool.options.visibleAtStart,
-        visibleForGroups: tool.options.visibleForGroups
-          ? tool.options.visibleForGroups
-          : [],
-      });
+      this.setState(
+        {
+          active: true,
+          index: tool.index,
+          target: tool.options.target || "toolbar",
+          position: tool.options.position,
+          width: tool.options.width,
+          height: tool.options.height,
+          instruction: tool.options.instruction,
+          activeServices: tool.options.activeServices || [],
+          visibleAtStart: tool.options.visibleAtStart,
+          visibleForGroups:
+            tool.options.visibleForGroups || this.state.visibleForGroups,
+        },
+        () => {
+          this.loadLayers();
+        }
+      );
     } else {
       this.setState({
         active: false,
@@ -102,9 +113,21 @@ class ToolOptions extends Component {
   componentWillMount() {}
 
   handleInputChange(event) {
-    var target = event.target;
-    var name = target.name;
-    var value = target.type === "checkbox" ? target.checked : target.value;
+    const t = event.target;
+    const name = t.name;
+    let value = t.type === "checkbox" ? t.checked : t.value;
+    if (typeof value === "string" && value.trim() !== "") {
+      value = !isNaN(Number(value)) ? Number(value) : value;
+    }
+    this.setState({
+      [name]: value,
+    });
+  }
+
+  handleLayerInputChange(event) {
+    const target = event.target;
+    const name = target.name;
+    let value = target.type === "checkbox" ? target.checked : target.value;
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
@@ -115,6 +138,65 @@ class ToolOptions extends Component {
     this.setState({
       [name]: value,
     });
+  }
+
+  /**
+   * Called from treeEdit.jsx in componentDidMount and passes refs.
+   * Sets checkboxes and input fields for edit layers.
+   * @param {*} childRefs
+   */
+  loadLayers(childRefs) {
+    // check checkboxes, show input field
+    // and set text from map config
+    let ids = [];
+
+    for (let id of this.state.activeServices) {
+      ids.push(id);
+    }
+    if (ids.length > 0 && typeof ids[0].visibleForGroups === "undefined") {
+      let idsNew = [];
+      for (let i = 0; i < ids.length; i++) {
+        let as = {
+          id: ids[i],
+          visibleForGroups: [],
+        };
+        idsNew.push(as);
+      }
+      ids = idsNew;
+      this.setState({
+        activeServices: idsNew,
+      });
+    }
+    if (typeof childRefs !== "undefined") {
+      for (let i of ids) {
+        childRefs["cb_" + i.id] && (childRefs["cb_" + i.id].checked = true);
+        childRefs[i.id] && (childRefs[i.id].hidden = false);
+        childRefs[i.id] && (childRefs[i.id].value = i.visibleForGroups.join());
+      }
+    }
+  }
+
+  loadEditableLayers() {
+    this.props.model.getConfig(
+      this.props.model.get("config").url_layers,
+      (layers) => {
+        this.setState({
+          editableLayers: layers.wfstlayers,
+        });
+
+        this.setState({
+          tree: (
+            <Tree
+              model={this}
+              activeServices={this.state.editableLayers}
+              handleAddEditableLayer={this.handleAddEditableLayer}
+              loadLayers={this.loadLayers}
+              authActive={this.props.parent.props.parent.state.authActive}
+            />
+          ),
+        });
+      }
+    );
   }
 
   getTool() {
@@ -146,7 +228,15 @@ class ToolOptions extends Component {
   }
 
   save() {
-    var tool = {
+    // Set visibleForGroups to [] instead of [""] if input field is empty.
+    for (let aS of this.state.activeServices) {
+      if (typeof aS.visibleForGroups !== "undefined") {
+        if (aS.visibleForGroups.length === 1 && aS.visibleForGroups[0] === "") {
+          aS.visibleForGroups = [];
+        }
+      }
+    }
+    let tool = {
       type: this.type,
       index: this.state.index,
       options: {
@@ -164,7 +254,7 @@ class ToolOptions extends Component {
       },
     };
 
-    var existing = this.getTool();
+    const existing = this.getTool();
 
     function update() {
       this.props.model.updateToolConfig(
@@ -242,46 +332,54 @@ class ToolOptions extends Component {
     }
   }
 
-  renderServices() {
-    const { services } = this.state;
-    if (services) {
-      return services.map((service, i) => {
-        var active = this.state.activeServices.find(
-          (serviceId) => serviceId === service.id
+  /**
+   * Called from treeEdit.jsx as event handler. Handles checkboxes and
+   * input of AD-groups for wfst
+   * @param {*} e
+   * @param {*} layer
+   */
+  handleAddEditableLayer(e, layer) {
+    if (e.target.type.toLowerCase() === "checkbox") {
+      if (e.target.checked) {
+        let toAdd = {
+          id: layer.id.toString(),
+          visibleForGroups: [],
+        };
+        this.setState({
+          activeServices: [...this.state.activeServices, toAdd],
+        });
+      } else {
+        let newArray = this.state.activeServices.filter(
+          (o) => o.id !== layer.id.toString()
         );
-        if (active === undefined) {
-          active = false;
-        }
-        return (
-          <li key={i}>
-            <input
-              id={service.id}
-              name={service.caption}
-              type="checkbox"
-              checked={active}
-              onChange={(e) => {
-                var actives = [...this.state.activeServices];
-                if (e.target.checked) {
-                  actives.push(service.id);
-                } else {
-                  actives = actives.filter(
-                    (serviceId) => serviceId !== service.id
-                  );
-                }
-                this.setState({
-                  activeServices: actives,
-                });
-              }}
-            />
-            &nbsp;
-            <label htmlFor={service.id}>{service.caption}</label>
-          </li>
-        );
+
+        this.setState({
+          activeServices: newArray,
+        });
+      }
+    }
+    if (e.target.type.toLowerCase() === "text") {
+      let obj = this.state.activeServices.find(
+        (o) => o.id === layer.id.toString()
+      );
+      let newArray = this.state.activeServices.filter(
+        (o) => o.id !== layer.id.toString()
+      );
+
+      // Creates array and trims whitespace from start and end
+      if (typeof obj !== "undefined") {
+        obj.visibleForGroups = e.target.value.split(",");
+        obj.visibleForGroups = obj.visibleForGroups.map((el) => el.trim());
+      }
+
+      newArray.push(obj);
+
+      this.setState({
+        activeServices: newArray,
       });
-    } else {
-      return null;
     }
   }
+
   /**
    *
    */
@@ -444,18 +542,12 @@ class ToolOptions extends Component {
               value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+          <div>{this.renderVisibleForGroups()}</div>
           <div>
-            <label>Tjänster</label>
-            <ul
-              style={{
-                display: "inline-block",
-                padding: 0,
-              }}
-            >
-              {this.renderServices()}
-            </ul>
+            <div className="separator">Redigeringstjänster</div>
+
+            {this.state.tree}
           </div>
-          {this.renderVisibleForGroups()}
         </form>
       </div>
     );
