@@ -1,13 +1,11 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import propTypes from "prop-types";
-
-import Radio from "@material-ui/core/Radio";
-import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
-import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
-
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
+import LayerItem from "./LayerItem.js";
+import Observer from "react-event-observer";
+import { set } from "ol/transform";
 
 const styles = (theme) => ({
   layerItemContainer: {
@@ -24,8 +22,8 @@ class BackgroundSwitcher extends React.PureComponent {
   state = {
     selectedLayer: -1, // By default, select special case "white background"
   };
-
-  osmLayer = undefined;
+  // A list is used since it is passed into LayerItem before the osmLayer is created (and thus no reference exists to it)
+  osmLayer = [];
 
   static propTypes = {
     backgroundSwitcherBlack: propTypes.bool.isRequired,
@@ -36,6 +34,10 @@ class BackgroundSwitcher extends React.PureComponent {
     layerMap: propTypes.object.isRequired,
     layers: propTypes.array.isRequired,
   };
+  constructor(props) {
+    super(props);
+    this.localObserver = Observer();
+  }
 
   /**
    * @summary If there's a Background layer that is visible from start, make sure that proper radio button is selected in Background Switcher.
@@ -55,74 +57,16 @@ class BackgroundSwitcher extends React.PureComponent {
       const osmSource = new OSM({
         reprojectionErrorThreshold: 5,
       });
-      this.osmLayer = new TileLayer({
-        visible: false,
-        source: osmSource,
-        zIndex: -1,
-      });
-      this.props.map.addLayer(this.osmLayer);
+      this.osmLayer.push(
+        new TileLayer({
+          visible: false,
+          source: osmSource,
+          zIndex: -1,
+        })
+      );
+      this.props.map.addLayer(this.osmLayer[0]);
     }
-
-    // Ensure that BackgroundSwitcher correctly selects visible layer,
-    // by listening to a event that each layer will send when its visibility
-    // changes.
-    this.props.app.globalObserver.subscribe(
-      "core.layerVisibilityChanged",
-      ({ target: layer }) => {
-        const name = layer.get("name");
-
-        // Early return if layer who's visibility was changed couldn't
-        // be found among the background layers, or if the visibility
-        // was changed to 'false'.
-        if (
-          this.props.layers.findIndex((l) => name === l.name) === -1 ||
-          layer.get("visible") === false
-        ) {
-          return;
-        }
-
-        // If we got this far, we have a background layer that just
-        // became visible. Let's notify the radio buttons by setting state!
-        this.setState({
-          selectedLayer: layer.get("name"),
-        });
-      }
-    );
   }
-  /**
-   * @summary Hides previously selected background and shows current selection.
-   * @param {Object} e The event object, contains target's value
-   */
-  onChange = (e) => {
-    const selectedLayer = e.target.value;
-
-    // Hide previously selected layers. The if > 0 is needed because we have our
-    // special cases (black and white backgrounds), that don't exist in our layerMap,
-    // and that would cause problem when we try to call .setVisible() on them.
-    Number(this.state.selectedLayer) >= 0 &&
-      this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);
-
-    // Make the currently clicked layer visible, but also handle our special cases.
-    Number(selectedLayer) >= 0 &&
-      this.props.layerMap[Number(selectedLayer)].setVisible(true);
-
-    // Take care of our special cases: negative values are reserved for them
-    selectedLayer === "-2" &&
-      (document.getElementById("map").style.backgroundColor = "#000");
-    selectedLayer === "-1" &&
-      (document.getElementById("map").style.backgroundColor = "#FFF");
-
-    // Another special case is the OSM layer
-    // show/hide OSM
-    if (this.osmLayer) {
-      this.osmLayer.setVisible(selectedLayer === "-3");
-    }
-
-    // Finally, store current selection in state
-    this.setState({
-      selectedLayer,
-    });
-  };
 
   /**
    * @summary Returns a <div> that contains a {React.Component} consisting of one Radio button.
@@ -133,32 +77,72 @@ class BackgroundSwitcher extends React.PureComponent {
    * @memberof BackgroundSwitcher
    */
   renderRadioButton(config, index) {
-    let caption;
     let checked = this.state.selectedLayer === config.name;
-    const mapLayer = this.props.layerMap[Number(config.name)];
+    let mapLayer = this.props.layerMap[Number(config.name)];
     const { classes } = this.props;
-
-    if (mapLayer) {
-      caption = mapLayer.get("layerInfo").caption;
-    } else {
-      caption = config.caption;
+    let options = this.props.options || {};
+    if (!("enableTransparencySlider" in options)) {
+      // Layersettings will crash if this is not present
+      options["enableTransparencySlider"] = true;
     }
+
+    if (!mapLayer) {
+      const that = this;
+      // Add some values so the code does not crash in LayerItem's constructor
+      mapLayer = {
+        isDefaultBackground: true,
+        backgroundSpecialCaseId: config.name,
+        properties: {
+          name: config.caption,
+          visible: checked,
+          layerInfo: { caption: config.caption },
+          opacity: 1,
+        },
+
+        get(key) {
+          if (key === "opacity") {
+            if (that.osmLayer.length > 0) {
+              // the first the opacity is taken is before osmlayer is initialized
+              return that.osmLayer[0].get("opacity");
+            } else {
+              return 1;
+            }
+          }
+          return this.properties[key];
+        },
+        set(key, value) {
+          this.properties[key] = value;
+        },
+        getProperties() {
+          return Object.keys(this.properties);
+        },
+        setOpacity(value) {
+          that.osmLayer[0].setOpacity(value);
+        },
+      };
+      if (config.name === "-3") {
+        mapLayer["osmLayer"] = this.osmLayer;
+      }
+    }
+    mapLayer["localObserver"] = this.localObserver;
+    mapLayer["isBackgroundLayer"] = true;
 
     return (
       <div key={index} className={classes.layerItemContainer}>
-        <Radio
-          id={caption + "_" + index}
-          checked={checked}
-          onChange={this.onChange}
-          value={config.name || config}
-          color="default"
-          name="backgroundLayer"
-          icon={<RadioButtonUncheckedIcon fontSize="small" />}
-          checkedIcon={<RadioButtonCheckedIcon fontSize="small" />}
+        <LayerItem
+          key={index}
+          layer={mapLayer}
+          model={this.props.model}
+          options={options}
+          chapters={this.props.chapters}
+          app={this.props.app}
+          onOpenChapter={(chapter) => {
+            const informativeWindow = this.props.app.windows.find(
+              (window) => window.type === "informative"
+            );
+            informativeWindow.props.custom.open(chapter);
+          }}
         />
-        <label htmlFor={caption + "_" + index} className={classes.captionText}>
-          {caption}
-        </label>
       </div>
     );
   }
