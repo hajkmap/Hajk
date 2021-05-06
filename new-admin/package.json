@@ -1,6 +1,6 @@
 {
   "name": "hajk-admin",
-  "version": "3.5.0",
+  "version": "3.6.0-rc.2",
   "private": true,
   "homepage": ".",
   "dependencies": {
@@ -24,7 +24,7 @@
     "react-scripts": "^3.4.3",
     "react-smooth-dnd": "^0.11.1",
     "typescript": "^3.9.5",
-    "x2js": "^3.4.0"
+    "x2js": "^3.4.1"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -96,12 +96,6 @@ class SearchBar extends React.PureComponent {
     selectSourcesOpen: false,
   };
 
-  updateSearchOptions = (name, value) => {
-    const { searchOptions } = this.props;
-    searchOptions[name] = value;
-    this.props.updateSearchOptions(searchOptions);
-  };
-
   getOriginBasedIcon = (origin) => {
     const { classes } = this.props;
     let icon;

@@ -580,9 +580,9 @@ class AppModel {
     return typeof v === "string" && v.trim().length > 0 ? v : undefined;
   }
 
-  overrideGlobalSearchConfig(searchTool, data) {
-    var configSpecificSearchLayers = searchTool.options.layers;
-    var searchLayers = data.wfslayers.filter((layer) => {
+  overrideGlobalSearchConfig(searchTool, wfslayers) {
+    const configSpecificSearchLayers = searchTool.options.layers;
+    const searchLayers = wfslayers.filter((layer) => {
       if (configSpecificSearchLayers.find((x) => x.id === layer.id)) {
         return layer;
       } else {
@@ -590,6 +590,18 @@ class AppModel {
       }
     });
     return searchLayers;
+  }
+
+  overrideGlobalEditConfig(editTool, wfstlayers) {
+    const configSpecificEditLayers = editTool.options.activeServices;
+    const editLayers = wfstlayers.filter((layer) => {
+      if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
+        return layer;
+      } else {
+        return undefined;
+      }
+    });
+    return editLayers;
   }
 
   translateConfig() {
@@ -640,24 +652,51 @@ class AppModel {
     }
 
     if (searchTool) {
-      if (searchTool.options.layers === null) {
-        searchTool.options.sources = layers.wfslayers;
-      } else {
-        if (
-          searchTool.options.layers &&
-          searchTool.options.layers.length !== 0
-        ) {
-          let wfslayers = this.overrideGlobalSearchConfig(searchTool, layers);
-          searchTool.options.sources = wfslayers;
-          layers.wfslayers = wfslayers;
-        } else {
-          searchTool.options.sources = layers.wfslayers;
-        }
-      }
+      // Take a look at all available wfslayers in layers repository,
+      // but let the search tool only see those that are specified in searchTool.options
+      const wfslayers = this.overrideGlobalSearchConfig(
+        searchTool,
+        layers.wfslayers
+      );
+      searchTool.options.sources = wfslayers;
     }
 
+    // This is for backwards compatibility prior to adding locking WFST edit layers with AD.
+    // This code handles if activeServices does not have an object with "id", "visibleForGroups"
     if (editTool) {
-      editTool.options.sources = layers.wfstlayers;
+      if (editTool.options.activeServices === null) {
+        editTool.options.sources = [];
+      } else {
+        if (
+          editTool.options.activeServices &&
+          editTool.options.activeServices.length !== 0
+        ) {
+          if (
+            typeof editTool.options.activeServices[0].visibleForGroups ===
+            "undefined"
+          ) {
+            // If activeService does not have an object with "id", "visibleForGroups", add it
+            let as = [];
+            for (let i = 0; i < editTool.options.activeServices.length; i++) {
+              let service = {
+                id: editTool.options.activeServices[i],
+                visibleForGroups: [],
+              };
+              as.push(service);
+            }
+            editTool.options.activeServices = as;
+          }
+
+          let wfstlayers = this.overrideGlobalEditConfig(
+            editTool,
+            layers.wfstlayers
+          );
+          editTool.options.sources = wfstlayers;
+          layers.wfstlayers = wfstlayers;
+        } else {
+          editTool.options.sources = [];
+        }
+      }
     }
 
     return this.mergeConfig(this.config.mapConfig, this.parseQueryParams());

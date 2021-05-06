@@ -406,7 +406,6 @@ class App extends React.PureComponent {
 
     // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
-      this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: results,
       });
@@ -603,7 +602,10 @@ class App extends React.PureComponent {
 
   renderSearchComponent() {
     // FIXME: We should get config from somewhere else now when Search is part of Core
-    if (this.appModel.plugins.search) {
+    if (
+      this.appModel.plugins.search &&
+      this.appModel.plugins.search.options.renderElsewhere !== true
+    ) {
       return (
         <Search
           map={this.appModel.getMap()}

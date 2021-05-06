@@ -32,7 +32,7 @@ In short, developing a new feature, would look something like:
 1. Code… :neckbeard:
 1. Regularly commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
 1. Regularly push your changes to GitHub with `git push`
-1. Regularly rebase your branch from develop. That means that you will incorporate recent changes in develop and your local branch will stay on top of it. **This is the really important part.** You can do it like this: `git checkout develop && git fetch && git pull && git checkout feature/foobar && git rebase develop`
+1. Regularly merge changes from develop into your branch. That means that you will incorporate recent changes in develop and your local branch will stay up-to-date with latest developments. **This is the really important part.** You can do it like this: `git checkout develop && git fetch && git pull && git checkout feature/foobar && git merge develop`
 1. When you're done coding, go to GitHub and create a new pull request. Make sure that you want to merge your branch into `develop`.
 1. Administrators overlooking the project will get notified when you create your PR, take a look at the code and if everything looks fine merge it into `develop` and delete your feature branch from GitHub. You will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d feature/foobar`.
 
