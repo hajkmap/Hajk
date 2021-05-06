@@ -1,4 +1,9 @@
 {
+  "common": {
+    "maximizeWindow": "Maximize",
+    "minimizeWindow": "Minimize",
+    "closeWindow": "Close"
+  },
   "core": {
     "drawer": {
       "toggleButtons": {

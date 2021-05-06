@@ -1,4 +1,9 @@
 {
+  "common": {
+    "maximizeWindow": "Maximera fönstret",
+    "minimizeWindow": "Minimera fönstret",
+    "closeWindow": "Stäng fönstret"
+  },
   "core": {
     "drawer": {
       "toggleButtons": {
