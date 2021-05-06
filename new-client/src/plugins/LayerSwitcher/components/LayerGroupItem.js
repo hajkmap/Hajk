@@ -580,8 +580,8 @@ class LayerGroupItem extends Component {
       return (
         <div>
           {this.renderInfo()}
-          {this.renderOwner()}
           {this.renderMetadataLink()}
+          {this.renderOwner()}
           <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
         </div>
       );

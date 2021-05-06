@@ -406,7 +406,6 @@ class App extends React.PureComponent {
 
     // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
-      this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: results,
       });
