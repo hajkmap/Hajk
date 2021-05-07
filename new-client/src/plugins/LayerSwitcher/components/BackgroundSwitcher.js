@@ -6,7 +6,6 @@ import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 import LayerItem from "./LayerItem.js";
 import Observer from "react-event-observer";
-import { set } from "ol/transform";
 
 const WHITE_BACKROUND_LAYER_ID = "-1";
 const BLACK_BACKROUND_LAYER_ID = "-2";
@@ -202,22 +201,20 @@ class BackgroundSwitcher extends React.PureComponent {
     mapLayer["isBackgroundLayer"] = true;
 
     return (
-      <div key={index} className={classes.layerItemContainer}>
-        <LayerItem
-          key={index}
-          layer={mapLayer}
-          model={this.props.model}
-          options={options}
-          chapters={this.props.chapters}
-          app={this.props.app}
-          onOpenChapter={(chapter) => {
-            const informativeWindow = this.props.app.windows.find(
-              (window) => window.type === "informative"
-            );
-            informativeWindow.props.custom.open(chapter);
-          }}
-        />
-      </div>
+      <LayerItem
+        key={index}
+        layer={mapLayer}
+        model={this.props.model}
+        options={options}
+        chapters={this.props.chapters}
+        app={this.props.app}
+        onOpenChapter={(chapter) => {
+          const informativeWindow = this.props.app.windows.find(
+            (window) => window.type === "informative"
+          );
+          informativeWindow.props.custom.open(chapter);
+        }}
+      />
     );
   }
 
