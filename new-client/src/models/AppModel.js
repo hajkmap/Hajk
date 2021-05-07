@@ -224,11 +224,6 @@ class AppModel {
       }
     });
 
-    // FIXME: Remove?
-    setTimeout(() => {
-      this.map.updateSize();
-    }, 0);
-
     // Add Snap Helper to the Map
     this.map.snapHelper = new SnapHelper(this);
 
