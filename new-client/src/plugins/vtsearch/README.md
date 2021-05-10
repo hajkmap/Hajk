@@ -60,7 +60,7 @@ För att alltid importera post-git vid uppstart av PowerShell, gå in i profil-f
 
 # Tekniska krav
 
-## Lista på tekniska krav (exempel)
+## Lista på tekniska krav
 
 - Node.js, version 12
 - .NET Framework, version 4.5.2
@@ -74,12 +74,12 @@ _Observera_ att du måste ha konto med inloggning till Västtrafik för att kunn
 ## Lista på dokument
 
 - Kartsidan 2 (Installation och grundkonfiguration), https://confluence.vasttrafik.se/display/TIPu/Kartsidan+2+%28Installation+och+grundkonfiguration%29+-+GEO
-- Kartsidanadministration, https://confluence.vasttrafik.se/display/TIPu/Kartsidanadministration+-GEO
+- Kartsidanadministration, https://confluence.vasttrafik.se/display/TIPu/Kartsidanadministration+-+GEO
 - Systemdokumentation, https://confluence.vasttrafik.se/display/TIPu/Systemdokumentation+-+GEO
 
 ## Change log
 
-I filen `CHANGELOG.md` noteras alla viktiga ändringar mellan varje release. Filen följer huvudsakligen formatet på [Keep a Changelog](http://keepachangelog.com), fast på svenska.
+I filen `new-client/src/plugins/vtsearch/CHANGELOG.md` noteras alla viktiga ändringar mellan varje release. Filen följer huvudsakligen formatet på [Keep a Changelog](http://keepachangelog.com), fast på svenska.
 
 # Brancher och git
 
