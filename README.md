@@ -14,7 +14,10 @@ For user info, please visit [our welcome page (Swedish only)](https://hajkmap.gi
 
 For a live demo of the latest version, go to https://hajk-demo.netlify.app/.
 
-## Quick start
+## Quick start (for admins)
+Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).
+
+## Quick start (for developers)
 
 _Note that Hajk consists of 3 applications: the main 'client' (which is the web map front end), 'admin' (which basically is a frontend for client's configuration files) and 'mapservice' (the backend server application which has a REST API)._
 
