@@ -210,10 +210,19 @@ class AppModel {
         zoom: config.map.zoom,
       }),
     });
-    // FIXME: Remove?
-    setTimeout(() => {
-      this.map.updateSize();
-    }, 0);
+
+    // Create throttled zoomEnd event
+    let currentZoom = this.map.getView().getZoom();
+
+    this.map.on("moveend", (e) => {
+      // using moveend to create a throttled zoomEnd event
+      // instead of using change:resolution to minimize events being fired.
+      const newZoom = this.map.getView().getZoom();
+      if (currentZoom !== newZoom) {
+        this.globalObserver.publish("core.zoomEnd", { zoom: newZoom });
+        currentZoom = newZoom;
+      }
+    });
 
     // Add Snap Helper to the Map
     this.map.snapHelper = new SnapHelper(this);
