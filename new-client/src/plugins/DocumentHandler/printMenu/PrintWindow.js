@@ -413,6 +413,76 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
+  // printContents = () => {
+  //   Promise.all([this.renderToc(), this.renderContent()]).then(() => {
+  //     this.areAllImagesLoaded().then(() => {
+  //       this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
+  //       this.distributeContentOnPages(this.toc, "TOC");
+  //       this.content.children.forEach((child, index, children) => {
+  //         const previousContent = index === 0 ? null : children[index - 1];
+  //         this.distributeContentOnPages(child, "CONTENT", previousContent);
+  //       });
+
+  //       const printElement = () => {
+  //         const mw = window.open("", "PRINT", "height=400,width=600");
+  //         mw.document.write(
+  //           "<html><head><title>" + document.title + "</title>"
+  //         );
+  //         const a = `<link
+  //         rel="stylesheet"
+  //         href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+  //       />
+  //       <link rel="stylesheet" type="text/css" href="/index.css" />`;
+
+  //         mw.document.write(a);
+  //         mw.document.write("</head><body >");
+  //         mw.document.write("<h1>" + document.title + "</h1>");
+  //         mw.document.write(document.getElementById("toc").innerHTML);
+  //         mw.document.write(document.getElementById("content").innerHTML);
+  //         mw.document.write("</body></html>");
+  //         mw.document.close(); // necessary for IE >= 10
+  //         mw.focus(); // necessary for IE >= 10*/
+  //         mw.print();
+  //         // mw.close();
+  //         return true;
+  //       };
+
+  //       printElement();
+
+  //       console.log("Print done");
+
+  //       // let canvasPromises = this.printPages.map((page, index) => {
+  //       //   return this.delayCanvasCreate(page, index);
+  //       // });
+  //       // Promise.all(canvasPromises).then((canvases) => {
+  //       //   let pdf = new jsPDF("p", "pt");
+  //       //   let numToc = this.printPages.filter((page) => page.type === "TOC")
+  //       //     .length;
+  //       //   canvases.forEach((canvas, index) => {
+  //       //     if (index > 0) {
+  //       //       pdf.addPage();
+  //       //     }
+  //       //     //! now we declare that we're working on that page
+  //       //     pdf.setPage(index + 1);
+  //       //     pdf.addImage(canvas, "PNG", 0, 0);
+  //       //   });
+  //       //   pdf = this.addFooters(pdf, numToc);
+  //       //   pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
+  //       document.body.removeChild(this.toc);
+  //       if (document.body.contains(this.content)) {
+  //         document.body.removeChild(this.content);
+  //       }
+  //       this.toggleAllDocuments(false);
+  //       this.setState({
+  //         pdfLoading: false,
+  //         printContent: undefined,
+  //         printMaps: false,
+  //       });
+  //       // });
+  //     });
+  //   });
+  // };
+
   printContents = () => {
     Promise.all([this.renderToc(), this.renderContent()]).then(() => {
       this.areAllImagesLoaded().then(() => {
@@ -422,37 +492,63 @@ class PrintWindow extends React.PureComponent {
           const previousContent = index === 0 ? null : children[index - 1];
           this.distributeContentOnPages(child, "CONTENT", previousContent);
         });
-
-        let canvasPromises = this.printPages.map((page, index) => {
-          return this.delayCanvasCreate(page, index);
+        let container = document.createElement("div");
+        this.printPages.forEach((page) => {
+          const pageBreak = document.createElement("div");
+          pageBreak.style.pageBreakBefore = "always";
+          container.appendChild(pageBreak);
+          page.content.forEach((child) => {
+            container.appendChild(child);
+          });
         });
 
-        Promise.all(canvasPromises).then((canvases) => {
-          let pdf = new jsPDF("p", "pt");
-          let numToc = this.printPages.filter((page) => page.type === "TOC")
-            .length;
-          canvases.forEach((canvas, index) => {
-            if (index > 0) {
-              pdf.addPage();
-            }
-            //! now we declare that we're working on that page
-            pdf.setPage(index + 1);
-            pdf.addImage(canvas, "PNG", 0, 0);
-          });
-          pdf = this.addFooters(pdf, numToc);
-          pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
-
-          document.body.removeChild(this.toc);
-          if (document.body.contains(this.content)) {
-            document.body.removeChild(this.content);
+        const styleTags = [];
+        [...document.head.children].forEach((c) => {
+          if (c.nodeName === "STYLE") {
+            styleTags.push(c.cloneNode(true));
           }
+        });
 
-          this.toggleAllDocuments(false);
-          this.setState({
-            pdfLoading: false,
-            printContent: undefined,
-            printMaps: false,
-          });
+        const printWindow = window.open("", "PRINT");
+
+        printWindow.document.write("<html>");
+        printWindow.document.write(
+          `<head>
+            <title>${document.title}</title>
+            <style>
+              @page {
+                size: A4;
+                /*margin: 0; controls whether the TITLE and URL are printed in page header/footer */
+              }
+              @media print {
+                html, body {
+                  width: 210mm;
+                  height: 297mm;
+                }
+              }
+            </style>
+          </head>
+          <body>`
+        );
+        styleTags.forEach((s) => {
+          printWindow.document.head.appendChild(s);
+        });
+        printWindow.document.write(container.innerHTML);
+        printWindow.document.write("</body></html>");
+        printWindow.document.close(); // necessary for IE >= 10
+        printWindow.focus(); // necessary for IE >= 10*/
+        printWindow.print();
+        printWindow.close();
+
+        document.body.removeChild(this.toc);
+        if (document.body.contains(this.content)) {
+          document.body.removeChild(this.content);
+        }
+        this.toggleAllDocuments(false);
+        this.setState({
+          pdfLoading: false,
+          printContent: undefined,
+          printMaps: false,
         });
       });
     });
