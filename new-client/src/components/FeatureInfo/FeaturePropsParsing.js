@@ -268,28 +268,29 @@ export default class FeaturePropsParsing {
     // The named capture groups will be the last parameter
     const matched = args[args.length - 1];
 
-    // Anchor text is simple
+    // Anchor text and title are simple
     const text = matched.text;
+    const title = matched.title ? " " + matched.title : "";
 
-    // Anchor href will require some more work
-    let href = "";
+    // Anchor href will require some more work.
+    let href = matched.href;
+
     try {
-      // Try creating a new URL from the matched href, removing the first
-      // and last character (which are "(" and ")").
+      // Try creating a new URL from the matched href.
       // Invoking new URL will escape any special characters and ensure
       // that we provide a well-formatted URL to the MarkDown.
-      href = new URL(matched.href.slice(1, -1)).href;
+      href = new URL(href);
     } catch (error) {
       // If the URL creation failed for some reason (e.g. if a.href was empty,
       // or if it was a relative path), fall back to using the provided
       // string as-is, but remember to remove the leading and closing parentheses
       // that our regex included in the match and encode the URL (i.e. still
       // transform 'dir/file åäö.pdf' to 'dir/file%20%C3%A5%C3%A4%C3%B6.pdf').
-      href = encodeURI(matched.href.slice(1, -1));
+      href = encodeURI(href);
     }
 
     // Prepare a nice MD Anchor string
-    const r = `[${text}](${href})`;
+    const r = `[${text}](${href}${title})`;
     return r;
   };
 
@@ -382,7 +383,7 @@ export default class FeaturePropsParsing {
       // [This is a link](https://www.example.com/Some%20PDF%20file%20we%20link%20to.pdf)
       // The following regex does just that.
       this.markdown = this.markdown.replace(
-        /\[(?<text>[^[]+)\](?<href>\(.*\))/gm,
+        /\[(?<text>[^[]+)\]\((?<href>[^")]+)(?<title>".*")?\)/gm,
         this.#markdownHrefEncoder
       );
 
