@@ -206,14 +206,7 @@ class BackgroundSwitcher extends React.PureComponent {
         layer={mapLayer}
         model={this.props.model}
         options={options}
-        chapters={this.props.chapters}
         app={this.props.app}
-        onOpenChapter={(chapter) => {
-          const informativeWindow = this.props.app.windows.find(
-            (window) => window.type === "informative"
-          );
-          informativeWindow.props.custom.open(chapter);
-        }}
       />
     );
   }
