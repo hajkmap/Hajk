@@ -340,17 +340,19 @@ export default class FeaturePropsParsing {
       // The regex below will match all placeholders.
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
-      // Match any word character, @ sign, dash or dot
-      (this.markdown.match(/{[\w@\-.]+}/g) || []).forEach((placeholder) => {
-        // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
-        // Let's replace all occurrences of the placeholder like this:
-        // {foobar} -> Some nice FoobarValue
-        // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
-        this.markdown = this.markdown.replace(
-          placeholder,
-          this.#getPropertyValueForPlaceholder(placeholder)
-        );
-      });
+      // Match any word character, range of unicode characters (åäö etc), @ sign, dash or dot
+      (this.markdown.match(/{[\w\u00C0-\u00ff@\-.]+}/g) || []).forEach(
+        (placeholder) => {
+          // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
+          // Let's replace all occurrences of the placeholder like this:
+          // {foobar} -> Some nice FoobarValue
+          // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
+          this.markdown = this.markdown.replace(
+            placeholder,
+            this.#getPropertyValueForPlaceholder(placeholder)
+          );
+        }
+      );
 
       // this.markdown will now contain actual values instead of properties, OR
       // references to elements in the this.resolvedPromises array. The latter will
