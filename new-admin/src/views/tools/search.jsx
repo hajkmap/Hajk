@@ -143,6 +143,9 @@ class ToolOptions extends Component {
           index: tool.index,
 
           layers: tool.options.layers || this.state.layers,
+          selectedSources: tool.options.selectedSources
+            ? tool.options.selectedSources
+            : [],
           visibleForGroups:
             tool.options.visibleForGroups || this.state.visibleForGroups,
           maxResultsPerDataset:
@@ -234,8 +237,8 @@ class ToolOptions extends Component {
             this.state.highlightStrokeColor,
         },
         () => {
-          this.loadLayers();
-          this.loadSources();
+          this.loadLayers(); // Load WFS search sources
+          this.loadSources(); // Load WMS layers as search sources too
         }
       );
     } else {
@@ -336,6 +339,9 @@ class ToolOptions extends Component {
       index: this.state.index,
       options: {
         layers: this.state.layers,
+        selectedSources: this.state.selectedSources
+          ? this.state.selectedSources
+          : [],
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -534,7 +540,9 @@ class ToolOptions extends Component {
     var layerTypes = Object.keys(layersConfig);
     for (let i = 0; i < layerTypes.length; i++) {
       for (let j = 0; j < layersConfig[layerTypes[i]].length; j++) {
-        if (Number(layersConfig[layerTypes[i]][j].id) === Number(layerId)) {
+        // We want to compare Numbers and Strings, hence the use of == operator.
+        // eslint-disable-next-line
+        if (layersConfig[layerTypes[i]][j].id == layerId) {
           found = layersConfig[layerTypes[i]][j].caption;
           break;
         }
@@ -566,6 +574,44 @@ class ToolOptions extends Component {
     });
   };
 
+  selectedSourceChange = (id, checked) => (e) => {
+    var selectedSources = checked
+      ? this.state.selectedSources.filter(
+          (selectedSource) => selectedSource !== id
+        )
+      : [id, ...this.state.selectedSources];
+
+    this.setState({
+      selectedSources: selectedSources,
+    });
+  };
+
+  renderSources(sources) {
+    if (!sources) return null;
+    return (
+      <ul>
+        {sources.map((source, i) => {
+          var id = "layer_" + source.id;
+          var checked = this.state.selectedSources.some(
+            (id) => id === source.id
+          );
+          return (
+            <li key={i}>
+              <input
+                id={id}
+                type="checkbox"
+                checked={checked}
+                onChange={this.selectedSourceChange(source.id, checked)}
+              />
+              &nbsp;
+              <label htmlFor={id}>{source.name}</label>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  }
+
   /**
    * Infoclick's stroke and fill color are set by the React
    * color picker. This method handles change event for those
@@ -575,7 +621,6 @@ class ToolOptions extends Component {
    * @param {*} color
    */
   handleColorChange = (target, color) => {
-    console.log("color: ", color, RGBA.toString(color.rgb));
     this.setState({ [target]: RGBA.toString(color.rgb) });
   };
 
@@ -701,6 +746,19 @@ class ToolOptions extends Component {
           <div className="separator">Söktjänster</div>
 
           {this.state.tree}
+
+          <div className="separator">Sök inom WMS-lager</div>
+
+          <div>
+            <label htmlFor="searchLayers">
+              Välj vilka WMS-lager som ska vara tillgängliga som söktjänster.
+              Kom ihåg att konfigurera respektive WMS-lagers sökinställningar i
+              Lager-fliken!
+            </label>
+            <div className="layer-list">
+              {this.renderSources(this.state.sources)}
+            </div>
+          </div>
 
           <div className="separator">Spatiala sökverktyg</div>
 

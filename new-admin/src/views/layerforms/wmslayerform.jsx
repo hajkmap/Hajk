@@ -55,11 +55,6 @@ const defaultState = {
   drawOrder: 1,
   layerType: "WMS",
   attribution: "",
-  searchUrl: "",
-  searchPropertyName: "",
-  searchDisplayName: "",
-  searchOutputFormat: "",
-  searchGeometryField: "",
   infoVisible: false,
   infoTitle: "",
   infoText: "",
@@ -355,8 +350,8 @@ class WMSLayerForm extends Component {
     });
 
     let styles = layerInfo.styles
-      ? layerInfo.styles.map((style) => (
-          <option key={"style_" + style.Name} value={style.Name}>
+      ? layerInfo.styles.map((style, i) => (
+          <option key={`style_${style.Name}_${i}`} value={style.Name}>
             {style.Name}
           </option>
         ))
@@ -496,6 +491,110 @@ class WMSLayerForm extends Component {
             onChange={(e) => {
               let addedLayersInfo = this.state.addedLayersInfo;
               addedLayersInfo[layerInfo.id].queryable = e.target.checked;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+
+        <div className="separator">Sökning</div>
+
+        <div>
+          <label>Url</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchUrl}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchUrl = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Sökfält</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchPropertyName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchPropertyName = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Visningsfält</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchDisplayName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Utdataformat</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchOutputFormat}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchOutputFormat = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Geometrifält</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchGeometryField}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchGeometryField =
+                e.target.value;
               this.setState(
                 {
                   addedLayersInfo: addedLayersInfo,
@@ -1674,73 +1773,6 @@ class WMSLayerForm extends Component {
               className={this.getValidationClass("infoOwner")}
             />
           </div>
-        </div>
-        <div className="separator">Sökning</div>
-        {/* <h2>Sökning</h2> */}
-        <div>
-          <label>Url</label>
-          <input
-            type="text"
-            ref="input_searchUrl"
-            onChange={(e) => {
-              this.setState({ searchUrl: e.target.value });
-              this.validateField("searchUrl", e);
-            }}
-            value={this.state.searchUrl}
-            className={this.getValidationClass("searchUrl")}
-          />
-        </div>
-        <div>
-          <label>Sökfält</label>
-          <input
-            type="text"
-            ref="input_searchPropertyName"
-            onChange={(e) => {
-              this.setState({ searchPropertyName: e.target.value });
-              this.validateField("searchPropertyName", e);
-            }}
-            value={this.state.searchPropertyName}
-            className={this.getValidationClass("searchPropertyName")}
-          />
-        </div>
-        <div>
-          <label>Visningsfält</label>
-          <input
-            type="text"
-            ref="input_searchDisplayName"
-            onChange={(e) => {
-              this.setState({ searchDisplayName: e.target.value });
-              this.validateField("searchDisplayName", e);
-            }}
-            value={this.state.searchDisplayName}
-            className={this.getValidationClass("searchDisplayName")}
-          />
-        </div>
-        <div>
-          <label>Utdataformat</label>
-          <input
-            type="text"
-            ref="input_searchOutputFormat"
-            onChange={(e) => {
-              this.setState({ searchOutputFormat: e.target.value });
-              this.validateField("searchOutputFormat", e);
-            }}
-            value={this.state.searchOutputFormat}
-            className={this.getValidationClass("searchOutputFormat")}
-          />
-        </div>
-        <div>
-          <label>Geometrifält</label>
-          <input
-            type="text"
-            ref="input_searchGeometryField"
-            onChange={(e) => {
-              this.setState({ searchGeometryField: e.target.value });
-              this.validateField("searchGeometryField", e);
-            }}
-            value={this.state.searchGeometryField}
-            className={this.getValidationClass("searchGeometryField")}
-          />
         </div>
       </fieldset>
     );
