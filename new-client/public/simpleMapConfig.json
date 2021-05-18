@@ -1,7 +1,6 @@
 {
   "version": "3.5.0",
-  "projections": [
-    {
+  "projections": [{
       "code": "EPSG:3006",
       "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
       "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
@@ -170,12 +169,10 @@
       "units": null
     }
   ],
-  "tools": [
-    {
+  "tools": [{
       "type": "layerswitcher",
       "options": {
-        "baselayers": [
-          {
+        "baselayers": [{
             "id": "1",
             "visibleAtStart": true,
             "drawOrder": 0,
@@ -197,15 +194,13 @@
             "infobox": null
           }
         ],
-        "groups": [
-          {
+        "groups": [{
             "id": "8838c969-590c-8683-435c-1ecaca271096",
             "parent": "-1",
             "name": "Länstyrelsen",
             "toggled": true,
             "expanded": false,
-            "layers": [
-              {
+            "layers": [{
                 "id": "7",
                 "visibleAtStart": false,
                 "drawOrder": 3,
@@ -220,6 +215,20 @@
                 "infobox": null
               }
             ]
+          },
+          {
+            "id": "9938c969-590c-8683-435c-1ecaca271096",
+            "parent": "-1",
+            "name": "Övrigt",
+            "toggled": true,
+            "expanded": false,
+            "layers": [{
+              "id": "1352",
+              "visibleAtStart": true,
+              "drawOrder": 4,
+              "visibleForGroups": null,
+              "infobox": null
+            }]
           }
         ],
         "active": true,
@@ -306,12 +315,10 @@
     {
       "type": "search",
       "options": {
-        "layers": [
-          {
-            "id": "4",
-            "visibleForGroups": []
-          }
-        ],
+        "layers": [{
+          "id": "4",
+          "visibleForGroups": []
+        }],
         "visibleForGroups": [],
         "maxResultsPerDataset": 100,
         "anchor": ["", ""],
@@ -370,8 +377,7 @@
     {
       "type": "preset",
       "options": {
-        "presetList": [
-          {
+        "presetList": [{
             "name": "Halmstad",
             "presetUrl": "?m=simpleMapConfig&x=368494.9197547268&y=6282312.7413127115&z=6.7339618545565125&l=1&f=%7B%7D&clean=false"
           },
@@ -410,17 +416,15 @@
         "target": "control",
         "position": "right",
         "instruction": "",
-        "transformations": [
-          {
-            "code": "EPSG:3006",
-            "default": true,
-            "hint": "Sweref99 TM",
-            "title": "Sweref99 TM",
-            "xtitle": "E",
-            "ytitle": "N",
-            "inverseAxis": false
-          }
-        ],
+        "transformations": [{
+          "code": "EPSG:3006",
+          "default": true,
+          "hint": "Sweref99 TM",
+          "title": "Sweref99 TM",
+          "xtitle": "E",
+          "ytitle": "N",
+          "inverseAxis": false
+        }],
         "visibleForGroups": []
       },
       "index": 15
@@ -472,10 +476,10 @@
   ],
   "map": {
     "target": "map",
-    "center": [523718, 6920000],
+    "center": [576357, 6386049],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 0.67,
+    "zoom": 1.33,
     "maxZoom": 8,
     "minZoom": 0,
     "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
