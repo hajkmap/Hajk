@@ -266,7 +266,10 @@ class ToolOptions extends Component {
       for (let i of ids) {
         childRefs["cb_" + i.id] && (childRefs["cb_" + i.id].checked = true);
         childRefs[i.id] && (childRefs[i.id].hidden = false);
-        childRefs[i.id] && (childRefs[i.id].value = i.visibleForGroups.join());
+        childRefs[i.id] &&
+          (childRefs[i.id].value = Array.isArray(i.visibleForGroups)
+            ? i.visibleForGroups.join()
+            : "");
       }
     }
   }
