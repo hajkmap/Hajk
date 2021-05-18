@@ -162,7 +162,8 @@ class WMSLayer {
           params.projection,
           {
             INFO_FORMAT:
-              this.get("serverType") === "arcgis"
+              this.get("serverType") === "arcgis" ||
+              this.get("serverType") === "mapserver"
                 ? "application/geojson"
                 : "application/json",
             feature_count: 100,
