@@ -750,6 +750,7 @@ class Manager extends Component {
             return (
               <form
                 id={`${type}-form`}
+                key={type}
                 method="post"
                 action={url}
                 encType="multipart/form-data"

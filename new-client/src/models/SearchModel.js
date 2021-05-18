@@ -125,11 +125,17 @@ class SearchModel {
         searchSource,
         searchOptions
       );
-      // Push promises to local Array so we can act when all Promises have resolved
-      promises.push(promise);
 
-      // Also, put AbortController to the global collection of controllers, so we can abort searches at any time
-      this.#controllers.push(controller);
+      // If #lookup returned actual Promise and Controller objects, push
+      // them to our array of promises. Important that we don't push empty
+      // values to the array, hence this check!
+      if (promise !== null && controller !== null) {
+        // Push promises to local Array so we can act when all Promises have resolved
+        promises.push(promise);
+
+        // Also, put AbortController to the global collection of controllers, so we can abort searches at any time
+        this.#controllers.push(controller);
+      }
     });
 
     // Start fetching, allow both fulfilled and rejected Promises
@@ -346,7 +352,9 @@ class SearchModel {
     let finalFilters = null;
     let possibleSearchCombinations = [];
 
-    if (searchString !== "") {
+    // In order to do a textual search, we must have both a search phrase
+    // and at least one search field (else there's no way to know where to search!)
+    if (searchString !== "" && searchSource.searchFields.length > 0) {
       if (searchOptions.getPossibleCombinations) {
         possibleSearchCombinations = this.getPossibleSearchCombinations(
           searchString
@@ -414,6 +422,21 @@ class SearchModel {
       finalFilters = comparisonFilters;
     } else if (spatialFilters !== null) {
       finalFilters = spatialFilters;
+    }
+
+    // Before we actually send a fetch request, we must ensure
+    // that it won't be empty, i.e. we must have at least one filter.
+    // The reason where this can be empty is if _user tries to do a
+    // textual search on a layer that lacks searchFields_. Those layers
+    // are still usable (we don't need to defined searchFields for spatial
+    // searches), so admins may have setup a layer like this. And in that
+    // case, it's crucial that we don't do a GetFeature to the WFS that doesn't
+    // contain any filters.
+    // The return value of this method must be an object that contains a promise
+    // and controller property (because the return value is used in a destruction
+    // assignment later on), hence this odd return, instead of just a null value.
+    if (finalFilters === null) {
+      return { promise: null, controller: null };
     }
 
     // Prepare the options for the upcoming request.
