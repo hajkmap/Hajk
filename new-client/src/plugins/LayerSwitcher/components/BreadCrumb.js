@@ -197,7 +197,9 @@ class BreadCrumb extends Component {
           </Grid>
           {this.renderInformativeIcon()}
           <Grid item className={classes.titleContainer}>
-            <Typography>{title}</Typography>
+            <Typography variant="body2" noWrap>
+              {title}
+            </Typography>
           </Grid>
           <Grid item>
             <IconButton size="small" onClick={this.setLayerVisibility(layer)}>
