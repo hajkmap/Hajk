@@ -129,7 +129,10 @@ export default class ConfigMapper {
         hidpi: args.hidpi,
         customRatio: args.customRatio,
         imageFormat: args.imageFormat || "image/png",
-        serverType: args.serverType || "geoserver",
+        serverType:
+          args.serverType === "arcgis"
+            ? "mapserver"
+            : args.serverType || "geoserver",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         attribution: args.attribution,
         searchUrl: args.searchUrl,
