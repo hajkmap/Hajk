@@ -82,7 +82,7 @@ class TimeSliderView extends React.PureComponent {
 
   validateLayers = () => {
     const { layers } = this.props;
-    let layerStatus = {
+    const layerStatus = {
       error: false,
       errorType: "",
       faultyLayers: [],
@@ -469,7 +469,6 @@ class TimeSliderView extends React.PureComponent {
       >
         <Button
           variant="outlined"
-          color="primary"
           onClick={() => {
             this.setState({ settingsDialog: !this.state.settingsDialog });
           }}
@@ -525,7 +524,6 @@ class TimeSliderView extends React.PureComponent {
               >
                 <Button
                   variant="outlined"
-                  color="primary"
                   onClick={() => {
                     this.toggleSlider(!playing);
                   }}
@@ -536,11 +534,7 @@ class TimeSliderView extends React.PureComponent {
             </Grid>
             <Grid item align="center" xs={4}>
               <Tooltip title="Återställ tidslinjen">
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={this.resetTimeSlider}
-                >
+                <Button variant="outlined" onClick={this.resetTimeSlider}>
                   <RotateLeftOutlinedIcon />
                 </Button>
               </Tooltip>

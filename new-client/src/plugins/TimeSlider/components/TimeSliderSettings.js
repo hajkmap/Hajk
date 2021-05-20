@@ -74,7 +74,6 @@ class TimeSliderSettings extends React.PureComponent {
                 <Tooltip title={visible ? "Dölj lager" : "Visa lager"}>
                   <Switch
                     checked={visible}
-                    color="primary"
                     onChange={() => {
                       layer.setVisible(!visible);
                       this.setState({ time: new Date() });
