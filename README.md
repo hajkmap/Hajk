@@ -8,7 +8,9 @@ _An open source web GIS solution based on OpenLayers_
 
 **For developer info, see [CONTRIBUTING.md](https://github.com/hajkmap/Hajk/blob/master/CONTRIBUTING.md).**
 
-For user info, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk)
+## New to Hajk and not a developer?
+
+If you are a new user of Hajk, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk) for more information about Hajk.
 
 ## Live examples
 
