@@ -10,10 +10,21 @@ _An open source web GIS solution based on OpenLayers_
 
 For user info, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk)
 
-## Demo
-For a live demo of the latest version, go to https://hajk-demo.netlify.app/. 
+## Live examples
 
-## Quick start
+The official automatic build of the latest version can be found here: https://hajk-demo.netlify.app/.
+
+For some real-life examples, see the following solutions:
+- [Halmstad municipality's map](https://karta.halmstad.se)
+- [Kungsbacka municipality's map](https://karta.kungsbacka.se)
+- [The Gothenburg Region's map](https://karta.goteborgsregionen.se)
+- [Varberg municipality's map](https://karta.varberg.se)
+- [Uddevalla municipality's map](https://karta.uddevalla.se)
+
+## Quick start (for admins)
+Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).
+
+## Quick start (for developers)
 
 _Note that Hajk consists of 3 applications: the main 'client' (which is the web map front end), 'admin' (which basically is a frontend for client's configuration files) and 'mapservice' (the backend server application which has a REST API)._
 

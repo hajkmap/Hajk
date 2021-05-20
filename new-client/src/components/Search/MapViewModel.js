@@ -8,6 +8,7 @@ import Feature from "ol/Feature";
 import FeatureStyle from "./utils/FeatureStyle";
 import { fromExtent } from "ol/geom/Polygon";
 import { handleClick } from "../../models/Click";
+import { deepMerge } from "utils/DeepMerge";
 
 class MapViewModel {
   constructor(settings) {
@@ -26,6 +27,10 @@ class MapViewModel {
   // An object holding the last highlightInformation.
   // We use this to restore highlight after filter changes.
   lastFeaturesInfo = [];
+
+  refreshFeatureStyle = (options) => {
+    this.featureStyle = new FeatureStyle(deepMerge(this.options, options));
+  };
 
   getDrawStyleSettings = () => {
     const strokeColor = this.options.drawStrokeColor ?? "rgba(74,74,74,0.5)";

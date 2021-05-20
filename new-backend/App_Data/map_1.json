@@ -319,6 +319,7 @@
         "markerImg": "",
         "delayBeforeAutoSearch": 300,
         "searchBarPlaceholder": "Sök...",
+        "autocompleteWildcardAtStart": false,
         "enablePolygonSearch": true,
         "enableRadiusSearch": true,
         "enableSelectSearch": true,
@@ -458,6 +459,68 @@
         "visibleForGroups": []
       },
       "index": 2
+    },
+    {
+      "type": "documenthandler",
+      "index": 0,
+      "options": {
+        "title": "Visa informationsruta",
+        "target": "hidden",
+        "showScrollButtonLimit": 400,
+        "dynamicImportUrls": {
+          "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
+          "customFont": "https://fonts.googleapis.com/css?family=Open+Sans"
+        },
+        "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
+        "customThemeUrl": "/documentHandlerTheme.json",
+        "width": 600,
+        "height": "90vh",
+        "searchImplemented": true,
+        "enablePrint": true,
+        "closePanelOnMapLinkOpen": false,
+        "displayLoadingOnMapLinkOpen": false,
+        "documentOnStart": "",
+        "drawerTitle": "",
+        "drawerButtonTitle": "Meny",
+        "tableOfContents": {
+          "active": false,
+          "expanded": false,
+          "chapterLevelsToShow": 2,
+          "title": "Innehållsförteckning"
+        },
+        "defaultDocumentColorSettings": {
+          "textAreaBackgroundColor": "#ccc",
+          "textAreaDividerColor": "#6A0DAD"
+        },
+        "menuConfig": {
+          "menu": [
+            {
+              "title": "Exempeldokument",
+              "document": "exempeldokument",
+              "color": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Exempeldokument2",
+              "document": "exempeldokument2",
+              "color": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            }
+          ]
+        }
+      }
     }
   ],
   "map": {

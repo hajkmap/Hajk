@@ -10,10 +10,6 @@ import MapViewModel from "./MapViewModel";
 import { withTheme, createMuiTheme } from "@material-ui/core/styles";
 import { deepMerge } from "../../utils/DeepMerge";
 
-const fetchOpts = {
-  credentials: "same-origin",
-};
-
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
     app: PropTypes.object.isRequired,
@@ -51,20 +47,49 @@ class DocumentHandler extends React.PureComponent {
       })
         .init()
         .then((loadedDocumentModel) => {
-          return this.fetchCustomThemeJson().then((customTheme) => {
-            this.setState(
-              {
-                model: loadedDocumentModel,
-                customTheme: customTheme,
-              },
-              () => {
-                this.addDrawerToggleButton();
-              }
-            );
-          });
+          return loadedDocumentModel
+            .fetchCustomThemeJson()
+            .then((customTheme) => {
+              this.setState(
+                {
+                  model: loadedDocumentModel,
+                  customTheme: this.getThemeWithCustomThemeApplied(customTheme),
+                },
+                () => {
+                  this.addDrawerToggleButton();
+                }
+              );
+            });
         });
     });
   }
+
+  componentDidUpdate = (prevProps) => {
+    const { theme } = this.props;
+    //We need to update the palette.type in the nested customTheme with dark/light from the main theme
+    if (prevProps.theme.palette.type !== theme.palette.type) {
+      //Spread to not mutate
+      this.setState((prevState) => {
+        return {
+          customTheme: {
+            ...prevState.customTheme,
+            palette: {
+              ...prevState.customTheme.palette,
+              type: theme.palette.type,
+            },
+          },
+        };
+      });
+    }
+  };
+
+  getThemeWithCustomThemeApplied = (customTheme) => {
+    const { theme } = this.props;
+    if (customTheme.typography) {
+      this.setBottomMarginsForTypographyVariants(customTheme);
+    }
+    return createMuiTheme(deepMerge(theme, customTheme));
+  };
 
   /**
    * @summary Loops customTheme and checks if certain typography-variants have marginBottom set
@@ -83,36 +108,6 @@ class DocumentHandler extends React.PureComponent {
         }
       }
     });
-  };
-
-  warnNoCustomThemeUrl = () => {
-    console.warn(
-      "Could not find valid url for custom theme in documenthandler, check customThemeUrl"
-    );
-  };
-
-  fetchCustomThemeJson = () => {
-    const { options } = this.props;
-
-    if (!options.customThemeUrl) {
-      this.warnNoCustomThemeUrl();
-      return Promise.resolve("");
-    }
-    return fetch(options.customThemeUrl, fetchOpts)
-      .then((res) => {
-        return res.json().then((documentHandlerTheme) => {
-          if (documentHandlerTheme.typography) {
-            this.setBottomMarginsForTypographyVariants(documentHandlerTheme);
-          }
-          return createMuiTheme(
-            deepMerge(this.props.theme, documentHandlerTheme)
-          );
-        });
-      })
-      .catch(() => {
-        this.warnNoCustomThemeUrl();
-        return null;
-      });
   };
 
   dynamicallyImportCustomFont = () => {
@@ -155,7 +150,7 @@ class DocumentHandler extends React.PureComponent {
       { title: "Till huvudmeny för webbplatsen", link: "#panelmenu" },
     ]);
     app.globalObserver.publish("core.addDrawerToggleButton", {
-      value: "menu",
+      value: "documenthandler",
       ButtonIcon: MenuIcon,
       caption: options.drawerButtonTitle || "Meny",
       drawerTitle: options.drawerTitle || "Översiktsplan",
@@ -180,6 +175,7 @@ class DocumentHandler extends React.PureComponent {
       documentName: null,
       headerIdentifier: null,
     });
+    this.localObserver.publish("document-window-closed");
     return;
   };
 

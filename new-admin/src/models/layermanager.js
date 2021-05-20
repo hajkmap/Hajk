@@ -25,6 +25,7 @@ import { Model } from "backbone";
 import WMSCapabilities from "ol/format/WMSCapabilities";
 import $ from "jquery";
 import { prepareProxyUrl } from "../utils/ProxyHelper";
+import { hfetch } from "utils/FetchWrapper";
 
 var manager = Model.extend({
   defaults: {
@@ -51,7 +52,7 @@ var manager = Model.extend({
             this.get("config").url_map + "/" + data[i],
             this.get("config").url_proxy
           );
-          fetch(url).then((res) => {
+          hfetch(url).then((res) => {
             // JSONify, filter just for one tool (layerswitcher), and then use first element (it's an array…)
             res.json().then((d) => {
               let layerswitcherConfig = d.tools.filter(
@@ -170,10 +171,9 @@ var manager = Model.extend({
 
   addLayer: function (layer, callback) {
     var url = this.getUrl(layer);
-    fetch(url, {
+    hfetch(url, {
       method: "POST",
       cache: "no-cache",
-      credentials: "same-origin",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",

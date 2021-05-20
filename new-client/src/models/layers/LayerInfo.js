@@ -8,6 +8,9 @@ export default class LayerInfo {
     this.infoUrl = properties.infoUrl;
     this.infoUrlText = properties.infoUrlText;
     this.infoVisible = properties.infoVisible;
+    this.infoClickSortType = properties.infoClickSortType;
+    this.infoClickSortDesc = properties.infoClickSortDesc;
+    this.infoClickSortProperty = properties.infoClickSortProperty;
     this.information = properties.information;
     this.legend = properties.legend;
     this.legendIcon = properties.legendIcon;

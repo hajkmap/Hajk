@@ -353,6 +353,8 @@ class Page extends Component {
         return (
           <Toolbar
             ref="toolbar"
+            field={attr.field}
+            geotype={attr.geotype}
             serviceConfig={this.props.serviceConfig}
             enabled={true}
             model={this.props.model}
@@ -529,6 +531,9 @@ class Page extends Component {
         color="primary"
         className={classes.buttonLeft}
         onClick={() => {
+          if (typeof this.refs.toolbar !== "undefined") {
+            this.refs.toolbar.storeValues();
+          }
           onPrevPage();
         }}
       >
@@ -542,6 +547,9 @@ class Page extends Component {
         color="primary"
         className={classes.buttonRight}
         onClick={() => {
+          if (typeof this.refs.toolbar !== "undefined") {
+            this.refs.toolbar.storeValues();
+          }
           onNextPage();
         }}
       >

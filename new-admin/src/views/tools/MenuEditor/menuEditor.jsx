@@ -7,6 +7,8 @@ import Modal from "@material-ui/core/Modal";
 import DragHandle from "@material-ui/icons/DragHandle";
 import TreeRow from "./treerow.jsx";
 import { withStyles } from "@material-ui/core/styles";
+import { SketchPicker } from "react-color";
+
 import { Typography } from "@material-ui/core";
 
 import {
@@ -31,13 +33,27 @@ const styles = (theme) => ({
   warningText: {
     color: theme.palette.error.main,
   },
+  textAreaSettings: {
+    position: "relative",
+  },
+  disabledDiv: {
+    position: "absolute",
+    top: 0,
+    backgroundColor: "white",
+    opacity: 0.5,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    zIndex: 10,
+  },
 });
 
 class ToolOptions extends Component {
   state = {
+    textAreacolorpickerEnabled: false,
     active: false,
     index: 0,
-    title: "Visa informationsruta",
+    title: "Dokumenthanterare",
     target: "hidden",
     showScrollButtonLimit: 400,
     dynamicImportUrls: {
@@ -45,7 +61,7 @@ class ToolOptions extends Component {
       customFont: "https://fonts.googleapis.com/css?family=Open+Sans",
     },
     width: 600,
-    height: "90vh",
+    height: "",
     menuConfig: {
       menu: [],
     },
@@ -67,8 +83,8 @@ class ToolOptions extends Component {
       title: "Innehållsförteckning",
     },
     defaultDocumentColorSettings: {
-      textAreaBackgroundColor: "#ccc",
-      textAreaDividerColor: "#6A0DAD",
+      textAreaBackgroundColor: "",
+      textAreaDividerColor: "",
     },
   };
   treeKeys = [];
@@ -87,6 +103,15 @@ class ToolOptions extends Component {
     });
   }
 
+  handleColorChange = (target, color) => {
+    this.setState((prevState) => ({
+      defaultDocumentColorSettings: {
+        ...prevState.defaultDocumentColorSettings,
+        [target]: color,
+      },
+    }));
+  };
+
   getMenuEditorModel = () => {
     return new MenuEditorModel({
       config: this.props.model.get("config"),
@@ -100,6 +125,11 @@ class ToolOptions extends Component {
     var tool = this.getTool();
     if (tool) {
       this.setState({
+        textAreacolorpickerEnabled:
+          tool.options.defaultDocumentColorSettings.textAreaBackgroundColor ||
+          tool.options.defaultDocumentColorSettings.textAreaDividerColor
+            ? true
+            : false,
         active: true,
         index: tool.index,
         target: tool.options.target,
@@ -117,9 +147,14 @@ class ToolOptions extends Component {
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
-        displayLoadingOnMapLinkOpen: tool.options.displayLoadingOnMapLinkOpen,
+        displayLoadingOnMapLinkOpen:
+          tool.options.displayLoadingOnMapLinkOpen || false,
         tableOfContents: tool.options.tableOfContents,
-        defaultDocumentColorSettings: tool.options.defaultDocumentColorSettings,
+        defaultDocumentColorSettings: tool.options
+          .defaultDocumentColorSettings || {
+          textAreaBackgroundColor: "",
+          textAreaDividerColor: "",
+        },
       });
     } else {
       this.setState({
@@ -157,6 +192,19 @@ class ToolOptions extends Component {
         .filter((tool) => tool.type !== this.type),
     });
   }
+
+  toggleTextAreaColorpickers = () => {
+    //React batches multiple setState in eventhandler so this should be fine
+    this.setState((prevState) => {
+      if (prevState.textAreacolorpickerEnabled) {
+        this.handleColorChange("textAreaBackgroundColor", "");
+        this.handleColorChange("textAreaDividerColor", "");
+      }
+      return {
+        textAreacolorpickerEnabled: !prevState.textAreacolorpickerEnabled,
+      };
+    });
+  };
 
   replace(tool) {
     this.props.model.get("toolConfig").forEach((t) => {
@@ -548,7 +596,7 @@ class ToolOptions extends Component {
     });
 
     return (
-      <div>
+      <div style={{ marginBottom: "10px" }}>
         <form>
           <p>
             <ColorButtonBlue
@@ -589,6 +637,49 @@ class ToolOptions extends Component {
           </p>
           <div className="separator">Generella inställningar</div>
           <div>
+            <label htmlFor="width">
+              Fönsterbredd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
+              />
+            </label>
+            <input
+              id="width"
+              name="width"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.width}
+            />
+          </div>
+          <div>
+            <label htmlFor="height">
+              Fönsterhöjd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+              />
+            </label>
+            <input
+              id="height"
+              name="height"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.height}
+            />
+          </div>
+
+          <div>
             <label htmlFor="documentOnStart">
               Startdokument{" "}
               <i
@@ -626,7 +717,6 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-
           <div>
             <label htmlFor="drawerButtonTitle">
               Knapptitel{" "}
@@ -646,7 +736,6 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-
           <div>
             <input
               id="searchImplemented"
@@ -660,7 +749,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="searchImplemented">Sökning aktiverad</label>
           </div>
-
           <div>
             <input
               id="enablePrint"
@@ -674,7 +762,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="enablePrint">Utskrift aktiverad</label>
           </div>
-
           <div>
             <input
               id="closePanelOnMapLinkOpen"
@@ -690,7 +777,6 @@ class ToolOptions extends Component {
               Stäng dokumentfönster vid klick på kartlänk
             </label>
           </div>
-
           <div>
             <input
               id="displayLoadingOnMapLinkOpen"
@@ -709,9 +795,7 @@ class ToolOptions extends Component {
               Visa 'Kartan laddar' dialog vid klick på kartlänk
             </label>
           </div>
-
           <div className="separator">Innehållsförteckning</div>
-
           <div>
             <input
               id="tableOfContentsActive"
@@ -732,7 +816,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="tableOfContentsActive">Aktiverad</label>
           </div>
-
           <div>
             <input
               id="tableOfContentsExpanded"
@@ -753,7 +836,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="tableOfContentsExpanded">Expanderad</label>
           </div>
-
           <div>
             <label htmlFor="tableOfContentsTitle">
               Titel{" "}
@@ -808,6 +890,17 @@ class ToolOptions extends Component {
           </div>
           <div className="separator">Faktaruta</div>
           <div>
+            <input
+              id="override_textarea_color"
+              name="override_textarea_color"
+              type="checkbox"
+              onChange={this.toggleTextAreaColorpickers}
+              checked={this.state.textAreacolorpickerEnabled}
+            />
+            &nbsp;
+            <label htmlFor="override_textarea_color">Aktiverad</label>
+          </div>
+          <div>
             <p className={classes.warningText}>
               <b>
                 Vid användning av dessa inställningar riskeras dark/light-mode
@@ -815,62 +908,57 @@ class ToolOptions extends Component {
               </b>
             </p>
           </div>
-          <div>
-            <label htmlFor="textAreaBackgroundColor">
-              Bakgrundsfärg{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Färg till textområde bakgrund"
-              />
-            </label>
-            <input
-              id="textAreaBackgroundColor"
-              value={
-                this.state.defaultDocumentColorSettings.textAreaBackgroundColor
-              }
-              type="text"
-              name="textAreaBackgroundColor"
-              onChange={(e) => {
-                const value = e.target.value;
-                this.setState((prevState) => ({
-                  defaultDocumentColorSettings: {
-                    ...prevState.defaultDocumentColorSettings,
-                    textAreaBackgroundColor: value,
-                  },
-                }));
-              }}
-            />
+          <div className={`${classes.textAreaSettings} clearfix`}>
+            {!this.state.textAreacolorpickerEnabled && (
+              //Add div on top of colorpickers to make them look disabled.
+              <div className={classes.disabledDiv}></div>
+            )}
+            <span className="pull-left">
+              <div>
+                <label className="long-label" htmlFor="textAreaBackgroundColor">
+                  Bakgrundsfärg
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Färg till textområdets bakgrund"
+                  />
+                </label>
+              </div>
+              <div>
+                <SketchPicker
+                  color={
+                    this.state.defaultDocumentColorSettings
+                      .textAreaBackgroundColor
+                  }
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("textAreaBackgroundColor", color.hex)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <label htmlFor="textAreaDividerColor">
+                  Kantfärg{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Färg till textområdets skiljelinje"
+                  />
+                </label>
+              </div>
+              <div>
+                <SketchPicker
+                  color={
+                    this.state.defaultDocumentColorSettings.textAreaDividerColor
+                  }
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("textAreaDividerColor", color.hex)
+                  }
+                />
+              </div>
+            </span>
           </div>
-
-          <div>
-            <label htmlFor="textAreaDividerColor">
-              Kantfärg{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Färg till textområde skiljelinje"
-              />
-            </label>
-            <input
-              id="textAreaDividerColor"
-              value={
-                this.state.defaultDocumentColorSettings.textAreaDividerColor
-              }
-              type="text"
-              name="textAreaDividerColor"
-              onChange={(e) => {
-                const value = e.target.value;
-                this.setState((prevState) => ({
-                  defaultDocumentColorSettings: {
-                    ...prevState.defaultDocumentColorSettings,
-                    textAreaDividerColor: value,
-                  },
-                }));
-              }}
-            />
-          </div>
-
           <section className="tab-pane active">
             <Modal
               style={{
@@ -886,7 +974,8 @@ class ToolOptions extends Component {
                   <Grid xs={12} item>
                     <Tree
                       blockNode
-                      height="80vh"
+                      height={window.innerHeight - 200}
+                      virtual={false} //Makes scroll work when drag
                       switcherIcon={<></>}
                       onDrop={this.onDropNode}
                       expandedKeys={expandedKeys}

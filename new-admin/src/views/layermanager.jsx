@@ -252,6 +252,9 @@ class Manager extends Component {
           opacity: layer.opacity,
           minZoom: layer.minZoom,
           maxZoom: layer.maxZoom,
+          infoClickSortProperty: layer.infoClickSortProperty || "",
+          infoClickSortType: layer.infoClickSortType || "string",
+          infoClickSortDesc: layer.infoClickSortDesc ?? true,
           sldUrl: layer.sldUrl,
           sldText: layer.sldText,
           sldStyle: layer.sldStyle,
@@ -309,6 +312,11 @@ class Manager extends Component {
           owner: layer.owner,
           url: layer.url,
           opacity: layer.opacity,
+          minZoom: layer.minZoom,
+          maxZoom: layer.maxZoom,
+          infoClickSortProperty: layer.infoClickSortProperty || "",
+          infoClickSortType: layer.infoClickSortType || "string",
+          infoClickSortDesc: layer.infoClickSortDesc ?? true,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
           hidpi: layer.hidpi,
@@ -377,6 +385,8 @@ class Manager extends Component {
           timeSliderVisible: layer.timeSliderVisible,
           timeSliderStart: layer.timeSliderStart,
           timeSliderEnd: layer.timeSliderEnd,
+          minZoom: layer.minZoom,
+          maxZoom: layer.maxZoom,
         });
         setTimeout(() => {
           this.refs["WMTSLayerForm"].validate();
@@ -749,6 +759,7 @@ class Manager extends Component {
             return (
               <form
                 id={`${type}-form`}
+                key={type}
                 method="post"
                 action={url}
                 encType="multipart/form-data"

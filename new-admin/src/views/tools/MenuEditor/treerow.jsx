@@ -14,7 +14,6 @@ import WarningModal from "./warningModal.jsx";
 const getTextField = (value, onChangeFunction, variant) => {
   return (
     <TextField
-      id="icon-picker"
       label={""}
       type="icon"
       variant={variant}

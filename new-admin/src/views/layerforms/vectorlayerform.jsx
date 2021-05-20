@@ -58,6 +58,7 @@ class VectorLayerForm extends React.Component {
     opacity: 1,
     projection: "",
     queryable: true,
+    hideExpandArrow: false,
     sldStyle: "Default Styler",
     sldText: "",
     sldUrl: "",
@@ -139,6 +140,7 @@ class VectorLayerForm extends React.Component {
       opacity: this.getValue("opacity"),
       projection: this.getValue("projection"),
       queryable: this.getValue("queryable"),
+      hideExpandArrow: this.getValue("hideExpandArrow"),
       sldStyle: this.getValue("sldStyle"),
       sldText: this.getValue("sldText"),
       sldUrl: this.getValue("sldUrl"),
@@ -166,6 +168,7 @@ class VectorLayerForm extends React.Component {
     if (fieldName === "filterable") value = input.checked;
     if (fieldName === "infoVisible") value = input.checked;
     if (fieldName === "timeSliderVisible") value = input.checked;
+    if (fieldName === "hideExpandArrow") value = input.checked;
 
     return value;
   }
@@ -284,11 +287,13 @@ class VectorLayerForm extends React.Component {
       if (Array.isArray(capabilities) && capabilities.length > 0) {
         projection = capabilities[0].projection;
       }
+
       this.setState({
         capabilities: capabilities,
         projection: this.state.projection || projection || "",
         legend: this.state.legend || capabilities.legend || "",
         legendIcon: this.state.legendIcon || "",
+        hideExpandArrow: capabilities.hideExpandArrow ?? false,
         load: false,
       });
 
@@ -552,6 +557,18 @@ class VectorLayerForm extends React.Component {
           </div>
         </div>
         <div>
+          <label>Stäng av möjlighet att expandera</label>
+          <input
+            type="checkbox"
+            ref="input_hideExpandArrow"
+            id="hideExpandArrow"
+            onChange={(e) => {
+              this.setState({ hideExpandArrow: e.target.checked });
+            }}
+            checked={this.state.hideExpandArrow}
+          />
+        </div>
+        <div>
           <label>Visningsnamn*</label>
           <input
             type="text"
@@ -604,7 +621,7 @@ class VectorLayerForm extends React.Component {
         <div>
           <label>
             Min zoom{" "}
-            <abbr title="Lägsta zoomnivå som krävs för att lagret ska vara synligt. '-1' betyder att lagret är synligt från lägsta zoomnivå. Se även nästa inställning.">
+            <abbr title="Lägsta zoomnivå där lagret visas. OBS! Om man vill att lagret ska visas för skala 1:10 000, 1:5 000, 1:2 000 osv måste man ange den zoomnivå som skalsteget ovanför skala 1:10 000 har (t ex 1:20 000). Om 5 motsvarar 1:10 000 ska man då ange 4. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den lägsta zoomnivån. Se även inställning för Max zoom.">
               (?)
             </abbr>
           </label>
@@ -625,7 +642,7 @@ class VectorLayerForm extends React.Component {
         <div>
           <label>
             Max zoom{" "}
-            <abbr title="Högsta zoomnivå vid vilket lagret visas. '-1' betyder att lagret är synligt hela vägen till den sista zoomnivån. Se även nästa inställning.">
+            <abbr title="Högsta zoomnivå vid vilket lagret visas. Om man t ex anger 5 för skala 1:10 000 kommer lagret att visas för skala 1:10 000 men inte för skala 1:5000. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den sista zoomnivån. Se även inställning för Min zoom.">
               (?)
             </abbr>
           </label>

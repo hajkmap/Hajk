@@ -134,8 +134,8 @@ class ConfigServiceV2 {
     // Helper - recursively extract IDs of layers from all groups
     const getLayerIdsFromGroup = (group) => {
       return [
-        ...group.layers.map((l) => l.id),
-        ...group.groups.flatMap((g) => getLayerIdsFromGroup(g)),
+        ...(group.layers?.map((l) => l.id) || []),
+        ...(group.groups?.flatMap((g) => getLayerIdsFromGroup(g)) || []),
       ];
     };
 
@@ -163,8 +163,24 @@ class ConfigServiceV2 {
 
     // Grab layers from Edit
     const editOptions = mapConfig.tools.find((t) => t.type === "edit")?.options;
-    // This one is different from the others: activeServices is already an array of IDs
-    const editLayerIds = editOptions?.activeServices || [];
+    let editLayerIds = [];
+
+    if (typeof editOptions != "undefined") {
+      if (
+        editOptions.activeServices &&
+        editOptions.activeServices.length !== 0
+      ) {
+        if (
+          typeof editOptions.activeServices[0].visibleForGroups === "undefined"
+        ) {
+          // if visibleForGroups is undefined the activeServices is an array of id's
+          editLayerIds = editOptions?.activeServices.map((as) => as) || [];
+        } else {
+          // else the activeServices is an array of objects with "id" and "visibleForGroups"
+          editLayerIds = editOptions?.activeServices.map((as) => as.id) || [];
+        }
+      }
+    }
 
     // We utilize Set to get rid of potential duplicates in the final list
     const uniqueLayerIds = new Set([
@@ -315,6 +331,7 @@ class ConfigServiceV2 {
    *  - Part 1: tools (access to each of them can be restricted)
    *  - Part 2: groups and layers (in LayerSwitcher's options)
    *  - Part 3: WFS search services (in Search's options)
+   *  - Part 4: WFST edit services (in Edit's options)
    *
    * @param {*} mapConfig
    * @param {*} user
@@ -325,25 +342,32 @@ class ConfigServiceV2 {
     // Helper function that will call itself recursively.
     // Necessary to handle the nested tree of groups from LayerSwitcher config.
     const recursivelyWashGroups = async (groups) => {
-      // Expect that we got an array of objects, and we must take
+      // Make sure that we can iterate 'groups', if not, exit.
+      if (Symbol.iterator in Object(groups) === false) return [];
+
+      // Looks like we've got an array and we must take
       // a look into each one of them separately.
       for (const group of groups) {
         // Notice that we modify the groups array in place!
         // Each group can have layers, take care of them. Remove any layers
         // to which user lacks access.
-        group.layers = await asyncFilter(
-          // Overwrite the previous value of layers property with return value
-          group.layers, // Array to be modified
-          async (layer) =>
-            await this.filterByGroupVisibility(
-              layer.visibleForGroups,
-              user,
-              `layer "${layer.id}"`
-            )
-        );
+        if (Symbol.iterator in Object(group.layers)) {
+          group.layers = await asyncFilter(
+            // Overwrite the previous value of layers property with return value
+            group.layers, // Array to be modified
+            async (layer) =>
+              await this.filterByGroupVisibility(
+                layer.visibleForGroups,
+                user,
+                `layer "${layer.id}"`
+              )
+          );
+        }
 
         // Now, recursively take care of groups
-        group.groups = await recursivelyWashGroups(group.groups);
+        if (Symbol.iterator in Object(group.groups)) {
+          group.groups = await recursivelyWashGroups(group.groups);
+        }
       }
 
       return groups;
@@ -408,6 +432,26 @@ class ConfigServiceV2 {
           )
       );
       mapConfig.tools[searchIndexInTools].options.layers = layers;
+    }
+
+    // Part 4: Wash WFST edit services
+    const editIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "edit"
+    );
+
+    if (editIndexInTools !== -1) {
+      let { activeServices } = mapConfig.tools[editIndexInTools].options;
+      // Wash WFST edit layers
+      activeServices = await asyncFilter(
+        activeServices, // layers in edit tool are named activeServices
+        async (layer) =>
+          await this.filterByGroupVisibility(
+            layer.visibleForGroups,
+            user,
+            `WFST edit layer "${layer.id}"`
+          )
+      );
+      mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
     }
 
     return mapConfig;

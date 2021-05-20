@@ -3,10 +3,7 @@ import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 //import GML from "ol/format/GML";
 import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
-
-const fetchConfig = {
-  credentials: "same-origin",
-};
+import { hfetch } from "utils/FetchWrapper";
 
 function query(map, layer, evt) {
   const coordinate = evt.coordinate;
@@ -37,18 +34,101 @@ function query(map, layer, evt) {
     const url = layer
       .getSource()
       .getFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
-    return fetch(url, fetchConfig);
+    return hfetch(url);
   } else {
     return false;
   }
 }
 
+function getSortParser(sortType) {
+  if (sortType === "number") {
+    return parseInt;
+  } else if (sortType === "string") {
+    return (a) => {
+      return a ? a.trim() : "";
+    };
+  } else {
+    return (a) => {
+      return a;
+    };
+  }
+}
+
+function getSortMethod(options) {
+  if (options.type === "number") {
+    return (a, b) => {
+      return (
+        (options.desc ? -1 : 1) *
+        (options.parser(a.getProperties()[options.prop]) -
+          options.parser(b.getProperties()[options.prop]))
+      );
+    };
+  } else {
+    return (a, b) => {
+      return (
+        (options.desc ? -1 : 1) *
+        options
+          .parser(a.getProperties()[options.prop])
+          .localeCompare(options.parser(b.getProperties()[options.prop]))
+      );
+    };
+  }
+}
+
+function sortFeatures(layer, features) {
+  if (!features || features.length <= 1) {
+    return;
+  }
+  const layerInfo = layer.getProperties().layerInfo;
+  if (!layerInfo.infoClickSortProperty) {
+    return;
+  }
+
+  const sortType = layerInfo.infoClickSortType || "string";
+  const sortOptions = {
+    type: sortType,
+    desc: layerInfo.infoClickSortDesc ?? true,
+    prop: layerInfo.infoClickSortProperty.trim(),
+    parser: getSortParser(sortType),
+  };
+
+  features.sort(getSortMethod(sortOptions));
+}
+
+// Function similar to GeoJSON().readFeatures, with the subtle difference that we set an
+// id if it is missing on the parsed feature. The missing id occurs when parsing features from
+// arcGis for some reason.
+function readJsonFeatures(jsonData) {
+  const parser = new GeoJSON();
+  const parsedFeatures = [];
+  // jsonData will always be a featureCollection, hence we must map over all
+  // features in the collection.
+  jsonData.features.map((jsonFeature) => {
+    // Lets parse the feature...
+    const parsedJsonFeature = parser.readFeature(jsonFeature);
+    // And check if we have an id...
+    if (!parsedJsonFeature.getId()) {
+      // If we don't, we set the id to the layerName, and a random id
+      // so that featureInfo knows when we clicked a new feature in
+      // the same layer.
+      parsedJsonFeature.setId(
+        `${jsonFeature.layerName}.${parsedJsonFeature.ol_uid}`
+      );
+    }
+    // Push the feature to the array of parsed features
+    return parsedFeatures.push(parsedJsonFeature);
+  });
+  // And return it
+  return parsedFeatures;
+}
+
 function getFeaturesFromJson(response, jsonData) {
-  let parsed = new GeoJSON().readFeatures(jsonData);
-  if (parsed.length > 0) {
+  const parsed = readJsonFeatures(jsonData);
+  if (parsed && parsed.length > 0) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
+    sortFeatures(response.layer, parsed);
     return parsed;
   } else {
     return [];
@@ -59,10 +139,11 @@ function getFeaturesFromGml(response, text) {
   let wmsGetFeatureInfo = new WMSGetFeatureInfo();
   //let doc = new DOMParser().parseFromString(text, "text/xml");
   let parsed = wmsGetFeatureInfo.readFeatures(text);
-  if (parsed.length > 0) {
+  if (parsed && parsed.length > 0) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
+    sortFeatures(response.layer, parsed);
     return parsed;
   } else {
     return [];

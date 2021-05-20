@@ -168,6 +168,9 @@ namespace MapService.Models.Config
         public string legendIcon { get; set; }
         public int    maxZoom { get; set; }
         public int    minZoom { get; set; }
+        public string infoClickSortType { get; set; }
+        public bool   infoClickSortDesc { get; set; }
+        public string infoClickSortProperty { get; set; }        
         public double opacity { get; set; }
         public string projection { get; set; }
         public bool   queryable { get; set; }
@@ -177,6 +180,8 @@ namespace MapService.Models.Config
         public string url { get; set; }
         public string version { get; set; }
         public bool   visibleAtStart { get; set; }
+
+        public bool hideExpandArrow { get; set; }
         public int?   zIndex { get; set; }
 
     }

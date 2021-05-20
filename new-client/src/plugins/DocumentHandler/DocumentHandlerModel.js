@@ -17,6 +17,7 @@ import {
 } from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
+import { hfetch } from "utils/FetchWrapper";
 
 /**
  * @summary  DocumentHandler model that doesn't do much.
@@ -27,10 +28,6 @@ import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
  *
  * @class DocumentHandlerModel
  */
-
-const fetchConfig = {
-  credentials: "same-origin",
-};
 
 export default class DocumentHandlerModel {
   internalId = 0;
@@ -56,6 +53,8 @@ export default class DocumentHandlerModel {
         this.documentSearchmodel = new DocumentSearchModel({
           allDocuments: allDocuments,
           globalSearchModel: this.app.searchModel,
+          app: this.app,
+          localObserver: this.localObserver,
         });
         this.settings.resolveSearchInterface(
           this.documentSearchmodel.implementSearchInterface()
@@ -63,6 +62,27 @@ export default class DocumentHandlerModel {
       })
       .then(() => {
         return this;
+      });
+  };
+
+  warnNoCustomThemeUrl = () => {
+    console.warn(
+      "Could not find valid url for custom theme in documenthandler, check customThemeUrl"
+    );
+  };
+
+  fetchCustomThemeJson = () => {
+    if (!this.options.customThemeUrl) {
+      this.warnNoCustomThemeUrl();
+      return Promise.resolve("");
+    }
+    return hfetch(this.options.customThemeUrl)
+      .then((res) => {
+        return res.json();
+      })
+      .catch(() => {
+        this.warnNoCustomThemeUrl();
+        return null;
       });
   };
 
@@ -202,9 +222,8 @@ export default class DocumentHandlerModel {
   async fetchJsonDocument(title) {
     let response;
     try {
-      response = await fetch(
-        `${this.mapServiceUrl}/informative/load/${title}`,
-        fetchConfig
+      response = await hfetch(
+        `${this.mapServiceUrl}/informative/load/${title}`
       );
       const text = await response.text();
       if (text === "File not found") {

@@ -30,6 +30,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style.js";
 import SnapHelper from "./SnapHelper";
+import { hfetch } from "utils/FetchWrapper";
 
 class AppModel {
   registerWindowPlugin(windowComponent) {
@@ -70,6 +71,7 @@ class AppModel {
     this.layersFromParams = [];
     this.cqlFiltersFromParams = {};
     register(this.coordinateSystemLoader.getProj4());
+    this.hfetch = hfetch;
   }
   /**
    * Add plugin to this tools property of loaded plugins.
@@ -208,10 +210,19 @@ class AppModel {
         zoom: config.map.zoom,
       }),
     });
-    // FIXME: Remove?
-    setTimeout(() => {
-      this.map.updateSize();
-    }, 0);
+
+    // Create throttled zoomEnd event
+    let currentZoom = this.map.getView().getZoom();
+
+    this.map.on("moveend", (e) => {
+      // using moveend to create a throttled zoomEnd event
+      // instead of using change:resolution to minimize events being fired.
+      const newZoom = this.map.getView().getZoom();
+      if (currentZoom !== newZoom) {
+        this.globalObserver.publish("core.zoomEnd", { zoom: newZoom });
+        currentZoom = newZoom;
+      }
+    });
 
     // Add Snap Helper to the Map
     this.map.snapHelper = new SnapHelper(this);
@@ -564,9 +575,9 @@ class AppModel {
     return typeof v === "string" && v.trim().length > 0 ? v : undefined;
   }
 
-  overrideGlobalSearchConfig(searchTool, data) {
-    var configSpecificSearchLayers = searchTool.options.layers;
-    var searchLayers = data.wfslayers.filter((layer) => {
+  overrideGlobalSearchConfig(searchTool, wfslayers) {
+    const configSpecificSearchLayers = searchTool.options.layers;
+    const searchLayers = wfslayers.filter((layer) => {
       if (configSpecificSearchLayers.find((x) => x.id === layer.id)) {
         return layer;
       } else {
@@ -574,6 +585,18 @@ class AppModel {
       }
     });
     return searchLayers;
+  }
+
+  overrideGlobalEditConfig(editTool, wfstlayers) {
+    const configSpecificEditLayers = editTool.options.activeServices;
+    const editLayers = wfstlayers.filter((layer) => {
+      if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
+        return layer;
+      } else {
+        return undefined;
+      }
+    });
+    return editLayers;
   }
 
   translateConfig() {
@@ -624,24 +647,91 @@ class AppModel {
     }
 
     if (searchTool) {
-      if (searchTool.options.layers === null) {
-        searchTool.options.sources = layers.wfslayers;
-      } else {
-        if (
-          searchTool.options.layers &&
-          searchTool.options.layers.length !== 0
-        ) {
-          let wfslayers = this.overrideGlobalSearchConfig(searchTool, layers);
-          searchTool.options.sources = wfslayers;
-          layers.wfslayers = wfslayers;
-        } else {
-          searchTool.options.sources = layers.wfslayers;
+      // Take a look at all available wfslayers in layers repository,
+      // but let the search tool only see those that are specified in searchTool.options
+      const wfslayers = this.overrideGlobalSearchConfig(
+        searchTool,
+        layers.wfslayers
+      );
+
+      // See if admin wants to expose any WMS layers. selectedSources will
+      // in that case be an array that will hold the IDs of corresponding layers
+      // (that can be found in our layers.wmslayers array). In there, a properly
+      // configured WMS layer that is to be searchable will have certain search-related
+      // settings active (such as name of the geometry column or URL to the WFS service).
+      const wmslayers = searchTool.options.selectedSources?.flatMap(
+        (wmslayerId) => {
+          // Find the corresponding layer
+          const layer = layers.wmslayers.find((l) => l.id === wmslayerId);
+
+          // Look into the layersInfo array - it will contain sublayers. We must
+          // expose each one of them as a WFS service.
+          return layer.layersInfo.map((sl) => {
+            return {
+              id: sl.id,
+              caption: sl.caption,
+              url: sl.searchUrl || layer.url,
+              layers: [sl.id],
+              searchFields:
+                typeof sl.searchPropertyName === "string"
+                  ? sl.searchPropertyName.split(",")
+                  : [],
+              infobox: sl.infobox || "",
+              aliasDict: "",
+              displayFields:
+                typeof sl.searchDisplayName === "string"
+                  ? sl.searchDisplayName.split(",")
+                  : [],
+              geometryField: sl.searchGeometryField || "geom",
+              outputFormat: sl.searchOutputFormat || "GML3",
+            };
+          });
         }
-      }
+      );
+
+      // Spread the WMS search layers onto the array with WFS search sources,
+      // from now on they're equal to our code.
+      Array.isArray(wmslayers) && wfslayers.push(...wmslayers);
+
+      searchTool.options.sources = wfslayers;
     }
 
+    // This is for backwards compatibility prior to adding locking WFST edit layers with AD.
+    // This code handles if activeServices does not have an object with "id", "visibleForGroups"
     if (editTool) {
-      editTool.options.sources = layers.wfstlayers;
+      if (editTool.options.activeServices === null) {
+        editTool.options.sources = [];
+      } else {
+        if (
+          editTool.options.activeServices &&
+          editTool.options.activeServices.length !== 0
+        ) {
+          if (
+            typeof editTool.options.activeServices[0].visibleForGroups ===
+            "undefined"
+          ) {
+            // If activeService does not have an object with "id", "visibleForGroups", add it
+            let as = [];
+            for (let i = 0; i < editTool.options.activeServices.length; i++) {
+              let service = {
+                id: editTool.options.activeServices[i],
+                visibleForGroups: [],
+              };
+              as.push(service);
+            }
+            editTool.options.activeServices = as;
+          }
+
+          let wfstlayers = this.overrideGlobalEditConfig(
+            editTool,
+            layers.wfstlayers
+          );
+          editTool.options.sources = wfstlayers;
+          layers.wfstlayers = wfstlayers;
+        } else {
+          editTool.options.sources = [];
+        }
+      }
     }
 
     return this.mergeConfig(this.config.mapConfig, this.parseQueryParams());

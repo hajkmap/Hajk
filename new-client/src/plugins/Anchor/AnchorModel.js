@@ -1,3 +1,4 @@
+import { isValidLayerId } from "../../utils/Validator";
 class AnchorModel {
   constructor(settings) {
     this.app = settings.app;
@@ -51,12 +52,14 @@ class AnchorModel {
     return this.map
       .getLayers()
       .getArray()
-      .filter(
-        (layer) =>
-          layer.getVisible() &&
+      .filter((layer) => {
+        return (
+          // We consider a layer to be visible only if…
+          layer.getVisible() && // …it's visible…
           layer.getProperties().name &&
-          !Number.isNaN(parseInt(layer.getProperties().name))
-      )
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
+        );
+      })
       .map((layer) => layer.getProperties().name)
       .join(",");
   }

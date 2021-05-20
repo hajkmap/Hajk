@@ -7,7 +7,9 @@ import { withStyles } from "@material-ui/core/styles";
 
 const styles = (theme) => ({
   sliderContainer: {
-    overflow: "hidden",
+    display: "flex",
+    flexFlow: "row nowrap",
+    alignItems: "center",
   },
   icon: {
     cursor: "pointer",
@@ -23,12 +25,15 @@ const styles = (theme) => ({
     fontWeight: 500,
   },
   sliderItem: {
-    float: "left",
-    width: "120px",
-    padding: "10px",
+    padding: "0 16px",
+    flex: "1 1 auto",
+    "& > span": {
+      top: "4px",
+    },
   },
   sliderText: {
-    float: "left",
+    flex: "0 1 auto",
+    minWidth: "40px",
   },
 });
 
@@ -61,7 +66,7 @@ class LayerSettings extends React.PureComponent {
       <div className={classes.sliderContainer}>
         <div className={classes.sliderText}>
           <Typography className={classes.subtitle2} variant="subtitle2">
-            Transparens:
+            Opacitet:
           </Typography>
         </div>
         <div className={classes.sliderItem}>
@@ -69,13 +74,13 @@ class LayerSettings extends React.PureComponent {
             value={opacityValue}
             min={0}
             max={1}
-            step={0.1}
+            step={0.05}
             onChange={this.opacitySliderChanged}
           />
         </div>
         <div className={classes.sliderText}>
           <Typography className={classes.subtitle2} variant="subtitle2">
-            {Math.trunc(100 * (1 - opacityValue).toFixed(1))} %
+            {Math.trunc(100 * opacityValue.toFixed(2))} %
           </Typography>
         </div>
       </div>
