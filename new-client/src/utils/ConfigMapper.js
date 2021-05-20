@@ -162,6 +162,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
 
@@ -221,6 +223,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
     return config;
@@ -303,6 +307,8 @@ export default class ConfigMapper {
         sldUrl: args.sldUrl,
         url: args.url,
         visible: args.visibleAtStart,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
 
@@ -353,6 +359,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
 
