@@ -7,7 +7,6 @@ import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import ScrollMenu from "react-horizontal-scrolling-menu";
-import "./BreadCrumbs.css";
 
 const styles = (theme) => ({
   moreButton: {
@@ -275,10 +274,9 @@ class BreadCrumbs extends Component {
   componentDidUpdate() {}
 
   render() {
-    const { classes } = this.props;
     const isMobile = this.state.width < 600;
-    var layers = this.state.visibleLayers.filter((layer) => {
-      var isBreadCrumb = true;
+    const layers = this.state.visibleLayers.filter((layer) => {
+      let isBreadCrumb = true;
       if (
         !layer.getProperties().layerInfo ||
         (layer.getProperties().layerInfo &&
@@ -292,7 +290,7 @@ class BreadCrumbs extends Component {
       return this.renderMobile(layers);
     } else {
       return (
-        <div className={classes.breadBasket}>
+        <div>
           <div>{this.renderDesktop(layers)}</div>
         </div>
       );
