@@ -490,7 +490,9 @@ class AppModel {
         this.highlightSource.addFeature(feature);
         if (window.innerWidth < 600) {
           let geom = feature.getGeometry();
-          this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          if (geom) {
+            this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          }
         }
       }
     }

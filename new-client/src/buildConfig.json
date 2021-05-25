@@ -18,7 +18,8 @@
     "Routing",
     "Search",
     "StreetView",
-    "Suggest"
+    "Suggest",
+    "TimeSlider"
   ],
   "allTools": [
     "Anchor",
@@ -41,6 +42,7 @@
     "Search",
     "StreetView",
     "Suggest",
+    "TimeSlider",
     "vtsearch"
   ]
 }

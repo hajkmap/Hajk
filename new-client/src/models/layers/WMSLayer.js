@@ -65,6 +65,8 @@ class WMSLayer {
         source: new ImageWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        timeSliderStart: config?.timeSliderStart,
+        timeSliderEnd: config?.timeSliderEnd,
         minZoom: minZoom,
         maxZoom: maxZoom,
       });
@@ -77,6 +79,8 @@ class WMSLayer {
         source: new TileWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        timeSliderStart: config?.timeSliderStart,
+        timeSliderEnd: config?.timeSliderEnd,
         minZoom: minZoom,
         maxZoom: maxZoom,
       });
