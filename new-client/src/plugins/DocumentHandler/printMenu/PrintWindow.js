@@ -117,7 +117,6 @@ class PrintWindow extends React.PureComponent {
 
   createPrintElement = (id) => {
     let div = document.createElement("div");
-    //div.style = "position : absolute; left : -10000px; width : 210mm";
     div.id = id;
     return div;
   };
@@ -187,6 +186,11 @@ class PrintWindow extends React.PureComponent {
             html, body {
               width: 210mm;
               height: 297mm;
+            },
+            /* FIXME: REMOVE */
+            img {
+              display: block;
+              break-inside: avoid;
             }
           }
         </style>
@@ -218,8 +222,11 @@ class PrintWindow extends React.PureComponent {
 
   addPageBreaksBeforeHeadings = (printWindow) => {
     const headings = printWindow.document.body.querySelectorAll(["h1", "h2"]);
-    for (let heading of headings) {
-      heading.style.pageBreakBefore = "always";
+    for (let i = 0; i < headings.length; i++) {
+      if (i !== 0 || this.state.includeCompleteToc) {
+        headings[i].style.pageBreakBefore = "always";
+        headings[i].style.breakBefore = "none";
+      }
     }
   };
 
@@ -233,13 +240,6 @@ class PrintWindow extends React.PureComponent {
         this.toc && printWindow.document.body.appendChild(this.toc);
         printWindow.document.body.appendChild(this.content);
         this.addPageBreaksBeforeHeadings(printWindow);
-        const headings = printWindow.document.body.querySelectorAll([
-          "h1",
-          "h2",
-        ]);
-        for (let heading of headings) {
-          heading.style.pageBreakBefore = "always";
-        }
         printWindow.print();
         printWindow.close();
 
