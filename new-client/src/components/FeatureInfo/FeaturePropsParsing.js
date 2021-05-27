@@ -179,7 +179,9 @@ export default class FeaturePropsParsing {
     else {
       // Grab the actual value from the Properties collection, if not found, fallback to empty string.
       // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
-      return this.properties[placeholder]?.replace(/=/g, "&equal;") || "";
+      return typeof this.properties[placeholder] === "string"
+        ? this.properties[placeholder].replace(/=/g, "&equal;")
+        : "";
     }
   };
 
