@@ -177,8 +177,9 @@ export default class FeaturePropsParsing {
     }
     // Just a "normal" placeholder, e.g. {foobar}
     else {
-      // Grab the actual value from the Properties collection, if not found, fallback to empty string
-      return this.properties[placeholder] || "";
+      // Grab the actual value from the Properties collection, if not found, fallback to empty string.
+      // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
+      return this.properties[placeholder]?.replace(/=/g, "&equal;") || "";
     }
   };
 
@@ -388,6 +389,11 @@ export default class FeaturePropsParsing {
         /\[(?<text>[^[]+)\]\((?<href>[^")]+)(?<title>".*")?\)/gm,
         this.#markdownHrefEncoder
       );
+
+      // Back in #getPropertyValueForPlaceholder we encode all equal signs ("=") as "&equal;",
+      // to ensure we don't run into the issue described in #812 when we do the conditional check.
+      // Now is a good time to revert that encoding back into an equal sign.
+      this.markdown = this.markdown.replace(/&equal;/g, "=");
 
       // The final step is to await for all promises that might exist (if we fetch from
       // external components) to fulfill. We can't render before that!
