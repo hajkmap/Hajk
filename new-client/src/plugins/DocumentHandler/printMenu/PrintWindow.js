@@ -173,36 +173,41 @@ class PrintWindow extends React.PureComponent {
       return this.handleNewWindowBlocked();
     }
 
-    printWindow.document.write("<html>");
-    printWindow.document.write(
-      `<head>
-        <title>${document.title}</title>
-        <style>
-          @page {
-            size: A4;
-            /*margin: 0;*/
-          }
-          @media print {
-            html, body {
-              width: 210mm;
-              height: 297mm;
-            },
-            /* FIXME: REMOVE */
-            img {
-              display: block;
-              break-inside: avoid;
-            }
-          }
-        </style>
-      </head>
-      <body>`
-    );
-
     this.getCurrentStyleTags().forEach((tag) => {
       printWindow.document.head.appendChild(tag);
     });
 
-    printWindow.document.write("</body></html>");
+    printWindow.document.head.insertAdjacentHTML(
+      "beforeend",
+      ` <title>${document.title}</title>
+        <style>
+          @page {
+            size: A4;
+          }
+          @media print {
+            html,
+            body {
+              height: 297mm;
+              width: 210mm;
+            }
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+              page-break-after: avoid;
+            }
+            MuiTypography-body1 {
+              page-break-before: avoid;
+            }
+            .MuiBox-root {
+              page-break-inside: avoid;
+            }
+          }        
+        </style>`
+    );
+
     return printWindow;
   };
 
@@ -240,6 +245,8 @@ class PrintWindow extends React.PureComponent {
         this.toc && printWindow.document.body.appendChild(this.toc);
         printWindow.document.body.appendChild(this.content);
         this.addPageBreaksBeforeHeadings(printWindow);
+        printWindow.document.close(); // necessary for IE >= 10
+        printWindow.focus(); // necessary for IE >= 10*/
         printWindow.print();
         printWindow.close();
 
