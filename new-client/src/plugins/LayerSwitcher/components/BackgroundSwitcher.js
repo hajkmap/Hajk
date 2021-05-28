@@ -44,14 +44,16 @@ class BackgroundSwitcher extends React.PureComponent {
   constructor(props) {
     super(props);
     this.localObserver = Observer();
-    this.osmSource = new OSM({
-      reprojectionErrorThreshold: 5,
-    });
-    this.osmLayer = new TileLayer({
-      visible: false,
-      source: this.osmSource,
-      zIndex: -1,
-    });
+    if (props.enableOSM) {
+      this.osmSource = new OSM({
+        reprojectionErrorThreshold: 5,
+      });
+      this.osmLayer = new TileLayer({
+        visible: false,
+        source: this.osmSource,
+        zIndex: -1,
+      });
+    }
   }
 
   /**
