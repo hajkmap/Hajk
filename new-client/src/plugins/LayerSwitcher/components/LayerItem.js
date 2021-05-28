@@ -136,7 +136,7 @@ class LayerItem extends React.PureComponent {
             if (activeLayer !== this.state.name) {
               if (layer.isDefaultBackground) {
                 if (layer.backgroundSpecialCaseId === "-3") {
-                  layer.osmLayer[0].setVisible(false);
+                  layer.osmLayer.setVisible(false);
                 }
               } else {
                 layer.setVisible(false);
@@ -272,7 +272,7 @@ class LayerItem extends React.PureComponent {
         } else if (layer.backgroundSpecialCaseId === "-1") {
           document.getElementById("map").style.backgroundColor = "#FFF";
         } else if (layer.backgroundSpecialCaseId === "-3") {
-          layer.osmLayer[0].setVisible(true);
+          layer.osmLayer.setVisible(true);
         }
       } else {
         layer.setVisible(true);

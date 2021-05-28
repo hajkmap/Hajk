@@ -31,8 +31,6 @@ class BackgroundSwitcher extends React.PureComponent {
   state = {
     selectedLayerId: -1, // By default, select special case "white background"
   };
-  // A list is used since it is passed into LayerItem before the osmLayer is created (and thus no reference exists to it)
-  osmLayer = [];
 
   static propTypes = {
     backgroundSwitcherBlack: propTypes.bool.isRequired,
@@ -46,6 +44,14 @@ class BackgroundSwitcher extends React.PureComponent {
   constructor(props) {
     super(props);
     this.localObserver = Observer();
+    this.osmSource = new OSM({
+      reprojectionErrorThreshold: 5,
+    });
+    this.osmLayer = new TileLayer({
+      visible: false,
+      source: this.osmSource,
+      zIndex: -1,
+    });
   }
 
   /**
@@ -63,17 +69,7 @@ class BackgroundSwitcher extends React.PureComponent {
 
     if (this.props.enableOSM) {
       // Initiate our special case layer, OpenStreetMap
-      const osmSource = new OSM({
-        reprojectionErrorThreshold: 5,
-      });
-      this.osmLayer.push(
-        new TileLayer({
-          visible: false,
-          source: osmSource,
-          zIndex: -1,
-        })
-      );
-      this.props.map.addLayer(this.osmLayer[0]);
+      this.props.map.addLayer(this.osmLayer);
     }
 
     // Ensure that BackgroundSwitcher correctly selects visible layer,
@@ -174,11 +170,11 @@ class BackgroundSwitcher extends React.PureComponent {
 
         get(key) {
           if (key === "opacity") {
-            if (that.osmLayer.length > 0) {
+            if (that.osmLayer) {
               // the first the opacity is taken is before osmlayer is initialized
-              return that.osmLayer[0].get("opacity");
+              return that.osmLayer.get("opacity");
             } else {
-              return 1;
+              return that.osmLayer.get("opacity"); //return 1;
             }
           }
           return this.properties[key];
@@ -190,7 +186,7 @@ class BackgroundSwitcher extends React.PureComponent {
           return Object.keys(this.properties);
         },
         setOpacity(value) {
-          that.osmLayer[0].setOpacity(value);
+          that.osmLayer.setOpacity(value);
         },
       };
       if (config.name === "-3") {
