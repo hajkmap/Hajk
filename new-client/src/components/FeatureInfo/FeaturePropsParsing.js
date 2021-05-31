@@ -177,11 +177,17 @@ export default class FeaturePropsParsing {
     }
     // Just a "normal" placeholder, e.g. {foobar}
     else {
-      // Grab the actual value from the Properties collection, if not found, fallback to empty string.
+      // Attempt to grab the actual value from the Properties collection, if not found, fallback to empty string.
       // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
-      return typeof this.properties[placeholder] === "string"
-        ? this.properties[placeholder].replace(/=/g, "&equal;")
-        : "";
+
+      return (
+        // What you see on the next line is what we call "hängslen och livrem" in Sweden.
+        // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
+        // "placeholder", but if it does, we can't be sure that it will have the replace() method (as only Strings have it).)
+        this.properties?.[placeholder]?.replace?.(/=/g, "&equal;") || // If replace() exists, it's a string, so we can revert our equal signs.
+        this.properties[placeholder] || // If not a string, return the value as-is…
+        "" // …unless it's undefined - in that case, return an empty string.
+      );
     }
   };
 
