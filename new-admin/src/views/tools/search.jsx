@@ -67,6 +67,7 @@ const defaultState = {
   showResultFeaturesInMap: true,
   showResultsLimitReachedWarning: true,
   enableFeatureToggler: true,
+  showCorrespondingWMSLayers: false,
 
   // Used to style the spatial search polygon/circle feature
   drawFillColor: "rgba(255,255,255,0.07)",
@@ -170,6 +171,9 @@ class ToolOptions extends Component {
             this.state.searchBarPlaceholder,
           enablePolygonSearch:
             tool.options.enablePolygonSearch ?? this.state.enablePolygonSearch,
+          showCorrespondingWMSLayers:
+            tool.options.showCorrespondingWMSLayers ??
+            this.state.showCorrespondingWMSLayers,
           enableRadiusSearch:
             tool.options.enableRadiusSearch ?? this.state.enableRadiusSearch,
           enableSelectSearch:
@@ -357,6 +361,7 @@ class ToolOptions extends Component {
         searchBarPlaceholder: this.state.searchBarPlaceholder,
         autocompleteWildcardAtStart: this.state.autocompleteWildcardAtStart,
         enablePolygonSearch: this.state.enablePolygonSearch,
+        showCorrespondingWMSLayers: this.state.showCorrespondingWMSLayers,
         enableRadiusSearch: this.state.enableRadiusSearch,
         enableSelectSearch: this.state.enableSelectSearch,
         enableExtentSearch: this.state.enableExtentSearch,
@@ -761,6 +766,22 @@ class ToolOptions extends Component {
             <div className="layer-list">
               {this.renderSources(this.state.sources)}
             </div>
+          </div>
+
+          <div>
+            <input
+              id="showCorrespondingWMSLayers"
+              name="showCorrespondingWMSLayers"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.showCorrespondingWMSLayers}
+            />
+            &nbsp;
+            <label htmlFor="showCorrespondingWMSLayers" className="long-label">
+              Tänd motsvarande WMS-lager automatiskt vid klick i resultatlistan
+            </label>
           </div>
 
           <div className="separator">Spatiala sökverktyg</div>

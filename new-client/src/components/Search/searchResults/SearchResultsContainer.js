@@ -766,8 +766,33 @@ class SearchResultsContainer extends React.PureComponent {
       },
       () => {
         this.handleFilterUpdate();
+        this.#showCorrespondingWMSLayers(featureCollection);
       }
     );
+  };
+
+  #showCorrespondingWMSLayers = (featureCollection) => {
+    if (this.props.options.showCorrespondingWMSLayers !== true) return;
+
+    const layer = this.#getLayerById(featureCollection.source.pid);
+
+    if (layer.layerType === "group") {
+      this.props.app.globalObserver.publish("layerswitcher.showLayer", {
+        layer: layer,
+        subLayersToShow: [featureCollection.source.id],
+      });
+    } else if (!layer.getVisible()) {
+      layer.setVisible(true);
+    }
+  };
+
+  #getLayerById = (layerId) => {
+    return this.props.map
+      .getLayers()
+      .getArray()
+      .find((layer) => {
+        return layerId === layer.values_.name;
+      });
   };
 
   handleFeatureCollectionClick = (featureCollection) => {

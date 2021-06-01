@@ -339,22 +339,46 @@ class LayerGroupItem extends Component {
     }
   };
 
-  setVisible = (l) => {
-    const { layer } = this.props;
-    if (l === layer) {
-      layer.setVisible(true);
+  setVisible = (la) => {
+    let l,
+      subLayersToShow = null;
 
+    // If the incoming parameter is an object that contains additional subLayersToShow,
+    // let's filter out the necessary objects from it
+    if (la.hasOwnProperty("layer") && la.hasOwnProperty("subLayersToShow")) {
+      subLayersToShow = la.subLayersToShow;
+      l = la.layer;
+    } else {
+      // In this case the incoming parameter is the actual OL Layer and there is
+      // no need to further filter. Just set subLayers to everything that's in this
+      // layer, and the incoming object itself as the working 'l' variable.
+      subLayersToShow = this.props.layer.subLayers;
+      l = la;
+    }
+
+    // Now we can be sure that we have the working 'l' variable and can compare
+    // it to the 'layer' object in current props. Note that this is necessary, as
+    // every single LayerGroupItem is subscribing to the event that calls this method,
+    // so without this check we'd end up running this for every LayerGroupItem, which
+    // is not intended.
+    if (l === this.props.layer) {
+      // Show the OL layer
+      this.props.layer.setVisible(true);
+
+      // Set LAYERS and STYLES so that the exact sublayers that are needed
+      // will be visible
       this.props.layer.getSource().updateParams({
-        LAYERS: this.props.layer.subLayers,
+        LAYERS: subLayersToShow,
         CQL_FILTER: null,
         // Extract .style property from each sub layer.
         // Join them into a string that will be used to
         // reset STYLES param for the GET request.
         STYLES: Object.entries(this.props.layer.layersInfo)
-          .map((o) => o[1])
-          .map((l) => l.style)
-          .join(),
+          .filter((k) => subLayersToShow.indexOf(k[0]) !== -1)
+          .map((l) => l[1].style)
+          .join(","),
       });
+
       this.setState({
         visible: true,
         visibleSubLayers: this.props.layer.subLayers,

@@ -671,6 +671,7 @@ class AppModel {
           return layer.layersInfo.map((sl) => {
             return {
               id: sl.id,
+              pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer
               caption: sl.caption,
               url: sl.searchUrl || layer.url,
               layers: [sl.id],
