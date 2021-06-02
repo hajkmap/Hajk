@@ -177,8 +177,17 @@ export default class FeaturePropsParsing {
     }
     // Just a "normal" placeholder, e.g. {foobar}
     else {
-      // Grab the actual value from the Properties collection, if not found, fallback to empty string
-      return this.properties[placeholder] || "";
+      // Attempt to grab the actual value from the Properties collection, if not found, fallback to empty string.
+      // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
+
+      return (
+        // What you see on the next line is what we call "hängslen och livrem" in Sweden.
+        // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
+        // "placeholder", but if it does, we can't be sure that it will have the replace() method (as only Strings have it).)
+        this.properties?.[placeholder]?.replace?.(/=/g, "&equal;") || // If replace() exists, it's a string, so we can revert our equal signs.
+        this.properties[placeholder] || // If not a string, return the value as-is…
+        "" // …unless it's undefined - in that case, return an empty string.
+      );
     }
   };
 
@@ -388,6 +397,11 @@ export default class FeaturePropsParsing {
         /\[(?<text>[^[]+)\]\((?<href>[^")]+)(?<title>".*")?\)/gm,
         this.#markdownHrefEncoder
       );
+
+      // Back in #getPropertyValueForPlaceholder we encode all equal signs ("=") as "&equal;",
+      // to ensure we don't run into the issue described in #812 when we do the conditional check.
+      // Now is a good time to revert that encoding back into an equal sign.
+      this.markdown = this.markdown.replace(/&equal;/g, "=");
 
       // The final step is to await for all promises that might exist (if we fetch from
       // external components) to fulfill. We can't render before that!
