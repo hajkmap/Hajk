@@ -381,7 +381,7 @@ class LayerGroupItem extends Component {
 
       this.setState({
         visible: true,
-        visibleSubLayers: this.props.layer.subLayers,
+        visibleSubLayers: subLayersToShow,
       });
     }
   };
