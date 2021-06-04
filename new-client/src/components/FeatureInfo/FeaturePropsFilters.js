@@ -16,8 +16,8 @@ class PropFilters {
       value = key.substring(1, key.length - 1);
     } else {
       value = properties[key];
-      if (!value || value === "") {
-        return "";
+      if (!value) {
+        value = "";
       }
     }
 
@@ -84,6 +84,10 @@ class PropFilters {
       func: f,
     };
   }
+
+  addAlias(key, targetKey) {
+    this.add(key, this.get(targetKey).func);
+  }
 }
 
 const filters = new PropFilters();
@@ -111,6 +115,37 @@ filters.add("roundToDecimals", function (value, numDecimals) {
 */
 filters.add("replace", function (value, replace, withString) {
   return value.replace(new RegExp(replace, "gm"), withString);
+});
+
+/*
+  default/fallback
+  Example:
+  {''|default('No value found')}
+  outputs: No value
+*/
+filters.add("default", function (value, defaultValue) {
+  return value === "" ? defaultValue : value;
+});
+filters.addAlias("fallback", "default");
+
+/*
+  equals
+  Example:
+  {'true'|equals('true', 'yes', 'no')}
+  outputs: yes
+*/
+filters.add("equals", function (value, test, trueValue, falseValue) {
+  return value === test ? trueValue : falseValue || value;
+});
+
+/*
+  notEquals
+  Example:
+  {'false'|notEquals('true', 'This value is not true', 'This value is true')}
+  outputs: This value is not false
+*/
+filters.add("notEquals", function (value, test, falseValue, trueValue) {
+  return value !== test ? falseValue : trueValue || value;
 });
 
 /*
