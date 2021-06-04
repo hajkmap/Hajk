@@ -356,7 +356,6 @@ export default class FeaturePropsParsing {
       // eslint-disable-next-line no-useless-escape
       (this.markdown.match(/{[\s'\w\u00C0-\u00ff@\-|,'.():]+}/g) || []).forEach(
         (placeholder) => {
-          console.log("!!!!", placeholder);
           // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
           // Let's replace all occurrences of the placeholder like this:
           // {foobar} -> Some nice FoobarValue
