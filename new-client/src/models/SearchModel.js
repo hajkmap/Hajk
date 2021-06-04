@@ -356,9 +356,8 @@ class SearchModel {
     // and at least one search field (else there's no way to know where to search!)
     if (searchString !== "" && searchSource.searchFields.length > 0) {
       if (searchOptions.getPossibleCombinations) {
-        possibleSearchCombinations = this.getPossibleSearchCombinations(
-          searchString
-        );
+        possibleSearchCombinations =
+          this.getPossibleSearchCombinations(searchString);
       } else {
         possibleSearchCombinations.push(
           this.#splitAndTrimOnCommas(searchString)

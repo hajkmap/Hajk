@@ -256,9 +256,8 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   updateDisplayFormat(featureCollection, attributesToDisplay) {
-    let columnsToChangeDisplayFormat = this.getColumsToChangeDisplayFormatFor(
-      attributesToDisplay
-    );
+    let columnsToChangeDisplayFormat =
+      this.getColumsToChangeDisplayFormatFor(attributesToDisplay);
 
     let adjustedFeatureCollection = this.changeDisplayFormat(
       featureCollection,
@@ -538,9 +537,8 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   swapWktCoordinatesForSqlServer = (polygonAsWkt) => {
-    let { updatedWkt, remainingWkt } = this.removePolygonStartOfWkt(
-      polygonAsWkt
-    );
+    let { updatedWkt, remainingWkt } =
+      this.removePolygonStartOfWkt(polygonAsWkt);
     updatedWkt = this.swapCoordinates(updatedWkt, remainingWkt).updatedWkt;
     updatedWkt = this.addEndOfPolygonWkt(updatedWkt);
 

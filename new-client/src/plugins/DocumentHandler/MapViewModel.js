@@ -30,9 +30,8 @@ export default class MapViewModel {
       const mapSettings = this.convertMapSettingsUrlToOlSettings(url);
       const visibleLayers = mapSettings.layers.split(",");
 
-      const { layersToShow, layersToHide } = this.getLayersToShowAndHide(
-        visibleLayers
-      );
+      const { layersToShow, layersToHide } =
+        this.getLayersToShowAndHide(visibleLayers);
 
       this.setMapLayersVisiblity(layersToShow, layersToHide);
       this.flyTo(this.map.getView(), mapSettings.center, mapSettings.zoom);
