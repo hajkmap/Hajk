@@ -144,6 +144,19 @@ filters.add("time", function (value) {
 });
 
 /*
+  formatNumber
+  Example:
+  {'98000'|formatNumber}
+  outputs: 98 000
+*/
+filters.add("formatNumber", function (value) {
+  if (isNaN(value)) {
+    throw new Error("Argument should be a number");
+  }
+  return Number(value).toLocaleString();
+});
+
+/*
   toUpper
   Example:
   {'testing'|toUpper}
