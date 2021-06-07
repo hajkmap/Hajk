@@ -263,26 +263,6 @@ filters.add("right", function (value, searchFor) {
 });
 
 /*
-  append
-  Example:
-  {'100'|append(' meters')}
-  outputs: 100 meters
-*/
-filters.add("append", function (value, append) {
-  return value.toString() + append;
-});
-
-/*
-  prepend
-  Example:
-  {'works'|prepend('this ')}
-  outputs: this works
-*/
-filters.add("prepend", function (value, prepend) {
-  return prepend + value.toString();
-});
-
-/*
   trim
   Example:
   {'   padded string  '|trim}
