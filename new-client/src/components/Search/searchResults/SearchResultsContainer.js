@@ -355,11 +355,8 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderFilterInputField = () => {
     const { classes } = this.props;
-    const {
-      activeFeatureCollection,
-      featureFilter,
-      featureCollectionFilter,
-    } = this.state;
+    const { activeFeatureCollection, featureFilter, featureCollectionFilter } =
+      this.state;
     const showClearFilterButton =
       featureFilter.length > 0 || featureCollectionFilter.length > 0;
     return (
@@ -416,11 +413,8 @@ class SearchResultsContainer extends React.PureComponent {
   // Helper function that checks if the filter is active in the
   // current view.
   isFilterActive = () => {
-    const {
-      activeFeatureCollection,
-      featureFilter,
-      featureCollectionFilter,
-    } = this.state;
+    const { activeFeatureCollection, featureFilter, featureCollectionFilter } =
+      this.state;
     // If we have an active featureCollection (meaning that we are
     // viewing _features_, and the featureFilter-value is set, the
     // filter is active.
@@ -890,9 +884,8 @@ class SearchResultsContainer extends React.PureComponent {
       return;
     }
 
-    const filteredFeatureCollections = this.getFilteredFeatureCollections(
-      featureCollections
-    );
+    const filteredFeatureCollections =
+      this.getFilteredFeatureCollections(featureCollections);
     const filteredFeatures = this.getFilteredFeatures(
       filteredFeatureCollections
     );
@@ -1090,9 +1083,8 @@ class SearchResultsContainer extends React.PureComponent {
         : // Otherwise we return all collections passing the filter
           this.getFilteredFeatureCollections(this.props.featureCollections);
 
-    const sortedFeatureCollections = this.sortFeatureCollections(
-      featureCollections
-    );
+    const sortedFeatureCollections =
+      this.sortFeatureCollections(featureCollections);
 
     const shouldRenderSelectedCollection =
       options.enableSelectedFeaturesCollection ?? true;
