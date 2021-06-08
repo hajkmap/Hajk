@@ -766,16 +766,42 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   #showCorrespondingWMSLayers = (featureCollection) => {
+    // Respect the setting from admin
     if (this.props.options.showCorrespondingWMSLayers !== true) return;
 
     const layer = this.#getLayerById(featureCollection.source.pid);
 
     if (layer.layerType === "group") {
+      // Group layers will publish an event to LayerSwitcher that will take
+      // care of the somewhat complicated toggling.
+
+      // N.B. We don't want to hide any sublayers, only ensure that new ones are shown.
+      // So the first step is to find out which sublayers are already visible.
+      const alreadyVisibleSubLayers = layer
+        .getSource()
+        .getParams()
+        ["LAYERS"].split(",")
+        .filter((e) => e.length !== 0);
+
+      // Next, prepare an array of the already visible layers, plus the new one.
+      // Make sure NOT TO CHANGE THE ORDER of sublayers. Hence no push or spread,
+      // only a filter on the admin-specified order that we have in the 'subLayers'
+      // property.
+      const subLayersToShow = layer.subLayers.filter((l) => {
+        return (
+          alreadyVisibleSubLayers.includes(l) ||
+          l === featureCollection.source.id
+        );
+      });
+
+      // Finally, let's publish the event so that LayerSwitcher can take care of the rest
       this.props.app.globalObserver.publish("layerswitcher.showLayer", {
-        layer: layer,
-        subLayersToShow: [featureCollection.source.id],
+        layer,
+        subLayersToShow,
       });
     } else if (!layer.getVisible()) {
+      // "Normal" layers are easier, we can just toggle the visibility directly.
+      // The already existing OL listener will update checkbox state on corresponding layer.
       layer.setVisible(true);
     }
   };
