@@ -47,6 +47,13 @@ const styles = (theme) => ({
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
     marginLeft: "45px",
   },
+  layerItemBackgroundContainer: {
+    paddingLeft: "0",
+    paddingTop: "5px",
+    paddingBottom: "5px",
+    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    marginLeft: "0px",
+  },
   layerItemInfo: {
     display: "flex",
   },
@@ -495,7 +502,7 @@ class LayerItem extends React.PureComponent {
   render() {
     const { classes, layer, model, app, chapters } = this.props;
     const { visible, legendIcon } = this.state;
-    const caption = this.state.caption; // TODO, changed to layerinfo caption
+    const caption = this.state.caption;
 
     const cqlFilterVisible =
       this.props.app.config.mapConfig.map?.cqlFilterVisible || false;
@@ -525,7 +532,13 @@ class LayerItem extends React.PureComponent {
     }
 
     return (
-      <div className={classes.layerItemContainer}>
+      <div
+        className={
+          this.state.isBackgroundLayer
+            ? classes.layerItemBackgroundContainer
+            : classes.layerItemContainer
+        }
+      >
         <div className={classes.layerItem}>
           <div>
             <Grid

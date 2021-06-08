@@ -146,11 +146,9 @@ class BackgroundSwitcher extends React.PureComponent {
    * @memberof BackgroundSwitcher
    */
   renderRadioButton(config, index) {
-    let caption;
     let checked = this.state.selectedLayerId === config.name;
 
     let mapLayer = this.props.layerMap[config.name];
-    const { classes } = this.props;
     let options = this.props.options || {};
     if (!("enableTransparencySlider" in options)) {
       // Layersettings will crash if this is not present
