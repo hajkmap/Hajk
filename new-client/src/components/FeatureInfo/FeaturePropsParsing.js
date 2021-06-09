@@ -175,7 +175,7 @@ export default class FeaturePropsParsing {
           ) - 1
         }}`;
       }
-    } else if (placeholder.indexOf("|") > 0) {
+    } else if (placeholder.includes("|")) {
       return FeaturePropFilters.applyFilters(this.properties, placeholder);
     }
     // Just a "normal" placeholder, e.g. {foobar}
@@ -353,8 +353,7 @@ export default class FeaturePropsParsing {
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
       // Match any word character, range of unicode characters (åäö etc), @ sign, dash or dot
-      // eslint-disable-next-line no-useless-escape
-      (this.markdown.match(/{[\s'\w\u00C0-\u00ff@\-|,'.():]+}/g) || []).forEach(
+      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|,'.():]+}/g) || []).forEach(
         (placeholder) => {
           // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
           // Let's replace all occurrences of the placeholder like this:
