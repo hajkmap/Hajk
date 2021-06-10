@@ -9,7 +9,11 @@ HAJK är fritt att använda och förändra, källkoden är fritt tillgänglig oc
 
 ![HAJK3](https://user-images.githubusercontent.com/110222/96265856-42960000-0fc6-11eb-805e-9e41ec5d77f9.png)
 
-### Exempel på karttjänster med HAJK: 
+### Exempel på karttjänster med HAJK:
+Göteborg – [https://karta.goteborg.se/](https://karta.goteborg.se/)
+
+Göteborgsregionen – [https://karta.goteborgsregionen.se/](https://karta.goteborgsregionen.se/)
+
 Halmstad – [https://karta.halmstad.se/](https://karta.halmstad.se/)
 
 Kungsbacka – [https://karta.kungsbacka.se/](https://karta.kungsbacka.se/)
