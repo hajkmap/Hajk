@@ -24,8 +24,17 @@ class AnchorModel {
         // Update anchor each time an underlying Source changes in some way (could be new CQL params, for example).
         layer.getSource().on("change", ({ target }) => {
           if (typeof target.getParams !== "function") return;
+
+          // Update CQL filters only if a real value exists
           const cqlFilterForCurrentLayer = target.getParams()?.CQL_FILTER;
-          this.cqlFilters[layerId] = cqlFilterForCurrentLayer;
+          if (
+            cqlFilterForCurrentLayer !== null &&
+            cqlFilterForCurrentLayer !== undefined
+          ) {
+            this.cqlFilters[layerId] = cqlFilterForCurrentLayer;
+          }
+
+          // Publish the event
           this.localObserver.publish("mapUpdated", this.getAnchor());
         });
       });
@@ -65,14 +74,27 @@ class AnchorModel {
   }
 
   getAnchor() {
+    // Read some "optional" values so we have them prepared.
+    // If some conditions aren't met, we won't add them to the
+    // anchor string, in order to keep the string short.
+    const q = document.getElementById("searchInputField")?.value.trim() || "";
+    const f = this.cqlFilters;
+    const clean = this.getCleanUrl();
+
     const str = this.toParams({
       m: this.app.config.activeMap,
       x: this.map.getView().getCenter()[0],
       y: this.map.getView().getCenter()[1],
       z: this.map.getView().getZoom(),
       l: this.getVisibleLayers(),
-      f: encodeURIComponent(JSON.stringify(this.cqlFilters)),
-      clean: this.getCleanUrl(),
+      // Only add 'q' if it isn't empty
+      ...(q.length > 0 && { q: encodeURIComponent(q) }),
+      // Only add 'f' if it isn't an empty object
+      ...(Object.keys(f).length > 0 && {
+        f: encodeURIComponent(JSON.stringify(f)),
+      }),
+      // Only add 'clean' if the value is true
+      ...(clean === true && { clean: clean }),
     });
 
     // Split on "?" and get only the first segment. This prevents
