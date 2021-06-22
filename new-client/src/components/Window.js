@@ -231,6 +231,19 @@ class Window extends React.PureComponent {
       : false;
   }
 
+  getMaxWindowHeight() {
+    if (this.rnd === undefined) return 400;
+    const parent = this.rnd.getSelfElement().parentElement;
+    const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? 42 : 0;
+    const h =
+      parent.clientHeight - // Maximum height of parent element
+      16 - // Reduce height with top margin
+      16 - // Reduce height with bottom margin
+      62 - // Reduce with space for Search bar
+      spaceForBreadcrumbs; // If Breadcrumbs are active, make space for them as well
+    return h;
+  }
+
   updatePosition() {
     const { width, height, position } = this.props;
     const parent = this.rnd.getSelfElement().parentElement;
@@ -243,15 +256,7 @@ class Window extends React.PureComponent {
 
     // If "auto" height is set, it means we want the Window to take up maximum space available
     if (this.props.height !== "dynamic" && this.height === "auto") {
-      // If Breadcrumbs are activated (in LayerSwitcher's config), we must make
-      // sure that our Windows leave some space at the bottom for the Breadcrumbs.
-      const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? 42 : 0;
-      this.height =
-        parent.clientHeight - // Maximum height of parent element
-        16 - // Reduce height with top margin
-        16 - // Reduce height with bottom margin
-        62 - // Reduce with space for Search bar
-        spaceForBreadcrumbs; // If Breadcrumbs are active, make space for them as well
+      this.height = this.getMaxWindowHeight();
     }
 
     // If Window renders on the right, there are some things that we need to compensate for
@@ -573,6 +578,11 @@ class Window extends React.PureComponent {
               classes.content,
               this.props.scrollable ? null : classes.nonScrollable
             )}
+            style={{
+              // Ensure to set maxHeight to ensure that we can scroll inside the container
+              maxHeight:
+                this.getMaxWindowHeight() - (isMobile === false ? 50 : -30), // Super-hack special case for small screens
+            }}
           >
             {features && features.length > 0 ? (
               <FeatureInfoContainer
