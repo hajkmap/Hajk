@@ -355,11 +355,8 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderFilterInputField = () => {
     const { classes } = this.props;
-    const {
-      activeFeatureCollection,
-      featureFilter,
-      featureCollectionFilter,
-    } = this.state;
+    const { activeFeatureCollection, featureFilter, featureCollectionFilter } =
+      this.state;
     const showClearFilterButton =
       featureFilter.length > 0 || featureCollectionFilter.length > 0;
     return (
@@ -416,11 +413,8 @@ class SearchResultsContainer extends React.PureComponent {
   // Helper function that checks if the filter is active in the
   // current view.
   isFilterActive = () => {
-    const {
-      activeFeatureCollection,
-      featureFilter,
-      featureCollectionFilter,
-    } = this.state;
+    const { activeFeatureCollection, featureFilter, featureCollectionFilter } =
+      this.state;
     // If we have an active featureCollection (meaning that we are
     // viewing _features_, and the featureFilter-value is set, the
     // filter is active.
@@ -772,16 +766,42 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   #showCorrespondingWMSLayers = (featureCollection) => {
+    // Respect the setting from admin
     if (this.props.options.showCorrespondingWMSLayers !== true) return;
 
     const layer = this.#getLayerById(featureCollection.source.pid);
 
     if (layer.layerType === "group") {
+      // Group layers will publish an event to LayerSwitcher that will take
+      // care of the somewhat complicated toggling.
+
+      // N.B. We don't want to hide any sublayers, only ensure that new ones are shown.
+      // So the first step is to find out which sublayers are already visible.
+      const alreadyVisibleSubLayers = layer
+        .getSource()
+        .getParams()
+        ["LAYERS"].split(",")
+        .filter((e) => e.length !== 0);
+
+      // Next, prepare an array of the already visible layers, plus the new one.
+      // Make sure NOT TO CHANGE THE ORDER of sublayers. Hence no push or spread,
+      // only a filter on the admin-specified order that we have in the 'subLayers'
+      // property.
+      const subLayersToShow = layer.subLayers.filter((l) => {
+        return (
+          alreadyVisibleSubLayers.includes(l) ||
+          l === featureCollection.source.id
+        );
+      });
+
+      // Finally, let's publish the event so that LayerSwitcher can take care of the rest
       this.props.app.globalObserver.publish("layerswitcher.showLayer", {
-        layer: layer,
-        subLayersToShow: [featureCollection.source.id],
+        layer,
+        subLayersToShow,
       });
     } else if (!layer.getVisible()) {
+      // "Normal" layers are easier, we can just toggle the visibility directly.
+      // The already existing OL listener will update checkbox state on corresponding layer.
       layer.setVisible(true);
     }
   };
@@ -890,9 +910,8 @@ class SearchResultsContainer extends React.PureComponent {
       return;
     }
 
-    const filteredFeatureCollections = this.getFilteredFeatureCollections(
-      featureCollections
-    );
+    const filteredFeatureCollections =
+      this.getFilteredFeatureCollections(featureCollections);
     const filteredFeatures = this.getFilteredFeatures(
       filteredFeatureCollections
     );
@@ -1090,9 +1109,8 @@ class SearchResultsContainer extends React.PureComponent {
         : // Otherwise we return all collections passing the filter
           this.getFilteredFeatureCollections(this.props.featureCollections);
 
-    const sortedFeatureCollections = this.sortFeatureCollections(
-      featureCollections
-    );
+    const sortedFeatureCollections =
+      this.sortFeatureCollections(featureCollections);
 
     const shouldRenderSelectedCollection =
       options.enableSelectedFeaturesCollection ?? true;

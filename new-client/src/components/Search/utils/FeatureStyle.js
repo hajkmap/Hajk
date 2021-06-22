@@ -12,8 +12,10 @@ export default class FeatureStyle {
     this.#options = options;
     this.#enableLabelOnHighlight = options.enableLabelOnHighlight ?? true;
     this.#defaultDisplayStyleSettings = this.#getDefaultDisplayStyleSettings();
-    this.#defaultSelectionStyleSettings = this.#getDefaultSelectionStyleSettings();
-    this.#defaultHighlightStyleSettings = this.#getDefaultHighlightStyleSettings();
+    this.#defaultSelectionStyleSettings =
+      this.#getDefaultSelectionStyleSettings();
+    this.#defaultHighlightStyleSettings =
+      this.#getDefaultHighlightStyleSettings();
   }
 
   #getDefaultDisplayStyleSettings = () => {

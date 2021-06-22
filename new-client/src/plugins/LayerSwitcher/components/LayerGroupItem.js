@@ -321,21 +321,23 @@ class LayerGroupItem extends Component {
   setHidden = (l) => {
     const { layer } = this.props;
     if (l === layer) {
+      // Fix underlaying source
       this.props.layer.getSource().updateParams({
-        LAYERS: [this.props.layer.subLayers[0]],
-        CQL_FILTER: "EXCLUDE",
+        // Ensure that the list of sublayers is emptied (otherwise they'd be
+        // "remembered" the next time user toggles group)
+        LAYERS: "",
+        // Remove any filters
+        CQL_FILTER: null,
       });
-      setTimeout(() => {
-        this.setState(
-          {
-            visible: false,
-            visibleSubLayers: [],
-          },
-          () => {
-            layer.setVisible(false);
-          }
-        );
-      }, 200);
+
+      // Hide the layer in OL
+      layer.setVisible(false);
+
+      // Update UI state
+      this.setState({
+        visible: false,
+        visibleSubLayers: [],
+      });
     }
   };
 
@@ -368,7 +370,8 @@ class LayerGroupItem extends Component {
       // Set LAYERS and STYLES so that the exact sublayers that are needed
       // will be visible
       this.props.layer.getSource().updateParams({
-        LAYERS: subLayersToShow,
+        // join(), so we always provide a string as value to LAYERS
+        LAYERS: subLayersToShow.join(),
         CQL_FILTER: null,
         // Extract .style property from each sub layer.
         // Join them into a string that will be used to
@@ -431,8 +434,15 @@ class LayerGroupItem extends Component {
       });
 
       this.props.layer.getSource().updateParams({
-        LAYERS: visibleSubLayers,
-        STYLES: visibleSubLayersStyles.join(),
+        // join(), so we always provide a string as value to LAYERS
+        LAYERS: visibleSubLayers.join(),
+        // Filter STYLES to only contain styles for currently visible layers,
+        // and maintain the order from layersInfo (it's crucial that the order
+        // of STYLES corresponds exactly to the order of LAYERS!)
+        STYLES: Object.entries(this.props.layer.layersInfo)
+          .filter((k) => visibleSubLayers.indexOf(k[0]) !== -1)
+          .map((l) => l[1].style)
+          .join(","),
         CQL_FILTER: null,
       });
       this.props.layer.setVisible(layerVisibility);

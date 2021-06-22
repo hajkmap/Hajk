@@ -1,8 +1,9 @@
-[![Netlify Status](https://api.netlify.com/api/v1/badges/fa0760e3-fd3a-43bf-a704-27e05cb901cc/deploy-status)](https://app.netlify.com/sites/hajk-demo/deploys)
+[![Docker Status](https://img.shields.io/docker/cloud/build/hallbergs/hajk)](https://hub.docker.com/r/hallbergs/hajk/)
+[![Netlify Status](https://img.shields.io/netlify/fa0760e3-fd3a-43bf-a704-27e05cb901cc)](https://app.netlify.com/sites/hajk-demo/deploys)
 
-# Hajk 3
+# Hajk
 
-_An open source web GIS solution based on OpenLayers_
+_A full-fledged open source web GIS solution based on OpenLayers_
 
 ![alt text](https://user-images.githubusercontent.com/110222/96265856-42960000-0fc6-11eb-805e-9e41ec5d77f9.png "Hajk 3 with all tools visible")
 

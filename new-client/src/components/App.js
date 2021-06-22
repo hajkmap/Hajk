@@ -224,8 +224,8 @@ class App extends React.PureComponent {
       activeDrawerContentFromLocalStorage === "plugins"
     ) {
       // If nothing was found in local storage, fall back to map config setting
-      activeDrawerContentFromLocalStorage = this.props.config.mapConfig.map
-        .activeDrawerOnStart;
+      activeDrawerContentFromLocalStorage =
+        this.props.config.mapConfig.map.activeDrawerOnStart;
     }
 
     const localStorageToolFoundInMapConfig = tools.some((tool) => {
@@ -260,8 +260,10 @@ class App extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const drawerPermanentFromLocalStorage = this.getDrawerPermanentFromLocalStorage();
-    const activeDrawerContentFromLocalStorage = this.getActiveDrawerContentFromLocalStorage();
+    const drawerPermanentFromLocalStorage =
+      this.getDrawerPermanentFromLocalStorage();
+    const activeDrawerContentFromLocalStorage =
+      this.getActiveDrawerContentFromLocalStorage();
     const canRenderDefaultDrawer = this.hasAnyToolbarTools();
 
     const canRenderCustomDrawer = this.canRenderCustomDrawer(

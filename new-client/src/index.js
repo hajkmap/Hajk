@@ -12,6 +12,13 @@ import "allsettled-polyfill";
 // See: https://github.com/hajkmap/Hajk/issues/606
 import "elm-pep";
 
+// Since we don't want to download roboto from the Google CDN,
+// we use fontSource and import all subsets that MUI relies on here.
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+
 import "ol/ol.css";
 import "./custom-ol.css";
 

@@ -25,17 +25,7 @@ class Print extends React.PureComponent {
 
   // Default scales, used if none supplied in options
   scales = [
-    100,
-    250,
-    500,
-    1000,
-    2500,
-    5000,
-    10000,
-    25000,
-    50000,
-    100000,
-    200000,
+    100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 200000,
     500000,
   ];
 

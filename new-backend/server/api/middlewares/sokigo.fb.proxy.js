@@ -8,15 +8,15 @@ import log4js from "log4js";
 // map the possible log4js values to one of the allowed HMP log level
 // values.
 const logLevels = {
-  all: "debug",
-  trace: "debug",
-  debug: "debug",
-  info: "info",
-  warn: "warn",
-  error: "error",
-  fatal: "error",
-  mark: "error",
-  off: "silent",
+  ALL: "debug",
+  TRACE: "debug",
+  DEBUG: "debug",
+  INFO: "info",
+  WARN: "warn",
+  ERROR: "error",
+  FATAL: "error",
+  MARK: "error",
+  OFF: "silent",
 };
 
 // Grab a logger
