@@ -326,8 +326,9 @@ class FmeView extends React.PureComponent {
       params = this.state.productParams;
     }
 
-    let geoAttribute = this.model.findProductById(this.state.productId)
-      .geoAttribute;
+    let geoAttribute = this.model.findProductById(
+      this.state.productId
+    ).geoAttribute;
 
     return (
       <>

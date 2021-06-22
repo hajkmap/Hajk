@@ -175,12 +175,8 @@ class Stops extends React.PureComponent {
       this.setState({ isPolygonActive: false });
     }
     if (this.state.isRectangleActive) {
-      const {
-        busStopValue,
-        stopNameOrNr,
-        publicLine,
-        municipality,
-      } = this.state;
+      const { busStopValue, stopNameOrNr, publicLine, municipality } =
+        this.state;
       this.localObserver.publish("stops-search", {
         busStopValue: busStopValue,
         stopNameOrNr: stopNameOrNr,
