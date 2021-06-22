@@ -135,7 +135,18 @@ const renderChild = (child) => {
   }
 
   if (child.nodeType === ELEMENT_NODE) {
-    return child.callback(child);
+    // Don't assume that callback exits
+    if (typeof child.callback === "function") {
+      return child.callback(child);
+    } else {
+      // If there's no callback, warn and render just
+      // the inner text portion of Element
+      console.warn(
+        "Unsupported DOMElement encountered. Rendering only innerText",
+        child
+      );
+      return child.innerText;
+    }
   }
 };
 
