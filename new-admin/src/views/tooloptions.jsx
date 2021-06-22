@@ -42,6 +42,7 @@ import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
 import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
+import TimeSlider from "./tools/timeslider.jsx";
 
 var defaultState = {
   activeTool: "",
@@ -122,6 +123,8 @@ class ToolOptions extends Component {
         return <Routing parent={this} model={this.props.model} />;
       case "collector":
         return <Collector parent={this} model={this.props.model} />;
+      case "timeslider":
+        return <TimeSlider parent={this} model={this.props.model} />;
       case "documenthandler":
         return <MenuEditor parent={this} model={this.props.model} />;
       default:
@@ -185,6 +188,7 @@ class ToolOptions extends Component {
       routing: "Navigation",
       collector: "Tyck till",
       dummy: "Dummy plugin",
+      timeslider: "Tidslinje",
       documenthandler: "Dokumenthanterare 2.0",
     };
 

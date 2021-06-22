@@ -160,7 +160,7 @@ class Search extends React.PureComponent {
         );
       } else if (type === "Polygon") {
         this.snackbarKey = this.props.enqueueSnackbar(
-          "Tryck en gång i kartan för varje nod i polygonen.",
+          "Tryck en gång i kartan för varje nod i polygonen. Genomför sökningen genom att trycka på den sista noden en gång till.",
           {
             variant: "information",
             anchorOrigin: { vertical: "bottom", horizontal: "center" },

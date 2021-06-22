@@ -45,6 +45,9 @@ class VectorLayerForm extends React.Component {
     infoUrlText: "",
     infoVisible: false,
     infobox: "",
+    timeSliderVisible: false,
+    timeSliderStart: "",
+    timeSliderEnd: "",
     layer: "",
     layerType: "Vector",
     legend: "",
@@ -126,6 +129,9 @@ class VectorLayerForm extends React.Component {
       infoUrlText: this.getValue("infoUrlText"),
       infoVisible: this.getValue("infoVisible"),
       infobox: this.getValue("infobox"),
+      timeSliderVisible: this.getValue("timeSliderVisible"),
+      timeSliderStart: this.getValue("timeSliderStart"),
+      timeSliderEnd: this.getValue("timeSliderEnd"),
       layer: this.state.addedLayers[0],
       legend: this.getValue("legend"),
       legendIcon: this.getValue("legendIcon"),
@@ -161,6 +167,7 @@ class VectorLayerForm extends React.Component {
     if (fieldName === "queryable") value = input.checked;
     if (fieldName === "filterable") value = input.checked;
     if (fieldName === "infoVisible") value = input.checked;
+    if (fieldName === "timeSliderVisible") value = input.checked;
     if (fieldName === "hideExpandArrow") value = input.checked;
 
     return value;
@@ -451,6 +458,9 @@ class VectorLayerForm extends React.Component {
       <i className="fa fa-refresh fa-spin" />
     ) : null;
     const infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const timeSliderClass = this.state.timeSliderVisible
+      ? "tooltip-timeSlider"
+      : "hidden";
 
     return (
       <fieldset>
@@ -946,6 +956,45 @@ class VectorLayerForm extends React.Component {
               }}
               value={this.state.infoOwner}
               className={this.getValidationClass("infoOwner")}
+            />
+          </div>
+        </div>
+        <div className="timeSlider-container">
+          <div>
+            <input
+              type="checkbox"
+              ref="input_timeSliderVisible"
+              id="timeSlider"
+              onChange={(e) => {
+                this.setState({ timeSliderVisible: e.target.checked });
+              }}
+              checked={this.state.timeSliderVisible}
+            />
+            &nbsp;
+            <label htmlFor="timeSlider">Tidslinjedatum</label>
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje start</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderStart"
+              onChange={(e) => {
+                this.setState({ timeSliderStart: e.target.value });
+              }}
+              value={this.state.timeSliderStart}
+            />
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje slut</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderEnd"
+              onChange={(e) => {
+                this.setState({ timeSliderEnd: e.target.value });
+              }}
+              value={this.state.timeSliderEnd}
             />
           </div>
         </div>

@@ -36,6 +36,7 @@ import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
+import MuiAlert from "@material-ui/lab/Alert";
 
 const ColorButtonRed = withStyles((theme) => ({
   root: {
@@ -66,6 +67,10 @@ const ColorButtonBlue = withStyles((theme) => ({
     },
   },
 }))(Button);
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 class Chapter {
   constructor(settings) {
@@ -679,6 +684,18 @@ class InformativeEditor extends Component {
   render() {
     return (
       <div>
+        <div
+          style={{
+            marginTop: "15px",
+            marginBottom: "15px",
+          }}
+        >
+          <Alert severity="error">
+            Denna version av dokumenthanteraren kommer inte stödjas framöver.
+            Vänligen använd den nya version under fliken "Dokumenthanteraren
+            2.0"
+          </Alert>
+        </div>
         {this.renderModal()}
         <div className="margined">
           <ColorButtonGreen
