@@ -49,7 +49,7 @@ const styles = (theme) => ({
   },
   layerItemBackgroundContainer: {
     paddingLeft: "0",
-    paddingTop: "5px",
+    paddingTop: "6px",
     paddingBottom: "5px",
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
     marginLeft: "0px",
