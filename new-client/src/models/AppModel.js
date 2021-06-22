@@ -210,10 +210,19 @@ class AppModel {
         zoom: config.map.zoom,
       }),
     });
-    // FIXME: Remove?
-    setTimeout(() => {
-      this.map.updateSize();
-    }, 0);
+
+    // Create throttled zoomEnd event
+    let currentZoom = this.map.getView().getZoom();
+
+    this.map.on("moveend", (e) => {
+      // using moveend to create a throttled zoomEnd event
+      // instead of using change:resolution to minimize events being fired.
+      const newZoom = this.map.getView().getZoom();
+      if (currentZoom !== newZoom) {
+        this.globalObserver.publish("core.zoomEnd", { zoom: newZoom });
+        currentZoom = newZoom;
+      }
+    });
 
     // Add Snap Helper to the Map
     this.map.snapHelper = new SnapHelper(this);
@@ -481,7 +490,9 @@ class AppModel {
         this.highlightSource.addFeature(feature);
         if (window.innerWidth < 600) {
           let geom = feature.getGeometry();
-          this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          if (geom) {
+            this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          }
         }
       }
     }
@@ -644,6 +655,47 @@ class AppModel {
         searchTool,
         layers.wfslayers
       );
+
+      // See if admin wants to expose any WMS layers. selectedSources will
+      // in that case be an array that will hold the IDs of corresponding layers
+      // (that can be found in our layers.wmslayers array). In there, a properly
+      // configured WMS layer that is to be searchable will have certain search-related
+      // settings active (such as name of the geometry column or URL to the WFS service).
+      const wmslayers = searchTool.options.selectedSources?.flatMap(
+        (wmslayerId) => {
+          // Find the corresponding layer
+          const layer = layers.wmslayers.find((l) => l.id === wmslayerId);
+
+          // Look into the layersInfo array - it will contain sublayers. We must
+          // expose each one of them as a WFS service.
+          return layer.layersInfo.map((sl) => {
+            return {
+              id: sl.id,
+              pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer
+              caption: sl.caption,
+              url: sl.searchUrl || layer.url,
+              layers: [sl.id],
+              searchFields:
+                typeof sl.searchPropertyName === "string"
+                  ? sl.searchPropertyName.split(",")
+                  : [],
+              infobox: sl.infobox || "",
+              aliasDict: "",
+              displayFields:
+                typeof sl.searchDisplayName === "string"
+                  ? sl.searchDisplayName.split(",")
+                  : [],
+              geometryField: sl.searchGeometryField || "geom",
+              outputFormat: sl.searchOutputFormat || "GML3",
+            };
+          });
+        }
+      );
+
+      // Spread the WMS search layers onto the array with WFS search sources,
+      // from now on they're equal to our code.
+      Array.isArray(wmslayers) && wfslayers.push(...wmslayers);
+
       searchTool.options.sources = wfslayers;
     }
 

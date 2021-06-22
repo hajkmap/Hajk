@@ -1,5 +1,5 @@
 # Stage 1 - Building the backend
-FROM node:10.18.1-alpine as backendBuilder
+FROM node:alpine as backendBuilder
 WORKDIR /usr/app
 COPY /new-backend/package*.json ./
 RUN npm install
@@ -27,18 +27,18 @@ RUN mv ./public/config.docker.json ./public/config.json
 RUN npm run build
 
 # Stage 4 - Combine everything and fire it up
-FROM node:10.18.1-alpine
+FROM node:14-alpine
 WORKDIR /usr/app
 COPY /new-backend/package*.json ./
 RUN npm install --production
-COPY --from=backendBuilder /usr/app/dist ./dist
+COPY --from=backendBuilder /usr/app/dist ./
 COPY /new-backend/.env .
 COPY /new-backend/App_Data ./App_Data
 COPY /new-backend/static ./static
 COPY --from=clientBuilder /usr/app/build ./static/client
 COPY --from=adminBuilder /usr/app/build ./static/admin
 EXPOSE 3002
-CMD node dist/index.js
+CMD node index.js
 
 # Build the container
 # docker build -t hajk-backend-with-client-and-admin .

@@ -522,6 +522,12 @@ body.dragging * {
   border-left: 1px solid gray;
 }
 
+.tooltip-timeSlider {
+  padding-left: 8px;
+  padding-top: 8px;
+  border-left: 1px solid gray;
+}
+
 textarea.form-control {
   height: 150px;
 }

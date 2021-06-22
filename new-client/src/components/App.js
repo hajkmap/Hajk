@@ -396,7 +396,9 @@ class App extends React.PureComponent {
       "touchmove",
       (event) => {
         // If this event would result in changing scale …
-        if (event.scale !== 1) {
+        // scale is always undefined on Android so we need to handle it, otherwise we loose the ability to scroll.
+        // For the prevention pinch-zoom on Android. Check index.css
+        if (event.scale !== undefined && event.scale !== 1) {
           // …cancel it.
           event.preventDefault();
         }

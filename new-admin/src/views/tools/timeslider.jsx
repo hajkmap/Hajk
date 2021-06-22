@@ -1,27 +1,4 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
-import React from "react";
-import { Component } from "react";
+import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
@@ -37,32 +14,29 @@ const ColorButtonBlue = withStyles((theme) => ({
   },
 }))(Button);
 
-var defaultState = {
+const defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
   target: "toolbar",
-  instruction: "",
-  varbergVer: false,
-  geoserverUrl: "",
-  notFeatureLayers: [],
-  geoserverNameToCategoryName: {},
+  icons: "",
   visibleAtStart: false,
-  visibleForGroups: [],
+  instruction: "",
+  activeLayers: [],
+  layers: [],
+  defaultResolution: "years",
 };
 
 class ToolOptions extends Component {
-  /**
-   *
-   */
   constructor() {
     super();
     this.state = defaultState;
-    this.type = "buffer";
+    this.type = "timeslider";
   }
 
   componentDidMount() {
-    var tool = this.getTool();
+    const tool = this.getTool();
+    const layers = this.getLayersWithDates();
     if (tool) {
       this.setState({
         active: true,
@@ -71,35 +45,25 @@ class ToolOptions extends Component {
         position: tool.options.position,
         width: tool.options.width,
         height: tool.options.height,
-        instruction: tool.options.instruction,
-        varbergVer: tool.options.varbergVer,
-        geoserverUrl: tool.options.geoserverUrl,
-        notFeatureLayers: tool.options.notFeatureLayers
-          ? tool.options.notFeatureLayers
-          : [],
-        geoserverNameToCategoryName: tool.options.geoserverNameToCategoryName,
+        icons: tool.options.icons,
         visibleAtStart: tool.options.visibleAtStart,
-        visibleForGroups: tool.options.visibleForGroups
-          ? tool.options.visibleForGroups
-          : [],
+        instruction: tool.options.instruction,
+        layers: layers,
+        activeLayers: tool.options.layers ?? [],
+        defaultResolution: tool.options.defaultResolution ?? "years",
       });
     } else {
       this.setState({
         active: false,
+        layers: layers,
       });
     }
   }
 
-  componentWillUnmount() {}
-  /**
-   *
-   */
-  componentWillMount() {}
-
   handleInputChange(event) {
-    var target = event.target;
-    var name = target.name;
-    var value = target.type === "checkbox" ? target.checked : target.value;
+    const target = event.target;
+    const name = target.name;
+    let value = target.type === "checkbox" ? target.checked : target.value;
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
@@ -141,7 +105,7 @@ class ToolOptions extends Component {
   }
 
   save() {
-    var tool = {
+    const tool = {
       type: this.type,
       index: this.state.index,
       options: {
@@ -149,19 +113,16 @@ class ToolOptions extends Component {
         position: this.state.position,
         width: this.state.width,
         height: this.state.height,
-        instruction: this.state.instruction,
-        varbergVer: this.state.varbergVer,
-        geoserverUrl: this.state.geoserverUrl,
-        notFeatureLayers: this.state.notFeatureLayers,
         visibleAtStart: this.state.visibleAtStart,
-        visibleForGroups: this.state.visibleForGroups.map(
-          Function.prototype.call,
-          String.prototype.trim
-        ),
+        instruction: this.state.instruction,
+        icons: this.state.icons,
+        proxyUrl: this.state.proxyUrl,
+        layers: this.state.activeLayers,
+        defaultResolution: this.state.defaultResolution,
       },
     };
 
-    var existing = this.getTool();
+    const existing = this.getTool();
 
     function update() {
       this.props.model.updateToolConfig(
@@ -202,57 +163,54 @@ class ToolOptions extends Component {
     }
   }
 
-  handleAuthGrpsChange(event) {
-    const target = event.target;
-    const value = target.value;
-    let groups = [];
-
-    try {
-      groups = value.split(",");
-    } catch (error) {
-      console.log(`Någonting gick fel: ${error}`);
-    }
-
-    switch (target.id) {
-      case "visibleForGroups":
-        this.setState({
-          visibleForGroups: value !== "" ? groups : [],
-        });
-        break;
-      case "notFeatureLayers":
-        this.setState({
-          notFeatureLayers: value !== "" ? groups : [],
-        });
-        break;
-      default:
-        break;
-    }
-  }
-
-  renderVisibleForGroups() {
-    if (this.props.parent.props.parent.state.authActive) {
+  getLayersWithDates = () => {
+    return this.props.model.get("layers").filter((layer) => {
+      //8 to follow xxxxmmdd-format...
       return (
-        <div>
-          <label htmlFor="visibleForGroups">Tillträde</label>
-          <input
-            id="visibleForGroups"
-            value={this.state.visibleForGroups}
-            type="text"
-            name="visibleForGroups"
-            onChange={(e) => {
-              this.handleAuthGrpsChange(e);
-            }}
-          />
-        </div>
+        layer.timeSliderStart?.length === 8 && layer.timeSliderEnd?.length === 8
       );
+    });
+  };
+
+  renderServices() {
+    const { layers } = this.state;
+    if (layers) {
+      return layers.map((layer, i) => {
+        let active = this.state.activeLayers.find(
+          (layerId) => layerId === layer.id
+        );
+        if (active === undefined) {
+          active = false;
+        }
+        return (
+          <li key={i}>
+            <input
+              id={layer.id}
+              name={layer.caption}
+              type="checkbox"
+              checked={active}
+              onChange={(e) => {
+                let actives = [...this.state.activeLayers];
+                if (e.target.checked) {
+                  actives.push(layer.id);
+                } else {
+                  actives = actives.filter((layerId) => layerId !== layer.id);
+                }
+                this.setState({
+                  activeLayers: actives,
+                });
+              }}
+            />
+            &nbsp;
+            <label htmlFor={layer.id}>{layer.caption}</label>
+          </li>
+        );
+      });
     } else {
       return null;
     }
   }
 
-  /**
-   *
-   */
   render() {
     return (
       <div>
@@ -380,6 +338,47 @@ class ToolOptions extends Component {
           </div>
           <div className="separator">Övriga inställningar</div>
           <div>
+            <label>
+              Tjänster{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Markera vilka tjänster som ska användas i tidslinjen."
+              />
+            </label>
+            <ul
+              style={{
+                display: "inline-block",
+                padding: 0,
+              }}
+            >
+              {this.renderServices()}
+            </ul>
+          </div>
+          <div>
+            <label>
+              Upplösning{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Välj hur stort steg som ska tas varje gång tidslinjen uppdateras."
+              />
+            </label>
+            <select
+              id="defaultResolution"
+              name="defaultResolution"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.defaultResolution}
+            >
+              <option value="days">En dag</option>
+              <option value="months">En månad</option>
+              <option value="years">Ett år</option>
+            </select>
+          </div>
+          <div>
             <input
               id="visibleAtStart"
               name="visibleAtStart"
@@ -409,58 +408,6 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               value={this.state.instruction ? atob(this.state.instruction) : ""}
-            />
-          </div>
-          {this.renderVisibleForGroups()}
-          <div>
-            <input
-              id="varbergVer"
-              name="varbergVer"
-              type="checkbox"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.varbergVer}
-            />
-            &nbsp;
-            <label htmlFor="varbergVer">Varbergs version</label>
-          </div>
-          <div>
-            <label htmlFor="geoserverUrl">geoserverUrl</label>
-            <input
-              type="text"
-              id="geoserverUrl"
-              name="geoserverUrl"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.geoserverUrl}
-            />
-          </div>
-          <div>
-            <label htmlFor="notFeatureLayers">notFeatureLayers</label>
-            <textarea
-              id="notFeatureLayers"
-              value={this.state.notFeatureLayers}
-              type="text"
-              name="notFeatureLayers"
-              onChange={(e) => {
-                this.handleAuthGrpsChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="geoserverNameToCategoryName">
-              geoserverNameToCategoryName
-            </label>
-            <textarea
-              id="geoserverNameToCategoryName"
-              value={this.state.geoserverNameToCategoryName}
-              type="text"
-              name="geoserverNameToCategoryName"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
             />
           </div>
         </form>

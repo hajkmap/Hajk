@@ -12,6 +12,7 @@ import log4js from "log4js";
 import clfDate from "clf-date";
 import oas from "./oas";
 
+import { createProxyMiddleware } from "http-proxy-middleware";
 import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
 import restrictStatic from "../api/middlewares/restrict.static";
 import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
@@ -137,13 +138,18 @@ export default class ExpressServer {
         frameguard: false, // If active, other pages can't embed our maps
       })
     );
+
     app.use(
       cors({
         origin: "*",
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
       })
     );
+
+    // Enable compression early so that responses that follow will get gziped
     app.use(compression());
+
+    this.setupGenericProxy();
 
     // Don't enable FB Proxy if necessary env variable isn't sat
     if (
@@ -179,6 +185,65 @@ export default class ExpressServer {
 
     // Optionally, other directories placed in "static" can be exposed.
     this.setupStaticDirs();
+  }
+
+  /**
+   * @summary Create proxies for endpoints specified in DOTENV as "PROXY_*".
+   * @issue https://github.com/hajkmap/Hajk/issues/824
+   * @returns
+   * @memberof ExpressServer
+   */
+  setupGenericProxy() {
+    try {
+      // Prepare a logger
+      const l = log4js.getLogger("hajk.proxy");
+
+      // Prepare a mapping of log levels between those used by Log4JS and
+      // http-proxy-middleware's internal levels
+      const logLevels = {
+        ALL: "debug",
+        TRACE: "debug",
+        DEBUG: "debug",
+        INFO: "info",
+        WARN: "warn",
+        ERROR: "error",
+        FATAL: "error",
+        MARK: "error",
+        OFF: "silent",
+      };
+
+      // Convert the settings from DOTENV to a nice Array of Objects.
+      const proxyMap = Object.entries(process.env)
+        .filter(([k, v]) => k.startsWith("PROXY_"))
+        .map(([k, v]) => {
+          // Get rid of the leading "PROXY_" and convert to lower case
+          k = k.replace("PROXY_", "").toLowerCase();
+          return { context: k, target: v };
+        });
+
+      proxyMap.forEach((v) => {
+        // Grab context and target from current element
+        const context = v.context;
+        const target = v.target;
+        l.trace(`Setting up Hajk proxy "${context}"`);
+
+        // Create the proxy itself
+        app.use(
+          `/api/v1/proxy/${context}`,
+          createProxyMiddleware({
+            target: target,
+            changeOrigin: true,
+            pathRewrite: {
+              [`^/api/v1/proxy/${context}`]: "", // remove base path
+            },
+            logProvider: () => l,
+            logLevel: logLevels[process.env.LOG_LEVEL],
+          })
+        );
+      });
+    } catch (error) {
+      return { error };
+    }
   }
 
   setupStaticDirs() {

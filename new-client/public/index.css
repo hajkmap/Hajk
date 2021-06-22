@@ -17,7 +17,15 @@ body {
   overflow-y: scroll;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  /* prevent pinch-zoom on Android */
+  touch-action: pan-y;
 }
+
+#map {
+  /* restore pinch-zoom for map */
+  touch-action: auto;
+}
+
 .app-start {
   position: absolute;
   top: 0;
