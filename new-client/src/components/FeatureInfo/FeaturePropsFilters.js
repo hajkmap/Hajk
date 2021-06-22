@@ -171,11 +171,37 @@ filters.add("date", function (value) {
 /*
   time
   Example:
-  {'2021-06-03T13:04:12Z'|date}
+  {'2021-06-03T13:04:12Z'|time}
   outputs: 13:04:12
 */
 filters.add("time", function (value) {
   return new Date(value).toLocaleTimeString();
+});
+
+/*
+  dateAddDays
+  Example:
+  {'2021-06-03T13:04:12Z'|dateAddDays(1)|date}
+  outputs: 2021-06-04 13:04
+  Note: negative value will substract days
+*/
+filters.add("dateAddDays", function (value, days) {
+  const date = new Date(value);
+  date.setDate(date.getDate() + days);
+  return date;
+});
+
+/*
+  dateAddHours
+  Example:
+  {'2021-06-03T13:04:12Z'|dateAddHours(1)|date}
+  outputs: 2021-06-03 14:04
+  Note: negative value will substract hours
+*/
+filters.add("dateAddHours", function (value, hours) {
+  const date = new Date(value);
+  date.setTime(date.getTime() + hours * 60 * 60 * 1000);
+  return date;
 });
 
 /*
