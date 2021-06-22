@@ -178,7 +178,7 @@ class CoordinatesTransformRow extends React.PureComponent {
           <TableCell>
             <NumberFormat
               label={
-                this.props.transformation.inverseAxis
+                this.props.inverseAxis
                   ? this.props.transformation.ytitle
                   : this.props.transformation.xtitle
               }
@@ -191,7 +191,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               onValueChange={(values) => {
                 this.handleInputX(values);
               }}
-              axis={this.props.transformation.inverseAxis ? "X" : "Y"}
+              axis={this.props.inverseAxis ? "X" : "Y"}
               error={this.state.errorX !== ""}
               helperText={this.state.errorX}
               thousandSeparator={this.model.thousandSeparator ? " " : false}
@@ -199,7 +199,7 @@ class CoordinatesTransformRow extends React.PureComponent {
             />
             <NumberFormat
               label={
-                this.props.transformation.inverseAxis
+                this.props.inverseAxis
                   ? this.props.transformation.xtitle
                   : this.props.transformation.ytitle
               }
@@ -212,7 +212,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               onValueChange={(values) => {
                 this.handleInputY(values);
               }}
-              axis={this.props.transformation.inverseAxis ? "Y" : "X"}
+              axis={this.props.inverseAxis ? "Y" : "X"}
               error={this.state.errorY !== ""}
               helperText={this.state.errorY}
               thousandSeparator={this.model.thousandSeparator ? " " : false}
