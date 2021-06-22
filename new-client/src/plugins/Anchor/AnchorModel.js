@@ -50,13 +50,6 @@ class AnchorModel {
     return this.map;
   }
 
-  toParams(obj) {
-    return Object.keys(obj).reduce((paramStr, key, index) => {
-      const prefix = index === 0 ? "?" : "&";
-      return (paramStr += `${prefix}${key}=${obj[key]}`);
-    }, "");
-  }
-
   getVisibleLayers() {
     return this.map
       .getLayers()
@@ -81,27 +74,28 @@ class AnchorModel {
     const f = this.cqlFilters;
     const clean = this.getCleanUrl();
 
-    const str = this.toParams({
-      m: this.app.config.activeMap,
-      x: this.map.getView().getCenter()[0],
-      y: this.map.getView().getCenter()[1],
-      z: this.map.getView().getZoom(),
-      l: this.getVisibleLayers(),
-      // Only add 'q' if it isn't empty
-      ...(q.length > 0 && { q: encodeURIComponent(q) }),
-      // Only add 'f' if it isn't an empty object
-      ...(Object.keys(f).length > 0 && {
-        f: encodeURIComponent(JSON.stringify(f)),
-      }),
-      // Only add 'clean' if the value is true
-      ...(clean === true && { clean: clean }),
-    });
+    // Split current URL on the "?" and just get the first part. This
+    // way we'll get rid of any unwanted search params, without messing
+    // up the remaining portion of URL (protocol, host, path, hash).
+    const url = new URL(document.location.href.split("?")[0]);
 
-    // Split on "?" and get only the first segment. This prevents
-    // multiple query string situations, such as https://www.foo.com/?a=b?c=d
-    // that can happen if user enters the application using a link that already
-    // contains query parameters.
-    return document.location.href.split("?")[0] + str;
+    // The following params are always appended
+    url.searchParams.append("m", this.app.config.activeMap);
+    url.searchParams.append("x", this.map.getView().getCenter()[0]);
+    url.searchParams.append("y", this.map.getView().getCenter()[1]);
+    url.searchParams.append("z", this.map.getView().getZoom());
+    url.searchParams.append("l", this.getVisibleLayers());
+
+    // Optionally, append those too:
+    // Only add 'clean' if the value is true
+    clean === true && url.searchParams.append("clean", clean);
+    // Only add 'f' if it isn't an empty object
+    Object.keys(f).length > 0 &&
+      url.searchParams.append("f", JSON.stringify(f));
+    // Only add 'q' if it isn't empty
+    q.length > 0 && url.searchParams.append("q", q);
+
+    return url.toString();
   }
 }
 
