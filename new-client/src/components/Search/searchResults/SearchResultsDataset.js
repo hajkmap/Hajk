@@ -226,11 +226,8 @@ class SearchResultsDataset extends React.Component {
 
   renderSearchResultPreview = () => {
     const { previewFeature, previewAnchorEl } = this.state;
-    const {
-      activeFeatureCollection,
-      getFeatureTitle,
-      enableFeaturePreview,
-    } = this.props;
+    const { activeFeatureCollection, getFeatureTitle, enableFeaturePreview } =
+      this.props;
     const shouldShowPreview =
       enableFeaturePreview && !isMobile && !previewFeature?.onClickName
         ? true

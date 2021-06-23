@@ -44,8 +44,7 @@ class ImageButton extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      url:
-        "https://loremflickr.com/cache/resized/65535_50301622157_65c29f21eb_z_640_360_nofilter.jpg",
+      url: "https://loremflickr.com/cache/resized/65535_50301622157_65c29f21eb_z_640_360_nofilter.jpg",
       imageDialogVisible: false,
       editImageDialogVisible: false,
       imageList: this.props.imageList,

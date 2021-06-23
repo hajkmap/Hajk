@@ -367,16 +367,16 @@ class ToolOptions extends Component {
         enableExtentSearch: this.state.enableExtentSearch,
         enableResultsFiltering: this.state.enableResultsFiltering,
         enableResultsSorting: this.state.enableResultsSorting,
-        enableResultsSelectionClearing: this.state
-          .enableResultsSelectionClearing,
+        enableResultsSelectionClearing:
+          this.state.enableResultsSelectionClearing,
         enableResultsDownloading: this.state.enableResultsDownloading,
         enableFeaturePreview: this.state.enableFeaturePreview,
         enableLabelOnHighlight: this.state.enableLabelOnHighlight,
-        enableSelectedFeaturesCollection: this.state
-          .enableSelectedFeaturesCollection,
+        enableSelectedFeaturesCollection:
+          this.state.enableSelectedFeaturesCollection,
         showResultFeaturesInMap: this.state.showResultFeaturesInMap,
-        showResultsLimitReachedWarning: this.state
-          .showResultsLimitReachedWarning,
+        showResultsLimitReachedWarning:
+          this.state.showResultsLimitReachedWarning,
         enableFeatureToggler: this.state.enableFeatureToggler,
 
         drawFillColor: this.state.drawFillColor,

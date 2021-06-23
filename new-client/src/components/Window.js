@@ -447,17 +447,47 @@ class Window extends React.PureComponent {
       resizeTopRight = true;
 
     if (isMobile) {
-      resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTopLeft = resizeTopRight = resizeLeft = false;
+      resizeBottom =
+        resizeBottomLeft =
+        resizeBottomRight =
+        resizeRight =
+        resizeTopLeft =
+        resizeTopRight =
+        resizeLeft =
+          false;
     } else {
       if (this.state.mode === "maximized") {
-        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+        resizeBottom =
+          resizeBottomLeft =
+          resizeBottomRight =
+          resizeRight =
+          resizeTop =
+          resizeTopLeft =
+          resizeTopRight =
+          resizeLeft =
+            false;
       }
       if (this.state.mode === "minimized") {
-        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+        resizeBottom =
+          resizeBottomLeft =
+          resizeBottomRight =
+          resizeTop =
+          resizeTopLeft =
+          resizeTopRight =
+          resizeLeft =
+            false;
       }
 
       if (!resizingEnabled) {
-        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+        resizeBottom =
+          resizeBottomLeft =
+          resizeBottomRight =
+          resizeRight =
+          resizeTop =
+          resizeTopLeft =
+          resizeTopRight =
+          resizeLeft =
+            false;
       }
     }
 

@@ -578,12 +578,8 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const {
-    mapLink,
-    headerIdentifier,
-    documentLink,
-    externalLink,
-  } = getLinkDataPerType(aTag.attributes);
+  const { mapLink, headerIdentifier, documentLink, externalLink } =
+    getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {
     return getDocumentLink(headerIdentifier, documentLink);

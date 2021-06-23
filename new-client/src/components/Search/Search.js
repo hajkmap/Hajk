@@ -261,7 +261,8 @@ class Search extends React.PureComponent {
   //Promise must be resolved into object with two methods getResults and getFunctionality
 
   getSearchImplementedPlugins = () => {
-    const pluginsConfToUseSearchInterface = this.getPluginsConfToUseSearchInterface();
+    const pluginsConfToUseSearchInterface =
+      this.getPluginsConfToUseSearchInterface();
     const searchBoundPlugins = this.tryBindSearchMethods(
       pluginsConfToUseSearchInterface
     );
@@ -596,9 +597,10 @@ class Search extends React.PureComponent {
   getMergeResultsFromAllSources = (results) => {
     return results.reduce(
       (searchResults, result) => {
-        searchResults.featureCollections = searchResults.featureCollections.concat(
-          result.value.featureCollections
-        );
+        searchResults.featureCollections =
+          searchResults.featureCollections.concat(
+            result.value.featureCollections
+          );
         searchResults.errors = searchResults.errors.concat(result.value.errors);
         return searchResults;
       },
@@ -694,9 +696,8 @@ class Search extends React.PureComponent {
     this.setState({ loading: true });
     const fetchOptions = this.getSearchResultsFetchSettings();
     const searchResults = await this.fetchResultFromSearchModel(fetchOptions);
-    const failedWFSFetchMessage = this.getPotentialWFSErrorMessage(
-      searchResults
-    );
+    const failedWFSFetchMessage =
+      this.getPotentialWFSErrorMessage(searchResults);
 
     this.setState({
       searchResults,

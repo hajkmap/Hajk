@@ -214,11 +214,8 @@ class BackgroundSwitcher extends React.PureComponent {
    * @memberof BackgroundSwitcher
    */
   renderBaseLayerComponents() {
-    const {
-      backgroundSwitcherWhite,
-      backgroundSwitcherBlack,
-      enableOSM,
-    } = this.props;
+    const { backgroundSwitcherWhite, backgroundSwitcherBlack, enableOSM } =
+      this.props;
     let radioButtons = [],
       defaults = [];
 

@@ -433,11 +433,8 @@ class WMSLayerForm extends Component {
                 () => {
                   this.validateField("select-layers-info-legend-icon");
                   let addedLayersInfo = this.state.addedLayersInfo;
-                  addedLayersInfo[
-                    layerInfo.id
-                  ].legendIcon = this.props.model.get(
-                    "select-layers-info-legend-icon"
-                  );
+                  addedLayersInfo[layerInfo.id].legendIcon =
+                    this.props.model.get("select-layers-info-legend-icon");
                   this.setState(
                     {
                       addedLayersInfo: addedLayersInfo,
@@ -913,8 +910,8 @@ class WMSLayerForm extends Component {
       this.state.capabilities.Capability.Request &&
       this.state.capabilities.Capability.Request.GetFeatureInfo
     ) {
-      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
-        .Format;
+      formats =
+        this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     }
     if (formats && formats.indexOf("application/geojson") > -1) {
       this.setState({ serverType: "arcgis" });
@@ -955,8 +952,8 @@ class WMSLayerForm extends Component {
       this.state.capabilities.Capability.Request &&
       this.state.capabilities.Capability.Request.GetFeatureInfo
     ) {
-      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
-        .Format;
+      formats =
+        this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     }
 
     let formatEles = formats

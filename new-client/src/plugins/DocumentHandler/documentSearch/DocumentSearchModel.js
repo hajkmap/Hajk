@@ -160,9 +160,10 @@ export default class DocumentSearchModel {
 
       // The searchString will be encoded if the search has been initiated
       // by selecting an alternative in the autocomplete.
-      possibleSearchCombinations = this.decodePotentialSpecialCharsFromFeatureProps(
-        possibleSearchCombinations
-      );
+      possibleSearchCombinations =
+        this.decodePotentialSpecialCharsFromFeatureProps(
+          possibleSearchCombinations
+        );
 
       resolve({
         featureCollections: this.getFeatureCollectionsForMatchingDocuments(

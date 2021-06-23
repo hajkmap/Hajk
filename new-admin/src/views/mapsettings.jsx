@@ -347,24 +347,24 @@ class Menu extends Component {
         this.setState({
           reset: false,
           active: this.props.model.get("layerMenuConfig").active,
-          visibleAtStart: this.props.model.get("layerMenuConfig")
-            .visibleAtStart,
-          visibleAtStartMobile: this.props.model.get("layerMenuConfig")
-            .visibleAtStartMobile,
-          backgroundSwitcherBlack: this.props.model.get("layerMenuConfig")
-            .backgroundSwitcherBlack,
-          backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
-            .backgroundSwitcherWhite,
+          visibleAtStart:
+            this.props.model.get("layerMenuConfig").visibleAtStart,
+          visibleAtStartMobile:
+            this.props.model.get("layerMenuConfig").visibleAtStartMobile,
+          backgroundSwitcherBlack:
+            this.props.model.get("layerMenuConfig").backgroundSwitcherBlack,
+          backgroundSwitcherWhite:
+            this.props.model.get("layerMenuConfig").backgroundSwitcherWhite,
           enableOSM: this.props.model.get("layerMenuConfig").enableOSM,
-          showBreadcrumbs: this.props.model.get("layerMenuConfig")
-            .showBreadcrumbs,
-          enableTransparencySlider: this.props.model.get("layerMenuConfig")
-            .enableTransparencySlider,
+          showBreadcrumbs:
+            this.props.model.get("layerMenuConfig").showBreadcrumbs,
+          enableTransparencySlider:
+            this.props.model.get("layerMenuConfig").enableTransparencySlider,
           instruction: this.props.model.get("layerMenuConfig").instruction,
-          dropdownThemeMaps: this.props.model.get("layerMenuConfig")
-            .dropdownThemeMaps,
-          themeMapHeaderCaption: this.props.model.get("layerMenuConfig")
-            .themeMapHeaderCaption,
+          dropdownThemeMaps:
+            this.props.model.get("layerMenuConfig").dropdownThemeMaps,
+          themeMapHeaderCaption:
+            this.props.model.get("layerMenuConfig").themeMapHeaderCaption,
           visibleForGroups: this.props.model.get("layerMenuConfig")
             .visibleForGroups
             ? this.props.model.get("layerMenuConfig").visibleForGroups
