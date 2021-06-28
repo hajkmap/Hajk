@@ -155,7 +155,8 @@ filters.add("notEquals", function (value, test, falseValue, trueValue) {
   outputs: 2021-06-03 13:04:12
 */
 filters.add("datetime", function (value) {
-  return new Date(value).toLocaleString();
+  const date = typeof value === "string" ? new Date(value) : value;
+  return date.toLocaleString();
 });
 
 /*
@@ -165,17 +166,45 @@ filters.add("datetime", function (value) {
   outputs: 2021-06-03
 */
 filters.add("date", function (value) {
-  return new Date(value).toLocaleDateString();
+  const date = typeof value === "string" ? new Date(value) : value;
+  return date.toLocaleDateString();
 });
 
 /*
   time
   Example:
-  {'2021-06-03T13:04:12Z'|date}
+  {'2021-06-03T13:04:12Z'|time}
   outputs: 13:04:12
 */
 filters.add("time", function (value) {
-  return new Date(value).toLocaleTimeString();
+  const date = typeof value === "string" ? new Date(value) : value;
+  return date.toLocaleTimeString();
+});
+
+/*
+  dateAddDays
+  Example:
+  {'2021-06-03T13:04:12Z'|dateAddDays(1)|datetime}
+  outputs: 2021-06-04 13:04
+  Note: negative value will substract days
+*/
+filters.add("dateAddDays", function (value, days) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  date.setDate(date.getDate() + parseFloat(days));
+  return date;
+});
+
+/*
+  dateAddHours
+  Example:
+  {'2021-06-03T13:04:12Z'|dateAddHours(1)|datetime}
+  outputs: 2021-06-03 14:04
+  Note: negative value will substract hours
+*/
+filters.add("dateAddHours", function (value, hours) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  date.setTime(date.getTime() + parseFloat(hours) * 60 * 60 * 1000);
+  return date;
 });
 
 /*
