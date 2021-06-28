@@ -79,6 +79,7 @@ class CoordinatesView extends React.PureComponent {
               key={transformation.code + index + "-element"}
               model={this.model}
               transformation={transformation}
+              inverseAxis={transformation.inverseAxis}
             />
           );
         })}
