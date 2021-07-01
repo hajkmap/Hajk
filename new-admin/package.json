@@ -1,13 +1,13 @@
 {
   "name": "hajk-admin",
-  "version": "3.6.0",
+  "version": "3.7.0-rc.1",
   "private": true,
   "homepage": ".",
   "dependencies": {
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.58",
-    "antd": "^4.16.1",
+    "antd": "^4.16.6",
     "backbone": "^1.4.0",
     "draft-js": "^0.11.7",
     "draft-js-export-html": "^1.4.1",
@@ -16,14 +16,14 @@
     "jquery": "^3.6.0",
     "jquery-sortable": "^0.9.13",
     "ol": "^5.3.3",
-    "proj4": "^2.7.2",
+    "proj4": "^2.7.4",
     "react": "^16.13.1",
     "react-color": "^2.18.1",
     "react-dom": "^16.13.1",
-    "react-modal": "^3.14.2",
+    "react-modal": "^3.14.3",
     "react-scripts": "^3.4.3",
     "react-smooth-dnd": "^0.11.1",
-    "typescript": "^3.9.5",
+    "typescript": "^3.9.10",
     "x2js": "^3.4.1"
   },
   "scripts": {
@@ -36,7 +36,7 @@
     "draft-convert": "^2.1.11",
     "draft-extend": "^1.6.5",
     "husky": "^4.3.7",
-    "prettier": "^2.3.0",
+    "prettier": "^2.3.2",
     "pretty-quick": "^2.0.1"
   },
   "browserslist": [
