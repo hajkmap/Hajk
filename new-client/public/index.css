@@ -27,6 +27,7 @@ body {
 }
 
 .app-start {
+  font-family: Helvetica, sans-serif;
   position: absolute;
   top: 0;
   bottom: 0;
