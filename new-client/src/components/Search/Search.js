@@ -113,6 +113,7 @@ class Search extends React.PureComponent {
     super(props);
     this.map = props.map;
     this.searchModel = props.app.appModel.searchModel;
+    this.globalObserver = props.app.globalObserver;
     this.initMapViewModel();
     this.initExportHandlers();
     this.bindSubscriptions();
@@ -293,8 +294,7 @@ class Search extends React.PureComponent {
   };
 
   componentDidMount = () => {
-    const { app } = this.props;
-    app.globalObserver.subscribe("core.appLoaded", () => {
+    this.globalObserver.subscribe("core.appLoaded", () => {
       this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
         this.setState(
           {
@@ -409,6 +409,9 @@ class Search extends React.PureComponent {
           }
         );
       }, this.delayBeforeAutoSearch);
+
+      // Announce the input change, so other plugins can be notified
+      this.globalObserver.publish("search.searchPhraseChanged", searchString);
     }
   };
 

@@ -7,7 +7,13 @@ class AnchorModel {
     this.map = settings.map;
     this.localObserver = settings.localObserver;
 
+    // Update the URL when map view changes
     this.map.getView().on("change", this.update);
+
+    // Update the URL when search phrase changes
+    this.app.globalObserver.subscribe("search.searchPhraseChanged", () => {
+      this.localObserver.publish("mapUpdated", this.getAnchor());
+    });
 
     this.map
       .getLayers()
