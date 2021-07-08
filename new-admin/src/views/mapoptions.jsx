@@ -70,6 +70,7 @@ class MapOptions extends Component {
         origin: config.origin,
         constrainOnlyCenter: config.constrainOnlyCenter,
         constrainResolution: config.constrainResolution,
+        constrainResolutionMobile: config.constrainResolutionMobile,
         enableDownloadLink: config.enableDownloadLink,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
@@ -125,6 +126,7 @@ class MapOptions extends Component {
       origin: mapConfig.origin,
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
       constrainResolution: mapConfig.constrainResolution,
+      constrainResolutionMobile: mapConfig.constrainResolutionMobile,
       enableDownloadLink: mapConfig.enableDownloadLink,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
@@ -266,6 +268,7 @@ class MapOptions extends Component {
         break;
       case "constrainOnlyCenter":
       case "constrainResolution":
+      case "constrainResolutionMobile":
       case "enableDownloadLink":
       case "mapselector":
       case "mapcleaner":
@@ -315,6 +318,9 @@ class MapOptions extends Component {
         config.origin = this.getValue("origin");
         config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
         config.constrainResolution = this.getValue("constrainResolution");
+        config.constrainResolutionMobile = this.getValue(
+          "constrainResolutionMobile"
+        );
         config.enableDownloadLink = this.getValue("enableDownloadLink");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
@@ -628,7 +634,32 @@ class MapOptions extends Component {
               />
               &nbsp;
               <label className="long-label" htmlFor="input_constrainResolution">
-                Lås zoom till satta upplösningar{" "}
+                Lås zoom till satta upplösningar för datorer{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styr ol.Views 'constrainResolution'-parameter. Om sant kommer det endast gå att zooma mellan satta resolutions"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_constrainResolutionMobile"
+                type="checkbox"
+                ref="input_constrainResolutionMobile"
+                onChange={(e) => {
+                  this.setState({
+                    constrainResolutionMobile: e.target.checked,
+                  });
+                }}
+                checked={this.state.constrainResolutionMobile}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_constrainResolutionMobile"
+              >
+                Lås zoom till satta upplösningar för mobiltelefoner{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
