@@ -8,10 +8,18 @@ import { hfetch } from "utils/FetchWrapper";
 function query(map, layer, evt) {
   const coordinate = evt.coordinate;
   const resolution = map.getView().getResolution();
+  const currentZoom = map.getView().getZoom();
   const referenceSystem = map.getView().getProjection().getCode();
   let subLayersToQuery = [];
 
-  if (layer.layersInfo) {
+  // Query only those layers that a) have a layersInfo property, and
+  // b) are currently displayed. Please note that checking for visibility
+  // is not enough, we must also respect the min/max zoom level settings, #836.
+  if (
+    layer.layersInfo &&
+    layer.getMinZoom() <= currentZoom &&
+    currentZoom <= layer.getMaxZoom()
+  ) {
     const subLayers = Object.values(layer.layersInfo);
     const visibleSubLayers = layer.getSource().getParams()["LAYERS"];
     subLayersToQuery = subLayers
@@ -95,8 +103,35 @@ function sortFeatures(layer, features) {
   features.sort(getSortMethod(sortOptions));
 }
 
+// Function similar to GeoJSON().readFeatures, with the subtle difference that we set an
+// id if it is missing on the parsed feature. The missing id occurs when parsing features from
+// arcGis for some reason.
+function readJsonFeatures(jsonData) {
+  const parser = new GeoJSON();
+  const parsedFeatures = [];
+  // jsonData will always be a featureCollection, hence we must map over all
+  // features in the collection.
+  jsonData.features.map((jsonFeature) => {
+    // Lets parse the feature...
+    const parsedJsonFeature = parser.readFeature(jsonFeature);
+    // And check if we have an id...
+    if (!parsedJsonFeature.getId()) {
+      // If we don't, we set the id to the layerName, and a random id
+      // so that featureInfo knows when we clicked a new feature in
+      // the same layer.
+      parsedJsonFeature.setId(
+        `${jsonFeature.layerName}.${parsedJsonFeature.ol_uid}`
+      );
+    }
+    // Push the feature to the array of parsed features
+    return parsedFeatures.push(parsedJsonFeature);
+  });
+  // And return it
+  return parsedFeatures;
+}
+
 function getFeaturesFromJson(response, jsonData) {
-  let parsed = new GeoJSON().readFeatures(jsonData);
+  const parsed = readJsonFeatures(jsonData);
   if (parsed && parsed.length > 0) {
     parsed.forEach((f) => {
       f.layer = response.layer;

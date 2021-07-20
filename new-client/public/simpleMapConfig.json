@@ -220,6 +220,22 @@
                 "infobox": null
               }
             ]
+          },
+          {
+            "id": "9938c969-590c-8683-435c-1ecaca271096",
+            "parent": "-1",
+            "name": "Övrigt",
+            "toggled": true,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "1352",
+                "visibleAtStart": true,
+                "drawOrder": 4,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ]
           }
         ],
         "active": true,
@@ -398,6 +414,10 @@
           {
             "name": "Umeå",
             "presetUrl": "?m=simpleMapConfig&x=758454.9972847599&y=7084504.860998487&z=6.739288215480473&l=1&f=%7B%7D&clean=false"
+          },
+          {
+            "name": "Varberg",
+            "presetUrl": "?m=simpleMapConfig&x=337544.0333333551&y=6331254.569479619&z=6.502756678859521&ss=ss&f=%7B%7D&clean=false"
           }
         ],
         "visibleForGroups": []
@@ -472,10 +492,10 @@
   ],
   "map": {
     "target": "map",
-    "center": [523718, 6920000],
+    "center": [576357, 6386049],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 0.67,
+    "zoom": 1.33,
     "maxZoom": 8,
     "minZoom": 0,
     "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],

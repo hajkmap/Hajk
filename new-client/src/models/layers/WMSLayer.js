@@ -65,6 +65,8 @@ class WMSLayer {
         source: new ImageWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        timeSliderStart: config?.timeSliderStart,
+        timeSliderEnd: config?.timeSliderEnd,
         minZoom: minZoom,
         maxZoom: maxZoom,
       });
@@ -77,6 +79,8 @@ class WMSLayer {
         source: new TileWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
+        timeSliderStart: config?.timeSliderStart,
+        timeSliderEnd: config?.timeSliderEnd,
         minZoom: minZoom,
         maxZoom: maxZoom,
       });
@@ -162,7 +166,8 @@ class WMSLayer {
           params.projection,
           {
             INFO_FORMAT:
-              this.get("serverType") === "arcgis"
+              this.get("serverType") === "arcgis" ||
+              this.get("serverType") === "mapserver"
                 ? "application/geojson"
                 : "application/json",
             feature_count: 100,

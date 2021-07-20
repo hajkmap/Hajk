@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { withStyles } from "@material-ui/core";
 import gfm from "remark-gfm";
+import FeaturePropFilters from "./FeaturePropsFilters";
 import {
   Divider,
   Link,
@@ -100,7 +101,7 @@ export default class FeaturePropsParsing {
       },
       a: ({ children, href, target }) => {
         return (
-          <Link href={href} target={target}>
+          <Link href={href} title={title} target="_blank">
             {children}
           </Link>
         );
@@ -224,11 +225,22 @@ export default class FeaturePropsParsing {
           ) - 1
         }}`;
       }
+    } else if (placeholder.includes("|")) {
+      return FeaturePropFilters.applyFilters(this.properties, placeholder);
     }
     // Just a "normal" placeholder, e.g. {foobar}
     else {
-      // Grab the actual value from the Properties collection, if not found, fallback to empty string
-      return this.properties[placeholder] || "";
+      // Attempt to grab the actual value from the Properties collection, if not found, fallback to empty string.
+      // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
+
+      return (
+        // What you see on the next line is what we call "hängslen och livrem" in Sweden.
+        // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
+        // "placeholder", but if it does, we can't be sure that it will have the replace() method (as only Strings have it).)
+        this.properties?.[placeholder]?.replace?.(/=/g, "&equal;") || // If replace() exists, it's a string, so we can revert our equal signs.
+        this.properties[placeholder] || // If not a string, return the value as-is…
+        "" // …unless it's undefined - in that case, return an empty string.
+      );
     }
   };
 
@@ -320,28 +332,29 @@ export default class FeaturePropsParsing {
     // The named capture groups will be the last parameter
     const matched = args[args.length - 1];
 
-    // Anchor text is simple
+    // Anchor text and title are simple
     const text = matched.text;
+    const title = matched.title ? " " + matched.title : "";
 
-    // Anchor href will require some more work
-    let href = "";
+    // Anchor href will require some more work.
+    let href = matched.href;
+
     try {
-      // Try creating a new URL from the matched href, removing the first
-      // and last character (which are "(" and ")").
+      // Try creating a new URL from the matched href.
       // Invoking new URL will escape any special characters and ensure
       // that we provide a well-formatted URL to the MarkDown.
-      href = new URL(matched.href.slice(1, -1)).href;
+      href = new URL(href);
     } catch (error) {
       // If the URL creation failed for some reason (e.g. if a.href was empty,
       // or if it was a relative path), fall back to using the provided
       // string as-is, but remember to remove the leading and closing parentheses
       // that our regex included in the match and encode the URL (i.e. still
       // transform 'dir/file åäö.pdf' to 'dir/file%20%C3%A5%C3%A4%C3%B6.pdf').
-      href = encodeURI(matched.href.slice(1, -1));
+      href = encodeURI(href);
     }
 
     // Prepare a nice MD Anchor string
-    const r = `[${text}](${href})`;
+    const r = `[${text}](${href}${title})`;
     return r;
   };
 
@@ -391,17 +404,19 @@ export default class FeaturePropsParsing {
       // The regex below will match all placeholders.
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
-      // Match any word character, @ sign, dash or dot
-      (this.markdown.match(/{[\w@\-.]+}/g) || []).forEach((placeholder) => {
-        // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
-        // Let's replace all occurrences of the placeholder like this:
-        // {foobar} -> Some nice FoobarValue
-        // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
-        this.markdown = this.markdown.replace(
-          placeholder,
-          this.#getPropertyValueForPlaceholder(placeholder)
-        );
-      });
+      // Match any word character, range of unicode characters (åäö etc), @ sign, dash or dot
+      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|,'.():]+}/g) || []).forEach(
+        (placeholder) => {
+          // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
+          // Let's replace all occurrences of the placeholder like this:
+          // {foobar} -> Some nice FoobarValue
+          // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
+          this.markdown = this.markdown.replace(
+            placeholder,
+            this.#getPropertyValueForPlaceholder(placeholder)
+          );
+        }
+      );
 
       // this.markdown will now contain actual values instead of properties, OR
       // references to elements in the this.resolvedPromises array. The latter will
@@ -434,9 +449,14 @@ export default class FeaturePropsParsing {
       // [This is a link](https://www.example.com/Some%20PDF%20file%20we%20link%20to.pdf)
       // The following regex does just that.
       this.markdown = this.markdown.replace(
-        /\[(?<text>[^[]+)\](?<href>\(.*\))/gm,
+        /\[(?<text>[^[]+)\]\((?<href>[^")]+)(?<title>".*")?\)/gm,
         this.#markdownHrefEncoder
       );
+
+      // Back in #getPropertyValueForPlaceholder we encode all equal signs ("=") as "&equal;",
+      // to ensure we don't run into the issue described in #812 when we do the conditional check.
+      // Now is a good time to revert that encoding back into an equal sign.
+      this.markdown = this.markdown.replace(/&equal;/g, "=");
 
       // The final step is to await for all promises that might exist (if we fetch from
       // external components) to fulfill. We can't render before that!

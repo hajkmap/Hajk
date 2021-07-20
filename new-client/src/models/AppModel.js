@@ -210,10 +210,19 @@ class AppModel {
         zoom: config.map.zoom,
       }),
     });
-    // FIXME: Remove?
-    setTimeout(() => {
-      this.map.updateSize();
-    }, 0);
+
+    // Create throttled zoomEnd event
+    let currentZoom = this.map.getView().getZoom();
+
+    this.map.on("moveend", (e) => {
+      // using moveend to create a throttled zoomEnd event
+      // instead of using change:resolution to minimize events being fired.
+      const newZoom = this.map.getView().getZoom();
+      if (currentZoom !== newZoom) {
+        this.globalObserver.publish("core.zoomEnd", { zoom: newZoom });
+        currentZoom = newZoom;
+      }
+    });
 
     // Add Snap Helper to the Map
     this.map.snapHelper = new SnapHelper(this);
@@ -481,68 +490,55 @@ class AppModel {
         this.highlightSource.addFeature(feature);
         if (window.innerWidth < 600) {
           let geom = feature.getGeometry();
-          this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          if (geom) {
+            this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          }
         }
       }
     }
   }
 
   /**
-   * TODO: Obsolete, replaced by new app-wide solution using URL APIs, see #568.
-   * Ensure that this gets removed too.
-   */
-  parseQueryParams() {
-    var o = {};
-    document.location.search
-      .replace(/(^\?)/, "")
-      .split("&")
-      .forEach((param) => {
-        var a = param.split("=");
-        o[a[0]] = a[1];
-      });
-    return o;
-  }
-  /**
    * @summary Merges two objects.
    *
-   * @param {*} a
-   * @param {*} b
-   * @returns {*} a Result of overwritting a with values from b
+   * @param {*} mapConfig
+   * @param {*} urlSearchParams
+   * @returns {*} a Result of overwriting a with values from b
    * @memberof AppModel
    */
-  mergeConfig(a, b) {
+  mergeConfig(mapConfig, urlSearchParams) {
     // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
     const clean =
-      Boolean(b.hasOwnProperty("clean")) &&
-      b.clean !== "false" &&
-      b.clean !== "0";
+      Boolean(urlSearchParams.hasOwnProperty("clean")) &&
+      urlSearchParams.clean !== "false" &&
+      urlSearchParams.clean !== "0";
 
     // f contains our CQL Filters
-    const f = b.f;
+    const f = urlSearchParams.f;
 
     // Merge query params to the map config from JSON
-    let x = parseFloat(b.x),
-      y = parseFloat(b.y),
-      z = parseInt(b.z, 10),
+    let x = parseFloat(urlSearchParams.x),
+      y = parseFloat(urlSearchParams.y),
+      z = parseInt(urlSearchParams.z, 10),
       l = undefined;
-    if (typeof b.l === "string") {
-      l = b.l.split(",");
+    if (typeof urlSearchParams.l === "string") {
+      l = urlSearchParams.l.split(",");
     }
 
     if (Number.isNaN(x)) {
-      x = a.map.center[0];
+      x = mapConfig.map.center[0];
     }
     if (Number.isNaN(y)) {
-      y = a.map.center[1];
+      y = mapConfig.map.center[1];
     }
     if (Number.isNaN(z)) {
-      z = a.map.zoom;
+      z = mapConfig.map.zoom;
     }
 
-    a.map.clean = clean;
-    a.map.center[0] = x;
-    a.map.center[1] = y;
-    a.map.zoom = z;
+    mapConfig.map.clean = clean;
+    mapConfig.map.center[0] = x;
+    mapConfig.map.center[1] = y;
+    mapConfig.map.zoom = z;
 
     if (l) {
       this.layersFromParams = l;
@@ -553,7 +549,7 @@ class AppModel {
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
     }
 
-    return a;
+    return mapConfig;
   }
   /**
    * @summary If supplied argument, v, is a string and is longer then 0, return an encoded value of v. Else return undefined.
@@ -644,6 +640,47 @@ class AppModel {
         searchTool,
         layers.wfslayers
       );
+
+      // See if admin wants to expose any WMS layers. selectedSources will
+      // in that case be an array that will hold the IDs of corresponding layers
+      // (that can be found in our layers.wmslayers array). In there, a properly
+      // configured WMS layer that is to be searchable will have certain search-related
+      // settings active (such as name of the geometry column or URL to the WFS service).
+      const wmslayers = searchTool.options.selectedSources?.flatMap(
+        (wmslayerId) => {
+          // Find the corresponding layer
+          const layer = layers.wmslayers.find((l) => l.id === wmslayerId);
+
+          // Look into the layersInfo array - it will contain sublayers. We must
+          // expose each one of them as a WFS service.
+          return layer.layersInfo.map((sl) => {
+            return {
+              id: sl.id,
+              pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer
+              caption: sl.caption,
+              url: sl.searchUrl || layer.url,
+              layers: [sl.id],
+              searchFields:
+                typeof sl.searchPropertyName === "string"
+                  ? sl.searchPropertyName.split(",")
+                  : [],
+              infobox: sl.infobox || "",
+              aliasDict: "",
+              displayFields:
+                typeof sl.searchDisplayName === "string"
+                  ? sl.searchDisplayName.split(",")
+                  : [],
+              geometryField: sl.searchGeometryField || "geom",
+              outputFormat: sl.searchOutputFormat || "GML3",
+            };
+          });
+        }
+      );
+
+      // Spread the WMS search layers onto the array with WFS search sources,
+      // from now on they're equal to our code.
+      Array.isArray(wmslayers) && wfslayers.push(...wmslayers);
+
       searchTool.options.sources = wfslayers;
     }
 
@@ -685,7 +722,10 @@ class AppModel {
       }
     }
 
-    return this.mergeConfig(this.config.mapConfig, this.parseQueryParams());
+    return this.mergeConfig(
+      this.config.mapConfig,
+      Object.fromEntries(new URLSearchParams(document.location.search))
+    );
   }
 }
 

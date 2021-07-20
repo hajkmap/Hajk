@@ -135,7 +135,18 @@ const renderChild = (child) => {
   }
 
   if (child.nodeType === ELEMENT_NODE) {
-    return child.callback(child);
+    // Don't assume that callback exits
+    if (typeof child.callback === "function") {
+      return child.callback(child);
+    } else {
+      // If there's no callback, warn and render just
+      // the inner text portion of Element
+      console.warn(
+        "Unsupported DOMElement encountered. Rendering only innerText",
+        child
+      );
+      return child.innerText;
+    }
   }
 };
 
@@ -514,7 +525,19 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       </Button>
     );
   };
-  const getMapLink = (aTag, mapLink) => {
+  const getMapLink = (aTag, mapLinkOrg) => {
+    // Attempt to safely URI Decode the supplied string. If
+    // it fails, use it as-is.
+    // The reason we want probably want to decode is that the
+    // link is created using the Anchor plugin, which encodes
+    // the query string properly, see #831 and #838.
+    let mapLink = null;
+    try {
+      mapLink = decodeURIComponent(mapLinkOrg);
+    } catch (error) {
+      mapLink = mapLinkOrg;
+    }
+
     return (
       <Button
         color="default"
@@ -567,12 +590,8 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const {
-    mapLink,
-    headerIdentifier,
-    documentLink,
-    externalLink,
-  } = getLinkDataPerType(aTag.attributes);
+  const { mapLink, headerIdentifier, documentLink, externalLink } =
+    getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {
     return getDocumentLink(headerIdentifier, documentLink);
