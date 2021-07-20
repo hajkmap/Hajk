@@ -150,15 +150,17 @@ class ConfigServiceV2 {
     // each of the following constants. Hence the frequent use of '?.' and '||'.
 
     // Grab layers and baselayers from LayerSwitcher
-    const lsOptions = mapConfig.tools.find((t) => t.type === "layerswitcher")
-      ?.options;
+    const lsOptions = mapConfig.tools.find(
+      (t) => t.type === "layerswitcher"
+    )?.options;
     const baseLayerIds = lsOptions?.baselayers.map((bl) => bl.id) || [];
     const layerIds =
       lsOptions?.groups.flatMap((g) => getLayerIdsFromGroup(g)) || [];
 
     // Grab layers from Search
-    const searchOptions = mapConfig.tools.find((t) => t.type === "search")
-      ?.options;
+    const searchOptions = mapConfig.tools.find(
+      (t) => t.type === "search"
+    )?.options;
     const searchLayerIds = searchOptions?.layers.map((l) => l.id) || [];
 
     // Grab layers from Edit

@@ -13,9 +13,9 @@ export class Controller {
   }
 
   findCommonADGroupsForUsers(req, res) {
-    ActiveDirectoryService.findCommonADGroupsForUsers(
-      req.query.users
-    ).then((data) => handleStandardResponse(res, data));
+    ActiveDirectoryService.findCommonADGroupsForUsers(req.query.users).then(
+      (data) => handleStandardResponse(res, data)
+    );
   }
 
   getStore(req, res) {

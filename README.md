@@ -18,6 +18,7 @@ If you are a new user of Hajk, please visit [our welcome page (Swedish only)](ht
 The official automatic build of the latest version can be found here: https://hajk-demo.netlify.app/.
 
 For some real-life examples, see the following solutions:
+
 - [Halmstad municipality's map](https://karta.halmstad.se)
 - [Kungsbacka municipality's map](https://karta.kungsbacka.se)
 - [The Gothenburg Region's map](https://karta.goteborgsregionen.se)
@@ -25,6 +26,7 @@ For some real-life examples, see the following solutions:
 - [Uddevalla municipality's map](https://karta.uddevalla.se)
 
 ## Quick start (for admins)
+
 Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).
 
 ## Quick start (for developers)

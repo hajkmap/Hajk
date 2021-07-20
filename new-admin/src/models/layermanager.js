@@ -233,14 +233,17 @@ var manager = Model.extend({
             : new XMLSerializer().serializeToString(data),
           apa = parser.xml2js(xmlstr);
         try {
-          var props = apa.schema.complexType.complexContent.extension.sequence.element.map(
-            (a) => {
-              return {
-                name: a._name,
-                localType: a._type ? a._type.replace(a.__prefix + ":", "") : "",
-              };
-            }
-          );
+          var props =
+            apa.schema.complexType.complexContent.extension.sequence.element.map(
+              (a) => {
+                return {
+                  name: a._name,
+                  localType: a._type
+                    ? a._type.replace(a.__prefix + ":", "")
+                    : "",
+                };
+              }
+            );
           if (props) {
             callback(props);
           } else {
@@ -274,12 +277,16 @@ var manager = Model.extend({
         crs = $(featureType).find("DefaultSRS").first().get(0).textContent;
       }
       if ($(featureType).find("wfs\\:DefaultCRS").length > 0) {
-        crs = $(featureType).find("wfs\\:DefaultCRS").first().get(0)
-          .textContent;
+        crs = $(featureType)
+          .find("wfs\\:DefaultCRS")
+          .first()
+          .get(0).textContent;
       }
       if ($(featureType).find("wfs\\:DefaultSRS").length > 0) {
-        crs = $(featureType).find("wfs\\:DefaultSRS").first().get(0)
-          .textContent;
+        crs = $(featureType)
+          .find("wfs\\:DefaultSRS")
+          .first()
+          .get(0).textContent;
       }
       if (crs && typeof crs === "string") {
         crs = crs.split(":");

@@ -1,10 +1,10 @@
 ## Contributing
 
->**A note on backends**
+> **A note on backends**
 >
->As you probably know by now, Hajk consists of three separate applications: Client, Admin and Backend. If this concept is new to you, please see [the description here](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29#the-three-editions-of-hajk).
+> As you probably know by now, Hajk consists of three separate applications: Client, Admin and Backend. If this concept is new to you, please see [the description here](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29#the-three-editions-of-hajk).
 >
->Prior to 2021, Backend was a .NET project. In the spring of 2021, the *Hajk NodeJS backend* became available, finally making Hajk an OS-independent webGIS solution. At the time of writing (mid 2021), some features are exclusively available in the NodeJS backend, but otherwise the both backends have similar functionality and API. 
+> Prior to 2021, Backend was a .NET project. In the spring of 2021, the _Hajk NodeJS backend_ became available, finally making Hajk an OS-independent webGIS solution. At the time of writing (mid 2021), some features are exclusively available in the NodeJS backend, but otherwise the both backends have similar functionality and API.
 
 ### Required tools
 
@@ -14,7 +14,7 @@
 
 The Client (`new-client`), Admin (`new-admin`) and NodeJS backend (`new-backend`) applications can be built and deployed on any OS supported by recent Git and Node versions (tested on macOS, Windows and Linux).
 
-The .NET backend (`backend`) component, requires Visual Studio 2019 for Windows. 
+The .NET backend (`backend`) component, requires Visual Studio 2019 for Windows.
 
 Please note that if you plan on working on the obsolete [Hajk 2](https://github.com/hajkmap/Hajk/tree/hajk2.x) branch, you must use Visual Studio 2015 instead.
 
