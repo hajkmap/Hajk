@@ -4,6 +4,7 @@ import ImageLayer from "ol/layer/Image";
 //import GML from "ol/format/GML";
 import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 import { hfetch } from "utils/FetchWrapper";
+import Point from "ol/geom/Point";
 
 function query(map, layer, evt) {
   const coordinate = evt.coordinate;
@@ -249,6 +250,15 @@ export function handleClick(evt, map, callback) {
     });
 
     Promise.all(featurePromises).then(() => {
+      // Check that all features have a geometry, depending on setup and layer, it is not always the case
+      features.forEach((feature) => {
+        if (feature.getGeometry() === null) {
+          // Add the point that was clicked as geometry if none was returned from the server
+          const nonGeomPoint = new Point(evt.coordinate);
+          feature.setGeometry(nonGeomPoint);
+        }
+      });
+
       map.forEachFeatureAtPixel(
         evt.pixel,
         (feature, layer) => {
