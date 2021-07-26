@@ -103,7 +103,7 @@ class Toolbar extends Component {
     const { theme } = this.props;
     let style = {};
     if (type === this.props.activeTool) {
-      style.backgroundColor = theme.palette.action.active;
+      style.backgroundColor = theme.palette.action.selected;
     }
     return style;
   }
