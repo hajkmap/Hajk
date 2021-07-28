@@ -301,6 +301,7 @@ class Edit extends Component {
       return {
         index: item.index,
         name: item.name,
+        alias: item.alias || item.name,
         dataType: item.localType,
         textType: item.textType || null,
         values: item.listValues || null,
@@ -389,6 +390,7 @@ class Edit extends Component {
           layer.editableFields.forEach((editableField) => {
             properties[editableField.index].listValues = editableField.values;
             properties[editableField.index].textType = editableField.textType;
+            properties[editableField.index].alias = editableField.alias;
             properties[editableField.index].checked = true;
             properties[editableField.index].hidden = editableField.hidden;
             properties[editableField.index].defaultValue =
@@ -663,6 +665,20 @@ class Edit extends Component {
         );
       };
 
+      var aliasEditor = (type, value) => {
+        return (
+          <div>
+            <input
+              defaultValue={value}
+              type="text"
+              onChange={(e) => {
+                property.alias = e.target.value;
+              }}
+            />
+          </div>
+        );
+      };
+
       if (!property.hasOwnProperty("hidden")) {
         property.hidden = false;
       }
@@ -695,6 +711,7 @@ class Edit extends Component {
             />
           </td>
           <td>{property.name}</td>
+          <td>{aliasEditor(property.localType, property.alias)}</td>
           <td>{stringDataTypes(property.localType)}</td>
           <td>{property.localType}</td>
           <td>{listEditor(property.localType)}</td>
@@ -712,6 +729,7 @@ class Edit extends Component {
             <th>Redigerbar</th>
             <th>Dold</th>
             <th>Namn</th>
+            <th>Alias</th>
             <th>Typ</th>
             <th>Datatyp</th>
             <th>Listvärden</th>

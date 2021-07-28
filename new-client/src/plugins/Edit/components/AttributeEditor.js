@@ -210,6 +210,10 @@ class AttributeEditor extends React.Component {
   }
 
   getValueMarkup(field) {
+    if (typeof field.alias === "undefined") {
+      field.alias = field.name;
+    }
+
     if (field.dataType === "int") {
       field.textType = "heltal";
     }
@@ -239,7 +243,7 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias}
             fullWidth={true}
             margin="normal"
             variant="outlined"
@@ -255,7 +259,7 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias}
             fullWidth={true}
             margin="normal"
             variant="outlined"
@@ -271,7 +275,7 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias}
             fullWidth={true}
             margin="normal"
             type="datetime-local"
@@ -293,7 +297,7 @@ class AttributeEditor extends React.Component {
           <>
             <TextField
               id={field.id}
-              label={field.name}
+              label={field.alias}
               size="small"
               fullWidth={true}
               margin="normal"
