@@ -20,6 +20,7 @@ The official automatic build of the latest version can be found here: https://ha
 For some real-life examples, see the following solutions:
 - [Halmstad municipality's map](https://karta.halmstad.se)
 - [Kungsbacka municipality's map](https://karta.kungsbacka.se)
+- [Göteborg stad](https://karta.goteborg.se)
 - [The Gothenburg Region's map](https://karta.goteborgsregionen.se)
 - [Varberg municipality's map](https://karta.varberg.se)
 - [Uddevalla municipality's map](https://karta.uddevalla.se)
