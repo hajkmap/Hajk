@@ -25,11 +25,8 @@ Varberg – [https://karta.varberg.se/](https://karta.varberg.se/)
 Demo (senaste versionen) - [https://hajk-demo.netlify.app/](https://hajk-demo.netlify.app/)
 
 ### Exempel på digitala översiktsplaner (ÖP) med HAJK:
-Göteborg - [https://oversiktsplan.goteborg.se/](https://oversiktsplan.goteborg.se/)  (tillgänglig t.o.m 28 juni 2021)
 
 Kungsbacka - [https://karta.kungsbacka.se/oversiktsplan/](https://karta.kungsbacka.se/oversiktsplan/)
-
-Uddevalla - [https://karta.uddevalla.se/oversiktsplan/](https://karta.uddevalla.se/oversiktsplan/) (tillgänglig 3 maj - 15 aug 2021)
 
 ## Organisationen
 Aktiva kommuner är Halmstad, Göteborg, Kungsbacka, Uddevalla, Varberg, m.fl. Andra organisationer som använder (och utvecklar) HAJK är bl. a. Västtrafik och Göteborgsregionen. 
