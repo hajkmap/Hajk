@@ -915,8 +915,6 @@ class WMSLayerForm extends Component {
     }
     if (formats && formats.indexOf("application/geojson") > -1) {
       this.setState({ serverType: "arcgis" });
-    } else {
-      this.setState({ serverType: "geoserver" });
     }
   }
 
