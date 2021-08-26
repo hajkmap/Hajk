@@ -8,10 +8,18 @@ import { hfetch } from "utils/FetchWrapper";
 function query(map, layer, evt) {
   const coordinate = evt.coordinate;
   const resolution = map.getView().getResolution();
+  const currentZoom = map.getView().getZoom();
   const referenceSystem = map.getView().getProjection().getCode();
   let subLayersToQuery = [];
 
-  if (layer.layersInfo) {
+  // Query only those layers that a) have a layersInfo property, and
+  // b) are currently displayed. Please note that checking for visibility
+  // is not enough, we must also respect the min/max zoom level settings, #836.
+  if (
+    layer.layersInfo &&
+    layer.getMinZoom() <= currentZoom &&
+    currentZoom <= layer.getMaxZoom()
+  ) {
     const subLayers = Object.values(layer.layersInfo);
     const visibleSubLayers = layer.getSource().getParams()["LAYERS"];
     subLayersToQuery = subLayers
@@ -25,11 +33,23 @@ function query(map, layer, evt) {
   }
 
   if (subLayersToQuery.length > 0) {
-    const params = {
+    let params = {
       FEATURE_COUNT: 100,
       INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT,
       QUERY_LAYERS: subLayersToQuery.join(","),
     };
+
+    // See #852. Without this, it's almost impossible to get a result from QGIS Server.
+    // TODO: This could be expanded and made an admin setting - I'm not sure that 50 px
+    // will work for everyone.
+    if (layer.getSource().serverType_ === "qgis") {
+      params = {
+        ...params,
+        FI_POINT_TOLERANCE: 50,
+        FI_LINE_TOLERANCE: 50,
+        FI_POLYGON_TOLERANCE: 50,
+      };
+    }
 
     const url = layer
       .getSource()

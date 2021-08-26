@@ -117,15 +117,18 @@ class EditView extends React.PureComponent {
           <Typography>Uppdateringen lyckades.</Typography>
           <Typography>
             Antal skapade objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalInserted.toString()}
+            {data.TransactionResponse.TransactionSummary.totalInserted?.toString() ||
+              0}
           </Typography>
           <Typography>
             Antal borttagna objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalDeleted.toString()}
+            {data.TransactionResponse.TransactionSummary.totalDeleted?.toString() ||
+              0}
           </Typography>
           <Typography>
             Antal uppdaterade objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalUpdated.toString()}
+            {data.TransactionResponse.TransactionSummary.totalUpdated?.toString() ||
+              0}
           </Typography>
         </div>
       );

@@ -91,7 +91,10 @@ class CoordinatesTransformRow extends React.PureComponent {
   }
 
   handleInputX(event) {
-    if (event.value === this.state.coordinateX) {
+    if (
+      (!this.props.inverseAxis && event.value === this.state.coordinateX) ||
+      (this.props.inverseAxis && event.value === this.state.coordinateY)
+    ) {
       // Nothing was changed so do nothing, this happens since the value is
       // changed multiple times during formatting and we do not want to create
       // infinite loops
@@ -119,7 +122,10 @@ class CoordinatesTransformRow extends React.PureComponent {
   }
 
   handleInputY(event) {
-    if (event.value === this.state.coordinateY) {
+    if (
+      (!this.props.inverseAxis && event.value === this.state.coordinateY) ||
+      (this.props.inverseAxis && event.value === this.state.coordinateX)
+    ) {
       // Nothing was changed so do nothing, this happens since the value is
       // changed multiple times during formatting and we do not want to create
       // infinite loops
@@ -171,7 +177,7 @@ class CoordinatesTransformRow extends React.PureComponent {
           </TableCell>
           <TableCell>
             <NumberFormat
-              label={this.props.transformation.ytitle}
+              label={this.props.transformation.xtitle}
               className={classes.textField}
               margin="dense"
               variant="outlined"
@@ -188,7 +194,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               customInput={TextField}
             />
             <NumberFormat
-              label={this.props.transformation.xtitle}
+              label={this.props.transformation.ytitle}
               className={classes.textField}
               margin="dense"
               variant="outlined"

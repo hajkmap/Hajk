@@ -51,13 +51,8 @@ class TreeRow extends React.Component {
   };
 
   renderConnectionSelect = () => {
-    const {
-      model,
-      treeNodeId,
-      updateMenuItem,
-      availableDocuments,
-      menuItem,
-    } = this.props;
+    const { model, treeNodeId, updateMenuItem, availableDocuments, menuItem } =
+      this.props;
 
     return (
       <MenuConnectionSelector

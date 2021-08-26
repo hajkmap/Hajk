@@ -221,14 +221,17 @@ var menu = Model.extend({
             : new XMLSerializer().serializeToString(data),
           apa = parser.xml2js(xmlstr);
         try {
-          var props = apa.schema.complexType.complexContent.extension.sequence.element.map(
-            (a) => {
-              return {
-                name: a._name,
-                localType: a._type ? a._type.replace(a.__prefix + ":", "") : "",
-              };
-            }
-          );
+          var props =
+            apa.schema.complexType.complexContent.extension.sequence.element.map(
+              (a) => {
+                return {
+                  name: a._name,
+                  localType: a._type
+                    ? a._type.replace(a.__prefix + ":", "")
+                    : "",
+                };
+              }
+            );
           if (props) {
             callback(props);
           } else {

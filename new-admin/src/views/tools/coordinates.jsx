@@ -277,10 +277,10 @@ class ToolOptions extends Component {
           <span>Titel</span>: <span>{t.title}</span>
         </div>
         <div>
-          <span>X-ettikett</span>: <span>{t.xtitle}</span>
+          <span>X-etikett</span>: <span>{t.xtitle}</span>
         </div>
         <div>
-          <span>Y-ettikett</span>: <span>{t.ytitle}</span>
+          <span>Y-etikett</span>: <span>{t.ytitle}</span>
         </div>
         <div>
           <span>Precision</span>: <span>{t.precision}</span>

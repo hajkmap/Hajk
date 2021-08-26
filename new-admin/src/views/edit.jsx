@@ -669,7 +669,8 @@ class Edit extends Component {
 
       property.index = i;
 
-      if (property.localType === "Geometry") {
+      // Don't render the geometry column as editable field
+      if (property.type.includes("gml:")) {
         return null;
       }
 

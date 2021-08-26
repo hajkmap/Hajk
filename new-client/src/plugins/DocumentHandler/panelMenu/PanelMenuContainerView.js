@@ -123,7 +123,9 @@ class PanelMenuView extends React.PureComponent {
 
   #handleShowMapLayersFromPanelMenu = (id) => {
     const { options } = this.props;
-    if (getIsMobile() && options.closePanelOnMapLinkOpen) {
+    // If we're on small screen, or the admin option is set (no matter screen size),
+    // let's close the DocumentHandler window
+    if (getIsMobile() || options.closePanelOnMapLinkOpen) {
       this.#closeDocumentWindow();
     }
     this.#handleShowMapLayers(this.state[id].maplink);

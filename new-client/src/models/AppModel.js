@@ -499,61 +499,46 @@ class AppModel {
   }
 
   /**
-   * TODO: Obsolete, replaced by new app-wide solution using URL APIs, see #568.
-   * Ensure that this gets removed too.
-   */
-  parseQueryParams() {
-    var o = {};
-    document.location.search
-      .replace(/(^\?)/, "")
-      .split("&")
-      .forEach((param) => {
-        var a = param.split("=");
-        o[a[0]] = a[1];
-      });
-    return o;
-  }
-  /**
    * @summary Merges two objects.
    *
-   * @param {*} a
-   * @param {*} b
-   * @returns {*} a Result of overwritting a with values from b
+   * @param {*} mapConfig
+   * @param {*} urlSearchParams
+   * @returns {*} a Result of overwriting a with values from b
    * @memberof AppModel
    */
-  mergeConfig(a, b) {
+  mergeConfig(mapConfig, urlSearchParams) {
     // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
     const clean =
-      Boolean(b.hasOwnProperty("clean")) &&
-      b.clean !== "false" &&
-      b.clean !== "0";
+      Boolean(urlSearchParams.hasOwnProperty("clean")) &&
+      urlSearchParams.clean !== "false" &&
+      urlSearchParams.clean !== "0";
 
     // f contains our CQL Filters
-    const f = b.f;
+    const f = urlSearchParams.f;
 
     // Merge query params to the map config from JSON
-    let x = parseFloat(b.x),
-      y = parseFloat(b.y),
-      z = parseInt(b.z, 10),
+    let x = parseFloat(urlSearchParams.x),
+      y = parseFloat(urlSearchParams.y),
+      z = parseInt(urlSearchParams.z, 10),
       l = undefined;
-    if (typeof b.l === "string") {
-      l = b.l.split(",");
+    if (typeof urlSearchParams.l === "string") {
+      l = urlSearchParams.l.split(",");
     }
 
     if (Number.isNaN(x)) {
-      x = a.map.center[0];
+      x = mapConfig.map.center[0];
     }
     if (Number.isNaN(y)) {
-      y = a.map.center[1];
+      y = mapConfig.map.center[1];
     }
     if (Number.isNaN(z)) {
-      z = a.map.zoom;
+      z = mapConfig.map.zoom;
     }
 
-    a.map.clean = clean;
-    a.map.center[0] = x;
-    a.map.center[1] = y;
-    a.map.zoom = z;
+    mapConfig.map.clean = clean;
+    mapConfig.map.center[0] = x;
+    mapConfig.map.center[1] = y;
+    mapConfig.map.zoom = z;
 
     if (l) {
       this.layersFromParams = l;
@@ -564,7 +549,7 @@ class AppModel {
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
     }
 
-    return a;
+    return mapConfig;
   }
   /**
    * @summary If supplied argument, v, is a string and is longer then 0, return an encoded value of v. Else return undefined.
@@ -737,7 +722,10 @@ class AppModel {
       }
     }
 
-    return this.mergeConfig(this.config.mapConfig, this.parseQueryParams());
+    return this.mergeConfig(
+      this.config.mapConfig,
+      Object.fromEntries(new URLSearchParams(document.location.search))
+    );
   }
 }
 

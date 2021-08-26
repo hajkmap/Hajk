@@ -26,15 +26,15 @@ export class Controller {
    * @memberof Controller
    */
   layers(req, res) {
-    ConfigService.getLayersStore(
-      ad.getUserFromRequestHeader(req)
-    ).then((data) => handleStandardResponse(res, data));
+    ConfigService.getLayersStore(ad.getUserFromRequestHeader(req)).then(
+      (data) => handleStandardResponse(res, data)
+    );
   }
 
   userSpecificMaps(req, res) {
-    ConfigService.getUserSpecificMaps(
-      ad.getUserFromRequestHeader(req)
-    ).then((data) => handleStandardResponse(res, data));
+    ConfigService.getUserSpecificMaps(ad.getUserFromRequestHeader(req)).then(
+      (data) => handleStandardResponse(res, data)
+    );
   }
 }
 export default new Controller();
