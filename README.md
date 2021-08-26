@@ -21,6 +21,7 @@ For some real-life examples, see the following solutions:
 
 - [Halmstad municipality's map](https://karta.halmstad.se)
 - [Kungsbacka municipality's map](https://karta.kungsbacka.se)
+- [Göteborg stad](https://karta.goteborg.se)
 - [The Gothenburg Region's map](https://karta.goteborgsregionen.se)
 - [Varberg municipality's map](https://karta.varberg.se)
 - [Uddevalla municipality's map](https://karta.uddevalla.se)
@@ -83,9 +84,10 @@ Now when Backend is up and running, it's time to start the Client (and optionall
 
 This process is similar to the Client app.
 
-1. Set the correct URL to Backend by editing `new-admin/public/config.json`.
-1. The admin application is located in `new-admin`. To get it running do `cd new-admin && npm i && npm start`.
-1. Verify that Admin is running on `http://localhost:3001`.
+1. Set the correct URL to Backend by editing `new-admin/public/config.json`.  
+*Map operations have moved to mapconfig so `"url_map", "url_map_list", "url_map_create", "url_map_delete"` needs to point toward `"http://localhost:3002/api/v1/mapconfig..."`, the rest is the same as for `new-client`*
+3. The admin application is located in `new-admin`. To get it running do `cd new-admin && npm i && npm start`.
+4. Verify that Admin is running on `http://localhost:3001`.
 
 ## Deploying
 
