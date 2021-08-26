@@ -20,7 +20,8 @@
         "moreButton": {
           "toolTip": "Fler sökverktyg och inställningar",
           "srText": "Öppna dialog med fler inställningar"
-        }
+        },
+        "screenReaderText": "Sök i webbplatsens innehåll"
       },
       "tools": {
         "extentSearch": {

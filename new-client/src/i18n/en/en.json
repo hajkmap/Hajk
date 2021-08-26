@@ -20,7 +20,8 @@
         "moreButton": {
           "toolTip": "More search tools and settings",
           "srText": "Open dialog with more settings"
-        }
+        },
+        "screenReaderText": "Search the content of the website"
       },
       "tools": {
         "extentSearch": {
