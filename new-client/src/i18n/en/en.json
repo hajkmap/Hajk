@@ -17,11 +17,23 @@
           "extentSearch": "Searching in the area...",
           "objectSearch": "Searching with objects..."
         },
+        "expandButton": {
+          "collapsed": "Show the search results",
+          "open": "Hide the search results"
+        },
+        "clearButton": {
+          "toolTip": "Clear search",
+          "srText": "Clear search"
+        },
         "moreButton": {
           "toolTip": "More search tools and settings",
           "srText": "Open dialog with more settings"
         },
-        "screenReaderText": "Search the content of the website"
+        "searchButton": {
+          "toolTip": "Perform search",
+          "srText": "Perform search"
+        },
+        "srText": "Search the content of the website"
       },
       "tools": {
         "extentSearch": {

@@ -17,11 +17,23 @@
           "extentSearch": "Söker i området...",
           "objectSearch": "Söker med objekt..."
         },
+        "expandButton": {
+          "collapsed": "Visa sökresultat",
+          "open": "Dölj sökresultat"
+        },
+        "clearButton": {
+          "toolTip": "Rensa sökning",
+          "srText": "Rensa sökning"
+        },
         "moreButton": {
           "toolTip": "Fler sökverktyg och inställningar",
           "srText": "Öppna dialog med fler inställningar"
         },
-        "screenReaderText": "Sök i webbplatsens innehåll"
+        "searchButton": {
+          "toolTip": "Utför sökning",
+          "srText": "Utför sökning"
+        },
+        "srText": "Sök i webbplatsens innehåll"
       },
       "tools": {
         "extentSearch": {

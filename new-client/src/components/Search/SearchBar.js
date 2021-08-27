@@ -341,19 +341,22 @@ class SearchBar extends React.PureComponent {
       handleOnClickOrKeyboardSearch,
       setSearchSources,
       failedWFSFetchMessage,
+      t,
     } = this.props;
     const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
       failedWFSFetchMessage.length > 0 && showSearchResults;
     const expandMessage = resultPanelCollapsed
-      ? "Visa sökresultat"
-      : "Dölj sökresultat";
+      ? t("core.search.searchBar.expandButton.collapsed")
+      : t("core.search.searchBar.expandButton.open");
     const placeholder = this.getPlaceholder();
     return (
       <TextField
         {...params}
         label={
-          <Typography variant="srOnly">Sök i webbplatsens innehåll</Typography>
+          <Typography variant="srOnly">
+            {t("core.search.searchBar.srText")}
+          </Typography>
         }
         variant={width === "xs" ? "standard" : "outlined"}
         placeholder={placeholder}
@@ -371,12 +374,16 @@ class SearchBar extends React.PureComponent {
               {showFailedWFSMessage &&
                 this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
               {!showSearchResults ? (
-                <Tooltip title="Utför sökning">
+                <Tooltip
+                  title={t("core.search.searchBar.searchButton.toolTip")}
+                >
                   <IconButton
                     size="small"
                     onClick={handleOnClickOrKeyboardSearch}
                   >
-                    <Typography variant="srOnly">Exekvera sökning</Typography>
+                    <Typography variant="srOnly">
+                      {t("core.search.searchBar.searchButton.srText")}
+                    </Typography>
                     <SearchIcon />
                   </IconButton>
                 </Tooltip>
@@ -401,9 +408,11 @@ class SearchBar extends React.PureComponent {
               {searchString.length > 0 ||
               showSearchResults ||
               searchActive !== "" ? (
-                <Tooltip title="Rensa sökning">
+                <Tooltip title={t("core.search.searchBar.clearButton.toolTip")}>
                   <IconButton onClick={handleOnClear} size="small">
-                    <Typography variant="srOnly">Rensa sökning</Typography>
+                    <Typography variant="srOnly">
+                      {t("core.search.searchBar.clearButton.srText")}
+                    </Typography>
                     <ClearIcon />
                   </IconButton>
                 </Tooltip>
