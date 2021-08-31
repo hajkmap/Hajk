@@ -316,7 +316,7 @@ class LayerItem extends React.PureComponent {
   }
 
   renderLegendImage() {
-    var src =
+    const src =
       this.state.legend && this.state.legend[0] && this.state.legend[0].url
         ? this.state.legend[0].url
         : "";
@@ -343,7 +343,7 @@ class LayerItem extends React.PureComponent {
   };
 
   findChapters(id, chapters) {
-    var result = [];
+    let result = [];
     if (Array.isArray(chapters)) {
       result = chapters.reduce((chaptersWithLayer, chapter) => {
         if (Array.isArray(chapter.layers)) {
