@@ -2,11 +2,10 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import propTypes from "prop-types";
 import { isValidLayerId } from "utils/Validator";
-import Radio from "@material-ui/core/Radio";
-import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
-import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
+import LayerItem from "./LayerItem.js";
+import Observer from "react-event-observer";
 
 const WHITE_BACKROUND_LAYER_ID = "-1";
 const BLACK_BACKROUND_LAYER_ID = "-2";
@@ -33,8 +32,6 @@ class BackgroundSwitcher extends React.PureComponent {
     selectedLayerId: -1, // By default, select special case "white background"
   };
 
-  osmLayer = undefined;
-
   static propTypes = {
     backgroundSwitcherBlack: propTypes.bool.isRequired,
     backgroundSwitcherWhite: propTypes.bool.isRequired,
@@ -44,6 +41,20 @@ class BackgroundSwitcher extends React.PureComponent {
     layerMap: propTypes.object.isRequired,
     layers: propTypes.array.isRequired,
   };
+  constructor(props) {
+    super(props);
+    this.localObserver = Observer();
+    if (props.enableOSM) {
+      this.osmSource = new OSM({
+        reprojectionErrorThreshold: 5,
+      });
+      this.osmLayer = new TileLayer({
+        visible: false,
+        source: this.osmSource,
+        zIndex: -1,
+      });
+    }
+  }
 
   /**
    * @summary If there's a Background layer that is visible from start, make sure that proper radio button is selected in Background Switcher.
@@ -60,14 +71,6 @@ class BackgroundSwitcher extends React.PureComponent {
 
     if (this.props.enableOSM) {
       // Initiate our special case layer, OpenStreetMap
-      const osmSource = new OSM({
-        reprojectionErrorThreshold: 5,
-      });
-      this.osmLayer = new TileLayer({
-        visible: false,
-        source: osmSource,
-        zIndex: -1,
-      });
       this.props.map.addLayer(this.osmLayer);
     }
 
@@ -143,34 +146,64 @@ class BackgroundSwitcher extends React.PureComponent {
    * @memberof BackgroundSwitcher
    */
   renderRadioButton(config, index) {
-    let caption;
     let checked = this.state.selectedLayerId === config.name;
 
-    const mapLayer = this.props.layerMap[config.name];
-    const { classes } = this.props;
-
-    if (mapLayer) {
-      caption = mapLayer.get("layerInfo").caption;
-    } else {
-      caption = config.caption;
+    let mapLayer = this.props.layerMap[config.name];
+    let options = this.props.options || {};
+    if (!("enableTransparencySlider" in options)) {
+      // Layersettings will crash if this is not present
+      options["enableTransparencySlider"] = true;
     }
 
+    if (!mapLayer) {
+      const that = this;
+      // Add some values so the code does not crash in LayerItem's constructor
+      mapLayer = {
+        isDefaultBackground: true,
+        backgroundSpecialCaseId: config.name,
+        properties: {
+          name: config.caption,
+          visible: checked,
+          layerInfo: { caption: config.caption },
+          opacity: 1,
+        },
+
+        get(key) {
+          if (key === "opacity") {
+            if (that.osmLayer) {
+              // the first the opacity is taken is before osmlayer is initialized
+              return that.osmLayer.get("opacity");
+            } else {
+              return that.osmLayer.get("opacity"); //return 1;
+            }
+          }
+          return this.properties[key];
+        },
+        set(key, value) {
+          this.properties[key] = value;
+        },
+        getProperties() {
+          return Object.keys(this.properties);
+        },
+        setOpacity(value) {
+          that.osmLayer.setOpacity(value);
+        },
+      };
+      if (config.name === "-3") {
+        mapLayer["osmLayer"] = this.osmLayer;
+      }
+    }
+    mapLayer["localObserver"] = this.localObserver;
+    mapLayer["isBackgroundLayer"] = true;
+
     return (
-      <div key={index} className={classes.layerItemContainer}>
-        <Radio
-          id={caption + "_" + index}
-          checked={checked}
-          onChange={this.onChange}
-          value={config.name || config}
-          color="default"
-          name="backgroundLayer"
-          icon={<RadioButtonUncheckedIcon fontSize="small" />}
-          checkedIcon={<RadioButtonCheckedIcon fontSize="small" />}
-        />
-        <label htmlFor={caption + "_" + index} className={classes.captionText}>
-          {caption}
-        </label>
-      </div>
+      <LayerItem
+        key={index}
+        layer={mapLayer}
+        model={this.props.model}
+        options={options}
+        app={this.props.app}
+      />
     );
   }
 
