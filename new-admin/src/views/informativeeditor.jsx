@@ -36,7 +36,7 @@ import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
-import MuiAlert from '@material-ui/lab/Alert';
+import MuiAlert from "@material-ui/lab/Alert";
 
 const ColorButtonRed = withStyles((theme) => ({
   root: {
@@ -154,7 +154,7 @@ class InformativeEditor extends Component {
           showModal: true,
           modalContent: result,
           showAbortButton: false,
-          modalConfirmCallback: () => { },
+          modalConfirmCallback: () => {},
         });
       }
     );
@@ -208,7 +208,7 @@ class InformativeEditor extends Component {
       showModal: false,
       modalStyle: {},
       okButtonText: "OK",
-      modalConfirmCallback: () => { },
+      modalConfirmCallback: () => {},
     });
   }
 
@@ -507,12 +507,12 @@ class InformativeEditor extends Component {
         <div className="subChapters">
           {chapter.expanded
             ? chapter.chapters.map((innerChapter, innerIndex) => {
-              return this.renderChapter(
-                chapter.chapters,
-                innerChapter,
-                innerIndex
-              );
-            })
+                return this.renderChapter(
+                  chapter.chapters,
+                  innerChapter,
+                  innerIndex
+                );
+              })
             : null}
         </div>
       </div>
@@ -688,10 +688,15 @@ class InformativeEditor extends Component {
           style={{
             marginTop: "15px",
             marginBottom: "15px",
-          }}>
-          <Alert severity="error">Denna version av dokumenthanteraren kommer inte stödjas framöver. Vänligen använd den nya version under fliken "Dokumenthanteraren 2.0"</Alert>
+          }}
+        >
+          <Alert severity="error">
+            Denna version av dokumenthanteraren kommer inte stödjas framöver.
+            Vänligen använd den nya version under fliken "Dokumenthanteraren
+            2.0"
+          </Alert>
         </div>
-        { this.renderModal()}
+        {this.renderModal()}
         <div className="margined">
           <ColorButtonGreen
             variant="contained"
@@ -736,7 +741,7 @@ class InformativeEditor extends Component {
           </ColorButtonRed>
         </div>
         <div className="chapters">{this.renderData()}</div>
-      </div >
+      </div>
     );
   }
 }

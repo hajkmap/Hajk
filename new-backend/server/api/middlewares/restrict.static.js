@@ -32,9 +32,10 @@ export default async function restrictStatic(req, res, next) {
   const dir = req.baseUrl.replace(/\//g, "");
 
   // Get allowed groups from the .env variable, split string to array
-  const restrictedToGroups = process.env[
-    `EXPOSE_AND_RESTRICT_STATIC_${dir.toUpperCase().replace(/-/g, "_")}`
-  ]?.split(",");
+  const restrictedToGroups =
+    process.env[
+      `EXPOSE_AND_RESTRICT_STATIC_${dir.toUpperCase().replace(/-/g, "_")}`
+    ]?.split(",");
 
   // Save user name to eliminate multiple calls to the same method
   const user = ad.getUserFromRequestHeader(req);

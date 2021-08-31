@@ -525,7 +525,19 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       </Button>
     );
   };
-  const getMapLink = (aTag, mapLink) => {
+  const getMapLink = (aTag, mapLinkOrg) => {
+    // Attempt to safely URI Decode the supplied string. If
+    // it fails, use it as-is.
+    // The reason we want probably want to decode is that the
+    // link is created using the Anchor plugin, which encodes
+    // the query string properly, see #831 and #838.
+    let mapLink = null;
+    try {
+      mapLink = decodeURIComponent(mapLinkOrg);
+    } catch (error) {
+      mapLink = mapLinkOrg;
+    }
+
     return (
       <Button
         color="default"
