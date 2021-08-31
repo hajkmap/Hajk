@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { withStyles } from "@material-ui/core/styles";
+import { withTranslation } from "react-i18next";
 import {
   ListItemIcon,
   Menu,
@@ -14,8 +15,6 @@ import {
 
 import Dialog from "../Dialog.js";
 import SearchSettings from "./SearchSettings";
-
-import { withTranslation } from "react-i18next";
 
 const styles = (theme) => ({});
 
@@ -67,7 +66,7 @@ class SearchTools extends React.PureComponent {
                 searchModel={searchModel}
               />
             ),
-            headerText: "Sökinställningar",
+            headerText: "core.search.settings.title",
             buttonText: "OK",
           }}
           open={settingsDialog}

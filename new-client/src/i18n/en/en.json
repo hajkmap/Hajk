@@ -35,6 +35,45 @@
         },
         "srText": "Search the content of the website"
       },
+      "settings": {
+        "title": "Search settings",
+        "general": {
+          "title": "General settings",
+          "limitSources": {
+            "title": "Limit sources",
+            "toolTip": "Enable to select which sources the search will be performed in. If the toggle is in it's off position, the search will be performed in all available sources."
+          }
+        },
+        "resultsDisplay": {
+          "title": "Results display",
+          "mapLabels": {
+            "title": "Show feature labels",
+            "toolTip": "If active, a label will be shown in the map next to the highlighted search result."
+          }
+        },
+        "spatial": {
+          "title": "Spatial settings",
+          "activeFilter": {
+            "title": "Demand that the whole feature must fit in the search area.",
+            "toolTip": "If active, the whole feature (for example an estate polygon) must fit within the search area to be shown in the search results. If inactive, only a small part of the polygon must be in the search area to be shown in the search results."
+          }
+        },
+        "text": {
+          "title": "Text settings",
+          "wildcardAtStart": {
+            "title": "Wildcard before",
+            "toolTip": "If active, a search for 'road' will also return hits on 'big road'."
+          },
+          "wildcardAtEnd": {
+            "title": "Wildcard after",
+            "toolTip": "If active, a search for 'road' will also return hits on 'road block'."
+          },
+          "matchCase": {
+            "title": "Case sensitivity",
+            "toolTip": "If active, a search for 'a' won't match features containing 'A'. Disable to search regardless of lowercase / uppercase."
+          }
+        }
+      },
       "tools": {
         "extentSearch": {
           "title": "View search",

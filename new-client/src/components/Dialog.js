@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
+import { withTranslation } from "react-i18next";
 import Button from "@material-ui/core/Button";
 
 import ReactDialog from "@material-ui/core/Dialog";
@@ -130,7 +131,7 @@ class Dialog extends Component {
   }
 
   render() {
-    const { options } = this.props;
+    const { options, t } = this.props;
 
     var text = "",
       header = "";
@@ -149,18 +150,18 @@ class Dialog extends Component {
         onClose={this.handleClose}
         aria-labelledby="responsive-dialog-title"
       >
-        <DialogTitle id="responsive-dialog-title">{header}</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">{t(header)}</DialogTitle>
         <DialogContent>
           {this.renderDialogContent(text)}
           {this.renderPromptInput()}
         </DialogContent>
         <DialogActions>
           <Button onClick={this.handleClose} color="primary" autoFocus>
-            {options.buttonText || "Stäng"}
+            {t(options.buttonText) || "Stäng"}
           </Button>
           {options.abortText ? (
             <Button onClick={this.handleAbort} color="primary" autoFocus>
-              {options.abortText}
+              {t(options.abortText)}
             </Button>
           ) : null}
         </DialogActions>
@@ -169,4 +170,4 @@ class Dialog extends Component {
   }
 }
 
-export default withStyles(styles)(Dialog);
+export default withTranslation()(withStyles(styles)(Dialog));
