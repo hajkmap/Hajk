@@ -35,6 +35,38 @@
         },
         "srText": "Sök i webbplatsens innehåll"
       },
+      "searchResults": {
+        "headerTitle": "Sökresultat",
+        "tools": {
+          "toolTip": "Visa verktyg",
+          "clear": {
+            "title": "Rensa",
+            "toolTip": "Rensa alla selekterade objekt"
+          },
+          "download": {
+            "title": "Ladda ner",
+            "toolTip": "Ladda ner objekten",
+            "downloadOptions": {
+              "excel": "Ladda ner till Excel",
+              "kml": "Ladda ner till KML"
+            }
+          },
+          "filter": {
+            "title": "Filtrera",
+            "toolTipActive": "Filtret är aktivt",
+            "toolTipInActive": "Filtrera resultatet"
+          },
+          "sort": {
+            "title": "Sortera",
+            "toolTip": "Sortera resultatet, sorterar nu enligt ",
+            "strategies": {
+              "AtoZ": "alfabetisk stigande",
+              "ZtoA": "alfabetisk fallande",
+              "numHits": "antal träffar"
+            }
+          }
+        }
+      },
       "settings": {
         "title": "Sökinställningar",
         "general": {
