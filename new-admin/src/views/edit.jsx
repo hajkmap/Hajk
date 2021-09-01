@@ -424,6 +424,161 @@ class Edit extends Component {
       props.listValues.push(e.target.value);
     }
   }
+
+  tooltipText(type) {
+    if (type === "string") {
+      return "Skriv in en text. För lista, skriv in ett värde och tryck på enterknappen för att lägga till som valbart element.";
+    } else if (type === "int") {
+      return "Skriv in ett heltal";
+    } else if (type === "date") {
+      return "Skriv in ett datum på följande format: YYYY-MM-DD. Exempel 2021-08-09";
+    } else if (type === "date-time") {
+      return "Skriv in ett datum samt tid på följande format: YYYY-MM-DD hh:mm. Exempel 2021-08-09 01:23";
+    } else if (type === "number") {
+      return "Skriv in ett tal";
+    } else if (type === "boolean") {
+      return "Skriv antingen ja eller nej";
+    }
+    return "";
+  }
+
+  validateEditableFields() {
+    let errors = [];
+
+    // Check the entered values
+    this.getEditableFields().forEach((field) => {
+      if (field.dataType === "string") {
+        if (field.value && typeof field.value !== "string") {
+          errors.push(
+            field.name + " is not a string. Was " + typeof field.value
+          );
+        }
+      } else if (field.dataType === "date") {
+        if (field.value) {
+          const d = new Date(field.value);
+          try {
+            d.getDate();
+          } catch (error) {
+            errors.push(
+              field.name + " is not a valid date. Was " + field.value
+            );
+          }
+        }
+      } else if (field.dataType === "date-time") {
+        if (field.value) {
+          const d = new Date(field.value);
+          try {
+            d.getDate();
+          } catch (error) {
+            errors.push(
+              field.name + " is not a valid date time. Was " + field.value
+            );
+          }
+        }
+      } else if (field.dataType === "int") {
+        if (field.value && isNaN(parseInt(field.value))) {
+          errors.push(
+            field.name + " is not a integer. Value was " + field.value
+          );
+        } else if (field.localType === "Positiva heltal") {
+          if (field.value && parseInt(field.value) <= 0) {
+            errors.push(
+              field.name + " is not a positive number. Was " + field.value
+            );
+          }
+        }
+      } else if (field.dataType === "number") {
+        if (field.value && isNaN(parseFloat(field.value))) {
+          errors.push(
+            field.name + " is not a number. Value was " + field.value
+          );
+        }
+      } else if (field.dataType === "boolean") {
+        if (field.value && field.value !== "ja" && field.value !== "nej") {
+          errors.push(
+            field.name + " is not a ja or nej. Value was " + field.value
+          );
+        }
+      }
+    });
+
+    // Check the entered default values
+    this.getEditableFields().forEach((field) => {
+      if (field.dataType === "string") {
+        if (field.defaultValue && typeof field.defaultValue !== "string") {
+          errors.push(
+            field.name +
+              " default value is not a string. Was " +
+              typeof field.defaultValue
+          );
+        }
+      } else if (field.dataType === "date") {
+        if (field.defaultValue) {
+          const d = new Date(field.defaultValue);
+          try {
+            d.getDate();
+          } catch (error) {
+            errors.push(
+              field.name +
+                " default value is not a valid date. Was " +
+                field.defaultValue
+            );
+          }
+        }
+      } else if (field.dataType === "date-time") {
+        if (field.defaultValue) {
+          const d = new Date(field.defaultValue);
+          try {
+            d.getDate();
+          } catch (error) {
+            errors.push(
+              field.name +
+                " default value is not a valid date time. Was " +
+                field.defaultValue
+            );
+          }
+        }
+      } else if (field.dataType === "int") {
+        if (field.defaultValue && isNaN(parseInt(field.defaultValue))) {
+          errors.push(
+            field.name +
+              " default value is not a integer. Value was " +
+              field.defaultValue
+          );
+        } else if (field.localType === "Positiva heltal") {
+          if (field.defaultValue && parseInt(field.defaultValue) <= 0) {
+            errors.push(
+              field.name +
+                " default value is not a positive number. Was " +
+                field.defaultValue
+            );
+          }
+        }
+      } else if (field.dataType === "number") {
+        if (field.defaultValue && isNaN(parseFloat(field.defaultValue))) {
+          errors.push(
+            field.name +
+              " default value is not a number. Value was " +
+              field.defaultValue
+          );
+        }
+      } else if (field.dataType === "boolean") {
+        if (
+          field.defaultValue &&
+          field.defaultValue !== "ja" &&
+          field.defaultValue !== "nej"
+        ) {
+          errors.push(
+            field.name +
+              " default value is not a ja or nej. Value was " +
+              field.defaultValue
+          );
+        }
+      }
+    });
+    return errors;
+  }
+
   /**
    *
    */
@@ -436,11 +591,13 @@ class Edit extends Component {
         validationErrors.push(fieldName);
       }
     });
+    var editableErrors = this.validateEditableFields();
     this.setState({
       validationErrors: validationErrors,
+      editableErrors: editableErrors,
     });
 
-    if (validationErrors.length === 0) {
+    if (validationErrors.length === 0 && editableErrors.length === 0) {
       let layer = {
         id: this.state.id,
         caption: this.getValue("caption"),
@@ -495,6 +652,14 @@ class Edit extends Component {
           }
         });
       }
+    } else {
+      let errorString = "Felaktig indata, se nedan\n";
+      errorString += validationErrors.join("\n");
+      if (editableErrors.length !== 0 && validationErrors.length !== 0) {
+        errorString += "\n";
+      }
+      errorString += editableErrors.join("\n");
+      alert(errorString);
     }
     e.preventDefault();
   }
@@ -623,6 +788,66 @@ class Edit extends Component {
               <option value="url">Url</option>
             </select>
           );
+        } else if (type === "date") {
+          return (
+            <select
+              defaultValue={property.textType}
+              onChange={(e) => {
+                property.textType = e.target.value;
+              }}
+            >
+              <option value="datum">Datum</option>
+            </select>
+          );
+        } else if (type === "date-time") {
+          return (
+            <>
+              <select
+                defaultValue={property.textType}
+                onChange={(e) => {
+                  property.textType = e.target.value;
+                }}
+              >
+                <option value="datumtid">Datum & Tid</option>
+              </select>
+            </>
+          );
+        } else if (type === "int") {
+          return (
+            <select
+              defaultValue={property.textType}
+              onChange={(e) => {
+                property.textType = e.target.value;
+              }}
+            >
+              <option value="heltal">Heltal</option>
+              <option value="positive">Positiva heltal</option>
+              <option value="negative">Negativa heltal</option>
+            </select>
+          );
+        } else if (type === "number") {
+          return (
+            <select
+              defaultValue={property.textType}
+              onChange={(e) => {
+                property.textType = e.target.value;
+              }}
+            >
+              <option value="tal">Reella tal</option>
+              <option value="heltal">Heltal</option>
+            </select>
+          );
+        } else if (type === "boolean") {
+          return (
+            <select
+              defaultValue={property.textType}
+              onChange={(e) => {
+                property.textType = e.target.value;
+              }}
+            >
+              <option value="janej">Ja/nej</option>
+            </select>
+          );
         }
         return null;
       };
@@ -651,15 +876,27 @@ class Edit extends Component {
 
       var defaultValueEditor = (type, value) => {
         return (
-          <div>
-            <input
-              defaultValue={value}
-              type="text"
-              onChange={(e) => {
-                property.defaultValue = e.target.value;
-              }}
-            />
-          </div>
+          <>
+            <div className="grid  edit-fields-table-default">
+              <div className="row">
+                <div className="col-sm">
+                  <input
+                    defaultValue={value}
+                    type="text"
+                    onChange={(e) => {
+                      property.defaultValue = e.target.value;
+                    }}
+                  />
+                  {"  "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title={this.tooltipText(property.localType)}
+                  />
+                </div>
+              </div>
+            </div>
+          </>
         );
       };
 

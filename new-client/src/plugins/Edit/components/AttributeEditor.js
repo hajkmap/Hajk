@@ -222,6 +222,14 @@ class AttributeEditor extends React.Component {
       field.textType = "datum";
     }
 
+    if (field.dataType === "date-time") {
+      field.textType = "date-time";
+    }
+
+    if (field.dataType === "boolean") {
+      field.textType = "boolean";
+    }
+
     let value = this.state.formValues[field.name];
 
     if (value === undefined || value === null) {
@@ -268,6 +276,26 @@ class AttributeEditor extends React.Component {
           />
         );
       case "datum":
+        return (
+          <TextField
+            id={field.id}
+            label={field.name}
+            fullWidth={true}
+            margin="normal"
+            type="date"
+            variant="outlined"
+            value={value}
+            onChange={(e) => {
+              this.setChanged();
+              this.checkDate(field.name, e.target.value);
+              field.initialRender = false;
+            }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        );
+      case "date-time":
         return (
           <TextField
             id={field.id}
@@ -390,6 +418,24 @@ class AttributeEditor extends React.Component {
             </FormControl>
           </>
         );
+      case "boolean":
+        return (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={field.value === "ja"}
+                color="primary"
+                onChange={(e) => {
+                  this.setChanged();
+                  field.value = e.target.checked ? "ja" : "nej";
+                  field.initialRender = false;
+                  this.forceUpdate();
+                }}
+              />
+            }
+            label={field.name}
+          />
+        );
       case null:
         return <span>{value}</span>;
       default:
@@ -403,7 +449,7 @@ class AttributeEditor extends React.Component {
 
     if (!formValues) return null;
 
-    const markup = this.props.editSource.editableFields.map((field, i) => {
+    const markup = this.props.editSource?.editableFields.map((field, i) => {
       const valueMarkup = this.getValueMarkup(field);
       return (
         <Grid item xs={12} key={i} ref={field.name}>
