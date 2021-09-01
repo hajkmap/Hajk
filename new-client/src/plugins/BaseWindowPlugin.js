@@ -47,8 +47,12 @@ class BaseWindowPlugin extends React.PureComponent {
 
     // Title and Color are kept in state and not as class properties. Keeping them in state
     // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
+    //
+    // Due to I18N, we ignore the value of `props.options.title` for now: it will always have a value
+    // (because of bugs in old Admin UI), and that would have precedence over `props.custom.title`, which
+    // is the object that holds our I18N string.
     this.state = {
-      title: props.options.title || props.custom.title || "Unnamed plugin",
+      title: props.custom.title || "Unnamed plugin",
       color: props.options.color || props.custom.color || null,
       windowVisible: visibleAtStart,
     };
@@ -56,7 +60,7 @@ class BaseWindowPlugin extends React.PureComponent {
     // Title is a special case: we want to use the state.title and pass on to Window in order
     // to update Window's title dynamically. At the same time, we want all other occurrences,
     // e.g. Widget or Drawer button's label to remain the same.
-    this.title = props.options.title || props.custom.title || "Unnamed plugin";
+    this.title = props.custom.title || "Unnamed plugin";
 
     // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
     this.width = props.options.width || props.custom.width || 400;
