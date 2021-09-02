@@ -1,5 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import { withTranslation } from "react-i18next";
 import { Grid, Popover, Typography, fade } from "@material-ui/core";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 
@@ -47,6 +48,7 @@ class SearchResultsPreview extends React.PureComponent {
       anchorEl,
       app,
       getFeatureTitle,
+      t,
     } = this.props;
 
     return (
@@ -75,7 +77,9 @@ class SearchResultsPreview extends React.PureComponent {
             className={classes.previewHeaderContainer}
             xs={12}
           >
-            <Typography variant="button">Förhandsvisning</Typography>
+            <Typography variant="button">
+              {t("core.search.searchResults.previewTitle")}
+            </Typography>
           </Grid>
           <Grid item className={classes.previewContentContainer} xs={12}>
             <SearchResultsDatasetFeatureDetails
@@ -96,4 +100,4 @@ class SearchResultsPreview extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchResultsPreview);
+export default withTranslation()(withStyles(styles)(SearchResultsPreview));

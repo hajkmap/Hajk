@@ -2,7 +2,9 @@
   "common": {
     "closeWindow": "Stäng fönstret",
     "maximizeWindow": "Maximera fönstret",
-    "minimizeWindow": "Minimera fönstret"
+    "minimizeWindow": "Minimera fönstret",
+    "results": "Resultat",
+    "showing": "Visar"
   },
   "core": {
     "drawer": {
@@ -36,28 +38,33 @@
         "srText": "Sök i webbplatsens innehåll"
       },
       "searchResults": {
+        "datasetSummary": {
+          "maxWarning": "Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas."
+        },
         "headerTitle": "Sökresultat",
+        "breadCrumbs": {
+          "searchResults": {
+            "toolTip": "Tillbaka till alla sökresultat"
+          }
+        },
         "tools": {
-          "toolTip": "Visa verktyg",
+          "toolTipClosed": "Visa verktyg",
+          "toolTipOpened": "Dölj verktyg",
           "clear": {
-            "title": "Rensa",
             "toolTip": "Rensa alla selekterade objekt"
           },
           "download": {
-            "title": "Ladda ner",
             "toolTip": "Ladda ner objekten",
-            "downloadOptions": {
-              "excel": "Ladda ner till Excel",
+            "options": {
+              "xlsx": "Ladda ner till Excel",
               "kml": "Ladda ner till KML"
             }
           },
           "filter": {
-            "title": "Filtrera",
             "toolTipActive": "Filtret är aktivt",
             "toolTipInActive": "Filtrera resultatet"
           },
           "sort": {
-            "title": "Sortera",
             "toolTip": "Sortera resultatet, sorterar nu enligt ",
             "strategies": {
               "AtoZ": "alfabetisk stigande",
@@ -65,7 +72,8 @@
               "numHits": "antal träffar"
             }
           }
-        }
+        },
+        "previewTitle": "Förhandsvisning"
       },
       "settings": {
         "title": "Sökinställningar",
@@ -113,15 +121,18 @@
         },
         "objectSearch": {
           "title": "Sök med objekt",
-          "toolTip": "Genomför en sökning genom att välja en eller flera områden i kartan."
+          "toolTip": "Genomför en sökning genom att välja en eller flera områden i kartan.",
+          "snackBarText": "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor."
         },
         "radiusSearch": {
           "title": "Sök med radie",
-          "toolTip": "Genomför en sökning i ett område genom att rita en cirkel."
+          "toolTip": "Genomför en sökning i ett område genom att rita en cirkel.",
+          "snackBarText": "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp."
         },
         "polygonSearch": {
           "title": "Sök med polygon",
-          "toolTip": "Genomför en sökning i ett område genom att rita en polygon."
+          "toolTip": "Genomför en sökning i ett område genom att rita en polygon.",
+          "snackBarText": "Tryck en gång i kartan för varje nod i polygonen. Genomför sökningen genom att trycka på den sista noden en gång till."
         },
         "searchSettings": {
           "title": "Sökinställningar",

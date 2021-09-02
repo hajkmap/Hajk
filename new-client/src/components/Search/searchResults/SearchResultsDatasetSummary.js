@@ -1,5 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import { withTranslation } from "react-i18next";
 import { Typography, Chip, Tooltip, Grid } from "@material-ui/core";
 
 const styles = (theme) => ({
@@ -49,12 +50,14 @@ class SearchResultsDatasetSummary extends React.PureComponent {
 
   renderDatasetSummary = () => {
     const { numberOfResultsToDisplay } = this.state;
-    const { featureCollection, getOriginBasedIcon, classes } = this.props;
+    const { featureCollection, getOriginBasedIcon, classes, t } = this.props;
 
     const displayWarning = this.shouldDisplayWarning();
     const toolTipTitle = displayWarning
-      ? `Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas.`
-      : `Visar ${numberOfResultsToDisplay} resultat`;
+      ? t("core.search.searchResults.datasetSummary.maxWarning")
+      : `${t("common.showing")} ${numberOfResultsToDisplay} ${t(
+          "common.results"
+        ).toLowerCase()}`;
 
     return (
       <>
@@ -101,4 +104,6 @@ class SearchResultsDatasetSummary extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchResultsDatasetSummary);
+export default withTranslation()(
+  withStyles(styles)(SearchResultsDatasetSummary)
+);

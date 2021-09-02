@@ -2,6 +2,7 @@ import React from "react";
 import SearchBar from "./SearchBar";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
+import { withTranslation } from "react-i18next";
 import Observer from "react-event-observer";
 import EditIcon from "@material-ui/icons/Edit";
 import Crop54Icon from "@material-ui/icons/Crop54";
@@ -148,10 +149,11 @@ class Search extends React.PureComponent {
   };
 
   bindSubscriptions = () => {
+    const { t } = this.props;
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
-          "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp.",
+          t("core.search.tools.radiusSearch.snackBarText"),
           {
             variant: "information",
             anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -159,7 +161,7 @@ class Search extends React.PureComponent {
         );
       } else if (type === "Polygon") {
         this.snackbarKey = this.props.enqueueSnackbar(
-          "Tryck en gång i kartan för varje nod i polygonen. Genomför sökningen genom att trycka på den sista noden en gång till.",
+          t("core.search.tools.polygonSearch.snackBarText"),
           {
             variant: "information",
             anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -173,7 +175,7 @@ class Search extends React.PureComponent {
     });
     this.localObserver.subscribe("on-select-search-start", () => {
       this.snackbarKey = this.props.enqueueSnackbar(
-        "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
+        t("core.search.tools.objectSearch.snackBarText"),
         {
           variant: "information",
           anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -1004,4 +1006,4 @@ class Search extends React.PureComponent {
     );
   }
 }
-export default withStyles(styles)(withSnackbar(Search));
+export default withTranslation()(withStyles(styles)(withSnackbar(Search)));

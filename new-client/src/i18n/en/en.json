@@ -2,7 +2,9 @@
   "common": {
     "closeWindow": "Close",
     "maximizeWindow": "Maximize",
-    "minimizeWindow": "Minimize"
+    "minimizeWindow": "Minimize",
+    "results": "Results",
+    "showing": "Showing"
   },
   "core": {
     "drawer": {
@@ -34,6 +36,44 @@
           "srText": "Perform search"
         },
         "srText": "Search the content of the website"
+      },
+      "searchResults": {
+        "datasetSummary": {
+          "maxWarning": "Maximum number of search hits has been reached. Refine your search to ensure that important information is not missed."
+        },
+        "headerTitle": "Search results",
+        "breadCrumbs": {
+          "searchResults": {
+            "toolTip": "Back to all search results"
+          }
+        },
+        "tools": {
+          "toolTipClosed": "Show tools",
+          "toolTipOpened": "Hide tools",
+          "clear": {
+            "toolTip": "Clear all selected objects"
+          },
+          "download": {
+            "toolTip": "Download the objects",
+            "options": {
+              "xlsx": "Download to Excel",
+              "kml": "Download to KML"
+            }
+          },
+          "filter": {
+            "toolTipActive": "The filter is active",
+            "toolTipInActive": "Filter the results"
+          },
+          "sort": {
+            "toolTip": "Sort the results, currently sorting after ",
+            "strategies": {
+              "AtoZ": "alphabetically ascending",
+              "ZtoA": "alphabetically descending",
+              "numHits": "number of hits"
+            }
+          }
+        },
+        "previewTitle": "Preview"
       },
       "settings": {
         "title": "Search settings",
@@ -81,15 +121,18 @@
         },
         "objectSearch": {
           "title": "Object search",
-          "toolTip": "Perform a search by selecting one or more areas in the map."
+          "toolTip": "Perform a search by selecting one or more areas in the map.",
+          "snackBarText": "Select an object in the map where you want to perform a search. Hold down CTRL to select multiple objects."
         },
         "radiusSearch": {
           "title": "Radius search",
-          "toolTip": "Perform a search in an area by drawing a circle."
+          "toolTip": "Perform a search in an area by drawing a circle.",
+          "snackBarText": "Tap the map to place a center point, then drag outwards and release."
         },
         "polygonSearch": {
           "title": "Polygon search",
-          "toolTip": "Perform a search in an area by drawing a polygon."
+          "toolTip": "Perform a search in an area by drawing a polygon.",
+          "snackBarText": "Tap the map once for each node in the polygon. Perform the search by pressing the last node again."
         },
         "searchSettings": {
           "title": "Search settings",
