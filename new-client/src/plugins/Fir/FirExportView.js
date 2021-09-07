@@ -7,6 +7,7 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import { Typography } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Button from "@material-ui/core/Button";
 
 class FirExportView extends React.PureComponent {
   state = {
@@ -31,6 +32,30 @@ class FirExportView extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
   }
 
+  ExcelLogo() {
+    return (
+      <img src="/excel.svg" alt="" style={{ width: "24px", height: "auto" }} />
+    );
+  }
+
+  EdpLogo() {
+    return (
+      <img src="/edp.svg" alt="" style={{ width: "24px", height: "auto" }} />
+    );
+  }
+
+  handleHousingListClick() {
+    console.log("Skapa boendeförteckning");
+  }
+
+  handleRealestateListClick() {
+    console.log("Skapa fastighetsförteckning");
+  }
+
+  handleEdpClick() {
+    console.log("Skicka till EDP");
+  }
+
   render() {
     const { classes } = this.props;
     return (
@@ -50,7 +75,17 @@ class FirExportView extends React.PureComponent {
               </Typography>
             </AccordionSummary>
             <AccordionDetails style={{ display: "block" }}>
-              <div>1</div>
+              <div>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  className={classes.button}
+                  startIcon={<this.ExcelLogo />}
+                  onClick={this.handleRealestateListClick}
+                >
+                  Skapa fastighetsförteckning
+                </Button>
+              </div>
             </AccordionDetails>
           </Accordion>
 
@@ -68,7 +103,17 @@ class FirExportView extends React.PureComponent {
               </Typography>
             </AccordionSummary>
             <AccordionDetails style={{ display: "block" }}>
-              <div>2</div>
+              <div>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  className={classes.button}
+                  startIcon={<this.ExcelLogo />}
+                  onClick={this.handleHousingListClick}
+                >
+                  Skapa boendeförteckning
+                </Button>
+              </div>
             </AccordionDetails>
           </Accordion>
 
@@ -84,7 +129,17 @@ class FirExportView extends React.PureComponent {
               <Typography className={classes.heading}>EDP Vision</Typography>
             </AccordionSummary>
             <AccordionDetails style={{ display: "block" }}>
-              <div>3</div>
+              <div>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  className={classes.button}
+                  startIcon={<this.EdpLogo />}
+                  onClick={this.handleEdpClick}
+                >
+                  Skicka till EDP
+                </Button>
+              </div>
             </AccordionDetails>
           </Accordion>
         </div>

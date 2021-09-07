@@ -60,6 +60,7 @@ class FirView extends React.PureComponent {
       <>
         <Accordion
           expanded={this.state.resultsExpanded}
+          className={classes.bottom}
           onChange={() => {
             this.setState({
               resultsExpanded: !this.state.resultsExpanded,
@@ -106,6 +107,7 @@ class FirView extends React.PureComponent {
             </div>
           </AccordionDetails>
         </Accordion>
+        <div className={classes.spacer}></div>
       </>
     );
   }
@@ -119,7 +121,9 @@ const styles = (theme) => ({
     top: "11px",
     right: "-26px",
   },
-  listRoot: {},
+  spacer: {
+    height: theme.spacing(2),
+  },
   resultItemData: {
     padding: theme.spacing(2),
   },

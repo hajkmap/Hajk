@@ -4,6 +4,8 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import FirSearchView from "./FirSearchView";
 import FirExportView from "./FirExportView";
+import FirSearchNeighborView from "./FirSearchNeighborView";
+import FirSearchResultsView from "./FirSearchResultsView";
 import AppBar from "@material-ui/core/AppBar";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
@@ -68,6 +70,16 @@ class FirView extends React.PureComponent {
               app={this.props.app}
               localObserver={this.localObserver}
             />
+            <FirSearchNeighborView
+              model={this.props.model}
+              app={this.props.app}
+              localObserver={this.localObserver}
+            />
+            <FirSearchResultsView
+              model={this.props.model}
+              app={this.props.app}
+              localObserver={this.localObserver}
+            />
           </div>
           <div
             className={classes.tabContent}
@@ -98,7 +110,7 @@ const styles = (theme) => ({
   tabContent: {
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
     padding: theme.spacing(1),
     width: "100%",
     height: "100%",
