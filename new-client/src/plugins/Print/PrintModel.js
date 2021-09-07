@@ -325,7 +325,9 @@ export default class PrintModel {
     color,
     scaleBarLength,
     scale,
-    scaleBarLengthMeters
+    scaleBarLengthMeters,
+    format,
+    orientation
   ) => {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
     pdf.setFontSize(8);
@@ -339,7 +341,11 @@ export default class PrintModel {
     );
     pdf.setFontSize(10);
     pdf.text(
-      `Skala: ${this.getUserFriendlyScale(scale)}`,
+      `Skala: ${this.getUserFriendlyScale(
+        scale
+      )} (vid ${format.toUpperCase()} ${
+        orientation === "landscape" ? "liggande" : "stående"
+      })`,
       scaleBarPosition.x,
       scaleBarPosition.y + 1
     );
@@ -377,7 +383,9 @@ export default class PrintModel {
     scale,
     resolution,
     scaleBarPlacement,
-    scaleResolution
+    scaleResolution,
+    format,
+    orientation
   ) => {
     const millimetersPerInch = 25.4;
     const pixelSize = millimetersPerInch / resolution / scaleResolution;
@@ -400,7 +408,9 @@ export default class PrintModel {
       color,
       scaleBarLength,
       scale,
-      scaleBarLengthMeters
+      scaleBarLengthMeters,
+      format,
+      orientation
     );
   };
 
@@ -613,7 +623,9 @@ export default class PrintModel {
           options.scale,
           options.resolution,
           options.scaleBarPlacement,
-          scaleResolution
+          scaleResolution,
+          options.format,
+          options.orientation
         );
       }
 
