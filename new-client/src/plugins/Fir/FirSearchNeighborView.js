@@ -80,13 +80,19 @@ class FirSearchNeighborView extends React.PureComponent {
                 onChange={this.handleRadioChange}
               >
                 <FormControlLabel
+                  classes={{
+                    label: classes.radioLabel,
+                  }}
                   value="delimiting"
-                  control={<Radio className={classes.radio} />}
+                  control={<Radio className={classes.radio} color="primary" />}
                   label="Hitta angränsade grannar"
                 />
                 <FormControlLabel
+                  classes={{
+                    label: classes.radioLabel,
+                  }}
                   value="radius"
-                  control={<Radio className={classes.radio} />}
+                  control={<Radio className={classes.radio} color="primary" />}
                   label="Hitta grannar inom X meter"
                 />
               </RadioGroup>
@@ -163,6 +169,10 @@ const styles = (theme) => ({
   radio: {
     paddingTop: "0.25rem",
     paddingBottom: "0.25rem",
+  },
+  radioLabel: {
+    fontSize: "0.875rem",
+    fontWeight: "400",
   },
   containerTopPadded: {
     paddingTop: theme.spacing(2),

@@ -177,7 +177,7 @@ class FirSearchView extends React.PureComponent {
                       className={classes.checkbox}
                       //checked={state.checkedA}
                       //onChange={handleChange}
-                      color="secondary"
+                      color="primary"
                       name="checkedA"
                     />
                   }
@@ -192,7 +192,7 @@ class FirSearchView extends React.PureComponent {
                       className={classes.checkbox}
                       //checked={state.checkedA}
                       //onChange={handleChange}
-                      color="secondary"
+                      color="primary"
                       name="checkedA"
                     />
                   }
@@ -207,7 +207,7 @@ class FirSearchView extends React.PureComponent {
                       className={classes.checkbox}
                       //checked={state.checkedA}
                       //onChange={handleChange}
-                      color="secondary"
+                      color="primary"
                       name="checkedA"
                     />
                   }
@@ -434,7 +434,7 @@ const styles = (theme) => ({
   },
   checkboxLabel: {
     fontSize: "0.875rem",
-    fontWeight: "300",
+    fontWeight: "400",
   },
   checkbox: {
     paddingTop: "0.25rem",
