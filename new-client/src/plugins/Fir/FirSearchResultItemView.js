@@ -27,7 +27,7 @@ class FirSearchResultItemView extends React.PureComponent {
 
     let data = {
       list: [
-        { key: "realestate", title: "Fastighet", value: "TESTÄPPLET 2" },
+        { key: "realestate", title: "Fastighet", value: "TESTÄPPLET X" },
         { key: "area", title: "Område", value: "1" },
         { key: "owner1", title: "Ägare", value: "Andersson, Greta Gunhild" },
         { key: "owner2", title: "Ägare", value: "Andersson, Nisse Greger" },
@@ -74,9 +74,9 @@ class FirSearchResultItemView extends React.PureComponent {
         <div className={classes.root}>
           <table className={classes.resultItemTable}>
             <tbody>
-              {data.list.map((item) => {
+              {data.list.map((item, index) => {
                 return (
-                  <tr>
+                  <tr key={"row" + index}>
                     <td>{item.title}</td>
                     <td>{item.value || "\u00A0"}</td>
                   </tr>
@@ -85,9 +85,9 @@ class FirSearchResultItemView extends React.PureComponent {
             </tbody>
           </table>
           <div className={classes.urlList}>
-            {data.urls.map((link) => {
+            {data.urls.map((link, index) => {
               return (
-                <div>
+                <div key={"url" + index}>
                   <a
                     href={link.url}
                     target={link.target || "_ blank"}

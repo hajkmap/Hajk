@@ -14,12 +14,14 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Collapse from "@material-ui/core/Collapse";
 import FirSearchResultItemView from "./FirSearchResultItemView";
+import Pagination from "@material-ui/lab/Pagination";
 
 class FirView extends React.PureComponent {
   state = {
     resultsExpanded: true,
     open: false,
     results: { list: [] },
+    paginatedResults: { list: [] },
   };
 
   static propTypes = {
@@ -32,13 +34,26 @@ class FirView extends React.PureComponent {
   static defaultProps = {};
 
   componentDidMount() {
-    let list = [
-      { name: "DRUVÄPPLET 1", open: false, data: { test: "hejsan1" } },
-      { name: "DRUVÄPPLET 2", open: false, data: { test: "hejsan2" } },
-      { name: "DRUVÄPPLET 3", open: false, data: { test: "hejsan3" } },
-      { name: "DRUVÄPPLET 4", open: false, data: { test: "hejsan4" } },
-    ];
+    let list = [];
+
+    for (let i = 1; i < 101; i++) {
+      list.push({
+        name: "TESTÄPPLET " + i,
+        open: false,
+        data: { test: "hejsan" + i },
+      });
+    }
+
+    list.forEach((item, index) => {
+      item.key = "firResult" + index;
+    });
+
     this.setState({ results: { list: list } });
+
+    setTimeout(() => {
+      // push to next draw
+      this.setPage(1);
+    }, 25);
   }
 
   constructor(props) {
@@ -46,12 +61,28 @@ class FirView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.itemsPerPage = 10;
   }
 
   handleItemClick(e, data) {
     data.open = !data.open;
     this.forceUpdate();
   }
+
+  paginationPageCount() {
+    return this.state.results.list.length / this.itemsPerPage;
+  }
+
+  setPage(p) {
+    let start = (p - 1) * this.itemsPerPage;
+    let end = p * this.itemsPerPage;
+    let list = this.state.results.list.slice(start, end);
+    this.setState({ paginatedResults: { list: list } });
+  }
+
+  handlePageChange = (e, p) => {
+    this.setPage(p);
+  };
 
   render() {
     const { classes } = this.props;
@@ -80,8 +111,8 @@ class FirView extends React.PureComponent {
           <AccordionDetails style={{ display: "block", padding: 0 }}>
             <div>
               <List dense={true} component="nav" className={classes.listRoot}>
-                {this.state.results.list.map((data, index) => (
-                  <div key={"firSearchResult" + index}>
+                {this.state.paginatedResults.list.map((data, index) => (
+                  <div key={data.key}>
                     {index > 0 ? <Divider /> : ""}
                     <ListItem
                       button
@@ -104,6 +135,22 @@ class FirView extends React.PureComponent {
                   </div>
                 ))}
               </List>
+              {this.paginationPageCount() > 1 ? (
+                <div className={classes.paginationContainer}>
+                  <Pagination
+                    // showFirstButton
+                    // showLastButton
+                    // variant="outlined"
+                    color="primary"
+                    defaultPage={1}
+                    count={this.state.results.list.length / this.itemsPerPage}
+                    onChange={this.handlePageChange}
+                    size="small"
+                  />
+                </div>
+              ) : (
+                ""
+              )}
             </div>
           </AccordionDetails>
         </Accordion>
@@ -126,6 +173,12 @@ const styles = (theme) => ({
   },
   resultItemData: {
     padding: theme.spacing(2),
+  },
+  paginationContainer: {
+    display: "flex",
+    justifyContent: "right",
+    paddingRight: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
   },
 });
 
