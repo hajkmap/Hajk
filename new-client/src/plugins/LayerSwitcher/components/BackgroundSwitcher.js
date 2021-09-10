@@ -29,7 +29,7 @@ const styles = (theme) => ({
 
 class BackgroundSwitcher extends React.PureComponent {
   state = {
-    selectedLayerId: -1, // By default, select special case "white background"
+    selectedLayerId: null,
   };
 
   static propTypes = {
@@ -52,6 +52,10 @@ class BackgroundSwitcher extends React.PureComponent {
         visible: false,
         source: this.osmSource,
         zIndex: -1,
+        layerInfo: {
+          caption: "OpenStreetMap",
+          layerType: "base",
+        },
       });
     }
   }
@@ -146,37 +150,41 @@ class BackgroundSwitcher extends React.PureComponent {
    * @memberof BackgroundSwitcher
    */
   renderRadioButton(config, index) {
-    let checked = this.state.selectedLayerId === config.name;
+    const checked = this.state.selectedLayerId === config.name;
 
+    // mapLayer will be sent to the LayerItem component. It will contain
+    // the Hajk layer with all properties.
     let mapLayer = this.props.layerMap[config.name];
-    let options = this.props.options || {};
-    if (!("enableTransparencySlider" in options)) {
-      // Layersettings will crash if this is not present
-      options["enableTransparencySlider"] = true;
+
+    // There's a special case for the OpenStreetMap layer. It does not exist
+    // in Hajk's layers repository, but has been created here, as a property
+    // of 'this'. Let's set mapLayer accordingly.
+    if (config.name === OSM_BACKGROUND_LAYER_ID) {
+      mapLayer = this.osmLayer;
+      mapLayer.set("foo", "bar");
+      // mapLayer.set("layerInfo", { layerType: "base" });
     }
 
+    // If we still don't have any mapLayer it means it's neither existing in
+    // Hajks layers repository, nor the OSM layer. (This will be the case for our
+    // black and white background colors.) In this case, let's prepare a fake
+    // 'mapLayer' that contains the necessary properties, so we can use the same
+    // logic further on.
     if (!mapLayer) {
-      const that = this;
       // Add some values so the code does not crash in LayerItem's constructor
       mapLayer = {
-        isDefaultBackground: true,
-        backgroundSpecialCaseId: config.name,
+        isFakeMapLayer: true,
         properties: {
-          name: config.caption,
+          name: config.name,
           visible: checked,
-          layerInfo: { caption: config.caption },
-          opacity: 1,
+          layerInfo: {
+            caption: config.caption,
+            name: config.name,
+            layerType: "base",
+          },
+          opacity: 1, // Only full opacity available for black/white backgrounds
         },
-
         get(key) {
-          if (key === "opacity") {
-            if (that.osmLayer) {
-              // the first the opacity is taken is before osmlayer is initialized
-              return that.osmLayer.get("opacity");
-            } else {
-              return that.osmLayer.get("opacity"); //return 1;
-            }
-          }
           return this.properties[key];
         },
         set(key, value) {
@@ -185,23 +193,20 @@ class BackgroundSwitcher extends React.PureComponent {
         getProperties() {
           return Object.keys(this.properties);
         },
-        setOpacity(value) {
-          that.osmLayer.setOpacity(value);
-        },
       };
-      if (config.name === "-3") {
-        mapLayer["osmLayer"] = this.osmLayer;
-      }
     }
-    mapLayer["localObserver"] = this.localObserver;
-    mapLayer["isBackgroundLayer"] = true;
 
+    // No matter the type of 'mapLayer', we want to append these
+    // properties:
+    mapLayer["localObserver"] = this.localObserver;
+
+    // Finally, let's render the component
     return (
       <LayerItem
         key={index}
         layer={mapLayer}
         model={this.props.model}
-        options={options}
+        options={this.props.options}
         app={this.props.app}
       />
     );
@@ -228,10 +233,10 @@ class BackgroundSwitcher extends React.PureComponent {
       defaults.push(
         this.renderRadioButton(
           {
-            name: "-1",
+            name: WHITE_BACKROUND_LAYER_ID,
             caption: "Vit",
           },
-          -1
+          Number(WHITE_BACKROUND_LAYER_ID)
         )
       );
     }
@@ -239,17 +244,20 @@ class BackgroundSwitcher extends React.PureComponent {
       defaults.push(
         this.renderRadioButton(
           {
-            name: "-2",
+            name: BLACK_BACKROUND_LAYER_ID,
             caption: "Svart",
           },
-          -2
+          Number(BLACK_BACKROUND_LAYER_ID)
         )
       );
     }
 
     enableOSM &&
       defaults.push(
-        this.renderRadioButton({ name: "-3", caption: "OpenStreetMap" }, -3)
+        this.renderRadioButton(
+          { name: OSM_BACKGROUND_LAYER_ID, caption: "OpenStreetMap" },
+          Number(OSM_BACKGROUND_LAYER_ID)
+        )
       );
 
     /**
