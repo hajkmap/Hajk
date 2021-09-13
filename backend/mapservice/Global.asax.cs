@@ -17,5 +17,10 @@ namespace MapService
             GlobalConfiguration.Configure(WebApiConfig.Register);
 			RouteConfig.RegisterRoutes(RouteTable.Routes);					
 		}
+
+        protected void Application_End()
+        {
+            Controllers.EdpController.CloseEdpConnections(); // This method does nothing if EDP integration is not used!
+        }
     }
 }
