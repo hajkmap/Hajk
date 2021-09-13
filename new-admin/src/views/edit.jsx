@@ -29,6 +29,7 @@ import AddIcon from "@material-ui/icons/Add";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { withStyles } from "@material-ui/core/styles";
 import { green, blue } from "@material-ui/core/colors";
+import TextArea from "antd/lib/input/TextArea";
 
 const ColorButtonGreen = withStyles((theme) => ({
   root: {
@@ -301,6 +302,8 @@ class Edit extends Component {
       return {
         index: item.index,
         name: item.name,
+        alias: item.alias || item.name,
+        description: item.description || "",
         dataType: item.localType,
         textType: item.textType || null,
         values: item.listValues || null,
@@ -389,6 +392,9 @@ class Edit extends Component {
           layer.editableFields.forEach((editableField) => {
             properties[editableField.index].listValues = editableField.values;
             properties[editableField.index].textType = editableField.textType;
+            properties[editableField.index].alias = editableField.alias;
+            properties[editableField.index].description =
+              editableField.description;
             properties[editableField.index].checked = true;
             properties[editableField.index].hidden = editableField.hidden;
             properties[editableField.index].defaultValue =
@@ -907,6 +913,34 @@ class Edit extends Component {
         );
       };
 
+      var aliasEditor = (type, value) => {
+        return (
+          <div>
+            <input
+              defaultValue={value}
+              type="text"
+              onChange={(e) => {
+                property.alias = e.target.value;
+              }}
+            />
+          </div>
+        );
+      };
+
+      var descriptionEditor = (type, value) => {
+        return (
+          <div>
+            <TextArea
+              defaultValue={value}
+              rows={3}
+              onChange={(e) => {
+                property.description = e.target.value;
+              }}
+            />
+          </div>
+        );
+      };
+
       if (!property.hasOwnProperty("hidden")) {
         property.hidden = false;
       }
@@ -939,6 +973,8 @@ class Edit extends Component {
             />
           </td>
           <td>{property.name}</td>
+          <td>{aliasEditor(property.localType, property.alias)}</td>
+          <td>{descriptionEditor(property.localType, property.description)}</td>
           <td>{stringDataTypes(property.localType)}</td>
           <td>{property.localType}</td>
           <td>{listEditor(property.localType)}</td>
@@ -956,6 +992,8 @@ class Edit extends Component {
             <th>Redigerbar</th>
             <th>Dold</th>
             <th>Namn</th>
+            <th>Alias</th>
+            <th>Beskrivning</th>
             <th>Typ</th>
             <th>Datatyp</th>
             <th>Listvärden</th>

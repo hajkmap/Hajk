@@ -9,7 +9,7 @@ import FormLabel from "@material-ui/core/FormLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import { Button } from "@material-ui/core";
+import { Button, FormHelperText } from "@material-ui/core";
 import Chip from "@material-ui/core/Chip";
 
 const styles = (theme) => ({
@@ -210,6 +210,10 @@ class AttributeEditor extends React.Component {
   }
 
   getValueMarkup(field) {
+    if (typeof field.alias === "undefined" || field.alias === "") {
+      field.alias = field.name;
+    }
+
     if (field.dataType === "int") {
       field.textType = "heltal";
     }
@@ -247,11 +251,17 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias}
             fullWidth={true}
             margin="normal"
             variant="outlined"
             value={value}
+            error={this.formErrors.hasOwnProperty(field.name)}
+            helperText={
+              this.formErrors[field.name]?.length >= 0
+                ? this.formErrors[field.name]
+                : field.description
+            }
             onChange={(e) => {
               this.setChanged();
               this.checkInteger(field.name, e.target.value);
@@ -263,11 +273,17 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias}
             fullWidth={true}
             margin="normal"
             variant="outlined"
             value={value}
+            error={this.formErrors.hasOwnProperty(field.name)}
+            helperText={
+              this.formErrors[field.name]?.length >= 0
+                ? this.formErrors[field.name]
+                : field.description
+            }
             onChange={(e) => {
               this.setChanged();
               this.checkNumber(field.name, e.target.value);
@@ -279,7 +295,7 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias}
             fullWidth={true}
             margin="normal"
             type="date"
@@ -305,6 +321,12 @@ class AttributeEditor extends React.Component {
             type="datetime-local"
             variant="outlined"
             value={value}
+            error={this.formErrors.hasOwnProperty(field.name)}
+            helperText={
+              this.formErrors[field.name]?.length >= 0
+                ? this.formErrors[field.name]
+                : field.description
+            }
             onChange={(e) => {
               this.setChanged();
               this.checkDate(field.name, e.target.value);
@@ -316,18 +338,54 @@ class AttributeEditor extends React.Component {
           />
         );
       case "url":
-      case "fritext":
         return (
           <>
             <TextField
               id={field.id}
-              label={field.name}
+              label={field.alias}
               size="small"
               fullWidth={true}
               margin="normal"
               variant="outlined"
               error={this.formErrors.hasOwnProperty(field.name)}
-              helperText={this.formErrors[field.name] ?? ""}
+              helperText={
+                this.formErrors[field.name]?.length >= 0
+                  ? this.formErrors[field.name]
+                  : field.description
+              }
+              value={value}
+              onChange={(e) => {
+                this.setChanged();
+                this.checkText(field.name, e.target.value);
+                field.initialRender = false;
+              }}
+              onBlur={(e) => {
+                this.setChanged();
+                if (field.textType === "url") {
+                  this.checkUrl(field.name, e.target.value);
+                }
+                field.initialRender = false;
+              }}
+            />
+          </>
+        );
+      case "fritext":
+        return (
+          <>
+            <TextField
+              id={field.id}
+              label={field.alias}
+              size="small"
+              fullWidth={true}
+              margin="normal"
+              variant="outlined"
+              multiline
+              error={this.formErrors.hasOwnProperty(field.name)}
+              helperText={
+                this.formErrors[field.name]?.length >= 0
+                  ? this.formErrors[field.name]
+                  : field.description
+              }
               value={value}
               onChange={(e) => {
                 this.setChanged();
@@ -385,8 +443,9 @@ class AttributeEditor extends React.Component {
         });
         return (
           <FormControl fullWidth margin="normal" component="fieldset">
-            <FormLabel component="legend">{field.name}</FormLabel>
+            <FormLabel component="legend">{field.alias}</FormLabel>
             <FormGroup>{checkboxes}</FormGroup>
+            <FormHelperText>{field.description}</FormHelperText>
           </FormControl>
         );
       case "lista":
@@ -397,11 +456,11 @@ class AttributeEditor extends React.Component {
               {val}
             </option>
           ));
-        }
+        } // TODO, fixa beskrivning för lista och flerval
         return (
           <>
             <FormControl fullWidth={true} component="fieldset">
-              <FormLabel component="legend">{field.name}</FormLabel>
+              <FormLabel component="legend">{field.alias}</FormLabel>
               <NativeSelect
                 value={value}
                 variant="outlined"
@@ -415,6 +474,7 @@ class AttributeEditor extends React.Component {
                 <option value="">-Välj värde-</option>
                 {options}
               </NativeSelect>
+              <FormHelperText>{field.description}</FormHelperText>
             </FormControl>
           </>
         );
