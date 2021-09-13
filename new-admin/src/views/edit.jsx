@@ -568,15 +568,20 @@ class Edit extends Component {
           field.defaultValue !== "ja" &&
           field.defaultValue !== "nej"
         ) {
-          errors.push(
-            field.name +
-              " default value is not a ja or nej. Value was " +
-              field.defaultValue
-          );
+          errors.push(field.name + " default value is not ja or nej.");
         }
       }
     });
     return errors;
+  }
+
+  modifyBooleans(layer) {
+    layer.editableFields.forEach((field) => {
+      if (field.dataType === "boolean") {
+        field.defaultValue = field.defaultValue === "ja";
+      }
+      console.log(field);
+    });
   }
 
   /**
@@ -610,6 +615,8 @@ class Edit extends Component {
         editPolygon: this.getValue("polygon"),
         editLine: this.getValue("linestring"),
       };
+
+      //this.modifyBooleans(layer);
 
       if (this.state.mode === "add") {
         layer.id = this.createGuid(this.props.model.get("layers"));
