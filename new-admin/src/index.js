@@ -73,7 +73,7 @@ wrapJqueryAjax($);
   }
 
   function load(config) {
-    var application_model = new ApplicationModel();
+    const application_model = new ApplicationModel();
     var application_element = React.createElement(ApplicationView, {
       model: application_model,
       tabs: config.router,
