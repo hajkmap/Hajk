@@ -29,7 +29,7 @@ class FirSearchView extends React.PureComponent {
     searchText: "",
     searchPanelExpanded: true,
     neighborExpanded: false,
-    searchType: "Fastighetsbeteckning",
+    searchType: "designation",
     searchAreaButtons: {
       polygon: { selected: false },
       rectangle: { selected: false },
@@ -123,6 +123,7 @@ class FirSearchView extends React.PureComponent {
       showDesignation: this.state.showDesignation || false,
       showSearchArea: this.state.showSearchArea || false,
       buffer: this.state.buffer || 0,
+      searchType: this.state.searchType,
     });
   };
 
@@ -158,11 +159,9 @@ class FirSearchView extends React.PureComponent {
                     this.setState({ searchType: e.target.value });
                   }}
                 >
-                  <MenuItem value="Fastighetsbeteckning">
-                    Fastighetsbeteckning
-                  </MenuItem>
-                  <MenuItem value="Ägare">Ägare</MenuItem>
-                  <MenuItem value="Adress">Adress</MenuItem>
+                  <MenuItem value="designation">Fastighetsbeteckning</MenuItem>
+                  <MenuItem value="owner">Ägare</MenuItem>
+                  <MenuItem value="address">Adress</MenuItem>
                 </Select>
               </FormControl>
             </div>

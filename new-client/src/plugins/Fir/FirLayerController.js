@@ -32,6 +32,11 @@ class FirLayerController {
     this.zoomTimeout = setTimeout(this.zoomToFit, 500);
   };
 
+  clearBeforeSearch = () => {
+    this.featureLayer.getSource().clear();
+    this.highlightLayer.getSource().clear();
+  };
+
   toggleHighlight = (feature) => {
     let f = this.highlightLayer.getSource().getFeatureByUid(feature.ol_uid);
     this.highlightLayer.getSource().clear();
@@ -67,8 +72,7 @@ class FirLayerController {
   };
 
   handleClearSearch = (data) => {
-    this.featureLayer.getSource().clear();
-    this.highlightLayer.getSource().clear();
+    this.clearBeforeSearch();
     // console.log(data);
   };
 

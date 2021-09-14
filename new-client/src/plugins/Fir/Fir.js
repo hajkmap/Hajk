@@ -34,10 +34,6 @@ class Fir extends React.PureComponent {
 
     this.localObserver = new Observer();
 
-    this.localObserver.subscribe("firEvent", (message) => {
-      console.log(message);
-    });
-
     this.localObserver.subscribe("fir.kml_upload", this.handleFileUpload);
     this.localObserver.subscribe("fir.search.search", this.handleSearch);
 
@@ -90,14 +86,16 @@ class Fir extends React.PureComponent {
   handleSearch = (params = {}) => {
     const type = "FirWfsService"; // TODO: Remove hard coded value when needed
     const defaultParams = {}; // TODO: Remove hard coded value when needed
-
     // Prepared for other types of services
     this.getService(type).then((Service) => {
       const service = new Service.default(defaultParams);
       try {
+        this.layerController.clearBeforeSearch();
         service.search(params).then((features) => {
           // Expect an array of features.
+          // console.log(features);
           this.layerController.addFeatures(features);
+          console.log(features);
           this.localObserver.publish("fir.search.completed", features);
         });
       } catch (error) {
