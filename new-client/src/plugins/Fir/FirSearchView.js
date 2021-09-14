@@ -26,6 +26,7 @@ import Collapse from "@material-ui/core/Collapse";
 
 class FirSearchView extends React.PureComponent {
   state = {
+    searchText: "",
     searchPanelExpanded: true,
     neighborExpanded: false,
     searchType: "Fastighetsbeteckning",
@@ -39,6 +40,9 @@ class FirSearchView extends React.PureComponent {
     },
     buffer: 0,
     files: { list: [] },
+    exactMatch: false,
+    showDesignation: true,
+    showSearchArea: true,
   };
 
   static propTypes = {
@@ -103,18 +107,30 @@ class FirSearchView extends React.PureComponent {
     if (e && e.target) {
       this.setState({ files: { list: e.target.files || [] } });
       if (e.target.files.length > 0) {
-        this.localObserver.publish("fir-kml-upload", e.target.files[0]);
+        this.localObserver.publish("fir.kml_upload", e.target.files[0]);
       }
     }
   };
 
-  handleClearSearch() {
-    console.log("Clear search!");
-  }
+  handleClearSearch = () => {
+    this.localObserver.publish("fir.search.clear", { sender: "FirSearchView" });
+  };
 
-  handleSearch() {
-    console.log("Search!");
-  }
+  handleSearch = () => {
+    this.localObserver.publish("fir.search.search", {
+      text: this.state.searchText,
+      exactMatch: this.state.exactMatch || false,
+      showDesignation: this.state.showDesignation || false,
+      showSearchArea: this.state.showSearchArea || false,
+      buffer: this.state.buffer || 0,
+    });
+  };
+
+  handleSearchTextChange = (e) => {
+    this.setState({
+      searchText: e.target.value || "",
+    });
+  };
 
   render() {
     const { classes } = this.props;
@@ -158,6 +174,7 @@ class FirSearchView extends React.PureComponent {
                 <Input
                   id="input-with-icon-adornment"
                   placeholder="Söktext"
+                  onChange={this.handleSearchTextChange}
                   startAdornment={
                     <InputAdornment position="start">
                       <SearchIcon />
@@ -175,10 +192,11 @@ class FirSearchView extends React.PureComponent {
                   control={
                     <Checkbox
                       className={classes.checkbox}
-                      //checked={state.checkedA}
-                      //onChange={handleChange}
+                      checked={this.state.exactMatch}
+                      onChange={(e) => {
+                        this.setState({ exactMatch: e.target.checked });
+                      }}
                       color="primary"
-                      name="checkedA"
                     />
                   }
                   label="Exakt matchning på text"
@@ -190,10 +208,11 @@ class FirSearchView extends React.PureComponent {
                   control={
                     <Checkbox
                       className={classes.checkbox}
-                      //checked={state.checkedA}
-                      //onChange={handleChange}
+                      checked={this.state.showDesignation}
+                      onChange={(e) => {
+                        this.setState({ showDesignation: e.target.checked });
+                      }}
                       color="primary"
-                      name="checkedA"
                     />
                   }
                   label="Visa fastighetsbeteckning"
@@ -205,10 +224,11 @@ class FirSearchView extends React.PureComponent {
                   control={
                     <Checkbox
                       className={classes.checkbox}
-                      //checked={state.checkedA}
-                      //onChange={handleChange}
+                      checked={this.state.showSearchArea}
+                      onChange={(e) => {
+                        this.setState({ showSearchArea: e.target.checked });
+                      }}
                       color="primary"
-                      name="checkedA"
                     />
                   }
                   label="Visa buffer/sökområde"

@@ -367,7 +367,7 @@ const styles = (theme) => ({
   },
   checkboxLabel: {
     fontSize: "0.875rem",
-    fontWeight: "300",
+    fontWeight: "400",
   },
   checkbox: {
     paddingTop: "0.25rem",

@@ -15,6 +15,10 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Collapse from "@material-ui/core/Collapse";
 import FirSearchResultItemView from "./FirSearchResultItemView";
 import Pagination from "@material-ui/lab/Pagination";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { Select } from "ol/interaction";
 
 class FirView extends React.PureComponent {
   state = {
@@ -22,6 +26,7 @@ class FirView extends React.PureComponent {
     open: false,
     results: { list: [] },
     paginatedResults: { list: [] },
+    currentPage: 1,
   };
 
   static propTypes = {
@@ -36,17 +41,17 @@ class FirView extends React.PureComponent {
   componentDidMount() {
     let list = [];
 
-    for (let i = 1; i < 101; i++) {
-      list.push({
-        name: "TESTÄPPLET " + i,
-        open: false,
-        data: { test: "hejsan" + i },
-      });
-    }
+    // for (let i = 1; i < 21; i++) {
+    //   list.push({
+    //     name: "TESTÄPPLET " + i,
+    //     open: false,
+    //     data: { test: "hejsan" + i },
+    //   });
+    // }
 
-    list.forEach((item, index) => {
-      item.key = "firResult" + index;
-    });
+    // list.forEach((item, index) => {
+    //   item.key = "firResult" + index;
+    // });
 
     this.setState({ results: { list: list } });
 
@@ -62,22 +67,84 @@ class FirView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
     this.itemsPerPage = 10;
+    this.initListeners();
   }
 
+  initListeners = () => {
+    this.localObserver.subscribe("fir.search.completed", (features) => {
+      features.forEach((o) => {
+        o.open = false;
+      });
+      this.setState({ results: { list: features } });
+      this.setPage(1);
+    });
+    this.localObserver.subscribe("fir.search.feature.selected", (feature) => {
+      this.expandFeature(feature, true);
+    });
+    this.localObserver.subscribe("fir.search.feature.deselected", (feature) => {
+      this.expandFeature(feature, false);
+    });
+  };
+
+  highlight = (feature, _highlight = false) => {
+    this.localObserver.publish("fir.search.results.highlight", {
+      feature: feature,
+      highlight: _highlight,
+    });
+  };
+
+  expandFeature = (feature, expand) => {
+    this.state.results.list
+      .filter((o) => o !== feature)
+      .forEach((o) => {
+        o.open = false;
+      });
+    feature.open = expand;
+    this.forceUpdate();
+  };
+
   handleItemClick(e, data) {
-    data.open = !data.open;
+    this.expandFeature(data, !data.open);
+
+    this.highlight(data, data.open);
     this.forceUpdate();
   }
 
-  paginationPageCount() {
-    return this.state.results.list.length / this.itemsPerPage;
+  handleDeleteClick(e, data) {
+    let list = this.state.results.list;
+    let index = list.findIndex((element) => element.ol_uid === data.ol_uid);
+    if (index >= 0) {
+      let uid = list[index].ol_uid;
+      this.highlight(null, false);
+      list.splice(index, 1);
+      this.setState({ results: { list: list } });
+      this.localObserver.publish("fir.search.results.delete", uid);
+    }
+
+    this.setPage(null);
   }
 
-  setPage(p) {
-    let start = (p - 1) * this.itemsPerPage;
-    let end = p * this.itemsPerPage;
+  paginationPageCount() {
+    return Math.round(this.state.results.list.length / this.itemsPerPage);
+  }
+
+  setPage(pageNum) {
+    if (!pageNum) {
+      pageNum = this.state.currentPage;
+    }
+    this.setState({ currentPage: pageNum });
+    let start = (pageNum - 1) * this.itemsPerPage;
+    let end = pageNum * this.itemsPerPage;
+    this.state.results.list.forEach((o) => {
+      o.open = false;
+    });
     let list = this.state.results.list.slice(start, end);
-    this.setState({ paginatedResults: { list: list } });
+
+    if (list.length === 0 && pageNum > 1) {
+      this.setPage(pageNum - 1);
+    } else {
+      this.setState({ paginatedResults: { list: list } });
+    }
   }
 
   handlePageChange = (e, p) => {
@@ -112,7 +179,7 @@ class FirView extends React.PureComponent {
             <div>
               <List dense={true} component="nav" className={classes.listRoot}>
                 {this.state.paginatedResults.list.map((data, index) => (
-                  <div key={data.key}>
+                  <div key={data.ol_uid}>
                     {index > 0 ? <Divider /> : ""}
                     <ListItem
                       button
@@ -120,7 +187,19 @@ class FirView extends React.PureComponent {
                         this.handleItemClick(e, data);
                       }}
                     >
-                      <ListItemText primary={data.name} />
+                      <ListItemText primary={data.get("fastbet")} />
+                      <ListItemSecondaryAction>
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          className={classes.btnDelete}
+                          onClick={(e) => {
+                            this.handleDeleteClick(e, data);
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </ListItemSecondaryAction>
                     </ListItem>
                     <Collapse in={data.open} timeout="auto" unmountOnExit>
                       <Divider />
@@ -134,16 +213,20 @@ class FirView extends React.PureComponent {
                     </Collapse>
                   </div>
                 ))}
+                {this.state.results.list.length === 0 ? (
+                  <div className={classes.noResults}>
+                    Inga resultat att visa
+                  </div>
+                ) : (
+                  ""
+                )}
               </List>
-              {this.paginationPageCount() > 1 ? (
+              {this.paginationPageCount() > 0 ? (
                 <div className={classes.paginationContainer}>
                   <Pagination
-                    // showFirstButton
-                    // showLastButton
-                    // variant="outlined"
                     color="primary"
                     defaultPage={1}
-                    count={this.state.results.list.length / this.itemsPerPage}
+                    count={this.paginationPageCount()}
                     onChange={this.handlePageChange}
                     size="small"
                   />
@@ -179,6 +262,20 @@ const styles = (theme) => ({
     justifyContent: "right",
     paddingRight: theme.spacing(2),
     paddingBottom: theme.spacing(2),
+  },
+  btnDelete: {
+    right: "6px",
+    padding: "6px",
+    "&:hover svg": {
+      color: theme.palette.error.dark,
+      stoke: theme.palette.error.dark,
+      fill: theme.palette.error.dark,
+    },
+  },
+  noResults: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+    paddingBottom: theme.spacing(1),
   },
 });
 
