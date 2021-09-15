@@ -1,8 +1,13 @@
 {
   "name": "hajk-client",
   "version": "3.7.0-rc.1",
-  "homepage": ".",
-  "private": true,
+  "description": "Hajk Client UI",
+  "homepage": "https://github.com/hajkmap/Hajk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hajkmap/Hajk.git"
+  },
+  "license": "MIT",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
