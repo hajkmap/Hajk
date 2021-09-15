@@ -1,7 +1,8 @@
 {
   "name": "hajk-backend",
   "version": "3.7.0-rc.1",
-  "description": "Hajk backend",
+  "description": "Hajk Backend",
+  "homepage": "https://github.com/hajkmap/Hajk",
   "repository": {
     "type": "git",
     "url": "https://github.com/hajkmap/Hajk.git"
