@@ -2,7 +2,7 @@
   "name": "hajk-client",
   "version": "3.7.0-rc.1",
   "description": "Hajk Client UI",
-  "homepage": "https://github.com/hajkmap/Hajk",
+  "homepage": ".",
   "repository": {
     "type": "git",
     "url": "https://github.com/hajkmap/Hajk.git"
