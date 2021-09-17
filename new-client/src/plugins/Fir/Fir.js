@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
-import { GeoJSON, WFS } from "ol/format";
 
 import Observer from "react-event-observer";
 
@@ -49,6 +48,14 @@ class Fir extends React.PureComponent {
     );
   }
 
+  onWindowShow = () => {
+    this.localObserver.publish("fir.window", { visible: true });
+  };
+
+  onWindowHide = () => {
+    this.localObserver.publish("fir.window", { visible: false });
+  };
+
   handleFileUpload = (file) => {
     try {
       if (!file) {
@@ -85,21 +92,23 @@ class Fir extends React.PureComponent {
 
   handleSearch = (params = {}) => {
     const type = "FirWfsService"; // TODO: Remove hard coded value when needed
-    const defaultParams = {}; // TODO: Remove hard coded value when needed
+    const defaultParams = {
+      features: this.model.layers.draw.getSource().getFeatures(),
+    }; // TODO: Remove hard coded value when needed
     // Prepared for other types of services
     this.getService(type).then((Service) => {
       const service = new Service.default(defaultParams);
       try {
         this.layerController.clearBeforeSearch();
+        this.localObserver.publish("fir.search.started", params);
         service.search(params).then((features) => {
-          // Expect an array of features.
-          // console.log(features);
+          // We're expecting an array of features.
           this.layerController.addFeatures(features);
-          console.log(features);
           this.localObserver.publish("fir.search.completed", features);
         });
       } catch (error) {
         console.error(error);
+        this.localObserver.publish("fir.search.error", error);
       }
     });
   };
@@ -114,9 +123,10 @@ class Fir extends React.PureComponent {
           title: this.state.title,
           color: this.state.color,
           description: "",
-
           height: "auto",
           width: 400,
+          onWindowShow: this.onWindowShow,
+          onWindowHide: this.onWindowHide,
         }}
       >
         <FirView

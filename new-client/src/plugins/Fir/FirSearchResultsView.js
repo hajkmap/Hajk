@@ -18,7 +18,7 @@ import Pagination from "@material-ui/lab/Pagination";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
-import { Select } from "ol/interaction";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 class FirView extends React.PureComponent {
   state = {
@@ -27,6 +27,7 @@ class FirView extends React.PureComponent {
     results: { list: [] },
     paginatedResults: { list: [] },
     currentPage: 1,
+    loading: false,
   };
 
   static propTypes = {
@@ -39,26 +40,7 @@ class FirView extends React.PureComponent {
   static defaultProps = {};
 
   componentDidMount() {
-    let list = [];
-
-    // for (let i = 1; i < 21; i++) {
-    //   list.push({
-    //     name: "TESTÄPPLET " + i,
-    //     open: false,
-    //     data: { test: "hejsan" + i },
-    //   });
-    // }
-
-    // list.forEach((item, index) => {
-    //   item.key = "firResult" + index;
-    // });
-
-    this.setState({ results: { list: list } });
-
-    setTimeout(() => {
-      // push to next draw
-      this.setPage(1);
-    }, 25);
+    this.clearResults();
   }
 
   constructor(props) {
@@ -71,10 +53,24 @@ class FirView extends React.PureComponent {
   }
 
   initListeners = () => {
+    this.localObserver.subscribe("fir.search.started", () => {
+      this.clearResults();
+      this.setState({ loading: true });
+    });
+
+    this.localObserver.subscribe("fir.search.error", () => {
+      this.setState({ loading: false });
+    });
+
     this.localObserver.subscribe("fir.search.completed", (features) => {
+      this.setState({ loading: false });
       features.forEach((o) => {
         o.open = false;
       });
+      let sortProp = "fastbet";
+      features.sort((a, b) =>
+        a[sortProp] > b[sortProp] ? 1 : b[sortProp] > a[sortProp] ? -1 : 0
+      );
       this.setState({ results: { list: features } });
       this.setPage(1);
     });
@@ -84,6 +80,16 @@ class FirView extends React.PureComponent {
     this.localObserver.subscribe("fir.search.feature.deselected", (feature) => {
       this.expandFeature(feature, false);
     });
+    this.localObserver.subscribe("fir.search.clear", this.clearResults);
+  };
+
+  clearResults = () => {
+    this.setState({ results: { list: [] } });
+
+    setTimeout(() => {
+      // push to next draw
+      this.setPage(1);
+    }, 25);
   };
 
   highlight = (feature, _highlight = false) => {
@@ -213,9 +219,23 @@ class FirView extends React.PureComponent {
                     </Collapse>
                   </div>
                 ))}
-                {this.state.results.list.length === 0 ? (
-                  <div className={classes.noResults}>
+                {this.state.results.list.length === 0 &&
+                this.state.loading === false ? (
+                  <div className={classes.paddedBottom}>
                     Inga resultat att visa
+                  </div>
+                ) : (
+                  ""
+                )}
+                {this.state.loading === true ? (
+                  <div
+                    className={`${classes.paddedBottom} ${classes.loaderContainer}`}
+                  >
+                    <CircularProgress
+                      size={24}
+                      className={classes.buttonProgress}
+                    />
+                    <span>Söker</span>
                   </div>
                 ) : (
                   ""
@@ -272,10 +292,17 @@ const styles = (theme) => ({
       fill: theme.palette.error.dark,
     },
   },
-  noResults: {
+  paddedBottom: {
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
     paddingBottom: theme.spacing(1),
+  },
+  loaderContainer: {
+    display: "flex",
+    alignItems: "center",
+    "& > span": {
+      paddingLeft: theme.spacing(1),
+    },
   },
 });
 

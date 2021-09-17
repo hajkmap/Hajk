@@ -1,8 +1,10 @@
 import { GeoJSON, WFS } from "ol/format";
 import {
+  and as andFilter,
   or as orFilter,
   equalTo as equalToFilter,
   like as likeFilter,
+  intersects as intersectsFilter,
 } from "ol/format/filter";
 import { hfetch } from "utils/FetchWrapper";
 
@@ -35,6 +37,15 @@ class FirWfsService {
     };
   }
 
+  getGeometryFilters(features) {
+    let filters = [];
+    features.forEach((feature) => {
+      filters.push(intersectsFilter("geom", feature.getGeometry()));
+    });
+
+    return filters.length === 0 ? null : filters;
+  }
+
   getFeatureRequestObject(type, params) {
     let rootFilter = null;
 
@@ -42,17 +53,42 @@ class FirWfsService {
 
     if (designations.length === 0) {
       // zero designations
-      if (!params.exactMatch) {
-        params.text += "*";
+
+      let geometryFilters = null;
+      let stringFilter = null;
+
+      if (params.features.length > 0) {
+        geometryFilters = this.getGeometryFilters(params.features);
       }
-      rootFilter = likeFilter(
-        type.searchProp,
-        params.text,
-        "*",
-        ".",
-        "!",
-        false
-      );
+
+      if (geometryFilters && geometryFilters.length >= 2) {
+        // wrap when more than 1
+        geometryFilters = orFilter(...geometryFilters);
+      } else if (geometryFilters && geometryFilters.length === 1) {
+        geometryFilters = geometryFilters[0];
+      }
+
+      if (params.text.trim() !== "") {
+        if (!params.exactMatch) {
+          params.text += "*";
+        }
+        stringFilter = likeFilter(
+          type.searchProp,
+          params.text,
+          "*",
+          ".",
+          "!",
+          false
+        );
+      }
+
+      if (stringFilter && !geometryFilters) {
+        rootFilter = stringFilter;
+      } else if (geometryFilters && !stringFilter) {
+        rootFilter = geometryFilters;
+      } else if (stringFilter && geometryFilters) {
+        rootFilter = andFilter(stringFilter, geometryFilters);
+      }
     } else if (designations.length === 1) {
       // one designations
       rootFilter = equalToFilter(type.searchProp, designations[0], false);
@@ -79,16 +115,17 @@ class FirWfsService {
   getRequestXml(params) {
     let type = this.searchTypeHash[params.searchType];
     let featureRequestObject = this.getFeatureRequestObject(type, params);
+    console.log(featureRequestObject);
     const featureRequest = new WFS().writeGetFeature(featureRequestObject);
 
     return new XMLSerializer().serializeToString(featureRequest);
   }
 
-  secondarySearch(data, params, resolve, reject) {
+  nestedSearch(data, params, resolve, reject) {
     let ids = [];
+
     data.features.forEach((feature) => {
       let id = feature.properties.fnr || feature.properties.nyckel;
-      console.log(id);
       if (!ids.includes(id)) {
         ids.push(id);
       }
@@ -102,7 +139,6 @@ class FirWfsService {
 
     const type = this.searchTypeHash[p.searchType];
 
-    // TODO: Remove hard coded value when needed
     hfetch(type.url, {
       method: "POST",
       body: requestXml,
@@ -118,7 +154,7 @@ class FirWfsService {
   search(params) {
     let _params = { ...this.params, ...params };
 
-    if (_params.text.trim() === "") {
+    if (_params.text.trim() === "" && _params.features.length === 0) {
       console.log("no text to search for");
       return Promise.resolve(null);
     }
@@ -139,11 +175,14 @@ class FirWfsService {
           return response ? response.json() : null;
         })
         .then((data) => {
-          if (type === this.searchTypeHash.designation) {
+          if (
+            type === this.searchTypeHash.designation ||
+            data.features?.length === 0
+          ) {
             resolve(new GeoJSON().readFeatures(data));
           } else {
             // searching by owner or address needs 2 separate requests... look into this in the future
-            this.secondarySearch(data, _params, resolve, reject);
+            this.nestedSearch(data, _params, resolve, reject);
           }
         });
     });
