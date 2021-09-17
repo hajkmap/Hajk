@@ -205,7 +205,7 @@ class BaseWindowPlugin extends React.PureComponent {
    * not only plugins specified as Drawer plugins (target===toolbar),
    * but it will also render Widget plugins - given some special condition.
    *
-   * Those special conditions are small screens, were there's no screen
+   * Those special conditions are small screens, where there's no screen
    * estate to render the Widget button in Map Overlay.
    *
    * There is another special case needed to be taken care of: the "hidden"
@@ -215,7 +215,12 @@ class BaseWindowPlugin extends React.PureComponent {
     return this.props.options.target === "hidden"
       ? null
       : createPortal(
-          <Hidden mdUp={this.props.options.target !== "toolbar"}>
+          <Hidden
+            mdUp={
+              this.props.options.target !== "toolbar" &&
+              this.props.options.target !== "control"
+            }
+          >
             <ListItem
               button
               divider={true}
