@@ -144,9 +144,23 @@ class BaseWindowPlugin extends React.PureComponent {
       }
     );
   };
-
-  renderWindow(mode = "window") {
-    return (
+  /**
+   * @summary Render the plugin and its buttons according to settings in admin.
+   * @description See comments in code to follow the rendering logic.
+   * @param {*} custom
+   * @returns {object} React.Component
+   * @memberof BaseWindowPlugin
+   */
+  renderWindow(custom) {
+    // BaseWindowPlugin, which calls this method, will supply an object.
+    // If that object contains a render() function, we want to call it
+    // and bypass any other functionality from this method.
+    return typeof custom?.render === "function" ? (
+      custom.render()
+    ) : (
+      // If there was not custom render method, we do "normal" rendering.
+      // That includes rendering the plugin Window itself, as well as a
+      // button (that will trigger opening of the plugin Window).
       <>
         <Window
           globalObserver={this.props.app.globalObserver}
@@ -165,18 +179,22 @@ class BaseWindowPlugin extends React.PureComponent {
           width={this.width}
           height={this.height}
           position={this.position}
-          mode={mode}
+          mode="window"
           layerswitcherConfig={this.props.app.config.mapConfig.tools.find(
             (t) => t.type === "layerswitcher"
           )}
         >
           {this.props.children}
         </Window>
+        {/* Always render the Drawer button if we have a Window.
+            See comment for renderDrawerButton() too. */}
         {this.renderDrawerButton()}
+        {/* Depending on value of target, render a left or right Widget too */}
         {this.props.options.target === "left" &&
           this.renderWidgetButton("left-column")}
         {this.props.options.target === "right" &&
           this.renderWidgetButton("right-column")}
+        {/* Finally, render a Control button if target has that value */}
         {this.props.options.target === "control" && this.renderControlButton()}
       </>
     );
@@ -242,7 +260,8 @@ class BaseWindowPlugin extends React.PureComponent {
   render() {
     // Don't render if "clean" query param is specified, otherwise go on
     return (
-      this.props.app.config.mapConfig.map.clean !== true && this.renderWindow()
+      this.props.app.config.mapConfig.map.clean !== true &&
+      this.renderWindow(this.props.custom)
     );
   }
 }
