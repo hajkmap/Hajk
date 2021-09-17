@@ -8,6 +8,7 @@ import PluginIcon from "@material-ui/icons/House";
 import FirModel from "./FirModel";
 import FirView from "./FirView";
 import FirLayerController from "./FirLayerController";
+import FirImport from "./FirImport";
 /* eslint-disable no-unused-vars */
 import FirWfsService from "./FirWfsService";
 /* eslint-enable no-unused-vars */
@@ -33,7 +34,6 @@ class Fir extends React.PureComponent {
 
     this.localObserver = new Observer();
 
-    this.localObserver.subscribe("fir.kml_upload", this.handleFileUpload);
     this.localObserver.subscribe("fir.search.search", this.handleSearch);
 
     this.model = new FirModel({
@@ -46,6 +46,12 @@ class Fir extends React.PureComponent {
       this.model,
       this.localObserver
     );
+
+    this.import = new FirImport({
+      localObserver: this.localObserver,
+      targetSource: this.model.layers.draw.getSource(),
+      map: props.map,
+    });
   }
 
   onWindowShow = () => {
@@ -54,30 +60,6 @@ class Fir extends React.PureComponent {
 
   onWindowHide = () => {
     this.localObserver.publish("fir.window", { visible: false });
-  };
-
-  handleFileUpload = (file) => {
-    try {
-      if (!file) {
-        return;
-      }
-      const fileType = file.type ? file.type : file.name.split(".").pop();
-
-      if (
-        fileType !== "kml" &&
-        fileType !== "application/vnd.google-earth.kml+xml"
-      ) {
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        // console.log(reader.result);
-      };
-      reader.readAsText(file);
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   getService(type) {
@@ -91,10 +73,10 @@ class Fir extends React.PureComponent {
   }
 
   handleSearch = (params = {}) => {
-    const type = "FirWfsService"; // TODO: Remove hard coded value when needed
+    const type = "FirWfsService";
     const defaultParams = {
       features: this.model.layers.draw.getSource().getFeatures(),
-    }; // TODO: Remove hard coded value when needed
+    };
     // Prepared for other types of services
     this.getService(type).then((Service) => {
       const service = new Service.default(defaultParams);

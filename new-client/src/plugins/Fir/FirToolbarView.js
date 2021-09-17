@@ -44,7 +44,10 @@ class FirToolbarView extends React.PureComponent {
   }
 
   initListeners = () => {
-    this.localObserver.subscribe("fir.search.clear", this.deactivateDraw);
+    this.localObserver.subscribe("fir.search.clear", () => {
+      this.deactivateDraw();
+      this.setState({ files: { list: [] } });
+    });
   };
 
   handleSearchAreaClick(id) {
@@ -151,7 +154,10 @@ class FirToolbarView extends React.PureComponent {
     if (e && e.target) {
       this.setState({ files: { list: e.target.files || [] } });
       if (e.target.files.length > 0) {
-        this.localObserver.publish("fir.kml_upload", e.target.files[0]);
+        this.localObserver.publish("fir.file.import", e.target.files[0]);
+        setTimeout(() => {
+          e.target.value = "";
+        }, 500);
       }
     }
   };
