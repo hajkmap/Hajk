@@ -93,6 +93,10 @@ class BaseWindowPlugin extends React.PureComponent {
       this.setState({ color: this.props.custom.color });
   }
 
+  pluginIsWidget(target) {
+    return ["left", "right"].includes(target);
+  }
+
   handleButtonClick = (e) => {
     this.showWindow({
       hideOtherPluginWindows: true,
@@ -152,6 +156,7 @@ class BaseWindowPlugin extends React.PureComponent {
    * @memberof BaseWindowPlugin
    */
   renderWindow(custom) {
+    const { target } = this.props.options;
     // BaseWindowPlugin, which calls this method, will supply an object.
     // If that object contains a render() function, we want to call it
     // and bypass any other functionality from this method.
@@ -186,16 +191,14 @@ class BaseWindowPlugin extends React.PureComponent {
         >
           {this.props.children}
         </Window>
-        {/* Always render the Drawer button if we have a Window.
-            See comment for renderDrawerButton() too. */}
-        {this.renderDrawerButton()}
-        {/* Depending on value of target, render a left or right Widget too */}
-        {this.props.options.target === "left" &&
-          this.renderWidgetButton("left-column")}
-        {this.props.options.target === "right" &&
-          this.renderWidgetButton("right-column")}
+        {/* Drawer buttons and Widget buttons should render a Drawer button. */}
+        {(target === "toolbar" || this.pluginIsWidget(target)) &&
+          this.renderDrawerButton()}
+        {/* Widget buttons must also render a Widget */}
+        {this.pluginIsWidget(target) &&
+          this.renderWidgetButton(`${target}-column`)}
         {/* Finally, render a Control button if target has that value */}
-        {this.props.options.target === "control" && this.renderControlButton()}
+        {target === "control" && this.renderControlButton()}
       </>
     );
   }
@@ -207,32 +210,22 @@ class BaseWindowPlugin extends React.PureComponent {
    *
    * Those special conditions are small screens, where there's no screen
    * estate to render the Widget button in Map Overlay.
-   *
-   * There is another special case needed to be taken care of: the "hidden"
-   * value on target should not render any button at all, but still load the plugin.
    */
   renderDrawerButton() {
-    return this.props.options.target === "hidden"
-      ? null
-      : createPortal(
-          <Hidden
-            mdUp={
-              this.props.options.target !== "toolbar" &&
-              this.props.options.target !== "control"
-            }
-          >
-            <ListItem
-              button
-              divider={true}
-              selected={this.state.windowVisible}
-              onClick={this.handleButtonClick}
-            >
-              <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
-              <ListItemText primary={this.title} />
-            </ListItem>
-          </Hidden>,
-          document.getElementById("plugin-buttons")
-        );
+    return createPortal(
+      <Hidden mdUp={this.pluginIsWidget(this.props.options.target)}>
+        <ListItem
+          button
+          divider={true}
+          selected={this.state.windowVisible}
+          onClick={this.handleButtonClick}
+        >
+          <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
+          <ListItemText primary={this.title} />
+        </ListItem>
+      </Hidden>,
+      document.getElementById("plugin-buttons")
+    );
   }
 
   renderWidgetButton(id) {
