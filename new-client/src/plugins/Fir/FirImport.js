@@ -3,7 +3,7 @@ import KML from "ol/format/KML.js";
 export default class FirImport {
   constructor(options) {
     this.localObserver = options.localObserver;
-    this.source = options.targetSource;
+    this.layerController = options.layerController;
     this.map = options.map;
 
     this.localObserver.subscribe("fir.file.import", this.handleFileImport);
@@ -41,7 +41,9 @@ export default class FirImport {
         this.translateImportedFeature(feature);
       });
       if (features.length) {
-        this.source.addFeatures(features);
+        const targetLayer = this.layerController.getLayer("draw");
+        targetLayer.getSource().addFeatures(features);
+        this.layerController.zoomToLayer(targetLayer);
       }
     } catch (err) {
       console.warn(err);
@@ -49,6 +51,7 @@ export default class FirImport {
   };
 
   translateImportedFeature(feature) {
+    // got this from the Draw plugin...
     var coordinates = feature.getGeometry().getCoordinates(),
       type = feature.getGeometry().getType(),
       newCoordinates = [];

@@ -49,7 +49,7 @@ class Fir extends React.PureComponent {
 
     this.import = new FirImport({
       localObserver: this.localObserver,
-      targetSource: this.model.layers.draw.getSource(),
+      layerController: this.layerController,
       map: props.map,
     });
   }
@@ -74,8 +74,15 @@ class Fir extends React.PureComponent {
 
   handleSearch = (params = {}) => {
     const type = "FirWfsService";
+
+    let features = this.model.layers.buffer.getSource().getFeatures();
+
+    if (features.length === 0) {
+      features = this.model.layers.draw.getSource().getFeatures();
+    }
+
     const defaultParams = {
-      features: this.model.layers.draw.getSource().getFeatures(),
+      features: features,
     };
     // Prepared for other types of services
     this.getService(type).then((Service) => {

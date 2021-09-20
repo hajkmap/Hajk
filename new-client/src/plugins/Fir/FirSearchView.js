@@ -164,6 +164,10 @@ class FirSearchView extends React.PureComponent {
                       checked={this.state.showDesignation}
                       onChange={(e) => {
                         this.setState({ showDesignation: e.target.checked });
+                        this.localObserver.publish(
+                          "fir.layers.showDesignation",
+                          { value: e.target.checked }
+                        );
                       }}
                       color="primary"
                     />
@@ -180,6 +184,10 @@ class FirSearchView extends React.PureComponent {
                       checked={this.state.showSearchArea}
                       onChange={(e) => {
                         this.setState({ showSearchArea: e.target.checked });
+                        this.localObserver.publish(
+                          "fir.layers.showSearchArea",
+                          { value: e.target.checked }
+                        );
                       }}
                       color="primary"
                     />

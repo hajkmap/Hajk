@@ -47,6 +47,7 @@ class FirToolbarView extends React.PureComponent {
     this.localObserver.subscribe("fir.search.clear", () => {
       this.deactivateDraw();
       this.setState({ files: { list: [] } });
+      this.deselectButtonItems();
     });
   };
 
@@ -75,8 +76,35 @@ class FirToolbarView extends React.PureComponent {
   handleDeleteClick = (e) => {
     var first = true;
     this.model.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
-      if (feature && layer === this.model.layers.draw && first) {
-        this.model.layers.draw.getSource().removeFeature(feature);
+      // Handles both drawn features and buffer features. Remove them at the same time as they are linked.
+
+      const firType = feature.get("fir_type");
+      if (firType && (firType === "draw" || firType === "buffer") && first) {
+        let findFn = null;
+
+        if (firType === "draw") {
+          findFn = (f) => {
+            return feature.ol_uid === f.get("owner_ol_uid");
+          };
+        } else if (firType === "buffer") {
+          findFn = (f) => {
+            return feature.get("owner_ol_uid") === f.ol_uid;
+          };
+        }
+
+        this.model.layers[firType].getSource().removeFeature(feature);
+        let secondaryLayer = this.model.layers[
+          firType === "draw" ? "buffer" : "draw"
+        ];
+        let secondaryFeature = secondaryLayer
+          .getSource()
+          .getFeatures()
+          .find(findFn);
+
+        if (secondaryFeature) {
+          secondaryLayer.getSource().removeFeature(secondaryFeature);
+        }
+
         this.deactivateDraw();
         this.deselectButtonItems();
       }
@@ -292,7 +320,12 @@ class FirToolbarView extends React.PureComponent {
                 v = 0;
               }
 
-              this.setState({ buffer: parseInt(v) });
+              const bufferValue = parseInt(v);
+              this.setState({ buffer: bufferValue });
+
+              this.localObserver.publish("fir.layers.bufferValueChanged", {
+                value: bufferValue,
+              });
             }}
             onFocus={(e) => {
               if (this.state.buffer === 0) {
