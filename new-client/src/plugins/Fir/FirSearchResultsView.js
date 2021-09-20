@@ -69,7 +69,11 @@ class FirView extends React.PureComponent {
       });
       let sortProp = "fastbet";
       features.sort((a, b) =>
-        a[sortProp] > b[sortProp] ? 1 : b[sortProp] > a[sortProp] ? -1 : 0
+        a.get(sortProp) > b.get(sortProp)
+          ? 1
+          : b.get(sortProp) > a.get(sortProp)
+          ? -1
+          : 0
       );
       this.setState({ results: { list: features } });
       this.setPage(1);
