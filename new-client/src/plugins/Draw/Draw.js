@@ -40,8 +40,8 @@ class Draw extends React.PureComponent {
         type="Draw"
         custom={{
           icon: <DrawIcon />,
-          title: "Rita",
-          description: "Rita, mät, importera och exportera",
+          title: "plugins.draw.title",
+          description: "plugins.draw.description",
           height: 600,
           width: 285,
           top: undefined,

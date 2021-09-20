@@ -1,8 +1,10 @@
 {
   "common": {
+    "cancel": "Cancel",
     "closeWindow": "Close",
     "maximizeWindow": "Maximize",
     "minimizeWindow": "Minimize",
+    "ok": "Ok",
     "results": "Results",
     "showing": "Showing"
   },
@@ -164,6 +166,27 @@
     }
   },
   "plugins": {
+    "draw": {
+      "description": "Draw, measure, import and export.",
+      "dragAndDrop": {
+        "notSupportedError": "files can not be imported.",
+        "onDragEnter": "Drop a KML file to import it!",
+        "onDropError": "The KML file could not be imported."
+      },
+      "import": {
+        "kml": {
+          "dialog": {
+            "header": "Upload content",
+            "mainArea": {
+              "title": "Choose KML file to import:",
+              "uploadButton": "Upload"
+            }
+          },
+          "error": "No objects were found in the KML file."
+        }
+      },
+      "title": "Draw"
+    },
     "layerSwitcher": {
       "description": "Choose what to show in the map",
       "title": "Layer manager",

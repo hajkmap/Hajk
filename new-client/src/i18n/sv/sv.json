@@ -1,8 +1,10 @@
 {
   "common": {
+    "cancel": "Avbryt",
     "closeWindow": "Stäng fönstret",
     "maximizeWindow": "Maximera fönstret",
     "minimizeWindow": "Minimera fönstret",
+    "ok": "Ok",
     "results": "Resultat",
     "showing": "Visar"
   },
@@ -164,6 +166,27 @@
     }
   },
   "plugins": {
+    "draw": {
+      "description": "Rita, mät, importera och exportera",
+      "dragAndDrop": {
+        "notSupportedError": "filer kan inte importeras.",
+        "onDragEnter": "Släpp en KML-fil i kartan för att importera!",
+        "onDropError": "Filen kunde inte importeras."
+      },
+      "import": {
+        "kml": {
+          "dialog": {
+            "header": "Ladda upp innehåll",
+            "mainArea": {
+              "title": "Välj KML-fil att importera:",
+              "uploadButton": "Ladda upp"
+            }
+          },
+          "error": "Inga ritobjekt hittades i KML-filen."
+        }
+      },
+      "title": "Rita"
+    },
     "layerSwitcher": {
       "description": "Välj vad du vill se i kartan",
       "title": "Lagerhanterare",
