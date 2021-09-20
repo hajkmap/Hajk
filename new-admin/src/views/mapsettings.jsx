@@ -160,13 +160,13 @@ $.fn.editable = function (component) {
     });
 
     if (node.parent().attr("data-expanded")) {
-      checkbox.attr("checked", "checked");
+      checkbox.attr("checked", JSON.parse(node.parent().attr("data-expanded")));
     }
     if (node.parent().attr("data-toggled")) {
-      checkbox2.attr("checked", "checked");
+      checkbox2.attr("checked", JSON.parse(node.parent().attr("data-toggled")));
     }
     if (node.parent().attr("data-visibleatstart")) {
-      checkbox3.attr("checked", "checked");
+      checkbox3.attr("checked", JSON.parse(node.parent().attr("data-visibleatstart")));
     }
     if (node.parent().attr("data-visibleforgroups")) {
       input3.val(node.parent().attr("data-visibleforgroups"));
