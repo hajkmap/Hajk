@@ -38,6 +38,10 @@
         "srText": "Sök i webbplatsens innehåll"
       },
       "searchResults": {
+        "featureDetails": {
+          "showNext": "Visa nästa objekt i resultatlistan",
+          "showPrevious": "Visa föregående objekt i resultatlistan"
+        },
         "datasetSummary": {
           "maxWarning": "Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas."
         },

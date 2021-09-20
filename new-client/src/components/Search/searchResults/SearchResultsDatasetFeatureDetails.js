@@ -1,6 +1,7 @@
 import React from "react";
 import FeaturePropsParsing from "../../FeatureInfo/FeaturePropsParsing";
 import { withStyles } from "@material-ui/core/styles";
+import { withTranslation } from "react-i18next";
 import {
   Table,
   TableBody,
@@ -152,7 +153,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   renderFeatureToggler = () => {
-    const { feature, classes, features } = this.props;
+    const { feature, classes, features, t } = this.props;
     const numFeaturesInCollection = features.length;
     const currentFeatureIndex = this.getFeatureIndex(feature, features);
 
@@ -166,7 +167,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
           <Tooltip
             title={
               !buttonLeftDisabled
-                ? "Visa föregående objekt i resultatlistan"
+                ? t("core.search.searchResults.featureDetails.showPrevious")
                 : ""
             }
           >
@@ -193,7 +194,9 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
         <Grid item>
           <Tooltip
             title={
-              !buttonRightDisabled ? "Visa nästa objekt i resultatlistan" : ""
+              !buttonRightDisabled
+                ? t("core.search.searchResults.featureDetails.showNext")
+                : ""
             }
           >
             <span>
@@ -265,4 +268,6 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     );
   }
 }
-export default withStyles(styles)(SearchResultsDatasetFeatureDetails);
+export default withTranslation()(
+  withStyles(styles)(SearchResultsDatasetFeatureDetails)
+);
