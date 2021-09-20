@@ -1,5 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import { withTranslation } from "react-i18next";
 import { Checkbox, Typography, Tooltip, Grid } from "@material-ui/core";
 import StarIcon from "@material-ui/icons/Star";
 import StarBorderIcon from "@material-ui/icons/StarBorder";
@@ -19,8 +20,10 @@ const styles = (theme) => ({
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
-    const { visibleInMap } = this.props;
-    const helpText = !visibleInMap ? "Lägg till i urval" : "Ta bort från urval";
+    const { visibleInMap, t } = this.props;
+    const helpText = !visibleInMap
+      ? t("core.search.searchResults.feature.addToSelection")
+      : t("core.search.searchResults.feature.removeFromSelection");
 
     return (
       <Grid item align="center">
@@ -93,4 +96,6 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     }
   }
 }
-export default withStyles(styles)(SearchResultsDatasetFeature);
+export default withTranslation()(
+  withStyles(styles)(SearchResultsDatasetFeature)
+);

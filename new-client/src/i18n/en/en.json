@@ -38,6 +38,10 @@
         "srText": "Search the content of the website"
       },
       "searchResults": {
+        "feature": {
+          "addToSelection": "Add to selection",
+          "removeFromSelection": "Remove from selection"
+        },
         "featureDetails": {
           "showNext": "Show the next object from the results list",
           "showPrevious": "Show the previous object from the results list"

@@ -38,6 +38,10 @@
         "srText": "Sök i webbplatsens innehåll"
       },
       "searchResults": {
+        "feature": {
+          "addToSelection": "Lägg till i urval",
+          "removeFromSelection": "Ta bort från urval"
+        },
         "featureDetails": {
           "showNext": "Visa nästa objekt i resultatlistan",
           "showPrevious": "Visa föregående objekt i resultatlistan"
