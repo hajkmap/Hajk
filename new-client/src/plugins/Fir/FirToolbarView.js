@@ -51,7 +51,7 @@ class FirToolbarView extends React.PureComponent {
     });
   };
 
-  handleSearchAreaClick(id) {
+  handleToolbarClick(id) {
     let o = { ...this.state.tools };
 
     for (let type in o) {
@@ -212,7 +212,7 @@ class FirToolbarView extends React.PureComponent {
               }}
               color={this.state.tools.Polygon.selected ? "primary" : null}
               onClick={() => {
-                this.handleSearchAreaClick("Polygon");
+                this.handleToolbarClick("Polygon");
               }}
             >
               <img src="/g-polygon.svg" className={classes.svgImg} alt="" />
@@ -225,7 +225,7 @@ class FirToolbarView extends React.PureComponent {
               }}
               color={this.state.tools.Rectangle.selected ? "primary" : null}
               onClick={() => {
-                this.handleSearchAreaClick("Rectangle");
+                this.handleToolbarClick("Rectangle");
               }}
             >
               <img src="/g-rect.svg" className={classes.svgImg} alt="" />
@@ -238,7 +238,7 @@ class FirToolbarView extends React.PureComponent {
               }}
               color={this.state.tools.LineString.selected ? "primary" : null}
               onClick={() => {
-                this.handleSearchAreaClick("LineString");
+                this.handleToolbarClick("LineString");
               }}
             >
               <img src="/g-line.svg" className={classes.svgImg} alt="" />
@@ -251,7 +251,7 @@ class FirToolbarView extends React.PureComponent {
               }}
               color={this.state.tools.Point.selected ? "primary" : null}
               onClick={() => {
-                this.handleSearchAreaClick("Point");
+                this.handleToolbarClick("Point");
               }}
             >
               <img src="/g-point.svg" className={classes.svgImg} alt="" />
@@ -261,7 +261,7 @@ class FirToolbarView extends React.PureComponent {
               className={classes.iconButton}
               color={this.state.tools.Import.selected ? "primary" : null}
               onClick={() => {
-                this.handleSearchAreaClick("Import");
+                this.handleToolbarClick("Import");
               }}
             >
               <InsertDriveFileIcon />
@@ -271,7 +271,7 @@ class FirToolbarView extends React.PureComponent {
               className={classes.iconButton}
               color={this.state.tools.Delete.selected ? "primary" : null}
               onClick={() => {
-                this.handleSearchAreaClick("Delete");
+                this.handleToolbarClick("Delete");
               }}
             >
               <DeleteIcon />

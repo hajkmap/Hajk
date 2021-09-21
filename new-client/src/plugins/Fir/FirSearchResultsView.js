@@ -49,6 +49,7 @@ class FirView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
     this.itemsPerPage = 10;
+    this.accordionList = React.createRef();
     this.initListeners();
   }
 
@@ -67,7 +68,7 @@ class FirView extends React.PureComponent {
       features.forEach((o) => {
         o.open = false;
       });
-      let sortProp = "fastbet";
+      const sortProp = "fastbet";
       features.sort((a, b) =>
         a.get(sortProp) > b.get(sortProp)
           ? 1
@@ -79,10 +80,10 @@ class FirView extends React.PureComponent {
       this.setPage(1);
     });
     this.localObserver.subscribe("fir.search.feature.selected", (feature) => {
-      this.expandFeature(feature, true);
+      this.expandFeatureByMapClick(feature, true);
     });
     this.localObserver.subscribe("fir.search.feature.deselected", (feature) => {
-      this.expandFeature(feature, false);
+      this.expandFeatureByMapClick(feature, false);
     });
     this.localObserver.subscribe("fir.search.clear", this.clearResults);
   };
@@ -103,21 +104,47 @@ class FirView extends React.PureComponent {
     });
   };
 
-  expandFeature = (feature, expand) => {
+  expandFeatureByMapClick = (feature, expand) => {
+    let index = this.state.results.list.findIndex((f) => f === feature);
+
+    if (index > -1) {
+      const foundOnPageNum = Math.floor(1 + index / this.itemsPerPage);
+      this.setPage(foundOnPageNum, false);
+    }
+
+    setTimeout(() => {
+      this.expandFeature(feature, expand);
+      // this.localObserver.publish("fir.window.scroll", {});
+    }, 25);
+  };
+
+  expandFeature(feature, expand) {
     this.state.results.list
       .filter((o) => o !== feature)
       .forEach((o) => {
         o.open = false;
       });
     feature.open = expand;
+
+    if (expand === true) {
+      setTimeout(() => {
+        const openElement = this.accordionList.current.querySelector(".isopen");
+        if (openElement) {
+          openElement.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+            inline: "nearest",
+          });
+        }
+      }, 400);
+    }
+
     this.forceUpdate();
-  };
+  }
 
   handleItemClick(e, data) {
     this.expandFeature(data, !data.open);
-
     this.highlight(data, data.open);
-    this.forceUpdate();
   }
 
   handleDeleteClick(e, data) {
@@ -138,16 +165,21 @@ class FirView extends React.PureComponent {
     return Math.round(this.state.results.list.length / this.itemsPerPage);
   }
 
-  setPage(pageNum) {
+  setPage(pageNum, closeAll = true) {
     if (!pageNum) {
       pageNum = this.state.currentPage;
     }
+
     this.setState({ currentPage: pageNum });
+
     let start = (pageNum - 1) * this.itemsPerPage;
     let end = pageNum * this.itemsPerPage;
-    this.state.results.list.forEach((o) => {
-      o.open = false;
-    });
+
+    if (closeAll) {
+      this.state.results.list.forEach((o) => {
+        o.open = false;
+      });
+    }
     let list = this.state.results.list.slice(start, end);
 
     if (list.length === 0 && pageNum > 1) {
@@ -158,6 +190,7 @@ class FirView extends React.PureComponent {
   }
 
   handlePageChange = (e, p) => {
+    // this.forceUpdate();
     this.setPage(p);
   };
 
@@ -187,9 +220,17 @@ class FirView extends React.PureComponent {
           </AccordionSummary>
           <AccordionDetails style={{ display: "block", padding: 0 }}>
             <div>
-              <List dense={true} component="nav" className={classes.listRoot}>
+              <List
+                ref={this.accordionList}
+                dense={true}
+                component="nav"
+                className={classes.listRoot}
+              >
                 {this.state.paginatedResults.list.map((data, index) => (
-                  <div key={data.ol_uid}>
+                  <div
+                    key={data.ol_uid}
+                    className={data.open ? "isopen" : "isclosed"}
+                  >
                     {index > 0 ? <Divider /> : ""}
                     <ListItem
                       button
@@ -248,8 +289,10 @@ class FirView extends React.PureComponent {
               {this.paginationPageCount() > 0 ? (
                 <div className={classes.paginationContainer}>
                   <Pagination
+                    ref={this.paginationRef}
                     color="primary"
                     defaultPage={1}
+                    page={this.state.currentPage}
                     count={this.paginationPageCount()}
                     onChange={this.handlePageChange}
                     size="small"

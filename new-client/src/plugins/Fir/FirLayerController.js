@@ -1,7 +1,14 @@
 import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
 
-import { Fill, Stroke, Circle, Style } from "ol/style";
+import {
+  Fill,
+  Stroke,
+  Circle,
+  Style,
+  Icon,
+  Circle as CircleStyle,
+} from "ol/style";
 import Feature from "ol/Feature.js";
 import LinearRing from "ol/geom/LinearRing.js";
 import {
@@ -85,7 +92,7 @@ class FirLayerController {
       queryable: false,
       visible: true,
       //style: this.getHighlightStyle(),
-      zIndex: 100,
+      // zIndex: 100,
     });
 
     this.model.layers.buffer = new VectorLayer({
@@ -120,7 +127,7 @@ class FirLayerController {
       // style: this.getFirBufferHiddenFeatureStyle(),
     });
 
-    this.model.layers.labels = new VectorLayer({
+    this.model.layers.label = new VectorLayer({
       caption: "FIRLabels",
       name: "FIRLabels",
       source: new VectorSource(),
@@ -129,12 +136,23 @@ class FirLayerController {
       // style: this.getFirBufferHiddenFeatureStyle(),
     });
 
+    this.model.layers.marker = new VectorLayer({
+      caption: "FIRMarker",
+      name: "FIRMarker",
+      source: new VectorSource(),
+      queryable: false,
+      visible: true,
+    });
+
     this.model.map.addLayer(this.model.layers.feature);
     this.model.map.addLayer(this.model.layers.highlight);
     this.model.map.addLayer(this.model.layers.buffer);
     this.model.map.addLayer(this.model.layers.draw);
     this.model.map.addLayer(this.model.layers.hiddenBuffer);
-    this.model.map.addLayer(this.model.layers.labels);
+    this.model.map.addLayer(this.model.layers.label);
+    this.model.map.addLayer(this.model.layers.marker);
+
+    this.addMarker();
   }
 
   getLayer(name) {
@@ -156,7 +174,7 @@ class FirLayerController {
       this.model.layers.buffer.setVisible(data.value);
     });
     this.observer.subscribe("fir.layers.showDesignation", (data) => {
-      this.model.layers.labels.setVisible(data.value);
+      this.model.layers.label.setVisible(data.value);
     });
 
     let bufferValueChanged_tm = null;
@@ -172,6 +190,20 @@ class FirLayerController {
 
     this.model.map.on("singleclick", this.handleFeatureClicks);
   }
+
+  addMarker = () => {
+    this.markerFeature = new Feature({ geometry: new Point([0, 0]) });
+    const styleMarker = new Style({
+      image: new Icon({
+        anchor: [0.5, 1.15],
+        scale: 0.15,
+        src: "marker.png",
+      }),
+    });
+    this.markerFeature.setStyle(styleMarker);
+    this.model.layers.marker.getSource().addFeature(this.markerFeature);
+    this.model.layers.marker.setVisible(false);
+  };
 
   addFeatures = (arr) => {
     if (!arr) {
@@ -196,14 +228,15 @@ class FirLayerController {
       c.setStyle(styles.getLabelStyle(feature));
       arr.push(c);
     });
-    this.model.layers.labels.getSource().addFeatures(arr);
+    this.model.layers.label.getSource().addFeatures(arr);
   };
 
   clearBeforeSearch = () => {
     this.model.layers.feature.getSource().clear();
     this.model.layers.buffer.getSource().clear();
     this.model.layers.highlight.getSource().clear();
-    this.model.layers.labels.getSource().clear();
+    this.model.layers.label.getSource().clear();
+    this.model.layers.marker.setVisible(false);
   };
 
   toggleHighlight = (feature) => {
@@ -211,27 +244,38 @@ class FirLayerController {
       .getSource()
       .getFeatureByUid(feature.ol_uid);
     this.model.layers.highlight.getSource().clear();
+    this.model.layers.marker.setVisible(false);
     if (f) {
       this.observer.publish("fir.search.feature.deselected", f);
     } else {
       this.model.layers.highlight.getSource().addFeature(feature);
       this.observer.publish("fir.search.feature.selected", feature);
+      this.markerFeature.setGeometry(
+        new Point(feature.getGeometry().getInteriorPoint().getCoordinates())
+      );
+      this.model.layers.marker.setVisible(true);
     }
   };
 
   handleFeatureClicks = (e) => {
+    let first = true;
     this.model.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
-      if (layer === this.model.layers.feature && feature) {
+      if (first === true && layer === this.model.layers.feature && feature) {
         this.toggleHighlight(feature);
+        first = false;
       }
     });
+    if (first === true) {
+      this.model.layers.marker.setVisible(false);
+    }
   };
 
   handleHighlight = (data) => {
     this.model.layers.highlight.getSource().clear();
     if (data.feature && data.highlight === true) {
       this.toggleHighlight(data.feature);
-      // this.model.layers.highlight.getSource().addFeature(data.feature);
+    } else {
+      this.model.layers.marker.setVisible(false);
     }
   };
 

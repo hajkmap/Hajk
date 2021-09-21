@@ -38,6 +38,7 @@ class Fir extends React.PureComponent {
 
     this.model = new FirModel({
       localObserver: this.localObserver,
+
       app: props.app,
       map: props.map,
     });

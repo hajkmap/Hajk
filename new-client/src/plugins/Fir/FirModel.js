@@ -1,5 +1,10 @@
 export default class FirModel {
   constructor(settings) {
+    this.state = {
+      searchResults: [],
+      modifiedSearchResults: [],
+    };
+
     this.map = settings.map;
     this.app = settings.app;
     this.localObserver = settings.localObserver;
