@@ -1,14 +1,7 @@
 import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
 
-import {
-  Fill,
-  Stroke,
-  Circle,
-  Style,
-  Icon,
-  Circle as CircleStyle,
-} from "ol/style";
+import { Fill, Stroke, Circle, Style, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
 import LinearRing from "ol/geom/LinearRing.js";
 import {
@@ -20,6 +13,8 @@ import {
   MultiPolygon,
 } from "ol/geom.js";
 import styles from "./FirStyles";
+import { hfetch } from "utils/FetchWrapper";
+import { GeoJSON } from "ol/format";
 import * as jsts from "jsts";
 
 class FirLayerController {
@@ -27,6 +22,7 @@ class FirLayerController {
     this.model = model;
     this.observer = observer;
     this.bufferValue = 0;
+    this.removeIsActive = false;
     this.initLayers();
     this.initListeners();
 
@@ -77,6 +73,13 @@ class FirLayerController {
   }
 
   initLayers() {
+    const searchLayerId = "" + 9999;
+
+    this.model.layers.realestateSearchLayer = this.model.map
+      .getLayers()
+      .getArray()
+      .find((layer) => layer.get("name") === searchLayerId);
+
     this.model.layers.feature = new VectorLayer({
       caption: "FIRSearchResultsLayer",
       name: "FIRSearchResultsLayer",
@@ -189,15 +192,37 @@ class FirLayerController {
     });
 
     this.model.map.on("singleclick", this.handleFeatureClicks);
+
+    this.observer.subscribe(
+      "fir.search.results.addFeatureByMapClick",
+      (data) => {
+        this.clickLock(data.active);
+        this.model.layers.realestateSearchLayer.setVisible(data.active);
+        this.removeIsActive = false;
+      }
+    );
+    this.observer.subscribe(
+      "fir.search.results.removeFeatureByMapClick",
+      (data) => {
+        this.clickLock(data.active);
+        this.removeIsActive = data.active;
+      }
+    );
+  }
+
+  clickLock(bLock) {
+    this.model.map.clickLock[bLock === true ? "add" : "delete"](
+      "fir-addremove-feature"
+    );
   }
 
   addMarker = () => {
     this.markerFeature = new Feature({ geometry: new Point([0, 0]) });
     const styleMarker = new Style({
       image: new Icon({
-        anchor: [0.5, 1.15],
+        anchor: [0.5, 1.18],
         scale: 0.15,
-        src: "marker.png",
+        src: "marker.svg",
       }),
     });
     this.markerFeature.setStyle(styleMarker);
@@ -205,12 +230,19 @@ class FirLayerController {
     this.model.layers.marker.setVisible(false);
   };
 
-  addFeatures = (arr) => {
+  addFeatures = (arr, zoomToLayer = true) => {
     if (!arr) {
       return;
     }
+
+    arr.forEach((feature) => {
+      feature.setStyle(styles.getResultStyle());
+    });
+
     this.model.layers.feature.getSource().addFeatures(arr);
-    this.zoomToLayer(this.model.layers.feature);
+    if (zoomToLayer) {
+      this.zoomToLayer(this.model.layers.feature);
+    }
 
     clearTimeout(this.renderDelay_tm);
     this.renderDelay_tm = setTimeout(() => {
@@ -220,12 +252,18 @@ class FirLayerController {
     }, 250);
   };
 
+  removeFeature = (feature) => {
+    this.handleRemoveFeature(feature.ol_uid);
+    this.observer.publish("fir.search.remove", feature);
+  };
+
   addFeatureLabels = (featureArr) => {
     let arr = [];
 
     featureArr.forEach((feature) => {
       let c = feature.clone();
       c.setStyle(styles.getLabelStyle(feature));
+      c.set("owner_ol_uid", feature.ol_uid);
       arr.push(c);
     });
     this.model.layers.label.getSource().addFeatures(arr);
@@ -242,13 +280,18 @@ class FirLayerController {
   toggleHighlight = (feature) => {
     let f = this.model.layers.highlight
       .getSource()
-      .getFeatureByUid(feature.ol_uid);
+      .getFeatures()
+      .find((a) => feature.ol_uid === a.get("owner_ol_uid"));
+
     this.model.layers.highlight.getSource().clear();
     this.model.layers.marker.setVisible(false);
     if (f) {
-      this.observer.publish("fir.search.feature.deselected", f);
+      this.observer.publish("fir.search.feature.deselected", feature);
     } else {
-      this.model.layers.highlight.getSource().addFeature(feature);
+      let clone = feature.clone();
+      clone.setStyle(styles.getHighlightStyle());
+      clone.set("owner_ol_uid", feature.ol_uid);
+      this.model.layers.highlight.getSource().addFeature(clone);
       this.observer.publish("fir.search.feature.selected", feature);
       this.markerFeature.setGeometry(
         new Point(feature.getGeometry().getInteriorPoint().getCoordinates())
@@ -257,17 +300,66 @@ class FirLayerController {
     }
   };
 
+  getFeaturesAtCoordinates(coordinate) {
+    if (!this.model.layers.realestateSearchLayer) {
+      return;
+    }
+    const view = this.model.map.getView();
+
+    const url = this.model.layers.realestateSearchLayer
+      .getSource()
+      .getFeatureInfoUrl(
+        coordinate,
+        view.getResolution(),
+        view.getProjection().getCode(),
+        {
+          INFO_FORMAT: "application/json",
+        }
+      );
+
+    hfetch(url)
+      .then((response) => {
+        return response ? response.json() : null;
+      })
+      .then((data) => {
+        try {
+          let features = new GeoJSON().readFeatures(data);
+          this.addFeatures(features, false);
+          this.observer.publish("fir.search.add", features);
+        } catch (err) {
+          console.warn(err);
+        }
+      });
+  }
+
   handleFeatureClicks = (e) => {
     let first = true;
     this.model.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
       if (first === true && layer === this.model.layers.feature && feature) {
-        this.toggleHighlight(feature);
+        if (this.removeIsActive === true) {
+          this.removeFeature(feature);
+        } else {
+          this.toggleHighlight(feature);
+        }
         first = false;
       }
     });
     if (first === true) {
       this.model.layers.marker.setVisible(false);
+      // no feature was clicked, check realestate layer for features.
+      if (this.model.layers.realestateSearchLayer.getVisible() === true) {
+        this.getFeaturesAtCoordinates(e.coordinate);
+      }
     }
+    this.observer.publish("fir.search.results.addFeatureByMapClick", {
+      active: false,
+    });
+    this.observer.publish("fir.search.results.removeFeatureByMapClick", {
+      active: false,
+    });
+    this.removeIsActive = false;
+    this.model.layers.realestateSearchLayer.setVisible(false);
+    this.clickLock(false);
   };
 
   handleHighlight = (data) => {
@@ -280,10 +372,25 @@ class FirLayerController {
   };
 
   handleRemoveFeature = (uid) => {
-    let feature = this.model.layers.feature.getSource().getFeatureByUid(uid);
-
+    const feature = this.model.layers.feature.getSource().getFeatureByUid(uid);
     if (feature) {
       this.model.layers.feature.getSource().removeFeature(feature);
+      let labelFeature = this.model.layers.label
+        .getSource()
+        .getFeatures()
+        .find((f) => {
+          return f.get("owner_ol_uid") === feature.ol_uid;
+        });
+      if (labelFeature) {
+        this.model.layers.label.getSource().removeFeature(labelFeature);
+      }
+      const highlightFeature = this.model.layers.highlight
+        .getSource()
+        .getFeatureByUid(uid);
+      if (highlightFeature) {
+        this.model.layers.highlight.getSource().removeFeature(highlightFeature);
+        this.model.layers.marker.setVisible(false);
+      }
     }
   };
 

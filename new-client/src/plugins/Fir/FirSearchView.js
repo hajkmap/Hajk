@@ -49,6 +49,13 @@ class FirSearchView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+
+    this.searchTypes = [
+      { value: "designation", name: "Fastighetsbeteckning" },
+      { value: "owner", name: "Ägare" },
+      { value: "address", name: "Adress" },
+    ];
+
     this.initListeners();
   }
 
@@ -112,9 +119,14 @@ class FirSearchView extends React.PureComponent {
                     this.setState({ searchType: e.target.value });
                   }}
                 >
-                  <MenuItem value="designation">Fastighetsbeteckning</MenuItem>
-                  <MenuItem value="owner">Ägare</MenuItem>
-                  <MenuItem value="address">Adress</MenuItem>
+                  {this.searchTypes.map((item, index) => (
+                    <MenuItem
+                      key={`fir-searchType-${item.value}`}
+                      value={item.value}
+                    >
+                      {item.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </div>

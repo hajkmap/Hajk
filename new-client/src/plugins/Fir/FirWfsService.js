@@ -13,7 +13,6 @@ class FirWfsService {
     this.params = defaultOptions;
 
     this.searchTypeHash = {
-      // TODO: Remove hard coded value when needed
       id: {
         featureType: "feature:fastighet_yta_alla_wms",
         url: "https://kommungis-utv.varberg.se/util/geoserver/sbk_fk_v1/wfs",
@@ -101,7 +100,6 @@ class FirWfsService {
       rootFilter = orFilter(...filters);
     }
 
-    // TODO: Remove hard coded value when needed
     return {
       srsName: "EPSG:3007",
       featureNS: "https://www.opengis.net",
@@ -159,14 +157,13 @@ class FirWfsService {
       return Promise.resolve(null);
     }
 
-    console.log("Will search with params:", _params);
+    // console.log("Will search with params:", _params);
 
     let type = this.searchTypeHash[_params.searchType];
 
     const requestXml = this.getRequestXml(_params);
 
     return new Promise((resolve, reject) => {
-      // TODO: Remove hard coded value when needed
       hfetch(type.url, {
         method: "POST",
         body: requestXml,
@@ -181,7 +178,7 @@ class FirWfsService {
           ) {
             resolve(new GeoJSON().readFeatures(data));
           } else {
-            // searching by owner or address needs 2 separate requests... look into this in the future
+            // searching by owner or address needs 2 separate requests... look into this in the future?
             this.nestedSearch(data, _params, resolve, reject);
           }
         });

@@ -18,6 +18,9 @@ import Pagination from "@material-ui/lab/Pagination";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
+import AddCircle from "@material-ui/icons/AddCircleOutline";
+import RemoveCircle from "@material-ui/icons/RemoveCircleOutline";
+
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 class FirView extends React.PureComponent {
@@ -28,6 +31,8 @@ class FirView extends React.PureComponent {
     paginatedResults: { list: [] },
     currentPage: 1,
     loading: false,
+    removeFeatureByMapClickActive: false,
+    addFeatureByMapClickActive: false,
   };
 
   static propTypes = {
@@ -63,21 +68,17 @@ class FirView extends React.PureComponent {
       this.setState({ loading: false });
     });
 
+    this.localObserver.subscribe("fir.search.add", (features) => {
+      this.addFeatures(features, false);
+    });
+
+    this.localObserver.subscribe("fir.search.remove", (feature) => {
+      this.removeFeature(feature);
+    });
+
     this.localObserver.subscribe("fir.search.completed", (features) => {
       this.setState({ loading: false });
-      features.forEach((o) => {
-        o.open = false;
-      });
-      const sortProp = "fastbet";
-      features.sort((a, b) =>
-        a.get(sortProp) > b.get(sortProp)
-          ? 1
-          : b.get(sortProp) > a.get(sortProp)
-          ? -1
-          : 0
-      );
-      this.setState({ results: { list: features } });
-      this.setPage(1);
+      this.addFeatures(features, true);
     });
     this.localObserver.subscribe("fir.search.feature.selected", (feature) => {
       this.expandFeatureByMapClick(feature, true);
@@ -86,6 +87,43 @@ class FirView extends React.PureComponent {
       this.expandFeatureByMapClick(feature, false);
     });
     this.localObserver.subscribe("fir.search.clear", this.clearResults);
+
+    this.localObserver.subscribe(
+      "fir.search.results.addFeatureByMapClick",
+      (data) => {
+        if (data.active === false) {
+          this.setState({ addFeatureByMapClickActive: data.active });
+        }
+      }
+    );
+    this.localObserver.subscribe(
+      "fir.search.results.removeFeatureByMapClick",
+      (data) => {
+        if (data.active === false) {
+          this.setState({ removeFeatureByMapClickActive: data.active });
+        }
+      }
+    );
+  };
+
+  addFeatures = (features, clear = false) => {
+    let _features = clear === true ? [] : this.state.results.list;
+
+    _features.push(...features);
+
+    _features.forEach((o) => {
+      o.open = false;
+    });
+    const sortProp = "fastbet";
+    _features.sort((a, b) =>
+      a.get(sortProp) > b.get(sortProp)
+        ? 1
+        : b.get(sortProp) > a.get(sortProp)
+        ? -1
+        : 0
+    );
+    this.setState({ results: { list: _features } });
+    this.setPage(1);
   };
 
   clearResults = () => {
@@ -105,7 +143,7 @@ class FirView extends React.PureComponent {
   };
 
   expandFeatureByMapClick = (feature, expand) => {
-    let index = this.state.results.list.findIndex((f) => f === feature);
+    const index = this.state.results.list.findIndex((f) => f === feature);
 
     if (index > -1) {
       const foundOnPageNum = Math.floor(1 + index / this.itemsPerPage);
@@ -147,17 +185,62 @@ class FirView extends React.PureComponent {
     this.highlight(data, data.open);
   }
 
-  handleDeleteClick(e, data) {
+  addFeatureClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const active = !this.state.addFeatureByMapClickActive;
+    this.setAddFeatureClickActive(active);
+    if (this.state.removeFeatureByMapClickActive === true) {
+      this.setRemoveFeatureClickActive(false);
+    }
+  };
+
+  setAddFeatureClickActive = (active) => {
+    this.setState({
+      addFeatureByMapClickActive: active,
+    });
+    this.localObserver.publish("fir.search.results.addFeatureByMapClick", {
+      active: active,
+    });
+  };
+
+  setRemoveFeatureClickActive = (active) => {
+    this.setState({
+      removeFeatureByMapClickActive: active,
+    });
+    this.localObserver.publish("fir.search.results.removeFeatureByMapClick", {
+      active: active,
+    });
+  };
+
+  removeFeatureClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const active = !this.state.removeFeatureByMapClickActive;
+    this.setRemoveFeatureClickActive(active);
+    if (this.state.addFeatureByMapClickActive === true) {
+      this.setAddFeatureClickActive(false);
+    }
+  };
+
+  removeFeature = (feature) => {
     let list = this.state.results.list;
-    let index = list.findIndex((element) => element.ol_uid === data.ol_uid);
+    const index = list.findIndex((f) => f.ol_uid === feature.ol_uid);
     if (index >= 0) {
       let uid = list[index].ol_uid;
       this.highlight(null, false);
       list.splice(index, 1);
       this.setState({ results: { list: list } });
+      this.setPage();
       this.localObserver.publish("fir.search.results.delete", uid);
     }
+  };
 
+  handleDeleteClick(e, data) {
+    console.log(data);
+    this.removeFeature(data);
     this.setPage(null);
   }
 
@@ -209,14 +292,53 @@ class FirView extends React.PureComponent {
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Badge
-              badgeContent={this.state.results.list.length}
-              color="secondary"
-              max={999}
-              classes={{ badge: classes.badge }}
-            >
-              <Typography className={classes.heading}>Sökresultat</Typography>
-            </Badge>
+            <div className={classes.extendedAccordionSummary}>
+              <div>
+                <Badge
+                  badgeContent={this.state.results.list.length}
+                  color="secondary"
+                  max={999}
+                  classes={{ badge: classes.badge }}
+                >
+                  <Typography className={classes.heading}>
+                    Sökresultat
+                  </Typography>
+                </Badge>
+              </div>
+              <div>
+                <IconButton
+                  disabled={
+                    this.state.results.list.length === 0 ||
+                    this.state.addFeatureByMapClickActive === true
+                  }
+                  edge="end"
+                  title="Ta bort"
+                  color={
+                    this.state.removeFeatureByMapClickActive
+                      ? "primary"
+                      : "default"
+                  }
+                  className={classes.btnIcon}
+                  onClick={this.removeFeatureClick}
+                >
+                  <RemoveCircle />
+                </IconButton>
+                <IconButton
+                  disabled={this.state.removeFeatureByMapClickActive === true}
+                  edge="end"
+                  title="Lägg till"
+                  color={
+                    this.state.addFeatureByMapClickActive
+                      ? "primary"
+                      : "default"
+                  }
+                  className={classes.btnIcon}
+                  onClick={this.addFeatureClick}
+                >
+                  <AddCircle />
+                </IconButton>
+              </div>
+            </div>
           </AccordionSummary>
           <AccordionDetails style={{ display: "block", padding: 0 }}>
             <div>
@@ -239,11 +361,12 @@ class FirView extends React.PureComponent {
                       }}
                     >
                       <ListItemText primary={data.get("fastbet")} />
+
                       <ListItemSecondaryAction>
                         <IconButton
                           edge="end"
-                          aria-label="delete"
-                          className={classes.btnDelete}
+                          title="Ta bort"
+                          className={classes.btnIcon}
                           onClick={(e) => {
                             this.handleDeleteClick(e, data);
                           }}
@@ -330,7 +453,7 @@ const styles = (theme) => ({
     paddingRight: theme.spacing(2),
     paddingBottom: theme.spacing(2),
   },
-  btnDelete: {
+  btnIcon: {
     right: "6px",
     padding: "6px",
     "&:hover svg": {
@@ -349,6 +472,21 @@ const styles = (theme) => ({
     alignItems: "center",
     "& > span": {
       paddingLeft: theme.spacing(1),
+    },
+  },
+  extendedAccordionSummary: {
+    display: "flex",
+    width: "100%",
+    "& > div:last-child": {
+      marginLeft: "auto",
+    },
+    "& button": {
+      marginTop: "-6px",
+      marginBottom: "-6px",
+      marginRight: "0",
+    },
+    "& button:first-child": {
+      marginRight: "0",
     },
   },
 });
