@@ -2,24 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import { Typography } from "@material-ui/core";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Button from "@material-ui/core/Button";
-import FormControl from "@material-ui/core/FormControl";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import TextField from "@material-ui/core/TextField";
-import InputAdornment from "@material-ui/core/InputAdornment";
-import FirEdpExportView from "./FirEdpExportView";
+import FirExportEdpView from "./FirExportEdpView";
+import FirExportPropertyListView from "./FirExportPropertyListView";
+import FirExportResidentListView from "./FirExportResidentListView";
 
 class FirExportView extends React.PureComponent {
   state = {
-    realestateExpanded: false,
-    housingExpanded: false,
-    age: 18,
     results: [],
   };
 
@@ -67,263 +55,22 @@ class FirExportView extends React.PureComponent {
             <span className={classes.num}>{this.state.results.length}</span>{" "}
             objekt finns tillgängliga för export.
           </div>
-          <Accordion
-            expanded={this.state.realestateExpanded}
-            onChange={() => {
-              this.setState({
-                realestateExpanded: !this.state.realestateExpanded,
-              });
-            }}
-          >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography className={classes.heading}>
-                Fastighetsförteckning
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails style={{ display: "block" }}>
-              <div>
-                {/* param["samfallighet"] =
-      this.get("chosenColumns").indexOf("samfallighet") != -1;
-    param["ga"] = this.get("chosenColumns").indexOf("ga") != -1;
-    param["rattighet"] = this.get("chosenColumns").indexOf("rattighet") != -1;
-    param["persnr"] = this.get("chosenColumns").indexOf("persnr") != -1;
-    param["taxerad_agare"] =
-      this.get("chosenColumns").indexOf("taxerad_agare") != -1;
-    param["fastighet_utskick"] =
-      this.get("chosenColumns").indexOf("fastighet_utskick") != -1; */}
-                <div>Inkludera:</div>
-                <div className={classes.checkboxGroupContainer}>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Samfälligheter"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Gemensamhetsanläggningar"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Rättigheter"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Personnummer"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Taxerad ägare"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Utskickslista"
-                    />
-                  </FormControl>
-                </div>
-                <Button
-                  fullWidth={true}
-                  variant="outlined"
-                  color="primary"
-                  className={classes.button}
-                  startIcon={<this.ExcelLogo />}
-                  onClick={this.handleRealestateListClick}
-                >
-                  Skapa fastighetsförteckning
-                </Button>
-              </div>
-            </AccordionDetails>
-          </Accordion>
 
-          <Accordion
-            expanded={this.state.housingExpanded}
-            onChange={() => {
-              this.setState({
-                housingExpanded: !this.state.housingExpanded,
-              });
-            }}
-          >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography className={classes.heading}>
-                Boendeförteckning
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails style={{ display: "block" }}>
-              <div>
-                <div>Inkludera:</div>
-                <div className={classes.checkboxGroupContainer}>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Ålder"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Födelsedatum"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Personnummer"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth={true}>
-                    <FormControlLabel
-                      classes={{ label: classes.checkboxLabel }}
-                      control={
-                        <Checkbox
-                          className={classes.checkbox}
-                          //checked={state.checkedA}
-                          //onChange={handleChange}
-                          color="primary"
-                          name="checkedA"
-                        />
-                      }
-                      label="Kön"
-                    />
-                  </FormControl>
-                  <div className={classes.containerTopPadded}>
-                    <TextField
-                      className={classes.textField}
-                      label="Ange lägsta ålder"
-                      value={this.state.age}
-                      onChange={(e) => {
-                        let v = parseInt(e.target.value);
-                        if (isNaN(v)) {
-                          v = 0;
-                        }
+          <FirExportPropertyListView
+            results={this.state.results}
+            model={this.model}
+            app={this.app}
+            localObserver={this.localObserver}
+          />
 
-                        this.setState({ age: parseInt(v) });
-                      }}
-                      onFocus={(e) => {
-                        if (this.state.age === 0) {
-                          this.setState({ age: "" });
-                        }
-                      }}
-                      onBlur={(e) => {
-                        if (this.state.age === "") {
-                          this.setState({ age: 0 });
-                        }
-                      }}
-                      size="small"
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">år</InputAdornment>
-                        ),
-                      }}
-                      variant="outlined"
-                    />
-                  </div>
-                </div>
+          <FirExportResidentListView
+            results={this.state.results}
+            model={this.model}
+            app={this.app}
+            localObserver={this.localObserver}
+          />
 
-                <Button
-                  fullWidth={true}
-                  variant="outlined"
-                  color="primary"
-                  className={classes.button}
-                  startIcon={<this.ExcelLogo />}
-                  onClick={this.handleHousingListClick}
-                >
-                  Skapa boendeförteckning
-                </Button>
-              </div>
-            </AccordionDetails>
-          </Accordion>
-
-          <FirEdpExportView
+          <FirExportEdpView
             results={this.state.results}
             model={this.model}
             app={this.app}

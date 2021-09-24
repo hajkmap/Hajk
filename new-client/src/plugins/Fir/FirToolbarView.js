@@ -93,9 +93,8 @@ class FirToolbarView extends React.PureComponent {
         }
 
         this.model.layers[firType].getSource().removeFeature(feature);
-        let secondaryLayer = this.model.layers[
-          firType === "draw" ? "buffer" : "draw"
-        ];
+        const layerName = firType === "draw" ? "buffer" : "draw";
+        let secondaryLayer = this.model.layers[layerName];
         let secondaryFeature = secondaryLayer
           .getSource()
           .getFeatures()

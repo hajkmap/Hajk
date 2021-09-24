@@ -302,7 +302,7 @@ class FirView extends React.PureComponent {
                 <Badge
                   badgeContent={this.state.results.list.length}
                   color="secondary"
-                  max={999}
+                  max={10000}
                   classes={{ badge: classes.badge }}
                 >
                   <Typography className={classes.heading}>

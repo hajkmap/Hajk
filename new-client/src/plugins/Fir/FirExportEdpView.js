@@ -10,7 +10,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Button from "@material-ui/core/Button";
 import { hfetch } from "utils/FetchWrapper";
 
-class FirEdpExportView extends React.PureComponent {
+class FirExportEdpView extends React.PureComponent {
   state = {
     edpExpanded: false,
   };
@@ -107,4 +107,4 @@ const styles = (theme) => ({
   },
 });
 
-export default withStyles(styles)(withSnackbar(FirEdpExportView));
+export default withStyles(styles)(withSnackbar(FirExportEdpView));
