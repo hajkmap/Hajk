@@ -301,6 +301,12 @@ class AttributeEditor extends React.Component {
             type="date"
             variant="outlined"
             value={value}
+            error={this.formErrors.hasOwnProperty(field.name)}
+            helperText={
+              this.formErrors[field.name]?.length >= 0
+                ? this.formErrors[field.name]
+                : field.description
+            }
             onChange={(e) => {
               this.setChanged();
               this.checkDate(field.name, e.target.value);
@@ -442,11 +448,14 @@ class AttributeEditor extends React.Component {
           );
         });
         return (
-          <FormControl fullWidth margin="normal" component="fieldset">
-            <FormLabel component="legend">{field.alias}</FormLabel>
-            <FormGroup>{checkboxes}</FormGroup>
-            <FormHelperText>{field.description}</FormHelperText>
-          </FormControl>
+          <>
+            <FormControl fullWidth margin="normal" component="fieldset">
+              <FormLabel component="legend">{field.alias}</FormLabel>
+              <FormGroup>{checkboxes}</FormGroup>
+              <FormHelperText>{field.description}</FormHelperText>
+            </FormControl>
+            <br />
+          </>
         );
       case "lista":
         let options = null;

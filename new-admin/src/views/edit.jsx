@@ -439,7 +439,7 @@ class Edit extends Component {
     } else if (type === "date") {
       return "Skriv in ett datum på följande format: YYYY-MM-DD. Exempel 2021-08-09";
     } else if (type === "date-time") {
-      return "Skriv in ett datum samt tid på följande format: YYYY-MM-DD hh:mm. Exempel 2021-08-09 01:23";
+      return "Skriv in ett datum samt tid på följande format: YYYY-MM-DDThh:mm. Exempel 2021-08-09T01:23";
     } else if (type === "number") {
       return "Skriv in ett tal";
     } else if (type === "boolean") {
@@ -622,7 +622,7 @@ class Edit extends Component {
         editLine: this.getValue("linestring"),
       };
 
-      //this.modifyBooleans(layer);
+      this.modifyBooleans(layer);
 
       if (this.state.mode === "add") {
         layer.id = this.createGuid(this.props.model.get("layers"));
@@ -888,6 +888,14 @@ class Edit extends Component {
       };
 
       var defaultValueEditor = (type, value) => {
+        if (type === "boolean") {
+          if (value === "true") {
+            value = "ja";
+          } else if (value === "false") {
+            value = "nej";
+          }
+          property.defaultValue = value;
+        }
         return (
           <>
             <div className="grid  edit-fields-table-default">
