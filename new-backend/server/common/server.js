@@ -10,12 +10,14 @@ import cookieParser from "cookie-parser";
 
 import log4js from "log4js";
 import clfDate from "clf-date";
-import oas from "./oas";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
 import restrictStatic from "../api/middlewares/restrict.static";
 import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
+
+import * as OpenApiValidator from "express-openapi-validator";
+import errorHandler from "../api/middlewares/error.handler";
 
 const app = new Express();
 
@@ -85,6 +87,11 @@ const exit = process.exit;
 export default class ExpressServer {
   constructor() {
     logger.debug("Process's current working directory: ", process.cwd());
+    const apiSpec = path.join(__dirname, "api.yml");
+    const validateResponses = !!(
+      process.env.OPENAPI_ENABLE_RESPONSE_VALIDATION &&
+      process.env.OPENAPI_ENABLE_RESPONSE_VALIDATION.toLowerCase() === "true"
+    );
 
     // If EXPRESS_TRUST_PROXY is set in .env, pass on the value to Express.
     // See https://expressjs.com/en/guide/behind-proxies.html.
@@ -185,6 +192,19 @@ export default class ExpressServer {
 
     // Optionally, other directories placed in "static" can be exposed.
     this.setupStaticDirs();
+
+    // Finally, finish by running through the Validator and exposing the API specification
+    app.use(process.env.OPENAPI_SPEC || "/spec", Express.static(apiSpec));
+    app.use(
+      OpenApiValidator.middleware({
+        apiSpec,
+        validateResponses,
+        validateRequests: {
+          allowUnknownQueryParameters: true,
+        },
+        ignorePaths: /.*\/spec(\/|$)/,
+      })
+    );
   }
 
   /**
@@ -327,7 +347,8 @@ export default class ExpressServer {
   }
 
   router(routes) {
-    this.routes = routes;
+    routes(app);
+    app.use(errorHandler);
     return this;
   }
 
@@ -337,14 +358,7 @@ export default class ExpressServer {
         `Server startup completed. Launched on port ${p}. (http://localhost:${p})`
       );
 
-    oas(app, this.routes)
-      .then(() => {
-        http.createServer(app).listen(port, welcome(port));
-      })
-      .catch((e) => {
-        logger.error(e);
-        exit(1);
-      });
+    http.createServer(app).listen(port, welcome(port));
 
     return app;
   }
