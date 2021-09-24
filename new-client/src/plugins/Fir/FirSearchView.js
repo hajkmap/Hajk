@@ -91,6 +91,12 @@ class FirSearchView extends React.PureComponent {
     this.setState({
       searchText: e.target.value || "",
     });
+    if (e.target.value && e.target.value.length >= 4) {
+      clearTimeout(this.search_tm);
+      this.search_tm = setTimeout(() => {
+        this.handleSearch();
+      }, 500);
+    }
   };
 
   render() {
@@ -139,6 +145,12 @@ class FirSearchView extends React.PureComponent {
                   id="input-with-icon-adornment"
                   placeholder="Söktext"
                   onChange={this.handleSearchTextChange}
+                  onKeyPress={(e) => {
+                    if (e.key.toLowerCase() === "enter") {
+                      this.handleSearch();
+                      e.preventDefault();
+                    }
+                  }}
                   value={this.state.searchText}
                   startAdornment={
                     <InputAdornment position="start">

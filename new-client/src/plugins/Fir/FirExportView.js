@@ -13,13 +13,14 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import FirEdpExportView from "./FirEdpExportView";
 
 class FirExportView extends React.PureComponent {
   state = {
     realestateExpanded: false,
     housingExpanded: false,
-    edpExpanded: false,
     age: 18,
+    results: [],
   };
 
   static propTypes = {
@@ -36,17 +37,16 @@ class FirExportView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+
+    this.localObserver.subscribe("fir.results.filtered", (list) => {
+      this.setState({ results: list });
+      this.forceUpdate();
+    });
   }
 
   ExcelLogo() {
     return (
       <img src="/excel.svg" alt="" style={{ width: "24px", height: "auto" }} />
-    );
-  }
-
-  EdpLogo() {
-    return (
-      <img src="/edp.svg" alt="" style={{ width: "24px", height: "auto" }} />
     );
   }
 
@@ -58,15 +58,15 @@ class FirExportView extends React.PureComponent {
     console.log("Skapa fastighetsförteckning");
   }
 
-  handleEdpClick() {
-    console.log("Skicka till EDP");
-  }
-
   render() {
     const { classes } = this.props;
     return (
       <>
         <div className={classes.root}>
+          <div className={classes.info}>
+            <span className={classes.num}>{this.state.results.length}</span>{" "}
+            objekt finns tillgängliga för export.
+          </div>
           <Accordion
             expanded={this.state.realestateExpanded}
             onChange={() => {
@@ -323,32 +323,12 @@ class FirExportView extends React.PureComponent {
             </AccordionDetails>
           </Accordion>
 
-          <Accordion
-            expanded={this.state.edpExpanded}
-            onChange={() => {
-              this.setState({
-                edpExpanded: !this.state.edpExpanded,
-              });
-            }}
-          >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography className={classes.heading}>EDP Vision</Typography>
-            </AccordionSummary>
-            <AccordionDetails style={{ display: "block" }}>
-              <div>
-                <Button
-                  fullWidth={true}
-                  variant="outlined"
-                  color="primary"
-                  className={classes.button}
-                  startIcon={<this.EdpLogo />}
-                  onClick={this.handleEdpClick}
-                >
-                  Skicka till EDP
-                </Button>
-              </div>
-            </AccordionDetails>
-          </Accordion>
+          <FirEdpExportView
+            results={this.state.results}
+            model={this.model}
+            app={this.app}
+            localObserver={this.localObserver}
+          />
         </div>
       </>
     );
@@ -356,6 +336,13 @@ class FirExportView extends React.PureComponent {
 }
 
 const styles = (theme) => ({
+  info: {
+    padding: theme.spacing(2),
+  },
+  num: {
+    fontWeight: 500,
+    fontSize: "1rem",
+  },
   heading: {
     fontWeight: 500,
   },

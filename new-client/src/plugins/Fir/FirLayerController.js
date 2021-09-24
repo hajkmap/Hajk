@@ -208,6 +208,9 @@ class FirLayerController {
         this.removeIsActive = data.active;
       }
     );
+    this.observer.subscribe("fir.zoomToFeature", (feature) => {
+      this.zoomToFeature(feature);
+    });
   }
 
   clickLock(bLock) {
@@ -444,6 +447,29 @@ class FirLayerController {
     targetSource.addFeatures(_bufferFeatures);
   };
 
+  _getZoomOptions = () => {
+    return {
+      maxZoom: this.model.app.config.mapConfig.map.maxZoom - 2,
+      padding: [20, 20, 20, 20],
+    };
+  };
+
+  zoomToFeature = (feature) => {
+    clearTimeout(this.zoomTimeout);
+    this.zoomTimeout = setTimeout(() => {
+      this._zoomToFeature(feature);
+    }, 500);
+  };
+
+  _zoomToFeature = (feature) => {
+    if (!feature) {
+      return;
+    }
+
+    const extent = feature.getGeometry().getExtent();
+    this.model.map.getView().fit(extent, this._getZoomOptions());
+  };
+
   zoomToLayer = (layer) => {
     clearTimeout(this.zoomTimeout);
     this.zoomTimeout = setTimeout(() => {
@@ -458,11 +484,7 @@ class FirLayerController {
     }
 
     const extent = source.getExtent();
-    const options = {
-      maxZoom: this.model.app.config.mapConfig.map.maxZoom - 1,
-      padding: [20, 20, 20, 20],
-    };
-    this.model.map.getView().fit(extent, options);
+    this.model.map.getView().fit(extent, this._getZoomOptions());
   };
 }
 

@@ -30,6 +30,7 @@ class FirView extends React.PureComponent {
     results: { list: [] },
     paginatedResults: { list: [] },
     currentPage: 1,
+    pageCount: 1,
     loading: false,
     removeFeatureByMapClickActive: false,
     addFeatureByMapClickActive: false,
@@ -122,17 +123,12 @@ class FirView extends React.PureComponent {
         ? -1
         : 0
     );
-    this.setState({ results: { list: _features } });
-    this.setPage(1);
+
+    this.updateResultList(_features, 1);
   };
 
   clearResults = () => {
-    this.setState({ results: { list: [] } });
-
-    setTimeout(() => {
-      // push to next draw
-      this.setPage(1);
-    }, 25);
+    this.updateResultList([], 1);
   };
 
   highlight = (feature, _highlight = false) => {
@@ -152,7 +148,6 @@ class FirView extends React.PureComponent {
 
     setTimeout(() => {
       this.expandFeature(feature, expand);
-      // this.localObserver.publish("fir.window.scroll", {});
     }, 25);
   };
 
@@ -182,6 +177,9 @@ class FirView extends React.PureComponent {
 
   handleItemClick(e, data) {
     this.expandFeature(data, !data.open);
+    if (data.open) {
+      this.localObserver.publish("fir.zoomToFeature", data);
+    }
     this.highlight(data, data.open);
   }
 
@@ -225,6 +223,16 @@ class FirView extends React.PureComponent {
     }
   };
 
+  updateResultList = (list, page = null) => {
+    this.setState({ results: { list: list } });
+    setTimeout(() => {
+      // push to next draw
+      this.localObserver.publish("fir.results.filtered", list);
+      this.setPage(page);
+    }, 25);
+    // this.model.filteredSearchResults =
+  };
+
   removeFeature = (feature) => {
     let list = this.state.results.list;
     const index = list.findIndex((f) => f.ol_uid === feature.ol_uid);
@@ -232,20 +240,14 @@ class FirView extends React.PureComponent {
       let uid = list[index].ol_uid;
       this.highlight(null, false);
       list.splice(index, 1);
-      this.setState({ results: { list: list } });
-      this.setPage();
+      this.updateResultList(list);
       this.localObserver.publish("fir.search.results.delete", uid);
     }
   };
 
   handleDeleteClick(e, data) {
-    console.log(data);
     this.removeFeature(data);
     this.setPage(null);
-  }
-
-  paginationPageCount() {
-    return Math.round(this.state.results.list.length / this.itemsPerPage);
   }
 
   setPage(pageNum, closeAll = true) {
@@ -254,6 +256,9 @@ class FirView extends React.PureComponent {
     }
 
     this.setState({ currentPage: pageNum });
+    this.setState({
+      pageCount: Math.round(this.state.results.list.length / this.itemsPerPage),
+    });
 
     let start = (pageNum - 1) * this.itemsPerPage;
     let end = pageNum * this.itemsPerPage;
@@ -409,14 +414,14 @@ class FirView extends React.PureComponent {
                   ""
                 )}
               </List>
-              {this.paginationPageCount() > 0 ? (
+              {this.state.pageCount > 0 ? (
                 <div className={classes.paginationContainer}>
                   <Pagination
                     ref={this.paginationRef}
                     color="primary"
                     defaultPage={1}
                     page={this.state.currentPage}
-                    count={this.paginationPageCount()}
+                    count={this.state.pageCount}
                     onChange={this.handlePageChange}
                     size="small"
                   />
