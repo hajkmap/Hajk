@@ -6,6 +6,7 @@ import clsx from "clsx";
 import Box from "@material-ui/core/Box";
 import TextArea from "../documentWindow/TextArea";
 import { makeStyles } from "@material-ui/core/styles";
+import Tooltip from "@material-ui/core/Tooltip";
 import {
   Button,
   Typography,
@@ -126,6 +127,10 @@ const useStyles = makeStyles((theme) => ({
   linkButton: {
     padding: theme.spacing(0),
     color: theme.palette.info.main,
+  },
+  hoverLink: {
+    cursor: "text",
+    textDecoration: "underline dotted",
   },
 }));
 
@@ -409,6 +414,62 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
   );
 };
 
+/**
+ * The render function for hte video-tag.
+ * @param {object} videoTag The video-tag.
+ * @returns React.Fragment
+ */
+export const Video = ({ videoTag }) => {
+  const children = [...videoTag.childNodes];
+  const height = videoTag?.height === 0 ? "auto" : videoTag?.height;
+  const width = videoTag?.width === 0 ? "auto" : videoTag?.width;
+  let array = [];
+  if (children.length > 0) {
+    children.forEach((child, index) => {
+      array.push(
+        <React.Fragment key={index}>
+          <video height={height} width={width} controls={"controls"}>
+            {renderChild(child)}
+          </video>
+        </React.Fragment>
+      );
+    });
+    return array;
+  }
+  return [
+    <React.Fragment key={0}>
+      <strong>{"video"}</strong>
+    </React.Fragment>,
+  ];
+};
+
+/**
+ * The render function for the source-tag.
+ * @param {object} sourceTag The source-tag.
+ * @returns React.Fragment
+ */
+export const Source = ({ sourceTag }) => {
+  const children = [...sourceTag.childNodes];
+  const src = sourceTag.src;
+  const type = sourceTag.type;
+  let array = [];
+  if (children.length > 0) {
+    children.forEach((child, index) => {
+      array.push(
+        <React.Fragment key={index}>
+          <source src={src} type={type}></source>
+        </React.Fragment>
+      );
+    });
+    return array;
+  }
+  return [
+    <React.Fragment key={0}>
+      <source src={src} type={type}></source>
+    </React.Fragment>,
+  ];
+};
+
 export const Strong = ({ strongTag }) => {
   const children = [...strongTag.childNodes];
   let array = [];
@@ -428,6 +489,7 @@ export const Strong = ({ strongTag }) => {
     </React.Fragment>,
   ];
 };
+
 export const Underline = ({ uTag }) => {
   const children = [...uTag.childNodes];
   let array = [];
@@ -475,6 +537,37 @@ export const Italic = ({ emTag }) => {
  */
 export const LineBreak = () => {
   return <br />;
+};
+
+/**
+ * The render function for hte abbr-tag, that renders a tooltip.
+ * @param {object} abbrTag The abbr-tag.
+ * @returns React.Fragment
+ */
+export const Hover = ({ abbrTag }) => {
+  const children = [...abbrTag.childNodes];
+  const hoverText = abbrTag.title;
+  const classes = useStyles();
+  let array = [];
+  if (children.length > 0) {
+    children.forEach((child, index) => {
+      array.push(
+        <React.Fragment key={index}>
+          <Tooltip title={hoverText} placement={"bottom"}>
+            <abbr className={classes.hoverLink}>{renderChild(child)}</abbr>
+          </Tooltip>
+        </React.Fragment>
+      );
+    });
+    return array;
+  }
+  return [
+    <React.Fragment key={0}>
+      <Tooltip title={hoverText} placement={"bottom"}>
+        <abbr className={classes.hoverLink}>{abbrTag.textContent}</abbr>
+      </Tooltip>
+    </React.Fragment>,
+  ];
 };
 
 /**

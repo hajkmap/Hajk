@@ -14,6 +14,9 @@ import {
   Img,
   BlockQuote,
   LineBreak,
+  Hover,
+  Video,
+  Source,
 } from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
@@ -410,6 +413,18 @@ export default class DocumentHandlerModel {
       },
     });
     allowedHtmlTags.push({
+      tagType: "video",
+      callback: (e) => {
+        return <Video videoTag={e}></Video>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "source",
+      callback: (e) => {
+        return <Source sourceTag={e}></Source>;
+      },
+    });
+    allowedHtmlTags.push({
       tagType: "p",
       callback: (e) => {
         return <Paragraph pTag={e}></Paragraph>;
@@ -437,6 +452,12 @@ export default class DocumentHandlerModel {
       tagType: "em",
       callback: (e) => {
         return <Italic emTag={e}></Italic>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "abbr",
+      callback: (e) => {
+        return <Hover abbrTag={e}></Hover>;
       },
     });
     return allowedHtmlTags;
