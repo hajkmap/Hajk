@@ -28,7 +28,7 @@ class TableView extends React.PureComponent {
 
   componentDidMount() {
     const { source, feature } = this.props;
-    var url = this.parse(source, feature.getProperties());
+    const url = this.parse(source, feature.getProperties());
     this.load(url);
   }
 
