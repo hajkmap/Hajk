@@ -47,17 +47,17 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1),
   },
 
-  pictureRight: {
+  mediaRight: {
     alignItems: "flex-end",
     display: "flex",
     flexDirection: "column",
   },
-  pictureLeft: {
+  mediaLeft: {
     alignItems: "flex-start",
     display: "flex",
     flexDirection: "column",
   },
-  pictureCenter: {
+  mediaCenter: {
     alignItems: "center",
     display: "flex",
     flexDirection: "column",
@@ -310,15 +310,15 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
 
   const getImagePositionClass = (position) => {
     if (position === "right") {
-      return classes.pictureRight;
+      return classes.mediaRight;
     }
 
     if (position === "left") {
-      return classes.pictureLeft;
+      return classes.mediaLeft;
     }
 
     if (position === "center") {
-      return classes.pictureCenter;
+      return classes.mediaCenter;
     }
 
     if (position === "floatLeft") {
@@ -419,28 +419,99 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
  * @param {object} videoTag The video-tag.
  * @returns React.Fragment
  */
-export const Video = ({ videoTag }) => {
-  const children = [...videoTag.childNodes];
-  const height = videoTag?.height === 0 ? "auto" : videoTag?.height;
-  const width = videoTag?.width === 0 ? "auto" : videoTag?.width;
-  let array = [];
-  if (children.length > 0) {
-    children.forEach((child, index) => {
-      array.push(
-        <React.Fragment key={index}>
-          <video height={height} width={width} controls={"controls"}>
-            {renderChild(child)}
-          </video>
-        </React.Fragment>
-      );
-    });
-    return array;
-  }
-  return [
-    <React.Fragment key={0}>
-      <strong>{"video"}</strong>
-    </React.Fragment>,
-  ];
+export const Video = ({ videoTag, componentId }) => {
+  const videoAttributes = {
+    caption: videoTag.attributes.getNamedItem("data-caption")?.value,
+    height: videoTag.attributes.getNamedItem("data-video-height")?.value,
+    width: videoTag.attributes.getNamedItem("data-video-width")?.value,
+    position: videoTag.attributes.getNamedItem("data-video-position")?.value,
+    source: videoTag.attributes.getNamedItem("data-source")?.value,
+    url: videoTag.attributes.getNamedItem("src")?.value,
+    id: `video_${componentId}`,
+  };
+
+  const classes = useStyles();
+  const getVideoPositionClass = (position) => {
+    if (position === "right") {
+      return classes.mediaRight;
+    }
+
+    if (position === "left") {
+      return classes.mediaLeft;
+    }
+
+    if (position === "center") {
+      return classes.mediaCenter;
+    }
+
+    if (position === "floatLeft") {
+      return classes.floatLeft;
+    }
+
+    if (position === "floatRight") {
+      return classes.floatRight;
+    }
+
+    return;
+  };
+  const positioningClass = getVideoPositionClass(videoAttributes.position);
+
+  const renderSources = (childrenSource) => {
+    let arraySources = [];
+    if (childrenSource.length > 0) {
+      childrenSource.forEach((child, index) => {
+        arraySources.push(
+          <React.Fragment key={index}>{renderChild(child)}</React.Fragment>
+        );
+      });
+    }
+
+    return arraySources;
+  };
+  const childrenSource = [...videoTag.childNodes];
+  const arraySources = renderSources(childrenSource);
+
+  const getVideoDescription = (videoAttributes) => {
+    return (
+      <Box
+        style={{ width: videoAttributes.width }}
+        className={classes.imageInformationWrapper}
+      >
+        {videoAttributes.caption && (
+          <Typography
+            id={`video_${videoAttributes.captionId}`}
+            variant="subtitle2"
+          >
+            {videoAttributes.caption}
+          </Typography>
+        )}
+        {videoAttributes.source && (
+          <Typography
+            id={`video_${videoAttributes.sourceId}`}
+            variant="subtitle2"
+            className={classes.imageText}
+          >
+            {videoAttributes.source}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  return (
+    <React.Fragment key={videoAttributes.id}>
+      <div className={positioningClass}>
+        <video
+          height={videoAttributes.height}
+          width={videoAttributes.width}
+          controls={"controls"}
+        >
+          {arraySources}
+        </video>
+        {getVideoDescription(videoAttributes)}
+      </div>
+    </React.Fragment>
+  );
 };
 
 /**

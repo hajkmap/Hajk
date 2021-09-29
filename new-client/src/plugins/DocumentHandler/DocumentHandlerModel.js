@@ -415,7 +415,7 @@ export default class DocumentHandlerModel {
     allowedHtmlTags.push({
       tagType: "video",
       callback: (e) => {
-        return <Video videoTag={e}></Video>;
+        return <Video videoTag={e} componentId={e.componentId}></Video>;
       },
     });
     allowedHtmlTags.push({
