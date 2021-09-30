@@ -366,4 +366,48 @@ export default class ConfigMapper {
 
     return config;
   }
+
+  mapMVTConfig(args, properties) {
+    if (args.minZoom === 0 && args.maxZoom === 0) {
+      args.minZoom = undefined;
+      args.maxZoom = undefined;
+    }
+
+    const config = {
+      type: "mvt",
+      options: {
+        id: args.id,
+        name: args.id,
+        layerType: args.layerType,
+        caption: args.caption,
+        visible: args.visibleAtStart !== false,
+        extent: args.extent,
+        queryable: false,
+        opacity: args.opacity || 1,
+        maxZoom: args.maxZoom,
+        minZoom: args.minZoom,
+        crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
+        wrapX: false,
+        url: args.url,
+        style: args.style,
+        projection: args.projection,
+        origin: args.origin,
+        resolutions: args.resolutions,
+        matrixIds: args.matrixIds,
+        attribution: args.attribution,
+        legend: args.legend,
+        legendIcon: args.legendIcon,
+        infoVisible: args.infoVisible || false,
+        infoTitle: args.infoTitle,
+        infoText: args.infoText,
+        infoUrl: args.infoUrl,
+        infoUrlText: args.infoUrlText,
+        infoOwner: args.infoOwner,
+        hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
+      },
+    };
+    return config;
+  }
 }

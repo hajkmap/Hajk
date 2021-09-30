@@ -206,6 +206,13 @@
             "expanded": false,
             "layers": [
               {
+                "id": "asd123",
+                "drawOrder": 2000,
+                "visibleAtStart": true,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
                 "id": "7",
                 "visibleAtStart": false,
                 "drawOrder": 3,

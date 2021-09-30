@@ -8,6 +8,7 @@ import { isMobile } from "./../utils/IsMobile.js";
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
+import MVTLayer from "./layers/MVTLayer";
 import { bindMapClickEvent } from "./Click.js";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { Map, View } from "ol";
@@ -361,6 +362,18 @@ class AppModel {
         );
         this.map.addLayer(layerItem.layer);
         break;
+      case "mvt":
+        console.log("addMapLayer()", layer);
+        layerConfig = configMapper.mapMVTConfig(layer, this.config);
+        console.log("got back layerConfig: ", layerConfig);
+        layerItem = new MVTLayer(
+          layerConfig.options,
+          this.config.appConfig.proxy,
+          this.map
+        );
+        console.log("got back layerItem: ", layerItem);
+        this.map.addLayer(layerItem.layer);
+        break;
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);
       //   layer = new ArcGISLayer(layerConfig);
@@ -375,7 +388,7 @@ class AppModel {
   }
 
   lookup(layers, type) {
-    var matchedLayers = [];
+    const matchedLayers = [];
     layers.forEach((layer) => {
       const layerConfig = this.config.layersConfig.find(
         (lookupLayer) => lookupLayer.id === layer.id
@@ -425,7 +438,7 @@ class AppModel {
 
     // Prepare layers
     this.layers = this.flattern(layerSwitcherConfig);
-    // FIXME: Use map instead?
+
     Object.keys(this.layers)
       .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
       .map((sortedKey) => this.layers[sortedKey])
@@ -618,12 +631,14 @@ class AppModel {
       layers.wmtslayers = this.config.layersConfig.wmtslayers || [];
       layers.vectorlayers = this.config.layersConfig.vectorlayers || [];
       layers.arcgislayers = this.config.layersConfig.arcgislayers || [];
+      layers.mvtlayers = this.config.layersConfig.mvtlayers || [];
 
       layers.wmslayers.forEach((l) => (l.type = "wms"));
       layers.wmtslayers.forEach((l) => (l.type = "wmts"));
       layers.wfstlayers.forEach((l) => (l.type = "edit"));
       layers.vectorlayers.forEach((l) => (l.type = "vector"));
       layers.arcgislayers.forEach((l) => (l.type = "arcgis"));
+      layers.mvtlayers.forEach((l) => (l.type = "mvt"));
 
       let allLayers = [
         ...layers.wmslayers,
@@ -631,6 +646,7 @@ class AppModel {
         ...layers.vectorlayers,
         ...layers.wfstlayers,
         ...layers.arcgislayers,
+        ...layers.mvtlayers,
       ];
 
       this.config.layersConfig = allLayers;
