@@ -12,7 +12,8 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
-import { ThemeProvider, StyledEngineProvider } from "@mui/styles";
+import { StyledEngineProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/styles";
 
 import {
   LinearProgress,
