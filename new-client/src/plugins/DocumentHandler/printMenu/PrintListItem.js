@@ -8,7 +8,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import PropTypes from "prop-types";
-import { Typography } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 
 const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
@@ -50,7 +50,7 @@ class PrintListItem extends React.PureComponent {
         onClick={this.handleOnExpandIconClick}
         classes={{ root: classes.collapseIconRoot }}
       >
-        <Typography variant="srOnly">Minimera submeny</Typography>
+        <span style={visuallyHidden}>Minimera submeny</span>
         <ExpandLess />
       </ListItemIcon>
     ) : (
@@ -58,7 +58,7 @@ class PrintListItem extends React.PureComponent {
         onClick={this.handleOnExpandIconClick}
         classes={{ root: classes.collapseIconRoot }}
       >
-        <Typography variant="srOnly">Maximera submeny</Typography>
+        <span style={visuallyHidden}>Maximera submeny</span>
         <ExpandMore />
       </ListItemIcon>
     );

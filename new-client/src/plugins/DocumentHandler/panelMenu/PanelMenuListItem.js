@@ -9,7 +9,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import PanelList from "./PanelList";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { Typography } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 
 const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
@@ -40,12 +40,12 @@ class PanelMenuListItem extends React.PureComponent {
 
     return expanded ? (
       <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        {!title && <Typography variant="srOnly">Minimera submeny</Typography>}
+        {!title && <span style={visuallyHidden}>Minimera submeny</span>}
         <ExpandLess />
       </ListItemIcon>
     ) : (
       <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        {!title && <Typography variant="srOnly">Maximera submeny</Typography>}
+        {!title && <span style={visuallyHidden}>Maximera submeny</span>}
         <ExpandMore />
       </ListItemIcon>
     );
@@ -55,9 +55,7 @@ class PanelMenuListItem extends React.PureComponent {
     const { classes, title, icon } = this.props;
     return (
       <ListItemIcon className={classes.listItemIcon}>
-        {!title && (
-          <Typography variant="srOnly">{icon.descriptiveText}</Typography>
-        )}
+        {!title && <span style={visuallyHidden}>{icon.descriptiveText}</span>}
         <Icon style={{ fontSize: icon.fontSize }}>
           {icon.materialUiIconName}
         </Icon>

@@ -2,9 +2,9 @@ import React from "react";
 import Fab from "@mui/material/Fab";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import makeStyles from "@mui/styles/makeStyles";
-import { Typography } from "@mui/material";
 import clsx from "clsx";
 import { darken } from "@mui/material/styles";
+import { visuallyHidden } from "@mui/utils";
 
 const useStyles = ({ color }) =>
   makeStyles((theme) => ({
@@ -35,9 +35,7 @@ const ScrollToTop = ({ onClick, color }) => {
       color={color ? "default" : "primary"}
       onClick={onClick}
     >
-      <Typography variant="srOnly">
-        Scrolla till toppen av dokumentet
-      </Typography>
+      <span style={visuallyHidden}>Scrolla till toppen av dokumentet</span>
       <NavigationIcon />
     </Fab>
   );
