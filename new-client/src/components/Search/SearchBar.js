@@ -29,9 +29,14 @@ import {
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 
-// FIXME checkout https://mui.com/components/use-media-query/#migrating-from-withwidth
-const withWidth = () => (WrappedComponent) => (props) =>
-  <WrappedComponent {...props} width="xs" />;
+// A HOC that pipes isMobile to the children. See this as a proposed
+// solution. It is not pretty, but if we move this to a separate file
+// we could use this HOC instead of the isMobile helper function in ../../utils/.
+const withIsMobile = () => (WrappedComponent) => (props) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  return <WrappedComponent {...props} isMobile={isMobile} />;
+};
 
 const styles = (theme) => ({
   searchContainer: {
@@ -286,24 +291,22 @@ class SearchBar extends React.PureComponent {
         renderOption={(props, option) => {
           if (searchString.length > 0) {
             return (
-              <li {...props}>
-                <Grid container alignItems="center">
-                  <Grid item xs={1}>
-                    {this.getOriginBasedIcon(option.origin)}
+              <Grid container alignItems="center" {...props}>
+                <Grid item xs={1}>
+                  {this.getOriginBasedIcon(option.origin)}
+                </Grid>
+                <Grid container item xs={11}>
+                  <Grid item xs={12}>
+                    {this.getHighlightedACE(
+                      searchString,
+                      decodeCommas(option.autocompleteEntry)
+                    )}
                   </Grid>
-                  <Grid container item xs={11}>
-                    <Grid item xs={12}>
-                      {this.getHighlightedACE(
-                        searchString,
-                        decodeCommas(option.autocompleteEntry)
-                      )}
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormHelperText>{option.dataset}</FormHelperText>
-                    </Grid>
+                  <Grid item xs={12}>
+                    <FormHelperText>{option.dataset}</FormHelperText>
                   </Grid>
                 </Grid>
-              </li>
+              </Grid>
             );
           }
         }}
@@ -333,7 +336,6 @@ class SearchBar extends React.PureComponent {
     const {
       searchString,
       loading,
-      width,
       searchActive,
       map,
       app,
@@ -349,8 +351,9 @@ class SearchBar extends React.PureComponent {
       handleOnClickOrKeyboardSearch,
       setSearchSources,
       failedWFSFetchMessage,
+      isMobile,
     } = this.props;
-    const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
+    const disableUnderline = isMobile ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
       failedWFSFetchMessage.length > 0 && showSearchResults;
     const expandMessage = resultPanelCollapsed
@@ -361,7 +364,7 @@ class SearchBar extends React.PureComponent {
       <TextField
         {...params}
         label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
-        variant={width === "xs" ? "standard" : "outlined"}
+        variant={isMobile ? "standard" : "outlined"}
         placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
         InputLabelProps={{ shrink: true }}
@@ -369,7 +372,7 @@ class SearchBar extends React.PureComponent {
           ...params.InputProps,
           ...disableUnderline,
           style: { margin: 0 },
-          notched: width === "xs" ? null : false,
+          notched: isMobile ? null : false,
           endAdornment: (
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}
@@ -433,7 +436,7 @@ class SearchBar extends React.PureComponent {
   };
 
   render() {
-    const { classes, showSearchResults, width } = this.props;
+    const { classes, showSearchResults, isMobile } = this.props;
     const { panelCollapsed } = this.state;
 
     return (
@@ -443,7 +446,7 @@ class SearchBar extends React.PureComponent {
         })}
       >
         <Grid item>
-          <Paper elevation={width === "xs" ? 0 : 1}>
+          <Paper elevation={isMobile ? 0 : 1}>
             {this.renderAutoComplete()}
           </Paper>
         </Grid>
@@ -453,4 +456,4 @@ class SearchBar extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(withWidth()(SearchBar)));
+export default withStyles(styles)(withTheme(withIsMobile()(SearchBar)));
