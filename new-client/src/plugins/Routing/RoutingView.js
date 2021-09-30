@@ -8,7 +8,8 @@ import {
   StepContent,
   ButtonGroup,
 } from "@mui/material";
-import { ToggleButtonGroup, ToggleButton } from "@mui/lab/";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsBikeIcon from "@mui/icons-material/DirectionsBike";
