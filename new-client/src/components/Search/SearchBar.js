@@ -67,14 +67,19 @@ const CustomPopper = (props) => {
       {...props}
       style={style}
       popperOptions={{
-        modifiers: {
-          computeStyle: { gpuAcceleration: false },
-          preventOverflow: {
+        modifiers: [
+          {
+            name: "preventOverflow",
             enabled: smallScreen,
-            boundariesElement: "root",
+            options: {
+              boundariesElement: "root",
+            },
           },
-          hide: { enabled: smallScreen },
-        },
+          {
+            name: "hide",
+            enabled: smallScreen,
+          },
+        ],
       }}
       placement="bottom-end"
     />
@@ -278,25 +283,27 @@ class SearchBar extends React.PureComponent {
         isOptionEqualToValue={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
-        renderOption={(option) => {
+        renderOption={(props, option) => {
           if (searchString.length > 0) {
             return (
-              <Grid container alignItems="center">
-                <Grid item xs={1}>
-                  {this.getOriginBasedIcon(option.origin)}
-                </Grid>
-                <Grid container item xs={11}>
-                  <Grid item xs={12}>
-                    {this.getHighlightedACE(
-                      searchString,
-                      decodeCommas(option.autocompleteEntry)
-                    )}
+              <li {...props}>
+                <Grid container alignItems="center">
+                  <Grid item xs={1}>
+                    {this.getOriginBasedIcon(option.origin)}
                   </Grid>
-                  <Grid item xs={12}>
-                    <FormHelperText>{option.dataset}</FormHelperText>
+                  <Grid container item xs={11}>
+                    <Grid item xs={12}>
+                      {this.getHighlightedACE(
+                        searchString,
+                        decodeCommas(option.autocompleteEntry)
+                      )}
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormHelperText>{option.dataset}</FormHelperText>
+                    </Grid>
                   </Grid>
                 </Grid>
-              </Grid>
+              </li>
             );
           }
         }}
