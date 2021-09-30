@@ -87,9 +87,7 @@ class SearchResultsContainer extends React.PureComponent {
     activeFeatureCollection: null,
     filteredFeatureCollections: null,
     filteredFeatures: null,
-    sumOfResults: this.props.searchResults.featureCollections
-      .map((fc) => fc.value.features.length ?? 0)
-      .reduce((a, b) => a + b, 0),
+    sumOfResults: null,
     filterInputFieldOpen: false,
     featureCollectionFilter: "", // String used to filter featureCollections
     featureFilter: "", // String used to filter features
@@ -164,7 +162,7 @@ class SearchResultsContainer extends React.PureComponent {
         this.showFeatureDetails(featureIds);
       }
     );
-    this.getPotentialSingleHit();
+    this.initializeResultsInformation();
   };
 
   componentWillUnmount = () => {
@@ -211,7 +209,7 @@ class SearchResultsContainer extends React.PureComponent {
     });
   };
 
-  getPotentialSingleHit = () => {
+  initializeResultsInformation = () => {
     const { featureCollections } = this.props;
 
     const activeFeatureCollection =
@@ -221,6 +219,9 @@ class SearchResultsContainer extends React.PureComponent {
         ? activeFeatureCollection.value.features[0]
         : undefined
       : undefined;
+    const sumOfResults = featureCollections
+      .map((fc) => fc.value.features.length ?? 0)
+      .reduce((a, b) => a + b, 0);
 
     // Hack hack.. we shouldn't set active collection and feature if we have a onClickName
     // on the source
@@ -233,6 +234,11 @@ class SearchResultsContainer extends React.PureComponent {
       this.setState({
         activeFeatureCollection: activeFeatureCollection,
         activeFeature: activeFeature,
+        sumOfResults: sumOfResults,
+      });
+    } else {
+      this.setState({
+        sumOfResults: sumOfResults,
       });
     }
   };
@@ -1122,7 +1128,7 @@ class SearchResultsContainer extends React.PureComponent {
 
     return (
       <Collapse in={!panelCollapsed}>
-        {sumOfResults === 0 ? (
+        {sumOfResults === null ? null : sumOfResults === 0 ? (
           <Paper className={classes.root}>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
           </Paper>
