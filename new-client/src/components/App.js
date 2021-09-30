@@ -98,9 +98,9 @@ const styles = (theme) => {
       },
       [theme.breakpoints.down("sm")]: {
         zIndex: 3,
-        marginLeft: -theme.spacing(2),
-        marginRight: -theme.spacing(2),
-        marginTop: -theme.spacing(2),
+        marginLeft: `-${theme.spacing(2)}`,
+        marginRight: `-${theme.spacing(2)}`,
+        marginTop: `-${theme.spacing(2)}`,
         maxHeight: theme.spacing(6),
         boxShadow: theme.shadows[3],
         backgroundColor: theme.palette.background.paper,
