@@ -907,7 +907,7 @@ class App extends React.PureComponent {
               ModalProps={{
                 hideBackdrop: this.state.drawerPermanent, //Don't show backdrop if drawer is permanent
                 disableEnforceFocus: true, //Dont enforce focus to be able to handle elements underneath modal
-                onEscapeKeyDown: () => {
+                onClose: () => {
                   this.globalObserver.publish("core.hideDrawer");
                 },
                 style: {
@@ -915,9 +915,6 @@ class App extends React.PureComponent {
                   position: this.state.drawerPermanent ? "initial" : "fixed",
                 },
                 keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
-                onBackdropClick: () => {
-                  this.globalObserver.publish("core.hideDrawer");
-                },
               }}
               variant="temporary"
               classes={{
