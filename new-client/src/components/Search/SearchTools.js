@@ -111,7 +111,6 @@ class SearchTools extends React.PureComponent {
             id="lock-menu"
             autoFocus={false}
             anchorEl={anchorEl}
-            getContentAnchorEl={null}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "center" }}
             keepMounted
