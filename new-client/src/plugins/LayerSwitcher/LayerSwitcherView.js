@@ -2,8 +2,8 @@ import React from "react";
 import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
-import { withStyles } from "@material-ui/core/styles";
-import { AppBar, Tab, Tabs } from "@material-ui/core";
+import withStyles from "@mui/styles/withStyles";
+import { AppBar, Tab, Tabs } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";

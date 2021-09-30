@@ -5,8 +5,8 @@ import {
   IconButton,
   InputAdornment,
   Tooltip,
-} from "@material-ui/core";
-import RefreshIcon from "@material-ui/icons/Refresh";
+} from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 const CQLFilter = ({ layer }) => {
   const source = layer.getSource();
@@ -37,7 +37,7 @@ const CQLFilter = ({ layer }) => {
         endAdornment={
           <InputAdornment position="end">
             <Tooltip title="Tryck för att ladda om lagret med angivet filter">
-              <IconButton edge="end" onClick={updateFilter}>
+              <IconButton edge="end" onClick={updateFilter} size="large">
                 <RefreshIcon />
               </IconButton>
             </Tooltip>

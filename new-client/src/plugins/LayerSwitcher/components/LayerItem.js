@@ -1,18 +1,18 @@
 import React from "react";
 import { withSnackbar } from "notistack";
-import { withStyles } from "@material-ui/core/styles";
-import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
+import withStyles from "@mui/styles/withStyles";
+import { Button, Tooltip, Typography, Grid } from "@mui/material";
 
-import IconWarning from "@material-ui/icons/Warning";
-import CallMadeIcon from "@material-ui/icons/CallMade";
-import InfoIcon from "@material-ui/icons/Info";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import RadioButtonChecked from "@material-ui/icons/RadioButtonChecked";
-import RadioButtonUnchecked from "@material-ui/icons/RadioButtonUnchecked";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import CloseIcon from "@material-ui/icons/Close";
+import IconWarning from "@mui/icons-material/Warning";
+import CallMadeIcon from "@mui/icons-material/CallMade";
+import InfoIcon from "@mui/icons-material/Info";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import RadioButtonChecked from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import CloseIcon from "@mui/icons-material/Close";
 
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
@@ -46,14 +46,14 @@ const styles = (theme) => ({
     paddingLeft: "0",
     paddingTop: "5px",
     paddingBottom: "5px",
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
     marginLeft: "45px",
   },
   layerItemBackgroundContainer: {
     paddingLeft: "0",
     paddingTop: "6px",
     paddingBottom: "5px",
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
     marginLeft: "0px",
   },
   layerItemInfo: {
@@ -67,7 +67,7 @@ const styles = (theme) => ({
     display: "flex",
     alignItems: "center",
     padding: "3px",
-    border: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    border: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
   },
   infoContainer: {},
   infoButton: {},

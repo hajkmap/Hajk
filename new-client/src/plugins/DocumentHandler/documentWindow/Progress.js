@@ -1,7 +1,7 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import withStyles from "@mui/styles/withStyles";
+import Grid from "@mui/material/Grid";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const styles = (theme) => ({
   grid: {
@@ -18,7 +18,7 @@ class Progress extends React.PureComponent {
     return (
       <Grid
         alignItems="center"
-        justify="center"
+        justifyContent="center"
         container
         className={classes.grid}
       >

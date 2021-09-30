@@ -1,13 +1,13 @@
 import React from "react";
-import { ThemeProvider } from "@material-ui/core/styles";
+import { ThemeProvider, StyledEngineProvider } from "@mui/material/styles";
 import BaseWindowPlugin from "../../BaseWindowPlugin";
 import DocumentViewer from "./DocumentViewer";
 import PrintWindow from "../printMenu/PrintWindow";
-import MenuBookIcon from "@material-ui/icons/MenuBook";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
 import { withSnackbar } from "notistack";
-import PrintIcon from "@material-ui/icons/Print";
+import PrintIcon from "@mui/icons-material/Print";
 
 class DocumentWindowBase extends React.PureComponent {
   snackbarKey = null;
@@ -194,9 +194,11 @@ class DocumentWindowBase extends React.PureComponent {
         {document != null && modelReady ? (
           !showPrintWindow ? (
             customTheme ? (
-              <ThemeProvider theme={customTheme}>
-                {this.getDocumentViewer()}
-              </ThemeProvider>
+              <StyledEngineProvider injectFirst>
+                <ThemeProvider theme={customTheme}>
+                  {this.getDocumentViewer()}
+                </ThemeProvider>
+              </StyledEngineProvider>
             ) : (
               this.getDocumentViewer()
             )

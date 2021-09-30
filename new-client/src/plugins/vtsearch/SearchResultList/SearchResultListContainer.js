@@ -2,17 +2,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Rnd } from "react-rnd";
-import { withStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Grid from "@material-ui/core/Grid";
-import Toolbar from "@material-ui/core/Toolbar";
+import withStyles from "@mui/styles/withStyles";
+import AppBar from "@mui/material/AppBar";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Grid from "@mui/material/Grid";
+import Toolbar from "@mui/material/Toolbar";
 import PanelToolbox from "./PanelToolbox";
 import TabPanel from "./TabPanel";
-import ClearIcon from "@material-ui/icons/Clear";
+import ClearIcon from "@mui/icons-material/Clear";
 import GeoJSON from "ol/format/GeoJSON";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 
 /**
  * @summary Base in the search result list
@@ -371,7 +371,7 @@ class SearchResultListContainer extends React.Component {
         position="static"
       >
         <Toolbar classes={{ regular: classes.toolbar }}>
-          <Grid justify="space-between" alignItems="center" container>
+          <Grid justifyContent="space-between" alignItems="center" container>
             <Grid style={{ paddingLeft: 10 }} item>
               {searchResults.length > 0 &&
                 this.renderTabsController(searchResults)}

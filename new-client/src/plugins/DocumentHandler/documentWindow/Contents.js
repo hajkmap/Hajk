@@ -1,9 +1,9 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
+import withStyles from "@mui/styles/withStyles";
+import Typography from "@mui/material/Typography";
 import ImagePopupModal from "./ImagePopupModal";
 import { flattenChaptersTree } from "../utils/helpers";
-import { Box } from "@material-ui/core";
+import { Box } from "@mui/material";
 
 const styles = (theme) => {
   return {

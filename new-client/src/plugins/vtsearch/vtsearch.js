@@ -9,22 +9,22 @@ import Journeys from "./SearchViews/Journeys";
 import Stops from "./SearchViews/Stops";
 import Lines from "./SearchViews/Lines";
 import Observer from "react-event-observer";
-import { Tooltip } from "@material-ui/core";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import IconButton from "@material-ui/core/IconButton";
+import { Tooltip } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import IconButton from "@mui/material/IconButton";
 import clsx from "clsx";
-import MenuIcon from "@material-ui/icons/Menu";
-import { withStyles } from "@material-ui/core/styles";
-import FormControl from "@material-ui/core/FormControl";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
+import MenuIcon from "@mui/icons-material/Menu";
+import withStyles from "@mui/styles/withStyles";
+import FormControl from "@mui/material/FormControl";
+import LinearProgress from "@mui/material/LinearProgress";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
 import SearchResultListContainer from "./SearchResultList/SearchResultListContainer";
 import ReactDOM from "react-dom";
 import MapViewModel from "./MapViewModel";
 
 import BaseWindowPlugin from "../BaseWindowPlugin";
-import SearchIcon from "@material-ui/icons/Search";
+import SearchIcon from "@mui/icons-material/Search";
 
 import Search from "./../../components/Search/Search";
 
@@ -317,6 +317,7 @@ class VTSearch extends React.PureComponent {
         onClick={this.handleExpandClick}
         aria-expanded={this.state.expanded}
         aria-label="show more"
+        size="large"
       >
         <ExpandMoreIcon />
       </IconButton>
@@ -335,6 +336,7 @@ class VTSearch extends React.PureComponent {
           onClick={onMenuClick}
           disabled={menuButtonDisabled}
           aria-label="menu"
+          size="large"
         >
           <MenuIcon />
         </IconButton>

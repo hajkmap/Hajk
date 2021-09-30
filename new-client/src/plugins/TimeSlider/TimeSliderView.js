@@ -1,18 +1,18 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 
-import { Slider, Button, Badge, Grid, Tooltip } from "@material-ui/core";
+import { Slider, Button, Badge, Grid, Tooltip } from "@mui/material";
 import { Vector as VectorLayer } from "ol/layer";
 
 import TimeSliderSettings from "./components/TimeSliderSettings.js";
 import Dialog from "../../components/Dialog.js";
 
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import PauseIcon from "@material-ui/icons/Pause";
-import RotateLeftOutlinedIcon from "@material-ui/icons/RotateLeftOutlined";
-import SettingsOutlinedIcon from "@material-ui/icons/SettingsOutlined";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
+import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -514,7 +514,7 @@ class TimeSliderView extends React.PureComponent {
           <Grid
             container
             direction="row"
-            justify="center"
+            justifyContent="center"
             alignItems="center"
             spacing={2}
           >
@@ -552,7 +552,7 @@ class TimeSliderView extends React.PureComponent {
         <Grid
           container
           alignItems="center"
-          justify="center"
+          justifyContent="center"
           style={{ width: "100%", height: "100%" }}
         >
           <>{this.renderSettingsDialog()}</>

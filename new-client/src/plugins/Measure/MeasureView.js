@@ -1,13 +1,13 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import PropTypes from "prop-types";
-import Button from "@material-ui/core/Button";
-import NativeSelect from "@material-ui/core/NativeSelect";
-import FormControl from "@material-ui/core/FormControl";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
+import Button from "@mui/material/Button";
+import NativeSelect from "@mui/material/NativeSelect";
+import FormControl from "@mui/material/FormControl";
+import Input from "@mui/material/Input";
+import InputLabel from "@mui/material/InputLabel";
 import { withSnackbar } from "notistack";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 
 const styles = (theme) => ({
   root: {

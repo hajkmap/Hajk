@@ -1,10 +1,10 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import propTypes from "prop-types";
 
-import { Button, Paper, Tooltip } from "@material-ui/core";
-import InfoIcon from "@material-ui/icons/Info";
+import { Button, Paper, Tooltip } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
 
 import Dialog from "../components/Dialog.js";
 

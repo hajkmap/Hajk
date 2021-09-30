@@ -4,7 +4,7 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import PrintModel from "./PrintModel";
 import PrintView from "./PrintView";
 import Observer from "react-event-observer";
-import PrintIcon from "@material-ui/icons/Print";
+import PrintIcon from "@mui/icons-material/Print";
 
 class Print extends React.PureComponent {
   // Paper dimensions: Array[width, height]

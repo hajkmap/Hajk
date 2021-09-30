@@ -1,7 +1,7 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { ScaleLine } from "ol/control";
-import { Paper, Tooltip } from "@material-ui/core";
+import { Paper, Tooltip } from "@mui/material";
 
 const styles = (theme) => {
   return {

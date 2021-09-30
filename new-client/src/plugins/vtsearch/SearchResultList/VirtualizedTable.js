@@ -1,12 +1,12 @@
 import React from "react";
 import clsx from "clsx";
-import { withStyles } from "@material-ui/core/styles";
-import TableCell from "@material-ui/core/TableCell";
+import withStyles from "@mui/styles/withStyles";
+import TableCell from "@mui/material/TableCell";
 import { AutoSizer, Column, Table } from "react-virtualized";
 import { SortIndicator } from "react-virtualized";
 
 import "react-virtualized/styles.css";
-import { Typography, Tooltip } from "@material-ui/core";
+import { Typography, Tooltip } from "@mui/material";
 
 const styles = (theme) => ({
   flexContainer: {

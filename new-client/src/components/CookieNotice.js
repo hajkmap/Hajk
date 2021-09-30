@@ -1,8 +1,8 @@
 import React from "react";
 import { object, string } from "prop-types";
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles((theme) => ({
   textButton: {

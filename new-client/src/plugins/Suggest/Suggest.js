@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { Fab } from "@material-ui/core";
-import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-import CommentIcon from "@material-ui/icons/Comment";
+import withStyles from "@mui/styles/withStyles";
+import { Fab } from "@mui/material";
+import { ListItem, ListItemIcon, ListItemText } from "@mui/material";
+import CommentIcon from "@mui/icons-material/Comment";
 
 import { detect } from "detect-browser";
 

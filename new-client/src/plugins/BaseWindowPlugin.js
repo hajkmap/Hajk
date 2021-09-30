@@ -2,14 +2,9 @@ import React from "react";
 import propTypes from "prop-types";
 import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
-import { withTheme } from "@material-ui/styles";
-import {
-  Hidden,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from "@material-ui/core";
+import withStyles from "@mui/styles/withStyles";
+import { withTheme } from "@mui/styles";
+import { Hidden, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
@@ -231,7 +226,7 @@ class BaseWindowPlugin extends React.PureComponent {
   renderWidgetButton(id) {
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden smDown>
+      <Hidden mdDown>
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}

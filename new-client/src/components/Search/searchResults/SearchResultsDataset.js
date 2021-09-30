@@ -1,7 +1,7 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { isMobile } from "../../../utils/IsMobile";
-import { List, ListItem } from "@material-ui/core";
+import { List, ListItem } from "@mui/material";
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 import SearchResultsPreview from "./SearchResultsPreview";

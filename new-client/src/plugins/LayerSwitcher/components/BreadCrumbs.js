@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import BreadCrumb from "./BreadCrumb.js";
-import { withStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography/Typography";
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
+import withStyles from "@mui/styles/withStyles";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import ScrollMenu from "react-horizontal-scrolling-menu";
 
 const styles = (theme) => ({
@@ -37,7 +37,7 @@ const styles = (theme) => ({
       width: "269px",
       boxShadow: theme.shadows[4],
     },
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       left: 0,
       bottom: 0,
       right: 0,
@@ -66,10 +66,10 @@ const styles = (theme) => ({
     maxHeight: "300px",
     overflow: "auto",
     margin: "10px",
-    [theme.breakpoints.down("md")]: {
+    [theme.breakpoints.down("lg")]: {
       maxHeight: "236px",
     },
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       maxHeight: "150px",
     },
   },
@@ -207,6 +207,7 @@ class BreadCrumbs extends Component {
               <IconButton
                 className={classes.button}
                 onClick={() => this.toggle()}
+                size="large"
               >
                 <RemoveCircleIcon />
               </IconButton>
@@ -214,6 +215,7 @@ class BreadCrumbs extends Component {
               <IconButton
                 className={classes.button}
                 onClick={() => this.toggle()}
+                size="large"
               >
                 <AddCircleIcon />
               </IconButton>

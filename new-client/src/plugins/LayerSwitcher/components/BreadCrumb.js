@@ -1,17 +1,17 @@
 import React, { Component } from "react";
-import CloseIcon from "@material-ui/icons/Close";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
-import LaunchIcon from "@material-ui/icons/Launch";
-import { Button, IconButton, Grid, Typography, Paper } from "@material-ui/core";
-import CallMadeIcon from "@material-ui/icons/CallMade";
-import { withStyles } from "@material-ui/core/styles";
-import Popover from "@material-ui/core/Popover";
+import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import LaunchIcon from "@mui/icons-material/Launch";
+import { Button, IconButton, Grid, Typography, Paper } from "@mui/material";
+import CallMadeIcon from "@mui/icons-material/CallMade";
+import withStyles from "@mui/styles/withStyles";
+import Popover from "@mui/material/Popover";
 
 const styles = (theme) => ({
   root: {
     marginRight: theme.spacing(0.5),
-    border: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    border: `${theme.spacing(0.1)} solid ${theme.palette.divider}`,
   },
   gridContainer: {
     padding: theme.spacing(1),
@@ -187,7 +187,7 @@ class BreadCrumb extends Component {
           container
           className={classes.gridContainer}
           data-type="bread-crumb"
-          justify="space-between"
+          justifyContent="space-between"
           alignItems="center"
         >
           <Grid item>

@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { useSnackbar } from "notistack";
 
-import { Paper, Tooltip } from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import LocationSearchingIcon from "@material-ui/icons/LocationSearching";
-import LocationDisabledIcon from "@material-ui/icons/LocationDisabled";
-import MyLocationIcon from "@material-ui/icons/MyLocation";
+import { Paper, Tooltip } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import ToggleButton from "@mui/material/ToggleButton";
+import CircularProgress from "@mui/material/CircularProgress";
+import LocationSearchingIcon from "@mui/icons-material/LocationSearching";
+import LocationDisabledIcon from "@mui/icons-material/LocationDisabled";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 
 const useStyles = makeStyles((theme) => ({
   paper: {

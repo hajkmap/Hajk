@@ -1,8 +1,8 @@
 import React from "react";
-import { Button, Paper, Tooltip } from "@material-ui/core";
-import Brightness4Icon from "@material-ui/icons/Brightness4";
+import { Button, Paper, Tooltip } from "@mui/material";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
 
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles((theme) => ({
   paper: {

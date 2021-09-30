@@ -1,8 +1,8 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { withTheme } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import withTheme from "@mui/styles/withTheme";
 import {
   Grid,
   List,
@@ -10,14 +10,14 @@ import {
   ListItemText,
   Button,
   Collapse,
-} from "@material-ui/core";
+} from "@mui/material";
 
 const styles = (theme) => {
   return {
     tableOfContents: {
       //Need to manually change color when switching between dark/light-mode
       backgroundColor:
-        theme.palette.type === "dark"
+        theme.palette.mode === "dark"
           ? theme.palette.grey[700]
           : theme.palette.grey[200],
       tapHighlightColor: "transparent",

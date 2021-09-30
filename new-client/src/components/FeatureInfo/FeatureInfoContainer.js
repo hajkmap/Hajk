@@ -1,8 +1,8 @@
 import React from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import withStyles from "@mui/styles/withStyles";
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import FeaturePropsParsing from "./FeaturePropsParsing";
 // import Diagram from "../Diagram";
 // import HajkTable from "../Table";
@@ -16,7 +16,7 @@ import {
   Button,
   Typography,
   Grid,
-} from "@material-ui/core";
+} from "@mui/material";
 
 const styles = (theme) => ({
   toggler: {
@@ -43,10 +43,10 @@ const styles = (theme) => ({
     width: "100%",
   },
   togglerButtonRightContainer: {
-    borderRight: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    borderRight: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
   },
   togglerButtonLeftContainer: {
-    borderLeft: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    borderLeft: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
   },
 });
 
@@ -98,7 +98,7 @@ class FeatureInfoContainer extends React.PureComponent {
     return (
       <Grid
         alignItems="center"
-        justify="space-between"
+        justifyContent="space-between"
         className={classes.toggler}
         container
       >
@@ -341,7 +341,7 @@ class FeatureInfoContainer extends React.PureComponent {
           </Grid>
         )}
         <Grid
-          justify="center"
+          justifyContent="center"
           alignContent={featureInfoLoaded ? "flex-start" : "center"}
           className={classes.featureInfoContainer}
           item

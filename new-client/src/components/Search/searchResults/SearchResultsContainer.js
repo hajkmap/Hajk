@@ -1,15 +1,15 @@
 import React from "react";
-import Alert from "@material-ui/lab/Alert";
+import Alert from "@mui/material/Alert";
 import SearchResultsList from "./SearchResultsList";
-import Collapse from "@material-ui/core/Collapse";
-import Breadcrumbs from "@material-ui/core/Breadcrumbs";
-import Link from "@material-ui/core/Link";
-import FilterListIcon from "@material-ui/icons/FilterList";
-import SortIcon from "@material-ui/icons/Sort";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import CloseIcon from "@material-ui/icons/Close";
-import DeleteIcon from "@material-ui/icons/Delete";
-import ClearIcon from "@material-ui/icons/Clear";
+import Collapse from "@mui/material/Collapse";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Link from "@mui/material/Link";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import SortIcon from "@mui/icons-material/Sort";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ClearIcon from "@mui/icons-material/Clear";
 import {
   Paper,
   Button,
@@ -22,8 +22,8 @@ import {
   MenuItem,
   Grow,
   IconButton,
-} from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import withStyles from "@mui/styles/withStyles";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 
 const styles = (theme) => ({
@@ -31,7 +31,7 @@ const styles = (theme) => ({
     display: "none",
   },
   searchResultListWrapper: {
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       maxHeight: "78vh",
     },
     [theme.breakpoints.up("sm")]: {
@@ -45,17 +45,17 @@ const styles = (theme) => ({
     [theme.breakpoints.up("sm")]: {
       maxWidth: 520,
     },
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       minWidth: "100%",
       maxWidth: "100%",
       position: "absolute",
       left: 0,
-      borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+      borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
     },
   },
   filterInputFieldContainer: {
     padding: theme.spacing(1),
-    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    borderBottom: `${theme.spacing(0.1)} solid ${theme.palette.divider}`,
   },
   headerContainer: {
     paddingRight: theme.spacing(1),
@@ -65,7 +65,7 @@ const styles = (theme) => ({
     minHeight: 42,
     paddingRight: theme.spacing(1),
     paddingLeft: theme.spacing(1),
-    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
+    borderBottom: `${theme.spacing(0.1)} solid ${theme.palette.divider}`,
   },
   headerTypography: {
     maxWidth: "100%",
@@ -641,7 +641,7 @@ class SearchResultsContainer extends React.PureComponent {
       return null;
     } else {
       return (
-        <Grid item container align="center" justify="flex-end">
+        <Grid item container align="center" justifyContent="flex-end">
           <Grow in={this.state.showTools} timeout={800}>
             <Grid
               item
@@ -1008,7 +1008,7 @@ class SearchResultsContainer extends React.PureComponent {
       <Grid
         container
         item
-        justify="space-between"
+        justifyContent="space-between"
         alignItems="center"
         wrap="nowrap"
         xs={12}
@@ -1040,7 +1040,7 @@ class SearchResultsContainer extends React.PureComponent {
         <Grid
           container
           item
-          justify="flex-end"
+          justifyContent="flex-end"
           xs={this.state.showTools ? 7 : 1}
         >
           {this.renderSearchResultListTools()}

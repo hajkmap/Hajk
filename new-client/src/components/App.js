@@ -1,7 +1,7 @@
 import React from "react";
 
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
@@ -39,11 +39,11 @@ import {
   IconButton,
   Tooltip,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import LockIcon from "@material-ui/icons/Lock";
-import LockOpenIcon from "@material-ui/icons/LockOpen";
-import MapIcon from "@material-ui/icons/Map";
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
+import MapIcon from "@mui/icons-material/Map";
 import ThemeToggler from "../controls/ThemeToggler";
 
 // A global that holds our windows, for use see components/Window.js
@@ -96,7 +96,7 @@ const styles = (theme) => {
       "& > *": {
         marginBottom: theme.spacing(2),
       },
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("sm")]: {
         zIndex: 3,
         marginLeft: -theme.spacing(2),
         marginRight: -theme.spacing(2),
@@ -121,7 +121,7 @@ const styles = (theme) => {
     controlsColumn: {
       display: "flex",
       flexDirection: "column",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("sm")]: {
         marginTop: theme.spacing(2),
       },
     },
@@ -177,7 +177,7 @@ const styles = (theme) => {
       width: "220px",
     },
     snackBarContainerRoot: {
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("sm")]: {
         pointerEvents: "none",
         // Getting around notistack bug, can't reach snackItem.
         "& div > div > div > div": {
@@ -186,12 +186,12 @@ const styles = (theme) => {
       },
     },
     snackbarContainerBottom: {
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("sm")]: {
         bottom: "35px",
       },
     },
     snackbarContainerTop: {
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("sm")]: {
         top: "18px",
       },
     },
@@ -646,7 +646,7 @@ class App extends React.PureComponent {
     // We need to be able to grab different logos depending
     // on light/dark mode theme
     const logoUrl =
-      (this.props.theme.palette.type === "light" // If light theme active…
+      (this.props.theme.palette.mode === "light" // If light theme active…
         ? config.mapConfig.map.logoLight // …grab light logo,
         : config.mapConfig.map.logoDark) || // …else grab dark logo.
       config.mapConfig.map.logo || // If neither was set, try to see if we have the legacy admin parameter.
@@ -664,7 +664,7 @@ class App extends React.PureComponent {
           container
           wrap="nowrap"
           direction="row"
-          justify="space-between"
+          justifyContent="space-between"
           alignItems="center"
         >
           <Grid item>
@@ -674,7 +674,7 @@ class App extends React.PureComponent {
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>
-            <Hidden smDown>
+            <Hidden mdDown>
               <Tooltip
                 title={
                   (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
@@ -686,6 +686,7 @@ class App extends React.PureComponent {
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
+                  size="large"
                 >
                   {this.state.drawerPermanent ? (
                     this.state.drawerMouseOverLock ? (

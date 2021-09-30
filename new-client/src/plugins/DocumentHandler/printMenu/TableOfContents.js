@@ -1,10 +1,11 @@
 import React from "react";
-import { withStyles, withTheme } from "@material-ui/core/styles";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import List from "@material-ui/core/List";
-import { Typography } from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
+import withStyles from "@mui/styles/withStyles";
+import withTheme from "@mui/styles/withTheme";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import List from "@mui/material/List";
+import { Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },

@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import RateReviewIcon from "@material-ui/icons/RateReview";
+import RateReviewIcon from "@mui/icons-material/RateReview";
 
 import Observer from "react-event-observer";
 import CollectorView from "./CollectorView.js";

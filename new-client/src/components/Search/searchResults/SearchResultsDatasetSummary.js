@@ -1,6 +1,6 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { Typography, Chip, Tooltip, Grid } from "@material-ui/core";
+import withStyles from "@mui/styles/withStyles";
+import { Typography, Chip, Tooltip, Grid } from "@mui/material";
 
 const styles = (theme) => ({
   summaryContainer: {
@@ -14,7 +14,7 @@ const styles = (theme) => ({
   warningChip: {
     color: theme.palette.warning.contrastText,
     backgroundColor:
-      theme.palette.type === "dark"
+      theme.palette.mode === "dark"
         ? theme.palette.warning.dark
         : theme.palette.warning.light,
   },
@@ -76,7 +76,7 @@ class SearchResultsDatasetSummary extends React.PureComponent {
               {featureCollection.source.caption}
             </Typography>
           </Grid>
-          <Grid container item justify="flex-end" xs={2}>
+          <Grid container item justifyContent="flex-end" xs={2}>
             <Tooltip title={toolTipTitle}>
               <Chip
                 size="small"

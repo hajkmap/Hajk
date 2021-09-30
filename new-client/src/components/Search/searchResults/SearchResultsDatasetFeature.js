@@ -1,8 +1,8 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { Checkbox, Typography, Tooltip, Grid } from "@material-ui/core";
-import StarIcon from "@material-ui/icons/Star";
-import StarBorderIcon from "@material-ui/icons/StarBorder";
+import withStyles from "@mui/styles/withStyles";
+import { Checkbox, Typography, Tooltip, Grid } from "@mui/material";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 const styles = (theme) => ({
   root: {

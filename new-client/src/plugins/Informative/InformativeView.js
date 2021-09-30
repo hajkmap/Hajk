@@ -1,18 +1,18 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import { withStyles } from "@material-ui/core/styles";
-import MapIcon from "@material-ui/icons/Map";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import MenuIcon from "@material-ui/icons/Menu";
-import PrintIcon from "@material-ui/icons/Print";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import TocIcon from "@material-ui/icons/Toc";
-import ArrowDownward from "@material-ui/icons/ArrowDownward";
-import Typography from "@material-ui/core/Typography";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import LinearProgress from "@mui/material/LinearProgress";
+import withStyles from "@mui/styles/withStyles";
+import MapIcon from "@mui/icons-material/Map";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import MenuIcon from "@mui/icons-material/Menu";
+import PrintIcon from "@mui/icons-material/Print";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import TocIcon from "@mui/icons-material/Toc";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import Typography from "@mui/material/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import Alert from "../../components/Alert.js";
 import { withSnackbar } from "notistack";
@@ -216,6 +216,7 @@ class Informative extends React.PureComponent {
             className={classes.button}
             aria-label="Teckenförklaring"
             onClick={this.toggleLegend}
+            size="large"
           >
             {this.state.displayLegend ? (
               <ExpandLessIcon color="primary" title="Teckenförklaring" />
@@ -405,6 +406,7 @@ class Informative extends React.PureComponent {
             className={classes.button}
             aria-label="Skriv ut"
             onClick={this.print}
+            size="large"
           >
             <PrintIcon color="primary" title="Skriv ut" />
           </IconButton>

@@ -1,5 +1,5 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import propTypes from "prop-types";
 import { isValidLayerId } from "utils/Validator";
 import OSM from "ol/source/OSM";
@@ -18,7 +18,7 @@ const SPECIAL_BACKGROUND_COLORS = {
 
 const styles = (theme) => ({
   layerItemContainer: {
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
   },
   captionText: {
     position: "relative",

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import {
   Tooltip,
   Grid,
@@ -13,7 +13,7 @@ import {
   Chip,
   MenuItem,
   Input,
-} from "@material-ui/core";
+} from "@mui/material";
 
 const styles = (theme) => ({
   chips: {

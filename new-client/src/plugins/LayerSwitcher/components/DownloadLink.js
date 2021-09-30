@@ -1,7 +1,7 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
-import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
+import makeStyles from "@mui/styles/makeStyles";
+import IconButton from "@mui/material/IconButton";
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 
 const useStyles = makeStyles((theme) => ({}));
 /**

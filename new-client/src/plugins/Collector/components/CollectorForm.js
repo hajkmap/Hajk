@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import Page from "./Page.js";
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@mui/material/Typography";
 
 const styles = (theme) => {
   return {

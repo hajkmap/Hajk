@@ -1,9 +1,9 @@
 import React from "react";
 import { easeOut } from "ol/easing";
-import { Button, Paper } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
-import RemoveIcon from "@material-ui/icons/Remove";
-import { makeStyles } from "@material-ui/styles";
+import { Button, Paper } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles((theme) => ({
   paper: {

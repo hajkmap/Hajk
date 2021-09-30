@@ -1,16 +1,16 @@
 import React, { Component } from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import CloseIcon from "@material-ui/icons/Close";
-import FullscreenIcon from "@material-ui/icons/Fullscreen";
-import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
-import AspectRatioIcon from "@material-ui/icons/AspectRatio";
-import { Hidden, Typography, IconButton, Box } from "@material-ui/core";
+import withStyles from "@mui/styles/withStyles";
+import CloseIcon from "@mui/icons-material/Close";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import AspectRatioIcon from "@mui/icons-material/AspectRatio";
+import { Hidden, Typography, IconButton, Box } from "@mui/material";
 
 const styles = (theme) => {
   return {
     header: {
-      padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
+      padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
       borderBottom: `4px solid ${theme.palette.primary.main}`,
       userSelect: "none",
       display: "flex",
@@ -83,7 +83,7 @@ class PanelHeader extends Component {
                 <FullscreenExitIcon />
               </IconButton>
             ))}
-          <Hidden xsDown>
+          <Hidden smDown>
             {allowMaximizedWindow && ( // If we're not on mobile and config allows fit-to-screen…
               <IconButton size="small" onClick={this.props.onMaximize}>
                 <Typography variant="srOnly">Maximera fönster</Typography>

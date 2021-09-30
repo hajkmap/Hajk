@@ -1,10 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { withSnackbar } from "notistack";
-import Button from "@material-ui/core/Button";
-import BugReportIcon from "@material-ui/icons/BugReport";
-import { Box, Typography } from "@material-ui/core";
+import Button from "@mui/material/Button";
+import BugReportIcon from "@mui/icons-material/BugReport";
+import { Box, Typography } from "@mui/material";
 
 // Define JSS styles that will be used in this component.
 // Example below utilizes the very powerful "theme" object

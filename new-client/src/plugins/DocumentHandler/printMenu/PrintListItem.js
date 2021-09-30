@@ -1,13 +1,14 @@
 import React from "react";
-import { withStyles, withTheme } from "@material-ui/core/styles";
-import ListItem from "@material-ui/core/ListItem";
-import Checkbox from "@material-ui/core/Checkbox";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
+import withStyles from "@mui/styles/withStyles";
+import withTheme from "@mui/styles/withTheme";
+import ListItem from "@mui/material/ListItem";
+import Checkbox from "@mui/material/Checkbox";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import PropTypes from "prop-types";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 
 const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
@@ -84,7 +85,7 @@ class PrintListItem extends React.PureComponent {
           className={classes.listItem}
           style={{
             paddingLeft: theme.spacing(1) + theme.spacing(chapter.level * 3),
-            borderLeft: `${theme.spacing(0.5)}px solid ${chapter.color}`,
+            borderLeft: `${theme.spacing(0.5)} solid ${chapter.color}`,
           }}
         >
           <ListItemIcon className={classes.listItemIcon}>

@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import SvgIcon from "@material-ui/core/SvgIcon";
+import SvgIcon from "@mui/material/SvgIcon";
 
 import MeasureView from "./MeasureView";
 import MeasureModel from "./MeasureModel";

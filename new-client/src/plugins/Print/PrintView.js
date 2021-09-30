@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { withSnackbar } from "notistack";
 import PrintDialog from "./PrintDialog";
-import { AppBar, Tab, Tabs } from "@material-ui/core";
-import PrintIcon from "@material-ui/icons/Print";
-import SettingsIcon from "@material-ui/icons/Settings";
-import { Tooltip, Button } from "@material-ui/core";
+import { AppBar, Tab, Tabs } from "@mui/material";
+import PrintIcon from "@mui/icons-material/Print";
+import SettingsIcon from "@mui/icons-material/Settings";
+import { Tooltip, Button } from "@mui/material";
 
 import GeneralOptions from "./GeneralOptions";
 import AdvancedOptions from "./AdvancedOptions";

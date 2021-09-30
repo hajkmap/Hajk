@@ -1,8 +1,8 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import IconButton from "@material-ui/core/IconButton";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import { withStyles } from "@material-ui/core/styles";
+import IconButton from "@mui/material/IconButton";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import withStyles from "@mui/styles/withStyles";
 import {
   ListItemIcon,
   Menu,
@@ -10,7 +10,7 @@ import {
   Paper,
   Tooltip,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import Dialog from "../Dialog.js";
 import SearchSettings from "./SearchSettings";

@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import ScatterPlotIcon from "@material-ui/icons/ScatterPlot";
-import BorderStyleIcon from "@material-ui/icons/BorderStyle";
-import LinearScaleIcon from "@material-ui/icons/LinearScale";
-import Typography from "@material-ui/core/Typography/Typography";
+import withStyles from "@mui/styles/withStyles";
+import Button from "@mui/material/Button";
+import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
+import BorderStyleIcon from "@mui/icons-material/BorderStyle";
+import LinearScaleIcon from "@mui/icons-material/LinearScale";
+import Typography from "@mui/material/Typography";
 import WKT from "ol/format/WKT";
 
 const styles = (theme) => ({

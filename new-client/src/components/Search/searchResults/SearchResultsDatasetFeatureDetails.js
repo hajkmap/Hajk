@@ -1,6 +1,6 @@
 import React from "react";
 import FeaturePropsParsing from "../../FeatureInfo/FeaturePropsParsing";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import {
   Table,
   TableBody,
@@ -11,9 +11,9 @@ import {
   Grid,
   Button,
   Tooltip,
-} from "@material-ui/core";
-import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+} from "@mui/material";
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 
 const styles = (theme) => ({
   tableCell: {
@@ -161,7 +161,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       currentFeatureIndex + 1 >= numFeaturesInCollection;
 
     return (
-      <Grid container item alignItems="center" justify="space-between">
+      <Grid container item alignItems="center" justifyContent="space-between">
         <Grid item>
           <Tooltip
             title={

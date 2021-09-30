@@ -1,8 +1,8 @@
 import React from "react";
-import { Button, Paper, Tooltip } from "@material-ui/core";
-import HomeIcon from "@material-ui/icons/Home";
+import { Button, Paper, Tooltip } from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
 
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 
 const styles = (theme) => ({
   paper: {

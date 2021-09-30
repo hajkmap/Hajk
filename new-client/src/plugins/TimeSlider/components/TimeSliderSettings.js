@@ -1,21 +1,16 @@
 import React from "react";
-import { withTheme } from "@material-ui/styles";
-import { Grid, Typography, Tooltip, Switch } from "@material-ui/core";
-import {
-  FormControl,
-  FormHelperText,
-  MenuItem,
-  Select,
-} from "@material-ui/core";
+import { withTheme } from "@mui/styles";
+import { Grid, Typography, Tooltip, Switch } from "@mui/material";
+import { FormControl, FormHelperText, MenuItem, Select } from "@mui/material";
 import {
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   ListItemSecondaryAction,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import WarningIcon from "@material-ui/icons/Warning";
+import WarningIcon from "@mui/icons-material/Warning";
 
 class TimeSliderSettings extends React.PureComponent {
   constructor(props) {
@@ -45,7 +40,7 @@ class TimeSliderSettings extends React.PureComponent {
             <ListItem
               key={index}
               style={{
-                borderLeft: `${theme.spacing(0.5)}px solid ${
+                borderLeft: `${theme.spacing(0.5)} solid ${
                   error ? theme.palette.error.main : theme.palette.success.main
                 }`,
               }}

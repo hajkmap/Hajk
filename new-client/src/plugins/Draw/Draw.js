@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import DrawIcon from "@material-ui/icons/Edit";
+import DrawIcon from "@mui/icons-material/Edit";
 
 import DrawView from "./DrawView";
 import DrawModel from "./DrawModel";

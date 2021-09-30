@@ -1,8 +1,8 @@
 import React from "react";
-import { Button, Paper, Tooltip } from "@material-ui/core";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import { Button, Paper, Tooltip } from "@mui/material";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles((theme) => ({
   paper: {

@@ -1,12 +1,12 @@
 import React from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import {
   Card as MUICard,
   CardHeader,
   CardActionArea,
   Avatar,
-} from "@material-ui/core";
+} from "@mui/material";
 
 const styles = (theme) => {
   return {
@@ -16,7 +16,7 @@ const styles = (theme) => {
     card: {
       marginBottom: theme.spacing(1),
       width: "210px",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("sm")]: {
         boxShadow: "none",
         borderBottom: "1px solid #ccc",
         borderRadius: 0,

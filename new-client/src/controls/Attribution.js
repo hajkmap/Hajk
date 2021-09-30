@@ -1,5 +1,5 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { Attribution } from "ol/control";
 
 const styles = (theme) => {
@@ -16,7 +16,7 @@ const styles = (theme) => {
         height: "25px",
         overflow: "auto",
         whiteSpace: "nowrap",
-        [theme.breakpoints.down("xs")]: {
+        [theme.breakpoints.down("sm")]: {
           maxWidth: "100px",
         },
       },

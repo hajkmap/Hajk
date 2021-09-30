@@ -1,6 +1,6 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { Grid, Popover, Typography, fade } from "@material-ui/core";
+import withStyles from "@mui/styles/withStyles";
+import { Grid, Popover, Typography, alpha } from "@mui/material";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 
 const styles = (theme) => ({
@@ -28,13 +28,13 @@ const styles = (theme) => ({
     width: 400,
     maxHeight: 200,
     overflow: "hidden",
-    background: fade(theme.palette.background.paper, 0.8),
+    background: alpha(theme.palette.background.paper, 0.8),
   },
   previewHeaderContainer: {
     paddingTop: theme.spacing(0.8),
   },
   previewContentContainer: {
-    borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
   },
 });
 

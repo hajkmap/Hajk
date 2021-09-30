@@ -1,9 +1,9 @@
 import React from "react";
 import VectorFilter from "./VectorFilter";
 import CQLFilter from "./CQLFilter";
-import Typography from "@material-ui/core/Typography";
-import Slider from "@material-ui/core/Slider";
-import { withStyles } from "@material-ui/core/styles";
+import Typography from "@mui/material/Typography";
+import Slider from "@mui/material/Slider";
+import withStyles from "@mui/styles/withStyles";
 
 const styles = (theme) => ({
   sliderContainer: {

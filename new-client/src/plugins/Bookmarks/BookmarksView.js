@@ -1,15 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
+import withStyles from "@mui/styles/withStyles";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
-import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
-import BookmarkIcon from "@material-ui/icons/Bookmark";
-import BookmarkOutlinedIcon from "@material-ui/icons/BookmarkBorderOutlined";
-import DeleteIcon from "@material-ui/icons/Delete";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
+import DeleteIcon from "@mui/icons-material/Delete";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 
 class BookmarksView extends React.PureComponent {
   state = {
@@ -148,6 +148,7 @@ class BookmarksView extends React.PureComponent {
                 onClick={() => {
                   this.btnDeleteBookmark(item);
                 }}
+                size="large"
               >
                 <DeleteIcon fontSize="small" className={classes.deleteIcon} />
               </IconButton>

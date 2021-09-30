@@ -3,7 +3,7 @@ import PanelList from "./PanelList";
 import { getIsMobile } from "../../../utils/IsMobile";
 import { delay } from "../../../utils/Delay";
 import { animateScroll as scroll } from "react-scroll";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { hasSubMenu } from "../utils/helpers";
 import { getNormalizedMenuState } from "../utils/stateConverter";
 import {

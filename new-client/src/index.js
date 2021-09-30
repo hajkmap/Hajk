@@ -25,7 +25,7 @@ import "./custom-ol.css";
 import React from "react";
 import ReactDOM from "react-dom";
 import buildConfig from "./buildConfig.json";
-import ErrorIcon from "@material-ui/icons/Error";
+import ErrorIcon from "@mui/icons-material/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
 import reportWebVitals from "./reportWebVitals";
 import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";

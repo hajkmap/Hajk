@@ -1,6 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { withSnackbar } from "notistack";
 
 import {
@@ -11,9 +11,9 @@ import {
   InputLabel,
   NativeSelect,
   LinearProgress,
-} from "@material-ui/core";
-import ArrowDownward from "@material-ui/icons/ArrowDownward";
-import PictureAsPdf from "@material-ui/icons/PictureAsPdf";
+} from "@mui/material";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import PictureAsPdf from "@mui/icons-material/PictureAsPdf";
 
 import { getCenter } from "ol/extent.js";
 const styles = (theme) => ({

@@ -1,8 +1,12 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { withWidth, List, ListItem } from "@material-ui/core";
+import withStyles from "@mui/styles/withStyles";
+import { List, ListItem } from "@mui/material";
 import SearchResultsDataset from "./SearchResultsDataset";
 import SearchResultsDatasetSummary from "./SearchResultsDatasetSummary";
+
+// FIXME checkout https://mui.com/components/use-media-query/#migrating-from-withwidth
+const withWidth = () => (WrappedComponent) => (props) =>
+  <WrappedComponent {...props} width="xs" />;
 
 const styles = () => ({
   searchResultList: {

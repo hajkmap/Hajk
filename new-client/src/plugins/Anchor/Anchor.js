@@ -2,7 +2,7 @@ import React from "react";
 import propTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 import AnchorView from "./AnchorView";
 import AnchorModel from "./AnchorModel";

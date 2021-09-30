@@ -1,6 +1,6 @@
 import React from "react";
-import Grid from "@material-ui/core/Grid";
-import { withStyles } from "@material-ui/core/styles";
+import Grid from "@mui/material/Grid";
+import withStyles from "@mui/styles/withStyles";
 import { withSnackbar } from "notistack";
 import {
   Badge,
@@ -14,8 +14,8 @@ import {
   Tooltip,
   IconButton,
   InputAdornment,
-} from "@material-ui/core";
-import PaletteIcon from "@material-ui/icons/Palette";
+} from "@mui/material";
+import PaletteIcon from "@mui/icons-material/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
 
 const styles = (theme) => ({

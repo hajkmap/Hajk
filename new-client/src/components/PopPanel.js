@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Popper from "@material-ui/core/Popper";
-import Paper from "@material-ui/core/Paper";
+import withStyles from "@mui/styles/withStyles";
+import Popper from "@mui/material/Popper";
+import Paper from "@mui/material/Paper";
 import PanelHeader from "./PanelHeader";
 
 const styles = (theme) => {

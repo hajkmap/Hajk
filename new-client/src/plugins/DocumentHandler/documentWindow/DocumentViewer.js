@@ -1,7 +1,7 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 
-import Grid from "@material-ui/core/Grid";
+import Grid from "@mui/material/Grid";
 import TableOfContents from "./TableOfContents";
 import clsx from "clsx";
 import Contents from "./Contents";

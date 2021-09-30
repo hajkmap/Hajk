@@ -1,10 +1,10 @@
 import React from "react";
-import Fab from "@material-ui/core/Fab";
-import NavigationIcon from "@material-ui/icons/Navigation";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import Fab from "@mui/material/Fab";
+import NavigationIcon from "@mui/icons-material/Navigation";
+import makeStyles from "@mui/styles/makeStyles";
+import { Typography } from "@mui/material";
 import clsx from "clsx";
-import { darken } from "@material-ui/core/styles";
+import { darken } from "@mui/material/styles";
 
 const useStyles = ({ color }) =>
   makeStyles((theme) => ({

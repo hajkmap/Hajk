@@ -1,9 +1,9 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { Button, Tooltip, Menu, MenuItem, Grid } from "@material-ui/core";
-import GetAppIcon from "@material-ui/icons/GetApp";
-import DescriptionIcon from "@material-ui/icons/Description";
-import PublicIcon from "@material-ui/icons/Public";
+import withStyles from "@mui/styles/withStyles";
+import { Button, Tooltip, Menu, MenuItem, Grid } from "@mui/material";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PublicIcon from "@mui/icons-material/Public";
 
 const styles = (theme) => ({
   menuTogglerButton: {

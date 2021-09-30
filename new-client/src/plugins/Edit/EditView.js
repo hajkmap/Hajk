@@ -1,17 +1,17 @@
 import React from "react";
 import Toolbar from "./components/Toolbar";
 import AttributeEditor from "./components/AttributeEditor";
-import FormControl from "@material-ui/core/FormControl";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import Select from "@material-ui/core/Select";
-import SaveIcon from "@material-ui/icons/Save";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Typography from "@material-ui/core/Typography/Typography";
+import FormControl from "@mui/material/FormControl";
+import FormHelperText from "@mui/material/FormHelperText";
+import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Select from "@mui/material/Select";
+import SaveIcon from "@mui/icons-material/Save";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 
 class EditView extends React.PureComponent {
   constructor(props) {

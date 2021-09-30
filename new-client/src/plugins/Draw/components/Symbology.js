@@ -1,11 +1,11 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { CompactPicker as ColorPicker } from "react-color";
-import NativeSelect from "@material-ui/core/NativeSelect";
-import Checkbox from "@material-ui/core/Checkbox";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
-import FormControl from "@material-ui/core/FormControl";
+import NativeSelect from "@mui/material/NativeSelect";
+import Checkbox from "@mui/material/Checkbox";
+import Input from "@mui/material/Input";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
 
 const styles = (theme) => ({
   root: {

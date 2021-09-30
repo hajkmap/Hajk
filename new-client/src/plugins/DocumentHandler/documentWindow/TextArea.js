@@ -1,7 +1,7 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Divider from "@material-ui/core/Divider";
-import Grid from "@material-ui/core/Grid";
+import withStyles from "@mui/styles/withStyles";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
 
 const styles = (theme) => {
   return {
@@ -11,7 +11,7 @@ const styles = (theme) => {
     containerContent: {
       //Need to manually change color when switching between dark/light-mode
       backgroundColor:
-        theme.palette.type === "dark"
+        theme.palette.mode === "dark"
           ? theme.palette.grey[700]
           : theme.palette.grey[200],
     },
@@ -24,7 +24,7 @@ const styles = (theme) => {
     divider: {
       //Need to manually change color when switching between dark/light-mode
       backgroundColor:
-        theme.palette.type === "dark"
+        theme.palette.mode === "dark"
           ? theme.palette.grey[200]
           : theme.palette.grey[400],
       height: "2px",
@@ -51,7 +51,7 @@ class TextArea extends React.PureComponent {
         <Grid
           id="text-area-content"
           className={classes.container}
-          justify="center"
+          justifyContent="center"
           container
         >
           <Grid
@@ -61,7 +61,7 @@ class TextArea extends React.PureComponent {
             item
           >
             {this.renderDivider()}
-            <Grid justify="center" container>
+            <Grid justifyContent="center" container>
               <Grid
                 component="blockquote"
                 className={classes.typographyContainer}

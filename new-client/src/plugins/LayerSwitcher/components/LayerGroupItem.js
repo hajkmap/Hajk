@@ -1,17 +1,17 @@
 import React, { Component } from "react";
 import cslx from "clsx";
-import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import IconWarning from "@material-ui/icons/Warning";
-import CallMadeIcon from "@material-ui/icons/CallMade";
-import InfoIcon from "@material-ui/icons/Info";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import CloseIcon from "@material-ui/icons/Close";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import { Button, Tooltip, Typography, Grid } from "@mui/material";
+import withStyles from "@mui/styles/withStyles";
+import IconWarning from "@mui/icons-material/Warning";
+import CallMadeIcon from "@mui/icons-material/CallMade";
+import InfoIcon from "@mui/icons-material/Info";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import CloseIcon from "@mui/icons-material/Close";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink";
 
@@ -40,7 +40,7 @@ const styles = (theme) => ({
   },
   layerItem: {
     justifyContent: "space-between",
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
     margin: "5px 0",
   },
   layerItemContainer: {
@@ -59,7 +59,7 @@ const styles = (theme) => ({
     display: "flex",
     alignItems: "center",
     padding: "3px",
-    border: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    border: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
   },
   infoContainer: {},
   infoButton: {
@@ -88,7 +88,7 @@ const styles = (theme) => ({
     width: "100%",
     display: "flex",
     justifyContent: "space-between",
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
   },
   layerGroupLayers: {
     marginLeft: "45px",

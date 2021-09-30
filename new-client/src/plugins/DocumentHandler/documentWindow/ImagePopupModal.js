@@ -1,9 +1,9 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Dialog from "@material-ui/core/Dialog";
-import Paper from "@material-ui/core/Paper";
+import withStyles from "@mui/styles/withStyles";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import Dialog from "@mui/material/Dialog";
+import Paper from "@mui/material/Paper";
 
 const mapDiv = document.getElementById("map");
 const blurCss = "filter : blur(7px)";

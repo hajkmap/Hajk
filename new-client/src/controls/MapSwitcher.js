@@ -1,7 +1,7 @@
 import React from "react";
-import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
+import { Button, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
+import withStyles from "@mui/styles/withStyles";
+import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "utils/FetchWrapper";
 
 const styles = (theme) => ({

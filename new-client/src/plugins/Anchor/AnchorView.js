@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { withSnackbar } from "notistack";
 
 import {
@@ -13,10 +13,10 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import FileCopyIcon from "@material-ui/icons/FileCopy";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 const styles = (theme) => ({
   margin: {
@@ -87,12 +87,19 @@ class AnchorView extends React.PureComponent {
               endAdornment: document.queryCommandSupported("copy") && (
                 <InputAdornment position="end">
                   <Tooltip title="Kopiera länk till urklipp">
-                    <IconButton onClick={this.handleClickOnCopyToClipboard}>
+                    <IconButton
+                      onClick={this.handleClickOnCopyToClipboard}
+                      size="large"
+                    >
                       <FileCopyIcon />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Öppna i nytt fönster">
-                    <IconButton href={this.state.anchor} target="_blank">
+                    <IconButton
+                      href={this.state.anchor}
+                      target="_blank"
+                      size="large"
+                    >
                       <OpenInNewIcon />
                     </IconButton>
                   </Tooltip>

@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from "@mui/styles/makeStyles";
 
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
-import CloseIcon from "@material-ui/icons/Close";
-import { Paper, Hidden } from "@material-ui/core";
+import CloseIcon from "@mui/icons-material/Close";
+import { Paper, Hidden } from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     marginRight: theme.spacing(1),
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       boxShadow: "none",
     },
   },
   button: {
     border: 0,
     color:
-      theme.palette.type === "dark"
+      theme.palette.mode === "dark"
         ? theme.palette.common.white
         : theme.palette.action.active,
   },
@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   grouped: {
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       border: "none",
     },
   },
@@ -93,7 +93,7 @@ function DrawerToggleButtons({
         className={classes.button}
       >
         {icon}
-        <Hidden smDown>{caption}</Hidden>
+        <Hidden mdDown>{caption}</Hidden>
       </ToggleButton>
     );
   };

@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import ExploreIcon from "@material-ui/icons/Explore";
+import ExploreIcon from "@mui/icons-material/Explore";
 
 import CoordinatesView from "./CoordinatesView.js";
 import CoordinatesModel from "./CoordinatesModel.js";

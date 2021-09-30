@@ -1,12 +1,12 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
-import FormControl from "@material-ui/core/FormControl";
-import Input from "@material-ui/core/Input";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
+import withStyles from "@mui/styles/withStyles";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import Input from "@mui/material/Input";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import { Vector as VectorLayer } from "ol/layer";
 import { hfetch } from "utils/FetchWrapper";
 

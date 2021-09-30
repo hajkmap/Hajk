@@ -1,21 +1,22 @@
 import React from "react";
-import { withStyles, withTheme } from "@material-ui/core/styles";
-import Icon from "@material-ui/core/Icon";
-import ListItem from "@material-ui/core/ListItem";
-import Collapse from "@material-ui/core/Collapse";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ExpandLess from "@material-ui/icons/ExpandLess";
+import withStyles from "@mui/styles/withStyles";
+import withTheme from "@mui/styles/withTheme";
+import Icon from "@mui/material/Icon";
+import ListItem from "@mui/material/ListItem";
+import Collapse from "@mui/material/Collapse";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ExpandLess from "@mui/icons-material/ExpandLess";
 import PanelList from "./PanelList";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import { Typography } from "@material-ui/core";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import { Typography } from "@mui/material";
 
 const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
   listItemIcon: { minWidth: theme.spacing(3) },
   collapseIconRoot: { minWidth: theme.spacing(4) },
   root: {
-    borderLeft: `${theme.spacing(1)}px solid ${theme.palette.background.paper}`,
+    borderLeft: `${theme.spacing(1)} solid ${theme.palette.background.paper}`,
     "&.Mui-selected": {
       borderLeftColor: theme.palette.action.selected,
     },
@@ -80,7 +81,7 @@ class PanelMenuListItem extends React.PureComponent {
     return colored
       ? {
           paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
-          borderLeft: `${theme.spacing(1)}px solid ${color}`,
+          borderLeft: `${theme.spacing(1)} solid ${color}`,
           paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         }
       : {

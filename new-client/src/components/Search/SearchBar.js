@@ -1,19 +1,20 @@
 import React from "react";
 import cslx from "clsx";
-import Grid from "@material-ui/core/Grid";
-import ClearIcon from "@material-ui/icons/Clear";
-import withWidth from "@material-ui/core/withWidth";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import SearchIcon from "@material-ui/icons/Search";
-import RoomIcon from "@material-ui/icons/Room";
-import CheckIcon from "@material-ui/icons/Check";
-import DescriptionIcon from "@material-ui/icons/Description";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import WarningIcon from "@material-ui/icons/Warning";
+import Grid from "@mui/material/Grid";
+import ClearIcon from "@mui/icons-material/Clear";
+import Autocomplete from "@mui/material/Autocomplete";
+import SearchIcon from "@mui/icons-material/Search";
+import RoomIcon from "@mui/icons-material/Room";
+import CheckIcon from "@mui/icons-material/Check";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import WarningIcon from "@mui/icons-material/Warning";
 import SearchResultsContainer from "./searchResults/SearchResultsContainer";
 import SearchTools from "./SearchTools";
-import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
+import { useTheme } from "@mui/material/styles";
+import withTheme from "@mui/styles/withTheme";
+import withStyles from "@mui/styles/withStyles";
 import { decodeCommas } from "../../utils/StringCommaCoder";
 import {
   CircularProgress,
@@ -25,7 +26,11 @@ import {
   useMediaQuery,
   Popper,
   Tooltip,
-} from "@material-ui/core";
+} from "@mui/material";
+
+// FIXME checkout https://mui.com/components/use-media-query/#migrating-from-withwidth
+const withWidth = () => (WrappedComponent) => (props) =>
+  <WrappedComponent {...props} width="xs" />;
 
 const styles = (theme) => ({
   searchContainer: {
@@ -54,7 +59,7 @@ const styles = (theme) => ({
 //Popper.js didn't work as expected
 const CustomPopper = (props) => {
   const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
+  const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const style = smallScreen ? { width: "100%" } : { width: 400 };
   return (
     <Popper
@@ -77,11 +82,11 @@ const CustomPopper = (props) => {
 
 const CustomPaper = (props) => {
   const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
+  const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const style = smallScreen
     ? {
         margin: 0,
-        borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+        borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
       }
     : { margin: 0 };
   return <Paper {...props} style={style} />;
@@ -269,7 +274,7 @@ class SearchBar extends React.PureComponent {
         disableClearable
         onChange={handleSearchInput}
         onInputChange={handleOnAutocompleteInputChange}
-        getOptionSelected={(option, value) =>
+        isOptionEqualToValue={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
         renderOption={(option) => {

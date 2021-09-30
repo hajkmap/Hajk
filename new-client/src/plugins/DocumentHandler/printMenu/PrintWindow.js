@@ -1,18 +1,18 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { withSnackbar } from "notistack";
-import Grid from "@material-ui/core/Grid";
-import { Typography } from "@material-ui/core";
+import Grid from "@mui/material/Grid";
+import { Typography } from "@mui/material";
 import ReactDOM from "react-dom";
-import Button from "@material-ui/core/Button";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import Button from "@mui/material/Button";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
-import { ThemeProvider } from "@material-ui/styles";
+import { ThemeProvider, StyledEngineProvider } from "@mui/styles";
 
 import {
   LinearProgress,
@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-} from "@material-ui/core";
+} from "@mui/material";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -104,9 +104,11 @@ class PrintWindow extends React.PureComponent {
   customRender = (element, container) => {
     return new Promise((resolve) => {
       ReactDOM.render(
-        <ThemeProvider theme={this.props.customTheme || this.props.theme}>
-          {element}
-        </ThemeProvider>,
+        <StyledEngineProvider injectFirst>
+          <ThemeProvider theme={this.props.customTheme || this.props.theme}>
+            {element}
+          </ThemeProvider>
+        </StyledEngineProvider>,
         container,
         (e) => {
           resolve();
@@ -428,7 +430,7 @@ class PrintWindow extends React.PureComponent {
         container
         alignContent="center"
         alignItems="center"
-        justify="center"
+        justifyContent="center"
       >
         <Button
           color="primary"
@@ -452,11 +454,7 @@ class PrintWindow extends React.PureComponent {
     return (
       <>
         {createPortal(
-          <Dialog
-            disableBackdropClick={true}
-            disableEscapeKeyDown={true}
-            open={this.state.pdfLoading}
-          >
+          <Dialog disableEscapeKeyDown={true} open={this.state.pdfLoading}>
             <LinearProgress />
             <DialogTitle>Din PDF skapas</DialogTitle>
             <DialogContent>

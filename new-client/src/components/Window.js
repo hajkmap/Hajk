@@ -1,6 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile, getIsMobile } from "../utils/IsMobile.js";
@@ -100,7 +100,7 @@ const styles = (theme) => {
       borderRadius: theme.shape.borderRadius,
       overflow: "hidden",
       pointerEvents: "all",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("sm")]: {
         borderRadius: "0",
         position: "fixed !important",
       },

@@ -1,11 +1,11 @@
 import React from "react";
-import MapIcon from "@material-ui/icons/Map";
-import DescriptionIcon from "@material-ui/icons/Description";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import MapIcon from "@mui/icons-material/Map";
+import DescriptionIcon from "@mui/icons-material/Description";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import clsx from "clsx";
-import Box from "@material-ui/core/Box";
+import Box from "@mui/material/Box";
 import TextArea from "../documentWindow/TextArea";
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import {
   Button,
   Typography,
@@ -13,7 +13,7 @@ import {
   List,
   ListItem,
   Grid,
-} from "@material-ui/core";
+} from "@mui/material";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -508,7 +508,6 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   const getExternalLink = (externalLink) => {
     return (
       <Button
-        color="default"
         startIcon={<OpenInNewIcon className={classes.linkIcon}></OpenInNewIcon>}
         classes={{ startIcon: classes.startIcon }}
         target="_blank"
@@ -540,7 +539,6 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
     return (
       <Button
-        color="default"
         className={clsx(
           bottomMargin
             ? [classes.bottomMargin, classes.linkButton]
@@ -563,7 +561,6 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   const getDocumentLink = (headerIdentifier, documentLink) => {
     return (
       <Button
-        color="default"
         className={clsx(
           bottomMargin
             ? [classes.bottomMargin, classes.linkButton]

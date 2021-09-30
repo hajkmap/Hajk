@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { easeOut } from "ol/easing";
-import { Button, Paper, Tooltip } from "@material-ui/core";
-import NavigationIcon from "@material-ui/icons/Navigation";
-import { makeStyles } from "@material-ui/styles";
+import { Button, Paper, Tooltip } from "@mui/material";
+import NavigationIcon from "@mui/icons-material/Navigation";
+import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
