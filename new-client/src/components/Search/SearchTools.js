@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 
 import Dialog from "../Dialog.js";
 import SearchSettings from "./SearchSettings";
@@ -100,9 +101,9 @@ class SearchTools extends React.PureComponent {
               })
             }
           >
-            <Typography variant="srOnly">
+            <span style={visuallyHidden}>
               Öppna dialog med fler inställningar
-            </Typography>
+            </span>
             <MoreVertIcon />
           </IconButton>
         </Tooltip>
@@ -131,9 +132,7 @@ class SearchTools extends React.PureComponent {
                   {option.icon ? (
                     <ListItemIcon>{option.icon}</ListItemIcon>
                   ) : null}
-                  <Typography variant="srOnly" noWrap>
-                    {option.name}
-                  </Typography>
+                  <span style={visuallyHidden}>{option.name}</span>
                   <Typography variant="inherit" noWrap>
                     {option.name}
                   </Typography>

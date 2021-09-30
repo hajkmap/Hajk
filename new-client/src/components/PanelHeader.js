@@ -6,6 +6,7 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import AspectRatioIcon from "@mui/icons-material/AspectRatio";
 import { Hidden, Typography, IconButton, Box } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 
 const styles = (theme) => {
   return {
@@ -44,7 +45,7 @@ class PanelHeader extends Component {
           onClick={buttonInfo.onClickCallback}
           size="small"
         >
-          <Typography variant="srOnly">{description}</Typography>
+          <span style={visuallyHidden}>{description}</span>
           <HeaderActionIcon />
         </IconButton>
       );
@@ -72,28 +73,28 @@ class PanelHeader extends Component {
           {mode !== "maximized" && // If window isn't in fit screen mode currently…
             (mode === "minimized" ? ( // … but it's minimized…
               <IconButton size="small" onClick={this.props.onMaximize}>
-                <Typography variant="srOnly">Maximera fönster</Typography>
+                <span style={visuallyHidden}>Maximera fönster</span>
                 <FullscreenIcon // …render the maximize icon.
                 />
               </IconButton>
             ) : (
               // If it's already in "window" mode though, render the minimize icon.
               <IconButton size="small" onClick={this.props.onMinimize}>
-                <Typography variant="srOnly">Minimera fönster</Typography>
+                <span style={visuallyHidden}>Minimera fönster</span>
                 <FullscreenExitIcon />
               </IconButton>
             ))}
           <Hidden smDown>
             {allowMaximizedWindow && ( // If we're not on mobile and config allows fit-to-screen…
               <IconButton size="small" onClick={this.props.onMaximize}>
-                <Typography variant="srOnly">Maximera fönster</Typography>
+                <span style={visuallyHidden}>Maximera fönster</span>
                 <AspectRatioIcon // … render the action button. Note: it will remain the same…
                 />
               </IconButton>
             )}
           </Hidden>
           <IconButton size="small" onClick={this.props.onClose}>
-            <Typography variant="srOnly">Stäng fönster</Typography>
+            <span style={visuallyHidden}>Stäng fönster</span>
             <CloseIcon />
           </IconButton>
         </Box>

@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 import withStyles from "@mui/styles/withStyles";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
+import { visuallyHidden } from "@mui/utils";
 
 const styles = (theme) => ({
   hidden: {
@@ -361,9 +362,7 @@ class SearchResultsContainer extends React.PureComponent {
       featureFilter.length > 0 || featureCollectionFilter.length > 0;
     return (
       <Grid item className={classes.filterInputFieldContainer} xs={12}>
-        <Typography variant="srOnly">
-          Textfält för att filtrera resultatet
-        </Typography>
+        <span style={visuallyHidden}>Textfält för att filtrera resultatet</span>
         <TextField
           autoFocus
           onChange={this.handleFilterTextFieldInputChange}
@@ -378,7 +377,7 @@ class SearchResultsContainer extends React.PureComponent {
             endAdornment: showClearFilterButton && (
               <Tooltip title="Rensa filtret">
                 <IconButton onClick={this.clearViewFilters} size="small">
-                  <Typography variant="srOnly">Rensa filtret</Typography>
+                  <span style={visuallyHidden}>Rensa filtret</span>
                   <ClearIcon />
                 </IconButton>
               </Tooltip>

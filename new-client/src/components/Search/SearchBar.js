@@ -27,6 +27,7 @@ import {
   Popper,
   Tooltip,
 } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 
 // FIXME checkout https://mui.com/components/use-media-query/#migrating-from-withwidth
 const withWidth = () => (WrappedComponent) => (props) =>
@@ -315,7 +316,7 @@ class SearchBar extends React.PureComponent {
     return (
       <Tooltip title={errorMessage}>
         <WarningIcon color="error">
-          <Typography variant="srOnly">{errorMessage}</Typography>
+          <span style={visuallyHidden}>{errorMessage}</span>
         </WarningIcon>
       </Tooltip>
     );
@@ -352,9 +353,7 @@ class SearchBar extends React.PureComponent {
     return (
       <TextField
         {...params}
-        label={
-          <Typography variant="srOnly">Sök i webbplatsens innehåll</Typography>
-        }
+        label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
         variant={width === "xs" ? "standard" : "outlined"}
         placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
@@ -376,7 +375,7 @@ class SearchBar extends React.PureComponent {
                     size="small"
                     onClick={handleOnClickOrKeyboardSearch}
                   >
-                    <Typography variant="srOnly">Exekvera sökning</Typography>
+                    <span style={visuallyHidden}>Exekvera sökning</span>
                     <SearchIcon />
                   </IconButton>
                 </Tooltip>
@@ -389,7 +388,7 @@ class SearchBar extends React.PureComponent {
                     }}
                     size="small"
                   >
-                    <Typography variant="srOnly">{expandMessage}</Typography>
+                    <span style={visuallyHidden}>{expandMessage}</span>
                     {resultPanelCollapsed ? (
                       <ExpandMoreIcon />
                     ) : (
@@ -403,7 +402,7 @@ class SearchBar extends React.PureComponent {
               searchActive !== "" ? (
                 <Tooltip title="Rensa sökning">
                   <IconButton onClick={handleOnClear} size="small">
-                    <Typography variant="srOnly">Rensa sökning</Typography>
+                    <span style={visuallyHidden}>Rensa sökning</span>
                     <ClearIcon />
                   </IconButton>
                 </Tooltip>
