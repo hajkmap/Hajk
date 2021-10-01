@@ -105,6 +105,11 @@ class FirView extends React.PureComponent {
         }
       }
     );
+    this.localObserver.subscribe("fir.results.filtered", (list) => {
+      this.setState({ results: { list: list } });
+      this.setPage(1);
+      this.forceUpdate();
+    });
   };
 
   addFeatures = (features, clear = false) => {
@@ -230,7 +235,6 @@ class FirView extends React.PureComponent {
       this.localObserver.publish("fir.results.filtered", list);
       this.setPage(page);
     }, 25);
-    // this.model.filteredSearchResults =
   };
 
   removeFeature = (feature) => {

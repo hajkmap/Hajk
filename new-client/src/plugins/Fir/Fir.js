@@ -35,6 +35,7 @@ class Fir extends React.PureComponent {
     this.localObserver = new Observer();
 
     this.localObserver.subscribe("fir.search.search", this.handleSearch);
+    this.localObserver.subscribe("fir.search.load", this.loadFeatures);
 
     this.model = new FirModel({
       localObserver: this.localObserver,
@@ -73,12 +74,20 @@ class Fir extends React.PureComponent {
     }*/
   }
 
+  loadFeatures = (features) => {
+    this.layerController.clearBeforeSearch();
+    this.layerController.addFeatures(features, true);
+    this.localObserver.publish("fir.search.completed", features);
+  };
+
   handleSearch = (params = {}) => {
     const type = "FirWfsService";
 
     let features = this.model.layers.buffer.getSource().getFeatures();
 
     if (features.length === 0) {
+      console.log("hmm");
+
       features = this.model.layers.draw.getSource().getFeatures();
     }
 
@@ -89,11 +98,11 @@ class Fir extends React.PureComponent {
     this.getService(type).then((Service) => {
       const service = new Service.default(defaultParams);
       try {
-        this.layerController.clearBeforeSearch();
+        this.layerController.clearBeforeSearch(params.keepNeighborBuffer);
         this.localObserver.publish("fir.search.started", params);
         service.search(params).then((features) => {
           // We're expecting an array of features.
-          this.layerController.addFeatures(features);
+          this.layerController.addFeatures(features, params.zoomToLayer);
           this.localObserver.publish("fir.search.completed", features);
         });
       } catch (error) {

@@ -15,17 +15,17 @@ class FirWfsService {
     this.searchTypeHash = {
       id: {
         featureType: "feature:fastighet_yta_alla_wms",
-        url: "https://kommungis-utv.varberg.se/util/geoserver/sbk_fk_v1/wfs",
+        url: "https://kommungis-utv3.varberg.se/util/geoserver/sbk_fk_v1/wfs",
         searchProp: "fnr",
       },
       designation: {
         featureType: "feature:fastighet_yta_alla_wms",
-        url: "https://kommungis-utv.varberg.se/util/geoserver/sbk_fk_v1/wfs",
+        url: "https://kommungis-utv3.varberg.se/util/geoserver/sbk_fk_v1/wfs",
         searchProp: "fastbet",
       },
       owner: {
         featureType: "feature:fastighet_agare_vw",
-        url: "https://kommungis-utv.varberg.se/util/geoserver/sbk_fk_v1/wfs",
+        url: "https://kommungis-utv3.varberg.se/util/geoserver/sbk_fk_v1/wfs",
         searchProp: "namn",
       },
       address: {
@@ -45,50 +45,52 @@ class FirWfsService {
     return filters.length === 0 ? null : filters;
   }
 
-  getFeatureRequestObject(type, params) {
+  _getFiltersForStringAndGeometrySearch(type, params) {
     let rootFilter = null;
+    let geometryFilters = null;
+    let stringFilter = null;
 
+    if (params.features.length > 0) {
+      geometryFilters = this.getGeometryFilters(params.features);
+    }
+
+    if (geometryFilters && geometryFilters.length >= 2) {
+      // wrap when more than 1
+      geometryFilters = orFilter(...geometryFilters);
+    } else if (geometryFilters && geometryFilters.length === 1) {
+      geometryFilters = geometryFilters[0];
+    }
+
+    if (params.text.trim() !== "") {
+      if (!params.exactMatch) {
+        params.text += "*";
+      }
+      stringFilter = likeFilter(
+        type.searchProp,
+        params.text,
+        "*",
+        ".",
+        "!",
+        false
+      );
+    }
+
+    if (stringFilter && !geometryFilters) {
+      rootFilter = stringFilter;
+    } else if (geometryFilters && !stringFilter) {
+      rootFilter = geometryFilters;
+    } else if (stringFilter && geometryFilters) {
+      rootFilter = andFilter(stringFilter, geometryFilters);
+    }
+
+    return rootFilter;
+  }
+
+  _getFiltersForDesignations(type, params) {
+    let rootFilter = null;
     let designations = params.designations || [];
 
-    if (designations.length === 0) {
-      // zero designations
-
-      let geometryFilters = null;
-      let stringFilter = null;
-
-      if (params.features.length > 0) {
-        geometryFilters = this.getGeometryFilters(params.features);
-      }
-
-      if (geometryFilters && geometryFilters.length >= 2) {
-        // wrap when more than 1
-        geometryFilters = orFilter(...geometryFilters);
-      } else if (geometryFilters && geometryFilters.length === 1) {
-        geometryFilters = geometryFilters[0];
-      }
-
-      if (params.text.trim() !== "") {
-        if (!params.exactMatch) {
-          params.text += "*";
-        }
-        stringFilter = likeFilter(
-          type.searchProp,
-          params.text,
-          "*",
-          ".",
-          "!",
-          false
-        );
-      }
-
-      if (stringFilter && !geometryFilters) {
-        rootFilter = stringFilter;
-      } else if (geometryFilters && !stringFilter) {
-        rootFilter = geometryFilters;
-      } else if (stringFilter && geometryFilters) {
-        rootFilter = andFilter(stringFilter, geometryFilters);
-      }
-    } else if (designations.length === 1) {
+    if (designations.length === 1) {
       // one designations
       rootFilter = equalToFilter(type.searchProp, designations[0], false);
     } else {
@@ -98,6 +100,20 @@ class FirWfsService {
         filters.push(equalToFilter(type.searchProp, designation));
       });
       rootFilter = orFilter(...filters);
+    }
+
+    return rootFilter;
+  }
+
+  getFeatureRequestObject(type, params) {
+    let rootFilter = null;
+    const designations = params.designations || [];
+
+    if (designations.length === 0) {
+      // zero designations
+      rootFilter = this._getFiltersForStringAndGeometrySearch(type, params);
+    } else if (designations.length === 1) {
+      rootFilter = this._getFiltersForDesignations(type, params);
     }
 
     return {
@@ -113,7 +129,7 @@ class FirWfsService {
   getRequestXml(params) {
     let type = this.searchTypeHash[params.searchType];
     let featureRequestObject = this.getFeatureRequestObject(type, params);
-    console.log(featureRequestObject);
+    // console.log(featureRequestObject);
     const featureRequest = new WFS().writeGetFeature(featureRequestObject);
 
     return new XMLSerializer().serializeToString(featureRequest);
@@ -134,7 +150,6 @@ class FirWfsService {
     p.designations = ids;
 
     const requestXml = this.getRequestXml(p);
-
     const type = this.searchTypeHash[p.searchType];
 
     hfetch(type.url, {

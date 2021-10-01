@@ -12,7 +12,7 @@ import { hfetch } from "utils/FetchWrapper";
 
 class FirExportEdpView extends React.PureComponent {
   state = {
-    edpExpanded: false,
+    accordionExpanded: false,
   };
 
   static propTypes = {
@@ -52,7 +52,7 @@ class FirExportEdpView extends React.PureComponent {
     let data = new URLSearchParams();
     data.append("json", JSON.stringify(this.getEdpDataAsArray()));
     hfetch(
-      "https://kommungis.varberg.se/mapservice/edp/SendRealEstateIdentifiers",
+      "https://kommungis-utv3.varberg.se/mapservice/edp/SendRealEstateIdentifiers",
       {
         method: "post",
         headers: {
@@ -71,10 +71,12 @@ class FirExportEdpView extends React.PureComponent {
       <>
         <Accordion
           disabled={this.props.results.length === 0}
-          expanded={this.state.edpExpanded && this.props.results.length > 0}
+          expanded={
+            this.state.accordionExpanded && this.props.results.length > 0
+          }
           onChange={() => {
             this.setState({
-              edpExpanded: !this.state.edpExpanded,
+              accordionExpanded: !this.state.accordionExpanded,
             });
           }}
         >

@@ -9,22 +9,33 @@ import FormControl from "@material-ui/core/FormControl";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
+import Slider from "@material-ui/core/Slider";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Collapse from "@material-ui/core/Collapse";
 import Button from "@material-ui/core/Button";
+import Feature from "ol/Feature.js";
+import {
+  Point,
+  LineString,
+  Polygon,
+  MultiPoint,
+  MultiLineString,
+  MultiPolygon,
+  LinearRing,
+} from "ol/geom.js";
 
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import HistoryIcon from "@material-ui/icons/History";
 import { Typography } from "@material-ui/core";
-
+import * as jsts from "jsts";
 class FirSearchNeighborView extends React.PureComponent {
   state = {
-    neighborExpanded: false,
+    accordionExpanded: false,
     radioValue: "delimiting",
     buffer: 50,
-
-    // open: false,
-    // results: { list: [] },
+    results: [],
+    resultHistory: [],
   };
 
   static propTypes = {
@@ -41,7 +52,25 @@ class FirSearchNeighborView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.update_tm = null;
+
+    this.localObserver.subscribe(
+      "fir.results.filtered",
+      this.handleDataRefresh
+    );
   }
+
+  handleDataRefresh = (list) => {
+    clearTimeout(this.update_tm);
+    const _list = list;
+    this.update_tm = setTimeout(() => {
+      this.setState({ results: _list });
+      if (_list.length === 0) {
+        this.setState({ accordionExpanded: false });
+      }
+      this.forceUpdate();
+    }, 500);
+  };
 
   handleRadioChange = (e) => {
     this.setState({ radioValue: e.target.value });
@@ -51,9 +80,66 @@ class FirSearchNeighborView extends React.PureComponent {
     console.log("Clear search!");
   }
 
-  handleSearch() {
-    console.log("Search!");
-  }
+  handleHistoryBack = () => {
+    if (this.state.resultHistory.length === 0) {
+      return;
+    }
+    this.props.model.layers.buffer.getSource().clear();
+    this.localObserver.publish(
+      "fir.search.load",
+      this.state.resultHistory.pop()
+    );
+  };
+
+  _handleSearch = () => {
+    const parser = new jsts.io.OL3Parser();
+    parser.inject(
+      Point,
+      LineString,
+      LinearRing,
+      Polygon,
+      MultiPoint,
+      MultiLineString,
+      MultiPolygon
+    );
+    const buffer = new Feature();
+    let bufferGeom = null;
+    let jstsGeom = null;
+    let buffered = null;
+    let bufferValue =
+      this.state.radioValue === "delimiting" ? 0.01 : this.state.buffer;
+
+    this.state.resultHistory.push(this.state.results);
+
+    this.state.results.forEach((feature) => {
+      jstsGeom = parser.read(feature.getGeometry());
+      buffered = jstsGeom.buffer(bufferValue);
+      bufferGeom = !bufferGeom ? buffered : bufferGeom.union(buffered);
+    });
+    if (bufferGeom) {
+      buffer.set("fir_type", "buffer");
+      buffer.set("fir_origin", "neighbor");
+      buffer.setGeometry(parser.write(bufferGeom));
+      this.props.model.layers.buffer.getSource().clear();
+      this.props.model.layers.buffer.getSource().addFeature(buffer);
+    }
+
+    let options = {
+      text: "",
+      searchType: "designation",
+      zoomToLayer: true,
+      keepNeighborBuffer: true,
+    };
+
+    this.localObserver.publish("fir.search.search", options);
+  };
+
+  handleSearch = () => {
+    clearTimeout(this.buffer_tm);
+    this.buffer_tm = setTimeout(() => {
+      this._handleSearch();
+    }, 25);
+  };
 
   render() {
     const { classes } = this.props;
@@ -61,10 +147,13 @@ class FirSearchNeighborView extends React.PureComponent {
     return (
       <>
         <Accordion
-          expanded={this.state.neighborExpanded}
+          disabled={this.state.results.length === 0}
+          expanded={
+            this.state.accordionExpanded && this.state.results.length > 0
+          }
           onChange={() => {
             this.setState({
-              neighborExpanded: !this.state.neighborExpanded,
+              accordionExpanded: !this.state.accordionExpanded,
             });
           }}
         >
@@ -99,36 +188,57 @@ class FirSearchNeighborView extends React.PureComponent {
             </FormControl>
             <Collapse in={this.state.radioValue === "radius"}>
               <div className={classes.containerTopPadded}>
-                <TextField
-                  fullWidth={true}
-                  label="Buffer"
-                  value={this.state.buffer}
-                  onChange={(e) => {
-                    let v = parseInt(e.target.value);
-                    if (isNaN(v)) {
-                      v = 0;
+                <div className={classes.sliderContainer}>
+                  <TextField
+                    fullWidth={true}
+                    label="Buffer"
+                    value={this.state.buffer}
+                    onKeyDown={(e) => {
+                      return !isNaN(e.key);
+                    }}
+                    onChange={(e) => {
+                      let v = parseInt(e.target.value);
+                      if (isNaN(v)) {
+                        v = 0;
+                      }
+                      if (v > 100) {
+                        v = 100;
+                      }
+                      this.setState({ buffer: parseInt(v) });
+                    }}
+                    onFocus={(e) => {
+                      if (this.state.buffer === 0) {
+                        this.setState({ buffer: "" });
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (this.state.buffer === "") {
+                        this.setState({ buffer: 0 });
+                      }
+                    }}
+                    size="small"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">meter</InputAdornment>
+                      ),
+                    }}
+                    variant="outlined"
+                  />
+                  <Slider
+                    value={
+                      isNaN(this.state.buffer) ||
+                      parseInt(this.state.buffer) === 0
+                        ? 1
+                        : this.state.buffer || 1
                     }
-
-                    this.setState({ buffer: parseInt(v) });
-                  }}
-                  onFocus={(e) => {
-                    if (this.state.buffer === 0) {
-                      this.setState({ buffer: "" });
-                    }
-                  }}
-                  onBlur={(e) => {
-                    if (this.state.buffer === "") {
-                      this.setState({ buffer: 0 });
-                    }
-                  }}
-                  size="small"
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">meter</InputAdornment>
-                    ),
-                  }}
-                  variant="outlined"
-                />
+                    onChange={(e, v) => {
+                      this.setState({ buffer: v });
+                    }}
+                    step={1}
+                    min={1}
+                    max={100}
+                  />
+                </div>
               </div>
             </Collapse>
             <div
@@ -136,14 +246,16 @@ class FirSearchNeighborView extends React.PureComponent {
               style={{ textAlign: "right" }}
             >
               <Button
+                disabled={this.state.resultHistory.length === 0}
                 variant="outlined"
                 color="primary"
                 component="span"
                 size="small"
-                onClick={this.handleClearSearch}
+                onClick={this.handleHistoryBack}
                 className={classes.clearButton}
+                startIcon={<HistoryIcon />}
               >
-                Rensa
+                Bakåt
               </Button>
               <Button
                 variant="contained"
@@ -182,6 +294,15 @@ const styles = (theme) => ({
   },
   clearButton: {
     marginRight: theme.spacing(2),
+  },
+  sliderContainer: {
+    display: "flex",
+    paddingRight: theme.spacing(1),
+    alignItems: "center",
+    "& > div:first-child": {
+      flex: "0 0 35%",
+      marginRight: theme.spacing(2),
+    },
   },
 });
 

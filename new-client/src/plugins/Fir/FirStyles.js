@@ -12,7 +12,7 @@ class FirStyles {
       colorResult: "rgba(255,255,0,0.15)",
       colorResultStroke: "rgba(0,0,0,0.6)",
       colorHighlight: "rgba(255,255,0,0.25)",
-      colorHighlightStroke: "rgba(0,0,0, 0.8)",
+      colorHighlightStroke: "rgba(0, 130, 179, 1)",
       colorHittaGrannarBuffer: "rgba(50,200,200,0.4)",
       colorHittaGrannarBufferStroke: "rgba(0,0,0,0.2)",
     };
@@ -51,7 +51,7 @@ class FirStyles {
       }),
       stroke: new Stroke({
         color: this.getColor("colorHighlightStroke"),
-        width: 2,
+        width: 3,
       }),
     });
   }

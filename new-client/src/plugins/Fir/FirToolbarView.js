@@ -313,6 +313,9 @@ class FirToolbarView extends React.PureComponent {
             fullWidth={true}
             label="Lägg till buffer på sökområde"
             value={this.state.buffer}
+            onKeyDown={(e) => {
+              return !isNaN(e.key);
+            }}
             onChange={(e) => {
               let v = parseInt(e.target.value);
               if (isNaN(v)) {

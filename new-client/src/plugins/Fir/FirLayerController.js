@@ -185,7 +185,7 @@ class FirLayerController {
     this.observer.subscribe("fir.layers.bufferValueChanged", (data) => {
       clearTimeout(bufferValueChanged_tm);
       bufferValueChanged_tm = setTimeout(() => {
-        // throttle buffer updates
+        // throttle buffer updates, why punish the gpu.
         this.bufferValue = data.value;
         this.bufferFeatures();
       }, 1000);
@@ -249,7 +249,7 @@ class FirLayerController {
 
     clearTimeout(this.renderDelay_tm);
     this.renderDelay_tm = setTimeout(() => {
-      // Force rendering of buffer and label to next tick to enhance speed and prevent gui freeze.
+      // Force rendering of buffer and label to next tick to prevent gui freeze.
       this.bufferFeatures();
       this.addFeatureLabels(arr);
     }, 250);
@@ -272,12 +272,21 @@ class FirLayerController {
     this.model.layers.label.getSource().addFeatures(arr);
   };
 
-  clearBeforeSearch = () => {
+  clearBeforeSearch = (keepNeighborBuffer = false) => {
     this.model.layers.feature.getSource().clear();
-    this.model.layers.buffer.getSource().clear();
     this.model.layers.highlight.getSource().clear();
     this.model.layers.label.getSource().clear();
     this.model.layers.marker.setVisible(false);
+
+    if (keepNeighborBuffer === false) {
+      const source = this.model.layers.buffer.getSource();
+      const featuresToRemove = source
+        .getFeatures()
+        .filter((f) => f.get("fir_origin") === "neighbor");
+      featuresToRemove.forEach((f) => {
+        source.removeFeature(f);
+      });
+    }
   };
 
   toggleHighlight = (feature) => {
@@ -400,6 +409,7 @@ class FirLayerController {
   handleClearSearch = (data) => {
     this.clearBeforeSearch();
     this.model.layers.draw.getSource().clear();
+    this.model.layers.buffer.getSource().clear();
   };
 
   bufferFeatures = () => {
@@ -414,34 +424,35 @@ class FirLayerController {
       MultiPolygon
     );
 
-    this.getLayer("buffer").getSource().clear();
-
     if (this.bufferValue === 0) {
       return;
     }
 
+    let drawFeatures = this.getLayer("draw").getSource().getFeatures();
+
+    if (drawFeatures.length > 0) {
+      this.getLayer("buffer").getSource().clear();
+    }
+
     let _bufferFeatures = [];
 
-    this.getLayer("draw")
-      .getSource()
-      .getFeatures()
-      .forEach((feature) => {
-        let olGeom = feature.getGeometry();
-        if (olGeom instanceof Circle) {
-          olGeom = Polygon.fromCircle(olGeom, 0b10000000);
-        }
-        const jstsGeom = parser.read(olGeom);
-        const bufferedGeom = jstsGeom.buffer(this.bufferValue);
-        // bufferedGeom.union(jstsGeom);
+    drawFeatures.forEach((feature) => {
+      let olGeom = feature.getGeometry();
+      if (olGeom instanceof Circle) {
+        olGeom = Polygon.fromCircle(olGeom, 0b10000000);
+      }
+      const jstsGeom = parser.read(olGeom);
+      const bufferedGeom = jstsGeom.buffer(this.bufferValue);
+      // bufferedGeom.union(jstsGeom);
 
-        let bufferFeature = new Feature({
-          geometry: parser.write(bufferedGeom),
-        });
-        bufferFeature.set("owner_ol_uid", feature.ol_uid);
-        bufferFeature.set("fir_type", "buffer");
-
-        _bufferFeatures.push(bufferFeature);
+      let bufferFeature = new Feature({
+        geometry: parser.write(bufferedGeom),
       });
+      bufferFeature.set("owner_ol_uid", feature.ol_uid);
+      bufferFeature.set("fir_type", "buffer");
+
+      _bufferFeatures.push(bufferFeature);
+    });
 
     const targetSource = this.getLayer("buffer").getSource();
     targetSource.addFeatures(_bufferFeatures);

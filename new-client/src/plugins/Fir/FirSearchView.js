@@ -76,15 +76,22 @@ class FirSearchView extends React.PureComponent {
     this.setState({ searchText: "" });
   };
 
-  handleSearch = () => {
-    this.localObserver.publish("fir.search.search", {
+  handleSearch = (overrideOptions = {}) => {
+    let options = {
       text: this.state.searchText,
       exactMatch: this.state.exactMatch || false,
       showDesignation: this.state.showDesignation || false,
       showSearchArea: this.state.showSearchArea || false,
       buffer: this.state.buffer || 0,
       searchType: this.state.searchType,
-    });
+      zoomToLayer: true,
+    };
+
+    options = { ...options, ...overrideOptions };
+
+    // this.props.model.layers.buffer.getSource().clear();
+
+    this.localObserver.publish("fir.search.search", options);
   };
 
   handleSearchTextChange = (e) => {
@@ -94,7 +101,7 @@ class FirSearchView extends React.PureComponent {
     if (e.target.value && e.target.value.length >= 4) {
       clearTimeout(this.search_tm);
       this.search_tm = setTimeout(() => {
-        this.handleSearch();
+        this.handleSearch({ zoomToLayer: false });
       }, 500);
     }
   };
