@@ -119,6 +119,10 @@ class ToolOptions extends Component {
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
+
+    if (name === "instruction") {
+      value = btoa(value);
+    }
     this.setState({
       [name]: value,
     });
