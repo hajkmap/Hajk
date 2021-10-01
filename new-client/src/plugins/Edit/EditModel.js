@@ -482,6 +482,7 @@ class EditModel {
     this.draw.on("drawend", (event) => {
       event.feature.modification = "added";
       this.editAttributes(event.feature);
+      this.deactivateInteraction();
     });
     this.map.addInteraction(this.draw);
     this.map.clickLock.add("edit");

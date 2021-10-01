@@ -33,6 +33,13 @@ class AttributeEditor extends React.Component {
         feature: feature,
       });
     });
+    props.editSource?.editableFields?.forEach((field, i) => {
+      field.initialRender = true;
+    });
+
+    props.editSource?.nonEditableNonHiddenFields?.forEach((field, i) => {
+      field.initialRender = true;
+    });
   }
 
   componentWillUnmount() {
@@ -81,6 +88,18 @@ class AttributeEditor extends React.Component {
           .join(";");
       }
       featureProps[key] = value;
+    });
+
+    this.props.editSource?.nonEditableNonHiddenFields?.forEach((field) => {
+      let value = field.defaultValue;
+      if (value === "") value = null;
+      if (Array.isArray(value)) {
+        value = value
+          .filter((v) => v.checked)
+          .map((v) => v.name)
+          .join(";");
+      }
+      featureProps[field.name] = value;
     });
     this.props.model.editFeature.setProperties(featureProps);
   }
@@ -209,7 +228,7 @@ class AttributeEditor extends React.Component {
     }
   }
 
-  getValueMarkup(field) {
+  getValueMarkup(field, editable) {
     if (typeof field.alias === "undefined" || field.alias === "") {
       field.alias = field.name;
     }
@@ -255,6 +274,7 @@ class AttributeEditor extends React.Component {
             fullWidth={true}
             margin="normal"
             variant="outlined"
+            disabled={!editable}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -277,6 +297,7 @@ class AttributeEditor extends React.Component {
             fullWidth={true}
             margin="normal"
             variant="outlined"
+            disabled={!editable}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -300,6 +321,7 @@ class AttributeEditor extends React.Component {
             margin="normal"
             type="date"
             variant="outlined"
+            disabled={!editable}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -326,6 +348,7 @@ class AttributeEditor extends React.Component {
             margin="normal"
             type="datetime-local"
             variant="outlined"
+            disabled={!editable}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -353,6 +376,7 @@ class AttributeEditor extends React.Component {
               fullWidth={true}
               margin="normal"
               variant="outlined"
+              disabled={!editable}
               error={this.formErrors.hasOwnProperty(field.name)}
               helperText={
                 this.formErrors[field.name]?.length >= 0
@@ -385,6 +409,7 @@ class AttributeEditor extends React.Component {
               fullWidth={true}
               margin="normal"
               variant="outlined"
+              disabled={!editable}
               multiline
               error={this.formErrors.hasOwnProperty(field.name)}
               helperText={
@@ -435,6 +460,7 @@ class AttributeEditor extends React.Component {
               control={
                 <Checkbox
                   checked={item.checked}
+                  disabled={!editable}
                   color="primary"
                   onChange={(e) => {
                     this.setChanged();
@@ -473,6 +499,7 @@ class AttributeEditor extends React.Component {
               <NativeSelect
                 value={value}
                 variant="outlined"
+                disabled={!editable}
                 input={<Input name={field.name} id={field.name} />}
                 onChange={(e) => {
                   this.setChanged();
@@ -494,6 +521,7 @@ class AttributeEditor extends React.Component {
               <Checkbox
                 checked={field.value === "ja"}
                 color="primary"
+                disabled={!editable}
                 onChange={(e) => {
                   this.setChanged();
                   field.value = e.target.checked ? "ja" : "nej";
@@ -518,14 +546,24 @@ class AttributeEditor extends React.Component {
 
     if (!formValues) return null;
 
-    const markup = this.props.editSource?.editableFields.map((field, i) => {
-      const valueMarkup = this.getValueMarkup(field);
+    const markup = this.props.editSource?.editableFields?.map((field, i) => {
+      const valueMarkup = this.getValueMarkup(field, true);
       return (
         <Grid item xs={12} key={i} ref={field.name}>
           {valueMarkup}
         </Grid>
       );
     });
+
+    const markupNonEdit =
+      this.props.editSource?.nonEditableNonHiddenFields?.map((field, i) => {
+        const valueMarkup = this.getValueMarkup(field, false);
+        return (
+          <Grid item xs={12} key={i} ref={field.name}>
+            {valueMarkup}
+          </Grid>
+        );
+      });
 
     return (
       <>
@@ -536,7 +574,10 @@ class AttributeEditor extends React.Component {
             label="Ange objektets attribut:"
           />
         </Grid>
+        <p>Editerbara fält:</p>
         {markup}
+        Icke-editerbara fält:
+        {markupNonEdit}
         <Grid item xs={12} className={classes.centeredContainer}>
           <Button
             color="primary"

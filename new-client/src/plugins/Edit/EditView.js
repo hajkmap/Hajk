@@ -241,7 +241,11 @@ class EditView extends React.PureComponent {
                 {!editFeature && (
                   <>
                     <Grid item xs={6}>
-                      <Button fullWidth onClick={this.handlePrev}>
+                      <Button
+                        fullWidth
+                        onClick={this.handlePrev}
+                        variant="contained"
+                      >
                         Bakåt
                       </Button>
                     </Grid>
