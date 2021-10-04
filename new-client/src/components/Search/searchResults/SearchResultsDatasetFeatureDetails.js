@@ -164,6 +164,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       <Grid container item alignItems="center" justifyContent="space-between">
         <Grid item>
           <Tooltip
+            disableInteractive
             title={
               !buttonLeftDisabled
                 ? "Visa föregående objekt i resultatlistan"
@@ -192,6 +193,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
         </Grid>
         <Grid item>
           <Tooltip
+            disableInteractive
             title={
               !buttonRightDisabled ? "Visa nästa objekt i resultatlistan" : ""
             }

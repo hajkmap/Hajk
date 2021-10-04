@@ -77,7 +77,7 @@ class SearchResultsDatasetSummary extends React.PureComponent {
             </Typography>
           </Grid>
           <Grid container item justifyContent="flex-end" xs={2}>
-            <Tooltip title={toolTipTitle}>
+            <Tooltip disableInteractive title={toolTipTitle}>
               <Chip
                 size="small"
                 color="default"

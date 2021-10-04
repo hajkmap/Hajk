@@ -61,7 +61,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
   renderMenuTogglerButton = () => {
     const { classes } = this.props;
     return (
-      <Tooltip title="Ladda ner objekten">
+      <Tooltip disableInteractive title="Ladda ner objekten">
         <Button
           className={classes.menuTogglerButton}
           onClick={(e) =>
@@ -108,7 +108,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
     const { classes } = this.props;
     return (
       <>
-        <Tooltip title="Ladda ner objekten">
+        <Tooltip disableInteractive title="Ladda ner objekten">
           <Button
             className={classes.menuTogglerButton}
             onClick={(e) =>

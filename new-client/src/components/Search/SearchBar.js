@@ -390,7 +390,7 @@ class SearchBar extends React.PureComponent {
                   </IconButton>
                 </Tooltip>
               ) : (
-                <Tooltip title={expandMessage}>
+                <Tooltip disableInteractive title={expandMessage}>
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
@@ -410,7 +410,7 @@ class SearchBar extends React.PureComponent {
               {searchString.length > 0 ||
               showSearchResults ||
               searchActive !== "" ? (
-                <Tooltip title="Rensa sökning">
+                <Tooltip disableInteractive title="Rensa sökning">
                   <IconButton onClick={handleOnClear} size="small">
                     <span style={visuallyHidden}>Rensa sökning</span>
                     <ClearIcon />

@@ -381,7 +381,7 @@ class SearchResultsContainer extends React.PureComponent {
           label="Filtrera sökresultaten"
           InputProps={{
             endAdornment: showClearFilterButton && (
-              <Tooltip title="Rensa filtret">
+              <Tooltip disableInteractive title="Rensa filtret">
                 <IconButton onClick={this.clearViewFilters} size="small">
                   <span style={visuallyHidden}>Rensa filtret</span>
                   <ClearIcon />
@@ -522,7 +522,7 @@ class SearchResultsContainer extends React.PureComponent {
       ? "Filtret är aktivt"
       : "Filtrera resultatet";
     return (
-      <Tooltip title={filterHelpText}>
+      <Tooltip disableInteractive title={filterHelpText}>
         <Button
           className={classes.headerButtons}
           onClick={() =>
@@ -568,7 +568,7 @@ class SearchResultsContainer extends React.PureComponent {
     }`;
 
     return (
-      <Tooltip title={sortHelpText}>
+      <Tooltip disableInteractive title={sortHelpText}>
         <Button
           className={classes.headerButtons}
           onClick={(e) =>
@@ -584,7 +584,7 @@ class SearchResultsContainer extends React.PureComponent {
   renderClearTool = () => {
     const { classes } = this.props;
     return (
-      <Tooltip title="Rensa alla selekterade objekt">
+      <Tooltip disableInteractive title="Rensa alla selekterade objekt">
         <Button
           className={classes.headerButtons}
           onClick={this.clearAllSelectedFeaturesInView}
@@ -663,6 +663,7 @@ class SearchResultsContainer extends React.PureComponent {
           </Grow>
           <Grid item>
             <Tooltip
+              disableInteractive
               title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
             >
               <Button
@@ -948,7 +949,7 @@ class SearchResultsContainer extends React.PureComponent {
     if (shouldRenderFeatureCollectionDetails) {
       return (
         <Breadcrumbs aria-label="breadcrumb" separator="/">
-          <Tooltip title="Tillbaka till alla sökresultat">
+          <Tooltip disableInteractive title="Tillbaka till alla sökresultat">
             <Link
               className={classes.breadCrumbLinks}
               tabIndex={0}
@@ -968,7 +969,7 @@ class SearchResultsContainer extends React.PureComponent {
               Sökresultat
             </Link>
           </Tooltip>
-          <Tooltip title={featureCollectionTitle}>
+          <Tooltip disableInteractive title={featureCollectionTitle}>
             <Link
               className={classes.breadCrumbLinks}
               tabIndex={0}
@@ -988,7 +989,7 @@ class SearchResultsContainer extends React.PureComponent {
             </Link>
           </Tooltip>
           {shouldRenderFeatureDetails && (
-            <Tooltip title={featureTitle}>
+            <Tooltip disableInteractive title={featureTitle}>
               <Link
                 tabIndex={0}
                 className={classes.breadCrumbLinks}
@@ -1026,6 +1027,7 @@ class SearchResultsContainer extends React.PureComponent {
           xs={this.state.showTools ? 5 : 11}
         >
           <Tooltip
+            disableInteractive
             title={
               activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
             }

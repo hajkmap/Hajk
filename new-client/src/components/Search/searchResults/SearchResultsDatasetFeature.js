@@ -24,7 +24,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
 
     return (
       <Grid item align="center">
-        <Tooltip title={helpText}>
+        <Tooltip disableInteractive title={helpText}>
           <Checkbox
             color="default"
             checked={visibleInMap}
