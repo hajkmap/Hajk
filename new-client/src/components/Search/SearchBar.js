@@ -380,7 +380,7 @@ class SearchBar extends React.PureComponent {
               {showFailedWFSMessage &&
                 this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
               {!showSearchResults ? (
-                <Tooltip title="Utför sökning">
+                <Tooltip disableInteractive title="Utför sökning">
                   <IconButton
                     size="small"
                     onClick={handleOnClickOrKeyboardSearch}
