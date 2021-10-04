@@ -324,7 +324,7 @@ class SearchBar extends React.PureComponent {
 
   renderFailedWFSFetchWarning = (errorMessage) => {
     return (
-      <Tooltip title={errorMessage}>
+      <Tooltip disableInteractive title={errorMessage}>
         <WarningIcon color="error">
           <span style={visuallyHidden}>{errorMessage}</span>
         </WarningIcon>
