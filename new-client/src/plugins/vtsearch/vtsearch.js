@@ -330,7 +330,7 @@ class VTSearch extends React.PureComponent {
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
       : "Visa verktygspanelen";
     return (
-      <Tooltip title={tooltipText}>
+      <Tooltip disableInteractive title={tooltipText}>
         <IconButton
           className={classes.iconButton}
           onClick={onMenuClick}

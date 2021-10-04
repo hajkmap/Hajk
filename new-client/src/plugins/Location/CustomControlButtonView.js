@@ -120,7 +120,7 @@ const CustomControlButtonView = React.memo((props) => {
   }, [model, enqueueSnackbar, originalTooltip]);
 
   return (
-    <Tooltip title={tooltip}>
+    <Tooltip disableInteractive title={tooltip}>
       <Paper className={classes.paper}>
         <ToggleButton
           aria-label={title}

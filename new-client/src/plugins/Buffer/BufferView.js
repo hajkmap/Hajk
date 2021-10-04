@@ -144,7 +144,7 @@ class BufferView extends React.PureComponent {
               <Grid container spacing={2} direction="row">
                 {this.renderClearButton()}
                 <Grid item xs={12}>
-                  <Tooltip title="Markera flera objekt">
+                  <Tooltip disableInteractive title="Markera flera objekt">
                     <ToggleButton
                       className={classes.toggleButton}
                       onChange={this.setSelecting}

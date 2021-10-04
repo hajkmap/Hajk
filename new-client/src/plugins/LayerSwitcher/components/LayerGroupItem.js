@@ -203,7 +203,10 @@ class LayerGroupItem extends Component {
     return (
       this.state.status === "loaderror" && (
         <div className={classes.layerButton}>
-          <Tooltip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+          <Tooltip
+            disableInteractive
+            title="Lagret kunde inte laddas in. Kartservern svarar inte."
+          >
             <IconWarning />
           </Tooltip>
         </div>

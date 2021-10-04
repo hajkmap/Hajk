@@ -520,6 +520,7 @@ class TimeSliderView extends React.PureComponent {
           >
             <Grid item align="center" xs={4}>
               <Tooltip
+                disableInteractive
                 title={playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
               >
                 <Button
@@ -533,14 +534,14 @@ class TimeSliderView extends React.PureComponent {
               </Tooltip>
             </Grid>
             <Grid item align="center" xs={4}>
-              <Tooltip title="Återställ tidslinjen">
+              <Tooltip disableInteractive title="Återställ tidslinjen">
                 <Button variant="outlined" onClick={this.resetTimeSlider}>
                   <RotateLeftOutlinedIcon />
                 </Button>
               </Tooltip>
             </Grid>
             <Grid item align="center" xs={4}>
-              <Tooltip title="Inställningar">
+              <Tooltip disableInteractive title="Inställningar">
                 {this.renderSettingsButton()}
               </Tooltip>
             </Grid>

@@ -155,7 +155,10 @@ class AdvancedOptions extends React.PureComponent {
                         variant="dot"
                         classes={{ badge: classes.badge }}
                       >
-                        <Tooltip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
+                        <Tooltip
+                          disableInteractive
+                          title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc."
+                        >
                           <IconButton
                             id="mapTextColor"
                             onClick={this.toggleColorPicker}

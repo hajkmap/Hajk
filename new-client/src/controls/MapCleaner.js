@@ -24,7 +24,7 @@ const MapCleaner = React.memo((props) => {
 
   return (
     props.appModel.config.mapConfig.map.mapcleaner && (
-      <Tooltip title="Dölj alla aktiva lager">
+      <Tooltip disableInteractive title="Dölj alla aktiva lager">
         <Paper className={classes.paper}>
           <Button
             aria-label="Rensa kartan"

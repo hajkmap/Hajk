@@ -86,7 +86,7 @@ class AnchorView extends React.PureComponent {
               // display Copy to clipboard only if browser supports copy command
               endAdornment: document.queryCommandSupported("copy") && (
                 <InputAdornment position="end">
-                  <Tooltip title="Kopiera länk till urklipp">
+                  <Tooltip disableInteractive title="Kopiera länk till urklipp">
                     <IconButton
                       onClick={this.handleClickOnCopyToClipboard}
                       size="large"
@@ -94,7 +94,7 @@ class AnchorView extends React.PureComponent {
                       <FileCopyIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Öppna i nytt fönster">
+                  <Tooltip disableInteractive title="Öppna i nytt fönster">
                     <IconButton
                       href={this.state.anchor}
                       target="_blank"

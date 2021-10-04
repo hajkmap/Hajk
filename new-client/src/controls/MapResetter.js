@@ -34,7 +34,7 @@ class MapResetter extends React.PureComponent {
     const { classes } = this.props;
 
     return (
-      <Tooltip title="Återställ kartan till startläget">
+      <Tooltip disableInteractive title="Återställ kartan till startläget">
         <Paper className={classes.paper}>
           <Button
             aria-label="Återställ kartan till startläget"

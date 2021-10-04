@@ -327,10 +327,10 @@ class PrintView extends React.PureComponent {
               value={activeTab}
               variant="fullWidth"
             >
-              <Tooltip title="Generella inställningar">
+              <Tooltip disableInteractive title="Generella inställningar">
                 <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
               </Tooltip>
-              <Tooltip title="Avancerade inställningar">
+              <Tooltip disableInteractive title="Avancerade inställningar">
                 <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
               </Tooltip>
             </Tabs>

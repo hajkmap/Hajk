@@ -20,7 +20,7 @@ export default function PluginControlButton({
   const classes = useStyles();
 
   return (
-    <Tooltip title={`${title}: ${abstract}`}>
+    <Tooltip disableInteractive title={`${title}: ${abstract}`}>
       <Paper className={classes.paper}>
         <Button aria-label={title} className={classes.button} onClick={onClick}>
           {icon}

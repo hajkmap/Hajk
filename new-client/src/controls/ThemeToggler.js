@@ -24,7 +24,7 @@ const ThemeToggler = React.memo((props) => {
 
   return (
     (props.showThemeToggler && (
-      <Tooltip title="Växla mellan mörkt och ljust färgtema">
+      <Tooltip disableInteractive title="Växla mellan mörkt och ljust färgtema">
         <Paper className={classes.paper}>
           <Button
             aria-label="Växla färgtema"

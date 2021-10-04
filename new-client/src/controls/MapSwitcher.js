@@ -115,7 +115,7 @@ class MapSwitcher extends React.PureComponent {
       // Render only if config says so
       this.props.appModel.config.mapConfig.map.mapselector && (
         <>
-          <Tooltip title={`Nuvarande karta: ${title}`}>
+          <Tooltip disableInteractive title={`Nuvarande karta: ${title}`}>
             <Paper className={classes.paper}>
               <Button
                 aria-owns={open ? "render-props-menu" : undefined}

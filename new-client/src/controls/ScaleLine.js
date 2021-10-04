@@ -97,7 +97,7 @@ class ScaleLineControl extends React.PureComponent {
   renderScaleBadge() {
     const { classes } = this.props;
     return (
-      <Tooltip title="Nuvarande skala">
+      <Tooltip disableInteractive title="Nuvarande skala">
         <Paper elevation={4} className={classes.scaleBadge}>
           1:{this.state.scale}
         </Paper>

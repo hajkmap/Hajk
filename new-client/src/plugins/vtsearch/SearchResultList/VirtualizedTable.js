@@ -120,7 +120,7 @@ class VirtualizedTable extends React.PureComponent {
 
     return (
       <>
-        <Tooltip title={cellData}>
+        <Tooltip disableInteractive title={cellData}>
           <TableCell
             component="div"
             className={this.getCellClassName()}

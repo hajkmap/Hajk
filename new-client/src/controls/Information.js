@@ -91,7 +91,7 @@ class Information extends React.PureComponent {
     return (
       <>
         {this.renderDialog()}
-        <Tooltip title={this.title}>
+        <Tooltip disableInteractive title={this.title}>
           <Paper className={classes.paper}>
             <Button
               aria-label={this.title}

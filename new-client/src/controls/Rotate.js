@@ -65,7 +65,7 @@ const RotateControl = React.memo((props) => {
 
   return (
     (props.map && rotation !== 0 && (
-      <Tooltip title="Återställ rotation">
+      <Tooltip disableInteractive title="Återställ rotation">
         <Paper className={classes.paper}>
           <Button
             aria-label="Återställ rotation"

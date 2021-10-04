@@ -224,7 +224,7 @@ class Preset extends React.PureComponent {
       const open = Boolean(anchorEl);
       return (
         <>
-          <Tooltip title={this.title}>
+          <Tooltip disableInteractive title={this.title}>
             <Paper className={classes.paper}>
               <Button
                 aria-label={this.title}
