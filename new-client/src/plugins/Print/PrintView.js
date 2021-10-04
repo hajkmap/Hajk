@@ -6,7 +6,7 @@ import PrintDialog from "./PrintDialog";
 import { AppBar, Tab, Tabs } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { Box, Typography, Tooltip, Button } from "@mui/material";
+import { Tooltip, Button } from "@mui/material";
 
 import GeneralOptions from "./GeneralOptions";
 import AdvancedOptions from "./AdvancedOptions";
@@ -187,7 +187,6 @@ class PrintView extends React.PureComponent {
   };
 
   handleChange = (event) => {
-    console.log("handleChange: ", event);
     this.setState(
       {
         [event.target.name]: event.target.value,
@@ -209,7 +208,6 @@ class PrintView extends React.PureComponent {
   };
 
   handleChangeTabs = (event, activeTab) => {
-    console.log("handleChangeTabs: ", activeTab);
     this.setState({ activeTab });
   };
 
@@ -289,33 +287,13 @@ class PrintView extends React.PureComponent {
 
   a11yProps(index) {
     return {
-      id: `full-width-tab-${index}`,
-      "aria-controls": `full-width-tabpanel-${index}`,
+      id: `print-tab-${index}`,
+      "aria-controls": `print-tab-${index}`,
     };
   }
 
-  TabPanel(props) {
-    const { children, value, index, ...other } = props;
-
-    return (
-      <div
-        role="tabpanel"
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
-      >
-        {value === index && (
-          <Box sx={{ p: 3 }}>
-            <Typography>{children}</Typography>
-          </Box>
-        )}
-      </div>
-    );
-  }
-
   render() {
-    const { classes } = this.props;
+    const { classes, windowVisible } = this.props;
     const {
       previewLayerVisible,
       scale,
@@ -328,8 +306,6 @@ class PrintView extends React.PureComponent {
       printOptionsOk,
     } = this.state;
 
-    const value = activeTab;
-
     this.model.renderPreviewFeature(previewLayerVisible, {
       scale: scale,
       format: format,
@@ -337,80 +313,51 @@ class PrintView extends React.PureComponent {
       useMargin: useMargin,
     });
 
-    console.log("activeTab: ", typeof activeTab);
-    // Toggle the condition in order to return 'null' and the error will go away.
-    // Toggle back to return the MUI Tabs example  and the error is back.
-    return true ? (
-      <Box sx={{ width: "100%" }}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={value}
-            onChange={this.handleChangeTabs}
-            aria-label="basic tabs example"
+    return !windowVisible ? null : (
+      <>
+        <div className={classes.root}>
+          <AppBar
+            position="sticky"
+            color="default"
+            className={classes.stickyAppBar}
           >
-            <Tab label="Item One" {...this.a11yProps(0)} />
-            <Tab label="Item Two" {...this.a11yProps(1)} />
-            <Tab label="Item Three" {...this.a11yProps(2)} />
-          </Tabs>
-        </Box>
-        <this.TabPanel value={value} index={0}>
-          Item One
-        </this.TabPanel>
-        <this.TabPanel value={value} index={1}>
-          Item Two
-        </this.TabPanel>
-        <this.TabPanel value={value} index={2}>
-          Item Three
-        </this.TabPanel>
-      </Box>
-    ) : null;
-    // Below is the unchanged Tabs component. Once we get the example to work, we
-    // can migrate to the code below and see if there error comes back.
-    // (
-    //   <>
-    //     <div className={classes.root}>
-    //       <AppBar
-    //         position="sticky"
-    //         color="default"
-    //         className={classes.stickyAppBar}
-    //       >
-    //         <Tabs
-    //           action={this.handleTabsMounted}
-    //           onChange={this.handleChangeTabs}
-    //           value={activeTab}
-    //           variant="fullWidth"
-    //         >
-    //           <Tooltip title="Generella inställningar">
-    //             <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
-    //           </Tooltip>
-    //           <Tooltip title="Avancerade inställningar">
-    //             <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
-    //           </Tooltip>
-    //         </Tabs>
-    //       </AppBar>
-    //       <div className={classes.tabContent}>
-    //         {activeTab === 0 && this.renderGeneralOptions()}
-    //         {activeTab === 1 && this.renderAdvancedOptions()}
-    //         <div className={classes.printButtonContainer}>
-    //           <Button
-    //             variant="contained"
-    //             fullWidth={true}
-    //             color="primary"
-    //             onClick={this.initiatePrint}
-    //             disabled={printInProgress || !printOptionsOk}
-    //           >
-    //             Skriv ut
-    //           </Button>
-    //         </div>
-    //       </div>
-    //     </div>
-    //     <PrintDialog
-    //       open={printInProgress}
-    //       saveAsType={saveAsType}
-    //       cancelPrint={this.cancelPrint}
-    //     />
-    //   </>
-    // );
+            <Tabs
+              action={this.handleTabsMounted}
+              onChange={this.handleChangeTabs}
+              value={activeTab}
+              variant="fullWidth"
+            >
+              <Tooltip title="Generella inställningar">
+                <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
+              </Tooltip>
+              <Tooltip title="Avancerade inställningar">
+                <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
+              </Tooltip>
+            </Tabs>
+          </AppBar>
+          <div className={classes.tabContent}>
+            {activeTab === 0 && this.renderGeneralOptions()}
+            {activeTab === 1 && this.renderAdvancedOptions()}
+            <div className={classes.printButtonContainer}>
+              <Button
+                variant="contained"
+                fullWidth={true}
+                color="primary"
+                onClick={this.initiatePrint}
+                disabled={printInProgress || !printOptionsOk}
+              >
+                Skriv ut
+              </Button>
+            </div>
+          </div>
+        </div>
+        <PrintDialog
+          open={printInProgress}
+          saveAsType={saveAsType}
+          cancelPrint={this.cancelPrint}
+        />
+      </>
+    );
   }
 }
 

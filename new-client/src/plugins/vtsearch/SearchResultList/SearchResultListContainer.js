@@ -341,8 +341,8 @@ class SearchResultListContainer extends React.Component {
   };
 
   renderTabsController = (searchResults) => {
-    const { classes } = this.props;
-    return true ? null : (
+    const { classes, windowVisible } = this.props;
+    return !windowVisible ? null : (
       <Tabs
         classes={{
           root: classes.tabsRoot,

@@ -133,9 +133,8 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
-    return null;
-    return (
+    const { classes, windowVisible } = this.props;
+    return !windowVisible ? null : (
       <>
         <div className={classes.windowContent}>
           <AppBar

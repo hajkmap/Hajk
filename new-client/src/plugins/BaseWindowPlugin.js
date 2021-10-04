@@ -184,7 +184,13 @@ class BaseWindowPlugin extends React.PureComponent {
             (t) => t.type === "layerswitcher"
           )}
         >
-          {this.props.children}
+          {/* We have to pass windowVisible down to the children so that we can conditionally render
+          the <Tabs /> component, since it does not accept components with display: "none". We use the
+          windowVisible-prop to make sure that we don't render the <Tabs /> when the window
+          is not visible.*/}
+          {React.cloneElement(this.props.children, {
+            windowVisible: this.state.windowVisible,
+          })}
         </Window>
         {/* Drawer buttons and Widget buttons should render a Drawer button. */}
         {(target === "toolbar" || this.pluginIsWidget(target)) &&
