@@ -16,6 +16,7 @@ import {
   LineBreak,
   Hover,
   Video,
+  Audio,
   Source,
 } from "./utils/ContentComponentFactory";
 
@@ -416,6 +417,12 @@ export default class DocumentHandlerModel {
       tagType: "video",
       callback: (e) => {
         return <Video videoTag={e} componentId={e.componentId}></Video>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "audio",
+      callback: (e) => {
+        return <Audio audioTag={e} componentId={e.componentId}></Audio>;
       },
     });
     allowedHtmlTags.push({

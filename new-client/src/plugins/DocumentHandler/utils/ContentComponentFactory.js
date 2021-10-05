@@ -474,7 +474,7 @@ export const Video = ({ videoTag, componentId }) => {
   const getVideoDescription = (videoAttributes) => {
     return (
       <Box
-        style={{ width: videoAttributes.width }}
+        style={{ width: videoAttributes.width + "px" }}
         className={classes.imageInformationWrapper}
       >
         {videoAttributes.caption && (
@@ -509,6 +509,94 @@ export const Video = ({ videoTag, componentId }) => {
           {arraySources}
         </video>
         {getVideoDescription(videoAttributes)}
+      </div>
+    </React.Fragment>
+  );
+};
+
+export const Audio = ({ audioTag, componentId }) => {
+  const audioAttributes = {
+    caption: audioTag.attributes.getNamedItem("data-caption")?.value,
+    position: audioTag.attributes.getNamedItem("data-audio-position")?.value,
+    source: audioTag.attributes.getNamedItem("data-source")?.value,
+    url: audioTag.attributes.getNamedItem("src")?.value,
+    width: audioTag.attributes.getNamedItem("data-audio-width")?.value,
+    id: `audio_${componentId}`,
+  };
+
+  const classes = useStyles();
+  const getVideoPositionClass = (position) => {
+    if (position === "right") {
+      return classes.mediaRight;
+    }
+
+    if (position === "left") {
+      return classes.mediaLeft;
+    }
+
+    if (position === "center") {
+      return classes.mediaCenter;
+    }
+
+    if (position === "floatLeft") {
+      return classes.floatLeft;
+    }
+
+    if (position === "floatRight") {
+      return classes.floatRight;
+    }
+
+    return;
+  };
+  const positioningClass = getVideoPositionClass(audioAttributes.position);
+
+  const renderSources = (childrenSource) => {
+    let arraySources = [];
+    if (childrenSource.length > 0) {
+      childrenSource.forEach((child, index) => {
+        arraySources.push(
+          <React.Fragment key={index}>{renderChild(child)}</React.Fragment>
+        );
+      });
+    }
+
+    return arraySources;
+  };
+  const childrenSource = [...audioTag.childNodes];
+  const arraySources = renderSources(childrenSource);
+
+  const getAudioDescription = (audioAttributes) => {
+    return (
+      <Box
+        style={{ width: audioAttributes.width + "px" }}
+        className={classes.imageInformationWrapper}
+      >
+        {audioAttributes.caption && (
+          <Typography
+            id={`video_${audioAttributes.captionId}`}
+            variant="subtitle2"
+          >
+            {audioAttributes.caption}
+          </Typography>
+        )}
+        {audioAttributes.source && (
+          <Typography
+            id={`video_${audioAttributes.sourceId}`}
+            variant="subtitle2"
+            className={classes.imageText}
+          >
+            {audioAttributes.source}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  return (
+    <React.Fragment key={audioAttributes.id}>
+      <div className={positioningClass}>
+        <audio controls={"controls"}>{arraySources}</audio>
+        {getAudioDescription(audioAttributes)}
       </div>
     </React.Fragment>
   );
