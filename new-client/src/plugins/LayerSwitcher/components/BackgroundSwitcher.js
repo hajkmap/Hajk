@@ -1,11 +1,11 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
 import propTypes from "prop-types";
 import { isValidLayerId } from "utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 import LayerItem from "./LayerItem.js";
 import Observer from "react-event-observer";
+import Box from "@mui/material/Box";
 
 const WHITE_BACKROUND_LAYER_ID = "-1";
 const BLACK_BACKROUND_LAYER_ID = "-2";
@@ -16,17 +16,6 @@ const SPECIAL_BACKGROUND_COLORS = {
   [BLACK_BACKROUND_LAYER_ID]: "#000",
 };
 
-const styles = (theme) => ({
-  layerItemContainer: {
-    borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-  },
-  captionText: {
-    position: "relative",
-    top: "2px",
-    fontSize: theme.typography.pxToRem(15),
-  },
-});
-
 class BackgroundSwitcher extends React.PureComponent {
   state = {
     selectedLayerId: null,
@@ -36,7 +25,6 @@ class BackgroundSwitcher extends React.PureComponent {
     backgroundSwitcherBlack: propTypes.bool.isRequired,
     backgroundSwitcherWhite: propTypes.bool.isRequired,
     enableOSM: propTypes.bool.isRequired,
-    classes: propTypes.object.isRequired,
     display: propTypes.bool.isRequired,
     layerMap: propTypes.object.isRequired,
     layers: propTypes.array.isRequired,
@@ -286,11 +274,11 @@ class BackgroundSwitcher extends React.PureComponent {
 
   render() {
     return (
-      <div style={{ display: this.props.display ? "block" : "none" }}>
+      <Box sx={{ display: this.props.display ? "block" : "none" }}>
         {this.renderBaseLayerComponents()}
-      </div>
+      </Box>
     );
   }
 }
 
-export default withStyles(styles)(BackgroundSwitcher);
+export default BackgroundSwitcher;
