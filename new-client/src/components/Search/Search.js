@@ -1,6 +1,5 @@
 import React from "react";
 import SearchBar from "./SearchBar";
-import withStyles from "@mui/styles/withStyles";
 import { withSnackbar } from "notistack";
 import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
@@ -13,12 +12,6 @@ import KmlExport from "./utils/KmlExport";
 import XLSXExport from "./utils/XLSXExport";
 import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
-
-const styles = () => ({
-  inputRoot: {
-    width: "100%",
-  },
-});
 
 class Search extends React.PureComponent {
   defaultSearchOptions = {
@@ -953,7 +946,6 @@ class Search extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     const {
       searchString,
       searchActive,
@@ -973,9 +965,7 @@ class Search extends React.PureComponent {
       this.state.searchImplementedPluginsLoaded &&
       this.props.app.appModel.config.mapConfig.map.clean === false && (
         <SearchBar
-          classes={{
-            root: classes.inputRoot,
-          }}
+          sx={{ width: "100%" }}
           escapeRegExp={this.escapeRegExp}
           localObserver={this.localObserver}
           searchTools={searchTools}
@@ -1006,4 +996,4 @@ class Search extends React.PureComponent {
     );
   }
 }
-export default withStyles(styles)(withSnackbar(Search));
+export default withSnackbar(Search);
