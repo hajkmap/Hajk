@@ -31,6 +31,7 @@ import { styled } from "@mui/material/styles";
 // A HOC that pipes isMobile to the children. See this as a proposed
 // solution. It is not pretty, but if we move this to a separate file
 // we could use this HOC instead of the isMobile helper function in ../../utils/.
+// TODO: Move to some /hooks folder
 const withIsMobile = () => (WrappedComponent) => (props) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));

@@ -1,26 +1,33 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
 import { List, ListItem } from "@mui/material";
 import SearchResultsDataset from "./SearchResultsDataset";
 import SearchResultsDatasetSummary from "./SearchResultsDatasetSummary";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-// FIXME checkout https://mui.com/components/use-media-query/#migrating-from-withwidth
-const withWidth = () => (WrappedComponent) => (props) =>
-  <WrappedComponent {...props} width="xs" />;
+// A HOC that pipes isMobile to the children. See this as a proposed
+// solution. It is not pretty, but if we move this to a separate file
+// we could use this HOC instead of the isMobile helper function in ../../utils/.
+// TODO: Move to some /hooks folder
+const withIsMobile = () => (WrappedComponent) => (props) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  return <WrappedComponent {...props} isMobile={isMobile} />;
+};
 
-const styles = () => ({
-  searchResultList: {
-    padding: 0,
-    width: "100%",
-    transition: "none",
-  },
-  searchResultListItem: {
-    width: "100%",
-    display: "flex",
-    padding: 0,
-    transition: "none",
-  },
-});
+const StyledList = styled(List)(() => ({
+  padding: 0,
+  width: "100%",
+  transition: "none",
+}));
+
+const StyledListItem = styled(ListItem)(() => ({
+  width: "100%",
+  display: "flex",
+  padding: 0,
+  transition: "none",
+}));
 
 class SearchResultsList extends React.PureComponent {
   componentDidMount = () => {
@@ -59,7 +66,7 @@ class SearchResultsList extends React.PureComponent {
         featureTitle: featureTitle,
         initiator: "showDetails",
       });
-      if (this.props.width === "xs" || this.props.width === "sm") {
+      if (this.props.isMobile) {
         localObserver.publish("minimizeSearchResultList");
       }
       localObserver.publish("map.addAndHighlightFeatureInSearchResultLayer", {
@@ -146,15 +153,13 @@ class SearchResultsList extends React.PureComponent {
   };
 
   renderSearchResultList = () => {
-    const { featureCollections, classes, handleFeatureCollectionClick } =
-      this.props;
+    const { featureCollections, handleFeatureCollectionClick } = this.props;
     return (
-      <List className={classes.searchResultList}>
+      <StyledList>
         {featureCollections.map((featureCollection) => (
-          <ListItem
+          <StyledListItem
             disableTouchRipple
             key={featureCollection.source.id}
-            className={classes.searchResultListItem}
             id={`search-result-dataset-${featureCollection.source.id}`}
             aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
             onClick={() => handleFeatureCollectionClick(featureCollection)}
@@ -162,9 +167,9 @@ class SearchResultsList extends React.PureComponent {
             divider
           >
             {this.renderSearchResultDatasetSummary(featureCollection)}
-          </ListItem>
+          </StyledListItem>
         ))}
-      </List>
+      </StyledList>
     );
   };
 
@@ -177,4 +182,4 @@ class SearchResultsList extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withWidth()(SearchResultsList));
+export default withIsMobile()(SearchResultsList);

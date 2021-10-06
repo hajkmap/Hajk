@@ -1,18 +1,17 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
 import { Button, Tooltip, Menu, MenuItem, Grid } from "@mui/material";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PublicIcon from "@mui/icons-material/Public";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  menuTogglerButton: {
-    minWidth: 30,
-  },
-  menuItemIcon: {
-    paddingRight: theme.spacing(1),
-  },
-});
+const MenuTogglerButton = styled(Button)(() => ({
+  minWidth: 30,
+}));
+
+const MenuItemIconWrapper = styled(Grid)(({ theme }) => ({
+  paddingRight: theme.spacing(1),
+}));
 
 class SearchResultsDownloadMenu extends React.PureComponent {
   constructor(props) {
@@ -59,11 +58,9 @@ class SearchResultsDownloadMenu extends React.PureComponent {
   };
 
   renderMenuTogglerButton = () => {
-    const { classes } = this.props;
     return (
       <Tooltip disableInteractive title="Ladda ner objekten">
-        <Button
-          className={classes.menuTogglerButton}
+        <MenuTogglerButton
           onClick={(e) =>
             this.setState({
               anchorEl: e.currentTarget,
@@ -71,13 +68,12 @@ class SearchResultsDownloadMenu extends React.PureComponent {
           }
         >
           <GetAppIcon />
-        </Button>
+        </MenuTogglerButton>
       </Tooltip>
     );
   };
 
   renderDownloadMenu = () => {
-    const { classes } = this.props;
     const { anchorEl } = this.state;
     const enabledDownloadOptions = this.downloadOptions.filter((option) => {
       return option.enabled;
@@ -92,9 +88,9 @@ class SearchResultsDownloadMenu extends React.PureComponent {
           return (
             <MenuItem key={index} onClick={downloadOption.onClick}>
               <Grid container>
-                <Grid item className={classes.menuItemIcon}>
+                <MenuItemIconWrapper item>
                   {downloadOption.icon}
-                </Grid>
+                </MenuItemIconWrapper>
                 <Grid item>{downloadOption.name}</Grid>
               </Grid>
             </MenuItem>
@@ -105,12 +101,10 @@ class SearchResultsDownloadMenu extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <>
         <Tooltip disableInteractive title="Ladda ner objekten">
-          <Button
-            className={classes.menuTogglerButton}
+          <MenuTogglerButton
             onClick={(e) =>
               this.setState({
                 anchorEl: e.currentTarget,
@@ -118,7 +112,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
             }
           >
             <GetAppIcon />
-          </Button>
+          </MenuTogglerButton>
         </Tooltip>
         {this.renderDownloadMenu()}
       </>
@@ -126,4 +120,4 @@ class SearchResultsDownloadMenu extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchResultsDownloadMenu);
+export default SearchResultsDownloadMenu;
