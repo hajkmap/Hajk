@@ -1,6 +1,4 @@
 import React from "react";
-
-import withStyles from "@mui/styles/withStyles";
 import {
   Tooltip,
   Grid,
@@ -14,16 +12,12 @@ import {
   MenuItem,
   Input,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  chips: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  chip: {
-    margin: 2,
-  },
-});
+const ChipsWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+}));
 
 class SearchSettings extends React.PureComponent {
   state = {
@@ -37,7 +31,7 @@ class SearchSettings extends React.PureComponent {
   };
 
   render() {
-    const { classes, searchOptions, searchSources, searchModel } = this.props;
+    const { searchOptions, searchSources, searchModel } = this.props;
     return (
       <Grid container spacing={2} direction="column">
         <Grid item xs>
@@ -85,15 +79,15 @@ class SearchSettings extends React.PureComponent {
                       }
                       input={<Input id="select-multiple-chip" />}
                       renderValue={(selected) => (
-                        <div className={classes.chips}>
+                        <ChipsWrapper>
                           {selected.map((option) => (
                             <Chip
                               key={option.id}
                               label={option.caption}
-                              className={classes.chip}
+                              sx={{ margin: 0.25 }}
                             />
                           ))}
-                        </div>
+                        </ChipsWrapper>
                       )}
                     >
                       {searchModel.getSources().map((source) => (
@@ -245,4 +239,4 @@ class SearchSettings extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchSettings);
+export default SearchSettings;
