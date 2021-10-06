@@ -27,7 +27,7 @@ import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 import { visuallyHidden } from "@mui/utils";
 import { styled } from "@mui/material/styles";
 
-const StyledPaper = styled((props) => <Paper {...props} />)(({ theme }) => ({
+const StyledPaper = styled(Paper)(({ theme }) => ({
   maxHeight: "80vh",
   overflow: "auto",
   minWidth: 200,
@@ -43,16 +43,14 @@ const StyledPaper = styled((props) => <Paper {...props} />)(({ theme }) => ({
   },
 }));
 
-const ResultListWrapper = styled((props) => <Grid {...props} />)(
-  ({ theme }) => ({
-    [theme.breakpoints.down("sm")]: {
-      maxHeight: "78vh",
-    },
-    [theme.breakpoints.up("sm")]: {
-      maxHeight: "82vh",
-    },
-  })
-);
+const ResultListWrapper = styled(Grid)(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    maxHeight: "78vh",
+  },
+  [theme.breakpoints.up("sm")]: {
+    maxHeight: "82vh",
+  },
+}));
 
 class SearchResultsContainer extends React.PureComponent {
   state = {

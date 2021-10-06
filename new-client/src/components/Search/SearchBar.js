@@ -37,13 +37,11 @@ const withIsMobile = () => (WrappedComponent) => (props) => {
   return <WrappedComponent {...props} isMobile={isMobile} />;
 };
 
-const StyledAutocomplete = styled((props) => <Autocomplete {...props} />)(
-  ({ theme }) => ({
-    [`& .${autocompleteClasses.inputRoot}`]: {
-      height: theme.spacing(6),
-    },
-  })
-);
+const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
+  [`& .${autocompleteClasses.inputRoot}`]: {
+    height: theme.spacing(6),
+  },
+}));
 
 const IconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
