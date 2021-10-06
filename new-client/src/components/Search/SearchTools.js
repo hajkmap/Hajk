@@ -2,7 +2,6 @@ import React from "react";
 import { createPortal } from "react-dom";
 import IconButton from "@mui/material/IconButton";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import withStyles from "@mui/styles/withStyles";
 import {
   ListItemIcon,
   Menu,
@@ -15,8 +14,6 @@ import { visuallyHidden } from "@mui/utils";
 
 import Dialog from "../Dialog.js";
 import SearchSettings from "./SearchSettings";
-
-const styles = (theme) => ({});
 
 class SearchTools extends React.PureComponent {
   state = {
@@ -150,4 +147,4 @@ class SearchTools extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchTools);
+export default SearchTools;
