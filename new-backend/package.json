@@ -1,7 +1,8 @@
 {
   "name": "hajk-backend",
   "version": "3.7.0-rc.1",
-  "description": "Hajk backend",
+  "description": "Hajk Backend",
+  "homepage": ".",
   "repository": {
     "type": "git",
     "url": "https://github.com/hajkmap/Hajk.git"
@@ -29,7 +30,7 @@
     "cors": "^2.8.5",
     "dotenv": "^9.0.0",
     "express": "^4.17.1",
-    "express-openapi-validator": "^3.17.2",
+    "express-openapi-validator": "^4.13.1",
     "helmet": "^4.6.0",
     "http-proxy-middleware": "^1.3.1",
     "log4js": "^6.3.0",

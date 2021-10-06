@@ -544,7 +544,7 @@ class AttributeEditor extends React.Component {
     const { formValues } = this.state;
     const { classes, model } = this.props;
 
-    if (!formValues) return null;
+    if (!formValues || this.props.editSource === undefined) return null;
 
     const markup = this.props.editSource?.editableFields?.map((field, i) => {
       const valueMarkup = this.getValueMarkup(field, true);

@@ -33,6 +33,27 @@ import SnapHelper from "./SnapHelper";
 import { hfetch } from "utils/FetchWrapper";
 
 class AppModel {
+  /**
+   * Initialize new AddModel
+   * @param object Config
+   * @param Observer observer
+   */
+  constructor(config, globalObserver) {
+    this.map = undefined;
+    this.windows = [];
+    this.plugins = {};
+    this.activeTool = undefined;
+    this.config = config;
+    this.coordinateSystemLoader = new CoordinateSystemLoader(
+      config.mapConfig.projections
+    );
+    this.globalObserver = globalObserver;
+    this.layersFromParams = [];
+    this.cqlFiltersFromParams = {};
+    register(this.coordinateSystemLoader.getProj4());
+    this.hfetch = hfetch;
+  }
+
   registerWindowPlugin(windowComponent) {
     this.windows.push(windowComponent);
   }
@@ -54,32 +75,13 @@ class AppModel {
   }
 
   /**
-   * Initialize new AddModel
-   * @param object Config
-   * @param Observer observer
-   */
-  constructor(config, globalObserver) {
-    this.map = undefined;
-    this.windows = [];
-    this.plugins = {};
-    this.activeTool = undefined;
-    this.config = config;
-    this.coordinateSystemLoader = new CoordinateSystemLoader(
-      config.mapConfig.projections
-    );
-    this.globalObserver = globalObserver;
-    this.layersFromParams = [];
-    this.cqlFiltersFromParams = {};
-    register(this.coordinateSystemLoader.getProj4());
-    this.hfetch = hfetch;
-  }
-  /**
    * Add plugin to this tools property of loaded plugins.
    * @internal
    */
   addPlugin(plugin) {
     this.plugins[plugin.type] = plugin;
   }
+
   /**
    * Get loaded plugins
    * @returns Array<Plugin>
@@ -89,6 +91,7 @@ class AppModel {
       return [...v, this.plugins[key]];
     }, []);
   }
+
   /**
    * A plugin may have the 'target' option. Currently we use three
    * targets: toolbar, left and right. Toolbar means it's a

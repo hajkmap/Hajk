@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 
@@ -32,33 +10,13 @@ class Info extends Component {
           Hajk Map är ett projekt som initierats för att skapa en snabb och
           stabil plattform för avancerade webbkartor.
           <br />
-          Projektet är öppet att delta i, det följer en licensform som bygger på
-          Creative Common Zero CC0.
+          Projektet är öppet att delta i och är licensierat under MIT.
           <br />
         </p>
-        <p>
-          De som utvecklar projektet är i huvudsak:
-          <br />
-          Göteborg Stad Stadsbyggnadskontoret
-          <br />
-          Kungsbacka Kommun
-          <br />
-          Sweco Position
-          <br />
-        </p>
-        <h2>Releaser</h2>
-        <ul>
-          <li>
-            <a href="Hajk2-2.0.0.zip">Release 2.0.0</a>
-          </li>
-        </ul>
         <p>Applikationen är skapad med komponenter från följande bibliotek:</p>
         <ul>
           <li>Open Layers</li>
           <li>React</li>
-          <li>Backbone</li>
-          <li>Bootstrap</li>
-          <li>Microsoft .NET 4.5</li>
         </ul>
         <p>Följande funktioner är i nuläget implementerade</p>
         <ul>
@@ -92,7 +50,7 @@ class Info extends Component {
             target="_blank"
             rel="noopener noreferrer"
           >
-            https://github.com/Johkar/Hajk2
+            https://github.com/hajkmap/Hajk
           </a>
         </p>
       </div>
