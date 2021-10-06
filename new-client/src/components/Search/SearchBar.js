@@ -1,8 +1,7 @@
 import React from "react";
-import cslx from "clsx";
 import Grid from "@mui/material/Grid";
 import ClearIcon from "@mui/icons-material/Clear";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
 import SearchIcon from "@mui/icons-material/Search";
 import RoomIcon from "@mui/icons-material/Room";
 import CheckIcon from "@mui/icons-material/Check";
@@ -14,7 +13,6 @@ import SearchResultsContainer from "./searchResults/SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { useTheme } from "@mui/material/styles";
 import withTheme from "@mui/styles/withTheme";
-import withStyles from "@mui/styles/withStyles";
 import { decodeCommas } from "../../utils/StringCommaCoder";
 import {
   CircularProgress,
@@ -28,6 +26,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
+import { styled } from "@mui/material/styles";
 
 // A HOC that pipes isMobile to the children. See this as a proposed
 // solution. It is not pretty, but if we move this to a separate file
@@ -38,28 +37,19 @@ const withIsMobile = () => (WrappedComponent) => (props) => {
   return <WrappedComponent {...props} isMobile={isMobile} />;
 };
 
-const styles = (theme) => ({
-  searchContainer: {
-    width: 400,
-    height: theme.spacing(6),
-  },
-  searchCollapsed: {
-    left: -440,
-  },
+const StyledAutocomplete = styled((props) => <Autocomplete {...props} />)(
+  ({ theme }) => ({
+    [`& .${autocompleteClasses.inputRoot}`]: {
+      height: theme.spacing(6),
+    },
+  })
+);
 
-  autocompleteTypography: {
-    maxWidth: "100%",
-  },
-
-  inputRoot: {
-    height: theme.spacing(6),
-  },
-  originIconWrapper: {
-    display: "flex",
-    flexWrap: "wrap",
-    paddingRight: theme.spacing(1),
-  },
-});
+const IconWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+  paddingRight: theme.spacing(1),
+}));
 
 //Needed to make a CustomPopper with inline styling to be able to override width,
 //Popper.js didn't work as expected
@@ -106,14 +96,12 @@ const CustomPaper = (props) => {
 class SearchBar extends React.PureComponent {
   state = {
     drawActive: false,
-    panelCollapsed: false,
     moreOptionsId: undefined,
     moreOptionsOpen: false,
     selectSourcesOpen: false,
   };
 
   getOriginBasedIcon = (origin) => {
-    const { classes } = this.props;
     let icon;
     switch (origin) {
       case "WFS":
@@ -128,7 +116,7 @@ class SearchBar extends React.PureComponent {
       default:
         icon = <RoomIcon color="disabled" />;
     }
-    return <div className={classes.originIconWrapper}>{icon}</div>;
+    return <IconWrapper>{icon}</IconWrapper>;
   };
 
   removeCommasAndSpaces = (string) => {
@@ -186,7 +174,7 @@ class SearchBar extends React.PureComponent {
   };
 
   getHighlightedACE = (searchString, autocompleteEntry) => {
-    const { getArrayWithSearchWords, classes } = this.props;
+    const { getArrayWithSearchWords } = this.props;
     const stringArraySS = getArrayWithSearchWords(searchString);
 
     let highlightInformation = stringArraySS
@@ -204,7 +192,7 @@ class SearchBar extends React.PureComponent {
       .flat();
 
     return (
-      <Typography noWrap={true} className={classes.autocompleteTypography}>
+      <Typography noWrap={true} sx={{ maxWidth: "100%" }}>
         {highlightInformation.length > 0
           ? this.renderHighlightedAutocompleteEntry(
               highlightInformation,
@@ -256,19 +244,15 @@ class SearchBar extends React.PureComponent {
       autoCompleteOpen,
       searchString,
       searchActive,
-      classes,
       loading,
       handleOnAutocompleteInputChange,
       handleSearchInput,
     } = this.props;
     return (
-      <Autocomplete
+      <StyledAutocomplete
         id="searchInputField"
         freeSolo
         size={"small"}
-        classes={{
-          inputRoot: classes.inputRoot,
-        }}
         PopperComponent={CustomPopper}
         PaperComponent={CustomPaper}
         clearOnEscape
@@ -436,15 +420,10 @@ class SearchBar extends React.PureComponent {
   };
 
   render() {
-    const { classes, showSearchResults, isMobile } = this.props;
-    const { panelCollapsed } = this.state;
+    const { showSearchResults, isMobile } = this.props;
 
     return (
-      <Grid
-        className={cslx(classes.searchContainer, {
-          [classes.searchCollapsed]: panelCollapsed,
-        })}
-      >
+      <Grid sx={{ width: 400, height: (theme) => theme.spacing(4) }}>
         <Grid item>
           <Paper elevation={isMobile ? 0 : 1}>
             {this.renderAutoComplete()}
@@ -456,4 +435,4 @@ class SearchBar extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(withIsMobile()(SearchBar)));
+export default withTheme(withIsMobile()(SearchBar));
