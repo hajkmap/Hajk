@@ -313,7 +313,7 @@ class PrintView extends React.PureComponent {
       useMargin: useMargin,
     });
 
-    return !windowVisible ? null : (
+    return (
       <>
         <div className={classes.root}>
           <AppBar
@@ -324,7 +324,9 @@ class PrintView extends React.PureComponent {
             <Tabs
               action={this.handleTabsMounted}
               onChange={this.handleChangeTabs}
-              value={activeTab}
+              value={windowVisible ? activeTab : false} // If the window is not visible,
+              // we cannot send a proper value to the tabs-component. If we do, mui will throw an error.
+              // false is OK though, apparently.
               variant="fullWidth"
             >
               <Tooltip disableInteractive title="Generella inställningar">

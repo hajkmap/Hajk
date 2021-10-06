@@ -342,12 +342,14 @@ class SearchResultListContainer extends React.Component {
 
   renderTabsController = (searchResults) => {
     const { classes, windowVisible } = this.props;
-    return !windowVisible ? null : (
+    return (
       <Tabs
         classes={{
           root: classes.tabsRoot,
         }}
-        value={this.state.activeTabId}
+        value={windowVisible ? this.state.activeTabId : false} // If the window is not visible,
+        // we cannot send a proper value to the tabs-component. If we do, mui will throw an error.
+        // false is OK though, apparently.
         onChange={this.handleTabChange}
         aria-label="search-result-tabs"
       >
