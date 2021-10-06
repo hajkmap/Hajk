@@ -391,7 +391,7 @@ class Edit extends Component {
       layerName,
       (properties) => {
         if (layer) {
-          if (layer.editableFields)
+          if (layer?.editableFields)
             layer.editableFields.forEach((editableField) => {
               properties[editableField.index].listValues = editableField.values;
               properties[editableField.index].textType = editableField.textType;
@@ -405,7 +405,7 @@ class Edit extends Component {
             });
         }
 
-        if (layer.nonEditableFields) {
+        if (layer?.nonEditableFields) {
           layer.nonEditableFields.forEach((nonEditableField) => {
             properties[nonEditableField.index].listValues =
               nonEditableField.values;

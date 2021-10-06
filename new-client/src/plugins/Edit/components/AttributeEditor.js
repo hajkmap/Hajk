@@ -99,7 +99,10 @@ class AttributeEditor extends React.Component {
           .map((v) => v.name)
           .join(";");
       }
-      featureProps[field.name] = value;
+      if (field.name !== "geom") {
+        // should not overwrite the feature's geom
+        featureProps[field.name] = value;
+      }
     });
     this.props.model.editFeature.setProperties(featureProps);
   }

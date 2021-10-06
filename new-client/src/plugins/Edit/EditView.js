@@ -156,7 +156,6 @@ class EditView extends React.PureComponent {
       } else {
         model.filty = false;
         model.refreshEditingLayer();
-        model.vectorSource.clear();
         model.editFeatureBackup = undefined;
         this.handleNext();
         app.globalObserver.publish(

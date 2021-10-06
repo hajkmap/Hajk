@@ -134,7 +134,7 @@ class EditModel {
         .then((response) => {
           response.text().then((wfsResponseText) => {
             const resXml = this.parseWFSTresponse(wfsResponseText);
-            if (response.ExceptionReport || !response.TransactionResponse) {
+            if (resXml.ExceptionReport || !resXml.TransactionResponse) {
               // do not delete the data so the user can submit it again
               done(resXml);
             } else {
