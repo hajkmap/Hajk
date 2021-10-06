@@ -1,24 +1,23 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
 import { isMobile } from "../../../utils/IsMobile";
 import { List, ListItem } from "@mui/material";
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 import SearchResultsPreview from "./SearchResultsPreview";
+import { styled } from "@mui/material/styles";
 
-const styles = () => ({
-  featureList: {
-    padding: 0,
-    width: "100%",
-    transition: "none",
-  },
-  featureListItem: {
-    width: "100%",
-    display: "flex",
-    padding: 0,
-    transition: "none",
-  },
-});
+const StyledList = styled(List)(() => ({
+  padding: 0,
+  width: "100%",
+  transition: "none",
+}));
+
+const StyledListItem = styled(ListItem)(() => ({
+  width: "100%",
+  display: "flex",
+  padding: 0,
+  transition: "none",
+}));
 
 class SearchResultsDataset extends React.Component {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
@@ -137,7 +136,6 @@ class SearchResultsDataset extends React.Component {
   renderFeatureList = (features) => {
     const {
       featureCollection,
-      classes,
       app,
       selectedFeatures,
       activeFeature,
@@ -153,16 +151,14 @@ class SearchResultsDataset extends React.Component {
     const sortedFeatures = this.getSortedFeatures(features);
     return (
       <>
-        <List
-          className={classes.featureList}
+        <StyledList
           id={`search-result-dataset-details-${featureCollection.source.id}`}
         >
           {sortedFeatures.map((f) => {
             const featureTitle = getFeatureTitle(f);
             return (
-              <ListItem
+              <StyledListItem
                 disableTouchRipple
-                className={classes.featureListItem}
                 key={f.id}
                 divider
                 button
@@ -199,10 +195,10 @@ class SearchResultsDataset extends React.Component {
                     shouldRenderSelectedCollection
                   }
                 />
-              </ListItem>
+              </StyledListItem>
             );
           })}
-        </List>
+        </StyledList>
         {this.renderSearchResultPreview()}
       </>
     );
@@ -253,4 +249,4 @@ class SearchResultsDataset extends React.Component {
   }
 }
 
-export default withStyles(styles)(SearchResultsDataset);
+export default SearchResultsDataset;
