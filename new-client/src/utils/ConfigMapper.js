@@ -379,6 +379,7 @@ export default class ConfigMapper {
         id: args.id,
         name: args.id,
         layerType: args.layerType,
+        declutter: args.declutter,
         caption: args.caption,
         visible: args.visibleAtStart !== false,
         extent: args.extent,

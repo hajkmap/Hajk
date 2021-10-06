@@ -38,7 +38,45 @@
   ],
   "mvtlayers": [
     {
-      "id": "asd123",
+      "id": "asd1234",
+      "caption": "Byggnader MVT",
+      "attributions": "Halmstads kommun",
+      "url": "http://geoservertest.halmstad.se/geoserver/gwc/service/tms/1.0.0/bmf%3Abyggnader@HK3006@pbf/{z}/{x}/{-y}.pbf",
+      "declutter": true,
+      "projection": "EPSG:3006",
+      "extent": [-1200000, 4700000, 2600000, 8500000],
+      "origin": [-1200000, 4700000],
+      "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8]
+    },
+    {
+      "id": "ext123",
+      "caption": "Länder MVT",
+      "projection": "EPSG:3006",
+      "attributions": "GeoServer",
+      "url": "https://ahocevar.com/geoserver/gwc/service/tms/1.0.0/ne:ne_10m_admin_0_countries@EPSG%3A900913@pbf/{z}/{x}/{-y}.pbf",
+      "declutter": true
+    },
+    {
+      "id": "_asd1234",
+      "caption": "Byggnader MVT",
+      "attributions": "Halmstads kommun",
+      "url": "http://geoservertest.halmstad.se/geoserver/gwc/service/tms/1.0.0/bmf%3Abyggnader@HK3KM@pbf/{z}/{x}/{-y}.pbf",
+      "declutter": true,
+      "projection": "EPSG:3006",
+      "resolutions": [
+        55.99999999999999, 27.999999999999996, 13.999999999999998,
+        6.999999999999999, 4.199999999999999, 2.8, 1.4, 0.5599999999999999,
+        0.28, 0.112, 0.056
+      ],
+      "origin": [69574.55121249048, 6266080.698556085],
+      "extent": [
+        69574.55121249048, 6266080.698556085, 142285.84709295488,
+        6316866.023399129
+      ],
+      "matrixIds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    },
+    {
+      "id": "_asd123",
       "caption": "Byggnader MVT",
       "attributions": "Lantmäteriet",
       "url": "https://mapslab.lantmateriet.se/vt-open/wmts/1.0.0/byggnad/default/3006/{z}/{y}/{x}.mvt",
@@ -49,6 +87,42 @@
       "matrixIds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
       "declutter": true,
       "projection": "EPSG:3006"
+    },
+    {
+      "id": "_asd1234",
+      "caption": "Byggnader MVT",
+      "attributions": "Halmstads kommun",
+      "declutter": true,
+      "url": "http://geoservertest.halmstad.se/geoserver/gwc/service/tms/1.0.0/bmf%3Abyggnader@HK3KM@pbf/{z}/{x}/{-y}.pbf",
+      "projection": "EPSG:3006",
+      "extent": [
+        -20037508.342789244, -20037508.342789244, 20037508.342789244,
+        20037508.342789244
+      ],
+      "origin": [-20037508.342789244, 20037508.342789244],
+      "resolutions": [
+        156543.03392804097, 78271.51696402048, 39135.75848201024,
+        19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564,
+        1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525,
+        76.43702828517625, 38.21851414258813, 19.109257071294063,
+        9.554628535647032
+      ],
+      "tileSize": 256,
+      "zoomFactor": 2
+    },
+    {
+      "id": "_asd1234",
+      "caption": "Byggnader MVT",
+      "attributions": "Halmstads kommun",
+      "declutter": true,
+      "url": "http://geoservertest.halmstad.se/geoserver/gwc/service/tms/1.0.0/bmf%3Abyggnader@HK3006@pbf/{z}/{x}/{-y}.pbf",
+      "projection": "EPSG:3006",
+      "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
+      "origin": [0, 0],
+      "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
+      "maxZoom": 8,
+      "minZoom": 0,
+      "tileSize": 256
     }
   ],
   "wmslayers": [

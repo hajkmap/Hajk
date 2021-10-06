@@ -363,15 +363,13 @@ class AppModel {
         this.map.addLayer(layerItem.layer);
         break;
       case "mvt":
-        console.log("addMapLayer()", layer);
         layerConfig = configMapper.mapMVTConfig(layer, this.config);
-        console.log("got back layerConfig: ", layerConfig);
         layerItem = new MVTLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
           this.map
         );
-        console.log("got back layerItem: ", layerItem);
+        console.log("Adding OL layer to map: ", layerItem);
         this.map.addLayer(layerItem.layer);
         break;
       // case "arcgis":
