@@ -28,6 +28,7 @@ import {
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HistoryIcon from "@material-ui/icons/History";
 import { Typography } from "@material-ui/core";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import * as jsts from "jsts";
 class FirSearchNeighborView extends React.PureComponent {
   state = {
@@ -36,6 +37,7 @@ class FirSearchNeighborView extends React.PureComponent {
     buffer: 50,
     results: [],
     resultHistory: [],
+    loading: false,
   };
 
   static propTypes = {
@@ -68,6 +70,7 @@ class FirSearchNeighborView extends React.PureComponent {
       if (_list.length === 0) {
         this.setState({ accordionExpanded: false });
       }
+      this.setState({ loading: false });
       this.forceUpdate();
     }, 500);
   };
@@ -84,6 +87,9 @@ class FirSearchNeighborView extends React.PureComponent {
     if (this.state.resultHistory.length === 0) {
       return;
     }
+
+    this.setState({ loading: true });
+
     this.props.model.layers.buffer.getSource().clear();
     this.localObserver.publish(
       "fir.search.load",
@@ -135,6 +141,7 @@ class FirSearchNeighborView extends React.PureComponent {
   };
 
   handleSearch = () => {
+    this.setState({ loading: true });
     clearTimeout(this.buffer_tm);
     this.buffer_tm = setTimeout(() => {
       this._handleSearch();
@@ -263,8 +270,15 @@ class FirSearchNeighborView extends React.PureComponent {
                 component="span"
                 size="small"
                 onClick={this.handleSearch}
+                disabled={this.state.loading}
               >
                 Sök
+                {this.state.loading && (
+                  <CircularProgress
+                    size={24}
+                    className={classes.buttonProgress}
+                  />
+                )}
               </Button>
             </div>
           </AccordionDetails>
@@ -303,6 +317,14 @@ const styles = (theme) => ({
       flex: "0 0 35%",
       marginRight: theme.spacing(2),
     },
+  },
+  buttonProgress: {
+    // color: green[500],
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
   },
 });
 

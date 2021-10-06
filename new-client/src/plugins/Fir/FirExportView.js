@@ -27,7 +27,7 @@ class FirExportView extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
 
     this.localObserver.subscribe("fir.results.filtered", (list) => {
-      this.setState({ results: list });
+      this.setState({ results: [...list] });
       this.forceUpdate();
     });
   }

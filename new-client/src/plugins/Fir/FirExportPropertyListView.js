@@ -11,10 +11,22 @@ import Button from "@material-ui/core/Button";
 import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import DownloadIcon from "@material-ui/icons/GetApp";
+import Collapse from "@material-ui/core/Collapse";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import { hfetch } from "utils/FetchWrapper";
 
 class FirExportPropertyListView extends React.PureComponent {
   state = {
     accordionExpanded: false,
+    loading: false,
+    downloadUrl: null,
+    chCommunities: false,
+    chCommunityFacilities: false,
+    chRights: false,
+    chSsn: false,
+    chTaxedOwner: false,
+    chSendList: false,
   };
 
   static propTypes = {
@@ -32,8 +44,66 @@ class FirExportPropertyListView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
   }
 
+  _collectAndSendData = () => {
+    let fnrList = [];
+
+    this.props.results.forEach((feature) => {
+      fnrList.push("" + feature.get("fnr")); // force string
+    });
+
+    const params = {
+      samfallighet: this.state.chCommunities,
+      ga: this.state.chCommunityFacilities,
+      rattigheter: this.state.chRights,
+      persnr: this.state.chSsn,
+      taxerad_agare: this.state.chTaxedOwner,
+      fastighet_utskick: this.state.chSendList,
+    };
+
+    let data = {
+      fnr: fnrList,
+      param: params,
+    };
+
+    let searchParams = new URLSearchParams();
+    searchParams.append("json", JSON.stringify(data));
+    hfetch(
+      "https://kommungis-utv3.varberg.se/mapservice/fir/realEstateOwnerlist",
+      {
+        method: "post",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        },
+        body: searchParams,
+      }
+    )
+      .then((response) => {
+        // url just comes as a simple body response, get it.
+        return response ? response.text() : null;
+      })
+      .then((text) => {
+        if (text) {
+          this.setState({ loading: false });
+          this.setState({ downloadUrl: text });
+        }
+      })
+      .catch((err, a) => {
+        this.setState({ loading: false });
+        this.setState({ downloadUrl: null });
+        this.props.closeSnackbar(this.snackBar);
+        this.snackBar = this.props.enqueueSnackbar(
+          "Ett fel inträffade vid exporten.",
+          {
+            variant: "error",
+          }
+        );
+      });
+  };
+
   handleSendClick = () => {
-    console.log("Skicka");
+    this.setState({ downloadUrl: null });
+    this.setState({ loading: true });
+    setTimeout(this._collectAndSendData, 25);
   };
 
   ExcelLogo() {
@@ -64,15 +134,6 @@ class FirExportPropertyListView extends React.PureComponent {
           </AccordionSummary>
           <AccordionDetails style={{ display: "block" }}>
             <div>
-              {/* param["samfallighet"] =
-      this.get("chosenColumns").indexOf("samfallighet") != -1;
-    param["ga"] = this.get("chosenColumns").indexOf("ga") != -1;
-    param["rattighet"] = this.get("chosenColumns").indexOf("rattighet") != -1;
-    param["persnr"] = this.get("chosenColumns").indexOf("persnr") != -1;
-    param["taxerad_agare"] =
-      this.get("chosenColumns").indexOf("taxerad_agare") != -1;
-    param["fastighet_utskick"] =
-      this.get("chosenColumns").indexOf("fastighet_utskick") != -1; */}
               <div>Inkludera:</div>
               <div className={classes.checkboxGroupContainer}>
                 <FormControl fullWidth={true}>
@@ -81,10 +142,11 @@ class FirExportPropertyListView extends React.PureComponent {
                     control={
                       <Checkbox
                         className={classes.checkbox}
-                        //checked={state.checkedA}
-                        //onChange={handleChange}
+                        checked={this.state.chCommunities}
+                        onChange={(e) => {
+                          this.setState({ chCommunities: e.target.checked });
+                        }}
                         color="primary"
-                        name="checkedA"
                       />
                     }
                     label="Samfälligheter"
@@ -96,10 +158,13 @@ class FirExportPropertyListView extends React.PureComponent {
                     control={
                       <Checkbox
                         className={classes.checkbox}
-                        //checked={state.checkedA}
-                        //onChange={handleChange}
+                        checked={this.state.chCommunityFacilities}
+                        onChange={(e) => {
+                          this.setState({
+                            chCommunityFacilities: e.target.checked,
+                          });
+                        }}
                         color="primary"
-                        name="checkedA"
                       />
                     }
                     label="Gemensamhetsanläggningar"
@@ -111,10 +176,11 @@ class FirExportPropertyListView extends React.PureComponent {
                     control={
                       <Checkbox
                         className={classes.checkbox}
-                        //checked={state.checkedA}
-                        //onChange={handleChange}
+                        checked={this.state.chRights}
+                        onChange={(e) => {
+                          this.setState({ chRights: e.target.checked });
+                        }}
                         color="primary"
-                        name="checkedA"
                       />
                     }
                     label="Rättigheter"
@@ -126,10 +192,11 @@ class FirExportPropertyListView extends React.PureComponent {
                     control={
                       <Checkbox
                         className={classes.checkbox}
-                        //checked={state.checkedA}
-                        //onChange={handleChange}
+                        checked={this.state.chSsn}
+                        onChange={(e) => {
+                          this.setState({ chSsn: e.target.checked });
+                        }}
                         color="primary"
-                        name="checkedA"
                       />
                     }
                     label="Personnummer"
@@ -141,10 +208,11 @@ class FirExportPropertyListView extends React.PureComponent {
                     control={
                       <Checkbox
                         className={classes.checkbox}
-                        //checked={state.checkedA}
-                        //onChange={handleChange}
+                        checked={this.state.chTaxedOwner}
+                        onChange={(e) => {
+                          this.setState({ chTaxedOwner: e.target.checked });
+                        }}
                         color="primary"
-                        name="checkedA"
                       />
                     }
                     label="Taxerad ägare"
@@ -156,26 +224,60 @@ class FirExportPropertyListView extends React.PureComponent {
                     control={
                       <Checkbox
                         className={classes.checkbox}
-                        //checked={state.checkedA}
-                        //onChange={handleChange}
+                        checked={this.state.chSendList}
+                        onChange={(e) => {
+                          this.setState({ chSendList: e.target.checked });
+                        }}
                         color="primary"
-                        name="checkedA"
                       />
                     }
                     label="Utskickslista"
                   />
                 </FormControl>
               </div>
-              <Button
-                fullWidth={true}
-                variant="outlined"
-                color="primary"
-                className={classes.button}
-                startIcon={<this.ExcelLogo />}
-                onClick={this.handleSendClick}
-              >
-                Skapa fastighetsförteckning
-              </Button>
+              <div>
+                <div>
+                  <Button
+                    fullWidth={true}
+                    variant="outlined"
+                    color="primary"
+                    className={
+                      this.state.loading
+                        ? classes.buttonLoading
+                        : classes.button
+                    }
+                    startIcon={<this.ExcelLogo />}
+                    onClick={this.handleSendClick}
+                    disabled={this.state.loading}
+                  >
+                    Skapa fastighetsförteckning
+                    {this.state.loading && (
+                      <CircularProgress
+                        size={24}
+                        className={classes.buttonProgress}
+                      />
+                    )}
+                  </Button>
+                </div>
+
+                <Collapse in={this.state.downloadUrl !== null}>
+                  <div className={classes.downloadContainer}>
+                    <Button
+                      fullWidth={true}
+                      variant="outlined"
+                      color="primary"
+                      title={"Ladda ner: \n" + this.state.downloadUrl}
+                      className={classes.button}
+                      startIcon={<DownloadIcon />}
+                      onClick={() => {
+                        document.location.href = this.state.downloadUrl;
+                      }}
+                    >
+                      Ladda ner fil
+                    </Button>
+                  </div>
+                </Collapse>
+              </div>
             </div>
           </AccordionDetails>
         </Accordion>
@@ -220,6 +322,21 @@ const styles = (theme) => ({
   },
   textField: {
     width: "50%",
+  },
+  downloadContainer: {
+    paddingTop: theme.spacing(2),
+  },
+  buttonLoading: {
+    "& img": {
+      opacity: 0.3,
+    },
+  },
+  buttonProgress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
   },
 });
 

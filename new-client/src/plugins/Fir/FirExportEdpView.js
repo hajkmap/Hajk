@@ -8,11 +8,15 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import { Typography } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Collapse from "@material-ui/core/Collapse";
 import { hfetch } from "utils/FetchWrapper";
 
 class FirExportEdpView extends React.PureComponent {
   state = {
     accordionExpanded: false,
+    loading: false,
+    dataWasSent: false,
   };
 
   static propTypes = {
@@ -47,7 +51,7 @@ class FirExportEdpView extends React.PureComponent {
   };
 
   handleEdpClick = () => {
-    console.log("Skicka till EDP");
+    this.setState({ loading: true });
 
     let data = new URLSearchParams();
     data.append("json", JSON.stringify(this.getEdpDataAsArray()));
@@ -60,9 +64,29 @@ class FirExportEdpView extends React.PureComponent {
         },
         body: data,
       }
-    ).then((res) => {
-      console.log(res);
-    });
+    )
+      .then((res) => {
+        clearTimeout(this.tm1);
+        clearTimeout(this.tm2);
+        this.tm1 = setTimeout(() => {
+          this.setState({ loading: false });
+          this.setState({ dataWasSent: true });
+          this.tm2 = setTimeout(() => {
+            this.setState({ dataWasSent: false });
+          }, 3000);
+        }, 1000);
+      })
+      .catch((err) => {
+        this.setState({ loading: false });
+        this.setState({ dataWasSent: false });
+        this.props.closeSnackbar(this.snackBar);
+        this.snackBar = this.props.enqueueSnackbar(
+          "Ett fel inträffade vid exporten.",
+          {
+            variant: "error",
+          }
+        );
+      });
   };
 
   render() {
@@ -89,12 +113,26 @@ class FirExportEdpView extends React.PureComponent {
                 fullWidth={true}
                 variant="outlined"
                 color="primary"
-                className={classes.button}
+                className={
+                  this.state.loading ? classes.buttonLoading : classes.button
+                }
                 startIcon={<this.EdpLogo />}
                 onClick={this.handleEdpClick}
+                disabled={this.state.loading}
               >
                 Skicka till EDP
+                {this.state.loading && (
+                  <CircularProgress
+                    size={24}
+                    className={classes.buttonProgress}
+                  />
+                )}
               </Button>
+              <Collapse in={this.state.dataWasSent}>
+                <div className={classes.bottomContainer}>
+                  <strong>{this.props.results.length}</strong> objekt skickades.
+                </div>
+              </Collapse>
             </div>
           </AccordionDetails>
         </Accordion>
@@ -106,6 +144,22 @@ class FirExportEdpView extends React.PureComponent {
 const styles = (theme) => ({
   heading: {
     fontWeight: 500,
+  },
+  buttonLoading: {
+    "& img": {
+      opacity: 0.3,
+    },
+  },
+  buttonProgress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
+  },
+  bottomContainer: {
+    paddingTop: theme.spacing(2),
+    textAlign: "center",
   },
 });
 

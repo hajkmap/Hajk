@@ -112,7 +112,7 @@ class FirWfsService {
     if (designations.length === 0) {
       // zero designations
       rootFilter = this._getFiltersForStringAndGeometrySearch(type, params);
-    } else if (designations.length === 1) {
+    } else if (designations.length >= 1) {
       rootFilter = this._getFiltersForDesignations(type, params);
     }
 
@@ -137,7 +137,6 @@ class FirWfsService {
 
   nestedSearch(data, params, resolve, reject) {
     let ids = [];
-
     data.features.forEach((feature) => {
       let id = feature.properties.fnr || feature.properties.nyckel;
       if (!ids.includes(id)) {

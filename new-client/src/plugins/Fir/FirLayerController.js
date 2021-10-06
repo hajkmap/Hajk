@@ -425,6 +425,7 @@ class FirLayerController {
     );
 
     if (this.bufferValue === 0) {
+      this.getLayer("buffer").getSource().clear();
       return;
     }
 

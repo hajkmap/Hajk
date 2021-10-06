@@ -86,8 +86,6 @@ class Fir extends React.PureComponent {
     let features = this.model.layers.buffer.getSource().getFeatures();
 
     if (features.length === 0) {
-      console.log("hmm");
-
       features = this.model.layers.draw.getSource().getFeatures();
     }
 
@@ -132,7 +130,6 @@ class Fir extends React.PureComponent {
           model={this.model}
           app={this.props.app}
           localObserver={this.localObserver}
-          updateCustomProp={this.updateCustomProp}
         />
       </BaseWindowPlugin>
     );
