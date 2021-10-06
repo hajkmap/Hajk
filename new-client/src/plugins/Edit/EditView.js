@@ -144,12 +144,28 @@ class EditView extends React.PureComponent {
   onSaveClicked = () => {
     const { model, app } = this.props;
     model.save((response) => {
-      model.filty = false;
-      model.refreshEditingLayer();
-      this.handleNext();
-      app.globalObserver.publish("core.alert", this.getStatusMessage(response));
-      this.toggleActiveTool(undefined);
-      model.deactivateInteraction();
+      if (
+        response &&
+        (response.ExceptionReport || !response.TransactionResponse)
+      ) {
+        this.props.observer.publish("editFeature", model.editFeatureBackup);
+        app.globalObserver.publish(
+          "core.alert",
+          this.getStatusMessage(response)
+        );
+      } else {
+        model.filty = false;
+        model.refreshEditingLayer();
+        model.vectorSource.clear();
+        model.editFeatureBackup = undefined;
+        this.handleNext();
+        app.globalObserver.publish(
+          "core.alert",
+          this.getStatusMessage(response)
+        );
+        this.toggleActiveTool(undefined);
+        model.deactivateInteraction();
+      }
     });
   };
 

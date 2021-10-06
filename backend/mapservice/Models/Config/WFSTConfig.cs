@@ -29,7 +29,7 @@ namespace MapService.Models.Config
 
         public List<EditableField> editableFields { get; set; }
 
-        public List<EditableField> nonEditableNonHiddenFields { get; set; }
+        public List<EditableField> nonEditableFields { get; set; }
 
         public bool editPoint{ get; set; }
 

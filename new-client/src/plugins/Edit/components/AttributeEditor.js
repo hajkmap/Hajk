@@ -37,7 +37,7 @@ class AttributeEditor extends React.Component {
       field.initialRender = true;
     });
 
-    props.editSource?.nonEditableNonHiddenFields?.forEach((field, i) => {
+    props.editSource?.nonEditableFields?.forEach((field, i) => {
       field.initialRender = true;
     });
   }
@@ -90,7 +90,7 @@ class AttributeEditor extends React.Component {
       featureProps[key] = value;
     });
 
-    this.props.editSource?.nonEditableNonHiddenFields?.forEach((field) => {
+    this.props.editSource?.nonEditableFields?.forEach((field) => {
       let value = field.defaultValue;
       if (value === "") value = null;
       if (Array.isArray(value)) {
@@ -555,8 +555,9 @@ class AttributeEditor extends React.Component {
       );
     });
 
-    const markupNonEdit =
-      this.props.editSource?.nonEditableNonHiddenFields?.map((field, i) => {
+    const markupNonEdit = this.props.editSource?.nonEditableFields
+      ?.filter((item) => item.hidden === false)
+      .map((field, i) => {
         const valueMarkup = this.getValueMarkup(field, false);
         return (
           <Grid item xs={12} key={i} ref={field.name}>

@@ -25,6 +25,7 @@ class EditModel {
     this.modify = undefined;
     this.key = undefined;
     this.editFeature = undefined;
+    this.editFeatureBackup = undefined;
     this.editSource = undefined;
     this.removeFeature = undefined;
     this.shell = undefined;
@@ -132,12 +133,18 @@ class EditModel {
       })
         .then((response) => {
           response.text().then((wfsResponseText) => {
-            this.refreshLayer(src.layers[0]);
-            this.vectorSource
-              .getFeatures()
-              .filter((f) => f.modification !== undefined)
-              .forEach((f) => (f.modification = undefined));
-            done(this.parseWFSTresponse(wfsResponseText));
+            const resXml = this.parseWFSTresponse(wfsResponseText);
+            if (response.ExceptionReport || !response.TransactionResponse) {
+              // do not delete the data so the user can submit it again
+              done(resXml);
+            } else {
+              this.refreshLayer(src.layers[0]);
+              this.vectorSource
+                .getFeatures()
+                .filter((f) => f.modification !== undefined)
+                .forEach((f) => (f.modification = undefined));
+              done(resXml);
+            }
           });
         })
         .catch((response) => {
@@ -572,6 +579,7 @@ class EditModel {
   }
 
   resetEditFeature = () => {
+    this.editFeatureBackup = this.editFeature;
     this.editFeature = undefined;
     this.observer.publish("editFeature", this.editFeature);
   };

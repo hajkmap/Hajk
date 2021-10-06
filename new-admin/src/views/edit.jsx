@@ -320,7 +320,7 @@ class Edit extends Component {
   /**
    *
    */
-  getNonEditableNonHiddenFields() {
+  getNonEditableFields() {
     var filter, mapper;
     mapper = (item) => {
       return {
@@ -336,8 +336,7 @@ class Edit extends Component {
       };
     };
 
-    filter = (item) =>
-      (!item.checked || item.checked === false) && item.hidden === false; // checked is missing if the checkbox has not been touched
+    filter = (item) => !item.checked || item.checked === false; // checked is missing if the checkbox has not been touched
 
     return this.state.layerProperties.filter(filter).map(mapper);
   }
@@ -428,24 +427,20 @@ class Edit extends Component {
             });
         }
 
-        if (layer.nonEditableNonHiddenFields) {
-          layer.nonEditableNonHiddenFields.forEach(
-            (nonEditableNonHiddenField) => {
-              properties[nonEditableNonHiddenField.index].listValues =
-                nonEditableNonHiddenField.values;
-              properties[nonEditableNonHiddenField.index].textType =
-                nonEditableNonHiddenField.textType;
-              properties[nonEditableNonHiddenField.index].alias =
-                nonEditableNonHiddenField.alias;
-              properties[nonEditableNonHiddenField.index].description =
-                nonEditableNonHiddenField.description;
-              properties[nonEditableNonHiddenField.index].checked = false;
-              properties[nonEditableNonHiddenField.index].hidden =
-                nonEditableNonHiddenField.hidden;
-              properties[nonEditableNonHiddenField.index].defaultValue =
-                nonEditableNonHiddenField.defaultValue;
-            }
-          );
+        if (layer.nonEditableFields) {
+          layer.nonEditableFields.forEach((nonEditableField) => {
+            properties[nonEditableField.index].listValues =
+              nonEditableField.values;
+            properties[nonEditableField.index].textType =
+              nonEditableField.textType;
+            properties[nonEditableField.index].alias = nonEditableField.alias;
+            properties[nonEditableField.index].description =
+              nonEditableField.description;
+            properties[nonEditableField.index].checked = false;
+            properties[nonEditableField.index].hidden = nonEditableField.hidden;
+            properties[nonEditableField.index].defaultValue =
+              nonEditableField.defaultValue;
+          });
         }
 
         this.setState({
@@ -663,7 +658,7 @@ class Edit extends Component {
         layers: this.getValue("layers"),
         projection: this.getValue("projection"),
         editableFields: this.getValue("editableFields"),
-        nonEditableNonHiddenFields: this.getNonEditableNonHiddenFields(),
+        nonEditableFields: this.getNonEditableFields(),
         editPoint: this.getValue("point"),
         editPolygon: this.getValue("polygon"),
         editLine: this.getValue("linestring"),
