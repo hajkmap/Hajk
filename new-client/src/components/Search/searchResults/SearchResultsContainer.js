@@ -27,7 +27,7 @@ import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 import { visuallyHidden } from "@mui/utils";
 import { styled } from "@mui/material/styles";
 
-const Root = styled((props) => <Paper {...props} />)(({ theme }) => ({
+const StyledPaper = styled((props) => <Paper {...props} />)(({ theme }) => ({
   maxHeight: "80vh",
   overflow: "auto",
   minWidth: 200,
@@ -1104,11 +1104,11 @@ class SearchResultsContainer extends React.PureComponent {
     return (
       <Collapse in={!panelCollapsed}>
         {sumOfResults === null ? null : sumOfResults === 0 ? (
-          <Root>
+          <StyledPaper>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
-          </Root>
+          </StyledPaper>
         ) : (
-          <Root>
+          <StyledPaper>
             <ResultListWrapper container>
               {this.renderSearchResultsHeader()}
               {filterInputFieldOpen && this.renderFilterInputField()}
@@ -1143,7 +1143,7 @@ class SearchResultsContainer extends React.PureComponent {
                 />
               </Grid>
             </ResultListWrapper>
-          </Root>
+          </StyledPaper>
         )}
       </Collapse>
     );
