@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import BreadCrumb from "./BreadCrumb.js";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -8,98 +10,56 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import ScrollMenu from "react-horizontal-scrolling-menu";
 
-const styles = (theme) => ({
-  moreButton: {
-    background: theme.palette.background.paper,
-    padding: "6px",
-    margin: "0px",
-    borderRadius: "100%",
-    "&:hover": {
-      cursor: "pointer",
-    },
+// A HOC that pipes isMobile to the children. See this as a proposed
+// solution. It is not pretty, but if we move this to a separate file
+// we could use this HOC instead of the isMobile helper function in ../../utils/.
+// TODO: Move to some /hooks folder
+const withIsMobile = () => (WrappedComponent) => (props) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  return <WrappedComponent {...props} isMobile={isMobile} />;
+};
+
+const MobileRoot = styled("div")(({ theme }) => ({
+  position: "fixed",
+  background: theme.palette.background.paper,
+  boxShadow: theme.shadows[24],
+  left: 0,
+  bottom: 0,
+  right: 0,
+  width: "auto",
+  zIndex: 2,
+}));
+
+const MobileHeader = styled("div")(({ theme }) => ({
+  padding: "5px 18px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+}));
+
+const BreadCrumbsContainerMobile = styled("div")(({ theme }) => ({
+  maxHeight: "300px",
+  overflow: "auto",
+  margin: "10px",
+  [theme.breakpoints.down("xs")]: {
+    maxHeight: "250px",
   },
-  breadExpand: {
-    position: "fixed",
-    right: 0,
-    bottom: "-2px",
-    zIndex: 1000,
-  },
-  breadCrumbs: {
-    position: "fixed",
-    background: theme.palette.background.paper,
-    boxShadow: theme.shadows[24],
-    borderRadius: theme.shape.borderRadius,
-    bottom: "20px",
-    right: "20px",
-    [theme.breakpoints.up("xs")]: {
-      borderRadius: theme.shape.borderRadius,
-      overflow: "hidden",
-      width: "269px",
-      boxShadow: theme.shadows[4],
-    },
-    [theme.breakpoints.down("sm")]: {
-      left: 0,
-      bottom: 0,
-      right: 0,
-      width: "auto",
-    },
-  },
-  breadCrumbsHeader: {
-    background: "white",
-    padding: "5px 18px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottom: "#ccc",
-  },
-  breadCrumbsHeaderText: {
-    marginRight: "15px",
-  },
-  breadCrumbsContainer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 2,
-  },
-  breadCrumbsContainerMobile: {
-    maxHeight: "300px",
-    overflow: "auto",
-    margin: "10px",
-    [theme.breakpoints.down("lg")]: {
-      maxHeight: "236px",
-    },
-    [theme.breakpoints.down("sm")]: {
-      maxHeight: "150px",
-    },
-  },
-  overflow: {
-    position: "absolute",
-    right: 0,
-    bottom: "50px",
-  },
-  arrowLeft: {
-    background: "white",
-    height: "24px",
-    display: "flex",
-    alignContent: "center",
-    padding: "10px",
-    border: "1px solid #ccc",
-  },
-  arrowRight: {
-    background: "white",
-    height: "24px",
-    display: "flex",
-    alignContent: "center",
-    padding: "10px",
-    border: "1px solid #ccc",
-  },
-});
+}));
+
+const BreadCrumbsContainer = styled("div")(() => ({
+  position: "absolute",
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 2,
+}));
 
 class BreadCrumbs extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      chapters: null,
       visibleLayers: [],
       open: false,
     };
@@ -108,7 +68,6 @@ class BreadCrumbs extends Component {
         chapters: chapters,
       });
     });
-    this.timer = 0;
   }
 
   bindLayerEvents = (visibleLayers) => (layer) => {
@@ -124,7 +83,7 @@ class BreadCrumbs extends Component {
     this.removedLayerBuffer = [];
 
     layer.on("change:visible", (e) => {
-      let changedLayer = e.target;
+      const changedLayer = e.target;
       setTimeout(() => {
         var visibleLayers = [
           ...this.state.visibleLayers,
@@ -187,6 +146,21 @@ class BreadCrumbs extends Component {
     }
   }
 
+  // Returns all active layers that contains layer-info
+  // and is not a background-layer.
+  getBreadCrumbCompatibleLayers = () => {
+    return this.state.visibleLayers.filter((layer) => {
+      if (
+        !layer.getProperties().layerInfo ||
+        (layer.getProperties().layerInfo &&
+          layer.getProperties().layerInfo.layerType === "base")
+      ) {
+        return false;
+      }
+      return true;
+    });
+  };
+
   toggle = () => {
     this.setState({
       open: !this.state.open,
@@ -194,36 +168,17 @@ class BreadCrumbs extends Component {
   };
 
   renderMobile(layers) {
-    const { classes } = this.props;
-    const { open, chapters } = this.state;
+    const { open } = this.state;
     return (
-      <div className={classes.breadCrumbs}>
-        <div className={classes.breadCrumbsHeader}>
-          <Typography variant="h5" className={classes.breadCrumbsHeaderText}>
-            Innehåll i kartan
-          </Typography>
-          <div>
-            {open ? (
-              <IconButton
-                className={classes.button}
-                onClick={() => this.toggle()}
-                size="large"
-              >
-                <RemoveCircleIcon />
-              </IconButton>
-            ) : (
-              <IconButton
-                className={classes.button}
-                onClick={() => this.toggle()}
-                size="large"
-              >
-                <AddCircleIcon />
-              </IconButton>
-            )}
-          </div>
-        </div>
-        {open ? (
-          <div className={classes.breadCrumbsContainerMobile}>
+      <MobileRoot>
+        <MobileHeader>
+          <Typography>Innehåll i kartan</Typography>
+          <IconButton onClick={this.toggle} size="large">
+            {open ? <RemoveCircleIcon /> : <AddCircleIcon />}
+          </IconButton>
+        </MobileHeader>
+        {!open ? null : (
+          <BreadCrumbsContainerMobile>
             {layers.length > 0 ? (
               <Button onClick={this.clear}>Ta bort allt innehåll</Button>
             ) : (
@@ -232,72 +187,48 @@ class BreadCrumbs extends Component {
                 information i kartan.
               </Typography>
             )}
-            {layers.map((layer) => (
+            {layers.map((layer, index) => (
               <BreadCrumb
-                key={layer.get("caption") + Math.random()}
+                key={`${layer.get("caption")}-${index}`}
                 title={layer.get("caption")}
                 layer={layer}
-                chapters={chapters}
+                chapters={this.state.chapters}
+                app={this.props.app}
               />
             ))}
-          </div>
-        ) : null}
-      </div>
+          </BreadCrumbsContainerMobile>
+        )}
+      </MobileRoot>
     );
   }
 
   renderDesktop(layers) {
-    const { classes, app } = this.props;
-    const { chapters } = this.state;
-
-    var breadCrumbs = layers.map((layer) => (
+    const breadCrumbs = layers.map((layer, index) => (
       <BreadCrumb
-        key={layer.get("caption") + Math.random()}
+        key={`${layer.get("caption")}-${index}`}
         title={layer.get("caption")}
         layer={layer}
-        chapters={chapters}
-        app={app}
+        chapters={this.state.chapters}
+        app={this.props.app}
       />
     ));
     return (
-      <div className={classes.breadCrumbsContainer}>
-        <ScrollMenu
-          ref="scrollMenu"
-          data={breadCrumbs}
-          alignCenter={false}
-          // hideArrows={false}
-          // arrowLeft={<Arrow type="left" />}
-          // arrowRight={<Arrow type="right" />}
-        />
-      </div>
+      <BreadCrumbsContainer>
+        <ScrollMenu ref="scrollMenu" data={breadCrumbs} alignCenter={false} />
+      </BreadCrumbsContainer>
     );
   }
 
-  componentDidUpdate() {}
-
   render() {
-    const isMobile = this.state.width < 600;
-    const layers = this.state.visibleLayers.filter((layer) => {
-      let isBreadCrumb = true;
-      if (
-        !layer.getProperties().layerInfo ||
-        (layer.getProperties().layerInfo &&
-          layer.getProperties().layerInfo.layerType === "base")
-      ) {
-        isBreadCrumb = false;
-      }
-      return isBreadCrumb;
-    });
-    if (isMobile) {
+    // We've never been mobile, huh?...
+    //const isMobile = this.state.width < 600;
+    const layers = this.getBreadCrumbCompatibleLayers();
+    if (this.props.isMobile) {
       return this.renderMobile(layers);
     } else {
-      return (
-        <div>
-          <div>{this.renderDesktop(layers)}</div>
-        </div>
-      );
+      return this.renderDesktop(layers);
     }
   }
 }
 
-export default withStyles(styles)(BreadCrumbs);
+export default withIsMobile()(BreadCrumbs);
