@@ -71,6 +71,9 @@ const styles = (theme) => {
       display: "flex",
       flexDirection: "column",
       pointerEvents: "none",
+      [theme.breakpoints.down("sm")]: {
+        padding: 0,
+      },
     },
     windowsContainer: {
       position: "absolute",
@@ -93,14 +96,8 @@ const styles = (theme) => {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "flex-start",
-      "& > *": {
-        marginBottom: theme.spacing(2),
-      },
       [theme.breakpoints.down("sm")]: {
         zIndex: 3,
-        marginLeft: `-${theme.spacing(2)}`,
-        marginRight: `-${theme.spacing(2)}`,
-        marginTop: `-${theme.spacing(2)}`,
         maxHeight: theme.spacing(6),
         boxShadow: theme.shadows[3],
         backgroundColor: theme.palette.background.paper,
@@ -110,6 +107,11 @@ const styles = (theme) => {
       zIndex: 2,
       flex: 1,
       display: "flex",
+      paddingTop: theme.spacing(2), // we don't want the content of main box to "hit" header/footer
+      paddingBottom: theme.spacing(2),
+      [theme.breakpoints.down("sm")]: {
+        padding: theme.spacing(2), // on small screen the inner padding of AppBox is unset, so we must add this
+      },
     },
     leftColumn: {
       flex: 1,
@@ -121,15 +123,26 @@ const styles = (theme) => {
     controlsColumn: {
       display: "flex",
       flexDirection: "column",
-      [theme.breakpoints.down("sm")]: {
-        marginTop: theme.spacing(2),
-      },
     },
     footer: {
+      width: "100%",
       zIndex: 3,
       display: "flex",
+      flexDirection: "row-reverse",
+      justifyContent: "space-between",
+      [theme.breakpoints.down("sm")]: {
+        flexDirection: "column",
+      },
+    },
+    footerBreadcrumbs: {},
+    footerMapControls: {
+      display: "flex",
       justifyContent: "flex-end",
-      height: 25,
+      [theme.breakpoints.down("sm")]: {
+        marginBottom: theme.spacing(2),
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(2),
+      },
       "& > *": {
         marginLeft: theme.spacing(1),
       },
@@ -874,8 +887,14 @@ class App extends React.PureComponent {
             <footer
               className={cslx(classes.footer, classes.pointerEventsOnChildren)}
             >
-              <ScaleLine map={this.appModel.getMap()} />
-              <Attribution map={this.appModel.getMap()} />
+              <div className={classes.footerMapControls}>
+                <ScaleLine map={this.appModel.getMap()} />
+                <Attribution map={this.appModel.getMap()} />
+              </div>
+              <div
+                className={classes.footerBreadcrumbs}
+                id="breadcrumbs-container"
+              />
             </footer>
           </div>
           <div

@@ -21,7 +21,6 @@ const withIsMobile = () => (WrappedComponent) => (props) => {
 };
 
 const MobileRoot = styled("div")(({ theme }) => ({
-  position: "fixed",
   background: theme.palette.background.paper,
   boxShadow: theme.shadows[24],
   left: 0,

@@ -135,7 +135,7 @@ class LayersSwitcherView extends React.PureComponent {
             app={this.props.app}
           />
         </div>,
-        document.getElementById("map")
+        document.getElementById("breadcrumbs-container")
       )
     );
   };
