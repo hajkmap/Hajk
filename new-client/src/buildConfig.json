@@ -19,7 +19,9 @@
     "Search",
     "StreetView",
     "Suggest",
-    "TimeSlider"
+    "TimeSlider",
+    "Fme",
+    "GeosuiteExport"
   ],
   "allTools": [
     "Anchor",
@@ -43,6 +45,7 @@
     "StreetView",
     "Suggest",
     "TimeSlider",
-    "vtsearch"
+    "vtsearch",
+    "GeosuiteExport"
   ]
 }
