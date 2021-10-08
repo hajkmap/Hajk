@@ -7,7 +7,7 @@
       "extent": [
         181896.33,
         6101648.07,
-        864416.0,
+        864416,
         7689478.3
       ],
       "units": null
@@ -18,7 +18,7 @@
       "extent": [
         181896.33,
         6101648.07,
-        864416.0,
+        864416,
         7689478.3
       ],
       "units": null
@@ -324,13 +324,13 @@
             "parent": "-1",
             "layers": [
               {
-                "id": "227",
-                "drawOrder": 0,
-                "visibleAtStart": false,
+                "id": "mnmm8k",
+                "drawOrder": 1000,
+                "visibleAtStart": true,
                 "infobox": ""
               },
               {
-                "id": "226",
+                "id": "229",
                 "drawOrder": 1000,
                 "visibleAtStart": false,
                 "infobox": ""
@@ -398,6 +398,10 @@
           {
             "id": "0022ac0a-d764-b704-9d6a-9a4ba12d401a",
             "visibleForGroups": []
+          },
+          {
+            "id": "6e3fc475-eeaf-2fd9-230c-f1c6936d983e",
+            "visibleForGroups": []
           }
         ],
         "visibleForGroups": [],
@@ -441,7 +445,18 @@
       "index": 11
     },
     {
+      "type": "geosuiteexport",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 4
+    },
+    {
       "type": "information",
+      "index": 3,
       "options": {
         "headerText": "Om kartan",
         "text": "<b>Här kan vi skriva information om Borrhålskartan</b><br /><br />\nInformationen som vi visar har kan vara specifik till borrhållskartan. <br /><br />\nVi kan har info och en länk och information här om de olika sätt man kan hämnta borrhålsdata om man har svårt att använda karrtan. ",
@@ -450,65 +465,54 @@
         "visibleAtStart": true,
         "showInfoOnce": false,
         "visibleForGroups": []
-      },
-      "index": 7
-    },
-    {
-      "type": "geosuiteexport",
-      "options": {
-        "target": "control",
-        "position": "right",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 16
+      }
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      320000,
-      6400000
+      150700,
+      6399400
     ],
     "title": "Hajk 3",
-    "projection": "EPSG:3006",
-    "zoom": 5,
-    "maxZoom": 8,
+    "projection": "EPSG:3007",
+    "zoom": 1,
+    "maxZoom": 10,
     "minZoom": 0,
     "resolutions": [
-      2048.0,
-      1024.0,
-      512.0,
-      256.0,
-      128.0,
-      64.0,
-      32.0,
-      16.0,
-      8.0
+      70.00022,
+      42,
+      28.00009,
+      14.00004,
+      7.000022,
+      2.800009,
+      1.400004,
+      0.700002,
+      0.280001,
+      0.14,
+      0.07
     ],
     "origin": [
-      -1200000.0,
-      8500000.0
+      0,
+      0
     ],
     "extent": [
-      -1200000.0,
-      4700000.0,
-      2600000.0,
-      8500000.0
+      105000,
+      6355000,
+      185000,
+      6435000
     ],
-    "constrainOnlyCenter": false,
+    "constrainOnlyCenter": true,
     "constrainResolution": false,
-    "enableDownloadLink": false,
     "logo": "/logoLight.png",
-    "logoLight": "logoLight.png",
-    "logoDark": "logoDark.png",
     "geoserverLegendOptions": "",
     "mapselector": false,
     "mapcleaner": false,
     "drawerVisible": false,
-    "drawerVisibleMobile": false,
     "drawerPermanent": false,
+    "drawerVisibleMobile": false,
     "activeDrawerOnStart": "plugins",
+    "showThemeToggler": false,
     "colors": {
       "primaryColor": "#333333",
       "secondaryColor": "#ffa000",
@@ -517,7 +521,9 @@
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
     "crossOrigin": "anonymous",
-    "showCookieNotice": true,
-    "showThemeToggler": false
+    "logoLight": "logoLight.png",
+    "logoDark": "logoDark.png",
+    "enableDownloadLink": false,
+    "showCookieNotice": true
   }
 }
