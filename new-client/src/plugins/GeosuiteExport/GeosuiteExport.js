@@ -9,6 +9,7 @@ import EditLocationIcon from "@material-ui/icons/EditLocation";
 class GeosuiteExport extends React.PureComponent {
   state = {
     title: this.props.options.title ?? "Hämta data",
+    description: this.props.options.description ?? "Hämta Geotekniska data",
     color: null,
     playing: false,
   };
@@ -43,7 +44,7 @@ class GeosuiteExport extends React.PureComponent {
           icon: <EditLocationIcon />,
           title: this.state.title,
           color: this.state.color,
-          description: "Hämta Geotekniska data",
+          description: this.state.description,
           height: 450,
           width: 400,
         }}

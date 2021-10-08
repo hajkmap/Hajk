@@ -14,7 +14,6 @@ class GeosuiteExportModel {
 
   //example
   createWfsRequest(area) {
-    console.log(area);
     //create wfs request (example)
     const request = `http://example.com/geoserver/wfs?
     service=wfs&
