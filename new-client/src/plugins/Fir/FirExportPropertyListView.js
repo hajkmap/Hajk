@@ -92,7 +92,7 @@ class FirExportPropertyListView extends React.PureComponent {
         this.setState({ downloadUrl: null });
         this.props.closeSnackbar(this.snackBar);
         this.snackBar = this.props.enqueueSnackbar(
-          "Ett fel inträffade vid exporten.",
+          "Ett fel inträffade vid exporten av fastighetsförteckningen.",
           {
             variant: "error",
           }

@@ -29,6 +29,17 @@ class FirView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+
+    this.localObserver.subscribe("fir.search.error", (err) => {
+      this.props.closeSnackbar(this.snackBar);
+      this.snackBar = this.props.enqueueSnackbar(
+        `Ett fel inträffade vid sökningen.\n ${err.name}: ${err.message}`,
+        {
+          variant: "error",
+          style: { whiteSpace: "pre-line" },
+        }
+      );
+    });
   }
 
   handleChangeTabs = (event, activeTab) => {

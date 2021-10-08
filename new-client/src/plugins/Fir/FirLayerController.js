@@ -1,7 +1,7 @@
 import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
 
-import { Fill, Stroke, Circle, Style, Icon } from "ol/style";
+import { Circle, Style, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
 import LinearRing from "ol/geom/LinearRing.js";
 import {
@@ -25,51 +25,6 @@ class FirLayerController {
     this.removeIsActive = false;
     this.initLayers();
     this.initListeners();
-
-    this.setStyle1();
-    this.setStyle2();
-  }
-
-  setStyle1() {
-    var fill = new Fill({
-      color: "rgba(255,255,255,0.4)",
-    });
-    var stroke = new Stroke({
-      color: "#3399CC",
-      width: 1.25 * 2,
-    });
-    this.styleOff = [
-      new Style({
-        image: new Circle({
-          fill: fill,
-          stroke: stroke,
-          radius: 5,
-        }),
-        fill: fill,
-        stroke: stroke,
-      }),
-    ];
-  }
-
-  setStyle2() {
-    var fill = new Fill({
-      color: "rgba(255,255,255,0.4)",
-    });
-    var stroke = new Stroke({
-      color: "red",
-      width: 1.25 * 4,
-    });
-    this.styleOn = [
-      new Style({
-        image: new Circle({
-          fill: fill,
-          stroke: stroke,
-          radius: 5,
-        }),
-        fill: fill,
-        stroke: stroke,
-      }),
-    ];
   }
 
   initLayers() {
@@ -94,8 +49,6 @@ class FirLayerController {
       source: new VectorSource(),
       queryable: false,
       visible: true,
-      //style: this.getHighlightStyle(),
-      // zIndex: 100,
     });
 
     this.model.layers.buffer = new VectorLayer({
@@ -104,7 +57,6 @@ class FirLayerController {
       source: new VectorSource(),
       queryable: false,
       visible: true,
-      // style: this.getFirBufferFeatureStyle(),
     });
 
     this.model.layers.draw = new VectorLayer({
@@ -113,21 +65,11 @@ class FirLayerController {
       source: new VectorSource(),
       queryable: false,
       visible: true,
-      // style: this.getFirBufferFeatureStyle(),
     });
 
     this.model.layers.draw.getSource().on("addfeature", (e) => {
       e.feature.set("fir_type", "draw");
       this.bufferFeatures(this.bufferValue);
-    });
-
-    this.model.layers.hiddenBuffer = new VectorLayer({
-      caption: "FIRHiddenSearchResultBufferLayer",
-      name: "FIRHiddenSearchResultBufferLayer",
-      source: new VectorSource(),
-      queryable: false,
-      visible: false,
-      // style: this.getFirBufferHiddenFeatureStyle(),
     });
 
     this.model.layers.label = new VectorLayer({
@@ -136,7 +78,6 @@ class FirLayerController {
       source: new VectorSource(),
       queryable: false,
       visible: true,
-      // style: this.getFirBufferHiddenFeatureStyle(),
     });
 
     this.model.layers.marker = new VectorLayer({
@@ -151,7 +92,6 @@ class FirLayerController {
     this.model.map.addLayer(this.model.layers.highlight);
     this.model.map.addLayer(this.model.layers.buffer);
     this.model.map.addLayer(this.model.layers.draw);
-    this.model.map.addLayer(this.model.layers.hiddenBuffer);
     this.model.map.addLayer(this.model.layers.label);
     this.model.map.addLayer(this.model.layers.marker);
 
@@ -180,11 +120,9 @@ class FirLayerController {
       this.model.layers.label.setVisible(data.value);
     });
 
-    let bufferValueChanged_tm = null;
-
     this.observer.subscribe("fir.layers.bufferValueChanged", (data) => {
-      clearTimeout(bufferValueChanged_tm);
-      bufferValueChanged_tm = setTimeout(() => {
+      clearTimeout(this.bufferValueChanged_tm);
+      this.bufferValueChanged_tm = setTimeout(() => {
         // throttle buffer updates, why punish the gpu.
         this.bufferValue = data.value;
         this.bufferFeatures();
@@ -252,7 +190,7 @@ class FirLayerController {
       // Force rendering of buffer and label to next tick to prevent gui freeze.
       this.bufferFeatures();
       this.addFeatureLabels(arr);
-    }, 250);
+    }, 100);
   };
 
   removeFeature = (feature) => {

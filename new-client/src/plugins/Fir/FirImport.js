@@ -1,4 +1,5 @@
 import KML from "ol/format/KML.js";
+// This class mostly has code picked from hajk2 kml import and hajk3 draw kml import.
 
 export default class FirImport {
   constructor(options) {

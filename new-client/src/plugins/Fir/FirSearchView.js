@@ -72,7 +72,7 @@ class FirSearchView extends React.PureComponent {
   }
 
   handleClearSearch = () => {
-    this.localObserver.publish("fir.search.clear", { sender: "FirSearchView" });
+    this.localObserver.publish("fir.search.clear", {});
     this.setState({ searchText: "" });
   };
 
@@ -89,8 +89,6 @@ class FirSearchView extends React.PureComponent {
 
     options = { ...options, ...overrideOptions };
 
-    // this.props.model.layers.buffer.getSource().clear();
-
     this.localObserver.publish("fir.search.search", options);
   };
 
@@ -99,6 +97,7 @@ class FirSearchView extends React.PureComponent {
       searchText: e.target.value || "",
     });
     if (e.target.value && e.target.value.length >= 4) {
+      // Throttle!
       clearTimeout(this.search_tm);
       this.search_tm = setTimeout(() => {
         this.handleSearch({ zoomToLayer: false });

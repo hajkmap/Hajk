@@ -32,20 +32,6 @@ class FirExportView extends React.PureComponent {
     });
   }
 
-  ExcelLogo() {
-    return (
-      <img src="/excel.svg" alt="" style={{ width: "24px", height: "auto" }} />
-    );
-  }
-
-  handleHousingListClick() {
-    console.log("Skapa boendeförteckning");
-  }
-
-  handleRealestateListClick() {
-    console.log("Skapa fastighetsförteckning");
-  }
-
   render() {
     const { classes } = this.props;
     return (

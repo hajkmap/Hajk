@@ -59,7 +59,7 @@ class FirStyles {
   getLabelStyle(feature) {
     return new Style({
       text: new Text({
-        font: "12px Arial, sans-serif",
+        font: "13px Arial, sans-serif",
         fill: new Fill({ color: "#000" }),
         stroke: new Stroke({
           color: "#fff",

@@ -159,7 +159,15 @@ class FirWfsService {
         return response ? response.json() : null;
       })
       .then((data) => {
-        resolve(new GeoJSON().readFeatures(data));
+        try {
+          // handle parser error
+          resolve(new GeoJSON().readFeatures(data));
+        } catch (err) {
+          reject(err);
+        }
+      })
+      .catch((err) => {
+        reject(err);
       });
   }
 
@@ -167,7 +175,7 @@ class FirWfsService {
     let _params = { ...this.params, ...params };
 
     if (_params.text.trim() === "" && _params.features.length === 0) {
-      console.log("no text to search for");
+      // nothing to search for..
       return Promise.resolve(null);
     }
 
@@ -190,11 +198,19 @@ class FirWfsService {
             type === this.searchTypeHash.designation ||
             data.features?.length === 0
           ) {
-            resolve(new GeoJSON().readFeatures(data));
+            try {
+              // handle parser error
+              resolve(new GeoJSON().readFeatures(data));
+            } catch (err) {
+              reject(err);
+            }
           } else {
-            // searching by owner or address needs 2 separate requests... look into this in the future?
+            // searching by owner or address needs 2 separate requests...
             this.nestedSearch(data, _params, resolve, reject);
           }
+        })
+        .catch((err) => {
+          reject(err);
         });
     });
   }

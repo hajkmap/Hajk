@@ -91,6 +91,7 @@ class FirSearchNeighborView extends React.PureComponent {
     this.setState({ loading: true });
 
     this.props.model.layers.buffer.getSource().clear();
+    // Now we need to get previous results and publish to ResultView etc.
     this.localObserver.publish(
       "fir.search.load",
       this.state.resultHistory.pop()

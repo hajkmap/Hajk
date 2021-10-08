@@ -9,7 +9,6 @@ export default class FirModel {
       highlight: null,
       buffer: null,
       draw: null,
-      hiddenBuffer: null,
       label: null,
       marker: null,
     };

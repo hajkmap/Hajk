@@ -81,7 +81,7 @@ class FirExportEdpView extends React.PureComponent {
         this.setState({ dataWasSent: false });
         this.props.closeSnackbar(this.snackBar);
         this.snackBar = this.props.enqueueSnackbar(
-          "Ett fel inträffade vid exporten.",
+          "Ett fel inträffade vid exporten till EDP.",
           {
             variant: "error",
           }

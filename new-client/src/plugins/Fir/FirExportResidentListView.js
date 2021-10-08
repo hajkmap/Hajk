@@ -194,7 +194,7 @@ class FirExportResidentListView extends React.PureComponent {
     let searchParams = new URLSearchParams();
     searchParams.append("json", JSON.stringify(data));
 
-    hfetch("https://kommungis-utv.varberg.se/mapservice/fir/residentlist", {
+    hfetch("https://kommungis-utv3.varberg.se/mapservice/fir/residentlist", {
       method: "post",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -216,7 +216,7 @@ class FirExportResidentListView extends React.PureComponent {
         this.setState({ downloadUrl: null });
         this.props.closeSnackbar(this.snackBar);
         this.snackBar = this.props.enqueueSnackbar(
-          "Ett fel inträffade vid exporten.",
+          "Ett fel inträffade vid exporten av boendeförteckningen.",
           {
             variant: "error",
           }
@@ -243,7 +243,7 @@ class FirExportResidentListView extends React.PureComponent {
       })
       .then((data) => {
         if (data.features?.length > 0) {
-          // note that this is raw json.
+          // Note that this is raw json. No need to convert as we will not use it in OL.
           this.sendResidentData(data.features);
         }
       })
@@ -276,7 +276,7 @@ class FirExportResidentListView extends React.PureComponent {
 
   formatSSN = (ssn) => {
     ssn = "" + ssn;
-    var _ssn = ssn.substring(0, ssn.length - 4);
+    let _ssn = ssn.substring(0, ssn.length - 4);
     _ssn += "-" + ssn.substr(ssn.length - 4, 4);
     return _ssn;
   };
@@ -384,7 +384,7 @@ class FirExportResidentListView extends React.PureComponent {
                         v = 0;
                       }
 
-                      this.setState({ age: parseInt(v) });
+                      this.setState({ age: v });
                     }}
                     onFocus={(e) => {
                       if (this.state.age === 0) {

@@ -1,9 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
-
 import Observer from "react-event-observer";
-
 import PluginIcon from "@material-ui/icons/House";
 import FirModel from "./FirModel";
 import FirView from "./FirView";
@@ -92,21 +90,22 @@ class Fir extends React.PureComponent {
     const defaultParams = {
       features: features,
     };
-    // Prepared for other types of services
+
     this.getService(type).then((Service) => {
       const service = new Service.default(defaultParams);
-      try {
-        this.layerController.clearBeforeSearch(params.keepNeighborBuffer);
-        this.localObserver.publish("fir.search.started", params);
-        service.search(params).then((features) => {
+
+      this.layerController.clearBeforeSearch(params.keepNeighborBuffer);
+      this.localObserver.publish("fir.search.started", params);
+      service
+        .search(params)
+        .then((features) => {
           // We're expecting an array of features.
           this.layerController.addFeatures(features, params.zoomToLayer);
           this.localObserver.publish("fir.search.completed", features);
+        })
+        .catch((error) => {
+          this.localObserver.publish("fir.search.error", error);
         });
-      } catch (error) {
-        console.error(error);
-        this.localObserver.publish("fir.search.error", error);
-      }
     });
   };
 
