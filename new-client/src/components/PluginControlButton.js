@@ -1,14 +1,13 @@
 import React from "react";
 import { Button, Paper, Tooltip } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { styled } from "@mui/material/styles";
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledButton = styled(Button)(() => ({
+  minWidth: "unset",
 }));
 
 export default function PluginControlButton({
@@ -17,15 +16,13 @@ export default function PluginControlButton({
   title,
   abstract,
 }) {
-  const classes = useStyles();
-
   return (
     <Tooltip disableInteractive title={`${title}: ${abstract}`}>
-      <Paper className={classes.paper}>
-        <Button aria-label={title} className={classes.button} onClick={onClick}>
+      <StyledPaper>
+        <StyledButton aria-label={title} onClick={onClick}>
           {icon}
-        </Button>
-      </Paper>
+        </StyledButton>
+      </StyledPaper>
     </Tooltip>
   );
 }
