@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import propTypes from "prop-types";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 
 import ReactDialog from "@mui/material/Dialog";
@@ -10,23 +10,16 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 
-const styles = (theme) => ({
-  container: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    width: 200,
-  },
-  dense: {
-    marginTop: 19,
-  },
-  menu: {
-    width: 200,
-  },
-});
+const StyledForm = styled("form")(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  marginRight: theme.spacing(1),
+  width: 200,
+}));
 
 class Dialog extends Component {
   state = {
@@ -35,7 +28,6 @@ class Dialog extends Component {
   };
 
   static propTypes = {
-    classes: propTypes.object.isRequired,
     onClose: propTypes.func.isRequired,
     open: propTypes.bool.isRequired,
     options: propTypes.object.isRequired,
@@ -102,12 +94,11 @@ class Dialog extends Component {
   }
 
   renderPromptInput() {
-    const { classes, options } = this.props;
+    const { options } = this.props;
     if (!options.prompt) return null;
 
     return (
-      <form
-        className={classes.container}
+      <StyledForm
         noValidate
         autoComplete="off"
         onSubmit={(e) => {
@@ -116,16 +107,15 @@ class Dialog extends Component {
           return false;
         }}
       >
-        <TextField
+        <StyledTextField
           id="prompt-text"
           label=""
-          className={classes.textField}
           value={this.state.text}
           onChange={this.handleChange("text")}
           margin="normal"
           autoFocus={true}
         />
-      </form>
+      </StyledForm>
     );
   }
 
@@ -167,4 +157,4 @@ class Dialog extends Component {
   }
 }
 
-export default withStyles(styles)(Dialog);
+export default Dialog;
