@@ -1,27 +1,22 @@
 import React, { Component } from "react";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import Popper from "@mui/material/Popper";
 import Paper from "@mui/material/Paper";
 import PanelHeader from "./PanelHeader";
 
-const styles = (theme) => {
-  return {
-    popper: {
-      zIndex: 4,
-    },
-    content: {
-      maxWidth: "400px",
-      background: "white",
-    },
-    hidden: {
-      display: "none",
-    },
-    body: {
-      padding: "15px",
-      overflow: "auto",
-    },
-  };
-};
+const StyledPopper = styled(Popper)(({ theme }) => ({
+  zIndex: 4,
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  maxWidth: "400px",
+  background: "white",
+}));
+
+const ChildrenContainer = styled("div")(({ theme }) => ({
+  padding: "15px",
+  overflow: "auto",
+}));
 
 /**
  * @summary Currently not implemented popup for infoclick. Similar to how  it worked in Hajk2.
@@ -59,21 +54,20 @@ class PopPanel extends Component {
   }
 
   render() {
-    var { classes, children, anchorEl, open } = this.props;
+    var { children, anchorEl, open } = this.props;
     const { placement } = this.state;
     if (open === undefined) {
       open = false;
     }
     const id = open ? "no-transition-popper" : null;
     return (
-      <Popper
+      <StyledPopper
         id={id}
         open={open}
         anchorEl={anchorEl}
         placement={placement}
-        className={classes.popper}
       >
-        <Paper className={classes.content}>
+        <StyledPaper>
           <PanelHeader
             title={this.props.title}
             onClose={this.close}
@@ -81,11 +75,11 @@ class PopPanel extends Component {
             onMaximize={() => {}}
             onMinimize={() => {}}
           />
-          <div className={classes.body}>{children}</div>
-        </Paper>
-      </Popper>
+          <ChildrenContainer>{children}</ChildrenContainer>
+        </StyledPaper>
+      </StyledPopper>
     );
   }
 }
 
-export default withStyles(styles)(PopPanel);
+export default PopPanel;
