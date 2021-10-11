@@ -51,6 +51,7 @@ class MapOptions extends Component {
         enableDownloadLink: config.enableDownloadLink,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
+        mapresetter: config.mapresetter,
         showThemeToggler: config.showThemeToggler,
         drawerVisible: config.drawerVisible,
         drawerVisibleMobile: config.drawerVisibleMobile,
@@ -106,6 +107,7 @@ class MapOptions extends Component {
       enableDownloadLink: mapConfig.enableDownloadLink,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
+      mapresetter: mapConfig.mapresetter,
       showThemeToggler: mapConfig.showThemeToggler,
       drawerVisible: mapConfig.drawerVisible,
       drawerVisibleMobile: mapConfig.drawerVisibleMobile,
@@ -247,6 +249,7 @@ class MapOptions extends Component {
       case "enableDownloadLink":
       case "mapselector":
       case "mapcleaner":
+      case "mapresetter":
       case "showThemeToggler":
       case "drawerVisible":
       case "drawVisibleMobile":
@@ -296,6 +299,7 @@ class MapOptions extends Component {
         config.enableDownloadLink = this.getValue("enableDownloadLink");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
+        config.mapresetter = this.getValue("mapresetter");
         config.showThemeToggler = this.getValue("showThemeToggler");
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
@@ -825,6 +829,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_mapresetter"
+                type="checkbox"
+                ref="input_mapresetter"
+                onChange={(e) => {
+                  this.setState({ mapresetter: e.target.checked });
+                }}
+                checked={this.state.mapresetter}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_mapresetter">
+                Visa en hemknapp som återställer kartans innehåll till startläge{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer en hemknapp som återställer kartan att visas för användaren"
                 />
               </label>
             </div>

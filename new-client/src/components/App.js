@@ -224,8 +224,8 @@ class App extends React.PureComponent {
       activeDrawerContentFromLocalStorage === "plugins"
     ) {
       // If nothing was found in local storage, fall back to map config setting
-      activeDrawerContentFromLocalStorage =
-        this.props.config.mapConfig.map.activeDrawerOnStart;
+      activeDrawerContentFromLocalStorage = this.props.config.mapConfig.map
+        .activeDrawerOnStart;
     }
 
     const localStorageToolFoundInMapConfig = tools.some((tool) => {
@@ -260,10 +260,8 @@ class App extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const drawerPermanentFromLocalStorage =
-      this.getDrawerPermanentFromLocalStorage();
-    const activeDrawerContentFromLocalStorage =
-      this.getActiveDrawerContentFromLocalStorage();
+    const drawerPermanentFromLocalStorage = this.getDrawerPermanentFromLocalStorage();
+    const activeDrawerContentFromLocalStorage = this.getActiveDrawerContentFromLocalStorage();
     const canRenderDefaultDrawer = this.hasAnyToolbarTools();
 
     const canRenderCustomDrawer = this.canRenderCustomDrawer(
@@ -743,6 +741,11 @@ class App extends React.PureComponent {
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
+
+    // Let admin decide whether MapResetter should be shown, but show it
+    // always on clean mode maps.
+    const showMapResetter = clean === true || config.mapConfig.map.mapresetter;
+
     const showMapSwitcher =
       clean === false && config.activeMap !== "simpleMapConfig";
     const showCookieNotice =
@@ -848,6 +851,12 @@ class App extends React.PureComponent {
               >
                 <Zoom map={this.appModel.getMap()} />
                 <div id="plugin-control-buttons"></div>
+                {showMapResetter && (
+                  <MapResetter
+                    mapConfig={this.appModel.config.mapConfig}
+                    map={this.appModel.getMap()}
+                  />
+                )}
                 <Rotate map={this.appModel.getMap()} />
                 {showMapSwitcher && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
@@ -861,12 +870,6 @@ class App extends React.PureComponent {
                   />
                 )}
                 {clean === false && this.renderInformationPlugin()}
-                {clean === true && (
-                  <MapResetter
-                    mapConfig={this.appModel.config.mapConfig}
-                    map={this.appModel.getMap()}
-                  />
-                )}
               </div>
             </main>
             <footer
