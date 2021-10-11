@@ -1,7 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
 import {
@@ -17,39 +17,31 @@ import {
   Typography,
 } from "@mui/material";
 
-const Paragraph = withStyles((theme) => ({
-  root: {
-    marginBottom: "1.1rem",
-  },
-}))(Typography);
+const Paragraph = styled(Typography)(() => ({
+  marginBottom: "1.1rem",
+}));
 
 // Styled Table Row Component, makes every second row in a Table colored
-const StyledTableRow = withStyles((theme) => ({
-  root: {
-    "&:nth-of-type(even)": {
-      backgroundColor: theme.palette.action.hover,
-    },
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(even)": {
+    backgroundColor: theme.palette.action.hover,
   },
-}))(TableRow);
+}));
 
-const StyledTableContainer = withStyles((theme) => ({
-  root: {
-    marginBottom: "1.1rem",
+const StyledTableContainer = styled(TableContainer)(() => ({
+  marginBottom: "1.1rem",
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(1),
+  marginBottom: "1.1rem",
+  backgroundColor: theme.palette.background.default,
+  "& p": {
+    marginBottom: "0",
   },
-}))(TableContainer);
+}));
 
-const StyledPaper = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    marginBottom: "1.1rem",
-    backgroundColor: theme.palette.background.default,
-    "& p": {
-      marginBottom: "0",
-    },
-  },
-}))(Paper);
-
-const StyledTypography = withStyles((theme) => ({
+const StyledTypography = styled(Typography)(({ theme }) => ({
   h1: {
     fontSize: "1.6rem",
     fontWeight: "500",
@@ -77,7 +69,7 @@ const StyledTypography = withStyles((theme) => ({
     fontWeight: "400",
     fontStyle: "italic",
   },
-}))(Typography);
+}));
 
 export default class FeaturePropsParsing {
   constructor(settings) {
