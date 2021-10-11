@@ -22,6 +22,11 @@ class GeosuiteExportModel {
 
     return request;
   }
+
+  clearMap() {
+    console.log("GeosuiteExportModel: clearMap");
+    console.log("clear the selected area from the map");
+  }
 }
 
 export default GeosuiteExportModel;
