@@ -1,21 +1,15 @@
 import React from "react";
 import propTypes from "prop-types";
-import withStyles from "@mui/styles/withStyles";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 
-const styles = (theme) => {
-  return {};
-};
-
 class AlertView extends React.PureComponent {
   state = {};
 
   static propTypes = {
-    classes: propTypes.object.isRequired,
     message: propTypes.any.isRequired,
     open: propTypes.bool.isRequired,
     parent: propTypes.object.isRequired,
@@ -56,4 +50,4 @@ class AlertView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(AlertView);
+export default AlertView;
