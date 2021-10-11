@@ -1,5 +1,4 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
 import {
   LineChart,
   Line,
@@ -10,8 +9,6 @@ import {
   Legend,
 } from "recharts";
 import { hfetch } from "utils/FetchWrapper";
-
-const styles = (theme) => ({});
 
 class DiagramView extends React.PureComponent {
   state = {
@@ -93,4 +90,4 @@ class DiagramView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(DiagramView);
+export default DiagramView;
