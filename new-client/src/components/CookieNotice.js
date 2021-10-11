@@ -2,13 +2,11 @@ import React from "react";
 import { object, string } from "prop-types";
 import { Button } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { makeStyles } from "@mui/styles";
+import { styled } from "@mui/material/styles";
 
-const useStyles = makeStyles((theme) => ({
-  textButton: {
-    color: theme.palette.primary.contrastText,
-    marginRight: theme.spacing(1),
-  },
+const StyledButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.primary.contrastText,
+  marginRight: theme.spacing(1),
 }));
 
 CookieNotice.propTypes = {
@@ -28,20 +26,18 @@ function CookieNotice({
   defaultCookieNoticeUrl = "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
   globalObserver,
 }) {
-  const classes = useStyles();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const action = (key) => (
     <>
-      <Button
+      <StyledButton
         onClick={() => {
           window.open(defaultCookieNoticeUrl);
         }}
         variant="text"
-        className={classes.textButton}
       >
         {"Mer information"}
-      </Button>
+      </StyledButton>
       <Button
         color="primary"
         variant="contained"
