@@ -3,39 +3,34 @@ import VectorFilter from "./VectorFilter";
 import CQLFilter from "./CQLFilter";
 import Typography from "@mui/material/Typography";
 import Slider from "@mui/material/Slider";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  sliderContainer: {
-    display: "flex",
-    flexFlow: "row nowrap",
-    alignItems: "center",
+const SettingsContainer = styled("div")(({ theme }) => ({
+  overflow: "hidden",
+  paddingLeft: "45px",
+  paddingRight: "30px",
+  paddingBottom: "10px",
+  paddingTop: "10px",
+}));
+
+const SliderContainer = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexFlow: "row nowrap",
+  alignItems: "center",
+}));
+
+const SliderTextWrapper = styled("div")(({ theme }) => ({
+  flex: "0 1 auto",
+  minWidth: "40px",
+}));
+
+const SliderWrapper = styled("div")(({ theme }) => ({
+  padding: "0 16px",
+  flex: "1 1 auto",
+  "& > span": {
+    top: "4px",
   },
-  icon: {
-    cursor: "pointer",
-  },
-  settingsContainer: {
-    overflow: "hidden",
-    paddingLeft: "45px",
-    paddingRight: "30px",
-    paddingBottom: "10px",
-    paddingTop: "10px",
-  },
-  subtitle2: {
-    fontWeight: 500,
-  },
-  sliderItem: {
-    padding: "0 16px",
-    flex: "1 1 auto",
-    "& > span": {
-      top: "4px",
-    },
-  },
-  sliderText: {
-    flex: "0 1 auto",
-    minWidth: "40px",
-  },
-});
+}));
 
 class LayerSettings extends React.PureComponent {
   constructor(props) {
@@ -64,29 +59,27 @@ class LayerSettings extends React.PureComponent {
 
   renderOpacitySlider() {
     const opacityValue = this.state.opacityValue;
-    const { classes } = this.props;
     return (
-      <div className={classes.sliderContainer}>
-        <div className={classes.sliderText}>
-          <Typography className={classes.subtitle2} variant="subtitle2">
-            Opacitet:
-          </Typography>
-        </div>
-        <div className={classes.sliderItem}>
+      <SliderContainer>
+        <SliderTextWrapper>
+          <Typography variant="subtitle2">Opacitet:</Typography>
+        </SliderTextWrapper>
+        <SliderWrapper>
           <Slider
+            size="small"
             value={opacityValue}
             min={0}
             max={1}
             step={0.05}
             onChange={this.opacitySliderChanged}
           />
-        </div>
-        <div className={classes.sliderText}>
-          <Typography className={classes.subtitle2} variant="subtitle2">
+        </SliderWrapper>
+        <SliderTextWrapper>
+          <Typography variant="subtitle2">
             {Math.trunc(100 * opacityValue.toFixed(2))} %
           </Typography>
-        </div>
-      </div>
+        </SliderTextWrapper>
+      </SliderContainer>
     );
   }
 
@@ -113,7 +106,7 @@ class LayerSettings extends React.PureComponent {
   renderSettings() {
     return (
       <div>
-        <div className={this.props.classes.settingsContainer}>
+        <SettingsContainer>
           {this.props.options?.enableTransparencySlider !== false &&
           this.props.showOpacity
             ? this.renderOpacitySlider()
@@ -125,7 +118,7 @@ class LayerSettings extends React.PureComponent {
           {this.props.cqlFilterVisible && (
             <CQLFilter layer={this.props.layer} />
           )}
-        </div>
+        </SettingsContainer>
       </div>
     );
   }
@@ -150,4 +143,4 @@ class LayerSettings extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(LayerSettings);
+export default LayerSettings;

@@ -298,9 +298,7 @@ class LayerGroup extends React.PureComponent {
       return <CheckBoxIcon sx={checkBoxIconStyle} />;
     }
     if (this.isSemiToggled()) {
-      return (
-        <CheckBoxIcon sx={({ ...checkBoxIconStyle }, { color: "gray" })} />
-      );
+      return <CheckBoxIcon sx={{ ...checkBoxIconStyle, color: "gray" }} />;
     }
     return <CheckBoxOutlineBlankIcon sx={checkBoxIconStyle} />;
   };
