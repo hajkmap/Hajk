@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import makeStyles from "@mui/styles/makeStyles";
+import { styled } from "@mui/material/styles";
 
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -8,30 +8,27 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import CloseIcon from "@mui/icons-material/Close";
 import { Paper, Hidden } from "@mui/material";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    marginRight: theme.spacing(1),
-    [theme.breakpoints.down("sm")]: {
-      boxShadow: "none",
-    },
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginRight: theme.spacing(1),
+  [theme.breakpoints.down("sm")]: {
+    boxShadow: "none",
   },
-  button: {
-    border: 0,
-    color:
-      theme.palette.mode === "dark"
-        ? theme.palette.common.white
-        : theme.palette.action.active,
+}));
+
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    border: "none",
   },
-  icon: {
-    [theme.breakpoints.up("md")]: {
-      marginRight: theme.spacing(1),
-    },
+}));
+
+const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    border: "none",
   },
-  grouped: {
-    [theme.breakpoints.down("sm")]: {
-      border: "none",
-    },
-  },
+  color:
+    theme.palette.mode === "dark"
+      ? theme.palette.common.white
+      : theme.palette.action.active,
 }));
 
 function DrawerToggleButtons({
@@ -39,8 +36,6 @@ function DrawerToggleButtons({
   globalObserver,
   initialActiveButton,
 }) {
-  const classes = useStyles();
-
   //Set initial active button state based on the initially active drawer, received from App.js
   //This will either be a drawer button name such as "plugins" or null, depending on whether there
   //is an active drawer when the map starts (set either from the cookie or config).
@@ -79,38 +74,32 @@ function DrawerToggleButtons({
     // Currently active toggle button should have a "Close" icon
     const icon =
       value === activeButton ? (
-        <CloseIcon className={classes.icon} />
+        <CloseIcon sx={{ marginRight: { md: 1 } }} />
       ) : (
-        <ButtonIcon className={classes.icon} />
+        <ButtonIcon sx={{ marginRight: { md: 1 } }} />
       );
 
     // Caption should be hidden on small screens
     return (
-      <ToggleButton
-        id={value}
-        key={value}
-        value={value}
-        className={classes.button}
-      >
+      <StyledToggleButton id={value} key={value} value={value}>
         {icon}
         <Hidden mdDown>{caption}</Hidden>
-      </ToggleButton>
+      </StyledToggleButton>
     );
   };
 
   return (
     drawerButtons.length > 0 && (
-      <Paper className={classes.root}>
-        <ToggleButtonGroup
+      <StyledPaper>
+        <StyledToggleButtonGroup
           value={activeButton}
           exclusive
           onChange={handleClickOnToggleButton}
           aria-label="Drawer content"
-          classes={{ grouped: classes.grouped }}
         >
           {drawerButtons.map((b) => renderToggleButton(b))}
-        </ToggleButtonGroup>
-      </Paper>
+        </StyledToggleButtonGroup>
+      </StyledPaper>
     )
   );
 }
