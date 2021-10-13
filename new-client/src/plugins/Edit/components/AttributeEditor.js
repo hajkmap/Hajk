@@ -481,7 +481,9 @@ class AttributeEditor extends React.Component {
             <FormControl fullWidth margin="normal" component="fieldset">
               <FormLabel component="legend">{field.alias}</FormLabel>
               <FormGroup>{checkboxes}</FormGroup>
-              <FormHelperText>{field.description}</FormHelperText>
+              <FormHelperText
+                style={{ marginTop: "0px", marginBottom: "10px" }}
+              ></FormHelperText>
             </FormControl>
             <br />
           </>
