@@ -1,12 +1,12 @@
 import React from "react";
-import { Button, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
 }));
 
-const StyledButton = styled(Button)(() => ({
+const StyledButton = styled(IconButton)(() => ({
   minWidth: "unset",
 }));
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { easeOut } from "ol/easing";
-import { Button, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper, Tooltip } from "@mui/material";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import { makeStyles } from "@mui/styles";
 
@@ -67,13 +67,13 @@ const RotateControl = React.memo((props) => {
     (props.map && rotation !== 0 && (
       <Tooltip disableInteractive title="Återställ rotation">
         <Paper className={classes.paper}>
-          <Button
+          <IconButton
             aria-label="Återställ rotation"
             className={classes.button}
             onClick={rotateNorth}
           >
             <NavigationIcon style={{ transform: `rotate(${rotation}rad)` }} />
-          </Button>
+          </IconButton>
         </Paper>
       </Tooltip>
     )) ||

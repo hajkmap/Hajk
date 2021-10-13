@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import withStyles from "@mui/styles/withStyles";
 import propTypes from "prop-types";
 
-import { Button, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
+import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
 import Bookmarks from "@mui/icons-material/Bookmarks";
 
 import Dialog from "../components/Dialog.js";
@@ -226,13 +226,13 @@ class Preset extends React.PureComponent {
         <>
           <Tooltip disableInteractive title={this.title}>
             <Paper className={classes.paper}>
-              <Button
+              <IconButton
                 aria-label={this.title}
                 className={classes.button}
                 onClick={this.handleClick}
               >
                 <Bookmarks />
-              </Button>
+              </IconButton>
             </Paper>
           </Tooltip>
           <Menu

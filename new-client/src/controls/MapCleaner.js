@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper, Tooltip } from "@mui/material";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 import { makeStyles } from "@mui/styles";
@@ -26,7 +26,7 @@ const MapCleaner = React.memo((props) => {
     props.appModel.config.mapConfig.map.mapcleaner && (
       <Tooltip disableInteractive title="Dölj alla aktiva lager">
         <Paper className={classes.paper}>
-          <Button
+          <IconButton
             aria-label="Rensa kartan"
             className={classes.button}
             onClick={(e) => {
@@ -34,7 +34,7 @@ const MapCleaner = React.memo((props) => {
             }}
           >
             <VisibilityOffIcon />
-          </Button>
+          </IconButton>
         </Paper>
       </Tooltip>
     )

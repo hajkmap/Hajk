@@ -1,6 +1,6 @@
 import React from "react";
 import { easeOut } from "ol/easing";
-import { Button, Paper } from "@mui/material";
+import { IconButton, Paper } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { makeStyles } from "@mui/styles";
@@ -48,7 +48,7 @@ const ZoomControl = React.memo((props) => {
 
   return (
     <Paper className={classes.paper}>
-      <Button
+      <IconButton
         aria-label="Zooma in"
         className={classes.button}
         onClick={() => {
@@ -56,8 +56,8 @@ const ZoomControl = React.memo((props) => {
         }}
       >
         <AddIcon />
-      </Button>
-      <Button
+      </IconButton>
+      <IconButton
         aria-label="Zooma ut"
         className={classes.button}
         onClick={() => {
@@ -65,7 +65,7 @@ const ZoomControl = React.memo((props) => {
         }}
       >
         <RemoveIcon />
-      </Button>
+      </IconButton>
     </Paper>
   );
 });

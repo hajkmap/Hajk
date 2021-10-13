@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper, Tooltip } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 
 import withStyles from "@mui/styles/withStyles";
@@ -36,13 +36,13 @@ class MapResetter extends React.PureComponent {
     return (
       <Tooltip disableInteractive title="Återställ kartan till startläget">
         <Paper className={classes.paper}>
-          <Button
+          <IconButton
             aria-label="Återställ kartan till startläget"
             className={classes.button}
             onClick={this.handleClick}
           >
             <HomeIcon />
-          </Button>
+          </IconButton>
         </Paper>
       </Tooltip>
     );

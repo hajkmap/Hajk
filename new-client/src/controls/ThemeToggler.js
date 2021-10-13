@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper, Tooltip } from "@mui/material";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 
 import { makeStyles } from "@mui/styles";
@@ -26,7 +26,7 @@ const ThemeToggler = React.memo((props) => {
     (props.showThemeToggler && (
       <Tooltip disableInteractive title="Växla mellan mörkt och ljust färgtema">
         <Paper className={classes.paper}>
-          <Button
+          <IconButton
             aria-label="Växla färgtema"
             className={classes.button}
             onClick={(e) => {
@@ -34,7 +34,7 @@ const ThemeToggler = React.memo((props) => {
             }}
           >
             <Brightness4Icon />
-          </Button>
+          </IconButton>
         </Paper>
       </Tooltip>
     )) ||

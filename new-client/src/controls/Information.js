@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import withStyles from "@mui/styles/withStyles";
 import propTypes from "prop-types";
 
-import { Button, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper, Tooltip } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 
 import Dialog from "../components/Dialog.js";
@@ -93,13 +93,13 @@ class Information extends React.PureComponent {
         {this.renderDialog()}
         <Tooltip disableInteractive title={this.title}>
           <Paper className={classes.paper}>
-            <Button
+            <IconButton
               aria-label={this.title}
               className={classes.button}
               onClick={this.handleOnClick}
             >
               <InfoIcon />
-            </Button>
+            </IconButton>
           </Paper>
         </Tooltip>
       </>

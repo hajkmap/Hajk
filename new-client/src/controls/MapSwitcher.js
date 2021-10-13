@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
+import { IconButton, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
 import withStyles from "@mui/styles/withStyles";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "utils/FetchWrapper";
@@ -117,14 +117,14 @@ class MapSwitcher extends React.PureComponent {
         <>
           <Tooltip disableInteractive title={`Nuvarande karta: ${title}`}>
             <Paper className={classes.paper}>
-              <Button
+              <IconButton
                 aria-owns={open ? "render-props-menu" : undefined}
                 aria-haspopup="true"
                 className={classes.button}
                 onClick={this.handleClick}
               >
                 <SwitchCameraIcon />
-              </Button>
+              </IconButton>
             </Paper>
           </Tooltip>
           <Menu
