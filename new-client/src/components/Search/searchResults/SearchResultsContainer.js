@@ -12,7 +12,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
   Paper,
-  Button,
+  IconButton,
   Grid,
   TextField,
   Typography,
@@ -21,7 +21,6 @@ import {
   Menu,
   MenuItem,
   Grow,
-  IconButton,
 } from "@mui/material";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 import { visuallyHidden } from "@mui/utils";
@@ -500,7 +499,7 @@ class SearchResultsContainer extends React.PureComponent {
       : "Filtrera resultatet";
     return (
       <Tooltip disableInteractive title={filterHelpText}>
-        <Button
+        <IconButton
           sx={{ minWidth: 30 }}
           onClick={() =>
             this.setState({
@@ -516,7 +515,7 @@ class SearchResultsContainer extends React.PureComponent {
           >
             <FilterListIcon />
           </Badge>
-        </Button>
+        </IconButton>
       </Tooltip>
     );
   };
@@ -545,14 +544,14 @@ class SearchResultsContainer extends React.PureComponent {
 
     return (
       <Tooltip disableInteractive title={sortHelpText}>
-        <Button
+        <IconButton
           sx={{ minWidth: 30 }}
           onClick={(e) =>
             this.setState({ sortingMenuAnchorEl: e.currentTarget })
           }
         >
           <SortIcon />
-        </Button>
+        </IconButton>
       </Tooltip>
     );
   };
@@ -560,12 +559,12 @@ class SearchResultsContainer extends React.PureComponent {
   renderClearTool = () => {
     return (
       <Tooltip disableInteractive title="Rensa alla selekterade objekt">
-        <Button
+        <IconButton
           sx={{ minWidth: 30 }}
           onClick={this.clearAllSelectedFeaturesInView}
         >
           <DeleteIcon />
-        </Button>
+        </IconButton>
       </Tooltip>
     );
   };
@@ -637,7 +636,7 @@ class SearchResultsContainer extends React.PureComponent {
               disableInteractive
               title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
             >
-              <Button
+              <IconButton
                 sx={{ minWidth: 30 }}
                 onClick={() =>
                   this.setState({
@@ -647,7 +646,7 @@ class SearchResultsContainer extends React.PureComponent {
                 }
               >
                 {this.state.showTools ? <CloseIcon /> : <MoreVertIcon />}
-              </Button>
+              </IconButton>
             </Tooltip>
           </Grid>
         </Grid>

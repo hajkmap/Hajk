@@ -1,11 +1,11 @@
 import React from "react";
-import { Button, Tooltip, Menu, MenuItem, Grid } from "@mui/material";
+import { IconButton, Tooltip, Menu, MenuItem, Grid } from "@mui/material";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PublicIcon from "@mui/icons-material/Public";
 import { styled } from "@mui/material/styles";
 
-const MenuTogglerButton = styled(Button)(() => ({
+const MenuTogglerButton = styled(IconButton)(() => ({
   minWidth: 30,
 }));
 
