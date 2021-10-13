@@ -42,6 +42,8 @@ class Fir extends React.PureComponent {
       map: props.map,
     });
 
+    console.log(this.model.app);
+
     this.layerController = new FirLayerController(
       this.model,
       this.localObserver
@@ -74,7 +76,7 @@ class Fir extends React.PureComponent {
 
   loadFeatures = (features) => {
     this.layerController.clearBeforeSearch();
-    this.layerController.addFeatures(features, true);
+    this.layerController.addFeatures(features, { zoomToLayer: true });
     this.localObserver.publish("fir.search.completed", features);
   };
 
@@ -94,13 +96,13 @@ class Fir extends React.PureComponent {
     this.getService(type).then((Service) => {
       const service = new Service.default(defaultParams);
 
-      this.layerController.clearBeforeSearch(params.keepNeighborBuffer);
+      this.layerController.clearBeforeSearch(params);
       this.localObserver.publish("fir.search.started", params);
       service
         .search(params)
         .then((features) => {
           // We're expecting an array of features.
-          this.layerController.addFeatures(features, params.zoomToLayer);
+          this.layerController.addFeatures(features, params);
           this.localObserver.publish("fir.search.completed", features);
         })
         .catch((error) => {

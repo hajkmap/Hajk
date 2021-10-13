@@ -212,7 +212,7 @@ class FirSearchNeighborView extends React.PureComponent {
                       if (v > 100) {
                         v = 100;
                       }
-                      this.setState({ buffer: parseInt(v) });
+                      this.setState({ buffer: v });
                     }}
                     onFocus={(e) => {
                       if (this.state.buffer === 0) {

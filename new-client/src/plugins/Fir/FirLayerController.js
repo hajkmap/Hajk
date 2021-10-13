@@ -171,7 +171,7 @@ class FirLayerController {
     this.model.layers.marker.setVisible(false);
   };
 
-  addFeatures = (arr, zoomToLayer = true) => {
+  addFeatures = (arr, options = { zoomToLayer: true }) => {
     if (!arr) {
       return;
     }
@@ -181,16 +181,16 @@ class FirLayerController {
     });
 
     this.model.layers.feature.getSource().addFeatures(arr);
-    if (zoomToLayer) {
+    if (options.zoomToLayer) {
       this.zoomToLayer(this.model.layers.feature);
     }
 
     clearTimeout(this.renderDelay_tm);
     this.renderDelay_tm = setTimeout(() => {
       // Force rendering of buffer and label to next tick to prevent gui freeze.
-      this.bufferFeatures();
+      this.bufferFeatures(options);
       this.addFeatureLabels(arr);
-    }, 100);
+    }, 250);
   };
 
   removeFeature = (feature) => {
@@ -210,13 +210,13 @@ class FirLayerController {
     this.model.layers.label.getSource().addFeatures(arr);
   };
 
-  clearBeforeSearch = (keepNeighborBuffer = false) => {
+  clearBeforeSearch = (options = { keepNeighborBuffer: false }) => {
     this.model.layers.feature.getSource().clear();
     this.model.layers.highlight.getSource().clear();
     this.model.layers.label.getSource().clear();
     this.model.layers.marker.setVisible(false);
 
-    if (keepNeighborBuffer === false) {
+    if (options.keepNeighborBuffer === false) {
       const source = this.model.layers.buffer.getSource();
       const featuresToRemove = source
         .getFeatures()
@@ -274,7 +274,7 @@ class FirLayerController {
       .then((data) => {
         try {
           let features = new GeoJSON().readFeatures(data);
-          this.addFeatures(features, false);
+          this.addFeatures(features, { zoomToLayer: false });
           this.observer.publish("fir.search.add", features);
         } catch (err) {
           console.warn(err);
@@ -350,7 +350,7 @@ class FirLayerController {
     this.model.layers.buffer.getSource().clear();
   };
 
-  bufferFeatures = () => {
+  bufferFeatures = (options) => {
     const parser = new jsts.io.OL3Parser();
     parser.inject(
       Point,
@@ -363,7 +363,9 @@ class FirLayerController {
     );
 
     if (this.bufferValue === 0) {
-      this.getLayer("buffer").getSource().clear();
+      if (options.keepNeighborBuffer !== true) {
+        this.getLayer("buffer").getSource().clear();
+      }
       return;
     }
 

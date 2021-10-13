@@ -47,12 +47,18 @@ class FirExportResidentListView extends React.PureComponent {
     super(props);
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
+    this.options = this.model.app.plugins.fir.options;
   }
 
   getGeometryFilters(features) {
     let filters = [];
     features.forEach((feature) => {
-      filters.push(intersectsFilter("geom", feature.getGeometry()));
+      filters.push(
+        intersectsFilter(
+          this.options.mappings.geometryName,
+          feature.getGeometry()
+        )
+      );
     });
 
     return filters.length === 0 ? null : filters;
@@ -82,7 +88,7 @@ class FirExportResidentListView extends React.PureComponent {
       srsName: "EPSG:3007",
       featureNS: "https://www.opengis.net",
       outputFormat: "application/json",
-      maxFeatures: "10000",
+      maxFeatures: this.options.maxFeatures,
       featureTypes: [params.featureType],
       filter: rootFilter,
     };
@@ -98,27 +104,10 @@ class FirExportResidentListView extends React.PureComponent {
     /* rawFeatures is not converted to openlayer features */
     let features = rawFeatures;
 
-    let config = {
-      addressDisplayName: "Adress",
-      addressFieldName: "adress",
-      ageDisplayName: "Ålder",
-      ageFieldName: "alder",
-      ssnDisplayName: "Personnummer",
-      ssnFieldName: "personnr",
-      birthDateDisplayName: "Födelsedatum",
-      birthDateFieldName: "personnr",
-      genderDisplayName: "Kön",
-      genderFieldName: "koen",
-      nameDisplayName: "Namn",
-      nameFieldName: "tillnamn",
-      postalCodeDisplayName: "Postnummer",
-      postalCodeFieldName: "postnr",
-      cityDisplayName: "Postort",
-      cityFieldName: "ort",
-    };
+    const mappings = this.options.residentList.mappings;
 
     features = features.filter((feature) => {
-      return feature.properties[config.ageFieldName] >= this.state.age || 0;
+      return feature.properties[mappings.ageFieldName] >= this.state.age || 0;
     });
 
     let columns = [];
@@ -127,24 +116,24 @@ class FirExportResidentListView extends React.PureComponent {
     // create columns
 
     if (this.state.chSsn === true) {
-      columns.push(config.ssnDisplayName);
+      columns.push(mappings.ssnDisplayName);
     }
 
-    columns.push(config.nameDisplayName);
-    columns.push(config.addressDisplayName);
-    columns.push(config.postalCodeDisplayName);
-    columns.push(config.cityDisplayName);
+    columns.push(mappings.nameDisplayName);
+    columns.push(mappings.addressDisplayName);
+    columns.push(mappings.postalCodeDisplayName);
+    columns.push(mappings.cityDisplayName);
 
     if (this.state.chAge) {
-      columns.push(config.ageDisplayName);
+      columns.push(mappings.ageDisplayName);
     }
 
     if (this.state.chBirthdate) {
-      columns.push(config.birthDateDisplayName);
+      columns.push(mappings.birthDateDisplayName);
     }
 
     if (this.state.chGender) {
-      columns.push(config.genderDisplayName);
+      columns.push(mappings.genderDisplayName);
     }
 
     function getValue(rawFeature, key) {
@@ -157,24 +146,26 @@ class FirExportResidentListView extends React.PureComponent {
       let row = [];
 
       if (this.state.chSsn === true) {
-        row.push(this.formatSSN(getValue(f, config.ssnFieldName)));
+        row.push(this.formatSSN(getValue(f, mappings.ssnFieldName)));
       }
 
-      row.push(getValue(f, config.nameFieldName));
-      row.push(getValue(f, config.addressFieldName));
-      row.push(getValue(f, config.postalCodeFieldName));
-      row.push(getValue(f, config.cityFieldName));
+      row.push(getValue(f, mappings.nameFieldName));
+      row.push(getValue(f, mappings.addressFieldName));
+      row.push(getValue(f, mappings.postalCodeFieldName));
+      row.push(getValue(f, mappings.cityFieldName));
 
       if (this.state.chAge) {
-        row.push(getValue(f, config.ageFieldName));
+        row.push(getValue(f, mappings.ageFieldName));
       }
 
       if (this.state.chBirthdate) {
-        row.push(this.formatBirthDate(getValue(f, config.birthDateFieldName)));
+        row.push(
+          this.formatBirthDate(getValue(f, mappings.birthDateFieldName))
+        );
       }
 
       if (this.state.chGender) {
-        row.push(getValue(f, config.genderFieldName));
+        row.push(getValue(f, mappings.genderFieldName));
       }
 
       rows.push(row);
