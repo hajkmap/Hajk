@@ -11,6 +11,7 @@ import {
   StepContent,
   ButtonGroup,
   Button,
+  Typography,
 } from "@material-ui/core";
 
 const styles = (theme) => ({
@@ -51,10 +52,19 @@ class GeosuiteExportView extends React.PureComponent {
     });
   };
 
-  //example
+  handleDrawAreaStart = () => {
+    console.log("GeosuiteExportView: handleDrawAreaStart");
+    this.props.model.addDrawInteraction();
+  };
+
+  handleShowSelectionShapeInfo = () => {
+    console.log("GeosuiteExportView: handleShowSelectionShapeInfo");
+    this.props.model.showShapeInfo();
+  };
+
   areaSelectionCompleted = () => {
     console.log("The area is selected, let's build the WFS search");
-    this.model.createWfsRequest();
+    this.props.model.createWfsRequest();
   };
 
   handleStepZeroComplete = () => {
@@ -122,13 +132,40 @@ class GeosuiteExportView extends React.PureComponent {
           <Step key="selectArea">
             <StepLabel>Markera område</StepLabel>
             <StepContent>
-              <Button
-                onClick={() => {
-                  this.handleStepZeroComplete();
-                }}
-              >
-                Nästa
-              </Button>
+              <div>
+                <Typography variant="caption">
+                  Rita område för uttag:
+                </Typography>
+                <div>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.handleDrawAreaStart();
+                    }}
+                  >
+                    Yta
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.handleShowSelectionShapeInfo();
+                    }}
+                  >
+                    Shape Info
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <Button
+                  onClick={() => {
+                    this.handleStepZeroComplete();
+                  }}
+                >
+                  Nästa
+                </Button>
+              </div>
             </StepContent>
           </Step>
           <Step key="selectData">
