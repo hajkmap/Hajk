@@ -3,7 +3,6 @@ import {
   ThemeProvider,
   StyledEngineProvider,
   createTheme,
-  adaptV4Theme,
 } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import App from "./App";
@@ -150,7 +149,7 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
   };
 
   // Take the theme object from state and generate a MUI-theme
-  const muiTheme = createTheme(adaptV4Theme(theme));
+  const muiTheme = createTheme(theme);
 
   // Render, pass through some stuff into App.
   return (

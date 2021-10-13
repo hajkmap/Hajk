@@ -7,7 +7,7 @@ import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
 import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
-import { createTheme, adaptV4Theme } from "@mui/material/styles";
+import { createTheme } from "@mui/material/styles";
 import withTheme from "@mui/styles/withTheme";
 import { deepMerge } from "../../utils/DeepMerge";
 
@@ -89,7 +89,7 @@ class DocumentHandler extends React.PureComponent {
     if (customTheme.typography) {
       this.setBottomMarginsForTypographyVariants(customTheme);
     }
-    return createTheme(adaptV4Theme(deepMerge(theme, customTheme)));
+    return createTheme(deepMerge(theme, customTheme));
   };
 
   /**
