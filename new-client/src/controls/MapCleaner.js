@@ -2,15 +2,14 @@ import React from "react";
 import { IconButton, Paper, Tooltip } from "@mui/material";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
-import { makeStyles } from "@mui/styles";
+import { styled } from "@mui/material/styles";
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
 }));
 
 /**
@@ -20,22 +19,19 @@ const useStyles = makeStyles((theme) => ({
  * @returns {object} React
  */
 const MapCleaner = React.memo((props) => {
-  const classes = useStyles();
-
   return (
     props.appModel.config.mapConfig.map.mapcleaner && (
       <Tooltip disableInteractive title="Dölj alla aktiva lager">
-        <Paper className={classes.paper}>
-          <IconButton
+        <StyledPaper>
+          <StyledIconButton
             aria-label="Rensa kartan"
-            className={classes.button}
             onClick={(e) => {
               props.appModel.clear();
             }}
           >
             <VisibilityOffIcon />
-          </IconButton>
-        </Paper>
+          </StyledIconButton>
+        </StyledPaper>
       </Tooltip>
     )
   );
