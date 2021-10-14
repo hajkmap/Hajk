@@ -12,6 +12,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 const StyledAccordion = styled(Accordion)(() => ({
   borderRadius: 0,
   boxShadow: "none",
+  backgroundImage: "none",
 }));
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
