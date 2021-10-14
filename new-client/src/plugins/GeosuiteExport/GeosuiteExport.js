@@ -4,14 +4,13 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import GeosuiteExportModel from "./GeosuiteExportModel";
 import GeosuiteExportView from "./GeosuiteExportView";
 import Observer from "react-event-observer";
-import EditLocationIcon from "@material-ui/icons/EditLocation";
+import GetAppIcon from "@material-ui/icons/GetApp";
 
 class GeosuiteExport extends React.PureComponent {
   state = {
     title: this.props.options.title ?? "Hämta data",
     description: this.props.options.description ?? "Hämta Geotekniska data",
     color: null,
-    playing: false,
   };
 
   static propTypes = {
@@ -27,6 +26,7 @@ class GeosuiteExport extends React.PureComponent {
   constructor(props) {
     super(props);
     this.localObserver = Observer();
+    this.globalObserver = props.app.globalObserver;
 
     this.geosuiteExportModel = new GeosuiteExportModel({
       localObserver: this.localObserver,
@@ -41,19 +41,21 @@ class GeosuiteExport extends React.PureComponent {
         {...this.props}
         type="GeosuiteExport"
         custom={{
-          icon: <EditLocationIcon />,
+          icon: <GetAppIcon />,
           title: this.state.title,
           color: this.state.color,
           description: this.state.description,
-          height: 450,
+          height: 600,
           width: 400,
         }}
       >
         <GeosuiteExportView
-          model={this.geosuiteExportModel}
           app={this.props.app}
-          map={this.props.map}
+          model={this.geosuiteExportModel}
+          options={this.props.options}
           localObserver={this.localObserver}
+          globalObserver={this.globalObserver}
+          title={this.state.title}
         />
       </BaseWindowPlugin>
     );
