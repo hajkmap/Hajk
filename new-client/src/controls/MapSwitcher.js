@@ -1,17 +1,16 @@
 import React from "react";
 import { IconButton, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "utils/FetchWrapper";
 
-const styles = (theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
-});
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
+}));
 
 class MapSwitcher extends React.PureComponent {
   // Will hold map configs
@@ -105,7 +104,6 @@ class MapSwitcher extends React.PureComponent {
 
   render() {
     const { anchorEl } = this.state;
-    const { classes } = this.props;
     const open = Boolean(anchorEl);
 
     const title =
@@ -116,16 +114,15 @@ class MapSwitcher extends React.PureComponent {
       this.props.appModel.config.mapConfig.map.mapselector && (
         <>
           <Tooltip disableInteractive title={`Nuvarande karta: ${title}`}>
-            <Paper className={classes.paper}>
-              <IconButton
+            <StyledPaper>
+              <StyledIconButton
                 aria-owns={open ? "render-props-menu" : undefined}
                 aria-haspopup="true"
-                className={classes.button}
                 onClick={this.handleClick}
               >
                 <SwitchCameraIcon />
-              </IconButton>
-            </Paper>
+              </StyledIconButton>
+            </StyledPaper>
           </Tooltip>
           <Menu
             id="render-props-menu"
@@ -141,4 +138,4 @@ class MapSwitcher extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(MapSwitcher);
+export default MapSwitcher;
