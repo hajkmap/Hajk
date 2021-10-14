@@ -26,7 +26,7 @@ class FirSearchView extends React.PureComponent {
     searchText: "",
     searchPanelExpanded: true,
     neighborExpanded: false,
-    searchType: "designation",
+    searchType: "",
     buffer: 0,
     files: { list: [] },
     exactMatch: false,
@@ -50,11 +50,7 @@ class FirSearchView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
 
-    this.searchTypes = [
-      { value: "designation", name: "Fastighetsbeteckning" },
-      { value: "owner", name: "Ägare" },
-      { value: "address", name: "Adress" },
-    ];
+    this.state.searchTypeId = this.model.searchTypes[0].id;
 
     this.initListeners();
   }
@@ -83,7 +79,7 @@ class FirSearchView extends React.PureComponent {
       showDesignation: this.state.showDesignation || false,
       showSearchArea: this.state.showSearchArea || false,
       buffer: this.state.buffer || 0,
-      searchType: this.state.searchType,
+      searchTypeId: this.state.searchTypeId,
       zoomToLayer: true,
     };
 
@@ -126,17 +122,14 @@ class FirSearchView extends React.PureComponent {
                 <InputLabel id="searchType">Sök på</InputLabel>
                 <Select
                   labelId="searchType"
-                  value={this.state.searchType}
+                  value={this.state.searchTypeId}
                   onChange={(e) => {
-                    this.setState({ searchType: e.target.value });
+                    this.setState({ searchTypeId: e.target.value });
                   }}
                 >
-                  {this.searchTypes.map((item, index) => (
-                    <MenuItem
-                      key={`fir-searchType-${item.value}`}
-                      value={item.value}
-                    >
-                      {item.name}
+                  {this.model.searchTypes.map((item, index) => (
+                    <MenuItem key={`fir-searchType-${item.id}`} value={item.id}>
+                      {item.caption}
                     </MenuItem>
                   ))}
                 </Select>

@@ -28,7 +28,7 @@ class FirLayerController {
   }
 
   initLayers() {
-    const searchLayerId = "" + 9999;
+    const searchLayerId = "" + this.model.config.wmsRealEstateLayer.id;
 
     this.model.layers.realestateSearchLayer = this.model.map
       .getLayers()
@@ -363,7 +363,7 @@ class FirLayerController {
     );
 
     if (this.bufferValue === 0) {
-      if (options.keepNeighborBuffer !== true) {
+      if (!options.keepNeighborBuffer || options.keepNeighborBuffer !== true) {
         this.getLayer("buffer").getSource().clear();
       }
       return;

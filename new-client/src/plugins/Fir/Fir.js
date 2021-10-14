@@ -91,10 +91,12 @@ class Fir extends React.PureComponent {
 
     const defaultParams = {
       features: features,
+      app: this.props.app,
+      map: this.props.map,
     };
 
     this.getService(type).then((Service) => {
-      const service = new Service.default(defaultParams);
+      const service = new Service.default(defaultParams, this.model);
 
       this.layerController.clearBeforeSearch(params);
       this.localObserver.publish("fir.search.started", params);

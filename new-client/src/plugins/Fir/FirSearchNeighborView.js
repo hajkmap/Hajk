@@ -79,10 +79,6 @@ class FirSearchNeighborView extends React.PureComponent {
     this.setState({ radioValue: e.target.value });
   };
 
-  handleClearSearch() {
-    console.log("Clear search!");
-  }
-
   handleHistoryBack = () => {
     if (this.state.resultHistory.length === 0) {
       return;
@@ -133,7 +129,7 @@ class FirSearchNeighborView extends React.PureComponent {
 
     let options = {
       text: "",
-      searchType: "designation",
+      searchTypeId: this.model.config.wfsRealEstateLayer.id,
       zoomToLayer: true,
       keepNeighborBuffer: true,
     };
