@@ -27,6 +27,7 @@ const Root = styled("div")(({ theme }) => ({
       maxWidth: "100px",
     },
     "& ul": {
+      fontSize: "0.7em",
       color: "unset",
       textShadow: "unset",
     },
