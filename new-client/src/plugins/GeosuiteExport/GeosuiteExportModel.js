@@ -29,6 +29,17 @@ class GeosuiteExportModel {
     this.draw = null;
   }
 
+  handleWindowOpen = () => {
+    //pass to the view, so we can re-set the view state.
+    //TODO - can we just handle what we need to here in the model?
+    this.localObserver.publish("window-opened");
+  };
+
+  handleWindowClose = () => {
+    //pass to the view, so we can re-set the view state.
+    this.localObserver.publish("window-closed");
+  };
+
   handleDrawStart = (e) => {
     //When the user starts drawing a feature, remove any existing feature. We only want one shape.
     this.clearMapFeatures();

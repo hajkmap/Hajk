@@ -19,21 +19,24 @@ class GeosuiteExport extends React.PureComponent {
     options: PropTypes.object.isRequired,
   };
 
-  static defaultProps = {
-    options: {},
-  };
-
   constructor(props) {
     super(props);
     this.localObserver = Observer();
     this.globalObserver = props.app.globalObserver;
-
-    this.geosuiteExportModel = new GeosuiteExportModel({
+    this.model = new GeosuiteExportModel({
       localObserver: this.localObserver,
       app: props.app,
       map: props.map,
     });
   }
+
+  onWindowShow = () => {
+    this.model.handleWindowOpen();
+  };
+
+  onWindowHide = () => {
+    this.model.handleWindowClose();
+  };
 
   render() {
     return (
@@ -47,11 +50,13 @@ class GeosuiteExport extends React.PureComponent {
           description: this.state.description,
           height: 600,
           width: 400,
+          onWindowShow: this.onWindowShow,
+          onWindowHide: this.onWindowHide,
         }}
       >
         <GeosuiteExportView
           app={this.props.app}
-          model={this.geosuiteExportModel}
+          model={this.model}
           options={this.props.options}
           localObserver={this.localObserver}
           globalObserver={this.globalObserver}

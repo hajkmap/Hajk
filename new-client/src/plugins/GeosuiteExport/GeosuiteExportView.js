@@ -26,12 +26,31 @@ const styles = (theme) => ({
   },
 });
 
+const defaultState = {
+  activeStep: 0,
+  isAreaSelected: false,
+  selectedProduct: "document",
+  steps: {
+    0: { canEnter: true },
+    1: { canEnter: false },
+    2: { canEnter: true },
+    3: { canEnter: true },
+  },
+};
+
 class GeosuiteExportView extends React.PureComponent {
-  state = {
-    activeStep: 0,
-    isAreaSelected: false,
-    selectedProduct: "document",
-  };
+  state = defaultState;
+  // state = {
+  //   activeStep: 0,
+  //   isAreaSelected: false,
+  //   selectedProduct: "document",
+  //   steps: {
+  //     0: { canEnter: true },
+  //     1: { canEnter: false },
+  //     2: { canEnter: true },
+  //     3: { canEnter: true },
+  //   },
+  // };
 
   static propTypes = {
     model: PropTypes.object.isRequired,
@@ -60,13 +79,16 @@ class GeosuiteExportView extends React.PureComponent {
       this.setState({ isAreaSelected: false });
     });
 
-    this.globalObserver.subscribe("core.closeWindow", (title) => {
-      if (title === this.props.title) {
-        this.handleReset();
-      }
+    this.localObserver.subscribe("window-closed", () => {
+      this.handleReset();
+    });
+
+    this.localObserver.subscribe("window-opened", () => {
+      this.handleEnterStepZero();
     });
   };
 
+  //used when we close using the 'avsluta' button.
   handleClose = () => {
     this.handleReset();
     this.globalObserver.publish(`geosuiteexport.closeWindow`);
@@ -74,6 +96,7 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleReset = () => {
     this.props.model.clearMapFeatures();
+    this.props.model.removeDrawInteraction();
     this.setState({
       activeStep: 0,
       isAreaSelected: false,
@@ -81,68 +104,82 @@ class GeosuiteExportView extends React.PureComponent {
     });
   };
 
-  handleDrawAreaStart = () => {
+  //update form in order step.
+  handleSelectProduct = (e) => {
+    this.setState({ selectedProduct: e.target.value });
+  };
+
+  handleLeaveStep = (step) => {
+    switch (step) {
+      case 0:
+        this.handleLeaveStepZero();
+        break;
+      case 1:
+        this.handleLeaveStepOne();
+        break;
+      case 2:
+        this.handleLeaveStepTwo();
+        break;
+      case 3:
+        this.handleLeaveStepThree();
+        break;
+      default:
+        console.warn("Reached an invalid step");
+    }
+  };
+
+  handleEnterStep = (step) => {
+    switch (step) {
+      case 0:
+        this.handleEnterStepZero();
+        break;
+      case 1:
+        this.handleEnterStepOne();
+        break;
+      case 2:
+        this.handleEnterStepTwo();
+        break;
+      case 3:
+        this.handleEnterStepThree();
+        break;
+      default:
+        console.warn("Reached an invalid step");
+    }
+  };
+
+  //Actions when leaving steps
+  handleEnterStepZero = () => {
+    console.log("handleEnterStepZero");
     this.props.model.addDrawInteraction();
   };
 
-  handleStepComplete = (step) => {
-    console.log(`handleStepComplete: step: ${step} `);
-    switch (step) {
-      case 0:
-        this.handleStepZeroComplete();
-        break;
-      case 1:
-        this.handleStepOneComplete();
-        break;
-      case 2:
-        this.handleStepTwoComplete();
-        break;
-      case 3:
-        this.handleStepThreeComplete();
-        break;
-      default:
-        console.log("Något gick fel");
-    }
+  handleEnterStepOne = () => {
+    console.log("handleEnterStepOne");
   };
 
-  handleStepBack = (step) => {
-    this.setState({ activeStep: step - 1 });
+  handleEnterStepTwo = () => {
+    console.log("handleEnterStepTwo");
   };
 
-  handleStepZeroComplete = () => {
-    console.log("handleStepZeroComplete");
-    if (this.state.isAreaSelected) {
-      this.setState({ activeStep: 1 });
-    } else {
-      this.props.enqueueSnackbar(
-        "Du behöver först rita ett beställningsområde",
-        {
-          variant: "info",
-          persist: false,
-          vertical: "bottom",
-          horizontal: "center",
-        }
-      );
-    }
+  handleEnterStepThree = () => {
+    console.log("handleEnterStepThree");
   };
 
-  handleStepOneComplete = () => {
-    console.log("handleStepOneComplete");
-    this.setState({ activeStep: 2 });
+  //Actions when entering steps
+  handleLeaveStepZero = () => {
+    console.log("handleLeaveStepZero");
   };
 
-  handleStepTwoComplete = () => {
-    console.log("handleStepTwoComplete");
-    this.setState({ activeStep: 3 });
+  handleLeaveStepOne = () => {
+    console.log("handleLeaveStepOne");
   };
 
-  handleStepThreeComplete = () => {
-    console.log("handleStepThreeComplete");
-    this.setState({ activeStep: 3 });
+  handleLeaveStepTwo = () => {
+    console.log("handleLeaveStepTwo");
   };
 
-  handleSelectProduct = (e) => {
-    this.setState({ selectedProduct: e.target.value });
+  handleLeaveStepThree = () => {
+    console.log("handleLeaveStepThree");
   };
 
   renderOrderStepDocument() {
@@ -233,17 +270,18 @@ class GeosuiteExportView extends React.PureComponent {
       <div>
         <Button
           onClick={() => {
-            this.handleStepComplete(step);
+            this.setState({ activeStep: step + 1 });
           }}
           variant="outlined"
           aria-label="Fortsätt till nästa steg"
+          disabled={!this.state.steps[step + 1]["canEnter"]}
         >
           {nextButtonName || "Fortsätt"}
         </Button>
         <Button
           disabled={step === 0}
           onClick={() => {
-            this.handleStepBack(step);
+            this.setState({ activeStep: step - 1 });
           }}
           variant="outlined"
           aria-label="Gå tillbaka till föregående steg"
@@ -253,6 +291,19 @@ class GeosuiteExportView extends React.PureComponent {
       </div>
     );
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.activeStep !== this.state.activeStep) {
+      this.handleLeaveStep(prevState.activeStep);
+      this.handleEnterStep(this.state.activeStep);
+    }
+
+    if (prevState.isAreaSelected !== this.state.isAreaSelected) {
+      const updatedSteps = { ...this.state.steps };
+      updatedSteps[1].canEnter = this.state.isAreaSelected;
+      this.setState({ steps: updatedSteps });
+    }
+  }
 
   render() {
     const { classes } = this.props;
@@ -267,16 +318,7 @@ class GeosuiteExportView extends React.PureComponent {
                 <Typography variant="caption">
                   Rita ditt omrråde i kartan, avsluta genom att dubbelklicka.
                 </Typography>
-                <div>
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      this.handleDrawAreaStart();
-                    }}
-                  >
-                    Yta
-                  </Button>
-                </div>
+                <br />
                 <br />
                 {this.renderNextAndBackButtons()}
               </div>
