@@ -2,16 +2,15 @@ import React from "react";
 import { IconButton, Paper, Tooltip } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
-});
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
+}));
 
 /**
  * @summary Resets map to initial zoom level, centrum coordinate and active layers.
@@ -31,22 +30,19 @@ class MapResetter extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
-
     return (
       <Tooltip disableInteractive title="Återställ kartan till startläget">
-        <Paper className={classes.paper}>
-          <IconButton
+        <StyledPaper>
+          <StyledIconButton
             aria-label="Återställ kartan till startläget"
-            className={classes.button}
             onClick={this.handleClick}
           >
             <HomeIcon />
-          </IconButton>
-        </Paper>
+          </StyledIconButton>
+        </StyledPaper>
       </Tooltip>
     );
   }
 }
 
-export default withStyles(styles)(MapResetter);
+export default MapResetter;
