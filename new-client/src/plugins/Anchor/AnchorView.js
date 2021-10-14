@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 
 import {
@@ -18,20 +18,18 @@ import {
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-const styles = (theme) => ({
-  margin: {
-    marginBottom: theme.spacing(1),
+const StyledFormGroup = styled(FormGroup)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledTextField = styled(TextField)(() => ({
+  "& input": {
+    fontFamily: "monospace",
   },
-  root: {
-    "& input": {
-      fontFamily: "monospace",
-    },
-  },
-});
+}));
 
 class AnchorView extends React.PureComponent {
   static propTypes = {
-    classes: PropTypes.object.isRequired,
     cleanUrl: PropTypes.bool.isRequired,
     closeSnackbar: PropTypes.func.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
@@ -68,18 +66,16 @@ class AnchorView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <>
-        <FormGroup row className={classes.margin}>
+        <StyledFormGroup row>
           <Typography>
             Skapa en länk med kartans synliga lager, aktuella zoomnivå och
             utbredning.
           </Typography>
-        </FormGroup>
-        <FormGroup row className={classes.margin}>
-          <TextField
-            className={classes.root}
+        </StyledFormGroup>
+        <StyledFormGroup row>
+          <StyledTextField
             fullWidth
             id="anchorUrl"
             InputProps={{
@@ -110,8 +106,8 @@ class AnchorView extends React.PureComponent {
             value={this.state.anchor}
             variant="outlined"
           />
-        </FormGroup>
-        <FormGroup row className={classes.margin}>
+        </StyledFormGroup>
+        <StyledFormGroup row>
           <FormControlLabel
             control={
               <Checkbox
@@ -122,10 +118,10 @@ class AnchorView extends React.PureComponent {
             }
             label="Valfritt: skapa länk till ren karta"
           />
-        </FormGroup>
+        </StyledFormGroup>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(AnchorView));
+export default withSnackbar(AnchorView);

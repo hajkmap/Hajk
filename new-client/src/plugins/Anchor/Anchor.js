@@ -59,7 +59,7 @@ class Anchor extends React.PureComponent {
           title: "Dela",
           description: "Skapa en länk och dela det du ser i kartan med andra",
           height: 230,
-          width: 530,
+          width: 600,
           top: undefined,
           left: undefined,
         }}
