@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
 
 import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
@@ -8,20 +8,16 @@ import Bookmarks from "@mui/icons-material/Bookmarks";
 
 import Dialog from "../components/Dialog.js";
 
-const styles = (theme) => {
-  return {
-    paper: {
-      marginBottom: theme.spacing(1),
-    },
-    button: {
-      minWidth: "unset",
-    },
-  };
-};
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
+}));
 
 class Preset extends React.PureComponent {
   static propTypes = {
-    classes: propTypes.object.isRequired,
     appModel: propTypes.object.isRequired,
   };
 
@@ -220,20 +216,18 @@ class Preset extends React.PureComponent {
       return null;
     } else {
       const { anchorEl } = this.state;
-      const { classes } = this.props;
       const open = Boolean(anchorEl);
       return (
         <>
           <Tooltip disableInteractive title={this.title}>
-            <Paper className={classes.paper}>
-              <IconButton
+            <StyledPaper>
+              <StyledIconButton
                 aria-label={this.title}
-                className={classes.button}
                 onClick={this.handleClick}
               >
                 <Bookmarks />
-              </IconButton>
-            </Paper>
+              </StyledIconButton>
+            </StyledPaper>
           </Tooltip>
           <Menu
             id="render-props-menu"
@@ -250,4 +244,4 @@ class Preset extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(Preset);
+export default Preset;
