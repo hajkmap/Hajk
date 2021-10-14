@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
 
 import { IconButton, Paper, Tooltip } from "@mui/material";
@@ -8,20 +8,16 @@ import InfoIcon from "@mui/icons-material/Info";
 
 import Dialog from "../components/Dialog.js";
 
-const styles = (theme) => {
-  return {
-    paper: {
-      marginBottom: theme.spacing(1),
-    },
-    button: {
-      minWidth: "unset",
-    },
-  };
-};
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
+}));
 
 class Information extends React.PureComponent {
   static propTypes = {
-    classes: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
   };
 
@@ -87,24 +83,22 @@ class Information extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
     return (
       <>
         {this.renderDialog()}
         <Tooltip disableInteractive title={this.title}>
-          <Paper className={classes.paper}>
-            <IconButton
+          <StyledPaper>
+            <StyledIconButton
               aria-label={this.title}
-              className={classes.button}
               onClick={this.handleOnClick}
             >
               <InfoIcon />
-            </IconButton>
-          </Paper>
+            </StyledIconButton>
+          </StyledPaper>
         </Tooltip>
       </>
     );
   }
 }
 
-export default withStyles(styles)(Information);
+export default Information;
