@@ -345,7 +345,7 @@ class LayerGroup extends React.PureComponent {
     return (
       // If the layerItem is a child, it should be rendered a tad to the
       // right. Apparently 21px.
-      <Box sx={{ marginLeft: this.props.child ? 21 : 0 }}>
+      <Box sx={{ marginLeft: this.props.child ? "21px" : "0px" }}>
         <StyledAccordion
           expanded={this.state.expanded}
           TransitionProps={{
