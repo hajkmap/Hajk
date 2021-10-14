@@ -1,6 +1,5 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
-import PropTypes from "prop-types";
+import { styled } from "@mui/material/styles";
 
 import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/AddBox";
@@ -12,15 +11,13 @@ import Tooltip from "@mui/material/Tooltip";
 import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
 import { withSnackbar } from "notistack";
 
-const styles = (theme) => ({
-  toggleButton: {
-    width: "100%",
-    paddingTop: 5,
-    paddingBottom: 5,
-    color: theme.palette.text.primary,
-    backgroundColor: theme.palette.primary,
-  },
-});
+const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
+  width: "100%",
+  paddingTop: 5,
+  paddingBottom: 5,
+  color: theme.palette.text.primary,
+  backgroundColor: theme.palette.primary,
+}));
 
 class BufferView extends React.PureComponent {
   state = {
@@ -134,7 +131,6 @@ class BufferView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <>
         <Stepper activeStep={this.state.activeStep} orientation="vertical">
@@ -145,15 +141,14 @@ class BufferView extends React.PureComponent {
                 {this.renderClearButton()}
                 <Grid item xs={12}>
                   <Tooltip disableInteractive title="Markera flera objekt">
-                    <ToggleButton
-                      className={classes.toggleButton}
+                    <StyledToggleButton
                       onChange={this.setSelecting}
                       selected={this.state.isSelecting}
                       value="isSelecting"
                     >
                       <AddIcon />
                       Välj objekt
-                    </ToggleButton>
+                    </StyledToggleButton>
                   </Tooltip>
                 </Grid>
                 {this.renderPrevButton()}
@@ -227,10 +222,4 @@ class BufferView extends React.PureComponent {
   }
 }
 
-BufferView.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles, { withTheme: true })(
-  withSnackbar(BufferView)
-);
+export default withSnackbar(BufferView);
