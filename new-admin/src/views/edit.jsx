@@ -42,8 +42,11 @@ const defaultState = {
   uri: "",
   projection: "",
   point: false,
+  multipoint: false,
   linestring: false,
+  multilinestring: false,
   polygon: false,
+  multipolygon: false,
   layerProperties: [],
   alert: false,
   corfirm: false,
@@ -129,8 +132,11 @@ class Edit extends Component {
       projection: layer.projection || "EPSG:3006",
       addedLayers: [],
       point: layer.editPoint,
+      multipoint: layer.editMultiPoint,
       linestring: layer.editLine,
+      multilinestring: layer.editMultiLine,
       polygon: layer.editPolygon,
+      multipolygon: layer.editMultiPolygon,
     });
 
     setTimeout(() => {
@@ -340,6 +346,9 @@ class Edit extends Component {
     if (fieldName === "point") value = input.checked;
     if (fieldName === "polygon") value = input.checked;
     if (fieldName === "linestring") value = input.checked;
+    if (fieldName === "multipoint") value = input.checked;
+    if (fieldName === "multipolygon") value = input.checked;
+    if (fieldName === "multilinestring") value = input.checked;
 
     return value;
   }
@@ -638,8 +647,11 @@ class Edit extends Component {
         editableFields: this.getValue("editableFields"),
         nonEditableFields: this.getNonEditableFields(),
         editPoint: this.getValue("point"),
+        editMultiPoint: this.getValue("multipoint"),
         editPolygon: this.getValue("polygon"),
+        editMultiPolygon: this.getValue("multipolygon"),
         editLine: this.getValue("linestring"),
+        editMultiLine: this.getValue("multilinestring"),
       };
 
       this.modifyBooleans(layer);
@@ -1257,7 +1269,11 @@ class Edit extends Component {
                   <input
                     checked={this.state.point}
                     onChange={(e) => {
-                      this.setState({ point: e.target.checked }, () =>
+                      const newSt = { point: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["multipoint"] = false;
+                      }
+                      this.setState(newSt, () =>
                         this.validateField("point", true)
                       );
                     }}
@@ -1269,9 +1285,31 @@ class Edit extends Component {
                   <label htmlFor="point">&nbsp;Punkter</label>
                   <br />
                   <input
+                    checked={this.state.multipoint}
+                    onChange={(e) => {
+                      const newSt = { multipoint: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["point"] = false;
+                      }
+                      this.setState(newSt, () =>
+                        this.validateField("multipoint", true)
+                      );
+                    }}
+                    ref="input_multipoint"
+                    name="multipoint"
+                    id="multipoint"
+                    type="checkbox"
+                  />
+                  <label htmlFor="multipoint">&nbsp;Multipunkter</label>
+                  <br />
+                  <input
                     checked={this.state.linestring}
                     onChange={(e) => {
-                      this.setState({ linestring: e.target.checked }, () =>
+                      const newSt = { linestring: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["multilinestring"] = false;
+                      }
+                      this.setState(newSt, () =>
                         this.validateField("linestring", true)
                       );
                     }}
@@ -1283,9 +1321,31 @@ class Edit extends Component {
                   <label htmlFor="linestring">&nbsp;Linjer</label>
                   <br />
                   <input
+                    checked={this.state.multilinestring}
+                    onChange={(e) => {
+                      const newSt = { multilinestring: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["linestring"] = false;
+                      }
+                      this.setState(newSt, () =>
+                        this.validateField("multilinestring", true)
+                      );
+                    }}
+                    ref="input_multilinestring"
+                    name="multilinestring"
+                    id="multilinestring"
+                    type="checkbox"
+                  />
+                  <label htmlFor="multilinestring">&nbsp;Multilinjer</label>
+                  <br />
+                  <input
                     checked={this.state.polygon}
                     onChange={(e) => {
-                      this.setState({ polygon: e.target.checked }, () =>
+                      const newSt = { polygon: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["multipolygon"] = false;
+                      }
+                      this.setState(newSt, () =>
                         this.validateField("polygon", true)
                       );
                     }}
@@ -1295,6 +1355,24 @@ class Edit extends Component {
                     type="checkbox"
                   />
                   <label htmlFor="polygon">&nbsp;Ytor</label>
+                  <br />
+                  <input
+                    checked={this.state.multipolygon}
+                    onChange={(e) => {
+                      const newSt = { multipolygon: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["polygon"] = false;
+                      }
+                      this.setState(newSt, () =>
+                        this.validateField("multipolygon", true)
+                      );
+                    }}
+                    ref="input_multipolygon"
+                    name="multipolygon"
+                    id="multipolygon"
+                    type="checkbox"
+                  />
+                  <label htmlFor="multipolygon">&nbsp;Multiytor</label>
                 </div>
               </div>
               <div>
