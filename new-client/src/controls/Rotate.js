@@ -2,19 +2,17 @@ import React, { useEffect, useRef, useState } from "react";
 import { easeOut } from "ol/easing";
 import { IconButton, Paper, Tooltip } from "@mui/material";
 import NavigationIcon from "@mui/icons-material/Navigation";
-import { makeStyles } from "@mui/styles";
+import { styled } from "@mui/material/styles";
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
 }));
 
 const RotateControl = React.memo((props) => {
-  const classes = useStyles();
   const view = useRef();
   const [rotation, setRotation] = useState(view.current?.getRotation() || 0);
 
@@ -66,15 +64,14 @@ const RotateControl = React.memo((props) => {
   return (
     (props.map && rotation !== 0 && (
       <Tooltip disableInteractive title="Återställ rotation">
-        <Paper className={classes.paper}>
-          <IconButton
+        <StyledPaper>
+          <StyledIconButton
             aria-label="Återställ rotation"
-            className={classes.button}
             onClick={rotateNorth}
           >
             <NavigationIcon style={{ transform: `rotate(${rotation}rad)` }} />
-          </IconButton>
-        </Paper>
+          </StyledIconButton>
+        </StyledPaper>
       </Tooltip>
     )) ||
     null
