@@ -4,6 +4,7 @@ import { Attribution } from "ol/control";
 
 const Root = styled("div")(({ theme }) => ({
   background: theme.palette.background.paper,
+  borderRadius: "2px",
   "& .ol-control": {
     position: "static",
     maxWidth: "none",
