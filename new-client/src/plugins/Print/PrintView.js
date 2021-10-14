@@ -328,6 +328,7 @@ class PrintView extends React.PureComponent {
               // we cannot send a proper value to the tabs-component. If we do, mui will throw an error.
               // false is OK though, apparently.
               variant="fullWidth"
+              textColor="inherit"
             >
               <Tooltip disableInteractive title="Generella inställningar">
                 <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />

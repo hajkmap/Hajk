@@ -155,6 +155,7 @@ class LayersSwitcherView extends React.PureComponent {
             // we cannot send a proper value to the tabs-component. If we do, mui will throw an error.
             // false is OK though, apparently.
             variant="fullWidth"
+            textColor="inherit"
           >
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
