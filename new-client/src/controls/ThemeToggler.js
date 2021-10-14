@@ -1,16 +1,14 @@
 import React from "react";
 import { IconButton, Paper, Tooltip } from "@mui/material";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
+import { styled } from "@mui/material/styles";
 
-import { makeStyles } from "@mui/styles";
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
 }));
 
 /**
@@ -20,22 +18,19 @@ const useStyles = makeStyles((theme) => ({
  * @returns {object} React
  */
 const ThemeToggler = React.memo((props) => {
-  const classes = useStyles();
-
   return (
     (props.showThemeToggler && (
       <Tooltip disableInteractive title="Växla mellan mörkt och ljust färgtema">
-        <Paper className={classes.paper}>
-          <IconButton
+        <StyledPaper>
+          <StyledIconButton
             aria-label="Växla färgtema"
-            className={classes.button}
             onClick={(e) => {
               props.toggleMUITheme();
             }}
           >
             <Brightness4Icon />
-          </IconButton>
-        </Paper>
+          </StyledIconButton>
+        </StyledPaper>
       </Tooltip>
     )) ||
     null
