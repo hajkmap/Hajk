@@ -883,6 +883,7 @@ class App extends React.PureComponent {
           </div>
           <div
             id="map"
+            tabIndex="0"
             role="application"
             className={cslx(classes.map, {
               [classes.shiftedLeft]:
