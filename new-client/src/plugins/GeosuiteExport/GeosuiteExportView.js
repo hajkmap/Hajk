@@ -160,6 +160,9 @@ class GeosuiteExportView extends React.PureComponent {
   handleEnterStepTwo = () => {
     console.log("handleEnterStepTwo");
     console.log("Here we will send the WFS request");
+    this.props.model.setSelectionStateFromGeometry(
+      this.props.model.getSelectedGeometry()
+    );
   };
 
   handleEnterStepThree = () => {
