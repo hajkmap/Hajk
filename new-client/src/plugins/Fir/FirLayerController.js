@@ -28,12 +28,12 @@ class FirLayerController {
   }
 
   initLayers() {
-    const searchLayerId = "" + this.model.config.wmsRealEstateLayer.id;
-
-    this.model.layers.realestateSearchLayer = this.model.map
+    this.model.layers.wmsRealEstate = this.model.map
       .getLayers()
       .getArray()
-      .find((layer) => layer.get("name") === searchLayerId);
+      .find(
+        (layer) => layer.get("name") === this.model.config.wmsRealEstateLayer.id
+      );
 
     this.model.layers.feature = new VectorLayer({
       caption: "FIRSearchResultsLayer",
@@ -135,7 +135,7 @@ class FirLayerController {
       "fir.search.results.addFeatureByMapClick",
       (data) => {
         this.clickLock(data.active);
-        this.model.layers.realestateSearchLayer.setVisible(data.active);
+        this.model.layers.wmsRealEstate.setVisible(data.active);
         this.removeIsActive = false;
       }
     );
@@ -251,12 +251,12 @@ class FirLayerController {
   };
 
   getFeaturesAtCoordinates(coordinate) {
-    if (!this.model.layers.realestateSearchLayer) {
+    if (!this.model.layers.wmsRealEstate) {
       return;
     }
     const view = this.model.map.getView();
 
-    const url = this.model.layers.realestateSearchLayer
+    const url = this.model.layers.wmsRealEstate
       .getSource()
       .getFeatureInfoUrl(
         coordinate,
@@ -297,7 +297,7 @@ class FirLayerController {
     if (first === true) {
       this.model.layers.marker.setVisible(false);
       // no feature was clicked, check realestate layer for features.
-      if (this.model.layers.realestateSearchLayer.getVisible() === true) {
+      if (this.model.layers.wmsRealEstate.getVisible() === true) {
         this.getFeaturesAtCoordinates(e.coordinate);
       }
     }
@@ -308,7 +308,7 @@ class FirLayerController {
       active: false,
     });
     this.removeIsActive = false;
-    this.model.layers.realestateSearchLayer.setVisible(false);
+    this.model.layers.wmsRealEstate.setVisible(false);
     this.clickLock(false);
   };
 

@@ -7,6 +7,7 @@ import FirModel from "./FirModel";
 import FirView from "./FirView";
 import FirLayerController from "./FirLayerController";
 import FirImport from "./FirImport";
+import styles from "./FirStyles";
 /* eslint-disable no-unused-vars */
 import FirWfsService from "./FirWfsService";
 /* eslint-enable no-unused-vars */
@@ -42,8 +43,6 @@ class Fir extends React.PureComponent {
       map: props.map,
     });
 
-    console.log(this.model.app);
-
     this.layerController = new FirLayerController(
       this.model,
       this.localObserver
@@ -54,6 +53,8 @@ class Fir extends React.PureComponent {
       layerController: this.layerController,
       map: props.map,
     });
+
+    styles.setModel(this.model);
   }
 
   onWindowShow = () => {

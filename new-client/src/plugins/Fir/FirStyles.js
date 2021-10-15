@@ -1,21 +1,14 @@
 import { Fill, Stroke, Style, Text } from "ol/style";
 
 class FirStyles {
-  // constructor(settings) {
-  //   // this.map = settings.map;
-  //   // this.app = settings.app;
-  //   // this.localObserver = settings.localObserver;
-  // }
-
   constructor() {
     this.colors = {
       colorResult: "rgba(255,255,0,0.15)",
       colorResultStroke: "rgba(0,0,0,0.6)",
       colorHighlight: "rgba(255,255,0,0.25)",
       colorHighlightStroke: "rgba(0, 130, 179, 1)",
-      colorHittaGrannarBuffer: "rgba(50,200,200,0.4)",
-      colorHittaGrannarBufferStroke: "rgba(0,0,0,0.2)",
     };
+    this.model = {};
     this.setResultStyle();
     this.setHighlightStyle();
   }
@@ -44,6 +37,10 @@ class FirStyles {
     return this.highlightStyle;
   }
 
+  setModel(model) {
+    this.model = model;
+  }
+
   setHighlightStyle() {
     this.highlightStyle = new Style({
       fill: new Fill({
@@ -65,7 +62,7 @@ class FirStyles {
           color: "#fff",
           width: 2,
         }),
-        text: feature.get("block_enhet") || "",
+        text: feature.get(this.model.baseSearchType.labelField) || "",
       }),
     });
   }
