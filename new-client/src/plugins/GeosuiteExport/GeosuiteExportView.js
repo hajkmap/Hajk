@@ -36,21 +36,11 @@ const defaultState = {
     2: { canEnter: true },
     3: { canEnter: true },
   },
+  processComplete: false,
 };
 
 class GeosuiteExportView extends React.PureComponent {
   state = defaultState;
-  // state = {
-  //   activeStep: 0,
-  //   isAreaSelected: false,
-  //   selectedProduct: "document",
-  //   steps: {
-  //     0: { canEnter: true },
-  //     1: { canEnter: false },
-  //     2: { canEnter: true },
-  //     3: { canEnter: true },
-  //   },
-  // };
 
   static propTypes = {
     model: PropTypes.object.isRequired,
@@ -97,11 +87,7 @@ class GeosuiteExportView extends React.PureComponent {
   handleReset = () => {
     this.props.model.clearMapFeatures();
     this.props.model.removeDrawInteraction();
-    this.setState({
-      activeStep: 0,
-      isAreaSelected: false,
-      selectedProduct: "document",
-    });
+    this.setState(defaultState);
   };
 
   //update form in order step.
@@ -225,6 +211,7 @@ class GeosuiteExportView extends React.PureComponent {
 
   renderConfirmStep = () => {
     const { classes } = this.props;
+    const step = this.state.activeStep;
     return (
       <>
         <Typography className={classes.bold}>
@@ -237,7 +224,28 @@ class GeosuiteExportView extends React.PureComponent {
           eller gå vidare med KLAR.
         </Typography>
         <br />
-        {this.renderNextAndBackButtons("Välj mer", "Klar")}
+        <div>
+          <Button
+            onClick={() => {
+              this.setState({ activeStep: 1 });
+            }}
+            variant="outlined"
+            aria-label="Välj mer produkter"
+            disabled={false}
+          >
+            Välj Mer
+          </Button>
+          <Button
+            disabled={step === 0}
+            onClick={() => {
+              this.setState({ processComplete: true, activeStep: null });
+            }}
+            variant="outlined"
+            aria-label="Klar"
+          >
+            Klar
+          </Button>
+        </div>
       </>
     );
   };
@@ -279,7 +287,7 @@ class GeosuiteExportView extends React.PureComponent {
           }}
           variant="outlined"
           aria-label="Fortsätt till nästa steg"
-          disabled={!this.state.steps[step + 1]["canEnter"]}
+          disabled={!this.state.steps?.[step + 1]?.["canEnter"]}
         >
           {nextButtonName || "Fortsätt"}
         </Button>
@@ -362,12 +370,12 @@ class GeosuiteExportView extends React.PureComponent {
                 : this.renderOrderStepGeoSuite()}
             </StepContent>
           </Step>
-          <Step key="confirmation">
+          <Step key="confirmation" completed={this.state.processComplete}>
             <StepLabel>Bekräftelse</StepLabel>
             <StepContent>{this.renderConfirmStep()}</StepContent>
           </Step>
         </Stepper>
-        {this.renderStepperButtons()}
+        {this.state.processComplete === true && this.renderStepperButtons()}
       </>
     );
   }
