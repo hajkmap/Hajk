@@ -1,8 +1,8 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import withStyles from "@mui/styles/withStyles";
-import PropTypes from "prop-types";
+import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
@@ -17,24 +17,23 @@ import { withSnackbar } from "notistack";
 import Dialog from "../../components/Dialog.js";
 import Symbology from "./components/Symbology.js";
 
+// The css-file is only targeting the ol-draw-interaction, and styles the tooltip.
+// TODO: Remove?
 import "./draw.css";
 
-const styles = (theme) => ({
-  root: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
-  row: {
-    marginBottom: "10px",
-  },
-});
+const StyledFormControl = styled(FormControl)(() => ({
+  width: "100%",
+}));
+
+const Row = styled("div")(({ theme }) => ({
+  width: "100%",
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledDivider = styled(Divider)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  marginBottom: theme.spacing(1),
+}));
 
 class DrawView extends React.PureComponent {
   state = {
@@ -194,15 +193,14 @@ class DrawView extends React.PureComponent {
   }
 
   renderForm() {
-    const { classes } = this.props;
     const { drawMethod } = this.state;
 
     if (drawMethod === "add") {
       return (
         <>
-          <div className={classes.row}>
-            <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="shape-native-helper">
+          <Row>
+            <StyledFormControl>
+              <InputLabel variant="standard" htmlFor="shape-native-helper">
                 Typ av ritobjekt
               </InputLabel>
               <NativeSelect
@@ -217,12 +215,12 @@ class DrawView extends React.PureComponent {
                 <option value="Circle">Cirkel</option>
                 <option value="Point">Punkt</option>
               </NativeSelect>
-            </FormControl>
-          </div>
-          <div className={classes.row}>
-            <div>Ritmanér</div>
+            </StyledFormControl>
+          </Row>
+          <StyledDivider>Ritmanér</StyledDivider>
+          <Row>
             <Symbology type={this.state.shape} model={this.props.model} />
-          </div>
+          </Row>
         </>
       );
     }
@@ -268,13 +266,13 @@ class DrawView extends React.PureComponent {
       return (
         <>
           <div>
-            <Button onClick={this.openUploadDialog}>
+            <Button sx={{ width: "100%" }} onClick={this.openUploadDialog}>
               <FolderOpenIcon />
               &nbsp; Importera ritobjekt
             </Button>
           </div>
           <div>
-            <Button onClick={this.props.model.export}>
+            <Button sx={{ width: "100%" }} onClick={this.props.model.export}>
               <SaveAltIcon />
               &nbsp; Exportera ritobjekt
             </Button>
@@ -303,11 +301,10 @@ class DrawView extends React.PureComponent {
   };
 
   renderImport() {
-    const { classes } = this.props;
     return (
       <div>
         <Typography>Välj KML-fil att importera:</Typography>
-        <div className={classes.row}>
+        <Row>
           <input
             type="file"
             name="files[]"
@@ -315,8 +312,8 @@ class DrawView extends React.PureComponent {
             multiple={false}
             id="file-uploader"
           />
-        </div>
-        <div className={classes.row}>
+        </Row>
+        <Row>
           <Button
             variant="contained"
             color="primary"
@@ -343,23 +340,26 @@ class DrawView extends React.PureComponent {
           >
             Ladda upp
           </Button>
-        </div>
+        </Row>
       </div>
     );
   }
 
   render() {
-    const { classes } = this.props;
     return (
       <>
-        <div className={classes.row}>
-          <div className={classes.row}>
-            <Button variant="contained" onClick={this.props.model.clear}>
+        <Row>
+          <Row>
+            <Button
+              variant="contained"
+              sx={{ width: "100%" }}
+              onClick={this.props.model.clear}
+            >
               <DeleteIcon />
               Ta bort alla ritobjekt
             </Button>
-          </div>
-          <div className={classes.row}>
+          </Row>
+          <Row>
             <FormControlLabel
               control={
                 <Checkbox
@@ -376,9 +376,10 @@ class DrawView extends React.PureComponent {
               }
               label="Visa mått på ritobjekt"
             />
-          </div>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="drawMethod-native-helper">
+          </Row>
+          <StyledDivider>Inställningar</StyledDivider>
+          <StyledFormControl>
+            <InputLabel variant="standard" htmlFor="drawMethod-native-helper">
               Aktivitet
             </InputLabel>
             <NativeSelect
@@ -393,8 +394,8 @@ class DrawView extends React.PureComponent {
               <option value="move">Flytta objekt</option>
               <option value="import">Importera/Exportera</option>
             </NativeSelect>
-          </FormControl>
-        </div>
+          </StyledFormControl>
+        </Row>
         {this.renderForm()}
         {this.renderDialog()}
       </>
@@ -402,8 +403,4 @@ class DrawView extends React.PureComponent {
   }
 }
 
-DrawView.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(withSnackbar(DrawView));
+export default withSnackbar(DrawView);

@@ -42,7 +42,7 @@ class Draw extends React.PureComponent {
           icon: <DrawIcon />,
           title: "Rita",
           description: "Rita, mät, importera och exportera",
-          height: 600,
+          height: "dynamic",
           width: 285,
           top: undefined,
           left: undefined,
