@@ -116,6 +116,7 @@ class MapSwitcher extends React.PureComponent {
           <Tooltip disableInteractive title={`Nuvarande karta: ${title}`}>
             <StyledPaper>
               <StyledIconButton
+                aria-label="Byt karta"
                 aria-owns={open ? "render-props-menu" : undefined}
                 aria-haspopup="true"
                 onClick={this.handleClick}

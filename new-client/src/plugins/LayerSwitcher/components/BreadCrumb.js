@@ -188,7 +188,11 @@ class BreadCrumb extends Component {
           alignItems="center"
         >
           <Grid item>
-            <IconButton size="small" onClick={this.setLayerOpacity(layer)}>
+            <IconButton
+              size="small"
+              onClick={this.setLayerOpacity(layer)}
+              aria-label="Visa/dölj lagret tillfälligt"
+            >
               {!hidden ? <VisibilityIcon /> : <VisibilityOffIcon />}
             </IconButton>
           </Grid>
@@ -199,7 +203,11 @@ class BreadCrumb extends Component {
             </Typography>
           </TitleGridContainer>
           <Grid item>
-            <IconButton size="small" onClick={this.setLayerVisibility(layer)}>
+            <IconButton
+              size="small"
+              onClick={this.setLayerVisibility(layer)}
+              aria-label="Ta bort lagret från kartan"
+            >
               <CloseIcon />
             </IconButton>
           </Grid>
