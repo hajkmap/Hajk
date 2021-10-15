@@ -159,6 +159,7 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleEnterStepTwo = () => {
     console.log("handleEnterStepTwo");
+    console.log("Here we will send the WFS request");
   };
 
   handleEnterStepThree = () => {
@@ -168,6 +169,7 @@ class GeosuiteExportView extends React.PureComponent {
   //Actions when entering steps
   handleLeaveStepZero = () => {
     console.log("handleLeaveStepZero");
+    this.props.model.removeDrawInteraction();
   };
 
   handleLeaveStepOne = () => {

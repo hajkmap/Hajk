@@ -1,4 +1,5 @@
 import Draw from "ol/interaction/Draw";
+import DoubleClickZoom from "ol/interaction/DoubleClickZoom";
 import { Fill, Stroke, Style } from "ol/style.js";
 import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
@@ -27,6 +28,7 @@ class GeosuiteExportModel {
 
     this.map.addLayer(this.vector);
     this.draw = null;
+    this.doubleClick = this.getMapsDoubleClickInteraction();
   }
 
   handleWindowOpen = () => {
@@ -56,6 +58,17 @@ class GeosuiteExportModel {
       this.draw = null;
     }
     this.map.clickLock.delete("geosuiteexport");
+
+    /*
+    Add the maps doubleclick zoom interaction back to map when we leave drawing mode (the doubleclick zoom interaction is removed from the map when we enter drawing mode, to avoid a zoom when doubleclicking to finish drawing).
+    TODO - do this without a timeout. (timeout because otherwise the map still zooms).
+    TODO - is there a better way to cancel the doubleclick zoom without removing and the re-adding the interaction?
+    */
+    if (this.doubleClick) {
+      setTimeout(() => {
+        this.map.addInteraction(this.doubleClick);
+      }, 200);
+    }
   };
 
   addDrawInteraction = () => {
@@ -69,11 +82,30 @@ class GeosuiteExportModel {
 
     //When drawing starts, lock clicks to this tool, otherwise the InfoClick tool will fire on click.
     this.map.clickLock.add("geosuiteexport");
+
+    //Remove the doubleClick interaction from the map. Otherwise when a user double clicks to finish drawing, the map will also zoom in.
+    if (this.doubleClick) {
+      this.map.removeInteraction(this.doubleClick);
+    }
   };
 
   clearMapFeatures = () => {
     this.map.removeLayer(this.source.clear());
     this.localObserver.publish("area-selection-removed");
+  };
+
+  getMapsDoubleClickInteraction = () => {
+    let doubleClick = null;
+    this.map
+      .getInteractions()
+      .getArray()
+      .forEach((interaction) => {
+        if (interaction instanceof DoubleClickZoom) {
+          doubleClick = interaction;
+        }
+      });
+
+    return doubleClick;
   };
 }
 
