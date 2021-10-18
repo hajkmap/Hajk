@@ -123,7 +123,7 @@ class Fme extends React.PureComponent {
               onClickCallback: () => {},
             },
           ],
-          height: 450, // Custom height/width etc | Use "auto" for automatic or leave undefined
+          height: "dynamic",
           width: 400,
           onWindowHide: this.onWindowHide,
           onWindowShow: this.onWindowShow,
