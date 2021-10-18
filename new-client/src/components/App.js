@@ -95,7 +95,7 @@ const MapContainer = styled("div")(() => ({
   right: 0,
   bottom: 0,
   top: 0,
-  //border: "2px solid transparent",
+  border: "2px solid transparent",
   "&:focus-visible": {
     border: "2px solid black",
   },
