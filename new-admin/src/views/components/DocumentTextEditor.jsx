@@ -20,7 +20,10 @@ import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
+import TranslateIcon from "@material-ui/icons/Translate";
 import ImageIcon from "@material-ui/icons/Image";
+import MovieIcon from "@material-ui/icons/Movie";
+import AudiotrackIcon from "@material-ui/icons/Audiotrack";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
@@ -69,10 +72,12 @@ export default class DocumentTextEditor extends React.Component {
       url: "",
       urlType: "",
       imageList: this.props.imageList,
+      videoList: this.props.videoList,
       documents: this.props.documents,
       readOnly: false,
       onReadOnly: false,
       currentImage: "",
+      currentVideo: "",
       imageData: {},
       urlValue: "",
       imageAlt: "",
@@ -86,6 +91,7 @@ export default class DocumentTextEditor extends React.Component {
       console.log("HTML", this.props.html);
       console.log(stateToHTML(content));
       console.log(convertToRaw(content));
+      console.log("---");
     };
     this.onChange = this._onChange.bind(this);
     this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
@@ -107,6 +113,7 @@ export default class DocumentTextEditor extends React.Component {
     this.addAudio = this._addAudio.bind(this);
     this.addImage = this._addImage.bind(this);
     this.addVideo = this._addVideo.bind(this);
+    this.addAudio = this._addAudio.bind(this);
     this.addMapLink = this._addMapLink.bind(this);
     this.addDocumentLink = this._addDocumentLink.bind(this);
     this.addWebLink = this._addWebLink.bind(this);
@@ -125,6 +132,7 @@ export default class DocumentTextEditor extends React.Component {
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
     this.blockRenderer = this._blockRenderer.bind(this);
     this.onImgLoad = this.onImgLoad.bind(this);
+    this.onVideoLoad = this.onVideoLoad.bind(this);
   }
 
   _stateFromHtmlWithOptions = (html) => {
@@ -144,9 +152,37 @@ export default class DocumentTextEditor extends React.Component {
           },
         };
       }
+
+      if (tagName === "FIGURE") {
+        const figureTypeName = element.lastElementChild.tagName;
+        const data = element.lastElementChild;
+
+        if (figureTypeName === "VIDEO") {
+          const mediaWidth = data.getAttribute("data-video-width");
+          const mediaHeight = data.getAttribute("data-video-height");
+          const mediaCaption = data.getAttribute("ata-caption");
+          const mediaSource = data.getAttribute("data-source");
+          const mediaPosition = data.getAttribute("data-video-position");
+          const urlValue = data.firstChild.getAttribute("src");
+
+          return {
+            type: "video",
+            data: {
+              src: urlValue,
+              "data-video-width": mediaWidth ? mediaWidth + "px" : null,
+              "data-video-height": mediaHeight ? mediaHeight + "px" : null,
+              "data-caption": mediaCaption,
+              "data-source": mediaSource,
+              "data-video-position": mediaPosition,
+            },
+          };
+        }
+      }
     };
+
     return stateFromHTML(html, { customBlockFn });
   };
+
   _onChange(editorState) {
     this.setState({ editorState });
     this.applyChanges();
@@ -167,8 +203,8 @@ export default class DocumentTextEditor extends React.Component {
       RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
     );
   }
-  _confirmMedia(e) {
-    e.preventDefault();
+
+  _createContentStateWithEntity = () => {
     const {
       editorState,
       urlValue,
@@ -181,31 +217,63 @@ export default class DocumentTextEditor extends React.Component {
       mediaPopup,
       mediaPosition,
     } = this.state;
-    const contentState = editorState.getCurrentContent();
-    let contentStateWithEntity;
 
-    if (mediaPopup) {
+    let contentStateWithEntity;
+    const contentState = editorState.getCurrentContent();
+
+    if (urlType === "image") {
+      if (mediaPopup) {
+        contentStateWithEntity = contentState.createEntity(
+          urlType,
+          "IMMUTABLE",
+          {
+            src: urlValue,
+            type: "image",
+            alt: imageAlt ? imageAlt : "",
+            "data-image-width": mediaWidth ? mediaWidth + "px" : null,
+            "data-image-height": mediaHeight ? mediaHeight + "px" : null,
+            "data-caption": mediaCaption,
+            "data-source": mediaSource,
+            "data-image-popup": "",
+            "data-image-position": mediaPosition,
+          }
+        );
+      } else {
+        contentStateWithEntity = contentState.createEntity(
+          urlType,
+          "IMMUTABLE",
+          {
+            src: urlValue,
+            type: "image",
+            alt: imageAlt ? imageAlt : "",
+            "data-image-width": mediaWidth ? mediaWidth + "px" : null,
+            "data-image-height": mediaHeight ? mediaHeight + "px" : null,
+            "data-caption": mediaCaption,
+            "data-source": mediaSource,
+            "data-image-position": mediaPosition,
+          }
+        );
+      }
+    } else if (urlType === "video") {
       contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
         src: urlValue,
-        alt: imageAlt ? imageAlt : "",
-        "data-image-width": mediaWidth ? mediaWidth + "px" : null,
-        "data-image-height": mediaHeight ? mediaHeight + "px" : null,
+        type: "video",
+        "data-video-width": mediaWidth ? mediaWidth + "px" : null,
+        "data-video-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
-        "data-image-popup": "",
-        "data-image-position": mediaPosition,
-      });
-    } else {
-      contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
-        src: urlValue,
-        alt: imageAlt ? imageAlt : "",
-        "data-image-width": mediaWidth ? mediaWidth + "px" : null,
-        "data-image-height": mediaHeight ? mediaHeight + "px" : null,
-        "data-caption": mediaCaption,
-        "data-source": mediaSource,
-        "data-image-position": mediaPosition,
+        "data-video-position": mediaPosition,
       });
     }
+
+    return contentStateWithEntity;
+  };
+
+  _confirmMedia(e) {
+    e.preventDefault();
+
+    const { editorState } = this.state;
+    const contentStateWithEntity = this._createContentStateWithEntity();
 
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.push(
@@ -213,6 +281,7 @@ export default class DocumentTextEditor extends React.Component {
       contentStateWithEntity,
       "create-entity"
     );
+
     this.setState(
       {
         editorState: AtomicBlockUtils.insertAtomicBlock(
@@ -400,14 +469,14 @@ export default class DocumentTextEditor extends React.Component {
     this._promptForTextArea();
   }
 
-  _addAudio() {
-    this._promptForMedia("audio");
-  }
   _addImage() {
     this._promptForMedia("image");
   }
   _addVideo() {
     this._promptForMedia("video");
+  }
+  _addAudio() {
+    this._promptForMedia("audio");
   }
   _addMapLink() {
     this._promptForLink("maplink");
@@ -495,7 +564,6 @@ export default class DocumentTextEditor extends React.Component {
 
       if (type === "image") {
         const selection = editorState.getSelection();
-
         const contentBlockKey = block.getKey();
 
         return {
@@ -516,8 +584,30 @@ export default class DocumentTextEditor extends React.Component {
           },
         };
       }
+
+      if (type === "video") {
+        const selection = editorState.getSelection();
+        const contentBlockKey = block.getKey();
+
+        return {
+          component: ImageComponent,
+          editable: false,
+          props: {
+            readOnlyMode: this.toggleReadOnly,
+            currentVideo: (video) => this.setState({ currentVideo: video }),
+            imageData: (data) =>
+              this.updateSelectedImageData(contentBlockKey, editorState, data),
+            isFocused: () =>
+              selection.getAnchorKey() === contentBlockKey &&
+              this.isImageBlockInSelection(editorState),
+            onClick: () =>
+              EditorState.push(
+                this.selectImageWithBlockKey(editorState, contentBlockKey)
+              ),
+          },
+        };
+      }
     }
-    return null;
   }
 
   selectImageWithBlockKey(editorState, key) {
@@ -743,6 +833,15 @@ export default class DocumentTextEditor extends React.Component {
     });
   }
 
+  onVideoLoad({ target: video }) {
+    this.setState({
+      defaultWidth: video.offsetWidth,
+      defaultHeight: video.offsetHeight,
+      mediaWidth: video.offsetWidth,
+      mediaHeight: video.offsetHeight,
+    });
+  }
+
   calculateHeight = (width) => {
     let aspectRatio = this.state.defaultHeight / this.state.defaultWidth;
     let height = width * aspectRatio;
@@ -763,17 +862,58 @@ export default class DocumentTextEditor extends React.Component {
     });
   };
 
+  renderImagesOrVideos = (type, imageList, videoList) => {
+    if (type === "image")
+      return imageList
+        ? imageList.map((image, i) => {
+            const imageUrl = "../Upload/" + image;
+            return imageUrl;
+          })
+        : null;
+    if (type === "video")
+      return videoList
+        ? videoList.map((video, i) => {
+            const videoUrl = "../Upload/" + video;
+            return videoUrl;
+          })
+        : null;
+  };
+
+  preview = (type) => {
+    if (type === "image")
+      return this.state.urlValue ? (
+        <img
+          onLoad={this.onImgLoad}
+          src={this.state.urlValue}
+          alt={this.state.imageAlt}
+          width={this.state.mediaWidth}
+          height={this.state.mediaHeight}
+        />
+      ) : null;
+    if (type === "video")
+      return this.state.urlValue ? (
+        <video
+          onLoadStart={this.onVideoLoad}
+          src={this.state.urlValue}
+          alt={this.state.imageAlt}
+          width={this.state.mediaWidth}
+          height={this.state.mediaHeight}
+        />
+      ) : null;
+  };
+
   render() {
-    const { editorState, imageList, documents } = this.state;
+    const { editorState, imageList, videoList, documents } = this.state;
 
     let editorContainer = styles.editor;
     let urlInput;
     if (this.state.showURLInput) {
+      const addTextLocale = this.state.urlType === "image" ? "bild" : "video";
       urlInput = (
         <Grid style={styles.gridItemContainer} container>
           <Grid container direction="column" spacing={2} item xs={6}>
             <Grid item>
-              <Typography variant="h5">Lägg till bild</Typography>
+              <Typography variant="h5">Lägg till {addTextLocale}</Typography>
               <Autocomplete
                 id="disabled-options-demo"
                 freeSolo
@@ -785,20 +925,17 @@ export default class DocumentTextEditor extends React.Component {
                 }}
                 ref="url"
                 name="url"
-                options={
-                  imageList
-                    ? imageList.map((image, i) => {
-                        const imageUrl = "../Upload/" + image;
-                        return imageUrl;
-                      })
-                    : null
-                }
+                options={this.renderImagesOrVideos(
+                  this.state.urlType,
+                  imageList,
+                  videoList
+                )}
                 style={{ width: 300 }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     placeholder="Sökväg"
-                    helperText="Ange URL till en bild"
+                    helperText={`Ange URL till en ${addTextLocale}`}
                     variant="standard"
                   />
                 )}
@@ -904,17 +1041,7 @@ export default class DocumentTextEditor extends React.Component {
             <Grid item>
               <p>Förhandsvisning:</p>
             </Grid>
-            <Grid item>
-              {this.state.urlValue && (
-                <img
-                  src={this.state.urlValue}
-                  alt={this.state.imageAlt}
-                  onLoad={this.onImgLoad}
-                  width={this.state.mediaWidth}
-                  height={this.state.mediaHeight}
-                />
-              )}
-            </Grid>
+            <Grid item>{this.preview(this.state.urlType)}</Grid>
           </Grid>
         </Grid>
       );
@@ -996,16 +1123,16 @@ export default class DocumentTextEditor extends React.Component {
               editorState={editorState}
               onToggle={this.toggleBlockType}
             />
-            <StyleButton
-              label={<FormatQuoteIcon />}
-              tooltip="Lägg till faktaruta"
-              onToggle={this.addTextArea}
+
+            <TextStyleControls
+              onToggleQuote={this.addTextArea}
+              onToggleHover={this.addTextArea}
             />
 
-            <StyleButton
-              tooltip="Lägg till en bild"
-              label={<ImageIcon />}
-              onToggle={this.addImage}
+            <MediaStyleControls
+              OnToggleImage={this.addImage}
+              OnToggleVideo={this.addVideo}
+              OnToggleAudio={this.addAudio}
             />
 
             <StyleButton
@@ -1048,6 +1175,48 @@ export default class DocumentTextEditor extends React.Component {
     );
   }
 }
+
+const TextStyleControls = (props) => {
+  return (
+    <div style={styles.buttons}>
+      <StyleButton
+        label={<FormatQuoteIcon />}
+        tooltip="Lägg till faktaruta"
+        onToggle={props.onToggleQuote}
+      />
+
+      <StyleButton
+        label={<TranslateIcon />}
+        tooltip="Lägg till en svävartext"
+        onToggle={props.onToggleHover}
+      />
+    </div>
+  );
+};
+
+const MediaStyleControls = (props) => {
+  return (
+    <div style={styles.buttons}>
+      <StyleButton
+        tooltip="Lägg till en bild"
+        label={<ImageIcon />}
+        onToggle={props.OnToggleImage}
+      />
+
+      <StyleButton
+        tooltip="Lägg till ett videoklipp"
+        label={<MovieIcon />}
+        onToggle={props.OnToggleVideo}
+      />
+
+      <StyleButton
+        tooltip="Lägg till ett ljudklipp"
+        label={<AudiotrackIcon />}
+        onToggle={props.OnToggleAudio}
+      />
+    </div>
+  );
+};
 
 /* Block types */
 function getBlockStyle(block) {

@@ -38,6 +38,7 @@ import {
 } from "@material-ui/core";
 
 import { Grid } from "@material-ui/core";
+import { updateInterfaceDeclaration, updateSourceFileNode } from "typescript";
 
 const ColorButtonRed = withStyles((theme) => ({
   root: {
@@ -128,6 +129,7 @@ class DocumentEditor extends Component {
       keywords: [],
       geoObjects: [],
       imageList: undefined,
+      videoList: undefined,
       newTableOfContentsExpanded: undefined,
       newTableOfContentsActive: undefined,
       newTableOfContentsLevels: undefined,
@@ -207,10 +209,19 @@ class DocumentEditor extends Component {
     });
   }
 
+  loadVideoList() {
+    this.props.model.listVideos((data) => {
+      this.setState({
+        videoList: data,
+      });
+    });
+  }
+
   componentDidMount() {
     this.props.model.set("config", this.props.config);
     this.load();
     this.loadImageList();
+    this.loadVideoList();
   }
 
   save() {
@@ -627,6 +638,7 @@ class DocumentEditor extends Component {
               chapter.html = html;
             }}
             imageList={this.state.imageList}
+            videoList={this.state.videoList}
             documents={this.state.documents}
           />
         </Grid>

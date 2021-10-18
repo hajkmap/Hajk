@@ -114,6 +114,15 @@ var documentEditor = Model.extend({
       });
     });
   },
+
+  listVideos: function (callback) {
+    var url = this.get("config").list_videos;
+    hfetch(url).then((response) => {
+      response.json().then((data) => {
+        callback(data);
+      });
+    });
+  },
 });
 
 export default documentEditor;

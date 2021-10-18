@@ -120,6 +120,15 @@ const ImageComponent = (props) => {
     setDefaultHeight(defaultHeight);
   };
 
+  const onVideoLoad = ({ target: video }) => {
+    debugger;
+    const defaultWidth = video.offsetWidth;
+    const defaultHeight = video.offsetHeight;
+
+    setDefaultWidth(defaultWidth);
+    setDefaultHeight(defaultHeight);
+  };
+
   const calculateHeight = (width) => {
     if (width) {
       width = parseInt(width); //Convert string to number
@@ -334,20 +343,51 @@ const ImageComponent = (props) => {
       </div>
     );
   } else {
+    if (data.type === "image") {
+      return (
+        <div className={classes.imgContainer}>
+          <img
+            src={src}
+            alt={alt}
+            width={width}
+            height={height}
+            data-image-width={width}
+            data-image-height={height}
+            data-caption={caption}
+            data-image-position={imagePosition}
+            onClick={handleOpen}
+            onLoad={onImgLoad}
+          />
+          <button
+            type="button"
+            variant="contained"
+            className="btn btn-success"
+            onClick={handleSubmit}
+            hidden={saveButton}
+          >
+            <CheckIcon /> Godkänn ändringar
+          </button>
+          {modal}
+        </div>
+      );
+    }
+  }
+  if (data.type === "video") {
     return (
       <div className={classes.imgContainer}>
-        <img
-          src={src}
+        <video
           alt={alt}
-          width={width}
-          height={height}
-          data-image-width={width}
-          data-image-height={height}
+          width={defaultWidth}
+          height={defaultHeight}
+          data-video-width={width}
+          data-video-height={height}
           data-caption={caption}
-          data-image-position={imagePosition}
+          data-video-position={imagePosition}
           onClick={handleOpen}
-          onLoad={onImgLoad}
-        />
+          onLoadStart={onVideoLoad}
+        >
+          <source src={src} type="video/mp4"></source>
+        </video>
         <button
           type="button"
           variant="contained"
