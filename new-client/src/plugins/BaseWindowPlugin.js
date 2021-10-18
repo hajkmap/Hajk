@@ -2,26 +2,18 @@ import React from "react";
 import propTypes from "prop-types";
 import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
-import withStyles from "@mui/styles/withStyles";
-import { withTheme } from "@mui/styles";
 import { Hidden, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
 
-const styles = (theme) => {
-  return {};
-};
-
 class BaseWindowPlugin extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     children: propTypes.object.isRequired,
-    classes: propTypes.object.isRequired,
     custom: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
-    theme: propTypes.object.isRequired,
     type: propTypes.string.isRequired,
   };
 
@@ -265,4 +257,4 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(BaseWindowPlugin));
+export default BaseWindowPlugin;
