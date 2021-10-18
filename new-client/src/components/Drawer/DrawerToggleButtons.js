@@ -10,6 +10,7 @@ import { Paper, Hidden } from "@mui/material";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginRight: theme.spacing(1),
+  backgroundImage: "unset",
   [theme.breakpoints.down("sm")]: {
     boxShadow: "none",
   },
