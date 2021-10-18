@@ -20,8 +20,17 @@ import { Box, Typography } from "@mui/material";
 
 // The example below shows how a <Button /> with a bottom-margin can be created.
 // Notice that we are also accessing the application theme.
-const StyledButton = styled(Button)(({ theme }) => ({
+const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
+}));
+
+// We can also create a custom button that accepts border as a
+// prop. If the border-prop is missing, we fall back on the theme
+// divider color. (borderColor would be a more fitting name, but
+// since this is a custom prop it must be all lowerCase, hence border will have
+// to do!)
+const ButtonWithBorder = styled(Button)(({ border, theme }) => ({
+  border: `${theme.spacing(0.5)} solid ${border ?? theme.palette.divider}`,
 }));
 
 // All mui-components (and all styled components, even styled div:s!) will have access to the sx-prop.
@@ -31,6 +40,7 @@ class DummyView extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
     counter: 0,
+    borderColor: "#fff",
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -178,61 +188,85 @@ class DummyView extends React.PureComponent {
     });
   };
 
+  // Generate a custom HEX color string
+  getRandomHexColorString = () => {
+    return `#${((Math.random() * 0xffffff) << 0).toString(16)}`;
+  };
+
   // Make it possible to programatically update Window's title/color
   handleClickOnRandomTitle = () => {
     // We use the updateCustomProp mehtod which is passed down from parent
     // component as a prop to this View.
     this.props.updateCustomProp("title", new Date().getTime().toString()); // Generate a timestamp
-    this.props.updateCustomProp(
-      "color",
-      "#" + ((Math.random() * 0xffffff) << 0).toString(16) // Generate a custom HEX color string
-    );
+    this.props.updateCustomProp("color", this.getRandomHexColorString());
+  };
+
+  // Make it possible to programatically update the border color of a button
+  updateBorderColor = () => {
+    // Get a random hex color string...
+    const randomColor = this.getRandomHexColorString();
+    // ...and update the state!
+    this.setState({
+      borderColor: randomColor,
+    });
   };
 
   render() {
     return (
       <>
-        <StyledButton
+        <Button
           variant="contained"
           fullWidth={true}
           // onChange={(e) => { console.log(e) }}
           // ^ Don't do this. Closures here are inefficient. Use the below:
           onClick={this.buttonClick}
+          sx={{ marginBottom: 2 }} // The sx-prop is available on all MUI-components!
         >
           {this.state.test ||
             `Clicked ${this.state.counter} ${
               this.state.counter === 1 ? "time" : "times"
             }`}
-        </StyledButton>
-        <StyledButton
+        </Button>
+        <ButtonWithBorder
+          border="blue"
+          sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
           variant="contained"
           fullWidth={true}
           onClick={this.showDefaultSnackbar}
         >
           Show default snackbar
-        </StyledButton>
-        <StyledButton
+        </ButtonWithBorder>
+        <ButtonWithBottomMargin
           variant="contained"
           fullWidth={true}
           onClick={this.showAdvancedSnackbar}
         >
           Show error snackbar
-        </StyledButton>
-        <StyledButton
+        </ButtonWithBottomMargin>
+        <ButtonWithBottomMargin
           variant="contained"
           fullWidth={true}
           color="primary"
           onClick={this.showIntroduction}
         >
           Show Hajk Introduction
-        </StyledButton>
-        <StyledButton
+        </ButtonWithBottomMargin>
+        <ButtonWithBottomMargin
           variant="contained"
           fullWidth={true}
           onClick={this.handleClickOnRandomTitle}
         >
           Set random title and color
-        </StyledButton>
+        </ButtonWithBottomMargin>
+        <ButtonWithBorder
+          border={this.state.borderColor} // Let's keep the borderColor in state so that we can update it!
+          sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
+          variant="contained"
+          fullWidth={true}
+          onClick={this.updateBorderColor} // When we click the button, we update the borderColor.
+        >
+          Set random border color
+        </ButtonWithBorder>
       </>
     );
   }
