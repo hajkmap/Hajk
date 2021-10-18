@@ -1,8 +1,7 @@
 import React from "react";
 
 import PropTypes from "prop-types";
-import withStyles from "@mui/styles/withStyles";
-import cslx from "clsx";
+import { styled } from "@mui/material/styles";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
@@ -51,173 +50,141 @@ document.windows = [];
 
 const DRAWER_WIDTH = 250;
 
-const styles = (theme) => {
-  return {
-    map: {
-      zIndex: 1,
-      position: "absolute",
-      left: 0,
-      right: 0,
-      bottom: 0,
-      top: 0,
-      border: "2px solid transparent",
-      "&:focus-visible": {
-        border: "2px solid black",
-      },
-    },
-    flexBox: {
-      position: "absolute",
-      left: 0,
-      right: 0,
-      bottom: 0,
-      top: 0,
-      padding: theme.spacing(2),
-      display: "flex",
-      flexDirection: "column",
-      pointerEvents: "none",
-      [theme.breakpoints.down("sm")]: {
-        padding: 0,
-      },
-    },
-    windowsContainer: {
-      position: "absolute",
-      left: 0,
-      right: 0,
-      bottom: 0,
-      top: 0,
-    },
-    pointerEventsOnChildren: {
-      "& > *": {
-        pointerEvents: "auto",
-      },
-    },
-    drawerContent: {
-      height: "inherit",
-    },
-    header: {
-      zIndex: theme.zIndex.appBar,
-      maxHeight: theme.spacing(8),
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      [theme.breakpoints.down("sm")]: {
-        zIndex: 3,
-        maxHeight: theme.spacing(6),
-        boxShadow: theme.shadows[3],
-        backgroundColor: theme.palette.background.paper,
-      },
-    },
-    main: {
-      zIndex: 2,
-      flex: 1,
-      display: "flex",
-      paddingTop: theme.spacing(2), // we don't want the content of main box to "hit" header/footer
-      paddingBottom: theme.spacing(2),
-      [theme.breakpoints.down("sm")]: {
-        padding: theme.spacing(2), // on small screen the inner padding of AppBox is unset, so we must add this
-      },
-    },
-    leftColumn: {
-      flex: 1,
-    },
-    rightColumn: {
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
-    },
-    controlsColumn: {
-      display: "flex",
-      flexDirection: "column",
-    },
-    footer: {
-      width: "100%",
-      zIndex: 3,
-      display: "flex",
-      flexDirection: "row-reverse",
-      justifyContent: "space-between",
-      [theme.breakpoints.down("sm")]: {
-        flexDirection: "column",
-      },
-    },
-    footerBreadcrumbs: {},
-    footerMapControls: {
-      display: "flex",
-      justifyContent: "flex-end",
-      [theme.breakpoints.down("sm")]: {
-        marginBottom: theme.spacing(2),
-        paddingLeft: theme.spacing(2),
-        paddingRight: theme.spacing(2),
-      },
-      "& > *": {
-        marginLeft: theme.spacing(1),
-      },
-    },
-    drawerBackground: {
-      width: DRAWER_WIDTH,
-      backgroundColor: theme.palette.background.default,
-    },
-    drawerHeader: {
-      display: "flex",
-      alignItems: "center",
-      padding: theme.spacing(0, 2),
-      ...theme.mixins.toolbar,
-      justifyContent: "space-between",
-      backgroundColor: theme.palette.background.paper,
-    },
-    drawerContentContainer: {
-      backgroundColor: theme.palette.background.paper,
-      height: "100%",
-      overflow: "auto",
-    },
-    drawerLockButton: {
-      margin: -12,
-    },
-    logoBox: {
-      padding: theme.spacing(1, 2),
-      height: theme.spacing(6),
-    },
-    logo: {
-      height: theme.spacing(4),
-    },
-    drawerGrid: {
-      padding: theme.spacing(1, 2),
-      backgroundColor: theme.palette.background.paper,
-      minHeight: theme.spacing(6),
-    },
-    drawerTitle: {
-      padding: theme.spacing(1, 0),
-      lineHeight: 0,
-    },
-    drawerLiveContent: {
-      backgroundColor: theme.palette.background.default,
-    },
-    widgetItem: {
-      width: "220px",
-    },
-    snackBarContainerRoot: {
-      [theme.breakpoints.down("sm")]: {
-        pointerEvents: "none",
-        // Getting around notistack bug, can't reach snackItem.
-        "& div > div > div > div": {
-          pointerEvents: "auto",
-        },
-      },
-    },
-    snackbarContainerBottom: {
-      [theme.breakpoints.down("sm")]: {
-        bottom: "35px",
-      },
-    },
-    snackbarContainerTop: {
-      [theme.breakpoints.down("sm")]: {
-        top: "18px",
-      },
-    },
-    // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
-    shiftedLeft: {
-      left: DRAWER_WIDTH,
-    },
-  };
-};
+// A bunch of styled components to get the Hajk feel! Remember that some
+// components are styled with the sx-prop instead/as well.
+const StyledHeader = styled("header")(({ theme }) => ({
+  zIndex: theme.zIndex.appBar,
+  maxHeight: theme.spacing(8),
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  [theme.breakpoints.down("sm")]: {
+    zIndex: 3,
+    maxHeight: theme.spacing(6),
+    boxShadow: theme.shadows[3],
+    backgroundColor: theme.palette.background.paper,
+  },
+}));
+
+const StyledMain = styled("main")(({ theme }) => ({
+  zIndex: 2,
+  flex: 1,
+  display: "flex",
+  paddingTop: theme.spacing(2), // we don't want the content of main box to "hit" header/footer
+  paddingBottom: theme.spacing(2),
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(2), // on small screen the inner padding of AppBox is unset, so we must add this
+  },
+}));
+
+const StyledFooter = styled("footer")(({ theme }) => ({
+  width: "100%",
+  zIndex: 3,
+  display: "flex",
+  flexDirection: "row-reverse",
+  justifyContent: "space-between",
+  [theme.breakpoints.down("sm")]: {
+    flexDirection: "column",
+  },
+}));
+
+const MapContainer = styled("div")(() => ({
+  zIndex: 1,
+  position: "absolute",
+  left: 0,
+  right: 0,
+  bottom: 0,
+  top: 0,
+  //border: "2px solid transparent",
+  "&:focus-visible": {
+    border: "2px solid black",
+  },
+}));
+
+const AppBox = styled("div")(({ theme }) => ({
+  position: "absolute",
+  left: 0,
+  right: 0,
+  bottom: 0,
+  top: 0,
+  padding: theme.spacing(2),
+  display: "flex",
+  flexDirection: "column",
+  pointerEvents: "none",
+  [theme.breakpoints.down("sm")]: {
+    padding: 0,
+  },
+}));
+
+const WindowsContainer = styled("div")(() => ({
+  position: "absolute",
+  left: 0,
+  right: 0,
+  bottom: 0,
+  top: 0,
+}));
+
+const DrawerHeaderGrid = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(1, 2),
+  backgroundColor: theme.palette.background.paper,
+  minHeight: theme.spacing(6),
+}));
+
+const DrawerContentContainer = styled("div")(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  height: "100%",
+  overflow: "auto",
+}));
+
+const FooterMapControlContainer = styled("div")(({ theme }) => ({
+  display: "flex",
+  justifyContent: "flex-end",
+  [theme.breakpoints.down("sm")]: {
+    marginBottom: theme.spacing(2),
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+  },
+  "& > *": {
+    marginLeft: theme.spacing(1),
+  },
+}));
+
+const LogoImage = styled("img")(({ theme }) => ({
+  height: theme.spacing(4),
+}));
+
+const DrawerTitle = styled(Typography)(({ theme }) => ({
+  padding: theme.spacing(1, 0),
+  lineHeight: 0,
+}));
+
+// TODO: The styles below are supposed to make the snackbars more usable
+// on small view-ports. However, it seems the styles are not working.
+// Must check with the implementer (jesade?) before migrating these.
+
+// const styles = (theme) => {
+//   return {
+//     snackBarContainerRoot: {
+//       [theme.breakpoints.down("sm")]: {
+//         pointerEvents: "none",
+//         // Getting around notistack bug, can't reach snackItem.
+//         "& div > div > div > div": {
+//           pointerEvents: "auto",
+//         },
+//       },
+//     },
+//     snackbarContainerBottom: {
+//       [theme.breakpoints.down("sm")]: {
+//         bottom: "35px",
+//       },
+//     },
+//     snackbarContainerTop: {
+//       [theme.breakpoints.down("sm")]: {
+//         top: "18px",
+//       },
+//     },
+//   };
+// };
 
 /**
  * The main React Component of Hajk. Rendered by index.js.
@@ -229,8 +196,6 @@ class App extends React.PureComponent {
   static propTypes = {
     /** List of plugins that has been activated in this instance of Hajk */
     activeTools: PropTypes.array.isRequired,
-    /** CSS class declarations used in this component */
-    classes: PropTypes.object.isRequired,
     /** Contains activeMap, layersConfig as well as objects that hold appConfig and mapConfig*/
     config: PropTypes.object.isRequired,
   };
@@ -654,8 +619,18 @@ class App extends React.PureComponent {
     return s instanceof String || typeof s === "string";
   }
 
+  drawerIsLocked() {
+    const { config } = this.props;
+    const clean = config.mapConfig.map.clean;
+
+    // The user might have locked the drawer while in regular mode,
+    // hence we must make sure we're not in clean mode, because
+    // if we are, the drawer cannot be locked, and we should return false.
+    return this.state.drawerPermanent && clean === false;
+  }
+
   renderDrawerHeader = () => {
-    const { classes, config } = this.props;
+    const { config } = this.props;
     const drawerTitle = this.state.drawerButtons.find(
       (db) => db.value === this.state.activeDrawerContent
     )?.drawerTitle;
@@ -671,12 +646,16 @@ class App extends React.PureComponent {
 
     return (
       <>
-        <Box className={classes.logoBox}>
-          <img alt="" src={logoUrl} className={classes.logo} />
+        <Box
+          sx={{
+            padding: (theme) => theme.spacing(1, 2),
+            height: (theme) => theme.spacing(6),
+          }}
+        >
+          <LogoImage alt="" src={logoUrl} />
         </Box>
         <Divider />
-        <Grid
-          className={classes.drawerGrid}
+        <DrawerHeaderGrid
           item
           container
           wrap="nowrap"
@@ -685,9 +664,7 @@ class App extends React.PureComponent {
           alignItems="center"
         >
           <Grid item>
-            <Typography variant="button" className={classes.drawerTitle}>
-              {drawerTitle}
-            </Typography>
+            <DrawerTitle variant="button">{drawerTitle}</DrawerTitle>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>
@@ -700,7 +677,7 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
-                  className={classes.drawerLockButton}
+                  sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
@@ -721,22 +698,21 @@ class App extends React.PureComponent {
               </Tooltip>
             </Hidden>
           </Grid>
-        </Grid>
+        </DrawerHeaderGrid>
       </>
     );
   };
 
   renderAllDrawerContent = () => {
-    const { classes } = this.props;
-
     return (
-      <div id="drawer-content" className={classes.drawerContentContainer}>
+      <DrawerContentContainer id="drawer-content">
         <Box
           key="plugins"
-          className={classes.drawerContent}
-          display={
-            this.state.activeDrawerContent === "plugins" ? "unset" : "none"
-          }
+          sx={{
+            height: "inherit",
+            display:
+              this.state.activeDrawerContent === "plugins" ? "unset" : "none",
+          }}
         >
           <nav role="navigation" id="plugin-buttons" />
         </Box>
@@ -744,21 +720,24 @@ class App extends React.PureComponent {
           return (
             <Box
               key={db.value}
-              className={classes.drawerContent}
-              display={
-                this.state.activeDrawerContent === db.value ? "unset" : "none"
-              }
+              sx={{
+                height: "inherit",
+                display:
+                  this.state.activeDrawerContent === db.value
+                    ? "unset"
+                    : "none",
+              }}
             >
               {db.renderDrawerContent()}
             </Box>
           );
         })}
-      </div>
+      </DrawerContentContainer>
     );
   };
 
   render() {
-    const { classes, config } = this.props;
+    const { config } = this.props;
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
@@ -789,11 +768,11 @@ class App extends React.PureComponent {
     return (
       <SnackbarProvider
         maxSnack={3}
-        classes={{
-          anchorOriginBottomCenter: classes.snackbarContainerBottom,
-          anchorOriginTopCenter: classes.snackbarContainerTop,
-          containerRoot: classes.snackBarContainerRoot,
-        }}
+        // classes={{
+        //   anchorOriginBottomCenter: classes.snackbarContainerBottom,
+        //   anchorOriginTopCenter: classes.snackbarContainerTop,
+        //   containerRoot: classes.snackBarContainerRoot,
+        // }}
         anchorOrigin={{
           vertical: "top",
           horizontal: "center",
@@ -822,16 +801,19 @@ class App extends React.PureComponent {
             title="Meddelande"
           />
           <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
-          <div
+          <AppBox
             id="appBox"
-            className={cslx(classes.flexBox, {
-              [classes.shiftedLeft]:
-                this.state.drawerPermanent && clean === false,
-            })}
+            sx={{
+              left: this.drawerIsLocked() ? DRAWER_WIDTH : 0,
+            }}
           >
-            <header
+            <StyledHeader
               id="header"
-              className={cslx(classes.header, classes.pointerEventsOnChildren)}
+              sx={{
+                "& > *": {
+                  pointerEvents: "auto",
+                },
+              }}
             >
               {clean === false && (
                 <DrawerToggleButtons
@@ -846,29 +828,37 @@ class App extends React.PureComponent {
               )}
               {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
               {this.renderSearchComponent()}
-            </header>
-            <main className={classes.main}>
-              <div
+            </StyledHeader>
+            <StyledMain>
+              <Box
                 id="left-column"
-                className={cslx(
-                  classes.leftColumn,
-                  classes.pointerEventsOnChildren
-                )}
-              ></div>
-              <div
+                sx={{
+                  flex: 1,
+                  "& > *": {
+                    pointerEvents: "auto",
+                  },
+                }}
+              ></Box>
+              <Box
                 id="right-column"
-                className={cslx(
-                  classes.rightColumn,
-                  classes.pointerEventsOnChildren
-                )}
-              ></div>
+                sx={{
+                  paddingLeft: 2,
+                  paddingRight: 2,
+                  "& > *": {
+                    pointerEvents: "auto",
+                  },
+                }}
+              ></Box>
 
-              <div
+              <Box
                 id="controls-column"
-                className={cslx(
-                  classes.controlsColumn,
-                  classes.pointerEventsOnChildren
-                )}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  "& > *": {
+                    pointerEvents: "auto",
+                  },
+                }}
               >
                 <Zoom map={this.appModel.getMap()} />
                 <div id="plugin-control-buttons"></div>
@@ -891,46 +881,44 @@ class App extends React.PureComponent {
                   />
                 )}
                 {clean === false && this.renderInformationPlugin()}
-              </div>
-            </main>
-            <footer
-              className={cslx(classes.footer, classes.pointerEventsOnChildren)}
+              </Box>
+            </StyledMain>
+            <StyledFooter
+              sx={{
+                "& > *": {
+                  pointerEvents: "auto",
+                },
+              }}
             >
-              <div className={classes.footerMapControls}>
+              <FooterMapControlContainer>
                 <ScaleLine map={this.appModel.getMap()} />
                 <Attribution map={this.appModel.getMap()} />
-              </div>
-              <div
-                className={classes.footerBreadcrumbs}
-                id="breadcrumbs-container"
-              />
-            </footer>
-          </div>
-          <div
+              </FooterMapControlContainer>
+              <div id="breadcrumbs-container" />
+            </StyledFooter>
+          </AppBox>
+          <MapContainer
             id="map"
             tabIndex="0"
             role="application"
-            className={cslx(classes.map, {
-              [classes.shiftedLeft]:
-                this.state.drawerPermanent && clean === false,
-            })}
-          ></div>
-          <div
+            sx={{
+              left: this.drawerIsLocked() ? DRAWER_WIDTH : 0,
+            }}
+          ></MapContainer>
+          <WindowsContainer
             id="windows-container"
-            className={cslx(
-              classes.pointerEventsOnChildren,
-              classes.windowsContainer,
-              {
-                [classes.shiftedLeft]:
-                  this.state.drawerPermanent && clean === false,
-              }
-            )}
+            sx={{
+              left: this.drawerIsLocked() ? DRAWER_WIDTH : 0,
+              "& > *": {
+                pointerEvents: "auto",
+              },
+            }}
           >
             {this.renderInfoclickWindow()}
             <PluginWindows
               plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
             />
-          </div>
+          </WindowsContainer>
           {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
             <Drawer
               open={this.state.drawerVisible}
@@ -947,8 +935,12 @@ class App extends React.PureComponent {
                 keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
               }}
               variant="temporary"
-              classes={{
-                paper: classes.drawerBackground,
+              sx={{
+                "& .MuiPaper-root": {
+                  width: DRAWER_WIDTH,
+                  backgroundColor: (theme) => theme.palette.background.default,
+                  backgroundImage: "unset", // To match the new (darker) black theme.
+                },
               }}
             >
               {this.renderDrawerHeader()}
@@ -973,4 +965,4 @@ class App extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(App);
+export default App;
