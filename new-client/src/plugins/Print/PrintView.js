@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import PrintDialog from "./PrintDialog";
 import { AppBar, Tab, Tabs } from "@mui/material";
@@ -11,34 +11,34 @@ import { Tooltip, Button } from "@mui/material";
 import GeneralOptions from "./GeneralOptions";
 import AdvancedOptions from "./AdvancedOptions";
 
-const styles = (theme) => ({
-  root: {
-    margin: -10,
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
-  },
-  stickyAppBar: {
-    top: -10,
-  },
-  tabContent: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    padding: theme.spacing(1),
-    width: "100%",
-    height: "100%",
-  },
-  printButtonContainer: {
-    padding: theme.spacing(1),
-  },
-});
+const Root = styled("div")(() => ({
+  margin: -10,
+  display: "flex",
+  flexDirection: "column",
+  height: "100%",
+}));
+
+const StyledAppBar = styled(AppBar)(() => ({
+  top: -10,
+}));
+
+const TabContent = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  padding: theme.spacing(1),
+  width: "100%",
+  height: "100%",
+}));
+
+const PrintButtonContainer = styled("div")(({ theme }) => ({
+  padding: theme.spacing(1),
+}));
 
 class PrintView extends React.PureComponent {
   static propTypes = {
     model: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
     closeSnackbar: PropTypes.func.isRequired,
   };
@@ -293,7 +293,7 @@ class PrintView extends React.PureComponent {
   }
 
   render() {
-    const { classes, windowVisible } = this.props;
+    const { windowVisible } = this.props;
     const {
       previewLayerVisible,
       scale,
@@ -315,12 +315,8 @@ class PrintView extends React.PureComponent {
 
     return (
       <>
-        <div className={classes.root}>
-          <AppBar
-            position="sticky"
-            color="default"
-            className={classes.stickyAppBar}
-          >
+        <Root>
+          <StyledAppBar position="sticky" color="default">
             <Tabs
               action={this.handleTabsMounted}
               onChange={this.handleChangeTabs}
@@ -337,11 +333,11 @@ class PrintView extends React.PureComponent {
                 <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
               </Tooltip>
             </Tabs>
-          </AppBar>
-          <div className={classes.tabContent}>
+          </StyledAppBar>
+          <TabContent>
             {activeTab === 0 && this.renderGeneralOptions()}
             {activeTab === 1 && this.renderAdvancedOptions()}
-            <div className={classes.printButtonContainer}>
+            <PrintButtonContainer>
               <Button
                 variant="contained"
                 fullWidth={true}
@@ -351,9 +347,9 @@ class PrintView extends React.PureComponent {
               >
                 Skriv ut
               </Button>
-            </div>
-          </div>
-        </div>
+            </PrintButtonContainer>
+          </TabContent>
+        </Root>
         <PrintDialog
           open={printInProgress}
           saveAsType={saveAsType}
@@ -364,4 +360,4 @@ class PrintView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(PrintView));
+export default withSnackbar(PrintView);

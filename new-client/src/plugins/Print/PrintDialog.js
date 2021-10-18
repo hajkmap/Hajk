@@ -1,6 +1,5 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import withStyles from "@mui/styles/withStyles";
 import { withSnackbar } from "notistack";
 
 import {
@@ -12,8 +11,6 @@ import {
   DialogActions,
   DialogContentText,
 } from "@mui/material";
-
-const styles = (theme) => {};
 
 class PrintDialog extends React.PureComponent {
   render() {
@@ -44,4 +41,4 @@ class PrintDialog extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(PrintDialog));
+export default withSnackbar(PrintDialog);
