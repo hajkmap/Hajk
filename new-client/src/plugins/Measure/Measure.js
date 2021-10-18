@@ -48,7 +48,7 @@ class Measure extends React.PureComponent {
           icon: <MeasureIcon />,
           title: "Mät",
           description: "Mät längder och ytor",
-          height: 400,
+          height: "dynamic",
           width: 300,
           top: undefined,
           left: undefined,
