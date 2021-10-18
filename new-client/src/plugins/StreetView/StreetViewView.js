@@ -1,39 +1,29 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
-import PropTypes from "prop-types";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
+import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-const styles = (theme) => ({
-  streetViewWindow: {
-    flex: 1,
-    position: "absolute !important",
-    top: "42px",
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  panorama: {
-    display: "flex",
-  },
-  hidden: {
-    display: "none",
-  },
-  streetView: {
-    marginTop: "30px",
-  },
-  date: {
-    color: theme.palette.common.white,
-    position: "absolute",
-    zIndex: 1,
-    top: "42px",
-    left: 0,
-    background: "rgba(0, 0, 0, 0.7)",
-    padding: "0px 3px",
-    lineHeight: 1.4,
-    fontSize: "10px",
-  },
-});
+const StreetViewWindow = styled("div")(() => ({
+  flex: 1,
+  position: "absolute !important",
+  top: "42px",
+  bottom: 0,
+  left: 0,
+  right: 0,
+}));
+
+const DateWrapper = styled("div")(({ theme }) => ({
+  color: theme.palette.common.white,
+  position: "absolute",
+  zIndex: 1,
+  top: "42px",
+  left: 0,
+  background: "rgba(0, 0, 0, 0.7)",
+  padding: "0px 3px",
+  lineHeight: 1.4,
+  fontSize: "10px",
+}));
 
 class StreetViewView extends React.PureComponent {
   state = {};
@@ -69,27 +59,18 @@ class StreetViewView extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
     return (
-      <div className={classes.streetView}>
+      <div>
         {this.renderInfoText()}
-        <div
-          className={
-            this.props.displayPanorama ? classes.panorama : classes.hidden
-          }
-        >
-          <div id="street-view-window" className={classes.streetViewWindow} />
-          <div id="image-date" className={classes.date}>
+        <Box sx={{ display: this.props.displayPanorama ? "flex" : "none" }}>
+          <StreetViewWindow id="street-view-window" />
+          <DateWrapper id="image-date">
             {this.state.imageDate ? this.state.imageDate : ""}
-          </div>
-        </div>
+          </DateWrapper>
+        </Box>
       </div>
     );
   }
 }
 
-StreetViewView.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(withSnackbar(StreetViewView));
+export default withSnackbar(StreetViewView);
