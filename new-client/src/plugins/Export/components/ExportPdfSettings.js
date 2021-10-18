@@ -1,46 +1,26 @@
 import React from "react";
 import propTypes from "prop-types";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
-
-import {
-  Paper,
-  FormControl,
-  Button,
-  Input,
-  InputLabel,
-  NativeSelect,
-  LinearProgress,
-} from "@mui/material";
+import { Paper, FormControl, Button, Input } from "@mui/material";
+import { Grid, InputLabel, NativeSelect, LinearProgress } from "@mui/material";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import PictureAsPdf from "@mui/icons-material/PictureAsPdf";
 
 import { getCenter } from "ol/extent.js";
-const styles = (theme) => ({
-  root: {
-    display: "flex",
-    flexGrow: 1,
-    flexWrap: "wrap",
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
-  loader: {
-    opacity: 1,
-    transition: "opacity 2s ease-in",
-  },
-  icon: {
-    marginRight: theme.spacing(1),
-  },
-});
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  opacity: 1,
+  transition: "opacity 2s ease-in",
+  marginBottom: theme.spacing(2),
+}));
 
 class ExportPdfSettings extends React.PureComponent {
   static propTypes = {
-    classes: propTypes.object.isRequired,
     localObserver: propTypes.object.isRequired,
     model: propTypes.object.isRequired,
   };
@@ -273,8 +253,6 @@ class ExportPdfSettings extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
-
     var scales = this.props.model.scales;
 
     const scalesOptions = scales.map((s, i) => (
@@ -331,15 +309,17 @@ class ExportPdfSettings extends React.PureComponent {
     }
 
     return (
-      <>
+      <Grid container>
         {this.state.loading && (
-          <Paper className={classes.loader}>
-            <LinearProgress />
-          </Paper>
+          <Grid item xs={12}>
+            <StyledPaper>
+              <LinearProgress />
+            </StyledPaper>
+          </Grid>
         )}
-        <div className={classes.root}>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="paper-size-native-helper">
+        <Grid item xs={12}>
+          <StyledFormControl fullWidth>
+            <InputLabel variant="standard" htmlFor="paper-size-native-helper">
               Pappersstorlek
             </InputLabel>
             <NativeSelect
@@ -349,9 +329,11 @@ class ExportPdfSettings extends React.PureComponent {
             >
               {paperFormatOptions}
             </NativeSelect>
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="orientation-native-helper">
+          </StyledFormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <StyledFormControl fullWidth>
+            <InputLabel variant="standard" htmlFor="orientation-native-helper">
               Orientering
             </InputLabel>
             <NativeSelect
@@ -364,9 +346,13 @@ class ExportPdfSettings extends React.PureComponent {
               <option value="P">stående</option>
               <option value="L">liggande</option>
             </NativeSelect>
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="scale-native-helper">Skala</InputLabel>
+          </StyledFormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <StyledFormControl fullWidth>
+            <InputLabel variant="standard" htmlFor="scale-native-helper">
+              Skala
+            </InputLabel>
             <NativeSelect
               onChange={this.setScale}
               value={this.state.selectScale}
@@ -377,18 +363,22 @@ class ExportPdfSettings extends React.PureComponent {
                 Annan skala
               </option>
             </NativeSelect>
-          </FormControl>
-          {this.state.selectScale === "other" && (
-            <FormControl>
+          </StyledFormControl>
+        </Grid>
+        {this.state.selectScale === "other" && (
+          <Grid item xs={12}>
+            <StyledFormControl fullWidth>
               <Input
                 type="text"
                 onChange={this.setManualScale}
                 value={this.state.manualScale}
               />
-            </FormControl>
-          )}
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="resolution-native-helper">
+            </StyledFormControl>
+          </Grid>
+        )}
+        <Grid item xs={12}>
+          <StyledFormControl fullWidth>
+            <InputLabel variant="standard" htmlFor="resolution-native-helper">
               Upplösning
             </InputLabel>
             <NativeSelect
@@ -398,33 +388,34 @@ class ExportPdfSettings extends React.PureComponent {
             >
               {resolutionOptions}
             </NativeSelect>
-          </FormControl>
-        </div>
-        <FormControl className={classes.formControl}>
+          </StyledFormControl>
+        </Grid>
+
+        <StyledFormControl fullWidth>
           <Button
             variant="contained"
             color="primary"
             fullWidth={true}
             onClick={this.exportPDF}
           >
-            <PictureAsPdf className={classes.icon} /> Skapa PDF
+            <PictureAsPdf sx={{ marginRight: 1 }} /> Skapa PDF
           </Button>
-        </FormControl>
+        </StyledFormControl>
         {this.state.url && (
-          <FormControl className={classes.formControl}>
+          <StyledFormControl fullWidth>
             <Button
               variant="contained"
               fullWidth={true}
               target="_blank"
               href={this.state.url}
             >
-              <ArrowDownward className={classes.icon} /> Ladda ner
+              <ArrowDownward sx={{ marginRight: 1 }} /> Ladda ner
             </Button>
-          </FormControl>
+          </StyledFormControl>
         )}
-      </>
+      </Grid>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(ExportPdfSettings));
+export default withSnackbar(ExportPdfSettings);
