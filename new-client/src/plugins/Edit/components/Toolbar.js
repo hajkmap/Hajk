@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import withStyles from "@mui/styles/withStyles";
-import { withTheme } from "@mui/styles";
+import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
@@ -11,11 +10,12 @@ import FormatShapesIcon from "@mui/icons-material/FormatShapes";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 
-const styles = (theme) => ({
-  rightIcon: {
-    marginLeft: theme.spacing(1),
-  },
-});
+const StyledButton = styled(Button)(({ selected, theme }) => ({
+  borderTop: `${theme.spacing(0.5)} solid transparent`,
+  borderBottom: selected
+    ? `${theme.spacing(0.5)} solid ${theme.palette.secondary.main}`
+    : `${theme.spacing(0.5)} solid transparent`,
+}));
 
 class Toolbar extends Component {
   constructor(props) {
@@ -99,17 +99,8 @@ class Toolbar extends Component {
     this.changeTool("move");
   }
 
-  getSelectedStyle(type) {
-    const { theme } = this.props;
-    let style = {};
-    if (type === this.props.activeTool) {
-      style.backgroundColor = theme.palette.action.active;
-    }
-    return style;
-  }
-
   render() {
-    const { editSource, classes } = this.props;
+    const { editSource } = this.props;
     const { editFeature } = this.state;
 
     if (!editSource || editFeature) return null;
@@ -120,24 +111,24 @@ class Toolbar extends Component {
           <Typography>Lägg till</Typography>
         </Grid>
         <Grid item xs={4}>
-          <Button
-            variant="outlined"
+          <StyledButton
+            variant="contained"
             fullWidth
             disabled={!editSource.editPoint}
             onClick={() => {
               this.onAddPointClicked();
             }}
+            selected={this.props.activeTool === "point"}
             type="button"
             title="Lägg till punkt"
-            style={this.getSelectedStyle("point")}
           >
             Punkt
-            <ScatterPlotIcon className={classes.rightIcon} />
-          </Button>
+            <ScatterPlotIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
         </Grid>
         <Grid item xs={4}>
-          <Button
-            variant="outlined"
+          <StyledButton
+            variant="contained"
             fullWidth
             disabled={!editSource.editLine}
             onClick={() => {
@@ -145,15 +136,15 @@ class Toolbar extends Component {
             }}
             type="button"
             title="Lägg till linje"
-            style={this.getSelectedStyle("linestring")}
+            selected={this.props.activeTool === "linestring"}
           >
             Linje
-            <LinearScaleIcon className={classes.rightIcon} />
-          </Button>
+            <LinearScaleIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
         </Grid>
         <Grid item xs={4}>
-          <Button
-            variant="outlined"
+          <StyledButton
+            variant="contained"
             fullWidth
             disabled={!editSource.editPolygon}
             onClick={() => {
@@ -161,64 +152,64 @@ class Toolbar extends Component {
             }}
             type="button"
             title="Lägg till yta"
-            style={this.getSelectedStyle("polygon")}
+            selected={this.props.activeTool === "polygon"}
           >
             Yta
-            <BorderStyleIcon className={classes.rightIcon} />
-          </Button>
+            <BorderStyleIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
         </Grid>
 
         <Grid item xs={12}>
           <Typography>Editera</Typography>
         </Grid>
         <Grid item xs={4}>
-          <Button
-            variant="outlined"
+          <StyledButton
+            variant="contained"
             fullWidth
             onClick={() => {
               this.onMoveClicked();
             }}
             type="button"
             title="Flytta geometri"
-            style={this.getSelectedStyle("move")}
+            selected={this.props.activeTool === "move"}
           >
             Flytta
-            <ZoomOutMapIcon className={classes.rightIcon} />
-          </Button>
+            <ZoomOutMapIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
         </Grid>
         <Grid item xs={4}>
-          <Button
-            variant="outlined"
+          <StyledButton
+            variant="contained"
             fullWidth
             onClick={() => {
               this.onRemoveClicked();
             }}
             type="button"
             title="Ta bort geometri"
-            style={this.getSelectedStyle("remove")}
+            selected={this.props.activeTool === "remove"}
           >
             Radera
-            <DeleteIcon className={classes.rightIcon} />
-          </Button>
+            <DeleteIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
         </Grid>
         <Grid item xs={4}>
-          <Button
-            variant="outlined"
+          <StyledButton
+            variant="contained"
             fullWidth
             onClick={() => {
               this.onModifyClicked();
             }}
             type="button"
             title="Ändra geometri"
-            style={this.getSelectedStyle("modify")}
+            selected={this.props.activeTool === "modify"}
           >
             Ändra
-            <FormatShapesIcon className={classes.rightIcon} />
-          </Button>
+            <FormatShapesIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
         </Grid>
       </Grid>
     );
   }
 }
 
-export default withStyles(styles)(withTheme(Toolbar));
+export default Toolbar;

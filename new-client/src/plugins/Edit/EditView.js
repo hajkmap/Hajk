@@ -156,10 +156,13 @@ class EditView extends React.PureComponent {
   renderSources() {
     const { loadingError, editSource } = this.state;
     return (
-      <FormControl error={loadingError} fullWidth>
-        <InputLabel id="select-source-label">Datakälla</InputLabel>
+      <FormControl variant="standard" error={loadingError} fullWidth>
+        <InputLabel variant="standard" id="select-source-label">
+          Datakälla
+        </InputLabel>
         <Select
           id="select-source"
+          variant="standard"
           value={editSource?.id || ""}
           onChange={(e) => {
             this.setLayer(e.target.value);

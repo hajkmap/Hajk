@@ -1,5 +1,5 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import Input from "@mui/material/Input";
 import TextField from "@mui/material/TextField";
@@ -12,12 +12,10 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import { Button } from "@mui/material";
 import Chip from "@mui/material/Chip";
 
-const styles = (theme) => ({
-  centeredContainer: {
-    textAlign: "center",
-    padding: theme.spacing(1),
-  },
-});
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  textAlign: "center",
+  padding: theme.spacing(1),
+}));
 
 class AttributeEditor extends React.Component {
   constructor(props) {
@@ -399,7 +397,7 @@ class AttributeEditor extends React.Component {
 
   render() {
     const { formValues } = this.state;
-    const { classes, model } = this.props;
+    const { model } = this.props;
 
     if (!formValues || this.props.editSource === undefined) return null;
 
@@ -414,27 +412,27 @@ class AttributeEditor extends React.Component {
 
     return (
       <>
-        <Grid item xs={12} className={classes.centeredContainer}>
+        <StyledGrid item xs={12}>
           <Chip
             variant="outlined"
             color="primary"
             label="Ange objektets attribut:"
           />
-        </Grid>
+        </StyledGrid>
         {markup}
-        <Grid item xs={12} className={classes.centeredContainer}>
+        <StyledGrid item xs={12}>
           <Button
             color="primary"
-            style={{ width: 100 }}
+            sx={{ width: "100px" }}
             variant="contained"
             onClick={model.resetEditFeature}
           >
             OK
           </Button>
-        </Grid>
+        </StyledGrid>
       </>
     );
   }
 }
 
-export default withStyles(styles)(AttributeEditor);
+export default AttributeEditor;
