@@ -60,6 +60,10 @@ const styles = (theme) => {
       right: 0,
       bottom: 0,
       top: 0,
+      border: "2px solid transparent",
+      "&:focus-visible": {
+        border: "2px solid black",
+      },
     },
     flexBox: {
       position: "absolute",
@@ -904,6 +908,7 @@ class App extends React.PureComponent {
           </div>
           <div
             id="map"
+            tabIndex="0"
             role="application"
             className={cslx(classes.map, {
               [classes.shiftedLeft]:
