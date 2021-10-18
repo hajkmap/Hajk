@@ -1,6 +1,4 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
-import PropTypes from "prop-types";
 
 import { withSnackbar } from "notistack";
 
@@ -14,8 +12,6 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import LinearProgress from "@mui/material/LinearProgress";
-
-const styles = (theme) => ({});
 
 class LocationView extends React.PureComponent {
   state = {
@@ -144,8 +140,4 @@ class LocationView extends React.PureComponent {
   }
 }
 
-LocationView.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(withSnackbar(LocationView));
+export default withSnackbar(LocationView);
