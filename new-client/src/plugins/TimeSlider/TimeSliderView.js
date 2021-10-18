@@ -1,7 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
-import withStyles from "@mui/styles/withStyles";
 
 import { Slider, Button, Badge, Grid, Tooltip } from "@mui/material";
 import { Vector as VectorLayer } from "ol/layer";
@@ -14,29 +13,10 @@ import PauseIcon from "@mui/icons-material/Pause";
 import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
-const styles = (theme) => ({
-  gridContainer: {
-    padding: theme.spacing(2),
-  },
-  yearSlider: {
-    paddingRight: theme.spacing(2),
-    paddingLeft: theme.spacing(2),
-  },
-  monthSlider: {
-    paddingRight: theme.spacing(4),
-    paddingLeft: theme.spacing(4),
-  },
-  daySlider: {
-    paddingRight: theme.spacing(6),
-    paddingLeft: theme.spacing(6),
-  },
-});
-
 class TimeSliderView extends React.PureComponent {
   static propTypes = {
     map: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -468,7 +448,7 @@ class TimeSliderView extends React.PureComponent {
         }`}
       >
         <Button
-          variant="outlined"
+          variant="contained"
           onClick={() => {
             this.setState({ settingsDialog: !this.state.settingsDialog });
           }}
@@ -481,24 +461,31 @@ class TimeSliderView extends React.PureComponent {
 
   render() {
     const { currentUnixTime, stepSize, playing } = this.state;
-    const { classes } = this.props;
 
     if (currentUnixTime) {
       return (
-        <Grid container className={classes.gridContainer}>
+        <Grid container sx={{ padding: 2 }}>
           <>{this.renderSettingsDialog()}</>
           <Grid
             item
             xs={12}
-            className={
-              this.markResolution === "years"
-                ? classes.yearSlider
-                : this.markResolution === "months"
-                ? classes.monthSlider
-                : classes.daySlider
-            }
+            sx={{
+              paddingLeft:
+                this.markResolution === "years"
+                  ? 2
+                  : this.markResolution === "months"
+                  ? 4
+                  : 6,
+              paddingRight:
+                this.markResolution === "years"
+                  ? 2
+                  : this.markResolution === "months"
+                  ? 4
+                  : 6,
+            }}
           >
             <Slider
+              size="small"
               value={currentUnixTime}
               min={this.startTime}
               max={this.endTime}
@@ -524,7 +511,7 @@ class TimeSliderView extends React.PureComponent {
                 title={playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
               >
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   onClick={() => {
                     this.toggleSlider(!playing);
                   }}
@@ -535,7 +522,7 @@ class TimeSliderView extends React.PureComponent {
             </Grid>
             <Grid item align="center" xs={4}>
               <Tooltip disableInteractive title="Återställ tidslinjen">
-                <Button variant="outlined" onClick={this.resetTimeSlider}>
+                <Button variant="contained" onClick={this.resetTimeSlider}>
                   <RotateLeftOutlinedIcon />
                 </Button>
               </Tooltip>
@@ -554,7 +541,7 @@ class TimeSliderView extends React.PureComponent {
           container
           alignItems="center"
           justifyContent="center"
-          style={{ width: "100%", height: "100%" }}
+          sx={{ width: "100%", height: "100%" }}
         >
           <>{this.renderSettingsDialog()}</>
           <Grid item>{this.renderSettingsButton()}</Grid>
@@ -564,4 +551,4 @@ class TimeSliderView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(TimeSliderView);
+export default TimeSliderView;
