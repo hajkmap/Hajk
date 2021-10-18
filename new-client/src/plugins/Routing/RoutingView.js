@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "@mui/material/Button";
-import withStyles from "@mui/styles/withStyles";
 import {
+  Box,
   Stepper,
   Step,
   StepLabel,
@@ -18,13 +18,6 @@ import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 import { withSnackbar } from "notistack";
-import clsx from "clsx";
-
-const styles = (theme) => ({
-  unifiedPadding: {
-    padding: theme.spacing(2),
-  },
-});
 
 class RoutingView extends React.PureComponent {
   state = {
@@ -147,13 +140,12 @@ class RoutingView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <>
         <Stepper
           activeStep={this.state.activeStep}
           orientation="vertical"
-          className={clsx(classes.unifiedPadding)}
+          sx={{ padding: 2 }}
         >
           <Step key="pickStart">
             <StepLabel>Välj startpunkt</StepLabel>
@@ -210,17 +202,17 @@ class RoutingView extends React.PureComponent {
           </Step>
         </Stepper>
         {this.renderStepperButtons()}
-        <div id="resultList" className={clsx(classes.unifiedPadding)}></div>
+        <Box id="resultList" sx={{ padding: 2 }}></Box>
       </>
     );
   }
 
   renderStepperButtons() {
-    const { classes } = this.props;
-
     return (
-      <ButtonGroup fullWidth className={clsx(classes.unifiedPadding)}>
+      <ButtonGroup fullWidth sx={{ padding: 2 }}>
         <Button
+          sx={{ marginRight: 1 }}
+          variant="contained"
           disabled={this.state.activeStep === 0}
           startIcon={<ArrowBackIosIcon />}
           onClick={() => {
@@ -230,6 +222,7 @@ class RoutingView extends React.PureComponent {
           Föregående
         </Button>
         <Button
+          variant="contained"
           startIcon={<SettingsBackupRestoreIcon />}
           onClick={() => {
             this.setState({
@@ -247,4 +240,4 @@ class RoutingView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(RoutingView));
+export default withSnackbar(RoutingView);
