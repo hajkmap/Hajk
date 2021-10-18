@@ -1,14 +1,9 @@
 import React, { Component } from "react";
-import withStyles from "@mui/styles/withStyles";
 import { Fab } from "@mui/material";
 import { ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import CommentIcon from "@mui/icons-material/Comment";
 
 import { detect } from "detect-browser";
-
-const styles = (theme) => {
-  return {};
-};
 
 class Suggest extends Component {
   onClick = (e) => {
@@ -34,14 +29,9 @@ class Suggest extends Component {
   }
 
   renderAsWidgetItem() {
-    const { classes } = this.props;
     return (
       <div>
-        <Fab
-          aria-label="Lämna synpunkter"
-          className={classes.button}
-          onClick={this.onClick}
-        >
+        <Fab aria-label="Lämna synpunkter" onClick={this.onClick}>
           <CommentIcon />
         </Fab>
       </div>
@@ -79,4 +69,4 @@ class Suggest extends Component {
   }
 }
 
-export default withStyles(styles)(Suggest);
+export default Suggest;
