@@ -1,23 +1,31 @@
 import React from "react";
 import PropTypes from "prop-types";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import Button from "@mui/material/Button";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import { Box, Typography } from "@mui/material";
 
-// Define JSS styles that will be used in this component.
-// Example below utilizes the very powerful "theme" object
-// that gives access to some constants, see: https://material-ui.com/customization/default-theme/
-const styles = (theme) => ({
-  buttonWithBottomMargin: {
-    marginBottom: theme.spacing(2),
-  },
-  drawerContent: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
-  },
-});
+// Hajk components are primarily styled in two ways:
+// - Using the styled-utility, see: https://mui.com/system/styled/
+// - Using the sx-prop, see: https://mui.com/system/basics/#the-sx-prop
+// The styled-utility creates a re-usable component, and might be the
+// best choice if the style is to be applied in several places.
+
+// The styled-components should be created at the top of the document
+// (but after imports) for consistency. Hajk does not have a naming
+// convention for the styled-components, but keep in mind to use names
+// that does not collide with regular components. (E.g. a styled div
+// should not be called Box).
+
+// The example below shows how a <Button /> with a bottom-margin can be created.
+// Notice that we are also accessing the application theme.
+const StyledButton = styled(Button)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+// All mui-components (and all styled components, even styled div:s!) will have access to the sx-prop.
+// Check out how the sx-prop works further down.
 
 class DummyView extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
@@ -33,7 +41,6 @@ class DummyView extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
     closeSnackbar: PropTypes.func.isRequired,
   };
@@ -59,9 +66,11 @@ class DummyView extends React.PureComponent {
   }
 
   renderDrawerContent = () => {
-    const { classes } = this.props;
     return (
-      <Box className={classes.drawerContent}>
+      // The sx-prop gives us some short hand commands, for example, the paddings below
+      // will be set to theme.spacing(2), and not 2px! Make sure to read up on how the sx-prop
+      // works before using it.
+      <Box sx={{ paddingLeft: 2, paddingRight: 2 }}>
         <Typography variant="h6">Dummy</Typography>
         <Typography variant="body1">
           Dummy har anropat globalObserver och bett om att få lägga till en
@@ -181,11 +190,9 @@ class DummyView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <>
-        <Button
-          className={classes.buttonWithBottomMargin}
+        <StyledButton
           variant="contained"
           fullWidth={true}
           // onChange={(e) => { console.log(e) }}
@@ -196,47 +203,42 @@ class DummyView extends React.PureComponent {
             `Clicked ${this.state.counter} ${
               this.state.counter === 1 ? "time" : "times"
             }`}
-        </Button>
-        <Button
-          className={classes.buttonWithBottomMargin}
+        </StyledButton>
+        <StyledButton
           variant="contained"
           fullWidth={true}
           onClick={this.showDefaultSnackbar}
         >
           Show default snackbar
-        </Button>
-        <Button
-          className={classes.buttonWithBottomMargin}
+        </StyledButton>
+        <StyledButton
           variant="contained"
           fullWidth={true}
           onClick={this.showAdvancedSnackbar}
         >
           Show error snackbar
-        </Button>
-        <Button
-          className={classes.buttonWithBottomMargin}
+        </StyledButton>
+        <StyledButton
           variant="contained"
           fullWidth={true}
           color="primary"
           onClick={this.showIntroduction}
         >
           Show Hajk Introduction
-        </Button>
-        <Button
-          className={classes.buttonWithBottomMargin}
+        </StyledButton>
+        <StyledButton
           variant="contained"
           fullWidth={true}
           onClick={this.handleClickOnRandomTitle}
         >
           Set random title and color
-        </Button>
+        </StyledButton>
       </>
     );
   }
 }
 
 // Exporting like this adds some props to DummyView.
-// withStyles will add a 'classes' prop, while withSnackbar
-// adds to functions (enqueueSnackbar() and closeSnackbar())
+// withSnackbar adds two functions (enqueueSnackbar() and closeSnackbar())
 // that can be used throughout the Component.
-export default withStyles(styles)(withSnackbar(DummyView));
+export default withSnackbar(DummyView);
