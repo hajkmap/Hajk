@@ -3,11 +3,14 @@ import BreadCrumb from "./BreadCrumb.js";
 import { styled } from "@mui/material/styles";
 import { useTheme } from "@mui/material/styles";
 import { useMediaQuery } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import ScrollMenu from "react-horizontal-scrolling-menu";
 
 // A HOC that pipes isMobile to the children. See this as a proposed
@@ -31,7 +34,7 @@ const MobileRoot = styled("div")(({ theme }) => ({
 }));
 
 const MobileHeader = styled("div")(({ theme }) => ({
-  padding: "5px 18px",
+  padding: "0px 18px",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
@@ -40,9 +43,8 @@ const MobileHeader = styled("div")(({ theme }) => ({
 const BreadCrumbsContainerMobile = styled("div")(({ theme }) => ({
   maxHeight: "300px",
   overflow: "auto",
-  margin: "10px",
-  [theme.breakpoints.down("xs")]: {
-    maxHeight: "250px",
+  [theme.breakpoints.down("sm")]: {
+    maxHeight: "110px",
   },
 }));
 
@@ -52,6 +54,12 @@ const BreadCrumbsContainer = styled("div")(() => ({
   right: 0,
   bottom: 0,
   zIndex: 2,
+}));
+
+const MobileBreadCrumbWrapper = styled("div")(({ theme }) => ({
+  width: "100%",
+  paddingLeft: theme.spacing(0.5),
+  paddingBottom: theme.spacing(0.5),
 }));
 
 class BreadCrumbs extends Component {
@@ -176,10 +184,22 @@ class BreadCrumbs extends Component {
             {open ? <RemoveCircleIcon /> : <AddCircleIcon />}
           </IconButton>
         </MobileHeader>
+        {open && <Divider />}
         {!open ? null : (
           <BreadCrumbsContainerMobile>
             {layers.length > 0 ? (
-              <Button onClick={this.clear}>Ta bort allt innehåll</Button>
+              <Grid
+                container
+                item
+                xs={12}
+                justifyContent="center"
+                sx={{ marginTop: 1, marginBottom: 1 }}
+              >
+                <Button variant="contained" onClick={this.clear}>
+                  Ta bort allt innehåll
+                  <VisibilityOffIcon sx={{ marginLeft: 2 }} />
+                </Button>
+              </Grid>
             ) : (
               <Typography>
                 Använd sökfunktionen eller innehållsmenyn för att visa
@@ -187,13 +207,14 @@ class BreadCrumbs extends Component {
               </Typography>
             )}
             {layers.map((layer, index) => (
-              <BreadCrumb
-                key={`${layer.get("caption")}-${index}`}
-                title={layer.get("caption")}
-                layer={layer}
-                chapters={this.state.chapters}
-                app={this.props.app}
-              />
+              <MobileBreadCrumbWrapper key={`${layer.get("caption")}-${index}`}>
+                <BreadCrumb
+                  title={layer.get("caption")}
+                  layer={layer}
+                  chapters={this.state.chapters}
+                  app={this.props.app}
+                />
+              </MobileBreadCrumbWrapper>
             ))}
           </BreadCrumbsContainerMobile>
         )}
@@ -223,7 +244,8 @@ class BreadCrumbs extends Component {
     //const isMobile = this.state.width < 600;
     const layers = this.getBreadCrumbCompatibleLayers();
     if (this.props.isMobile) {
-      return this.renderMobile(layers);
+      // We don't want to show the breadcrumbs-summary if there are no layers
+      return layers.length > 0 ? this.renderMobile(layers) : null;
     } else {
       return this.renderDesktop(layers);
     }
