@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Parser from "html2json";
 import Button from "@mui/material/Button";
@@ -17,37 +18,15 @@ import Slide from "@mui/material/Slide";
 import Toolbar from "./Toolbar.js";
 import { withSnackbar } from "notistack";
 
-const styles = (theme) => ({
-  button: {
-    margin: theme.spacing(1),
-  },
-  buttonLeft: {
-    float: "left",
-    margin: theme.spacing(1),
-  },
-  buttonRight: {
-    float: "right",
-    margin: theme.spacing(1),
-  },
-  input: {
-    display: "none",
-  },
-  page: {
-    height: "100%",
-  },
-  textField: {
-    minWidth: "60%",
-  },
-  pageContent: {
-    height: "calc(100% - 60px)",
-    overflowX: "hidden",
-    borderBottom: "1px solid #ccc",
-  },
-  pageContentInner: {
-    paddingBottom: "10px",
-  },
-  buttons: {},
-});
+const PageContent = styled("div")(() => ({
+  height: "calc(100% - 60px)",
+  overflowX: "hidden",
+  borderBottom: "1px solid #ccc",
+}));
+
+const PageContentInner = styled("div")(() => ({
+  paddingBottom: "10px",
+}));
 
 class Page extends Component {
   constructor(props) {
@@ -63,9 +42,8 @@ class Page extends Component {
   }
 
   getError(field) {
-    const { classes } = this.props;
     return this.formErrors.hasOwnProperty(field.name) ? (
-      <div className={classes.error}>{this.formErrors[field.name]}</div>
+      <div>{this.formErrors[field.name]}</div>
     ) : null;
   }
 
@@ -142,8 +120,6 @@ class Page extends Component {
   }
 
   getValueMarkup(field, label) {
-    const { classes } = this.props;
-
     if (!field) return null;
 
     if (field.dataType === "int") {
@@ -180,7 +156,7 @@ class Page extends Component {
           <TextField
             id={field.id}
             label={label || field.name}
-            className={classes.textField}
+            sx={{ minWidth: "60%" }}
             margin="normal"
             value={value}
             onChange={(e) => {
@@ -194,7 +170,7 @@ class Page extends Component {
           <TextField
             id={field.id}
             label={label || field.name}
-            className={classes.textField}
+            sx={{ minWidth: "60%" }}
             margin="normal"
             value={value}
             onChange={(e) => {
@@ -208,7 +184,7 @@ class Page extends Component {
           <TextField
             id={field.id}
             label={label || field.name}
-            className={classes.textField}
+            sx={{ minWidth: "60%" }}
             type="datetime-local"
             margin="normal"
             value={value}
@@ -229,7 +205,7 @@ class Page extends Component {
               id={field.id}
               multiline
               label={label || field.name}
-              className={classes.textField}
+              sx={{ minWidth: "60%" }}
               margin="normal"
               value={value}
               onChange={(e) => {
@@ -285,8 +261,8 @@ class Page extends Component {
           );
         });
         return (
-          <div className={classes.root}>
-            <FormControl component="fieldset" className={classes.formControl}>
+          <div>
+            <FormControl component="fieldset">
               <FormLabel component="legend">{label || field.name}</FormLabel>
               <FormGroup>{checkboxes}</FormGroup>
             </FormControl>
@@ -319,8 +295,8 @@ class Page extends Component {
         }
 
         return (
-          <div className={classes.root}>
-            <FormControl component="fieldset" className={classes.formControl}>
+          <div>
+            <FormControl component="fieldset">
               <FormLabel component="legend">{label || field.name}</FormLabel>
               <NativeSelect
                 value={value}
@@ -525,13 +501,12 @@ class Page extends Component {
   };
 
   renderButtons() {
-    const { page, numPages, classes, onPrevPage, onNextPage } = this.props;
+    const { page, numPages, onPrevPage, onNextPage } = this.props;
 
     const prevButton = (
       <Button
-        variant="outlined"
-        color="primary"
-        className={classes.buttonLeft}
+        variant="contained"
+        sx={{ float: "left", margin: 1 }}
         onClick={() => {
           if (typeof this.refs.toolbar !== "undefined") {
             this.refs.toolbar.storeValues();
@@ -545,9 +520,8 @@ class Page extends Component {
 
     const nextButton = (
       <Button
-        variant="outlined"
-        color="primary"
-        className={classes.buttonRight}
+        variant="contained"
+        sx={{ float: "right", margin: 1 }}
         onClick={() => {
           if (typeof this.refs.toolbar !== "undefined") {
             this.refs.toolbar.storeValues();
@@ -561,9 +535,8 @@ class Page extends Component {
 
     const sendButton = (
       <Button
-        variant="outlined"
-        color="primary"
-        className={classes.buttonRight}
+        variant="contained"
+        sx={{ float: "right", margin: 1 }}
         onClick={this.save}
       >
         Skicka
@@ -572,9 +545,8 @@ class Page extends Component {
 
     const okButton = (
       <Button
-        variant="outlined"
-        color="primary"
-        className={classes.buttonRight}
+        variant="contained"
+        sx={{ float: "right", margin: 1 }}
         onClick={() => {
           this.props.model.observer.publish("abort");
         }}
@@ -585,9 +557,8 @@ class Page extends Component {
 
     const closeButton = (
       <Button
-        variant="outlined"
-        color="primary"
-        className={classes.buttonRight}
+        variant="contained"
+        sx={{ float: "right", margin: 1 }}
         onClick={() => {
           this.props.model.app.windows.forEach((window) => {
             if (window.type === "collector") {
@@ -650,7 +621,7 @@ class Page extends Component {
   }
 
   renderSlide() {
-    const { classes, page } = this.props;
+    const { page } = this.props;
     const { json } = this.state;
     return (
       <Slide
@@ -658,32 +629,29 @@ class Page extends Component {
         in={true}
         mountOnEnter
         unmountOnExit
-        className={classes.page}
+        sx={{ height: "100%" }}
       >
         <div>
           <Typography variant="h4">{page.header}</Typography>
-          <div className={classes.pageContentInner}>
-            {this.renderFromJsonDom(json)}
-          </div>
+          <PageContentInner>{this.renderFromJsonDom(json)}</PageContentInner>
         </div>
       </Slide>
     );
   }
 
   render() {
-    const { classes } = this.props;
     const { displayThankYou } = this.state;
     return (
       this.props.active && (
-        <div className={classes.page}>
-          <div className={classes.pageContent}>
+        <Box sx={{ height: "100%" }}>
+          <PageContent>
             {displayThankYou ? this.renderThankYou() : this.renderSlide()}
-          </div>
-          <div className={classes.buttons}>{this.renderButtons()}</div>
-        </div>
+          </PageContent>
+          <div>{this.renderButtons()}</div>
+        </Box>
       )
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(Page));
+export default withSnackbar(Page);
