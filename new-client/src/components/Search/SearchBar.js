@@ -12,7 +12,6 @@ import WarningIcon from "@mui/icons-material/Warning";
 import SearchResultsContainer from "./searchResults/SearchResultsContainer";
 import SearchTools from "./SearchTools";
 import { useTheme } from "@mui/material/styles";
-import withTheme from "@mui/styles/withTheme";
 import { decodeCommas } from "../../utils/StringCommaCoder";
 import {
   CircularProgress,
@@ -434,4 +433,4 @@ class SearchBar extends React.PureComponent {
   }
 }
 
-export default withTheme(withIsMobile()(SearchBar));
+export default withIsMobile()(SearchBar);
