@@ -51,7 +51,7 @@ const styles = (theme) => ({
 });
 
 const defaultState = {
-  activeStep: 0,
+  activeStep: null,
   isAreaSelected: false,
   selectedProduct: "document",
   steps: {
@@ -103,7 +103,8 @@ class GeosuiteExportView extends React.PureComponent {
 
     this.localObserver.subscribe("window-opened", () => {
       console.log("window opened");
-      this.handleEnterStepZero();
+      //instead of this, just set the activeState to 0. This will then fire handleEnterStepZero.
+      this.setState({ activeStep: 0 });
     });
   };
 
@@ -164,6 +165,8 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleLeaveStep = (step) => {
     switch (step) {
+      case null:
+        break; //will be reached when we open the tool. Do nothing as all handled by enterStepZero.
       case 0:
         this.handleLeaveStepZero();
         break;
@@ -189,6 +192,8 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleEnterStep = (step) => {
     switch (step) {
+      case null:
+        break; //will be reached when we close the tool. Do nothing as all handled already.
       case 0:
         this.handleEnterStepZero();
         break;
