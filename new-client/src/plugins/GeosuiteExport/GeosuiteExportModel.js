@@ -371,66 +371,80 @@ class GeosuiteExportModel {
 
   #updateSelectedProjectsDetailsFromTrimbleApi = () => {
     console.log("#updateSelectedProjectsDetailsFromTrimbleApi");
-    // Example settle wait: await Promise.allSettled(promises)
-    // then: this.localObserver.publish("borehole-selection-updated");
-    // ...to trigger view observer signal
     const controller = new AbortController();
     const signal = controller.signal;
-    Object.keys(this.selection.projects)
-      .filter((projectId) => {
+
+    const projectIds = Object.keys(this.selection.projects).filter(
+      (projectId) => {
         // Optimized Trimble API usage: only fetch if we don't have the project details
         const project = this.#getProjectById(projectId);
         return !project || !project.numBoreHolesTotal;
-      })
-      .forEach((projectId) => {
-        const apiUrl = this.config.trimble.apiUrl.concat(
-          this.config.trimble.projectDetailsMethod,
-          "/",
-          projectId
-        );
-        const apiRequestOptions = {
-          credentials: "same-origin",
-          signal: signal,
-          method: "GET",
-        };
+      }
+    );
+
+    /*
+    Create all of the requests we need to make the the Trimble API as an array of promises.
+    We only want to update the projects data if all the requests are successful. 
+    */
+    const requests = projectIds.map((projectId) => {
+      const apiUrl = this.config.trimble.apiUrl.concat(
+        this.config.trimble.projectDetailsMethod,
+        "/",
+        projectId
+      );
+      const apiRequestOptions = {
+        credentials: "same-origin",
+        signal: signal,
+        method: "GET",
+      };
+
+      const promise = new Promise((resolve, reject) => {
         hfetch(apiUrl, apiRequestOptions)
           .then((response) => {
             if (!response.ok) {
-              console.log(
-                "#updateSelectedProjectsDetailsFromTrimbleApi: API query rejected"
-              );
-              throw new TypeError("Rejected");
+              reject("Trimble response not ok.");
+              console.log(response);
             }
-            const contentType = response.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-              // TODO: REMOVE:
-              response.text().then((body) => {
-                console.log(
-                  "#updateSelectedProjectsDetailsFromTrimbleApi: API response is not JSON:",
-                  body
-                );
-              });
-              throw new TypeError("Response is not JSON"); // E.g. server error or OGC XML for WFS exceptions
-            }
-            return response.json();
+            resolve(response);
           })
-          .then((investigationDetail) => {
-            this.#updateProjectDetails(investigationDetail);
+          .catch((error) => reject(error));
+      });
+      return promise;
+    });
+
+    /*
+    If all of our Trimble requests are successful, get the json, update the projects data and inform the view.
+    If something is wrong with one of our requests, inform the view that updating the project has failed.
+    */
+    Promise.all(requests)
+      .then((responses) => {
+        const jsonData = responses.map((res) => {
+          return res.json();
+        });
+        /*
+        Perhaps a little over the top, but we want to know that all of our response can be resolved to json
+        before we make any updates to the project data. 
+        */
+        Promise.all(jsonData)
+          .then((investigationDetails) => {
+            investigationDetails.forEach((investigationDetail) => {
+              this.#updateProjectDetails(investigationDetail);
+            });
+            this.localObserver.publish("borehole-selection-updated");
           })
           .catch((error) => {
-            //TODO: Error handling
-            console.log(
-              "#updateSelectedProjectsDetailsFromTrimbleApi: API error",
-              error
-            );
+            this.localObserver.publish("borehole-selection-failed");
           });
+      })
+      .catch((error) => {
+        this.localObserver.publish("borehole-selection-failed");
       });
   };
 
   #getProjectById = (projectId) => {
     let project = undefined;
     if (this.selection.projects[projectId]) {
-      project = this.selection.projects[projectId];
+      project = { ...this.selection.projects[projectId] };
     } else {
       project = {
         id: projectId,

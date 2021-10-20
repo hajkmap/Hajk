@@ -61,6 +61,9 @@ const defaultState = {
     3: { canEnter: true },
   },
   processComplete: false,
+  selectedProjects: [],
+  responsePending: false,
+  responseFailed: false,
 };
 
 class GeosuiteExportView extends React.PureComponent {
@@ -86,7 +89,13 @@ class GeosuiteExportView extends React.PureComponent {
 
   bindSubscriptions = () => {
     this.localObserver.subscribe("borehole-selection-updated", () => {
+      console.log("view - borehole selection has updated");
       this.boreHoleSelectionUpdated();
+    });
+
+    this.localObserver.subscribe("borehole-selection-failed", () => {
+      console.log("view - borehole selection has failed");
+      this.boreHoleSelectionfailed();
     });
 
     this.localObserver.subscribe("area-selection-complete", () => {
@@ -103,12 +112,16 @@ class GeosuiteExportView extends React.PureComponent {
 
     this.localObserver.subscribe("window-opened", () => {
       console.log("window opened");
-      //instead of this, just set the activeState to 0. This will then fire handleEnterStepZero.
       this.setState({ activeStep: 0 });
     });
   };
 
   handleOrderGeosuiteToolboxFormat = () => {
+    this.setState({
+      responseFailed: false,
+      responsePending: true,
+    });
+
     console.log("GeosuiteExportView: handleOrderGeosuiteToolboxFormat");
     this.props.model.updateBoreholeSelection(
       this.props.model.getSelectedGeometry()
@@ -128,21 +141,22 @@ class GeosuiteExportView extends React.PureComponent {
   };
 
   boreHoleSelectionUpdated = () => {
-    const selectedProjects = this.props.model.getSelectedProjects();
-    console.log(
-      "GeosuiteExportView: boreHoleSelectionUpdated. selected=",
-      selectedProjects
-    );
+    let selectedProjects = this.props.model.getSelectedProjects();
+    //add a 'selected property' to use in UI's selection list.
     selectedProjects.forEach((project) => {
-      // Available: Project detail keys: { id<string>, name<string>, numBoreHolesSelected<number>, numBoreHolesTotal<number>, allDocumentsUrl<string> }
-      console.log(
-        "Selected project %s (id %s), selected %d bore holes (total %d). href=%s for all documents download.",
-        project.name,
-        project.id,
-        project.numBoreHolesSelected,
-        project.numBoreHolesTotal,
-        project.allDocumentsUrl
-      );
+      project.selected = false;
+    });
+    this.setState({
+      responsePending: false,
+      selectedProjects: selectedProjects,
+    });
+  };
+
+  boreHoleSelectionfailed = () => {
+    console.log("GeosuiteExportView: boreHoleSelectionfailed");
+    this.setState({
+      responsePending: false,
+      responseFailed: true,
     });
   };
 
@@ -232,11 +246,12 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleEnterStepTwo = () => {
     console.log("handleEnterStepTwo");
-    //send the WFS request when we enter the step 'leveransalternativ'
-    this.handleOrderGeosuiteToolboxFormat();
 
-    //if document
-    //this.handleOrderDocumentsFormat();
+    if (this.state.selectedProduct === "document") {
+      this.handleOrderDocumentsFormat();
+    } else {
+      this.handleOrderGeosuiteToolboxFormat();
+    }
   };
 
   handleEnterStepThree = () => {
@@ -434,6 +449,12 @@ class GeosuiteExportView extends React.PureComponent {
     );
   };
 
+  toggleStepEnabled = (step, isEnabled) => {
+    const stepState = { ...this.state.steps };
+    stepState[step].canEnter = isEnabled;
+    this.setState({ steps: stepState });
+  };
+
   componentDidUpdate(prevProps, prevState) {
     //When the step of the stepper tool changes.
     if (prevState.activeStep !== this.state.activeStep) {
@@ -446,6 +467,16 @@ class GeosuiteExportView extends React.PureComponent {
       const updatedSteps = { ...this.state.steps };
       updatedSteps[1].canEnter = this.state.isAreaSelected;
       this.setState({ steps: updatedSteps });
+    }
+
+    //When the projects update
+    if (prevState.selectedProjects !== this.state.selectedProjects) {
+      //toggle availabilty of Beställ knapp based on if there are any orders selected.
+      const selectedForOrder = this.state.selectedProjects.filter(
+        (proj) => proj.selected
+      );
+
+      this.toggleStepEnabled(3, selectedForOrder.length);
     }
   }
 
