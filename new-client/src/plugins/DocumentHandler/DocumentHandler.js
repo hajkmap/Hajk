@@ -8,7 +8,7 @@ import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
 import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
 import { createTheme } from "@mui/material/styles";
-import withTheme from "@mui/styles/withTheme";
+import { withTheme } from "@emotion/react";
 import { deepMerge } from "../../utils/DeepMerge";
 
 class DocumentHandler extends React.PureComponent {

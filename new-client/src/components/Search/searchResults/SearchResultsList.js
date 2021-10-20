@@ -2,7 +2,7 @@ import React from "react";
 import { List, ListItem } from "@mui/material";
 import SearchResultsDataset from "./SearchResultsDataset";
 import SearchResultsDatasetSummary from "./SearchResultsDatasetSummary";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material";
 import { useMediaQuery } from "@mui/material";
 import { styled } from "@mui/material/styles";
 

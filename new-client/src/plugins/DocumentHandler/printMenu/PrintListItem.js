@@ -1,6 +1,6 @@
 import React from "react";
 import withStyles from "@mui/styles/withStyles";
-import withTheme from "@mui/styles/withTheme";
+import { withTheme } from "@emotion/react";
 import ListItem from "@mui/material/ListItem";
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
@@ -84,7 +84,7 @@ class PrintListItem extends React.PureComponent {
           aria-controls="submenu"
           className={classes.listItem}
           style={{
-            paddingLeft: theme.spacing(1) + theme.spacing(chapter.level * 3),
+            paddingLeft: theme.spacing(1 + chapter.level * 3),
             borderLeft: `${theme.spacing(0.5)} solid ${chapter.color}`,
           }}
         >

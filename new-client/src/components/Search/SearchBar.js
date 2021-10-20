@@ -11,7 +11,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import WarningIcon from "@mui/icons-material/Warning";
 import SearchResultsContainer from "./searchResults/SearchResultsContainer";
 import SearchTools from "./SearchTools";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material";
 import { decodeCommas } from "../../utils/StringCommaCoder";
 import {
   CircularProgress,

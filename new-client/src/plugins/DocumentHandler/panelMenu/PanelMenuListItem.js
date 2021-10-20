@@ -1,6 +1,6 @@
 import React from "react";
 import withStyles from "@mui/styles/withStyles";
-import withTheme from "@mui/styles/withTheme";
+import { withTheme } from "@emotion/react";
 import Icon from "@mui/material/Icon";
 import ListItem from "@mui/material/ListItem";
 import Collapse from "@mui/material/Collapse";
@@ -78,12 +78,12 @@ class PanelMenuListItem extends React.PureComponent {
     const hasSubMenu = this.#hasSubMenu();
     return colored
       ? {
-          paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
+          paddingLeft: theme.spacing(1 + level * 3),
           borderLeft: `${theme.spacing(1)} solid ${color}`,
           paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         }
       : {
-          paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
+          paddingLeft: theme.spacing(1 + level * 3),
           paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         };
   };

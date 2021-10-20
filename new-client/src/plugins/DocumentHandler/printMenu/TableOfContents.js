@@ -1,6 +1,6 @@
 import React from "react";
 import withStyles from "@mui/styles/withStyles";
-import withTheme from "@mui/styles/withTheme";
+import { withTheme } from "@emotion/react";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import List from "@mui/material/List";
@@ -57,8 +57,7 @@ class TableOfContents extends React.PureComponent {
                 key={index}
                 dense={true}
                 style={{
-                  paddingLeft:
-                    theme.spacing(1) + theme.spacing(chapter.level * 3),
+                  paddingLeft: theme.spacing(1 + chapter.level * 3),
                 }}
               >
                 <ListItemText>{chapter.title}</ListItemText>
@@ -69,8 +68,7 @@ class TableOfContents extends React.PureComponent {
                 dense={true}
                 key={index}
                 style={{
-                  paddingLeft:
-                    theme.spacing(1) + theme.spacing(chapter.level * 3),
+                  paddingLeft: theme.spacing(1 + chapter.level * 3),
                 }}
               >
                 <ListItemText>{chapter.title}</ListItemText>
