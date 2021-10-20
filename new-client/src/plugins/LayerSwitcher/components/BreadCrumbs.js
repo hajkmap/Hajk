@@ -34,7 +34,7 @@ const MobileRoot = styled("div")(({ theme }) => ({
 }));
 
 const MobileHeader = styled("div")(({ theme }) => ({
-  padding: "0px 18px",
+  padding: `6px ${theme.spacing(2)}`,
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
@@ -180,7 +180,7 @@ class BreadCrumbs extends Component {
       <MobileRoot>
         <MobileHeader>
           <Typography>Innehåll i kartan</Typography>
-          <IconButton onClick={this.toggle} size="large">
+          <IconButton onClick={this.toggle} size="small">
             {open ? <RemoveCircleIcon /> : <AddCircleIcon />}
           </IconButton>
         </MobileHeader>
