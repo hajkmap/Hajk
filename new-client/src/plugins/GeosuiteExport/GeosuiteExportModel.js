@@ -10,8 +10,7 @@ import { WFS } from "ol/format";
 class GeosuiteExportModel {
   selection = {
     boreHoleIds: [], // Member: String(Trimble project id)
-    projects: {}, // Key: ProjectId, Value: Project. TODO: class Project? id, name, numBoreHolesSelected, numBoreHolesTotal
-    //boreholes: {}, // Key: BoreholeId, Value: ??? TODO: class BoreHole? (name,) id, projectId
+    projects: {}, // Key: ProjectId, Value: Project. TODO: class Project? id, name, numBoreHolesSelected, numBoreHolesTotal, allDocumentsUrl
   };
 
   constructor(settings) {
@@ -40,6 +39,8 @@ class GeosuiteExportModel {
     this.doubleClick = this.getMapsDoubleClickInteraction();
     this.wfsParser = new WFS();
   }
+
+  /**** General Model methods ****/
 
   handleWindowOpen = () => {
     //pass to the view, so we can re-set the view state.
@@ -94,12 +95,48 @@ class GeosuiteExportModel {
     this.map.clickLock.add("geosuiteexport");
 
     //Remove the doubleClick interaction from the map. Otherwise when a user double clicks to finish drawing, the map will also zoom in.
+    //The doubleClick interation is added back to the map when we end the drawInteraction.
     if (this.doubleClick) {
       this.map.removeInteraction(this.doubleClick);
     }
   };
 
-  // Work in progress
+  clearMapFeatures = () => {
+    this.map.removeLayer(this.source.clear());
+    this.localObserver.publish("area-selection-removed");
+    //the map is cleared so the selection is no longer valid - clear the selection.
+    this.#clearSelectionState();
+  };
+
+  getMapsDoubleClickInteraction = () => {
+    let doubleClick = null;
+    this.map
+      .getInteractions()
+      .getArray()
+      .forEach((interaction) => {
+        if (interaction instanceof DoubleClickZoom) {
+          doubleClick = interaction;
+        }
+      });
+
+    return doubleClick;
+  };
+
+  getSelectedGeometry = () => {
+    let geom = undefined;
+    const features = this.source.getFeatures();
+    if (features.length > 0) {
+      const featureGeometry = features[0].getGeometry();
+      console.log(featureGeometry);
+      //return features[0].getGeometry().getArea();
+      geom = features[0].getGeometry();
+    }
+    console.log("getSelectedGeometry: geom: ", geom);
+    return geom;
+  };
+
+  /**** Anrop till wfs och trimble api - work in progress ****/
+
   setSelectionStateFromGeometry = (selectionGeometry) => {
     console.log(
       "setSelectionStateFromGeometry: Calling WFS GetFeature using spatial WITHIN filter from user selection geometry:",
@@ -117,7 +154,7 @@ class GeosuiteExportModel {
 
     const srsName = this.map.getView().getProjection().getCode();
 
-    // TODO: SEMARA: Generalize code from SearchModel.js (WFS encapsulation? WFS util/low level XML handling?)
+    // TODO: Replace code-duplication with shared model with search (SearchModel) before PR is created.
     const filter = within(geometryName, selectionGeometry, srsName);
 
     const wfsGetFeatureOtions = {
@@ -189,13 +226,10 @@ class GeosuiteExportModel {
           // TODO: FIXME!
           this.app.config.appConfig.searchProxy =
             "https://cors-anywhere.herokuapp.com/";
-          // TODO: const fetchResponses = await Promise.allSettled(promises);
+          // Example settle wait: await Promise.allSettled(promises)
+          // then: this.localObserver.publish("borehole-selection-updated");
+          // ...to trigger view observer signal
           Object.keys(this.selection.projects).forEach((projectId) => {
-            console.log(
-              "GeoSuiteExportModel: createWfsRequest: getting Trimble API details for project %s (proxy: %s)",
-              projectId,
-              this.app.config.appConfig.searchProxy
-            );
             const apiUrl = this.app.config.appConfig.searchProxy.concat(
               trimbleApiUrl,
               trimbleApiProjectDetails,
@@ -247,38 +281,19 @@ class GeosuiteExportModel {
       });
   };
 
-  clearMapFeatures = () => {
-    this.map.removeLayer(this.source.clear());
-    this.localObserver.publish("area-selection-removed");
-    //the map is cleared to the selection is no logner valid - clear the selection.
-    this.#clearSelectionState();
-  };
+  /**** Methods for retrieving data from the model ****/
 
-  getMapsDoubleClickInteraction = () => {
-    let doubleClick = null;
-    this.map
-      .getInteractions()
-      .getArray()
-      .forEach((interaction) => {
-        if (interaction instanceof DoubleClickZoom) {
-          doubleClick = interaction;
-        }
-      });
-
-    return doubleClick;
-  };
-
-  getSelectedGeometry = () => {
-    let geom = undefined;
-    const features = this.source.getFeatures();
-    if (features.length > 0) {
-      const featureGeometry = features[0].getGeometry();
-      console.log(featureGeometry);
-      //return features[0].getGeometry().getArea();
-      geom = features[0].getGeometry();
-    }
-    console.log("getSelectedGeometry: geom: ", geom);
-    return geom;
+  /**
+   * Returns an array of project detail objects for selected projects.
+   * NB! Dependent on previous selection state update call, otherwise returned array will always be empty.
+   * @returns array of project detail JSON-objects
+   */
+  getSelectedProjects = () => {
+    const projects = [];
+    Object.keys(this.selection.projects).forEach((projectId) => {
+      projects.push(this.#getProjectById(projectId));
+    });
+    return projects;
   };
 
   #clearSelectionState = () => {
@@ -291,23 +306,22 @@ class GeosuiteExportModel {
     const project = this.#getProjectById(projectDetails.investigationId);
     project.name = projectDetails.name;
     project.numBoreHolesTotal = projectDetails.numberOfPoints;
-    console.log(
-      "GeosuiteExportModel: #updateProjectDetails: project=",
-      project
-    );
   };
 
   #selectBoreHole = (feature) => {
     const props = feature.properties;
     // TODO: config for field names ("externt_id", "externt_projekt_id")
+    // NB! "handlingar_url" is not the correct ZIP/PDF link - TO BE CHANGED BY SBK (new version of WFS prel. publish date: 2021-10-18)
     const boreHoleId = props.externt_id;
     const projectId = props.externt_projekt_id;
+    const allDocumentsUrl = props.handlingar_url;
 
     if (!this.selection.boreHoleIds.includes(boreHoleId)) {
       this.selection.boreHoleIds.push(boreHoleId);
     }
     const project = this.#getProjectById(projectId);
     project.numBoreHolesSelected++;
+    project.allDocumentsUrl = allDocumentsUrl;
   };
 
   #getProjectById = (projectId) => {
@@ -320,6 +334,7 @@ class GeosuiteExportModel {
         name: "",
         numBoreHolesSelected: 0,
         numBoreHolesTotal: 0,
+        allDocumentsUrl: "",
       };
       this.selection.projects[projectId] = project;
     }

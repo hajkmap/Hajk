@@ -48,7 +48,7 @@ class GeosuiteExport extends React.PureComponent {
           title: this.state.title,
           color: this.state.color,
           description: this.state.description,
-          height: 600,
+          height: 800,
           width: 400,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,

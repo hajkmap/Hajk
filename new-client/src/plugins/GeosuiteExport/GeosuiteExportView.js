@@ -18,11 +18,35 @@ import {
   FormControlLabel,
   RadioGroup,
   Radio,
+  Box,
+  Grid,
+  Link,
+  List,
+  ListItem,
+  Paper,
 } from "@material-ui/core";
 
 const styles = (theme) => ({
   bold: {
     fontWeight: 600,
+  },
+  stepButton: {
+    marginTop: theme.spacing(2),
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(2),
+  },
+  subheading: {
+    padding: theme.spacing(1),
+    fontWeight: 500,
+  },
+  link: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+  },
+  productList: {
+    maxHeight: 200,
+    overflowY: "scroll",
+    overflowX: "hidden",
   },
 });
 
@@ -74,6 +98,7 @@ class GeosuiteExportView extends React.PureComponent {
     });
 
     this.localObserver.subscribe("window-opened", () => {
+      console.log("window opened");
       this.handleEnterStepZero();
     });
   };
@@ -109,6 +134,12 @@ class GeosuiteExportView extends React.PureComponent {
       case 3:
         this.handleLeaveStepThree();
         break;
+      case 10:
+        /*
+        Leave the completed state. This will occur when we click on 
+        börja om. this is already handled by on the button with handleReset(). 
+        */
+        break;
       default:
         console.warn("Reached an invalid step");
     }
@@ -128,9 +159,18 @@ class GeosuiteExportView extends React.PureComponent {
       case 3:
         this.handleEnterStepThree();
         break;
+      case 10:
+        this.handleProcessComplete();
+        break;
       default:
         console.warn("Reached an invalid step");
     }
+  };
+
+  handleProcessComplete = () => {
+    //set process to complete.
+    //this will cause the stepper to display as completed, and the final options buttons to display.
+    this.setState({ processComplete: true });
   };
 
   //Actions when leaving steps
@@ -145,7 +185,7 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleEnterStepTwo = () => {
     console.log("handleEnterStepTwo");
-    console.log("Here we will send the WFS request");
+    //send the WFS request when we enter the step 'leveransalternativ'
     this.props.model.setSelectionStateFromGeometry(
       this.props.model.getSelectedGeometry()
     );
@@ -174,14 +214,49 @@ class GeosuiteExportView extends React.PureComponent {
   };
 
   renderOrderStepDocument() {
+    const { classes } = this.props;
     return (
       <>
-        <span>
-          <Typography variant="subtitle1">
-            <DescriptionOutlinedIcon />
+        <Grid container direction="row" alignItems="center">
+          <DescriptionOutlinedIcon />
+          <Typography variant="subtitle1" className={classes.subheading}>
             {"Geotekniska utredningar"}
           </Typography>
-        </span>
+        </Grid>
+        <Typography>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur
+          iste minima est? Voluptate hic dicta quaerat modi, vitae maxime ad?
+        </Typography>
+        <Grid
+          className={classes.link}
+          container
+          direction="row"
+          alignItems="center"
+        >
+          {/* TODO - set link button color (check if there is a 'link' in palette) */}
+          <DescriptionOutlinedIcon />
+          <Link
+            href="http://www.google.com"
+            className={classes.link}
+            target="_blank"
+          >
+            {"Villkor för nyttjande"}
+          </Link>
+        </Grid>
+        <div>
+          <Paper className={classes.productList}>
+            <List>
+              <ListItem>1</ListItem>
+              <ListItem>2</ListItem>
+              <ListItem>3</ListItem>
+              <ListItem>4</ListItem>
+              <ListItem>5</ListItem>
+              <ListItem>6</ListItem>
+              <ListItem>7</ListItem>
+              <ListItem>8</ListItem>
+            </List>
+          </Paper>
+        </div>
         {this.renderNextAndBackButtons("Beställ", null)}
       </>
     );
@@ -190,12 +265,12 @@ class GeosuiteExportView extends React.PureComponent {
   renderOrderStepGeoSuite() {
     return (
       <>
-        <span>
+        <Grid container direction="row" alignItems="center">
+          <EmailOutlinedIcon />
           <Typography variant="subtitle1">
-            <EmailOutlinedIcon />
             {"Borrhålsdata i GeoSuite-format"}
           </Typography>
-        </span>
+        </Grid>
         <br />
         <Typography variant="body1">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
@@ -232,15 +307,16 @@ class GeosuiteExportView extends React.PureComponent {
             variant="outlined"
             aria-label="Välj mer produkter"
             disabled={false}
+            color="primary"
           >
             Välj Mer
           </Button>
           <Button
             disabled={step === 0}
             onClick={() => {
-              this.setState({ processComplete: true, activeStep: null });
+              this.setState({ activeStep: 10 });
             }}
-            variant="outlined"
+            color="primary"
             aria-label="Klar"
           >
             Klar
@@ -251,8 +327,6 @@ class GeosuiteExportView extends React.PureComponent {
   };
 
   renderStepperButtons() {
-    const { classes } = this.props;
-
     return (
       <ButtonGroup fullWidth>
         <Button
@@ -261,6 +335,7 @@ class GeosuiteExportView extends React.PureComponent {
           onClick={() => {
             this.handleReset();
           }}
+          color="primary"
         >
           Börja Om
         </Button>
@@ -269,6 +344,7 @@ class GeosuiteExportView extends React.PureComponent {
           onClick={() => {
             this.handleClose();
           }}
+          color="primary"
         >
           Avsluta
         </Button>
@@ -278,39 +354,46 @@ class GeosuiteExportView extends React.PureComponent {
 
   renderNextAndBackButtons = (nextButtonName, backButtonName) => {
     const step = this.state.activeStep;
+    const { classes } = this.props;
 
     return (
-      <div>
+      <Box display="flex">
         <Button
+          className={classes.stepButton}
           onClick={() => {
             this.setState({ activeStep: step + 1 });
           }}
           variant="outlined"
           aria-label="Fortsätt till nästa steg"
           disabled={!this.state.steps?.[step + 1]?.["canEnter"]}
+          color="primary"
         >
           {nextButtonName || "Fortsätt"}
         </Button>
         <Button
+          className={classes.stepButton}
           disabled={step === 0}
           onClick={() => {
             this.setState({ activeStep: step - 1 });
           }}
-          variant="outlined"
+          variant="text"
           aria-label="Gå tillbaka till föregående steg"
+          color="primary"
         >
           {backButtonName || "Tillbaka"}
         </Button>
-      </div>
+      </Box>
     );
   };
 
   componentDidUpdate(prevProps, prevState) {
+    //When the step of the stepper tool changes.
     if (prevState.activeStep !== this.state.activeStep) {
       this.handleLeaveStep(prevState.activeStep);
       this.handleEnterStep(this.state.activeStep);
     }
 
+    //When the selected area of interest changes.
     if (prevState.isAreaSelected !== this.state.isAreaSelected) {
       const updatedSteps = { ...this.state.steps };
       updatedSteps[1].canEnter = this.state.isAreaSelected;
@@ -319,63 +402,64 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
-
     return (
       <>
-        <Stepper activeStep={this.state.activeStep} orientation="vertical">
-          <Step key="selectArea">
-            <StepLabel>Markera område</StepLabel>
-            <StepContent>
-              <div>
-                <Typography variant="caption">
-                  Rita ditt omrråde i kartan, avsluta genom att dubbelklicka.
-                </Typography>
-                <br />
-                <br />
+        <div>
+          <Stepper activeStep={this.state.activeStep} orientation="vertical">
+            <Step key="selectArea">
+              <StepLabel>Markera område</StepLabel>
+              <StepContent>
+                <div>
+                  <Typography variant="caption">
+                    Rita ditt omrråde i kartan, avsluta genom att dubbelklicka.
+                  </Typography>
+                  <br />
+                  {this.renderNextAndBackButtons()}
+                </div>
+              </StepContent>
+            </Step>
+            <Step key="selectData">
+              <StepLabel>Välj produkt</StepLabel>
+              <StepContent>
+                <FormControl component="fieldset" label="">
+                  <RadioGroup
+                    aria-label="selektera produkt"
+                    name="select-product"
+                    value={this.state.selectedProduct}
+                    onChange={this.handleSelectProduct}
+                  >
+                    <FormControlLabel
+                      value="document"
+                      label="Geotekniska utredningar"
+                      control={<Radio color="primary" />}
+                    ></FormControlLabel>
+                    <FormControlLabel
+                      value="borrhal"
+                      label="Borrhålsdata i GeoSuite format"
+                      control={<Radio color="primary" />}
+                    ></FormControlLabel>
+                  </RadioGroup>
+                </FormControl>
                 {this.renderNextAndBackButtons()}
-              </div>
-            </StepContent>
-          </Step>
-          <Step key="selectData">
-            <StepLabel>Välj produkt</StepLabel>
-            <StepContent>
-              <FormControl component="fieldset" label="">
-                <RadioGroup
-                  aria-label=""
-                  name=""
-                  value={this.state.selectedProduct}
-                  onChange={this.handleSelectProduct}
-                >
-                  <FormControlLabel
-                    value="document"
-                    label="Geotekniska utredningar"
-                    control={<Radio />}
-                  ></FormControlLabel>
-                  <FormControlLabel
-                    value="borrhal"
-                    label="Borrhålsdata i GeoSuite format"
-                    control={<Radio />}
-                  ></FormControlLabel>
-                </RadioGroup>
-              </FormControl>
-              {this.renderNextAndBackButtons()}
-            </StepContent>
-          </Step>
-          <Step key="order">
-            <StepLabel>Leveransalternativ</StepLabel>
-            <StepContent>
-              {this.state.selectedProduct === "document"
-                ? this.renderOrderStepDocument()
-                : this.renderOrderStepGeoSuite()}
-            </StepContent>
-          </Step>
-          <Step key="confirmation" completed={this.state.processComplete}>
-            <StepLabel>Bekräftelse</StepLabel>
-            <StepContent>{this.renderConfirmStep()}</StepContent>
-          </Step>
-        </Stepper>
-        {this.state.processComplete === true && this.renderStepperButtons()}
+              </StepContent>
+            </Step>
+            <Step key="order">
+              <StepLabel>Leveransalternativ</StepLabel>
+              <StepContent>
+                {this.state.selectedProduct === "document"
+                  ? this.renderOrderStepDocument()
+                  : this.renderOrderStepGeoSuite()}
+              </StepContent>
+            </Step>
+            <Step key="confirmation" completed={this.state.processComplete}>
+              <StepLabel>Bekräftelse</StepLabel>
+              <StepContent>{this.renderConfirmStep()}</StepContent>
+            </Step>
+          </Stepper>
+        </div>
+        <div>
+          {this.state.processComplete === true && this.renderStepperButtons()}
+        </div>
       </>
     );
   }
