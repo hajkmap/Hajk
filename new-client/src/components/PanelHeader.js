@@ -8,8 +8,10 @@ import AspectRatioIcon from "@mui/icons-material/AspectRatio";
 import { Hidden, Typography, IconButton, Box } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 
-const StyledHeader = styled("header")(({ theme }) => ({
-  padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
+const StyledHeader = styled("header")(({ mode, theme }) => ({
+  padding: `${
+    mode === "minimized" ? theme.spacing(0) : theme.spacing(1)
+  } ${theme.spacing(2)}`,
   borderBottom: `4px solid ${theme.palette.primary.main}`,
   userSelect: "none",
   display: "flex",
@@ -57,6 +59,7 @@ class PanelHeader extends Component {
     return (
       <StyledHeader
         style={{ borderColor: this.props.color }} // Allow for dynamic override of accent border color
+        mode={this.props.mode}
       >
         <Typography component="h1" variant="button" align="left" noWrap={true}>
           {this.props.title}
