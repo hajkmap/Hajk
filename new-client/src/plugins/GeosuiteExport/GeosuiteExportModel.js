@@ -8,9 +8,39 @@ import { hfetch } from "utils/FetchWrapper";
 import { WFS } from "ol/format";
 
 class GeosuiteExportModel {
+  config = {
+    boreholes: {
+      wfsUrl: "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
+      geometryName: "geom", // Get from DescribeFeatureType? Config?
+      featurePrefixName: "borrhal-v2",
+      featureName: "borrhal",
+      attributes: {
+        external_id: "externt_id",
+        external_project_id: "externt_projekt_id",
+        //all_documents_url: "handlingar_url", // TODO: SBK-38: not yet defined if we get this attribute in the same WFS from SBK
+      },
+      maxFeatures: 100, // TODO: REMOVE
+    },
+    projects: {
+      wfsUrl: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
+      geometryName: "geom",
+      featurePrefixName: "borrhal-v2-utv",
+      featureName: "geoteknisk_utredning",
+      attributes: {
+        project_name: "projektnamn",
+        all_documents_url: "url", // TODO: SBK-38: not yet defined if we get this attribute in the borehole WFS from SBK
+      },
+      maxFeatures: 25, // TODO: REMOVE
+    },
+    trimble: {
+      apiUrl: "https://geoarkiv-api.goteborg.se/test", // TODO: PROD
+      projectDetailsMethod: "/investigation",
+    },
+  };
+
   selection = {
     boreHoleIds: [], // Member: String(Trimble project id)
-    projects: {}, // Key: ProjectId, Value: Project. TODO: class Project? id, name, numBoreHolesSelected, numBoreHolesTotal, allDocumentsUrl
+    projects: {}, // Key: ProjectId, Value: Project. TODO: class Project? { id, name, numBoreHolesSelected, numBoreHolesTotal, allDocumentsUrl }
   };
 
   constructor(settings) {
@@ -63,25 +93,6 @@ class GeosuiteExportModel {
     this.localObserver.publish("area-selection-complete");
   };
 
-  removeDrawInteraction = () => {
-    if (this.draw !== null) {
-      this.map.removeInteraction(this.draw);
-      this.draw = null;
-    }
-    this.map.clickLock.delete("geosuiteexport");
-
-    /*
-    Add the maps doubleclick zoom interaction back to map when we leave drawing mode (the doubleclick zoom interaction is removed from the map when we enter drawing mode, to avoid a zoom when doubleclicking to finish drawing).
-    TODO - do this without a timeout. (timeout because otherwise the map still zooms).
-    TODO - is there a better way to cancel the doubleclick zoom without removing and the re-adding the interaction?
-    */
-    if (this.doubleClick) {
-      setTimeout(() => {
-        this.map.addInteraction(this.doubleClick);
-      }, 200);
-    }
-  };
-
   addDrawInteraction = () => {
     this.draw = new Draw({
       source: this.source,
@@ -98,6 +109,25 @@ class GeosuiteExportModel {
     //The doubleClick interation is added back to the map when we end the drawInteraction.
     if (this.doubleClick) {
       this.map.removeInteraction(this.doubleClick);
+    }
+  };
+
+  removeDrawInteraction = () => {
+    if (this.draw !== null) {
+      this.map.removeInteraction(this.draw);
+      this.draw = null;
+    }
+    this.map.clickLock.delete("geosuiteexport");
+
+    /*
+    Add the maps doubleclick zoom interaction back to map when we leave drawing mode (the doubleclick zoom interaction is removed from the map when we enter drawing mode, to avoid a zoom when doubleclicking to finish drawing).
+    TODO - do this without a timeout. (timeout because otherwise the map still zooms).
+    TODO - is there a better way to cancel the doubleclick zoom without removing and the re-adding the interaction?
+    */
+    if (this.doubleClick) {
+      setTimeout(() => {
+        this.map.addInteraction(this.doubleClick);
+      }, 200);
     }
   };
 
@@ -126,162 +156,38 @@ class GeosuiteExportModel {
     let geom = undefined;
     const features = this.source.getFeatures();
     if (features.length > 0) {
-      const featureGeometry = features[0].getGeometry();
-      console.log(featureGeometry);
-      //return features[0].getGeometry().getArea();
       geom = features[0].getGeometry();
     }
-    console.log("getSelectedGeometry: geom: ", geom);
     return geom;
   };
 
-  /**** Anrop till wfs och trimble api - work in progress ****/
+  /*Methods for fetching and updating borehole/project information*/
 
-  setSelectionStateFromGeometry = (selectionGeometry) => {
-    console.log(
-      "setSelectionStateFromGeometry: Calling WFS GetFeature using spatial WITHIN filter from user selection geometry:",
-      selectionGeometry
+  updateBoreholeSelection = (selectionGeometry) => {
+    this.#updateSelectionStateFromWfs(
+      this.config.boreholes,
+      selectionGeometry,
+      this.#selectBoreHole,
+      this.#updateSelectedProjectsDetailsFromTrimbleApi
     );
-
-    // TODO: SEMARA: FIXME: config/option?
-    const wfsUrl = "https://opengeodata.goteborg.se/services/borrhal-v2/wfs";
-    const geometryName = "geom"; // Get from DescribeFeatureType? Config?
-    const featurePrefixName = "borrhal-v2";
-    const featureName = "borrhal";
-    const maxFeatures = 100;
-    const trimbleApiUrl = "https://geoarkiv-api.goteborg.se/prod";
-    const trimbleApiProjectDetails = "/investigation";
-
-    const srsName = this.map.getView().getProjection().getCode();
-
-    // TODO: Replace code-duplication with shared model with search (SearchModel) before PR is created.
-    const filter = within(geometryName, selectionGeometry, srsName);
-
-    const wfsGetFeatureOtions = {
-      srsName: srsName,
-      featureNS: "", // Must be blank for IE GML parsing
-      featurePrefix: featurePrefixName,
-      featureTypes: [featureName],
-      outputFormat: "application/json",
-      geometryName: geometryName,
-      filter: filter,
-      maxFeatures: maxFeatures,
-    };
-
-    const wfsBodyXml = new XMLSerializer().serializeToString(
-      this.wfsParser.writeGetFeature(wfsGetFeatureOtions)
-    );
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    const wfsRequest = {
-      credentials: "same-origin",
-      signal: signal,
-      method: "POST",
-      headers: {
-        "Content-Type": "text/xml",
-      },
-      body: wfsBodyXml,
-    };
-    console.log(
-      "GeoSuiteExportModel: createWfsRequest: Calling WFS GetFeature using body:",
-      wfsRequest.body
-    );
-    hfetch(wfsUrl, wfsRequest)
-      .then((response) => {
-        if (!response.ok) {
-          console.log(
-            "GeoSuiteExportModel: createWfsRequest: WFS query rejected"
-          );
-          throw new TypeError("Rejected"); // E.g. CORS error or similar
-        }
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          // TODO: REMOVE:
-          response.text().then((body) => {
-            console.log(
-              "GeoSuiteExportModel: createWfsRequest: response is not JSON:",
-              body
-            );
-          });
-          throw new TypeError("Response is not JSON"); // E.g. server error or OGC XML for WFS exceptions
-        }
-        return response.json();
-      })
-      .then((featureCollection) => {
-        console.log(
-          "GeoSuiteExportModel: createWfsRequest: WFS response fetched:",
-          featureCollection
-        );
-        console.log(
-          "GeoSuiteExportModel: createWfsRequest: got %d features of matched %d (out of total %d)",
-          featureCollection.numberReturned,
-          featureCollection.numberMatched,
-          featureCollection.totalFeatures
-        );
-        if (featureCollection.numberReturned > 0) {
-          featureCollection.features.forEach((feature) => {
-            this.#selectBoreHole(feature);
-          });
-          // TODO: FIXME!
-          this.app.config.appConfig.searchProxy =
-            "https://cors-anywhere.herokuapp.com/";
-          // Example settle wait: await Promise.allSettled(promises)
-          // then: this.localObserver.publish("borehole-selection-updated");
-          // ...to trigger view observer signal
-          Object.keys(this.selection.projects).forEach((projectId) => {
-            const apiUrl = this.app.config.appConfig.searchProxy.concat(
-              trimbleApiUrl,
-              trimbleApiProjectDetails,
-              "/",
-              projectId
-            );
-            const apiRequestOptions = {
-              credentials: "same-origin",
-              signal: signal,
-              method: "GET",
-            };
-            hfetch(apiUrl, apiRequestOptions)
-              .then((response) => {
-                if (!response.ok) {
-                  console.log(
-                    "GeoSuiteExportModel: createWfsRequest: API query rejected"
-                  );
-                  throw new TypeError("Rejected");
-                }
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                  // TODO: REMOVE:
-                  response.text().then((body) => {
-                    console.log(
-                      "GeoSuiteExportModel: createWfsRequest: API response is not JSON:",
-                      body
-                    );
-                  });
-                  throw new TypeError("Response is not JSON"); // E.g. server error or OGC XML for WFS exceptions
-                }
-                return response.json();
-              })
-              .then((investigationDetail) => {
-                this.#updateProjectDetails(investigationDetail);
-              })
-              .catch((error) => {
-                //TODO: Error handling
-                console.log(
-                  "GeoSuiteExportModel: createWfsRequest: API error",
-                  error
-                );
-              });
-          });
-        }
-      })
-      .catch((error) => {
-        //TODO: Error handling
-        console.log("GeoSuiteExportModel: createWfsRequest: WFS error", error);
-      });
   };
 
-  /**** Methods for retrieving data from the model ****/
+  updateProjectsSelection = (selectionGeometry) => {
+    this.#updateSelectionStateFromWfs(
+      this.config.projects,
+      selectionGeometry,
+      this.#selectProject
+    );
+  };
+
+  /**
+   * Clear borehole and project selection state.
+   */
+  clearSelection = () => {
+    console.log("GeosuiteExportModel: clearSelection");
+    this.#clearSelectionState();
+    this.source.clear();
+  };
 
   /**
    * Returns an array of project detail objects for selected projects.
@@ -296,32 +202,229 @@ class GeosuiteExportModel {
     return projects;
   };
 
-  #clearSelectionState = () => {
-    this.selection.boreHoleIds.length = 0;
-    delete this.selection.projects; // GC
-    this.selection.projects = {};
+  // Work in progress, re-use search model
+  #updateSelectionStateFromWfs = (
+    wfsConfig,
+    selectionGeometry,
+    featureSelectCallback,
+    postFeatureSelectionCallback
+  ) => {
+    console.log(
+      "#updateSelectionStateFromWfs: Calling WFS GetFeature using spatial WITHIN filter from user selection geometry:",
+      selectionGeometry
+    );
+    if (!selectionGeometry) {
+      return;
+    }
+
+    const srsName = this.map.getView().getProjection().getCode();
+
+    // TODO: Replace code-duplication with shared model with search (SearchModel) before PR is created.
+    const spatialFilter = within(
+      wfsConfig.geometryName,
+      selectionGeometry,
+      srsName
+    );
+
+    const wfsGetFeatureOtions = {
+      srsName: srsName,
+      featureNS: "", // Must be blank for IE GML parsing
+      featurePrefix: wfsConfig.featurePrefixName,
+      featureTypes: [wfsConfig.featureName],
+      outputFormat: "application/json",
+      geometryName: wfsConfig.geometryName,
+      filter: spatialFilter,
+      maxFeatures: wfsConfig.maxFeatures,
+    };
+
+    const wfsBoreholesBodyXml = new XMLSerializer().serializeToString(
+      this.wfsParser.writeGetFeature(wfsGetFeatureOtions)
+    );
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const wfsBoreholesRequest = {
+      credentials: "same-origin",
+      signal: signal,
+      method: "POST",
+      headers: {
+        "Content-Type": "text/xml",
+      },
+      body: wfsBoreholesBodyXml,
+    };
+    console.log(
+      "#updateSelectionStateFromWfs: Calling boreholes WFS GetFeature using body:",
+      wfsBoreholesRequest.body
+    );
+    hfetch(wfsConfig.wfsUrl, wfsBoreholesRequest)
+      .then((response) => {
+        if (!response.ok) {
+          console.log("#updateSelectionStateFromWfs: WFS query rejected");
+          throw new TypeError("Rejected"); // E.g. CORS error or similar
+        }
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          // TODO: REMOVE:
+          response.text().then((body) => {
+            console.log(
+              "#updateSelectionStateFromWfs: response is not JSON:",
+              body
+            );
+          });
+          throw new TypeError("Response is not JSON"); // E.g. server error or OGC XML for WFS exceptions
+        }
+        return response.json();
+      })
+      .then((featureCollection) => {
+        console.log(
+          "#updateSelectionStateFromWfs: WFS response fetched:",
+          featureCollection
+        );
+        console.log(
+          "#updateSelectionStateFromWfs: got %d features of matched %d (out of total %d)",
+          featureCollection.numberReturned,
+          featureCollection.numberMatched,
+          featureCollection.totalFeatures
+        );
+        if (featureCollection.numberReturned > 0) {
+          featureCollection.features.forEach((feature) => {
+            featureSelectCallback(feature);
+          });
+        }
+        if (postFeatureSelectionCallback) {
+          postFeatureSelectionCallback();
+        }
+      })
+      .catch((error) => {
+        //TODO: Error handling
+        console.log("#updateSelectionStateFromWfs: WFS error", error);
+      });
   };
 
-  #updateProjectDetails = (projectDetails) => {
-    const project = this.#getProjectById(projectDetails.investigationId);
-    project.name = projectDetails.name;
-    project.numBoreHolesTotal = projectDetails.numberOfPoints;
-  };
-
-  #selectBoreHole = (feature) => {
+  // Feature selection callback for updating state with project details,
+  // given a WFS project feature
+  #selectProject = (feature) => {
+    console.log("#selectProject", feature);
     const props = feature.properties;
-    // TODO: config for field names ("externt_id", "externt_projekt_id")
-    // NB! "handlingar_url" is not the correct ZIP/PDF link - TO BE CHANGED BY SBK (new version of WFS prel. publish date: 2021-10-18)
-    const boreHoleId = props.externt_id;
-    const projectId = props.externt_projekt_id;
-    const allDocumentsUrl = props.handlingar_url;
+    const projectId = feature.id;
+    const projectName = props[this.config.projects.attributes.project_name];
 
+    if (!projectId || !projectName) {
+      console.log(
+        "#selectProject: WFS is missing feature id or project name attribute (%s)",
+        this.config.projects.attributes.project_name
+      );
+      throw new TypeError("Internt fel, identiteter saknas.");
+    }
+    const project = this.#getProjectById(projectId);
+    project.name = projectName;
+    if (this.config.projects.attributes.all_documents_url) {
+      const allDocumentsUrl =
+        props[this.config.projects.attributes.all_documents_url];
+      project.allDocumentsUrl = allDocumentsUrl;
+    }
+  };
+
+  // Feature selection callback for updating state with borehole and project details,
+  // given a WFS borehole feature
+  #selectBoreHole = (feature) => {
+    console.log("#selectBoreHole", feature);
+    const props = feature.properties;
+    const boreHoleId = props[this.config.boreholes.attributes.external_id];
+    const projectId =
+      props[this.config.boreholes.attributes.external_project_id];
+
+    if (!boreHoleId || !projectId) {
+      console.log(
+        "#selectBoreHole: WFS is missing id (%s) or project id attribute (%s)",
+        this.config.boreholes.attributes.external_id,
+        this.config.boreholes.attributes.external_project_id
+      );
+      throw new TypeError("Internt fel, identiteter saknas.");
+    }
     if (!this.selection.boreHoleIds.includes(boreHoleId)) {
       this.selection.boreHoleIds.push(boreHoleId);
     }
     const project = this.#getProjectById(projectId);
     project.numBoreHolesSelected++;
-    project.allDocumentsUrl = allDocumentsUrl;
+    if (this.config.boreholes.attributes.all_documents_url) {
+      const allDocumentsUrl =
+        props[this.config.boreholes.attributes.all_documents_url];
+      project.allDocumentsUrl = allDocumentsUrl;
+    }
+  };
+
+  #updateProjectDetails = (projectDetails) => {
+    const projectId = projectDetails.investigationId;
+    const projectName = projectDetails.name;
+    const projectNumBoreHolesTotal = projectDetails.numberOfPoints;
+    console.log(
+      "#updateProjectDetails - project %s: name=%s, total boreholes=%s",
+      projectId,
+      projectName,
+      projectNumBoreHolesTotal
+    );
+    const project = this.#getProjectById(projectId);
+    project.name = projectName;
+    project.numBoreHolesTotal = projectNumBoreHolesTotal;
+  };
+
+  #updateSelectedProjectsDetailsFromTrimbleApi = () => {
+    console.log("#updateSelectedProjectsDetailsFromTrimbleApi");
+    // Example settle wait: await Promise.allSettled(promises)
+    // then: this.localObserver.publish("borehole-selection-updated");
+    // ...to trigger view observer signal
+    const controller = new AbortController();
+    const signal = controller.signal;
+    Object.keys(this.selection.projects)
+      .filter((projectId) => {
+        // Optimized Trimble API usage: only fetch if we don't have the project details
+        const project = this.#getProjectById(projectId);
+        return !project || !project.numBoreHolesTotal;
+      })
+      .forEach((projectId) => {
+        const apiUrl = this.config.trimble.apiUrl.concat(
+          this.config.trimble.projectDetailsMethod,
+          "/",
+          projectId
+        );
+        const apiRequestOptions = {
+          credentials: "same-origin",
+          signal: signal,
+          method: "GET",
+        };
+        hfetch(apiUrl, apiRequestOptions)
+          .then((response) => {
+            if (!response.ok) {
+              console.log(
+                "#updateSelectedProjectsDetailsFromTrimbleApi: API query rejected"
+              );
+              throw new TypeError("Rejected");
+            }
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+              // TODO: REMOVE:
+              response.text().then((body) => {
+                console.log(
+                  "#updateSelectedProjectsDetailsFromTrimbleApi: API response is not JSON:",
+                  body
+                );
+              });
+              throw new TypeError("Response is not JSON"); // E.g. server error or OGC XML for WFS exceptions
+            }
+            return response.json();
+          })
+          .then((investigationDetail) => {
+            this.#updateProjectDetails(investigationDetail);
+          })
+          .catch((error) => {
+            //TODO: Error handling
+            console.log(
+              "#updateSelectedProjectsDetailsFromTrimbleApi: API error",
+              error
+            );
+          });
+      });
   };
 
   #getProjectById = (projectId) => {
@@ -339,6 +442,12 @@ class GeosuiteExportModel {
       this.selection.projects[projectId] = project;
     }
     return project;
+  };
+
+  #clearSelectionState = () => {
+    this.selection.boreHoleIds.length = 0;
+    delete this.selection.projects; // GC
+    this.selection.projects = {};
   };
 }
 

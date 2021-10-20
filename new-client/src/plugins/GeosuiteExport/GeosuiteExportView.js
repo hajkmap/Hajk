@@ -85,6 +85,10 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   bindSubscriptions = () => {
+    this.localObserver.subscribe("borehole-selection-updated", () => {
+      this.boreHoleSelectionUpdated();
+    });
+
     this.localObserver.subscribe("area-selection-complete", () => {
       this.setState({ isAreaSelected: true });
     });
@@ -100,6 +104,44 @@ class GeosuiteExportView extends React.PureComponent {
     this.localObserver.subscribe("window-opened", () => {
       console.log("window opened");
       this.handleEnterStepZero();
+    });
+  };
+
+  handleOrderGeosuiteToolboxFormat = () => {
+    console.log("GeosuiteExportView: handleOrderGeosuiteToolboxFormat");
+    this.props.model.updateBoreholeSelection(
+      this.props.model.getSelectedGeometry()
+    );
+  };
+
+  handleOrderDocumentsFormat = () => {
+    console.log("GeosuiteExportView: handleOrderDocumentsFormat");
+    this.props.model.updateProjectsSelection(
+      this.props.model.getSelectedGeometry()
+    );
+  };
+
+  clearSelection = () => {
+    console.log("GeosuiteExportView: clearSelection");
+    this.props.model.clearSelection();
+  };
+
+  boreHoleSelectionUpdated = () => {
+    const selectedProjects = this.props.model.getSelectedProjects();
+    console.log(
+      "GeosuiteExportView: boreHoleSelectionUpdated. selected=",
+      selectedProjects
+    );
+    selectedProjects.forEach((project) => {
+      // Available: Project detail keys: { id<string>, name<string>, numBoreHolesSelected<number>, numBoreHolesTotal<number>, allDocumentsUrl<string> }
+      console.log(
+        "Selected project %s (id %s), selected %d bore holes (total %d). href=%s for all documents download.",
+        project.name,
+        project.id,
+        project.numBoreHolesSelected,
+        project.numBoreHolesTotal,
+        project.allDocumentsUrl
+      );
     });
   };
 
@@ -186,9 +228,10 @@ class GeosuiteExportView extends React.PureComponent {
   handleEnterStepTwo = () => {
     console.log("handleEnterStepTwo");
     //send the WFS request when we enter the step 'leveransalternativ'
-    this.props.model.setSelectionStateFromGeometry(
-      this.props.model.getSelectedGeometry()
-    );
+    this.handleOrderGeosuiteToolboxFormat();
+
+    //if document
+    //this.handleOrderDocumentsFormat();
   };
 
   handleEnterStepThree = () => {
@@ -449,6 +492,47 @@ class GeosuiteExportView extends React.PureComponent {
                 {this.state.selectedProduct === "document"
                   ? this.renderOrderStepDocument()
                   : this.renderOrderStepGeoSuite()}
+                <div>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.handleShowSelectionShapeInfo();
+                      this.clearSelection();
+                    }}
+                  >
+                    Rensa tillstånd
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.handleOrderGeosuiteToolboxFormat();
+                    }}
+                  >
+                    Beställ GeoSuite-export
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.handleOrderDocumentsFormat();
+                    }}
+                  >
+                    Hämta handlingar
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.boreHoleSelectionUpdated();
+                    }}
+                  >
+                    Visa tillstånd
+                  </Button>
+                </div>
               </StepContent>
             </Step>
             <Step key="confirmation" completed={this.state.processComplete}>
