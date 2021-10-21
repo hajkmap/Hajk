@@ -496,7 +496,7 @@ class AttributeEditor extends React.Component {
               {val}
             </option>
           ));
-        } // TODO, fixa beskrivning för lista och flerval
+        }
         return (
           <>
             <FormControl fullWidth={true} component="fieldset">
