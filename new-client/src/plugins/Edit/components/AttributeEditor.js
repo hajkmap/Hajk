@@ -582,7 +582,7 @@ class AttributeEditor extends React.Component {
         </Grid>
         <p>Editerbara fält:</p>
         {markup}
-        Icke-editerbara fält:
+        {markupNonEdit.length > 2 ? "Icke-editerbara fält:" : ""}
         {markupNonEdit}
         <Grid item xs={12} className={classes.centeredContainer}>
           <Button
