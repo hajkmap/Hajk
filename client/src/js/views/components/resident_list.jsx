@@ -21,7 +21,6 @@
 // https://github.com/hajkmap/Hajk
 
 var ResidentList = {
-
   getInitialState: function () {
     this.config = this.props.model.get("residentList");
     return {
@@ -29,74 +28,116 @@ var ResidentList = {
       minAge: this.config.minAge,
       includeAge: false,
       includeBirthDate: false,
+      adjustToReal: false,
+      includeSSN: false,
       includeGender: false,
       fetchingExcel: false,
       excelUrl: "",
-      errorMessage: null
+      errorMessage: null,
     };
   },
 
-  getResidentData: function(callback) {
+  getResidentData: function (callback) {
     var hits = this.props.model.get("items"),
-        mapProjection = this.props.model.get("map").getView().getProjection().getCode(),
-        wfslayer = null;
+      mapProjection = this.props.model
+        .get("map")
+        .getView()
+        .getProjection()
+        .getCode(),
+      wfslayer = null;
 
-    if (this.config.residentListWfsLayer && this.config.residentListWfsLayer.length > 0) {
+    if (
+      this.config.residentListWfsLayer &&
+      this.config.residentListWfsLayer.length > 0
+    ) {
       wfslayer = this.config.residentListWfsLayer[0];
-    }
-    else {
+    } else {
       console.error("KIR WFS layer not configured");
       return;
     }
 
     if (!hits || hits.length === 0) {
-       alert("Inga fastigheter eller adresser valda");
-       return;
+      alert("Inga fastigheter eller adresser valda");
+      return;
     }
 
     var filters = [];
-    hits.forEach(function(l) {
-      l.hits.forEach(function(h) {
-        filters.push(new ol.format.filter.Intersects(wfslayer.geometryField, h.getGeometry(), mapProjection))
-      }.bind(this));
-    }.bind(this));
+    hits.forEach(
+      function (l) {
+        l.hits.forEach(
+          function (h) {
+            filters.push(
+              new ol.format.filter.Intersects(
+                wfslayer.geometryField,
+                h.getGeometry(),
+                mapProjection
+              )
+            );
+          }.bind(this)
+        );
+      }.bind(this)
+    );
 
     var featureRequest = new ol.format.WFS().writeGetFeature({
       srsName: mapProjection,
       featureTypes: wfslayer.layers,
       outputFormat: wfslayer.outputFormat,
-      filter: filters.length > 1 ? ol.format.filter.or.apply(null, filters) : filters[0]
+      filter:
+        filters.length > 1
+          ? ol.format.filter.or.apply(null, filters)
+          : filters[0],
     });
 
     this.props.model.set("kirExcelReportIsReady", false);
     this.setState({ fetchingExcel: true, excelUrl: "", errorMessage: null });
     $.ajax({
       url: wfslayer.url,
-      method: 'POST',
-      contentType: 'application/xml',
+      method: "POST",
+      contentType: "application/xml",
       xhrFields: { withCredentials: true },
       data: new XMLSerializer().serializeToString(featureRequest),
-      success: function(response) {
-        var features = wfslayer.outputFormat === "GML3" ?
-          new ol.format.GML().readFeatures(response) : new ol.format.GeoJSON().readFeatures(response);
+      success: function (response) {
+        var features =
+          wfslayer.outputFormat === "GML3"
+            ? new ol.format.GML().readFeatures(response)
+            : new ol.format.GeoJSON().readFeatures(response);
 
         callback(features);
       }.bind(this),
-      error: function(message) {
+      error: function (message) {
         this.setState({
           fetchingExcel: false,
-          errorMessage: "Kunde inte hämta invånarinformation"
+          errorMessage: "Kunde inte hämta invånarinformation",
         });
 
         console.error(message);
-      }.bind(this)
+      }.bind(this),
     });
   },
 
-  generateExcel: function(features) {
-    var _config =  this.props.model.get("residentListDataLayer"),
-        rows = [],
-        columns = [_config.namnDisplayName, _config.adressDisplayName, _config.postnrDisplayName, _config.postortDisplayName];
+  generateExcel: function (features) {
+    var _config = this.props.model.get("residentListDataLayer");
+    var rows = [];
+    var columns = [];
+
+    if (this.state.adjustToReal) {
+      columns.push(" ");
+    }
+
+    if (this.state.includeSSN) {
+      columns.push("Personnummer");
+    }
+
+    columns.push(_config.namnDisplayName);
+
+    if (this.state.adjustToReal) {
+      columns.push("I egenskap av");
+      columns.push("  ");
+    }
+
+    columns.push(_config.adressDisplayName);
+    columns.push(_config.postnrDisplayName);
+    columns.push(_config.postortDisplayName);
 
     if (this.state.includeAge) {
       columns.push(_config.alderDisplayName);
@@ -110,131 +151,242 @@ var ResidentList = {
       columns.push(_config.koenDisplayName);
     }
 
-    features.forEach(function(f) {
-      var row = [];
+    features.forEach(
+      function (f) {
+        var row = [];
 
-      row.push(f.get(_config.namnFieldName));
-      row.push(f.get(_config.adressFieldName));
-      row.push(f.get(_config.postnrFieldName));
-      row.push(f.get(_config.postortFieldName));
+        if (this.state.adjustToReal) {
+          row.push(" ");
+        }
 
-      if (f.get(_config.alderFieldName) && (parseInt(f.get(_config.alderFieldName)) < parseInt(document.getElementById("min-age").value))) {
-        return;
-      }
+        if (this.state.includeSSN) {
+          row.push(this.addDashToSSN(f.get(_config.fodelsedatumFieldName)));
+        }
 
-      if (this.state.includeAge) {
-        row.push(f.get(_config.alderFieldName));
-      }
+        row.push(f.get(_config.namnFieldName));
 
-      if (this.state.includeBirthDate) {
-        row.push(this.dateFromPersonalNumber(f.get(_config.fodelsedatumFieldName)));
-      }
+        if (this.state.adjustToReal) {
+          row.push("Boende");
+          row.push("  ");
+        }
 
-      if (this.state.includeGender) {
-        row.push(f.get(_config.koenFieldName));
-      }
+        row.push(f.get(_config.adressFieldName));
+        row.push(f.get(_config.postnrFieldName));
+        row.push(f.get(_config.postortFieldName));
 
-      rows.push(row);
-    }.bind(this));
+        if (
+          f.get(_config.alderFieldName) &&
+          parseInt(f.get(_config.alderFieldName)) <
+            parseInt(document.getElementById("min-age").value)
+        ) {
+          return;
+        }
+
+        if (this.state.includeAge) {
+          row.push(f.get(_config.alderFieldName));
+        }
+
+        if (this.state.includeBirthDate) {
+          row.push(
+            this.dateFromPersonalNumber(f.get(_config.fodelsedatumFieldName))
+          );
+        }
+
+        if (this.state.includeGender) {
+          row.push(f.get(_config.koenFieldName));
+        }
+
+        rows.push(row);
+      }.bind(this)
+    );
 
     $.ajax({
       url: this.config.excelExportUrl,
       method: "POST",
-      data: { json: JSON.stringify({ "columns": columns, "rows": rows }) },
-      success: function(response) {
+      data: { json: JSON.stringify({ columns: columns, rows: rows }) },
+      success: function (response) {
         if (response) {
           this.props.model.set("kirExcelReportIsReady", true);
-          this.setState({ fetchingExcel: false, excelUrl: response, errorMessage: null });
+          this.setState({
+            fetchingExcel: false,
+            excelUrl: response,
+            errorMessage: null,
+          });
         }
       }.bind(this),
-      error: function() {
+      error: function () {
         this.setState({
           fetchingExcel: false,
-          errorMessage: "Kunde inte skapa Excel-fil"
+          errorMessage: "Kunde inte skapa Excel-fil",
         });
-      }.bind(this)
+      }.bind(this),
     });
   },
 
-  dateFromPersonalNumber: function(personalNumber) {
+  addDashToSSN: function (ssn) {
+    ssn = "" + ssn;
+    var _ssn = ssn.substring(0, ssn.length - 4);
+    _ssn += "-" + ssn.substr(ssn.length - 4, 4);
+    return _ssn;
+  },
+
+  dateFromPersonalNumber: function (personalNumber) {
     return personalNumber.substring(0, personalNumber.length - 4);
   },
 
-  exportToExcel: function() {
+  exportToExcel: function () {
     if (this.props.residentData) {
       this.generateExcel(this.props.residentData);
     } else {
-      this.getResidentData(function(features) {
-        this.generateExcel(features);
-      }.bind(this));
+      this.getResidentData(
+        function (features) {
+          this.generateExcel(features);
+        }.bind(this)
+      );
     }
   },
 
-  render: function() {
-    var expandButtonClass = "fa clickable arrow pull-right expand-button fa-angle-" + (this.state.visible ? "up" : "down");
+  render: function () {
+    var expandButtonClass =
+      "fa clickable arrow pull-right expand-button fa-angle-" +
+      (this.state.visible ? "up" : "down");
 
     return (
-        <div className='panel panel-default kir'>
-            <div className='panel-heading'>Boendeförteckning
-              {
-                  this.props.model.get("instructionResidentList") != null ?
-                  <button className='btn-info-fir' onClick={() => this.setState({ instructionVisible: !this.state.instructionVisible })}>
-                    <img src={this.props.model.get("infoKnappLogo")} />
-                  </button> : ""
+      <div className="panel panel-default kir">
+        <div className="panel-heading">
+          Boendeförteckning
+          {this.props.model.get("instructionResidentList") != null ? (
+            <button
+              className="btn-info-fir"
+              onClick={() =>
+                this.setState({
+                  instructionVisible: !this.state.instructionVisible,
+                })
               }
-
-              <button className={ expandButtonClass } onClick={(e) => { this.setState({ visible: !this.state.visible })}}></button>
-
-              {
-                this.state.instructionVisible ?
-                <div className='panel-body-instruction'
-                  dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionResidentList")))}} /> : ""
-              }
-            </div>
-
-            <div className={ this.state.visible ? "panel-body" : "panel-body hidden" }>
-              <fieldset>
-                <legend>Inkludera i förteckning:</legend>
-
-                <label htmlFor="min-age">Ange lägsta ålder</label>
-                <input type="text" id="min-age" defaultValue={this.state.minAge}
-                  onChange={(e) => this.setState({ minAge: e.target.value })} /><br />
-
-                <input type="checkbox" id="cbx-age" defaultChecked={this.state.includeAge}
-                  onChange={(e) => this.setState({ includeAge: e.target.checked })} />
-                <label htmlFor="cbx-age">Ålder</label><br />
-
-                <input id="cbx-bd" type="checkbox" defaultChecked={this.state.includeBirthDate}
-                  onChange={(e) => this.setState({ includeBirthDate: e.target.checked })} />
-                <label htmlFor="cbx-bd">Födelsedatum</label><br />
-
-                <input id="cbx-gender" type="checkbox" defaultChecked={this.state.includeGender}
-                  onChange={(e) => this.setState({ includeGender: e.target.checked })} />
-                <label htmlFor="cbx-gender">Kön</label>
-              </fieldset>
-            </div>
-
-            {
-              this.props.model.get('excelExportUrl') != null ?
-              <button className='btn btn-default fir-icon-button' onClick={this.exportToExcel}>
-                <i className='excel' />Skapa boendeförteckning
-              </button> : ""
-            }
-
-            {
-              this.state.fetchingExcel ? "Hämtar..." : ""
-            }
-
-            {
-              this.props.model.get("kirExcelReportIsReady") ? <a href={this.state.excelUrl} target="_blank">Ladda ner</a> : ""
-            }
-
-            {
-              this.state.errorMessage != null ? <div className="error-message">{this.state.errorMessage}</div> : ""
-            }
+            >
+              <img src={this.props.model.get("infoKnappLogo")} />
+            </button>
+          ) : (
+            ""
+          )}
+          <button
+            className={expandButtonClass}
+            onClick={(e) => {
+              this.setState({ visible: !this.state.visible });
+            }}
+          ></button>
+          {this.state.instructionVisible ? (
+            <div
+              className="panel-body-instruction"
+              dangerouslySetInnerHTML={{
+                __html: decodeURIComponent(
+                  atob(this.props.model.get("instructionResidentList"))
+                ),
+              }}
+            />
+          ) : (
+            ""
+          )}
         </div>
+
+        <div
+          className={this.state.visible ? "panel-body" : "panel-body hidden"}
+        >
+          <fieldset>
+            <legend>Inkludera i förteckning:</legend>
+
+            <label htmlFor="min-age">Ange lägsta ålder</label>
+            <input
+              type="text"
+              id="min-age"
+              defaultValue={this.state.minAge}
+              onChange={(e) => this.setState({ minAge: e.target.value })}
+            />
+            <br />
+
+            <input
+              id="cbx-adjust"
+              type="checkbox"
+              defaultChecked={this.state.adjustToReal}
+              onChange={(e) =>
+                this.setState({ adjustToReal: e.target.checked })
+              }
+            />
+            <label htmlFor="cbx-adjust">
+              Anpassa till Fastighetsförteckning
+            </label>
+            <br />
+            <input
+              id="cbx-ssn"
+              type="checkbox"
+              defaultChecked={this.state.includeSSN}
+              onChange={(e) => this.setState({ includeSSN: e.target.checked })}
+            />
+            <label htmlFor="cbx-ssn">Personnummer</label>
+            <br />
+
+            <input
+              type="checkbox"
+              id="cbx-age"
+              defaultChecked={this.state.includeAge}
+              onChange={(e) => this.setState({ includeAge: e.target.checked })}
+            />
+            <label htmlFor="cbx-age">Ålder</label>
+            <br />
+
+            <input
+              id="cbx-bd"
+              type="checkbox"
+              defaultChecked={this.state.includeBirthDate}
+              onChange={(e) =>
+                this.setState({ includeBirthDate: e.target.checked })
+              }
+            />
+            <label htmlFor="cbx-bd">Födelsedatum</label>
+            <br />
+
+            <input
+              id="cbx-gender"
+              type="checkbox"
+              defaultChecked={this.state.includeGender}
+              onChange={(e) =>
+                this.setState({ includeGender: e.target.checked })
+              }
+            />
+            <label htmlFor="cbx-gender">Kön</label>
+          </fieldset>
+        </div>
+
+        {this.props.model.get("excelExportUrl") != null ? (
+          <button
+            className="btn btn-default fir-icon-button"
+            onClick={this.exportToExcel}
+          >
+            <i className="excel" />
+            Skapa boendeförteckning
+          </button>
+        ) : (
+          ""
+        )}
+
+        {this.state.fetchingExcel ? "Hämtar..." : ""}
+
+        {this.props.model.get("kirExcelReportIsReady") ? (
+          <a href={this.state.excelUrl} target="_blank">
+            Ladda ner
+          </a>
+        ) : (
+          ""
+        )}
+
+        {this.state.errorMessage != null ? (
+          <div className="error-message">{this.state.errorMessage}</div>
+        ) : (
+          ""
+        )}
+      </div>
     );
-  }
+  },
 };
 
 module.exports = React.createClass(ResidentList);
