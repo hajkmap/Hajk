@@ -56,7 +56,7 @@ class FirExportResidentListView extends React.PureComponent {
     features.forEach((feature) => {
       filters.push(
         intersectsFilter(
-          this.options.mappings.geometryName,
+          this.options.wfsRealEstateLayer.geometryField,
           feature.getGeometry()
         )
       );
@@ -86,7 +86,7 @@ class FirExportResidentListView extends React.PureComponent {
     let rootFilter = this.getFiltersForStringAndGeometrySearch(params);
 
     return {
-      srsName: "EPSG:3007",
+      srsName: this.model.config.srsName,
       featureNS: "https://www.opengis.net",
       outputFormat: "application/json",
       maxFeatures: this.options.maxFeatures,
@@ -186,7 +186,7 @@ class FirExportResidentListView extends React.PureComponent {
     let searchParams = new URLSearchParams();
     searchParams.append("json", JSON.stringify(data));
 
-    hfetch("https://kommungis-utv3.varberg.se/mapservice/fir/residentlist", {
+    hfetch(this.options.residentList.excelExportUrl, {
       method: "post",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",

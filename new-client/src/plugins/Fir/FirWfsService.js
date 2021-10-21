@@ -18,7 +18,10 @@ class FirWfsService {
     let filters = [];
     features.forEach((feature) => {
       filters.push(
-        intersectsFilter(params.searchType.geometryField, feature.getGeometry())
+        intersectsFilter(
+          params.searchType.geometryField || "geom",
+          feature.getGeometry()
+        )
       );
     });
 

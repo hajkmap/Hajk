@@ -43,13 +43,14 @@ class FirExportPropertyListView extends React.PureComponent {
     super(props);
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
+    this.options = this.model.app.plugins.fir.options;
   }
 
   _collectAndSendData = () => {
     let fnrList = [];
 
     this.props.results.forEach((feature) => {
-      fnrList.push("" + feature.get("fnr")); // force string
+      fnrList.push("" + feature.get(this.options.propertyList.idField)); // force string
     });
 
     const params = {
@@ -68,16 +69,13 @@ class FirExportPropertyListView extends React.PureComponent {
 
     let searchParams = new URLSearchParams();
     searchParams.append("json", JSON.stringify(data));
-    hfetch(
-      "https://kommungis-utv3.varberg.se/mapservice/fir/realEstateOwnerlist",
-      {
-        method: "post",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        },
-        body: searchParams,
-      }
-    )
+    hfetch(this.options.propertyList.excelExportUrl, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      },
+      body: searchParams,
+    })
       .then((response) => {
         // url just comes as a simple body response, get it.
         return response ? response.text() : null;

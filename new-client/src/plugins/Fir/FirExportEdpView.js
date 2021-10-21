@@ -33,6 +33,7 @@ class FirExportEdpView extends React.PureComponent {
     super(props);
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
+    this.options = this.model.app.plugins.fir.options;
   }
 
   EdpLogo() {
@@ -45,7 +46,10 @@ class FirExportEdpView extends React.PureComponent {
     let a = [];
 
     this.props.results.forEach((feature) => {
-      a.push({ Fnr: feature.get("fnr"), Fastbet: feature.get("fastbet") });
+      a.push({
+        Fnr: feature.get(this.options.edp.idField),
+        Fastbet: feature.get(this.options.edp.designationField),
+      });
     });
 
     return a;
@@ -56,16 +60,13 @@ class FirExportEdpView extends React.PureComponent {
 
     let data = new URLSearchParams();
     data.append("json", JSON.stringify(this.getEdpDataAsArray()));
-    hfetch(
-      "https://kommungis-utv3.varberg.se/mapservice/edp/SendRealEstateIdentifiers",
-      {
-        method: "post",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        },
-        body: data,
-      }
-    )
+    hfetch(this.options.edp.url, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      },
+      body: data,
+    })
       .then((res) => {
         clearTimeout(this.tm1);
         clearTimeout(this.tm2);
