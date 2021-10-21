@@ -42,12 +42,16 @@ function query(map, layer, evt) {
     // See #852. Without this, it's almost impossible to get a result from QGIS Server.
     // TODO: This could be expanded and made an admin setting - I'm not sure that 50 px
     // will work for everyone.
+    // The WITH_GEOMETRY is necessary to make QGIS Server send back the feature's geometry
+    // in the response.
+    // See: https://docs.qgis.org/3.16/en/docs/server_manual/services.html#wms-withgeometry.
     if (layer.getSource().serverType_ === "qgis") {
       params = {
         ...params,
         FI_POINT_TOLERANCE: 50,
         FI_LINE_TOLERANCE: 50,
         FI_POLYGON_TOLERANCE: 50,
+        WITH_GEOMETRY: true,
       };
     }
 
