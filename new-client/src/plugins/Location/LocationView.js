@@ -4,13 +4,6 @@ import PropTypes from "prop-types";
 
 import { withSnackbar } from "notistack";
 
-import Geolocation from "ol/Geolocation.js";
-import Feature from "ol/Feature.js";
-import Point from "ol/geom/Point.js";
-import { Vector as VectorLayer } from "ol/layer.js";
-import { Vector as VectorSource } from "ol/source.js";
-import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style.js";
-
 import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
@@ -25,10 +18,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 const styles = (theme) => ({});
 
 class LocationView extends React.PureComponent {
-  firstLoad = true; // used to determine if we want to center and zoom in to point (we want this only on first position change)
-
   state = {
-    errorMessage: null,
     loading: false, // indicates if loading is in progress
     track: false, // enables or disables GPS tracking
     accuracy: undefined, // this and the following actual GPS info values
@@ -48,110 +38,54 @@ class LocationView extends React.PureComponent {
 
   componentDidMount() {
     this.map = this.props.map;
+    this.model = this.props.model;
 
-    // Create source and layer and add to map. Later on we'll draw features to this layer.
-    this.source = new VectorSource({ wrapX: false });
-    this.layer = new VectorLayer({
-      source: this.source,
-      name: "geolocation-layer",
-    });
-    this.map.addLayer(this.layer);
-
-    // Create 2 features, one for position (point) and another one for position accuracy (outer ring)
-    this.accuracyFeature = new Feature();
-    this.positionFeature = new Feature();
-    this.positionFeature.setStyle(
-      new Style({
-        image: new CircleStyle({
-          radius: 6,
-          fill: new Fill({
-            color: "#3399CC",
-          }),
-          stroke: new Stroke({
-            color: "#fff",
-            width: 2,
-          }),
-        }),
-      })
-    );
-
-    // Init geolocation layer where the point will be drawn to
-    this.geolocation = new Geolocation({
-      trackingOptions: {
-        enableHighAccuracy: true,
-      },
-      projection: this.map.getView().getProjection(),
-    });
-
-    // Set up some event handlers for our Geolocation object
-    this.geolocation.on("change", this.handleGeolocationChange);
-    this.geolocation.on("error", this.handleGeolocationError);
-    this.geolocation.on(
-      "change:accuracyGeometry",
-      this.handleGeolocationChangeAccuracy
-    );
-    this.geolocation.on(
-      "change:position",
-      this.handleGeolocationChangePosition
-    );
-  }
-
-  handleGeolocationChange = () => {
-    this.setState({
-      accuracy: this.geolocation.getAccuracy(),
-      altitude: this.geolocation.getAltitude(),
-      altitudeAccuracy: this.geolocation.getAltitudeAccuracy(),
-      heading: this.geolocation.getHeading(),
-      speed: this.geolocation.getSpeed(),
-    });
-  };
-
-  handleGeolocationError = (error) => {
-    this.setState({ loading: false });
-    console.error(error);
-    this.props.enqueueSnackbar(
-      `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
-      {
-        variant: "error",
+    this.model.localObserver.subscribe(
+      "geolocationChange",
+      ({ accuracy, altitude, altitudeAccuracy, heading, speed }) => {
+        this.setState({
+          accuracy,
+          altitude,
+          altitudeAccuracy,
+          heading,
+          speed,
+        });
       }
     );
-  };
 
-  handleGeolocationChangeAccuracy = () => {
-    this.accuracyFeature.setGeometry(this.geolocation.getAccuracyGeometry());
-  };
+    this.model.localObserver.subscribe("locationStatus", (status) => {
+      switch (status) {
+        case "loading":
+          this.setState({ loading: true });
+          break;
+        case "on":
+          this.setState({ loading: false });
+          break;
+        case "error":
+          this.setState({ loading: false });
+          break;
+        case "off":
+        default:
+          this.setState({ loading: false });
+          break;
+      }
+    });
 
-  handleGeolocationChangePosition = () => {
-    let coordinates = this.geolocation.getPosition();
-    this.positionFeature.setGeometry(
-      coordinates ? new Point(coordinates) : null
-    );
-
-    // If we've got new coordinates, make sure to hide the loading indicator
-    if (this.state.loading) {
-      this.setState({ loading: false });
-    }
-
-    if (this.firstLoad) {
-      this.map.getView().animate({ center: coordinates, zoom: 10 });
-      this.firstLoad = false;
-    }
-  };
+    this.model.localObserver.subscribe("geolocationError", (error) => {
+      this.props.enqueueSnackbar(
+        `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
+        {
+          variant: "error",
+        }
+      );
+    });
+  }
 
   toggleTracking = (event) => {
-    this.setState({ track: event.target.checked });
-    this.setState({ loading: event.target.checked });
-    this.geolocation.setTracking(event.target.checked);
-
-    // Remove features from map if tracking has been switched off
-    if (event.target.checked === false) {
-      this.layer.getSource().clear();
-    }
-    // Else, add 2 features to map, one for accuracy (outer ring) and one for position (smaller point)
-    else {
-      this.layer.getSource().addFeature(this.accuracyFeature);
-      this.layer.getSource().addFeature(this.positionFeature);
-    }
+    const { checked } = event.target;
+    checked ? this.model.enable() : this.model.disable();
+    this.setState({ track: checked });
+    this.setState({ loading: checked });
   };
 
   renderLocationDetails() {

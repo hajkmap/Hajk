@@ -155,13 +155,11 @@ class Dialog extends Component {
           {this.renderPromptInput()}
         </DialogContent>
         <DialogActions>
-          <Button onClick={this.handleClose} color="primary" autoFocus>
+          <Button onClick={this.handleClose}>
             {options.buttonText || "Stäng"}
           </Button>
           {options.abortText ? (
-            <Button onClick={this.handleAbort} color="primary" autoFocus>
-              {options.abortText}
-            </Button>
+            <Button onClick={this.handleAbort}>{options.abortText}</Button>
           ) : null}
         </DialogActions>
       </ReactDialog>

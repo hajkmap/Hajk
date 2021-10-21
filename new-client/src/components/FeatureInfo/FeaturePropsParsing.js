@@ -7,6 +7,7 @@ import FeaturePropFilters from "./FeaturePropsFilters";
 import {
   Divider,
   Link,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -36,6 +37,17 @@ const StyledTableContainer = withStyles((theme) => ({
     marginBottom: "1.1rem",
   },
 }))(TableContainer);
+
+const StyledPaper = withStyles((theme) => ({
+  root: {
+    padding: theme.spacing(1),
+    marginBottom: "1.1rem",
+    backgroundColor: theme.palette.background.default,
+    "& p": {
+      marginBottom: "0",
+    },
+  },
+}))(Paper);
 
 const StyledTypography = withStyles((theme) => ({
   h1: {
@@ -85,6 +97,10 @@ export default class FeaturePropsParsing {
     // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
     this.components = {
       p: (props) => {
+        if (!props.children) {
+          return null;
+        }
+
         const r = props.children.map((child, index) => {
           // Initiate a holder for external components. If a regex matches below,
           // this variable will be filled with correct value.
@@ -153,6 +169,9 @@ export default class FeaturePropsParsing {
             {children}
           </div>
         );
+      },
+      blockquote: (props) => {
+        return <StyledPaper variant="outlined">{props.children}</StyledPaper>;
       },
     };
   }

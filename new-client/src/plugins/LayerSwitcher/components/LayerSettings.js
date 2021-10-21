@@ -42,25 +42,28 @@ class LayerSettings extends React.PureComponent {
     super(props);
 
     const { layer } = props;
-    var layerInfo = layer.get("layerInfo");
+    const layerInfo = layer.get("layerInfo");
+
     this.state = {
-      opacityValue: props.layer.get("opacity"),
+      opacityValue: layer.get("opacity"),
       legend: layerInfo.legend,
     };
-    props.layer.on("change:opacity", this.updateOpacity);
+
+    // Ensure that state is updated when OL Layer's opacity changes
+    layer.on?.("change:opacity", this.updateOpacity);
   }
 
+  // Ensure that opacity slider's value gets updated when
+  // opacity is changed programmatically (e.g. via BreadCrumbs)
   updateOpacity = (e) => {
-    var o = e.target.getOpacity();
-    if (o === 0 || o === 1) {
-      this.setState({
-        opacityValue: o,
-      });
-    }
+    const opacityValue = e.target.getOpacity();
+    this.setState({
+      opacityValue,
+    });
   };
 
   renderOpacitySlider() {
-    let opacityValue = this.state.opacityValue;
+    const opacityValue = this.state.opacityValue;
     const { classes } = this.props;
     return (
       <div className={classes.sliderContainer}>
@@ -98,9 +101,7 @@ class LayerSettings extends React.PureComponent {
    * to worry about any conversion and rounding here.
    * */
   opacitySliderChanged = (event, opacityValue) => {
-    this.setState({ opacityValue }, () => {
-      this.props.layer.setOpacity(this.state.opacityValue);
-    });
+    this.props.layer.setOpacity(opacityValue);
   };
 
   toggle = (e) => {
@@ -113,7 +114,7 @@ class LayerSettings extends React.PureComponent {
     return (
       <div>
         <div className={this.props.classes.settingsContainer}>
-          {this.props.options.enableTransparencySlider !== false &&
+          {this.props.options?.enableTransparencySlider !== false &&
           this.props.showOpacity
             ? this.renderOpacitySlider()
             : null}
@@ -130,12 +131,9 @@ class LayerSettings extends React.PureComponent {
   }
 
   renderLegendImage() {
-    var index = this.props.index ? this.props.index : 0;
+    const index = this.props.index ? this.props.index : 0;
+    const src = this.state.legend?.[index]?.url ?? "";
 
-    var src =
-      this.state.legend[index] && this.state.legend[index].url
-        ? this.state.legend[index].url
-        : "";
     return src ? (
       <div>
         <img max-width="250px" alt="Teckenförklaring" src={src} />

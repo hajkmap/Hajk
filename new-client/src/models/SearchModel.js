@@ -442,7 +442,11 @@ class SearchModel {
     const options = {
       featureTypes: searchSource.layers,
       srsName: srsName,
-      outputFormat: "JSON", //source.outputFormat,
+      // Currently we only support JSON as output - the GML formats
+      // are not implemented further downstream, so we must enforce
+      // "application/json". Luckily, both GeoServer and QGIS Server
+      // support this output format.
+      outputFormat: "application/json", // searchSource.outputFormat,
       geometryName: geometryName,
       maxFeatures: maxFeatures,
       filter: finalFilters,

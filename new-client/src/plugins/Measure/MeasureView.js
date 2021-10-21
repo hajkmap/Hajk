@@ -56,11 +56,13 @@ class MeasureView extends React.PureComponent {
             på Esc-tangenten.
           </Typography>
           <FormControl className={classes.formControl}>
-            <InputLabel>Typ av mätning</InputLabel>
+            <InputLabel htmlFor="measure-native-helper">
+              Typ av mätning
+            </InputLabel>
             <NativeSelect
               value={this.state.shape}
               onChange={this.handleChange("shape")}
-              input={<Input name="shape" id="shape-native-helper" />}
+              input={<Input name="shape" id="measure-native-helper" />}
             >
               <option value="Point">Punkt</option>
               <option value="LineString">Sträcka</option>
