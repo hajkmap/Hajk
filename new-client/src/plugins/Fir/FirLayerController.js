@@ -1,6 +1,6 @@
 import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
-
+import { IconMarker } from "./FirIcons";
 import { Circle, Style, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
 import LinearRing from "ol/geom/LinearRing.js";
@@ -163,7 +163,7 @@ class FirLayerController {
       image: new Icon({
         anchor: [0.5, 1.18],
         scale: 0.15,
-        src: "marker.svg",
+        src: IconMarker(),
       }),
     });
     this.markerFeature.setStyle(styleMarker);

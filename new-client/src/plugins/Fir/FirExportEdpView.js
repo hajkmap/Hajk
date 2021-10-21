@@ -1,4 +1,5 @@
 import React from "react";
+import { IconEdp } from "./FirIcons";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
@@ -36,7 +37,7 @@ class FirExportEdpView extends React.PureComponent {
 
   EdpLogo() {
     return (
-      <img src="/edp.svg" alt="" style={{ width: "24px", height: "auto" }} />
+      <img src={IconEdp()} alt="" style={{ width: "24px", height: "auto" }} />
     );
   }
 

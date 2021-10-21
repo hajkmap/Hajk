@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { IconPolygon, IconRect, IconLine, IconPoint } from "./FirIcons";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Button from "@material-ui/core/Button";
@@ -214,7 +215,7 @@ class FirToolbarView extends React.PureComponent {
                 this.handleToolbarClick("Polygon");
               }}
             >
-              <img src="/g-polygon.svg" className={classes.svgImg} alt="" />
+              <img src={IconPolygon()} className={classes.svgImg} alt="" />
             </Button>
             <Button
               title="Rektangel"
@@ -227,7 +228,7 @@ class FirToolbarView extends React.PureComponent {
                 this.handleToolbarClick("Rectangle");
               }}
             >
-              <img src="/g-rect.svg" className={classes.svgImg} alt="" />
+              <img src={IconRect()} className={classes.svgImg} alt="" />
             </Button>
             <Button
               title="Linje"
@@ -240,7 +241,7 @@ class FirToolbarView extends React.PureComponent {
                 this.handleToolbarClick("LineString");
               }}
             >
-              <img src="/g-line.svg" className={classes.svgImg} alt="" />
+              <img src={IconLine()} className={classes.svgImg} alt="" />
             </Button>
             <Button
               title="Punkt"
@@ -253,7 +254,7 @@ class FirToolbarView extends React.PureComponent {
                 this.handleToolbarClick("Point");
               }}
             >
-              <img src="/g-point.svg" className={classes.svgImg} alt="" />
+              <img src={IconPoint()} className={classes.svgImg} alt="" />
             </Button>
             <Button
               title="Importera KLM-fil"

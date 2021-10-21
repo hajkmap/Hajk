@@ -1,4 +1,5 @@
 import React from "react";
+import { IconExcel } from "./FirIcons";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
@@ -261,7 +262,7 @@ class FirExportResidentListView extends React.PureComponent {
 
   ExcelLogo() {
     return (
-      <img src="/excel.svg" alt="" style={{ width: "24px", height: "auto" }} />
+      <img src={IconExcel()} alt="" style={{ width: "24px", height: "auto" }} />
     );
   }
 
