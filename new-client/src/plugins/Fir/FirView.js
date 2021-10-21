@@ -121,7 +121,6 @@ const styles = (theme) => ({
   tabContent: {
     display: "flex",
     flexDirection: "column",
-    // justifyContent: "space-between",
     padding: theme.spacing(1),
     width: "100%",
     height: "100%",

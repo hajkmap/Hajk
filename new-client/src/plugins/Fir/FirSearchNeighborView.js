@@ -30,6 +30,7 @@ import HistoryIcon from "@material-ui/icons/History";
 import { Typography } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import * as jsts from "jsts";
+
 class FirSearchNeighborView extends React.PureComponent {
   state = {
     accordionExpanded: false,
@@ -119,6 +120,7 @@ class FirSearchNeighborView extends React.PureComponent {
       buffered = jstsGeom.buffer(bufferValue);
       bufferGeom = !bufferGeom ? buffered : bufferGeom.union(buffered);
     });
+
     if (bufferGeom) {
       buffer.set("fir_type", "buffer");
       buffer.set("fir_origin", "neighbor");
@@ -316,7 +318,6 @@ const styles = (theme) => ({
     },
   },
   buttonProgress: {
-    // color: green[500],
     position: "absolute",
     top: "50%",
     left: "50%",

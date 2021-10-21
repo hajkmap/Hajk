@@ -265,9 +265,6 @@ class FirSearchView extends React.PureComponent {
 }
 
 const styles = (theme) => ({
-  root: {
-    // paddingBottom: theme.spacing(2),
-  },
   heading: {
     fontWeight: 500,
   },
@@ -340,7 +337,6 @@ const styles = (theme) => ({
     },
   },
   buttonProgress: {
-    // color: green[500],
     position: "absolute",
     top: "50%",
     left: "50%",

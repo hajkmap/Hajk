@@ -56,6 +56,8 @@ class FirView extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
     this.itemsPerPage = 10;
     this.accordionList = React.createRef();
+    this.sortByField = this.model.config.resultsList.sortByField.trim();
+    this.textField = this.model.config.resultsList.textField.trim();
     this.initListeners();
   }
 
@@ -120,14 +122,18 @@ class FirView extends React.PureComponent {
     _features.forEach((o) => {
       o.open = false;
     });
-    const sortProp = "fastbet";
-    _features.sort((a, b) =>
-      a.get(sortProp) > b.get(sortProp)
-        ? 1
-        : b.get(sortProp) > a.get(sortProp)
-        ? -1
-        : 0
-    );
+
+    const sortProp = this.sortByField;
+
+    if (sortProp !== "") {
+      _features.sort((a, b) =>
+        a.get(sortProp) > b.get(sortProp)
+          ? 1
+          : b.get(sortProp) > a.get(sortProp)
+          ? -1
+          : 0
+      );
+    }
 
     this.updateResultList(_features, 1);
   };
@@ -369,7 +375,7 @@ class FirView extends React.PureComponent {
                         this.handleItemClick(e, data);
                       }}
                     >
-                      <ListItemText primary={data.get("fastbet")} />
+                      <ListItemText primary={data.get(this.textField)} />
 
                       <ListItemSecondaryAction>
                         <IconButton

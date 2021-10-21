@@ -288,6 +288,8 @@ class FirLayerController {
       if (first === true && layer === this.model.layers.feature && feature) {
         if (this.removeIsActive === true) {
           this.removeFeature(feature);
+          this.model.layers.highlight.setVisible(false);
+          this.model.layers.marker.setVisible(false);
         } else {
           this.toggleHighlight(feature);
         }

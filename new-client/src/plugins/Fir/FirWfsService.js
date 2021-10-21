@@ -168,7 +168,7 @@ class FirWfsService {
       return Promise.resolve(null);
     }
 
-    let baseSearchType = this.getBaseSearchType();
+    let baseSearchType = this.model.baseSearchType;
 
     let searchType = this.model.getSearchTypeById(_params.searchTypeId);
     searchType.searchProp = searchType.searchFields[0];
