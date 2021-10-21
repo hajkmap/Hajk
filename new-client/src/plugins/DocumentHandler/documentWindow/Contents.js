@@ -1,21 +1,8 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
 import Typography from "@mui/material/Typography";
 import ImagePopupModal from "./ImagePopupModal";
 import { flattenChaptersTree } from "../utils/helpers";
 import { Box } from "@mui/material";
-
-const styles = (theme) => {
-  return {
-    typography: {
-      overflowWrap: "break-word",
-    },
-    chapter: {
-      cursor: "text",
-      display: "block",
-    },
-  };
-};
 
 class Contents extends React.PureComponent {
   state = {
@@ -125,13 +112,11 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderHeadline = (chapter) => {
-    const { classes } = this.props;
-
     return (
       <>
         <Typography
           ref={chapter.scrollRef}
-          className={classes.typography}
+          sx={{ overflowWrap: "break-word" }}
           data-type="chapter-header"
           variant={this.getHeaderVariant(chapter)}
         >
@@ -155,4 +140,4 @@ class Contents extends React.PureComponent {
   };
 }
 
-export default withStyles(styles)(Contents);
+export default Contents;

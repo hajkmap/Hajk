@@ -1,39 +1,31 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 
 import Grid from "@mui/material/Grid";
 import TableOfContents from "./TableOfContents";
-import clsx from "clsx";
 import Contents from "./Contents";
 import { delay } from "../../../utils/Delay";
 import { animateScroll as scroll } from "react-scroll";
 import ScrollToTop from "./ScrollToTop";
 
-const styles = (theme) => ({
-  gridContainer: {
-    maxHeight: "100%",
-    overflowY: "auto",
-    overflowX: "hidden",
-    userSelect: "text",
-    outline: "none",
-  },
-  contentContainer: {
-    paddingBottom: theme.spacing(1),
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
-    outline: "none",
-  },
-  margin: {
-    marginTop: theme.spacing(2),
-  },
+const GridContainer = styled(Grid)(() => ({
+  maxHeight: "100%",
+  overflowY: "auto",
+  overflowX: "hidden",
+  userSelect: "text",
+  outline: "none",
+}));
 
-  toc: {
-    marginBottom: theme.spacing(2),
-  },
-  printButton: {
-    paddingBottom: theme.spacing(1),
-  },
-});
+const ContentContainer = styled(Grid)(({ theme }) => ({
+  paddingBottom: theme.spacing(1),
+  paddingLeft: theme.spacing(2),
+  paddingRight: theme.spacing(2),
+  outline: "none",
+}));
+
+const TocGridWrapper = styled(Grid)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
 
 const expandedTocOnStart = (props) => {
   const { activeDocument, options } = props;
@@ -195,7 +187,6 @@ class DocumentViewer extends React.PureComponent {
 
   render() {
     const {
-      classes,
       activeDocument,
       localObserver,
       documentWindowMaximized,
@@ -207,20 +198,19 @@ class DocumentViewer extends React.PureComponent {
     const showTableOfContents = this.getShouldShowTableOfContents();
     return (
       <>
-        <Grid
+        <GridContainer
           onScroll={this.onScroll}
           id="documentViewer"
           ref={this.documentViewerRef}
-          className={classes.gridContainer}
           container
         >
           {showTableOfContents && (
-            <Grid className={classes.toc} xs={12} item>
+            <TocGridWrapper xs={12} item>
               {this.getTableOfContents()}
-            </Grid>
+            </TocGridWrapper>
           )}
 
-          <Grid
+          <ContentContainer
             tabIndex="0" //Focus grid to be able to use onKeyDown
             onKeyDown={(e) => {
               //If ctrl-a or command-a is pressed
@@ -229,11 +219,7 @@ class DocumentViewer extends React.PureComponent {
                 e.preventDefault();
               }
             }}
-            className={clsx(
-              showTableOfContents
-                ? classes.contentContainer
-                : [classes.contentContainer, classes.margin]
-            )}
+            sx={{ marginTop: showTableOfContents ? 0 : 2 }}
             container
             item
           >
@@ -243,8 +229,8 @@ class DocumentViewer extends React.PureComponent {
               localObserver={localObserver}
               activeDocument={activeDocument}
             />
-          </Grid>
-        </Grid>
+          </ContentContainer>
+        </GridContainer>
         {showScrollButton && documentWindowMaximized && (
           <ScrollToTop
             color={activeDocument.documentColor}
@@ -256,4 +242,4 @@ class DocumentViewer extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(DocumentViewer);
+export default DocumentViewer;
