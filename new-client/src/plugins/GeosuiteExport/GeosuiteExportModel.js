@@ -8,16 +8,15 @@ import { hfetch } from "utils/FetchWrapper";
 import { WFS } from "ol/format";
 
 class GeosuiteExportModel {
-  config = {
+  #config = {
     boreholes: {
       wfsUrl: "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
-      geometryName: "geom", // Get from DescribeFeatureType? Config?
+      geometryName: "geom",
       featurePrefixName: "borrhal-v2",
       featureName: "borrhal",
       attributes: {
         external_id: "externt_id",
         external_project_id: "externt_projekt_id",
-        //all_documents_url: "handlingar_url", // TODO: SBK-38: not yet defined if we get this attribute in the same WFS from SBK
       },
       maxFeatures: 100, // TODO: REMOVE
     },
@@ -27,34 +26,49 @@ class GeosuiteExportModel {
       featurePrefixName: "borrhal-v2-utv",
       featureName: "geoteknisk_utredning",
       attributes: {
-        project_name: "projektnamn",
-        all_documents_url: "url", // TODO: SBK-38: not yet defined if we get this attribute in the borehole WFS from SBK
+        title: "projektnamn",
+        link: "url",
       },
       maxFeatures: 25, // TODO: REMOVE
     },
     trimble: {
-      apiUrl: "https://geoarkiv-api.goteborg.se/test", // TODO: PROD
+      apiUrl: "https://geoarkiv-api.goteborg.se/prod",
       projectDetailsMethod: "/investigation",
+      exportMethod: "/export",
     },
   };
 
-  selection = {
-    boreHoleIds: [], // Member: String(Trimble project id)
-    projects: {}, // Key: ProjectId, Value: Project. TODO: class Project? { id, name, numBoreHolesSelected, numBoreHolesTotal, allDocumentsUrl }
+  #selection = {
+    borehole: {
+      boreHoleIds: [], // Member: String(Trimble borehole id)
+      projects: {}, // Key: ProjectId, Value: JSON-object with Project details: { id, name, numBoreHolesSelected, numBoreHolesTotal, allDocumentsUrl }
+    },
+    // In a future layer-agnostic extension of this tool the document selection can be keyed by e.g. WFS source key for multi-source capability
+    document: {}, // DocumentSelection: key String<id>, value: { title: String<title>, link: String<download url> }
   };
+  #map;
+  #app;
+  #options;
+  #localObserver;
+  #vector;
+  #draw;
+  #source;
+  #style;
+  #doubleClick;
+  #wfsParser;
 
   constructor(settings) {
-    this.map = settings.map;
-    this.app = settings.app;
-    this.options = settings.options;
-    this.localObserver = settings.localObserver;
+    this.#map = settings.map;
+    this.#app = settings.app;
+    this.#options = settings.options;
+    this.#localObserver = settings.localObserver;
 
-    this.source = new VectorSource();
-    this.vector = new VectorLayer({
-      source: this.source,
+    this.#source = new VectorSource();
+    this.#vector = new VectorLayer({
+      source: this.#source,
       name: "geoSuiteDrawLayer",
     });
-    this.style = new Style({
+    this.#style = new Style({
       fill: new Fill({
         color: "rgba(255, 255, 255, 0.3)",
       }),
@@ -64,10 +78,10 @@ class GeosuiteExportModel {
       }),
     });
 
-    this.map.addLayer(this.vector);
-    this.draw = null;
-    this.doubleClick = this.getMapsDoubleClickInteraction();
-    this.wfsParser = new WFS();
+    this.#map.addLayer(this.#vector);
+    this.#draw = null;
+    this.#doubleClick = this.getMapsDoubleClickInteraction();
+    this.#wfsParser = new WFS();
   }
 
   /**** General Model methods ****/
@@ -75,12 +89,12 @@ class GeosuiteExportModel {
   handleWindowOpen = () => {
     //pass to the view, so we can re-set the view state.
     //TODO - can we just handle what we need to here in the model?
-    this.localObserver.publish("window-opened");
+    this.#localObserver.publish("window-opened");
   };
 
   handleWindowClose = () => {
     //pass to the view, so we can re-set the view state.
-    this.localObserver.publish("window-closed");
+    this.#localObserver.publish("window-closed");
   };
 
   handleDrawStart = (e) => {
@@ -90,57 +104,58 @@ class GeosuiteExportModel {
 
   handleDrawEnd = (e) => {
     this.removeDrawInteraction();
-    this.localObserver.publish("area-selection-complete");
+    this.#localObserver.publish("area-selection-complete");
   };
 
   addDrawInteraction = () => {
-    this.draw = new Draw({
-      source: this.source,
+    this.#draw = new Draw({
+      source: this.#source,
       type: "Polygon",
     });
-    this.draw.on("drawstart", this.handleDrawStart);
-    this.draw.on("drawend", this.handleDrawEnd);
-    this.map.addInteraction(this.draw);
+    this.#draw.on("drawstart", this.handleDrawStart);
+    this.#draw.on("drawend", this.handleDrawEnd);
+    this.#map.addInteraction(this.#draw);
 
     //When drawing starts, lock clicks to this tool, otherwise the InfoClick tool will fire on click.
-    this.map.clickLock.add("geosuiteexport");
+    this.#map.clickLock.add("geosuiteexport");
 
     //Remove the doubleClick interaction from the map. Otherwise when a user double clicks to finish drawing, the map will also zoom in.
     //The doubleClick interation is added back to the map when we end the drawInteraction.
-    if (this.doubleClick) {
-      this.map.removeInteraction(this.doubleClick);
+    if (this.#doubleClick) {
+      this.#map.removeInteraction(this.#doubleClick);
     }
   };
 
   removeDrawInteraction = () => {
-    if (this.draw !== null) {
-      this.map.removeInteraction(this.draw);
-      this.draw = null;
+    console.log("removeDrawInteraction");
+    if (this.#draw !== null) {
+      this.#map.removeInteraction(this.#draw);
+      this.#draw = null;
     }
-    this.map.clickLock.delete("geosuiteexport");
+    this.#map.clickLock.delete("geosuiteexport");
 
     /*
     Add the maps doubleclick zoom interaction back to map when we leave drawing mode (the doubleclick zoom interaction is removed from the map when we enter drawing mode, to avoid a zoom when doubleclicking to finish drawing).
     TODO - do this without a timeout. (timeout because otherwise the map still zooms).
     TODO - is there a better way to cancel the doubleclick zoom without removing and the re-adding the interaction?
     */
-    if (this.doubleClick) {
+    if (this.#doubleClick) {
       setTimeout(() => {
-        this.map.addInteraction(this.doubleClick);
-      }, 200);
+        this.#map.addInteraction(this.#doubleClick);
+      }, 500);
     }
   };
 
   clearMapFeatures = () => {
-    this.map.removeLayer(this.source.clear());
-    this.localObserver.publish("area-selection-removed");
+    this.#map.removeLayer(this.#source.clear());
+    this.#localObserver.publish("area-selection-removed");
     //the map is cleared so the selection is no longer valid - clear the selection.
     this.#clearSelectionState();
   };
 
   getMapsDoubleClickInteraction = () => {
     let doubleClick = null;
-    this.map
+    this.#map
       .getInteractions()
       .getArray()
       .forEach((interaction) => {
@@ -154,29 +169,80 @@ class GeosuiteExportModel {
 
   getSelectedGeometry = () => {
     let geom = undefined;
-    const features = this.source.getFeatures();
+    const features = this.#source.getFeatures();
     if (features.length > 0) {
       geom = features[0].getGeometry();
     }
     return geom;
   };
 
-  /*Methods for fetching and updating borehole/project information*/
+  /*Methods for GeoSuite-format exports*/
+
+  /**
+   * @summary Call Trimble API to order an export in GeoSuite Toolbox format. The results will be packaged in DBSX format
+   * for each project and finally ZIP-compressed and emailed to the recipient, using GeoSuite Cloud (and SendGrid).
+   * @param {*} email recipient e-mail address, the recipient is expected to be a registered GeoSuite Cloud user
+   * @param {*} boreHoleIds array of strings, where each string represents the external identity of a bore hole to export
+   * @param {*} projectIds array of strings, where each string represents the external identity of a full project to export
+   */
+  orderGeoSuiteExport = (email, boreHoleIds, projectIds) => {
+    console.log(
+      "GeosuiteExportView: orderGeoSuiteExport. email=%s, boreHoleIds, projectIds",
+      email,
+      boreHoleIds,
+      projectIds
+    );
+    if (
+      !email ||
+      ((!boreHoleIds || boreHoleIds.size === 0) &&
+        (!projectIds || projectIds.size === 0))
+    ) {
+      throw new TypeError(
+        "Cannot export without an e-mail address and at least one external identity"
+      );
+    }
+    if (!boreHoleIds) {
+      boreHoleIds = [];
+    }
+    if (!projectIds) {
+      projectIds = [];
+    }
+    const body = {
+      email: email,
+      surveypointIds: boreHoleIds,
+      investigationIds: projectIds,
+    };
+    this.#trimbleApiFetch(this.#config.trimble.exportMethod, "POST", body)
+      .then((response) => {
+        if (!response.ok) {
+          console.log("orderGeoSuiteExport: API query rejected");
+          throw new TypeError("Rejected");
+        }
+        // TODO: Remove
+        console.log("orderGeoSuiteExport: Tack för din beställning :-)");
+      })
+      .catch((error) => {
+        //TODO: Error handling
+        console.error("orderGeoSuiteExport: API error", error);
+      });
+  };
+
+  /*Methods for fetching and updating borehole and document information*/
 
   updateBoreholeSelection = (selectionGeometry) => {
     this.#updateSelectionStateFromWfs(
-      this.config.boreholes,
+      this.#config.boreholes,
       selectionGeometry,
       this.#selectBoreHole,
       this.#updateSelectedProjectsDetailsFromTrimbleApi
     );
   };
 
-  updateProjectsSelection = (selectionGeometry) => {
+  updateDocumentSelection = (selectionGeometry) => {
     this.#updateSelectionStateFromWfs(
-      this.config.projects,
+      this.#config.projects,
       selectionGeometry,
-      this.#selectProject
+      this.#selectDocument
     );
   };
 
@@ -186,20 +252,33 @@ class GeosuiteExportModel {
   clearSelection = () => {
     console.log("GeosuiteExportModel: clearSelection");
     this.#clearSelectionState();
-    this.source.clear();
+    this.#source.clear();
   };
 
   /**
-   * Returns an array of project detail objects for selected projects.
+   * @summary Returns an array of project detail objects for selected projects.
    * NB! Dependent on previous selection state update call, otherwise returned array will always be empty.
    * @returns array of project detail JSON-objects
    */
   getSelectedProjects = () => {
     const projects = [];
-    Object.keys(this.selection.projects).forEach((projectId) => {
-      projects.push(this.#getProjectById(projectId));
+    Object.keys(this.#selection.borehole.projects).forEach((projectId) => {
+      projects.push(this.#getBoreholeProjectById(projectId));
     });
     return projects;
+  };
+
+  /**
+   * @summary Returns an array of document detail objects for selected documents.
+   * NB! Dependent on previous selection state update call, otherwise returned array will always be empty.
+   * @returns array of document detail JSON-objects
+   */
+  getSelectedDocuments = () => {
+    const documents = [];
+    Object.keys(this.#selection.document).forEach((featureId) => {
+      documents.push(this.#getDocumentById(featureId));
+    });
+    return documents;
   };
 
   // Work in progress, re-use search model
@@ -217,7 +296,7 @@ class GeosuiteExportModel {
       return;
     }
 
-    const srsName = this.map.getView().getProjection().getCode();
+    const srsName = this.#map.getView().getProjection().getCode();
 
     // TODO: Replace code-duplication with shared model with search (SearchModel) before PR is created.
     const spatialFilter = within(
@@ -238,7 +317,7 @@ class GeosuiteExportModel {
     };
 
     const wfsBoreholesBodyXml = new XMLSerializer().serializeToString(
-      this.wfsParser.writeGetFeature(wfsGetFeatureOtions)
+      this.#wfsParser.writeGetFeature(wfsGetFeatureOtions)
     );
     const controller = new AbortController();
     const signal = controller.signal;
@@ -303,26 +382,24 @@ class GeosuiteExportModel {
 
   // Feature selection callback for updating state with project details,
   // given a WFS project feature
-  #selectProject = (feature) => {
-    console.log("#selectProject", feature);
+  #selectDocument = (feature) => {
+    console.log("#selectDocument", feature);
     const props = feature.properties;
-    const projectId = feature.id;
-    const projectName = props[this.config.projects.attributes.project_name];
+    const featureId = feature.id;
+    const title = props[this.#config.projects.attributes.title];
+    const link = props[this.#config.projects.attributes.link];
 
-    if (!projectId || !projectName) {
+    if (!featureId || !title || !link) {
       console.log(
-        "#selectProject: WFS is missing feature id or project name attribute (%s)",
-        this.config.projects.attributes.project_name
+        "#selectDocument: WFS is missing feature id, title (%s) or link attribute (%s)",
+        this.#config.projects.attributes.title,
+        this.#config.projects.attributes.link
       );
       throw new TypeError("Internt fel, identiteter saknas.");
     }
-    const project = this.#getProjectById(projectId);
-    project.name = projectName;
-    if (this.config.projects.attributes.all_documents_url) {
-      const allDocumentsUrl =
-        props[this.config.projects.attributes.all_documents_url];
-      project.allDocumentsUrl = allDocumentsUrl;
-    }
+    const documentDetail = this.#getDocumentById(featureId);
+    documentDetail.title = title;
+    documentDetail.link = link;
   };
 
   // Feature selection callback for updating state with borehole and project details,
@@ -330,27 +407,22 @@ class GeosuiteExportModel {
   #selectBoreHole = (feature) => {
     console.log("#selectBoreHole", feature);
     const props = feature.properties;
-    const boreHoleId = props[this.config.boreholes.attributes.external_id];
+    const boreHoleId = props[this.#config.boreholes.attributes.external_id];
     const projectId =
-      props[this.config.boreholes.attributes.external_project_id];
+      props[this.#config.boreholes.attributes.external_project_id];
 
     if (!boreHoleId || !projectId) {
       console.log(
         "#selectBoreHole: WFS is missing id (%s) or project id attribute (%s)",
-        this.config.boreholes.attributes.external_id,
-        this.config.boreholes.attributes.external_project_id
+        this.#config.boreholes.attributes.external_id,
+        this.#config.boreholes.attributes.external_project_id
       );
       throw new TypeError("Internt fel, identiteter saknas.");
     }
-    if (!this.selection.boreHoleIds.includes(boreHoleId)) {
-      this.selection.boreHoleIds.push(boreHoleId);
-    }
-    const project = this.#getProjectById(projectId);
-    project.numBoreHolesSelected++;
-    if (this.config.boreholes.attributes.all_documents_url) {
-      const allDocumentsUrl =
-        props[this.config.boreholes.attributes.all_documents_url];
-      project.allDocumentsUrl = allDocumentsUrl;
+    const project = this.#getBoreholeProjectById(projectId);
+    if (!this.#selection.borehole.boreHoleIds.includes(boreHoleId)) {
+      this.#selection.borehole.boreHoleIds.push(boreHoleId);
+      project.numBoreHolesSelected++;
     }
   };
 
@@ -364,7 +436,7 @@ class GeosuiteExportModel {
       projectName,
       projectNumBoreHolesTotal
     );
-    const project = this.#getProjectById(projectId);
+    const project = this.#getBoreholeProjectById(projectId);
     project.name = projectName;
     project.numBoreHolesTotal = projectNumBoreHolesTotal;
   };
@@ -374,10 +446,10 @@ class GeosuiteExportModel {
     const controller = new AbortController();
     const signal = controller.signal;
 
-    const projectIds = Object.keys(this.selection.projects).filter(
+    const projectIds = Object.keys(this.#selection.borehole.projects).filter(
       (projectId) => {
         // Optimized Trimble API usage: only fetch if we don't have the project details
-        const project = this.#getProjectById(projectId);
+        const project = this.#getBoreholeProjectById(projectId);
         return !project || !project.numBoreHolesTotal;
       }
     );
@@ -387,19 +459,12 @@ class GeosuiteExportModel {
     We only want to update the projects data if all the requests are successful. 
     */
     const requests = projectIds.map((projectId) => {
-      const apiUrl = this.config.trimble.apiUrl.concat(
-        this.config.trimble.projectDetailsMethod,
-        "/",
-        projectId
-      );
-      const apiRequestOptions = {
-        credentials: "same-origin",
-        signal: signal,
-        method: "GET",
-      };
-
       const promise = new Promise((resolve, reject) => {
-        hfetch(apiUrl, apiRequestOptions)
+        this.#trimbleApiFetch(
+          signal,
+          this.#config.trimble.projectDetailsMethod.concat("/", projectId),
+          "GET"
+        )
           .then((response) => {
             if (!response.ok) {
               reject("Trimble response not ok.");
@@ -430,38 +495,87 @@ class GeosuiteExportModel {
             investigationDetails.forEach((investigationDetail) => {
               this.#updateProjectDetails(investigationDetail);
             });
-            this.localObserver.publish("borehole-selection-updated");
+            this.#localObserver.publish("borehole-selection-updated");
           })
           .catch((error) => {
-            this.localObserver.publish("borehole-selection-failed");
+            this.#localObserver.publish("borehole-selection-failed");
           });
       })
       .catch((error) => {
-        this.localObserver.publish("borehole-selection-failed");
+        this.#localObserver.publish("borehole-selection-failed");
       });
   };
 
-  #getProjectById = (projectId) => {
+  /**
+   * @summary Returns a hfetch promise for a method invocation on the Trimble REST API.
+   * @param {*} signal abortcontroller signal
+   * @param {*} endpointAddress relative address/endpoint, will be prefixed with the API base URL
+   * @param {*} httpMethod "GET" or "POST"
+   * @param {*} body optional body parameter if sending a POST request,
+   * content type is expected to be application/json
+   * @returns hfetch promise
+   */
+  #trimbleApiFetch = (signal, endpointAddress, httpMethod, body) => {
+    let apiUrl = this.#config.trimble.apiUrl.concat(endpointAddress);
+
+    // TODO: REMOVE: Work-around pending customer technical solution to CORS pre-flight for POST requests
+    apiUrl = this.#app.config.appConfig.searchProxy.concat(apiUrl);
+
+    const apiRequestOptions = {
+      credentials: "same-origin",
+      signal: signal,
+      method: httpMethod,
+    };
+    if (httpMethod === "POST" && body) {
+      apiRequestOptions["body"] = JSON.stringify(body);
+      apiRequestOptions["headers"] = {
+        "Content-Type": "application/json",
+      };
+    }
+    console.log("API request options", apiRequestOptions);
+    return hfetch(apiUrl, apiRequestOptions);
+  };
+
+  #getBoreholeProjectById = (projectId) => {
     let project = undefined;
-    if (this.selection.projects[projectId]) {
-      project = this.selection.projects[projectId];
+    if (this.#selection.borehole.projects[projectId]) {
+      project = this.#selection.borehole.projects[projectId];
     } else {
       project = {
         id: projectId,
         name: "",
         numBoreHolesSelected: 0,
         numBoreHolesTotal: 0,
-        allDocumentsUrl: "",
       };
-      this.selection.projects[projectId] = project;
+      this.#selection.borehole.projects[projectId] = project;
     }
     return project;
   };
 
+  #getDocumentById = (featureId) => {
+    let documentDetail = undefined;
+    if (this.#selection.document[featureId]) {
+      documentDetail = this.#selection.document[featureId];
+    } else {
+      documentDetail = {
+        id: featureId,
+        title: "",
+        link: "",
+      };
+      this.#selection.document[featureId] = documentDetail;
+    }
+    return documentDetail;
+  };
+
   #clearSelectionState = () => {
-    this.selection.boreHoleIds.length = 0;
-    delete this.selection.projects; // GC
-    this.selection.projects = {};
+    // First delete existing object reference, if any, for GC friendliness
+    delete this.#selection.borehole.projects;
+    delete this.#selection.document;
+    // Reset borehole selection state
+    this.#selection.borehole.boreHoleIds.length = 0;
+    this.#selection.borehole.projects = {};
+    // Reset document selection state
+    this.#selection.document = {};
   };
 }
 

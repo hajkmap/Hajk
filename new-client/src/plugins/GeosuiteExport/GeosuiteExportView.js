@@ -52,7 +52,7 @@ const styles = (theme) => ({
     overflowY: "scroll",
     overflowX: "hidden",
   },
-  accordian: {
+  accordion: {
     width: "100%",
   },
 });
@@ -137,7 +137,7 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleOrderDocumentsFormat = () => {
     console.log("GeosuiteExportView: handleOrderDocumentsFormat");
-    this.props.model.updateProjectsSelection(
+    this.props.model.updateDocumentSelection(
       this.props.model.getSelectedGeometry()
     );
   };
@@ -268,6 +268,11 @@ class GeosuiteExportView extends React.PureComponent {
     //bekräftelse step
     console.log("handleEnterStepThree");
     //send order request to Trimble API.
+    // See model method:
+    //  orderGeoSuiteExport(email, boreHoleIds, projectIds)
+    // @param {*} email recipient e-mail address, the recipient is expected to be a registered GeoSuite Cloud user
+    // @param {*} boreHoleIds array of strings, where each string represents the external identity of a bore hole to export
+    // @param {*} projectIds array of strings, where each string represents the external identity of a full project to export
     console.log("TODO - Send request to Trimble");
   };
 
@@ -363,10 +368,10 @@ class GeosuiteExportView extends React.PureComponent {
               {projects.map((project) => {
                 return (
                   <ListItem key={project.id} divider>
-                    <Accordion className={classes.accordian} elevation={0}>
+                    <Accordion className={classes.accordion} elevation={0}>
                       <AccordionSummary>
                         <Grid
-                          className={classes.accordian}
+                          className={classes.accordion}
                           wrap="nowrap"
                           alignItems="center"
                           container
