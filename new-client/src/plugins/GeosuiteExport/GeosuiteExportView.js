@@ -6,6 +6,7 @@ import ReplayIcon from "@material-ui/icons/Replay";
 import CancelOutlinedIcon from "@material-ui/icons/CancelOutlined";
 import DescriptionOutlinedIcon from "@material-ui/icons/DescriptionOutlined";
 import EmailOutlinedIcon from "@material-ui/icons/EmailOutlined";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import {
   Stepper,
   Step,
@@ -24,6 +25,9 @@ import {
   List,
   ListItem,
   Paper,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@material-ui/core";
 
 const styles = (theme) => ({
@@ -47,6 +51,9 @@ const styles = (theme) => ({
     maxHeight: 200,
     overflowY: "scroll",
     overflowX: "hidden",
+  },
+  accordian: {
+    width: "100%",
   },
 });
 
@@ -142,9 +149,12 @@ class GeosuiteExportView extends React.PureComponent {
 
   boreHoleSelectionUpdated = () => {
     let selectedProjects = this.props.model.getSelectedProjects();
-    //add a 'selected property' to use in UI's selection list.
+
+    //The 'selected property' will be used to select/deselect the project in UI's selection list.
+    //The 'exportAll' will be used to toggle export of all project points/points within selected area.
     selectedProjects.forEach((project) => {
-      project.selected = false;
+      project.selected = true;
+      project.exportAll = false;
     });
     this.setState({
       responsePending: false,
@@ -255,7 +265,10 @@ class GeosuiteExportView extends React.PureComponent {
   };
 
   handleEnterStepThree = () => {
+    //bekräftelse step
     console.log("handleEnterStepThree");
+    //send order request to Trimble API.
+    console.log("TODO - Send request to Trimble");
   };
 
   //Actions when entering steps
@@ -326,6 +339,8 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   renderOrderStepGeoSuite() {
+    const { classes } = this.props;
+    const projects = this.state.selectedProjects;
     return (
       <>
         <Grid container direction="row" alignItems="center">
@@ -342,6 +357,37 @@ class GeosuiteExportView extends React.PureComponent {
           aliquip ex ea commodo consequat.
         </Typography>
         <br />
+        {projects.length && (
+          <div className={classes.productList}>
+            <List>
+              {projects.map((project) => {
+                return (
+                  <ListItem key={project.id} divider>
+                    <Accordion className={classes.accordian} elevation={0}>
+                      <AccordionSummary>
+                        <Grid
+                          className={classes.accordian}
+                          wrap="nowrap"
+                          alignItems="center"
+                          container
+                          onClick={() => {
+                            console.log("Project clicked");
+                          }}
+                        >
+                          <Typography noWrap>{project.name}</Typography>
+                          <MoreVertIcon />
+                        </Grid>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Typography>Example</Typography>
+                      </AccordionDetails>
+                    </Accordion>
+                  </ListItem>
+                );
+              })}
+            </List>
+          </div>
+        )}
         {this.renderNextAndBackButtons("Beställ", null)}
       </>
     );

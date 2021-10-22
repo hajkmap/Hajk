@@ -444,7 +444,7 @@ class GeosuiteExportModel {
   #getProjectById = (projectId) => {
     let project = undefined;
     if (this.selection.projects[projectId]) {
-      project = { ...this.selection.projects[projectId] };
+      project = this.selection.projects[projectId];
     } else {
       project = {
         id: projectId,
