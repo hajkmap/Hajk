@@ -6,7 +6,8 @@ import ReplayIcon from "@material-ui/icons/Replay";
 import CancelOutlinedIcon from "@material-ui/icons/CancelOutlined";
 import DescriptionOutlinedIcon from "@material-ui/icons/DescriptionOutlined";
 import EmailOutlinedIcon from "@material-ui/icons/EmailOutlined";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import LaunchIcon from "@material-ui/icons/Launch";
 import {
   Stepper,
   Step,
@@ -28,7 +29,11 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  OutlinedInput,
+  InputAdornment,
+  InputLabel,
 } from "@material-ui/core";
+import ProductList from "./components/ProductList";
 
 const styles = (theme) => ({
   bold: {
@@ -39,21 +44,20 @@ const styles = (theme) => ({
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(2),
   },
-  subheading: {
-    padding: theme.spacing(1),
-    fontWeight: 500,
-  },
   link: {
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(1),
   },
-  productList: {
-    maxHeight: 200,
-    overflowY: "scroll",
-    overflowX: "hidden",
-  },
   accordion: {
     width: "100%",
+  },
+  subheading: {
+    padding: theme.spacing(1),
+    fontWeight: theme.typography.fontWeightMedium,
+  },
+  paragraph: {
+    marginTop: theme.spacing(1),
+    marginBotton: theme.spacing(1),
   },
 });
 
@@ -61,6 +65,8 @@ const defaultState = {
   activeStep: null,
   isAreaSelected: false,
   selectedProduct: "document",
+  email: "",
+  emailValid: false,
   steps: {
     0: { canEnter: true },
     1: { canEnter: false },
@@ -68,10 +74,28 @@ const defaultState = {
     3: { canEnter: true },
   },
   processComplete: false,
-  selectedProjects: [],
+  projects: [],
   responsePending: false,
   responseFailed: false,
 };
+
+/*Make configurable*/
+const boreholeIntro =
+  "Nedan visas alla borrhålsprojekt med undersökningspunkter inom det markerade området.";
+
+const boreholeDescription =
+  "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.";
+
+const errorMessage =
+  "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår";
+
+const referenceSystemText =
+  "Geotekniska undersökningspunkter är i koordinatsystemet SWEREF 99 12 00 samt höjdsystemet RH2000";
+
+const deliveryInformationText =
+  "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets mölntjänst.";
+
+const geoArchiveLink = "https://gbg.geosuitecloud.se";
 
 class GeosuiteExportView extends React.PureComponent {
   state = defaultState;
@@ -96,12 +120,10 @@ class GeosuiteExportView extends React.PureComponent {
 
   bindSubscriptions = () => {
     this.localObserver.subscribe("borehole-selection-updated", () => {
-      console.log("view - borehole selection has updated");
       this.boreHoleSelectionUpdated();
     });
 
     this.localObserver.subscribe("borehole-selection-failed", () => {
-      console.log("view - borehole selection has failed");
       this.boreHoleSelectionfailed();
     });
 
@@ -118,9 +140,20 @@ class GeosuiteExportView extends React.PureComponent {
     });
 
     this.localObserver.subscribe("window-opened", () => {
-      console.log("window opened");
       this.setState({ activeStep: 0 });
     });
+  };
+
+  handleEmailChange = (value) => {
+    const isValid = this.emailIsValid(value);
+    this.setState({ email: value, emailValid: isValid });
+  };
+
+  emailIsValid = (email) => {
+    /*Basic email validation - at least one @ with a '.' somewhere after it.*/
+    const emailRegex = /@.*?\./;
+    const valid = emailRegex.test(email);
+    return valid;
   };
 
   handleOrderGeosuiteToolboxFormat = () => {
@@ -129,36 +162,32 @@ class GeosuiteExportView extends React.PureComponent {
       responsePending: true,
     });
 
-    console.log("GeosuiteExportView: handleOrderGeosuiteToolboxFormat");
     this.props.model.updateBoreholeSelection(
       this.props.model.getSelectedGeometry()
     );
   };
 
   handleOrderDocumentsFormat = () => {
-    console.log("GeosuiteExportView: handleOrderDocumentsFormat");
     this.props.model.updateDocumentSelection(
       this.props.model.getSelectedGeometry()
     );
   };
 
   clearSelection = () => {
-    console.log("GeosuiteExportView: clearSelection");
     this.props.model.clearSelection();
   };
 
   boreHoleSelectionUpdated = () => {
-    let selectedProjects = this.props.model.getSelectedProjects();
-
+    let projects = this.props.model.getSelectedProjects();
     //The 'selected property' will be used to select/deselect the project in UI's selection list.
     //The 'exportAll' will be used to toggle export of all project points/points within selected area.
-    selectedProjects.forEach((project) => {
+    projects.forEach((project) => {
       project.selected = true;
       project.exportAll = false;
     });
     this.setState({
       responsePending: false,
-      selectedProjects: selectedProjects,
+      projects: projects,
     });
   };
 
@@ -273,7 +302,14 @@ class GeosuiteExportView extends React.PureComponent {
     // @param {*} email recipient e-mail address, the recipient is expected to be a registered GeoSuite Cloud user
     // @param {*} boreHoleIds array of strings, where each string represents the external identity of a bore hole to export
     // @param {*} projectIds array of strings, where each string represents the external identity of a full project to export
+
     console.log("TODO - Send request to Trimble");
+    const email = this.state.email;
+
+    //work out the full projects to export.
+    const fullProjects = this.state.projects.filter(
+      (proj) => proj.selected && proj.exportAll
+    );
   };
 
   //Actions when entering steps
@@ -315,7 +351,7 @@ class GeosuiteExportView extends React.PureComponent {
           alignItems="center"
         >
           {/* TODO - set link button color (check if there is a 'link' in palette) */}
-          <DescriptionOutlinedIcon />
+          <LaunchIcon />
           <Link
             href="http://www.google.com"
             className={classes.link}
@@ -343,56 +379,112 @@ class GeosuiteExportView extends React.PureComponent {
     );
   }
 
+  renderPending() {
+    return (
+      <div>
+        <Typography>Hämtar resultat...</Typography>
+      </div>
+    );
+  }
+
+  renderFailed() {
+    return (
+      <div>
+        <Typography color="error">{`${errorMessage}`}</Typography>
+      </div>
+    );
+  }
+
+  renderOrderResult() {
+    const { responsePending, responseFailed, projects } = this.state;
+
+    if (responsePending) {
+      return this.renderPending();
+    }
+
+    if (responseFailed) {
+      return this.renderFailed();
+    }
+
+    return <ProductList projects={projects}></ProductList>;
+  }
+
   renderOrderStepGeoSuite() {
     const { classes } = this.props;
-    const projects = this.state.selectedProjects;
     return (
       <>
         <Grid container direction="row" alignItems="center">
           <EmailOutlinedIcon />
-          <Typography variant="subtitle1">
+          <Typography className={classes.subheading} variant="subtitle1">
             {"Borrhålsdata i GeoSuite-format"}
           </Typography>
         </Grid>
+        <Typography
+          className={classes.paragraph}
+        >{`${boreholeIntro}`}</Typography>
+        <Typography
+          className={classes.paragraph}
+        >{`${boreholeDescription}`}</Typography>
         <br />
-        <Typography variant="body1">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat.
-        </Typography>
+        {this.renderOrderResult()}
         <br />
-        {projects.length > 0 && (
-          <div className={classes.productList}>
-            <List>
-              {projects.map((project) => {
-                return (
-                  <ListItem key={project.id} divider>
-                    <Accordion className={classes.accordion} elevation={0}>
-                      <AccordionSummary>
-                        <Grid
-                          className={classes.accordion}
-                          wrap="nowrap"
-                          alignItems="center"
-                          container
-                          onClick={() => {
-                            console.log("Project clicked");
-                          }}
-                        >
-                          <Typography noWrap>{project.name}</Typography>
-                          <MoreVertIcon />
-                        </Grid>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Typography>Example</Typography>
-                      </AccordionDetails>
-                    </Accordion>
-                  </ListItem>
-                );
-              })}
-            </List>
-          </div>
-        )}
+        <br />
+        <Accordion elevation={0}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography className={classes.subheading}>
+              Referenssystem
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography>{`${referenceSystemText}`}</Typography>
+          </AccordionDetails>
+        </Accordion>
+        <Accordion elevation={0}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography className={classes.subheading}>
+              Leveransinformation
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography>{`${deliveryInformationText}`}</Typography>
+          </AccordionDetails>
+        </Accordion>
+        <br />
+        <div>
+          <FormControl fullWidth>
+            <InputLabel htmlFor="emailInput">Din e-postadress</InputLabel>
+            <OutlinedInput
+              id="emailInput"
+              required
+              value={this.state.email}
+              error={
+                this.state.email.length === 0 ? false : !this.state.emailValid
+              }
+              onChange={(e) => {
+                this.handleEmailChange(e.target.value);
+              }}
+              startAdornment={
+                <InputAdornment position="start">@</InputAdornment>
+              }
+            />
+          </FormControl>
+          <Grid
+            className={classes.link}
+            container
+            direction="row"
+            alignItems="center"
+          >
+            {/* TODO - set link button color (check if there is a 'link' in palette) */}
+            <LaunchIcon />
+            <Link
+              href="http://www.google.com"
+              className={classes.link}
+              target="_blank"
+            >
+              {"Villkor för nyttjande"}
+            </Link>
+          </Grid>
+        </div>
         {this.renderNextAndBackButtons("Beställ", null)}
       </>
     );
@@ -520,14 +612,20 @@ class GeosuiteExportView extends React.PureComponent {
       this.setState({ steps: updatedSteps });
     }
 
-    //When the projects update
-    if (prevState.selectedProjects !== this.state.selectedProjects) {
+    //When the projects update or the email validity updates. Toggle availability of the 'Beställ' button.
+    if (
+      prevState.projects !== this.state.projects ||
+      prevState.emailValid !== this.state.emailValid
+    ) {
       //toggle availabilty of Beställ knapp based on if there are any orders selected.
-      const selectedForOrder = this.state.selectedProjects.filter(
+      const selectedForOrder = this.state.projects.filter(
         (proj) => proj.selected
       );
 
-      this.toggleStepEnabled(3, selectedForOrder.length);
+      this.toggleStepEnabled(
+        3,
+        selectedForOrder.length && this.state.emailValid
+      );
     }
   }
 
@@ -579,47 +677,6 @@ class GeosuiteExportView extends React.PureComponent {
                 {this.state.selectedProduct === "document"
                   ? this.renderOrderStepDocument()
                   : this.renderOrderStepGeoSuite()}
-                <div>
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      this.handleShowSelectionShapeInfo();
-                      this.clearSelection();
-                    }}
-                  >
-                    Rensa tillstånd
-                  </Button>
-                </div>
-                <div>
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      this.handleOrderGeosuiteToolboxFormat();
-                    }}
-                  >
-                    Beställ GeoSuite-export
-                  </Button>
-                </div>
-                <div>
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      this.handleOrderDocumentsFormat();
-                    }}
-                  >
-                    Hämta handlingar
-                  </Button>
-                </div>
-                <div>
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      this.boreHoleSelectionUpdated();
-                    }}
-                  >
-                    Visa tillstånd
-                  </Button>
-                </div>
               </StepContent>
             </Step>
             <Step key="confirmation" completed={this.state.processComplete}>
