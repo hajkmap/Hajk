@@ -3,13 +3,9 @@ import PropTypes from "prop-types";
 import {
   withStyles,
   Typography,
-  List,
-  ListItem,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Grid,
   Chip,
+  IconButton,
+  Badge,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import WorkIcon from "@material-ui/icons/Work";
@@ -28,6 +24,33 @@ const styles = (theme) => ({
   },
   leftChip: {
     marginRight: theme.spacing(1),
+  },
+  listItemContainer: {
+    paddingLeft: "0",
+    paddingTop: "5px",
+    paddingBottom: "5px",
+    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+  },
+  listItem: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  listItemText: {
+    display: "flex",
+    alignItems: "center",
+    maxWidth: "80%",
+  },
+  itemButtons: {
+    display: "flex",
+    alignItems: "center",
+    marginLeft: theme.spacing(1),
+  },
+  itemButton: {
+    padding: theme.spacing(0.3),
+  },
+  badge: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
   },
 });
 
@@ -66,33 +89,53 @@ class ProductList extends React.PureComponent {
             />
           </div>
           <div className={classes.productList}>
-            <List>
-              {projects.map((project) => {
-                return (
-                  <ListItem key={project.id} divider>
-                    <Accordion className={classes.accordion} elevation={0}>
-                      <AccordionSummary>
-                        <Grid
-                          className={classes.accordion}
-                          wrap="nowrap"
-                          alignItems="center"
-                          container
+            {projects.map((project) => {
+              return (
+                <div key={project.id} className={classes.listItemContainer}>
+                  <div className={classes.listItem}>
+                    <div id="itemText" className={classes.listItemText}>
+                      <Typography noWrap>{project.name}</Typography>
+                    </div>
+                    <div className={classes.itemButtons}>
+                      <div className={classes.itemButton}>
+                        <IconButton
                           onClick={() => {
-                            console.log("Project clicked");
+                            console.log("show select choices");
                           }}
+                          aria-label=""
                         >
-                          <Typography noWrap>{project.name}</Typography>
                           <MoreVertIcon />
-                        </Grid>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Typography>Example</Typography>
-                      </AccordionDetails>
-                    </Accordion>
-                  </ListItem>
-                );
-              })}
-            </List>
+                        </IconButton>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={classes.listItem}>
+                    <div>
+                      <Typography>{`${project.id}`}</Typography>
+                    </div>
+                    {project.exportAll ? (
+                      <div className={classes.badge}>
+                        <Badge
+                          badgeContent={project.numBoreHolesTotal}
+                          color="primary"
+                        >
+                          <WorkIcon />
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div className={classes.badge}>
+                        <Badge
+                          badgeContent={project.numBoreHolesSelected}
+                          color="primary"
+                        >
+                          <Crop32Icon />
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </>
       );

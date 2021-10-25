@@ -80,6 +80,8 @@ const defaultState = {
 };
 
 /*Make configurable*/
+const termsAndConditionsLink = "https://vecka.nu/";
+
 const boreholeIntro =
   "Nedan visas alla borrhålsprojekt med undersökningspunkter inom det markerade området.";
 
@@ -366,7 +368,7 @@ class GeosuiteExportView extends React.PureComponent {
           {/* TODO - set link button color (check if there is a 'link' in palette) */}
           <LaunchIcon />
           <Link
-            href="http://www.google.com"
+            href={`${termsAndConditionsLink}`}
             className={classes.link}
             target="_blank"
           >
@@ -497,7 +499,7 @@ class GeosuiteExportView extends React.PureComponent {
             {/* TODO - set link button color (check if there is a 'link' in palette) */}
             <LaunchIcon />
             <Link
-              href="http://www.google.com"
+              href={`${termsAndConditionsLink}`}
               className={classes.link}
               target="_blank"
             >
