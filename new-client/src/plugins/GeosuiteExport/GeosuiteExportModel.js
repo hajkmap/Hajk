@@ -40,11 +40,12 @@ class GeosuiteExportModel {
 
   #selection = {
     borehole: {
-      boreHoleIds: [], // Member: String(Trimble borehole id)
-      projects: {}, // Key: ProjectId, Value: JSON-object with Project details: { id, name, numBoreHolesSelected, numBoreHolesTotal, allDocumentsUrl }
+      boreholeIds: [], // Member: String(Trimble borehole id)
+      projects: {}, // Key: ProjectId, Value: JSON-object with Project details:
+      // { id<String>, name<String>, boreholeIds<Array[String]>, numBoreHolesSelected<Number>, numBoreHolesTotal<Number> }
     },
     // In a future layer-agnostic extension of this tool the document selection can be keyed by e.g. WFS source key for multi-source capability
-    document: {}, // DocumentSelection: key String<id>, value: { title: String<title>, link: String<download url> }
+    document: {}, // DocumentSelection: key String<id>, value: { title: title<String>, link: String<download url> }
   };
   #map;
   #app;
@@ -179,51 +180,60 @@ class GeosuiteExportModel {
   /*Methods for GeoSuite-format exports*/
 
   /**
-   * @summary Call Trimble API to order an export in GeoSuite Toolbox format. The results will be packaged in DBSX format
-   * for each project and finally ZIP-compressed and emailed to the recipient, using GeoSuite Cloud (and SendGrid).
+   * Performs a Trimble API call to export data in GeoSuite Toolbox format and publish result event to local observer.
+   * @summary Constructs a promise to call the Trimble API for ordering of an export in GeoSuite Toolbox format.
+   * The results will be packaged in DBSX format for each project and finally ZIP-compressed
+   * and emailed to the recipient using GeoSuite Cloud (via Trimble's SendGrid implementation).
+   * Local observer events: OK: geosuite-export-completed, failure: geosuite-export-failed.
    * @param {*} email recipient e-mail address, the recipient is expected to be a registered GeoSuite Cloud user
-   * @param {*} boreHoleIds array of strings, where each string represents the external identity of a bore hole to export
+   * @param {*} boreholeIds array of strings, where each string represents the external identity of a bore hole to export
    * @param {*} projectIds array of strings, where each string represents the external identity of a full project to export
    */
-  orderGeoSuiteExport = (email, boreHoleIds, projectIds) => {
+  orderGeoSuiteExport = (email, boreholeIds, projectIds) => {
     console.log(
-      "GeosuiteExportView: orderGeoSuiteExport. email=%s, boreHoleIds, projectIds",
+      "GeosuiteExportView: orderGeoSuiteExport. email=%s, boreholeIds, projectIds",
       email,
-      boreHoleIds,
+      boreholeIds,
       projectIds
     );
     if (
       !email ||
-      ((!boreHoleIds || boreHoleIds.size === 0) &&
+      ((!boreholeIds || boreholeIds.size === 0) &&
         (!projectIds || projectIds.size === 0))
     ) {
       throw new TypeError(
         "Cannot export without an e-mail address and at least one external identity"
       );
     }
-    if (!boreHoleIds) {
-      boreHoleIds = [];
+    if (!boreholeIds) {
+      boreholeIds = [];
     }
     if (!projectIds) {
       projectIds = [];
     }
     const body = {
       email: email,
-      surveypointIds: boreHoleIds,
+      surveypointIds: boreholeIds,
       investigationIds: projectIds,
     };
-    this.#trimbleApiFetch(this.#config.trimble.exportMethod, "POST", body)
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    this.#trimbleApiFetch(
+      signal,
+      this.#config.trimble.exportMethod,
+      "POST",
+      body
+    )
       .then((response) => {
         if (!response.ok) {
           console.log("orderGeoSuiteExport: API query rejected");
           throw new TypeError("Rejected");
         }
-        // TODO: Remove
-        console.log("orderGeoSuiteExport: Tack för din beställning :-)");
+        this.#localObserver.publish("geosuite-export-completed");
       })
       .catch((error) => {
-        //TODO: Error handling
-        console.error("orderGeoSuiteExport: API error", error);
+        this.#localObserver.publish("geosuite-export-failed");
       });
   };
 
@@ -407,11 +417,11 @@ class GeosuiteExportModel {
   #selectBoreHole = (feature) => {
     console.log("#selectBoreHole", feature);
     const props = feature.properties;
-    const boreHoleId = props[this.#config.boreholes.attributes.external_id];
+    const boreholeId = props[this.#config.boreholes.attributes.external_id];
     const projectId =
       props[this.#config.boreholes.attributes.external_project_id];
 
-    if (!boreHoleId || !projectId) {
+    if (!boreholeId || !projectId) {
       console.log(
         "#selectBoreHole: WFS is missing id (%s) or project id attribute (%s)",
         this.#config.boreholes.attributes.external_id,
@@ -420,8 +430,9 @@ class GeosuiteExportModel {
       throw new TypeError("Internt fel, identiteter saknas.");
     }
     const project = this.#getBoreholeProjectById(projectId);
-    if (!this.#selection.borehole.boreHoleIds.includes(boreHoleId)) {
-      this.#selection.borehole.boreHoleIds.push(boreHoleId);
+    if (!this.#selection.borehole.boreholeIds.includes(boreholeId)) {
+      this.#selection.borehole.boreholeIds.push(boreholeId);
+      project.boreholeIds.push(boreholeId);
       project.numBoreHolesSelected++;
     }
   };
@@ -544,6 +555,7 @@ class GeosuiteExportModel {
       project = {
         id: projectId,
         name: "",
+        boreholeIds: [],
         numBoreHolesSelected: 0,
         numBoreHolesTotal: 0,
       };
@@ -572,7 +584,7 @@ class GeosuiteExportModel {
     delete this.#selection.borehole.projects;
     delete this.#selection.document;
     // Reset borehole selection state
-    this.#selection.borehole.boreHoleIds.length = 0;
+    this.#selection.borehole.boreholeIds.length = 0;
     this.#selection.borehole.projects = {};
     // Reset document selection state
     this.#selection.document = {};

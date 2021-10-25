@@ -293,23 +293,29 @@ class GeosuiteExportView extends React.PureComponent {
     }
   };
 
+  /**
+   * Performs GeoSuite Toolbox-format export.
+   * @summary Handles GeoSuite Toolbox-format export via Trimble API, after UI selection of
+   * projects and/or boreholes. Pre-requisite: state must be updated with projects and contain e-mail.
+   */
   handleEnterStepThree = () => {
-    //bekräftelse step
     console.log("handleEnterStepThree");
-    //send order request to Trimble API.
-    // See model method:
-    //  orderGeoSuiteExport(email, boreHoleIds, projectIds)
-    // @param {*} email recipient e-mail address, the recipient is expected to be a registered GeoSuite Cloud user
-    // @param {*} boreHoleIds array of strings, where each string represents the external identity of a bore hole to export
-    // @param {*} projectIds array of strings, where each string represents the external identity of a full project to export
-
-    console.log("TODO - Send request to Trimble");
     const email = this.state.email;
-
-    //work out the full projects to export.
-    const fullProjects = this.state.projects.filter(
-      (proj) => proj.selected && proj.exportAll
-    );
+    const boreholeIds = [];
+    const projectIds = [];
+    // Go through user selection in state and build Trimble API input parameters
+    this.state.projects
+      .filter((proj) => {
+        return proj.selected;
+      })
+      .forEach((proj) => {
+        if (proj.exportAll) {
+          projectIds.push(proj.id);
+        } else {
+          boreholeIds.push.apply(boreholeIds, proj.boreholeIds);
+        }
+      });
+    this.props.model.orderGeoSuiteExport(email, boreholeIds, projectIds);
   };
 
   //Actions when entering steps
