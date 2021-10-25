@@ -2,6 +2,7 @@
   "name": "hajk-backend",
   "version": "3.7.0",
   "description": "Hajk Backend",
+  "type": "module",
   "homepage": ".",
   "repository": {
     "type": "git",
