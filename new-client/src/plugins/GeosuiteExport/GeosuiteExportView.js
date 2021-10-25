@@ -362,7 +362,7 @@ class GeosuiteExportView extends React.PureComponent {
           aliquip ex ea commodo consequat.
         </Typography>
         <br />
-        {projects.length && (
+        {projects.length > 0 && (
           <div className={classes.productList}>
             <List>
               {projects.map((project) => {
