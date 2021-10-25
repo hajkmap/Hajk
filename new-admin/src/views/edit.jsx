@@ -85,7 +85,7 @@ class Edit extends Component {
   /**
    *
    */
-  componentWillUnmount() {
+  UNSAFE_componentWillUnmount() {
     this.props.model.off("change:layers");
   }
   /**
