@@ -1,5 +1,5 @@
-import FmeServerService from "../../services/fmeServer.service";
-import handleStandardResponse from "../../utils/handleStandardResponse";
+import FmeServerService from "../../services/fmeServer.service.js";
+import handleStandardResponse from "../../utils/handleStandardResponse.js";
 
 export class Controller {
   getRepositories(req, res) {
