@@ -1,5 +1,5 @@
 import log4js from "log4js";
-import ad from "../services/activedirectory.service";
+import ad from "../services/activedirectory.service.js";
 
 const logger = log4js.getLogger("hajk.static.restrict");
 /**

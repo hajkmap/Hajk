@@ -12,12 +12,18 @@ import log4js from "log4js";
 import clfDate from "clf-date";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
-import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
-import restrictStatic from "../api/middlewares/restrict.static";
-import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
+import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy.js";
+import restrictStatic from "../api/middlewares/restrict.static.js";
+import detailedRequestLogger from "../api/middlewares/detailed.request.logger.js";
 
 import * as OpenApiValidator from "express-openapi-validator";
-import errorHandler from "../api/middlewares/error.handler";
+import errorHandler from "../api/middlewares/error.handler.js";
+
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = new Express();
 
