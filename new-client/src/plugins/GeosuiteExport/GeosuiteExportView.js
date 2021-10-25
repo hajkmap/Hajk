@@ -156,6 +156,13 @@ class GeosuiteExportView extends React.PureComponent {
     return valid;
   };
 
+  toggleExportEntireProjects = (shouldExportAll) => {
+    const updatedProjects = this.state.projects.map((project) => {
+      return { ...project, exportAll: shouldExportAll };
+    });
+    this.setState({ projects: updatedProjects });
+  };
+
   handleOrderGeosuiteToolboxFormat = () => {
     this.setState({
       responseFailed: false,
@@ -412,7 +419,14 @@ class GeosuiteExportView extends React.PureComponent {
       return this.renderFailed();
     }
 
-    return <ProductList projects={projects}></ProductList>;
+    return (
+      <ProductList
+        projects={projects}
+        handleExportAll={(shouldExportAll) => {
+          this.toggleExportEntireProjects(shouldExportAll);
+        }}
+      ></ProductList>
+    );
   }
 
   renderOrderStepGeoSuite() {
