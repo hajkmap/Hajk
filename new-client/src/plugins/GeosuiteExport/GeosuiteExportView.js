@@ -71,7 +71,7 @@ const defaultState = {
     0: { canEnter: true },
     1: { canEnter: false },
     2: { canEnter: true },
-    3: { canEnter: true },
+    3: { canEnter: false },
   },
   processComplete: false,
   projects: [],
