@@ -364,7 +364,13 @@ class EditModel {
   }
 
   loadData(source, extent, done) {
-    const url = this.urlFromObject(source.url, {
+    const urlT = new URL(source.url);
+    // qgis server requires service in the url in admin and we need to avoid duplicates here
+    // so we delete the parameter before it is added twice
+    urlT.searchParams.delete("service");
+    urlT.searchParams.delete("SERVICE");
+
+    const url = this.urlFromObject(urlT.href, {
       service: "WFS",
       version: "1.1.0",
       request: "GetFeature",
