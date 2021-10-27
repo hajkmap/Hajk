@@ -81,7 +81,7 @@ const defaultState = {
 };
 
 /*Make configurable*/
-const termsAndConditionsLink = "https://vecka.nu/";
+const termsAndConditionsLink = "https://goteborg.se/wps/portal/om-webbplatsen";
 
 const boreholeIntro =
   "Nedan visas alla borrhålsprojekt med undersökningspunkter inom det markerade området.";
@@ -90,7 +90,7 @@ const boreholeDescription =
   "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.";
 
 const errorMessage =
-  "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår";
+  "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår.";
 
 const referenceSystemText =
   "Geotekniska undersökningspunkter är i koordinatsystemet SWEREF 99 12 00 samt höjdsystemet RH2000";
