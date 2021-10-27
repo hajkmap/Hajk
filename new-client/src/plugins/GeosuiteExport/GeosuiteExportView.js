@@ -75,6 +75,7 @@ const defaultState = {
   },
   processComplete: false,
   projects: [],
+  documents: [],
   responsePending: false,
   responseFailed: false,
 };
@@ -96,8 +97,6 @@ const referenceSystemText =
 
 const deliveryInformationText =
   "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets mölntjänst.";
-
-const geoArchiveLink = "https://gbg.geosuitecloud.se";
 
 class GeosuiteExportView extends React.PureComponent {
   state = defaultState;
@@ -121,28 +120,36 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   bindSubscriptions = () => {
+    this.localObserver.subscribe("area-selection-complete", () => {
+      this.setState({ isAreaSelected: true });
+    });
+
     this.localObserver.subscribe("borehole-selection-updated", () => {
       this.boreHoleSelectionUpdated();
     });
 
     this.localObserver.subscribe("borehole-selection-failed", () => {
-      this.boreHoleSelectionfailed();
+      this.boreHoleSelectionFailed();
     });
 
-    this.localObserver.subscribe("area-selection-complete", () => {
-      this.setState({ isAreaSelected: true });
+    this.localObserver.subscribe("document-selection-updated", () => {
+      this.documentSelectionUpdated();
+    });
+
+    this.localObserver.subscribe("document-selection-failed", () => {
+      this.documentSelectionfailed();
     });
 
     this.localObserver.subscribe("area-selection-removed", () => {
       this.setState({ isAreaSelected: false });
     });
 
-    this.localObserver.subscribe("window-closed", () => {
-      this.handleReset();
-    });
-
     this.localObserver.subscribe("window-opened", () => {
       this.setState({ activeStep: 0 });
+    });
+
+    this.localObserver.subscribe("window-closed", () => {
+      this.handleReset();
     });
   };
 
@@ -177,6 +184,11 @@ class GeosuiteExportView extends React.PureComponent {
   };
 
   handleOrderDocumentsFormat = () => {
+    this.setState({
+      responseFailed: false,
+      responsePending: true,
+    });
+
     this.props.model.updateDocumentSelection(
       this.props.model.getSelectedGeometry()
     );
@@ -200,8 +212,30 @@ class GeosuiteExportView extends React.PureComponent {
     });
   };
 
-  boreHoleSelectionfailed = () => {
-    console.log("GeosuiteExportView: boreHoleSelectionfailed");
+  boreHoleSelectionFailed = () => {
+    console.log("GeosuiteExportView: boreHoleSelectionFailed");
+    this.setState({
+      responsePending: false,
+      responseFailed: true,
+    });
+  };
+
+  documentSelectionUpdated = () => {
+    let documents = this.props.model.getSelectedDocuments();
+    //The 'selected property' will be used to select/deselect the project in UI's selection list (NB! pending ÄTA/sprint 2)
+    documents.forEach((document) => {
+      document.selected = true;
+    });
+    this.setState({
+      responsePending: false,
+      documents: documents,
+    });
+    // TODO: Remove logging:
+    console.log("View state updated with the following documents: ", documents);
+  };
+
+  documebntSelectionfailed = () => {
+    console.log("GeosuiteExportView: documebntSelectionfailed");
     this.setState({
       responsePending: false,
       responseFailed: true,
@@ -358,6 +392,7 @@ class GeosuiteExportView extends React.PureComponent {
         <Typography>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur
           iste minima est? Voluptate hic dicta quaerat modi, vitae maxime ad?
+          SBK kommer att tillhandahålla informationstext för steget.
         </Typography>
         <Grid
           className={classes.link}
@@ -376,6 +411,13 @@ class GeosuiteExportView extends React.PureComponent {
           </Link>
         </Grid>
         <div>
+          {/*
+            TODO: Replace with dynamic content from state.documents,
+            each array entry contains a JSON object with the following props:
+              .title - string, link text
+              .link - string, href for A-link
+            A-element title / text for mouseover is not set by Model, should be constructed in View.
+          */}
           <Paper className={classes.productList}>
             <List>
               <ListItem>1</ListItem>

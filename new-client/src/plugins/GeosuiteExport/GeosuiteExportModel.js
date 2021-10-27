@@ -252,7 +252,8 @@ class GeosuiteExportModel {
     this.#updateSelectionStateFromWfs(
       this.#config.projects,
       selectionGeometry,
-      this.#selectDocument
+      this.#selectDocument,
+      this.#updateDocumentDetails
     );
   };
 
@@ -562,6 +563,14 @@ class GeosuiteExportModel {
       this.#selection.borehole.projects[projectId] = project;
     }
     return project;
+  };
+
+  // Callback for updating document details. Currently a no-op/signal handler only since all document details
+  // are returned in WFS query.
+  #updateDocumentDetails = () => {
+    console.log("#updateDocumentDetails");
+    // TODO: Fix WFS call error handling: this.#localObserver.publish("document-selection-failed");
+    this.#localObserver.publish("document-selection-updated");
   };
 
   #getDocumentById = (featureId) => {
