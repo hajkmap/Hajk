@@ -9,7 +9,8 @@ import GetAppIcon from "@material-ui/icons/GetApp";
 class GeosuiteExport extends React.PureComponent {
   state = {
     title: this.props.options.title ?? "Hämta data",
-    description: this.props.options.description ?? "Hämta Geotekniska data",
+    description:
+      this.props.options.description ?? "Hämta data med urvalsområde",
     color: null,
   };
 
