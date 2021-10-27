@@ -4,7 +4,7 @@ body {
   color: #373d3f;
 }
 
-input[type="text"]:not(#documentEditor input) {
+input[type="text"]:not(#documentEditor input):not(#fmeGroupArea input) {
   border: 1px solid #ccc;
   padding: 5px;
   border-radius: 3px;
@@ -59,7 +59,7 @@ article label.full {
   white-space: nowrap;
 }
 
-article input[type="text"] {
+article input[type="text"]:not(#fmeGroupArea input) {
   width: 400px;
   margin-right: 5px;
   margin-bottom: 5px;
