@@ -29,7 +29,7 @@ export default function fmeServerProxy(err, req, res, next) {
     logProvider: () => logger,
     changeOrigin: true,
     onProxyReq: (proxyReq, req, res) => {
-      // add custom header to request
+      // We have to add an authorization header to the request
       proxyReq.setHeader(
         "Authorization",
         `Basic ${Buffer.from(
