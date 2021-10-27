@@ -52,6 +52,13 @@ const styles = (theme) => ({
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
   },
+  noResultMessage: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    fontWeight: theme.typography.fontWeightMedium,
+  },
 });
 
 class ProductList extends React.PureComponent {
@@ -142,7 +149,9 @@ class ProductList extends React.PureComponent {
     } else {
       return (
         <div>
-          <Typography>Ingen resultat</Typography>
+          <Typography className={classes.noResultMessage}>
+            Inga resultat
+          </Typography>
         </div>
       );
     }

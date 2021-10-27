@@ -23,17 +23,16 @@ import {
   Box,
   Grid,
   Link,
-  List,
-  ListItem,
-  Paper,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   OutlinedInput,
   InputAdornment,
   InputLabel,
+  CircularProgress,
 } from "@material-ui/core";
 import ProductList from "./components/ProductList";
+import LinkItem from "./components/LinkItem";
 
 const styles = (theme) => ({
   bold: {
@@ -58,6 +57,26 @@ const styles = (theme) => ({
   paragraph: {
     marginTop: theme.spacing(1),
     marginBotton: theme.spacing(1),
+  },
+  linkList: {
+    maxHeight: 200,
+    overflowY: "scroll",
+    overflowX: "hidden",
+  },
+  pending: {
+    display: "flex",
+    justifyContent: "center",
+  },
+  pendingContainer: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+  },
+  noResultMessage: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    fontWeight: theme.typography.fontWeightMedium,
   },
 });
 
@@ -88,6 +107,9 @@ const boreholeIntro =
 
 const boreholeDescription =
   "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.";
+
+const documentDescription =
+  "Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur iste minima est? Voluptate hic dicta quaerat modi, vitae maxime ad?";
 
 const errorMessage =
   "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår.";
@@ -316,7 +338,7 @@ class GeosuiteExportView extends React.PureComponent {
     this.setState({ processComplete: true });
   };
 
-  //Actions when leaving steps
+  //Actions when entering steps
   handleEnterStepZero = () => {
     console.log("handleEnterStepZero");
     this.props.model.addDrawInteraction();
@@ -328,8 +350,9 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleEnterStepTwo = () => {
     console.log("handleEnterStepTwo");
-
     if (this.state.selectedProduct === "document") {
+      //moving to the next step should always be enabled when ordering documents
+      this.toggleStepEnabled(3, true);
       this.handleOrderDocumentsFormat();
     } else {
       this.handleOrderGeosuiteToolboxFormat();
@@ -343,25 +366,28 @@ class GeosuiteExportView extends React.PureComponent {
    */
   handleEnterStepThree = () => {
     console.log("handleEnterStepThree");
-    const email = this.state.email;
-    const boreholeIds = [];
-    const projectIds = [];
-    // Go through user selection in state and build Trimble API input parameters
-    this.state.projects
-      .filter((proj) => {
-        return proj.selected;
-      })
-      .forEach((proj) => {
-        if (proj.exportAll) {
-          projectIds.push(proj.id);
-        } else {
-          boreholeIds.push.apply(boreholeIds, proj.boreholeIds);
-        }
-      });
-    this.props.model.orderGeoSuiteExport(email, boreholeIds, projectIds);
+
+    if (this.state.selectedProduct !== "document") {
+      const email = this.state.email;
+      const boreholeIds = [];
+      const projectIds = [];
+      // Go through user selection in state and build Trimble API input parameters
+      this.state.projects
+        .filter((proj) => {
+          return proj.selected;
+        })
+        .forEach((proj) => {
+          if (proj.exportAll) {
+            projectIds.push(proj.id);
+          } else {
+            boreholeIds.push.apply(boreholeIds, proj.boreholeIds);
+          }
+        });
+      this.props.model.orderGeoSuiteExport(email, boreholeIds, projectIds);
+    }
   };
 
-  //Actions when entering steps
+  //Actions when leaving steps
   handleLeaveStepZero = () => {
     console.log("handleLeaveStepZero");
     this.props.model.removeDrawInteraction();
@@ -389,18 +415,14 @@ class GeosuiteExportView extends React.PureComponent {
             {"Geotekniska utredningar"}
           </Typography>
         </Grid>
-        <Typography>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur
-          iste minima est? Voluptate hic dicta quaerat modi, vitae maxime ad?
-          SBK kommer att tillhandahålla informationstext för steget.
-        </Typography>
+        <Typography>{documentDescription}</Typography>
+        {this.renderDocumentOrderResult()}
         <Grid
           className={classes.link}
           container
           direction="row"
           alignItems="center"
         >
-          {/* TODO - set link button color (check if there is a 'link' in palette) */}
           <LaunchIcon />
           <Link
             href={`${termsAndConditionsLink}`}
@@ -410,27 +432,6 @@ class GeosuiteExportView extends React.PureComponent {
             {"Villkor för nyttjande"}
           </Link>
         </Grid>
-        <div>
-          {/*
-            TODO: Replace with dynamic content from state.documents,
-            each array entry contains a JSON object with the following props:
-              .title - string, link text
-              .link - string, href for A-link
-            A-element title / text for mouseover is not set by Model, should be constructed in View.
-          */}
-          <Paper className={classes.productList}>
-            <List>
-              <ListItem>1</ListItem>
-              <ListItem>2</ListItem>
-              <ListItem>3</ListItem>
-              <ListItem>4</ListItem>
-              <ListItem>5</ListItem>
-              <ListItem>6</ListItem>
-              <ListItem>7</ListItem>
-              <ListItem>8</ListItem>
-            </List>
-          </Paper>
-        </div>
         {this.renderNextAndBackButtons("Beställ", null)}
       </>
     );
@@ -438,21 +439,28 @@ class GeosuiteExportView extends React.PureComponent {
 
   renderPending() {
     return (
-      <div>
-        <Typography>Hämtar resultat...</Typography>
-      </div>
+      <>
+        <div className={this.props.classes.pendingContainer}>
+          <div className={this.props.classes.pending}>
+            <CircularProgress variant="indeterminate" size={30} />
+          </div>
+          <div className={this.props.classes.pending}>
+            <Typography>Hämtar resultat...</Typography>
+          </div>
+        </div>
+      </>
     );
   }
 
-  renderFailed() {
+  renderFailed(message) {
     return (
       <div>
-        <Typography color="error">{`${errorMessage}`}</Typography>
+        <Typography color="error">{`${message}`}</Typography>
       </div>
     );
   }
 
-  renderOrderResult() {
+  renderBoreholeOrderResult() {
     const { responsePending, responseFailed, projects } = this.state;
 
     if (responsePending) {
@@ -460,7 +468,7 @@ class GeosuiteExportView extends React.PureComponent {
     }
 
     if (responseFailed) {
-      return this.renderFailed();
+      return this.renderFailed(errorMessage);
     }
 
     return (
@@ -470,6 +478,33 @@ class GeosuiteExportView extends React.PureComponent {
           this.toggleExportEntireProjects(shouldExportAll);
         }}
       ></ProductList>
+    );
+  }
+
+  renderDocumentOrderResult() {
+    const { classes } = this.props;
+    const { responsePending, responseFailed, documents } = this.state;
+
+    if (responsePending) {
+      return this.renderPending();
+    }
+
+    if (responseFailed) {
+      return this.renderFailed(errorMessage);
+    }
+
+    return documents.length > 0 ? (
+      <div className={classes.linkList}>
+        {this.state.documents.map((document) => {
+          return <LinkItem key={document.id} link={document} />;
+        })}
+      </div>
+    ) : (
+      <div className={classes.noResultMessage}>
+        <Typography className={classes.noResultMessage}>
+          Inga resultat
+        </Typography>
+      </div>
     );
   }
 
@@ -490,7 +525,7 @@ class GeosuiteExportView extends React.PureComponent {
           className={classes.paragraph}
         >{`${boreholeDescription}`}</Typography>
         <br />
-        {this.renderOrderResult()}
+        {this.renderBoreholeOrderResult()}
         <br />
         <br />
         <Accordion elevation={0}>
