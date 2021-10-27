@@ -18,7 +18,7 @@ class GeosuiteExportModel {
         external_id: "externt_id",
         external_project_id: "externt_projekt_id",
       },
-      maxFeatures: 100, // TODO: REMOVE
+      maxFeatures: -1,
     },
     projects: {
       wfsUrl: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
@@ -29,7 +29,7 @@ class GeosuiteExportModel {
         title: "projektnamn",
         link: "url",
       },
-      maxFeatures: 25, // TODO: REMOVE
+      maxFeatures: -1,
     },
     trimble: {
       apiUrl: "https://geoarkiv-api.goteborg.se/prod",
@@ -324,8 +324,10 @@ class GeosuiteExportModel {
       outputFormat: "application/json",
       geometryName: wfsConfig.geometryName,
       filter: spatialFilter,
-      maxFeatures: wfsConfig.maxFeatures,
     };
+    if (wfsConfig.maxFeatures > 0) {
+      wfsGetFeatureOtions["maxFeatures"] = wfsConfig.maxFeatures;
+    }
 
     const wfsBoreholesBodyXml = new XMLSerializer().serializeToString(
       this.#wfsParser.writeGetFeature(wfsGetFeatureOtions)
@@ -391,22 +393,26 @@ class GeosuiteExportModel {
       });
   };
 
+  /**
+   * Updates state with document details from the specified feature.
+   * @param {*} feature OL feature
+   */
   // Feature selection callback for updating state with project details,
   // given a WFS project feature
   #selectDocument = (feature) => {
-    console.log("#selectDocument", feature);
     const props = feature.properties;
     const featureId = feature.id;
     const title = props[this.#config.projects.attributes.title];
     const link = props[this.#config.projects.attributes.link];
 
     if (!featureId || !title || !link) {
-      console.log(
-        "#selectDocument: WFS is missing feature id, title (%s) or link attribute (%s)",
+      console.error(
+        "#selectDocument: WFS is missing feature id, title (%s) or link attribute (%s). Feature=",
         this.#config.projects.attributes.title,
-        this.#config.projects.attributes.link
+        this.#config.projects.attributes.link,
+        feature
       );
-      throw new TypeError("Internt fel, identiteter saknas.");
+      return;
     }
     const documentDetail = this.#getDocumentById(featureId);
     documentDetail.title = title;
