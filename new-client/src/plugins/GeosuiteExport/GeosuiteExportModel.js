@@ -422,7 +422,6 @@ class GeosuiteExportModel {
   // Feature selection callback for updating state with borehole and project details,
   // given a WFS borehole feature
   #selectBoreHole = (feature) => {
-    console.log("#selectBoreHole", feature);
     const props = feature.properties;
     const boreholeId = props[this.#config.boreholes.attributes.external_id];
     const projectId =
@@ -448,12 +447,6 @@ class GeosuiteExportModel {
     const projectId = projectDetails.investigationId;
     const projectName = projectDetails.name;
     const projectNumBoreHolesTotal = projectDetails.numberOfPoints;
-    console.log(
-      "#updateProjectDetails - project %s: name=%s, total boreholes=%s",
-      projectId,
-      projectName,
-      projectNumBoreHolesTotal
-    );
     const project = this.#getBoreholeProjectById(projectId);
     project.name = projectName;
     project.numBoreHolesTotal = projectNumBoreHolesTotal;
@@ -550,7 +543,6 @@ class GeosuiteExportModel {
         "Content-Type": "application/json",
       };
     }
-    console.log("API request options", apiRequestOptions);
     return hfetch(apiUrl, apiRequestOptions);
   };
 
