@@ -17,8 +17,8 @@ tags:
     description: Resources for working with ActiveDirectory
   - name: Sokigo FB Proxy
     description: Proxy specified in working with Sokigo's FB API
-  - name: FME
-    description: Resources for working with FME-server
+  - name: FME-server Proxy
+    description: Proxy for tunneling authenticated requests against FME server
   - name: Specification
     description: The OpenAPI specification
 paths:
@@ -475,50 +475,21 @@ paths:
         200:
           description: Result will vary depending on response from the API
           content: {}
-  /fme/repositories/list:
+  /fmeproxy/{query}:
     get:
       tags:
-        - FME
-      description: List all repositories from FME-server
+        - FME-server Proxy
+      parameters:
+        - name: query
+          in: path
+          description: The query to be proxied
+          required: true
+          schema:
+            type: string
+      description: Proxy the specified query to FME-server REST API
       responses:
         200:
-          description: Returns all the repositories that the specified FME-server-user has access to.
-          content: {}
-  /fme/repositories/{name}:
-    get:
-      tags:
-        - FME
-      description: List all workspaces in the specified repository.
-      responses:
-        200:
-          description: Returns all the workspaces that are present in the specified repository.
-          content: {}
-  /fme/parameters/{repository}/{name}:
-    get:
-      tags:
-        - FME
-      description: List all published parameters in the specified workspace.
-      responses:
-        200:
-          description: Returns all published parameters in the specified workspace.
-          content: {}
-  /fme/submit/{repository}/{name}:
-    post:
-      tags:
-        - FME
-      description: Submits a request to run the specified workspace.
-      responses:
-        200:
-          description: Returns an id that can be used to check the transformation status.
-          content: {}
-  /fme/status/id/{id}:
-    get:
-      tags:
-        - FME
-      description: Check status of transformation by id.
-      responses:
-        200:
-          description: Returns the transformation status.
+          description: Result will vary depending on response from the API
           content: {}
   /spec:
     get:

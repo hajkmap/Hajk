@@ -13,6 +13,7 @@ import clfDate from "clf-date";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy.js";
+import fmeServerProxy from "../api/middlewares/fme.server.proxy.js";
 import restrictStatic from "../api/middlewares/restrict.static.js";
 import detailedRequestLogger from "../api/middlewares/detailed.request.logger.js";
 
@@ -179,6 +180,23 @@ export default class ExpressServer {
         "FB_SERVICE_ACTIVE is set to %o in .env. Not enabling Sokigo FB Proxy",
         process.env.FB_SERVICE_ACTIVE
       );
+
+    // Don't enable FME-server Proxy if necessary env variable isn't sat
+    if (
+      process.env.FME_SERVER_ACTIVE === "true" &&
+      process.env.FME_SERVER_BASE_URL !== undefined
+    ) {
+      app.use("/api/v1/fmeproxy", fmeServerProxy());
+      logger.info(
+        "FME_SERVER_ACTIVE is set to %o in .env. Enabling FME-server proxy",
+        process.env.FME_SERVER_ACTIVE
+      );
+    } else
+      logger.info(
+        "FME_SERVER_ACTIVE is set to %o in .env. Not enabling FME-server proxy",
+        process.env.FME_SERVER_ACTIVE
+      );
+
     app.use(Express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(
       Express.urlencoded({
