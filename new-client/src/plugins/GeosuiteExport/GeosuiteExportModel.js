@@ -1,10 +1,9 @@
 import Draw from "ol/interaction/Draw";
 import DoubleClickZoom from "ol/interaction/DoubleClickZoom";
-import { Feature } from "ol";
 import { Fill, Stroke, Style } from "ol/style";
 import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
-import { within } from "ol/format/filter";
+import { intersects, within } from "ol/format/filter";
 import { hfetch } from "utils/FetchWrapper";
 import { WFS } from "ol/format";
 
@@ -12,26 +11,27 @@ class GeosuiteExportModel {
   #config = {
     boreholes: {
       wfsUrl: "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
-      geometryName: "geom",
       featurePrefixName: "borrhal-v2",
       featureName: "borrhal",
+      srs: "EPSG:3006",
+      geometryName: "geom",
       attributes: {
         external_id: "externt_id",
         external_project_id: "externt_projekt_id",
       },
-      srs: "EPSG:3006",
       maxFeatures: -1,
     },
     projects: {
       wfsUrl: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
-      geometryName: "geom",
       featurePrefixName: "borrhal-v2-utv",
       featureName: "geoteknisk_utredning",
+      srs: "EPSG:3006",
+      geometryName: "geom",
+      spatialFilter: intersects,
       attributes: {
         title: "projektnamn",
         link: "url",
       },
-      srs: "EPSG:3006",
       maxFeatures: -1,
     },
     trimble: {
@@ -303,7 +303,7 @@ class GeosuiteExportModel {
     postFeatureSelectionCallback
   ) => {
     console.log(
-      "#updateSelectionStateFromWfs: Calling WFS GetFeature using spatial WITHIN filter from user selection geometry:",
+      "#updateSelectionStateFromWfs: Calling WFS GetFeature using spatial filter from user selection geometry:",
       selectionGeometry
     );
     if (!selectionGeometry) {
@@ -314,20 +314,24 @@ class GeosuiteExportModel {
     const layerSrs = wfsConfig.srs ?? mapSrs;
     let filterGeometry = selectionGeometry;
     if (mapSrs !== layerSrs) {
-      filterGeometry = new Feature({
-        geometry: selectionGeometry.transform(mapSrs, layerSrs),
-      });
+      console.log(
+        "Reprojecting selection geometry from %s to %s",
+        mapSrs,
+        layerSrs
+      );
+      filterGeometry = selectionGeometry.clone().transform(mapSrs, layerSrs);
     }
 
     // TODO: Replace code-duplication with shared model with search (SearchModel) before PR is created.
-    const spatialFilter = within(
+    const filter = wfsConfig.spatialFilter ?? within;
+    const spatialFilter = filter(
       wfsConfig.geometryName,
       filterGeometry,
       layerSrs
     );
 
     const wfsGetFeatureOtions = {
-      srsName: layerSrs,
+      srsName: mapSrs,
       featureNS: "", // Must be blank for IE GML parsing
       featurePrefix: wfsConfig.featurePrefixName,
       featureTypes: [wfsConfig.featureName],
