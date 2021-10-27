@@ -1,8 +1,9 @@
 import Draw from "ol/interaction/Draw";
 import DoubleClickZoom from "ol/interaction/DoubleClickZoom";
-import { Fill, Stroke, Style } from "ol/style.js";
-import { Vector as VectorSource } from "ol/source.js";
-import { Vector as VectorLayer } from "ol/layer.js";
+import { Feature } from "ol";
+import { Fill, Stroke, Style } from "ol/style";
+import { Vector as VectorSource } from "ol/source";
+import { Vector as VectorLayer } from "ol/layer";
 import { within } from "ol/format/filter";
 import { hfetch } from "utils/FetchWrapper";
 import { WFS } from "ol/format";
@@ -18,6 +19,7 @@ class GeosuiteExportModel {
         external_id: "externt_id",
         external_project_id: "externt_projekt_id",
       },
+      srs: "EPSG:3006",
       maxFeatures: -1,
     },
     projects: {
@@ -29,6 +31,7 @@ class GeosuiteExportModel {
         title: "projektnamn",
         link: "url",
       },
+      srs: "EPSG:3006",
       maxFeatures: -1,
     },
     trimble: {
@@ -307,17 +310,24 @@ class GeosuiteExportModel {
       return;
     }
 
-    const srsName = this.#map.getView().getProjection().getCode();
+    const mapSrs = this.#map.getView().getProjection().getCode();
+    const layerSrs = wfsConfig.srs ?? mapSrs;
+    let filterGeometry = selectionGeometry;
+    if (mapSrs !== layerSrs) {
+      filterGeometry = new Feature({
+        geometry: selectionGeometry.transform(mapSrs, layerSrs),
+      });
+    }
 
     // TODO: Replace code-duplication with shared model with search (SearchModel) before PR is created.
     const spatialFilter = within(
       wfsConfig.geometryName,
-      selectionGeometry,
-      srsName
+      filterGeometry,
+      layerSrs
     );
 
     const wfsGetFeatureOtions = {
-      srsName: srsName,
+      srsName: layerSrs,
       featureNS: "", // Must be blank for IE GML parsing
       featurePrefix: wfsConfig.featurePrefixName,
       featureTypes: [wfsConfig.featureName],
