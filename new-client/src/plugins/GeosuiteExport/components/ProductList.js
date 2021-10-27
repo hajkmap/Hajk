@@ -150,7 +150,7 @@ class ProductList extends React.PureComponent {
       return (
         <div>
           <Typography className={classes.noResultMessage}>
-            Inga resultat
+            Inget resultat. Gå tillbaka och markera ett nytt område.
           </Typography>
         </div>
       );

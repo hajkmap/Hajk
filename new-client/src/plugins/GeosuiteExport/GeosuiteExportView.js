@@ -167,10 +167,12 @@ class GeosuiteExportView extends React.PureComponent {
     });
 
     this.localObserver.subscribe("window-opened", () => {
+      console.log("Window opened: set state activeStep=0");
       this.setState({ activeStep: 0 });
     });
 
     this.localObserver.subscribe("window-closed", () => {
+      console.log("Window closed: reset");
       this.handleReset();
     });
   };
@@ -266,11 +268,13 @@ class GeosuiteExportView extends React.PureComponent {
 
   //used when we close using the 'avsluta' button.
   handleClose = () => {
+    console.log("handleClose");
     this.handleReset();
     this.globalObserver.publish(`geosuiteexport.closeWindow`);
   };
 
   handleReset = () => {
+    console.log("handleReset");
     this.props.model.clearMapFeatures();
     this.props.model.removeDrawInteraction();
     this.setState(defaultState);
@@ -300,7 +304,7 @@ class GeosuiteExportView extends React.PureComponent {
       case 10:
         /*
         Leave the completed state. This will occur when we click on 
-        börja om. this is already handled by on the button with handleReset(). 
+        börja om. This is already handled by the button click handler. 
         */
         break;
       default:
@@ -333,6 +337,8 @@ class GeosuiteExportView extends React.PureComponent {
   };
 
   handleProcessComplete = () => {
+    this.props.model.clearMapFeatures();
+    this.props.model.removeDrawInteraction();
     //set process to complete.
     //this will cause the stepper to display as completed, and the final options buttons to display.
     this.setState({ processComplete: true });
@@ -403,6 +409,13 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleLeaveStepThree = () => {
     console.log("handleLeaveStepThree");
+  };
+
+  // "Börja om"
+  handleLeaveStepTen = () => {
+    console.log("handleLeaveStepTen");
+    this.handleReset();
+    this.setState({ activeStep: 0 });
   };
 
   renderOrderStepDocument() {
@@ -638,7 +651,7 @@ class GeosuiteExportView extends React.PureComponent {
           disabled={this.state.activeStep === 0}
           startIcon={<ReplayIcon />}
           onClick={() => {
-            this.handleReset();
+            this.handleLeaveStepTen();
           }}
           color="primary"
         >
