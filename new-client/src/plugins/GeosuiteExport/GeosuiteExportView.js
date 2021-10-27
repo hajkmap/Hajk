@@ -733,7 +733,7 @@ class GeosuiteExportView extends React.PureComponent {
       <>
         <div>
           <Stepper activeStep={this.state.activeStep} orientation="vertical">
-            <Step key="selectArea">
+            <Step key="selectArea" completed={false}>
               <StepLabel>Markera område</StepLabel>
               <StepContent>
                 <div>
@@ -745,7 +745,7 @@ class GeosuiteExportView extends React.PureComponent {
                 </div>
               </StepContent>
             </Step>
-            <Step key="selectData">
+            <Step key="selectData" completed={false}>
               <StepLabel>Välj produkt</StepLabel>
               <StepContent>
                 <FormControl component="fieldset" label="">
@@ -770,7 +770,7 @@ class GeosuiteExportView extends React.PureComponent {
                 {this.renderNextAndBackButtons()}
               </StepContent>
             </Step>
-            <Step key="order">
+            <Step key="order" completed={false}>
               <StepLabel>Leveransalternativ</StepLabel>
               <StepContent>
                 {this.state.selectedProduct === "document"
@@ -778,7 +778,7 @@ class GeosuiteExportView extends React.PureComponent {
                   : this.renderOrderStepGeoSuite()}
               </StepContent>
             </Step>
-            <Step key="confirmation" completed={this.state.processComplete}>
+            <Step key="confirmation" completed={false}>
               <StepLabel>Bekräftelse</StepLabel>
               <StepContent>{this.renderConfirmStep()}</StepContent>
             </Step>
