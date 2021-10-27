@@ -6,6 +6,12 @@ import IconButton from "@material-ui/core/IconButton";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import DeleteIcon from "@material-ui/icons/Delete";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
@@ -30,15 +36,43 @@ const defaultState = {
   visibleAtStart: false,
   visibleForGroups: [],
   workspaceGroups: ["GIS-verktyg"],
-  workspaces: [],
+  workspaces: [
+    {
+      name: "testName",
+      group: "GIS-verktyg",
+      workspace: "testWorkspace",
+      repository: "testRepository",
+      maxArea: "testMaxArea",
+      infoUrl: "testInfoUrl",
+      geoAttribute: "geom",
+      visibleForGroups: [],
+    },
+    {
+      name: "testName",
+      group: "GIS-verktyg",
+      workspace: "testWorkspace",
+      repository: "testRepository",
+      maxArea: "testMaxArea",
+      infoUrl: "testInfoUrl",
+      geoAttribute: "geom",
+      visibleForGroups: [],
+    },
+    {
+      name: "testName",
+      group: "GIS-verktyg",
+      workspace: "testWorkspace",
+      repository: "testRepository",
+      maxArea: "testMaxArea",
+      infoUrl: "testInfoUrl",
+      geoAttribute: "geom",
+      visibleForGroups: [],
+    },
+  ],
   newGroupName: "",
   newGroupError: false,
 };
 
 class ToolOptions extends Component {
-  /**
-   *
-   */
   constructor() {
     super();
     this.state = defaultState;
@@ -70,10 +104,6 @@ class ToolOptions extends Component {
     }
   }
 
-  /**
-   *
-   */
-
   handleInputChange(event) {
     const t = event.target;
     const name = t.name;
@@ -100,42 +130,6 @@ class ToolOptions extends Component {
     this.setState({
       [name]: value,
     });
-  }
-
-  /**
-   * Called from treeEdit.jsx in componentDidMount and passes refs.
-   * Sets checkboxes and input fields for edit layers.
-   * @param {*} childRefs
-   */
-  loadLayers(childRefs) {
-    // check checkboxes, show input field
-    // and set text from map config
-    let ids = [];
-
-    for (let id of this.state.activeServices) {
-      ids.push(id);
-    }
-    if (ids.length > 0 && typeof ids[0].visibleForGroups === "undefined") {
-      let idsNew = [];
-      for (let i = 0; i < ids.length; i++) {
-        let as = {
-          id: ids[i],
-          visibleForGroups: [],
-        };
-        idsNew.push(as);
-      }
-      ids = idsNew;
-      this.setState({
-        activeServices: idsNew,
-      });
-    }
-    if (typeof childRefs !== "undefined") {
-      for (let i of ids) {
-        childRefs["cb_" + i.id] && (childRefs["cb_" + i.id].checked = true);
-        childRefs[i.id] && (childRefs[i.id].hidden = false);
-        childRefs[i.id] && (childRefs[i.id].value = i.visibleForGroups.join());
-      }
-    }
   }
 
   getTool() {
@@ -267,6 +261,15 @@ class ToolOptions extends Component {
     });
   };
 
+  // Terrible, i know. But it is admin after all ;)
+  handleWorkspaceChange = (index, field, newValue) => {
+    const { workspaces } = this.state;
+    workspaces[index][field] = newValue;
+    this.setState({
+      workspaces,
+    });
+  };
+
   renderVisibleForGroups() {
     if (this.props.parent.props.parent.state.authActive) {
       return (
@@ -314,9 +317,52 @@ class ToolOptions extends Component {
     );
   };
 
+  renderWorkspaces = () => {
+    return (
+      <Grid container item xs={12}>
+        <Grid item xs={12} style={{ marginBottom: 8 }}>
+          <Typography variant="button">Aktiva arbetsytor:</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          {this.state.workspaces.map((workspace, index) => {
+            return (
+              <Accordion square key={index} style={{ marginBottom: 16 }}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  id="workspace-header"
+                >
+                  <Typography>{`Namn: ${workspace.name}, Repository: ${workspace.repository}, tillhör grupp: ${workspace.group}`}</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Namn"
+                      size="small"
+                      variant="outlined"
+                      placeholder="Namn på arbetsytan"
+                      onChange={(e) =>
+                        this.handleWorkspaceChange(
+                          index,
+                          "name",
+                          e.target.value
+                        )
+                      }
+                      error={this.state.newGroupError}
+                      value={workspace.name}
+                    />
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
+            );
+          })}
+        </Grid>
+      </Grid>
+    );
+  };
+
   render() {
     return (
-      <div>
+      <div id="fmeGroupArea">
         <form>
           <p>
             <ColorButtonBlue
@@ -474,7 +520,7 @@ class ToolOptions extends Component {
           </div>
           <div>{this.renderVisibleForGroups()}</div>
           <div className="separator">Grupper</div>
-          <Grid container item xs={12} id="fmeGroupArea">
+          <Grid container item xs={12}>
             <Grid item xs={12}>
               <p>
                 <i>
@@ -539,6 +585,7 @@ class ToolOptions extends Component {
                 </i>
               </p>
             </Grid>
+            {this.renderWorkspaces()}
           </Grid>
         </form>
       </div>
