@@ -734,6 +734,10 @@ class Search extends Component {
                     );
                   }}
                 >
+                  <option value="application/json">application/json</option>
+                  <option value="application/vnd.geo+json">
+                    application/vnd.geo+json
+                  </option>
                   <option value="GML3">GML3</option>
                   <option value="GML2">GML2</option>
                 </select>
