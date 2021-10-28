@@ -126,7 +126,7 @@ class AnchorView extends React.PureComponent {
         </Box>
         {document.queryCommandSupported("copy") && (
           <Box ml={7} mr={7} pt={2}>
-            <ButtonGroup row className={classes.buttons}>
+            <ButtonGroup className={classes.buttons}>
               <Tooltip title="Kopiera länk till urklipp">
                 <Button
                   style={{ marginRight: 10 }}
