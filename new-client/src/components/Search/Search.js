@@ -503,10 +503,10 @@ class Search extends React.PureComponent {
           const searchFieldMatch = RegExp(
             `^${this.escapeRegExp(word)}\\W*`,
             "i"
-          ).test(feature.properties[sf] || "");
+          ).test(feature.get(sf) || "");
           // If we find a match, and the matched searchField
           // returns a feature prop which is not undefined...
-          if (feature.properties[sf]) {
+          if (feature.get(sf)) {
             // we add the searchField to the array of matched
             // searchFields.
             if (searchFieldMatch) {
@@ -520,7 +520,7 @@ class Search extends React.PureComponent {
     // they have been matched or not. Therefore we get the searchFields
     // that have not been matched)...
     const unMatchedSearchFields = searchFields.filter(
-      (sf) => !matchedSearchFields.includes(sf) && feature.properties[sf]
+      (sf) => !matchedSearchFields.includes(sf) && feature.get(sf)
     );
     // And concatenate the matched searchFields with the unMatched searchFields.
     return matchedSearchFields.concat(unMatchedSearchFields);
@@ -529,7 +529,7 @@ class Search extends React.PureComponent {
   getSortedAutocompleteEntry = (feature) => {
     let autocompleteEntry = "";
     feature.searchFieldOrder.map((sf, index) => {
-      const featureProperty = feature.properties[sf];
+      const featureProperty = feature.get(sf);
       const propertyAsString =
         typeof featureProperty === "string"
           ? featureProperty
@@ -748,7 +748,7 @@ class Search extends React.PureComponent {
     }
 
     return source.displayFields.reduce((featureTitleString, df) => {
-      let displayField = feature.properties[df];
+      let displayField = feature.get(df);
       if (Array.isArray(displayField)) {
         displayField = displayField.join(", ");
       }
@@ -768,7 +768,7 @@ class Search extends React.PureComponent {
 
   filterFeaturesWithGeometry = (features) => {
     return features.filter((feature) => {
-      return feature.geometry != null;
+      return feature.getGeometry() != null;
     });
   };
 

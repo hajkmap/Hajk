@@ -1,4 +1,4 @@
-import { WFS } from "ol/format";
+import { GeoJSON, WFS } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
 import Or from "ol/format/filter/Or";
 import And from "ol/format/filter/And";
@@ -117,6 +117,8 @@ class SearchModel {
     // Ensure that we've cleaned obsolete AbortControllers before we put new ones there
     this.#controllers = [];
 
+    const viewProjection = this.#map.getView().getProjection().getCode();
+
     // Loop through all defined search sources
     searchSources.forEach((searchSource) => {
       // Expect the Promise and an AbortController from each Source
@@ -182,6 +184,25 @@ class SearchModel {
           index: featureCollection.source.searchFields[0],
         });
       }
+
+      // Parse results (which currently are GeoJSON or GML) to OL Features
+      featureCollection.originalResponse = featureCollection.value;
+
+      const parserOptions = featureCollection.value.crs
+        ? {}
+        : {
+            dataProjection: "EPSG:4326", //FIXME: Only valid for GeoJSON responses!
+            featureProjection: viewProjection,
+          };
+
+      console.log("Pre featureCollection.value: ", featureCollection.value);
+      const olFeatures = new GeoJSON().readFeatures(
+        featureCollection.value,
+        parserOptions
+      );
+      featureCollection.value = { features: olFeatures };
+
+      console.log("Post featureCollection.value: ", featureCollection.value);
     });
 
     // Return an object with out results and errors
@@ -447,6 +468,7 @@ class SearchModel {
       // "application/json". Luckily, both GeoServer and QGIS Server
       // support this output format.
       outputFormat: "application/json", // searchSource.outputFormat,
+      // outputFormat: "GML3", // searchSource.outputFormat,
       geometryName: geometryName,
       maxFeatures: maxFeatures,
       filter: finalFilters,
