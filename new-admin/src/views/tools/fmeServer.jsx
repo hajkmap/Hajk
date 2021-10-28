@@ -11,8 +11,15 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@material-ui/core";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import DeleteIcon from "@material-ui/icons/Delete";
+import DoneIcon from "@material-ui/icons/Done";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
@@ -36,6 +43,7 @@ const defaultState = {
   visibleAtStart: false,
   visibleForGroups: [],
   workspaceGroups: ["GIS-verktyg"],
+  showRemoveGroupWarning: false,
   workspaces: [
     {
       name: "testName",
@@ -256,9 +264,15 @@ class ToolOptions extends Component {
     const updatedGroups = workspaceGroups.filter((g) => {
       return g !== group;
     });
-    this.setState({
-      workspaceGroups: updatedGroups,
-    });
+    if (updatedGroups.length === 0) {
+      this.setState({
+        showRemoveGroupWarning: true,
+      });
+    } else {
+      this.setState({
+        workspaceGroups: updatedGroups,
+      });
+    }
   };
 
   // Terrible, i know. But it is admin after all ;)
@@ -269,6 +283,30 @@ class ToolOptions extends Component {
       workspaces,
     });
   };
+
+  renderModal() {
+    return (
+      <Dialog
+        open={this.state.showRemoveGroupWarning}
+        onClose={() => this.setState({ showRemoveGroupWarning: false })}
+      >
+        <DialogTitle>Kan inte radera gruppen</DialogTitle>
+        <DialogContent>
+          Gruppen gick inte att radera eftersom det måste finnas minst en grupp.
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            className="btn"
+            onClick={() => this.setState({ showRemoveGroupWarning: false })}
+            startIcon={<DoneIcon />}
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
 
   renderVisibleForGroups() {
     if (this.props.parent.props.parent.state.authActive) {
@@ -588,6 +626,7 @@ class ToolOptions extends Component {
             {this.renderWorkspaces()}
           </Grid>
         </form>
+        {this.renderModal()}
       </div>
     );
   }
