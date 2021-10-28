@@ -1,4 +1,8 @@
 import { GeoJSON, WFS } from "ol/format";
+import GML2 from "ol/format/GML2";
+import GML3 from "ol/format/GML3";
+import GML32 from "ol/format/GML32";
+
 import IsLike from "ol/format/filter/IsLike";
 import Or from "ol/format/filter/Or";
 import And from "ol/format/filter/And";
@@ -6,7 +10,7 @@ import Intersects from "ol/format/filter/Intersects";
 import Within from "ol/format/filter/Within";
 import { fromCircle } from "ol/geom/Polygon";
 
-import { arraySort } from "../utils/ArraySort";
+// import { arraySort } from "../utils/ArraySort";
 import { decodeCommas } from "../utils/StringCommaCoder";
 import { hfetch } from "utils/FetchWrapper";
 
@@ -145,29 +149,41 @@ class SearchModel {
 
     // fetchedResponses will be an array of Promises in object form.
     // Each object will have a "status" and a "value" property.
-    const jsonResponses = await Promise.allSettled(
-      fetchResponses.map((fetchResponse) => {
+    const responsePromises = await Promise.allSettled(
+      fetchResponses.map((fetchResponse, i) => {
         // We look at the status and filter out only those that fulfilled.
         if (fetchResponse.status === "rejected")
           return Promise.reject("Could not fetch");
-        // The Fetch Promise might have fulfilled, but it doesn't mean the Response
-        // can be parsed with JSON (i.e. errors from GeoServer will arrive as XML),
-        // so we must be careful before invoking .json() on our Response's value.
-        if (typeof fetchResponse.value.json !== "function")
-          return Promise.reject("Fetched result is not JSON");
-        // If Response can be parsed as JSON, return it.
-        return fetchResponse.value.json();
+        // If we requested GeoJSON, we can try parsing it with
+        // the Promise's body's .json() method.
+        switch (searchSources[i].outputFormat) {
+          case "application/json":
+          case "application/vnd.geo+json":
+            return fetchResponse.value.json();
+          // Otherwise we should expect XML, which needs to be parsed
+          // as text
+          case "GML2":
+          case "GML3":
+          case "GML32":
+            return fetchResponse.value.text();
+          default:
+            return Promise.reject("Output format now allowed");
+        }
       })
     );
 
-    let featureCollections = [];
-    let errors = [];
+    // Prepare two arrays that will hold our successful and
+    // failed responses
+    const successfulResponses = [];
+    const errors = [];
 
-    jsonResponses.forEach((r, i) => {
+    // Investigate each response and put in the correct collection,
+    // depending on if it succeeded or failed.
+    responsePromises.forEach((r, i) => {
       if (r.status === "fulfilled") {
         r.source = searchSources[i];
         r.origin = "WFS";
-        featureCollections.push(r);
+        successfulResponses.push(r);
       } else if ((r) => r.status === "rejected") {
         r.source = searchSources[i];
         r.origin = "WFS";
@@ -176,37 +192,57 @@ class SearchModel {
     });
 
     // Do some magic on our valid results
-    featureCollections.forEach((featureCollection, i) => {
-      if (featureCollection.value.features.length > 0) {
-        // FIXME: Investigate if this sorting is really needed, and if so, if we can find some Unicode variant and not only for Swedish characters
-        arraySort({
-          array: featureCollection.value.features,
-          index: featureCollection.source.searchFields[0],
-        });
+    successfulResponses.forEach((r) => {
+      // if (featureCollection.value.features.length > 0) {
+      //   // FIXME: Investigate if this sorting is really needed, and if so, if we can find some Unicode variant and not only for Swedish characters
+      //   // FIXME: Can't be done like this, by assuming that `value` is an object. It is NOT if we have GML here!
+      //   arraySort({
+      //     array: featureCollection.value.features,
+      //     index: featureCollection.source.searchFields[0],
+      //   });
+      // }
+
+      switch (r.source.outputFormat) {
+        case "application/json":
+        case "application/vnd.geo+json": {
+          // If the CRS object is lacking in the GeoJSON response, we can
+          // safely assume that the geometries are in the standard-compilant
+          // WGS84 (EPSG:4326).
+          const parserOptions = r.value.crs
+            ? {}
+            : {
+                dataProjection: "EPSG:4326", //FIXME: Only valid for GeoJSON responses!
+                featureProjection: viewProjection,
+              };
+
+          // Parse the GeoJSON object, optionally supplying the options if needed (see above ^)
+          const olFeatures = new GeoJSON().readFeatures(r.value, parserOptions);
+          r.value = { features: olFeatures };
+          break;
+        }
+        case "GML2":
+        case "GML3":
+        case "GML32": {
+          let parser = null;
+          if (r.source.outputFormat === "GML2") {
+            parser = new GML2();
+          } else if (r.source.outputFormat === "GML3") {
+            parser = new GML3();
+          } else if (r.source.outputFormat === "GML32") {
+            parser = new GML32();
+          }
+          const olFeatures = parser.readFeatures(r.value);
+          r.value = { features: olFeatures };
+          break;
+        }
+
+        default:
+          throw new Error("Unknown output format");
       }
-
-      // Parse results (which currently are GeoJSON or GML) to OL Features
-      featureCollection.originalResponse = featureCollection.value;
-
-      const parserOptions = featureCollection.value.crs
-        ? {}
-        : {
-            dataProjection: "EPSG:4326", //FIXME: Only valid for GeoJSON responses!
-            featureProjection: viewProjection,
-          };
-
-      console.log("Pre featureCollection.value: ", featureCollection.value);
-      const olFeatures = new GeoJSON().readFeatures(
-        featureCollection.value,
-        parserOptions
-      );
-      featureCollection.value = { features: olFeatures };
-
-      console.log("Post featureCollection.value: ", featureCollection.value);
     });
 
     // Return an object with out results and errors
-    rawResults = { featureCollections, errors };
+    rawResults = { featureCollections: successfulResponses, errors };
 
     return rawResults;
   };
@@ -463,12 +499,7 @@ class SearchModel {
     const options = {
       featureTypes: searchSource.layers,
       srsName: srsName,
-      // Currently we only support JSON as output - the GML formats
-      // are not implemented further downstream, so we must enforce
-      // "application/json". Luckily, both GeoServer and QGIS Server
-      // support this output format.
-      outputFormat: "application/json", // searchSource.outputFormat,
-      // outputFormat: "GML3", // searchSource.outputFormat,
+      outputFormat: searchSource.outputFormat,
       geometryName: geometryName,
       maxFeatures: maxFeatures,
       filter: finalFilters,
