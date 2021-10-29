@@ -40,7 +40,7 @@ article textarea {
   border: 1px solid #999;
 }
 
-article label:not(.sketch-picker label) {
+article label:not(.sketch-picker label):not(#fmeWorkspaceInfo label) {
   width: 150px;
   display: inline-block;
   margin: 0;
