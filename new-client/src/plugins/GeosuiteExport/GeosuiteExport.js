@@ -28,6 +28,7 @@ class GeosuiteExport extends React.PureComponent {
       localObserver: this.localObserver,
       app: props.app,
       map: props.map,
+      options: props.options,
     });
   }
 

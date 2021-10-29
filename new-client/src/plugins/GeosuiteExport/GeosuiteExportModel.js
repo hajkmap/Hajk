@@ -8,39 +8,6 @@ import { hfetch } from "utils/FetchWrapper";
 import { WFS } from "ol/format";
 
 class GeosuiteExportModel {
-  #config = {
-    boreholes: {
-      wfsUrl: "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
-      featurePrefixName: "borrhal-v2",
-      featureName: "borrhal",
-      srs: "EPSG:3006",
-      geometryName: "geom",
-      attributes: {
-        external_id: "externt_id",
-        external_project_id: "externt_projekt_id",
-      },
-      maxFeatures: -1,
-    },
-    projects: {
-      wfsUrl: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
-      featurePrefixName: "borrhal-v2-utv",
-      featureName: "geoteknisk_utredning",
-      srs: "EPSG:3006",
-      geometryName: "geom",
-      spatialFilter: intersects,
-      attributes: {
-        title: "projektnamn",
-        link: "url",
-      },
-      maxFeatures: -1,
-    },
-    trimble: {
-      apiUrl: "https://geoarkiv-api.goteborg.se/prod",
-      projectDetailsMethod: "/investigation",
-      exportMethod: "/export",
-    },
-  };
-
   #selection = {
     borehole: {
       boreholeIds: [], // Member: String(Trimble borehole id)
@@ -52,6 +19,7 @@ class GeosuiteExportModel {
   };
   #map;
   #app;
+  #config;
   #options;
   #localObserver;
   #vector;
@@ -81,6 +49,60 @@ class GeosuiteExportModel {
         width: 3,
       }),
     });
+
+    // Set WFS configuration from defaults and option overrides, if any
+    this.#config = {
+      boreholes: {
+        url:
+          this.#options.services?.wfs?.boreholes?.url ??
+          "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
+        featurePrefixName:
+          this.#options.services?.wfs?.boreholes?.featurePrefixName ??
+          "borrhal-v2",
+        featureName:
+          this.#options.services?.wfs?.boreholes?.featureName ?? "borrhal",
+        srs: this.#options.services?.wfs?.boreholes?.srs ?? "EPSG:3006",
+        geometryName:
+          this.#options.services?.wfs?.boreholes?.geometryName ?? "geom",
+        spatialFilter: this.#getSpatialFilter(
+          this.#options.services?.wfs?.boreholes?.spatialFilter
+        ),
+        attributes: {
+          external_id:
+            this.#options.services?.wfs?.boreholes?.attributes?.external_id ??
+            "externt_id",
+          external_project_id:
+            this.#options.services?.wfs?.boreholes?.attributes
+              ?.external_project_id ?? "externt_projekt_id",
+        },
+        maxFeatures: this.#options.services?.wfs?.boreholes?.maxFeatures ?? -1,
+      },
+      projects: {
+        url:
+          this.#options.services?.wfs?.projects?.url ??
+          "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
+        featurePrefixName:
+          this.#options.services?.wfs?.projects?.featurePrefixName ??
+          "borrhal-v2-utv",
+        featureName:
+          this.#options.services?.wfs?.projects?.featureName ??
+          "geoteknisk_utredning",
+        srs: this.#options.services?.wfs?.projects?.srs ?? "EPSG:3006",
+        geometryName:
+          this.#options.services?.wfs?.projects?.geometryName ?? "geom",
+        spatialFilter: this.#getSpatialFilter(
+          this.#options.services?.wfs?.projects?.spatialFilter
+        ),
+        attributes: {
+          title:
+            this.#options.services?.wfs?.projects?.attributes?.title ??
+            "projektnamn",
+          link:
+            this.#options.services?.wfs?.projects?.attributes?.link ?? "url",
+        },
+        maxFeatures: this.#options.services?.wfs?.projects?.maxFeatures ?? -1,
+      },
+    };
 
     this.#map.addLayer(this.#vector);
     this.#draw = null;
@@ -224,7 +246,7 @@ class GeosuiteExportModel {
 
     this.#trimbleApiFetch(
       signal,
-      this.#config.trimble.exportMethod,
+      this.#options?.services?.trimble?.exportMethod ?? "/export",
       "POST",
       body
     )
@@ -362,7 +384,7 @@ class GeosuiteExportModel {
       "#updateSelectionStateFromWfs: Calling boreholes WFS GetFeature using body:",
       wfsBoreholesRequest.body
     );
-    hfetch(wfsConfig.wfsUrl, wfsBoreholesRequest)
+    hfetch(wfsConfig.url, wfsBoreholesRequest)
       .then((response) => {
         if (!response.ok) {
           console.log("#updateSelectionStateFromWfs: WFS query rejected");
@@ -485,9 +507,12 @@ class GeosuiteExportModel {
     */
     const requests = projectIds.map((projectId) => {
       const promise = new Promise((resolve, reject) => {
+        const projectDetailsMethod =
+          this.#options?.services?.trimble?.projectDetailsMethod ??
+          "/investigation";
         this.#trimbleApiFetch(
           signal,
-          this.#config.trimble.projectDetailsMethod.concat("/", projectId),
+          projectDetailsMethod.concat("/", projectId),
           "GET"
         )
           .then((response) => {
@@ -523,10 +548,12 @@ class GeosuiteExportModel {
             this.#localObserver.publish("borehole-selection-updated");
           })
           .catch((error) => {
+            console.error(error);
             this.#localObserver.publish("borehole-selection-failed");
           });
       })
       .catch((error) => {
+        console.error(error);
         this.#localObserver.publish("borehole-selection-failed");
       });
   };
@@ -541,10 +568,14 @@ class GeosuiteExportModel {
    * @returns hfetch promise
    */
   #trimbleApiFetch = (signal, endpointAddress, httpMethod, body) => {
-    let apiUrl = this.#config.trimble.apiUrl.concat(endpointAddress);
+    const apiUrlPrefix =
+      this.#options.services?.trimble?.url ??
+      "https://geoarkiv-api.goteborg.se/prod";
+    let apiUrl = apiUrlPrefix.concat(endpointAddress);
 
     // TODO: REMOVE: Work-around pending customer technical solution to CORS pre-flight for POST requests
-    apiUrl = this.#app.config.appConfig.searchProxy.concat(apiUrl);
+    const proxy = this.#app.config?.appConfig?.searchProxy ?? "";
+    apiUrl = proxy.concat(apiUrl);
 
     const apiRequestOptions = {
       credentials: "same-origin",
@@ -558,6 +589,13 @@ class GeosuiteExportModel {
       };
     }
     return hfetch(apiUrl, apiRequestOptions);
+  };
+
+  #getSpatialFilter = (filterName) => {
+    if (filterName === "intersects") {
+      return intersects;
+    }
+    return within;
   };
 
   #getBoreholeProjectById = (projectId) => {

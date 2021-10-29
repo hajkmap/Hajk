@@ -99,27 +99,6 @@ const defaultState = {
   responseFailed: false,
 };
 
-/*Make configurable*/
-const termsAndConditionsLink = "https://goteborg.se/wps/portal/om-webbplatsen";
-
-const boreholeIntro =
-  "Nedan visas alla borrhålsprojekt med undersökningspunkter inom det markerade området.";
-
-const boreholeDescription =
-  "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.";
-
-const documentDescription =
-  "Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur iste minima est? Voluptate hic dicta quaerat modi, vitae maxime ad?";
-
-const errorMessage =
-  "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår.";
-
-const referenceSystemText =
-  "Geotekniska undersökningspunkter är i koordinatsystemet SWEREF 99 12 00 samt höjdsystemet RH2000";
-
-const deliveryInformationText =
-  "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets mölntjänst.";
-
 class GeosuiteExportView extends React.PureComponent {
   state = defaultState;
 
@@ -254,8 +233,6 @@ class GeosuiteExportView extends React.PureComponent {
       responsePending: false,
       documents: documents,
     });
-    // TODO: Remove logging:
-    console.log("View state updated with the following documents: ", documents);
   };
 
   documebntSelectionfailed = () => {
@@ -419,7 +396,11 @@ class GeosuiteExportView extends React.PureComponent {
   };
 
   renderOrderStepDocument() {
-    const { classes } = this.props;
+    const { classes, options } = this.props;
+    const termsAndConditionsLink = this.#getTermsAndConditionsLink();
+    const documentDescription =
+      options.view?.documentDescription ??
+      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur iste minima est? Voluptate hic dicta quaerat modi, vitae maxime ad?";
     return (
       <>
         <Grid container direction="row" alignItems="center">
@@ -438,7 +419,7 @@ class GeosuiteExportView extends React.PureComponent {
         >
           <LaunchIcon />
           <Link
-            href={`${termsAndConditionsLink}`}
+            href={termsAndConditionsLink}
             className={classes.link}
             target="_blank"
           >
@@ -481,7 +462,7 @@ class GeosuiteExportView extends React.PureComponent {
     }
 
     if (responseFailed) {
-      return this.renderFailed(errorMessage);
+      return this.renderFailed(this.#getErrorMessage());
     }
 
     return (
@@ -503,7 +484,7 @@ class GeosuiteExportView extends React.PureComponent {
     }
 
     if (responseFailed) {
-      return this.renderFailed(errorMessage);
+      return this.renderFailed(this.#getErrorMessage());
     }
 
     return documents.length > 0 ? (
@@ -522,7 +503,20 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   renderOrderStepGeoSuite() {
-    const { classes } = this.props;
+    const { classes, options } = this.props;
+    const termsAndConditionsLink = this.#getTermsAndConditionsLink();
+    const boreholeIntro =
+      options.view?.boreholeIntro ??
+      "Nedan visas alla borrhålsprojekt med undersökningspunkter inom det markerade området.";
+    const boreholeDescription =
+      options.view?.boreholeDescription ??
+      "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.";
+    const referenceSystemText =
+      options.view?.referenceSystemText ??
+      "Geotekniska undersökningspunkter är i koordinatsystemet SWEREF 99 12 00 samt höjdsystemet RH2000";
+    const deliveryInformationText =
+      options.view?.deliveryInformationText ??
+      "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets molntjänst.";
     return (
       <>
         <Grid container direction="row" alignItems="center">
@@ -531,12 +525,10 @@ class GeosuiteExportView extends React.PureComponent {
             {"Borrhålsdata i GeoSuite-format"}
           </Typography>
         </Grid>
-        <Typography
-          className={classes.paragraph}
-        >{`${boreholeIntro}`}</Typography>
-        <Typography
-          className={classes.paragraph}
-        >{`${boreholeDescription}`}</Typography>
+        <Typography className={classes.paragraph}>{boreholeIntro}</Typography>
+        <Typography className={classes.paragraph}>
+          {boreholeDescription}
+        </Typography>
         <br />
         {this.renderBoreholeOrderResult()}
         <br />
@@ -548,7 +540,7 @@ class GeosuiteExportView extends React.PureComponent {
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Typography>{`${referenceSystemText}`}</Typography>
+            <Typography>{referenceSystemText}</Typography>
           </AccordionDetails>
         </Accordion>
         <Accordion elevation={0}>
@@ -558,7 +550,7 @@ class GeosuiteExportView extends React.PureComponent {
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Typography>{`${deliveryInformationText}`}</Typography>
+            <Typography>{deliveryInformationText}</Typography>
           </AccordionDetails>
         </Accordion>
         <br />
@@ -586,10 +578,9 @@ class GeosuiteExportView extends React.PureComponent {
             direction="row"
             alignItems="center"
           >
-            {/* TODO - set link button color (check if there is a 'link' in palette) */}
             <LaunchIcon />
             <Link
-              href={`${termsAndConditionsLink}`}
+              href={termsAndConditionsLink}
               className={classes.link}
               target="_blank"
             >
@@ -603,19 +594,26 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   renderConfirmStep = () => {
-    const { classes } = this.props;
+    const { classes, options } = this.props;
+    const deliveryConfirmationHeader =
+      options.view?.deliveryConfirmationHeader ?? "Tack för din beställning!";
+    const deliveryInformationTextFirst =
+      options.view?.deliveryInformationTextFirst ??
+      "Ett e-postmeddelande med vidare instruktioner kommer att skickas till dig.";
+    const deliveryInformationTextSecond =
+      options.view?.deliveryInformationTextSecond ??
+      "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.";
     const step = this.state.activeStep;
     return (
       <>
         <Typography className={classes.bold}>
           {" "}
-          Tack för din beställning!
+          {deliveryConfirmationHeader}
         </Typography>
         <br />
-        <Typography variant="body1">
-          Klicka på VÄLJ MER för att hämta mer data för ditt markerade område
-          eller gå vidare med KLAR.
-        </Typography>
+        <Typography variant="body1">{deliveryInformationTextFirst}</Typography>
+        <br />
+        <Typography variant="body1">{deliveryInformationTextSecond}</Typography>
         <br />
         <div>
           <Button
@@ -803,6 +801,22 @@ class GeosuiteExportView extends React.PureComponent {
       </>
     );
   }
+
+  #getTermsAndConditionsLink = () => {
+    const { options } = this.props;
+    return (
+      options.view?.termsAndConditionsLink ??
+      "https://goteborg.se/wps/portal/om-webbplatsen"
+    );
+  };
+
+  #getErrorMessage = () => {
+    const { options } = this.props;
+    return (
+      options.view?.errorMessage ??
+      "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår."
+    );
+  };
 }
 
 export default withStyles(styles)(withSnackbar(GeosuiteExportView));
