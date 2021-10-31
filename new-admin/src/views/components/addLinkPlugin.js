@@ -3,6 +3,7 @@ import { KeyBindingUtil } from "draft-js";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
+import Tooltip from "@material-ui/core/Tooltip";
 
 const LinkStrategy = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
@@ -51,6 +52,12 @@ const Link = (props) => {
       >
         <MapIcon /> {title}
       </a>
+    );
+  } else if (data["data-hover"]) {
+    return (
+      <Tooltip title={data["data-hover"]} placement={"bottom"}>
+        <abbr data-hover={data["data-hover"]}>{props.decoratedText}</abbr>
+      </Tooltip>
     );
   } else {
     return (

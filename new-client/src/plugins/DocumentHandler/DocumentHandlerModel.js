@@ -14,7 +14,6 @@ import {
   Img,
   BlockQuote,
   LineBreak,
-  Hover,
   Video,
   Audio,
   Source,
@@ -318,7 +317,7 @@ export default class DocumentHandlerModel {
       <CustomLink
         aTag={e}
         localObserver={this.localObserver}
-        bottomMargin
+        bottomMargin={true}
       ></CustomLink>
     );
   };
@@ -401,6 +400,7 @@ export default class DocumentHandlerModel {
       tagType: "a",
       callback: (e) => {
         this.getCustomLink.bind(this);
+        return this.getCustomLink(e);
       },
     });
     allowedHtmlTags.push({
@@ -457,12 +457,7 @@ export default class DocumentHandlerModel {
         return <Italic emTag={e}></Italic>;
       },
     });
-    // allowedHtmlTags.push({
-    //   tagType: "abbr",
-    //   callback: (e) => {
-    //     return <Hover abbrTag={e}></Hover>;
-    //   },
-    // });
+
     return allowedHtmlTags;
   };
 

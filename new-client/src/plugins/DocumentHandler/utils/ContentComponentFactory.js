@@ -415,8 +415,8 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
 };
 
 /**
- * The render function for hte video-tag.
- * @param {object} videoTag The video-tag.
+ * The render function for the video-tag as an img-tag.
+ * @param {object} imgTag The video-tag as an img-tag.
  * @returns React.Fragment
  */
 export const Video = ({ imgTag, componentId }) => {
@@ -499,6 +499,11 @@ export const Video = ({ imgTag, componentId }) => {
   );
 };
 
+/**
+ * The render function for the audio-tag as an img-tag.
+ * @param {object} imgTag The audio-tag as an img-tag.
+ * @returns React.Fragment
+ */
 export const Audio = ({ imgTag, componentId }) => {
   const audioAttributes = {
     caption: imgTag.attributes.getNamedItem("data-caption")?.value,
@@ -671,37 +676,6 @@ export const LineBreak = () => {
 };
 
 /**
- * The render function for hte abbr-tag, that renders a tooltip.
- * @param {object} abbrTag The abbr-tag.
- * @returns React.Fragment
- */
-// export const Hover = ({ abbrTag }) => {
-//   const children = [...abbrTag.childNodes];
-//   const hoverText = abbrTag.title;
-//   const classes = useStyles();
-//   let array = [];
-//   if (children.length > 0) {
-//     children.forEach((child, index) => {
-//       array.push(
-//         <React.Fragment key={index}>
-//           <Tooltip title={hoverText} placement={"bottom"}>
-//             <abbr className={classes.hoverLink}>{renderChild(child)}</abbr>
-//           </Tooltip>
-//         </React.Fragment>
-//       );
-//     });
-//     return array;
-//   }
-//   return [
-//     <React.Fragment key={0}>
-//       <Tooltip title={hoverText} placement={"bottom"}>
-//         <abbr className={classes.hoverLink}>{abbrTag.textContent}</abbr>
-//       </Tooltip>
-//     </React.Fragment>,
-//   ];
-// };
-
-/**
  * Callback used to render different link-components from a-elements
  * @param {Element} aTag a-element.
  * @returns {<Link>} Returns materialUI component <Link>
@@ -731,10 +705,12 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     return { mapLink, headerIdentifier, documentLink, externalLink, hoverLink };
   };
 
-  const getHoverLink = (hoverLink) => {
+  const getHoverLink = (hoverLink, tagText) => {
     return (
       <React.Fragment>
-        <abbr className={classes.hoverLink}>{hoverLink.textContent}</abbr>
+        <Tooltip title={hoverLink} placement={"bottom"}>
+          <abbr className={classes.hoverLink}>{tagText}</abbr>
+        </Tooltip>
       </React.Fragment>
     );
   };
@@ -840,7 +816,8 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   }
 
   if (hoverLink) {
-    return getHoverLink(hoverLink);
+    const tagText = aTag.text;
+    return getHoverLink(hoverLink, tagText);
   }
 
   return null;

@@ -859,7 +859,7 @@ export default class DocumentTextEditor extends React.Component {
       case "maplink":
         return "kartlänk";
       case "hover":
-        return "svävarlänk";
+        return "svävartext";
       default:
         return "länk";
     }
