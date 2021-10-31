@@ -21,6 +21,7 @@ const ImageComponent = (props) => {
 
   const { readOnlyMode } = props.blockProps;
   const entity = props.contentState.getEntity(props.block.getEntityAt(0));
+  const [entityKey, setEntityKey] = useState(entity);
 
   const { src } = entity.getData();
   const data = entity.getData();
@@ -32,6 +33,7 @@ const ImageComponent = (props) => {
   const dataPopup = data["data-image-popup"] === undefined ? false : true;
   const dataImagePosition = data["data-image-position"];
 
+  const dataType = data["data-type"] || "image";
   const [open, setOpen] = useState(false);
   const [alt, setAlt] = useState(imageAlt === undefined ? "" : imageAlt);
   const [defaultWidth, setDefaultWidth] = useState();
@@ -45,18 +47,40 @@ const ImageComponent = (props) => {
   const [saveButton, showSaveButton] = useState(true);
 
   useEffect(() => {
-    if (
-      dataSource !== source ||
-      imageAlt !== alt ||
-      imageWidth !== width ||
-      imageHeight !== height ||
-      dataCaption !== caption ||
-      dataPopup !== popup ||
-      dataImagePosition !== imagePosition
-    ) {
-      showSaveButton(false);
-    } else {
-      showSaveButton(true);
+    if (dataType === "image") {
+      if (
+        dataSource !== source ||
+        imageAlt !== alt ||
+        imageWidth !== width ||
+        imageHeight !== height ||
+        dataCaption !== caption ||
+        dataPopup !== popup ||
+        dataImagePosition !== imagePosition
+      ) {
+        showSaveButton(false);
+      } else {
+        showSaveButton(true);
+      }
+    } else if (dataType === "video") {
+      if (
+        dataSource !== source ||
+        // imageAlt !== alt ||
+        imageWidth !== width ||
+        imageHeight !== height ||
+        dataCaption !== caption ||
+        dataImagePosition !== imagePosition
+      )
+        showSaveButton(false);
+      else showSaveButton(true);
+    } else if (dataType === "audio") {
+      if (
+        dataSource !== source ||
+        // imageAlt !== alt ||
+        dataCaption !== caption ||
+        dataImagePosition !== imagePosition
+      )
+        showSaveButton(false);
+      else showSaveButton(true);
     }
   }, [
     dataSource,
@@ -101,6 +125,9 @@ const ImageComponent = (props) => {
     if (popup) {
       data["data-image-popup"] = "";
     }
+    if (dataType === "video") data["data-type"] = "video";
+    else if (dataType === "audio") data["data-type"] = "audio";
+
     imageData(data);
   };
 
@@ -121,12 +148,15 @@ const ImageComponent = (props) => {
   };
 
   const onVideoLoad = ({ target: video }) => {
-    debugger;
     const defaultWidth = video.offsetWidth;
     const defaultHeight = video.offsetHeight;
 
     setDefaultWidth(defaultWidth);
     setDefaultHeight(defaultHeight);
+  };
+
+  const onAudioLoad = ({ target: audio }) => {
+    setDefaultWidth(300);
   };
 
   const calculateHeight = (width) => {
@@ -164,6 +194,8 @@ const ImageComponent = (props) => {
       setWidth("");
     }
   };
+
+  const popupDisabled = dataType != "image";
 
   const body = (
     <div className={classes.paper}>
@@ -239,6 +271,7 @@ const ImageComponent = (props) => {
             id="image-popup"
             checked={popup}
             onChange={handlePopupChange}
+            disabled={popupDisabled}
             inputProps={{ "aria-label": "primary checkbox" }}
           />
           <label>Popup</label>
@@ -343,7 +376,7 @@ const ImageComponent = (props) => {
       </div>
     );
   } else {
-    if (data.type === "image") {
+    if (dataType === "image" || data.type === "image") {
       return (
         <div className={classes.imgContainer}>
           <img
@@ -372,22 +405,54 @@ const ImageComponent = (props) => {
       );
     }
   }
-  if (data.type === "video") {
+
+  if (dataType === "video" || data.type === "video") {
     return (
       <div className={classes.imgContainer}>
         <video
           alt={alt}
-          width={defaultWidth}
-          height={defaultHeight}
-          data-video-width={width}
-          data-video-height={height}
+          width={width}
+          height={height}
+          data-image-width={width}
+          data-image-height={height}
           data-caption={caption}
-          data-video-position={imagePosition}
+          data-image-position={imagePosition}
           onClick={handleOpen}
           onLoadStart={onVideoLoad}
         >
           <source src={src} type="video/mp4"></source>
         </video>
+        <button
+          type="button"
+          variant="contained"
+          className="btn btn-success"
+          onClick={handleSubmit}
+          hidden={saveButton}
+        >
+          <CheckIcon /> Godkänn ändringar
+        </button>
+        {modal}
+      </div>
+    );
+  }
+
+  if (dataType === "audio" || data.type === "audio") {
+    return (
+      <div className={classes.imgContainer}>
+        <audio
+          alt={alt}
+          width={width}
+          height={height}
+          data-image-width={width}
+          data-image-height={height}
+          data-caption={caption}
+          data-image-position={imagePosition}
+          onClick={handleOpen}
+          onLoadStart={onAudioLoad}
+          controls
+        >
+          <source src={src} type="audio/mpeg"></source>
+        </audio>
         <button
           type="button"
           variant="contained"

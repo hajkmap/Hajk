@@ -399,30 +399,26 @@ export default class DocumentHandlerModel {
     });
     allowedHtmlTags.push({
       tagType: "a",
-      callback: this.getCustomLink.bind(this),
+      callback: (e) => {
+        this.getCustomLink.bind(this);
+      },
     });
     allowedHtmlTags.push({
       tagType: "img",
       callback: (e) => {
-        return (
-          <Img
-            componentId={e.componentId}
-            imgTag={e}
-            localObserver={this.localObserver}
-          ></Img>
-        );
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "video",
-      callback: (e) => {
-        return <Video videoTag={e} componentId={e.componentId}></Video>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "audio",
-      callback: (e) => {
-        return <Audio audioTag={e} componentId={e.componentId}></Audio>;
+        const dataType = e.dataset.type || "image";
+        if (dataType === "image")
+          return (
+            <Img
+              componentId={e.componentId}
+              imgTag={e}
+              localObserver={this.localObserver}
+            ></Img>
+          );
+        else if (dataType === "video")
+          return <Video imgTag={e} componentId={e.componentId}></Video>;
+        else if (dataType === "audio")
+          return <Audio imgTag={e} componentId={e.componentId}></Audio>;
       },
     });
     allowedHtmlTags.push({
@@ -461,12 +457,12 @@ export default class DocumentHandlerModel {
         return <Italic emTag={e}></Italic>;
       },
     });
-    allowedHtmlTags.push({
-      tagType: "abbr",
-      callback: (e) => {
-        return <Hover abbrTag={e}></Hover>;
-      },
-    });
+    // allowedHtmlTags.push({
+    //   tagType: "abbr",
+    //   callback: (e) => {
+    //     return <Hover abbrTag={e}></Hover>;
+    //   },
+    // });
     return allowedHtmlTags;
   };
 

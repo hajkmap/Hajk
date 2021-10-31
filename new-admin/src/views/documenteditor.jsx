@@ -210,9 +210,19 @@ class DocumentEditor extends Component {
   }
 
   loadVideoList() {
-    this.props.model.listVideos((data) => {
+    this.props.model.listVideos((data, videoUrl) => {
       this.setState({
         videoList: data,
+        videoUrl: videoUrl,
+      });
+    });
+  }
+
+  loadAudioList() {
+    this.props.model.listAudios((data, audioUrl) => {
+      this.setState({
+        audioList: data,
+        audioUrl: audioUrl,
       });
     });
   }
@@ -222,6 +232,7 @@ class DocumentEditor extends Component {
     this.load();
     this.loadImageList();
     this.loadVideoList();
+    this.loadAudioList();
   }
 
   save() {
@@ -639,6 +650,9 @@ class DocumentEditor extends Component {
             }}
             imageList={this.state.imageList}
             videoList={this.state.videoList}
+            audioList={this.state.audioList}
+            videoUrl={this.state.videoUrl}
+            audioUrl={this.state.audioUrl}
             documents={this.state.documents}
           />
         </Grid>

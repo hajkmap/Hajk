@@ -39,6 +39,13 @@ var documentEditor = Model.extend({
     data.chapters.forEach((chapter) => {
       this.deleteParentChapter(chapter, data.chapters);
     });
+
+    data.chapters.map((chapter) => {
+      chapter.html = chapter.html
+        .replaceAll("&lt;", "<")
+        .replaceAll("&gt;", ">");
+    });
+
     hfetch(url, {
       method: "post",
       body: JSON.stringify(data),
@@ -119,7 +126,16 @@ var documentEditor = Model.extend({
     var url = this.get("config").list_videos;
     hfetch(url).then((response) => {
       response.json().then((data) => {
-        callback(data);
+        callback(data, url);
+      });
+    });
+  },
+
+  listAudios: function (callback) {
+    var url = this.get("config").list_audios;
+    hfetch(url).then((response) => {
+      response.json().then((data) => {
+        callback(data, url);
       });
     });
   },

@@ -419,14 +419,14 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
  * @param {object} videoTag The video-tag.
  * @returns React.Fragment
  */
-export const Video = ({ videoTag, componentId }) => {
+export const Video = ({ imgTag, componentId }) => {
   const videoAttributes = {
-    caption: videoTag.attributes.getNamedItem("data-caption")?.value,
-    height: videoTag.attributes.getNamedItem("data-video-height")?.value,
-    width: videoTag.attributes.getNamedItem("data-video-width")?.value,
-    position: videoTag.attributes.getNamedItem("data-video-position")?.value,
-    source: videoTag.attributes.getNamedItem("data-source")?.value,
-    url: videoTag.attributes.getNamedItem("src")?.value,
+    caption: imgTag.dataset.caption,
+    height: imgTag.dataset.imageHeight,
+    width: imgTag.dataset.imageWidth,
+    position: imgTag.dataset.imagePosition,
+    source: imgTag.dataset.source,
+    url: imgTag.src,
     id: `video_${componentId}`,
   };
 
@@ -456,25 +456,10 @@ export const Video = ({ videoTag, componentId }) => {
   };
   const positioningClass = getVideoPositionClass(videoAttributes.position);
 
-  const renderSources = (childrenSource) => {
-    let arraySources = [];
-    if (childrenSource.length > 0) {
-      childrenSource.forEach((child, index) => {
-        arraySources.push(
-          <React.Fragment key={index}>{renderChild(child)}</React.Fragment>
-        );
-      });
-    }
-
-    return arraySources;
-  };
-  const childrenSource = [...videoTag.childNodes];
-  const arraySources = renderSources(childrenSource);
-
   const getVideoDescription = (videoAttributes) => {
     return (
       <Box
-        style={{ width: videoAttributes.width + "px" }}
+        style={{ width: videoAttributes.width }}
         className={classes.imageInformationWrapper}
       >
         {videoAttributes.caption && (
@@ -506,7 +491,7 @@ export const Video = ({ videoTag, componentId }) => {
           width={videoAttributes.width}
           controls={"controls"}
         >
-          {arraySources}
+          <source src={imgTag.src} type="video/mp4"></source>
         </video>
         {getVideoDescription(videoAttributes)}
       </div>
@@ -514,13 +499,13 @@ export const Video = ({ videoTag, componentId }) => {
   );
 };
 
-export const Audio = ({ audioTag, componentId }) => {
+export const Audio = ({ imgTag, componentId }) => {
   const audioAttributes = {
-    caption: audioTag.attributes.getNamedItem("data-caption")?.value,
-    position: audioTag.attributes.getNamedItem("data-audio-position")?.value,
-    source: audioTag.attributes.getNamedItem("data-source")?.value,
-    url: audioTag.attributes.getNamedItem("src")?.value,
-    width: audioTag.attributes.getNamedItem("data-audio-width")?.value,
+    caption: imgTag.attributes.getNamedItem("data-caption")?.value,
+    position: imgTag.attributes.getNamedItem("data-image-position")?.value,
+    source: imgTag.attributes.getNamedItem("data-source")?.value,
+    url: imgTag.attributes.getNamedItem("src")?.value,
+    width: imgTag.attributes.getNamedItem("data-image-width")?.value,
     id: `audio_${componentId}`,
   };
 
@@ -549,21 +534,6 @@ export const Audio = ({ audioTag, componentId }) => {
     return;
   };
   const positioningClass = getVideoPositionClass(audioAttributes.position);
-
-  const renderSources = (childrenSource) => {
-    let arraySources = [];
-    if (childrenSource.length > 0) {
-      childrenSource.forEach((child, index) => {
-        arraySources.push(
-          <React.Fragment key={index}>{renderChild(child)}</React.Fragment>
-        );
-      });
-    }
-
-    return arraySources;
-  };
-  const childrenSource = [...audioTag.childNodes];
-  const arraySources = renderSources(childrenSource);
 
   const getAudioDescription = (audioAttributes) => {
     return (
@@ -595,7 +565,9 @@ export const Audio = ({ audioTag, componentId }) => {
   return (
     <React.Fragment key={audioAttributes.id}>
       <div className={positioningClass}>
-        <audio controls={"controls"}>{arraySources}</audio>
+        <audio controls={"controls"}>
+          <source src={imgTag.src} type="audio/mpeg"></source>
+        </audio>
         {getAudioDescription(audioAttributes)}
       </div>
     </React.Fragment>
@@ -703,31 +675,31 @@ export const LineBreak = () => {
  * @param {object} abbrTag The abbr-tag.
  * @returns React.Fragment
  */
-export const Hover = ({ abbrTag }) => {
-  const children = [...abbrTag.childNodes];
-  const hoverText = abbrTag.title;
-  const classes = useStyles();
-  let array = [];
-  if (children.length > 0) {
-    children.forEach((child, index) => {
-      array.push(
-        <React.Fragment key={index}>
-          <Tooltip title={hoverText} placement={"bottom"}>
-            <abbr className={classes.hoverLink}>{renderChild(child)}</abbr>
-          </Tooltip>
-        </React.Fragment>
-      );
-    });
-    return array;
-  }
-  return [
-    <React.Fragment key={0}>
-      <Tooltip title={hoverText} placement={"bottom"}>
-        <abbr className={classes.hoverLink}>{abbrTag.textContent}</abbr>
-      </Tooltip>
-    </React.Fragment>,
-  ];
-};
+// export const Hover = ({ abbrTag }) => {
+//   const children = [...abbrTag.childNodes];
+//   const hoverText = abbrTag.title;
+//   const classes = useStyles();
+//   let array = [];
+//   if (children.length > 0) {
+//     children.forEach((child, index) => {
+//       array.push(
+//         <React.Fragment key={index}>
+//           <Tooltip title={hoverText} placement={"bottom"}>
+//             <abbr className={classes.hoverLink}>{renderChild(child)}</abbr>
+//           </Tooltip>
+//         </React.Fragment>
+//       );
+//     });
+//     return array;
+//   }
+//   return [
+//     <React.Fragment key={0}>
+//       <Tooltip title={hoverText} placement={"bottom"}>
+//         <abbr className={classes.hoverLink}>{abbrTag.textContent}</abbr>
+//       </Tooltip>
+//     </React.Fragment>,
+//   ];
+// };
 
 /**
  * Callback used to render different link-components from a-elements
@@ -745,16 +717,26 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       1: headerIdentifier,
       2: documentLink,
       3: externalLink,
+      4: hoverLink,
     } = [
       "data-maplink",
       "data-header-identifier",
       "data-document",
       "data-link",
+      "data-hover",
     ].map((attributeKey) => {
       return attributes.getNamedItem(attributeKey)?.value;
     });
 
-    return { mapLink, headerIdentifier, documentLink, externalLink };
+    return { mapLink, headerIdentifier, documentLink, externalLink, hoverLink };
+  };
+
+  const getHoverLink = (hoverLink) => {
+    return (
+      <React.Fragment>
+        <abbr className={classes.hoverLink}>{hoverLink.textContent}</abbr>
+      </React.Fragment>
+    );
   };
 
   const getExternalLink = (externalLink) => {
@@ -842,7 +824,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const { mapLink, headerIdentifier, documentLink, externalLink } =
+  const { mapLink, headerIdentifier, documentLink, externalLink, hoverLink } =
     getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {
@@ -855,6 +837,10 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
   if (externalLink) {
     return getExternalLink(externalLink);
+  }
+
+  if (hoverLink) {
+    return getHoverLink(hoverLink);
   }
 
   return null;
