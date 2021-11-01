@@ -28,6 +28,8 @@ const FmeServerView = (props) => {
     setActiveGroup("");
   }
 
+  // Returns an array of products, where each product belongs
+  // to the currently active group.
   function getProductsInActiveGroup() {
     return props.options.products.filter((product) => {
       return product.group === activeGroup;
@@ -67,6 +69,9 @@ const FmeServerView = (props) => {
     );
   }
 
+  // Renders the content for the step where the user can select
+  // which group they want to get their products from. If no group is selected,
+  // the user cannot continue to the next step.
   function renderChooseGroupStep() {
     return (
       <Grid container item xs={12}>
@@ -90,12 +95,20 @@ const FmeServerView = (props) => {
             </Select>
           </FormControl>
         </Grid>
-        {renderStepperButtons([{ type: "next", disabled: activeGroup === "" }])}
+        {
+          // Since this is the first step, we only need a "next" button. We can't
+          // go back to step -1.
+          renderStepperButtons([{ type: "next", disabled: activeGroup === "" }])
+        }
       </Grid>
     );
   }
 
+  // Renders the content for the step where the user can select
+  // which product they want to run.
   function renderChooseProductStep() {
+    // We only want to render the products that belong to the active group,
+    // so letch get those.
     const productsInActiveGroup = getProductsInActiveGroup();
     return (
       <Grid container item xs={12}>
@@ -121,10 +134,14 @@ const FmeServerView = (props) => {
             </Select>
           </FormControl>
         </Grid>
-        {renderStepperButtons([
-          { type: "back", disabled: false },
-          { type: "next", disabled: activeProduct === "" },
-        ])}
+        {
+          // In this step we need both a "back" and a "next" button, since the
+          // user might want to change the selected group along the way
+          renderStepperButtons([
+            { type: "back", disabled: false },
+            { type: "next", disabled: activeProduct === "" },
+          ])
+        }
       </Grid>
     );
   }
