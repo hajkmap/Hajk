@@ -112,6 +112,8 @@ class MapViewModel {
     this.#removeDrawInteraction();
   };
 
+  // Returns all drawn features.
+  // TBD: Return OL- or GJ-features. Hmm...
   #getDrawnFeatures = () => {
     return this.#drawSource.getFeatures();
   };
