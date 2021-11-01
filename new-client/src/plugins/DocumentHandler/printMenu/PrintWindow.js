@@ -13,6 +13,12 @@ import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
 import { ThemeProvider } from "@material-ui/styles";
+import { getNormalizedMenuState } from "../utils/stateConverter";
+import { hasSubMenu } from "../utils/helpers";
+import {
+  isExpandedTopLevelItem,
+  getItemIdsToColor,
+} from "../panelMenu/panelMenuUtils";
 
 import {
   LinearProgress,
@@ -21,6 +27,7 @@ import {
   DialogContent,
   DialogContentText,
 } from "@material-ui/core";
+import { Menu } from "@material-ui/icons";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -53,15 +60,76 @@ class PrintWindow extends React.PureComponent {
     printMaps: false,
     allDocumentsToggled: false,
     includeCompleteToc: true,
+    menuInformation: this.createMenu(),
     chapterInformation: this.setChapterInfo(),
     printContent: undefined,
     pdfLoading: false,
+  };
+
+  internalId = 0;
+
+  #handleSubMenuClicked = (id) => {
+    this.#setItemStateProperties(id);
+  };
+
+  #setItemStateProperties = (idClicked) => {
+    return new Promise((resolve) => {
+      const currentState = { ...this.state.menuInformation };
+      const clickedItem = currentState[idClicked];
+      const newState = Object.values(currentState).reduce((items, item) => {
+        const isClickedItem = item.id === idClicked;
+        if (isClickedItem) {
+          return {
+            ...items,
+            [item.id]: this.#setClickedItemProperties(item),
+          };
+        } else {
+          return {
+            ...items,
+            [item.id]: this.#setNonClickedItemProperties(
+              item,
+              currentState,
+              clickedItem
+            ),
+          };
+        }
+      }, {});
+
+      this.setState({ menuInformation: newState }, resolve);
+    });
+  };
+
+  #setClickedItemProperties = (clickedItem) => {
+    let newItem = { ...clickedItem };
+    return {
+      ...clickedItem,
+      //colored: !isExpandedTopLevelItem(newItem),
+      selected: !newItem.hasSubMenu,
+      expandedSubMenu: newItem.hasSubMenu
+        ? !newItem.expandedSubMenu
+        : newItem.expandedSubMenu,
+    };
+  };
+
+  #setNonClickedItemProperties = (item, currentState, clickedItem) => {
+    //const idsToColor = getItemIdsToColor(clickedItem, currentState);
+    return {
+      ...item,
+      //colored: idsToColor.indexOf(item.id) !== -1,
+      expandedSubMenu:
+        clickedItem.allParents.indexOf(item.id) !== -1
+          ? true
+          : item.expandedSubMenu,
+      selected: clickedItem.hasSubMenu ? item.selected : false,
+    };
   };
 
   componentDidMount = () => {
     this.props.localObserver.subscribe(
       "chapter-components-appended",
       (renderedChapters) => {
+        console.log(renderedChapters);
+        debugger;
         this.setState(
           {
             printContent: renderedChapters,
@@ -72,6 +140,10 @@ class PrintWindow extends React.PureComponent {
         );
       }
     );
+
+    this.props.localObserver.subscribe("print-submenu-clicked", (id) => {
+      this.#handleSubMenuClicked(id);
+    });
   };
 
   componentWillUnmount = () => {
@@ -131,6 +203,7 @@ class PrintWindow extends React.PureComponent {
 
   renderContent = () => {
     this.content = this.createPrintElement("content");
+    console.log("renderContent:", this.content);
     return this.customRender(this.state.printContent, this.content);
   };
 
@@ -243,6 +316,7 @@ class PrintWindow extends React.PureComponent {
       this.areAllImagesLoaded().then(() => {
         const printWindow = this.createPrintWindow();
         this.toc && printWindow.document.body.appendChild(this.toc);
+        console.log("printContents - this.content: ", this.content);
         printWindow.document.body.appendChild(this.content);
         this.addPageBreaksBeforeHeadings(printWindow);
         printWindow.document.close(); // necessary for IE >= 10
@@ -272,6 +346,7 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
+  //Change to toggle sub documents.
   toggleSubChapters(chapter, checked) {
     if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
       chapter.chapters.forEach((subChapter) => {
@@ -285,27 +360,160 @@ class PrintWindow extends React.PureComponent {
     const { activeDocument, model } = this.props;
     let chapterInformation = model.getAllChapterInfo();
 
-    let topChapter = chapterInformation.find(
-      (topChapter) =>
-        topChapter.headerIdentifier ===
-        activeDocument.chapters[0].headerIdentifier
-    );
+    //chapterInformation is an array of chapterObjects.
+    console.log("setChapterInfo: chapterInformation", chapterInformation);
 
-    topChapter.chosenForPrint = true;
-    this.toggleSubChapters(topChapter, true);
+    //the below segment just sets the chapter that was clicked to come into print as active.
+
+    // let topChapter = chapterInformation.find(
+    //   (topChapter) =>
+    //     topChapter.headerIdentifier ===
+    //     activeDocument.chapters[0].headerIdentifier
+    // );
+
+    // topChapter.chosenForPrint = true;
+    // this.toggleSubChapters(topChapter, true);
 
     return chapterInformation;
   }
 
-  toggleAllDocuments = (toggled) => {
-    this.state.chapterInformation.forEach((chapter) => {
-      chapter.chosenForPrint = toggled;
-      this.toggleSubChapters(chapter, toggled);
+  setInitialMenuItemProperties(menuItem) {
+    if (hasSubMenu(menuItem)) {
+      menuItem.hasSubMenu = true;
+      menuItem.menu.forEach((subMenuItem) => {
+        this.setInitialMenuItemProperties(subMenuItem, menuItem);
+      });
+    }
+  }
+
+  removeNonPrintableDocuments(documents) {
+    //Remove items that should not appear in the print menu (maplinks, links)
+    let removedIds = [];
+
+    Object.keys(documents).forEach((key) => {
+      if (documents[key].maplink || documents[key].link) {
+        removedIds.push(parseInt(key));
+        delete documents[key];
+      }
     });
 
-    this.setState({
-      allDocumentsToggled: toggled,
+    Object.keys(documents).forEach((key) => {
+      let item = documents[key];
+
+      //if a document has been removed from the printMenu, also remove its id from the children array of other documents.
+      let newChildren = item.allChildren.filter(
+        (child) => !removedIds.includes(child)
+      );
+      item.allChildren = newChildren;
+      //also remove its id from the menuItemIds of other documents.
+      let newMenuItemIds = item.menuItemIds.filter(
+        (id) => !removedIds.includes(id)
+      );
+      item.menuItemIds = newMenuItemIds;
+      //we should not need to remove it from the allParents array, as a Link menu item cannot be a parent.
     });
+  }
+
+  createMenu() {
+    const { options } = this.props;
+
+    const newOptions = { ...options };
+    const menuConfig = { ...newOptions }.menuConfig;
+    const clone = JSON.parse(JSON.stringify(menuConfig));
+    const a = getNormalizedMenuState(clone.menu);
+
+    const keys = Object.keys(a);
+    const idOffset = keys.length + 1;
+
+    keys.forEach((key) => {
+      let document = a[key];
+      const offsetChildren = document.allChildren.map((id) => (id += idOffset));
+      const offsetParents = document.allParents.map((id) => (id += idOffset));
+      const offsetMenuItemIds = document.menuItemIds.map(
+        (id) => (id += idOffset)
+      );
+
+      document.id += idOffset;
+      document.parentId = document.parentId
+        ? (document.parentId += idOffset)
+        : null;
+      document.allChildren = offsetChildren;
+      document.allParents = offsetParents;
+      document.menuItemIds = offsetMenuItemIds;
+
+      document.chosenForPrint = false;
+      document.colored = true;
+    });
+
+    let keys2 = Object.keys(a);
+
+    let newObj = {};
+    keys2.forEach((key) => {
+      let keyOffset = parseInt(key) + idOffset;
+      newObj[keyOffset] = a[key];
+    });
+
+    this.removeNonPrintableDocuments(newObj);
+    return newObj;
+  }
+
+  //Change to toggle sub documents.
+  toggleSubDocuments(documentId, checked, menuState) {
+    const subDocuments = menuState[documentId].allChildren;
+    subDocuments.forEach((subDocId) => {
+      const updateDoc = {
+        ...menuState[subDocId],
+        chosenForPrint: checked,
+      };
+      menuState[subDocId] = updateDoc;
+      this.toggleSubDocuments(subDocId, checked, menuState);
+    });
+
+    return menuState;
+  }
+
+  toggleParents(documentId, checked) {
+    //if a child documents is untoggled, it's holding parent element should no longer be toggled?
+    console.log("toggleParents");
+    //allParents
+  }
+
+  toggleChosenForPrint = (documentId) => {
+    const current = { ...this.state.menuInformation };
+    const shouldPrint = !current[documentId].chosenForPrint;
+
+    const updateDoc = {
+      ...current[documentId],
+      chosenForPrint: !current[documentId].chosenForPrint,
+    };
+    current[documentId] = updateDoc;
+
+    /*
+    update child documents (toggle subDocuments does not set state itself, but returns an object
+    that we can use to update the state along with out parent document, so we only make one state update.) 
+    */
+    const updatedMenuState = this.toggleSubDocuments(
+      documentId,
+      shouldPrint,
+      current
+    );
+
+    this.setState({ menuInformation: updatedMenuState });
+  };
+
+  toggleAllDocuments = (toggled) => {
+    const menuState = { ...this.state.menuInformation };
+
+    Object.keys(menuState).forEach((key) => {
+      console.log(menuState[key]);
+      const updateDoc = {
+        ...menuState[key],
+        chosenForPrint: toggled,
+      };
+      menuState[key] = updateDoc;
+    });
+
+    this.setState({ allDocumentsToggled: toggled, menuInformation: menuState });
   };
 
   removeTagsNotSelectedForPrint = (chapter) => {
@@ -375,6 +583,11 @@ class PrintWindow extends React.PureComponent {
     return chaptersToPrint;
   };
 
+  getDocumentsToPrint = () => {
+    //earlier we kept koll på chapters hela tiden.
+    //nu ska vi bara hämta upp de när vi klicka print.
+  };
+
   checkIfChaptersSelected = (chapter) => {
     let subChapters = chapter.chapters;
     if (chapter.chosenForPrint) {
@@ -390,20 +603,54 @@ class PrintWindow extends React.PureComponent {
     return false;
   };
 
-  isAnyChapterSelected = () => {
-    const { chapterInformation } = this.state;
-    for (let i = 0; i < chapterInformation.length; i++) {
-      if (this.checkIfChaptersSelected(chapterInformation[i])) {
+  isAnyDocumentSelected = () => {
+    const keys = Object.keys(this.state.menuInformation);
+    for (let i = 0; i < keys.length; i++) {
+      if (this.state.menuInformation[keys[i]].chosenForPrint) {
         return true;
       }
     }
     return false;
   };
 
+  //TODO - change to documents
+  // isAnyChapterSelected = () => {
+  //   const { chapterInformation } = this.state;
+  //   for (let i = 0; i < chapterInformation.length; i++) {
+  //     if (this.checkIfChaptersSelected(chapterInformation[i])) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // };
+
+  getDocumentsToPrint = () => {
+    const { menuInformation } = this.state;
+    console.log("getDocumentsToPrint");
+    console.log(this.state.menuInformation);
+
+    const documentIdsForPrint = Object.keys(menuInformation).filter(
+      (key) => menuInformation[key].chosenForPrint
+    );
+
+    const documentNamesForPrint = documentIdsForPrint.map(
+      (id) => menuInformation[id].document
+    );
+
+    const docs = this.props.model.getDocuments(documentNamesForPrint);
+    console.log(docs);
+
+    //parentTitle
+
+    return docs;
+  };
+
   createPDF = () => {
-    if (!this.isAnyChapterSelected()) {
+    console.log(this.state.chapterInformation);
+    console.log(this.state.menuInformation);
+    if (!this.isAnyDocumentSelected()) {
       this.props.enqueueSnackbar(
-        "Du måste välja minst ett kapitel för att kunna skapa en PDF.",
+        "Du måste välja minst ett dokument för att kunna skapa en PDF.",
         {
           variant: "warning",
           persist: false,
@@ -411,11 +658,19 @@ class PrintWindow extends React.PureComponent {
       );
     } else {
       this.setState({ pdfLoading: true });
-      const chaptersToPrint = this.getChaptersToPrint();
-      this.props.localObserver.publish(
-        "append-chapter-components",
-        chaptersToPrint
+      //const documentsToPrint
+      const documentsToPrint = this.getDocumentsToPrint().filter(
+        (doc) => doc !== undefined
       );
+      this.props.localObserver.publish(
+        "append-document-components",
+        documentsToPrint
+      );
+      //const chaptersToPrint = this.getChaptersToPrint(); //change to get documents to print?
+      // this.props.localObserver.publish(
+      //   "append-chapter-components",
+      //   chaptersToPrint
+      // );
     }
   };
 
@@ -481,7 +736,7 @@ class PrintWindow extends React.PureComponent {
       localObserver,
       documentWindowMaximized,
     } = this.props;
-    const { chapterInformation } = this.state;
+    const { chapterInformation, menuInformation } = this.state;
     return (
       <Grid
         container
@@ -559,6 +814,9 @@ class PrintWindow extends React.PureComponent {
             chapters={chapterInformation}
             handleCheckboxChange={this.handleCheckboxChange}
             localObserver={localObserver}
+            documentMenu={menuInformation}
+            level={0}
+            handleTogglePrint={this.toggleChosenForPrint}
           />
         </Grid>
 

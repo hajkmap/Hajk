@@ -36,15 +36,21 @@ class Contents extends React.PureComponent {
   bindPrintSpecificHandlers = () => {
     const { localObserver, model } = this.props;
     localObserver.unsubscribe("append-chapter-components");
-    localObserver.subscribe("append-chapter-components", (chapters) => {
-      chapters.forEach((chapter) => {
-        model.appendComponentsToChapter(chapter);
+
+    localObserver.subscribe("append-document-components", (documents) => {
+      let chapters = [];
+
+      documents.forEach((document) => {
+        document.chapters.forEach((chapter) => {
+          model.appendComponentsToChapter(chapter);
+        });
+
+        chapters.push(
+          this.renderChapters(flattenChaptersTree(document.chapters))
+        );
       });
 
-      localObserver.publish(
-        "chapter-components-appended",
-        this.renderChapters(flattenChaptersTree(chapters))
-      );
+      localObserver.publish("chapter-components-appended", chapters);
     });
   };
 
@@ -86,6 +92,7 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderChapters = (chapters) => {
+    debugger;
     return Array.isArray(chapters)
       ? chapters.map((chapter) => this.renderChapter(chapter))
       : null;

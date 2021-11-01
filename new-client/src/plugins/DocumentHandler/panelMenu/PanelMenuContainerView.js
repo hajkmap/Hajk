@@ -92,6 +92,7 @@ class PanelMenuView extends React.PureComponent {
   };
 
   #handleOpenDocumentFromPanelMenu = (id) => {
+    //debugger;
     const { app } = this.props;
     this.#setDocument(this.state[id].document, null);
     this.#setItemStateProperties(id).then(() => {

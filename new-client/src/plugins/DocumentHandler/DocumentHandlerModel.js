@@ -101,14 +101,14 @@ export default class DocumentHandlerModel {
         resolve(this.allDocuments);
       }
 
-      const menuItemsWithDocumentConnetion = this.flattenMenu(
+      const menuItemsWithDocumentConnection = this.flattenMenu(
         this.settings.menu
       ).filter((menuItem) => {
         return menuItem.document;
       });
 
       Promise.all(
-        menuItemsWithDocumentConnetion.map((menuItem) => {
+        menuItemsWithDocumentConnection.map((menuItem) => {
           return this.fetchJsonDocument(menuItem.document).then((doc) => {
             if (!doc.title) {
               console.warn(
@@ -121,6 +121,7 @@ export default class DocumentHandlerModel {
               documentColor: menuItem.color,
               documentFileName: menuItem.document,
               documentTitle: doc.title,
+              menuItemId: menuItem.id,
             };
           });
         })
@@ -135,6 +136,7 @@ export default class DocumentHandlerModel {
   }
 
   getDocuments(fileNames) {
+    //debugger;
     let documents = [];
     fileNames.forEach((fileName) => {
       let document = this.allDocuments.find(
@@ -150,6 +152,7 @@ export default class DocumentHandlerModel {
     if (this.chapterInfo.length === 0) {
       this.allDocuments.forEach((document, index) => {
         document.chapters.forEach((mainChapter) => {
+          //debugger;
           this.setChapterInfo(mainChapter, 0, document.documentColor);
         });
       });
@@ -169,6 +172,7 @@ export default class DocumentHandlerModel {
 
   setChapterInfo(chapter, level, color) {
     let getParentIdentifier = this.getParentIdentifier(chapter);
+    //debugger;
     let chapterInfo = {};
     chapterInfo.id = ++this.chapterNumber;
     chapterInfo.level = level;
@@ -234,7 +238,7 @@ export default class DocumentHandlerModel {
       const document = await JSON.parse(text);
       this.internalId = 0;
       document.chapters.forEach((chapter) => {
-        this.setParentChapter(chapter, undefined);
+        this.setParentChapter(chapter, undefined); //TODO - Why do we set to undefined?
         this.setInternalId(chapter);
         this.setScrollReferences(chapter);
         this.appendComponentsToChapter(chapter);

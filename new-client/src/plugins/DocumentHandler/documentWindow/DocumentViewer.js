@@ -203,6 +203,8 @@ class DocumentViewer extends React.PureComponent {
       options,
     } = this.props;
 
+    console.log("documentViewer.js render, activeDocument: ", activeDocument);
+
     const { showScrollButton } = this.state;
     const showTableOfContents = this.getShouldShowTableOfContents();
     return (

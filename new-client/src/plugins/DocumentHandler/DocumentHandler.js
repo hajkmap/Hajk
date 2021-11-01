@@ -194,6 +194,7 @@ class DocumentHandler extends React.PureComponent {
         document = this.state.model.getDocuments([documentFileName])[0];
       }
       if (document) {
+        //debugger;
         this.setState(
           {
             document: document,

@@ -136,6 +136,7 @@ class DocumentWindowBase extends React.PureComponent {
 
   getDocumentViewer = () => {
     const { documentWindowMaximized, document } = this.props;
+    console.log("getDocumentViewer - document: ", document);
     return (
       <DocumentViewer
         documentWindowMaximized={documentWindowMaximized}
@@ -149,7 +150,6 @@ class DocumentWindowBase extends React.PureComponent {
   render() {
     const {
       options,
-      chapters,
       localObserver,
       documentWindowMaximized,
       document,
@@ -203,11 +203,12 @@ class DocumentWindowBase extends React.PureComponent {
           ) : (
             <PrintWindow
               customTheme={customTheme}
-              chapters={chapters}
+              //chapters={chapters} this was never used.
               activeDocument={document}
               documentWindowMaximized={documentWindowMaximized}
               togglePrintWindow={togglePrintWindow}
               localObserver={localObserver}
+              options={this.props.options}
               {...this.props}
             />
           )

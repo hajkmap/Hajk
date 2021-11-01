@@ -6,9 +6,10 @@ import Collapse from "@material-ui/core/Collapse";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ExpandLess from "@material-ui/icons/ExpandLess";
-import PanelList from "./PanelList";
+import PanelList from "./../panelMenu/PanelList";
+import PrintList from "./PrintList";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import { Typography } from "@material-ui/core";
+import { Typography, Checkbox } from "@material-ui/core";
 
 const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
@@ -28,7 +29,7 @@ const styles = (theme) => ({
   },
 });
 
-class PanelMenuListItem extends React.PureComponent {
+class PrintListItemNew extends React.PureComponent {
   #getListTitle = () => {
     const { title } = this.props;
     return <ListItemText>{title}</ListItemText>;
@@ -50,29 +51,14 @@ class PanelMenuListItem extends React.PureComponent {
     );
   };
 
-  #getListIcon = () => {
-    const { classes, title, icon } = this.props;
-    return (
-      <ListItemIcon className={classes.listItemIcon}>
-        {!title && (
-          <Typography variant="srOnly">{icon.descriptiveText}</Typography>
-        )}
-        <Icon style={{ fontSize: icon.fontSize }}>
-          {icon.materialUiIconName}
-        </Icon>
-      </ListItemIcon>
-    );
-  };
-
   #hasSubMenu = () => {
     const { subMenuItems } = this.props;
     return subMenuItems && subMenuItems.length > 0;
   };
 
   #handleMenuButtonClick = (type, id) => {
-    //debugger;
     const { localObserver } = this.props;
-    localObserver.publish(`${type}-clicked`, id);
+    localObserver.publish(`print-${type}-clicked`, id);
   };
 
   #getMenuItemStyle = () => {
@@ -101,6 +87,7 @@ class PanelMenuListItem extends React.PureComponent {
       level,
       title,
       id,
+      chosenForPrint,
     } = this.props;
     const hasSubMenu = this.#hasSubMenu();
     return (
@@ -123,17 +110,31 @@ class PanelMenuListItem extends React.PureComponent {
           className={classes.listItem}
           style={this.#getMenuItemStyle()}
         >
-          {icon ? this.#getListIcon() : null}
+          <ListItemIcon className={classes.listItemIcon}>
+            <Checkbox
+              color="primary"
+              checked={chosenForPrint}
+              onChange={(e) => {
+                this.props.handleTogglePrint(this.props.id);
+              }}
+              onClick={(e) => e.stopPropagation()}
+              edge="start"
+              tabIndex={-1}
+              disableRipple
+            />
+          </ListItemIcon>
           {title && this.#getListTitle()}
           {hasSubMenu && this.#getCollapseIcon()}
         </ListItem>
         {hasSubMenu && (
           <Collapse id={`submenu_${id}`} in={expanded} timeout={200}>
-            <PanelList
+            <PrintList
               {...this.props}
               level={level + 1}
-              items={subMenuItems}
-            ></PanelList>
+              documentMenu={subMenuItems}
+              handleTogglePrint={this.props.handleTogglePrint}
+              //items={subMenuItems}
+            ></PrintList>
           </Collapse>
         )}
       </>
@@ -141,4 +142,4 @@ class PanelMenuListItem extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(PanelMenuListItem));
+export default withStyles(styles)(withTheme(PrintListItemNew));
