@@ -1,3 +1,5 @@
+import { Draw } from "ol/interaction";
+import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill } from "ol/style";
@@ -13,9 +15,9 @@ class MapViewModel {
   constructor(settings) {
     this.#map = settings.map;
     this.#localObserver = settings.localObserver;
+    this.#draw = null;
 
     this.#drawStyleSettings = this.#getDrawStyleSettings();
-    this.#draw = null;
     this.#initDrawLayer();
     this.#bindSubscriptions();
   }
@@ -101,8 +103,31 @@ class MapViewModel {
   };
 
   // Toggles the draw method
-  #toggleDrawMethod = (drawStyle) => {
-    console.log("drawStyle: ", drawStyle);
+  #toggleDrawMethod = (drawMethod, freehand = false) => {
+    // We begin with removing potential existing draw
+    this.#removeDrawInteraction();
+    // Then we have to check wether the user is toggling on or off
+    if (drawMethod !== "") {
+      // If the drawMethod contains something, they want to toggle on!
+      this.#draw = new Draw({
+        source: this.#drawSource,
+        // Rectangles should be created with the "Circle" mehtod
+        // apparently.
+        type: drawMethod === "Rectangle" ? "Circle" : drawMethod,
+        freehand: drawMethod === "Circle" ? true : freehand,
+        stopClick: true,
+        geometryFunction: drawMethod === "Rectangle" ? createBox() : null,
+        style: this.#getDrawStyle(),
+      });
+      // Let's add the clickLock to avoid the featureInfo
+      this.#map.clickLock.add("fmeServer");
+      // Then we add the interaction to the map!
+      this.#map.addInteraction(this.#draw);
+    } else {
+      // If no method was supplied, the user is toggling draw off!
+      this.#map.removeInteraction(this.#draw);
+      this.#map.clickLock.delete("fmeServer");
+    }
   };
 
   // Resets the draw-layer
