@@ -5,9 +5,10 @@ import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
 import DrawToolbox from "./DrawToolbox";
 
 const FmeServerView = (props) => {
+  // We're gonna be needing the localObserver.
   const { localObserver } = props;
   // We're gonna need some state, e.g. which step are we on,
-  // or which product-group the user has selected.
+  // or which product-group the user has selected and so on.
   const [activeStep, setActiveStep] = React.useState(2);
   const [activeGroup, setActiveGroup] = React.useState("");
   const [activeProduct, setActiveProduct] = React.useState("");
@@ -29,9 +30,7 @@ const FmeServerView = (props) => {
   // In this effect we make sure to subscribe to all events emitted by
   // the mapViewModel and fmeServerModel.
   React.useEffect(() => {
-    localObserver.subscribe("map.drawCompleted", (drawInformation) => {
-      handleDrawCompleted(drawInformation);
-    });
+    localObserver.subscribe("map.drawCompleted", handleDrawCompleted);
     return () => {
       // We must make sure to unsubscribe on unmount.
       localObserver.unSubscribe("map.drawCompleted");
@@ -67,6 +66,8 @@ const FmeServerView = (props) => {
     return setActiveDrawButton(buttonType);
   }
 
+  // When the user ends their drawing they might have drawn an
+  // area containing errors, this will be shown in drawInformation.error.
   function handleDrawCompleted(drawInformation) {
     setDrawCompleted(drawInformation.error ? false : true);
     setDrawError(drawInformation.error ? true : false);
