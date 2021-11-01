@@ -23,5 +23,9 @@ export default function useProductParameters(groupName, workspaceName, model) {
     fetchParameters();
   }, [model, groupName, workspaceName]);
 
-  return { error, loading, parameters };
+  const setProductParameters = (newParameters) => {
+    setParameters(newParameters);
+  };
+
+  return { error, loading, parameters, setProductParameters };
 }

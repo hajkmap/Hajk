@@ -40,6 +40,14 @@ const ProductParameters = (props) => {
     );
   }
 
+  function handleParameterChange(e, index, type) {
+    const { parameters } = props;
+    if (type === "TEXT") {
+      parameters[index].value = e.target.value;
+      props.setProductParameters(parameters);
+    }
+  }
+
   function renderChoice(parameter, index) {
     return (
       <Grid key={index} item xs={12}>
@@ -70,10 +78,10 @@ const ProductParameters = (props) => {
         <TextField
           size="small"
           label={parameter.description}
-          defaultValue={parameter.defaultValue}
+          onChange={(e) => handleParameterChange(e, index, "TEXT")}
           fullWidth
           variant="outlined"
-          value={parameter.value}
+          value={parameter.value ?? parameter.defaultValue ?? ""}
         />
       </Grid>
     );

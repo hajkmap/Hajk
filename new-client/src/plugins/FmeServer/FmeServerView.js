@@ -25,11 +25,14 @@ const FmeServerView = (props) => {
   const [drawError, setDrawError] = React.useState(false);
 
   // We're gonna use a custom hook to fetch the product parameters when
-  // the user changes group and/or product.
+  // the user changes group and/or product. We're also supplying a function
+  // that can be used to set the parameters (so that the user can change
+  // the value before they send the submit request).
   const {
     error: parametersError,
     loading: parametersLoading,
     parameters: productParameters,
+    setProductParameters,
   } = useProductParameters(activeGroup, activeProduct, model);
 
   // Let's create an object with all the steps to be rendered. This
@@ -185,7 +188,12 @@ const FmeServerView = (props) => {
       activeGroup,
       activeProduct
     );
-    return <ProductParameters parameters={parametersToRender} />;
+    return (
+      <ProductParameters
+        parameters={parametersToRender}
+        setProductParameters={setProductParameters}
+      />
+    );
   }
 
   // Renders the content for the step where the user can select
