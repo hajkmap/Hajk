@@ -8,12 +8,13 @@ const FmeServerView = (props) => {
   // or which product-group the user has selected.
   const [activeStep, setActiveStep] = React.useState(0);
   const [activeGroup, setActiveGroup] = React.useState("");
+  const [activeProduct, setActiveProduct] = React.useState("");
 
   // Let's create an object with all the steps to be rendered. This
   // will allow us to add another step in a simple manner.
   const steps = [
     { label: "Välj grupp", renderFunction: renderChooseGroupStep },
-    { label: "Välj arbetsyta", renderFunction: renderChooseProductStep },
+    { label: "Välj produkt", renderFunction: renderChooseProductStep },
     { label: "Rita geometri", renderFunction: renderDrawGeometryStep },
     { label: "Fyll i parametrar", renderFunction: renderEnterParametersStep },
     { label: "Beställ", renderFunction: renderOrderStep },
@@ -25,6 +26,12 @@ const FmeServerView = (props) => {
   function handleResetStepper() {
     setActiveStep(0);
     setActiveGroup("");
+  }
+
+  function getProductsInActiveGroup() {
+    return props.options.products.filter((product) => {
+      return product.group === activeGroup;
+    });
   }
 
   // A function to render the stepper-buttons (next, back reset).
@@ -65,10 +72,10 @@ const FmeServerView = (props) => {
       <Grid container item xs={12}>
         <Grid item xs={12}>
           <FormControl fullWidth>
-            <InputLabel id="select-group-label">Grupp</InputLabel>
+            <InputLabel id="fme-server-select-group-label">Grupp</InputLabel>
             <Select
-              labelId="select-group-label"
-              id="select-group"
+              labelId="fme-server-select-group-label"
+              id="fme-server-select-group"
               value={activeGroup}
               label="Grupp"
               onChange={(e) => setActiveGroup(e.target.value)}
@@ -89,10 +96,30 @@ const FmeServerView = (props) => {
   }
 
   function renderChooseProductStep() {
+    const productsInActiveGroup = getProductsInActiveGroup();
     return (
       <Grid container item xs={12}>
         <Grid item xs={12}>
-          <Typography>Välj produkt</Typography>
+          <FormControl fullWidth>
+            <InputLabel id="fme-server-select-product-label">
+              Produkt
+            </InputLabel>
+            <Select
+              labelId="fme-server-select-product-label"
+              id="fme-server-select-product"
+              value={activeProduct}
+              label="Produkt"
+              onChange={(e) => setActiveProduct(e.target.value)}
+            >
+              {productsInActiveGroup.map((product, index) => {
+                return (
+                  <MenuItem value={product.name} key={index}>
+                    {product.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
         </Grid>
         {renderStepperButtons([
           { type: "back", disabled: false },
