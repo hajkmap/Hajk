@@ -5,44 +5,71 @@ import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
 import DrawToolbox from "./DrawToolbox";
 
 const FmeServerView = (props) => {
+  const { localObserver } = props;
   // We're gonna need some state, e.g. which step are we on,
   // or which product-group the user has selected.
   const [activeStep, setActiveStep] = React.useState(2);
   const [activeGroup, setActiveGroup] = React.useState("");
   const [activeProduct, setActiveProduct] = React.useState("");
   const [activeDrawButton, setActiveDrawButton] = React.useState("");
+  const [drawCompleted, setDrawCompleted] = React.useState(false);
+  const [drawError, setDrawError] = React.useState(false);
 
   // Let's create an object with all the steps to be rendered. This
   // will allow us to add another step in a simple manner.
   const steps = [
     { label: "Välj grupp", renderFunction: renderChooseGroupStep },
     { label: "Välj produkt", renderFunction: renderChooseProductStep },
-    { label: "Rita geometri", renderFunction: renderDrawGeometryStep },
+    { label: "Välj omfattning", renderFunction: renderDrawGeometryStep },
     { label: "Fyll i parametrar", renderFunction: renderEnterParametersStep },
     { label: "Beställ", renderFunction: renderOrderStep },
     { label: "Klart!", renderFunction: renderDoneStep },
   ];
+
+  // In this effect we make sure to subscribe to all events emitted by
+  // the mapViewModel and fmeServerModel.
+  React.useEffect(() => {
+    localObserver.subscribe("map.drawCompleted", (drawInformation) => {
+      handleDrawCompleted(drawInformation);
+    });
+    return () => {
+      // We must make sure to unsubscribe on unmount.
+      localObserver.unSubscribe("map.drawCompleted");
+    };
+  }, [localObserver]);
 
   // If the user reaches the last step, they will be able to reset
   // the stepper. If they do, there will be some cleanup done.
   function handleResetStepper() {
     setActiveStep(0);
     setActiveGroup("");
+    setDrawCompleted(false);
+    setDrawError(false);
   }
 
   function handleDrawButtonClick(buttonType) {
     // The reset button should not be toggled (even if it is a toggle-button...)
     // We should only reset the draw state and move on.
     if (buttonType === "RESET") {
-      return null;
+      localObserver.publish("map.resetDrawing");
+      setDrawCompleted(false);
+      setDrawError(false);
+      return;
     }
     // If the user clicks the button that is currently active, we must set
     // that button inactive again.
     if (activeDrawButton === buttonType) {
+      localObserver.publish("map.toggleDrawMethod", "");
       return setActiveDrawButton("");
     }
     // Otherwise, we set the button active!
+    localObserver.publish("map.toggleDrawMethod", buttonType);
     return setActiveDrawButton(buttonType);
+  }
+
+  function handleDrawCompleted(drawInformation) {
+    setDrawCompleted(drawInformation.error ? false : true);
+    setDrawError(drawInformation.error ? true : false);
   }
 
   // Returns an array of products, where each product belongs
@@ -163,12 +190,14 @@ const FmeServerView = (props) => {
     );
   }
 
+  // Renders the content for the step where the user can draw the area
+  // for which the ordered product perform calculations.
   function renderDrawGeometryStep() {
     return (
       <Grid container item xs={12}>
         <Grid item xs={12}>
           <Typography variant="caption">
-            Välj ritverktyg nedan för att rita en yta för beställningen.
+            Välj ritverktyg nedan för att rita beställningens omfattning.
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -177,10 +206,22 @@ const FmeServerView = (props) => {
             handleDrawButtonClick={handleDrawButtonClick}
           />
         </Grid>
-        {renderStepperButtons([
-          { type: "back", disabled: false },
-          { type: "next", disabled: false },
-        ])}
+        {drawError && (
+          <Grid item xs={12}>
+            <Typography variant="caption">
+              Den ritade ytan är för stor. Ta bort den och försök igen för att
+              kunna gå vidare med beställningen!
+            </Typography>
+          </Grid>
+        )}
+        {
+          // If the drawing is not completed, or if the drawing contains an error,
+          // we won't let the user continue on.
+          renderStepperButtons([
+            { type: "back", disabled: false },
+            { type: "next", disabled: !drawCompleted || drawError },
+          ])
+        }
       </Grid>
     );
   }
