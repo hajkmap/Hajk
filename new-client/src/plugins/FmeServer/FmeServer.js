@@ -18,7 +18,7 @@ const FmeServer = (props) => {
   // keep the view free from direct interactions with the server.
   const fmeServerModel = new FmeServerModel({
     localObserver: localObserver,
-    map: props.map,
+    options: props.options,
   });
 
   // A model used to interact with the map. We want to keep the view free

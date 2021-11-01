@@ -7,6 +7,8 @@ import DrawToolbox from "./DrawToolbox";
 const FmeServerView = (props) => {
   // We're gonna be needing the localObserver.
   const { localObserver } = props;
+  // We're also gonna be needing the model
+  const { model } = props;
   // We're gonna need some state, e.g. which step are we on,
   // or which product-group the user has selected and so on.
   const [activeStep, setActiveStep] = React.useState(2);
@@ -14,6 +16,8 @@ const FmeServerView = (props) => {
   const [activeProduct, setActiveProduct] = React.useState("");
   const [activeDrawButton, setActiveDrawButton] = React.useState("");
   const [featureExists, setFeatureExists] = React.useState(false);
+  const [totalAllowedArea, setTotalAllowedArea] = React.useState(0);
+  const [totalDrawnArea, setTotalDrawnArea] = React.useState(0);
   const [drawError, setDrawError] = React.useState(false);
 
   // Let's create an object with all the steps to be rendered. This
@@ -27,15 +31,32 @@ const FmeServerView = (props) => {
     { label: "Klart!", renderFunction: renderDoneStep },
   ];
 
+  // Memoized to prevent useless re-rendering
+  const handleFeatureAdded = React.useCallback(
+    (drawInformation) => {
+      const product = model.getProduct(activeGroup, activeProduct);
+      const totalArea = drawInformation.totalArea;
+      const error =
+        drawInformation.error || drawInformation.totalArea > product.maxArea
+          ? true
+          : false;
+      setFeatureExists(drawInformation.features.length === 0 ? false : true);
+      setDrawError(error);
+      setTotalDrawnArea(totalArea);
+      setTotalAllowedArea(product.maxArea);
+    },
+    [activeGroup, activeProduct, model]
+  );
+
   // In this effect we make sure to subscribe to all events emitted by
   // the mapViewModel and fmeServerModel.
   React.useEffect(() => {
     localObserver.subscribe("map.featureAdded", handleFeatureAdded);
     return () => {
       // We must make sure to unsubscribe on unmount.
-      localObserver.unSubscribe("map.featureAdded");
+      localObserver.unsubscribe("map.featureAdded");
     };
-  }, [localObserver]);
+  }, [localObserver, handleFeatureAdded]);
 
   // If the user reaches the last step, they will be able to reset
   // the stepper. If they do, there will be some cleanup done.
@@ -51,6 +72,7 @@ const FmeServerView = (props) => {
     // We should only reset the draw state and move on.
     if (buttonType === "Reset") {
       localObserver.publish("map.resetDrawing");
+      setActiveDrawButton("");
       setFeatureExists(false);
       setDrawError(false);
       return;
@@ -64,13 +86,6 @@ const FmeServerView = (props) => {
     // Otherwise, we set the button active!
     localObserver.publish("map.toggleDrawMethod", buttonType);
     return setActiveDrawButton(buttonType);
-  }
-
-  // When the user adds a feature we must make sure that the
-  // feature does not contain any errors.
-  function handleFeatureAdded(drawInformation) {
-    setFeatureExists(drawInformation.features.length === 0 ? false : true);
-    setDrawError(drawInformation.error ? true : false);
   }
 
   // Returns an array of products, where each product belongs
@@ -220,8 +235,11 @@ const FmeServerView = (props) => {
         {drawError && (
           <Grid item xs={12}>
             <Typography variant="caption">
-              Den ritade ytan är för stor. Ta bort den och försök igen för att
-              kunna gå vidare med beställningen!
+              {`Den ritade ytan är för stor. Ta bort den och försök igen för att
+              kunna gå vidare med beställningen! Den ritade ytan är ${Math.round(
+                totalDrawnArea
+              )} m2, 
+              och den högst tillåtna arean är ${totalAllowedArea} m2`}
             </Typography>
           </Grid>
         )}

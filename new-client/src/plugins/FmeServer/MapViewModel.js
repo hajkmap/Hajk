@@ -159,11 +159,24 @@ class MapViewModel {
     });
   };
 
-  #handleDrawFeatureAdded = (e) => {
-    this.#localObserver.publish("map.featureAdded", {
-      error: null,
-      features: this.#getDrawnFeatures(),
-    });
+  #handleDrawFeatureAdded = () => {
+    try {
+      let totalArea = 0;
+      const features = this.#getDrawnFeatures();
+      features.map((feature) => {
+        return (totalArea += feature.getGeometry().getArea());
+      });
+      this.#localObserver.publish("map.featureAdded", {
+        error: totalArea === 0,
+        features: features,
+        totalArea: totalArea,
+      });
+    } catch (error) {
+      this.#localObserver.publish("map.featureAdded", {
+        error: true,
+        features: [],
+      });
+    }
   };
 
   // Resets the draw-layer
