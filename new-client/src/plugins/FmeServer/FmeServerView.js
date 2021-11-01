@@ -5,6 +5,7 @@ import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
 import { LinearProgress } from "@material-ui/core";
 
 import DrawToolbox from "./components/DrawToolbox";
+import ProductParameters from "./components/ProductParameters";
 import useProductParameters from "./hooks/useProductParameters";
 
 const FmeServerView = (props) => {
@@ -184,7 +185,7 @@ const FmeServerView = (props) => {
       activeGroup,
       activeProduct
     );
-    console.log("parameters to render: ", parametersToRender);
+    return <ProductParameters parameters={parametersToRender} />;
   }
 
   // Renders the content for the step where the user can select
