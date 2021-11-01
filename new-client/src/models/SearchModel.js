@@ -193,12 +193,16 @@ class SearchModel {
 
     // Do some magic on our valid results
     successfulResponses.forEach((r) => {
-      // if (featureCollection.value.features.length > 0) {
-      //   // FIXME: Investigate if this sorting is really needed, and if so, if we can find some Unicode variant and not only for Swedish characters
-      //   // FIXME: Can't be done like this, by assuming that `value` is an object. It is NOT if we have GML here!
+      // FIXME: Investigate if this sorting is really needed, and if so,
+      // if we can find some Unicode variant and not only for Swedish characters.
+      // FIXME: NB: This can't be done like this as it only works for GeoJSON
+      // responses. GML won't have an object assigned to r.value, so there won't
+      // be any "features" that can be sorted like this (in GML response, the r.value
+      // is a XML string).
+      // if (r.value?.features?.length > 0) {
       //   arraySort({
-      //     array: featureCollection.value.features,
-      //     index: featureCollection.source.searchFields[0],
+      //     array: r.value.features,
+      //     index: r.source.searchFields[0],
       //   });
       // }
 
@@ -425,7 +429,7 @@ class SearchModel {
         possibleSearchCombinations
       );
 
-      let searchFilters = possibleSearchCombinations.map((combination) => {
+      const searchFilters = possibleSearchCombinations.map((combination) => {
         let searchWordsForCombination = combination.map((wordInCombination) => {
           wordInCombination = this.#escapeSpecialChars(wordInCombination);
           wordInCombination = this.#addPotentialWildCards(
@@ -453,11 +457,23 @@ class SearchModel {
         searchOptions.activeSpatialFilter === "within" ? Within : Intersects;
       // Next, loop through supplied features and create the desired filter
       spatialFilters = searchOptions.featuresToFilter.map((feature) => {
-        // Convert circle feature to polygon
-        let geometry = feature.getGeometry();
-        if (geometry.getType() === "Circle") {
-          geometry = fromCircle(geometry);
-        }
+        // If the drawn feature that we want to use as a filter happens to be an
+        // OpenLayers Circle feature, we must convert it to a polygon. (GML only
+        // accepts the following operands: Point, LineString, Polygon, Envelope.)
+        // If it's not a Circle however, let's clone the geometry, to avoid
+        // modifying the geometry that belongs to the feature that  will be used
+        // throughout the loop (see also "Fix for QGIS" below).
+        const geometry =
+          feature.getGeometry().getType() === "Circle"
+            ? fromCircle(feature.getGeometry())
+            : feature.getGeometry().clone();
+
+        // Fix for QGIS Server: for some unknown reasons QGIS doesn't want the Polygon
+        // to be closed. We fix it by basically removing the last two elements of the
+        // flatCoordinates array, effectively eliminating the last point of the polygon.
+        // See also: https://github.com/hajkmap/Hajk/issues/882#issuecomment-956099289
+        searchSource.serverType === "qgis" &&
+          geometry.flatCoordinates.splice(-2, 2);
         return new activeSpatialFilter(geometryName, geometry, srsName);
       });
 
