@@ -3,6 +3,7 @@ import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill } from "ol/style";
+import { handleClick } from "../../models/Click";
 
 class MapViewModel {
   #map;
@@ -106,15 +107,24 @@ class MapViewModel {
   #toggleDrawMethod = (drawMethod, freehand = false) => {
     // We begin with removing potential existing draw
     this.#removeDrawInteraction();
+    // And also remove potential event listener from select
+    this.#map.un("singleclick", this.#handleSelectFeatureClick);
+    // If the interaction is "Select" we dont wan't a draw method
+    if (drawMethod === "Select") {
+      return this.#enableSelectFeaturesSearch();
+    }
     // Then we have to check wether the user is toggling on or off
     if (drawMethod !== "") {
       // If the drawMethod contains something, they want to toggle on!
       this.#draw = new Draw({
         source: this.#drawSource,
-        // Rectangles should be created with the "Circle" mehtod
+        // Rectangles should be created with the "Circle" method
         // apparently.
         type: drawMethod === "Rectangle" ? "Circle" : drawMethod,
-        freehand: drawMethod === "Circle" ? true : freehand,
+        // We want freehand drawing for rectangles and circles
+        freehand: ["Circle", "Rectangle"].includes(drawMethod)
+          ? true
+          : freehand,
         stopClick: true,
         geometryFunction: drawMethod === "Rectangle" ? createBox() : null,
         style: this.#getDrawStyle(),
@@ -128,6 +138,21 @@ class MapViewModel {
       this.#map.removeInteraction(this.#draw);
       this.#map.clickLock.delete("fmeServer");
     }
+  };
+
+  #enableSelectFeaturesSearch = () => {
+    this.#map.clickLock.add("search");
+    this.#map.on("singleclick", this.#handleSelectFeatureClick);
+  };
+
+  #handleSelectFeatureClick = (event) => {
+    handleClick(event, event.map, (response) => {
+      const features = response.features;
+      if (features.length === 0) {
+        return;
+      }
+      this.#drawSource.addFeatures(response.features);
+    });
   };
 
   // Resets the draw-layer

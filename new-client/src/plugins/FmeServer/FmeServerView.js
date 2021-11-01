@@ -49,7 +49,7 @@ const FmeServerView = (props) => {
   function handleDrawButtonClick(buttonType) {
     // The reset button should not be toggled (even if it is a toggle-button...)
     // We should only reset the draw state and move on.
-    if (buttonType === "RESET") {
+    if (buttonType === "Reset") {
       localObserver.publish("map.resetDrawing");
       setDrawCompleted(false);
       setDrawError(false);

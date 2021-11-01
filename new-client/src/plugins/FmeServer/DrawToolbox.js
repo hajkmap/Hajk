@@ -11,28 +11,28 @@ import RotateLeftIcon from "@material-ui/icons/RotateLeft";
 const DrawToolbox = (props) => {
   const drawButtons = [
     {
-      type: "POLYGON",
+      type: "Polygon", // Open-layers does not like all caps!
       tooltip:
         "Rita en yta i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
       icon: <EditIcon />,
     },
     {
-      type: "RECTANGLE",
+      type: "Rectangle",
       tooltip: "Rita en rektangel i kartan.",
       icon: <Crop54Icon />,
     },
     {
-      type: "CIRCLE",
+      type: "Circle",
       tooltip: "Rita en cirkel i kartan.",
       icon: <RadioButtonUncheckedIcon />,
     },
     {
-      type: "SELECT",
+      type: "Select",
       tooltip: "Välj från befintliga objekt i kartan.",
       icon: <TouchAppIcon />,
     },
     {
-      type: "RESET",
+      type: "Reset",
       tooltip: "Blev du inte nöjd? Ta bort alla objekt från kartan.",
       icon: <RotateLeftIcon />,
     },
