@@ -4,6 +4,8 @@ import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
 import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
 import DrawToolbox from "./DrawToolbox";
 
+import useProductParameters from "./hooks/useProductParameters";
+
 const FmeServerView = (props) => {
   // We're gonna be needing the localObserver.
   const { localObserver } = props;
@@ -19,6 +21,16 @@ const FmeServerView = (props) => {
   const [totalAllowedArea, setTotalAllowedArea] = React.useState(0);
   const [totalDrawnArea, setTotalDrawnArea] = React.useState(0);
   const [drawError, setDrawError] = React.useState(false);
+
+  // We're gonna use a custom hook to fetch the product parameters when
+  // the user changes group and/or product.
+  const {
+    error: parametersError,
+    loading: parametersLoading,
+    parameters,
+  } = useProductParameters(activeGroup, activeProduct, model);
+
+  console.log(parametersError, parametersLoading, parameters);
 
   // Let's create an object with all the steps to be rendered. This
   // will allow us to add another step in a simple manner.
