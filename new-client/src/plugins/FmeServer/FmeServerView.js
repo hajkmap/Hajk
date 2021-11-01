@@ -2,8 +2,9 @@ import React from "react";
 import { Button, Grid, Typography } from "@material-ui/core";
 import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
 import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
-import DrawToolbox from "./components/DrawToolbox";
+import { LinearProgress } from "@material-ui/core";
 
+import DrawToolbox from "./components/DrawToolbox";
 import useProductParameters from "./hooks/useProductParameters";
 
 const FmeServerView = (props) => {
@@ -27,10 +28,8 @@ const FmeServerView = (props) => {
   const {
     error: parametersError,
     loading: parametersLoading,
-    parameters,
+    parameters: productParameters,
   } = useProductParameters(activeGroup, activeProduct, model);
-
-  console.log(parametersError, parametersLoading, parameters);
 
   // Let's create an object with all the steps to be rendered. This
   // will allow us to add another step in a simple manner.
@@ -149,6 +148,43 @@ const FmeServerView = (props) => {
       return setActiveStep(activeStep + 1);
     }
     return handleResetStepper();
+  }
+
+  // Renders the product parameters fetched by the useProductParameters hook.
+  function renderProductParameters() {
+    // If an error was returned when fetching the parameters, let's render
+    // some error text.
+    if (parametersError) {
+      return (
+        <Typography>
+          Produktens parametrar kunde inte hämtas. Kontakta
+          systemadministratören.
+        </Typography>
+      );
+    }
+    // If we're still loading the parameters, let's display some
+    // loading-bar
+    if (parametersLoading) {
+      return (
+        <Grid container>
+          <Grid item xs={12}>
+            <Typography>Försöker hämta parametrar...</Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <LinearProgress />
+          </Grid>
+        </Grid>
+      );
+    }
+    // If we're not loading, and we're not error:ing, let's render the
+    // parameters! First we need to get all parameters intended to be
+    // rendered. (Every parameter except the one containing the geometry).
+    const parametersToRender = model.getParametersToRender(
+      productParameters,
+      activeGroup,
+      activeProduct
+    );
+    console.log("parameters to render: ", parametersToRender);
   }
 
   // Renders the content for the step where the user can select
@@ -271,11 +307,11 @@ const FmeServerView = (props) => {
     return (
       <Grid container item xs={12}>
         <Grid item xs={12}>
-          <Typography>Ange parmaterar</Typography>
+          {renderProductParameters()}
         </Grid>
         {renderStepperButtons([
           { type: "back", disabled: false },
-          { type: "next", disabled: false },
+          { type: "next", disabled: parametersLoading || parametersError },
         ])}
       </Grid>
     );

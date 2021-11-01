@@ -19,6 +19,22 @@ class FmeServerModel {
     });
   };
 
+  // Returns all parameters except the one parameter stated
+  // to be the one containing the geometry.
+  getParametersToRender = (parameters, groupName, productName) => {
+    // We must fetch the product
+    const product = this.getProduct(groupName, productName);
+    // And make sure it exists. If it doesn't we return an empty array
+    if (!product) {
+      return [];
+    }
+    // Otherwise we return the filtered parameters, where the parameter
+    // with the geomAttribute as name is removed.
+    return parameters.filter((parameter) => {
+      return parameter.name !== product.geoAttribute;
+    });
+  };
+
   // Fetches all product parameters from FME-server
   getProductParameters = async (groupName, productName) => {
     // If the product is missing for some reason, we return an
