@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, TextField, Typography } from "@material-ui/core";
 
 const ProductParameters = (props) => {
   const allowedFmeTypes = ["CHOICE", "LOOKUP_CHOICE", "LOOKUP_LISTBOX", "TEXT"];
@@ -40,7 +40,7 @@ const ProductParameters = (props) => {
     );
   }
 
-  function renderChoice(index) {
+  function renderChoice(parameter, index) {
     return (
       <Grid key={index} item xs={12}>
         <h3>CHOICE</h3>
@@ -48,7 +48,7 @@ const ProductParameters = (props) => {
     );
   }
 
-  function renderLookupChoice(index) {
+  function renderLookupChoice(parameter, index) {
     return (
       <Grid key={index} item xs={12}>
         <h3>renderLookupChoice</h3>
@@ -56,7 +56,7 @@ const ProductParameters = (props) => {
     );
   }
 
-  function renderLookupListbox(index) {
+  function renderLookupListbox(parameter, index) {
     return (
       <Grid key={index} item xs={12}>
         <h3>renderLookupListbox</h3>
@@ -64,10 +64,17 @@ const ProductParameters = (props) => {
     );
   }
 
-  function renderText(index) {
+  function renderText(parameter, index) {
     return (
-      <Grid key={index} item xs={12}>
-        <h3>renderText</h3>
+      <Grid key={index} item xs={12} style={{ padding: 8 }}>
+        <TextField
+          size="small"
+          label={parameter.description}
+          defaultValue={parameter.defaultValue}
+          fullWidth
+          variant="outlined"
+          value={parameter.value}
+        />
       </Grid>
     );
   }
@@ -78,13 +85,13 @@ const ProductParameters = (props) => {
         {props.parameters.map((parameter, index) => {
           switch (parameter.type) {
             case "CHOICE":
-              return renderChoice(index);
+              return renderChoice(parameter, index);
             case "LOOKUP_CHOICE":
-              return renderLookupChoice(index);
+              return renderLookupChoice(parameter, index);
             case "LOOKUP_LISTBOX":
-              return renderLookupListbox(index);
+              return renderLookupListbox(parameter, index);
             case "TEXT":
-              return renderText(index);
+              return renderText(parameter, index);
             default:
               return null;
           }
