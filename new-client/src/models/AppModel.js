@@ -33,6 +33,27 @@ import SnapHelper from "./SnapHelper";
 import { hfetch } from "utils/FetchWrapper";
 
 class AppModel {
+  /**
+   * Initialize new AddModel
+   * @param object Config
+   * @param Observer observer
+   */
+  constructor(config, globalObserver) {
+    this.map = undefined;
+    this.windows = [];
+    this.plugins = {};
+    this.activeTool = undefined;
+    this.config = config;
+    this.coordinateSystemLoader = new CoordinateSystemLoader(
+      config.mapConfig.projections
+    );
+    this.globalObserver = globalObserver;
+    this.layersFromParams = [];
+    this.cqlFiltersFromParams = {};
+    register(this.coordinateSystemLoader.getProj4());
+    this.hfetch = hfetch;
+  }
+
   registerWindowPlugin(windowComponent) {
     this.windows.push(windowComponent);
   }
@@ -54,32 +75,13 @@ class AppModel {
   }
 
   /**
-   * Initialize new AddModel
-   * @param object Config
-   * @param Observer observer
-   */
-  constructor(config, globalObserver) {
-    this.map = undefined;
-    this.windows = [];
-    this.plugins = {};
-    this.activeTool = undefined;
-    this.config = config;
-    this.coordinateSystemLoader = new CoordinateSystemLoader(
-      config.mapConfig.projections
-    );
-    this.globalObserver = globalObserver;
-    this.layersFromParams = [];
-    this.cqlFiltersFromParams = {};
-    register(this.coordinateSystemLoader.getProj4());
-    this.hfetch = hfetch;
-  }
-  /**
    * Add plugin to this tools property of loaded plugins.
    * @internal
    */
   addPlugin(plugin) {
     this.plugins[plugin.type] = plugin;
   }
+
   /**
    * Get loaded plugins
    * @returns Array<Plugin>
@@ -89,6 +91,7 @@ class AppModel {
       return [...v, this.plugins[key]];
     }, []);
   }
+
   /**
    * A plugin may have the 'target' option. Currently we use three
    * targets: toolbar, left and right. Toolbar means it's a
@@ -179,6 +182,47 @@ class AppModel {
    */
   createMap() {
     const config = this.translateConfig();
+
+    // Prepare OL interactions options, refer to https://openlayers.org/en/latest/apidoc/module-ol_interaction.html#.defaults.
+    // We use conditional properties to ensure that only existing keys are set. The rest
+    // will fallback to defaults from OL. (The entire interactionsOptions object, as well as all its properties are optional
+    // according to OL documentation, so there's no need to set stuff that won't be needed.)
+    const interactionsOptions = {
+      ...(config.map.hasOwnProperty("altShiftDragRotate") && {
+        altShiftDragRotate: config.map.altShiftDragRotate,
+      }),
+      ...(config.map.hasOwnProperty("onFocusOnly") && {
+        onFocusOnly: config.map.onFocusOnly,
+      }),
+      ...(config.map.hasOwnProperty("doubleClickZoom") && {
+        doubleClickZoom: config.map.doubleClickZoom,
+      }),
+      ...(config.map.hasOwnProperty("keyboard") && {
+        keyboard: config.map.keyboard,
+      }),
+      ...(config.map.hasOwnProperty("mouseWheelZoom") && {
+        mouseWheelZoom: config.map.mouseWheelZoom,
+      }),
+      ...(config.map.hasOwnProperty("shiftDragZoom") && {
+        shiftDragZoom: config.map.shiftDragZoom,
+      }),
+      ...(config.map.hasOwnProperty("dragPan") && {
+        dragPan: config.map.dragPan,
+      }),
+      ...(config.map.hasOwnProperty("pinchRotate") && {
+        pinchRotate: config.map.pinchRotate,
+      }),
+      ...(config.map.hasOwnProperty("pinchZoom") && {
+        pinchZoom: config.map.pinchZoom,
+      }),
+      ...(!Number.isNaN(Number.parseInt(config.map.zoomDelta)) && {
+        zoomDelta: config.map.zoomDelta,
+      }),
+      ...(!Number.isNaN(Number.parseInt(config.map.zoomDuration)) && {
+        zoomDuration: config.map.zoomDuration,
+      }),
+    };
+
     this.map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
@@ -193,7 +237,7 @@ class AppModel {
         //   })
         // })
       ],
-      interactions: defaultInteractions(),
+      interactions: defaultInteractions(interactionsOptions),
       layers: [],
       target: config.map.target,
       overlays: [],

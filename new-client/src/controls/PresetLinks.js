@@ -194,7 +194,7 @@ class Preset extends React.PureComponent {
       return createPortal(
         <Dialog
           options={{
-            text: "Alla lager i kartan kommer nu att släckas.",
+            text: "Alla tända lager i kartan kommer nu att släckas. Snabbvalets fördefinierade lager tänds istället.",
             headerText: "Visa snabbval",
             buttonText: "OK",
             abortText: "Avbryt",

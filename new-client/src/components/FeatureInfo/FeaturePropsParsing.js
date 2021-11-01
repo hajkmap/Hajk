@@ -97,6 +97,10 @@ export default class FeaturePropsParsing {
     // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
     this.components = {
       p: (props) => {
+        if (!props.children) {
+          return null;
+        }
+
         const r = props.children.map((child, index) => {
           // Initiate a holder for external components. If a regex matches below,
           // this variable will be filled with correct value.
