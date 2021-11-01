@@ -2,13 +2,15 @@ import React from "react";
 import { Button, Grid, Typography } from "@material-ui/core";
 import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
 import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
+import DrawToolbox from "./DrawToolbox";
 
 const FmeServerView = (props) => {
   // We're gonna need some state, e.g. which step are we on,
   // or which product-group the user has selected.
-  const [activeStep, setActiveStep] = React.useState(0);
+  const [activeStep, setActiveStep] = React.useState(2);
   const [activeGroup, setActiveGroup] = React.useState("");
   const [activeProduct, setActiveProduct] = React.useState("");
+  const [activeDrawButton, setActiveDrawButton] = React.useState("");
 
   // Let's create an object with all the steps to be rendered. This
   // will allow us to add another step in a simple manner.
@@ -26,6 +28,21 @@ const FmeServerView = (props) => {
   function handleResetStepper() {
     setActiveStep(0);
     setActiveGroup("");
+  }
+
+  function handleDrawButtonClick(buttonType) {
+    // The reset button should not be toggled (even if it is a toggle-button...)
+    // We should only reset the draw state and move on.
+    if (buttonType === "RESET") {
+      return null;
+    }
+    // If the user clicks the button that is currently active, we must set
+    // that button inactive again.
+    if (activeDrawButton === buttonType) {
+      return setActiveDrawButton("");
+    }
+    // Otherwise, we set the button active!
+    return setActiveDrawButton(buttonType);
   }
 
   // Returns an array of products, where each product belongs
@@ -150,7 +167,15 @@ const FmeServerView = (props) => {
     return (
       <Grid container item xs={12}>
         <Grid item xs={12}>
-          <Typography>Rita geometri</Typography>
+          <Typography variant="caption">
+            Välj ritverktyg nedan för att rita en yta för beställningen.
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <DrawToolbox
+            activeDrawButton={activeDrawButton}
+            handleDrawButtonClick={handleDrawButtonClick}
+          />
         </Grid>
         {renderStepperButtons([
           { type: "back", disabled: false },
