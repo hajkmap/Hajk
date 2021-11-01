@@ -107,8 +107,9 @@ class MapViewModel {
   #toggleDrawMethod = (drawMethod, freehand = false) => {
     // We begin with removing potential existing draw
     this.#removeDrawInteraction();
-    // And also remove potential event listener from select
+    // And also remove potential event listeners
     this.#map.un("singleclick", this.#handleSelectFeatureClick);
+    this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
     // If the interaction is "Select" we dont wan't a draw method
     if (drawMethod === "Select") {
       return this.#enableSelectFeaturesSearch();
@@ -133,6 +134,8 @@ class MapViewModel {
       this.#map.clickLock.add("fmeServer");
       // Then we add the interaction to the map!
       this.#map.addInteraction(this.#draw);
+      // We need a listener for when a feature is added to the source.
+      this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
     } else {
       // If no method was supplied, the user is toggling draw off!
       this.#map.removeInteraction(this.#draw);
@@ -143,6 +146,7 @@ class MapViewModel {
   #enableSelectFeaturesSearch = () => {
     this.#map.clickLock.add("search");
     this.#map.on("singleclick", this.#handleSelectFeatureClick);
+    this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
   };
 
   #handleSelectFeatureClick = (event) => {
@@ -152,6 +156,13 @@ class MapViewModel {
         return;
       }
       this.#drawSource.addFeatures(response.features);
+    });
+  };
+
+  #handleDrawFeatureAdded = (e) => {
+    this.#localObserver.publish("map.featureAdded", {
+      error: null,
+      features: this.#getDrawnFeatures(),
     });
   };
 

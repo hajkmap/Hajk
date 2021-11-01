@@ -13,7 +13,7 @@ const FmeServerView = (props) => {
   const [activeGroup, setActiveGroup] = React.useState("");
   const [activeProduct, setActiveProduct] = React.useState("");
   const [activeDrawButton, setActiveDrawButton] = React.useState("");
-  const [drawCompleted, setDrawCompleted] = React.useState(false);
+  const [featureExists, setFeatureExists] = React.useState(false);
   const [drawError, setDrawError] = React.useState(false);
 
   // Let's create an object with all the steps to be rendered. This
@@ -30,10 +30,10 @@ const FmeServerView = (props) => {
   // In this effect we make sure to subscribe to all events emitted by
   // the mapViewModel and fmeServerModel.
   React.useEffect(() => {
-    localObserver.subscribe("map.drawCompleted", handleDrawCompleted);
+    localObserver.subscribe("map.featureAdded", handleFeatureAdded);
     return () => {
       // We must make sure to unsubscribe on unmount.
-      localObserver.unSubscribe("map.drawCompleted");
+      localObserver.unSubscribe("map.featureAdded");
     };
   }, [localObserver]);
 
@@ -42,7 +42,7 @@ const FmeServerView = (props) => {
   function handleResetStepper() {
     setActiveStep(0);
     setActiveGroup("");
-    setDrawCompleted(false);
+    setFeatureExists(false);
     setDrawError(false);
   }
 
@@ -51,7 +51,7 @@ const FmeServerView = (props) => {
     // We should only reset the draw state and move on.
     if (buttonType === "Reset") {
       localObserver.publish("map.resetDrawing");
-      setDrawCompleted(false);
+      setFeatureExists(false);
       setDrawError(false);
       return;
     }
@@ -66,10 +66,10 @@ const FmeServerView = (props) => {
     return setActiveDrawButton(buttonType);
   }
 
-  // When the user ends their drawing they might have drawn an
-  // area containing errors, this will be shown in drawInformation.error.
-  function handleDrawCompleted(drawInformation) {
-    setDrawCompleted(drawInformation.error ? false : true);
+  // When the user adds a feature we must make sure that the
+  // feature does not contain any errors.
+  function handleFeatureAdded(drawInformation) {
+    setFeatureExists(drawInformation.features.length === 0 ? false : true);
     setDrawError(drawInformation.error ? true : false);
   }
 
@@ -94,13 +94,7 @@ const FmeServerView = (props) => {
               style={{ marginTop: 8, marginLeft: 8 }}
               disabled={button.disabled}
               variant="contained"
-              onClick={
-                button.type === "back"
-                  ? () => setActiveStep(activeStep - 1)
-                  : button.type === "next"
-                  ? () => setActiveStep(activeStep + 1)
-                  : () => handleResetStepper()
-              }
+              onClick={() => handleStepperButtonClick(button.type)}
             >
               {button.type === "back"
                 ? "Tillbaka"
@@ -112,6 +106,22 @@ const FmeServerView = (props) => {
         })}
       </Grid>
     );
+  }
+
+  // Handles back, next, and reset clicks.
+  function handleStepperButtonClick(type) {
+    // We always want to make sure that we are turning the draw-method off.
+    if (activeDrawButton !== "") {
+      setActiveDrawButton("");
+      localObserver.publish("map.toggleDrawMethod", "");
+    }
+    if (type === "back") {
+      return setActiveStep(activeStep - 1);
+    }
+    if (type === "next") {
+      return setActiveStep(activeStep + 1);
+    }
+    return handleResetStepper();
   }
 
   // Renders the content for the step where the user can select
@@ -220,7 +230,7 @@ const FmeServerView = (props) => {
           // we won't let the user continue on.
           renderStepperButtons([
             { type: "back", disabled: false },
-            { type: "next", disabled: !drawCompleted || drawError },
+            { type: "next", disabled: !featureExists || drawError },
           ])
         }
       </Grid>
