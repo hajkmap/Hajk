@@ -3,7 +3,7 @@ import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill } from "ol/style";
-import { handleClick } from "../../models/Click";
+import { handleClick } from "../../../models/Click";
 
 class MapViewModel {
   #map;

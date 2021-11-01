@@ -7,8 +7,8 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import FmeView from "./FmeServerView";
 
 // Models
-import FmeServerModel from "./FmeServerModel";
-import MapViewModel from "./MapViewModel";
+import FmeServerModel from "./models/FmeServerModel";
+import MapViewModel from "./models/MapViewModel";
 
 const FmeServer = (props) => {
   // The local observer will handle the communication between models and views.

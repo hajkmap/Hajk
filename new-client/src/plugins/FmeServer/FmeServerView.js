@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Grid, Typography } from "@material-ui/core";
 import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
 import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
-import DrawToolbox from "./DrawToolbox";
+import DrawToolbox from "./components/DrawToolbox";
 
 import useProductParameters from "./hooks/useProductParameters";
 
