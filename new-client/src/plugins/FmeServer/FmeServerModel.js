@@ -21,7 +21,8 @@ class FmeServerModel {
 
   // Fetches all product parameters from FME-server
   getProductParameters = async (groupName, productName) => {
-    // If the product is missing for some reason, we return an empty array.
+    // If the product is missing for some reason, we return an
+    // error and an empty array.
     const product = this.getProduct(groupName, productName);
     if (!product) {
       return { error: true, parameters: [] };
@@ -67,6 +68,24 @@ class FmeServerModel {
     }
   };
 
+  // Fetches the status for a submitted job
+  getJobStatusById = async (jobId) => {
+    // If the jobId is missing, we return an error.
+    if (!jobId) {
+      return { error: true, status: null };
+    }
+    // If not, let's create the url used to fetch the parameters.
+    const url = this.#createProductStatusUrl(jobId);
+    // And then try to fetch the status with the url...
+    try {
+      const response = await hfetch(url);
+      const data = await response.json();
+      return { error: false, status: data };
+    } catch (error) {
+      return { error: true, status: null };
+    }
+  };
+
   // Returns the url needed to fetch the product parameters from FME-server.
   #createGetParametersUrl = (product) => {
     return `${this.#mapServiceBase}/fmeproxy/fmerest/v3/repositories/${
@@ -81,6 +100,14 @@ class FmeServerModel {
     }/fmeproxy/fmerest/v3/transformations/submit/${product.repository}/${
       product.workspace
     }`;
+  };
+
+  // Returns the url needed to fetch information about a submitted job.
+  // The required parameter, jobId is a string returned when queuing a job.
+  #createProductStatusUrl = (jobId) => {
+    return `${
+      this.#mapServiceBase
+    }/fmeproxy/fmerest/v3/transformations/jobs/id/${jobId}`;
   };
 }
 export default FmeServerModel;
