@@ -90,7 +90,7 @@ const FmeServerView = (props) => {
             </Select>
           </FormControl>
         </Grid>
-        {renderStepperButtons([{ type: "next", disabled: false }])}
+        {renderStepperButtons([{ type: "next", disabled: activeGroup === "" }])}
       </Grid>
     );
   }
@@ -123,7 +123,7 @@ const FmeServerView = (props) => {
         </Grid>
         {renderStepperButtons([
           { type: "back", disabled: false },
-          { type: "next", disabled: false },
+          { type: "next", disabled: activeProduct === "" },
         ])}
       </Grid>
     );
