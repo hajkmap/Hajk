@@ -18,6 +18,7 @@ const FmeServer = (props) => {
   // keep the view free from direct interactions with the server.
   const fmeServerModel = new FmeServerModel({
     localObserver: localObserver,
+    app: props.app,
     options: props.options,
   });
 

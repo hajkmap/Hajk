@@ -11,7 +11,7 @@ const FmeServerView = (props) => {
   const { model } = props;
   // We're gonna need some state, e.g. which step are we on,
   // or which product-group the user has selected and so on.
-  const [activeStep, setActiveStep] = React.useState(2);
+  const [activeStep, setActiveStep] = React.useState(0);
   const [activeGroup, setActiveGroup] = React.useState("");
   const [activeProduct, setActiveProduct] = React.useState("");
   const [activeDrawButton, setActiveDrawButton] = React.useState("");
