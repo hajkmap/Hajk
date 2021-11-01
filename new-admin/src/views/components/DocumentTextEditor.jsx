@@ -318,7 +318,7 @@ export default class DocumentTextEditor extends React.Component {
     } = this.state;
 
     const urlIndex = videoUrl.indexOf("config");
-    urlValue = urlValue.replace("../", videoUrl.substr(0, urlIndex));
+    //urlValue = urlValue.replace("../", videoUrl.substr(0, urlIndex));
     imageAlt = imageAlt ? imageAlt : "";
     mediaCaption = mediaCaption ? mediaCaption : "";
     mediaSource = mediaSource ? mediaSource : "";
@@ -358,7 +358,7 @@ export default class DocumentTextEditor extends React.Component {
     } = this.state;
 
     const urlIndex = audioUrl.indexOf("config");
-    urlValue = urlValue.replace("../", audioUrl.substr(0, urlIndex));
+    //urlValue = urlValue.replace("../", audioUrl.substr(0, urlIndex));
     imageAlt = imageAlt ? imageAlt : "";
     mediaCaption = mediaCaption ? mediaCaption : "";
     mediaSource = mediaSource ? mediaSource : "";
@@ -1060,8 +1060,6 @@ export default class DocumentTextEditor extends React.Component {
           : "ljud";
       const popupDisabled = this.state.urlType === "image" ? false : true;
       const widthHeightDisable = this.state.urlType === "audio" ? true : false;
-
-      debugger;
 
       urlInput = (
         <Grid style={styles.gridItemContainer} container>
