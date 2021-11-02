@@ -1,12 +1,14 @@
 import React from "react";
 import { Grid, TextField, Typography } from "@material-ui/core";
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
+import Slider from "@material-ui/core/Slider";
 
 const ProductParameters = (props) => {
   const allowedFmeTypes = [
     "CHOICE",
     "LOOKUP_CHOICE",
     "LOOKUP_LISTBOX",
+    "RANGE_SLIDER",
     "PASSWORD",
     "TEXT",
   ];
@@ -23,6 +25,24 @@ const ProductParameters = (props) => {
   // Checks wether there are no parameters to render or not.
   function noParametersToRender() {
     return props.parameters.length === 0;
+  }
+
+  function getRangeSliderValueAndStep(parameter) {
+    if (parameter.decimalPrecision > 0) {
+    }
+    const value = parameter.value
+      ? parameter.decimalPrecision > 0
+        ? parseFloat(parameter.value)
+        : parseInt(parameter.value)
+      : parameter.defaultValue
+      ? parameter.decimalPrecision > 0
+        ? parseFloat(parameter.defaultValue)
+        : parseInt(parameter.defaultValue)
+      : parameter.minimum;
+
+    const step = 1;
+
+    return { value, step };
   }
 
   function renderParameterRenderingError() {
@@ -47,7 +67,7 @@ const ProductParameters = (props) => {
     );
   }
 
-  function handleParameterChange(e, index, type) {
+  function handleParameterChange(value, index, type) {
     const { parameters } = props;
     // Choice, lookup_choice, and text should all only have
     // a single value, so the same handler should get the job
@@ -58,11 +78,15 @@ const ProductParameters = (props) => {
       case "LOOKUP_CHOICE":
       case "PASSWORD":
       case "TEXT":
-        parameters[index].value = e.target.value;
+        parameters[index].value = value;
         props.setProductParameters(parameters);
         return;
       case "LOOKUP_LISTBOX":
-        parameters[index].value = e.target.value;
+        parameters[index].value = value;
+        props.setProductParameters(parameters);
+        return;
+      case "RANGE_SLIDER":
+        parameters[index].value = value;
         props.setProductParameters(parameters);
         return;
       default:
@@ -83,7 +107,9 @@ const ProductParameters = (props) => {
             variant="outlined"
             value={parameter.value ?? parameter.defaultValue ?? ""}
             label={parameter.description}
-            onChange={(e) => handleParameterChange(e, index, "LOOKUP_CHOICE")}
+            onChange={(e) =>
+              handleParameterChange(e.target.value, index, "LOOKUP_CHOICE")
+            }
           >
             {parameter.listOptions.map((option, index) => {
               return (
@@ -106,6 +132,28 @@ const ProductParameters = (props) => {
     );
   }
 
+  function renderRangeSlider(parameter, index) {
+    const { value, step } = getRangeSliderValueAndStep(parameter);
+    return (
+      <Grid key={index} item xs={12} style={{ padding: 8 }}>
+        <Grid item xs={12}>
+          <Typography>{parameter.description}</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Slider
+            value={value}
+            min={parameter.minimum}
+            max={parameter.maximum}
+            step={step}
+            onChange={(e, newValue) =>
+              handleParameterChange(newValue, index, "RANGE_SLIDER")
+            }
+          />
+        </Grid>
+      </Grid>
+    );
+  }
+
   function renderText(parameter, index) {
     return (
       <Grid key={index} item xs={12} style={{ padding: 8 }}>
@@ -115,7 +163,7 @@ const ProductParameters = (props) => {
           type={parameter.type === "PASSWORD" ? "password" : "text"}
           required={!parameter.optional}
           label={parameter.description}
-          onChange={(e) => handleParameterChange(e, index, "TEXT")}
+          onChange={(e) => handleParameterChange(e.target.value, index, "TEXT")}
           fullWidth
           variant="outlined"
           value={parameter.value ?? parameter.defaultValue ?? ""}
@@ -136,6 +184,8 @@ const ProductParameters = (props) => {
               return renderChoice(parameter, index);
             case "LOOKUP_LISTBOX":
               return renderLookupListbox(parameter, index);
+            case "RANGE_SLIDER":
+              return renderRangeSlider(parameter, index);
             case "TEXT":
             case "PASSWORD":
               return renderText(parameter, index);
