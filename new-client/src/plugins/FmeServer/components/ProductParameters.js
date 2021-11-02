@@ -3,7 +3,13 @@ import { Grid, TextField, Typography } from "@material-ui/core";
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 
 const ProductParameters = (props) => {
-  const allowedFmeTypes = ["CHOICE", "LOOKUP_CHOICE", "LOOKUP_LISTBOX", "TEXT"];
+  const allowedFmeTypes = [
+    "CHOICE",
+    "LOOKUP_CHOICE",
+    "LOOKUP_LISTBOX",
+    "PASSWORD",
+    "TEXT",
+  ];
 
   // Checks wether all parameters can be rendered or not.
   // A parameter cannot be rendered if the parameter type is not
@@ -50,6 +56,7 @@ const ProductParameters = (props) => {
     switch (type) {
       case "CHOICE":
       case "LOOKUP_CHOICE":
+      case "PASSWORD":
       case "TEXT":
         parameters[index].value = e.target.value;
         props.setProductParameters(parameters);
@@ -72,7 +79,7 @@ const ProductParameters = (props) => {
           </InputLabel>
           <Select
             labelId="fme-lookup-choice-label"
-            id="fme-lookup-choice"
+            id={`fme-lookup-choice-${index}`}
             variant="outlined"
             value={parameter.value ?? parameter.defaultValue ?? ""}
             label={parameter.description}
@@ -103,8 +110,9 @@ const ProductParameters = (props) => {
     return (
       <Grid key={index} item xs={12} style={{ padding: 8 }}>
         <TextField
-          id="fme-text"
+          id={`fme-text-${index}`}
           size="small"
+          type={parameter.type === "PASSWORD" ? "password" : "text"}
           required={!parameter.optional}
           label={parameter.description}
           onChange={(e) => handleParameterChange(e, index, "TEXT")}
@@ -129,6 +137,7 @@ const ProductParameters = (props) => {
             case "LOOKUP_LISTBOX":
               return renderLookupListbox(parameter, index);
             case "TEXT":
+            case "PASSWORD":
               return renderText(parameter, index);
             default:
               return null;
