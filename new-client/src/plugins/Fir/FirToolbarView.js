@@ -25,6 +25,7 @@ class FirToolbarView extends React.PureComponent {
     },
     files: { list: [] },
     buffer: 0,
+    numberOfObjects: 0,
   };
 
   static propTypes = {
@@ -50,6 +51,17 @@ class FirToolbarView extends React.PureComponent {
       this.setState({ files: { list: [] } });
       this.deselectButtonItems();
     });
+  };
+
+  updateNumberOfObjects = () => {
+    setTimeout(() => {
+      // TODO: create and listen to update event instead.
+      this.setState({
+        numberOfObjects: this.model.layers.draw.getSource().getFeatures()
+          .length,
+      });
+      this.forceUpdate();
+    }, 100);
   };
 
   handleToolbarClick(id) {
@@ -110,6 +122,7 @@ class FirToolbarView extends React.PureComponent {
       }
       first = false;
     });
+    this.updateNumberOfObjects();
   };
 
   activateTool = (type) => {
@@ -155,12 +168,14 @@ class FirToolbarView extends React.PureComponent {
       this.model.map.clickLock.delete("fir-draw");
       window.removeEventListener("keydown", this.handleKeyDown);
     }
+    this.updateNumberOfObjects();
   };
 
   activateDraw = () => {
     this.model.map.addInteraction(this.interaction);
     this.model.map.clickLock.add("fir-draw");
     window.addEventListener("keydown", this.handleKeyDown);
+    this.updateNumberOfObjects();
   };
 
   deselectButtonItems = () => {
@@ -309,46 +324,48 @@ class FirToolbarView extends React.PureComponent {
             </div>
           </Collapse>
         </div>
-        <div className={classes.containerTopDoublePadded}>
-          <TextField
-            fullWidth={true}
-            label="Lägg till buffer på sökområde"
-            value={this.state.buffer}
-            onKeyDown={(e) => {
-              return !isNaN(e.key);
-            }}
-            onChange={(e) => {
-              let v = parseInt(e.target.value);
-              if (isNaN(v)) {
-                v = 0;
-              }
+        <Collapse in={this.state.numberOfObjects > 0}>
+          <div className={classes.containerTopDoublePadded}>
+            <TextField
+              fullWidth={true}
+              label="Lägg till buffer på sökområde"
+              value={this.state.buffer}
+              onKeyDown={(e) => {
+                return !isNaN(e.key);
+              }}
+              onChange={(e) => {
+                let v = parseInt(e.target.value);
+                if (isNaN(v)) {
+                  v = 0;
+                }
 
-              const bufferValue = parseInt(v);
-              this.setState({ buffer: bufferValue });
+                const bufferValue = parseInt(v);
+                this.setState({ buffer: bufferValue });
 
-              this.localObserver.publish("fir.layers.bufferValueChanged", {
-                value: bufferValue,
-              });
-            }}
-            onFocus={(e) => {
-              if (this.state.buffer === 0) {
-                this.setState({ buffer: "" });
-              }
-            }}
-            onBlur={(e) => {
-              if (this.state.buffer === "") {
-                this.setState({ buffer: 0 });
-              }
-            }}
-            size="small"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">meter</InputAdornment>
-              ),
-            }}
-            variant="outlined"
-          />
-        </div>
+                this.localObserver.publish("fir.layers.bufferValueChanged", {
+                  value: bufferValue,
+                });
+              }}
+              onFocus={(e) => {
+                if (this.state.buffer === 0) {
+                  this.setState({ buffer: "" });
+                }
+              }}
+              onBlur={(e) => {
+                if (this.state.buffer === "") {
+                  this.setState({ buffer: 0 });
+                }
+              }}
+              size="small"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">meter</InputAdornment>
+                ),
+              }}
+              variant="outlined"
+            />
+          </div>
+        </Collapse>
       </>
     );
   }

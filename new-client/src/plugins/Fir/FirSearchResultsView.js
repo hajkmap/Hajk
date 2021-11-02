@@ -395,6 +395,7 @@ class FirView extends React.PureComponent {
                       <div className={classes.resultItemData}>
                         <FirSearchResultItemView
                           model={data}
+                          rootModel={this.model}
                           app={this.props.app}
                           localObserver={this.localObserver}
                         />

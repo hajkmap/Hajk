@@ -23,6 +23,7 @@ class FirLayerController {
     this.observer = observer;
     this.bufferValue = 0;
     this.removeIsActive = false;
+    this.ctrlKeyIsDown = false;
     this.initLayers();
     this.initListeners();
   }
@@ -34,6 +35,12 @@ class FirLayerController {
       .find(
         (layer) => layer.get("name") === this.model.config.wmsRealEstateLayer.id
       );
+
+    if (!this.model.layers.wmsRealEstate) {
+      console.warn(
+        `FIR: wmsRealEstateLayer with id ${this.model.config.wmsRealEstateLayer.id} could not be found in map layers.`
+      );
+    }
 
     this.model.layers.feature = new VectorLayer({
       caption: "FIRSearchResultsLayer",
@@ -98,10 +105,6 @@ class FirLayerController {
     this.addMarker();
   }
 
-  getLayer(name) {
-    return this.model.layers[name];
-  }
-
   initListeners() {
     this.observer.subscribe("fir.search.clear", this.handleClearSearch);
     this.observer.subscribe(
@@ -149,6 +152,23 @@ class FirLayerController {
     this.observer.subscribe("fir.zoomToFeature", (feature) => {
       this.zoomToFeature(feature);
     });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key.toLowerCase() === "control") {
+        this.ctrlKeyIsDown = true;
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (this.ctrlKeyIsDown && e.key.toLowerCase() === "control") {
+        this.ctrlKeyIsDown = false;
+        this.handleFeatureClicksCancelled();
+      }
+    });
+  }
+
+  getLayer(name) {
+    return this.model.layers[name];
   }
 
   clickLock(bLock) {
@@ -288,7 +308,7 @@ class FirLayerController {
       if (first === true && layer === this.model.layers.feature && feature) {
         if (this.removeIsActive === true) {
           this.removeFeature(feature);
-          this.model.layers.highlight.setVisible(false);
+          this.model.layers.highlight.getSource().clear();
           this.model.layers.marker.setVisible(false);
         } else {
           this.toggleHighlight(feature);
@@ -303,6 +323,15 @@ class FirLayerController {
         this.getFeaturesAtCoordinates(e.coordinate);
       }
     }
+    if (e.originalEvent.ctrlKey === true) {
+      // allow multiple add/removes
+      return;
+    }
+
+    this.handleFeatureClicksCancelled();
+  };
+
+  handleFeatureClicksCancelled = () => {
     this.observer.publish("fir.search.results.addFeatureByMapClick", {
       active: false,
     });
@@ -365,7 +394,7 @@ class FirLayerController {
     );
 
     if (this.bufferValue === 0) {
-      if (!options.keepNeighborBuffer || options.keepNeighborBuffer !== true) {
+      if (options?.keepNeighborBuffer !== true) {
         this.getLayer("buffer").getSource().clear();
       }
       return;

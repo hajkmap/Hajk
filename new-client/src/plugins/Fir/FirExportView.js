@@ -41,27 +41,38 @@ class FirExportView extends React.PureComponent {
             <span className={classes.num}>{this.state.results.length}</span>{" "}
             objekt finns tillgängliga för export.
           </div>
+          {this.model.config.propertyList ? (
+            <FirExportPropertyListView
+              results={this.state.results}
+              model={this.model}
+              app={this.app}
+              localObserver={this.localObserver}
+            />
+          ) : (
+            ""
+          )}
 
-          <FirExportPropertyListView
-            results={this.state.results}
-            model={this.model}
-            app={this.app}
-            localObserver={this.localObserver}
-          />
+          {this.model.config.residentList ? (
+            <FirExportResidentListView
+              results={this.state.results}
+              model={this.model}
+              app={this.app}
+              localObserver={this.localObserver}
+            />
+          ) : (
+            ""
+          )}
 
-          <FirExportResidentListView
-            results={this.state.results}
-            model={this.model}
-            app={this.app}
-            localObserver={this.localObserver}
-          />
-
-          <FirExportEdpView
-            results={this.state.results}
-            model={this.model}
-            app={this.app}
-            localObserver={this.localObserver}
-          />
+          {this.model.config.edp ? (
+            <FirExportEdpView
+              results={this.state.results}
+              model={this.model}
+              app={this.app}
+              localObserver={this.localObserver}
+            />
+          ) : (
+            ""
+          )}
         </div>
       </>
     );

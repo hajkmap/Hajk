@@ -217,10 +217,12 @@ class FirExportResidentListView extends React.PureComponent {
   };
 
   getResidentData = () => {
+    let searchType = this.model.getSearchTypeById(this.options.residentList.id);
+
     let params = {
-      featureType: "ext_skv_v1:kir_folk",
-      url: "https://kommungis-utv.varberg.se/util/geoserver/ext_skv_v1/wfs",
-      searchProp: "geom",
+      featureType: searchType.layers[0],
+      url: searchType.url,
+      searchProp: searchType.geometryField,
       features: this.props.results,
     };
 

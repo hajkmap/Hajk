@@ -29,7 +29,7 @@ class FirSearchView extends React.PureComponent {
     searchType: "",
     buffer: 0,
     files: { list: [] },
-    exactMatch: false,
+    exactMatch: true,
     showDesignation: true,
     showSearchArea: true,
     loading: false,
@@ -50,7 +50,9 @@ class FirSearchView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
 
-    this.state.searchTypeId = this.model.searchTypes[0].id;
+    if (this.model.searchTypes.length > 0) {
+      this.state.searchTypeId = this.model.searchTypes[0].id;
+    }
 
     this.initListeners();
   }
