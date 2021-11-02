@@ -43,11 +43,18 @@ const ProductParameters = (props) => {
 
   function handleParameterChange(e, index, type) {
     const { parameters } = props;
+    // Choice, lookup_choice, and text should all only have
+    // a single value, so the same handler should get the job
+    // done. Lookup_listbox permits several values, and must be
+    // handled separately.
     switch (type) {
       case "CHOICE":
       case "LOOKUP_CHOICE":
-      case "LOOKUP_LISTBOX":
       case "TEXT":
+        parameters[index].value = e.target.value;
+        props.setProductParameters(parameters);
+        return;
+      case "LOOKUP_LISTBOX":
         parameters[index].value = e.target.value;
         props.setProductParameters(parameters);
         return;
