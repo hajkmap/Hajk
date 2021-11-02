@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import ad from "./activedirectory.service.js";
-import asyncFilter from "../utils/asyncFilter.js";
+import ad from "./activedirectory.service";
+import asyncFilter from "../utils/asyncFilter";
 import log4js from "log4js";
 
 const logger = log4js.getLogger("service.config");
