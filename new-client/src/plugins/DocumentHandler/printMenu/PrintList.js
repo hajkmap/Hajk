@@ -1,49 +1,8 @@
 import React from "react";
 import List from "@material-ui/core/List";
-import PrintSubList from "./PrintSubList";
-import PrintListItem from "./PrintListItem";
 import PrintListItemNew from "./PrintListItemNew";
 
 class PrintList extends React.Component {
-  // renderPrintListItem = (chapter, type) => {
-  //   const { handleCheckboxChange, localObserver } = this.props;
-  //   return (
-  //     <PrintListItemNew
-  //       type={type}
-  //       chapter={chapter} //we are not using this at the moment.
-  //       checked={chapter.chosenForPrint} //we are not using this at the moment.
-  //       localObserver={localObserver}
-  //       handleCheckboxChange={handleCheckboxChange} //we are not using this at the moment.
-  //     ></PrintListItemNew>
-  //   );
-  // };
-
-  // renderSubMenu = (chapter) => {
-  //   const { handleCheckboxChange, localObserver, documentMenu } = this.props;
-  //   return (
-  //     <PrintSubList
-  //       documentMenu={documentMenu}
-  //       chapter={chapter}
-  //       subChapters={chapter.chapters}
-  //       checked={chapter.chosenForPrint}
-  //       handleCheckboxChange={handleCheckboxChange}
-  //       localObserver={localObserver}
-  //     ></PrintSubList>
-  //   );
-  // };
-
-  // getSubChapters = (chapters, headerIdentifier) => {
-  //   return chapters.filter((chapter) => chapter.parent === headerIdentifier);
-  // };
-
-  // hasSubChapters = (chapter) => {
-  //   if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // };
-
   getMenuItemType = (item, type) => {
     return (
       <PrintListItemNew
@@ -90,15 +49,13 @@ class PrintList extends React.Component {
     }
   };
 
-  //map chapters into their respective menu object.
-
   render() {
-    const { chapters, documentMenu, level } = this.props;
+    const { documentMenu, level } = this.props;
     return (
       <List style={{ width: "100%" }} disablePadding>
         {Object.values(documentMenu)
           .filter((item) => {
-            return item.level === this.props.level;
+            return item.level === level;
           })
           .map((item) => {
             return (

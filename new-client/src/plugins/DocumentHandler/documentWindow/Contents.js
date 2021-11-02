@@ -38,17 +38,62 @@ class Contents extends React.PureComponent {
     localObserver.unsubscribe("append-chapter-components");
 
     localObserver.subscribe("append-document-components", (documents) => {
+      console.log("CREATING CONTENTS");
+      console.log("documents: ", documents);
+      //temporarily filter away the heading documents so we can see how chapters works:
+      //documents = documents.filter((doc) => !doc.isGroupHeader);
+      console.log(documents);
+
       let chapters = [];
 
-      documents.forEach((document) => {
-        document.chapters.forEach((chapter) => {
-          model.appendComponentsToChapter(chapter);
-        });
+      //debugger;
+      let headerChapter = [];
 
-        chapters.push(
-          this.renderChapters(flattenChaptersTree(document.chapters))
-        );
+      documents.forEach((document) => {
+        if (document.isGroupHeader) {
+          // headerChapter.push(
+          //   model.returnChapterHeader(document.title, document.id)
+          // );
+          // chapters.push(headerChapter);
+        } else {
+          document.chapters.forEach((chapter) => {
+            model.appendComponentsToChapter(chapter);
+          });
+
+          let renderChapters = [];
+          if (headerChapter.length > 0) {
+            chapters.push(headerChapter);
+            headerChapter = [];
+          }
+
+          let flatChaptersTree = flattenChaptersTree(document.chapters);
+          // if (document.title === "Utvecklingsinriktning - Genomförande") {
+          //   debugger;
+          // }
+          flatChaptersTree = flatChaptersTree.map((item) => {
+            if (item.mustReplace) {
+              let newItem = {};
+              newItem.header = item.header;
+              //newItem.components = [];
+              //let newItem = [];
+              // newItem.components.push(
+              //   model.returnChapterHeader(item.header, item.headerIdentifier)
+              // );
+              item = newItem;
+            }
+            return item;
+          });
+          // if (flatChaptersTree.length === 0) {
+          //   flatChaptersTree.push(model.returnChapterHeader())
+          // }
+          console.log(flatChaptersTree);
+          renderChapters.push(this.renderChapters(flatChaptersTree));
+
+          console.log(renderChapters);
+          chapters.push(renderChapters);
+        }
       });
+      console.log(chapters);
 
       localObserver.publish("chapter-components-appended", chapters);
     });
@@ -92,7 +137,6 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderChapters = (chapters) => {
-    debugger;
     return Array.isArray(chapters)
       ? chapters.map((chapter) => this.renderChapter(chapter))
       : null;
@@ -105,6 +149,10 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderChapter = (chapter) => {
+    // if (chapter.header === "Genomförande") {
+    //   debugger;
+    // }
+    console.log(chapter);
     return (
       <React.Fragment key={chapter.id}>
         {this.renderHeadline(chapter)}
@@ -132,6 +180,12 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderHeadline = (chapter) => {
+    // if (document.title === "Utvecklingsinriktning - Genomförande") {
+    //   debugger;
+    // }
+    // if (chapter.header === "Genomförande") {
+    //   debugger;
+    // }
     const { classes } = this.props;
 
     return (

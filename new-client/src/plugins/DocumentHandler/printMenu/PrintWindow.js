@@ -15,10 +15,6 @@ import TableOfContents from "./TableOfContents";
 import { ThemeProvider } from "@material-ui/styles";
 import { getNormalizedMenuState } from "../utils/stateConverter";
 import { hasSubMenu } from "../utils/helpers";
-import {
-  isExpandedTopLevelItem,
-  getItemIdsToColor,
-} from "../panelMenu/panelMenuUtils";
 
 import {
   LinearProgress,
@@ -27,7 +23,6 @@ import {
   DialogContent,
   DialogContentText,
 } from "@material-ui/core";
-import { Menu } from "@material-ui/icons";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -59,9 +54,8 @@ class PrintWindow extends React.PureComponent {
     printImages: true,
     printMaps: false,
     allDocumentsToggled: false,
-    includeCompleteToc: true,
+    tableOfContentsType: "none",
     menuInformation: this.createMenu(),
-    chapterInformation: this.setChapterInfo(),
     printContent: undefined,
     pdfLoading: false,
   };
@@ -128,8 +122,6 @@ class PrintWindow extends React.PureComponent {
     this.props.localObserver.subscribe(
       "chapter-components-appended",
       (renderedChapters) => {
-        console.log(renderedChapters);
-        debugger;
         this.setState(
           {
             printContent: renderedChapters,
@@ -196,14 +188,16 @@ class PrintWindow extends React.PureComponent {
   renderToc = () => {
     this.toc = this.createPrintElement("toc");
     return this.customRender(
-      <TableOfContents chapters={this.state.chapterInformation} />,
+      <TableOfContents
+        documents={this.state.menuInformation}
+        type={this.state.tableOfContentsType}
+      />,
       this.toc
     );
   };
 
   renderContent = () => {
     this.content = this.createPrintElement("content");
-    console.log("renderContent:", this.content);
     return this.customRender(this.state.printContent, this.content);
   };
 
@@ -299,24 +293,65 @@ class PrintWindow extends React.PureComponent {
   };
 
   addPageBreaksBeforeHeadings = (printWindow) => {
+    console.log(printWindow.document.body);
+    //debugger;
+    //const headings = printWindow.document.body.querySelectorAll(["h1", "h2"]);
+
     const headings = printWindow.document.body.querySelectorAll(["h1", "h2"]);
+
+    //use Adjacent sibling combinator
+    const headingsAfterGroupHeading =
+      printWindow.document.body.querySelectorAll(["h1 + h2"]);
+    console.log(headingsAfterGroupHeading);
+
+    //remove the nodes in headingsAfterGroupHeading from the headings list.
+    // let finalNodes = [];
+    // headings.forEach((heading) => {
+    //   if (!headingsAfterGroupHeading.includes(heading)) {
+    //     finalNodes.push(heading);
+    //   }
+    // });
+
+    // console.log(finalNodes);
+    // console.log(headings);
+    // debugger;
+    let isAfterH1 = false;
+
+    //debugger;
     for (let i = 0; i < headings.length; i++) {
-      if (i !== 0 || this.state.includeCompleteToc) {
+      if (headings[i].nodeName === "H1") {
+        isAfterH1 = true;
+      }
+
+      if (headings[i].nodeName === "H1" && i !== 0) {
         headings[i].style.pageBreakBefore = "always";
         headings[i].style.breakBefore = "none";
       }
+
+      if (i !== 0 && headings[i].nodeName === "H2" && !isAfterH1) {
+        headings[i].style.pageBreakBefore = "always";
+        headings[i].style.breakBefore = "none";
+      }
+
+      if (headings[i].nodeName !== "H1") {
+        isAfterH1 = false;
+      }
+
+      // if (i !== 0 || this.state.tableOfContentsType !== "none") {
+      //   headings[i].style.pageBreakBefore = "always";
+      //   headings[i].style.breakBefore = "none";
+      // }
     }
   };
 
   printContents = () => {
     Promise.all([
-      this.state.includeCompleteToc && this.renderToc(),
+      this.state.tableOfContentsType !== "none" && this.renderToc(),
       this.renderContent(),
     ]).then(() => {
       this.areAllImagesLoaded().then(() => {
         const printWindow = this.createPrintWindow();
         this.toc && printWindow.document.body.appendChild(this.toc);
-        console.log("printContents - this.content: ", this.content);
         printWindow.document.body.appendChild(this.content);
         this.addPageBreaksBeforeHeadings(printWindow);
         printWindow.document.close(); // necessary for IE >= 10
@@ -346,37 +381,6 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  //Change to toggle sub documents.
-  toggleSubChapters(chapter, checked) {
-    if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
-      chapter.chapters.forEach((subChapter) => {
-        subChapter.chosenForPrint = checked;
-        this.toggleSubChapters(subChapter, checked);
-      });
-    }
-  }
-
-  setChapterInfo() {
-    const { activeDocument, model } = this.props;
-    let chapterInformation = model.getAllChapterInfo();
-
-    //chapterInformation is an array of chapterObjects.
-    console.log("setChapterInfo: chapterInformation", chapterInformation);
-
-    //the below segment just sets the chapter that was clicked to come into print as active.
-
-    // let topChapter = chapterInformation.find(
-    //   (topChapter) =>
-    //     topChapter.headerIdentifier ===
-    //     activeDocument.chapters[0].headerIdentifier
-    // );
-
-    // topChapter.chosenForPrint = true;
-    // this.toggleSubChapters(topChapter, true);
-
-    return chapterInformation;
-  }
-
   setInitialMenuItemProperties(menuItem) {
     if (hasSubMenu(menuItem)) {
       menuItem.hasSubMenu = true;
@@ -391,7 +395,7 @@ class PrintWindow extends React.PureComponent {
     let removedIds = [];
 
     Object.keys(documents).forEach((key) => {
-      if (documents[key].maplink || documents[key].link) {
+      if (documents[key].maplink.trim() || documents[key].link.trim()) {
         removedIds.push(parseInt(key));
         delete documents[key];
       }
@@ -505,7 +509,6 @@ class PrintWindow extends React.PureComponent {
     const menuState = { ...this.state.menuInformation };
 
     Object.keys(menuState).forEach((key) => {
-      console.log(menuState[key]);
       const updateDoc = {
         ...menuState[key],
         chosenForPrint: toggled,
@@ -549,59 +552,59 @@ class PrintWindow extends React.PureComponent {
     return chapter;
   };
 
-  prepareChapterForPrint = (chapter) => {
-    if (chapter.chapters && chapter.chapters.length > 0) {
-      chapter.chapters.forEach((subChapter) => {
-        if (subChapter.chapters && subChapter.chapters.length > 0) {
-          return this.prepareChapterForPrint(subChapter);
-        }
-        if (!subChapter.chosenForPrint) {
-          subChapter.html = "";
-          subChapter.header = "";
-        } else {
-          subChapter = this.removeTagsNotSelectedForPrint(subChapter);
-        }
-      });
-    }
-    if (!chapter.chosenForPrint) {
-      chapter.html = "";
-      chapter.header = "";
-    } else {
-      chapter = this.removeTagsNotSelectedForPrint(chapter);
-    }
-    return chapter;
-  };
+  // prepareChapterForPrint = (chapter) => {
+  //   if (chapter.chapters && chapter.chapters.length > 0) {
+  //     chapter.chapters.forEach((subChapter) => {
+  //       if (subChapter.chapters && subChapter.chapters.length > 0) {
+  //         return this.prepareChapterForPrint(subChapter);
+  //       }
+  //       if (!subChapter.chosenForPrint) {
+  //         subChapter.html = "";
+  //         subChapter.header = "";
+  //       } else {
+  //         subChapter = this.removeTagsNotSelectedForPrint(subChapter);
+  //       }
+  //     });
+  //   }
+  //   if (!chapter.chosenForPrint) {
+  //     chapter.html = "";
+  //     chapter.header = "";
+  //   } else {
+  //     chapter = this.removeTagsNotSelectedForPrint(chapter);
+  //   }
+  //   return chapter;
+  // };
 
-  getChaptersToPrint = () => {
-    let chaptersToPrint = JSON.parse(
-      JSON.stringify(this.state.chapterInformation)
-    );
-    chaptersToPrint.forEach((chapter) => {
-      chapter = this.prepareChapterForPrint(chapter);
-    });
+  // getChaptersToPrint = () => {
+  //   let chaptersToPrint = JSON.parse(
+  //     JSON.stringify(this.state.chapterInformation)
+  //   );
+  //   chaptersToPrint.forEach((chapter) => {
+  //     chapter = this.prepareChapterForPrint(chapter);
+  //   });
 
-    return chaptersToPrint;
-  };
+  //   return chaptersToPrint;
+  // };
 
-  getDocumentsToPrint = () => {
-    //earlier we kept koll på chapters hela tiden.
-    //nu ska vi bara hämta upp de när vi klicka print.
-  };
+  // getDocumentsToPrint = () => {
+  //   //earlier we kept koll på chapters hela tiden.
+  //   //nu ska vi bara hämta upp de när vi klicka print.
+  // };
 
-  checkIfChaptersSelected = (chapter) => {
-    let subChapters = chapter.chapters;
-    if (chapter.chosenForPrint) {
-      return true;
-    } else if (subChapters && subChapters.length > 0) {
-      for (let i = 0; i < subChapters.length; i++) {
-        let subChapter = subChapters[i];
-        if (this.checkIfChaptersSelected(subChapter)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
+  // checkIfChaptersSelected = (chapter) => {
+  //   let subChapters = chapter.chapters;
+  //   if (chapter.chosenForPrint) {
+  //     return true;
+  //   } else if (subChapters && subChapters.length > 0) {
+  //     for (let i = 0; i < subChapters.length; i++) {
+  //       let subChapter = subChapters[i];
+  //       if (this.checkIfChaptersSelected(subChapter)) {
+  //         return true;
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // };
 
   isAnyDocumentSelected = () => {
     const keys = Object.keys(this.state.menuInformation);
@@ -613,25 +616,19 @@ class PrintWindow extends React.PureComponent {
     return false;
   };
 
-  //TODO - change to documents
-  // isAnyChapterSelected = () => {
-  //   const { chapterInformation } = this.state;
-  //   for (let i = 0; i < chapterInformation.length; i++) {
-  //     if (this.checkIfChaptersSelected(chapterInformation[i])) {
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // };
+  createHeaderItems = (menuItem) => {
+    console.log(menuItem);
+    return { isGroupHeader: true, title: menuItem.title, id: menuItem.id };
+  };
 
   getDocumentsToPrint = () => {
     const { menuInformation } = this.state;
-    console.log("getDocumentsToPrint");
-    console.log(this.state.menuInformation);
 
     const documentIdsForPrint = Object.keys(menuInformation).filter(
       (key) => menuInformation[key].chosenForPrint
     );
+
+    //create those without documents (header items) as a header item object.
 
     const documentNamesForPrint = documentIdsForPrint.map(
       (id) => menuInformation[id].document
@@ -640,14 +637,30 @@ class PrintWindow extends React.PureComponent {
     const docs = this.props.model.getDocuments(documentNamesForPrint);
     console.log(docs);
 
-    //parentTitle
+    /*where getDocuments returns an empty string. This is a menuItem without a corresponding document, which
+    is a menu parent.
+    */
+    const mappedDocs = docs.map((doc, index) => {
+      if (doc === undefined) {
+        //return this.createHeaderItem()
+        console.log("mapping docs");
+        console.log(documentIdsForPrint[index]);
+        console.log(menuInformation[documentIdsForPrint[index]]);
+        return this.createHeaderItems(
+          menuInformation[documentIdsForPrint[index]]
+        );
+      }
+      return doc;
+    });
 
-    return docs;
+    //parent group headers will look like {isGroupHeader: true, title: "the menu parent title"}
+    console.log(mappedDocs);
+
+    //return docs;
+    return mappedDocs;
   };
 
   createPDF = () => {
-    console.log(this.state.chapterInformation);
-    console.log(this.state.menuInformation);
     if (!this.isAnyDocumentSelected()) {
       this.props.enqueueSnackbar(
         "Du måste välja minst ett dokument för att kunna skapa en PDF.",
@@ -658,7 +671,9 @@ class PrintWindow extends React.PureComponent {
       );
     } else {
       this.setState({ pdfLoading: true });
-      //const documentsToPrint
+      //here we are filtering out undefined, undefined are the parent documents.
+      console.log("TODO - printwindow 655 kolla på att får med parent header");
+      //TODO - no longer need to filter undefined.
       const documentsToPrint = this.getDocumentsToPrint().filter(
         (doc) => doc !== undefined
       );
@@ -666,11 +681,6 @@ class PrintWindow extends React.PureComponent {
         "append-document-components",
         documentsToPrint
       );
-      //const chaptersToPrint = this.getChaptersToPrint(); //change to get documents to print?
-      // this.props.localObserver.publish(
-      //   "append-chapter-components",
-      //   chaptersToPrint
-      // );
     }
   };
 
@@ -736,7 +746,7 @@ class PrintWindow extends React.PureComponent {
       localObserver,
       documentWindowMaximized,
     } = this.props;
-    const { chapterInformation, menuInformation } = this.state;
+    const { menuInformation } = this.state;
     return (
       <Grid
         container
@@ -793,12 +803,16 @@ class PrintWindow extends React.PureComponent {
               control={
                 <Checkbox
                   color="primary"
-                  checked={this.state.includeCompleteToc}
-                  onChange={() =>
+                  checked={this.state.tableOfContentsType !== "none"}
+                  onChange={() => {
+                    let newTocType =
+                      this.state.tableOfContentsType === "none"
+                        ? "full"
+                        : "none";
                     this.setState({
-                      includeCompleteToc: !this.state.includeCompleteToc,
-                    })
-                  }
+                      tableOfContentsType: newTocType,
+                    });
+                  }}
                 />
               }
               label="Inkludera hela innehållsförteckningen"
@@ -811,8 +825,6 @@ class PrintWindow extends React.PureComponent {
 
         <Grid className={classes.middleContainer} item container>
           <PrintList
-            chapters={chapterInformation}
-            handleCheckboxChange={this.handleCheckboxChange}
             localObserver={localObserver}
             documentMenu={menuInformation}
             level={0}

@@ -136,7 +136,6 @@ export default class DocumentHandlerModel {
   }
 
   getDocuments(fileNames) {
-    //debugger;
     let documents = [];
     fileNames.forEach((fileName) => {
       let document = this.allDocuments.find(
@@ -152,7 +151,6 @@ export default class DocumentHandlerModel {
     if (this.chapterInfo.length === 0) {
       this.allDocuments.forEach((document, index) => {
         document.chapters.forEach((mainChapter) => {
-          //debugger;
           this.setChapterInfo(mainChapter, 0, document.documentColor);
         });
       });
@@ -172,7 +170,6 @@ export default class DocumentHandlerModel {
 
   setChapterInfo(chapter, level, color) {
     let getParentIdentifier = this.getParentIdentifier(chapter);
-    //debugger;
     let chapterInfo = {};
     chapterInfo.id = ++this.chapterNumber;
     chapterInfo.level = level;
@@ -459,6 +456,15 @@ export default class DocumentHandlerModel {
     return chapter.chapters && chapter.chapters.length > 0;
   };
 
+  returnChapterHeader = (title, id) => {
+    //debugger;
+    return (
+      <React.Fragment key={id}>
+        <h1>{title}</h1>
+      </React.Fragment>
+    );
+  };
+
   appendComponentsToChapter = (chapter) => {
     if (this.hasSubChapters(chapter)) {
       chapter.chapters.forEach((subChapter) => {
@@ -469,7 +475,18 @@ export default class DocumentHandlerModel {
         }
       });
     }
-    chapter.components = this.getMaterialUIComponentsForChapter(chapter);
+    // if (chapter.header === "Genomförande") {
+    //   debugger;
+    // }
+
+    let chapterComponents = this.getMaterialUIComponentsForChapter(chapter);
+    // if (chapterComponents.length === 0) {
+    //   chapterComponents = this.returnChapterHeader(
+    //     chapter.header,
+    //     "123-dfr-43"
+    //   );
+    // }
+    chapter.components = chapterComponents;
   };
 
   appendParsedComponentsToDocument = () => {

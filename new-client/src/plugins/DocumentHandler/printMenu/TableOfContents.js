@@ -21,24 +21,33 @@ class TableOfContents extends React.PureComponent {
   }
 
   componentDidMount = () => {
-    const { chapters } = this.props;
-    chapters.forEach((chapter) => {
-      this.setTitlesAndLevels(chapter);
+    const { documents, type } = this.props;
+    Object.keys(documents).forEach((key) => {
+      this.setTitlesAndLevels(documents[key]);
     });
+
+    let test = "partial";
+    if (type === "partial" || test === "partial") {
+      this.filterTitlesAndLevels();
+    }
+
     this.setState({ titlesAndLevels: this.titlesAndLevels });
   };
 
-  setTitlesAndLevels = (chapter) => {
+  filterTitlesAndLevels() {
+    //TODO - Add logic to keep the parent if children are chosen.
+    const filteredTable = this.titlesAndLevels.filter(
+      (document) => document.chosenForPrint
+    );
+    this.titlesAndLevels = filteredTable;
+  }
+
+  setTitlesAndLevels = (document) => {
     this.titlesAndLevels.push({
-      title: chapter.header,
-      level: chapter.level,
-      chosenForPrint: chapter.chosenForPrint,
+      title: document.title,
+      level: document.level,
+      chosenForPrint: document.chosenForPrint,
     });
-    if (chapter.chapters) {
-      chapter.chapters.forEach((subChapter) => {
-        this.setTitlesAndLevels(subChapter);
-      });
-    }
   };
 
   render() {
@@ -50,17 +59,17 @@ class TableOfContents extends React.PureComponent {
           Innehållsförteckning
         </Typography>
         <List style={{ width: "100%" }} disablePadding>
-          {titlesAndLevels.map((chapter, index) => {
-            return chapter.chosenForPrint ? (
+          {titlesAndLevels.map((document, index) => {
+            return document.chosenForPrint ? (
               <ListItem
                 key={index}
                 dense={true}
                 style={{
                   paddingLeft:
-                    theme.spacing(1) + theme.spacing(chapter.level * 3),
+                    theme.spacing(1) + theme.spacing(document.level * 3),
                 }}
               >
-                <ListItemText>{chapter.title}</ListItemText>
+                <ListItemText>{document.title}</ListItemText>
               </ListItem>
             ) : (
               <ListItem
@@ -69,10 +78,10 @@ class TableOfContents extends React.PureComponent {
                 key={index}
                 style={{
                   paddingLeft:
-                    theme.spacing(1) + theme.spacing(chapter.level * 3),
+                    theme.spacing(1) + theme.spacing(document.level * 3),
                 }}
               >
-                <ListItemText>{chapter.title}</ListItemText>
+                <ListItemText>{document.title}</ListItemText>
               </ListItem>
             );
           })}

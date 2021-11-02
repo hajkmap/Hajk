@@ -70,7 +70,6 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   #handleMenuButtonClick = (type, id) => {
-    //debugger;
     const { localObserver } = this.props;
     localObserver.publish(`${type}-clicked`, id);
   };
