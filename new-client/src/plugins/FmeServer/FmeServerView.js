@@ -111,6 +111,31 @@ const FmeServerView = (props) => {
     });
   }
 
+  // Returns wether it is OK to continue from the step where the
+  // user is providing values for the published parameters.
+  function getContinueFromParameterStep() {
+    // If the parameters are loading, or if we error:ed when fetching
+    // the parameters, we can't move on.
+    if (parametersLoading || parametersError) {
+      return false;
+    }
+    // If we have a required parameter (not optional), and that parameter is
+    // missing, we can't move on. So let's check if there is any parameter
+    // that is not optional, and empty.
+    const requiredParametersMissing = productParameters.some((parameter) => {
+      if (
+        !parameter.optional &&
+        (!parameter.value || parameter.value.length === 0)
+      ) {
+        return true;
+      }
+      return false;
+    });
+    // Let's return the inverse of required..., since this function returns wether
+    // it's OK to continue or not.
+    return !requiredParametersMissing;
+  }
+
   // A function to render the stepper-buttons (next, back reset).
   // Used to limit code rewrite.
   // Accepts: An array of objects on {type: string, disabled: bool} form.
@@ -320,7 +345,7 @@ const FmeServerView = (props) => {
         </Grid>
         {renderStepperButtons([
           { type: "back", disabled: false },
-          { type: "next", disabled: parametersLoading || parametersError },
+          { type: "next", disabled: !getContinueFromParameterStep() },
         ])}
       </Grid>
     );
