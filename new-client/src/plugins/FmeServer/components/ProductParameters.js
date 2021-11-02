@@ -1,5 +1,6 @@
 import React from "react";
 import { Grid, TextField, Typography } from "@material-ui/core";
+import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 
 const ProductParameters = (props) => {
   const allowedFmeTypes = ["CHOICE", "LOOKUP_CHOICE", "LOOKUP_LISTBOX", "TEXT"];
@@ -42,24 +43,43 @@ const ProductParameters = (props) => {
 
   function handleParameterChange(e, index, type) {
     const { parameters } = props;
-    if (type === "TEXT") {
-      parameters[index].value = e.target.value;
-      props.setProductParameters(parameters);
+    switch (type) {
+      case "CHOICE":
+      case "LOOKUP_CHOICE":
+      case "LOOKUP_LISTBOX":
+      case "TEXT":
+        parameters[index].value = e.target.value;
+        props.setProductParameters(parameters);
+        return;
+      default:
+        return null;
     }
   }
 
   function renderChoice(parameter, index) {
     return (
-      <Grid key={index} item xs={12}>
-        <h3>CHOICE</h3>
-      </Grid>
-    );
-  }
-
-  function renderLookupChoice(parameter, index) {
-    return (
-      <Grid key={index} item xs={12}>
-        <h3>renderLookupChoice</h3>
+      <Grid key={index} item xs={12} style={{ padding: 8 }}>
+        <FormControl fullWidth size="small" required={!parameter.optional}>
+          <InputLabel variant="outlined" id="fme-lookup-choice-label">
+            {parameter.description}
+          </InputLabel>
+          <Select
+            labelId="fme-lookup-choice-label"
+            id="fme-lookup-choice"
+            variant="outlined"
+            value={parameter.value ?? parameter.defaultValue ?? ""}
+            label={parameter.description}
+            onChange={(e) => handleParameterChange(e, index, "LOOKUP_CHOICE")}
+          >
+            {parameter.listOptions.map((option, index) => {
+              return (
+                <MenuItem key={index} value={option.value}>
+                  {option.caption}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
       </Grid>
     );
   }
@@ -76,7 +96,9 @@ const ProductParameters = (props) => {
     return (
       <Grid key={index} item xs={12} style={{ padding: 8 }}>
         <TextField
+          id="fme-text"
           size="small"
+          required={!parameter.optional}
           label={parameter.description}
           onChange={(e) => handleParameterChange(e, index, "TEXT")}
           fullWidth
@@ -95,7 +117,8 @@ const ProductParameters = (props) => {
             case "CHOICE":
               return renderChoice(parameter, index);
             case "LOOKUP_CHOICE":
-              return renderLookupChoice(parameter, index);
+              // TODO: Should be the same as choice? Right!?
+              return renderChoice(parameter, index);
             case "LOOKUP_LISTBOX":
               return renderLookupListbox(parameter, index);
             case "TEXT":
