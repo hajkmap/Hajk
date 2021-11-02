@@ -7,9 +7,8 @@ import { withSnackbar } from "notistack";
 import {
   Box,
   Button,
-  ButtonGroup,
   FormControlLabel,
-  FormGroup,
+  Grid,
   Radio,
   RadioGroup,
   TextField,
@@ -25,15 +24,11 @@ const styles = (theme) => ({
     "& input": {
       fontFamily: "monospace",
     },
-    width: "100%",
-    minWidth: 380,
-    display: "flex",
   },
-  buttons: {
-    width: 380,
-  },
-  button: {
-    width: 180,
+  margin: {
+    [theme.breakpoints.down("xs")]: {
+      margin: 0,
+    },
   },
 });
 
@@ -78,84 +73,90 @@ class AnchorView extends React.PureComponent {
   render() {
     const { classes } = this.props;
     return (
-      <>
-        <Box>
-          <FormGroup row>
+      <Box sx={{ width: "100%" }}>
+        <Grid container item spacing={2} columns={12}>
+          <Grid item xs={12}>
             <Typography>
               Skapa en länk med kartans synliga lager, aktuella zoomnivå och
               utbredning.
             </Typography>
-          </FormGroup>
+          </Grid>
+        </Grid>
+        <Box ml={3} className={classes.margin}>
+          <Grid container item spacing={2} columns={12}>
+            <Grid item xs={12}>
+              <RadioGroup
+                aria-label="copy-url"
+                name="copy-url"
+                onChange={this.props.toggleCleanUrl}
+              >
+                <FormControlLabel
+                  checked={!this.props.cleanUrl}
+                  value="default"
+                  control={<Radio color="primary" />}
+                  label="Skapa länk till karta"
+                />
+                <FormControlLabel
+                  checked={this.props.cleanUrl}
+                  value="clean"
+                  control={<Radio color="primary" />}
+                  label="Skapa länk till karta utan verktyg etc."
+                />
+              </RadioGroup>
+            </Grid>
+          </Grid>
         </Box>
-        <Box ml={3} pt={1}>
-          <FormGroup row>
-            <RadioGroup
-              aria-label="copy-url"
-              name="copy-url"
-              onChange={this.props.toggleCleanUrl}
-            >
-              <FormControlLabel
-                checked={!this.props.cleanUrl}
-                value="default"
-                control={<Radio color="primary" />}
-                label="Skapa länk till karta"
+        <Box ml={7} mr={7} className={classes.margin}>
+          <Grid container item spacing={2} columns={12}>
+            <Grid item xs={12}>
+              <TextField
+                className={classes.input}
+                fullWidth={true}
+                id="anchorUrl"
+                InputProps={{
+                  readOnly: true,
+                }}
+                value={this.state.anchor}
+                variant="outlined"
+                size="small"
               />
-              <FormControlLabel
-                checked={this.props.cleanUrl}
-                value="clean"
-                control={<Radio color="primary" />}
-                label="Skapa länk till karta utan verktyg etc."
-              />
-            </RadioGroup>
-          </FormGroup>
-        </Box>
-        <Box ml={7} mr={7} pt={2}>
-          <FormGroup row>
-            <TextField
-              className={classes.input}
-              fullWidth={false}
-              id="anchorUrl"
-              InputProps={{
-                readOnly: true,
-              }}
-              value={this.state.anchor}
-              variant="outlined"
-              size="small"
-            />
-          </FormGroup>
+            </Grid>
+          </Grid>
         </Box>
         {document.queryCommandSupported("copy") && (
-          <Box ml={7} mr={7} pt={2}>
-            <ButtonGroup className={classes.buttons}>
-              <Tooltip title="Kopiera länk till urklipp">
-                <Button
-                  style={{ marginRight: 10 }}
-                  variant="contained"
-                  color="primary"
-                  className={classes.button}
-                  endIcon={<FileCopyIcon />}
-                  onClick={this.handleClickOnCopyToClipboard}
-                >
-                  Kopiera länk
-                </Button>
-              </Tooltip>
-              <Tooltip title="Öppna länk i nytt fönster">
-                <Button
-                  style={{ marginLeft: 10 }}
-                  variant="contained"
-                  color="primary"
-                  className={classes.button}
-                  endIcon={<OpenInNewIcon />}
-                  href={this.state.anchor}
-                  target="_blank"
-                >
-                  Öppna länk
-                </Button>
-              </Tooltip>
-            </ButtonGroup>
+          <Box ml={7} mr={7} className={classes.margin}>
+            <Grid container spacing={2} columns={12}>
+              <Grid item xs={6}>
+                <Tooltip title="Kopiera länk till urklipp">
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    endIcon={<FileCopyIcon />}
+                    onClick={this.handleClickOnCopyToClipboard}
+                  >
+                    Kopiera länk
+                  </Button>
+                </Tooltip>
+              </Grid>
+              <Grid item xs={6}>
+                <Tooltip title="Öppna länk i nytt fönster">
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    endIcon={<OpenInNewIcon />}
+                    href={this.state.anchor}
+                    target="_blank"
+                  >
+                    Öppna länk
+                  </Button>
+                </Tooltip>
+              </Grid>
+            </Grid>
           </Box>
         )}
-      </>
+      </Box>
     );
   }
 }
