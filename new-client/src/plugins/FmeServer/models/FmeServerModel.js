@@ -35,6 +35,19 @@ class FmeServerModel {
     });
   };
 
+  // Checks wether we should prompt the user for their email or not
+  shouldPromptForEmail = (groupName, productName) => {
+    // We must fetch the product
+    const product = this.getProduct(groupName, productName);
+    // And make sure it exists. If it doesn't we return false
+    if (!product) {
+      return false;
+    }
+    // Otherwise we return the parameter containing information regarding
+    // email prompting
+    return product.promptForEmail;
+  };
+
   // Fetches all product parameters from FME-server
   getProductParameters = async (groupName, productName) => {
     // If the product is missing for some reason, we return an

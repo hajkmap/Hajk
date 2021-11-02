@@ -5,6 +5,7 @@ import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
 import { LinearProgress } from "@material-ui/core";
 
 import DrawToolbox from "./components/DrawToolbox";
+import OrderPanel from "./components/OrderPanel";
 import ProductParameters from "./components/ProductParameters";
 import useProductParameters from "./hooks/useProductParameters";
 
@@ -23,6 +24,7 @@ const FmeServerView = (props) => {
   const [totalAllowedArea, setTotalAllowedArea] = React.useState(0);
   const [totalDrawnArea, setTotalDrawnArea] = React.useState(0);
   const [drawError, setDrawError] = React.useState(false);
+  const [userEmail, setUserEmail] = React.useState("");
 
   // We're gonna use a custom hook to fetch the product parameters when
   // the user changes group and/or product. We're also supplying a function
@@ -136,6 +138,18 @@ const FmeServerView = (props) => {
     return !requiredParametersMissing;
   }
 
+  // Returns wether it is OK to continue from the step where the
+  // user is making an order.
+  function getContinueFromOrderStep(shouldPromptForEmail) {
+    // If no email is to be supplied, the user can go right ahead and order.
+    if (!shouldPromptForEmail) {
+      return true;
+    }
+    // Otherwise, we make sure that _something_ is written in the
+    // email-field. (TODO: Check valid email?)
+    return userEmail.length > 6;
+  }
+
   // A function to render the stepper-buttons (next, back reset).
   // Used to limit code rewrite.
   // Accepts: An array of objects on {type: string, disabled: bool} form.
@@ -155,6 +169,8 @@ const FmeServerView = (props) => {
                 ? "Tillbaka"
                 : button.type === "next"
                 ? "Nästa"
+                : button.type === "order"
+                ? "Beställ!"
                 : "Börja om!"}
             </Button>
           );
@@ -174,6 +190,11 @@ const FmeServerView = (props) => {
       return setActiveStep(activeStep - 1);
     }
     if (type === "next") {
+      return setActiveStep(activeStep + 1);
+    }
+    if (type === "order") {
+      // TODO: Handle order and move on once we get
+      // confirmation from model!
       return setActiveStep(activeStep + 1);
     }
     return handleResetStepper();
@@ -352,14 +373,23 @@ const FmeServerView = (props) => {
   }
 
   function renderOrderStep() {
+    const shouldPromptForEmail = model.shouldPromptForEmail(
+      activeGroup,
+      activeProduct
+    );
     return (
       <Grid container item xs={12}>
-        <Grid item xs={12}>
-          <Typography>Beställ</Typography>
-        </Grid>
+        <OrderPanel
+          shouldPromptForEmail={shouldPromptForEmail}
+          userEmail={userEmail}
+          setUserEmail={setUserEmail}
+        />
         {renderStepperButtons([
           { type: "back", disabled: false },
-          { type: "next", disabled: false },
+          {
+            type: "order",
+            disabled: !getContinueFromOrderStep(shouldPromptForEmail),
+          },
         ])}
       </Grid>
     );
