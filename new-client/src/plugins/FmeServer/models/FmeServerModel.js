@@ -48,6 +48,15 @@ class FmeServerModel {
     return product.promptForEmail;
   };
 
+  // Check wethers the provided string is a valid email
+  isValidEmail = (emailString) => {
+    if (typeof emailString !== "string") {
+      return false;
+    }
+    const regExp = /\S+@\S+\.\S+/;
+    return regExp.test(emailString);
+  };
+
   // Fetches all product parameters from FME-server
   getProductParameters = async (groupName, productName) => {
     // If the product is missing for some reason, we return an

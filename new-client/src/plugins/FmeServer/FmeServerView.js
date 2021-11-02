@@ -145,9 +145,9 @@ const FmeServerView = (props) => {
     if (!shouldPromptForEmail) {
       return true;
     }
-    // Otherwise, we make sure that _something_ is written in the
-    // email-field. (TODO: Check valid email?)
-    return userEmail.length > 6;
+    // Otherwise, we just make sure that the supplied string is a valid
+    // email.
+    return model.isValidEmail(userEmail);
   }
 
   // A function to render the stepper-buttons (next, back reset).
