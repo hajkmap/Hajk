@@ -1,4 +1,4 @@
-import InformativeService from "../../services/informative.service.js";
+import InformativeService from "../../services/informative.service";
 import log4js from "log4js";
 
 // Create a logger for admin events, those will be saved in a separate log file.
