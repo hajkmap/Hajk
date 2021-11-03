@@ -4,6 +4,7 @@ import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
 import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
 import { LinearProgress } from "@material-ui/core";
 
+import ErrorWrapper from "./components/ErrorWrapper";
 import DrawToolbox from "./components/DrawToolbox";
 import OrderPanel from "./components/OrderPanel";
 import ProductParameters from "./components/ProductParameters";
@@ -336,14 +337,16 @@ const FmeServerView = (props) => {
           />
         </Grid>
         {drawError && (
-          <Grid item xs={12}>
-            <Typography variant="caption">
-              {`Den ritade ytan är för stor. Ta bort den och försök igen för att
+          <Grid item xs={12} style={{ marginTop: 8 }}>
+            <ErrorWrapper>
+              <Typography variant="caption">
+                {`Den ritade ytan är för stor. Ta bort den och försök igen för att
               kunna gå vidare med beställningen! Den ritade ytan är ${Math.round(
                 totalDrawnArea
               )} m2, 
               och den högst tillåtna arean är ${totalAllowedArea} m2`}
-            </Typography>
+              </Typography>
+            </ErrorWrapper>
           </Grid>
         )}
         {
