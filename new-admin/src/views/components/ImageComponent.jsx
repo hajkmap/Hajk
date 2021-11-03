@@ -35,7 +35,7 @@ const ImageComponent = (props) => {
 
   const dataType = data["data-type"] || "image";
   const [open, setOpen] = useState(false);
-  const [alt, setAlt] = useState(imageAlt === undefined ? "" : imageAlt);
+  const [alt, setAlt] = useState(imageAlt); //useState(imageAlt === undefined ? "" : imageAlt);
   const [defaultWidth, setDefaultWidth] = useState();
   const [defaultHeight, setDefaultHeight] = useState();
   const [width, setWidth] = useState(imageWidth);
@@ -64,7 +64,7 @@ const ImageComponent = (props) => {
     } else if (dataType === "video") {
       if (
         dataSource !== source ||
-        // imageAlt !== alt ||
+        imageAlt !== alt ||
         imageWidth !== width ||
         imageHeight !== height ||
         dataCaption !== caption ||
@@ -75,7 +75,7 @@ const ImageComponent = (props) => {
     } else if (dataType === "audio") {
       if (
         dataSource !== source ||
-        // imageAlt !== alt ||
+        imageAlt !== alt ||
         dataCaption !== caption ||
         dataImagePosition !== imagePosition
       )

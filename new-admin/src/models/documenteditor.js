@@ -126,7 +126,7 @@ var documentEditor = Model.extend({
     var url = this.get("config").list_videos;
     hfetch(url).then((response) => {
       response.json().then((data) => {
-        callback(data, url);
+        callback(data);
       });
     });
   },
@@ -135,7 +135,7 @@ var documentEditor = Model.extend({
     var url = this.get("config").list_audios;
     hfetch(url).then((response) => {
       response.json().then((data) => {
-        callback(data, url);
+        callback(data);
       });
     });
   },

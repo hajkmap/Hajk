@@ -74,8 +74,6 @@ export default class DocumentTextEditor extends React.Component {
       imageList: this.props.imageList,
       videoList: this.props.videoList,
       audioList: this.props.audioList,
-      videoUrl: this.props.videoUrl,
-      audioUrl: this.props.audioUrl,
       documents: this.props.documents,
       readOnly: false,
       onReadOnly: false,
@@ -314,11 +312,8 @@ export default class DocumentTextEditor extends React.Component {
       mediaCaption,
       mediaSource,
       mediaPosition,
-      videoUrl,
     } = this.state;
 
-    const urlIndex = videoUrl.indexOf("config");
-    //urlValue = urlValue.replace("../", videoUrl.substr(0, urlIndex));
     imageAlt = imageAlt ? imageAlt : "";
     mediaCaption = mediaCaption ? mediaCaption : "";
     mediaSource = mediaSource ? mediaSource : "";
@@ -354,11 +349,8 @@ export default class DocumentTextEditor extends React.Component {
       mediaCaption,
       mediaSource,
       mediaPosition,
-      audioUrl,
     } = this.state;
 
-    const urlIndex = audioUrl.indexOf("config");
-    //urlValue = urlValue.replace("../", audioUrl.substr(0, urlIndex));
     imageAlt = imageAlt ? imageAlt : "";
     mediaCaption = mediaCaption ? mediaCaption : "";
     mediaSource = mediaSource ? mediaSource : "";

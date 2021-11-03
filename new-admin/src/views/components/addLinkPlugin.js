@@ -55,7 +55,7 @@ const Link = (props) => {
     );
   } else if (data["data-hover"]) {
     return (
-      <Tooltip title={data["data-hover"]} placement={"bottom"}>
+      <Tooltip title={data["data-hover"]}>
         <abbr data-hover={data["data-hover"]}>{props.decoratedText}</abbr>
       </Tooltip>
     );
