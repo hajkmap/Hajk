@@ -299,7 +299,8 @@ class PrintWindow extends React.PureComponent {
         isAfterH1 = true;
       }
 
-      if (headings[i].nodeName === "H1" && i !== 0) {
+      //H1s are group headings and should start on a new page.
+      if (headings[i].nodeName === "H1" && this.state.tocPrintMode !== "none") {
         headings[i].style.pageBreakBefore = "always";
         headings[i].style.breakBefore = "none";
       }
