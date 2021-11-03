@@ -84,11 +84,9 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
     const t = event.target;
