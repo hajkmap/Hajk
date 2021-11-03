@@ -267,22 +267,30 @@ class MapViewModel {
 
   #handleDrawFeatureAdded = () => {
     try {
-      let totalArea = 0;
+      // First we need to get all the drawn features
       const features = this.#getDrawnFeatures();
-      features.map((feature) => {
-        return (totalArea += this.#getFeatureArea(feature));
-      });
+      // Then we'll calculate the total area
+      const totalArea = this.#getTotalArea(features);
+      // And publish the results
       this.#localObserver.publish("map.featureAdded", {
         error: totalArea === 0,
         features: features,
         totalArea: totalArea,
       });
     } catch (error) {
+      // If we've error:ed we have to let the view know
       this.#localObserver.publish("map.featureAdded", {
         error: true,
         features: [],
       });
     }
+  };
+
+  // Returns the combined area of all features supplied.
+  #getTotalArea = (features) => {
+    return features.reduce((acc, feature) => {
+      return acc + this.#getFeatureArea(feature);
+    }, 0);
   };
 
   // This handler has one job; add a change listener to the feature
