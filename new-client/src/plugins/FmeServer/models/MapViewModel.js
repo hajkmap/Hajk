@@ -304,7 +304,13 @@ class MapViewModel {
 
   // Returns the supplied area in a more readable format.
   #getTooltipText = (featureArea) => {
-    return featureArea;
+    if (featureArea >= 1e6) {
+      // If the area is larger than one square kilometer we show the result in km²
+      // Rounded to show 3 decimals.
+      return `${(featureArea / 1e6).toFixed(3)} km²`;
+    }
+    // Otherwise m2² will do. (Displayed in local format).
+    return `${featureArea.toLocaleString()} m²`;
   };
 
   // Resets the draw-layer
