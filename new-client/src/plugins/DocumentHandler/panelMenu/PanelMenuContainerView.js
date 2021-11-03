@@ -144,7 +144,7 @@ class PanelMenuView extends React.PureComponent {
   //---------------------------------------------------
 
   #setClickedItemProperties = (clickedItem) => {
-    let newItem = { ...clickedItem }; //
+    let newItem = { ...clickedItem };
     return {
       ...clickedItem,
       colored: !isExpandedTopLevelItem(newItem),

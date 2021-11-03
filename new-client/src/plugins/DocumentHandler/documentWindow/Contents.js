@@ -36,15 +36,46 @@ class Contents extends React.PureComponent {
   bindPrintSpecificHandlers = () => {
     const { localObserver, model } = this.props;
     localObserver.unsubscribe("append-chapter-components");
-    localObserver.subscribe("append-chapter-components", (chapters) => {
-      chapters.forEach((chapter) => {
-        model.appendComponentsToChapter(chapter);
+
+    localObserver.subscribe("append-document-components", (documents) => {
+      let chapters = [];
+      let headerChapter = [];
+
+      documents.forEach((document) => {
+        /*
+         * add an H1 tag for menu parents when printing.
+         * chapters if a group of documents has a parent document, the header of the parent
+         * is printed if any of the children are printed.
+         */
+        if (document.isGroupHeader) {
+          headerChapter.push(
+            this.createGroupHeadingTag(document.title, document.id)
+          );
+          chapters.push(headerChapter);
+        } else {
+          document.chapters.forEach((chapter) => {
+            model.appendComponentsToChapter(chapter);
+          });
+
+          let renderChapters = [];
+          if (headerChapter.length > 0) {
+            headerChapter = [];
+          }
+
+          let flatChaptersTree = flattenChaptersTree(document.chapters);
+          flatChaptersTree = flatChaptersTree.map((item) => {
+            if (item.mustReplace) {
+              let newItem = {};
+              item = newItem;
+            }
+            return item;
+          });
+          renderChapters.push(this.renderChapters(flatChaptersTree));
+          chapters.push(renderChapters);
+        }
       });
 
-      localObserver.publish(
-        "chapter-components-appended",
-        this.renderChapters(flattenChaptersTree(chapters))
-      );
+      localObserver.publish("chapter-components-appended", chapters);
     });
   };
 
@@ -76,6 +107,22 @@ class Contents extends React.PureComponent {
         close={this.closePopupModal}
         image={popupImage}
       ></ImagePopupModal>
+    );
+  };
+
+  createGroupHeadingTag = (title, id) => {
+    const { classes } = this.props;
+    return (
+      <React.Fragment key={id}>
+        <Typography
+          className={classes.typography}
+          data-type="chapter-header"
+          variant={"h2"}
+          component={"h1"}
+        >
+          {title}
+        </Typography>
+      </React.Fragment>
     );
   };
 

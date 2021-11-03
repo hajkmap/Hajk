@@ -104,14 +104,14 @@ export default class DocumentHandlerModel {
         resolve(this.allDocuments);
       }
 
-      const menuItemsWithDocumentConnetion = this.flattenMenu(
+      const menuItemsWithDocumentConnection = this.flattenMenu(
         this.settings.menu
       ).filter((menuItem) => {
         return menuItem.document;
       });
 
       Promise.all(
-        menuItemsWithDocumentConnetion.map((menuItem) => {
+        menuItemsWithDocumentConnection.map((menuItem) => {
           return this.fetchJsonDocument(menuItem.document).then((doc) => {
             if (!doc.title) {
               console.warn(
@@ -124,6 +124,7 @@ export default class DocumentHandlerModel {
               documentColor: menuItem.color,
               documentFileName: menuItem.document,
               documentTitle: doc.title,
+              menuItemId: menuItem.id,
             };
           });
         })
@@ -484,7 +485,9 @@ export default class DocumentHandlerModel {
         }
       });
     }
-    chapter.components = this.getMaterialUIComponentsForChapter(chapter);
+
+    let chapterComponents = this.getMaterialUIComponentsForChapter(chapter);
+    chapter.components = chapterComponents;
   };
 
   appendParsedComponentsToDocument = () => {
