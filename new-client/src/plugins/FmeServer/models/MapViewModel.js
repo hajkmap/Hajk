@@ -190,6 +190,7 @@ class MapViewModel {
   #removeDrawInteraction = () => {
     if (this.#draw) {
       this.#map.removeInteraction(this.#draw);
+      this.#map.clickLock.delete("fmeServer");
     }
   };
 
@@ -215,8 +216,9 @@ class MapViewModel {
     if (drawMethod === "Select") {
       return this.#enableSelectFeaturesSearch();
     }
-    // Then we have to check wether the user is toggling on or off
-    if (drawMethod !== "") {
+    // If the drawMethod is missing or equals an empty string, the user
+    // is toggling draw off.
+    if (drawMethod && drawMethod !== "") {
       // If the drawMethod contains something, they want to toggle on!
       this.#draw = new Draw({
         source: this.#drawSource,
@@ -244,10 +246,6 @@ class MapViewModel {
       this.#map.addInteraction(this.#draw);
       // We need a listener for when a feature is added to the source.
       this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
-    } else {
-      // If no method was supplied, the user is toggling draw off!
-      this.#map.removeInteraction(this.#draw);
-      this.#map.clickLock.delete("fmeServer");
     }
   };
 

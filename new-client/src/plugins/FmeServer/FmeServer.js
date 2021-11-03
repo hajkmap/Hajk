@@ -29,6 +29,13 @@ const FmeServer = (props) => {
     map: props.map,
   });
 
+  // We're gonna need to catch if the user closes the window, and make sure to
+  // disable the draw interaction if it is active. Let's publish a couple events.
+  const onWindowHide = () => {
+    localObserver.publish("view.toggleDrawMethod", "");
+    localObserver.publish("map.toggleDrawMethod", "");
+  };
+
   // We're rendering the view in a BaseWindowPlugin, since this is a
   // "standard" plugin.
   return (
@@ -41,6 +48,7 @@ const FmeServer = (props) => {
         description: "Beställ jobb från FME-server.",
         height: "dynamic",
         width: 400,
+        onWindowHide: onWindowHide,
       }}
     >
       <FmeView

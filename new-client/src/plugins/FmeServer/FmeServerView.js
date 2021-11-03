@@ -74,9 +74,13 @@ const FmeServerView = (props) => {
   // the mapViewModel and fmeServerModel.
   React.useEffect(() => {
     localObserver.subscribe("map.featureAdded", handleFeatureAdded);
+    localObserver.subscribe("view.toggleDrawMethod", () => {
+      setActiveDrawButton("");
+    });
     return () => {
       // We must make sure to unsubscribe on unmount.
       localObserver.unsubscribe("map.featureAdded");
+      localObserver.unsubscribe("view.toggleDrawMethod");
     };
   }, [localObserver, handleFeatureAdded]);
 
