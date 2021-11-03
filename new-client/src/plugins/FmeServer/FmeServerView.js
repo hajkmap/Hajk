@@ -56,10 +56,12 @@ const FmeServerView = (props) => {
       const totalArea = drawInformation.totalArea;
       // We've got an error if an error is returned in the drawInformation or if
       // the drawn area is bigger than what the product allows. (If the product
-      // maxArea is set to -1, there is no area limitation).
+      // maxArea is set to -1 (or if it is missing), there is no area limitation).
       const error =
         drawInformation.error ||
-        (product.maxArea !== -1 && drawInformation.totalArea > product.maxArea)
+        (product.maxArea &&
+          product.maxArea !== -1 &&
+          drawInformation.totalArea > product.maxArea)
           ? true
           : false;
       setFeatureExists(drawInformation.features.length === 0 ? false : true);
