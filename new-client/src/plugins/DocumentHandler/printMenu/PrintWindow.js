@@ -54,7 +54,7 @@ class PrintWindow extends React.PureComponent {
     printImages: true,
     printMaps: false,
     allDocumentsToggled: false,
-    tableOfContentsType: "none",
+    tocPrintMode: this.props.options?.tableOfContents?.printMode ?? "none",
     menuInformation: this.createMenu(),
     printContent: undefined,
     pdfLoading: false,
@@ -190,7 +190,7 @@ class PrintWindow extends React.PureComponent {
     return this.customRender(
       <TableOfContents
         documents={this.state.menuInformation}
-        type={this.state.tableOfContentsType}
+        mode={this.state.tocPrintMode}
       />,
       this.toc
     );
@@ -346,7 +346,7 @@ class PrintWindow extends React.PureComponent {
 
   printContents = () => {
     Promise.all([
-      this.state.tableOfContentsType !== "none" && this.renderToc(),
+      this.state.tocPrintMode !== "none" && this.renderToc(),
       this.renderContent(),
     ]).then(() => {
       this.areAllImagesLoaded().then(() => {
@@ -552,60 +552,6 @@ class PrintWindow extends React.PureComponent {
     return chapter;
   };
 
-  // prepareChapterForPrint = (chapter) => {
-  //   if (chapter.chapters && chapter.chapters.length > 0) {
-  //     chapter.chapters.forEach((subChapter) => {
-  //       if (subChapter.chapters && subChapter.chapters.length > 0) {
-  //         return this.prepareChapterForPrint(subChapter);
-  //       }
-  //       if (!subChapter.chosenForPrint) {
-  //         subChapter.html = "";
-  //         subChapter.header = "";
-  //       } else {
-  //         subChapter = this.removeTagsNotSelectedForPrint(subChapter);
-  //       }
-  //     });
-  //   }
-  //   if (!chapter.chosenForPrint) {
-  //     chapter.html = "";
-  //     chapter.header = "";
-  //   } else {
-  //     chapter = this.removeTagsNotSelectedForPrint(chapter);
-  //   }
-  //   return chapter;
-  // };
-
-  // getChaptersToPrint = () => {
-  //   let chaptersToPrint = JSON.parse(
-  //     JSON.stringify(this.state.chapterInformation)
-  //   );
-  //   chaptersToPrint.forEach((chapter) => {
-  //     chapter = this.prepareChapterForPrint(chapter);
-  //   });
-
-  //   return chaptersToPrint;
-  // };
-
-  // getDocumentsToPrint = () => {
-  //   //earlier we kept koll på chapters hela tiden.
-  //   //nu ska vi bara hämta upp de när vi klicka print.
-  // };
-
-  // checkIfChaptersSelected = (chapter) => {
-  //   let subChapters = chapter.chapters;
-  //   if (chapter.chosenForPrint) {
-  //     return true;
-  //   } else if (subChapters && subChapters.length > 0) {
-  //     for (let i = 0; i < subChapters.length; i++) {
-  //       let subChapter = subChapters[i];
-  //       if (this.checkIfChaptersSelected(subChapter)) {
-  //         return true;
-  //       }
-  //     }
-  //   }
-  //   return false;
-  // };
-
   isAnyDocumentSelected = () => {
     const keys = Object.keys(this.state.menuInformation);
     for (let i = 0; i < keys.length; i++) {
@@ -629,23 +575,18 @@ class PrintWindow extends React.PureComponent {
     );
 
     //create those without documents (header items) as a header item object.
-
     const documentNamesForPrint = documentIdsForPrint.map(
       (id) => menuInformation[id].document
     );
 
     const docs = this.props.model.getDocuments(documentNamesForPrint);
-    console.log(docs);
 
-    /*where getDocuments returns an empty string. This is a menuItem without a corresponding document, which
+    /*
+    where getDocuments returns an empty string. This is a menuItem without a corresponding document, which
     is a menu parent.
     */
-    const mappedDocs = docs.map((doc, index) => {
+    const docsIncludingGroupParent = docs.map((doc, index) => {
       if (doc === undefined) {
-        //return this.createHeaderItem()
-        console.log("mapping docs");
-        console.log(documentIdsForPrint[index]);
-        console.log(menuInformation[documentIdsForPrint[index]]);
         return this.createHeaderItems(
           menuInformation[documentIdsForPrint[index]]
         );
@@ -654,10 +595,7 @@ class PrintWindow extends React.PureComponent {
     });
 
     //parent group headers will look like {isGroupHeader: true, title: "the menu parent title"}
-    console.log(mappedDocs);
-
-    //return docs;
-    return mappedDocs;
+    return docsIncludingGroupParent;
   };
 
   createPDF = () => {
@@ -671,12 +609,8 @@ class PrintWindow extends React.PureComponent {
       );
     } else {
       this.setState({ pdfLoading: true });
-      //here we are filtering out undefined, undefined are the parent documents.
       console.log("TODO - printwindow 655 kolla på att får med parent header");
-      //TODO - no longer need to filter undefined.
-      const documentsToPrint = this.getDocumentsToPrint().filter(
-        (doc) => doc !== undefined
-      );
+      const documentsToPrint = this.getDocumentsToPrint();
       this.props.localObserver.publish(
         "append-document-components",
         documentsToPrint
@@ -793,29 +727,6 @@ class PrintWindow extends React.PureComponent {
                 />
               }
               label="Välj alla dokument"
-              labelPlacement="end"
-            />
-          </Grid>
-
-          <Grid xs={12} item>
-            <FormControlLabel
-              value="Inkludera hela innehållsförteckningen"
-              control={
-                <Checkbox
-                  color="primary"
-                  checked={this.state.tableOfContentsType !== "none"}
-                  onChange={() => {
-                    let newTocType =
-                      this.state.tableOfContentsType === "none"
-                        ? "full"
-                        : "none";
-                    this.setState({
-                      tableOfContentsType: newTocType,
-                    });
-                  }}
-                />
-              }
-              label="Inkludera hela innehållsförteckningen"
               labelPlacement="end"
             />
           </Grid>

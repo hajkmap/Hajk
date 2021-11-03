@@ -21,13 +21,12 @@ class TableOfContents extends React.PureComponent {
   }
 
   componentDidMount = () => {
-    const { documents, type } = this.props;
+    const { documents, mode } = this.props;
     Object.keys(documents).forEach((key) => {
       this.setTitlesAndLevels(documents[key]);
     });
 
-    let test = "partial";
-    if (type === "partial" || test === "partial") {
+    if (mode === "partial") {
       this.filterTitlesAndLevels();
     }
 
