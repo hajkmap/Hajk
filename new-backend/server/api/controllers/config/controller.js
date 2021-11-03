@@ -1,6 +1,6 @@
-import ConfigService from "../../services/config.service.js";
-import ad from "../../services/activedirectory.service.js";
-import handleStandardResponse from "../../utils/handleStandardResponse.js";
+import ConfigService from "../../services/config.service";
+import ad from "../../services/activedirectory.service";
+import handleStandardResponse from "../../utils/handleStandardResponse";
 
 export class Controller {
   /**

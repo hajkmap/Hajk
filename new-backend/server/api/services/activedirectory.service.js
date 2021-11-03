@@ -1,5 +1,5 @@
 import ActiveDirectory from "activedirectory2";
-import ActiveDirectoryError from "../utils/ActiveDirectoryError.js";
+import ActiveDirectoryError from "../utils/ActiveDirectoryError";
 import log4js from "log4js";
 
 const logger = log4js.getLogger("service.auth");
@@ -24,7 +24,7 @@ const logger = log4js.getLogger("service.auth");
  * @class ActiveDirectoryService
  */
 class ActiveDirectoryService {
-  constructor(...rest) {
+  constructor() {
     if (process.env.AD_LOOKUP_ACTIVE !== "true") {
       logger.info(
         "AD_LOOKUP_ACTIVE is set to %o in .env. Not enabling ActiveDirectory authentication.",
@@ -51,15 +51,13 @@ class ActiveDirectoryService {
     this._groups = new Set();
     this._groupsPerUser = new Map();
 
-    const config = {
-      url: process.env.AD_URL,
-      baseDN: process.env.AD_BASE_DN,
-      username: process.env.AD_USERNAME,
-      password: process.env.AD_PASSWORD,
-    };
-
     // The main AD object that will handle communication
-    this._ad = new ActiveDirectory(config);
+    this._ad = new ActiveDirectory(
+      process.env.AD_URL,
+      process.env.AD_BASE_DN,
+      process.env.AD_USERNAME,
+      process.env.AD_PASSWORD
+    );
 
     this._trustedHeader = process.env.AD_TRUSTED_HEADER || "X-Control-Header";
   }
