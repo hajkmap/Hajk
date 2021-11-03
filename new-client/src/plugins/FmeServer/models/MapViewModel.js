@@ -4,6 +4,7 @@ import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill } from "ol/style";
+import Overlay from "ol/Overlay.js";
 import { handleClick } from "../../../models/Click";
 
 class MapViewModel {
@@ -13,15 +14,20 @@ class MapViewModel {
   #draw;
   #drawSource;
   #drawLayer;
+  #drawTooltipElement;
+  #drawTooltip;
 
   constructor(settings) {
     this.#map = settings.map;
     this.#localObserver = settings.localObserver;
     this.#draw = null;
+    this.#drawTooltipElement = null;
+    this.#drawTooltip = null;
 
     this.#drawStyleSettings = this.#getDrawStyleSettings();
     this.#initDrawLayer();
     this.#bindSubscriptions();
+    this.#createDrawTooltip();
   }
 
   // Initializes the layer in which the user will be adding their
@@ -55,6 +61,45 @@ class MapViewModel {
       "map.getDrawnFeatures",
       this.#getDrawnFeatures
     );
+  };
+
+  // Creates the element and overlay used to display the area of the feature
+  // currently being drawn.
+  #createDrawTooltip = () => {
+    // If the element already exists in the dom (which it will if #drawTooltipElement
+    //  isn't nullish), we must make sure to remove it.
+    this.#removeEventualDrawTooltipElement();
+    // Let's crete a element that we can use in the overlay.
+    this.#drawTooltipElement = document.createElement("div");
+    // Then let's create the overlay...
+    this.#drawTooltip = new Overlay({
+      element: this.#drawTooltipElement,
+      offset: [0, -15],
+      positioning: "bottom-center",
+    });
+    // And add it to the map!
+    this.#map.addOverlay(this.#drawTooltip);
+  };
+
+  #removeEventualDrawTooltipElement = () => {
+    if (this.#drawTooltipElement) {
+      this.#drawTooltipElement.parentNode.removeElement(
+        this.#drawTooltipElement
+      );
+      this.#drawTooltip = null;
+    }
+  };
+
+  #removeEventualDrawTooltipOverlay = () => {
+    if (this.#drawTooltip) {
+      this.#map.removeOverlay(this.#drawTooltip);
+      this.#drawTooltip = null;
+    }
+  };
+
+  #cleanupMapOverlays = () => {
+    this.#removeEventualDrawTooltipElement();
+    this.#removeEventualDrawTooltipOverlay();
   };
 
   // Returns the style settings used in the OL-style.
@@ -194,6 +239,7 @@ class MapViewModel {
     console.log("Resetting draw!");
     this.#drawSource.clear();
     this.#removeDrawInteraction();
+    this.#cleanupMapOverlays();
   };
 
   // Returns all drawn features.
