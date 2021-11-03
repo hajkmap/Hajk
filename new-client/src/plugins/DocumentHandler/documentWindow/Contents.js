@@ -38,17 +38,18 @@ class Contents extends React.PureComponent {
     localObserver.unsubscribe("append-chapter-components");
 
     localObserver.subscribe("append-document-components", (documents) => {
-      console.log("documents: ", documents);
-
       let chapters = [];
       let headerChapter = [];
 
       documents.forEach((document) => {
-        //add an H1 tag for menu parents.
+        /*
+         * add an H1 tag for menu parents when printing.
+         * chapters if a group of documents has a parent document, the header of the parent
+         * is printed if any of the children are printed.
+         */
         if (document.isGroupHeader) {
-          //debugger;
           headerChapter.push(
-            model.returnChapterHeader(document.title, document.id)
+            this.createGroupHeadingTag(document.title, document.id)
           );
           chapters.push(headerChapter);
         } else {
@@ -58,38 +59,21 @@ class Contents extends React.PureComponent {
 
           let renderChapters = [];
           if (headerChapter.length > 0) {
-            //chapters.push(headerChapter);
             headerChapter = [];
           }
 
           let flatChaptersTree = flattenChaptersTree(document.chapters);
-          // if (document.title === "Utvecklingsinriktning - Genomförande") {
-          //   debugger;
-          // }
           flatChaptersTree = flatChaptersTree.map((item) => {
             if (item.mustReplace) {
               let newItem = {};
-              //newItem.header = item.header; //adding a header will cause renderHeadline to apply to this chapter.
-              //newItem.components = [];
-              //let newItem = [];
-              // newItem.components.push(
-              //   model.returnChapterHeader(item.header, item.headerIdentifier)
-              // );
               item = newItem;
             }
             return item;
           });
-          // if (flatChaptersTree.length === 0) {
-          //   flatChaptersTree.push(model.returnChapterHeader())
-          // }
-          console.log(flatChaptersTree);
           renderChapters.push(this.renderChapters(flatChaptersTree));
-
-          console.log(renderChapters);
           chapters.push(renderChapters);
         }
       });
-      console.log(chapters);
 
       localObserver.publish("chapter-components-appended", chapters);
     });
@@ -126,6 +110,22 @@ class Contents extends React.PureComponent {
     );
   };
 
+  createGroupHeadingTag = (title, id) => {
+    const { classes } = this.props;
+    return (
+      <React.Fragment key={id}>
+        <Typography
+          className={classes.typography}
+          data-type="chapter-header"
+          variant={"h2"}
+          component={"h1"}
+        >
+          {title}
+        </Typography>
+      </React.Fragment>
+    );
+  };
+
   /**
    * Renders the document with all it's chapters and sub chapters.
    * @param {object} document The document that will be rendered.
@@ -145,10 +145,6 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderChapter = (chapter) => {
-    // if (chapter.header === "Genomförande") {
-    //   debugger;
-    // }
-    console.log(chapter);
     return (
       <React.Fragment key={chapter.id}>
         {this.renderHeadline(chapter)}
@@ -176,12 +172,6 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderHeadline = (chapter) => {
-    // if (document.title === "Utvecklingsinriktning - Genomförande") {
-    //   debugger;
-    // }
-    // if (chapter.header === "Genomförande") {
-    //   debugger;
-    // }
     const { classes } = this.props;
 
     return (

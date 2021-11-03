@@ -1,5 +1,4 @@
 const getTopLevelItem = (clickedItem, allItems) => {
-  //earlier, this would have been 0, but because of the printId offset, it's not.
   if (!clickedItem.parentId) {
     return clickedItem;
   } else {

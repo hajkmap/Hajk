@@ -97,7 +97,6 @@ class PrintWindow extends React.PureComponent {
     let newItem = { ...clickedItem };
     return {
       ...clickedItem,
-      //colored: !isExpandedTopLevelItem(newItem),
       selected: !newItem.hasSubMenu,
       expandedSubMenu: newItem.hasSubMenu
         ? !newItem.expandedSubMenu
@@ -106,10 +105,8 @@ class PrintWindow extends React.PureComponent {
   };
 
   #setNonClickedItemProperties = (item, currentState, clickedItem) => {
-    //const idsToColor = getItemIdsToColor(clickedItem, currentState);
     return {
       ...item,
-      //colored: idsToColor.indexOf(item.id) !== -1,
       expandedSubMenu:
         clickedItem.allParents.indexOf(item.id) !== -1
           ? true
@@ -293,31 +290,10 @@ class PrintWindow extends React.PureComponent {
   };
 
   addPageBreaksBeforeHeadings = (printWindow) => {
-    console.log(printWindow.document.body);
-    //debugger;
-    //const headings = printWindow.document.body.querySelectorAll(["h1", "h2"]);
-
     const headings = printWindow.document.body.querySelectorAll(["h1", "h2"]);
-
-    //use Adjacent sibling combinator
-    const headingsAfterGroupHeading =
-      printWindow.document.body.querySelectorAll(["h1 + h2"]);
-    console.log(headingsAfterGroupHeading);
-
-    //remove the nodes in headingsAfterGroupHeading from the headings list.
-    // let finalNodes = [];
-    // headings.forEach((heading) => {
-    //   if (!headingsAfterGroupHeading.includes(heading)) {
-    //     finalNodes.push(heading);
-    //   }
-    // });
-
-    // console.log(finalNodes);
-    // console.log(headings);
-    // debugger;
+    //we don't want page breaks before a h2 if there is a h1 immediately before. In this case the H1 is the group parent heading.
     let isAfterH1 = false;
 
-    //debugger;
     for (let i = 0; i < headings.length; i++) {
       if (headings[i].nodeName === "H1") {
         isAfterH1 = true;
@@ -336,11 +312,6 @@ class PrintWindow extends React.PureComponent {
       if (headings[i].nodeName !== "H1") {
         isAfterH1 = false;
       }
-
-      // if (i !== 0 || this.state.tableOfContentsType !== "none") {
-      //   headings[i].style.pageBreakBefore = "always";
-      //   headings[i].style.breakBefore = "none";
-      // }
     }
   };
 
@@ -391,7 +362,10 @@ class PrintWindow extends React.PureComponent {
   }
 
   removeNonPrintableDocuments(documents) {
-    //Remove items that should not appear in the print menu (maplinks, links)
+    /*
+     * Remove menu items that should not appear in the print menu.
+     * Items that should be removed are: items without a document that are not a group parent. (maplinks, links)
+     */
     let removedIds = [];
 
     Object.keys(documents).forEach((key) => {
@@ -414,23 +388,25 @@ class PrintWindow extends React.PureComponent {
         (id) => !removedIds.includes(id)
       );
       item.menuItemIds = newMenuItemIds;
-      //we should not need to remove it from the allParents array, as a Link menu item cannot be a parent.
     });
   }
 
   createMenu() {
+    /* 
+    Create a normalised menu structure for the print menu, similar to that of the panel menu, but only for printable documents. 
+    */
     const { options } = this.props;
 
     const newOptions = { ...options };
     const menuConfig = { ...newOptions }.menuConfig;
-    const clone = JSON.parse(JSON.stringify(menuConfig));
-    const a = getNormalizedMenuState(clone.menu);
+    const menuConfigClone = JSON.parse(JSON.stringify(menuConfig));
+    const menuStructure = getNormalizedMenuState(menuConfigClone.menu);
 
-    const keys = Object.keys(a);
-    const idOffset = keys.length + 1;
+    const keys = Object.keys(menuStructure);
+    const idOffset = keys.length + 1; //used to give new ids, so printMenu items do not get the same id as panelMenu items
 
     keys.forEach((key) => {
-      let document = a[key];
+      let document = menuStructure[key];
       const offsetChildren = document.allChildren.map((id) => (id += idOffset));
       const offsetParents = document.allParents.map((id) => (id += idOffset));
       const offsetMenuItemIds = document.menuItemIds.map(
@@ -449,19 +425,16 @@ class PrintWindow extends React.PureComponent {
       document.colored = true;
     });
 
-    let keys2 = Object.keys(a);
-
-    let newObj = {};
-    keys2.forEach((key) => {
+    let menuWithOffset = {};
+    keys.forEach((key) => {
       let keyOffset = parseInt(key) + idOffset;
-      newObj[keyOffset] = a[key];
+      menuWithOffset[keyOffset] = menuStructure[key];
     });
 
-    this.removeNonPrintableDocuments(newObj);
-    return newObj;
+    this.removeNonPrintableDocuments(menuWithOffset);
+    return menuWithOffset;
   }
 
-  //Change to toggle sub documents.
   toggleSubDocuments(documentId, checked, menuState) {
     const subDocuments = menuState[documentId].allChildren;
     subDocuments.forEach((subDocId) => {
@@ -477,9 +450,8 @@ class PrintWindow extends React.PureComponent {
   }
 
   toggleParents(documentId, checked) {
-    //if a child documents is untoggled, it's holding parent element should no longer be toggled?
-    console.log("toggleParents");
-    //allParents
+    // TODO - if a child documents is untoggled, it's holding parent element should no longer be fully toggled.
+    // should behave in the same way as the layer menu.
   }
 
   toggleChosenForPrint = (documentId) => {
@@ -563,7 +535,6 @@ class PrintWindow extends React.PureComponent {
   };
 
   createHeaderItems = (menuItem) => {
-    console.log(menuItem);
     return { isGroupHeader: true, title: menuItem.title, id: menuItem.id };
   };
 
@@ -594,7 +565,6 @@ class PrintWindow extends React.PureComponent {
       return doc;
     });
 
-    //parent group headers will look like {isGroupHeader: true, title: "the menu parent title"}
     return docsIncludingGroupParent;
   };
 
@@ -609,7 +579,6 @@ class PrintWindow extends React.PureComponent {
       );
     } else {
       this.setState({ pdfLoading: true });
-      console.log("TODO - printwindow 655 kolla på att får med parent header");
       const documentsToPrint = this.getDocumentsToPrint();
       this.props.localObserver.publish(
         "append-document-components",

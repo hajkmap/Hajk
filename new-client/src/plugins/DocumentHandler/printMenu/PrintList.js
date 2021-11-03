@@ -1,11 +1,11 @@
 import React from "react";
 import List from "@material-ui/core/List";
-import PrintListItemNew from "./PrintListItemNew";
+import PrintListItem from "./PrintListItem";
 
 class PrintList extends React.Component {
   getMenuItemType = (item, type) => {
     return (
-      <PrintListItemNew
+      <PrintListItem
         {...this.props}
         type={type}
         menu={item.menu}
@@ -21,7 +21,7 @@ class PrintList extends React.Component {
         selected={item.selected}
         chosenForPrint={item.chosenForPrint}
         handleTogglePrint={this.props.handleTogglePrint}
-      ></PrintListItemNew>
+      ></PrintListItem>
     );
   };
 
