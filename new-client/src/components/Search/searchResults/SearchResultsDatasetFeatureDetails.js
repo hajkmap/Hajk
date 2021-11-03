@@ -85,13 +85,15 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   getHtmlItemInfoBox = () => {
     const { feature } = this.props;
     const source = feature.source ?? this.props.source;
-    feature.properties = this.featurePropsParsing.extractPropertiesFromJson(
-      feature.properties
+    feature.setProperties(
+      this.featurePropsParsing.extractPropertiesFromJson(
+        feature.getProperties()
+      )
     );
     this.featurePropsParsing
       .setMarkdownAndProperties({
         markdown: source.infobox,
-        properties: feature.properties,
+        properties: feature.getProperties(),
       })
       .mergeFeaturePropsWithMarkdown()
       .then((MarkdownComponent) => {
@@ -123,7 +125,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       <TableContainer>
         <Table size="small">
           <TableBody>
-            {Object.entries(feature.properties).map((row) => {
+            {Object.entries(feature.getProperties()).map((row) => {
               return (
                 <TableRow key={row[0]}>
                   {this.renderTableCell(row[0])}
@@ -146,7 +148,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   getFeatureIndex = (feature, features) => {
     return (
       features?.findIndex((f) => {
-        return f.id === feature.id;
+        return f.getId() === feature.getId();
       }) ?? -1
     );
   };

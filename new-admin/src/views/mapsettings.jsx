@@ -403,12 +403,11 @@ class Menu extends Component {
   /**
    *
    */
-  componentWillMount() {}
 
   /**
    *
    */
-  componentWillUnmount() {
+  UNSAFE_componentWillUnmount() {
     this.props.model.off("change:layers");
     this.props.model.off("change:urlMapConfig");
     this.props.model.off("change:layerMenuConfig");

@@ -55,6 +55,7 @@ const defaultState = {
   geometryField: "",
   url: "",
   outputFormat: undefined,
+  serverType: "geoserver",
   alert: false,
   corfirm: false,
   alertMessage: "",
@@ -92,7 +93,7 @@ class Search extends Component {
   /**
    *
    */
-  componentWillUnmount() {
+  UNSAFE_componentWillUnmount() {
     this.props.model.off("change:layers");
   }
   /**
@@ -139,6 +140,7 @@ class Search extends Component {
       displayFields: layer.displayFields,
       geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || "GML3",
+      serverType: layer.serverType || "geoserver",
       url: layer.url,
       addedLayers: [],
     });
@@ -149,6 +151,7 @@ class Search extends Component {
       this.validateField("displayFields", true);
       this.validateField("geometryField", true);
       this.validateField("outputFormat", true);
+      this.validateField("serverType", true);
 
       this.loadWMSCapabilities(undefined, () => {
         this.setState({
@@ -349,6 +352,7 @@ class Search extends Component {
         }
         break;
       case "outputFormat":
+      case "serverType":
         if (value === "") {
           valid = false;
         }
@@ -433,6 +437,7 @@ class Search extends Component {
         "displayFields",
         "geometryField",
         "outputFormat",
+        "serverType",
       ];
 
     validationFields.forEach((fieldName) => {
@@ -457,6 +462,7 @@ class Search extends Component {
         displayFields: this.getValue("displayFields"),
         geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat"),
+        serverType: this.getValue("serverType"),
       };
 
       if (this.state.mode === "add") {
@@ -734,8 +740,33 @@ class Search extends Component {
                     );
                   }}
                 >
+                  <option value="application/json">application/json</option>
+                  <option value="application/vnd.geo+json">
+                    application/vnd.geo+json
+                  </option>
                   <option value="GML3">GML3</option>
                   <option value="GML2">GML2</option>
+                </select>
+              </div>
+              <div>
+                <label>Servertyp</label>
+                <select
+                  ref="input_serverType"
+                  value={this.state.serverType}
+                  className="control-fixed-width"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        serverType: e.target.value,
+                      },
+                      () => this.validateField("serverType", true)
+                    );
+                  }}
+                >
+                  <option value="geoserver">GeoServer</option>
+                  <option value="qgis">QGIS Server</option>
+                  <option value="arcgis">ArcGIS Server</option>
+                  <option value="mapserver">MapServer</option>
                 </select>
               </div>
               <div className="separator">Tillgängliga lager</div>

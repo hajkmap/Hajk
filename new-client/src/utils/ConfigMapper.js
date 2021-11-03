@@ -27,18 +27,33 @@ export default class ConfigMapper {
           getIndex >= 0 &&
           args.layersInfo[getIndex].style;
 
-        /**
-         * GeoServer allows finer control over the legend appearance via the vendor parameter LEGEND_OPTIONS.
-         * See: https://docs.geoserver.org/latest/en/user/services/wms/get_legend_graphic/index.html#controlling-legend-appearance-with-legend-options
-         */
-        // Use custom legend options if specified by admin
-        const geoserverLegendOptions = properties.mapConfig.map.hasOwnProperty(
-          "geoserverLegendOptions"
-        )
-          ? "LEGEND_OPTIONS=" + properties.mapConfig.map.geoserverLegendOptions
-          : "";
+        let geoserverLegendOptions = "";
+        let qgisOptions = "";
 
-        legendUrl = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
+        if (args.serverType === "geoserver") {
+          /**
+           * GeoServer allows finer control over the legend appearance via the vendor parameter LEGEND_OPTIONS.
+           * See: https://docs.geoserver.org/latest/en/user/services/wms/get_legend_graphic/index.html#controlling-legend-appearance-with-legend-options
+           */
+          // Use custom legend options if specified by admin
+          geoserverLegendOptions = properties.mapConfig.map.hasOwnProperty(
+            "geoserverLegendOptions"
+          )
+            ? "&LEGEND_OPTIONS=" +
+              properties.mapConfig.map.geoserverLegendOptions
+            : "";
+        }
+
+        // QGIS Server requires the SERVICE parameter to be set, see issue #880.
+        if (args.serverType === "qgis") {
+          qgisOptions = "&SERVICE=WMS";
+        }
+
+        // If layers URL already includes a query string separator (ie question mark), we want
+        // to append the remaining values with &.
+        const theGlue = args.url.includes("?") ? "&" : "?";
+
+        legendUrl = `${proxy}${args.url}${theGlue}REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}${geoserverLegendOptions}${qgisOptions}`;
       }
       // If there's a legend URL specified in admin, use it as is
       else {
@@ -177,6 +192,7 @@ export default class ConfigMapper {
           ? args.displayFields
           : args.searchFields[0] || "Sökträff",
         srsName: properties.mapConfig.map.projection || "EPSG:3006",
+        serverType: config.options.serverType,
       };
     }
 
