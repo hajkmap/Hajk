@@ -96,7 +96,7 @@ class MapViewModel {
       this.#drawTooltipElement.parentNode.removeElement(
         this.#drawTooltipElement
       );
-      this.#drawTooltip = null;
+      this.#drawTooltipElement = null;
     }
   };
 
