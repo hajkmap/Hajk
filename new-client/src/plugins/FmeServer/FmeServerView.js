@@ -4,7 +4,7 @@ import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
 import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
 import { LinearProgress } from "@material-ui/core";
 
-import ErrorWrapper from "./components/ErrorWrapper";
+import InformationWrapper from "./components/InformationWrapper";
 import DrawToolbox from "./components/DrawToolbox";
 import OrderPanel from "./components/OrderPanel";
 import ProductParameters from "./components/ProductParameters";
@@ -221,12 +221,12 @@ const FmeServerView = (props) => {
     // some error text.
     if (parametersError) {
       return (
-        <ErrorWrapper>
+        <InformationWrapper type="error">
           <Typography>
             Produktens parametrar kunde inte hämtas. Kontakta
             systemadministratören.
           </Typography>
-        </ErrorWrapper>
+        </InformationWrapper>
       );
     }
     // If we're still loading the parameters, let's display some
@@ -354,13 +354,13 @@ const FmeServerView = (props) => {
         </Grid>
         {drawError && (
           <Grid item xs={12} style={{ marginTop: 8 }}>
-            <ErrorWrapper>
+            <InformationWrapper type="error">
               <Typography variant="caption">
                 {`Den ritade ytan är för stor. Ta bort den och försök igen för att
               kunna gå vidare med beställningen! Den ritade ytan är ${totalDrawnArea.toLocaleString()} m2, 
               och den högst tillåtna arean är ${totalAllowedArea.toLocaleString()} m2`}
               </Typography>
-            </ErrorWrapper>
+            </InformationWrapper>
           </Grid>
         )}
         {

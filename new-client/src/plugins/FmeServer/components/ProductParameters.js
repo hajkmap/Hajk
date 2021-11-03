@@ -3,6 +3,8 @@ import { Grid, TextField, Typography } from "@material-ui/core";
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 import Slider from "@material-ui/core/Slider";
 
+import InformationWrapper from "./InformationWrapper";
+
 const ProductParameters = (props) => {
   const allowedFmeTypes = [
     "CHOICE",
@@ -49,22 +51,26 @@ const ProductParameters = (props) => {
 
   function renderParameterRenderingError() {
     return (
-      <Grid item xs={12}>
-        <Typography>
-          Observera att vissa publicerade parametrar inte kunde renderas! Det är
-          inte säkert att beställningen går att genomföra.
-        </Typography>
+      <Grid item xs={12} style={{ padding: 8 }}>
+        <InformationWrapper type="error">
+          <Typography>
+            Observera att vissa publicerade parametrar inte kunde renderas! Det
+            är inte säkert att beställningen går att genomföra.
+          </Typography>
+        </InformationWrapper>
       </Grid>
     );
   }
 
   function renderNoParametersToRenderError() {
     return (
-      <Grid item xs={12}>
-        <Typography>
-          Observera att vissa publicerade parametrar inte kunde renderas! Det är
-          inte säkert att beställningen går att genomföra.
-        </Typography>
+      <Grid item xs={12} style={{ padding: 8 }}>
+        <InformationWrapper type="info">
+          <Typography>
+            Det finns inga publicerade parametrar att rendera! Du kan fortsätta
+            direkt till nästa steg!
+          </Typography>
+        </InformationWrapper>
       </Grid>
     );
   }
