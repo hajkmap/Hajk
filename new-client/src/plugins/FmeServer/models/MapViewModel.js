@@ -1,4 +1,5 @@
 import { Draw } from "ol/interaction";
+import { Circle as CircleGeometry } from "ol/geom.js";
 import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
@@ -164,7 +165,16 @@ class MapViewModel {
       let totalArea = 0;
       const features = this.#getDrawnFeatures();
       features.map((feature) => {
-        return (totalArea += feature.getGeometry().getArea());
+        // Apparently the circle geometry instance does not expose a
+        // getArea method. Here's a quick fix. (Remember that this area
+        // is only used as an heads-up for the user.)
+        const geometry = feature.getGeometry();
+        if (geometry instanceof CircleGeometry) {
+          const radius = geometry.getRadius();
+          return (totalArea += Math.pow(radius, 2) * Math.PI);
+        }
+        // If we're not dealing with a circle, we can just return the area.
+        return (totalArea += geometry.getArea());
       });
       this.#localObserver.publish("map.featureAdded", {
         error: totalArea === 0,
