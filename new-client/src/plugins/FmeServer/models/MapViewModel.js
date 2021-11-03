@@ -16,6 +16,7 @@ class MapViewModel {
   #drawLayer;
   #drawTooltipElement;
   #drawTooltip;
+  #currentPointerCoordinate;
 
   constructor(settings) {
     this.#map = settings.map;
@@ -23,6 +24,7 @@ class MapViewModel {
     this.#draw = null;
     this.#drawTooltipElement = null;
     this.#drawTooltip = null;
+    this.#currentPointerCoordinate = null;
 
     this.#drawStyleSettings = this.#getDrawStyleSettings();
     this.#initDrawLayer();
@@ -74,7 +76,7 @@ class MapViewModel {
     // Then let's create the overlay...
     this.#drawTooltip = new Overlay({
       element: this.#drawTooltipElement,
-      offset: [0, -15],
+      offset: [30, -10],
       positioning: "bottom-center",
     });
     // And add it to the map!
@@ -149,14 +151,25 @@ class MapViewModel {
     }
   };
 
+  // We have to make sure to remove all event listeners to avoid clogging.
+  #removeEventListeners = () => {
+    // But they will only exist if draw is/has ever been active...
+    if (this.#draw) {
+      this.#map.un("singleclick", this.#handleSelectFeatureClick);
+      this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
+      this.#draw.un("drawstart", this.#handleDrawStart);
+      this.#draw.un("drawend", this.#handleDrawEnd);
+      this.#map.un("pointermove", this.#handlePointerMove);
+    }
+  };
+
   // Toggles the draw method
   #toggleDrawMethod = (drawMethod, freehand = false) => {
     // We begin with removing potential existing draw
     this.#removeDrawInteraction();
     // And also remove potential event listeners
-    this.#map.un("singleclick", this.#handleSelectFeatureClick);
-    this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
-    // If the interaction is "Select" we dont wan't a draw method
+    this.#removeEventListeners();
+    // If the interaction is "Select" we don't want a draw method
     if (drawMethod === "Select") {
       return this.#enableSelectFeaturesSearch();
     }
@@ -180,6 +193,11 @@ class MapViewModel {
       this.#map.clickLock.add("fmeServer");
       // Then we'll add a listener for when the drawing starts
       this.#draw.on("drawstart", this.#handleDrawStart);
+      // And a listener for when the drawing is complete
+      this.#draw.on("drawend", this.#handleDrawEnd);
+      // We'll also want a handler for the pointer event to keep
+      // track of where the users pointer is located.
+      this.#map.on("pointermove", this.#handlePointerMove);
       // Then we'll add the interaction to the map!
       this.#map.addInteraction(this.#draw);
       // We need a listener for when a feature is added to the source.
@@ -234,12 +252,29 @@ class MapViewModel {
     feature.on("change", this.#handleFeatureChange);
   };
 
+  // This handler will make sure that the overlay will be removed
+  // when the feature is done.
+  #handleDrawEnd = () => {
+    this.#drawTooltipElement.innerHTML = null;
+    this.#currentPointerCoordinate = null;
+    this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
+  };
+
+  // This handler has one job; get the coordinate from the event,
+  // and store it for later use.
+  #handlePointerMove = (e) => {
+    this.#currentPointerCoordinate = e.coordinate;
+  };
+
   // This handler will make sure that we keep the area calculation
   // updated during the feature changes.
   #handleFeatureChange = (e) => {
     const feature = e.target;
     const featureArea = this.#getFeatureArea(feature);
-    console.log("Change fire: featureArea: ", featureArea);
+    const toolTipText = this.#getTooltipText(featureArea);
+
+    this.#drawTooltipElement.innerHTML = toolTipText;
+    this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
   };
 
   // Calculates the area of the supplied feature.
@@ -259,11 +294,16 @@ class MapViewModel {
     return Math.round(geometry.getArea());
   };
 
+  // Returns the supplied area in a more readable format.
+  #getTooltipText = (featureArea) => {
+    return featureArea;
+  };
+
   // Resets the draw-layer
   #resetDrawing = () => {
-    console.log("Resetting draw!");
     this.#drawSource.clear();
     this.#removeDrawInteraction();
+    this.#removeEventListeners();
     this.#cleanupMapOverlays();
   };
 
