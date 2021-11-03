@@ -15,6 +15,7 @@ class MapViewModel {
   #drawSource;
   #drawLayer;
   #drawTooltipElement;
+  #drawTooltipElementStyle;
   #drawTooltip;
   #currentPointerCoordinate;
 
@@ -25,6 +26,8 @@ class MapViewModel {
     this.#drawTooltipElement = null;
     this.#drawTooltip = null;
     this.#currentPointerCoordinate = null;
+    this.#drawTooltipElementStyle =
+      "position: relative; background: rgba(0, 0, 0, 0.5); border-radius: 4px; color: white; padding: 4px 8px; opacity: 0.7; white-space: nowrap;";
 
     this.#drawStyleSettings = this.#getDrawStyleSettings();
     this.#initDrawLayer();
@@ -73,10 +76,15 @@ class MapViewModel {
     this.#removeEventualDrawTooltipElement();
     // Let's crete a element that we can use in the overlay.
     this.#drawTooltipElement = document.createElement("div");
+    // Let's style the element a bit so it looks prettier...
+    this.#drawTooltipElement.setAttribute(
+      "style",
+      this.#drawTooltipElementStyle
+    );
     // Then let's create the overlay...
     this.#drawTooltip = new Overlay({
       element: this.#drawTooltipElement,
-      offset: [30, -10],
+      offset: [30, -5],
       positioning: "bottom-center",
     });
     // And add it to the map!
