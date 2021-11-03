@@ -14,6 +14,9 @@ import {
   Img,
   BlockQuote,
   LineBreak,
+  Video,
+  Audio,
+  Source,
 } from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
@@ -314,7 +317,7 @@ export default class DocumentHandlerModel {
       <CustomLink
         aTag={e}
         localObserver={this.localObserver}
-        bottomMargin
+        bottomMargin={true}
       ></CustomLink>
     );
   };
@@ -395,18 +398,33 @@ export default class DocumentHandlerModel {
     });
     allowedHtmlTags.push({
       tagType: "a",
-      callback: this.getCustomLink.bind(this),
+      callback: (e) => {
+        this.getCustomLink.bind(this);
+        return this.getCustomLink(e);
+      },
     });
     allowedHtmlTags.push({
       tagType: "img",
       callback: (e) => {
-        return (
-          <Img
-            componentId={e.componentId}
-            imgTag={e}
-            localObserver={this.localObserver}
-          ></Img>
-        );
+        const dataType = e.dataset.type || "image";
+        if (dataType === "image")
+          return (
+            <Img
+              componentId={e.componentId}
+              imgTag={e}
+              localObserver={this.localObserver}
+            ></Img>
+          );
+        else if (dataType === "video")
+          return <Video imgTag={e} componentId={e.componentId}></Video>;
+        else if (dataType === "audio")
+          return <Audio imgTag={e} componentId={e.componentId}></Audio>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "source",
+      callback: (e) => {
+        return <Source sourceTag={e}></Source>;
       },
     });
     allowedHtmlTags.push({
@@ -439,6 +457,7 @@ export default class DocumentHandlerModel {
         return <Italic emTag={e}></Italic>;
       },
     });
+
     return allowedHtmlTags;
   };
 

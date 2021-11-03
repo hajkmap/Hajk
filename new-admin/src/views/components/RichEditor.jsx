@@ -91,14 +91,32 @@ function getBlockStyle(block) {
   }
 }
 
+const Audio = (props) => {
+  return <audio controls src={props.src} />;
+};
+
 const Image = (props) => {
   return <img src={props.src} alt="external" />;
+};
+
+const Video = (props) => {
+  return <video controls src={props.src} />;
 };
 
 const Media = (props) => {
   const entity = props.contentState.getEntity(props.block.getEntityAt(0));
   const { src } = entity.getData();
-  let media = <Image src={src} />;
+  const type = entity.getType();
+
+  let media;
+  if (type === "audio") {
+    media = <Audio src={src} />;
+  } else if (type === "image") {
+    media = <Image src={src} />;
+  } else if (type === "video") {
+    media = <Video src={src} />;
+  }
+
   return media;
 };
 
@@ -204,6 +222,75 @@ class ImageButton extends Component {
             className="btn"
             onClick={() => {
               this.addImage();
+            }}
+            startIcon={<AddIcon />}
+          >
+            Lägg till
+          </ColorButtonGreen>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  render() {
+    var style = {
+      color: "black",
+      marginBottom: "5px",
+    };
+
+    return (
+      <div>
+        <span
+          style={style}
+          className="RichEditor-styleButton fa fa-image"
+          onClick={() => {
+            this.setState({
+              urlInputVisible: !this.state.urlInputVisible,
+            });
+          }}
+        />
+        {this.renderUrlInput()}
+      </div>
+    );
+  }
+}
+
+class VideoButton extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      url: "https://www.kitchentreaty.com/wp-content/uploads/2017/05/vegan-vanilla-bean-waffles-image-660x430.jpg",
+      urlInputVisible: false,
+    };
+  }
+
+  addVideo() {
+    this.props.addVideo(this.state.url);
+  }
+
+  urlChanged(e) {
+    this.setState({
+      url: e.target.value,
+    });
+  }
+
+  renderUrlInput() {
+    var style = {
+      color: "black",
+      marginBottom: "5px",
+    };
+    if (this.state.urlInputVisible) {
+      return (
+        <div style={style}>
+          <input type="text" name="url" onChange={(e) => this.urlChanged(e)} />
+          &nbsp;
+          <ColorButtonGreen
+            variant="contained"
+            className="btn"
+            onClick={() => {
+              this.addVideo();
             }}
             startIcon={<AddIcon />}
           >

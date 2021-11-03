@@ -77,7 +77,9 @@
     "default_coordinate": [320564, 6471766],
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
     "wms_layers": "topowebbkartan",
-    "list_images": "/api/v1/mapconfig/listimage"
+    "list_images": "/api/v1/mapconfig/listimage",
+    "list_videos": "/api/v1/mapconfig/listvideo",
+    "list_audio": "/api/v1/mapconfig/listaudio"
   },
   "router": [
     { "name": "layermanager", "title": "Lager", "default": true },
