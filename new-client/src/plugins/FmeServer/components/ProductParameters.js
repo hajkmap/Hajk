@@ -27,6 +27,8 @@ const ProductParameters = (props) => {
     return props.parameters.length === 0;
   }
 
+  // The range slider and it's helper functions
+  // are obviously TODO: !
   function getRangeSliderValueAndStep(parameter) {
     if (parameter.decimalPrecision > 0) {
     }
@@ -137,7 +139,7 @@ const ProductParameters = (props) => {
     return (
       <Grid key={index} item xs={12} style={{ padding: 8 }}>
         <Grid item xs={12}>
-          <Typography>{parameter.description}</Typography>
+          <Typography>{`${parameter.description} (${value})`}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Slider
@@ -145,6 +147,7 @@ const ProductParameters = (props) => {
             min={parameter.minimum}
             max={parameter.maximum}
             step={step}
+            valueLabelDisplay="auto"
             onChange={(e, newValue) =>
               handleParameterChange(newValue, index, "RANGE_SLIDER")
             }
