@@ -178,7 +178,9 @@ class MapViewModel {
       });
       // Let's add the clickLock to avoid the featureInfo
       this.#map.clickLock.add("fmeServer");
-      // Then we add the interaction to the map!
+      // Then we'll add a listener for when the drawing starts
+      this.#draw.on("drawstart", this.#handleDrawStart);
+      // Then we'll add the interaction to the map!
       this.#map.addInteraction(this.#draw);
       // We need a listener for when a feature is added to the source.
       this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
@@ -225,6 +227,21 @@ class MapViewModel {
     }
   };
 
+  // This handler has one job; add a change listener to the feature
+  // currently being drawn.
+  #handleDrawStart = (e) => {
+    const feature = e.feature;
+    feature.on("change", this.#handleFeatureChange);
+  };
+
+  // This handler will make sure that we keep the area calculation
+  // updated during the feature changes.
+  #handleFeatureChange = (e) => {
+    const feature = e.target;
+    const featureArea = this.#getFeatureArea(feature);
+    console.log("Change fire: featureArea: ", featureArea);
+  };
+
   // Calculates the area of the supplied feature.
   // Accepts an OL-feature, and is tested for Circle and Polygon.
   #getFeatureArea = (feature) => {
@@ -234,10 +251,10 @@ class MapViewModel {
     // is only used as an heads-up for the user.)
     if (geometry instanceof CircleGeometry) {
       const radius = geometry.getRadius();
-      return Math.pow(radius, 2) * Math.PI;
+      return Math.round(Math.pow(radius, 2) * Math.PI);
     }
     // If we're not dealing with a circle, we can just return the area.
-    return geometry.getArea();
+    return Math.round(geometry.getArea());
   };
 
   // Resets the draw-layer
