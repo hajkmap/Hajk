@@ -7,10 +7,11 @@ const useStyles = makeStyles((theme) => ({
     background:
       theme.palette.type === "dark"
         ? theme.palette.error.dark
-        : theme.palette.error.light,
+        : theme.palette.error.main,
     color: theme.palette.error.contrastText,
     padding: theme.spacing(1),
     borderRadius: theme.shape.borderRadius,
+    boxShadow: theme.shadows[2],
   },
 }));
 
@@ -21,14 +22,7 @@ const ErrorWrapper = ({ children }) => {
   const classes = useStyles();
 
   return (
-    <Grid
-      container
-      item
-      xs={12}
-      className={classes.root}
-      justify="center"
-      alignContent="center"
-    >
+    <Grid container item xs={12} className={classes.root}>
       {children}
     </Grid>
   );
