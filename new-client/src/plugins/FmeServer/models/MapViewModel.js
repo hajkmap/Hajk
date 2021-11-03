@@ -210,16 +210,7 @@ class MapViewModel {
       let totalArea = 0;
       const features = this.#getDrawnFeatures();
       features.map((feature) => {
-        // Apparently the circle geometry instance does not expose a
-        // getArea method. Here's a quick fix. (Remember that this area
-        // is only used as an heads-up for the user.)
-        const geometry = feature.getGeometry();
-        if (geometry instanceof CircleGeometry) {
-          const radius = geometry.getRadius();
-          return (totalArea += Math.pow(radius, 2) * Math.PI);
-        }
-        // If we're not dealing with a circle, we can just return the area.
-        return (totalArea += geometry.getArea());
+        return (totalArea += this.#getFeatureArea(feature));
       });
       this.#localObserver.publish("map.featureAdded", {
         error: totalArea === 0,
@@ -232,6 +223,21 @@ class MapViewModel {
         features: [],
       });
     }
+  };
+
+  // Calculates the area of the supplied feature.
+  // Accepts an OL-feature, and is tested for Circle and Polygon.
+  #getFeatureArea = (feature) => {
+    const geometry = feature.getGeometry();
+    // Apparently the circle geometry instance does not expose a
+    // getArea method. Here's a quick fix. (Remember that this area
+    // is only used as an heads-up for the user.)
+    if (geometry instanceof CircleGeometry) {
+      const radius = geometry.getRadius();
+      return Math.pow(radius, 2) * Math.PI;
+    }
+    // If we're not dealing with a circle, we can just return the area.
+    return geometry.getArea();
   };
 
   // Resets the draw-layer
