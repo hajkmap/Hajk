@@ -91,24 +91,38 @@ class MapViewModel {
     this.#map.addOverlay(this.#drawTooltip);
   };
 
+  // We have to make sure that we remove eventual unused elements
+  // from the dom tree so they're not lurking around.
   #removeEventualDrawTooltipElement = () => {
+    // Before we do anything else, we make sire that there actually is
+    // an element present.
     if (this.#drawTooltipElement) {
+      // Then we can remove it
       this.#drawTooltipElement.parentNode.removeElement(
         this.#drawTooltipElement
       );
+      // And clear the variable
       this.#drawTooltipElement = null;
     }
   };
 
+  // We have to make sure that we leave no unused overlays behind
   #removeEventualDrawTooltipOverlay = () => {
+    // Before anything else, we make sure that there is an overlay
+    // present.
     if (this.#drawTooltip) {
+      // Then we can remove it
       this.#map.removeOverlay(this.#drawTooltip);
+      // And clear the variable
       this.#drawTooltip = null;
     }
   };
 
+  // Makes sure that we clean up after ourselves.
   #cleanupMapOverlays = () => {
+    // Remove unused elements
     this.#removeEventualDrawTooltipElement();
+    // REmove unused overlays
     this.#removeEventualDrawTooltipOverlay();
   };
 
@@ -249,22 +263,33 @@ class MapViewModel {
     }
   };
 
+  // We're not only letting the user draw features in the map,
+  // they can also select existing features (from active layers).
   #enableSelectFeaturesSearch = () => {
+    // We don't want the FeatureInfo to get in the way, so let's add
+    // the clickLock.
     this.#map.clickLock.add("search");
+    // Then we'll register the required event listeners
     this.#map.on("singleclick", this.#handleSelectFeatureClick);
     this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
   };
 
+  // Handles singleclick(s) in the map when the current draw method is set to "Select"
   #handleSelectFeatureClick = (event) => {
     handleClick(event, event.map, (response) => {
+      // The response will contain an array
       const features = response.features;
+      // Which might be empty
       if (features.length === 0) {
         return;
       }
+      // But it might also contain some features that we should add to the map.
+      // TODO: Only add one (1)? Might get messy if the user has 15 layers active.
       this.#drawSource.addFeatures(response.features);
     });
   };
 
+  // Handles the addfeature event
   #handleDrawFeatureAdded = () => {
     try {
       // First we need to get all the drawn features
