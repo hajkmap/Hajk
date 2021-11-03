@@ -81,7 +81,15 @@ const FmeServerView = (props) => {
   function handleResetStepper() {
     setActiveStep(0);
     setActiveGroup("");
+    setActiveProduct("");
+    handleResetDraw();
+  }
+
+  function handleResetDraw() {
+    localObserver.publish("map.resetDrawing");
+    setActiveDrawButton("");
     setFeatureExists(false);
+    setTotalDrawnArea(0);
     setDrawError(false);
   }
 
@@ -89,11 +97,7 @@ const FmeServerView = (props) => {
     // The reset button should not be toggled (even if it is a toggle-button...)
     // We should only reset the draw state and move on.
     if (buttonType === "Reset") {
-      localObserver.publish("map.resetDrawing");
-      setActiveDrawButton("");
-      setFeatureExists(false);
-      setDrawError(false);
-      return;
+      return handleResetDraw();
     }
     // If the user clicks the button that is currently active, we must set
     // that button inactive again.
