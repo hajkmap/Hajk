@@ -3,7 +3,7 @@ import { Circle as CircleGeometry } from "ol/geom.js";
 import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
-import { Stroke, Style, Circle, Fill } from "ol/style";
+import { Stroke, Style, Circle, Fill, Text } from "ol/style";
 import Overlay from "ol/Overlay.js";
 import { handleClick } from "../../../models/Click";
 
@@ -139,6 +139,40 @@ class MapViewModel {
     });
   };
 
+  // Returns the style that should be used on the drawn features
+  #getFeatureStyle = (feature) => {
+    // Let's start by grabbing the standard draw style as a baseline
+    const baseLineStyle = this.#getDrawStyle();
+    // Then we'll create a new text-style which will allow us to show
+    // the area of the drawn feature.
+    const textStyle = this.#getFeatureTextStyle(feature);
+    // Apply the text-style to the baseline style...
+    baseLineStyle.setText(textStyle);
+    // And return the finished style.
+    return baseLineStyle;
+  };
+
+  // Returns a text-style that shows the tooltip-label
+  // (i.e. the area of the feature in a readable format).
+  #getFeatureTextStyle = (feature) => {
+    return new Text({
+      textAlign: "center",
+      textBaseline: "middle",
+      font: "12pt sans-serif",
+      fill: new Fill({ color: "#FFF" }),
+      text: this.#getTooltipText(feature),
+      overflow: true,
+      stroke: new Stroke({
+        color: "rgba(0, 0, 0, 0.5)",
+        width: 3,
+      }),
+      offsetX: 0,
+      offsetY: 0,
+      rotation: 0,
+      scale: 1,
+    });
+  };
+
   // Returns a new vector source.
   #getNewVectorSource = () => {
     return new VectorSource({ wrapX: false });
@@ -262,10 +296,12 @@ class MapViewModel {
 
   // This handler will make sure that the overlay will be removed
   // when the feature is done.
-  #handleDrawEnd = () => {
+  #handleDrawEnd = (e) => {
+    const { feature } = e;
     this.#drawTooltipElement.innerHTML = null;
     this.#currentPointerCoordinate = null;
     this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
+    feature.setStyle(this.#getFeatureStyle(feature));
   };
 
   // This handler has one job; get the coordinate from the event,
@@ -278,8 +314,7 @@ class MapViewModel {
   // updated during the feature changes.
   #handleFeatureChange = (e) => {
     const feature = e.target;
-    const featureArea = this.#getFeatureArea(feature);
-    const toolTipText = this.#getTooltipText(featureArea);
+    const toolTipText = this.#getTooltipText(feature);
 
     this.#drawTooltipElement.innerHTML = toolTipText;
     this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
@@ -302,8 +337,11 @@ class MapViewModel {
     return Math.round(geometry.getArea());
   };
 
-  // Returns the supplied area in a more readable format.
-  #getTooltipText = (featureArea) => {
+  // Returns the area of the supplied feature in a readable format.
+  #getTooltipText = (feature) => {
+    // First we must get the feature area.
+    const featureArea = this.#getFeatureArea(feature);
+    // Let's check if we're dealing with a huge area.
     if (featureArea >= 1e6) {
       // If the area is larger than one square kilometer we show the result in km²
       // Rounded to show 3 decimals.
