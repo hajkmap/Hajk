@@ -207,10 +207,12 @@ const FmeServerView = (props) => {
     // some error text.
     if (parametersError) {
       return (
-        <Typography>
-          Produktens parametrar kunde inte hämtas. Kontakta
-          systemadministratören.
-        </Typography>
+        <ErrorWrapper>
+          <Typography>
+            Produktens parametrar kunde inte hämtas. Kontakta
+            systemadministratören.
+          </Typography>
+        </ErrorWrapper>
       );
     }
     // If we're still loading the parameters, let's display some
