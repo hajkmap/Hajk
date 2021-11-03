@@ -205,12 +205,16 @@ class FirLayerController {
       this.zoomToLayer(this.model.layers.feature);
     }
 
+    // Force rendering of buffer and label to next tick to prevent gui freeze.
+    // buffer is throttled for good reasons.
     clearTimeout(this.renderDelay_tm);
     this.renderDelay_tm = setTimeout(() => {
-      // Force rendering of buffer and label to next tick to prevent gui freeze.
       this.bufferFeatures(options);
-      this.addFeatureLabels(arr);
     }, 250);
+
+    setTimeout(() => {
+      this.addFeatureLabels(arr);
+    }, 50);
   };
 
   removeFeature = (feature) => {
@@ -355,12 +359,13 @@ class FirLayerController {
   handleRemoveFeature = (uid) => {
     const feature = this.model.layers.feature.getSource().getFeatureByUid(uid);
     if (feature) {
+      const featureUID = feature.ol_uid;
       this.model.layers.feature.getSource().removeFeature(feature);
       let labelFeature = this.model.layers.label
         .getSource()
         .getFeatures()
         .find((f) => {
-          return f.get("owner_ol_uid") === feature.ol_uid;
+          return f.get("owner_ol_uid") === featureUID;
         });
       if (labelFeature) {
         this.model.layers.label.getSource().removeFeature(labelFeature);

@@ -23,9 +23,7 @@ export default class FirModel {
 
   initSearchTypes = () => {
     this.config.wfsLayers.forEach((layerRef) => {
-      const wfs = this.app.plugins.search.options.sources.find(
-        (_layer) => _layer.id === layerRef.id
-      );
+      const wfs = this.getWfsById(layerRef.id);
       if (wfs) {
         wfs.idField = layerRef.idField;
         wfs.areaField = layerRef.areaField;
@@ -39,9 +37,7 @@ export default class FirModel {
 
     const wfsRef = this.app.plugins.fir.options.wfsRealEstateLayer;
 
-    this.baseSearchType = this.app.plugins.search.options.sources.find(
-      (_layer) => _layer.id === wfsRef.id
-    );
+    this.baseSearchType = this.getWfsById(wfsRef.id);
 
     if (this.baseSearchType) {
       this.baseSearchType.areaField = wfsRef.areaField;
@@ -57,6 +53,12 @@ export default class FirModel {
 
   getSearchTypeById = (id) => {
     return this.searchTypes.find((wfs) => wfs.id === id);
+  };
+
+  getWfsById = (id) => {
+    return this.app.plugins.search.options.sources.find(
+      (layer) => layer.id === id
+    );
   };
 
   getMap() {

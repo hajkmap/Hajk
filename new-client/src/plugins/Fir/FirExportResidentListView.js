@@ -30,6 +30,7 @@ class FirExportResidentListView extends React.PureComponent {
     chBirthdate: false,
     chSsn: false,
     chGender: false,
+    chAdjustToReal: false,
     age: 18,
     loading: false,
     downloadUrl: null,
@@ -116,11 +117,21 @@ class FirExportResidentListView extends React.PureComponent {
 
     // create columns
 
+    if (this.state.chAdjustToReal) {
+      columns.push(" ");
+    }
+
     if (this.state.chSsn === true) {
       columns.push(mappings.ssnDisplayName);
     }
 
     columns.push(mappings.nameDisplayName);
+
+    if (this.state.chAdjustToReal) {
+      columns.push("I egenskap av");
+      columns.push("  ");
+    }
+
     columns.push(mappings.addressDisplayName);
     columns.push(mappings.postalCodeDisplayName);
     columns.push(mappings.cityDisplayName);
@@ -146,11 +157,21 @@ class FirExportResidentListView extends React.PureComponent {
     features.forEach((f) => {
       let row = [];
 
+      if (this.state.chAdjustToReal) {
+        row.push(" ");
+      }
+
       if (this.state.chSsn === true) {
         row.push(this.formatSSN(getValue(f, mappings.ssnFieldName)));
       }
 
       row.push(getValue(f, mappings.nameFieldName));
+
+      if (this.state.chAdjustToReal) {
+        row.push("Boende");
+        row.push("  ");
+      }
+
       row.push(getValue(f, mappings.addressFieldName));
       row.push(getValue(f, mappings.postalCodeFieldName));
       row.push(getValue(f, mappings.cityFieldName));
@@ -217,8 +238,7 @@ class FirExportResidentListView extends React.PureComponent {
   };
 
   getResidentData = () => {
-    let searchType = this.model.getSearchTypeById(this.options.residentList.id);
-
+    let searchType = this.model.getWfsById(this.options.residentList.id);
     let params = {
       featureType: searchType.layers[0],
       url: searchType.url,
@@ -303,6 +323,22 @@ class FirExportResidentListView extends React.PureComponent {
             <div>
               <div>Inkludera:</div>
               <div className={classes.checkboxGroupContainer}>
+                <FormControl fullWidth={true}>
+                  <FormControlLabel
+                    classes={{ label: classes.checkboxLabel }}
+                    control={
+                      <Checkbox
+                        className={classes.checkbox}
+                        checked={this.state.chAdjustToReal}
+                        onChange={(e) => {
+                          this.setState({ chAdjustToReal: e.target.checked });
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Anpassa till fastighetsförteckning"
+                  />
+                </FormControl>
                 <FormControl fullWidth={true}>
                   <FormControlLabel
                     classes={{ label: classes.checkboxLabel }}
