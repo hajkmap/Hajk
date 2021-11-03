@@ -18,7 +18,7 @@ export const flattenChaptersTree = (chapters) => {
     // if (!chapter.html) {
     //   debugger;
     // }
-    if (chapter.html && chapter.header) {
+    if (chapter.header) {
       let chapterStrippedFromSubChapters = { ...chapter };
       chapterStrippedFromSubChapters.chapters = [];
       acc = [...acc, chapterStrippedFromSubChapters];

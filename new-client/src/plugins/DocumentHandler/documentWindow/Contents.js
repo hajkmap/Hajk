@@ -38,23 +38,19 @@ class Contents extends React.PureComponent {
     localObserver.unsubscribe("append-chapter-components");
 
     localObserver.subscribe("append-document-components", (documents) => {
-      console.log("CREATING CONTENTS");
       console.log("documents: ", documents);
-      //temporarily filter away the heading documents so we can see how chapters works:
-      //documents = documents.filter((doc) => !doc.isGroupHeader);
-      console.log(documents);
 
       let chapters = [];
-
-      //debugger;
       let headerChapter = [];
 
       documents.forEach((document) => {
+        //add an H1 tag for menu parents.
         if (document.isGroupHeader) {
-          // headerChapter.push(
-          //   model.returnChapterHeader(document.title, document.id)
-          // );
-          // chapters.push(headerChapter);
+          //debugger;
+          headerChapter.push(
+            model.returnChapterHeader(document.title, document.id)
+          );
+          chapters.push(headerChapter);
         } else {
           document.chapters.forEach((chapter) => {
             model.appendComponentsToChapter(chapter);
@@ -62,7 +58,7 @@ class Contents extends React.PureComponent {
 
           let renderChapters = [];
           if (headerChapter.length > 0) {
-            chapters.push(headerChapter);
+            //chapters.push(headerChapter);
             headerChapter = [];
           }
 
@@ -73,7 +69,7 @@ class Contents extends React.PureComponent {
           flatChaptersTree = flatChaptersTree.map((item) => {
             if (item.mustReplace) {
               let newItem = {};
-              newItem.header = item.header;
+              //newItem.header = item.header; //adding a header will cause renderHeadline to apply to this chapter.
               //newItem.components = [];
               //let newItem = [];
               // newItem.components.push(
