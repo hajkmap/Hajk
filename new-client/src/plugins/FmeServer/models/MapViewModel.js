@@ -251,9 +251,11 @@ class MapViewModel {
     // is only used as an heads-up for the user.)
     if (geometry instanceof CircleGeometry) {
       const radius = geometry.getRadius();
+      // We're rounding since precision isn't important when choosing the area.
       return Math.round(Math.pow(radius, 2) * Math.PI);
     }
     // If we're not dealing with a circle, we can just return the area.
+    // We're rounding since precision isn't important when choosing the area.
     return Math.round(geometry.getArea());
   };
 
