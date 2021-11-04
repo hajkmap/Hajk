@@ -29,24 +29,46 @@ const ProductParameters = (props) => {
     return props.parameters.length === 0;
   }
 
-  // The range slider and it's helper functions
-  // are obviously TODO: !
-  function getRangeSliderValueAndStep(parameter) {
-    if (parameter.decimalPrecision > 0) {
+  // Returns a stepSize that corresponds to the supplied decimalPrecision
+  // E.g. decimalPrecision: 0 => step: 1,
+  //      decimalPrecision: 1 => step: 0.1,
+  //      decimalPrecision: 2 => step: 0.01
+  function getStepSize(decimalPrecision) {
+    // Special case, 0 precision should just return 1
+    if (decimalPrecision === 0) {
+      return 1;
     }
-    const value = parameter.value
-      ? parameter.decimalPrecision > 0
-        ? parseFloat(parameter.value)
-        : parseInt(parameter.value)
-      : parameter.defaultValue
-      ? parameter.decimalPrecision > 0
-        ? parseFloat(parameter.defaultValue)
-        : parseInt(parameter.defaultValue)
-      : parameter.minimum;
+    // Otherwise we use the padStart string function to create
+    // a float with a fitting number of decimals.
+    return Number(`0.${"1".padStart(decimalPrecision, "0")}`);
+  }
 
-    const step = 1;
-
+  // Calculates a fitting stepSize and fetches the current value for
+  // the range slider.
+  function getRangeSliderValueAndStep(parameter) {
+    // First we get a stepSize that fits the decimalPrecision supplied
+    const step = getStepSize(parameter.decimalPrecision);
+    // Then we get the parameter value (that might be set) or return the
+    // minimum (or the step over the minimum if that should be excluded).
+    const value = parameter.value ?? getRangeSliderMinimum(parameter, step);
+    // And return everything
     return { value, step };
+  }
+
+  // Returns the range slider minimum or the step above if
+  // minimum should be excluded.
+  function getRangeSliderMinimum(parameter, step) {
+    return parameter.minimumExclusive
+      ? parameter.minimum
+      : parameter.minimum + step;
+  }
+
+  // Returns the range slider maximum or the step below if
+  // minimum should be excluded.
+  function getRangeSliderMaximum(parameter, step) {
+    return parameter.maximumExclusive
+      ? parameter.maximum
+      : parameter.maximum - step;
   }
 
   function renderParameterRenderingError() {
@@ -85,15 +107,12 @@ const ProductParameters = (props) => {
       case "CHOICE":
       case "LOOKUP_CHOICE":
       case "PASSWORD":
+      case "RANGE_SLIDER":
       case "TEXT":
         parameters[index].value = value;
         props.setProductParameters(parameters);
         return;
       case "LOOKUP_LISTBOX":
-        parameters[index].value = value;
-        props.setProductParameters(parameters);
-        return;
-      case "RANGE_SLIDER":
         parameters[index].value = value;
         props.setProductParameters(parameters);
         return;
@@ -150,8 +169,8 @@ const ProductParameters = (props) => {
         <Grid item xs={12}>
           <Slider
             value={value}
-            min={parameter.minimum}
-            max={parameter.maximum}
+            min={getRangeSliderMinimum(parameter, step)}
+            max={getRangeSliderMaximum(parameter, step)}
             step={step}
             valueLabelDisplay="auto"
             onChange={(e, newValue) =>
