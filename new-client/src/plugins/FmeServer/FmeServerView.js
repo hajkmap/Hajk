@@ -22,6 +22,7 @@ const FmeServerView = (props) => {
   const [activeProduct, setActiveProduct] = React.useState("");
   const [activeDrawButton, setActiveDrawButton] = React.useState("");
   const [featureExists, setFeatureExists] = React.useState(false);
+  const [geometryRequired, setGeometryRequired] = React.useState(false);
   const [totalAllowedArea, setTotalAllowedArea] = React.useState(0);
   const [totalDrawnArea, setTotalDrawnArea] = React.useState(0);
   const [drawError, setDrawError] = React.useState(false);
@@ -52,8 +53,11 @@ const FmeServerView = (props) => {
   // Memoized to prevent useless re-rendering
   const handleFeatureAdded = React.useCallback(
     (drawInformation) => {
+      // Let's get the product information from the activeGroup and activeProduct
+      // (which are strings, and does not contain information about the product).
       const product = model.getProduct(activeGroup, activeProduct);
-      const totalArea = drawInformation.totalArea;
+      // Let's destruct the totalArea property
+      const { totalArea } = drawInformation;
       // We've got an error if an error is returned in the drawInformation or if
       // the drawn area is bigger than what the product allows. (If the product
       // maxArea is set to -1 (or if it is missing), there is no area limitation).
@@ -64,6 +68,7 @@ const FmeServerView = (props) => {
           drawInformation.totalArea > product.maxArea)
           ? true
           : false;
+      // After we've checked for errors we can set some state.
       setFeatureExists(drawInformation.features.length === 0 ? false : true);
       setDrawError(error);
       setTotalDrawnArea(totalArea);
@@ -85,6 +90,21 @@ const FmeServerView = (props) => {
       localObserver.unsubscribe("view.toggleDrawMethod");
     };
   }, [localObserver, handleFeatureAdded]);
+
+  // This effects makes sure to check wether the currently selected
+  // product requires a geometry or not, and updates state accordingly.
+  React.useEffect(() => {
+    // Let's get the product information from the activeGroup and activeProduct
+    // (which are strings, and does not contain information about the product).
+    const product = model.getProduct(activeGroup, activeProduct);
+    // If no product is returned, or if the geoAttribute is missing (or set to none)
+    // no geometry is required.
+    if (!product || !product.geoAttribute || product.geoAttribute === "none") {
+      return setGeometryRequired(false);
+    }
+    // Otherwise it is.
+    setGeometryRequired(true);
+  }, [activeGroup, activeProduct, model]);
 
   // If the user reaches the last step, they will be able to reset
   // the stepper. If they do, there will be some cleanup done.
@@ -259,6 +279,51 @@ const FmeServerView = (props) => {
     );
   }
 
+  // Renders a toolbox that the user can use to draw the geometries needed
+  // to submit the order. It also renders information about potential errors.
+  function renderGeometryHandler() {
+    return (
+      <Grid container item xs={12}>
+        <Grid item xs={12}>
+          <Typography variant="caption">
+            Välj ritverktyg nedan för att rita beställningens omfattning.
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <DrawToolbox
+            activeDrawButton={activeDrawButton}
+            handleDrawButtonClick={handleDrawButtonClick}
+          />
+        </Grid>
+        {drawError && (
+          <Grid item xs={12} style={{ marginTop: 8 }}>
+            <InformationWrapper type="error">
+              <Typography variant="caption">
+                {`Den ritade ytan är för stor. Ta bort den och försök igen för att kunna gå vidare med beställningen! 
+                      Den ritade ytan är ${totalDrawnArea.toLocaleString()} m2, och den högst tillåtna arean är ${totalAllowedArea.toLocaleString()} m2`}
+              </Typography>
+            </InformationWrapper>
+          </Grid>
+        )}
+      </Grid>
+    );
+  }
+
+  // Renders an informational message if the user does not need to draw
+  // a geometry to move in with the product submit request.
+  function renderNoGeometryNeededMessage() {
+    return (
+      <Grid container item xs={12}>
+        <InformationWrapper>
+          <Typography>
+            Denna produkt kräver ingen geometri! Du kan fortsätta till nästa
+            steg.
+          </Typography>
+        </InformationWrapper>
+      </Grid>
+    );
+  }
+
   // Renders the content for the step where the user can select
   // which group they want to get their products from. If no group is selected,
   // the user cannot continue to the next step.
@@ -337,38 +402,25 @@ const FmeServerView = (props) => {
   }
 
   // Renders the content for the step where the user can draw the area
-  // for which the ordered product perform calculations.
+  // for which the ordered product perform calculations. (Note! If no
+  // geometry is required for the chosen product, only an informational
+  // message is shown instead.)
   function renderDrawGeometryStep() {
     return (
       <Grid container item xs={12}>
-        <Grid item xs={12}>
-          <Typography variant="caption">
-            Välj ritverktyg nedan för att rita beställningens omfattning.
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <DrawToolbox
-            activeDrawButton={activeDrawButton}
-            handleDrawButtonClick={handleDrawButtonClick}
-          />
-        </Grid>
-        {drawError && (
-          <Grid item xs={12} style={{ marginTop: 8 }}>
-            <InformationWrapper type="error">
-              <Typography variant="caption">
-                {`Den ritade ytan är för stor. Ta bort den och försök igen för att
-              kunna gå vidare med beställningen! Den ritade ytan är ${totalDrawnArea.toLocaleString()} m2, 
-              och den högst tillåtna arean är ${totalAllowedArea.toLocaleString()} m2`}
-              </Typography>
-            </InformationWrapper>
-          </Grid>
-        )}
+        {geometryRequired
+          ? renderGeometryHandler()
+          : renderNoGeometryNeededMessage()}
         {
           // If the drawing is not completed, or if the drawing contains an error,
-          // we won't let the user continue on.
+          // we won't let the user continue on. (This only applies if geometryRequired is
+          // true obviously).
           renderStepperButtons([
             { type: "back", disabled: false },
-            { type: "next", disabled: !featureExists || drawError },
+            {
+              type: "next",
+              disabled: geometryRequired && (!featureExists || drawError),
+            },
           ])
         }
       </Grid>
