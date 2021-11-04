@@ -283,7 +283,7 @@ export const Figure = ({ figureTag }) => {
  *
  * @memberof Contents
  */
-export const Img = ({ imgTag, localObserver, componentId }) => {
+export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
   const classes = useStyles();
   const tagIsPresent = (imgTag, attribute) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
@@ -389,6 +389,11 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
     return describedBy.length > 0 ? describedBy.join(" ") : null;
   };
 
+  let imgUrl = image.url;
+  if (imgUrl.includes("../")) {
+    imgUrl = image.url.replace("../", baseUrl);
+  }
+
   return (
     <Box
       key={`${image.id}`}
@@ -407,7 +412,7 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
             : null
         }
         className={getImageStyle(image)}
-        image={image.url}
+        image={imgUrl}
       />
       {getImageDescription(image)}
     </Box>
@@ -419,7 +424,7 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
  * @param {object} imgTag The video-tag as an img-tag.
  * @returns React.Fragment
  */
-export const Video = ({ imgTag, componentId }) => {
+export const Video = ({ imgTag, componentId, baseUrl }) => {
   const videoAttributes = {
     caption: imgTag.dataset.caption,
     height: imgTag.dataset.imageHeight,
@@ -483,6 +488,11 @@ export const Video = ({ imgTag, componentId }) => {
     );
   };
 
+  let videoUrl = videoAttributes.url;
+  if (videoUrl.includes("../")) {
+    videoUrl = videoAttributes.url.replace("../", baseUrl);
+  }
+
   return (
     <React.Fragment key={videoAttributes.id}>
       <div className={positioningClass}>
@@ -491,7 +501,7 @@ export const Video = ({ imgTag, componentId }) => {
           width={videoAttributes.width}
           controls={"controls"}
         >
-          <source src={imgTag.src} type="video/mp4"></source>
+          <source src={videoUrl} type="video/mp4"></source>
         </video>
         {getVideoDescription(videoAttributes)}
       </div>
@@ -504,7 +514,7 @@ export const Video = ({ imgTag, componentId }) => {
  * @param {object} imgTag The audio-tag as an img-tag.
  * @returns React.Fragment
  */
-export const Audio = ({ imgTag, componentId }) => {
+export const Audio = ({ imgTag, componentId, baseUrl }) => {
   const audioAttributes = {
     caption: imgTag.attributes.getNamedItem("data-caption")?.value,
     position: imgTag.attributes.getNamedItem("data-image-position")?.value,
@@ -566,6 +576,11 @@ export const Audio = ({ imgTag, componentId }) => {
       </Box>
     );
   };
+
+  let audioUrl = audioAttributes.url;
+  if (audioUrl.includes("../")) {
+    audioUrl = audioAttributes.url.replace("../", baseUrl);
+  }
 
   return (
     <React.Fragment key={audioAttributes.id}>

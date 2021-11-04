@@ -414,12 +414,25 @@ export default class DocumentHandlerModel {
               componentId={e.componentId}
               imgTag={e}
               localObserver={this.localObserver}
+              baseUrl={this.mapServiceUrl}
             ></Img>
           );
         else if (dataType === "video")
-          return <Video imgTag={e} componentId={e.componentId}></Video>;
+          return (
+            <Video
+              imgTag={e}
+              componentId={e.componentId}
+              baseUrl={this.mapServiceUrl}
+            ></Video>
+          );
         else if (dataType === "audio")
-          return <Audio imgTag={e} componentId={e.componentId}></Audio>;
+          return (
+            <Audio
+              imgTag={e}
+              componentId={e.componentId}
+              baseUrl={this.mapServiceUrl}
+            ></Audio>
+          );
       },
     });
     allowedHtmlTags.push({
