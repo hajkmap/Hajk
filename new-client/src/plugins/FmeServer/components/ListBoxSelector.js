@@ -1,0 +1,71 @@
+import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import { Grid, FormControl, Select, Chip, MenuItem } from "@material-ui/core";
+
+const useStyles = makeStyles(() => ({
+  chips: {
+    display: "flex",
+    flexWrap: "wrap",
+  },
+  chip: {
+    marginRight: 2,
+  },
+}));
+
+const ListBoxSelector = (props) => {
+  const { parameter, index, onChange } = props;
+  const classes = useStyles();
+
+  // Returns an array of items currently selected
+  function getSelectedItems() {
+    // If the user hasn't chosen yet, we return the default value
+    if (!parameter.value) {
+      return parameter.defaultValue;
+    }
+    // Otherwise we get the chosen listOption-values
+    // (We dont want the full objects, only the value).
+    return parameter.listOptions.reduce((acc, next) => {
+      // So if the value is in the selected values
+      // we push it to the return array.
+      if (parameter.value.includes(next.value)) {
+        acc.push(next.value);
+      }
+      return acc;
+    }, []);
+  }
+
+  return (
+    <Grid container item xs={12} style={{ padding: 8 }}>
+      <FormControl size="small" fullWidth>
+        <Select
+          multiple
+          value={getSelectedItems()}
+          onChange={(event) =>
+            onChange(event.target.value, index, parameter.type)
+          }
+          input={<Select variant="outlined" />}
+          renderValue={(selected) => (
+            <div className={classes.chips}>
+              {selected.map((option, index) => (
+                <Chip
+                  key={index}
+                  label={option}
+                  size="small"
+                  className={classes.chip}
+                />
+              ))}
+            </div>
+          )}
+        >
+          {parameter.listOptions.map((option, index) => (
+            <MenuItem key={index} value={option.value}>
+              {option.caption}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
+  );
+};
+
+export default ListBoxSelector;

@@ -4,11 +4,13 @@ import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 import Slider from "@material-ui/core/Slider";
 
 import InformationWrapper from "./InformationWrapper";
+import ListBoxSelector from "./ListBoxSelector";
 
 const ProductParameters = (props) => {
   const allowedFmeTypes = [
     "CHOICE",
     "LOOKUP_CHOICE",
+    "LISTBOX",
     "LOOKUP_LISTBOX",
     "RANGE_SLIDER",
     "PASSWORD",
@@ -97,33 +99,23 @@ const ProductParameters = (props) => {
     );
   }
 
+  // When the parameters change, we must make sure to
+  // set the updated value on the corresponding parameter.
   function handleParameterChange(value, index, type) {
     const { parameters } = props;
-    // Choice, lookup_choice, and text should all only have
-    // a single value, so the same handler should get the job
-    // done. Lookup_listbox permits several values, and must be
-    // handled separately.
-    switch (type) {
-      case "CHOICE":
-      case "LOOKUP_CHOICE":
-      case "PASSWORD":
-      case "RANGE_SLIDER":
-      case "TEXT":
-        parameters[index].value = value;
-        props.setProductParameters(parameters);
-        return;
-      case "LOOKUP_LISTBOX":
-        parameters[index].value = value;
-        props.setProductParameters(parameters);
-        return;
-      default:
-        return null;
-    }
+    parameters[index].value = value;
+    props.setProductParameters(parameters);
+    return;
   }
 
   function renderChoice(parameter, index) {
     return (
-      <Grid key={index} item xs={12} style={{ padding: 8 }}>
+      <Grid
+        key={`${parameter.type}-${index}`}
+        item
+        xs={12}
+        style={{ padding: 8 }}
+      >
         <FormControl fullWidth size="small" required={!parameter.optional}>
           <InputLabel variant="outlined" id="fme-lookup-choice-label">
             {parameter.description}
@@ -151,18 +143,26 @@ const ProductParameters = (props) => {
     );
   }
 
-  function renderLookupListbox(parameter, index) {
+  function renderListBox(parameter, index) {
     return (
-      <Grid key={index} item xs={12}>
-        <h3>renderLookupListbox</h3>
-      </Grid>
+      <ListBoxSelector
+        key={`${parameter.type}-${index}`}
+        parameter={parameter}
+        index={index}
+        onChange={handleParameterChange}
+      />
     );
   }
 
   function renderRangeSlider(parameter, index) {
     const { value, step } = getRangeSliderValueAndStep(parameter);
     return (
-      <Grid key={index} item xs={12} style={{ padding: 8 }}>
+      <Grid
+        key={`${parameter.type}-${index}`}
+        item
+        xs={12}
+        style={{ padding: 8 }}
+      >
         <Grid item xs={12}>
           <Typography>{`${parameter.description} (${value})`}</Typography>
         </Grid>
@@ -184,7 +184,12 @@ const ProductParameters = (props) => {
 
   function renderText(parameter, index) {
     return (
-      <Grid key={index} item xs={12} style={{ padding: 8 }}>
+      <Grid
+        key={`${parameter.type}-${index}`}
+        item
+        xs={12}
+        style={{ padding: 8 }}
+      >
         <TextField
           id={`fme-text-${index}`}
           size="small"
@@ -201,6 +206,7 @@ const ProductParameters = (props) => {
   }
 
   function renderParameters() {
+    console.log("parameters: ", props.parameters);
     return (
       <Grid container>
         {props.parameters.map((parameter, index) => {
@@ -208,10 +214,11 @@ const ProductParameters = (props) => {
             case "CHOICE":
               return renderChoice(parameter, index);
             case "LOOKUP_CHOICE":
-              // TODO: Should be the same as choice? Right!?
               return renderChoice(parameter, index);
+            case "LISTBOX":
+              return renderListBox(parameter, index);
             case "LOOKUP_LISTBOX":
-              return renderLookupListbox(parameter, index);
+              return renderListBox(parameter, index);
             case "RANGE_SLIDER":
               return renderRangeSlider(parameter, index);
             case "TEXT":
