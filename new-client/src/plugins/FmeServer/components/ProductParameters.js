@@ -73,6 +73,15 @@ const ProductParameters = (props) => {
       : parameter.maximum - step;
   }
 
+  // When the parameters change, we must make sure to
+  // set the updated value on the corresponding parameter.
+  function handleParameterChange(value, index) {
+    const { parameters } = props;
+    parameters[index].value = value;
+    props.setProductParameters(parameters);
+    return;
+  }
+
   function renderParameterRenderingError() {
     return (
       <Grid item xs={12} style={{ padding: 8 }}>
@@ -99,15 +108,6 @@ const ProductParameters = (props) => {
     );
   }
 
-  // When the parameters change, we must make sure to
-  // set the updated value on the corresponding parameter.
-  function handleParameterChange(value, index, type) {
-    const { parameters } = props;
-    parameters[index].value = value;
-    props.setProductParameters(parameters);
-    return;
-  }
-
   function renderChoice(parameter, index) {
     return (
       <Grid
@@ -129,9 +129,7 @@ const ProductParameters = (props) => {
             variant="outlined"
             value={parameter.value ?? parameter.defaultValue ?? ""}
             label={parameter.description}
-            onChange={(e) =>
-              handleParameterChange(e.target.value, index, "LOOKUP_CHOICE")
-            }
+            onChange={(e) => handleParameterChange(e.target.value, index)}
           >
             {parameter.listOptions.map((option, index) => {
               return (
@@ -176,9 +174,7 @@ const ProductParameters = (props) => {
             max={getRangeSliderMaximum(parameter, step)}
             step={step}
             valueLabelDisplay="auto"
-            onChange={(e, newValue) =>
-              handleParameterChange(newValue, index, "RANGE_SLIDER")
-            }
+            onChange={(e, newValue) => handleParameterChange(newValue, index)}
           />
         </Grid>
       </Grid>
@@ -199,7 +195,7 @@ const ProductParameters = (props) => {
           type={parameter.type === "PASSWORD" ? "password" : "text"}
           required={!parameter.optional}
           label={parameter.description}
-          onChange={(e) => handleParameterChange(e.target.value, index, "TEXT")}
+          onChange={(e) => handleParameterChange(e.target.value, index)}
           fullWidth
           variant="outlined"
           value={parameter.value ?? parameter.defaultValue ?? ""}
@@ -209,7 +205,6 @@ const ProductParameters = (props) => {
   }
 
   function renderParameters() {
-    console.log("parameters: ", props.parameters);
     return (
       <Grid container>
         {props.parameters.map((parameter, index) => {

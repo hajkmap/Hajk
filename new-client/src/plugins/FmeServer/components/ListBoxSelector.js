@@ -44,9 +44,7 @@ const ListBoxSelector = (props) => {
         <Select
           multiple
           value={getSelectedItems()}
-          onChange={(event) =>
-            onChange(event.target.value, index, parameter.type)
-          }
+          onChange={(event) => onChange(event.target.value, index)}
           input={
             <Select
               labelId={`fme-listbox-label-${index}`}
