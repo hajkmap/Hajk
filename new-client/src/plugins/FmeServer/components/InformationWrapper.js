@@ -37,9 +37,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-// Wraps the children inside a Grid container with some error-styling.
-// TODO: Rename to HighlightWrapper and pass type-prop? That way we could
-// highlight bot error, warning, and success information.
+// Wraps the children inside a Grid container with some styling.
+// Supports "error", "warning", and "info". Default to "info".
 const InformationWrapper = ({ children, type }) => {
   const classes = useStyles();
 
