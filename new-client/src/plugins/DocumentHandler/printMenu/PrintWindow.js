@@ -450,9 +450,40 @@ class PrintWindow extends React.PureComponent {
     return menuState;
   }
 
-  toggleParents(documentId, checked) {
-    // TODO - if a child documents is untoggled, it's holding parent element should no longer be fully toggled.
-    // should behave in the same way as the layer menu.
+  toggleParentChecked(documentId, menuState) {
+    const parentId = menuState[documentId].parentId;
+    const updatedParent = { ...menuState[parentId], chosenForPrint: true };
+    menuState[parentId] = updatedParent;
+
+    if (menuState[parentId].parentId) {
+      menuState = this.toggleParentChecked(parentId, menuState);
+    }
+
+    return menuState;
+  }
+
+  toggleParentUnchecked(documentId, menuState) {
+    const parentId = menuState[documentId].parentId;
+
+    //if the parent has other children that are checked, do not toggle the parent.
+    const hasOtherCheckedChildren =
+      menuState[parentId].allChildren.filter((child) => {
+        if (child.id !== documentId && menuState[child].chosenForPrint) {
+          return true;
+        } else return false;
+      }).length > 0;
+
+    if (hasOtherCheckedChildren) {
+      return menuState;
+    }
+
+    const updatedParent = { ...menuState[parentId], chosenForPrint: false };
+    menuState[parentId] = updatedParent;
+
+    if (menuState[parentId].parentId) {
+      menuState = this.toggleParentUnchecked(parentId, menuState);
+    }
+    return menuState;
   }
 
   toggleChosenForPrint = (documentId) => {
@@ -469,11 +500,22 @@ class PrintWindow extends React.PureComponent {
     update child documents (toggle subDocuments does not set state itself, but returns an object
     that we can use to update the state along with out parent document, so we only make one state update.) 
     */
-    const updatedMenuState = this.toggleSubDocuments(
+    let updatedMenuState = this.toggleSubDocuments(
       documentId,
       shouldPrint,
       current
     );
+
+    if (current[documentId].parentId && shouldPrint) {
+      updatedMenuState = this.toggleParentChecked(documentId, updatedMenuState);
+    }
+
+    if (current[documentId].parentId && !shouldPrint) {
+      updatedMenuState = this.toggleParentUnchecked(
+        documentId,
+        updatedMenuState
+      );
+    }
 
     this.setState({ menuInformation: updatedMenuState });
   };
