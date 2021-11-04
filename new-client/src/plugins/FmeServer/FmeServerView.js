@@ -300,7 +300,7 @@ const FmeServerView = (props) => {
             <InformationWrapper type="error">
               <Typography variant="caption">
                 {`Den ritade ytan är för stor. Ta bort den och försök igen för att kunna gå vidare med beställningen! 
-                      Den ritade ytan är ${totalDrawnArea.toLocaleString()} m2, och den högst tillåtna arean är ${totalAllowedArea.toLocaleString()} m2`}
+                      Den ritade ytan är ${totalDrawnArea.toLocaleString()} m², och den högst tillåtna arean är ${totalAllowedArea.toLocaleString()} m²`}
               </Typography>
             </InformationWrapper>
           </Grid>

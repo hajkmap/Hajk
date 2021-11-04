@@ -378,7 +378,7 @@ class MapViewModel {
       // Rounded to show 3 decimals.
       return `${(featureArea / 1e6).toFixed(3)} km²`;
     }
-    // Otherwise m2² will do. (Displayed in local format).
+    // Otherwise m² will do. (Displayed in local format).
     return `${featureArea.toLocaleString()} m²`;
   };
 
