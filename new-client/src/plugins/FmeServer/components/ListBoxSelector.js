@@ -1,6 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid, FormControl, Select, Chip, MenuItem } from "@material-ui/core";
+import { FormControl, InputLabel } from "@material-ui/core";
+import { Grid, Select, Chip, MenuItem } from "@material-ui/core";
 
 const useStyles = makeStyles(() => ({
   chips: {
@@ -37,13 +38,22 @@ const ListBoxSelector = (props) => {
   return (
     <Grid container item xs={12} style={{ padding: 8 }}>
       <FormControl size="small" fullWidth>
+        <InputLabel variant="outlined" id={`fme-listbox-label-${index}`}>
+          {parameter.description}
+        </InputLabel>
         <Select
           multiple
           value={getSelectedItems()}
           onChange={(event) =>
             onChange(event.target.value, index, parameter.type)
           }
-          input={<Select variant="outlined" />}
+          input={
+            <Select
+              labelId={`fme-listbox-label-${index}`}
+              label={parameter.description}
+              variant="outlined"
+            />
+          }
           renderValue={(selected) => (
             <div className={classes.chips}>
               {selected.map((option, index) => (
