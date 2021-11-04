@@ -18,6 +18,7 @@ class MapViewModel {
   #drawTooltipElementStyle;
   #drawTooltip;
   #currentPointerCoordinate;
+  #activeProduct;
 
   constructor(settings) {
     this.#map = settings.map;
@@ -26,6 +27,7 @@ class MapViewModel {
     this.#drawTooltipElement = null;
     this.#drawTooltip = null;
     this.#currentPointerCoordinate = null;
+    this.#activeProduct = null;
     this.#drawTooltipElementStyle =
       "position: relative; background: rgba(0, 0, 0, 0.5); border-radius: 4px; color: white; padding: 4px 8px; opacity: 0.7; white-space: nowrap;";
 
@@ -54,6 +56,10 @@ class MapViewModel {
   // We must make sure that we are listening to the appropriate events from
   // the local observer.
   #bindSubscriptions = () => {
+    // Will fire when the active product changes
+    this.#localObserver.subscribe("view.activeProductChange", (product) => {
+      this.#activeProduct = product;
+    });
     // Will fire when the user changes tool
     this.#localObserver.subscribe(
       "map.toggleDrawMethod",
@@ -326,12 +332,32 @@ class MapViewModel {
   };
 
   // This handler will make sure that the overlay will be removed
-  // when the feature is done.
+  // when the feature is done. It also makes sure to remove previously
+  // drawn geometries if multiple geometries is not allowed.
+  // It also publishes an event in the case that the previously drawn geometry
+  // was removed.
   #handleDrawEnd = (e) => {
+    // First we must check if the currently active product allows for
+    // multiple geometries. We fallback on false if the config option
+    // is missing (since is more usual that only one geometry is allowed).
+    const multipleGeometriesAllowed =
+      this.#activeProduct.allowMultipleGeometries ?? false;
+    // Then we must check if the user has already drawn a geometry
+    const numFeaturesDrawn = this.#drawSource.getFeatures().length;
+    // If they had, and multiple geometries are not allowed, we remove
+    // the previously drawn geometry by clearing the draw source.
+    // Then we publish an event to let the user know that we removed
+    // a geometry from the map.
+    if (!multipleGeometriesAllowed && numFeaturesDrawn !== 0) {
+      this.#drawSource.clear();
+      this.#localObserver.publish("map.maxFeaturesExceeded");
+    }
+    // Then we make sure to remove the draw tooltip
     const { feature } = e;
     this.#drawTooltipElement.innerHTML = null;
     this.#currentPointerCoordinate = null;
     this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
+    // And set a nice style on the feature to be added.
     feature.setStyle(this.#getFeatureStyle(feature));
   };
 

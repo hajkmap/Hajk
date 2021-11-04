@@ -3,6 +3,7 @@ import { Button, Grid, Typography } from "@material-ui/core";
 import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
 import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
 import { LinearProgress } from "@material-ui/core";
+import { useSnackbar } from "notistack";
 
 import InformationWrapper from "./components/InformationWrapper";
 import DrawToolbox from "./components/DrawToolbox";
@@ -27,6 +28,10 @@ const FmeServerView = (props) => {
   const [totalDrawnArea, setTotalDrawnArea] = React.useState(0);
   const [drawError, setDrawError] = React.useState(false);
   const [userEmail, setUserEmail] = React.useState("");
+
+  // We're gonna be showing some snacks to the user, lets destruct the
+  // enqueueSnackbar function so that we can do that.
+  const { enqueueSnackbar } = useSnackbar();
 
   // We're gonna use a custom hook to fetch the product parameters when
   // the user changes group and/or product. We're also supplying a function
@@ -84,15 +89,30 @@ const FmeServerView = (props) => {
     localObserver.subscribe("view.toggleDrawMethod", () => {
       setActiveDrawButton("");
     });
+    localObserver.subscribe("map.maxFeaturesExceeded", () => {
+      enqueueSnackbar(
+        "Denna arbetsytan tillåter enbart en geometri. Den tidigare ritade geometrin togs bort.",
+        {
+          anchorOrigin: {
+            vertical: "bottom",
+            horizontal: "left",
+          },
+          variant: "warning",
+        }
+      );
+    });
     return () => {
       // We must make sure to unsubscribe on unmount.
       localObserver.unsubscribe("map.featureAdded");
       localObserver.unsubscribe("view.toggleDrawMethod");
+      localObserver.unsubscribe("map.maxFeaturesExceeded");
     };
-  }, [localObserver, handleFeatureAdded]);
+  }, [localObserver, handleFeatureAdded, enqueueSnackbar]);
 
   // This effects makes sure to check wether the currently selected
   // product requires a geometry or not, and updates state accordingly.
+  // It also makes sure to publish an event so that the mapViewModel knows
+  // which product is currently active.
   React.useEffect(() => {
     // Let's get the product information from the activeGroup and activeProduct
     // (which are strings, and does not contain information about the product).
@@ -104,7 +124,10 @@ const FmeServerView = (props) => {
     }
     // Otherwise it is.
     setGeometryRequired(true);
-  }, [activeGroup, activeProduct, model]);
+    // Make sure to publish an event on the observer so that the mapViewModel
+    // knows which product is currently active.
+    localObserver.publish("view.activeProductChange", product);
+  }, [activeGroup, activeProduct, localObserver, model]);
 
   // If the user reaches the last step, they will be able to reset
   // the stepper. If they do, there will be some cleanup done.
