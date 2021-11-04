@@ -117,11 +117,14 @@ const ProductParameters = (props) => {
         style={{ padding: 8 }}
       >
         <FormControl fullWidth size="small" required={!parameter.optional}>
-          <InputLabel variant="outlined" id="fme-lookup-choice-label">
+          <InputLabel
+            variant="outlined"
+            id={`fme-lookup-choice-label-${index}`}
+          >
             {parameter.description}
           </InputLabel>
           <Select
-            labelId="fme-lookup-choice-label"
+            labelId={`fme-lookup-choice-label-${index}`}
             id={`fme-lookup-choice-${index}`}
             variant="outlined"
             value={parameter.value ?? parameter.defaultValue ?? ""}
