@@ -280,18 +280,24 @@ class MapViewModel {
     this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
   };
 
-  // Handles singleclick(s) in the map when the current draw method is set to "Select"
+  // Handles singleClick(s) in the map when the current draw method is set to "Select"
   #handleSelectFeatureClick = (event) => {
     handleClick(event, event.map, (response) => {
       // The response will contain an array
       const features = response.features;
-      // Which might be empty
-      if (features.length === 0) {
+      // Which might contain features without geometry. We have to make sure
+      // we remove those.
+      const featuresWithGeom = features.filter((feature) => {
+        return feature.getGeometry();
+      });
+      // The resulting array might be empty, then we abort.
+      if (featuresWithGeom.length === 0) {
         return;
       }
-      // But it might also contain some features that we should add to the map.
-      // TODO: Only add one (1)? Might get messy if the user has 15 layers active.
-      this.#drawSource.addFeatures(response.features);
+      // But it might also contain several features that we should add to the map.
+      // However, we're only adding the first one, otherwise it might get messy if the
+      // user has 15 layers active at the same time.
+      this.#drawSource.addFeature(featuresWithGeom[0]);
     });
   };
 
@@ -313,6 +319,7 @@ class MapViewModel {
       this.#localObserver.publish("map.featureAdded", {
         error: true,
         features: [],
+        totalArea: 0,
       });
     }
   };
