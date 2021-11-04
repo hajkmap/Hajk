@@ -61,16 +61,16 @@ const ProductParameters = (props) => {
   // minimum should be excluded.
   function getRangeSliderMinimum(parameter, step) {
     return parameter.minimumExclusive
-      ? parameter.minimum
-      : parameter.minimum + step;
+      ? parameter.minimum + step
+      : parameter.minimum;
   }
 
   // Returns the range slider maximum or the step below if
   // minimum should be excluded.
   function getRangeSliderMaximum(parameter, step) {
     return parameter.maximumExclusive
-      ? parameter.maximum
-      : parameter.maximum - step;
+      ? parameter.maximum - step
+      : parameter.maximum;
   }
 
   // When the parameters change, we must make sure to
