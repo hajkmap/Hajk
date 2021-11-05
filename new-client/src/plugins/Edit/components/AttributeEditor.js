@@ -66,6 +66,14 @@ class AttributeEditor extends React.Component {
                 : false,
           };
         });
+      } else if (field.textType === "boolean") {
+        if (field.dataType === "boolean") {
+          valueMap[field.name] =
+            featureProps[field.name] || field.defaultValue === "ja" || false;
+        } else {
+          valueMap[field.name] =
+            featureProps[field.name] || field.defaultValue === 1 || 0;
+        }
       } else {
         //If the feature has field: "" it will be changed to the default value.
         //Not sure if we want this behavior?
@@ -116,6 +124,25 @@ class AttributeEditor extends React.Component {
         formValues[name] = "";
       }
     }
+    this.setState(
+      {
+        formValues: formValues,
+      },
+      () => {
+        this.updateFeature();
+      }
+    );
+  }
+
+  checkBoolean(name, value) {
+    let formValues = Object.assign({}, this.state.formValues);
+    if (value === "ja") {
+      value = true;
+    } else if (value === "nej") {
+      value = false;
+    }
+
+    formValues[name] = value;
     this.setState(
       {
         formValues: formValues,
@@ -236,26 +263,28 @@ class AttributeEditor extends React.Component {
       field.alias = field.name;
     }
 
-    if (field.dataType === "int") {
-      field.textType = "heltal";
-    }
+    // Add a default texttype if none is set
+    if (!field.textType || field.textType === "") {
+      if (field.dataType === "int" || field.dataType === "integer") {
+        field.textType = "heltal";
+      }
 
-    if (field.dataType === "number") {
-      field.textType = "nummer";
-    }
+      if (field.dataType === "number" || field.dataType === "decimal") {
+        field.textType = "nummer";
+      }
 
-    if (field.dataType === "date") {
-      field.textType = "datum";
-    }
+      if (field.dataType === "date") {
+        field.textType = "datum";
+      }
 
-    if (field.dataType === "date-time") {
-      field.textType = "date-time";
-    }
+      if (field.dataType === "date-time" || field.dataType === "dateTime") {
+        field.textType = "date-time";
+      }
 
-    if (field.dataType === "boolean") {
-      field.textType = "boolean";
+      if (field.dataType === "boolean") {
+        field.textType = "boolean";
+      }
     }
-
     let value = this.state.formValues[field.name];
 
     if (value === undefined || value === null) {
@@ -524,13 +553,29 @@ class AttributeEditor extends React.Component {
           <FormControlLabel
             control={
               <Checkbox
-                checked={field.value === "ja"}
+                checked={
+                  (field.dataType === "boolean" && field.value === "ja") ||
+                  (field.dataType === "int" && field.value === 1)
+                }
                 color="primary"
                 disabled={!editable}
                 onChange={(e) => {
                   this.setChanged();
-                  field.value = e.target.checked ? "ja" : "nej";
+                  if (e.target.checked) {
+                    if (field.dataType === "boolean") {
+                      field.value = "ja";
+                    } else {
+                      field.value = 1;
+                    }
+                  } else {
+                    if (field.dataType === "boolean") {
+                      field.value = "nej";
+                    } else {
+                      field.value = 0;
+                    }
+                  }
                   field.initialRender = false;
+                  this.checkBoolean(field.name, field.value);
                   this.forceUpdate();
                 }}
               />

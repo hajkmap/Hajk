@@ -463,7 +463,7 @@ class Edit extends Component {
     if (type === "string") {
       return "Skriv in en text. För lista, skriv in ett värde och tryck på enterknappen för att lägga till som valbart element.";
     } else if (type === "int") {
-      return "Skriv in ett heltal";
+      return "Skriv in ett heltal. Vid ja/nej så ange 1 för ja och 0 för nej";
     } else if (type === "date") {
       return "Skriv in ett datum på följande format: YYYY-MM-DD. Exempel 2021-08-09";
     } else if (type === "date-time") {
@@ -611,7 +611,7 @@ class Edit extends Component {
 
   modifyBooleans(layer) {
     layer.editableFields.forEach((field) => {
-      if (field.dataType === "boolean") {
+      if (field.textType === "boolean") {
         field.defaultValue = field.defaultValue === "ja";
       }
       console.log(field);
@@ -854,6 +854,7 @@ class Edit extends Component {
                 }}
               >
                 <option value="datumtid">Datum & Tid</option>
+                <option value="datum">Datum</option>
               </select>
             </>
           );
@@ -868,6 +869,7 @@ class Edit extends Component {
               <option value="heltal">Heltal</option>
               <option value="positive">Positiva heltal</option>
               <option value="negative">Negativa heltal</option>
+              <option value="boolean">Ja/nej</option>
             </select>
           );
         } else if (type === "number") {
@@ -890,7 +892,7 @@ class Edit extends Component {
                 property.textType = e.target.value;
               }}
             >
-              <option value="janej">Ja/nej</option>
+              <option value="boolean">Ja/nej</option>
             </select>
           );
         }
