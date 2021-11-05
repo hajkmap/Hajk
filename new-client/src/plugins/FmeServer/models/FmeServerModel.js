@@ -38,16 +38,68 @@ class FmeServerModel {
     // The data-download does not expect the parameters to be sent in the request
     // body, but rather as URL-parameters
     const requestUrlString = this.#createRequestUrlString(
+      product,
       productParameters,
       userEmail
     );
-    return requestUrlString;
+    console.log("requestString: ", requestUrlString);
   };
 
   // Creates a string to be used for the data-download request
   // Built upon the userEmail and the parameterValues.
-  #createRequestUrlString = (productParameters, userEmail) => {
-    return "";
+  #createRequestUrlString = (product, productParameters, userEmail) => {
+    // We're gonna need some base information in the request string, let's add
+    // that first.
+    let requestString = `opt_servicemode=async&opt_responseformat=json&opt_requesteremail=${userEmail}&`;
+    // Let's check wether their will be a geometry to send
+    if (!this.noGeomAttributeSupplied(product)) {
+      // If there is, we get the geometries as GeoJSON
+      const geoJson = this.#mapViewModel.getAllFeaturesAsGeoJson();
+      // And add it to the request string.
+      requestString += `${product.geoAttribute}=${geoJson}&`;
+    }
+    productParameters.forEach((parameter) => {
+      requestString += `${this.#getParameterNameValueString(parameter)}&`;
+    });
+    // Let's encode the string and return it.
+    return encodeURIComponent(requestString);
+  };
+
+  // Returns a name value string for the supplied parameter
+  #getParameterNameValueString = (parameter) => {
+    switch (parameter.type) {
+      case "CHOICE":
+      case "LOOKUP_CHOICE":
+      case "TEXT":
+      case "PASSWORD":
+        // All above should be clean strings... TODO: Tests!
+        return `${parameter.name}=${
+          parameter.value ?? parameter.defaultValue ?? ""
+        }`;
+      case "LISTBOX":
+      case "LOOKUP_LISTBOX":
+        // These should be array of strings...
+        const selectedArray = parameter.value ?? parameter.defaultValue ?? [];
+        // If the array is empty, we can return an empty string
+        if (selectedArray.length === 0) {
+          return "";
+        }
+        // Otherwise we concatenate a string with all selected values.
+        let urlString = `${parameter.name}=`;
+        selectedArray.forEach((value, index) => {
+          urlString += `${value}${
+            index === selectedArray.length - 1 ? "" : "&"
+          }`;
+        });
+        return urlString;
+      case "RANGE_SLIDER":
+        // This one expects a number
+        const { value } = this.getRangeSliderValueAndStep(parameter);
+        return `${parameter.name}=${value}`;
+      default:
+        // Let's default to a string.
+        return parameter.value ?? parameter.defaultValue ?? "";
+    }
   };
 
   // Handles the REST-api order
