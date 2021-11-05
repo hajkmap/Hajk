@@ -21,6 +21,11 @@ class FmeServerModel {
     });
   };
 
+  // Entry point for when user clicks the "Order" button.
+  // We're targeting different FME-server endpoints determined by wether
+  // The userEmail has been supplied or not. (If the userEmail is supplied
+  // it means that the admin has registered the product as an data-download
+  // product rather than a product that should target the regular FME-server REST-API).
   makeOrder = (groupName, productName, productParameters, userEmail) => {
     // We're gonna need the product
     const product = this.getProduct(groupName, productName);
