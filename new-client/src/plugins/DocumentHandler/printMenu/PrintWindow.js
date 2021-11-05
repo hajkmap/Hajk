@@ -186,7 +186,8 @@ class PrintWindow extends React.PureComponent {
     this.toc = this.createPrintElement("toc");
     return this.customRender(
       <TableOfContents
-        documents={this.state.menuInformation}
+        documentMenuState={this.state.menuInformation}
+        allDocuments={this.props.model.allDocuments}
         mode={this.state.tocPrintMode}
       />,
       this.toc
