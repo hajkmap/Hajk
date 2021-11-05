@@ -8,6 +8,7 @@ import Grid from "@material-ui/core/Grid";
 
 const styles = (theme) => ({
   listItem: { overflowWrap: "break-word" },
+  printToc: { pageBreakAfter: "always" },
 });
 
 class TableOfContents extends React.PureComponent {
@@ -104,9 +105,9 @@ class TableOfContents extends React.PureComponent {
 
   render() {
     const { titlesAndLevels } = this.state;
-    const { theme } = this.props;
+    const { theme, classes } = this.props;
     return (
-      <Grid container>
+      <Grid container className={classes.printToc}>
         <Typography variant="h4" gutterBottom={true}>
           Innehållsförteckning
         </Typography>
