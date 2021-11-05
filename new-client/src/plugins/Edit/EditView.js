@@ -96,7 +96,7 @@ class EditView extends React.PureComponent {
     if (!data) {
       return (
         <Typography>
-          Uppdatateringen lyckades men det upptäcktes inte några ändringar.
+          Uppdateringen lyckades men det upptäcktes inte några ändringar.
         </Typography>
       );
     }

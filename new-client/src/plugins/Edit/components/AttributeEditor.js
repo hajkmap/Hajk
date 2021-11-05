@@ -54,31 +54,33 @@ class AttributeEditor extends React.Component {
     let valueMap = {};
 
     editSource.editableFields.forEach((field) => {
-      if (field.textType === "flerval") {
-        valueMap[field.name] = field.values.map((value) => {
-          return {
-            name: value,
-            checked:
-              typeof featureProps[field.name] === "string"
-                ? featureProps[field.name]
-                    .split(";")
-                    .find((v) => v === value) !== undefined
-                : false,
-          };
-        });
-      } else if (field.textType === "boolean") {
-        if (field.dataType === "boolean") {
-          valueMap[field.name] =
-            featureProps[field.name] || field.defaultValue === "ja" || false;
+      if (featureProps[field.name] !== null) {
+        if (field.textType === "flerval" && featureProps[field.name] !== "") {
+          valueMap[field.name] = field.values.map((value) => {
+            return {
+              name: value,
+              checked:
+                typeof featureProps[field.name] === "string"
+                  ? featureProps[field.name]
+                      .split(";")
+                      .find((v) => v === value) !== undefined
+                  : false,
+            };
+          });
+        } else if (field.textType === "boolean") {
+          if (field.dataType === "boolean") {
+            valueMap[field.name] =
+              featureProps[field.name] || field.defaultValue === "ja" || false;
+          } else {
+            valueMap[field.name] =
+              featureProps[field.name] || field.defaultValue === 1 || 0;
+          }
         } else {
+          //If the feature has field: "" it will be changed to the default value.
+          //Not sure if we want this behavior?
           valueMap[field.name] =
-            featureProps[field.name] || field.defaultValue === 1 || 0;
+            featureProps[field.name] || field.defaultValue || "";
         }
-      } else {
-        //If the feature has field: "" it will be changed to the default value.
-        //Not sure if we want this behavior?
-        valueMap[field.name] =
-          featureProps[field.name] || field.defaultValue || "";
       }
     });
     return valueMap;
