@@ -3,10 +3,12 @@ import { hfetch } from "../../../utils/FetchWrapper";
 class FmeServerModel {
   #options;
   #mapServiceBase;
+  #mapViewModel;
 
   constructor(settings) {
     this.#options = settings.options;
     this.#mapServiceBase = settings.app.config.appConfig.mapserviceBase;
+    this.#mapViewModel = settings.mapViewModel;
   }
 
   // Returns the product matching the group and product name.
@@ -17,6 +19,116 @@ class FmeServerModel {
     return this.#options.products.find((product) => {
       return product.group === groupName && product.name === productName;
     });
+  };
+
+  makeOrder = (groupName, productName, productParameters) => {
+    const product = this.getProduct(groupName, productName);
+    const parametersToSend = this.#getParametersToSend(
+      product,
+      productParameters
+    );
+    console.log("parametersToSend: ", parametersToSend);
+  };
+
+  // Checks wether the geoAttribute contains a valid value.
+  // (An empty string or "none" is to be considered as no geoAttribute
+  // wa supplied).
+  noGeomAttributeSupplied = (product) => {
+    return (
+      !product ||
+      !product.geoAttribute ||
+      product.geoAttribute === "" ||
+      product.geoAttribute === "none"
+    );
+  };
+
+  // Returns a stepSize that corresponds to the supplied decimalPrecision
+  // E.g. decimalPrecision: 0 => step: 1,
+  //      decimalPrecision: 1 => step: 0.1,
+  //      decimalPrecision: 2 => step: 0.01
+  #getStepSize = (decimalPrecision) => {
+    // Special case, 0 precision should just return 1
+    if (decimalPrecision === 0) {
+      return 1;
+    }
+    // Otherwise we use the padStart string function to create
+    // a float with a fitting number of decimals.
+    return Number(`0.${"1".padStart(decimalPrecision, "0")}`);
+  };
+
+  // Calculates a fitting stepSize and fetches the current value for
+  // the range slider.
+  getRangeSliderValueAndStep = (parameter) => {
+    // First we get a stepSize that fits the decimalPrecision supplied
+    const step = this.#getStepSize(parameter.decimalPrecision);
+    // Then we get the parameter value (that might be set) or return the
+    // minimum (or the step over the minimum if that should be excluded).
+    const value =
+      parameter.value ?? this.getRangeSliderMinimum(parameter, step);
+    // And return everything
+    return { value, step };
+  };
+
+  // Returns the range slider minimum or the step above if
+  // minimum should be excluded.
+  getRangeSliderMinimum = (parameter, step) => {
+    return parameter.minimumExclusive
+      ? parameter.minimum + step
+      : parameter.minimum;
+  };
+
+  // Returns the range slider maximum or the step below if
+  // minimum should be excluded.
+  getRangeSliderMaximum = (parameter, step) => {
+    return parameter.maximumExclusive
+      ? parameter.maximum - step
+      : parameter.maximum;
+  };
+
+  // Returns the value of the parameter supplied.
+  // Since the parameter types expects different fallback values
+  // we'll have to handle them differently.
+  #getParameterValue = (parameter) => {
+    switch (parameter.type) {
+      case "CHOICE":
+      case "LOOKUP_CHOICE":
+      case "TEXT":
+      case "PASSWORD":
+        // All of the above expects a single string
+        return parameter.value ?? parameter.defaultValue ?? "";
+      case "LISTBOX":
+      case "LOOKUP_LISTBOX":
+        // These expect an array of strings
+        return parameter.value ?? parameter.defaultValue ?? [];
+      case "RANGE_SLIDER":
+        // This one expects a number
+        const { value } = this.getRangeSliderValueAndStep(parameter);
+        return value;
+      default:
+        // Let's default to a string.
+        return parameter.value ?? parameter.defaultValue ?? "";
+    }
+  };
+
+  // Returns all parameters with their values in the format that
+  // FME-server expects.
+  #getParametersToSend = (product, productParameters) => {
+    // Initiate an array where all parameter objects will be pushed
+    const parametersToSend = [];
+    // Let's check wether their will be a geometry to send
+    if (!this.noGeomAttributeSupplied(product)) {
+      // If there is, we get the geometries as GeoJSON
+      const geoJson = this.#mapViewModel.getAllFeaturesAsGeoJson();
+      // And add the geoAttribute with it's GeoJSON to the array
+      parametersToSend.push({ name: product.geoAttribute, value: geoJson });
+    }
+    // Then we get all other values and add them to the array
+    productParameters.forEach((parameter) => {
+      const value = this.#getParameterValue(parameter);
+      parametersToSend.push({ name: parameter.name, value: value });
+    });
+    // And return the array.
+    return parametersToSend;
   };
 
   // Returns all parameters except the one parameter stated

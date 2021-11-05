@@ -5,6 +5,7 @@ import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill, Text } from "ol/style";
 import Overlay from "ol/Overlay.js";
+import GeoJSON from "ol/format/GeoJSON";
 import { handleClick } from "../../../models/Click";
 
 class MapViewModel {
@@ -67,11 +68,6 @@ class MapViewModel {
     );
     // Will fire when the user wants to reset the drawing.
     this.#localObserver.subscribe("map.resetDrawing", this.#resetDrawing);
-    // Will fire when we want to collect all drawn features
-    this.#localObserver.subscribe(
-      "map.getDrawnFeatures",
-      this.#getDrawnFeatures
-    );
   };
 
   // Creates the element and overlay used to display the area of the feature
@@ -424,9 +420,27 @@ class MapViewModel {
   };
 
   // Returns all drawn features.
-  // TBD: Return OL- or GJ-features. Hmm...
   #getDrawnFeatures = () => {
     return this.#drawSource.getFeatures();
+  };
+
+  // Returns all drawn features in GeoJSON format.
+  getAllFeaturesAsGeoJson = () => {
+    // First we need to get all the ol-features
+    const features = this.#getDrawnFeatures();
+    // If there are no features, we return null
+    if (features.length === 0) {
+      return null;
+    }
+    // If there's exactly one feature, we use the writeFeature method,
+    // otherwise we would get a featureCollection with one feature.
+    // (We rather want just the single feature, not a collection).
+    if (features.length === 1) {
+      return new GeoJSON().writeFeature(features[0]);
+    }
+    // If there's more than one feature, we use the writeFeatures method,
+    // which returns a featureCollection.
+    return new GeoJSON().writeFeatures(features);
   };
 }
 export default MapViewModel;

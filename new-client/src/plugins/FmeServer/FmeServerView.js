@@ -119,7 +119,7 @@ const FmeServerView = (props) => {
     const product = model.getProduct(activeGroup, activeProduct);
     // If no product is returned, or if the geoAttribute is missing (or set to none)
     // no geometry is required.
-    if (!product || !product.geoAttribute || product.geoAttribute === "none") {
+    if (model.noGeomAttributeSupplied(product)) {
       return setGeometryRequired(false);
     }
     // Otherwise it is.
@@ -251,8 +251,7 @@ const FmeServerView = (props) => {
       return setActiveStep(activeStep + 1);
     }
     if (type === "order") {
-      // TODO: Handle order and move on once we get
-      // confirmation from model!
+      model.makeOrder(activeGroup, activeProduct, productParameters);
       return setActiveStep(activeStep + 1);
     }
     return handleResetStepper();
@@ -297,6 +296,7 @@ const FmeServerView = (props) => {
     return (
       <ProductParameters
         parameters={parametersToRender}
+        model={model}
         setProductParameters={setProductParameters}
       />
     );
