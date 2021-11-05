@@ -33,18 +33,6 @@ class FmeServerModel {
     return this.#makeRestApiOrder(product, productParameters);
   };
 
-  // Handles the data-download order
-  #makeDataDownloadOrder = (product, productParameters, userEmail) => {
-    // The data-download does not expect the parameters to be sent in the request
-    // body, but rather as URL-parameters
-    const requestUrlString = this.#createRequestUrlString(
-      product,
-      productParameters,
-      userEmail
-    );
-    console.log("requestString: ", requestUrlString);
-  };
-
   // Creates a string to be used for the data-download request
   // Built upon the userEmail and the parameterValues.
   #createRequestUrlString = (product, productParameters, userEmail) => {
@@ -100,16 +88,6 @@ class FmeServerModel {
         // Let's default to a string.
         return parameter.value ?? parameter.defaultValue ?? "";
     }
-  };
-
-  // Handles the REST-api order
-  #makeRestApiOrder = (product, productParameters) => {
-    // First, we're gonna have to prepare the parameters to send.
-    const parametersToSend = this.#getParametersToSend(
-      product,
-      productParameters
-    );
-    return console.log("parametersToSend: ", parametersToSend);
   };
 
   // Checks wether the geoAttribute contains a valid value.
@@ -271,26 +249,53 @@ class FmeServerModel {
     }
   };
 
-  // Posts a request to run a workspace on FME-server.
+  // Posts a request to run a workspace on FME-server via the REST-API.
   // Returns an object containing eventual error and eventual
   // jobId which can be used to check the status of the job.
-  submitProductRequest = async (groupName, productName, parameters) => {
-    // If the product is missing for some reason, we return an error
-    // and null for the job id.
-    const product = this.getProduct(groupName, productName);
-    if (!product) {
-      return { error: true, jobId: null };
-    }
-    // If not, let's create the url used to submit the workspace.
+  #makeRestApiOrder = async (product, productParameters) => {
+    // First, we're gonna have to prepare the parameters to send.
+    const parametersToSend = this.#getParametersToSend(
+      product,
+      productParameters
+    );
+    // Let's create the request url
     const url = this.#createSubmitProductRequestUrl(product);
-    // And then try to submit the job using the url...
+    // And then try to submit the job using that url...
     try {
       const response = await hfetch(url, {
         method: "POST",
-        body: parameters,
+        body: parametersToSend,
         credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      return { error: false, jobId: data };
+    } catch (error) {
+      return { error: true, jobId: null };
+    }
+  };
+
+  // Handles the data-download order
+  #makeDataDownloadOrder = async (product, productParameters, userEmail) => {
+    // Let's create the base-url for the request.
+    const requestUrl = this.#createDataDownloadUrl(product);
+    // The data-download does not expect the parameters to be be sent
+    // as json. So let's create a string instead TODO: Is this really true?
+    const requestUrlString = this.#createRequestUrlString(
+      product,
+      productParameters,
+      userEmail
+    );
+    // Then we try to fetch with this information
+    try {
+      const response = await hfetch(requestUrl, {
+        method: "POST",
+        body: requestUrlString,
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       });
       const data = await response.json();
@@ -332,6 +337,14 @@ class FmeServerModel {
     }/fmeproxy/fmerest/v3/transformations/submit/${product.repository}/${
       product.workspace
     }`;
+  };
+
+  // Returns the base url used to post a request to submit a
+  // data-download job.
+  #createDataDownloadUrl = (product) => {
+    return `${this.#mapServiceBase}/fmeproxy/fmedatadownload/${
+      product.repository
+    }/${product.repository}`;
   };
 
   // Returns the url needed to fetch information about a submitted job.
