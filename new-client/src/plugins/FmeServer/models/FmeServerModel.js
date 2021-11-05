@@ -54,8 +54,8 @@ class FmeServerModel {
     productParameters.forEach((parameter) => {
       requestString += `${this.#getParameterNameValueString(parameter)}&`;
     });
-    // Let's encode the string and return it.
-    return encodeURIComponent(requestString);
+    // Then we return the string!
+    return requestString;
   };
 
   // Returns a name value string for the supplied parameter
