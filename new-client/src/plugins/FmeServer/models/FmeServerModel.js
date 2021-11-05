@@ -21,13 +21,43 @@ class FmeServerModel {
     });
   };
 
-  makeOrder = (groupName, productName, productParameters) => {
+  makeOrder = (groupName, productName, productParameters, userEmail) => {
+    // We're gonna need the product
     const product = this.getProduct(groupName, productName);
+    // If user email is supplied, it means that we are dealing
+    // with data-download, not the ordinary REST-api
+    if (userEmail.length !== "") {
+      return this.#makeDataDownloadOrder(product, productParameters, userEmail);
+    }
+    // If it is not, we're dealing with the regular REST-application
+    return this.#makeRestApiOrder(product, productParameters);
+  };
+
+  // Handles the data-download order
+  #makeDataDownloadOrder = (product, productParameters, userEmail) => {
+    // The data-download does not expect the parameters to be sent in the request
+    // body, but rather as URL-parameters
+    const requestUrlString = this.#createRequestUrlString(
+      productParameters,
+      userEmail
+    );
+    return requestUrlString;
+  };
+
+  // Creates a string to be used for the data-download request
+  // Built upon the userEmail and the parameterValues.
+  #createRequestUrlString = (productParameters, userEmail) => {
+    return "";
+  };
+
+  // Handles the REST-api order
+  #makeRestApiOrder = (product, productParameters) => {
+    // First, we're gonna have to prepare the parameters to send.
     const parametersToSend = this.#getParametersToSend(
       product,
       productParameters
     );
-    console.log("parametersToSend: ", parametersToSend);
+    return console.log("parametersToSend: ", parametersToSend);
   };
 
   // Checks wether the geoAttribute contains a valid value.

@@ -251,7 +251,7 @@ const FmeServerView = (props) => {
       return setActiveStep(activeStep + 1);
     }
     if (type === "order") {
-      model.makeOrder(activeGroup, activeProduct, productParameters);
+      model.makeOrder(activeGroup, activeProduct, productParameters, userEmail);
       return setActiveStep(activeStep + 1);
     }
     return handleResetStepper();
