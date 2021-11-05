@@ -157,6 +157,8 @@ const ProductParameters = (props) => {
 
   function renderRangeSlider(parameter, index) {
     const { value, step } = getRangeSliderValueAndStep(parameter);
+    const sliderMin = getRangeSliderMinimum(parameter, step);
+    const sliderMax = getRangeSliderMaximum(parameter, step);
     return (
       <Grid
         key={`${parameter.type}-${index}`}
@@ -165,14 +167,18 @@ const ProductParameters = (props) => {
         style={{ padding: 8 }}
       >
         <Grid item xs={12}>
-          <Typography>{`${parameter.description} (${value})`}</Typography>
+          <Typography variant="caption">{parameter.description}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Slider
             value={value}
-            min={getRangeSliderMinimum(parameter, step)}
-            max={getRangeSliderMaximum(parameter, step)}
+            min={sliderMin}
+            max={sliderMax}
             step={step}
+            marks={[
+              { value: sliderMin, label: sliderMin.toString() },
+              { value: sliderMax, label: sliderMax.toString() },
+            ]}
             valueLabelDisplay="auto"
             onChange={(e, newValue) => handleParameterChange(newValue, index)}
           />
