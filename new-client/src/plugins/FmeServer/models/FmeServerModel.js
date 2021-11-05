@@ -26,7 +26,7 @@ class FmeServerModel {
     const product = this.getProduct(groupName, productName);
     // If user email is supplied, it means that we are dealing
     // with data-download, not the ordinary REST-api
-    if (userEmail.length !== "") {
+    if (userEmail !== "") {
       return this.#makeDataDownloadOrder(product, productParameters, userEmail);
     }
     // If it is not, we're dealing with the regular REST-application
@@ -260,11 +260,13 @@ class FmeServerModel {
     );
     // Let's create the request url
     const url = this.#createSubmitProductRequestUrl(product);
+    // And the body containing all the parameters
+    const body = JSON.stringify({ publishedParameters: parametersToSend });
     // And then try to submit the job using that url...
     try {
       const response = await hfetch(url, {
         method: "POST",
-        body: parametersToSend,
+        body: body,
         credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
@@ -344,7 +346,7 @@ class FmeServerModel {
   #createDataDownloadUrl = (product) => {
     return `${this.#mapServiceBase}/fmeproxy/fmedatadownload/${
       product.repository
-    }/${product.repository}`;
+    }/${product.workspace}`;
   };
 
   // Returns the url needed to fetch information about a submitted job.
