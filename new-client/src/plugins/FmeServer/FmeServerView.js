@@ -28,6 +28,9 @@ const FmeServerView = (props) => {
   const [totalDrawnArea, setTotalDrawnArea] = React.useState(0);
   const [drawError, setDrawError] = React.useState(false);
   const [userEmail, setUserEmail] = React.useState("");
+  const [orderLoading, setOrderLoading] = React.useState(false);
+  const [orderError, setOrderError] = React.useState(false);
+  const [jobId, setJobId] = React.useState(null);
 
   // We're gonna be showing some snacks to the user, lets destruct the
   // enqueueSnackbar function so that we can do that.
@@ -237,24 +240,63 @@ const FmeServerView = (props) => {
     );
   }
 
-  // Handles back, next, and reset clicks.
+  // Handles back, next, order, and reset clicks.
   function handleStepperButtonClick(type) {
     // We always want to make sure that we are turning the draw-method off.
     if (activeDrawButton !== "") {
       setActiveDrawButton("");
       localObserver.publish("map.toggleDrawMethod", "");
     }
-    if (type === "back") {
-      return setActiveStep(activeStep - 1);
+    // Then we'll check what type of button that was pressed,
+    // and handle that accordingly.
+    switch (type) {
+      // Going back? Let's decrement by one.
+      case "back":
+        return setActiveStep(activeStep - 1);
+      // Going forward? Let's increment by one.
+      case "next":
+        return setActiveStep(activeStep + 1);
+      // Making an order? Let's handle that.
+      case "order":
+        return handleProductOrder();
+      // If none of the above matched, we're probably resetting.
+      default:
+        return handleResetStepper();
     }
-    if (type === "next") {
-      return setActiveStep(activeStep + 1);
-    }
-    if (type === "order") {
-      model.makeOrder(activeGroup, activeProduct, productParameters, userEmail);
-      return setActiveStep(activeStep + 1);
-    }
-    return handleResetStepper();
+  }
+
+  // Handles when user presses the order button. The makeOrder method
+  // will return an object containing two properties => error and jobId.
+  // The jobId can be used to fetch information about the order request.
+  // (When making an order, we're queuing a job on FME-server, and we cannot know
+  // when that will finish. Which means we cannot wait for the job to complete).
+  async function handleProductOrder() {
+    // Let's make sure to reset the jobId and set that we are now loading.
+    setJobId(null);
+    setOrderLoading(true);
+    // Let's await the order request
+    const result = await model.makeOrder(
+      activeGroup,
+      activeProduct,
+      productParameters,
+      userEmail
+    );
+    // And then we update the state accordingly.
+    setOrderError(result.error);
+    setJobId(result.jobId);
+    setOrderLoading(false);
+    // We're gonna be doing some fun stuff with these parameters later, but for now
+    // let's just log them out.
+    console.log(
+      "orderLoading: ",
+      orderLoading,
+      "jobId: ",
+      jobId,
+      "orderError: ",
+      orderError
+    );
+    // When we're all done, we move on.
+    return setActiveStep(activeStep + 1);
   }
 
   // Renders the product parameters fetched by the useProductParameters hook.
