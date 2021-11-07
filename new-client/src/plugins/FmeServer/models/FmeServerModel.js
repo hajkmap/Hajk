@@ -278,7 +278,7 @@ class FmeServerModel {
         },
       });
       const data = await response.json();
-      return { error: false, jobId: data };
+      return { error: false, jobId: data.id ?? null };
     } catch (error) {
       return { error: true, jobId: null };
     }
@@ -306,7 +306,7 @@ class FmeServerModel {
         },
       });
       const data = await response.json();
-      return { error: false, jobId: data };
+      return { error: false, jobId: data?.serviceResponse?.jobID ?? null };
     } catch (error) {
       return { error: true, jobId: null };
     }
