@@ -10,6 +10,17 @@ import DrawToolbox from "./components/DrawToolbox";
 import OrderPanel from "./components/OrderPanel";
 import ProductParameters from "./components/ProductParameters";
 import useProductParameters from "./hooks/useProductParameters";
+import useInterval from "./hooks/useInterval";
+
+// We're gonna be checking the job status against this array of
+// FME-status messages (all of witch means that the job has completed).
+const FME_DONE_MESSAGES = [
+  "ABORTED",
+  "SUCCESS",
+  "FME_FAILURE",
+  "JOB_FAILURE",
+  "PULLED",
+];
 
 const FmeServerView = (props) => {
   // We're gonna be needing the localObserver.
@@ -28,8 +39,8 @@ const FmeServerView = (props) => {
   const [totalDrawnArea, setTotalDrawnArea] = React.useState(0);
   const [drawError, setDrawError] = React.useState(false);
   const [userEmail, setUserEmail] = React.useState("");
-  const [orderLoading, setOrderLoading] = React.useState(false);
-  const [orderError, setOrderError] = React.useState(false);
+  const [orderStatus, setOrderStatus] = React.useState("NONE");
+  const [pollError, setPollError] = React.useState(false);
   const [jobId, setJobId] = React.useState(null);
 
   // We're gonna be showing some snacks to the user, lets destruct the
@@ -57,6 +68,19 @@ const FmeServerView = (props) => {
     { label: "Beställ", renderFunction: renderOrderStep },
     { label: "Klart!", renderFunction: renderDoneStep },
   ];
+
+  // We are using a custom hook to poll data. If we are polling (determined
+  // by shouldPollData, we poll information about a job every 5 seconds).
+  useInterval(
+    async () => {
+      const { error, status } = await model.getJobStatusById(jobId);
+      if (error) {
+        return setPollError(true);
+      }
+      setOrderStatus(status);
+    },
+    shouldPollData() ? 5 * 1000 : null
+  );
 
   // Memoized to prevent useless re-rendering
   const handleFeatureAdded = React.useCallback(
@@ -147,6 +171,27 @@ const FmeServerView = (props) => {
     setFeatureExists(false);
     setTotalDrawnArea(0);
     setDrawError(false);
+  }
+
+  // Checks wether we should be polling information about a submitted
+  // job or not.
+  function shouldPollData() {
+    // If we've encountered an error while polling data, we're stopping.
+    if (pollError) {
+      return false;
+    }
+    // If we have no jobId, it means that we haven't made any product
+    // requests yet. (And we should not poll data obviously).
+    if (jobId === null) {
+      return false;
+    }
+    // If the order status is any of the "done" statuses,
+    // we should not poll any more.
+    if (FME_DONE_MESSAGES.includes(orderStatus)) {
+      return false;
+    }
+    // Otherwise, we are going to poll data!
+    return true;
   }
 
   function handleDrawButtonClick(buttonType) {
@@ -273,7 +318,7 @@ const FmeServerView = (props) => {
   async function handleProductOrder() {
     // Let's make sure to reset the jobId and set that we are now loading.
     setJobId(null);
-    setOrderLoading(true);
+    setOrderStatus("ORDER_REQUEST_SENT");
     // Let's await the order request
     const result = await model.makeOrder(
       activeGroup,
@@ -282,19 +327,8 @@ const FmeServerView = (props) => {
       userEmail
     );
     // And then we update the state accordingly.
-    setOrderError(result.error);
     setJobId(result.jobId);
-    setOrderLoading(false);
-    // We're gonna be doing some fun stuff with these parameters later, but for now
-    // let's just log them out.
-    console.log(
-      "orderLoading: ",
-      orderLoading,
-      "jobId: ",
-      jobId,
-      "orderError: ",
-      orderError
-    );
+    setOrderStatus(result.error ? "ORDER_REQUEST_FAILED" : "POLLING");
     // When we're all done, we move on.
     return setActiveStep(activeStep + 1);
   }

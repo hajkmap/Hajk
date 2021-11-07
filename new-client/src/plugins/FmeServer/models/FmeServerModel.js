@@ -324,7 +324,7 @@ class FmeServerModel {
     try {
       const response = await hfetch(url);
       const data = await response.json();
-      return { error: false, status: data };
+      return { error: false, status: data?.status ?? null };
     } catch (error) {
       return { error: true, status: null };
     }
