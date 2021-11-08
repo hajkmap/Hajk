@@ -8,7 +8,7 @@ import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 
-import log4js from "log4js";
+import log4js from "../api/utils/hajkLogger";
 import clfDate from "clf-date";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
@@ -23,68 +23,7 @@ import errorHandler from "../api/middlewares/error.handler";
 
 const app = new Express();
 
-// Setup our logger.
-// First, see if Hajk is running in a clustered environment, if so, we want unique log file
-// names for each instance
-const uniqueInstance =
-  process.env.HAJK_INSTANCE_ID.length > 0
-    ? `_${process.env.HAJK_INSTANCE_ID}`
-    : "";
-log4js.configure({
-  // Appenders are output methods, e.g. if log should be written to file or console (or both)
-  appenders: {
-    // Console appender will print to stdout
-    console: { type: "stdout" },
-    // File appender will print to a log file, rotating it each day.
-    file: { type: "dateFile", filename: `logs/output${uniqueInstance}.log` },
-    // Another file appender, specifically to log events that modify Hajk's layers/maps
-    adminEventLog: {
-      type: "dateFile",
-      filename: `logs/admin_events${uniqueInstance}.log`,
-      // Custom layout as we only care about the timestamp, the message and new line,
-      // log level and log context are not of interest to this specific appender.
-      layout: {
-        type: "pattern",
-        pattern: "[%d] %m",
-      },
-    },
-    // Appender used for writing access logs. Rotates daily.
-    accessLog: {
-      type: "dateFile",
-      filename: `logs/access${uniqueInstance}.log`,
-      layout: { type: "messagePassThrough" },
-    },
-  },
-  // Categories specify _which appender is used with respective logger_. E.g., if we create
-  // a logger with 'const logger = log4js.getLogger("foo")', and there exists a "foo" category
-  // below, the options (regarding appenders and log level to use) will be used. If "foo" doesn't
-  // exist, log4js falls back to the "default" category.
-  categories: {
-    default: {
-      // Use settings from .env to decide which appenders (defined above) will be active
-      appenders: process.env.LOG_DEBUG_TO.split(","),
-      // Use settings from .env to determine which log level should be used
-      level: process.env.LOG_LEVEL,
-    },
-    // Separate category to log admin UI events (requests to endpoints that modify the layers/maps)
-    ...(process.env.LOG_ADMIN_EVENTS === "true" && {
-      adminEvent: {
-        appenders: ["adminEventLog"],
-        level: "all",
-      },
-    }),
-    // If activated in .env, write access log to the configured appenders
-    ...(process.env.LOG_ACCESS_LOG_TO.trim().length !== 0 && {
-      http: {
-        appenders: process.env.LOG_ACCESS_LOG_TO.split(","),
-        level: "all",
-      },
-    }),
-  },
-});
-
 const logger = log4js.getLogger("hajk");
-const exit = process.exit;
 
 export default class ExpressServer {
   constructor() {
@@ -253,7 +192,7 @@ export default class ExpressServer {
 
       // Convert the settings from DOTENV to a nice Array of Objects.
       const proxyMap = Object.entries(process.env)
-        .filter(([k, v]) => k.startsWith("PROXY_"))
+        .filter(([k]) => k.startsWith("PROXY_"))
         .map(([k, v]) => {
           // Get rid of the leading "PROXY_" and convert to lower case
           k = k.replace("PROXY_", "").toLowerCase();
