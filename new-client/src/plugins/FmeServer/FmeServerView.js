@@ -256,6 +256,11 @@ const FmeServerView = (props) => {
   // Returns an array of products, where each product belongs
   // to the currently active group.
   function getProductsInActiveGroup() {
+    // If we have no active group, we should return an empty array.
+    if (activeGroup === "") {
+      return [];
+    }
+    // Otherwise we return the products that belong to the current group.
     return props.options.products.filter((product) => {
       return product.group === activeGroup;
     });
@@ -496,26 +501,37 @@ const FmeServerView = (props) => {
   function renderChooseGroupStep() {
     return (
       <Grid container item xs={12}>
-        <Grid item xs={12}>
-          <FormControl fullWidth>
-            <InputLabel id="fme-server-select-group-label">Grupp</InputLabel>
-            <Select
-              labelId="fme-server-select-group-label"
-              id="fme-server-select-group"
-              value={activeGroup}
-              label="Grupp"
-              onChange={(e) => setActiveGroup(e.target.value)}
-            >
-              {props.options.productGroups.map((group, index) => {
-                return (
-                  <MenuItem value={group} key={index}>
-                    {group}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-        </Grid>
+        {props.options?.groups?.length > 0 ? (
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel id="fme-server-select-group-label">Grupp</InputLabel>
+              <Select
+                labelId="fme-server-select-group-label"
+                id="fme-server-select-group"
+                value={activeGroup}
+                label="Grupp"
+                onChange={(e) => setActiveGroup(e.target.value)}
+              >
+                {props.options.productGroups.map((group, index) => {
+                  return (
+                    <MenuItem value={group} key={index}>
+                      {group}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </Grid>
+        ) : (
+          <Grid item xs={12}>
+            <InformationWrapper type="error">
+              <Typography>
+                Pluginet är felkonfigurerat, kontakta systemadministratören.
+              </Typography>
+            </InformationWrapper>
+          </Grid>
+        )}
+
         {
           // Since this is the first step, we only need a "next" button. We can't
           // go back to step -1.
