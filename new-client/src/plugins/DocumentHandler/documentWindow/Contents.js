@@ -52,15 +52,13 @@ class Contents extends React.PureComponent {
             this.createGroupHeadingTag(document.title, document.id)
           );
           chapters.push(headerChapter);
+          headerChapter = [];
         } else {
           document.chapters.forEach((chapter) => {
             model.appendComponentsToChapter(chapter);
           });
 
           let renderChapters = [];
-          if (headerChapter.length > 0) {
-            headerChapter = [];
-          }
 
           let flatChaptersTree = flattenChaptersTree(document.chapters);
           flatChaptersTree = flatChaptersTree.map((item) => {
