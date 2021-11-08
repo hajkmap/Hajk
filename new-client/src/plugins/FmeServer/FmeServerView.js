@@ -50,6 +50,15 @@ const FmeServerView = (props) => {
   // enqueueSnackbar function so that we can do that.
   const { enqueueSnackbar } = useSnackbar();
 
+  // We must keep track of if we should be polling data from FME-server.
+  const shouldPollData = getShouldPollData();
+
+  // We must also keep track of if a order is loading or not.
+  const orderIsLoading = getOrderIsLoading();
+
+  // We want to keep track of wether the order is completed or not.
+  const orderIsCompleted = getOrderIsCompleted();
+
   // We're gonna use a custom hook to fetch the product parameters when
   // the user changes group and/or product. We're also supplying a function
   // that can be used to set the parameters (so that the user can change
@@ -83,7 +92,7 @@ const FmeServerView = (props) => {
       }
       setOrderStatus(status);
     },
-    shouldPollData() ? POLLING_INTERVAL : null
+    shouldPollData ? POLLING_INTERVAL : null
   );
 
   // Memoized to prevent useless re-rendering
@@ -166,6 +175,7 @@ const FmeServerView = (props) => {
     setActiveStep(0);
     setActiveGroup("");
     setActiveProduct("");
+    resetOrderInformation();
     handleResetDraw();
   }
 
@@ -177,9 +187,15 @@ const FmeServerView = (props) => {
     setDrawError(false);
   }
 
+  function resetOrderInformation() {
+    setJobId(null);
+    setOrderStatus("NONE");
+    setPollError(null);
+  }
+
   // Checks wether we should be polling information about a submitted
   // job or not.
-  function shouldPollData() {
+  function getShouldPollData() {
     // If we've encountered an error while polling data, we're stopping.
     if (pollError) {
       return false;
@@ -195,6 +211,29 @@ const FmeServerView = (props) => {
       return false;
     }
     // Otherwise, we are going to poll data!
+    return true;
+  }
+
+  // Helper function to determine if the order is loading or not.
+  // (we are loading if we are about to poll data, or if we are
+  // currently polling data).
+  function getOrderIsLoading() {
+    // If shouldPollData is true, we are currently polling data.
+    // If the orderStatus is set to ORDER_REQUEST_SENT, we are about to poll data.
+    return shouldPollData || orderStatus === "ORDER_REQUEST_SENT";
+  }
+
+  // Helper function to determine if the order is completed.
+  function getOrderIsCompleted() {
+    // If no jobId is set, the order cannot be done.
+    if (jobId === null) {
+      return false;
+    }
+    // If the order is loading, we are not done...
+    if (orderIsLoading) {
+      return false;
+    }
+    // Otherwise, the order should be completed.
     return true;
   }
 
@@ -251,6 +290,10 @@ const FmeServerView = (props) => {
   // Returns wether it is OK to continue from the step where the
   // user is making an order.
   function getContinueFromOrderStep(shouldPromptForEmail) {
+    // If the order is currently loading, we cannot continue.
+    if (orderIsLoading) {
+      return false;
+    }
     // If no email is to be supplied, the user can go right ahead and order.
     if (!shouldPromptForEmail) {
       return true;
@@ -301,6 +344,11 @@ const FmeServerView = (props) => {
     switch (type) {
       // Going back? Let's decrement by one.
       case "back":
+        // We always want to reset the current order information if we
+        // are going back! (We might be going back from the last step,
+        // where the order has already been placed. We want to clear eventual
+        // errors etc, if the user want's to try to order again).
+        resetOrderInformation();
         return setActiveStep(activeStep - 1);
       // Going forward? Let's increment by one.
       case "next":
@@ -333,8 +381,6 @@ const FmeServerView = (props) => {
     // And then we update the state accordingly.
     setJobId(result.jobId);
     setOrderStatus(result.error ? "ORDER_REQUEST_FAILED" : "POLLING");
-    // When we're all done, we move on.
-    return setActiveStep(activeStep + 1);
   }
 
   // Renders the product parameters fetched by the useProductParameters hook.
@@ -425,6 +471,18 @@ const FmeServerView = (props) => {
         </InformationWrapper>
       </Grid>
     );
+  }
+
+  function getActiveStepperButtons(shouldPromptForEmail) {
+    return orderIsCompleted
+      ? [{ type: "reset", disabled: false }]
+      : [
+          { type: "back", disabled: orderIsLoading },
+          {
+            type: "order",
+            disabled: !getContinueFromOrderStep(shouldPromptForEmail),
+          },
+        ];
   }
 
   // Renders the content for the step where the user can select
@@ -555,14 +613,13 @@ const FmeServerView = (props) => {
           shouldPromptForEmail={shouldPromptForEmail}
           userEmail={userEmail}
           setUserEmail={setUserEmail}
+          jobId={jobId}
+          pollError={pollError}
+          orderStatus={orderStatus}
+          orderIsLoading={orderIsLoading}
+          orderIsCompleted={orderIsCompleted}
         />
-        {renderStepperButtons([
-          { type: "back", disabled: false },
-          {
-            type: "order",
-            disabled: !getContinueFromOrderStep(shouldPromptForEmail),
-          },
-        ])}
+        {renderStepperButtons(getActiveStepperButtons(shouldPromptForEmail))}
       </Grid>
     );
   }
