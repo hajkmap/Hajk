@@ -21,6 +21,9 @@ const FME_DONE_MESSAGES = [
   "JOB_FAILURE",
   "PULLED",
 ];
+// We're gonna be polling data from FME-server with an interval.
+// This constant sets how often we are polling. (In ms).
+const POLLING_INTERVAL = 5000;
 
 const FmeServerView = (props) => {
   // We're gonna be needing the localObserver.
@@ -70,7 +73,8 @@ const FmeServerView = (props) => {
   ];
 
   // We are using a custom hook to poll data. If we are polling (determined
-  // by shouldPollData, we poll information about a job every 5 seconds).
+  // by shouldPollData, we poll information about a job every POLLING_INTERVAL
+  // milliseconds).
   useInterval(
     async () => {
       const { error, status } = await model.getJobStatusById(jobId);
@@ -79,7 +83,7 @@ const FmeServerView = (props) => {
       }
       setOrderStatus(status);
     },
-    shouldPollData() ? 5 * 1000 : null
+    shouldPollData() ? POLLING_INTERVAL : null
   );
 
   // Memoized to prevent useless re-rendering
