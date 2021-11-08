@@ -260,8 +260,9 @@ const FmeServerView = (props) => {
     if (activeGroup === "") {
       return [];
     }
+    const products = props.options?.products ?? [];
     // Otherwise we return the products that belong to the current group.
-    return props.options.products.filter((product) => {
+    return products.filter((product) => {
       return product.group === activeGroup;
     });
   }
@@ -495,13 +496,25 @@ const FmeServerView = (props) => {
         ];
   }
 
+  function renderPluginNotConfiguredMessage() {
+    return (
+      <Grid item xs={12}>
+        <InformationWrapper type="error">
+          <Typography>
+            Verktyget är felkonfigurerat, kontakta systemadministratören.
+          </Typography>
+        </InformationWrapper>
+      </Grid>
+    );
+  }
+
   // Renders the content for the step where the user can select
   // which group they want to get their products from. If no group is selected,
   // the user cannot continue to the next step.
   function renderChooseGroupStep() {
     return (
       <Grid container item xs={12}>
-        {props.options?.groups?.length > 0 ? (
+        {props.options?.productGroups?.length > 0 ? (
           <Grid item xs={12}>
             <FormControl fullWidth>
               <InputLabel id="fme-server-select-group-label">Grupp</InputLabel>
@@ -523,13 +536,7 @@ const FmeServerView = (props) => {
             </FormControl>
           </Grid>
         ) : (
-          <Grid item xs={12}>
-            <InformationWrapper type="error">
-              <Typography>
-                Verktyget är felkonfigurerat, kontakta systemadministratören.
-              </Typography>
-            </InformationWrapper>
-          </Grid>
+          renderPluginNotConfiguredMessage()
         )}
 
         {
@@ -549,28 +556,33 @@ const FmeServerView = (props) => {
     const productsInActiveGroup = getProductsInActiveGroup();
     return (
       <Grid container item xs={12}>
-        <Grid item xs={12}>
-          <FormControl fullWidth>
-            <InputLabel id="fme-server-select-product-label">
-              Produkt
-            </InputLabel>
-            <Select
-              labelId="fme-server-select-product-label"
-              id="fme-server-select-product"
-              value={activeProduct}
-              label="Produkt"
-              onChange={(e) => setActiveProduct(e.target.value)}
-            >
-              {productsInActiveGroup.map((product, index) => {
-                return (
-                  <MenuItem value={product.name} key={index}>
-                    {product.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-        </Grid>
+        {productsInActiveGroup.length > 0 ? (
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel id="fme-server-select-product-label">
+                Produkt
+              </InputLabel>
+              <Select
+                labelId="fme-server-select-product-label"
+                id="fme-server-select-product"
+                value={activeProduct}
+                label="Produkt"
+                onChange={(e) => setActiveProduct(e.target.value)}
+              >
+                {productsInActiveGroup.map((product, index) => {
+                  return (
+                    <MenuItem value={product.name} key={index}>
+                      {product.name}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </Grid>
+        ) : (
+          renderPluginNotConfiguredMessage()
+        )}
+
         {
           // In this step we need both a "back" and a "next" button, since the
           // user might want to change the selected group along the way
