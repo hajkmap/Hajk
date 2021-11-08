@@ -168,6 +168,17 @@ const FmeServerView = (props) => {
     localObserver.publish("view.activeProductChange", product);
   }, [activeGroup, activeProduct, localObserver, model]);
 
+  // This effect makes sure that we clear the map when the activeProduct
+  // changes. We don't want to keep geometries between products, that
+  // might lead to weird effects.
+  React.useEffect(() => {
+    localObserver.publish("map.resetDrawing");
+    setActiveDrawButton("");
+    setFeatureExists(false);
+    setTotalDrawnArea(0);
+    setDrawError(false);
+  }, [activeProduct, localObserver]);
+
   // If the user reaches the last step, they will be able to reset
   // the stepper. If they do, there will be some cleanup done.
   function handleResetStepper() {
