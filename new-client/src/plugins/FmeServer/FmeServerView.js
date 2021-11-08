@@ -78,7 +78,6 @@ const FmeServerView = (props) => {
     { label: "Välj omfattning", renderFunction: renderDrawGeometryStep },
     { label: "Fyll i parametrar", renderFunction: renderEnterParametersStep },
     { label: "Beställ", renderFunction: renderOrderStep },
-    { label: "Klart!", renderFunction: renderDoneStep },
   ];
 
   // We are using a custom hook to poll data. If we are polling (determined
@@ -620,17 +619,6 @@ const FmeServerView = (props) => {
           orderIsCompleted={orderIsCompleted}
         />
         {renderStepperButtons(getActiveStepperButtons(shouldPromptForEmail))}
-      </Grid>
-    );
-  }
-
-  function renderDoneStep() {
-    return (
-      <Grid container item xs={12}>
-        <Grid item xs={12}>
-          <Typography>Klart!</Typography>
-        </Grid>
-        {renderStepperButtons([{ type: "reset", disabled: false }])}
       </Grid>
     );
   }
