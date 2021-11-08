@@ -8,13 +8,7 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import Tooltip from "@material-ui/core/Tooltip";
 import Paper from "@material-ui/core/Paper";
-import {
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-} from "@material-ui/core";
+import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import {
   Accordion,
   AccordionSummary,
@@ -49,7 +43,8 @@ const newProductTemplate = {
   group: "",
   workspace: "",
   repository: "",
-  maxArea: 1000,
+  maxArea: 100000,
+  promptForEmail: false,
   infoUrl: "",
   geoAttribute: "",
   visibleForGroups: [],
@@ -641,7 +636,6 @@ class ToolOptions extends Component {
 
   renderCreateProductForm = () => {
     const { newProduct, availableParameters } = this.state;
-    const numParameters = availableParameters.length;
     const newProductIsValid = this.newProductIsValid();
     return (
       <Grid item xs={12} id="fmeWorkspaceInfo">
@@ -701,11 +695,7 @@ class ToolOptions extends Component {
             })}
           </Select>
         </FormControl>
-        <FormControl
-          fullWidth
-          error={numParameters === 0}
-          style={{ marginTop: 16 }}
-        >
+        <FormControl fullWidth style={{ marginTop: 16 }}>
           <InputLabel variant="outlined" id="select-workspace-label">
             Arbetsyta
           </InputLabel>
@@ -727,11 +717,6 @@ class ToolOptions extends Component {
               );
             })}
           </Select>
-          <FormHelperText>
-            {numParameters === 0
-              ? "Arbetsytan har inga publicerade parametrar"
-              : ""}
-          </FormHelperText>
         </FormControl>
         <FormControl fullWidth style={{ marginTop: 16 }}>
           <InputLabel variant="outlined" id="select-workspace-label">
@@ -749,6 +734,9 @@ class ToolOptions extends Component {
             id="select-workspace"
             value={newProduct.geoAttribute}
           >
+            <MenuItem key={"select-geom-base-item"} value={"none"}>
+              Inget
+            </MenuItem>
             {availableParameters.map((parameter, index) => {
               return (
                 <MenuItem key={index} value={parameter}>
@@ -759,7 +747,7 @@ class ToolOptions extends Component {
           </Select>
         </FormControl>
         <TextField
-          label="Area begränsning (m2)"
+          label="Area-begränsning (m2)"
           type="number"
           fullWidth
           variant="outlined"
@@ -777,7 +765,9 @@ class ToolOptions extends Component {
           variant="outlined"
           placeholder="Länk till eventuellt informations-dokument"
           style={{ marginTop: 16 }}
-          onChange={(e) => this.handleProductChange("infoUrl", e.target.value)}
+          onChange={(e) =>
+            this.handleNewProductChange("infoUrl", e.target.value)
+          }
           error={this.state.newGroupError}
           value={newProduct.infoUrl ?? ""}
         />
@@ -792,6 +782,46 @@ class ToolOptions extends Component {
           }
           value={newProduct.visibleForGroups ?? ""}
         />
+        <Grid
+          container
+          item
+          xs={12}
+          justify="flex-end"
+          style={{ marginBottom: 8 }}
+        >
+          <Typography variant="caption">
+            Nedan bestäms om workspaces skall köras som Data-download eller
+            inte. Vad betyder det då? Jo, om denna parameter sätts till "Ja" så
+            kommer användarna vara tvugna att ange sin epost-adress. Denna
+            adressen kommer sedan skickas med till FME-server under ett
+            user_email attribut. Känns detta oklart? Konsultera FME-server
+            dokumentationen.
+          </Typography>
+        </Grid>
+        <FormControl fullWidth style={{ marginTop: 16 }}>
+          <InputLabel variant="outlined" id="select-prompt-email-label">
+            Ska workspacet köras som Data-download?
+          </InputLabel>
+          <Select
+            labelId="select-prompt-email-label"
+            fullWidth
+            label="Ska workspacet köras som Data-download?"
+            variant="outlined"
+            placeholder="Ska workspacet köras som Data-download?"
+            onChange={(e) =>
+              this.handleNewProductChange("promptForEmail", e.target.value)
+            }
+            id="select-workspace"
+            value={newProduct.promptForEmail}
+          >
+            <MenuItem key={"select-geom-base-item"} value={true}>
+              Ja
+            </MenuItem>
+            <MenuItem key={"select-geom-base-item"} value={false}>
+              Nej
+            </MenuItem>
+          </Select>
+        </FormControl>
         <Grid
           container
           item
