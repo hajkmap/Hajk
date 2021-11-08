@@ -178,6 +178,8 @@ const FmeServerView = (props) => {
     handleResetDraw();
   }
 
+  // We have to make sure to reset the drawing, this function
+  // makes sure to reset all state connected to that.
   function handleResetDraw() {
     localObserver.publish("map.resetDrawing");
     setActiveDrawButton("");
@@ -186,6 +188,8 @@ const FmeServerView = (props) => {
     setDrawError(false);
   }
 
+  // If the user chooses to reset the stepper, we must make sure
+  // to reset the information about the (eventual) earlier order.
   function resetOrderInformation() {
     setJobId(null);
     setOrderStatus("NONE");
@@ -484,6 +488,9 @@ const FmeServerView = (props) => {
     );
   }
 
+  // Returns an array of stepper-buttons. Used in the order-step.
+  // We use this helper since the buttons in the order step will
+  // change when an order has been completed.
   function getActiveStepperButtons(shouldPromptForEmail) {
     return orderIsCompleted
       ? [{ type: "reset", disabled: false }]
@@ -496,6 +503,10 @@ const FmeServerView = (props) => {
         ];
   }
 
+  // Renders an error message, showing the user that the plugin is
+  // wrongly configured. We use this approach so that the entire
+  // application does not crash if someone has been messing with the
+  // configuration-files directly (not using the admin-ui).
   function renderPluginNotConfiguredMessage() {
     return (
       <Grid item xs={12}>
@@ -621,6 +632,8 @@ const FmeServerView = (props) => {
     );
   }
 
+  // Renders the content for the step where the user can enter values
+  // for the published parameters.
   function renderEnterParametersStep() {
     return (
       <Grid container item xs={12}>
@@ -635,6 +648,9 @@ const FmeServerView = (props) => {
     );
   }
 
+  // Renders the content for the step where the user can submit their order.
+  // The <OrderPanel /> will display potential errors that might occur when
+  // an order has been submitted.
   function renderOrderStep() {
     const shouldPromptForEmail = model.shouldPromptForEmail(
       activeGroup,
