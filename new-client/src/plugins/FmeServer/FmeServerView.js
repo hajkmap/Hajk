@@ -14,16 +14,11 @@ import useInterval from "./hooks/useInterval";
 
 // We're gonna be checking the job status against this array of
 // FME-status messages (all of witch means that the job has completed).
-const FME_DONE_MESSAGES = [
-  "ABORTED",
-  "SUCCESS",
-  "FME_FAILURE",
-  "JOB_FAILURE",
-  "PULLED",
-];
+import { FME_DONE_MESSAGES } from "./constants";
+
 // We're gonna be polling data from FME-server with an interval.
 // This constant sets how often we are polling. (In ms).
-const POLLING_INTERVAL = 5000;
+import { POLLING_INTERVAL } from "./constants";
 
 const FmeServerView = (props) => {
   // We're gonna be needing the localObserver.

@@ -5,7 +5,7 @@ import InformationWrapper from "./InformationWrapper";
 
 // We're gonna be checking the job status against this array of
 // FME-status messages (all of witch means the job failed).
-const FME_FAIL_MESSAGES = ["ABORTED", "FME_FAILURE", "JOB_FAILURE"];
+import { FME_FAIL_MESSAGES } from "../constants";
 
 const OrderPanel = (props) => {
   // Let's destruct the props.
