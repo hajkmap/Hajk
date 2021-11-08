@@ -31,6 +31,7 @@
   },
   "mapsettings": {
     "url_proxy": "",
+    "url_base": "/api/v1",
     "url_map": "/api/v1/mapconfig",
     "url_map_create": "/api/v1/mapconfig/create",
     "url_map_delete": "/api/v1/mapconfig/delete",
