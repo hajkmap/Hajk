@@ -814,10 +814,10 @@ class ToolOptions extends Component {
             id="select-workspace"
             value={newProduct.promptForEmail}
           >
-            <MenuItem key={"select-geom-base-item"} value={true}>
+            <MenuItem key={"select-promptForEmail-true"} value={true}>
               Ja
             </MenuItem>
-            <MenuItem key={"select-geom-base-item"} value={false}>
+            <MenuItem key={"select-promptForEmail-false"} value={false}>
               Nej
             </MenuItem>
           </Select>
