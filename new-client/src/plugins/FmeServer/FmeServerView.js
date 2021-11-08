@@ -121,6 +121,17 @@ const FmeServerView = (props) => {
     [activeGroup, activeProduct, model]
   );
 
+  // We have to make sure to reset the drawing, this function
+  // makes sure to reset all state connected to that.
+  // Memoized to prevent useless re-rendering.
+  const handleResetDraw = React.useCallback(() => {
+    localObserver.publish("map.resetDrawing");
+    setActiveDrawButton("");
+    setFeatureExists(false);
+    setTotalDrawnArea(0);
+    setDrawError(false);
+  }, [localObserver]);
+
   // In this effect we make sure to subscribe to all events emitted by
   // the mapViewModel and fmeServerModel.
   React.useEffect(() => {
@@ -172,12 +183,8 @@ const FmeServerView = (props) => {
   // changes. We don't want to keep geometries between products, that
   // might lead to weird effects.
   React.useEffect(() => {
-    localObserver.publish("map.resetDrawing");
-    setActiveDrawButton("");
-    setFeatureExists(false);
-    setTotalDrawnArea(0);
-    setDrawError(false);
-  }, [activeProduct, localObserver]);
+    handleResetDraw();
+  }, [activeProduct, handleResetDraw]);
 
   // If the user reaches the last step, they will be able to reset
   // the stepper. If they do, there will be some cleanup done.
@@ -187,16 +194,6 @@ const FmeServerView = (props) => {
     setActiveProduct("");
     resetOrderInformation();
     handleResetDraw();
-  }
-
-  // We have to make sure to reset the drawing, this function
-  // makes sure to reset all state connected to that.
-  function handleResetDraw() {
-    localObserver.publish("map.resetDrawing");
-    setActiveDrawButton("");
-    setFeatureExists(false);
-    setTotalDrawnArea(0);
-    setDrawError(false);
   }
 
   // If the user chooses to reset the stepper, we must make sure
