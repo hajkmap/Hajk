@@ -526,7 +526,7 @@ const FmeServerView = (props) => {
           <Grid item xs={12}>
             <InformationWrapper type="error">
               <Typography>
-                Pluginet är felkonfigurerat, kontakta systemadministratören.
+                Verktyget är felkonfigurerat, kontakta systemadministratören.
               </Typography>
             </InformationWrapper>
           </Grid>
