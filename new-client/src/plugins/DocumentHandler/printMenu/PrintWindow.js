@@ -294,14 +294,22 @@ class PrintWindow extends React.PureComponent {
     const headings = printWindow.document.body.querySelectorAll(["h1", "h2"]);
     //we don't want page breaks before a h2 if there is a h1 immediately before. In this case the H1 is the group parent heading.
     let isAfterH1 = false;
+    let isConsecutiveH1 = false;
 
     for (let i = 0; i < headings.length; i++) {
+      if (headings[i].nodeName === "H1" && isAfterH1) {
+        isConsecutiveH1 = true;
+      }
       if (headings[i].nodeName === "H1") {
         isAfterH1 = true;
       }
 
       //H1s are group headings and should start on a new page.
-      if (headings[i].nodeName === "H1" && this.state.tocPrintMode !== "none") {
+      if (
+        headings[i].nodeName === "H1" &&
+        this.state.tocPrintMode !== "none" &&
+        !isConsecutiveH1
+      ) {
         headings[i].style.pageBreakBefore = "always";
         headings[i].style.breakBefore = "none";
       }
