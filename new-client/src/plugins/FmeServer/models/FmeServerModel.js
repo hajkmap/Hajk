@@ -212,6 +212,17 @@ class FmeServerModel {
     });
   };
 
+  getInfoUrl = (groupName, productName) => {
+    // We must fetch the product
+    const product = this.getProduct(groupName, productName);
+    // And make sure it exists. If it doesn't we return an empty string
+    if (!product) {
+      return "";
+    }
+    // Then we'll return the infoUrl, or an empty string if it's missing.
+    return product.infoUrl ?? "";
+  };
+
   // Checks wether we should prompt the user for their email or not
   shouldPromptForEmail = (groupName, productName) => {
     // We must fetch the product

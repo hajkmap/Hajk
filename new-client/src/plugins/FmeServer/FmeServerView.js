@@ -418,11 +418,17 @@ const FmeServerView = (props) => {
       activeGroup,
       activeProduct
     );
+    // Then we'll check and get the eventual information-url, which will provide
+    // the users with some information regarding the product.
+    const infoUrl = model.getInfoUrl(activeGroup, activeProduct);
+
+    // Then we'll render the parameters and the eventual information-url.
     return (
       <ProductParameters
         parameters={parametersToRender}
         model={model}
         setProductParameters={setProductParameters}
+        infoUrl={infoUrl}
       />
     );
   }

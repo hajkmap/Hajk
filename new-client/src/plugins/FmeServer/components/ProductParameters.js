@@ -1,7 +1,8 @@
 import React from "react";
-import { Grid, TextField, Typography } from "@material-ui/core";
+import { Grid, IconButton, TextField, Typography } from "@material-ui/core";
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
-import Slider from "@material-ui/core/Slider";
+import { Paper, Slider } from "@material-ui/core";
+import HelpIcon from "@material-ui/icons/Help";
 
 import InformationWrapper from "./InformationWrapper";
 import ListBoxSelector from "./ListBoxSelector";
@@ -43,6 +44,12 @@ const ProductParameters = (props) => {
     return;
   }
 
+  // Checks wether the infoUrl from props is valid
+  // (A string that is not empty).
+  function infoUrlIsValid() {
+    return props.infoUrl?.length > 0;
+  }
+
   function renderParameterRenderingError() {
     return (
       <Grid item xs={12} style={{ padding: 8 }}>
@@ -53,6 +60,24 @@ const ProductParameters = (props) => {
           </Typography>
         </InformationWrapper>
       </Grid>
+    );
+  }
+
+  function renderInformationUrl() {
+    return (
+      <Paper style={{ margin: 8, width: "100%" }}>
+        <Grid container item xs={12} wrap="nowrap" justify="space-between">
+          <Typography style={{ alignSelf: "center", marginLeft: 8 }}>
+            Vill du veta mer om produkten?
+          </Typography>
+          <IconButton
+            aria-label="Hjälp"
+            onClick={() => window.open(props.infoUrl, "_blank")}
+          >
+            <HelpIcon />
+          </IconButton>
+        </Grid>
+      </Paper>
     );
   }
 
@@ -199,6 +224,7 @@ const ProductParameters = (props) => {
 
   return (
     <Grid container>
+      {infoUrlIsValid() && renderInformationUrl()}
       {allParametersCantBeRendered() && renderParameterRenderingError()}
       {noParametersToRender() && renderNoParametersToRenderError()}
       {renderParameters()}
