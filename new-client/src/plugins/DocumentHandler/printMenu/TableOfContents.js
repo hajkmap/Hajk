@@ -42,14 +42,14 @@ class TableOfContents extends React.PureComponent {
     let menu = { ...documentMenuState };
     //add the chapters from all documents onto the documentMenuState
     Object.keys(menu).forEach((key) => {
-      let ourDoc = menu[key];
-      if (ourDoc.document) {
+      let menuDoc = menu[key];
+      if (menuDoc.document) {
         //get the corresponding chapters from allDocuments.
-        let docInAllDocs = allDocuments.find(
-          (doc) => doc.documentFileName === ourDoc.document
+        let jsonDoc = allDocuments.find(
+          (doc) => doc.documentFileName === menuDoc.document
         );
         //add the chapters to our doc in the menuState.
-        menu[key].chapters = docInAllDocs.chapters;
+        menu[key].chapters = jsonDoc.chapters;
       }
     });
     return menu;
@@ -69,15 +69,20 @@ class TableOfContents extends React.PureComponent {
       level++;
     }
 
-    this.titlesAndLevels.push({
-      title: document.title,
-      level: level,
-      chosenForPrint: document.chosenForPrint,
-    });
+    //Add the meny document title if it is a menu parent that just holds other documents;
+    if (!document.document) {
+      this.titlesAndLevels.push({
+        title: document.title,
+        level: level,
+        chosenForPrint: document.chosenForPrint,
+      });
+    }
 
     //add the documents chapters to the table of contents.
     if (document.chapters) {
-      level++;
+      if (!document.document) {
+        level++;
+      }
       if (level <= this.state.maxLevelsToShow) {
         document.chapters.forEach((chapter) => {
           this.titlesAndLevels.push({
