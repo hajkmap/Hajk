@@ -267,11 +267,16 @@ const FmeServerView = (props) => {
     if (activeGroup === "") {
       return [];
     }
+    // Let's get the products from the config.
     const products = props.options?.products ?? [];
-    // Otherwise we return the products that belong to the current group.
-    return products.filter((product) => {
+    // And get the products that belong to the current group.
+    products.filter((product) => {
       return product.group === activeGroup;
     });
+    // Then we sort the products alphabetically
+    products.sort((a, b) => a.name.localeCompare(b.name));
+    // Return the sorted products
+    return products;
   }
 
   // Returns wether it is OK to continue from the step where the
@@ -526,9 +531,15 @@ const FmeServerView = (props) => {
   // which group they want to get their products from. If no group is selected,
   // the user cannot continue to the next step.
   function renderChooseGroupStep() {
+    // We want to make sure that there are some groups available, and if there are,
+    // we want to render them in alphabetical order.
+    const groupsToRender =
+      props.options?.productGroups?.length > 0
+        ? props.options.productGroups.sort()
+        : [];
     return (
       <Grid container item xs={12}>
-        {props.options?.productGroups?.length > 0 ? (
+        {groupsToRender.length > 0 ? (
           <Grid item xs={12}>
             <FormControl fullWidth>
               <InputLabel id="fme-server-select-group-label">Grupp</InputLabel>
@@ -539,7 +550,7 @@ const FmeServerView = (props) => {
                 label="Grupp"
                 onChange={(e) => setActiveGroup(e.target.value)}
               >
-                {props.options.productGroups.map((group, index) => {
+                {groupsToRender.map((group, index) => {
                   return (
                     <MenuItem value={group} key={index}>
                       {group}
