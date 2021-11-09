@@ -181,6 +181,12 @@ const FmeServerView = (props) => {
     handleResetDraw();
   }, [activeProduct, handleResetDraw]);
 
+  // This effect makes sure that we clear the active product when
+  // the activeGroup changes.
+  React.useEffect(() => {
+    setActiveProduct("");
+  }, [activeGroup]);
+
   // If the user reaches the last step, they will be able to reset
   // the stepper. If they do, there will be some cleanup done.
   function handleResetStepper() {
@@ -270,13 +276,13 @@ const FmeServerView = (props) => {
     // Let's get the products from the config.
     const products = props.options?.products ?? [];
     // And get the products that belong to the current group.
-    products.filter((product) => {
+    const filteredProducts = products.filter((product) => {
       return product.group === activeGroup;
     });
     // Then we sort the products alphabetically
-    products.sort((a, b) => a.name.localeCompare(b.name));
+    filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
     // Return the sorted products
-    return products;
+    return filteredProducts;
   }
 
   // Returns wether it is OK to continue from the step where the
