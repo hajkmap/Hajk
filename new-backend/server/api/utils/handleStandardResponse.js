@@ -9,6 +9,6 @@
  * @param {*} data The data Promise that our various services return
  */
 export default function handleStandardResponse(res, data, successStatus = 200) {
-  if (!data || data.error) res.status(500).send(data.error.toString());
+  if (data.error) res.status(500).send(data.error.toString());
   else res.status(successStatus).json(data);
 }

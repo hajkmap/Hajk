@@ -48,7 +48,10 @@ export default function fmeServerProxy(err, req, res, next) {
       return path;
     },
     onError: (err, req, res) => {
-      logger.error(err);
+      if (err) {
+        logger.error(err);
+        res.status(500).send("Request failed while proxying to FME-server.");
+      }
     },
   });
 }
