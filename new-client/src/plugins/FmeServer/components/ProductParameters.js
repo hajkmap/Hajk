@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid, IconButton, TextField, Typography } from "@material-ui/core";
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
-import { Paper, Slider } from "@material-ui/core";
+import { Slider } from "@material-ui/core";
 import HelpIcon from "@material-ui/icons/Help";
 
 import InformationWrapper from "./InformationWrapper";
@@ -65,19 +65,18 @@ const ProductParameters = (props) => {
 
   function renderInformationUrl() {
     return (
-      <Paper style={{ margin: 8, width: "100%" }}>
-        <Grid container item xs={12} wrap="nowrap" justify="space-between">
-          <Typography style={{ alignSelf: "center", marginLeft: 8 }}>
-            Vill du veta mer om produkten?
-          </Typography>
-          <IconButton
-            aria-label="Hjälp"
-            onClick={() => window.open(props.infoUrl, "_blank")}
-          >
-            <HelpIcon />
-          </IconButton>
-        </Grid>
-      </Paper>
+      <Grid container item xs={12} wrap="nowrap" justify="space-between">
+        <Typography style={{ alignSelf: "center", marginLeft: 8 }}>
+          Oklart hur produkten fungerar? Tryck på frågetecknet för mer
+          information.
+        </Typography>
+        <IconButton
+          aria-label="Hjälp"
+          onClick={() => window.open(props.infoUrl, "_blank")}
+        >
+          <HelpIcon />
+        </IconButton>
+      </Grid>
     );
   }
 
