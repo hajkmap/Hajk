@@ -15,7 +15,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "compile": "babel server --out-dir dist --delete-dir-on-start --source-maps inline --copy-files",
-    "dev": "nodemon server --exec ./node_modules/.bin/babel-node --config .nodemonrc.json",
+    "dev": "nodemon server --exec babel-node --config .nodemonrc.json",
     "dev:debug": "nodemon server --exec babel-node --config .nodemonrc.json --inspect",
     "test": "mocha --require @babel/register --exit",
     "test:debug": "mocha --require @babel/register --inspect-brk --exit",
