@@ -297,17 +297,37 @@ const FmeServerView = (props) => {
     // missing, we can't move on. So let's check if there is any parameter
     // that is not optional, and empty.
     const requiredParametersMissing = productParameters.some((parameter) => {
-      if (
-        !parameter.optional &&
-        (!parameter.value || parameter.value.length === 0)
-      ) {
-        return true;
+      // If the parameter is optional, we return false.
+      if (parameter.optional) {
+        return false;
       }
-      return false;
+      // Otherwise, we must make sure that the parameter either got the value
+      // parameter set, or that it has a default value set.
+      const parameterGotSomeValue =
+        parameterValueSet(parameter) || parameterDefaultValueSet(parameter);
+      // And we should return the inverse of parameterGotSomeValue since we're checking
+      // if a required parameter is missing!
+      return !parameterGotSomeValue;
     });
     // Let's return the inverse of required..., since this function returns wether
     // it's OK to continue or not.
     return !requiredParametersMissing;
+  }
+
+  // Checks that the parameter value is not missing or is an empty string
+  function parameterValueSet(parameter) {
+    if (!parameter.value || parameter.value.length === 0) {
+      return false;
+    }
+    return true;
+  }
+
+  // Checks that the parameter default value is not missing or is an empty string
+  function parameterDefaultValueSet(parameter) {
+    if (!parameter.defaultValue || parameter.defaultValue.length === 0) {
+      return false;
+    }
+    return true;
   }
 
   // Returns wether it is OK to continue from the step where the
