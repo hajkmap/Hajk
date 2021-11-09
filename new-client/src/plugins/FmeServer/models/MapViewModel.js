@@ -1,6 +1,6 @@
 import { Draw } from "ol/interaction";
 import { Circle as CircleGeometry } from "ol/geom.js";
-import { createBox } from "ol/interaction/Draw";
+import { createBox, createRegularPolygon } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill, Text } from "ol/style";
@@ -246,7 +246,12 @@ class MapViewModel {
           ? true
           : freehand,
         stopClick: true,
-        geometryFunction: drawMethod === "Rectangle" ? createBox() : null,
+        geometryFunction:
+          drawMethod === "Rectangle"
+            ? createBox()
+            : drawMethod === "Circle"
+            ? createRegularPolygon()
+            : null,
         style: this.#getDrawStyle(),
       });
       // Let's add the clickLock to avoid the featureInfo
