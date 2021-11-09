@@ -477,7 +477,7 @@ class ConfigServiceV2 {
           )
       );
       // And then update the mapConfig with the products.
-      mapConfig.tools[editIndexInTools].options.products = products;
+      mapConfig.tools[fmeServerIndexInTools].options.products = products;
     }
 
     return mapConfig;
