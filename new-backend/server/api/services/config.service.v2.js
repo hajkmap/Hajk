@@ -270,7 +270,7 @@ class ConfigServiceV2 {
       // Finally, if we're running with authentication on, let's send
       // some user details to the client.
       let userDetails = undefined;
-      if (user !== undefined) {
+      if (user !== undefined && process.env.AD_EXPOSE_USER_OBJECT === "true") {
         userDetails = await ad.findUser(user);
       }
 
