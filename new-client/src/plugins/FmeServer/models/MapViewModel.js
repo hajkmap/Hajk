@@ -437,19 +437,14 @@ class MapViewModel {
     if (features.length === 0) {
       return null;
     }
-    // If there's exactly one feature, we use the writeGeometry method,
-    // which returns a geoJSON with only "type", "properties", and "coordinates" properties.
-    // (Which follows the geoJSON-standard).
-    // If we would use the writeFeature method we would get the properties above
-    // baked inside a Feature object, more like the ol-features.
+    // If there's exactly one feature, we use the writeFeature method,
+    // otherwise we would get a featureCollection with one feature.
+    // (We rather want just the single feature, not a collection).
     if (features.length === 1) {
-      const geometry = features[0].getGeometry();
-      return new GeoJSON().writeGeometry(geometry);
+      return new GeoJSON().writeFeature(features[0]);
     }
     // If there's more than one feature, we use the writeFeatures method,
-    // which returns a featureCollection. This approach will not really follow
-    // the geoJSON-standard... Maybe it would be a better idea to create a GeometryCollection
-    // or a MultiPolygon and then convert that to geoJSON? (TODO:).
+    // which returns a featureCollection.
     return new GeoJSON().writeFeatures(features);
   };
 }
