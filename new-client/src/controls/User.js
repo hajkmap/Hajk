@@ -14,6 +14,7 @@ const useStyles = makeStyles((theme) => ({
     width: 25,
     height: 25,
     fontSize: "0.8rem",
+    backgroundColor: theme.palette.text.primary,
   },
 }));
 
