@@ -431,6 +431,7 @@ class MapViewModel {
 
   // Resets the draw-layer
   #resetDrawing = () => {
+    this.#map.clickLock.delete("fmeServer");
     this.#drawSource.clear();
     this.#removeDrawInteraction();
     this.#removeEventListeners();
