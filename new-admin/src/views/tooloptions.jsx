@@ -7,6 +7,7 @@ import Coordinates from "./tools/coordinates.jsx";
 import Draw from "./tools/draw.jsx";
 import Edit from "./tools/edit.jsx";
 import Export from "./tools/export.jsx";
+import FmeServer from "./tools/fmeServer.jsx";
 import Print from "./tools/print.jsx";
 import Infoclick from "./tools/infoclick.jsx";
 import Information from "./tools/information.jsx";
@@ -77,6 +78,8 @@ class ToolOptions extends Component {
         return <Edit parent={this} model={this.props.model} />;
       case "export":
         return <Export parent={this} model={this.props.model} />;
+      case "fmeServer":
+        return <FmeServer parent={this} model={this.props.model} />;
       case "print":
         return <Print parent={this} model={this.props.model} />;
       case "infoclick":
@@ -154,6 +157,7 @@ class ToolOptions extends Component {
       draw: "Rita och mäta",
       edit: "Editering",
       export: "Utskrift",
+      fmeServer: "FME-server",
       print: "Utskrift (på klienten)",
       infoclick: "Infoklick",
       information: "Om kartan",

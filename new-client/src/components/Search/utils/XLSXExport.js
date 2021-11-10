@@ -75,10 +75,10 @@ export default class XLSXExport {
   #getUserSelectedExportArray = (features) => {
     const exportArray = [];
     // Keys from first feature. We assume that all features in the collections has the same keys.
-    const keys = Object.keys(features[0].properties);
+    const keys = Object.keys(features[0].getProperties());
     exportArray.push(keys);
     features.forEach((feature) => {
-      exportArray.push(Object.values(feature.properties));
+      exportArray.push(Object.values(feature.getProperties()));
     });
     return exportArray;
   };
@@ -91,7 +91,7 @@ export default class XLSXExport {
       exportArray.push(keys);
 
       featureCollection.value.features.forEach((feature) => {
-        exportArray.push(Object.values(feature.properties));
+        exportArray.push(Object.values(feature.getProperties()));
       });
 
       return XLSX.utils.aoa_to_sheet(exportArray);

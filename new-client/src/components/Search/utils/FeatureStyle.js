@@ -145,7 +145,7 @@ export default class FeatureStyle {
     });
     const stroke = new Stroke({
       color: this.#defaultDisplayStyleSettings.strokeColor,
-      width: 1,
+      width: 2,
     });
     return new Style({
       fill: fill,

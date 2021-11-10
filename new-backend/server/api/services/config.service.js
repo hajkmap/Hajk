@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import ad from "./activedirectory.service.js";
-import asyncFilter from "../utils/asyncFilter.js";
+import ad from "./activedirectory.service";
+import asyncFilter from "../utils/asyncFilter";
 import log4js from "log4js";
 
 const logger = log4js.getLogger("service.config");
@@ -293,6 +293,30 @@ class ConfigService {
       );
 
       mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
+    }
+
+    // Part 5: Wash FME-server products
+    const fmeServerIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "fmeServer"
+    );
+
+    if (fmeServerIndexInTools !== -1) {
+      // The FME-server tool got a bunch of products, and each one of them
+      // can be controlled to be visible only for some groups.
+      let { products } = mapConfig.tools[fmeServerIndexInTools].options;
+      // So let's remove the products that the current user does not have
+      // access to.
+      products = await asyncFilter(
+        products,
+        async (product) =>
+          await this.filterByGroupVisibility(
+            product.visibleForGroups,
+            user,
+            `FME-server product "${product.name}"`
+          )
+      );
+      // And then update the mapConfig with the products.
+      mapConfig.tools[fmeServerIndexInTools].options.products = products;
     }
 
     return mapConfig;

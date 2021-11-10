@@ -2,7 +2,6 @@ import Draw from "ol/interaction/Draw";
 import { Stroke, Style, Circle, Fill } from "ol/style";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
-import GeoJSON from "ol/format/GeoJSON";
 import { extend, createEmpty, isEmpty } from "ol/extent";
 import Feature from "ol/Feature";
 import FeatureStyle from "./utils/FeatureStyle";
@@ -118,8 +117,8 @@ class MapViewModel {
       }
     });
     features.forEach((feature) => {
-      if (!this.resultSource.getFeatureById(feature.id)) {
-        this.resultSource.addFeature(new GeoJSON().readFeature(feature));
+      if (!this.resultSource.getFeatureById(feature.getId())) {
+        this.resultSource.addFeature(feature);
       }
     });
     this.setSelectedStyle(this.lastFeaturesInfo);
@@ -143,11 +142,7 @@ class MapViewModel {
 
   addFeaturesToResultsLayer = (features) => {
     this.resultSource.clear();
-    this.resultSource.addFeatures(
-      features.map((f) => {
-        return new GeoJSON().readFeature(f);
-      })
-    );
+    this.resultSource.addFeatures(features);
 
     if (this.options.showResultFeaturesInMap) {
       this.fitMapToSearchResult();
@@ -185,7 +180,7 @@ class MapViewModel {
     if (!feature) {
       return;
     }
-    const mapFeature = this.getFeatureFromResultSourceById(feature.id);
+    const mapFeature = this.getFeatureFromResultSourceById(feature.getId());
     return mapFeature?.setStyle(
       this.featureStyle.getFeatureStyle(
         mapFeature,
@@ -201,7 +196,7 @@ class MapViewModel {
       return;
     }
     const extent = createEmpty();
-    const mapFeature = this.getFeatureFromResultSourceById(feature.id);
+    const mapFeature = this.getFeatureFromResultSourceById(feature.getId());
     extend(extent, mapFeature?.getGeometry().getExtent());
     const extentToZoomTo = isEmpty(extent)
       ? this.resultSource.getExtent()
@@ -214,7 +209,7 @@ class MapViewModel {
     this.resetStyleForFeaturesInResultSource();
     featuresInfo.map((featureInfo) => {
       const feature = this.getFeatureFromResultSourceById(
-        featureInfo.feature.id
+        featureInfo.feature.getId()
       );
       return feature?.setStyle(
         this.featureStyle.getFeatureStyle(
@@ -228,7 +223,7 @@ class MapViewModel {
   };
 
   addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
-    const feature = new GeoJSON().readFeature(featureInfo.feature);
+    const feature = featureInfo.feature;
     feature.setStyle(
       this.featureStyle.getFeatureStyle(
         feature,
@@ -251,12 +246,12 @@ class MapViewModel {
     //BoundingExtent-function gave wrong coordinates for some
     featuresInfo.forEach((featureInfo) => {
       const feature = this.getFeatureFromResultSourceById(
-        featureInfo.feature.id
+        featureInfo.feature.getId()
       );
       if (feature) {
         extend(
           extent,
-          this.getFeatureFromResultSourceById(featureInfo.feature.id)
+          this.getFeatureFromResultSourceById(featureInfo.feature.getId())
             .getGeometry()
             .getExtent()
         );

@@ -1,0 +1,9 @@
+export const FME_DONE_MESSAGES = [
+  "ABORTED",
+  "SUCCESS",
+  "FME_FAILURE",
+  "JOB_FAILURE",
+  "PULLED",
+];
+export const FME_FAIL_MESSAGES = ["ABORTED", "FME_FAILURE", "JOB_FAILURE"];
+export const POLLING_INTERVAL = 5000;

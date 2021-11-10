@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import ConfigService from "./config.service.js";
+import ConfigService from "./config.service";
 
 class SettingsService {
   /**
@@ -132,7 +132,7 @@ class SettingsService {
       }
 
       // Step 2: remove entry from layers store
-      // Buggy admin legacy: layer types are in pluralis in layers.json,
+      // FIXME: Buggy Admin UI legacy: layer types are in pluralis in layers.json,
       // but the incoming request is singular. We must fix it below:
       type = type + "s";
 
@@ -196,6 +196,22 @@ class SettingsService {
       return group;
     };
 
+    // Helper function, used to remove references to a layer from Search tool's options
+    const removeLayerIdFromSearchSources = (searchSources) => {
+      const index = searchSources.findIndex((l) => l === layerId);
+      // If layerId was found in searchSources…
+      if (index !== -1) {
+        // …remove it…
+        searchSources.splice(index, 1);
+
+        // … and set the modified flag in order to save the file later on.
+        modified = true;
+      }
+
+      // Either way, return the array
+      return searchSources;
+    };
+
     // This flag will be set spliceByLayerId only if changes have been made to the
     // current file. This way we only write to filesystem if it's necessary.
     let modified = false;
@@ -204,24 +220,45 @@ class SettingsService {
     const json = await this.readFileAsJson(file + ".json");
 
     // Find index of LayerSwitcher in map's tools
-    const lsIndex = json.tools.findIndex((t) => t.type === "layerswitcher");
+    const layerSwitcherToolIndex = json.tools.findIndex(
+      (t) => t.type === "layerswitcher"
+    );
 
     // Put options to an object - this will be the main object we'll work on here
-    const options = json.tools[lsIndex].options;
+    const lsOptions = json.tools[layerSwitcherToolIndex].options;
 
     // Check in groups, recursively
-    options.groups = options.groups.map(spliceByLayerId);
+    lsOptions.groups = lsOptions.groups.map(spliceByLayerId);
 
     // Check in baselayers, a bit of a special case as options.baselayers already
     // contains the elements (without neither .layers nor .groups properties, as
     // expected by spliceByLayerId). Hence we wrap .baselayers in a temporary .layers property.
-    options.baselayers = spliceByLayerId({ layers: options.baselayers }).layers;
+    lsOptions.baselayers = spliceByLayerId({
+      layers: lsOptions.baselayers,
+    }).layers;
+
+    // If current map config has the Search plugin active, we must
+    // check if current layer's ID is found in the "searchSources" array
+    // of Search's options. If found, let's remove the ID from there.
+    const searchToolIndex = json.tools.findIndex((t) => t.type === "search");
+    const searchOptions = json.tools[searchToolIndex]?.options;
+    if (
+      searchOptions !== undefined &&
+      Array.isArray(searchOptions.selectedSources)
+    ) {
+      searchOptions.selectedSources = removeLayerIdFromSearchSources(
+        searchOptions.selectedSources
+      );
+    }
 
     // If any of the above resulted in modified file, write the changes
     if (modified === true) {
       // Use the found index of LayerSwitcher to entirely replace
       // the "options" property on that object
-      json.tools[lsIndex].options = options;
+      json.tools[layerSwitcherToolIndex].options = lsOptions;
+
+      // Do the same for the options of Search tool
+      json.tools[searchToolIndex].options = searchOptions;
 
       // Write changes to file
       await fs.promises.writeFile(
