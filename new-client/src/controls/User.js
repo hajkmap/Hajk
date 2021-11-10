@@ -39,7 +39,11 @@ const getInitialsFromDisplayName = (displayName) => {
  * @returns {string} Tooltip string value
  */
 const getTooltipString = (userDetails) => {
-  return `${userDetails.displayName}, ${userDetails.description}`;
+  // Let's combine the details to an array
+  const userDetailsArrays = [userDetails.displayName, userDetails.description];
+  // Then we'll get rid of empty values, and create a string by joining the non-empty
+  // values.
+  return userDetailsArrays.filter((v) => v !== undefined).join(", ");
 };
 
 /**
