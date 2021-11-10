@@ -283,6 +283,7 @@ class Manager extends Component {
         this.refs["WMSLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           legend: layer.legend,
@@ -460,6 +461,7 @@ class Manager extends Component {
     var alphabetically = [];
 
     if (this.state.filter) {
+      // TODO filter on both caption and internal name
       layers.forEach((layer) => {
         layer.caption.toLowerCase().indexOf(this.state.filter) === 0
           ? startsWith.push(layer)
@@ -504,7 +506,10 @@ class Manager extends Component {
         <li onClick={(e) => this.loadLayer(e, layer)} key={"layer_" + i}>
           <div className="main-box">
             <span>
-              {layer.caption} {displayType}
+              {layer.internalLayerName?.length > 0
+                ? layer.internalLayerName
+                : layer.caption}{" "}
+              {displayType}
             </span>
           </div>
           <div className="options-box">

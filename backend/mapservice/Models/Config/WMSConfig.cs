@@ -11,6 +11,7 @@ namespace MapService.Models.Config
     {
         public string id { get; set; }
         public string caption { get; set; }
+        public string internalLayerName { get; set; }
         public string legend { get; set; }
         public string legendIcon { get; set; }
         public string infobox { get; set; }
@@ -33,6 +34,8 @@ namespace MapService.Models.Config
         public string id { get; set; }
 
         public string caption { get; set; }
+
+        public string internalLayerName { get; set; }
 
         public string url { get; set; }
 

@@ -41,7 +41,7 @@ article textarea {
 }
 
 article label:not(.sketch-picker label) {
-  width: 150px;
+  width: 160px;
   display: inline-block;
   margin: 0;
   vertical-align: top;

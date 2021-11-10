@@ -19,6 +19,8 @@ namespace MapService.Models.Config
 
         public string caption { get; set; }
 
+        public string internalLayerName { get; set; }
+
         public string url { get; set; }
 
 		public string uri { get; set; }
