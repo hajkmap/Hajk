@@ -188,7 +188,7 @@ class SearchResultsContainer extends React.PureComponent {
 
     // Get the clicked feature
     const feature = featureCollection.value.features.find(
-      (feature) => feature.id === featureId
+      (feature) => feature.getId() === featureId
     );
 
     // If the feature has onClickName set we won't show the details
@@ -204,7 +204,7 @@ class SearchResultsContainer extends React.PureComponent {
     return featureCollections.find((featureCollection) => {
       return (
         featureCollection.value.features.findIndex(
-          (feature) => feature.id === featureId
+          (feature) => feature.getId() === featureId
         ) > -1
       );
     });
@@ -257,7 +257,7 @@ class SearchResultsContainer extends React.PureComponent {
     const { activeFeatureCollection } = this.state;
     const selectedFeatures = [...this.state.selectedFeatures];
 
-    const featureIndex = this.getSelectedFeatureIndex(feature.id);
+    const featureIndex = this.getSelectedFeatureIndex(feature.getId());
     selectedFeatures.splice(featureIndex, 1);
 
     if (activeFeatureCollection?.origin === "USERSELECT") {
@@ -282,7 +282,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   getSelectedFeatureIndex = (featureId) => {
     return this.state.selectedFeatures.findIndex((featureInfo) => {
-      return featureInfo.feature.id === featureId;
+      return featureInfo.feature.getId() === featureId;
     });
   };
 
@@ -355,11 +355,8 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderFilterInputField = () => {
     const { classes } = this.props;
-    const {
-      activeFeatureCollection,
-      featureFilter,
-      featureCollectionFilter,
-    } = this.state;
+    const { activeFeatureCollection, featureFilter, featureCollectionFilter } =
+      this.state;
     const showClearFilterButton =
       featureFilter.length > 0 || featureCollectionFilter.length > 0;
     return (
@@ -416,11 +413,8 @@ class SearchResultsContainer extends React.PureComponent {
   // Helper function that checks if the filter is active in the
   // current view.
   isFilterActive = () => {
-    const {
-      activeFeatureCollection,
-      featureFilter,
-      featureCollectionFilter,
-    } = this.state;
+    const { activeFeatureCollection, featureFilter, featureCollectionFilter } =
+      this.state;
     // If we have an active featureCollection (meaning that we are
     // viewing _features_, and the featureFilter-value is set, the
     // filter is active.
@@ -698,7 +692,7 @@ class SearchResultsContainer extends React.PureComponent {
     if (activeFeature) {
       const featureIndex = selectedFeatures.findIndex((featureInfo) => {
         return (
-          featureInfo.feature.id === activeFeature.id &&
+          featureInfo.feature.getId() === activeFeature.getId() &&
           featureInfo.initiator !== "userSelect"
         );
       });
@@ -738,7 +732,7 @@ class SearchResultsContainer extends React.PureComponent {
   featureIsSelected = (feature) => {
     const { selectedFeatures } = this.state;
     return selectedFeatures.some((featureInfo) => {
-      return featureInfo.feature.id === feature.id;
+      return featureInfo.feature.getId() === feature.getId();
     });
   };
 
@@ -766,8 +760,59 @@ class SearchResultsContainer extends React.PureComponent {
       },
       () => {
         this.handleFilterUpdate();
+        this.#showCorrespondingWMSLayers(featureCollection);
       }
     );
+  };
+
+  #showCorrespondingWMSLayers = (featureCollection) => {
+    // Respect the setting from admin
+    if (this.props.options.showCorrespondingWMSLayers !== true) return;
+
+    const layer = this.#getLayerById(featureCollection.source.pid);
+
+    if (layer.layerType === "group") {
+      // Group layers will publish an event to LayerSwitcher that will take
+      // care of the somewhat complicated toggling.
+
+      // N.B. We don't want to hide any sublayers, only ensure that new ones are shown.
+      // So the first step is to find out which sublayers are already visible.
+      const alreadyVisibleSubLayers = layer
+        .getSource()
+        .getParams()
+        ["LAYERS"].split(",")
+        .filter((e) => e.length !== 0);
+
+      // Next, prepare an array of the already visible layers, plus the new one.
+      // Make sure NOT TO CHANGE THE ORDER of sublayers. Hence no push or spread,
+      // only a filter on the admin-specified order that we have in the 'subLayers'
+      // property.
+      const subLayersToShow = layer.subLayers.filter((l) => {
+        return (
+          alreadyVisibleSubLayers.includes(l) ||
+          l === featureCollection.source.id
+        );
+      });
+
+      // Finally, let's publish the event so that LayerSwitcher can take care of the rest
+      this.props.app.globalObserver.publish("layerswitcher.showLayer", {
+        layer,
+        subLayersToShow,
+      });
+    } else if (!layer.getVisible()) {
+      // "Normal" layers are easier, we can just toggle the visibility directly.
+      // The already existing OL listener will update checkbox state on corresponding layer.
+      layer.setVisible(true);
+    }
+  };
+
+  #getLayerById = (layerId) => {
+    return this.props.map
+      .getLayers()
+      .getArray()
+      .find((layer) => {
+        return layerId === layer.values_.name;
+      });
   };
 
   handleFeatureCollectionClick = (featureCollection) => {
@@ -813,7 +858,7 @@ class SearchResultsContainer extends React.PureComponent {
     const source = feature.source ?? activeFeatureCollection.source;
 
     return source.displayFields.reduce((featureTitleString, df) => {
-      let displayField = feature.properties[df];
+      let displayField = feature.get(df);
       if (Array.isArray(displayField)) {
         displayField = displayField.join(", ");
       }
@@ -865,14 +910,13 @@ class SearchResultsContainer extends React.PureComponent {
       return;
     }
 
-    const filteredFeatureCollections = this.getFilteredFeatureCollections(
-      featureCollections
-    );
+    const filteredFeatureCollections =
+      this.getFilteredFeatureCollections(featureCollections);
     const filteredFeatures = this.getFilteredFeatures(
       filteredFeatureCollections
     );
     const currentFeatureIds = filteredFeatures.map((feature) => {
-      return feature.id;
+      return feature.getId();
     });
 
     this.setState({
@@ -1065,9 +1109,8 @@ class SearchResultsContainer extends React.PureComponent {
         : // Otherwise we return all collections passing the filter
           this.getFilteredFeatureCollections(this.props.featureCollections);
 
-    const sortedFeatureCollections = this.sortFeatureCollections(
-      featureCollections
-    );
+    const sortedFeatureCollections =
+      this.sortFeatureCollections(featureCollections);
 
     const shouldRenderSelectedCollection =
       options.enableSelectedFeaturesCollection ?? true;

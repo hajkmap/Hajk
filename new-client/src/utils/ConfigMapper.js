@@ -27,18 +27,33 @@ export default class ConfigMapper {
           getIndex >= 0 &&
           args.layersInfo[getIndex].style;
 
-        /**
-         * GeoServer allows finer control over the legend appearance via the vendor parameter LEGEND_OPTIONS.
-         * See: https://docs.geoserver.org/latest/en/user/services/wms/get_legend_graphic/index.html#controlling-legend-appearance-with-legend-options
-         */
-        // Use custom legend options if specified by admin
-        const geoserverLegendOptions = properties.mapConfig.map.hasOwnProperty(
-          "geoserverLegendOptions"
-        )
-          ? "LEGEND_OPTIONS=" + properties.mapConfig.map.geoserverLegendOptions
-          : "";
+        let geoserverLegendOptions = "";
+        let qgisOptions = "";
 
-        legendUrl = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
+        if (args.serverType === "geoserver") {
+          /**
+           * GeoServer allows finer control over the legend appearance via the vendor parameter LEGEND_OPTIONS.
+           * See: https://docs.geoserver.org/latest/en/user/services/wms/get_legend_graphic/index.html#controlling-legend-appearance-with-legend-options
+           */
+          // Use custom legend options if specified by admin
+          geoserverLegendOptions = properties.mapConfig.map.hasOwnProperty(
+            "geoserverLegendOptions"
+          )
+            ? "&LEGEND_OPTIONS=" +
+              properties.mapConfig.map.geoserverLegendOptions
+            : "";
+        }
+
+        // QGIS Server requires the SERVICE parameter to be set, see issue #880.
+        if (args.serverType === "qgis") {
+          qgisOptions = "&SERVICE=WMS";
+        }
+
+        // If layers URL already includes a query string separator (ie question mark), we want
+        // to append the remaining values with &.
+        const theGlue = args.url.includes("?") ? "&" : "?";
+
+        legendUrl = `${proxy}${args.url}${theGlue}REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}${geoserverLegendOptions}${qgisOptions}`;
       }
       // If there's a legend URL specified in admin, use it as is
       else {
@@ -120,7 +135,7 @@ export default class ConfigMapper {
         infoClickSortType: args.infoClickSortType,
         infoClickSortDesc: args.infoClickSortDesc,
         infoClickSortProperty: args.infoClickSortProperty,
-        //information: args.infobox,
+        information: args.infobox,
         resolutions: properties.mapConfig.map.resolutions,
         projection: projection || "EPSG:3006",
         origin: properties.mapConfig.map.origin,
@@ -129,7 +144,10 @@ export default class ConfigMapper {
         hidpi: args.hidpi,
         customRatio: args.customRatio,
         imageFormat: args.imageFormat || "image/png",
-        serverType: args.serverType || "geoserver",
+        serverType:
+          args.serverType === "arcgis"
+            ? "mapserver"
+            : args.serverType || "geoserver",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         attribution: args.attribution,
         searchUrl: args.searchUrl,
@@ -159,6 +177,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
 
@@ -172,6 +192,7 @@ export default class ConfigMapper {
           ? args.displayFields
           : args.searchFields[0] || "Sökträff",
         srsName: properties.mapConfig.map.projection || "EPSG:3006",
+        serverType: config.options.serverType,
       };
     }
 
@@ -218,6 +239,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
     return config;
@@ -300,6 +323,8 @@ export default class ConfigMapper {
         sldUrl: args.sldUrl,
         url: args.url,
         visible: args.visibleAtStart,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
 
@@ -350,6 +375,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
 

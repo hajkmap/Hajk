@@ -82,6 +82,8 @@ class WFSVectorLayer {
       featureType: config.params.typename.split(":")[1],
       minZoom: config?.minZoom >= 0 ? config.minZoom : undefined,
       maxZoom: config?.maxZoom >= 0 ? config.maxZoom : undefined,
+      timeSliderStart: config?.timeSliderStart,
+      timeSliderEnd: config?.timeSliderEnd,
     });
 
     // Styling section starts here.

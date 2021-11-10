@@ -321,43 +321,70 @@ class LayerGroupItem extends Component {
   setHidden = (l) => {
     const { layer } = this.props;
     if (l === layer) {
+      // Fix underlaying source
       this.props.layer.getSource().updateParams({
-        LAYERS: [this.props.layer.subLayers[0]],
-        CQL_FILTER: "EXCLUDE",
+        // Ensure that the list of sublayers is emptied (otherwise they'd be
+        // "remembered" the next time user toggles group)
+        LAYERS: "",
+        // Remove any filters
+        CQL_FILTER: null,
       });
-      setTimeout(() => {
-        this.setState(
-          {
-            visible: false,
-            visibleSubLayers: [],
-          },
-          () => {
-            layer.setVisible(false);
-          }
-        );
-      }, 200);
+
+      // Hide the layer in OL
+      layer.setVisible(false);
+
+      // Update UI state
+      this.setState({
+        visible: false,
+        visibleSubLayers: [],
+      });
     }
   };
 
-  setVisible = (l) => {
-    const { layer } = this.props;
-    if (l === layer) {
-      layer.setVisible(true);
+  setVisible = (la) => {
+    let l,
+      subLayersToShow = null;
 
+    // If the incoming parameter is an object that contains additional subLayersToShow,
+    // let's filter out the necessary objects from it
+    if (la.hasOwnProperty("layer") && la.hasOwnProperty("subLayersToShow")) {
+      subLayersToShow = la.subLayersToShow;
+      l = la.layer;
+    } else {
+      // In this case the incoming parameter is the actual OL Layer and there is
+      // no need to further filter. Just set subLayers to everything that's in this
+      // layer, and the incoming object itself as the working 'l' variable.
+      subLayersToShow = this.props.layer.subLayers;
+      l = la;
+    }
+
+    // Now we can be sure that we have the working 'l' variable and can compare
+    // it to the 'layer' object in current props. Note that this is necessary, as
+    // every single LayerGroupItem is subscribing to the event that calls this method,
+    // so without this check we'd end up running this for every LayerGroupItem, which
+    // is not intended.
+    if (l === this.props.layer) {
+      // Show the OL layer
+      this.props.layer.setVisible(true);
+
+      // Set LAYERS and STYLES so that the exact sublayers that are needed
+      // will be visible
       this.props.layer.getSource().updateParams({
-        LAYERS: this.props.layer.subLayers,
+        // join(), so we always provide a string as value to LAYERS
+        LAYERS: subLayersToShow.join(),
         CQL_FILTER: null,
         // Extract .style property from each sub layer.
         // Join them into a string that will be used to
         // reset STYLES param for the GET request.
         STYLES: Object.entries(this.props.layer.layersInfo)
-          .map((o) => o[1])
-          .map((l) => l.style)
-          .join(),
+          .filter((k) => subLayersToShow.indexOf(k[0]) !== -1)
+          .map((l) => l[1].style)
+          .join(","),
       });
+
       this.setState({
         visible: true,
-        visibleSubLayers: this.props.layer.subLayers,
+        visibleSubLayers: subLayersToShow,
       });
     }
   };
@@ -407,8 +434,15 @@ class LayerGroupItem extends Component {
       });
 
       this.props.layer.getSource().updateParams({
-        LAYERS: visibleSubLayers,
-        STYLES: visibleSubLayersStyles.join(),
+        // join(), so we always provide a string as value to LAYERS
+        LAYERS: visibleSubLayers.join(),
+        // Filter STYLES to only contain styles for currently visible layers,
+        // and maintain the order from layersInfo (it's crucial that the order
+        // of STYLES corresponds exactly to the order of LAYERS!)
+        STYLES: Object.entries(this.props.layer.layersInfo)
+          .filter((k) => visibleSubLayers.indexOf(k[0]) !== -1)
+          .map((l) => l[1].style)
+          .join(","),
         CQL_FILTER: null,
       });
       this.props.layer.setVisible(layerVisibility);
@@ -580,8 +614,8 @@ class LayerGroupItem extends Component {
       return (
         <div>
           {this.renderInfo()}
-          {this.renderOwner()}
           {this.renderMetadataLink()}
+          {this.renderOwner()}
           <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
         </div>
       );

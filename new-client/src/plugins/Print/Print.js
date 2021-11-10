@@ -17,19 +17,15 @@ class Print extends React.PureComponent {
     a5: [210, 148],
   };
 
+  // Default DPIs, used if none supplied in options
+  dpis = [72, 150, 300];
+
+  // Default paperFormats a0-a5, used if none supplied in options
+  paperFormats = Object.keys(this.dims);
+
   // Default scales, used if none supplied in options
   scales = [
-    100,
-    250,
-    500,
-    1000,
-    2500,
-    5000,
-    10000,
-    25000,
-    50000,
-    100000,
-    200000,
+    100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 200000,
     500000,
   ];
 
@@ -47,6 +43,30 @@ class Print extends React.PureComponent {
       props.options.scales = props.options.scales.replace(/\s/g, "").split(",");
     } else {
       props.options.scales = this.scales;
+    }
+
+    // Prepare dpis from admin options, fallback to default if needed
+    if (props?.options?.dpis?.split(",").length > 1) {
+      props.options.dpis = props.options.dpis
+        .replace(/\s/g, "")
+        .split(",")
+        .map((el) => {
+          return parseInt(el);
+        });
+    } else {
+      props.options.dpis = this.dpis;
+    }
+
+    // Prepare paperFormats from admin options, fallback to default if needed
+    if (props?.options?.paperFormats?.split(",").length > 1) {
+      props.options.paperFormats = props.options.paperFormats
+        .replace(/\s/g, "")
+        .split(",")
+        .map((el) => {
+          return el.toLowerCase();
+        });
+    } else {
+      props.options.paperFormats = this.paperFormats;
     }
 
     // If no valid max logo width is supplied, use a hard-coded default

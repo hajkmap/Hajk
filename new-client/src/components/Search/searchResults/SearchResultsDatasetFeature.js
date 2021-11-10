@@ -70,14 +70,10 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   render() {
-    const {
-      feature,
-      featureTitle,
-      classes,
-      shouldRenderSelectedCollection,
-    } = this.props;
+    const { feature, featureTitle, classes, shouldRenderSelectedCollection } =
+      this.props;
     const shouldRenderCheckbox =
-      feature.geometry && shouldRenderSelectedCollection;
+      feature.getGeometry() && shouldRenderSelectedCollection;
     if (featureTitle.length > 0) {
       return (
         <Grid container alignItems="center" className={classes.root}>

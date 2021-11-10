@@ -913,16 +913,6 @@ class DocumentEditor extends Component {
     });
   };
 
-  saveTitle() {
-    this.setState({
-      data: {
-        ...this.state.data,
-        title: this.state.documentTitle,
-      },
-      editTitle: false,
-    });
-  }
-
   renderEditTitle() {
     return (
       <TextField
@@ -933,6 +923,13 @@ class DocumentEditor extends Component {
         onChange={(e) => {
           this.setState({
             documentTitle: e.target.value,
+          });
+
+          this.setState({
+            data: {
+              ...this.state.data,
+              title: e.target.value,
+            },
           });
         }}
       />

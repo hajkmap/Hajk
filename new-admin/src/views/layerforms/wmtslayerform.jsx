@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import $ from "jquery";
@@ -68,6 +46,9 @@ const defaultState = {
   infoUrl: "",
   infoUrlText: "",
   infoOwner: "",
+  timeSliderVisible: false,
+  timeSliderStart: "",
+  timeSliderEnd: "",
   maxZoom: -1,
   minZoom: -1,
 };
@@ -91,7 +72,7 @@ class WMTSLayerForm extends Component {
     });
   }
 
-  componentWillUnmount() {
+  UNSAFE_componentWillUnmount() {
     this.props.model.off("change:select-image");
     this.props.model.off("change:select-legend-icon");
   }
@@ -136,6 +117,9 @@ class WMTSLayerForm extends Component {
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
+      timeSliderVisible: this.getValue("timeSliderVisible"),
+      timeSliderStart: this.getValue("timeSliderStart"),
+      timeSliderEnd: this.getValue("timeSliderEnd"),
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
     };
@@ -171,6 +155,7 @@ class WMTSLayerForm extends Component {
     if (fieldName === "resolutions") value = value.split(",");
     if (fieldName === "matrixIds") value = value.split(",");
     if (fieldName === "infoVisible") value = input.checked;
+    if (fieldName === "timeSliderVisible") value = input.checked;
 
     return value;
   }
@@ -272,10 +257,13 @@ class WMTSLayerForm extends Component {
   }
 
   render() {
-    var imageLoader = this.state.imageLoad ? (
+    const imageLoader = this.state.imageLoad ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
-    var infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const timeSliderClass = this.state.timeSliderVisible
+      ? "tooltip-timeSlider"
+      : "hidden";
 
     return (
       <fieldset>
@@ -617,6 +605,45 @@ class WMTSLayerForm extends Component {
               }}
               value={this.state.infoOwner}
               className={this.getValidationClass("infoOwner")}
+            />
+          </div>
+        </div>
+        <div className="timeSlider-container">
+          <div>
+            <input
+              type="checkbox"
+              ref="input_timeSliderVisible"
+              id="timeSlider"
+              onChange={(e) => {
+                this.setState({ timeSliderVisible: e.target.checked });
+              }}
+              checked={this.state.timeSliderVisible}
+            />
+            &nbsp;
+            <label htmlFor="timeSlider">Tidslinjedatum</label>
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje start</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderStart"
+              onChange={(e) => {
+                this.setState({ timeSliderStart: e.target.value });
+              }}
+              value={this.state.timeSliderStart}
+            />
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje slut</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderEnd"
+              onChange={(e) => {
+                this.setState({ timeSliderEnd: e.target.value });
+              }}
+              value={this.state.timeSliderEnd}
             />
           </div>
         </div>

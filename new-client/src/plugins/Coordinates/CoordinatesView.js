@@ -7,8 +7,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
+import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
 
 import { withSnackbar } from "notistack";
 
@@ -34,64 +33,13 @@ const styles = (theme) => ({
 });
 
 class CoordinatesView extends React.PureComponent {
-  state = {
-    transformedCoordinates: [],
-    errorField: "",
-    errorValue: "",
-  };
+  state = {};
 
   constructor(props) {
     super(props);
     this.model = this.props.model;
     this.snackbarKey = null;
     this.localObserver = this.props.localObserver;
-
-    this.localObserver.subscribe(
-      "setTransformedCoordinates",
-      (transformedCoordinates) => {
-        this.setState(
-          {
-            transformedCoordinates: transformedCoordinates,
-            errorField: "",
-            errorValue: "",
-          },
-          () => {
-            // React moves the cursor to the end for the field that was modified so we restore the position here
-            if (
-              this.props.model.updatedTransformId !== "" &&
-              document.getElementById(this.props.model.updatedTransformId) !==
-                null
-            ) {
-              document.getElementById(
-                this.props.model.updatedTransformId
-              ).selectionStart = this.props.model.updatedTransformIdx;
-              document.getElementById(
-                this.props.model.updatedTransformId
-              ).selectionEnd = this.props.model.updatedTransformIdx;
-            }
-          }
-        );
-      }
-    );
-
-    this.localObserver.subscribe("errorInOnChange", (data) => {
-      this.setState(
-        {
-          errorField: data.errorField,
-          errorValue: data.errorValue,
-        },
-        () => {
-          // React moves the cursor to the end for the field that was modified so we restore the position here
-
-          document.getElementById(
-            this.state.errorField
-          ).selectionStart = this.props.model.updatedTransformIdx;
-          document.getElementById(
-            this.state.errorField
-          ).selectionEnd = this.props.model.updatedTransformIdx;
-        }
-      );
-    });
 
     /**
      * Setup listeners that will show/hide snackbar. The Model will publish
@@ -123,78 +71,16 @@ class CoordinatesView extends React.PureComponent {
   }
 
   renderProjections() {
-    const { classes } = this.props;
-
     return (
       <>
-        {this.state.transformedCoordinates.map((transformation, i) => {
-          // Create the values for xCoord and yCoord where one might have a faulty format
-          let xCoord = transformation.inverseAxis
-            ? transformation.coordinates[0]
-            : transformation.coordinates[1];
-          let yCoord = transformation.inverseAxis
-            ? transformation.coordinates[1]
-            : transformation.coordinates[0];
-
-          if (this.state.errorField === "coordinates-transforms-X-" + i) {
-            xCoord = this.state.errorValue;
-          } else if (
-            this.state.errorField ===
-            "coordinates-transforms-Y-" + i
-          ) {
-            yCoord = this.state.errorValue;
-          }
+        {this.props.model.transformations.map((transformation, index) => {
           return (
-            <TableRow key={i}>
-              <TableCell>
-                <Typography variant="body1" style={{ display: "flex" }}>
-                  {transformation.title}
-                </Typography>
-                <Typography variant="body2" style={{ display: "flex" }}>
-                  ({transformation.code})
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <TextField
-                  label={transformation.ytitle}
-                  className={classes.textField}
-                  id={"coordinates-transforms-X-" + i}
-                  margin="dense"
-                  variant="outlined"
-                  value={xCoord}
-                  onChange={this.model.handleInput}
-                  transform={transformation.code}
-                  axis={transformation.inverseAxis ? "X" : "Y"}
-                  error={
-                    this.state.errorField === "coordinates-transforms-X-" + i
-                  }
-                  helperText={
-                    this.state.errorField === "coordinates-transforms-X-" + i
-                      ? "Ange ett decimaltal"
-                      : ""
-                  }
-                />
-                <TextField
-                  label={transformation.xtitle}
-                  className={classes.textField}
-                  id={"coordinates-transforms-Y-" + i}
-                  margin="dense"
-                  variant="outlined"
-                  value={yCoord}
-                  onChange={this.model.handleInput}
-                  transform={transformation.code}
-                  axis={transformation.inverseAxis ? "Y" : "X"}
-                  error={
-                    this.state.errorField === "coordinates-transforms-Y-" + i
-                  }
-                  helperText={
-                    this.state.errorField === "coordinates-transforms-Y-" + i
-                      ? "Ange ett decimaltal"
-                      : ""
-                  }
-                />
-              </TableCell>
-            </TableRow>
+            <CoordinatesTransformRow
+              key={transformation.code + index + "-element"}
+              model={this.model}
+              transformation={transformation}
+              inverseAxis={transformation.inverseAxis}
+            />
           );
         })}
       </>
@@ -229,6 +115,20 @@ class CoordinatesView extends React.PureComponent {
             }}
           >
             Panorera
+          </Button>
+          <Button
+            onClick={() => {
+              this.props.model.goToUserLocation();
+            }}
+          >
+            Min position
+          </Button>
+          <Button
+            onClick={() => {
+              this.props.model.resetCoords();
+            }}
+          >
+            Rensa fält
           </Button>
         </Paper>
       </>

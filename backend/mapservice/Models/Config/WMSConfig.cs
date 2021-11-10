@@ -59,6 +59,8 @@ namespace MapService.Models.Config
 
         public bool visibleAtStart { get; set; }
 
+        public bool hideExpandArrow { get; set; }
+
         public bool tiled { get; set; }
 
         public double opacity { get; set; }
@@ -110,6 +112,12 @@ namespace MapService.Models.Config
         public string version { get; set; }
 
         public string infoFormat { get; set; }
+
+        public bool timeSliderVisible { get; set; }
+
+        public string timeSliderStart { get; set; }
+
+        public string timeSliderEnd { get; set; }
 
         public int? zIndex { get; set; }
     }

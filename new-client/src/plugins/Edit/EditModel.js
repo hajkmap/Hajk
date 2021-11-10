@@ -31,6 +31,24 @@ class EditModel {
     this.instruction = "";
     this.filty = false;
     this.removalToolMode = "off";
+
+    // Normalize the sources that come from options.
+    this.options.sources = this.options.sources.map((s) => {
+      // Namespace URI is required for insert. QGIS Server tends to accept this value.
+      if (s.uri.trim().length === 0) {
+        s.uri = "http://www.opengis.net/wfs";
+      }
+
+      // Get rid of the SERVICE=WFS attribute if existing: we will add it on the following requests
+      // while QGIS Server's WFS endpoint requires the SERVICE parameter to be preset. We'd
+      // end up with duplicate parameters, so the safest way around is to remove it, in a controlled
+      // manner, without disturbing the URL.
+      const url = new URL(s.url);
+      url.searchParams.delete("service");
+      s.url = url.href;
+
+      return s;
+    });
   }
 
   write(features) {
@@ -565,9 +583,7 @@ class EditModel {
   }
 
   getSources() {
-    return this.sources.filter((source) => {
-      return this.activeServices.some((serviceId) => serviceId === source.id);
-    });
+    return this.options.sources;
   }
 }
 

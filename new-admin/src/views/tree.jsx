@@ -29,10 +29,7 @@ export default class Tree extends Component {
   buildList() {
     return (
       <div>
-        <label>
-          Aktiva WFS-söktjänster (OBS: om ingen söktjänst är markerad kommer
-          alla söktjänster att vara aktiva i kartan)
-        </label>
+        <label>Aktiva WFS-söktjänster</label>
         <div className="layer-list">
           <ul>
             {this.props.layers.map((layer) => {

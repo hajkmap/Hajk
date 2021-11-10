@@ -17,8 +17,17 @@ body {
   overflow-y: scroll;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  /* prevent pinch-zoom on Android */
+  touch-action: pan-y;
 }
+
+#map {
+  /* restore pinch-zoom for map */
+  touch-action: auto;
+}
+
 .app-start {
+  font-family: Helvetica, Arial, sans-serif;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -38,23 +47,18 @@ body {
 }
 
 .sr-only {
-  /*Same styleattributes as MaterialUI SrOnly*/
+  /*Same style attributes as MaterialUI SrOnly*/
   width: 1px;
   height: 1px;
   overflow: hidden;
   position: absolute;
 }
 
-.app-start div {
-  font-size: 3rem;
-  font-style: italic;
-  font-weight: 100;
-  font-variant-caps: all-small-caps;
-}
 .compass {
   animation: compass 1.2s cubic-bezier(0.51, 0.41, 0.17, 1.1) infinite;
   height: 80px;
 }
+
 @keyframes compass {
   0% {
     transform: rotate(0deg);
@@ -62,6 +66,17 @@ body {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.app-name {
+  font-size: 5rem;
+  font-variant-caps: all-small-caps;
+  font-style: italic;
+}
+
+.app-version {
+  font-size: 0.8rem;
+  line-height: 5rem;
 }
 
 /* Used only for displaying error if nothing loaded (and we don't have any MUI yet) */

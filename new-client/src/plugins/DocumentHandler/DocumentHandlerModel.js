@@ -458,9 +458,8 @@ export default class DocumentHandlerModel {
   appendComponentsToChapter = (chapter) => {
     if (this.hasSubChapters(chapter)) {
       chapter.chapters.forEach((subChapter) => {
-        subChapter.components = this.getMaterialUIComponentsForChapter(
-          subChapter
-        );
+        subChapter.components =
+          this.getMaterialUIComponentsForChapter(subChapter);
         if (this.hasSubChapters(subChapter)) {
           this.appendComponentsToChapter(subChapter);
         }

@@ -663,14 +663,13 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+                title="Höjd i pixlar på verktygets fönster. Anges antingen numeriskt (pixlar), 'dynamic' för att automatiskt anpassa höjden efter innehållet eller 'auto' att använda maximal höjd."
               />
             </label>
             <input
               id="height"
               name="height"
-              type="number"
-              min="0"
+              type="text"
               className="control-fixed-width"
               onChange={(e) => {
                 this.handleInputChange(e);

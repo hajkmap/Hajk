@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import ConfigService from "./config.service";
-const crypto = require("crypto");
 
 class SettingsService {
   /**
@@ -11,8 +10,33 @@ class SettingsService {
    * @returns {string} uniqueId
    * @memberof SettingsService
    */
-  generateId() {
-    return crypto.randomBytes(16).toString("hex");
+  async generateId() {
+    // Prepare the recursive part. It takes an array of existing layers
+    // as argument and returns a random string if it doesn't exist in
+    // the array yet.
+    const seedAndReturnIfUnique = (existingIds) => {
+      // The IDs is generated as follows: Math.random() returns a 0-13 characters number, usually around 12 characters.
+      // Calling toString with radix 36 will return a Base36 number (see https://en.wikipedia.org/wiki/Base36).
+      // The returned number is between 0 and 1, hence it starts with "0.". We remove the leading zero and
+      // limit the length to 6 using slice.
+      //
+      // The string return will have 36^6 possible combinations, which should do for a while.
+      const proposedId = Math.random().toString(36).slice(2, 8); // Create a new string, something like '3mu2zq'
+      return existingIds.has(proposedId) // If the newly created string exists in the array already…
+        ? seedAndReturnIfUnique(existingIds) // …try seeding a new one. Else…
+        : proposedId; // …just return generated string.
+    };
+
+    // Start with reading the store
+    const layersStore = await this.readFileAsJson("layers.json");
+
+    // Extract all IDs to a flat array
+    const existingIds = Object.values(layersStore)
+      .flat()
+      .map((l) => l.id);
+
+    // Invoke the recursive part, supply a Set of existing IDs, for comparison.
+    return seedAndReturnIfUnique(new Set(existingIds));
   }
 
   getFullPathToFile(file) {
@@ -62,8 +86,12 @@ class SettingsService {
         layersTypeWithChanges = layersType.filter((x) => x.id !== newLayer.id);
         status = 200;
       } else {
-        // ID was null, generate a new ID
-        newLayer.id = this.generateId();
+        // If ID was null, generate a new ID.
+        //
+        // IMPORTANT: Ignore the warning saying that "await has no effect on this type of expression".
+        // It does, as without it, we return a pending Promise, instead of its resolved value.
+        // eslint-disable-next-line
+        newLayer.id = await this.generateId();
         layersTypeWithChanges = layersType; // No need to clean up existing data, just use as is
         status = 201;
       }
@@ -104,7 +132,7 @@ class SettingsService {
       }
 
       // Step 2: remove entry from layers store
-      // Buggy admin legacy: layer types are in pluralis in layers.json,
+      // FIXME: Buggy Admin UI legacy: layer types are in pluralis in layers.json,
       // but the incoming request is singular. We must fix it below:
       type = type + "s";
 
@@ -168,6 +196,22 @@ class SettingsService {
       return group;
     };
 
+    // Helper function, used to remove references to a layer from Search tool's options
+    const removeLayerIdFromSearchSources = (searchSources) => {
+      const index = searchSources.findIndex((l) => l === layerId);
+      // If layerId was found in searchSources…
+      if (index !== -1) {
+        // …remove it…
+        searchSources.splice(index, 1);
+
+        // … and set the modified flag in order to save the file later on.
+        modified = true;
+      }
+
+      // Either way, return the array
+      return searchSources;
+    };
+
     // This flag will be set spliceByLayerId only if changes have been made to the
     // current file. This way we only write to filesystem if it's necessary.
     let modified = false;
@@ -176,24 +220,45 @@ class SettingsService {
     const json = await this.readFileAsJson(file + ".json");
 
     // Find index of LayerSwitcher in map's tools
-    const lsIndex = json.tools.findIndex((t) => t.type === "layerswitcher");
+    const layerSwitcherToolIndex = json.tools.findIndex(
+      (t) => t.type === "layerswitcher"
+    );
 
     // Put options to an object - this will be the main object we'll work on here
-    const options = json.tools[lsIndex].options;
+    const lsOptions = json.tools[layerSwitcherToolIndex].options;
 
     // Check in groups, recursively
-    options.groups = options.groups.map(spliceByLayerId);
+    lsOptions.groups = lsOptions.groups.map(spliceByLayerId);
 
     // Check in baselayers, a bit of a special case as options.baselayers already
     // contains the elements (without neither .layers nor .groups properties, as
     // expected by spliceByLayerId). Hence we wrap .baselayers in a temporary .layers property.
-    options.baselayers = spliceByLayerId({ layers: options.baselayers }).layers;
+    lsOptions.baselayers = spliceByLayerId({
+      layers: lsOptions.baselayers,
+    }).layers;
+
+    // If current map config has the Search plugin active, we must
+    // check if current layer's ID is found in the "searchSources" array
+    // of Search's options. If found, let's remove the ID from there.
+    const searchToolIndex = json.tools.findIndex((t) => t.type === "search");
+    const searchOptions = json.tools[searchToolIndex]?.options;
+    if (
+      searchOptions !== undefined &&
+      Array.isArray(searchOptions.selectedSources)
+    ) {
+      searchOptions.selectedSources = removeLayerIdFromSearchSources(
+        searchOptions.selectedSources
+      );
+    }
 
     // If any of the above resulted in modified file, write the changes
     if (modified === true) {
       // Use the found index of LayerSwitcher to entirely replace
       // the "options" property on that object
-      json.tools[lsIndex].options = options;
+      json.tools[layerSwitcherToolIndex].options = lsOptions;
+
+      // Do the same for the options of Search tool
+      json.tools[searchToolIndex].options = searchOptions;
 
       // Write changes to file
       await fs.promises.writeFile(

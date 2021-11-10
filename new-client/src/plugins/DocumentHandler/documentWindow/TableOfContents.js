@@ -146,13 +146,8 @@ class TableOfContents extends React.PureComponent {
   };
 
   render() {
-    const {
-      classes,
-      activeDocument,
-      title,
-      expanded,
-      toggleCollapse,
-    } = this.props;
+    const { classes, activeDocument, title, expanded, toggleCollapse } =
+      this.props;
 
     return (
       <Grid className={classes.tableOfContents} container>

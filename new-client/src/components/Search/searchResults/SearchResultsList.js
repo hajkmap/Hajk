@@ -142,11 +142,8 @@ class SearchResultsList extends React.PureComponent {
   };
 
   renderSearchResultList = () => {
-    const {
-      featureCollections,
-      classes,
-      handleFeatureCollectionClick,
-    } = this.props;
+    const { featureCollections, classes, handleFeatureCollectionClick } =
+      this.props;
     return (
       <List className={classes.searchResultList}>
         {featureCollections.map((featureCollection) => (

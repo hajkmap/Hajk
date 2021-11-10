@@ -1,28 +1,9 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import { Model } from "backbone";
 import $ from "jquery";
+import X2JS from "x2js";
 import { prepareProxyUrl } from "../utils/ProxyHelper";
+
+const x2js = new X2JS({ attributePrefix: "" });
 
 var edit = Model.extend({
   defaults: {
@@ -96,11 +77,41 @@ var edit = Model.extend({
     $.ajax(url, {
       data: {
         request: "describeFeatureType",
+        // Not part of WFS 1.0.0/1.1.0 spec, but GeoServer supports it,
+        // so we try it first. Later on we'll check if we got back JSON
+        // or XML (e.g. QGIS Server will ignore outputFormat and return XML)
+        // and handle it properly.
         outputFormat: "application/json",
         typename: layer,
       },
-      success: (data) => {
-        if (data.featureTypes && data.featureTypes[0]) {
+      success: (data, status, xhr) => {
+        // We can't assume that we got back a JSON object! GeoServer will work,
+        // but e.g. QGIS Server follows the WFS specification more strictly and
+        // ignores the outputFormat value will return a XMLDocument.
+        if (data instanceof XMLDocument) {
+          const json = x2js.xml2js(xhr.responseText);
+
+          // The array we want is nestled down a bit (at least it follows the WFS
+          // specification so we can assume that properties exist).
+          const properties =
+            json.schema.complexType.complexContent.extension.sequence.element;
+          const mapped = properties.map((e, index) => {
+            return {
+              index: index,
+              hidden: Boolean(e.hidden),
+              name: e.name,
+              // Remove the 'gml:' part from the string, if it exists
+              localType: e.type.includes(":") ? e.type.split(":")[1] : e.type,
+              nillable: Boolean(e.nillable),
+              // If 'type' already includes ':', don't prepend the 'xds:'
+              type: e.type.includes(":") ? e.type : `xsd:${e.type}`,
+              maxOccurs: Number.parseInt(e.maxOccurs) || 1,
+              minOccurs: Number.parseInt(e.minOccurs) || 0,
+            };
+          });
+          callback(mapped);
+        } else if (data.featureTypes && data.featureTypes[0]) {
+          // If the response wasn't XMLDocument, we assume it's GeoJSON
           callback(data.featureTypes[0].properties);
         } else {
           callback(false);

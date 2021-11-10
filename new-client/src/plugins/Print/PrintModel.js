@@ -22,6 +22,8 @@ export default class PrintModel {
     this.northArrowUrl = settings.options.northArrow ?? "";
     this.logoMaxWidth = settings.options.logoMaxWidth;
     this.scales = settings.options.scales;
+    this.copyright = settings.options.copyright ?? "";
+    this.disclaimer = settings.options.disclaimer ?? "";
     this.localObserver = settings.localObserver;
   }
 
@@ -44,6 +46,13 @@ export default class PrintModel {
 
   previewLayer = null;
   previewFeature = null;
+
+  // Used to calculate the margin around the map-image. Change this value to get
+  // more or less margin.
+  marginAmount = 0.03;
+
+  // Used to store the calculated margin.
+  margin = 0;
 
   // Used to store some values that will be needed for resetting the map
   valuesToRestoreFrom = {};
@@ -100,20 +109,40 @@ export default class PrintModel {
     return getCenter(extent);
   };
 
+  // Calculates the margin around the map-image depending on
+  // the paper dimensions
+  getMargin = (paperDim) => {
+    const longestSide = Math.max(...paperDim);
+    return this.marginAmount * longestSide;
+  };
+
+  // Returns an array with the paper dimensions with the selected
+  // format and orientation.
+  getPaperDim = (format, orientation) => {
+    return orientation === "portrait"
+      ? [...this.dims[format]].reverse()
+      : this.dims[format];
+  };
+
   addPreview(options) {
     const scale = options.scale;
     const format = options.format;
     const orientation = options.orientation;
+    const useMargin = options.useMargin;
+    const dim = this.getPaperDim(format, orientation);
 
-    const dim =
-      orientation === "portrait"
-        ? [...this.dims[format]].reverse()
-        : this.dims[format];
+    this.margin = useMargin ? this.getMargin(dim) : 0;
 
-    const size = { width: dim[0] / 25.4, height: dim[1] / 25.4 },
-      inchInMillimeter = 25.4,
-      defaultPixelSizeInMillimeter = 0.28,
-      dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
+    const inchInMillimeter = 25.4;
+    // We should take pixelRatio into account? What happens when we have
+    // pr=2? PixelSize will be 0.14?
+    const defaultPixelSizeInMillimeter = 0.28;
+    const dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
+
+    const size = {
+      width: (dim[0] - this.margin * 2) / 25.4,
+      height: (dim[1] - this.margin * 2) / 25.4,
+    };
 
     const paper = {
       width: size.width * dpi,
@@ -169,7 +198,7 @@ export default class PrintModel {
    * @param {*} url
    * @returns {Promise}
    */
-  getImageDataBlogFromUrl = (url) => {
+  getImageDataBlobFromUrl = (url) => {
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.setAttribute("crossOrigin", "anonymous"); //getting images from external domain
@@ -212,7 +241,7 @@ export default class PrintModel {
       data,
       width: sourceWidth,
       height: sourceHeight,
-    } = await this.getImageDataBlogFromUrl(url);
+    } = await this.getImageDataBlobFromUrl(url);
 
     // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
     const ratio = maxWidth / sourceWidth;
@@ -239,7 +268,8 @@ export default class PrintModel {
     pdfWidth,
     pdfHeight
   ) => {
-    const margin = 6;
+    // We must take the potential margin around the map-image into account (this.margin)
+    const margin = 6 + this.margin;
     let pdfPlacement = { x: 0, y: 0 };
     if (placement === "topLeft") {
       pdfPlacement.x = margin;
@@ -295,19 +325,27 @@ export default class PrintModel {
     color,
     scaleBarLength,
     scale,
-    scaleBarLengthMeters
+    scaleBarLengthMeters,
+    format,
+    orientation
   ) => {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
-    pdf.setFontSize(6);
+    pdf.setFontSize(8);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(color);
+    pdf.setLineWidth(0.25);
     pdf.text(
       lengthText,
       scaleBarPosition.x + scaleBarLength + 1,
-      scaleBarPosition.y + 3.7
+      scaleBarPosition.y + 4
     );
+    pdf.setFontSize(10);
     pdf.text(
-      `Skala: ${this.getUserFriendlyScale(scale)}`,
+      `Skala: ${this.getUserFriendlyScale(
+        scale
+      )} (vid ${format.toUpperCase()} ${
+        orientation === "landscape" ? "liggande" : "stående"
+      })`,
       scaleBarPosition.x,
       scaleBarPosition.y + 1
     );
@@ -345,7 +383,9 @@ export default class PrintModel {
     scale,
     resolution,
     scaleBarPlacement,
-    scaleResolution
+    scaleResolution,
+    format,
+    orientation
   ) => {
     const millimetersPerInch = 25.4;
     const pixelSize = millimetersPerInch / resolution / scaleResolution;
@@ -368,7 +408,9 @@ export default class PrintModel {
       color,
       scaleBarLength,
       scale,
-      scaleBarLengthMeters
+      scaleBarLengthMeters,
+      format,
+      orientation
     );
   };
 
@@ -403,8 +445,8 @@ export default class PrintModel {
   // the backgroundColor of the mapCanvas has changed. We must keep track of this
   // to make sure that the print-results has the same appearance.
   getMapBackgroundColor = () => {
-    const currentBackgroundColor = document.getElementById("map").style
-      .backgroundColor;
+    const currentBackgroundColor =
+      document.getElementById("map").style.backgroundColor;
     return currentBackgroundColor !== "" ? currentBackgroundColor : "white";
   };
 
@@ -502,6 +544,17 @@ export default class PrintModel {
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
 
+      // Add potential margin around the image
+      if (this.margin > 0) {
+        // The lineWidth increases the line width equally to "both sides",
+        // therefore, we must have a line width two times the margin we want.
+        pdf.setLineWidth(this.margin * 2);
+        // We always want a white margin
+        pdf.setDrawColor("white");
+        // Draw the border (margin) around the entire image
+        pdf.rect(0, 0, dim[0], dim[1], "S");
+      }
+
       // If logo URL is provided, add the logo to the map
       if (options.includeLogo && this.logoUrl.trim().length >= 5) {
         try {
@@ -570,7 +623,9 @@ export default class PrintModel {
           options.scale,
           options.resolution,
           options.scaleBarPlacement,
-          scaleResolution
+          scaleResolution,
+          options.format,
+          options.orientation
         );
       }
 
@@ -578,14 +633,51 @@ export default class PrintModel {
       if (options.mapTitle.trim().length > 0) {
         pdf.setFontSize(24);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.mapTitle, dim[0] / 2, 12, { align: "center" });
+        pdf.text(options.mapTitle, dim[0] / 2, 12 + this.margin, {
+          align: "center",
+        });
       }
 
       // Add print comment if user supplied one
       if (options.printComment.trim().length > 0) {
         pdf.setFontSize(11);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.printComment, dim[0] / 2, 18, { align: "center" });
+        pdf.text(options.printComment, dim[0] / 2, 18 + this.margin, {
+          align: "center",
+        });
+      }
+
+      // Add potential copyright text
+      if (this.copyright.length > 0) {
+        pdf.setFontSize(8);
+        pdf.setTextColor(options.mapTextColor);
+        pdf.text(
+          this.copyright,
+          dim[0] - 4 - this.margin,
+          dim[1] - 4 - this.margin,
+          {
+            align: "right",
+          }
+        );
+      }
+
+      // Add potential disclaimer text
+      if (this.disclaimer.length > 0) {
+        pdf.setFontSize(8);
+        pdf.setTextColor(options.mapTextColor);
+        let textLines = pdf.splitTextToSize(
+          this.disclaimer,
+          dim[0] / 2 - this.margin - 8
+        );
+        let textLinesDims = pdf.getTextDimensions(textLines, { fontSize: 8 });
+        pdf.text(
+          textLines,
+          dim[0] - 4 - this.margin,
+          dim[1] - 6 - this.margin - textLinesDims.h,
+          {
+            align: "right",
+          }
+        );
       }
 
       // Finally, save the PDF (or PNG)

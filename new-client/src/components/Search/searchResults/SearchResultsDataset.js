@@ -163,7 +163,7 @@ class SearchResultsDataset extends React.Component {
               <ListItem
                 disableTouchRipple
                 className={classes.featureListItem}
-                key={f.id}
+                key={f.getId()}
                 divider
                 button
                 onClick={() => {
@@ -188,7 +188,7 @@ class SearchResultsDataset extends React.Component {
                   origin={featureCollection.origin}
                   visibleInMap={
                     selectedFeatures.findIndex(
-                      (item) => item.feature.id === f.id
+                      (item) => item.feature.getId() === f.getId()
                     ) > -1
                   }
                   addFeatureToSelected={addFeatureToSelected}
@@ -226,11 +226,8 @@ class SearchResultsDataset extends React.Component {
 
   renderSearchResultPreview = () => {
     const { previewFeature, previewAnchorEl } = this.state;
-    const {
-      activeFeatureCollection,
-      getFeatureTitle,
-      enableFeaturePreview,
-    } = this.props;
+    const { activeFeatureCollection, getFeatureTitle, enableFeaturePreview } =
+      this.props;
     const shouldShowPreview =
       enableFeaturePreview && !isMobile && !previewFeature?.onClickName
         ? true

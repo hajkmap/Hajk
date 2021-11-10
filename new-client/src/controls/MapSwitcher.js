@@ -118,6 +118,7 @@ class MapSwitcher extends React.PureComponent {
           <Tooltip title={`Nuvarande karta: ${title}`}>
             <Paper className={classes.paper}>
               <Button
+                aria-label="Byt karta"
                 aria-owns={open ? "render-props-menu" : undefined}
                 aria-haspopup="true"
                 className={classes.button}

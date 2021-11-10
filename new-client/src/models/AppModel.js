@@ -33,6 +33,27 @@ import SnapHelper from "./SnapHelper";
 import { hfetch } from "utils/FetchWrapper";
 
 class AppModel {
+  /**
+   * Initialize new AddModel
+   * @param object Config
+   * @param Observer observer
+   */
+  constructor(config, globalObserver) {
+    this.map = undefined;
+    this.windows = [];
+    this.plugins = {};
+    this.activeTool = undefined;
+    this.config = config;
+    this.coordinateSystemLoader = new CoordinateSystemLoader(
+      config.mapConfig.projections
+    );
+    this.globalObserver = globalObserver;
+    this.layersFromParams = [];
+    this.cqlFiltersFromParams = {};
+    register(this.coordinateSystemLoader.getProj4());
+    this.hfetch = hfetch;
+  }
+
   registerWindowPlugin(windowComponent) {
     this.windows.push(windowComponent);
   }
@@ -54,32 +75,13 @@ class AppModel {
   }
 
   /**
-   * Initialize new AddModel
-   * @param object Config
-   * @param Observer observer
-   */
-  constructor(config, globalObserver) {
-    this.map = undefined;
-    this.windows = [];
-    this.plugins = {};
-    this.activeTool = undefined;
-    this.config = config;
-    this.coordinateSystemLoader = new CoordinateSystemLoader(
-      config.mapConfig.projections
-    );
-    this.globalObserver = globalObserver;
-    this.layersFromParams = [];
-    this.cqlFiltersFromParams = {};
-    register(this.coordinateSystemLoader.getProj4());
-    this.hfetch = hfetch;
-  }
-  /**
    * Add plugin to this tools property of loaded plugins.
    * @internal
    */
   addPlugin(plugin) {
     this.plugins[plugin.type] = plugin;
   }
+
   /**
    * Get loaded plugins
    * @returns Array<Plugin>
@@ -89,6 +91,7 @@ class AppModel {
       return [...v, this.plugins[key]];
     }, []);
   }
+
   /**
    * A plugin may have the 'target' option. Currently we use three
    * targets: toolbar, left and right. Toolbar means it's a
@@ -179,6 +182,47 @@ class AppModel {
    */
   createMap() {
     const config = this.translateConfig();
+
+    // Prepare OL interactions options, refer to https://openlayers.org/en/latest/apidoc/module-ol_interaction.html#.defaults.
+    // We use conditional properties to ensure that only existing keys are set. The rest
+    // will fallback to defaults from OL. (The entire interactionsOptions object, as well as all its properties are optional
+    // according to OL documentation, so there's no need to set stuff that won't be needed.)
+    const interactionsOptions = {
+      ...(config.map.hasOwnProperty("altShiftDragRotate") && {
+        altShiftDragRotate: config.map.altShiftDragRotate,
+      }),
+      ...(config.map.hasOwnProperty("onFocusOnly") && {
+        onFocusOnly: config.map.onFocusOnly,
+      }),
+      ...(config.map.hasOwnProperty("doubleClickZoom") && {
+        doubleClickZoom: config.map.doubleClickZoom,
+      }),
+      ...(config.map.hasOwnProperty("keyboard") && {
+        keyboard: config.map.keyboard,
+      }),
+      ...(config.map.hasOwnProperty("mouseWheelZoom") && {
+        mouseWheelZoom: config.map.mouseWheelZoom,
+      }),
+      ...(config.map.hasOwnProperty("shiftDragZoom") && {
+        shiftDragZoom: config.map.shiftDragZoom,
+      }),
+      ...(config.map.hasOwnProperty("dragPan") && {
+        dragPan: config.map.dragPan,
+      }),
+      ...(config.map.hasOwnProperty("pinchRotate") && {
+        pinchRotate: config.map.pinchRotate,
+      }),
+      ...(config.map.hasOwnProperty("pinchZoom") && {
+        pinchZoom: config.map.pinchZoom,
+      }),
+      ...(!Number.isNaN(Number.parseInt(config.map.zoomDelta)) && {
+        zoomDelta: config.map.zoomDelta,
+      }),
+      ...(!Number.isNaN(Number.parseInt(config.map.zoomDuration)) && {
+        zoomDuration: config.map.zoomDuration,
+      }),
+    };
+
     this.map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
@@ -193,7 +237,7 @@ class AppModel {
         //   })
         // })
       ],
-      interactions: defaultInteractions(),
+      interactions: defaultInteractions(interactionsOptions),
       layers: [],
       target: config.map.target,
       overlays: [],
@@ -210,10 +254,19 @@ class AppModel {
         zoom: config.map.zoom,
       }),
     });
-    // FIXME: Remove?
-    setTimeout(() => {
-      this.map.updateSize();
-    }, 0);
+
+    // Create throttled zoomEnd event
+    let currentZoom = this.map.getView().getZoom();
+
+    this.map.on("moveend", (e) => {
+      // using moveend to create a throttled zoomEnd event
+      // instead of using change:resolution to minimize events being fired.
+      const newZoom = this.map.getView().getZoom();
+      if (currentZoom !== newZoom) {
+        this.globalObserver.publish("core.zoomEnd", { zoom: newZoom });
+        currentZoom = newZoom;
+      }
+    });
 
     // Add Snap Helper to the Map
     this.map.snapHelper = new SnapHelper(this);
@@ -481,68 +534,55 @@ class AppModel {
         this.highlightSource.addFeature(feature);
         if (window.innerWidth < 600) {
           let geom = feature.getGeometry();
-          this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          if (geom) {
+            this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          }
         }
       }
     }
   }
 
   /**
-   * TODO: Obsolete, replaced by new app-wide solution using URL APIs, see #568.
-   * Ensure that this gets removed too.
-   */
-  parseQueryParams() {
-    var o = {};
-    document.location.search
-      .replace(/(^\?)/, "")
-      .split("&")
-      .forEach((param) => {
-        var a = param.split("=");
-        o[a[0]] = a[1];
-      });
-    return o;
-  }
-  /**
    * @summary Merges two objects.
    *
-   * @param {*} a
-   * @param {*} b
-   * @returns {*} a Result of overwritting a with values from b
+   * @param {*} mapConfig
+   * @param {*} urlSearchParams
+   * @returns {*} a Result of overwriting a with values from b
    * @memberof AppModel
    */
-  mergeConfig(a, b) {
+  mergeConfig(mapConfig, urlSearchParams) {
     // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
     const clean =
-      Boolean(b.hasOwnProperty("clean")) &&
-      b.clean !== "false" &&
-      b.clean !== "0";
+      Boolean(urlSearchParams.hasOwnProperty("clean")) &&
+      urlSearchParams.clean !== "false" &&
+      urlSearchParams.clean !== "0";
 
     // f contains our CQL Filters
-    const f = b.f;
+    const f = urlSearchParams.f;
 
     // Merge query params to the map config from JSON
-    let x = parseFloat(b.x),
-      y = parseFloat(b.y),
-      z = parseInt(b.z, 10),
+    let x = parseFloat(urlSearchParams.x),
+      y = parseFloat(urlSearchParams.y),
+      z = parseInt(urlSearchParams.z, 10),
       l = undefined;
-    if (typeof b.l === "string") {
-      l = b.l.split(",");
+    if (typeof urlSearchParams.l === "string") {
+      l = urlSearchParams.l.split(",");
     }
 
     if (Number.isNaN(x)) {
-      x = a.map.center[0];
+      x = mapConfig.map.center[0];
     }
     if (Number.isNaN(y)) {
-      y = a.map.center[1];
+      y = mapConfig.map.center[1];
     }
     if (Number.isNaN(z)) {
-      z = a.map.zoom;
+      z = mapConfig.map.zoom;
     }
 
-    a.map.clean = clean;
-    a.map.center[0] = x;
-    a.map.center[1] = y;
-    a.map.zoom = z;
+    mapConfig.map.clean = clean;
+    mapConfig.map.center[0] = x;
+    mapConfig.map.center[1] = y;
+    mapConfig.map.zoom = z;
 
     if (l) {
       this.layersFromParams = l;
@@ -553,7 +593,7 @@ class AppModel {
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
     }
 
-    return a;
+    return mapConfig;
   }
   /**
    * @summary If supplied argument, v, is a string and is longer then 0, return an encoded value of v. Else return undefined.
@@ -566,9 +606,9 @@ class AppModel {
     return typeof v === "string" && v.trim().length > 0 ? v : undefined;
   }
 
-  overrideGlobalSearchConfig(searchTool, data) {
-    var configSpecificSearchLayers = searchTool.options.layers;
-    var searchLayers = data.wfslayers.filter((layer) => {
+  overrideGlobalSearchConfig(searchTool, wfslayers) {
+    const configSpecificSearchLayers = searchTool.options.layers;
+    const searchLayers = wfslayers.filter((layer) => {
       if (configSpecificSearchLayers.find((x) => x.id === layer.id)) {
         return layer;
       } else {
@@ -576,6 +616,18 @@ class AppModel {
       }
     });
     return searchLayers;
+  }
+
+  overrideGlobalEditConfig(editTool, wfstlayers) {
+    const configSpecificEditLayers = editTool.options.activeServices;
+    const editLayers = wfstlayers.filter((layer) => {
+      if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
+        return layer;
+      } else {
+        return undefined;
+      }
+    });
+    return editLayers;
   }
 
   translateConfig() {
@@ -626,27 +678,99 @@ class AppModel {
     }
 
     if (searchTool) {
-      if (searchTool.options.layers === null) {
-        searchTool.options.sources = layers.wfslayers;
+      // Take a look at all available wfslayers in layers repository,
+      // but let the search tool only see those that are specified in searchTool.options
+      const wfslayers = this.overrideGlobalSearchConfig(
+        searchTool,
+        layers.wfslayers
+      );
+
+      // See if admin wants to expose any WMS layers. selectedSources will
+      // in that case be an array that will hold the IDs of corresponding layers
+      // (that can be found in our layers.wmslayers array). In there, a properly
+      // configured WMS layer that is to be searchable will have certain search-related
+      // settings active (such as name of the geometry column or URL to the WFS service).
+      const wmslayers = searchTool.options.selectedSources?.flatMap(
+        (wmslayerId) => {
+          // Find the corresponding layer
+          const layer = layers.wmslayers.find((l) => l.id === wmslayerId);
+
+          // Look into the layersInfo array - it will contain sublayers. We must
+          // expose each one of them as a WFS service.
+          return layer.layersInfo.map((sl) => {
+            return {
+              id: sl.id,
+              pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer
+              caption: sl.caption,
+              url: sl.searchUrl || layer.url,
+              layers: [sl.id],
+              searchFields:
+                typeof sl.searchPropertyName === "string"
+                  ? sl.searchPropertyName.split(",")
+                  : [],
+              infobox: sl.infobox || "",
+              aliasDict: "",
+              displayFields:
+                typeof sl.searchDisplayName === "string"
+                  ? sl.searchDisplayName.split(",")
+                  : [],
+              geometryField: sl.searchGeometryField || "geom",
+              outputFormat: sl.searchOutputFormat || "GML3",
+              serverType: layer.serverType || "geoserver",
+            };
+          });
+        }
+      );
+
+      // Spread the WMS search layers onto the array with WFS search sources,
+      // from now on they're equal to our code.
+      Array.isArray(wmslayers) && wfslayers.push(...wmslayers);
+
+      searchTool.options.sources = wfslayers;
+    }
+
+    // This is for backwards compatibility prior to adding locking WFST edit layers with AD.
+    // This code handles if activeServices does not have an object with "id", "visibleForGroups"
+    if (editTool) {
+      if (editTool.options.activeServices === null) {
+        editTool.options.sources = [];
       } else {
         if (
-          searchTool.options.layers &&
-          searchTool.options.layers.length !== 0
+          editTool.options.activeServices &&
+          editTool.options.activeServices.length !== 0
         ) {
-          let wfslayers = this.overrideGlobalSearchConfig(searchTool, layers);
-          searchTool.options.sources = wfslayers;
-          layers.wfslayers = wfslayers;
+          if (
+            typeof editTool.options.activeServices[0].visibleForGroups ===
+            "undefined"
+          ) {
+            // If activeService does not have an object with "id", "visibleForGroups", add it
+            let as = [];
+            for (let i = 0; i < editTool.options.activeServices.length; i++) {
+              let service = {
+                id: editTool.options.activeServices[i],
+                visibleForGroups: [],
+              };
+              as.push(service);
+            }
+            editTool.options.activeServices = as;
+          }
+
+          let wfstlayers = this.overrideGlobalEditConfig(
+            editTool,
+            layers.wfstlayers
+          );
+          editTool.options.sources = wfstlayers;
+          layers.wfstlayers = wfstlayers;
         } else {
-          searchTool.options.sources = layers.wfslayers;
+          editTool.options.sources = [];
         }
       }
     }
 
-    if (editTool) {
-      editTool.options.sources = layers.wfstlayers;
-    }
-
-    return this.mergeConfig(this.config.mapConfig, this.parseQueryParams());
+    return this.mergeConfig(
+      this.config.mapConfig,
+      Object.fromEntries(new URLSearchParams(document.location.search))
+    );
   }
 }
 

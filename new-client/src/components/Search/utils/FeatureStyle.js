@@ -12,8 +12,10 @@ export default class FeatureStyle {
     this.#options = options;
     this.#enableLabelOnHighlight = options.enableLabelOnHighlight ?? true;
     this.#defaultDisplayStyleSettings = this.#getDefaultDisplayStyleSettings();
-    this.#defaultSelectionStyleSettings = this.#getDefaultSelectionStyleSettings();
-    this.#defaultHighlightStyleSettings = this.#getDefaultHighlightStyleSettings();
+    this.#defaultSelectionStyleSettings =
+      this.#getDefaultSelectionStyleSettings();
+    this.#defaultHighlightStyleSettings =
+      this.#getDefaultHighlightStyleSettings();
   }
 
   #getDefaultDisplayStyleSettings = () => {
@@ -143,7 +145,7 @@ export default class FeatureStyle {
     });
     const stroke = new Stroke({
       color: this.#defaultDisplayStyleSettings.strokeColor,
-      width: 1,
+      width: 2,
     });
     return new Style({
       fill: fill,

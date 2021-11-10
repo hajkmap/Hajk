@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import X2JS from "x2js";
 import { Model } from "backbone";
 import WMSCapabilities from "ol/format/WMSCapabilities";
@@ -233,14 +211,17 @@ var manager = Model.extend({
             : new XMLSerializer().serializeToString(data),
           apa = parser.xml2js(xmlstr);
         try {
-          var props = apa.schema.complexType.complexContent.extension.sequence.element.map(
-            (a) => {
-              return {
-                name: a._name,
-                localType: a._type ? a._type.replace(a.__prefix + ":", "") : "",
-              };
-            }
-          );
+          var props =
+            apa.schema.complexType.complexContent.extension.sequence.element.map(
+              (a) => {
+                return {
+                  name: a._name,
+                  localType: a._type
+                    ? a._type.replace(a.__prefix + ":", "")
+                    : "",
+                };
+              }
+            );
           if (props) {
             callback(props);
           } else {
@@ -274,12 +255,16 @@ var manager = Model.extend({
         crs = $(featureType).find("DefaultSRS").first().get(0).textContent;
       }
       if ($(featureType).find("wfs\\:DefaultCRS").length > 0) {
-        crs = $(featureType).find("wfs\\:DefaultCRS").first().get(0)
-          .textContent;
+        crs = $(featureType)
+          .find("wfs\\:DefaultCRS")
+          .first()
+          .get(0).textContent;
       }
       if ($(featureType).find("wfs\\:DefaultSRS").length > 0) {
-        crs = $(featureType).find("wfs\\:DefaultSRS").first().get(0)
-          .textContent;
+        crs = $(featureType)
+          .find("wfs\\:DefaultSRS")
+          .first()
+          .get(0).textContent;
       }
       if (crs && typeof crs === "string") {
         crs = crs.split(":");

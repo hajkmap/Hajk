@@ -5,7 +5,6 @@ import { withSnackbar } from "notistack";
 import Grid from "@material-ui/core/Grid";
 import { Typography } from "@material-ui/core";
 import ReactDOM from "react-dom";
-import Divider from "@material-ui/core/Divider";
 import Button from "@material-ui/core/Button";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -13,8 +12,6 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import { ThemeProvider } from "@material-ui/styles";
 
 import {
@@ -38,9 +35,11 @@ const styles = (theme) => ({
   headerContainer: {
     marginBottom: theme.spacing(2),
   },
+  settingsContainer: {
+    marginBottom: theme.spacing(2),
+  },
   footerContainer: {
     flexBasis: "10%",
-    borderTop: "1px solid grey",
   },
 });
 
@@ -53,18 +52,11 @@ class PrintWindow extends React.PureComponent {
     printImages: true,
     printMaps: false,
     allDocumentsToggled: false,
+    includeCompleteToc: true,
     chapterInformation: this.setChapterInfo(),
     printContent: undefined,
     pdfLoading: false,
   };
-
-  constructor(props) {
-    super(props);
-
-    this.printPages = [
-      { type: "TOC", availableHeight: maxHeight, content: [] },
-    ];
-  }
 
   componentDidMount = () => {
     this.props.localObserver.subscribe(
@@ -84,223 +76,6 @@ class PrintWindow extends React.PureComponent {
 
   componentWillUnmount = () => {
     this.props.localObserver.unsubscribe("chapter-components-appended");
-  };
-
-  getAvailableHeight = () => {
-    return this.printPages[this.printPages.length - 1].availableHeight;
-  };
-
-  checkIfContentIsHtag = () => {};
-
-  checkIfContentIsChapterTitle = (node) => {
-    if (node.getAttribute("data-type") === "chapter-header") {
-      return true;
-    } else {
-      return [...node.children].some((child) => {
-        return (
-          ["H1", "H2", "H3", "H4", "H5"].includes(child.tagName) &&
-          node.getAttribute("data-type") === "chapter-header"
-        );
-      });
-    }
-  };
-
-  isContentHeaderTag = (content) => {
-    return ["H1", "H2", "H3", "H4", "H5"].includes(content.tagName);
-  };
-
-  contentFitsCurrentPage = (content) => {
-    if (this.isContentHeaderTag(content)) {
-      return this.getAvailableHeight() >= 0.4 * maxHeight;
-    }
-    let contentHeight = content.getBoundingClientRect().height;
-
-    let availableHeight = this.getAvailableHeight();
-
-    return contentHeight <= availableHeight;
-  };
-
-  isContentFloatingPicture = (content) => {
-    if (content) {
-      const type = content.attributes.getNamedItem("data-position")?.value;
-      if (type === "floatRight" || type === "floatLeft") {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  addContentToNewPage = (content, maxHeight, type) => {
-    let height = content.getBoundingClientRect().height;
-
-    if (this.isContentFloatingPicture(content)) {
-      height = 0;
-    }
-    this.printPages.push({
-      type: type,
-      availableHeight: maxHeight - height,
-      content: [content],
-    });
-  };
-
-  addContentToCurrentPage = (content) => {
-    let height = content.getBoundingClientRect().height;
-
-    if (this.isContentFloatingPicture(content)) {
-      height = 0;
-    }
-    this.printPages[this.printPages.length - 1].availableHeight -= height;
-    this.printPages[this.printPages.length - 1].content.push(content);
-  };
-
-  addNewPage = (type, maxHeight) => {
-    this.printPages.push({
-      type: type,
-      availableHeight: maxHeight,
-      content: [],
-    });
-  };
-
-  isTocListElement = (type, content) => {
-    return type === "TOC" && content.tagName === "LI";
-  };
-
-  hasChildren = (content) => {
-    return (
-      content.children && content.children.length > 0 && content.tagName !== "P"
-    );
-  };
-
-  isContentTextArea = (content) => {
-    return content.id === "text-area-content";
-  };
-
-  /**
-   * Distributes all content so page-breaks happens
-   * att suitable places. If content doesn't fit it is divided into
-   * smaller fractions e.g its children. (Happens recursively)
-   *
-   * Handle TextAreas as an element that cant be divided into
-   * smaller fractions
-   *
-   * Chapter titles is always appended to new page
-   *
-   * Special case for li-tags so that they keep their inline-prop (indentation)
-   * in Table Of Contents
-   *
-   * If contents fit the current page otherwise we add it to new page.
-   *
-   * Type is used to differentiate between TOC and CONTENT because
-   * footer is different for TOC and CONTENT
-   *
-   * @param {DOMNode} content
-   * @param {string} type Can be either TOC or CONTENT.
-   *
-   */
-
-  //if-else-chaos, sorry :)
-  distributeContentOnPages = (content, type, previousContent) => {
-    if (content.tagName === "BR") {
-      this.handleBrTags(content);
-    }
-
-    if (content.nodeName === "UL") {
-      for (let child of content.children) {
-        child.style.paddingLeft = "8px";
-      }
-    }
-    if (this.isContentTextArea(content)) {
-      if (this.contentFitsCurrentPage(content)) {
-        this.addContentToCurrentPage(content);
-      } else {
-        this.addContentToNewPage(content, maxHeight, type);
-      }
-    } else {
-      if (
-        this.checkIfContentIsChapterTitle(content) &&
-        !this.isContentFloatingPicture(previousContent)
-      ) {
-        this.addContentToNewPage(content, maxHeight, type);
-      } else {
-        if (this.contentFitsCurrentPage(content)) {
-          this.addContentToCurrentPage(content);
-        } else {
-          if (
-            !this.hasChildren(content) ||
-            this.isTocListElement(type, content)
-          ) {
-            this.addContentToNewPage(content, maxHeight, type);
-          } else {
-            [...content.children].forEach((child, index, children) => {
-              const previousContent = index === 0 ? null : children[index - 1];
-
-              this.distributeContentOnPages(child, type, previousContent);
-            });
-          }
-        }
-      }
-    }
-  };
-
-  handleBrTags = (content) => {
-    let brHeight = window.getComputedStyle(content).lineHeight;
-    this.printPages[this.printPages.length - 1].availableHeight -=
-      brHeight.substr(0, brHeight.length - 2) * 1.2;
-  };
-
-  getCanvasFromContent = (page) => {
-    let sWidth = Math.round((210 * 96) / 25.4);
-    let sHeight = Math.round((297 * 96) / 25.4);
-    let dWidth = Math.round((210 * 96) / 25.4);
-    let dHeight = Math.round((297 * 96) / 25.4);
-    let pR = window.devicePixelRatio;
-    let onePageDiv = document.createElement("div");
-
-    //Moving div outside viewport - hack
-    onePageDiv.style.position = "absolute";
-    onePageDiv.style.left = "-10000px";
-    onePageDiv.style.width = `${210}mm`;
-    onePageDiv.style.padding = "50px";
-
-    document.body.appendChild(onePageDiv);
-
-    page.content.forEach((child) => {
-      onePageDiv.appendChild(child);
-    });
-
-    return html2canvas(onePageDiv, {
-      allowTaint: false,
-      logging: false,
-    }).then((canvas) => {
-      let onePageCanvas = document.createElement("canvas");
-
-      onePageCanvas.width = Math.round((210 * 96) / 25.4);
-      onePageCanvas.height = Math.round((297 * 96) / 25.4);
-
-      let ctx = onePageCanvas.getContext("2d");
-
-      ctx.fillStyle = "white";
-      ctx.fillRect(
-        0,
-        0,
-        onePageCanvas.width + 200 * pR, //Just add 200px to fix edge-bug
-        onePageCanvas.height + 200 * pR //Just add 200px to fix edge-bug
-      );
-
-      ctx.drawImage(
-        canvas,
-        0,
-        0,
-        sWidth * pR,
-        sHeight * pR,
-        0,
-        0,
-        dWidth,
-        dHeight
-      );
-      document.body.removeChild(onePageDiv);
-      return onePageCanvas;
-    });
   };
 
   resizeImage = (img) => {
@@ -326,36 +101,6 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  addFooters = (pdf, numToc) => {
-    const pageCount = pdf.internal.getNumberOfPages();
-
-    pdf.setFont("helvetica", "italic");
-    pdf.setFontSize(8);
-    for (var i = 1; i <= pageCount; i++) {
-      pdf.setPage(i);
-      if (i === 1) {
-        pdf.text(
-          `Skapad: ${new Date().toLocaleString()}`,
-          pdf.internal.pageSize.width / 2,
-          pdf.internal.pageSize.height - 20,
-          {
-            align: "center",
-          }
-        );
-      } else if (i > numToc) {
-        pdf.text(
-          `Sida ${i - numToc} av ${pageCount - numToc}`,
-          pdf.internal.pageSize.width / 2,
-          pdf.internal.pageSize.height - 20,
-          {
-            align: "center",
-          }
-        );
-      }
-    }
-    return pdf;
-  };
-
   customRender = (element, container) => {
     return new Promise((resolve) => {
       ReactDOM.render(
@@ -372,7 +117,6 @@ class PrintWindow extends React.PureComponent {
 
   createPrintElement = (id) => {
     let div = document.createElement("div");
-    div.style = "position : absolute; left : -10000px; width : 210mm";
     div.id = id;
     return div;
   };
@@ -382,16 +126,12 @@ class PrintWindow extends React.PureComponent {
     return this.customRender(
       <TableOfContents chapters={this.state.chapterInformation} />,
       this.toc
-    ).then(() => {
-      document.body.appendChild(this.toc);
-    });
+    );
   };
 
   renderContent = () => {
     this.content = this.createPrintElement("content");
-    return this.customRender(this.state.printContent, this.content).then(() => {
-      document.body.appendChild(this.content);
-    });
+    return this.customRender(this.state.printContent, this.content);
   };
 
   areAllImagesLoaded = () => {
@@ -402,58 +142,115 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
-  //Bug in html2canvas so we need to delay
-  delayCanvasCreate = (page, index) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        this.getCanvasFromContent(page).then((x) => {
-          resolve(x);
-        });
-      }, 500 * index + 1);
+  getCurrentStyleTags = () => {
+    const styleTags = [];
+    [...document.head.children].forEach((c) => {
+      if (c.nodeName === "STYLE") {
+        styleTags.push(c.cloneNode(true));
+      }
+    });
+    return styleTags;
+  };
+
+  handleNewWindowBlocked = () => {
+    window.alert(
+      "Please allow opening of popup windows in order to print this document."
+    );
+
+    this.setState({
+      pdfLoading: false,
+      printContent: undefined,
+      printMaps: false,
+    });
+
+    return null;
+  };
+
+  createPrintWindow = () => {
+    const printWindow = window.open("", "PRINT");
+
+    if (printWindow === null) {
+      return this.handleNewWindowBlocked();
+    }
+
+    this.getCurrentStyleTags().forEach((tag) => {
+      printWindow.document.head.appendChild(tag);
+    });
+
+    printWindow.document.head.insertAdjacentHTML(
+      "beforeend",
+      ` <title>${document.title}</title>
+        <style>
+          @page {
+            size: A4;
+          }
+          @media print {
+            html,
+            body {
+              height: 297mm;
+              width: 210mm;
+            }
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+              page-break-after: avoid;
+            }
+            MuiTypography-body1 {
+              page-break-before: avoid;
+            }
+            .MuiBox-root {
+              page-break-inside: avoid;
+            }
+          }        
+        </style>`
+    );
+
+    return printWindow;
+  };
+
+  clearPrintContainers = () => {
+    this.toc = null;
+    this.content = null;
+  };
+
+  handlePrintCompleted = () => {
+    this.toggleAllDocuments(false);
+    this.setState({
+      pdfLoading: false,
+      printContent: undefined,
+      printMaps: false,
     });
   };
 
+  addPageBreaksBeforeHeadings = (printWindow) => {
+    const headings = printWindow.document.body.querySelectorAll(["h1", "h2"]);
+    for (let i = 0; i < headings.length; i++) {
+      if (i !== 0 || this.state.includeCompleteToc) {
+        headings[i].style.pageBreakBefore = "always";
+        headings[i].style.breakBefore = "none";
+      }
+    }
+  };
+
   printContents = () => {
-    Promise.all([this.renderToc(), this.renderContent()]).then(() => {
+    Promise.all([
+      this.state.includeCompleteToc && this.renderToc(),
+      this.renderContent(),
+    ]).then(() => {
       this.areAllImagesLoaded().then(() => {
-        this.printPages = [{ type: "TOC", availableHeight: 950, content: [] }];
-        this.distributeContentOnPages(this.toc, "TOC");
-        this.content.children.forEach((child, index, children) => {
-          const previousContent = index === 0 ? null : children[index - 1];
-          this.distributeContentOnPages(child, "CONTENT", previousContent);
-        });
+        const printWindow = this.createPrintWindow();
+        this.toc && printWindow.document.body.appendChild(this.toc);
+        printWindow.document.body.appendChild(this.content);
+        this.addPageBreaksBeforeHeadings(printWindow);
+        printWindow.document.close(); // necessary for IE >= 10
+        printWindow.focus(); // necessary for IE >= 10*/
+        printWindow.print();
+        printWindow.close();
 
-        let canvasPromises = this.printPages.map((page, index) => {
-          return this.delayCanvasCreate(page, index);
-        });
-
-        Promise.all(canvasPromises).then((canvases) => {
-          let pdf = new jsPDF("p", "pt");
-          let numToc = this.printPages.filter((page) => page.type === "TOC")
-            .length;
-          canvases.forEach((canvas, index) => {
-            if (index > 0) {
-              pdf.addPage();
-            }
-            //! now we declare that we're working on that page
-            pdf.setPage(index + 1);
-            pdf.addImage(canvas, "PNG", 0, 0);
-          });
-          pdf = this.addFooters(pdf, numToc);
-          pdf.save(`oversiktsplan-${new Date().toLocaleString()}.pdf`);
-
-          document.body.removeChild(this.toc);
-          if (document.body.contains(this.content)) {
-            document.body.removeChild(this.content);
-          }
-
-          this.toggleAllDocuments(false);
-          this.setState({
-            pdfLoading: false,
-            printContent: undefined,
-            printMaps: false,
-          });
-        });
+        this.handlePrintCompleted();
       });
     });
   };
@@ -622,72 +419,6 @@ class PrintWindow extends React.PureComponent {
     }
   };
 
-  renderCheckboxes() {
-    return (
-      <Grid container>
-        <Grid container item alignItems="center" spacing={2}>
-          <Grid item xs={12}>
-            <Typography variant="h6">Innehåll</Typography>
-          </Grid>
-          <Grid item xs align="center">
-            <FormControlLabel
-              value="Texter"
-              control={
-                <Checkbox
-                  color="primary"
-                  checked={this.state.printText}
-                  onChange={() => {
-                    this.setState({
-                      printText: !this.state.printText,
-                    });
-                  }}
-                />
-              }
-              label="Texter"
-              labelPlacement="end"
-            />
-          </Grid>
-          <Grid item xs align="center">
-            <FormControlLabel
-              value="Bilder"
-              control={
-                <Checkbox
-                  color="primary"
-                  checked={this.state.printImages}
-                  onChange={() => {
-                    this.setState({
-                      printImages: !this.state.printImages,
-                    });
-                  }}
-                />
-              }
-              label="Bilder"
-              labelPlacement="end"
-            />
-          </Grid>
-          <Grid item xs align="center">
-            <FormControlLabel
-              value="Kartor"
-              control={
-                <Checkbox
-                  color="primary"
-                  checked={this.state.printMaps}
-                  onChange={() => {
-                    this.setState({
-                      printMaps: !this.state.printMaps,
-                    });
-                  }}
-                />
-              }
-              label="Kartor"
-              labelPlacement="end"
-            />
-          </Grid>
-        </Grid>
-      </Grid>
-    );
-  }
-
   renderCreatePDFButton() {
     const { classes } = this.props;
     return (
@@ -710,7 +441,7 @@ class PrintWindow extends React.PureComponent {
             style={{ marginRight: "20px", marginLeft: "20px" }}
             justify="center"
           >
-            Skapa PDF-utskrift
+            Skriv ut
           </Typography>
         </Button>
       </Grid>
@@ -780,34 +511,49 @@ class PrintWindow extends React.PureComponent {
             </Typography>
           </Grid>
         </Grid>
-        <Divider></Divider>
 
-        <Grid container item>
-          <Grid xs={6} item>
-            <Grid xs={12} item>
-              <Typography variant="h6">Dokument</Typography>
-            </Grid>
+        <Grid container item className={classes.settingsContainer}>
+          <Typography variant="h6">Inställningar</Typography>
 
-            <Grid xs={12} item>
-              {" "}
-              <FormControlLabel
-                value="Välj alla dokument"
-                control={
-                  <Checkbox
-                    color="primary"
-                    checked={this.state.allDocumentsToggled}
-                    onChange={() =>
-                      this.toggleAllDocuments(!this.state.allDocumentsToggled)
-                    }
-                  />
-                }
-                label="Välj alla dokument"
-                labelPlacement="end"
-              />
-            </Grid>
+          <Grid xs={12} item>
+            <FormControlLabel
+              value="Välj alla dokument"
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={this.state.allDocumentsToggled}
+                  onChange={() =>
+                    this.toggleAllDocuments(!this.state.allDocumentsToggled)
+                  }
+                />
+              }
+              label="Välj alla dokument"
+              labelPlacement="end"
+            />
           </Grid>
-          <Grid xs={6} item></Grid>
+
+          <Grid xs={12} item>
+            <FormControlLabel
+              value="Inkludera hela innehållsförteckningen"
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={this.state.includeCompleteToc}
+                  onChange={() =>
+                    this.setState({
+                      includeCompleteToc: !this.state.includeCompleteToc,
+                    })
+                  }
+                />
+              }
+              label="Inkludera hela innehållsförteckningen"
+              labelPlacement="end"
+            />
+          </Grid>
         </Grid>
+
+        <Typography variant="h6">Valt innehåll</Typography>
+
         <Grid className={classes.middleContainer} item container>
           <PrintList
             chapters={chapterInformation}

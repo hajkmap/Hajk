@@ -18,7 +18,8 @@
     "Routing",
     "Search",
     "StreetView",
-    "Suggest"
+    "Suggest",
+    "TimeSlider"
   ],
   "allTools": [
     "Anchor",
@@ -31,6 +32,7 @@
     "Dummy",
     "Edit",
     "Export",
+    "FmeServer",
     "Informative",
     "LayerSwitcher",
     "Location",
@@ -39,6 +41,8 @@
     "Routing",
     "Search",
     "StreetView",
-    "Suggest"
+    "Suggest",
+    "TimeSlider",
+    "vtsearch"
   ]
 }

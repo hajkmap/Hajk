@@ -12,6 +12,13 @@ import "allsettled-polyfill";
 // See: https://github.com/hajkmap/Hajk/issues/606
 import "elm-pep";
 
+// Since we don't want to download roboto from the Google CDN,
+// we use fontSource and import all subsets that MUI relies on here.
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+
 import "ol/ol.css";
 import "./custom-ol.css";
 
@@ -22,6 +29,7 @@ import ErrorIcon from "@material-ui/icons/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
 import reportWebVitals from "./reportWebVitals";
 import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";
+import LocalStorageHelper from "utils/LocalStorageHelper";
 
 initHFetch();
 
@@ -127,6 +135,9 @@ hfetch("appConfig.json", { cacheBuster: true })
                   urlParams,
                 };
 
+                // At this stage, we know for sure what activeMap is, so we can initiate the LocalStorageHelper
+                LocalStorageHelper.setKeyName(config.activeMap);
+
                 // Invoke React's renderer. Render Theme. Theme will render App.
                 ReactDOM.render(
                   <HajkThemeProvider
@@ -180,6 +191,9 @@ hfetch("appConfig.json", { cacheBuster: true })
                     mapConfig: mapConfig,
                     urlParams,
                   };
+
+                  // At this stage, we know for sure what activeMap is, so we can initiate the LocalStorageHelper
+                  LocalStorageHelper.setKeyName(config.activeMap);
 
                   // Make sure that the current user is allowed to display the current map
                   const layerSwitcherConfig = config.mapConfig.tools.find(

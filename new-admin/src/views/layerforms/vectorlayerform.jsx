@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import $ from "jquery";
 
@@ -45,6 +23,9 @@ class VectorLayerForm extends React.Component {
     infoUrlText: "",
     infoVisible: false,
     infobox: "",
+    timeSliderVisible: false,
+    timeSliderStart: "",
+    timeSliderEnd: "",
     layer: "",
     layerType: "Vector",
     legend: "",
@@ -55,6 +36,7 @@ class VectorLayerForm extends React.Component {
     opacity: 1,
     projection: "",
     queryable: true,
+    hideExpandArrow: false,
     sldStyle: "Default Styler",
     sldText: "",
     sldUrl: "",
@@ -82,7 +64,7 @@ class VectorLayerForm extends React.Component {
     });
   }
 
-  componentWillUnmount() {
+  UNSAFE_componentWillUnmount() {
     this.props.model.off("change:legend");
     this.props.model.off("change:legendIcon");
   }
@@ -125,6 +107,9 @@ class VectorLayerForm extends React.Component {
       infoUrlText: this.getValue("infoUrlText"),
       infoVisible: this.getValue("infoVisible"),
       infobox: this.getValue("infobox"),
+      timeSliderVisible: this.getValue("timeSliderVisible"),
+      timeSliderStart: this.getValue("timeSliderStart"),
+      timeSliderEnd: this.getValue("timeSliderEnd"),
       layer: this.state.addedLayers[0],
       legend: this.getValue("legend"),
       legendIcon: this.getValue("legendIcon"),
@@ -133,6 +118,7 @@ class VectorLayerForm extends React.Component {
       opacity: this.getValue("opacity"),
       projection: this.getValue("projection"),
       queryable: this.getValue("queryable"),
+      hideExpandArrow: this.getValue("hideExpandArrow"),
       sldStyle: this.getValue("sldStyle"),
       sldText: this.getValue("sldText"),
       sldUrl: this.getValue("sldUrl"),
@@ -159,6 +145,8 @@ class VectorLayerForm extends React.Component {
     if (fieldName === "queryable") value = input.checked;
     if (fieldName === "filterable") value = input.checked;
     if (fieldName === "infoVisible") value = input.checked;
+    if (fieldName === "timeSliderVisible") value = input.checked;
+    if (fieldName === "hideExpandArrow") value = input.checked;
 
     return value;
   }
@@ -277,11 +265,13 @@ class VectorLayerForm extends React.Component {
       if (Array.isArray(capabilities) && capabilities.length > 0) {
         projection = capabilities[0].projection;
       }
+
       this.setState({
         capabilities: capabilities,
         projection: this.state.projection || projection || "",
         legend: this.state.legend || capabilities.legend || "",
         legendIcon: this.state.legendIcon || "",
+        hideExpandArrow: capabilities.hideExpandArrow ?? false,
         load: false,
       });
 
@@ -446,6 +436,9 @@ class VectorLayerForm extends React.Component {
       <i className="fa fa-refresh fa-spin" />
     ) : null;
     const infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const timeSliderClass = this.state.timeSliderVisible
+      ? "tooltip-timeSlider"
+      : "hidden";
 
     return (
       <fieldset>
@@ -540,6 +533,18 @@ class VectorLayerForm extends React.Component {
           >
             <ul>{this.renderSelectedLayers()}</ul>
           </div>
+        </div>
+        <div>
+          <label>Stäng av möjlighet att expandera</label>
+          <input
+            type="checkbox"
+            ref="input_hideExpandArrow"
+            id="hideExpandArrow"
+            onChange={(e) => {
+              this.setState({ hideExpandArrow: e.target.checked });
+            }}
+            checked={this.state.hideExpandArrow}
+          />
         </div>
         <div>
           <label>Visningsnamn*</label>
@@ -929,6 +934,45 @@ class VectorLayerForm extends React.Component {
               }}
               value={this.state.infoOwner}
               className={this.getValidationClass("infoOwner")}
+            />
+          </div>
+        </div>
+        <div className="timeSlider-container">
+          <div>
+            <input
+              type="checkbox"
+              ref="input_timeSliderVisible"
+              id="timeSlider"
+              onChange={(e) => {
+                this.setState({ timeSliderVisible: e.target.checked });
+              }}
+              checked={this.state.timeSliderVisible}
+            />
+            &nbsp;
+            <label htmlFor="timeSlider">Tidslinjedatum</label>
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje start</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderStart"
+              onChange={(e) => {
+                this.setState({ timeSliderStart: e.target.value });
+              }}
+              value={this.state.timeSliderStart}
+            />
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje slut</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderEnd"
+              onChange={(e) => {
+                this.setState({ timeSliderEnd: e.target.value });
+              }}
+              value={this.state.timeSliderEnd}
             />
           </div>
         </div>

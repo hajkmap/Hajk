@@ -61,6 +61,10 @@ const styles = (theme) => {
       right: 0,
       bottom: 0,
       top: 0,
+      border: "2px solid transparent",
+      "&:focus-visible": {
+        border: "2px solid black",
+      },
     },
     flexBox: {
       position: "absolute",
@@ -178,9 +182,12 @@ const styles = (theme) => {
       width: "220px",
     },
     snackBarContainerRoot: {
-      pointerEvents: "none",
-      '& div[class^="SnackbarItem-root"]': {
-        pointerEvents: "auto",
+      [theme.breakpoints.down("xs")]: {
+        pointerEvents: "none",
+        // Getting around notistack bug, can't reach snackItem.
+        "& div > div > div > div": {
+          pointerEvents: "auto",
+        },
       },
     },
     snackbarContainerBottom: {
@@ -217,13 +224,20 @@ class App extends React.PureComponent {
   };
 
   canRenderCustomDrawer = (activeDrawerContentFromLocalStorage, tools) => {
-    if (!activeDrawerContentFromLocalStorage) {
-      return false;
+    if (
+      !activeDrawerContentFromLocalStorage ||
+      activeDrawerContentFromLocalStorage === "plugins"
+    ) {
+      // If nothing was found in local storage, fall back to map config setting
+      activeDrawerContentFromLocalStorage =
+        this.props.config.mapConfig.map.activeDrawerOnStart;
     }
+
     const localStorageToolFoundInMapConfig = tools.some((tool) => {
       return (
+        typeof activeDrawerContentFromLocalStorage === "string" &&
         tool.type.toLowerCase() ===
-        activeDrawerContentFromLocalStorage.toLowerCase()
+          activeDrawerContentFromLocalStorage.toLowerCase()
       );
     });
 
@@ -251,9 +265,12 @@ class App extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const drawerPermanentFromLocalStorage = this.getDrawerPermanentFromLocalStorage();
-    const activeDrawerContentFromLocalStorage = this.getActiveDrawerContentFromLocalStorage();
+    const drawerPermanentFromLocalStorage =
+      this.getDrawerPermanentFromLocalStorage();
+    const activeDrawerContentFromLocalStorage =
+      this.getActiveDrawerContentFromLocalStorage();
     const canRenderDefaultDrawer = this.hasAnyToolbarTools();
+
     const canRenderCustomDrawer = this.canRenderCustomDrawer(
       activeDrawerContentFromLocalStorage,
       props.config.mapConfig.tools
@@ -266,37 +283,45 @@ class App extends React.PureComponent {
     //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
 
     const activeDrawerContentState = canRenderCustomDrawer
-      ? activeDrawerContentFromLocalStorage
-      : props.config.mapConfig.map.activeDrawerOnStart || "plugins";
+      ? activeDrawerContentFromLocalStorage !== null &&
+        activeDrawerContentFromLocalStorage !== "plugins"
+        ? activeDrawerContentFromLocalStorage
+        : this.props.config.mapConfig.map.activeDrawerOnStart
+      : canRenderDefaultDrawer
+      ? "plugins"
+      : null;
 
     // First check if we have anything to render at all and in case we haven't -> do not show drawer
-    //If on a mobile device, the drawer should never be permanent.
+    // If on a mobile device, the drawer should never be permanent.
     // If not on mobile, if cookie is not null, use it to show/hide Drawer.
     // If cookie is not null, use it to show/hide Drawer.
     // If cookie however is null, fall back to the values from config.
     // Finally, fall back to "false" if no cookie or config is found.
     const drawerPermanent =
-      (canRenderCustomDrawer || canRenderDefaultDrawer) &&
-      (isMobile
+      activeDrawerContentState === null
+        ? false
+        : isMobile
         ? false
         : drawerPermanentFromLocalStorage !== null
         ? drawerPermanentFromLocalStorage
         : (props.config.mapConfig.map.drawerVisible &&
             props.config.mapConfig.map.drawerPermanent) ||
-          false);
+          false;
 
     // First check if we have anything to render at all and in case we haven't -> do not show drawer
-    //If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
-    //Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-    //If there a no cookie settings, use the config drawVisible setting.
-    //Finally, don't show the drawer.
+    // If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
+    // Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
+    // If there a no cookie settings, use the config drawVisible setting.
+    // Finally, don't show the drawer.
     const drawerVisible =
-      (canRenderCustomDrawer || canRenderDefaultDrawer) &&
-      (isMobile && props.config.mapConfig.map.drawerVisibleMobile !== undefined
+      activeDrawerContentState === null
+        ? false
+        : isMobile &&
+          props.config.mapConfig.map.drawerVisibleMobile !== undefined
         ? props.config.mapConfig.map.drawerVisibleMobile
         : drawerPermanentFromLocalStorage !== null
         ? drawerPermanentFromLocalStorage
-        : props.config.mapConfig.map.drawerVisible || false);
+        : props.config.mapConfig.map.drawerVisible || false;
 
     this.state = {
       alert: false,
@@ -310,7 +335,7 @@ class App extends React.PureComponent {
     };
 
     //if drawer is visible at start - ensure the activeDrawerContent is set to current content
-    if (drawerVisible && drawerPermanent) {
+    if (drawerVisible && drawerPermanent && activeDrawerContentState !== null) {
       window.localStorage.setItem(
         "activeDrawerContent",
         activeDrawerContentState
@@ -375,7 +400,9 @@ class App extends React.PureComponent {
       "touchmove",
       (event) => {
         // If this event would result in changing scale …
-        if (event.scale !== 1) {
+        // scale is always undefined on Android so we need to handle it, otherwise we loose the ability to scroll.
+        // For the prevention pinch-zoom on Android. Check index.css
+        if (event.scale !== undefined && event.scale !== 1) {
           // …cancel it.
           event.preventDefault();
         }
@@ -388,7 +415,6 @@ class App extends React.PureComponent {
 
     // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
-      this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: results,
       });
@@ -585,7 +611,10 @@ class App extends React.PureComponent {
 
   renderSearchComponent() {
     // FIXME: We should get config from somewhere else now when Search is part of Core
-    if (this.appModel.plugins.search) {
+    if (
+      this.appModel.plugins.search &&
+      this.appModel.plugins.search.options.renderElsewhere !== true
+    ) {
       return (
         <Search
           map={this.appModel.getMap()}
@@ -719,6 +748,11 @@ class App extends React.PureComponent {
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
+
+    // Let admin decide whether MapResetter should be shown, but show it
+    // always on clean mode maps.
+    const showMapResetter = clean === true || config.mapConfig.map.mapresetter;
+
     const showMapSwitcher =
       clean === false && config.activeMap !== "simpleMapConfig";
     const showCookieNotice =
@@ -827,6 +861,12 @@ class App extends React.PureComponent {
                   <User userDetails={this.appModel.config.userDetails} />
                 )}
                 <div id="plugin-control-buttons"></div>
+                {showMapResetter && (
+                  <MapResetter
+                    mapConfig={this.appModel.config.mapConfig}
+                    map={this.appModel.getMap()}
+                  />
+                )}
                 <Rotate map={this.appModel.getMap()} />
                 {showMapSwitcher && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
@@ -840,12 +880,6 @@ class App extends React.PureComponent {
                   />
                 )}
                 {clean === false && this.renderInformationPlugin()}
-                {clean === true && (
-                  <MapResetter
-                    mapConfig={this.appModel.config.mapConfig}
-                    map={this.appModel.getMap()}
-                  />
-                )}
               </div>
             </main>
             <footer
@@ -857,6 +891,7 @@ class App extends React.PureComponent {
           </div>
           <div
             id="map"
+            tabIndex="0"
             role="application"
             className={cslx(classes.map, {
               [classes.shiftedLeft]:

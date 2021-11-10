@@ -118,13 +118,6 @@ const ImageComponent = (props) => {
 
     setDefaultWidth(defaultWidth);
     setDefaultHeight(defaultHeight);
-
-    if (width === undefined) {
-      setWidth(defaultWidth);
-    }
-    if (height === undefined) {
-      setHeight(defaultHeight);
-    }
   };
 
   const calculateHeight = (width) => {
@@ -140,8 +133,8 @@ const ImageComponent = (props) => {
       setWidth(width);
       setHeight(height);
     } else {
-      setWidth(0);
-      setHeight(0);
+      setWidth("");
+      setHeight("");
     }
   };
 
@@ -158,8 +151,8 @@ const ImageComponent = (props) => {
       setHeight(height);
       setWidth(width);
     } else {
-      setHeight(0);
-      setWidth(0);
+      setHeight("");
+      setWidth("");
     }
   };
 

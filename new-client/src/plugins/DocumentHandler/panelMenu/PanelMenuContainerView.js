@@ -1,6 +1,6 @@
 import React from "react";
 import PanelList from "./PanelList";
-import { isMobile } from "../../../utils/IsMobile";
+import { getIsMobile } from "../../../utils/IsMobile";
 import { delay } from "../../../utils/Delay";
 import { animateScroll as scroll } from "react-scroll";
 import { withStyles } from "@material-ui/core/styles";
@@ -99,26 +99,36 @@ class PanelMenuView extends React.PureComponent {
     });
   };
 
-  #handleShowMapLayersFromLink = (maplink) => {
+  #handleShowMapLayers = (mapLink) => {
     const { options, localObserver, app } = this.props;
     if (options.displayLoadingOnMapLinkOpen) {
       localObserver.publish("maplink-loading");
     }
     app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-    this.#delayAndFlyToMapLink(maplink);
+    this.#delayAndFlyToMapLink(mapLink);
+  };
+
+  #closeDocumentWindow = () => {
+    const { app } = this.props;
+    this.#setDocument();
+    app.globalObserver.publish("documentviewer.closeWindow");
+  };
+
+  #handleShowMapLayersFromLink = (maplink) => {
+    if (getIsMobile()) {
+      this.#closeDocumentWindow();
+    }
+    this.#handleShowMapLayers(maplink);
   };
 
   #handleShowMapLayersFromPanelMenu = (id) => {
-    const { options, app, localObserver } = this.props;
-    if (!isMobile && options.closePanelOnMapLinkOpen) {
-      this.#setDocument();
-      app.globalObserver.publish("documentviewer.closeWindow");
-      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    const { options } = this.props;
+    // If we're on small screen, or the admin option is set (no matter screen size),
+    // let's close the DocumentHandler window
+    if (getIsMobile() || options.closePanelOnMapLinkOpen) {
+      this.#closeDocumentWindow();
     }
-    if (options.displayLoadingOnMapLinkOpen) {
-      localObserver.publish("maplink-loading");
-    }
-    this.#delayAndFlyToMapLink(this.state[id].maplink);
+    this.#handleShowMapLayers(this.state[id].maplink);
   };
 
   #handleSubMenuClicked = (id) => {
