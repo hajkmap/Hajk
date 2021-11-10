@@ -14,7 +14,6 @@ const styles = (theme) => ({
 class TableOfContents extends React.PureComponent {
   state = {
     titlesAndLevels: [],
-    maxLevelsToShow: 10,
   };
 
   constructor(props) {
@@ -63,47 +62,66 @@ class TableOfContents extends React.PureComponent {
       }
     }
 
-    //add the document to the table of contents.
+    let levelsToShow = document?.tocChapterLevels || 100;
+    let indentationLevel = 0;
     let level = 0;
+
+    /*If a document is under a menu parent, push the level up, as the levelsToShow property
+    in the document configuration is specific to that document, and does not take into account. that having
+    a parent document may change it's level*/
     if (document.allParents.length) {
       level++;
+      levelsToShow++;
+      indentationLevel += document.allParents.length;
     }
 
-    //Add the meny document title if it is a menu parent that just holds other documents;
+    //Add the menu document title if it is a menu parent that just holds other documents;
     if (!document.document) {
       this.titlesAndLevels.push({
         title: document.title,
-        level: level,
+        level: indentationLevel,
         chosenForPrint: document.chosenForPrint,
       });
     }
 
     //add the documents chapters to the table of contents.
     if (document.chapters) {
-      if (!document.document) {
-        level++;
-      }
-      if (level <= this.state.maxLevelsToShow) {
+      level++;
+      if (level <= levelsToShow) {
         document.chapters.forEach((chapter) => {
           this.titlesAndLevels.push({
             title: chapter.header,
-            level: level,
+            level: indentationLevel,
           });
-          this.setChapterTitlesAndLevels(chapter, level);
+          this.setChapterTitlesAndLevels(
+            chapter,
+            level + 1,
+            levelsToShow,
+            indentationLevel + 1
+          );
         });
       }
     }
   };
 
-  setChapterTitlesAndLevels = (chapter, level) => {
-    level++;
-    if (chapter.chapters) {
+  setChapterTitlesAndLevels = (
+    chapter,
+    levelsToShow,
+    level,
+    indentationLevel
+  ) => {
+    if (chapter.chapters && level <= levelsToShow) {
       chapter.chapters.forEach((subChapter) => {
         this.titlesAndLevels.push({
           title: subChapter.header,
-          level: level,
+          level: indentationLevel,
         });
-        this.setChapterTitlesAndLevels(subChapter, level);
+        this.setChapterTitlesAndLevels(
+          subChapter,
+          levelsToShow,
+          level + 1,
+          indentationLevel + 1
+        );
       });
     }
   };

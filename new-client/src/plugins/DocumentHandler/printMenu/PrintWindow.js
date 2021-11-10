@@ -407,6 +407,7 @@ class PrintWindow extends React.PureComponent {
     */
     const { options } = this.props;
 
+    const modelDocuments = this.props.model.allDocuments;
     const newOptions = { ...options };
     const menuConfig = { ...newOptions }.menuConfig;
     const menuConfigClone = JSON.parse(JSON.stringify(menuConfig));
@@ -433,6 +434,15 @@ class PrintWindow extends React.PureComponent {
 
       document.chosenForPrint = false;
       document.colored = true;
+
+      //add the table of contents settings from the document json.
+      if (document.document) {
+        let modelDoc = modelDocuments.find(
+          (modelDoc) => modelDoc.documentFileName === document.document
+        );
+        document.tocChapterLevels =
+          modelDoc?.tableOfContents?.chapterLevelsToShow || 100;
+      }
     });
 
     let menuWithOffset = {};
