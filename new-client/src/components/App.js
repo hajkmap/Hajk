@@ -857,9 +857,11 @@ class App extends React.PureComponent {
                 )}
               >
                 <Zoom map={this.appModel.getMap()} />
-                {clean === false && (
-                  <User userDetails={this.appModel.config.userDetails} />
-                )}
+                {clean === false &&
+                  this.appModel.config.mapConfig.map.showUserAvatar ===
+                    true && (
+                    <User userDetails={this.appModel.config.userDetails} />
+                  )}
                 <div id="plugin-control-buttons"></div>
                 {showMapResetter && (
                   <MapResetter
