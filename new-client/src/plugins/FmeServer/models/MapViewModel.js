@@ -206,16 +206,17 @@ class MapViewModel {
   #removeDrawInteraction = () => {
     if (this.#draw) {
       this.#map.removeInteraction(this.#draw);
-      this.#map.clickLock.delete("fmeServer");
     }
   };
 
   // We have to make sure to remove all event listeners to avoid clogging.
   #removeEventListeners = () => {
-    // But they will only exist if draw is/has ever been active...
+    // Some listeners will exist even if the draw interaction is not existing.
+    // (The "Select" listeners)
+    this.#map.un("singleclick", this.#handleSelectFeatureClick);
+    this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
+    // While some will only exist if draw is/has ever been active...
     if (this.#draw) {
-      this.#map.un("singleclick", this.#handleSelectFeatureClick);
-      this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
       this.#draw.un("drawstart", this.#handleDrawStart);
       this.#draw.un("drawend", this.#handleDrawEnd);
       this.#map.un("pointermove", this.#handlePointerMove);
@@ -228,6 +229,8 @@ class MapViewModel {
     this.#removeDrawInteraction();
     // And also remove potential event listeners
     this.#removeEventListeners();
+    // We also want to make sure to remove the potential click-lock
+    this.#map.clickLock.delete("fmeServer");
     // If the interaction is "Select" we don't want a draw method
     if (drawMethod === "Select") {
       return this.#enableSelectFeaturesSearch();
@@ -275,7 +278,7 @@ class MapViewModel {
   #enableSelectFeaturesSearch = () => {
     // We don't want the FeatureInfo to get in the way, so let's add
     // the clickLock.
-    this.#map.clickLock.add("search");
+    this.#map.clickLock.add("fmeServer");
     // Then we'll register the required event listeners
     this.#map.on("singleclick", this.#handleSelectFeatureClick);
     this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
@@ -295,6 +298,10 @@ class MapViewModel {
       if (featuresWithGeom.length === 0) {
         return;
       }
+      // If we know that we are going to add a feature to the layer,
+      // we must make sure to remove the existing geometry if multiple
+      // geometries are not allowed.
+      this.#handlePotentialMultipleGeometriesException();
       // But it might also contain several features that we should add to the map.
       // However, we're only adding the first one, otherwise it might get messy if the
       // user has 15 layers active at the same time.
@@ -345,6 +352,19 @@ class MapViewModel {
   // It also publishes an event in the case that the previously drawn geometry
   // was removed.
   #handleDrawEnd = (e) => {
+    // First we must make sure to handle and remove potential features
+    // that exceed the maximum allowance.
+    this.#handlePotentialMultipleGeometriesException();
+    // Then we make sure to remove the draw tooltip
+    const { feature } = e;
+    this.#drawTooltipElement.innerHTML = null;
+    this.#currentPointerCoordinate = null;
+    this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
+    // And set a nice style on the feature to be added.
+    feature.setStyle(this.#getFeatureStyle(feature));
+  };
+
+  #handlePotentialMultipleGeometriesException = () => {
     // First we must check if the currently active product allows for
     // multiple geometries. We fallback on false if the config option
     // is missing (since is more usual that only one geometry is allowed).
@@ -360,13 +380,6 @@ class MapViewModel {
       this.#drawSource.clear();
       this.#localObserver.publish("map.maxFeaturesExceeded");
     }
-    // Then we make sure to remove the draw tooltip
-    const { feature } = e;
-    this.#drawTooltipElement.innerHTML = null;
-    this.#currentPointerCoordinate = null;
-    this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
-    // And set a nice style on the feature to be added.
-    feature.setStyle(this.#getFeatureStyle(feature));
   };
 
   // This handler has one job; get the coordinate from the event,
