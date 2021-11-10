@@ -154,7 +154,12 @@ export default class DocumentHandlerModel {
     if (this.chapterInfo.length === 0) {
       this.allDocuments.forEach((document, index) => {
         document.chapters.forEach((mainChapter) => {
-          this.setChapterInfo(mainChapter, 0, document.documentColor);
+          this.setChapterInfo(
+            mainChapter,
+            0,
+            document.documentColor,
+            document.documentFileName
+          );
         });
       });
       this.mergeChapterInfo();
@@ -171,9 +176,10 @@ export default class DocumentHandlerModel {
     }
   }
 
-  setChapterInfo(chapter, level, color) {
+  setChapterInfo(chapter, level, color, documentFileName) {
     let getParentIdentifier = this.getParentIdentifier(chapter);
     let chapterInfo = {};
+    chapterInfo.documentFileName = documentFileName;
     chapterInfo.id = ++this.chapterNumber;
     chapterInfo.level = level;
     chapterInfo.html = chapter.html;
@@ -189,7 +195,12 @@ export default class DocumentHandlerModel {
       this.chapterInfo = [...this.chapterInfo, chapterInfo];
       level = level + 1;
       chapter.chapters.forEach((subChapter) => {
-        subChapter = this.setChapterInfo(subChapter, level, color);
+        subChapter = this.setChapterInfo(
+          subChapter,
+          level,
+          color,
+          documentFileName
+        );
       });
     } else {
       chapterInfo.hasSubChapters = false;

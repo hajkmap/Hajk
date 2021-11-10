@@ -50,6 +50,7 @@ const imageResizeRatio = 0.7;
 
 class PrintWindow extends React.PureComponent {
   state = {
+    printLinks: true,
     printText: true,
     printImages: true,
     printMaps: false,
@@ -411,6 +412,7 @@ class PrintWindow extends React.PureComponent {
     const menuConfig = { ...newOptions }.menuConfig;
     const menuConfigClone = JSON.parse(JSON.stringify(menuConfig));
     const menuStructure = getNormalizedMenuState(menuConfigClone.menu);
+    let chapterInformation = this.props.model.getAllChapterInfo();
 
     const keys = Object.keys(menuStructure);
     const idOffset = keys.length + 1; //used to give new ids, so printMenu items do not get the same id as panelMenu items
@@ -433,6 +435,20 @@ class PrintWindow extends React.PureComponent {
 
       document.chosenForPrint = false;
       document.colored = true;
+
+      //add document chapters onto the related document menu item.
+      if (document.document) {
+        document.chapters = [];
+        document.chapters.push(
+          JSON.parse(
+            JSON.stringify(
+              chapterInformation.find(
+                (chapter) => chapter.documentFileName === document.document
+              )
+            )
+          )
+        );
+      }
     });
 
     let menuWithOffset = {};
@@ -544,16 +560,17 @@ class PrintWindow extends React.PureComponent {
   };
 
   removeTagsNotSelectedForPrint = (chapter) => {
-    const { printImages, printText } = this.state;
+    const { printImages, printText, printLinks } = this.state;
 
     let elementsToRemove = [];
     const div = document.createElement("div");
     div.innerHTML = chapter.html;
 
-    //A-tags should always be removed before printing
-    Array.from(div.getElementsByTagName("a")).forEach((element) => {
-      elementsToRemove.push(element);
-    });
+    if (!printLinks) {
+      Array.from(div.getElementsByTagName("a")).forEach((element) => {
+        elementsToRemove.push(element);
+      });
+    }
     if (!printImages) {
       Array.from(div.getElementsByTagName("figure")).forEach((element) => {
         elementsToRemove.push(element);
@@ -568,11 +585,32 @@ class PrintWindow extends React.PureComponent {
       chapter.header = "";
     }
 
+    //ensure links to internal documents are no longer clickable.
+    let documentLinks = Array.from(div.querySelectorAll("[data-document]"));
+    for (let i = 0; i < documentLinks.length; i++) {
+      documentLinks[i].style.cursor = "auto";
+      documentLinks[i].href = "#";
+    }
+
     for (let i = 0; i < elementsToRemove.length; i++) {
       elementsToRemove[i].parentNode.removeChild(elementsToRemove[i]);
     }
 
     chapter.html = div.innerHTML;
+    return chapter;
+  };
+
+  prepareChapterForPrint = (chapter) => {
+    if (chapter.chapters && chapter.chapters.length > 0) {
+      chapter.chapters.forEach((subChapter) => {
+        if (subChapter.chapters && subChapter.chapters.length > 0) {
+          return this.prepareChapterForPrint(subChapter);
+        } else {
+          subChapter = this.removeTagsNotSelectedForPrint(subChapter);
+        }
+      });
+    }
+    chapter = this.removeTagsNotSelectedForPrint(chapter);
     return chapter;
   };
 
@@ -602,7 +640,23 @@ class PrintWindow extends React.PureComponent {
       (id) => menuInformation[id].document
     );
 
-    const docs = this.props.model.getDocuments(documentNamesForPrint);
+    //TODO - now that we get the document chapters earlier, do we need to get the document here?
+    const originalDocs = this.props.model.getDocuments(documentNamesForPrint);
+
+    let docs = originalDocs.map((doc) => {
+      if (doc) {
+        let menuDocKey = Object.keys(menuInformation).find(
+          (key) => menuInformation[key].document === doc.documentFileName
+        );
+        return {
+          documentFileName: doc.documentFileName,
+          tableOfContents: doc.tableOfContents,
+          chapters: menuInformation[menuDocKey].chapters,
+        };
+      } else {
+        return undefined;
+      }
+    });
 
     /*
     where getDocuments returns an empty string. This is a menuItem without a corresponding document, which
@@ -617,7 +671,20 @@ class PrintWindow extends React.PureComponent {
       return doc;
     });
 
-    return docsIncludingGroupParent;
+    let newDocs = [];
+
+    docsIncludingGroupParent.forEach((document) => {
+      if (document?.chapters?.length) {
+        let preparedChapters = [];
+        document?.chapters.forEach((chapter) => {
+          preparedChapters.push(this.prepareChapterForPrint(chapter));
+        });
+        document.chapters = preparedChapters;
+      }
+      newDocs.push(document);
+    });
+
+    return newDocs;
   };
 
   createPDF = () => {

@@ -58,8 +58,7 @@ class Contents extends React.PureComponent {
             model.appendComponentsToChapter(chapter);
           });
 
-          let renderChapters = [];
-
+          let renderedChapters = [];
           let flatChaptersTree = flattenChaptersTree(document.chapters);
           flatChaptersTree = flatChaptersTree.map((item) => {
             if (item.mustReplace) {
@@ -68,8 +67,9 @@ class Contents extends React.PureComponent {
             }
             return item;
           });
-          renderChapters.push(this.renderChapters(flatChaptersTree));
-          chapters.push(renderChapters);
+
+          renderedChapters.push(this.renderChapters(flatChaptersTree));
+          chapters.push(renderedChapters);
         }
       });
 
