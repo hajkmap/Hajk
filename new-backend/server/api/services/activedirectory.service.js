@@ -194,11 +194,20 @@ class ActiveDirectoryService {
       this._ad.find({ filter: query, sizeLimit: 1 }, function (err, res) {
         if (err || !res) {
           const e = new ActiveDirectoryError(
+            ` AD CONNECTION FAILED!
+Connection to ${process.env.AD_URL} failed. Control your AD_* settings
+in .env. There could be an issue with the certificates, CA, passphrase.
+Also, make sure that the machine that runs this process can access the 
+specified server (no firewalls etc that block the request). 
+
+--------------------------- ORIGINAL ERROR ----------------------------
+Error code: ${err.code}
+Error message: ${err.message}
+${err.stack}
+------------------------- END ORIGINAL ERROR ----------------------------
+
+ABORTING STARTUP.
             `
-            Connection to ${process.env.AD_URL} failed. Control your AD_* settings
-            in .env. Also, make sure that the machine that runs this process can
-            access the specified server (no firewalls etc that block the request). 
-            ABORTING STARTUP.`
           );
           // Write the error to log file
           logger.fatal(e.message);
