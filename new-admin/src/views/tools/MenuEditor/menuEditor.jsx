@@ -889,8 +889,8 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="tocPrintMode">
-                Utskriftsläge{" "}
+            <label htmlFor="tocPrintMode" style={{ width: "400px" }}>
+            Välj hur innehållsförteckningen skall skivas ut{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
@@ -910,9 +910,9 @@ class ToolOptions extends Component {
                   },
                 }));
               }}>
-            <FormControlLabel value="full" control={<Radio />} label="Hela" />
-            <FormControlLabel value="partial" control={<Radio />} label="Valda" />
-            <FormControlLabel value="none" control={<Radio />} label="Ingen" />
+            <FormControlLabel value="full" control={<Radio color="primary" />} label="Hela" />
+            <FormControlLabel value="partial" control={<Radio color="primary" />} label="Valda" />
+            <FormControlLabel value="none" control={<Radio color="primary" />} label="Inga" />
           </RadioGroup>
           </div>
           <div className="separator">Faktaruta</div>
