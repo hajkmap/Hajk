@@ -353,30 +353,28 @@ class EditModel {
     });
   };
 
-  urlFromObject(url, obj) {
-    return Object.keys(obj).reduce((str, key, i, a) => {
-      str = str + key + "=" + obj[key];
-      if (i < a.length - 1) {
-        str = str + "&";
-      }
-      return str;
-    }, (url += "?"));
-  }
-
   loadData(source, extent, done) {
-    const urlT = new URL(source.url);
-    // qgis server requires service in the url in admin and we need to avoid duplicates here
-    // so we delete the parameter before it is added twice
-    urlT.searchParams.delete("service");
-    urlT.searchParams.delete("SERVICE");
+    // Prepare the URL for retrieving data in a proper manner:
+    const url = new URL(source.url);
 
-    const url = this.urlFromObject(urlT.href, {
+    // Read potential existing search params from provided WFS URL
+    const existingSearchParams = Object.fromEntries(url.searchParams.entries());
+
+    // Merge those with other params that we want to append to the search params string
+    const mergedSearchParams = {
+      ...existingSearchParams,
       service: "WFS",
       version: "1.1.0",
       request: "GetFeature",
       typename: source.layers[0],
       srsname: source.projection,
-    });
+    };
+
+    // Create a new URLSearchParams object from the merged object…
+    const searchParams = new URLSearchParams(mergedSearchParams);
+    // …and update our URL's search string with the new value
+    url.search = searchParams.toString();
+
     hfetch(url)
       .then((response) => {
         if (response.status !== 200) {
