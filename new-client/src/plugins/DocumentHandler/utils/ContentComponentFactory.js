@@ -785,7 +785,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       </Button>
     );
   };
-  const getDocumentLink = (headerIdentifier, documentLink) => {
+  const getDocumentLink = (headerIdentifier, documentLink, isPrintMode) => {
     return (
       <Button
         color="default"
@@ -801,7 +801,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         classes={{ startIcon: classes.startIcon }}
         href="#"
         key="document-link"
-        component="button"
+        component={isPrintMode ? "span" : "button"}
         underline="hover"
         onClick={() => {
           localObserver.publish("document-link-clicked", {
@@ -819,7 +819,8 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {
-    return getDocumentLink(headerIdentifier, documentLink);
+    const isPrintMode = Boolean(aTag.attributes.printMode);
+    return getDocumentLink(headerIdentifier, documentLink, isPrintMode);
   }
 
   if (mapLink) {

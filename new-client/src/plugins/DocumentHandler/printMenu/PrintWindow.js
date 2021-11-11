@@ -595,9 +595,9 @@ class PrintWindow extends React.PureComponent {
     }
 
     //ensure links to internal documents are no longer clickable.
-    let documentLinks = Array.from(div.querySelectorAll("[data-document]"));
+    let documentLinks = div.querySelectorAll("[data-document]");
     for (let i = 0; i < documentLinks.length; i++) {
-      documentLinks[i].style.cursor = "auto";
+      documentLinks[i].setAttribute("printMode", "true");
       documentLinks[i].href = "#";
     }
 
