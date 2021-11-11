@@ -115,8 +115,7 @@ class Contents extends React.PureComponent {
         <Typography
           className={classes.typography}
           data-type="chapter-header"
-          variant={"h2"}
-          component={"h1"}
+          variant={"h1"}
         >
           {title}
         </Typography>
