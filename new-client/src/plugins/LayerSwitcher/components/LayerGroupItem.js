@@ -377,7 +377,9 @@ class LayerGroupItem extends Component {
         // Join them into a string that will be used to
         // reset STYLES param for the GET request.
         STYLES: Object.entries(this.props.layer.layersInfo)
-          .filter((k) => subLayersToShow.indexOf(k[0]) !== -1)
+          .filter(
+            (k) => subLayersToShow.indexOf(k[0]) !== -1 && k[1].style !== ""
+          )
           .map((l) => l[1].style)
           .join(","),
       });

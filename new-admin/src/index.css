@@ -362,6 +362,10 @@ body.dragging * {
   margin: 0 !important;
 }
 
+.edit-fields-table-default {
+  width: 184px !important;
+}
+
 .list-value:first-child {
   margin-left: 0 !important;
 }
