@@ -4,13 +4,13 @@
     {
       "code": "EPSG:3006",
       "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
+      "extent": [181896.33, 6101648.07, 864416, 7689478.3],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
       "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
+      "extent": [181896.33, 6101648.07, 864416, 7689478.3],
       "units": null
     },
     {
@@ -219,7 +219,8 @@
                 "visibleForGroups": null,
                 "infobox": null
               }
-            ]
+            ],
+            "groups": []
           },
           {
             "id": "9938c969-590c-8683-435c-1ecaca271096",
@@ -235,7 +236,8 @@
                 "visibleForGroups": null,
                 "infobox": null
               }
-            ]
+            ],
+            "groups": []
           }
         ],
         "active": true,
@@ -549,13 +551,14 @@
     "minZoom": 0,
     "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
     "origin": [0, 0],
-    "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
+    "extent": [-1200000, 4700000, 2600000, 8500000],
     "constrainOnlyCenter": false,
     "constrainResolution": false,
     "logo": "/logoLight.png",
     "geoserverLegendOptions": "",
     "mapselector": false,
     "mapcleaner": false,
+    "showUserAvatar": false,
     "drawerVisible": false,
     "drawerPermanent": false,
     "drawerVisibleMobile": false,

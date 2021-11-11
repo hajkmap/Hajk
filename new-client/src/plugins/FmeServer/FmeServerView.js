@@ -36,7 +36,7 @@ const FmeServerView = (props) => {
   const [totalAllowedArea, setTotalAllowedArea] = React.useState(0);
   const [totalDrawnArea, setTotalDrawnArea] = React.useState(0);
   const [drawError, setDrawError] = React.useState(false);
-  const [userEmail, setUserEmail] = React.useState("");
+  const [userEmail, setUserEmail] = React.useState(model.getActiveUserEmail());
   const [orderStatus, setOrderStatus] = React.useState("NONE");
   const [pollError, setPollError] = React.useState(false);
   const [jobId, setJobId] = React.useState(null);

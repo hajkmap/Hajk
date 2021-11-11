@@ -35,6 +35,17 @@ const ListBoxSelector = (props) => {
     }, []);
   }
 
+  // Finds the option connected to the supplied value and returns it's
+  // corresponding caption.
+  function getOptionCaption(value) {
+    // Let's start by grabbing the option
+    const currentOption = parameter.listOptions.find((option) => {
+      return option.value === value;
+    });
+    // And then return the caption.
+    return currentOption.caption;
+  }
+
   return (
     <Grid container item xs={12} style={{ padding: 8 }}>
       <FormControl size="small" fullWidth required={!parameter.optional}>
@@ -54,10 +65,10 @@ const ListBoxSelector = (props) => {
           }
           renderValue={(selected) => (
             <div className={classes.chips}>
-              {selected.map((option, index) => (
+              {selected.map((value, index) => (
                 <Chip
                   key={index}
-                  label={option}
+                  label={getOptionCaption(value)}
                   size="small"
                   className={classes.chip}
                 />

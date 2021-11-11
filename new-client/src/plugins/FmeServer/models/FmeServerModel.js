@@ -4,12 +4,19 @@ class FmeServerModel {
   #options;
   #mapServiceBase;
   #mapViewModel;
+  #activeUserEmail;
 
   constructor(settings) {
     this.#options = settings.options;
     this.#mapServiceBase = settings.app.config.appConfig.mapserviceBase;
+    this.#activeUserEmail = settings.app.config.userDetails?.mail ?? "";
     this.#mapViewModel = settings.mapViewModel;
   }
+
+  // A get:er to return the active user:s email.
+  getActiveUserEmail = () => {
+    return this.#activeUserEmail;
+  };
 
   // Returns the product matching the group and product name.
   getProduct = (groupName, productName) => {
