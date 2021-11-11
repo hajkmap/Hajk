@@ -163,7 +163,7 @@ class SearchResultsDataset extends React.Component {
               <ListItem
                 disableTouchRipple
                 className={classes.featureListItem}
-                key={f.id}
+                key={f.getId()}
                 divider
                 button
                 onClick={() => {
@@ -188,7 +188,7 @@ class SearchResultsDataset extends React.Component {
                   origin={featureCollection.origin}
                   visibleInMap={
                     selectedFeatures.findIndex(
-                      (item) => item.feature.id === f.id
+                      (item) => item.feature.getId() === f.getId()
                     ) > -1
                   }
                   addFeatureToSelected={addFeatureToSelected}

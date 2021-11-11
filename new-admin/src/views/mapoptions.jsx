@@ -62,6 +62,7 @@ class MapOptions extends Component {
         mapcleaner: config.mapcleaner,
         mapresetter: config.mapresetter,
         showThemeToggler: config.showThemeToggler,
+        showUserAvatar: config.showUserAvatar,
         drawerVisible: config.drawerVisible,
         drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
@@ -131,6 +132,7 @@ class MapOptions extends Component {
       mapcleaner: mapConfig.mapcleaner,
       mapresetter: mapConfig.mapresetter,
       showThemeToggler: mapConfig.showThemeToggler,
+      showUserAvatar: mapConfig.showUserAvatar,
       drawerVisible: mapConfig.drawerVisible,
       drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
@@ -290,6 +292,7 @@ class MapOptions extends Component {
       case "mapcleaner":
       case "mapresetter":
       case "showThemeToggler":
+      case "showUserAvatar":
       case "drawerVisible":
       case "drawVisibleMobile":
       case "drawerPermanent":
@@ -351,6 +354,7 @@ class MapOptions extends Component {
         config.mapcleaner = this.getValue("mapcleaner");
         config.mapresetter = this.getValue("mapresetter");
         config.showThemeToggler = this.getValue("showThemeToggler");
+        config.showUserAvatar = this.getValue("showUserAvatar");
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
@@ -1107,6 +1111,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktiv kommer en knapp som möjliggör temaväxling att visas"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_showUserAvatar"
+                type="checkbox"
+                ref="input_showUserAvatar"
+                onChange={(e) => {
+                  this.setState({ showUserAvatar: e.target.checked });
+                }}
+                checked={this.state.showUserAvatar}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_showUserAvatar">
+                Visa en knapp med användarens initialer intill zoomknapparna{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om AD-kopplingen är aktiv kommer en avatar-ikon bestående av användarens initialer att visas bland kartkontrollerna"
                 />
               </label>
             </div>

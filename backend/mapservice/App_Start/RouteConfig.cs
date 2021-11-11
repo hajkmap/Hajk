@@ -19,6 +19,11 @@ namespace MapService
                 defaults: new { controller = "Config", action = "GetConfig", name = UrlParameter.Optional }
             );
             routes.MapRoute(
+                name: "FmeProxy",
+                url: "fmeproxy/{*url}",
+                defaults: new { controller = "FmeProxy", action = "EndPoint", url = UrlParameter.Optional }
+            );
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
