@@ -128,11 +128,11 @@ export default class FeaturePropsParsing {
       },
       hr: () => <Divider />,
       a: ({ children, href, title }) => {
-        return (
+        return children ? (
           <Link href={href} title={title} target="_blank">
             {children}
           </Link>
-        );
+        ) : null;
       },
       h1: this.#markdownHeaderComponent,
       h2: this.#markdownHeaderComponent,
