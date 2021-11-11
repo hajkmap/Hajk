@@ -82,15 +82,10 @@ class FmeServerModel {
         const selectedArray = parameter.value ?? parameter.defaultValue ?? [];
         // If the array is empty, we can return an empty string
         if (selectedArray.length === 0) {
-          return "";
+          return `${parameter.name}=`;
         }
         // Otherwise we concatenate a string with all selected values.
-        let urlString = `${parameter.name}=`;
-        selectedArray.forEach((value, index) => {
-          urlString += `${value}${
-            index === selectedArray.length - 1 ? "" : "&"
-          }`;
-        });
+        const urlString = `${parameter.name}=${selectedArray.join(",")}`;
         return urlString;
       case "RANGE_SLIDER":
         // This one expects a number
