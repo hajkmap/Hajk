@@ -36,9 +36,12 @@ class FmeServerModel {
   makeOrder = (groupName, productName, productParameters, userEmail) => {
     // We're gonna need the product
     const product = this.getProduct(groupName, productName);
-    // If user email is supplied, it means that we are dealing
-    // with data-download, not the ordinary REST-api
-    if (userEmail !== "") {
+    // If user email is supplied and prompted for, it means that we are dealing
+    // with data-download, not the ordinary REST-api.
+    // The user email might not be an empty string if AD-lookup is enabled
+    // and user-details are exposed to the client, which means that we must
+    // check that the product is set to prompt for email as well.
+    if (userEmail !== "" && product.promptForEmail) {
       return this.#makeDataDownloadOrder(product, productParameters, userEmail);
     }
     // If it is not, we're dealing with the regular REST-application
