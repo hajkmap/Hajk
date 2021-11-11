@@ -59,6 +59,7 @@ class PrintWindow extends React.PureComponent {
     menuInformation: this.createMenu(),
     printContent: undefined,
     pdfLoading: false,
+    isAnyDocumentSelected: false,
   };
 
   internalId = 0;
@@ -551,7 +552,9 @@ class PrintWindow extends React.PureComponent {
       );
     }
 
-    this.setState({ menuInformation: updatedMenuState });
+    this.setState({ menuInformation: updatedMenuState }, () => {
+      this.setIsAnyDocumentSelected();
+    });
   };
 
   toggleAllDocuments = (toggled) => {
@@ -565,7 +568,11 @@ class PrintWindow extends React.PureComponent {
       menuState[key] = updateDoc;
     });
 
-    this.setState({ allDocumentsToggled: toggled, menuInformation: menuState });
+    this.setState({
+      allDocumentsToggled: toggled,
+      menuInformation: menuState,
+      isAnyDocumentSelected: toggled,
+    });
   };
 
   removeTagsNotSelectedForPrint = (chapter) => {
@@ -623,14 +630,16 @@ class PrintWindow extends React.PureComponent {
     return chapter;
   };
 
-  isAnyDocumentSelected = () => {
+  setIsAnyDocumentSelected = () => {
     const keys = Object.keys(this.state.menuInformation);
+    let isAnyDocumentSelected = false;
+
     for (let i = 0; i < keys.length; i++) {
       if (this.state.menuInformation[keys[i]].chosenForPrint) {
-        return true;
+        isAnyDocumentSelected = true;
       }
     }
-    return false;
+    this.setState({ isAnyDocumentSelected: isAnyDocumentSelected });
   };
 
   createHeaderItems = (menuItem) => {
@@ -697,22 +706,12 @@ class PrintWindow extends React.PureComponent {
   };
 
   createPDF = () => {
-    if (!this.isAnyDocumentSelected()) {
-      this.props.enqueueSnackbar(
-        "Du måste välja minst ett dokument för att kunna skapa en PDF.",
-        {
-          variant: "warning",
-          persist: false,
-        }
-      );
-    } else {
-      this.setState({ pdfLoading: true });
-      const documentsToPrint = this.getDocumentsToPrint();
-      this.props.localObserver.publish(
-        "append-document-components",
-        documentsToPrint
-      );
-    }
+    this.setState({ pdfLoading: true });
+    const documentsToPrint = this.getDocumentsToPrint();
+    this.props.localObserver.publish(
+      "append-document-components",
+      documentsToPrint
+    );
   };
 
   renderCreatePDFButton() {
@@ -729,7 +728,7 @@ class PrintWindow extends React.PureComponent {
         <Button
           color="primary"
           variant="contained"
-          disabled={this.state.pdfLoading}
+          disabled={this.state.pdfLoading || !this.state.isAnyDocumentSelected}
           startIcon={<OpenInNewIcon />}
           onClick={this.createPDF}
         >
