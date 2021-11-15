@@ -1,8 +1,8 @@
 import React from "react";
-import { Button, Grid, Typography } from "@material-ui/core";
-import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
-import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
-import { LinearProgress } from "@material-ui/core";
+import { Button, Grid, Typography } from "@mui/material";
+import { Select, FormControl, InputLabel, MenuItem } from "@mui/material";
+import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
+import { LinearProgress } from "@mui/material";
 import { useSnackbar } from "notistack";
 
 import InformationWrapper from "./components/InformationWrapper";
@@ -352,12 +352,12 @@ const FmeServerView = (props) => {
   // Accepts: An array of objects on {type: string, disabled: bool} form.
   function renderStepperButtons(buttons) {
     return (
-      <Grid container item justify="flex-end">
+      <Grid container item justifyContent="flex-end">
         {buttons.map((button, index) => {
           return (
             <Button
               key={index}
-              style={{ marginTop: 8, marginLeft: 8 }}
+              sx={{ marginTop: 1, marginLeft: 1 }}
               disabled={button.disabled}
               variant="contained"
               onClick={() => handleStepperButtonClick(button.type)}
@@ -495,7 +495,7 @@ const FmeServerView = (props) => {
           />
         </Grid>
         {drawError && (
-          <Grid item xs={12} style={{ marginTop: 8 }}>
+          <Grid item xs={12} sx={{ marginTop: 1 }}>
             <InformationWrapper type="error">
               <Typography variant="caption">
                 {`Den ritade ytan är för stor. Ta bort den och försök igen för att kunna gå vidare med beställningen! 
@@ -569,11 +569,14 @@ const FmeServerView = (props) => {
         {groupsToRender.length > 0 ? (
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel id="fme-server-select-group-label">Grupp</InputLabel>
+              <InputLabel size="small" id="fme-server-select-group-label">
+                Grupp
+              </InputLabel>
               <Select
                 labelId="fme-server-select-group-label"
                 id="fme-server-select-group"
                 value={activeGroup}
+                size="small"
                 label="Grupp"
                 onChange={(e) => setActiveGroup(e.target.value)}
               >
@@ -611,13 +614,14 @@ const FmeServerView = (props) => {
         {productsInActiveGroup.length > 0 ? (
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel id="fme-server-select-product-label">
+              <InputLabel size="small" id="fme-server-select-product-label">
                 Produkt
               </InputLabel>
               <Select
                 labelId="fme-server-select-product-label"
                 id="fme-server-select-product"
                 value={activeProduct}
+                size="small"
                 label="Produkt"
                 onChange={(e) => setActiveProduct(e.target.value)}
               >
@@ -715,11 +719,7 @@ const FmeServerView = (props) => {
   }
 
   return (
-    <Stepper
-      activeStep={activeStep}
-      orientation="vertical"
-      style={{ padding: 8 }}
-    >
+    <Stepper activeStep={activeStep} orientation="vertical" sx={{ padding: 1 }}>
       {steps.map((step, index) => {
         return (
           <Step key={index}>
