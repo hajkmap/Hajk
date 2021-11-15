@@ -68,19 +68,28 @@ class Toolbar extends Component {
   onAddPointClicked() {
     this.props.model.layer.dragLocked = true;
     this.props.toggleActiveTool("point");
-    this.changeTool("add", "Point");
+    this.changeTool(
+      "add",
+      this.props.editSource.editMultiPoint ? "MultiPoint" : "Point"
+    );
   }
 
   onAddLineClicked() {
     this.props.model.layer.dragLocked = true;
     this.props.toggleActiveTool("linestring");
-    this.changeTool("add", "LineString");
+    this.changeTool(
+      "add",
+      this.props.editSource.editMultiLine ? "MultiLineString" : "LineString"
+    );
   }
 
   onAddPolygonClicked() {
     this.props.model.layer.dragLocked = true;
     this.props.toggleActiveTool("polygon");
-    this.changeTool("add", "Polygon");
+    this.changeTool(
+      "add",
+      this.props.editSource.editMultiPolygon ? "MultiPolygon" : "Polygon"
+    );
   }
 
   onRemoveClicked() {
@@ -114,7 +123,7 @@ class Toolbar extends Component {
           <StyledButton
             variant="contained"
             fullWidth
-            disabled={!editSource.editPoint}
+            disabled={!editSource.editPoint && !editSource.editMultiPoint}
             onClick={() => {
               this.onAddPointClicked();
             }}
@@ -130,7 +139,7 @@ class Toolbar extends Component {
           <StyledButton
             variant="contained"
             fullWidth
-            disabled={!editSource.editLine}
+            disabled={!editSource.editLine && !editSource.editMultiLine}
             onClick={() => {
               this.onAddLineClicked();
             }}
@@ -146,7 +155,7 @@ class Toolbar extends Component {
           <StyledButton
             variant="contained"
             fullWidth
-            disabled={!editSource.editPolygon}
+            disabled={!editSource.editPolygon && !editSource.editMultiPolygon}
             onClick={() => {
               this.onAddPolygonClicked();
             }}

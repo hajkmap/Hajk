@@ -716,6 +716,7 @@ class AppModel {
                   : [],
               geometryField: sl.searchGeometryField || "geom",
               outputFormat: sl.searchOutputFormat || "GML3",
+              serverType: layer.serverType || "geoserver",
             };
           });
         }

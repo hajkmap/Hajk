@@ -157,7 +157,7 @@ class SearchResultsContainer extends React.PureComponent {
 
     // Get the clicked feature
     const feature = featureCollection.value.features.find(
-      (feature) => feature.id === featureId
+      (feature) => feature.getId() === featureId
     );
 
     // If the feature has onClickName set we won't show the details
@@ -173,7 +173,7 @@ class SearchResultsContainer extends React.PureComponent {
     return featureCollections.find((featureCollection) => {
       return (
         featureCollection.value.features.findIndex(
-          (feature) => feature.id === featureId
+          (feature) => feature.getId() === featureId
         ) > -1
       );
     });
@@ -234,7 +234,7 @@ class SearchResultsContainer extends React.PureComponent {
     const { activeFeatureCollection } = this.state;
     const selectedFeatures = [...this.state.selectedFeatures];
 
-    const featureIndex = this.getSelectedFeatureIndex(feature.id);
+    const featureIndex = this.getSelectedFeatureIndex(feature.getId());
     selectedFeatures.splice(featureIndex, 1);
 
     if (activeFeatureCollection?.origin === "USERSELECT") {
@@ -259,7 +259,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   getSelectedFeatureIndex = (featureId) => {
     return this.state.selectedFeatures.findIndex((featureInfo) => {
-      return featureInfo.feature.id === featureId;
+      return featureInfo.feature.getId() === featureId;
     });
   };
 
@@ -668,7 +668,7 @@ class SearchResultsContainer extends React.PureComponent {
     if (activeFeature) {
       const featureIndex = selectedFeatures.findIndex((featureInfo) => {
         return (
-          featureInfo.feature.id === activeFeature.id &&
+          featureInfo.feature.getId() === activeFeature.getId() &&
           featureInfo.initiator !== "userSelect"
         );
       });
@@ -708,7 +708,7 @@ class SearchResultsContainer extends React.PureComponent {
   featureIsSelected = (feature) => {
     const { selectedFeatures } = this.state;
     return selectedFeatures.some((featureInfo) => {
-      return featureInfo.feature.id === feature.id;
+      return featureInfo.feature.getId() === feature.getId();
     });
   };
 
@@ -834,7 +834,7 @@ class SearchResultsContainer extends React.PureComponent {
     const source = feature.source ?? activeFeatureCollection.source;
 
     return source.displayFields.reduce((featureTitleString, df) => {
-      let displayField = feature.properties[df];
+      let displayField = feature.get(df);
       if (Array.isArray(displayField)) {
         displayField = displayField.join(", ");
       }
@@ -892,7 +892,7 @@ class SearchResultsContainer extends React.PureComponent {
       filteredFeatureCollections
     );
     const currentFeatureIds = filteredFeatures.map((feature) => {
-      return feature.id;
+      return feature.getId();
     });
 
     this.setState({

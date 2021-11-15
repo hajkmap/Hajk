@@ -9,7 +9,7 @@ import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import { Button } from "@mui/material";
+import { Button, FormHelperText } from "@mui/material";
 import Chip from "@mui/material/Chip";
 
 const StyledGrid = styled(Grid)(({ theme }) => ({
@@ -31,6 +31,13 @@ class AttributeEditor extends React.Component {
         feature: feature,
       });
     });
+    props.editSource?.editableFields?.forEach((field, i) => {
+      field.initialRender = true;
+    });
+
+    props.editSource?.nonEditableFields?.forEach((field, i) => {
+      field.initialRender = true;
+    });
   }
 
   componentWillUnmount() {
@@ -45,23 +52,33 @@ class AttributeEditor extends React.Component {
     let valueMap = {};
 
     editSource.editableFields.forEach((field) => {
-      if (field.textType === "flerval") {
-        valueMap[field.name] = field.values.map((value) => {
-          return {
-            name: value,
-            checked:
-              typeof featureProps[field.name] === "string"
-                ? featureProps[field.name]
-                    .split(";")
-                    .find((v) => v === value) !== undefined
-                : false,
-          };
-        });
-      } else {
-        //If the feature has field: "" it will be changed to the default value.
-        //Not sure if we want this behavior?
-        valueMap[field.name] =
-          featureProps[field.name] || field.defaultValue || "";
+      if (featureProps[field.name] !== null) {
+        if (field.textType === "flerval" && featureProps[field.name] !== "") {
+          valueMap[field.name] = field.values.map((value) => {
+            return {
+              name: value,
+              checked:
+                typeof featureProps[field.name] === "string"
+                  ? featureProps[field.name]
+                      .split(";")
+                      .find((v) => v === value) !== undefined
+                  : false,
+            };
+          });
+        } else if (field.textType === "boolean") {
+          if (field.dataType === "boolean") {
+            valueMap[field.name] =
+              featureProps[field.name] || field.defaultValue === "ja" || false;
+          } else {
+            valueMap[field.name] =
+              featureProps[field.name] || field.defaultValue === 1 || 0;
+          }
+        } else {
+          //If the feature has field: "" it will be changed to the default value.
+          //Not sure if we want this behavior?
+          valueMap[field.name] =
+            featureProps[field.name] || field.defaultValue || "";
+        }
       }
     });
     return valueMap;
@@ -80,6 +97,25 @@ class AttributeEditor extends React.Component {
       }
       featureProps[key] = value;
     });
+
+    this.props.editSource?.nonEditableFields?.forEach((field) => {
+      let value = field.defaultValue;
+      if (value === "") value = null;
+      if (Array.isArray(value)) {
+        value = value
+          .filter((v) => v.checked)
+          .map((v) => v.name)
+          .join(";");
+      }
+      let geomName = this.props.model.editFeature.getGeometryName();
+      if (!geomName) {
+        geomName = "geom";
+      }
+      if (field.name !== geomName) {
+        // should not overwrite the feature's geom
+        featureProps[field.name] = value;
+      }
+    });
     this.props.model.editFeature.setProperties(featureProps);
   }
 
@@ -92,6 +128,25 @@ class AttributeEditor extends React.Component {
         formValues[name] = "";
       }
     }
+    this.setState(
+      {
+        formValues: formValues,
+      },
+      () => {
+        this.updateFeature();
+      }
+    );
+  }
+
+  checkBoolean(name, value) {
+    let formValues = Object.assign({}, this.state.formValues);
+    if (value === "ja") {
+      value = true;
+    } else if (value === "nej") {
+      value = false;
+    }
+
+    formValues[name] = value;
     this.setState(
       {
         formValues: formValues,
@@ -207,19 +262,33 @@ class AttributeEditor extends React.Component {
     }
   }
 
-  getValueMarkup(field) {
-    if (field.dataType === "int") {
-      field.textType = "heltal";
+  getValueMarkup(field, editable) {
+    if (typeof field.alias === "undefined" || field.alias === "") {
+      field.alias = field.name;
     }
 
-    if (field.dataType === "number") {
-      field.textType = "nummer";
-    }
+    // Add a default texttype if none is set
+    if (!field.textType || field.textType === "") {
+      if (field.dataType === "int" || field.dataType === "integer") {
+        field.textType = "heltal";
+      }
 
-    if (field.dataType === "date") {
-      field.textType = "datum";
-    }
+      if (field.dataType === "number" || field.dataType === "decimal") {
+        field.textType = "nummer";
+      }
 
+      if (field.dataType === "date") {
+        field.textType = "datum";
+      }
+
+      if (field.dataType === "date-time" || field.dataType === "dateTime") {
+        field.textType = "date-time";
+      }
+
+      if (field.dataType === "boolean") {
+        field.textType = "boolean";
+      }
+    }
     let value = this.state.formValues[field.name];
 
     if (value === undefined || value === null) {
@@ -237,11 +306,18 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias}
             fullWidth={true}
             margin="normal"
             variant="outlined"
+            disabled={!editable}
             value={value}
+            error={this.formErrors.hasOwnProperty(field.name)}
+            helperText={
+              this.formErrors[field.name]?.length >= 0
+                ? this.formErrors[field.name]
+                : field.description
+            }
             onChange={(e) => {
               this.setChanged();
               this.checkInteger(field.name, e.target.value);
@@ -253,11 +329,18 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias}
             fullWidth={true}
             margin="normal"
             variant="outlined"
+            disabled={!editable}
             value={value}
+            error={this.formErrors.hasOwnProperty(field.name)}
+            helperText={
+              this.formErrors[field.name]?.length >= 0
+                ? this.formErrors[field.name]
+                : field.description
+            }
             onChange={(e) => {
               this.setChanged();
               this.checkNumber(field.name, e.target.value);
@@ -269,12 +352,46 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
+            label={field.alias}
+            fullWidth={true}
+            margin="normal"
+            type="date"
+            variant="outlined"
+            disabled={!editable}
+            value={value}
+            error={this.formErrors.hasOwnProperty(field.name)}
+            helperText={
+              this.formErrors[field.name]?.length >= 0
+                ? this.formErrors[field.name]
+                : field.description
+            }
+            onChange={(e) => {
+              this.setChanged();
+              this.checkDate(field.name, e.target.value);
+              field.initialRender = false;
+            }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        );
+      case "date-time":
+        return (
+          <TextField
+            id={field.id}
             label={field.name}
             fullWidth={true}
             margin="normal"
             type="datetime-local"
             variant="outlined"
+            disabled={!editable}
             value={value}
+            error={this.formErrors.hasOwnProperty(field.name)}
+            helperText={
+              this.formErrors[field.name]?.length >= 0
+                ? this.formErrors[field.name]
+                : field.description
+            }
             onChange={(e) => {
               this.setChanged();
               this.checkDate(field.name, e.target.value);
@@ -286,18 +403,56 @@ class AttributeEditor extends React.Component {
           />
         );
       case "url":
+        return (
+          <>
+            <TextField
+              id={field.id}
+              label={field.alias}
+              size="small"
+              fullWidth={true}
+              margin="normal"
+              variant="outlined"
+              disabled={!editable}
+              error={this.formErrors.hasOwnProperty(field.name)}
+              helperText={
+                this.formErrors[field.name]?.length >= 0
+                  ? this.formErrors[field.name]
+                  : field.description
+              }
+              value={value}
+              onChange={(e) => {
+                this.setChanged();
+                this.checkText(field.name, e.target.value);
+                field.initialRender = false;
+              }}
+              onBlur={(e) => {
+                this.setChanged();
+                if (field.textType === "url") {
+                  this.checkUrl(field.name, e.target.value);
+                }
+                field.initialRender = false;
+              }}
+            />
+          </>
+        );
       case "fritext":
         return (
           <>
             <TextField
               id={field.id}
-              label={field.name}
+              label={field.alias}
               size="small"
               fullWidth={true}
               margin="normal"
               variant="outlined"
+              disabled={!editable}
+              multiline
               error={this.formErrors.hasOwnProperty(field.name)}
-              helperText={this.formErrors[field.name] ?? ""}
+              helperText={
+                this.formErrors[field.name]?.length >= 0
+                  ? this.formErrors[field.name]
+                  : field.description
+              }
               value={value}
               onChange={(e) => {
                 this.setChanged();
@@ -341,6 +496,7 @@ class AttributeEditor extends React.Component {
               control={
                 <Checkbox
                   checked={item.checked}
+                  disabled={!editable}
                   color="primary"
                   onChange={(e) => {
                     this.setChanged();
@@ -354,10 +510,16 @@ class AttributeEditor extends React.Component {
           );
         });
         return (
-          <FormControl fullWidth margin="normal" component="fieldset">
-            <FormLabel component="legend">{field.name}</FormLabel>
-            <FormGroup>{checkboxes}</FormGroup>
-          </FormControl>
+          <>
+            <FormControl fullWidth margin="normal" component="fieldset">
+              <FormLabel component="legend">{field.alias}</FormLabel>
+              <FormGroup>{checkboxes}</FormGroup>
+              <FormHelperText
+                style={{ marginTop: "0px", marginBottom: "10px" }}
+              ></FormHelperText>
+            </FormControl>
+            <br />
+          </>
         );
       case "lista":
         let options = null;
@@ -371,10 +533,11 @@ class AttributeEditor extends React.Component {
         return (
           <>
             <FormControl fullWidth={true} component="fieldset">
-              <FormLabel component="legend">{field.name}</FormLabel>
+              <FormLabel component="legend">{field.alias}</FormLabel>
               <NativeSelect
                 value={value}
                 variant="outlined"
+                disabled={!editable}
                 input={<Input name={field.name} id={field.name} />}
                 onChange={(e) => {
                   this.setChanged();
@@ -385,8 +548,44 @@ class AttributeEditor extends React.Component {
                 <option value="">-Välj värde-</option>
                 {options}
               </NativeSelect>
+              <FormHelperText>{field.description}</FormHelperText>
             </FormControl>
           </>
+        );
+      case "boolean":
+        return (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={
+                  (field.dataType === "boolean" && field.value === "ja") ||
+                  (field.dataType === "int" && field.value === 1)
+                }
+                color="primary"
+                disabled={!editable}
+                onChange={(e) => {
+                  this.setChanged();
+                  if (e.target.checked) {
+                    if (field.dataType === "boolean") {
+                      field.value = "ja";
+                    } else {
+                      field.value = 1;
+                    }
+                  } else {
+                    if (field.dataType === "boolean") {
+                      field.value = "nej";
+                    } else {
+                      field.value = 0;
+                    }
+                  }
+                  field.initialRender = false;
+                  this.checkBoolean(field.name, field.value);
+                  this.forceUpdate();
+                }}
+              />
+            }
+            label={field.name}
+          />
         );
       case null:
         return <span>{value}</span>;
@@ -401,14 +600,25 @@ class AttributeEditor extends React.Component {
 
     if (!formValues || this.props.editSource === undefined) return null;
 
-    const markup = this.props.editSource.editableFields.map((field, i) => {
-      const valueMarkup = this.getValueMarkup(field);
+    const markup = this.props.editSource?.editableFields?.map((field, i) => {
+      const valueMarkup = this.getValueMarkup(field, true);
       return (
         <Grid item xs={12} key={i} ref={field.name}>
           {valueMarkup}
         </Grid>
       );
     });
+
+    const markupNonEdit = this.props.editSource?.nonEditableFields
+      ?.filter((item) => item.hidden === false)
+      .map((field, i) => {
+        const valueMarkup = this.getValueMarkup(field, false);
+        return (
+          <Grid item xs={12} key={i} ref={field.name}>
+            {valueMarkup}
+          </Grid>
+        );
+      });
 
     return (
       <>
@@ -419,7 +629,12 @@ class AttributeEditor extends React.Component {
             label="Ange objektets attribut:"
           />
         </StyledGrid>
-        {markup}
+        <StyledGrid item xs={12}>
+          <p>Editerbara fält:</p>
+          {markup}
+          {markupNonEdit?.length > 2 ? "Icke-editerbara fält:" : ""}
+          {markupNonEdit}
+        </StyledGrid>
         <StyledGrid item xs={12}>
           <Button
             color="primary"

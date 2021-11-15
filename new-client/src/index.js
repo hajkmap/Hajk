@@ -130,6 +130,7 @@ hfetch("appConfig.json", { cacheBuster: true })
                   appConfig: appConfig,
                   layersConfig: mapConfig.layersConfig,
                   mapConfig: mapConfig.mapConfig,
+                  userDetails: mapConfig.userDetails,
                   userSpecificMaps: mapConfig.userSpecificMaps,
                   urlParams,
                 };

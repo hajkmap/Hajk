@@ -192,6 +192,7 @@ export default class ConfigMapper {
           ? args.displayFields
           : args.searchFields[0] || "Sökträff",
         srsName: properties.mapConfig.map.projection || "EPSG:3006",
+        serverType: config.options.serverType,
       };
     }
 

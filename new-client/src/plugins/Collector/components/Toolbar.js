@@ -102,7 +102,7 @@ class Toolbar extends Component {
     if (!data) {
       return (
         <Typography>
-          Uppdatateringen lyckades men det upptäcktes inte några ändringar.
+          Uppdateringen lyckades men det upptäcktes inte några ändringar.
         </Typography>
       );
     }

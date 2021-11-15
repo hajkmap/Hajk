@@ -96,7 +96,7 @@ class EditView extends React.PureComponent {
     if (!data) {
       return (
         <Typography>
-          Uppdatateringen lyckades men det upptäcktes inte några ändringar.
+          Uppdateringen lyckades men det upptäcktes inte några ändringar.
         </Typography>
       );
     }
@@ -144,12 +144,27 @@ class EditView extends React.PureComponent {
   onSaveClicked = () => {
     const { model, app } = this.props;
     model.save((response) => {
-      model.filty = false;
-      model.refreshEditingLayer();
-      this.handleNext();
-      app.globalObserver.publish("core.alert", this.getStatusMessage(response));
-      this.toggleActiveTool(undefined);
-      model.deactivateInteraction();
+      if (
+        response &&
+        (response.ExceptionReport || !response.TransactionResponse)
+      ) {
+        this.props.observer.publish("editFeature", model.editFeatureBackup);
+        app.globalObserver.publish(
+          "core.alert",
+          this.getStatusMessage(response)
+        );
+      } else {
+        model.filty = false;
+        model.refreshEditingLayer();
+        model.editFeatureBackup = undefined;
+        this.handleNext();
+        app.globalObserver.publish(
+          "core.alert",
+          this.getStatusMessage(response)
+        );
+        this.toggleActiveTool(undefined);
+        model.deactivateInteraction();
+      }
     });
   };
 
@@ -244,7 +259,11 @@ class EditView extends React.PureComponent {
                 {!editFeature && (
                   <>
                     <Grid item xs={6}>
-                      <Button fullWidth onClick={this.handlePrev}>
+                      <Button
+                        fullWidth
+                        onClick={this.handlePrev}
+                        variant="contained"
+                      >
                         Bakåt
                       </Button>
                     </Grid>

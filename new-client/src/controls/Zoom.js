@@ -44,24 +44,26 @@ const ZoomControl = React.memo((props) => {
   }
 
   return (
-    <StyledPaper>
-      <StyledIconButton
-        aria-label="Zooma in"
-        onClick={() => {
-          zoomByDelta(1);
-        }}
-      >
-        <AddIcon />
-      </StyledIconButton>
-      <StyledIconButton
-        aria-label="Zooma ut"
-        onClick={() => {
-          zoomByDelta(-1);
-        }}
-      >
-        <RemoveIcon />
-      </StyledIconButton>
-    </StyledPaper>
+    props.map !== undefined && (
+      <StyledPaper>
+        <StyledIconButton
+          aria-label="Zooma in"
+          onClick={() => {
+            zoomByDelta(1);
+          }}
+        >
+          <AddIcon />
+        </StyledIconButton>
+        <StyledIconButton
+          aria-label="Zooma ut"
+          onClick={() => {
+            zoomByDelta(-1);
+          }}
+        >
+          <RemoveIcon />
+        </StyledIconButton>
+      </StyledPaper>
+    )
   );
 });
 
