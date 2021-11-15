@@ -95,8 +95,8 @@ class TableOfContents extends React.PureComponent {
           });
           this.setChapterTitlesAndLevels(
             chapter,
-            level + 1,
             levelsToShow,
+            level + 1,
             indentationLevel + 1
           );
         });
