@@ -1,21 +1,20 @@
 import React from "react";
-import { Avatar, Button, Paper, Tooltip } from "@material-ui/core";
+import { Avatar, IconButton, Paper, Tooltip } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-import { makeStyles } from "@material-ui/styles";
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
-  avatar: {
-    width: 25,
-    height: 25,
-    fontSize: "0.8rem",
-    backgroundColor: theme.palette.text.primary,
-  },
+const StyledIconButton = styled(IconButton)(() => ({
+  minWidth: "unset",
+}));
+
+const StyledAvatar = styled(Avatar)(({ theme }) => ({
+  width: 25,
+  height: 25,
+  fontSize: "0.8rem",
+  backgroundColor: theme.palette.text.primary,
 }));
 
 /**
@@ -53,21 +52,16 @@ const getTooltipString = (userDetails) => {
  * @returns {object} React
  */
 const User = React.memo(({ userDetails }) => {
-  const classes = useStyles();
-
   return (
     (userDetails && (
       <Tooltip title={getTooltipString(userDetails)}>
-        <Paper className={classes.paper}>
-          <Button
-            aria-label={userDetails.displayName}
-            className={classes.button}
-          >
-            <Avatar alt={userDetails.displayName} className={classes.avatar}>
+        <StyledPaper>
+          <StyledIconButton aria-label={userDetails.displayName}>
+            <StyledAvatar alt={userDetails.displayName}>
               {getInitialsFromDisplayName(userDetails.displayName)}
-            </Avatar>
-          </Button>
-        </Paper>
+            </StyledAvatar>
+          </StyledIconButton>
+        </StyledPaper>
       </Tooltip>
     )) ||
     null
