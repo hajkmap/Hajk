@@ -1,5 +1,5 @@
 # Stage 1 - Building the backend
-FROM node:alpine as backendBuilder
+FROM node:16-alpine as backendBuilder
 WORKDIR /usr/app
 COPY /new-backend/package*.json ./
 RUN npm install
@@ -7,7 +7,7 @@ COPY ./new-backend .
 RUN npm run compile
 
 # Stage 2 - Building the client
-FROM node:alpine as clientBuilder
+FROM node:16-alpine as clientBuilder
 WORKDIR /usr/app
 COPY /new-client/package*.json ./
 RUN npm install --ignore-scripts
@@ -17,7 +17,7 @@ RUN mv ./public/appConfig.docker.json ./public/appConfig.json
 RUN npm run build --ignore-scripts
 
 # Stage 3 - Building the admin
-FROM node:alpine as adminBuilder
+FROM node:16-alpine as adminBuilder
 WORKDIR /usr/app
 COPY /new-admin/package*.json ./
 RUN npm install
