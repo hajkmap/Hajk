@@ -375,7 +375,8 @@ class EditModel {
     // …and update our URL's search string with the new value
     url.search = searchParams.toString();
 
-    hfetch(url)
+    // .toString() since hfetch expects it
+    hfetch(url.toString())
       .then((response) => {
         if (response.status !== 200) {
           return done("data-load-error");
