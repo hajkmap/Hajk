@@ -499,6 +499,7 @@
     "maxZoom": 8,
     "minZoom": 0,
     "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
+    "hiddenResolutions": [],
     "origin": [0, 0],
     "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
     "constrainOnlyCenter": false,

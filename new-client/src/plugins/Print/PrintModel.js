@@ -6,6 +6,7 @@ import * as PDFjs from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 
 import Vector from "ol/layer/Vector.js";
+import View from "ol/View";
 import VectorSource from "ol/source/Vector.js";
 import Polygon from "ol/geom/Polygon";
 import Feature from "ol/Feature.js";
@@ -25,6 +26,20 @@ export default class PrintModel {
     this.copyright = settings.options.copyright ?? "";
     this.disclaimer = settings.options.disclaimer ?? "";
     this.localObserver = settings.localObserver;
+    this.mapConfig = settings.mapConfig;
+
+    this.originalView = this.map.getView();
+
+    this.printView = new View({
+      center: this.originalView.getCenter(),
+      constrainOnlyCenter: this.mapConfig.constrainOnlyCenter,
+      constrainResolution: this.mapConfig.constrainResolution,
+      maxZoom: 24,
+      minZoom: 0,
+      projection: this.originalView.getProjection(),
+      resolutions: this.mapConfig.allResolutions,
+      zoom: this.originalView.getZoom(),
+    });
   }
 
   scaleBarLengths = {
@@ -79,9 +94,9 @@ export default class PrintModel {
 
   getMapScale = () => {
     const dpi = 25.4 / 0.28,
-      mpu = this.map.getView().getProjection().getMetersPerUnit(),
+      mpu = this.printView.getProjection().getMetersPerUnit(),
       inchesPerMeter = 39.37,
-      res = this.map.getView().getResolution();
+      res = this.printView.getResolution();
 
     return res * mpu * inchesPerMeter * dpi;
   };
@@ -427,7 +442,7 @@ export default class PrintModel {
 
     // The desired options are OK if they result in a resolution bigger than the minimum
     // resolution of the map.
-    return desiredResolution >= this.map.getView().getMinResolution();
+    return desiredResolution >= this.printView.getMinResolution();
   };
 
   getScaleResolution = (scale, resolution, center) => {
@@ -465,6 +480,7 @@ export default class PrintModel {
     const width = Math.round((dim[0] * resolution) / 25.4);
     const height = Math.round((dim[1] * resolution) / 25.4);
     const size = this.map.getSize();
+    this.map.setView(this.printView);
     const originalResolution = this.map.getView().getResolution();
     const originalCenter = this.map.getView().getCenter();
 
@@ -697,6 +713,7 @@ export default class PrintModel {
           this.map.setSize(size);
           this.map.getView().setResolution(originalResolution);
           this.map.getView().setCenter(originalCenter);
+          this.map.setView(this.originalView);
         });
     });
 
