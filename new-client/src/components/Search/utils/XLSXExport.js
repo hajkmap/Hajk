@@ -87,7 +87,9 @@ export default class XLSXExport {
     if (featureCollection?.value?.features?.length > 0) {
       const exportArray = [];
       // Keys from first feature. We assume that all features in the collections has the same keys.
-      const keys = Object.keys(featureCollection.value.features[0].properties);
+      const keys = Object.keys(
+        featureCollection.value.features[0].getProperties()
+      );
       exportArray.push(keys);
 
       featureCollection.value.features.forEach((feature) => {
