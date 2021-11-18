@@ -18,7 +18,30 @@ const defaultState = {
   active: false,
   index: 0,
   target: "toolbar",
-  visibleAtStart: false
+  visibleAtStart: false,
+  view: {
+    termsAndConditionsLink: "https://goteborg.se/wps/portal/om-webbplatsen",
+    boreholeIntro: "Nedan visas alla borrhålsprojekt med undersökningspunkter inom det markerade området.",
+    boreholeDescription: "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.",
+    referenceSystemText: "Geotekniska undersökningspunkter är i koordinatsystemet SWEREF 99 12 00 samt höjdsystemet RH2000.",
+    deliveryInformationText: "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets molntjänst.",
+    deliveryConfirmationHeader: "Tack för din beställning!",
+    deliveryInformationTextFirst: "Ett e-postmeddelande med vidare instruktioner kommer att skickas till dig.",
+    deliveryInformationTextSecond: "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.",
+    documentDescription: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur iste minima est? Voluptate hic dicta quaerat modi, vitae maxime ad?",
+    errorMessage: "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår."
+  },
+  services: {
+    trimble: {
+      url: "https://geoarkiv-api.goteborg.se/prod",
+      projectDetailsMethod: "/investigation",
+      exportMethod: "/export"
+    },
+    wfs: {
+      boreholes: {},
+      projects: {}
+    }
+  }
 };
 
 class ToolOptions extends Component {
@@ -36,13 +59,36 @@ class ToolOptions extends Component {
         index: tool.index,
         target: tool.options.target || "toolbar",
         visibleAtStart: tool.options.visibleAtStart,
-        position: tool.options.position
+        position: tool.options.position,
+        view: tool.options.view,
+        services: tool.options.services
       });
     } else {
       this.setState({
         active: false
       });
     }
+  }
+
+  /**
+   * Updates current state property with new value, potentially recursively on a nested property path.
+   * Inspired by https://stackoverflow.com/a/50392139/13508133, modified by Sweco to to handle empty tail and work on current state
+   * @param {*} obj current value object for setting updated state key, should be an empty object on first level call
+   * @param {*} propPath flat or nested path to state key to update, nesting is specified by underscores (_)
+   * @param {*} value new value to set on specified state key
+   */
+   getUpdatedStateProp = (obj, propPath, value) => {
+    const [head, ...tail] = propPath.split('_');
+
+    if (!tail || !tail.length) {
+      obj[head] = value;
+      return obj;
+    }
+    var parentObject = obj[head];
+    if (!parentObject) {
+      parentObject = this.state[head];
+    }
+    return this.getUpdatedStateProp(parentObject, tail.join('_'), value);
   }
 
   handleInputChange(event) {
@@ -53,9 +99,16 @@ class ToolOptions extends Component {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
 
-    this.setState({
-      [name]: value,
-    });
+    const [head, ...tail] = name.split('_');
+    if (!tail || !tail.length) {
+      this.setState({
+        [name]: value
+      });
+    } else {
+      this.setState({
+        [head]: this.getUpdatedStateProp({}, name, value)
+      });
+    }
   }
 
   getTool() {
@@ -92,7 +145,9 @@ class ToolOptions extends Component {
       options: {
         target: this.state.target,
         position: this.state.position,
-        visibleAtStart: this.state.visibleAtStart
+        visibleAtStart: this.state.visibleAtStart,
+        view: this.state.view,
+        services: this.state.services
       },
     };
 
@@ -220,6 +275,65 @@ class ToolOptions extends Component {
               <option value="left">Left</option>
               <option value="right">Right</option>
             </select>
+          </div>
+          <div className="separator">Trimble GeoSuite Archive API</div>
+          <div>
+            <label htmlFor="services_trimble_url">
+              Basadress{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Basadress till Trimble GeoSuite Archive API (URL till Trimble WebAPI)"
+              />
+            </label>
+            <input
+              type="text"
+              id="services_trimble_url"
+              name="services_trimble_url"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.services.trimble.url}
+            />
+          </div>
+          <div className="separator">Texter</div>
+          <div>
+            <label htmlFor="view_termsAndConditionsLink">
+              Villkor{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Visas som en länk till villkor för användning och beställning av data"
+              />
+            </label>
+            <input
+              type="text"
+              id="view_termsAndConditionsLink"
+              name="view_termsAndConditionsLink"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.view.termsAndConditionsLink}
+            />
+          </div>
+          <div>
+            <label htmlFor="view_boreholeIntro">
+              Beställning GeoSuite-format, intro{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Visas som introduktion vid beställning av GeoSuite-format"
+              />
+            </label>
+            <textarea
+              type="text"
+              id="view_boreholeIntro"
+              name="view_boreholeIntro"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.view.boreholeIntro}
+            />
           </div>
           <div className="separator">Övriga inställningar</div>
           <div>
