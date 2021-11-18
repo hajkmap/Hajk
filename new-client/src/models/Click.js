@@ -1,7 +1,6 @@
-import GeoJSON from "ol/format/GeoJSON.js";
+import GeoJSON from "ol/format/GeoJSON";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
-//import GML from "ol/format/GML";
 import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 import { hfetch } from "utils/FetchWrapper";
 
@@ -42,12 +41,16 @@ function query(map, layer, evt) {
     // See #852. Without this, it's almost impossible to get a result from QGIS Server.
     // TODO: This could be expanded and made an admin setting - I'm not sure that 50 px
     // will work for everyone.
+    // The WITH_GEOMETRY is necessary to make QGIS Server send back the feature's geometry
+    // in the response.
+    // See: https://docs.qgis.org/3.16/en/docs/server_manual/services.html#wms-withgeometry.
     if (layer.getSource().serverType_ === "qgis") {
       params = {
         ...params,
         FI_POINT_TOLERANCE: 50,
         FI_LINE_TOLERANCE: 50,
         FI_POLYGON_TOLERANCE: 50,
+        WITH_GEOMETRY: true,
       };
     }
 
@@ -118,14 +121,26 @@ function sortFeatures(layer, features) {
 // Function similar to GeoJSON().readFeatures, with the subtle difference that we set an
 // id if it is missing on the parsed feature. The missing id occurs when parsing features from
 // arcGis for some reason.
-function readJsonFeatures(jsonData) {
+function readJsonFeatures(jsonData, layerProjection, viewProjection) {
   const parser = new GeoJSON();
+
+  // If the response from WMS service contains a CRS (GeoServer), the feature parser
+  // will use it be default to determine the features' projection.
+  // However, if it's empty (QGIS Server), we must tell the parser which projection
+  // should be used for the features and which projection our View is in.
+  const parserOptions = jsonData.crs
+    ? {}
+    : {
+        dataProjection: layerProjection,
+        featureProjection: viewProjection,
+      };
+
   const parsedFeatures = [];
   // jsonData will always be a featureCollection, hence we must map over all
   // features in the collection.
   jsonData.features.map((jsonFeature) => {
     // Lets parse the feature...
-    const parsedJsonFeature = parser.readFeature(jsonFeature);
+    const parsedJsonFeature = parser.readFeature(jsonFeature, parserOptions);
     // And check if we have an id...
     if (!parsedJsonFeature.getId()) {
       // If we don't, we set the id to the layerName, and a random id
@@ -143,7 +158,9 @@ function readJsonFeatures(jsonData) {
 }
 
 function getFeaturesFromJson(response, jsonData) {
-  const parsed = readJsonFeatures(jsonData);
+  const layerProjection = response.layer.getSource().getProjection();
+  const viewProjection = response.viewProjection;
+  const parsed = readJsonFeatures(jsonData, layerProjection, viewProjection);
   if (parsed && parsed.length > 0) {
     parsed.forEach((f) => {
       f.layer = response.layer;
@@ -179,6 +196,7 @@ function getFeaturesFromGml(response, text) {
 export function handleClick(evt, map, callback) {
   document.querySelector("body").style.cursor = "progress";
   const promises = [];
+  const viewProjection = map.getView().getProjection().getCode();
   map
     .getLayers()
     .getArray()
@@ -202,6 +220,7 @@ export function handleClick(evt, map, callback) {
             return {
               layer: layer,
               requestResponse: response,
+              viewProjection: viewProjection,
             };
           })
         );

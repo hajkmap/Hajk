@@ -5,7 +5,6 @@ import { saveAs } from "file-saver";
 import { Circle as CircleStyle, Icon } from "ol/style.js";
 import { fromCircle } from "ol/geom/Polygon.js";
 import { Circle } from "ol/geom.js";
-import GeoJSON from "ol/format/GeoJSON";
 
 export default class KmlExport {
   #featureStyle;
@@ -58,7 +57,7 @@ export default class KmlExport {
   };
 
   #getStyledFeature = (feature, featureTitle, displayFields) => {
-    const gjFeature = new GeoJSON().readFeature(feature);
+    const gjFeature = feature.clone();
     gjFeature.setStyle(); // We must reset the current style before applying new...
     gjFeature.setStyle(
       this.#featureStyle.getFeatureStyle(

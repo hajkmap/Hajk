@@ -31,11 +31,9 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   activeChanged(e) {
     this.setState({

@@ -49,12 +49,25 @@ class MapOptions extends Component {
         constrainOnlyCenter: config.constrainOnlyCenter,
         constrainResolution: config.constrainResolution,
         enableDownloadLink: config.enableDownloadLink,
+        altShiftDragRotate: config.altShiftDragRotate || true,
+        onFocusOnly: config.onFocusOnly || true,
+        doubleClickZoom: config.doubleClickZoom || true,
+        keyboard: config.keyboard || true,
+        mouseWheelZoom: config.mouseWheelZoom || true,
+        shiftDragZoom: config.shiftDragZoom || true,
+        dragPan: config.dragPan || true,
+        pinchRotate: config.pinchRotate || true,
+        pinchZoom: config.pinchZoom || true,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
+        mapresetter: config.mapresetter,
         showThemeToggler: config.showThemeToggler,
+        showUserAvatar: config.showUserAvatar,
         drawerVisible: config.drawerVisible,
         drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
+        zoomDelta: config.zoomDelta,
+        zoomDuration: config.zoomDuration,
         title: config.title ? config.title : "",
         geoserverLegendOptions: config.geoserverLegendOptions
           ? config.geoserverLegendOptions
@@ -71,11 +84,11 @@ class MapOptions extends Component {
     });
   }
 
-  componentWillUnmount() {
+  UNSAFE_componentWillUnmount() {
     this.props.model.off("change:mapConfig");
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     var mapConfig = this.props.model.get("mapConfig");
     this.setState({
       primaryColor:
@@ -104,9 +117,22 @@ class MapOptions extends Component {
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
       constrainResolution: mapConfig.constrainResolution,
       enableDownloadLink: mapConfig.enableDownloadLink,
+      altShiftDragRotate: mapConfig.altShiftDragRotate,
+      onFocusOnly: mapConfig.onFocusOnly,
+      doubleClickZoom: mapConfig.doubleClickZoom,
+      keyboard: mapConfig.keyboard,
+      mouseWheelZoom: mapConfig.mouseWheelZoom,
+      shiftDragZoom: mapConfig.shiftDragZoom,
+      dragPan: mapConfig.dragPan,
+      pinchRotate: mapConfig.pinchRotate,
+      pinchZoom: mapConfig.pinchZoom,
+      zoomDelta: mapConfig.zoomDelta,
+      zoomDuration: mapConfig.zoomDuration,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
+      mapresetter: mapConfig.mapresetter,
       showThemeToggler: mapConfig.showThemeToggler,
+      showUserAvatar: mapConfig.showUserAvatar,
       drawerVisible: mapConfig.drawerVisible,
       drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
@@ -136,7 +162,11 @@ class MapOptions extends Component {
       value = input.checked;
     }
 
-    if (["zoom", "maxZoom", "minZoom"].includes(fieldName))
+    if (
+      ["zoom", "maxZoom", "minZoom", "zoomDelta", "zoomDuration"].includes(
+        fieldName
+      )
+    )
       value = parseInt(value);
     if (["origin", "extent", "center", "resolutions"].includes(fieldName))
       value = value.split(",").map((v) => parseFloat(v));
@@ -157,6 +187,8 @@ class MapOptions extends Component {
         "zoom",
         "maxZoom",
         "minZoom",
+        "zoomDelta",
+        "zoomDuration",
         "center",
       ],
       validationErrors = [];
@@ -237,6 +269,8 @@ class MapOptions extends Component {
           valid = false;
         }
         break;
+      case "zoomDelta":
+      case "zoomDuration":
       case "projection":
         if (empty(value)) {
           valid = false;
@@ -245,9 +279,20 @@ class MapOptions extends Component {
       case "constrainOnlyCenter":
       case "constrainResolution":
       case "enableDownloadLink":
+      case "altShiftDragRotate":
+      case "onFocusOnly":
+      case "doubleClickZoom":
+      case "keyboard":
+      case "mouseWheelZoom":
+      case "shiftDragZoom":
+      case "dragPan":
+      case "pinchRotate":
+      case "pinchZoom":
       case "mapselector":
       case "mapcleaner":
+      case "mapresetter":
       case "showThemeToggler":
+      case "showUserAvatar":
       case "drawerVisible":
       case "drawVisibleMobile":
       case "drawerPermanent":
@@ -294,9 +339,22 @@ class MapOptions extends Component {
         config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
         config.constrainResolution = this.getValue("constrainResolution");
         config.enableDownloadLink = this.getValue("enableDownloadLink");
+        config.altShiftDragRotate = this.getValue("altShiftDragRotate");
+        config.onFocusOnly = this.getValue("onFocusOnly");
+        config.doubleClickZoom = this.getValue("doubleClickZoom");
+        config.keyboard = this.getValue("keyboard");
+        config.mouseWheelZoom = this.getValue("mouseWheelZoom");
+        config.shiftDragZoom = this.getValue("shiftDragZoom");
+        config.dragPan = this.getValue("dragPan");
+        config.pinchRotate = this.getValue("pinchRotate");
+        config.pinchZoom = this.getValue("pinchZoom");
+        config.zoomDelta = this.getValue("zoomDelta");
+        config.zoomDuration = this.getValue("zoomDuration");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
+        config.mapresetter = this.getValue("mapresetter");
         config.showThemeToggler = this.getValue("showThemeToggler");
+        config.showUserAvatar = this.getValue("showUserAvatar");
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
@@ -634,6 +692,194 @@ class MapOptions extends Component {
                 />
               </label>
             </div>
+            <div className="separator">Kartinteraktioner</div>
+            <div>
+              Se{" "}
+              <a href="https://openlayers.org/en/latest/apidoc/module-ol_interaction.html#.defaults">
+                OpenLayers-dokumentation
+              </a>{" "}
+              för detaljer kring vad varje inställning gör.
+            </div>
+            <div>
+              <input
+                id="input_altShiftDragRotate"
+                type="checkbox"
+                ref="input_altShiftDragRotate"
+                onChange={(e) => {
+                  this.setState({ altShiftDragRotate: e.target.checked });
+                }}
+                checked={this.state.altShiftDragRotate}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_altShiftDragRotate">
+                Whether Alt-Shift-drag rotate is desired{" "}
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_onFocusOnly"
+                type="checkbox"
+                ref="input_onFocusOnly"
+                onChange={(e) => {
+                  this.setState({ onFocusOnly: e.target.checked });
+                }}
+                checked={this.state.onFocusOnly}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_onFocusOnly">
+                Interact only when the map has the{" "}
+                <abbr
+                  title="This affects the
+                MouseWheelZoom and DragPan interactions and is useful when page
+                scroll is desired for maps that do not have the browser's focus."
+                >
+                  focus
+                </abbr>
+                .
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_doubleClickZoom"
+                type="checkbox"
+                ref="input_doubleClickZoom"
+                onChange={(e) => {
+                  this.setState({ doubleClickZoom: e.target.checked });
+                }}
+                checked={this.state.doubleClickZoom}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_doubleClickZoom">
+                Whether double click zoom is desired.
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_keyboard"
+                type="checkbox"
+                ref="input_keyboard"
+                onChange={(e) => {
+                  this.setState({ keyboard: e.target.checked });
+                }}
+                checked={this.state.keyboard}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_keyboard">
+                Whether keyboard interaction is desired.
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_mouseWheelZoom"
+                type="checkbox"
+                ref="input_mouseWheelZoom"
+                onChange={(e) => {
+                  this.setState({ mouseWheelZoom: e.target.checked });
+                }}
+                checked={this.state.mouseWheelZoom}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_mouseWheelZoom">
+                Whether mousewheel zoom is desired.
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_shiftDragZoom"
+                type="checkbox"
+                ref="input_shiftDragZoom"
+                onChange={(e) => {
+                  this.setState({ shiftDragZoom: e.target.checked });
+                }}
+                checked={this.state.shiftDragZoom}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_shiftDragZoom">
+                Whether Shift-drag zoom is desired.
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_dragPan"
+                type="checkbox"
+                ref="input_dragPan"
+                onChange={(e) => {
+                  this.setState({ dragPan: e.target.checked });
+                }}
+                checked={this.state.dragPan}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_dragPan">
+                Whether drag pan is desired.
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_pinchRotate"
+                type="checkbox"
+                ref="input_pinchRotate"
+                onChange={(e) => {
+                  this.setState({ pinchRotate: e.target.checked });
+                }}
+                checked={this.state.pinchRotate}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_pinchRotate">
+                Whether pinch rotate is desired.
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_pinchZoom"
+                type="checkbox"
+                ref="input_pinchZoom"
+                onChange={(e) => {
+                  this.setState({ pinchZoom: e.target.checked });
+                }}
+                checked={this.state.pinchZoom}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_pinchZoom">
+                Whether pinch zoom is desired.
+              </label>
+            </div>
+            <div>
+              <label>
+                Zoom level delta when using keyboard or double click zoom.
+              </label>
+              <input
+                type="number"
+                min="0"
+                ref="input_zoomDelta"
+                value={this.state.zoomDelta}
+                className={
+                  (this.getValidationClass("zoomDelta"), "control-fixed-width")
+                }
+                onChange={(e) => {
+                  this.setState({ zoomDelta: e.target.value }, () =>
+                    this.validateField("zoomDelta")
+                  );
+                }}
+              />
+            </div>
+            <div>
+              <label>Duration of the zoom animation in milliseconds.</label>
+              <input
+                type="number"
+                min="0"
+                ref="input_zoomDuration"
+                value={this.state.zoomDuration}
+                className={
+                  (this.getValidationClass("zoomDuration"),
+                  "control-fixed-width")
+                }
+                onChange={(e) => {
+                  this.setState({ zoomDuration: e.target.value }, () =>
+                    this.validateField("zoomDuration")
+                  );
+                }}
+              />
+            </div>
             <div className="separator">Extra inställningar</div>
             <div>
               <label>
@@ -830,6 +1076,26 @@ class MapOptions extends Component {
             </div>
             <div>
               <input
+                id="input_mapresetter"
+                type="checkbox"
+                ref="input_mapresetter"
+                onChange={(e) => {
+                  this.setState({ mapresetter: e.target.checked });
+                }}
+                checked={this.state.mapresetter}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_mapresetter">
+                Visa en hemknapp som återställer kartans innehåll till startläge{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer en hemknapp som återställer kartan att visas för användaren"
+                />
+              </label>
+            </div>
+            <div>
+              <input
                 id="input_showThemeToggler"
                 type="checkbox"
                 ref="input_showThemeToggler"
@@ -845,6 +1111,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktiv kommer en knapp som möjliggör temaväxling att visas"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_showUserAvatar"
+                type="checkbox"
+                ref="input_showUserAvatar"
+                onChange={(e) => {
+                  this.setState({ showUserAvatar: e.target.checked });
+                }}
+                checked={this.state.showUserAvatar}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_showUserAvatar">
+                Visa en knapp med användarens initialer intill zoomknapparna{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om AD-kopplingen är aktiv kommer en avatar-ikon bestående av användarens initialer att visas bland kartkontrollerna"
                 />
               </label>
             </div>

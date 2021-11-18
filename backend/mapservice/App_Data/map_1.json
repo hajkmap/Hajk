@@ -220,6 +220,22 @@
                 "infobox": null
               }
             ]
+          },
+          {
+            "id": "9938c969-590c-8683-435c-1ecaca271096",
+            "parent": "-1",
+            "name": "Övrigt",
+            "toggled": true,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "1352",
+                "visibleAtStart": true,
+                "drawOrder": 4,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ]
           }
         ],
         "active": true,
@@ -524,14 +540,14 @@
   ],
   "map": {
     "target": "map",
-    "center": [-740000, 6920000],
+    "center": [576357, 6386049],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 0.67,
+    "zoom": 1.33,
     "maxZoom": 8,
     "minZoom": 0,
     "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
-    "origin": [-1200000.0, 8500000.0],
+    "origin": [0, 0],
     "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
     "constrainOnlyCenter": false,
     "constrainResolution": false,
