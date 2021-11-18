@@ -6,14 +6,18 @@ import { extend, createEmpty, isEmpty } from "ol/extent";
 import Feature from "ol/Feature";
 import FeatureStyle from "./utils/FeatureStyle";
 import { fromExtent } from "ol/geom/Polygon";
+import TileLayer from "ol/layer/Tile";
+import ImageLayer from "ol/layer/Image";
 import { handleClick } from "../../models/Click";
 import { deepMerge } from "utils/DeepMerge";
+import { isValidLayerId } from "../../utils/Validator";
 
 class MapViewModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
     this.options = settings.options;
+    // this.options.searchInVisibleLayers = false;
     this.drawStyleSettings = this.getDrawStyleSettings();
     this.featureStyle = new FeatureStyle(settings.options);
     this.localObserver = settings.localObserver;
@@ -47,6 +51,60 @@ class MapViewModel {
       source: source,
       style: style,
     });
+  };
+
+  getVisibleLayers = () => {
+    return this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => {
+        return (
+          (layer instanceof TileLayer || layer instanceof ImageLayer) &&
+          // We consider a layer to be visible only if…
+          layer.getVisible() && // …it's visible…
+          layer.getProperties().name &&
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
+        );
+      });
+  };
+
+  getVisibleSearchLayers = () => {
+    const searchSources = this.options.sources;
+    const visibleLayers = this.getVisibleLayers();
+
+    const visibleSearchLayers = [];
+    visibleLayers.forEach((vl) => {
+      if (vl.layersInfo !== undefined) {
+        const subLayers = Object.values(vl.layersInfo);
+        const sl = subLayers[0];
+        searchSources.forEach((wms) => {
+          const vsl = [];
+          if (wms.id === sl.id) {
+            vsl.id = sl.id;
+            vsl.pid = vl.id;
+            vsl.caption = sl.caption;
+            vsl.url = sl.searchUrl;
+            vsl.layers = [sl.id];
+            vsl.searchFields =
+              typeof sl.searchPropertyName === "string"
+                ? sl.searchPropertyName.split(",")
+                : [];
+            vsl.infobox = sl.infobox;
+            vsl.aliasDict = "foo";
+            vsl.displayFields =
+              typeof sl.searchDisplayName === "string"
+                ? sl.searchDisplayName.split(",")
+                : [];
+            vsl.geometryField = sl.searchGeometryField;
+            vsl.outputFormat = sl.searchOutputFormat;
+
+            visibleSearchLayers.push(vsl);
+          }
+        });
+      }
+    });
+    console.log("visibleSearchLayers: \n", visibleSearchLayers);
+    return visibleSearchLayers;
   };
 
   initMapLayers = () => {
