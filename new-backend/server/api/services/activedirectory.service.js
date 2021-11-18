@@ -1,6 +1,7 @@
 import ActiveDirectory from "activedirectory2";
 import ActiveDirectoryError from "../utils/ActiveDirectoryError";
 import log4js from "log4js";
+import fs from "fs";
 
 const logger = log4js.getLogger("service.auth");
 
@@ -35,14 +36,89 @@ class ActiveDirectoryService {
 
     logger.trace("Initiating ActiveDirectoryService");
 
+    // If .env says we should use AD but the configuration is missing, abort.
     if (
       process.env.AD_URL === undefined ||
       process.env.AD_BASE_DN === undefined ||
       process.env.AD_USERNAME === undefined ||
       process.env.AD_PASSWORD === undefined
     ) {
-      throw new ActiveDirectoryError("Configuration missing");
+      const e = new ActiveDirectoryError(
+        `One or more AD configuration parameters is missing. Check the AD_* options. 
+        If you want to run backend without the AD functionality, set AD_LOOKUP_ACTIVE=false.`
+      );
+      logger.fatal(e.message);
+      throw e;
     }
+
+    // Check if .env is configured for LDAPS. For the TLS functionality,
+    // we require all of the following keys:
+    const certs = [
+      process.env.AD_TLS_PATH_TO_KEY,
+      process.env.AD_TLS_PATH_TO_CERT,
+      process.env.AD_TLS_PATH_TO_CA,
+    ];
+
+    // If at least one of those keys is set, then _all_ of them must be.
+    if (
+      certs.some(this.#isReadableFile) &&
+      certs.every(this.#throwErrorIfNotReadable)
+    ) {
+      const buffers = { key: null, cert: null, ca: null };
+
+      try {
+        buffers.key = fs.readFileSync(process.env.AD_TLS_PATH_TO_KEY);
+        buffers.cert = fs.readFileSync(process.env.AD_TLS_PATH_TO_CERT);
+        buffers.ca = fs.readFileSync(process.env.AD_TLS_PATH_TO_CA);
+      } catch (error) {
+        const e = new ActiveDirectoryError(
+          `
+          Could not read TLS certificate files necessary for establishing the LDAPS connection. 
+          Control your AD_TLS_* options or disable TLS by providing a ldap:// URL to the service. 
+          ${error.message}`
+        );
+        logger.fatal(e.message);
+      }
+
+      this.tlsOptions = {
+        key: buffers.key,
+        cert: buffers.cert,
+        ca: [buffers.ca],
+        passphrase: process.env.AD_TLS_PASSPHRASE,
+        requestCert: true,
+        rejectUnauthorized: true,
+      };
+    }
+    // An extra check: if .env says that we don't want to use TLS, but the
+    // AD_URL seems to point to LDAPS server, let the log know, as it's probably
+    // a mistake.
+    else if (process.env.AD_URL.includes("ldaps://")) {
+      logger.warn(
+        `Caution: the configured AD_URL parameter contains "ldaps://" but you have not provided any TLS certificates!`
+      );
+    }
+
+    // Now we have the AD options and - optionally - the TLS options.
+    // We're ready to prepare the config object for AD.
+    const config = {
+      url: process.env.AD_URL,
+      baseDN: process.env.AD_BASE_DN,
+      username: process.env.AD_USERNAME,
+      password: process.env.AD_PASSWORD,
+      ...(this.tlsOptions && { tlsOptions: this.tlsOptions }), // Assign only if exists
+    };
+
+    // The main AD object that will handle communication
+    logger.trace(`Setting up AD connection to: ${process.env.AD_URL}`);
+    this._ad = new ActiveDirectory(config);
+
+    logger.info(`Testing the AD connection to ${process.env.AD_URL}…`);
+
+    // Check the LDAP(S) connection. It will return true if OK or throw an error if connection
+    // can't be established. Ideally, we'd want to await the return value here, but
+    // we're in a constructor so it can't be done. Still, we achieve the goal of
+    // aborting the startup if connection fails, so it doesn't really matter in the end.
+    this.#checkConnection();
 
     // Initiate 3 local stores to cache the results from AD.
     // One will hold user details, the other will hold groups
@@ -51,15 +127,113 @@ class ActiveDirectoryService {
     this._groups = new Set();
     this._groupsPerUser = new Map();
 
-    // The main AD object that will handle communication
-    this._ad = new ActiveDirectory(
-      process.env.AD_URL,
-      process.env.AD_BASE_DN,
-      process.env.AD_USERNAME,
-      process.env.AD_PASSWORD
-    );
-
     this._trustedHeader = process.env.AD_TRUSTED_HEADER || "X-Control-Header";
+  }
+  /**
+   * @summary Checks if provided path is a readable file. Fails silently
+   * @description The reason for the silent failing here is that it is possible
+   * that none of the paths are set, and that's fine. In that case we should
+   * just continue without the TLS functionality.
+   *
+   * @param {*} path
+   * @returns
+   * @memberof ActiveDirectoryService
+   */
+  #isReadableFile(path) {
+    try {
+      fs.accessSync(path, fs.constants.R_OK);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * @summary Checks if provided path is a readable file. Throws error on failure.
+   * @description This predicate function is used when we check that _every_
+   * path is readable. By the time this is run, we require _all_ paths to exist,
+   * so if one fails, it's a total failure and we can not continue without
+   * informing the admin.
+   *
+   * @param {*} path
+   * @returns
+   * @memberof ActiveDirectoryService
+   */
+  #throwErrorIfNotReadable(path) {
+    try {
+      fs.accessSync(path, fs.constants.R_OK);
+      return true;
+    } catch (error) {
+      const e = new ActiveDirectoryError(
+        `
+        Could not read certificate. Check your AD_TLS_PATH_* settings.
+        ${error.message}
+        ABORTING STARTUP.
+        `
+      );
+      logger.fatal(e.message);
+      throw e;
+    }
+  }
+
+  /**
+   * @summary Checks if a connection to the specified LDAP server can be established.
+   *
+   * @memberof ActiveDirectoryService
+   */
+  #checkConnection() {
+    // Prepare the query that will be sent to AD. Admin can set a specific
+    // query or leave it empty to just ask for "everything". Either way,
+    // we'll limit the results to 1 item, so it won't be heavy on the AD.
+    const query = process.env.AD_CHECK_CONNECTION_QUERY || undefined;
+
+    // Wrap the call to _ad.find() in a try/catch, as we want to catch
+    // internal errors that might occur inside the AD component. One
+    // reason could be that the query string is malformed.
+    try {
+      this._ad.find({ filter: query, sizeLimit: 1 }, function (err, res) {
+        if (err || !res) {
+          const e = new ActiveDirectoryError(
+            ` AD CONNECTION FAILED!
+Connection to ${process.env.AD_URL} failed. Control your AD_* settings
+in .env. There could be an issue with the certificates, CA, passphrase.
+Also, make sure that the machine that runs this process can access the 
+specified server (no firewalls etc that block the request). 
+
+--------------------------- ORIGINAL ERROR ----------------------------
+Error code: ${err.code}
+Error message: ${err.message}
+${err.stack}
+------------------------- END ORIGINAL ERROR ----------------------------
+
+ABORTING STARTUP.
+            `
+          );
+          // Write the error to log file
+          logger.fatal(e.message);
+
+          // Now, abort startup by throwing an _uncaught_ error. Note that this
+          // wil NOT be caught by the try/catch we're inside, as we're NOT inside
+          // of it. We are in fact inside a callback, and that callback, and I haven't
+          // defined any try/catch here on purpose. From the NodeJS docs:
+          //
+          // "If it is necessary to terminate the Node.js process due to an error condition,
+          // throwing an uncaught error and allowing the process to terminate accordingly
+          //is safer than calling process.exit()."
+          throw e;
+        } else {
+          logger.info(`Connection to ${process.env.AD_URL} succeeded.`);
+          return true;
+        }
+      });
+    } catch (error) {
+      const e = new ActiveDirectoryError(`
+      Couldn't test AD connection to ${process.env.AD_URL} due to malformed query value: "${process.env.AD_CHECK_CONNECTION_QUERY}". 
+      Check the AD_CHECK_CONNECTION_QUERY parameter in .env.
+      ABORTING STARTUP.`);
+      logger.fatal(e);
+      throw e;
+    }
   }
 
   /**
