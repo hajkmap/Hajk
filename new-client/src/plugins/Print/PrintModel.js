@@ -28,8 +28,13 @@ export default class PrintModel {
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
 
+    // Let's keep track of the original view, since we're gonna change the view
+    // under the print-process. (And we want to be able to change back to the original one).
     this.originalView = this.map.getView();
 
+    // We must initiate a "print-view" that includes potential "hidden" resolutions.
+    // These "hidden" resolutions allows the print-process to zoom more than what the
+    // users are allowed (which is required if we want to print in high resolutions).
     this.printView = new View({
       center: this.originalView.getCenter(),
       constrainOnlyCenter: this.mapConfig.constrainOnlyCenter,
@@ -37,7 +42,7 @@ export default class PrintModel {
       maxZoom: 24,
       minZoom: 0,
       projection: this.originalView.getProjection(),
-      resolutions: this.mapConfig.allResolutions,
+      resolutions: this.mapConfig.allResolutions, // allResolutions includes the "hidden" resolutions
       zoom: this.originalView.getZoom(),
     });
   }
@@ -93,6 +98,12 @@ export default class PrintModel {
   }
 
   getMapScale = () => {
+    // We have to make sure to get (and set on the printView) the current zoom
+    //  of the "original" view. Otherwise, the scale calculation could be wrong
+    // since it depends on the static zoom of the printView.
+    this.printView.setZoom(this.originalView.getZoom());
+    // When this is updated, we're ready to calculate the scale, which depends on the
+    // dpi, mpu, inchPerMeter, and resolution. (TODO: (@hallbergs) Clarify these calculations).
     const dpi = 25.4 / 0.28,
       mpu = this.printView.getProjection().getMetersPerUnit(),
       inchesPerMeter = 39.37,
@@ -441,7 +452,7 @@ export default class PrintModel {
     );
 
     // The desired options are OK if they result in a resolution bigger than the minimum
-    // resolution of the map.
+    // resolution of the print-view.
     return desiredResolution >= this.printView.getMinResolution();
   };
 
@@ -480,6 +491,8 @@ export default class PrintModel {
     const width = Math.round((dim[0] * resolution) / 25.4);
     const height = Math.round((dim[1] * resolution) / 25.4);
     const size = this.map.getSize();
+    // Before we're printing we must make sure to change the map-view from the
+    // original one, to the print-view.
     this.map.setView(this.printView);
     const originalResolution = this.map.getView().getResolution();
     const originalCenter = this.map.getView().getCenter();
