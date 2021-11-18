@@ -30,6 +30,8 @@ namespace MapService.Models
         public int minZoom { get; set; }
 
         public double[] resolutions { get; set; }
+        
+        public double[] extraPrintResolutions { get; set; }        
 
         public double[] origin { get; set; }
 
