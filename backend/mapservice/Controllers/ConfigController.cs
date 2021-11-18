@@ -393,7 +393,7 @@ namespace MapService.Controllers
                 }
             }
 
-            var layersInFirTool = firTool.SelectToken("$.options.layers");
+            var layersInFirTool = firTool.SelectToken("$.options.wfsLayers");
             if (layersInFirTool != null)
             {
                 foreach (JToken child in layersInFirTool.Children())
