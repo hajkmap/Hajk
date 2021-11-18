@@ -60,7 +60,7 @@ class AppModel {
     // It will also be used in the print plugin to be able to print in higher resolutions.
     this.config.mapConfig.map.allResolutions = [
       ...this.config.mapConfig.map.resolutions,
-      ...(this.config.mapConfig.map.hiddenResolutions ?? []),
+      ...(this.config.mapConfig.map.extraPrintResolutions ?? []),
     ];
   }
 
