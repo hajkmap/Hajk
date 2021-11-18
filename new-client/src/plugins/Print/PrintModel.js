@@ -45,6 +45,9 @@ export default class PrintModel {
       resolutions: this.mapConfig.allResolutions, // allResolutions includes the "hidden" resolutions
       zoom: this.originalView.getZoom(),
     });
+
+    // TODO (@jesade-vbg) Remove the unnecessary logic connected to storing information about the
+    // original view as discussed in #912.
   }
 
   scaleBarLengths = {
