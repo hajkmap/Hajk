@@ -17,7 +17,6 @@ class MapViewModel {
     this.map = settings.map;
     this.app = settings.app;
     this.options = settings.options;
-    // this.options.searchInVisibleLayers = false;
     this.drawStyleSettings = this.getDrawStyleSettings();
     this.featureStyle = new FeatureStyle(settings.options);
     this.localObserver = settings.localObserver;
@@ -103,7 +102,6 @@ class MapViewModel {
         });
       }
     });
-    console.log("visibleSearchLayers: \n", visibleSearchLayers);
     return visibleSearchLayers;
   };
 

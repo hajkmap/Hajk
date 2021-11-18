@@ -23,7 +23,6 @@ const styles = () => ({
 class Search extends React.PureComponent {
   defaultSearchOptions = {
     enableLabelOnHighlight: true,
-    //searchInVisibleLayers: false,
     wildcardAtStart: false,
     wildcardAtEnd: true,
     matchCase: false,
@@ -639,23 +638,11 @@ class Search extends React.PureComponent {
     if (searchSources.length === 0) {
       searchSources = this.searchModel.getSources();
     }
-    console.log("searchSources\n", searchSources);
-    console.log(
-      "this.state.searchOptions.searchInVisibleLayers: ",
-      this.state.searchOptions.searchInVisibleLayers
-    );
 
     if (this.state.searchOptions.searchInVisibleLayers) {
-      console.log("searchInVisibleLayers . . .");
       searchSources = this.mapViewModel.getVisibleSearchLayers();
     }
 
-    // console.log(
-    //   "searchString:",
-    //   searchString,
-    //   "\nsearchSources: ",
-    //   searchSources
-    // );
     let active = true;
     const promise = this.searchModel.getResults(
       searchString,
