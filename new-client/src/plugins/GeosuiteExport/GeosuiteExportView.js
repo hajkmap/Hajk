@@ -620,7 +620,7 @@ class GeosuiteExportView extends React.PureComponent {
             onClick={() => {
               this.setState({ activeStep: 1 });
             }}
-            variant="outlined"
+            variant="contained"
             aria-label="Välj mer produkter"
             disabled={false}
             color="primary"
@@ -644,7 +644,7 @@ class GeosuiteExportView extends React.PureComponent {
 
   renderStepperButtons() {
     return (
-      <ButtonGroup fullWidth>
+      <div style={{ width: "80%", margin: "0 auto" }}>
         <Button
           disabled={this.state.activeStep === 0}
           startIcon={<ReplayIcon />}
@@ -652,6 +652,9 @@ class GeosuiteExportView extends React.PureComponent {
             this.handleLeaveStepTen();
           }}
           color="primary"
+          variant="outlined"
+          fullWidth
+          style={{ marginBottom: "5px" }}
         >
           Börja Om
         </Button>
@@ -661,10 +664,13 @@ class GeosuiteExportView extends React.PureComponent {
             this.handleClose();
           }}
           color="primary"
+          variant="outlined"
+          fullWidth
+          style={{ marginTop: "5px" }}
         >
           Avsluta
         </Button>
-      </ButtonGroup>
+      </div>
     );
   }
 
@@ -679,7 +685,7 @@ class GeosuiteExportView extends React.PureComponent {
           onClick={() => {
             this.setState({ activeStep: step + 1 });
           }}
-          variant="outlined"
+          variant="contained"
           aria-label="Fortsätt till nästa steg"
           disabled={!this.state.steps?.[step + 1]?.["canEnter"]}
           color="primary"
