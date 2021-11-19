@@ -489,12 +489,21 @@ class EditModel {
       source: this.vectorSource,
       style: this.getSketchStyle(),
       type: geometryType,
+      stopClick: true,
       geometryName: this.geometryName,
     });
     this.draw.on("drawend", (event) => {
       event.feature.modification = "added";
       this.editAttributes(event.feature);
-      this.deactivateInteraction();
+      // OpenLayers seems to have a problem stopping the clicks if
+      // the draw interaction is removed too early. This fix is not pretty,
+      // but it gets the job done. It seems to be enough to remove the draw
+      // interaction after one cpu-cycle.
+      // If this is not added, the user will get a zoom-event when closing
+      // a polygon drawing.
+      setTimeout(() => {
+        this.deactivateInteraction();
+      }, 1);
     });
     this.map.addInteraction(this.draw);
     this.map.clickLock.add("edit");
