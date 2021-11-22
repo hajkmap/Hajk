@@ -37,6 +37,7 @@ const defaultState = {
   addedLayers: [],
   id: "",
   caption: "",
+  internalLayerName: "",
   url: "",
   uri: "",
   projection: "",
@@ -123,6 +124,7 @@ class Edit extends Component {
       mode: "edit",
       id: layer.id,
       caption: layer.caption,
+      internalLayerName: layer.internalLayerName || layer.caption,
       url: layer.url,
       uri: layer.uri,
       projection: layer.projection || "EPSG:3006",
@@ -422,6 +424,7 @@ class Edit extends Component {
       let layer = {
         id: this.state.id,
         caption: this.getValue("caption"),
+        internalLayerName: this.getValue("internalLayerName"),
         url: this.getValue("url"),
         uri: this.getValue("uri"),
         layers: this.getValue("layers"),
@@ -510,7 +513,11 @@ class Edit extends Component {
     }
     return layers.map((layer, i) => (
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
-        <span>{layer.caption}</span>
+        <span>
+          {layer.internalLayerName?.length > 0
+            ? layer.internalLayerName
+            : layer.caption}
+        </span>
         <i
           title="Radera lager"
           onClick={(e) => this.removeLayer(e, layer)}
@@ -913,6 +920,18 @@ class Edit extends Component {
                     );
                   }}
                   className={this.getValidationClass("caption")}
+                />
+              </div>
+              <div>
+                <label>Visningsnamn Admin</label>
+                <input
+                  type="text"
+                  ref="input_internalLayerName"
+                  value={this.state.internalLayerName}
+                  onChange={(e) => {
+                    this.setState({ internalLayerName: e.target.value });
+                    this.validateField("internalLayerName");
+                  }}
                 />
               </div>
               <div>

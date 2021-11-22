@@ -166,7 +166,10 @@ $.fn.editable = function (component) {
       checkbox2.attr("checked", JSON.parse(node.parent().attr("data-toggled")));
     }
     if (node.parent().attr("data-visibleatstart")) {
-      checkbox3.attr("checked", JSON.parse(node.parent().attr("data-visibleatstart")));
+      checkbox3.attr(
+        "checked",
+        JSON.parse(node.parent().attr("data-visibleatstart"))
+      );
     }
     if (node.parent().attr("data-visibleforgroups")) {
       input3.val(node.parent().attr("data-visibleforgroups"));
@@ -897,7 +900,10 @@ class Menu extends Component {
           <span className={cls} />
           &nbsp;
           <span className="main-box">
-            {layer.caption} {displayType}
+            {layer.internalLayerName?.length > 0
+              ? layer.internalLayerName
+              : layer.caption}{" "}
+            {displayType}
           </span>
         </li>
       );
