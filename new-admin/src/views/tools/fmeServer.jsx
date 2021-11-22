@@ -56,6 +56,8 @@ const defaultState = {
   index: 0,
   target: "toolbar",
   instruction: "",
+  title: "",
+  description: "",
   visibleAtStart: false,
   visibleForGroups: [],
   productGroups: ["Fastighetsinformation"],
@@ -103,11 +105,13 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
-        target: tool.options.target || "toolbar",
-        position: tool.options.position,
-        width: tool.options.width,
-        height: tool.options.height,
-        instruction: tool.options.instruction,
+        target: tool.options.target ?? "toolbar",
+        position: tool.options.position ?? "left",
+        width: tool.options.width ?? "",
+        height: tool.options.height ?? "",
+        instruction: tool.options.instruction ?? "",
+        title: tool.options.title ?? "",
+        description: tool.options.description ?? "",
         visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups:
           tool.options.visibleForGroups || this.state.visibleForGroups,
@@ -258,6 +262,8 @@ class ToolOptions extends Component {
         width: this.state.width,
         height: this.state.height,
         instruction: this.state.instruction,
+        title: this.state.title,
+        description: this.state.description,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
@@ -1008,6 +1014,46 @@ class ToolOptions extends Component {
               value={this.state.height}
             />
           </div>
+          <div>
+            <label htmlFor="height">
+              Rubrik{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Vill du ha en annan rubrik på pluginet?"
+              />
+            </label>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.title}
+            />
+          </div>
+          <div>
+            <label htmlFor="height">
+              Beskrivning{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Vill du ha en annan beskrivning på pluginet?"
+              />
+            </label>
+            <input
+              id="description"
+              name="description"
+              type="text"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.description}
+            />
+          </div>
           <div className="separator">Övriga inställningar</div>
           <div>
             <input
@@ -1038,7 +1084,7 @@ class ToolOptions extends Component {
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
-              value={this.state.instruction ? atob(this.state.instruction) : ""}
+              value={this.state.instruction}
             />
           </div>
           <div>{this.renderVisibleForGroups()}</div>

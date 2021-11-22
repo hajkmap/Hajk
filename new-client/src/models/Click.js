@@ -24,7 +24,7 @@ function query(map, layer, evt) {
     subLayersToQuery = subLayers
       .filter(
         (subLayer) =>
-          subLayer.queryable === true && visibleSubLayers.includes(subLayer.id)
+          subLayer.queryable === true && visibleSubLayers === subLayer.id
       ) // QUERY_LAYERS must not include anything that's not in LAYERS, see https://github.com/hajkmap/Hajk/issues/211
       .map((queryableSubLayer) => {
         return queryableSubLayer.id;

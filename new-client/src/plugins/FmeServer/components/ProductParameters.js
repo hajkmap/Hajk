@@ -7,26 +7,20 @@ import HelpIcon from "@material-ui/icons/Help";
 import InformationWrapper from "./InformationWrapper";
 import ListBoxSelector from "./ListBoxSelector";
 
+// All parameters will be checked against an array of allowed
+// parameter types to make sure that the parameter type is supported in the renderer.
+import { ALLOWED_FME_PARAMETERS } from "../constants";
+
 const ProductParameters = (props) => {
   // We're gonna need the model for some shared methods
   const { model } = props;
-
-  const allowedFmeTypes = [
-    "CHOICE",
-    "LOOKUP_CHOICE",
-    "LISTBOX",
-    "LOOKUP_LISTBOX",
-    "RANGE_SLIDER",
-    "PASSWORD",
-    "TEXT",
-  ];
 
   // Checks wether all parameters can be rendered or not.
   // A parameter cannot be rendered if the parameter type is not
   // included in the allowedFmeTypes-array.
   function allParametersCantBeRendered() {
     return props.parameters.some((parameter) => {
-      return !allowedFmeTypes.includes(parameter.type);
+      return !ALLOWED_FME_PARAMETERS.includes(parameter.type);
     });
   }
 

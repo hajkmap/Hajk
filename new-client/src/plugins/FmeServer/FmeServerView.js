@@ -12,9 +12,9 @@ import ProductParameters from "./components/ProductParameters";
 import useProductParameters from "./hooks/useProductParameters";
 import useInterval from "./hooks/useInterval";
 
-// We're gonna be checking the job status against this array of
-// FME-status messages (all of witch means that the job has completed).
-import { FME_DONE_MESSAGES } from "./constants";
+// We're gonna be checking the job status against arrays of FME-status
+// messages (all of witch means that the job has completed in some way).
+import { FME_FAIL_MESSAGES, FME_SUCCESS_MESSAGES } from "./constants";
 
 // We're gonna be polling data from FME-server with an interval.
 // This constant sets how often we are polling. (In ms).
@@ -217,9 +217,10 @@ const FmeServerView = (props) => {
     if (jobId === null) {
       return false;
     }
-    // If the order status is any of the "done" statuses,
-    // we should not poll any more.
-    if (FME_DONE_MESSAGES.includes(orderStatus)) {
+    // If the order status is any of the "done" (any fail or success status),
+    // statuses we should not poll any more.
+    const doneStatuses = [...FME_FAIL_MESSAGES, ...FME_SUCCESS_MESSAGES];
+    if (doneStatuses.includes(orderStatus)) {
       return false;
     }
     // Otherwise, we are going to poll data!
