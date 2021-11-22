@@ -54,7 +54,10 @@ class AttributeEditor extends React.Component {
     let valueMap = {};
 
     editSource.editableFields.forEach((field) => {
-      if (featureProps[field.name] !== null) {
+      if (
+        featureProps[field.name] !== null &&
+        typeof featureProps[field.name] !== "undefined"
+      ) {
         if (field.textType === "flerval" && featureProps[field.name] !== "") {
           valueMap[field.name] = field.values.map((value) => {
             return {
