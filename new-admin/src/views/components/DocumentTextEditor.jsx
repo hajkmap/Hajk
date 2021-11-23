@@ -159,8 +159,7 @@ export default class DocumentTextEditor extends React.Component {
       }
     };
 
-    //  return stateFromHTML(html, { customBlockFn });
-    return stateFromHTML(html);
+    return stateFromHTML(html, { customBlockFn });
   };
 
   _onChange(editorState) {
