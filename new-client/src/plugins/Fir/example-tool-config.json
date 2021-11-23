@@ -1,0 +1,86 @@
+{
+  "type": "fir",
+  "index": 401,
+  "options": {
+    "target": "toolbar",
+    "visibleAtStart": true,
+    "visibleForGroups": [],
+    "maxFeatures": 10000,
+    "mappings": {
+      "geometryField": "geom"
+    },
+    "wfsLayers": [
+      {
+        "id": "9246",
+        "idField": "fnr",
+        "areaField": "omrade",
+        "visibleForGroups": []
+      },
+      {
+        "id": "9248",
+        "idField": "fnr",
+        "areaField": "omrade",
+        "visibleForGroups": []
+      },
+      {
+        "id": "9249",
+        "idField": "nyckel",
+        "areaField": "omrade",
+        "visibleForGroups": []
+      }
+    ],
+    "wmsRealEstateLayer": {
+      "id": "9999",
+      "areaField": "omrade",
+      "idField": "fnr"
+    },
+    "wfsRealEstateLayer": {
+      "id": "9246",
+      "areaField": "omrade",
+      "geometryField": "geom",
+      "idField": "fnr",
+      "labelField": "block_enhet",
+      "maxFeatures": "10000"
+    },
+    "resultsList": {
+      "sortByField": "fastbet",
+      "textField": "fastbet",
+      "template": "<div>\n        <table>\n          <tbody>\n            <tr>\n              <td>Fastighet</td>\n              <td>{fastbet}</td>\n            </tr>\n            <tr>\n              <td>Område</td>\n              <td>{omrade}</td>\n            </tr>\n            <tr>\n              <td>Ägare</td>\n              <td>{namn1}</td>\n            </tr>\n            <tr>\n              <td>Ägare</td>\n              <td>{namn2}</td>\n            </tr>\n            <tr>\n              <td>Ägare</td>\n              <td>{namn3}</td>\n            </tr>\n            <tr>\n              <td>Notering ägare</td>\n              <td>{agare_notering}</td>\n            </tr>\n            <tr>\n              <td>Fastighetsadress</td>\n              <td>{fastighetsadress}</td>\n            </tr>\n            <tr>\n              <td>Registrerad totalarea (m2)</td>\n              <td>{totalarea}</td>\n            </tr>\n          </tbody>\n        </table>\n        <ul>\n          <li>\n            <a href=\"https://x/Report/Fastighetenkel/pdf/{fnr}\" target=\"_blank\">\n              Fastighetsrapport (förenklad)\n            </a>\n          </li>\n          <li>\n            <a href=\"https://x/Report/Fastighet/pdf/{fnr}\" target=\"_blank\">\n              Fastighetsrapport (komplett)\n            </a>\n          </li>\n          <li>\n            <a href=\"https://x/?fnr={fnr}&fastighet={fastbet}\" target=\"_blank\">\n              Bygglovsanteckning\n            </a>\n          </li>\n        </ul>\n      </div>"
+    },
+    "propertyList": {
+      "idField": "fnr",
+      "excelExportUrl": "https://x/mapservice/fir/realEstateOwnerlist",
+      "visibleForGroups": []
+    },
+    "residentList": {
+      "mappings": {
+        "addressDisplayName": "Adress",
+        "addressFieldName": "adress",
+        "ageDisplayName": "Ålder",
+        "ageFieldName": "alder",
+        "ssnDisplayName": "Personnummer",
+        "ssnFieldName": "personnr",
+        "birthDateDisplayName": "Födelsedatum",
+        "birthDateFieldName": "personnr",
+        "genderDisplayName": "Kön",
+        "genderFieldName": "koen",
+        "nameDisplayName": "Namn",
+        "nameFieldName": "tillnamn",
+        "postalCodeDisplayName": "Postnummer",
+        "postalCodeFieldName": "postnr",
+        "cityDisplayName": "Postort",
+        "cityFieldName": "ort"
+      },
+      "id": "9247",
+      "excelExportUrl": "https://x/mapservice/fir/residentlist",
+      "minAge": 0,
+      "visibleForGroups": []
+    },
+    "edp": {
+      "url": "https://x/mapservice/edp/SendRealEstateIdentifiers",
+      "idField": "fnr",
+      "designationField": "fastbet",
+      "visibleForGroups": []
+    }
+  }
+}
