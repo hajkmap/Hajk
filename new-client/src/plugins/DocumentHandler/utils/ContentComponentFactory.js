@@ -723,7 +723,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   const getHoverLink = (hoverLink, tagText) => {
     return (
       <React.Fragment>
-        <Tooltip title={hoverLink} placement={"bottom"}>
+        <Tooltip title={hoverLink}>
           <abbr className={classes.hoverLink}>{tagText}</abbr>
         </Tooltip>
       </React.Fragment>
