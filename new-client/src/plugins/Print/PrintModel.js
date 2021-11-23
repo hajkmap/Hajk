@@ -6,6 +6,7 @@ import * as PDFjs from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 
 import Vector from "ol/layer/Vector.js";
+import View from "ol/View";
 import VectorSource from "ol/source/Vector.js";
 import Polygon from "ol/geom/Polygon";
 import Feature from "ol/Feature.js";
@@ -25,6 +26,28 @@ export default class PrintModel {
     this.copyright = settings.options.copyright ?? "";
     this.disclaimer = settings.options.disclaimer ?? "";
     this.localObserver = settings.localObserver;
+    this.mapConfig = settings.mapConfig;
+
+    // Let's keep track of the original view, since we're gonna change the view
+    // under the print-process. (And we want to be able to change back to the original one).
+    this.originalView = this.map.getView();
+
+    // We must initiate a "print-view" that includes potential "hidden" resolutions.
+    // These "hidden" resolutions allows the print-process to zoom more than what the
+    // users are allowed (which is required if we want to print in high resolutions).
+    this.printView = new View({
+      center: this.originalView.getCenter(),
+      constrainOnlyCenter: this.mapConfig.constrainOnlyCenter,
+      constrainResolution: this.mapConfig.constrainResolution,
+      maxZoom: 24,
+      minZoom: 0,
+      projection: this.originalView.getProjection(),
+      resolutions: this.mapConfig.allResolutions, // allResolutions includes the "hidden" resolutions
+      zoom: this.originalView.getZoom(),
+    });
+
+    // TODO (@jesade-vbg) Remove the unnecessary logic connected to storing information about the
+    // original view as discussed in #912.
   }
 
   scaleBarLengths = {
@@ -78,10 +101,16 @@ export default class PrintModel {
   }
 
   getMapScale = () => {
+    // We have to make sure to get (and set on the printView) the current zoom
+    //  of the "original" view. Otherwise, the scale calculation could be wrong
+    // since it depends on the static zoom of the printView.
+    this.printView.setZoom(this.originalView.getZoom());
+    // When this is updated, we're ready to calculate the scale, which depends on the
+    // dpi, mpu, inchPerMeter, and resolution. (TODO: (@hallbergs) Clarify these calculations).
     const dpi = 25.4 / 0.28,
-      mpu = this.map.getView().getProjection().getMetersPerUnit(),
+      mpu = this.printView.getProjection().getMetersPerUnit(),
       inchesPerMeter = 39.37,
-      res = this.map.getView().getResolution();
+      res = this.printView.getResolution();
 
     return res * mpu * inchesPerMeter * dpi;
   };
@@ -426,8 +455,8 @@ export default class PrintModel {
     );
 
     // The desired options are OK if they result in a resolution bigger than the minimum
-    // resolution of the map.
-    return desiredResolution >= this.map.getView().getMinResolution();
+    // resolution of the print-view.
+    return desiredResolution >= this.printView.getMinResolution();
   };
 
   getScaleResolution = (scale, resolution, center) => {
@@ -465,6 +494,9 @@ export default class PrintModel {
     const width = Math.round((dim[0] * resolution) / 25.4);
     const height = Math.round((dim[1] * resolution) / 25.4);
     const size = this.map.getSize();
+    // Before we're printing we must make sure to change the map-view from the
+    // original one, to the print-view.
+    this.map.setView(this.printView);
     const originalResolution = this.map.getView().getResolution();
     const originalCenter = this.map.getView().getCenter();
 
@@ -697,6 +729,7 @@ export default class PrintModel {
           this.map.setSize(size);
           this.map.getView().setResolution(originalResolution);
           this.map.getView().setCenter(originalCenter);
+          this.map.setView(this.originalView);
         });
     });
 
