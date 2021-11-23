@@ -55,4 +55,5 @@ Utöver GitHub finns vi på [Slack](https://hajk.slack.com/), med en öppen inbj
 
 
 ## Användardokumentation (guider)
+* [Wiki (Admin- och användardokumentation)](https://github.com/hajkmap/Hajk/wiki)
 * [Sök](https://github.com/hajkmap/Hajk/files/6276475/Guide_sok_HenrikH.pdf)
