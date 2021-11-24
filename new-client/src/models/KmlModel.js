@@ -15,7 +15,8 @@ import KML from "ol/format/KML.js";
  * - import(kmlString): Accepts a KML-string and adds the KML-features to the layer.
  * - removeImportedFeatures(): Removes all imported features from the kml-source.
  * - zoomToCurrentExtent(): Zooms the map to the current extent of the kml-source.
- * - getLayerName(): Returns the name of the vectorLayer that is connected to the model.
+ * - setLayer(layerName): Accepts a string containing a layer name. Will set current layer.
+ * - getCurrentLayerName(): Returns the name of the vectorLayer that is currently connected to the model.
  * - getCurrentExtent(): Returns the current extent of the kml-source.
  */
 class KmlModel {
@@ -277,8 +278,20 @@ class KmlModel {
     this.#currentExtent = this.#kmlSource.getExtent();
   };
 
+  // Set:er allowing us to change which layer the kml-model will interact with
+  setLayer = (layerName) => {
+    // First we must update the private field holding the current layer name
+    this.#layerName = layerName;
+    // Then we must initiate the kml-layer. This will either get the layer
+    // corresponding to the supplied name, or create a new one.
+    this.#initiateKmlLayer();
+    // When the current layer changes, the current extent will obviously
+    // change as well.
+    this.#currentExtent = this.#kmlSource.getExtent();
+  };
+
   // Get:er returning the name of the KML-layer.
-  getLayerName = () => {
+  getCurrentLayerName = () => {
     return this.#layerName;
   };
 
