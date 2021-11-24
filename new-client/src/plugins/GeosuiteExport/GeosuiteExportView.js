@@ -13,7 +13,6 @@ import {
   Step,
   StepLabel,
   StepContent,
-  ButtonGroup,
   Button,
   Typography,
   FormControl,
@@ -36,40 +35,24 @@ import LinkItem from "./components/LinkItem";
 
 const styles = (theme) => ({
   bold: {
-    fontWeight: 600,
+    fontWeight: 500,
   },
   stepButton: {
-    marginTop: theme.spacing(2),
-    marginLeft: theme.spacing(1),
+    marginTop: theme.spacing(1),
     marginRight: theme.spacing(2),
   },
   link: {
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(1),
   },
-  accordion: {
-    width: "100%",
-  },
   subheading: {
     padding: theme.spacing(1),
     fontWeight: theme.typography.fontWeightMedium,
-  },
-  paragraph: {
-    marginTop: theme.spacing(1),
-    marginBotton: theme.spacing(1),
   },
   linkList: {
     maxHeight: 200,
     overflowY: "scroll",
     overflowX: "hidden",
-  },
-  pending: {
-    display: "flex",
-    justifyContent: "center",
-  },
-  pendingContainer: {
-    marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2),
   },
   noResultMessage: {
     display: "flex",
@@ -433,16 +416,16 @@ class GeosuiteExportView extends React.PureComponent {
 
   renderPending() {
     return (
-      <>
-        <div className={this.props.classes.pendingContainer}>
-          <div className={this.props.classes.pending}>
+      <Grid container direction="row" justify="center">
+        <Grid item xs={12}>
+          <Box display="flex" justifyContent="center">
             <CircularProgress variant="indeterminate" size={30} />
-          </div>
-          <div className={this.props.classes.pending}>
-            <Typography>Hämtar resultat...</Typography>
-          </div>
-        </div>
-      </>
+          </Box>
+        </Grid>
+        <Grid item>
+          <Typography>Hämtar resultat...</Typography>
+        </Grid>
+      </Grid>
     );
   }
 
@@ -518,62 +501,71 @@ class GeosuiteExportView extends React.PureComponent {
       options.view?.boreholes?.order?.informationText ??
       "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets molntjänst.";
     return (
-      <>
-        <Grid container direction="row" alignItems="center">
-          <EmailOutlinedIcon />
-          <Typography className={classes.subheading} variant="subtitle1">
-            {"Borrhålsdata i GeoSuite-format"}
-          </Typography>
-        </Grid>
-        <Typography className={classes.paragraph}>{boreholeIntro}</Typography>
-        <Typography className={classes.paragraph}>
-          {boreholeDescription}
-        </Typography>
-        <br />
-        {this.renderBoreholeOrderResult()}
-        <br />
-        <br />
-        <Accordion elevation={0}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography className={classes.subheading}>
-              Referenssystem
+      <div>
+        <Grid container>
+          <Grid container direction="row" alignItems="center">
+            <EmailOutlinedIcon />
+            <Typography className={classes.subheading} variant="subtitle1">
+              {"Borrhålsdata i GeoSuite-format"}
             </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography>{referenceSystemText}</Typography>
-          </AccordionDetails>
-        </Accordion>
-        <Accordion elevation={0}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography className={classes.subheading}>
-              Leveransinformation
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography>{deliveryInformationText}</Typography>
-          </AccordionDetails>
-        </Accordion>
-        <br />
-        <div>
-          <FormControl fullWidth>
-            <InputLabel htmlFor="emailInput">Din e-postadress</InputLabel>
-            <OutlinedInput
-              id="emailInput"
-              required
-              value={this.state.email}
-              error={
-                this.state.email.length === 0 ? false : !this.state.emailValid
-              }
-              onChange={(e) => {
-                this.handleEmailChange(e.target.value);
-              }}
-              startAdornment={
-                <InputAdornment position="start">@</InputAdornment>
-              }
-            />
-          </FormControl>
+          </Grid>
+          <Typography paragraph>{boreholeIntro}</Typography>
+          <Typography paragraph>{boreholeDescription}</Typography>
+          {this.renderBoreholeOrderResult()}
+
+          <Grid item xs={12} style={{ marginTop: "20px" }}>
+            <Accordion
+              elevation={0}
+              style={{ paddingLeft: "0px", marginLeft: "0px" }}
+            >
+              <AccordionSummary
+                style={{ padding: "0px" }}
+                expandIcon={<ExpandMoreIcon />}
+              >
+                <Typography className={classes.bold}>Referenssystem</Typography>
+              </AccordionSummary>
+              <AccordionDetails style={{ padding: "0px" }}>
+                <Typography>{referenceSystemText}</Typography>
+              </AccordionDetails>
+            </Accordion>
+            <Accordion elevation={0}>
+              <AccordionSummary
+                style={{ padding: "0px" }}
+                expandIcon={<ExpandMoreIcon />}
+              >
+                <Typography className={classes.bold}>
+                  Leveransinformation
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails style={{ padding: "0px" }}>
+                <Typography>{deliveryInformationText}</Typography>
+              </AccordionDetails>
+            </Accordion>
+          </Grid>
+
+          <Grid item xs={12} style={{ marginTop: "20px" }}>
+            <FormControl fullWidth>
+              <InputLabel htmlFor="emailInput">Din e-postadress</InputLabel>
+              <OutlinedInput
+                id="emailInput"
+                required
+                value={this.state.email}
+                error={
+                  this.state.email.length === 0 ? false : !this.state.emailValid
+                }
+                onChange={(e) => {
+                  this.handleEmailChange(e.target.value);
+                }}
+                startAdornment={
+                  <InputAdornment position="start">@</InputAdornment>
+                }
+              />
+            </FormControl>
+          </Grid>
+
           <Grid
             className={classes.link}
+            style={{ marginTop: "10px" }}
             container
             direction="row"
             alignItems="center"
@@ -587,9 +579,10 @@ class GeosuiteExportView extends React.PureComponent {
               {"Villkor för nyttjande"}
             </Link>
           </Grid>
-        </div>
-        {this.renderNextAndBackButtons("Beställ", null)}
-      </>
+
+          {this.renderNextAndBackButtons("Beställ", null)}
+        </Grid>
+      </div>
     );
   }
 
@@ -623,7 +616,7 @@ class GeosuiteExportView extends React.PureComponent {
             onClick={() => {
               this.setState({ activeStep: 1 });
             }}
-            variant="outlined"
+            variant="contained"
             aria-label="Välj mer produkter"
             disabled={false}
             color="primary"
@@ -647,7 +640,7 @@ class GeosuiteExportView extends React.PureComponent {
 
   renderStepperButtons() {
     return (
-      <ButtonGroup fullWidth>
+      <div style={{ width: "80%", margin: "0 auto" }}>
         <Button
           disabled={this.state.activeStep === 0}
           startIcon={<ReplayIcon />}
@@ -655,6 +648,9 @@ class GeosuiteExportView extends React.PureComponent {
             this.handleLeaveStepTen();
           }}
           color="primary"
+          variant="outlined"
+          fullWidth
+          style={{ marginBottom: "5px" }}
         >
           Börja Om
         </Button>
@@ -664,10 +660,13 @@ class GeosuiteExportView extends React.PureComponent {
             this.handleClose();
           }}
           color="primary"
+          variant="outlined"
+          fullWidth
+          style={{ marginTop: "5px" }}
         >
           Avsluta
         </Button>
-      </ButtonGroup>
+      </div>
     );
   }
 
@@ -682,7 +681,7 @@ class GeosuiteExportView extends React.PureComponent {
           onClick={() => {
             this.setState({ activeStep: step + 1 });
           }}
-          variant="outlined"
+          variant="contained"
           aria-label="Fortsätt till nästa steg"
           disabled={!this.state.steps?.[step + 1]?.["canEnter"]}
           color="primary"
@@ -709,6 +708,22 @@ class GeosuiteExportView extends React.PureComponent {
     const stepState = { ...this.state.steps };
     stepState[step].canEnter = isEnabled;
     this.setState({ steps: stepState });
+  };
+
+  #getTermsAndConditionsLink = () => {
+    const { options } = this.props;
+    return (
+      options.view?.termsAndConditionsLink ??
+      "https://goteborg.se/wps/portal/om-webbplatsen"
+    );
+  };
+
+  #getErrorMessage = () => {
+    const { options } = this.props;
+    return (
+      options.view?.errorMessage ??
+      "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår."
+    );
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -750,13 +765,18 @@ class GeosuiteExportView extends React.PureComponent {
     return (
       <>
         <div>
-          <Stepper activeStep={this.state.activeStep} orientation="vertical">
+          <Stepper
+            activeStep={this.state.activeStep}
+            orientation="vertical"
+            style={{ paddingLeft: "0px", paddingRight: "0px" }}
+          >
             <Step key="selectArea" completed={false}>
               <StepLabel>Markera område</StepLabel>
               <StepContent>
                 <div>
-                  <Typography variant="caption">{description}</Typography>
-                  <br />
+                  <Typography variant="caption" paragraph>
+                    {description}
+                  </Typography>
                   {this.renderNextAndBackButtons()}
                 </div>
               </StepContent>
@@ -806,22 +826,6 @@ class GeosuiteExportView extends React.PureComponent {
       </>
     );
   }
-
-  #getTermsAndConditionsLink = () => {
-    const { options } = this.props;
-    return (
-      options.view?.termsAndConditionsLink ??
-      "https://goteborg.se/wps/portal/om-webbplatsen"
-    );
-  };
-
-  #getErrorMessage = () => {
-    const { options } = this.props;
-    return (
-      options.view?.errorMessage ??
-      "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår."
-    );
-  };
 }
 
 export default withStyles(styles)(withSnackbar(GeosuiteExportView));
