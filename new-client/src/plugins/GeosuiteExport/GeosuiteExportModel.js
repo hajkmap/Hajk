@@ -7,21 +7,17 @@ import { intersects, within } from "ol/format/filter";
 import { hfetch } from "utils/FetchWrapper";
 import { WFS } from "ol/format";
 
+/**
+ * GeosuiteExport plug-in, model class.
+ * Dependency: Search plug-in.
+ */
 class GeosuiteExportModel {
-  #selection = {
-    borehole: {
-      boreholeIds: [], // Member: String(Trimble borehole id)
-      projects: {}, // Key: ProjectId, Value: JSON-object with Project details:
-      // { id<String>, name<String>, boreholeIds<Array[String]>, numBoreHolesSelected<Number>, numBoreHolesTotal<Number> }
-    },
-    // In a future layer-agnostic extension of this tool the document selection can be keyed by e.g. WFS source key for multi-source capability
-    document: {}, // DocumentSelection: key String<id>, value: { title: title<String>, link: String<download url> }
-  };
   #map;
   #app;
   #config;
   #options;
   #localObserver;
+  #selection;
   #vector;
   #draw;
   #source;
@@ -35,6 +31,15 @@ class GeosuiteExportModel {
     this.#options = settings.options;
     this.#localObserver = settings.localObserver;
 
+    this.#selection = {
+      borehole: {
+        boreholeIds: [], // Member: String(Trimble borehole id)
+        projects: {}, // Key: ProjectId, Value: JSON-object with Project details:
+        // { id<String>, name<String>, boreholeIds<Array[String]>, numBoreHolesSelected<Number>, numBoreHolesTotal<Number> }
+      },
+      // In a future layer-agnostic extension of this tool the document selection can be keyed by e.g. WFS source key for multi-source capability
+      document: {}, // DocumentSelection: key String<id>, value: { title: title<String>, link: String<download url> }
+    };
     this.#source = new VectorSource();
     this.#vector = new VectorLayer({
       source: this.#source,
@@ -50,20 +55,14 @@ class GeosuiteExportModel {
       }),
     });
 
-    // Set WFS configuration from defaults and option overrides, if any
+    // Set configuration from defaults and option overrides, if any
     this.#config = {
       boreholes: {
-        url:
-          this.#options.services?.wfs?.boreholes?.url ??
-          "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
-        featurePrefixName:
-          this.#options.services?.wfs?.boreholes?.featurePrefixName ??
-          "borrhal-v2",
-        featureName:
-          this.#options.services?.wfs?.boreholes?.featureName ?? "borrhal",
-        srs: this.#options.services?.wfs?.boreholes?.srs ?? "EPSG:3006",
-        geometryName:
-          this.#options.services?.wfs?.boreholes?.geometryName ?? "geom",
+        layer: {
+          id: this.#options.services?.wfs?.boreholes?.layer?.id ?? "-1",
+          srs:
+            this.#options.services?.wfs?.boreholes?.layer?.srs ?? "EPSG:3006",
+        },
         spatialFilter: this.#getSpatialFilter(
           this.#options.services?.wfs?.boreholes?.spatialFilter
         ),
@@ -78,18 +77,10 @@ class GeosuiteExportModel {
         maxFeatures: this.#options.services?.wfs?.boreholes?.maxFeatures ?? -1,
       },
       projects: {
-        url:
-          this.#options.services?.wfs?.projects?.url ??
-          "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
-        featurePrefixName:
-          this.#options.services?.wfs?.projects?.featurePrefixName ??
-          "borrhal-v2-utv",
-        featureName:
-          this.#options.services?.wfs?.projects?.featureName ??
-          "geoteknisk_utredning",
-        srs: this.#options.services?.wfs?.projects?.srs ?? "EPSG:3006",
-        geometryName:
-          this.#options.services?.wfs?.projects?.geometryName ?? "geom",
+        layer: {
+          id: this.#options.services?.wfs?.projects?.layer?.id ?? "-1",
+          srs: this.#options.services?.wfs?.projects?.layer?.srs ?? "EPSG:3006",
+        },
         spatialFilter: this.#getSpatialFilter(
           this.#options.services?.wfs?.projects?.spatialFilter
         ),
@@ -103,6 +94,8 @@ class GeosuiteExportModel {
         maxFeatures: this.#options.services?.wfs?.projects?.maxFeatures ?? -1,
       },
     };
+    this.#initWfsLayers();
+    this.#config.srsName = this.#map.getView().getProjection().getCode();
 
     this.#map.addLayer(this.#vector);
     this.#draw = null;
@@ -332,35 +325,38 @@ class GeosuiteExportModel {
       return;
     }
 
-    const mapSrs = this.#map.getView().getProjection().getCode();
-    const layerSrs = wfsConfig.srs ?? mapSrs;
+    const layerSrs = wfsConfig.projection ?? this.#config.srsName;
     let filterGeometry = selectionGeometry;
-    if (mapSrs !== layerSrs) {
+    if (this.#config.srsName !== layerSrs) {
       console.log(
         "Reprojecting selection geometry from %s to %s",
-        mapSrs,
+        this.#config.srsName,
         layerSrs
       );
-      filterGeometry = selectionGeometry.clone().transform(mapSrs, layerSrs);
+      filterGeometry = selectionGeometry
+        .clone()
+        .transform(this.#config.srsName, layerSrs);
     }
 
     // TODO: Replace code-duplication with shared model with search (SearchModel) before PR is created.
     const filter = wfsConfig.spatialFilter ?? within;
     const spatialFilter = filter(
-      wfsConfig.geometryName,
+      wfsConfig.layer.geometryField,
       filterGeometry,
       layerSrs
     );
 
     const wfsGetFeatureOtions = {
-      srsName: mapSrs,
-      featureNS: "", // Must be blank for IE GML parsing
-      featurePrefix: wfsConfig.featurePrefixName,
-      featureTypes: [wfsConfig.featureName],
+      srsName: this.#config.srsName,
+      featureNS: "", // Must be blank for older IE GML parsing
+      featurePrefix: wfsConfig.layer.layers[0].split(":")[0], //featurePrefixName,
+      featureTypes: [wfsConfig.layer.layers[0].split(":")[1]], //[wfsConfig.layer.featureName],
       outputFormat: "application/json",
-      geometryName: wfsConfig.geometryName,
+      geometryName: wfsConfig.layer.geometryField,
       filter: spatialFilter,
     };
+    console.log("WFS config:", wfsConfig);
+    console.log("WFS GetFeature options:", wfsGetFeatureOtions);
     if (wfsConfig.maxFeatures > 0) {
       wfsGetFeatureOtions["maxFeatures"] = wfsConfig.maxFeatures;
     }
@@ -384,7 +380,7 @@ class GeosuiteExportModel {
       "#updateSelectionStateFromWfs: Calling boreholes WFS GetFeature using body:",
       wfsBoreholesRequest.body
     );
-    hfetch(wfsConfig.url, wfsBoreholesRequest)
+    hfetch(wfsConfig.layer.url, wfsBoreholesRequest)
       .then((response) => {
         if (!response.ok) {
           console.log("#updateSelectionStateFromWfs: WFS query rejected");
@@ -647,6 +643,50 @@ class GeosuiteExportModel {
     this.#selection.borehole.projects = {};
     // Reset document selection state
     this.#selection.document = {};
+  };
+
+  #initWfsLayers = () => {
+    this.#config.boreholes.layer = this.#getSearchLayerByRefOrDefaults(
+      this.#config.boreholes.layer.id,
+      {
+        url: "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
+        featurePrefixName: "borrhal-v2",
+        featureName: "borrhal",
+        geometryField: "geom",
+      }
+    );
+    this.#config.projects.layer = this.#getSearchLayerByRefOrDefaults(
+      this.#config.projects.layer.id,
+      {
+        url: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
+        featurePrefixName: "geoteknik-v2-utv",
+        featureName: "geoteknisk_utredning",
+        geometryField: "geom",
+      }
+    );
+  };
+
+  // Returns layer from configured Search layers, given layer id reference.
+  // If no reference is found, the given defaults are used as a static layer.
+  #getSearchLayerByRefOrDefaults = (id, defaults) => {
+    var layer = this.#getSearchLayerById(id);
+    console.log("Get layer by %s:", id, layer);
+    if (!layer) {
+      console.warn(
+        "GeosuiteExport: Layer not found, please configure search layer via admin and mark as active in search plug-in. Using defaults. Reference id=%s.",
+        id
+      );
+      layer = defaults;
+    }
+    return layer;
+  };
+
+  // Returns layer from configured Search layers, given layer id reference.
+  #getSearchLayerById = (id) => {
+    return (this.#app.searchModel?.getSources() ?? []).find((layer) => {
+      console.log("Checking ref %s against: %s", id, layer.id, layer);
+      return layer.id === id;
+    });
   };
 }
 
