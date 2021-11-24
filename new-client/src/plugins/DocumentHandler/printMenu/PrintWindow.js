@@ -250,6 +250,7 @@ class PrintWindow extends React.PureComponent {
         <style>
           @page {
             size: A4;
+            margin: 25mm 25mm 25mm 25mm;
           }
           @media print {
             html,
