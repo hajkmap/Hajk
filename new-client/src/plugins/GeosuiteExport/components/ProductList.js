@@ -5,7 +5,8 @@ import {
   Typography,
   Chip,
   IconButton,
-  Badge,
+  Box,
+  Grid,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import WorkIcon from "@material-ui/icons/Work";
@@ -13,138 +14,138 @@ import Crop32Icon from "@material-ui/icons/Crop32";
 
 const styles = (theme) => ({
   productList: {
-    maxHeight: 200,
+    maxHeight: 350,
     overflowY: "scroll",
     overflowX: "hidden",
-  },
-  chipContainer: {
-    maxWidth: "100%",
-    display: "flex",
-    marginBottom: theme.spacing(2),
-  },
-  leftChip: {
-    marginRight: theme.spacing(1),
+    marginTop: "10px",
   },
   listItemContainer: {
-    paddingLeft: "0",
-    paddingTop: "5px",
+    //Override the padding of the stepper to allow more space for the results.
     paddingBottom: "5px",
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
   },
-  listItem: {
-    display: "flex",
-    justifyContent: "space-between",
+  leftChip: {
+    width: "50%",
+    marginLeft: "5%",
   },
-  listItemText: {
-    display: "flex",
-    alignItems: "center",
-    maxWidth: "80%",
-  },
-  itemButtons: {
-    display: "flex",
-    alignItems: "center",
-    marginLeft: theme.spacing(1),
-  },
-  itemButton: {
-    padding: theme.spacing(0.3),
-  },
-  badge: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
-  },
-  noResultMessage: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-    fontWeight: theme.typography.fontWeightMedium,
+  rightChip: {
+    width: "50%",
+    marginRight: "7%", //take the scrollbar into account.
   },
 });
 
 class ProductList extends React.PureComponent {
-  state = {};
+  state = {
+    globalExportAll: false,
+  };
 
   static propTypes = {
     projects: PropTypes.array.isRequired,
   };
 
+  renderProjectDetails = (project) => {
+    let shouldExportAll = project.exportAll;
+    if (shouldExportAll) {
+      return (
+        <Box display="flex" justifyContent="center" gridColumnGap="5%">
+          <WorkIcon />
+          <Typography>{project.numBoreHolesTotal}</Typography>
+        </Box>
+      );
+    } else {
+      return (
+        <Box display="flex" gridColumnGap="5%">
+          <Crop32Icon />
+          <Typography>{project.numBoreHolesSelected}</Typography>
+        </Box>
+      );
+    }
+  };
+
   render() {
     const { classes, projects, handleExportAll } = this.props;
 
-    if (projects.length > 0) {
+    if (true) {
       return (
-        <>
-          <div className={classes.chipContainer}>
-            <Chip
-              onClick={() => {
-                handleExportAll(true);
-              }}
-              className={classes.leftChip}
-              icon={<WorkIcon />}
-              label="Hela projektet"
-              color="primary"
-              size="small"
-            />
-            <Chip
-              onClick={() => {
-                handleExportAll(false);
-              }}
-              icon={<Crop32Icon />}
-              label="Inom markering"
-              color="primary"
-              size="small"
-            />
-          </div>
-          <div className={classes.productList}>
-            {projects.map((project) => {
-              return (
-                <div key={project.id} className={classes.listItemContainer}>
-                  <div className={classes.listItem}>
-                    <div id="itemText" className={classes.listItemText}>
-                      <Typography noWrap>{project.name}</Typography>
-                    </div>
-                    <div className={classes.itemButtons}>
-                      <div className={classes.itemButton}>
+        <Grid container style={{ marginTop: "10px" }}>
+          <Grid item xs={12}>
+            <Box display="flex" justifyContent="center" gridColumnGap="5%">
+              <Chip
+                className={classes.leftChip}
+                onClick={() => {
+                  this.setState({ globalExportAll: false });
+                  handleExportAll(false);
+                }}
+                icon={<Crop32Icon />}
+                label="Inom markering"
+                size="medium"
+                variant={`${
+                  this.state.globalExportAll ? "outlined" : "default"
+                }`}
+              />
+              <Chip
+                className={classes.rightChip}
+                onClick={() => {
+                  this.setState({ globalExportAll: true });
+                  handleExportAll(true);
+                }}
+                icon={<WorkIcon />}
+                label=" Hela projektet"
+                size="medium"
+                variant={`${
+                  this.state.globalExportAll ? "default" : "outlined"
+                }`}
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={12} style={{ marginTop: "10px" }}>
+            <div className={classes.productList}>
+              {projects.map((project) => {
+                return (
+                  <Grid
+                    key={project.id}
+                    container
+                    alignContent="center"
+                    className={classes.listItemContainer}
+                  >
+                    <Grid item xs={12}>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
+                        <Typography
+                          noWrap
+                          variant="body1"
+                          style={{ fontWeight: 500 }}
+                        >
+                          {project.name}
+                        </Typography>
                         <IconButton
                           onClick={() => {
                             console.log("show select choices");
                           }}
-                          aria-label=""
+                          size="small"
+                          aria-label="Visa projekt export val."
                         >
                           <MoreVertIcon />
                         </IconButton>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={classes.listItem}>
-                    <div>
-                      <Typography>{`${project.id}`}</Typography>
-                    </div>
-                    {project.exportAll ? (
-                      <div className={classes.badge}>
-                        <Badge
-                          badgeContent={project.numBoreHolesTotal}
-                          color="primary"
-                        >
-                          <WorkIcon />
-                        </Badge>
-                      </div>
-                    ) : (
-                      <div className={classes.badge}>
-                        <Badge
-                          badgeContent={project.numBoreHolesSelected}
-                          color="primary"
-                        >
-                          <Crop32Icon />
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} md={10}>
+                      <Typography>{`Id: ${project.id}`}</Typography>
+                    </Grid>
+                    <Grid item xs={3} md={2} style={{ paddingRight: "5%" }}>
+                      <Box display="flex" gridColumnGap="5%">
+                        {this.renderProjectDetails(project)}
+                      </Box>
+                    </Grid>
+                  </Grid>
+                );
+              })}
+            </div>
+          </Grid>
+        </Grid>
       );
     } else {
       return (
