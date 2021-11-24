@@ -1,6 +1,10 @@
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import KML from "ol/format/KML.js";
+import { Circle } from "ol/geom.js";
+import { fromCircle } from "ol/geom/Polygon.js";
+import { createXML } from "../utils/KMLWriter";
+import { saveAs } from "file-saver";
 
 /*
  * A model supplying useful KML-functionality.
@@ -13,6 +17,7 @@ import KML from "ol/format/KML.js";
  * Exposes a couple of methods:
  * - parseFeatures(kmlString): Accepts a KML-string and tries to parse it to OL-features.
  * - import(kmlString): Accepts a KML-string and adds the KML-features to the layer.
+ * - export(): Exports all features in the current kml-layer.
  * - removeImportedFeatures(): Removes all imported features from the kml-source.
  * - zoomToCurrentExtent(): Zooms the map to the current extent of the kml-source.
  * - setLayer(layerName): Accepts a string containing a layer name. Will set current layer.
@@ -240,6 +245,97 @@ class KmlModel {
     zoomToExtent && this.zoomToCurrentExtent();
     // Finally we return a success message to the initiator.
     return { status: "SUCCESS", error: null };
+  };
+
+  // Tries to export all the features in the current kml-layer
+  export = () => {
+    // First we need to get all the features from the current kml-source.
+    const features = this.#kmlSource.getFeatures();
+    // Then we have to make sure that there were some feature there to export.
+    if (!features || features?.length === 0) {
+      return {
+        status: "FAILED",
+        error: "No features exist in the current kml-layer.",
+      };
+    }
+    // Then we'll do some transformations on the features to make sure
+    // that they are kml-compatible.
+    const compatibleFeatures = this.#getKmlCompatibleFeatures(features);
+    // Let's make sure that we have some compatible features to return,
+    // if we don't, we make sure to abort.
+    if (compatibleFeatures.length === 0) {
+      return {
+        status: "FAILED",
+        error: "Could not transform any features to the .kml standard.",
+      };
+    }
+    // If we do have compatible features, we can create the kml-xml
+    const postData = createXML(
+      compatibleFeatures,
+      `${this.#layerName}-kml-export`
+    );
+    // Then we'll call the save-as method from file-saver, which will
+    // initiate the download-process for the user.
+    try {
+      saveAs(
+        new Blob([postData], {
+          type: "application/vnd.google-earth.kml+xml;charset=utf-8",
+        }),
+        `Hajk - ${new Date().toLocaleString()}.kml`
+      );
+      return {
+        status: "SUCCESS",
+        error: null,
+      };
+    } catch (error) {
+      return {
+        status: "FAILED",
+        error: "Could not save the KML-file. File-saver Error.",
+      };
+    }
+  };
+
+  // Clones the supplied features and returns new features which are transformed
+  // so that they are compatible with the .kml-format.
+  #getKmlCompatibleFeatures = (features) => {
+    // Declare an array where we can push the transformed features.
+    const transformedFeatures = [];
+    // Looping trough all the features, creating a clone of each, this clone
+    // will be transformed and then pushed to the transformedFeatures-array.
+    features.forEach((feature) => {
+      // Create the feature-clone
+      const clonedFeature = feature.clone();
+      // Let's check if we're dealing with a circle
+      const geomIsCircle = clonedFeature.getGeometry() instanceof Circle;
+      // If we're dealing with a circle, we have to make sure to simplify
+      // the geometry since the kml standard does not like circles.
+      if (geomIsCircle) {
+        // Create the simplified geometry
+        const simplifiedGeometry = fromCircle(clonedFeature.getGeometry(), 96);
+        // And then set the cloned feature's geometry to the simplified one.
+        clonedFeature.setGeometry(simplifiedGeometry);
+      }
+      // Transform the geometry to WGS:84 so the kml-interpreters will be happy.
+      clonedFeature
+        .getGeometry()
+        .transform(this.#map.getView().getProjection(), "EPSG:4326");
+      // Here some styling-magic is happening... TODO: What?!
+      if (clonedFeature.getStyle()[1]) {
+        clonedFeature.setProperties({
+          style: JSON.stringify(
+            this.extractStyle(
+              clonedFeature.getStyle()[1] || clonedFeature.getStyle()[0],
+              geomIsCircle ? clonedFeature.getGeometry().getRadius() : false
+            )
+          ),
+          geometryType: clonedFeature.getGeometry().getType(),
+        });
+      }
+      // Finally, we can push the transformed feature to the
+      // transformedFeatures-array.
+      transformedFeatures.push(clonedFeature);
+    });
+    return transformedFeatures;
   };
 
   // Fits the map to the extent of the features currently in the kml-layer
