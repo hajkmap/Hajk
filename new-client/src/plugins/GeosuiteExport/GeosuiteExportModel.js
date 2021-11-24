@@ -59,7 +59,7 @@ class GeosuiteExportModel {
     this.#config = {
       boreholes: {
         layer: {
-          id: this.#options.services?.wfs?.boreholes?.layer?.id ?? "-1",
+          id: this.#options.services?.wfs?.boreholes?.layer?.id ?? "",
           srs:
             this.#options.services?.wfs?.boreholes?.layer?.srs ?? "EPSG:3006",
         },
@@ -74,11 +74,11 @@ class GeosuiteExportModel {
             this.#options.services?.wfs?.boreholes?.attributes
               ?.external_project_id ?? "externt_projekt_id",
         },
-        maxFeatures: this.#options.services?.wfs?.boreholes?.maxFeatures ?? -1,
+        maxFeatures: this.#options.services?.wfs?.boreholes?.maxFeatures ?? 0,
       },
       projects: {
         layer: {
-          id: this.#options.services?.wfs?.projects?.layer?.id ?? "-1",
+          id: this.#options.services?.wfs?.projects?.layer?.id ?? "",
           srs: this.#options.services?.wfs?.projects?.layer?.srs ?? "EPSG:3006",
         },
         spatialFilter: this.#getSpatialFilter(
@@ -91,11 +91,11 @@ class GeosuiteExportModel {
           link:
             this.#options.services?.wfs?.projects?.attributes?.link ?? "url",
         },
-        maxFeatures: this.#options.services?.wfs?.projects?.maxFeatures ?? -1,
+        maxFeatures: this.#options.services?.wfs?.projects?.maxFeatures ?? 0,
       },
     };
     this.#initWfsLayers();
-    this.#config.srsName = this.#map.getView().getProjection().getCode();
+    this.#config["srsName"] = this.#map.getView().getProjection().getCode();
 
     this.#map.addLayer(this.#vector);
     this.#draw = null;

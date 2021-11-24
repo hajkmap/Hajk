@@ -399,8 +399,8 @@ class GeosuiteExportView extends React.PureComponent {
     const { classes, options } = this.props;
     const termsAndConditionsLink = this.#getTermsAndConditionsLink();
     const documentDescription =
-      options.view?.documentDescription ??
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur iste minima est? Voluptate hic dicta quaerat modi, vitae maxime ad?";
+      options.view?.projects?.order?.description ??
+      "Välj geoteknisk utredning nedan för att hämta motsvarande handlingar.";
     return (
       <>
         <Grid container direction="row" alignItems="center">
@@ -506,16 +506,16 @@ class GeosuiteExportView extends React.PureComponent {
     const { classes, options } = this.props;
     const termsAndConditionsLink = this.#getTermsAndConditionsLink();
     const boreholeIntro =
-      options.view?.boreholeIntro ??
+      options.view?.boreholes?.order?.intro ??
       "Nedan visas alla borrhålsprojekt med undersökningspunkter inom det markerade området.";
     const boreholeDescription =
-      options.view?.boreholeDescription ??
+      options.view?.boreholes?.order?.description ??
       "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.";
     const referenceSystemText =
-      options.view?.referenceSystemText ??
+      options.view?.boreholes?.order?.referenceSystemText ??
       "Geotekniska undersökningspunkter är i koordinatsystemet SWEREF 99 12 00 samt höjdsystemet RH2000";
     const deliveryInformationText =
-      options.view?.deliveryInformationText ??
+      options.view?.boreholes?.order?.informationText ??
       "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets molntjänst.";
     return (
       <>
@@ -596,12 +596,13 @@ class GeosuiteExportView extends React.PureComponent {
   renderConfirmStep = () => {
     const { classes, options } = this.props;
     const deliveryConfirmationHeader =
-      options.view?.deliveryConfirmationHeader ?? "Tack för din beställning!";
-    const deliveryInformationTextFirst =
-      options.view?.deliveryInformationTextFirst ??
+      options.view?.boreholes?.confirmation?.header ??
+      "Tack för din beställning!";
+    const confirmDeliveryInformationText =
+      options.view?.boreholes?.confirmation?.confirmDeliveryInformationText ??
       "Ett e-postmeddelande med vidare instruktioner kommer att skickas till dig.";
-    const deliveryInformationTextSecond =
-      options.view?.deliveryInformationTextSecond ??
+    const whereNextText =
+      options.view?.boreholes?.confirmation?.whereNextText ??
       "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.";
     const step = this.state.activeStep;
     return (
@@ -611,9 +612,11 @@ class GeosuiteExportView extends React.PureComponent {
           {deliveryConfirmationHeader}
         </Typography>
         <br />
-        <Typography variant="body1">{deliveryInformationTextFirst}</Typography>
+        <Typography variant="body1">
+          {confirmDeliveryInformationText}
+        </Typography>
         <br />
-        <Typography variant="body1">{deliveryInformationTextSecond}</Typography>
+        <Typography variant="body1">{whereNextText}</Typography>
         <br />
         <div>
           <Button
@@ -625,7 +628,7 @@ class GeosuiteExportView extends React.PureComponent {
             disabled={false}
             color="primary"
           >
-            Välj Mer
+            Välj mer
           </Button>
           <Button
             disabled={step === 0}
@@ -740,6 +743,10 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   render() {
+    const { options } = this.props;
+    const description =
+      options.view?.digitizeDescription ??
+      "Rita ditt område i kartan, avsluta genom att dubbelklicka.";
     return (
       <>
         <div>
@@ -748,9 +755,7 @@ class GeosuiteExportView extends React.PureComponent {
               <StepLabel>Markera område</StepLabel>
               <StepContent>
                 <div>
-                  <Typography variant="caption">
-                    Rita ditt omrråde i kartan, avsluta genom att dubbelklicka.
-                  </Typography>
+                  <Typography variant="caption">{description}</Typography>
                   <br />
                   {this.renderNextAndBackButtons()}
                 </div>
