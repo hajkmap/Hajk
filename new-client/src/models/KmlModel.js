@@ -240,6 +240,10 @@ class KmlModel {
 
   // We will need a way to initiate a clear of the kml-layer. Let's expose
   // a method for that.
+  // TODO: We should only remove the imported features. The kml-model might
+  // be connected to say a draw-layer. We dont want to remove the drawn features,
+  // only the imported ones. We should also change the name of this method
+  // (maybe "clearImportedFeatures"?)
   clear = () => {
     // Let's clear!
     this.#kmlSource.clear();
