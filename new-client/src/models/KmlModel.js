@@ -14,7 +14,8 @@ import KML from "ol/format/KML.js";
  * - getLayerName(): Returns the name of the vectorLayer that is connected to the model.
  * - parseFeatures(kmlString): Accepts a KML-string and tries to parse it to OL-features.
  * - import(kmlString): Accepts a KML-string and adds the KML-features to the layer.
- * - zoomToFitKmlFeaturesExtent(): Zooms the map to the current extent of the kml-source.
+ * - clear(): Removes all features from the kml-source.
+ * - zoomToCurrentExtent(): Zooms the map to the current extent of the kml-source.
  */
 class KmlModel {
   #map;
@@ -162,7 +163,7 @@ class KmlModel {
   };
 
   // Fits the map to the current extent of the kml-source (with some padding).
-  #fitMapToKmlExtent = () => {
+  #fitMapToExtent = () => {
     this.#map.getView().fit(this.#currentExtent, {
       size: this.#map.getSize(),
       padding: [20, 20, 20, 20],
@@ -212,23 +213,37 @@ class KmlModel {
     this.#currentExtent = this.#kmlSource.getExtent();
     // Then we make sure to zoom to the current extent (unless the initiator
     // has told us not to!).
-    zoomToExtent && this.zoomToFitKmlFeaturesExtent();
+    zoomToExtent && this.zoomToCurrentExtent();
     // Finally we return a success message to the initiator.
     return { status: "SUCCESS", error: null };
   };
 
   // Fits the map to the extent of the features currently in the kml-layer
-  zoomToFitKmlFeaturesExtent = () => {
+  zoomToCurrentExtent = () => {
     // First we make sure to check wether the kml-source has any features
     // or not. If none exist, what would we zoom to?!
     if (!this.#kmlSourceHasFeatures()) {
       return;
     }
-    // If there are features, we check that the current extent is finite
+    // Let's also make sure that the current extent is not null.
+    if (this.#currentExtent === null) {
+      return;
+    }
+    // If there are features, and the extent is not null, we'll check
+    // that the current extent is finite
     if (this.#currentExtent.map(Number.isFinite).includes(false) === false) {
       // If it is, we can fit the map to that extent!
-      this.#fitMapToKmlExtent(this.#currentExtent);
+      this.#fitMapToExtent(this.#currentExtent);
     }
+  };
+
+  // We will need a way to initiate a clear of the kml-layer. Let's expose
+  // a method for that.
+  clear = () => {
+    // Let's clear!
+    this.#kmlSource.clear();
+    // When all features have been removed, the current extent must be reset.
+    this.#currentExtent = null;
   };
 
   // Make sure to supply a get:er returning the name of the KML-layer.
