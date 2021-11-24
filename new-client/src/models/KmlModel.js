@@ -134,7 +134,7 @@ class KmlModel {
     // to terminate to avoid errors.
     if (geometryType === null) return null;
     // We are going to be using the view of the map when translating, let's get it
-    const mapViewProjection = this.map.getView().getProjection();
+    const mapViewProjection = this.#map.getView().getProjection();
     // The kml-parser which has been used to extract features from the .kml-file can return
     // a bunch of geometry-types. We have to make sure that we handle each of them.
     feature.getGeometry().transform("EPSG:4326", mapViewProjection);
