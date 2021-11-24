@@ -122,7 +122,6 @@ class GeosuiteExportModel {
   };
 
   handleDrawEnd = (e) => {
-    this.removeDrawInteraction();
     this.#localObserver.publish("area-selection-complete");
   };
 
