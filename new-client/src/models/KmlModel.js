@@ -13,7 +13,7 @@ import KML from "ol/format/KML.js";
  * Exposes a couple of methods:
  * - parseFeatures(kmlString): Accepts a KML-string and tries to parse it to OL-features.
  * - import(kmlString): Accepts a KML-string and adds the KML-features to the layer.
- * - clear(): Removes all features from the kml-source.
+ * - removeImportedFeatures(): Removes all imported features from the kml-source.
  * - zoomToCurrentExtent(): Zooms the map to the current extent of the kml-source.
  * - getLayerName(): Returns the name of the vectorLayer that is connected to the model.
  * - getCurrentExtent(): Returns the current extent of the kml-source.
@@ -158,6 +158,25 @@ class KmlModel {
     });
   };
 
+  #tagFeaturesAsImported = (features) => {
+    // If no features are supplied, we abort!
+    if (!features || features?.length === 0) {
+      return null;
+    }
+    // Otherwise we set the "KML_IMPORT" property to true
+    features.forEach((feature) => {
+      feature.set("KML_IMPORT", true);
+    });
+  };
+
+  // Returns all features from the kml-source that are tagged
+  // as imported.
+  #getAllImportedFeatures = () => {
+    return this.#kmlSource.getFeatures().filter((feature) => {
+      return feature.get("KML_IMPORT") === true;
+    });
+  };
+
   // Checks wether there are any features in the kml-source or not.
   #kmlSourceHasFeatures = () => {
     return this.#kmlSource.getFeatures().length > 0;
@@ -182,6 +201,9 @@ class KmlModel {
     try {
       // First we must parse the string to ol-features
       const features = this.#parser.readFeatures(kmlString) ?? [];
+      // Let's make sure to tag all imported features so that we can
+      // distinguish them from "ordinary" features.
+      this.#tagFeaturesAsImported(features);
       // Then we must make sure to translate all the features to
       // the current map-views coordinate system. (If the user has not
       // explicitly told us no to!)
@@ -238,17 +260,21 @@ class KmlModel {
     }
   };
 
-  // We will need a way to initiate a clear of the kml-layer. Let's expose
-  // a method for that.
-  // TODO: We should only remove the imported features. The kml-model might
-  // be connected to say a draw-layer. We dont want to remove the drawn features,
-  // only the imported ones. We should also change the name of this method
-  // (maybe "clearImportedFeatures"?)
-  clear = () => {
-    // Let's clear!
-    this.#kmlSource.clear();
-    // When all features have been removed, the current extent must be reset.
-    this.#currentExtent = null;
+  // We will need a way to remove all imported features from the kml-source.
+  // Why aren't we using a simple "clear()" one might ask =>  simply because
+  // the kml-source might be the draw-source, and we don't want to remove
+  // all drawn features, only the imported ones.
+  removeImportedFeatures = () => {
+    // Let's get all the features in the kml-source that have been imported
+    const importedFeatures = this.#getAllImportedFeatures();
+    // Since OL does not supply a "removeFeatures" method, we have to map
+    // over the array, and remove every single feature one by one...
+    importedFeatures.forEach((feature) => {
+      this.#kmlSource.removeFeature(feature);
+    });
+    // When the imported features has been removed, we have to make sure
+    // to update the current extent.
+    this.#currentExtent = this.#kmlSource.getExtent();
   };
 
   // Get:er returning the name of the KML-layer.
