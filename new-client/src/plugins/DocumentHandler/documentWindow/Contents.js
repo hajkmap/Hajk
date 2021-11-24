@@ -68,7 +68,7 @@ class Contents extends React.PureComponent {
             return item;
           });
 
-          renderedChapters.push(this.renderChapters(flatChaptersTree));
+          renderedChapters.push(this.renderChapters(flatChaptersTree, true));
           chapters.push(renderedChapters);
         }
       });
@@ -129,9 +129,9 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderChapters = (chapters) => {
+  renderChapters = (chapters, isPrintMode) => {
     return Array.isArray(chapters)
-      ? chapters.map((chapter) => this.renderChapter(chapter))
+      ? chapters.map((chapter) => this.renderChapter(chapter, isPrintMode))
       : null;
   };
 
@@ -141,10 +141,10 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderChapter = (chapter) => {
+  renderChapter = (chapter, isPrintMode) => {
     return (
       <React.Fragment key={chapter.id}>
-        {this.renderHeadline(chapter)}
+        {this.renderHeadline(chapter, isPrintMode)}
         {chapter.components}
         {Array.isArray(chapter.chapters)
           ? chapter.chapters.map((subChapter) => this.renderChapter(subChapter))
@@ -153,8 +153,15 @@ class Contents extends React.PureComponent {
     );
   };
 
-  getHeaderVariant = (chapter) => {
+  getHeaderVariant = (chapter, isPrintMode) => {
     let headerSize = 2; //Chapters start with h2
+
+    //If we are printing, we have a flattened chapters tree, so use the chapter.level property to set the heading
+    //instead of cycling through the parent chapter objects.
+    if (isPrintMode) {
+      headerSize += chapter.level;
+      return `h${headerSize}`;
+    }
     while (chapter.parent) {
       headerSize++;
       chapter = chapter.parent;
@@ -168,7 +175,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderHeadline = (chapter) => {
+  renderHeadline = (chapter, isPrintMode) => {
     const { classes } = this.props;
 
     return (
@@ -177,7 +184,7 @@ class Contents extends React.PureComponent {
           ref={chapter.scrollRef}
           className={classes.typography}
           data-type="chapter-header"
-          variant={this.getHeaderVariant(chapter)}
+          variant={this.getHeaderVariant(chapter, isPrintMode)}
         >
           {chapter.header}
         </Typography>

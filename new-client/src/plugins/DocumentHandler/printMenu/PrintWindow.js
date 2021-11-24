@@ -288,7 +288,7 @@ class PrintWindow extends React.PureComponent {
     this.setState({
       pdfLoading: false,
       printContent: undefined,
-      printMaps: false,
+      menuInformation: this.createMenu(),
     });
   };
 
@@ -446,18 +446,12 @@ class PrintWindow extends React.PureComponent {
         document.tocChapterLevels =
           modelDoc?.tableOfContents?.chapterLevelsToShow || 100;
       }
-      //add document chapters onto the related document menu item.
       if (document.document) {
         document.chapters = [];
-        document.chapters.push(
-          JSON.parse(
-            JSON.stringify(
-              chapterInformation.find(
-                (chapter) => chapter.documentFileName === document.document
-              )
-            )
-          )
+        let documentChapters = chapterInformation.filter(
+          (chapter) => chapter.documentFileName === document.document
         );
+        documentChapters.forEach((chapter) => document.chapters.push(chapter));
       }
     });
 
