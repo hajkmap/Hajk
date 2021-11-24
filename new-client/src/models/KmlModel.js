@@ -1,5 +1,6 @@
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
+import KML from "ol/format/KML.js";
 
 /*
  * A model supplying useful KML-functionality.
@@ -11,7 +12,7 @@ import VectorSource from "ol/source/Vector";
  *
  * Exposes a couple of methods:
  * - getLayerName(): Returns the name of the vectorLayer that is connected to the model.
- * - getFeatures(kmlString): Accepts a KML-string and returns all features in OL-format.
+ * - parseFeatures(kmlString): Accepts a KML-string and tries to parse it to OL-features.
  * - import(kmlString): Accepts a KML-string and adds the KML-features to the layer.
  */
 class KmlModel {
@@ -19,6 +20,7 @@ class KmlModel {
   #layerName;
   #kmlSource;
   #kmlLayer;
+  #parser;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -29,6 +31,8 @@ class KmlModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    // We are gonna need a kml parser obviously.
+    this.#parser = new KML();
     // A KML-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
     this.#initiateKmlLayer();
@@ -45,10 +49,8 @@ class KmlModel {
   // We have to initiate a vector layer that can be used to display the imported features.
   #initiateKmlLayer = () => {
     if (this.#vectorLayerExists()) {
-      console.log("layer does exist");
       return this.#connectExistingVectorLayer();
     }
-    console.log("Layer does NOT exist");
     return this.#createNewKmlLayer();
   };
 
@@ -122,6 +124,68 @@ class KmlModel {
     return new VectorLayer({
       source: source,
     });
+  };
+
+  // Translates the supplied feature to the map-views coordinate system.
+  #translateFeatureToViewSrs = (feature) => {
+    // Let's get the geometry-type to begin with
+    const geometryType = feature?.getGeometry?.().getType?.() ?? null;
+    // If no geometry-type could be fetched from the supplied feature, we make sure
+    // to terminate to avoid errors.
+    if (geometryType === null) return null;
+    // We are going to be using the view of the map when translating, let's get it
+    const mapViewProjection = this.map.getView().getProjection();
+    // The kml-parser which has been used to extract features from the .kml-file can return
+    // a bunch of geometry-types. We have to make sure that we handle each of them.
+    feature.getGeometry().transform("EPSG:4326", mapViewProjection);
+  };
+
+  // Translates the supplied features to the map-views coordinate system.
+  #translateFeaturesToViewSrs = (features) => {
+    // If no features are supplied, we abort!
+    if (!features || features?.length === 0) {
+      return null;
+    }
+    // Otherwise we translate every feature to the map-views coordinate system.
+    features.forEach((feature) => {
+      this.#translateFeatureToViewSrs(feature);
+    });
+  };
+
+  // Tries to parse features from the supplied kml-string.
+  // Returns an object on the following form:
+  // {features: <Array of ol-features>, error: <String with potential error message>}
+  // **The returned features are translated to the map-views coordinate system.**
+  parseFeatures = (kmlString) => {
+    try {
+      // First we must parse the string to ol-features
+      const features = this.#parser.readFeatures(kmlString) ?? [];
+      // Then we must make sure to translate all the features to
+      // the current map-views coordinate system.
+      this.#translateFeaturesToViewSrs(features);
+      // Then we can return the features
+      return { features: features, error: null };
+    } catch (exception) {
+      // If we happen to hit a mine, we make sure to return the error
+      // message and an empty array.
+      return { features: [], error: exception.message };
+    }
+  };
+
+  // Tries to parse features from a KML-string and then add them to
+  // the kml-source.
+  import = (kmlString) => {
+    // Start by trying to parse the kml-string
+    const { features, error } = this.parseFeatures(kmlString);
+    // If the parsing led to any kind of error, we make sure to abort
+    // and return the error to the initiator.
+    if (error !== null) {
+      return { status: "FAILED", error: error };
+    }
+    // Otherwise we add the parsed features to the kml-source and return
+    // a success message to the initiator.
+    this.#kmlSource.addFeatures(features);
+    return { status: "SUCCESS", error: null };
   };
 
   // Make sure to supply a get:er returning the name of the KML-layer.
