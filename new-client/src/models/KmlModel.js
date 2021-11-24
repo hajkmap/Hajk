@@ -11,11 +11,12 @@ import KML from "ol/format/KML.js";
  * - map: (olMap): The current map-object.
  *
  * Exposes a couple of methods:
- * - getLayerName(): Returns the name of the vectorLayer that is connected to the model.
  * - parseFeatures(kmlString): Accepts a KML-string and tries to parse it to OL-features.
  * - import(kmlString): Accepts a KML-string and adds the KML-features to the layer.
  * - clear(): Removes all features from the kml-source.
  * - zoomToCurrentExtent(): Zooms the map to the current extent of the kml-source.
+ * - getLayerName(): Returns the name of the vectorLayer that is connected to the model.
+ * - getCurrentExtent(): Returns the current extent of the kml-source.
  */
 class KmlModel {
   #map;
@@ -246,9 +247,14 @@ class KmlModel {
     this.#currentExtent = null;
   };
 
-  // Make sure to supply a get:er returning the name of the KML-layer.
+  // Get:er returning the name of the KML-layer.
   getLayerName = () => {
     return this.#layerName;
+  };
+
+  // Get:er returning the current extent of the kml-source.
+  getCurrentExtent = () => {
+    return this.#currentExtent;
   };
 }
 export default KmlModel;
