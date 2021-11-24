@@ -726,6 +726,15 @@ class GeosuiteExportView extends React.PureComponent {
     );
   };
 
+  componentDidMount() {
+    //The standard way that we start the stepper is by changing the activeStep state
+    //causing componentDidUpdate to handleEnterStep. Because onWindowShow() does not
+    //get called for a plugin when visibleAtStart is true, we handle this in componentDidMount instead.
+    if (this.props?.options?.visibleAtStart) {
+      this.setState({ activeStep: 0 });
+    }
+  }
+
   componentDidUpdate(prevProps, prevState) {
     //When the step of the stepper tool changes.
     if (prevState.activeStep !== this.state.activeStep) {
