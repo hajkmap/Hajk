@@ -14,6 +14,7 @@ import KML from "ol/format/KML.js";
  * - getLayerName(): Returns the name of the vectorLayer that is connected to the model.
  * - parseFeatures(kmlString): Accepts a KML-string and tries to parse it to OL-features.
  * - import(kmlString): Accepts a KML-string and adds the KML-features to the layer.
+ * - zoomToFitKmlFeaturesExtent(): Zooms the map to the current extent of the kml-source.
  */
 class KmlModel {
   #map;
@@ -21,6 +22,7 @@ class KmlModel {
   #kmlSource;
   #kmlLayer;
   #parser;
+  #currentExtent;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -33,6 +35,8 @@ class KmlModel {
     this.#layerName = settings.layerName;
     // We are gonna need a kml parser obviously.
     this.#parser = new KML();
+    // We are going to be keeping track of the current extent of the kml-source.
+    this.#currentExtent = null;
     // A KML-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
     this.#initiateKmlLayer();
@@ -152,17 +156,34 @@ class KmlModel {
     });
   };
 
+  // Checks wether there are any features in the kml-source or not.
+  #kmlSourceHasFeatures = () => {
+    return this.#kmlSource.getFeatures().length > 0;
+  };
+
+  // Fits the map to the current extent of the kml-source (with some padding).
+  #fitMapToKmlExtent = () => {
+    this.#map.getView().fit(this.#currentExtent, {
+      size: this.#map.getSize(),
+      padding: [20, 20, 20, 20],
+      maxZoom: 7,
+    });
+  };
+
   // Tries to parse features from the supplied kml-string.
+  // Accepts a kmlString and an optional second parameter stating if
+  // the features should be translated to the map-views srs or not.
   // Returns an object on the following form:
   // {features: <Array of ol-features>, error: <String with potential error message>}
   // **The returned features are translated to the map-views coordinate system.**
-  parseFeatures = (kmlString) => {
+  parseFeatures = (kmlString, translateToViewSrs = true) => {
     try {
       // First we must parse the string to ol-features
       const features = this.#parser.readFeatures(kmlString) ?? [];
       // Then we must make sure to translate all the features to
-      // the current map-views coordinate system.
-      this.#translateFeaturesToViewSrs(features);
+      // the current map-views coordinate system. (If the user has not
+      // explicitly told us no to!)
+      translateToViewSrs && this.#translateFeaturesToViewSrs(features);
       // Then we can return the features
       return { features: features, error: null };
     } catch (exception) {
@@ -174,7 +195,9 @@ class KmlModel {
 
   // Tries to parse features from a KML-string and then add them to
   // the kml-source.
-  import = (kmlString) => {
+  // Accepts an kmlString and an optional parameter stating if the map should
+  // zoom the the imported features extent or not.
+  import = (kmlString, zoomToExtent = true) => {
     // Start by trying to parse the kml-string
     const { features, error } = this.parseFeatures(kmlString);
     // If the parsing led to any kind of error, we make sure to abort
@@ -182,10 +205,30 @@ class KmlModel {
     if (error !== null) {
       return { status: "FAILED", error: error };
     }
-    // Otherwise we add the parsed features to the kml-source and return
-    // a success message to the initiator.
+    // Otherwise we add the parsed features to the kml-source.
     this.#kmlSource.addFeatures(features);
+    // We have to make sure to update the current extent when we've added
+    // features to the kml-source.
+    this.#currentExtent = this.#kmlSource.getExtent();
+    // Then we make sure to zoom to the current extent (unless the initiator
+    // has told us not to!).
+    zoomToExtent && this.zoomToFitKmlFeaturesExtent();
+    // Finally we return a success message to the initiator.
     return { status: "SUCCESS", error: null };
+  };
+
+  // Fits the map to the extent of the features currently in the kml-layer
+  zoomToFitKmlFeaturesExtent = () => {
+    // First we make sure to check wether the kml-source has any features
+    // or not. If none exist, what would we zoom to?!
+    if (!this.#kmlSourceHasFeatures()) {
+      return;
+    }
+    // If there are features, we check that the current extent is finite
+    if (this.#currentExtent.map(Number.isFinite).includes(false) === false) {
+      // If it is, we can fit the map to that extent!
+      this.#fitMapToKmlExtent(this.#currentExtent);
+    }
   };
 
   // Make sure to supply a get:er returning the name of the KML-layer.
