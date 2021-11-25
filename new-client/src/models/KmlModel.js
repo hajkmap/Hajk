@@ -5,7 +5,7 @@ import { Circle } from "ol/geom.js";
 import { fromCircle } from "ol/geom/Polygon.js";
 import { createXML } from "../utils/KMLWriter";
 import { saveAs } from "file-saver";
-import { Fill, Stroke, Style } from "ol/style.js";
+import { Fill, Stroke, Style, Text } from "ol/style.js";
 
 /*
  * A model supplying useful KML-functionality.
@@ -189,7 +189,7 @@ class KmlModel {
   #setStyleFromStyleFunction = (feature, styleFunction) => {
     // Let's create the style using the style function. The views resolution
     // must be passed since the style might behave differently when resolution change.
-    const style = styleFunction(feature, this.map.getView().getResolution());
+    const style = styleFunction(feature, this.#map.getView().getResolution());
     // Checks if the fill is nullish, if it is, we must make sure to set _something_
     // to avoid issues when adding the feature to the map.
     if (this.#styleFillIsNullish(style)) {
@@ -218,22 +218,54 @@ class KmlModel {
 
   // Creates a style-object from the special settings that are
   // added when drawing features in the draw-plugin. E.g. stroke-dash
-  // and so on. TODO: (1) Add image and text styles
+  // and so on. TODO: (1) Add image style
   // TODO: (2) Get rid of this and use standard ol stuff.
   #createFeatureStyle = (parsedStyle) => {
-    const { fillColor, strokeColor, strokeWidth, lineDash } = parsedStyle;
     return [
       new Style({
-        fill: new Fill({ color: fillColor }),
-        stroke: new Stroke({
-          color: strokeColor,
-          width: strokeWidth,
-          lineDash: lineDash,
-        }),
-        image: null,
-        text: null,
+        fill: this.#getFillStyle(parsedStyle),
+        image: this.#getImageStyle(parsedStyle),
+        stroke: this.#getStrokeStyle(parsedStyle),
+        text: this.#getTextStyle(parsedStyle),
       }),
     ];
+  };
+
+  // Returns a fill-style based on the supplied values
+  #getFillStyle = (styleSettings) => {
+    const { fillColor } = styleSettings;
+    return new Fill({ color: fillColor });
+  };
+
+  // Returns an image-style based on the supplied values
+  #getImageStyle = (styleSettings) => {
+    return null;
+  };
+
+  // Returns a stroke-style based on the supplied values
+  #getStrokeStyle = (styleSettings) => {
+    const { lineDash, strokeWidth, strokeColor } = styleSettings;
+    return new Stroke({
+      lineDash: lineDash,
+      color: strokeColor,
+      width: strokeWidth,
+    });
+  };
+
+  // Returns a text-style based on the supplied values
+  #getTextStyle = (styleSettings) => {
+    const { text } = styleSettings;
+    return new Text({
+      font: "12pt sans-serif",
+      fill: new Fill({ color: "#FFF" }),
+      text: text,
+      overflow: true,
+      stroke: new Stroke({
+        color: "rgba(0, 0, 0, 0.5)",
+        width: 3,
+      }),
+      offsetY: -10,
+    });
   };
 
   // Extracts some information from the geometry and sets it as properties on
