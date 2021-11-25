@@ -7,6 +7,9 @@ import {
   IconButton,
   Box,
   Grid,
+  Paper,
+  Menu,
+  MenuItem,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import WorkIcon from "@material-ui/icons/Work";
@@ -36,6 +39,8 @@ const styles = (theme) => ({
 
 class ProductList extends React.PureComponent {
   state = {
+    anchorEl: undefined,
+    activeProject: undefined,
     globalExportAll: false,
   };
 
@@ -63,9 +68,16 @@ class ProductList extends React.PureComponent {
   };
 
   render() {
-    const { classes, projects, handleExportAll } = this.props;
+    const {
+      classes,
+      projects,
+      handleExportAll,
+      exportPerProject = false,
+      handleToggleProjectExport = () => {},
+    } = this.props;
+    const { anchorEl } = this.state;
 
-    if (true) {
+    if (projects.length > 0) {
       return (
         <Grid container style={{ marginTop: "10px" }}>
           <Grid item xs={12}>
@@ -121,16 +133,72 @@ class ProductList extends React.PureComponent {
                         >
                           {project.name}
                         </Typography>
-                        <IconButton
-                          onClick={() => {
-                            console.log("show select choices");
-                          }}
-                          size="small"
-                          aria-label="Visa projekt export val."
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
+                        {exportPerProject === true && (
+                          <IconButton
+                            onClick={(e) => {
+                              this.setState({
+                                anchorEl: e.currentTarget,
+                                activeProject: project,
+                              });
+                            }}
+                            size="small"
+                            aria-label="Visa projekt export val."
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                        )}
                       </Box>
+                      <Paper elevation={1}>
+                        <Menu
+                          id="choice-menu"
+                          autoFocus={false}
+                          anchorEl={anchorEl}
+                          getContentAnchorEl={null}
+                          anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "right",
+                          }}
+                          transformOrigin={{
+                            vertical: "top",
+                            horizontal: "center",
+                          }}
+                          open={Boolean(anchorEl)}
+                          onClose={() =>
+                            this.setState({
+                              anchorEl: undefined,
+                            })
+                          }
+                        >
+                          <MenuItem
+                            onClick={() => {
+                              handleToggleProjectExport(
+                                this.state.activeProject.id,
+                                false
+                              );
+                              this.setState({ anchorEl: undefined });
+                            }}
+                          >
+                            <Box display="flex" gridColumnGap={"8px"}>
+                              <Crop32Icon />
+                              <Typography>{`Inom markering (${this.state.activeProject?.numBoreHolesSelected})`}</Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              handleToggleProjectExport(
+                                this.state.activeProject.id,
+                                true
+                              );
+                              this.setState({ anchorEl: undefined });
+                            }}
+                          >
+                            <Box display="flex" gridColumnGap={"8px"}>
+                              <WorkIcon />
+                              <Typography>{`Hela projektet (${this.state.activeProject?.numBoreHolesTotal})`}</Typography>
+                            </Box>
+                          </MenuItem>
+                        </Menu>
+                      </Paper>
                     </Grid>
                     <Grid item xs={9} md={10}>
                       <Typography>{`Id: ${project.id}`}</Typography>
@@ -150,7 +218,7 @@ class ProductList extends React.PureComponent {
     } else {
       return (
         <div>
-          <Typography className={classes.noResultMessage}>
+          <Typography color="error">
             Inget resultat. Gå tillbaka och markera ett nytt område.
           </Typography>
         </div>

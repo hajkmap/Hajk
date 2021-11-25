@@ -149,10 +149,28 @@ class GeosuiteExportView extends React.PureComponent {
   //toggle all projects exportAll setting, which controls the information that is exported for that borehole
   //when the order is completed. if exportAll is true, all boreholes within the project will be exported.
   //if exportAll is false, only those boreholes within the drawn polygon that belong to the project will be exported.
-  toggleExportEntireProjects = (shouldExportAll) => {
+  toggleEntireProjectsForAll = (shouldExportAll) => {
     const updatedProjects = this.state.projects.map((project) => {
       return { ...project, exportAll: shouldExportAll };
     });
+    this.setState({ projects: updatedProjects });
+  };
+
+  toggleEntireProject = (projectId, shouldExportAll) => {
+    const projectToUpdate = this.state.projects.find(
+      (project) => project.id === projectId
+    );
+
+    const updatedProject = { ...projectToUpdate, exportAll: shouldExportAll };
+
+    const updatedProjects = this.state.projects.map((project) => {
+      if (project.id === projectId) {
+        return updatedProject;
+      } else {
+        return project;
+      }
+    });
+
     this.setState({ projects: updatedProjects });
   };
 
@@ -433,9 +451,13 @@ class GeosuiteExportView extends React.PureComponent {
 
     return (
       <ProductList
+        exportPerProject={true}
         projects={projects}
         handleExportAll={(shouldExportAll) => {
-          this.toggleExportEntireProjects(shouldExportAll);
+          this.toggleEntireProjectsForAll(shouldExportAll);
+        }}
+        handleToggleProjectExport={(projectId, shouldExportAll) => {
+          this.toggleEntireProject(projectId, shouldExportAll);
         }}
       ></ProductList>
     );
