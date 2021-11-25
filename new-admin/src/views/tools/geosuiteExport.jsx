@@ -28,9 +28,9 @@ const defaultState = {
     wfs: {
       projects: {
         layer: {
-          id: "",
-          spatialFilter: "intersects",
+          id: ""
         },
+        spatialFilter: "intersects",
         attributes: {
           title: "projektnamn",
           link: "url",
@@ -68,7 +68,7 @@ const defaultState = {
       confirmation: {
         header: "Tack för din beställning!",
         informationText: "Ett e-postmeddelande med vidare instruktioner kommer att skickas till dig.",
-        whereNextText: "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.",   
+        whereNextText: "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.",
       },
     },
   },
@@ -107,7 +107,7 @@ class ToolOptions extends Component {
    * @param {*} propPath flat or nested path to state key to update, nesting is specified by double underscores (__)
    * @param {*} value new value to set on specified state key
    */
-   getUpdatedStateProp = (obj, propPath, value) => {
+  getUpdatedStateProp = (obj, propPath, value) => {
     const [head, ...tail] = propPath.split('__');
 
     console.log("getUpdatedStateProp: propPath=%s, head=%s, tail=%s, obj:", propPath, head, tail, obj);
@@ -462,7 +462,7 @@ class ToolOptions extends Component {
               value={this.state.services.wfs.boreholes.layer?.id || ""}
             />
           </div>
-<div>
+          <div>
             <label htmlFor="services__wfs__boreholes__layer__projection">
               Projektion{" "}
               <i

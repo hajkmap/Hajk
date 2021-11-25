@@ -60,8 +60,9 @@ class GeosuiteExportModel {
       boreholes: {
         layer: {
           id: this.#options.services?.wfs?.boreholes?.layer?.id ?? "",
-          srs:
-            this.#options.services?.wfs?.boreholes?.layer?.srs ?? "EPSG:3006",
+          projection:
+            this.#options.services?.wfs?.boreholes?.layer?.projection ??
+            "EPSG:3006",
         },
         spatialFilter: this.#getSpatialFilter(
           this.#options.services?.wfs?.boreholes?.spatialFilter
@@ -79,7 +80,9 @@ class GeosuiteExportModel {
       projects: {
         layer: {
           id: this.#options.services?.wfs?.projects?.layer?.id ?? "",
-          srs: this.#options.services?.wfs?.projects?.layer?.srs ?? "EPSG:3006",
+          projection:
+            this.#options.services?.wfs?.projects?.layer?.projection ??
+            "EPSG:3006",
         },
         spatialFilter: this.#getSpatialFilter(
           this.#options.services?.wfs?.projects?.spatialFilter
@@ -324,7 +327,13 @@ class GeosuiteExportModel {
       return;
     }
 
-    const layerSrs = wfsConfig.projection ?? this.#config.srsName;
+    const layerSrs = wfsConfig.layer.projection ?? this.#config.srsName;
+    console.log(
+      "Projections: map=%s, layer=%s. wfsConfig:",
+      this.#config.srsName,
+      layerSrs,
+      wfsConfig
+    );
     let filterGeometry = selectionGeometry;
     if (this.#config.srsName !== layerSrs) {
       console.log(
@@ -644,8 +653,27 @@ class GeosuiteExportModel {
     this.#selection.document = {};
   };
 
+  // Set layer config to result of merge of by-id-referenced search layer,
+  // with overwrite/merge from our own plug-in's layer config or defaults.
   #initWfsLayers = () => {
-    this.#config.boreholes.layer = this.#getSearchLayerByRefOrDefaults(
+    console.log(
+      "#initWfsLayers: projects: pre merge our config=",
+      this.#config.projects.layer
+    );
+    console.log(
+      "#initWfsLayers: boreholes: pre merge our config=",
+      this.#config.boreholes.layer
+    );
+    const projectsLayerByRefOrDefaults = this.#getSearchLayerByRefOrDefaults(
+      this.#config.projects.layer.id,
+      {
+        url: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
+        featurePrefixName: "geoteknik-v2-utv",
+        featureName: "geoteknisk_utredning",
+        geometryField: "geom",
+      }
+    );
+    const boreholesLayerByRefOrDefaults = this.#getSearchLayerByRefOrDefaults(
       this.#config.boreholes.layer.id,
       {
         url: "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
@@ -654,14 +682,29 @@ class GeosuiteExportModel {
         geometryField: "geom",
       }
     );
-    this.#config.projects.layer = this.#getSearchLayerByRefOrDefaults(
-      this.#config.projects.layer.id,
-      {
-        url: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
-        featurePrefixName: "geoteknik-v2-utv",
-        featureName: "geoteknisk_utredning",
-        geometryField: "geom",
-      }
+    this.#config.projects.layer = Object.assign(
+      projectsLayerByRefOrDefaults,
+      this.#config.projects.layer
+    );
+    this.#config.boreholes.layer = Object.assign(
+      boreholesLayerByRefOrDefaults,
+      this.#config.boreholes.layer
+    );
+    console.log(
+      "#initWfsLayers: projects: get layer by ref or defaults=",
+      projectsLayerByRefOrDefaults
+    );
+    console.log(
+      "#initWfsLayers: projects: post merge our config=",
+      this.#config.projects.layer
+    );
+    console.log(
+      "#initWfsLayers: boreholes: get layer by ref or defaults=",
+      boreholesLayerByRefOrDefaults
+    );
+    console.log(
+      "#initWfsLayers: boreholes: post merge our config=",
+      this.#config.boreholes.layer
     );
   };
 
