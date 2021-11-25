@@ -577,7 +577,7 @@ class GeosuiteExportView extends React.PureComponent {
       options.view?.boreholes?.confirmation?.header ??
       "Tack för din beställning!";
     const confirmDeliveryInformationText =
-      options.view?.boreholes?.confirmation?.confirmDeliveryInformationText ??
+      options.view?.boreholes?.confirmation?.informationText ??
       "Ett e-postmeddelande med vidare instruktioner kommer att skickas till dig.";
     const whereNextText =
       options.view?.boreholes?.confirmation?.whereNextText ??
