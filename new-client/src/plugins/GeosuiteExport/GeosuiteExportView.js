@@ -37,10 +37,6 @@ const styles = (theme) => ({
   bold: {
     fontWeight: 500,
   },
-  stepButton: {
-    marginTop: theme.spacing(1),
-    marginRight: theme.spacing(2),
-  },
   link: {
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(1),
@@ -64,20 +60,20 @@ const styles = (theme) => ({
 });
 
 const defaultState = {
+  projects: [],
+  documents: [],
   activeStep: null,
   isAreaSelected: false,
   selectedProduct: "document",
   email: "",
   emailValid: false,
   steps: {
-    0: { canEnter: true },
-    1: { canEnter: false },
-    2: { canEnter: true },
-    3: { canEnter: false },
+    0: { enterable: true },
+    1: { enterable: false },
+    2: { enterable: true },
+    3: { enterable: false },
   },
   processComplete: false,
-  projects: [],
-  documents: [],
   responsePending: false,
   responseFailed: false,
 };
@@ -100,20 +96,20 @@ class GeosuiteExportView extends React.PureComponent {
 
     this.globalObserver = props.globalObserver;
     this.localObserver = props.localObserver;
-    this.bindSubscriptions();
+    this.initSubscriptions();
   }
 
-  bindSubscriptions = () => {
+  initSubscriptions = () => {
     this.localObserver.subscribe("area-selection-complete", () => {
       this.setState({ isAreaSelected: true });
     });
 
     this.localObserver.subscribe("borehole-selection-updated", () => {
-      this.boreHoleSelectionUpdated();
+      this.boreholeSelectionUpdated();
     });
 
     this.localObserver.subscribe("borehole-selection-failed", () => {
-      this.boreHoleSelectionFailed();
+      this.boreholeSelectionFailed();
     });
 
     this.localObserver.subscribe("document-selection-updated", () => {
@@ -121,7 +117,7 @@ class GeosuiteExportView extends React.PureComponent {
     });
 
     this.localObserver.subscribe("document-selection-failed", () => {
-      this.documentSelectionfailed();
+      this.documentSelectionFailed();
     });
 
     this.localObserver.subscribe("area-selection-removed", () => {
@@ -129,12 +125,10 @@ class GeosuiteExportView extends React.PureComponent {
     });
 
     this.localObserver.subscribe("window-opened", () => {
-      console.log("Window opened: set state activeStep=0");
       this.setState({ activeStep: 0 });
     });
 
     this.localObserver.subscribe("window-closed", () => {
-      console.log("Window closed: reset");
       this.handleReset();
     });
   };
@@ -145,12 +139,16 @@ class GeosuiteExportView extends React.PureComponent {
   };
 
   emailIsValid = (email) => {
-    /*Basic email validation - at least one @ with a '.' somewhere after it.*/
-    const emailRegex = /@.*?\./;
+    //Basic email validation - at least one @ with a '.' somewhere after it.
+    //There must be at least one character before the @ and at least one character after the following '.'
+    const emailRegex = /.@.*?\../;
     const valid = emailRegex.test(email);
     return valid;
   };
 
+  //toggle all projects exportAll setting, which controls the information that is exported for that borehole
+  //when the order is completed. if exportAll is true, all boreholes within the project will be exported.
+  //if exportAll is false, only those boreholes within the drawn polygon that belong to the project will be exported.
   toggleExportEntireProjects = (shouldExportAll) => {
     const updatedProjects = this.state.projects.map((project) => {
       return { ...project, exportAll: shouldExportAll };
@@ -158,6 +156,8 @@ class GeosuiteExportView extends React.PureComponent {
     this.setState({ projects: updatedProjects });
   };
 
+  //Ask the model to do a wfs search against the boreholes layer, and then then get the projects for those boreholes
+  //from the Trimble GeoSuite API. When the model is ready is will publish "borehole-selection-updated"
   handleOrderGeosuiteToolboxFormat = () => {
     this.setState({
       responseFailed: false,
@@ -169,6 +169,8 @@ class GeosuiteExportView extends React.PureComponent {
     );
   };
 
+  //Ask the model to do a wfs search against the document wfs layer, and update the documents. When the model is
+  //ready it will publish "document-selection-updated".
   handleOrderDocumentsFormat = () => {
     this.setState({
       responseFailed: false,
@@ -180,14 +182,11 @@ class GeosuiteExportView extends React.PureComponent {
     );
   };
 
-  clearSelection = () => {
-    this.props.model.clearSelection();
-  };
-
-  boreHoleSelectionUpdated = () => {
+  //update the projects state if the projects on the model have been updated.
+  //The added 'selected property' is used select/deselect the project in UI's selection list.
+  //The added 'exportAll' will be used to toggle export of all project points (e.g. boreholes) within selected area, or //for the entire project.
+  boreholeSelectionUpdated = () => {
     let projects = this.props.model.getSelectedProjects();
-    //The 'selected property' will be used to select/deselect the project in UI's selection list.
-    //The 'exportAll' will be used to toggle export of all project points/points within selected area.
     projects.forEach((project) => {
       project.selected = true;
       project.exportAll = false;
@@ -198,17 +197,19 @@ class GeosuiteExportView extends React.PureComponent {
     });
   };
 
-  boreHoleSelectionFailed = () => {
-    console.log("GeosuiteExportView: boreHoleSelectionFailed");
+  boreholeSelectionFailed = () => {
     this.setState({
       responsePending: false,
       responseFailed: true,
     });
   };
 
+  //update the documents state if the projects on the model have been updated.
+  //The added 'selected property' can used select/deselect the project in UI's selection list. OBS. the
+  //'selected' property is not currently used. Bul will be used in planned changes to the document list by Gothenburg
+  //SBK.
   documentSelectionUpdated = () => {
     let documents = this.props.model.getSelectedDocuments();
-    //The 'selected property' will be used to select/deselect the project in UI's selection list (NB! pending ÄTA/sprint 2)
     documents.forEach((document) => {
       document.selected = true;
     });
@@ -218,50 +219,43 @@ class GeosuiteExportView extends React.PureComponent {
     });
   };
 
-  documebntSelectionfailed = () => {
-    console.log("GeosuiteExportView: documebntSelectionfailed");
+  documentSelectionFailed = () => {
     this.setState({
       responsePending: false,
       responseFailed: true,
     });
   };
 
-  //used when we close using the 'avsluta' button.
+  //This is used when manually closing the plugin via the 'Avsluta' button.
   handleClose = () => {
-    console.log("handleClose");
     this.handleReset();
     this.globalObserver.publish(`geosuiteexport.closeWindow`);
   };
 
+  //reset the plugin to it's initial state upon closing.
   handleReset = () => {
-    console.log("handleReset");
     this.props.model.clearMapFeatures();
     this.props.model.removeDrawInteraction();
     this.setState(defaultState);
   };
 
-  //update form in order step.
-  handleSelectProduct = (e) => {
-    this.setState({ selectedProduct: e.target.value });
-  };
-
   handleLeaveStep = (step) => {
     switch (step) {
       case null:
-        break; //will be reached when we open the tool. Do nothing as all handled by enterStepZero.
+        break; //this will be reached when we open the tool. Do nothing as all handled by enterDrawStep.
       case 0:
-        this.handleLeaveStepZero();
+        this.handleLeaveDrawStep();
         break;
       case 1:
-        this.handleLeaveStepOne();
+        this.handleLeaveProductChoiceStep();
         break;
       case 2:
-        this.handleLeaveStepTwo();
+        this.handleLeaveOrderStep();
         break;
       case 3:
-        this.handleLeaveStepThree();
+        this.handleLeaveConfirmationStep();
         break;
-      case 10:
+      case 100:
         /*
         Leave the completed state. This will occur when we click on 
         börja om. This is already handled by the button click handler. 
@@ -277,18 +271,18 @@ class GeosuiteExportView extends React.PureComponent {
       case null:
         break; //will be reached when we close the tool. Do nothing as all handled already.
       case 0:
-        this.handleEnterStepZero();
+        this.handleEnterDrawStep();
         break;
       case 1:
-        this.handleEnterStepOne();
+        this.handleEnterProductChoiceStep();
         break;
       case 2:
-        this.handleEnterStepTwo();
+        this.handleEnterOrderStep();
         break;
       case 3:
-        this.handleEnterStepThree();
+        this.handleEnterConfirmationStep();
         break;
-      case 10:
+      case 100:
         this.handleProcessComplete();
         break;
       default:
@@ -296,29 +290,25 @@ class GeosuiteExportView extends React.PureComponent {
     }
   };
 
+  //set process to complete.
+  //this will cause the stepper to display as completed, and the final options buttons to display.
   handleProcessComplete = () => {
     this.props.model.clearMapFeatures();
     this.props.model.removeDrawInteraction();
-    //set process to complete.
-    //this will cause the stepper to display as completed, and the final options buttons to display.
     this.setState({ processComplete: true });
   };
 
-  //Actions when entering steps
-  handleEnterStepZero = () => {
-    console.log("handleEnterStepZero");
+  /** Actions when entering steps **/
+
+  handleEnterDrawStep = () => {
     this.props.model.addDrawInteraction();
   };
 
-  handleEnterStepOne = () => {
-    console.log("handleEnterStepOne");
-  };
+  handleEnterProductChoiceStep = () => {};
 
-  handleEnterStepTwo = () => {
-    console.log("handleEnterStepTwo");
+  handleEnterOrderStep = () => {
     if (this.state.selectedProduct === "document") {
-      //moving to the next step should always be enabled when ordering documents
-      this.toggleStepEnabled(3, true);
+      this.toggleStepEnabled(3, true); //moving to the next step should always be enabled when ordering documents.
       this.handleOrderDocumentsFormat();
     } else {
       this.handleOrderGeosuiteToolboxFormat();
@@ -330,9 +320,7 @@ class GeosuiteExportView extends React.PureComponent {
    * @summary Handles GeoSuite Toolbox-format export via Trimble API, after UI selection of
    * projects and/or boreholes. Pre-requisite: state must be updated with projects and contain e-mail.
    */
-  handleEnterStepThree = () => {
-    console.log("handleEnterStepThree");
-
+  handleEnterConfirmationStep = () => {
     if (this.state.selectedProduct !== "document") {
       const email = this.state.email;
       const boreholeIds = [];
@@ -353,31 +341,24 @@ class GeosuiteExportView extends React.PureComponent {
     }
   };
 
-  //Actions when leaving steps
-  handleLeaveStepZero = () => {
-    console.log("handleLeaveStepZero");
+  /** Actions when leaving steps **/
+  handleLeaveDrawStep = () => {
     this.props.model.removeDrawInteraction();
   };
 
-  handleLeaveStepOne = () => {
-    console.log("handleLeaveStepOne");
-  };
+  handleLeaveProductChoiceStep = () => {};
 
-  handleLeaveStepTwo = () => {
-    console.log("handleLeaveStepTwo");
-  };
+  handleLeaveOrderStep = () => {};
 
-  handleLeaveStepThree = () => {
-    console.log("handleLeaveStepThree");
-  };
+  handleLeaveConfirmationStep = () => {};
 
-  // "Börja om"
-  handleLeaveStepTen = () => {
-    console.log("handleLeaveStepTen");
+  //reset to the first step when the user clicks 'Börja om'.
+  handleLeaveFinalStep = () => {
     this.handleReset();
     this.setState({ activeStep: 0 });
   };
 
+  //render the orderStep for the product 'documents'.
   renderOrderStepDocument() {
     const { classes, options } = this.props;
     const termsAndConditionsLink = this.#getTermsAndConditionsLink();
@@ -414,6 +395,7 @@ class GeosuiteExportView extends React.PureComponent {
     );
   }
 
+  //render a spinner while the results are pending.
   renderPending() {
     return (
       <Grid container direction="row" justify="center">
@@ -437,6 +419,7 @@ class GeosuiteExportView extends React.PureComponent {
     );
   }
 
+  //The results to be shown in the OrderStep for product 'borehole'.
   renderBoreholeOrderResult() {
     const { responsePending, responseFailed, projects } = this.state;
 
@@ -458,6 +441,7 @@ class GeosuiteExportView extends React.PureComponent {
     );
   }
 
+  //The results to be shown in the OrderStep for product 'documents'.
   renderDocumentOrderResult() {
     const { classes } = this.props;
     const { responsePending, responseFailed, documents } = this.state;
@@ -485,6 +469,7 @@ class GeosuiteExportView extends React.PureComponent {
     );
   }
 
+  //render the orderStep for the product 'borehole'.
   renderOrderStepGeoSuite() {
     const { classes, options } = this.props;
     const termsAndConditionsLink = this.#getTermsAndConditionsLink();
@@ -586,7 +571,7 @@ class GeosuiteExportView extends React.PureComponent {
     );
   }
 
-  renderConfirmStep = () => {
+  renderConfirmationStep = () => {
     const { classes, options } = this.props;
     const deliveryConfirmationHeader =
       options.view?.boreholes?.confirmation?.header ??
@@ -626,7 +611,7 @@ class GeosuiteExportView extends React.PureComponent {
           <Button
             disabled={step === 0}
             onClick={() => {
-              this.setState({ activeStep: 10 });
+              this.setState({ activeStep: 100 });
             }}
             color="primary"
             aria-label="Klar"
@@ -645,7 +630,7 @@ class GeosuiteExportView extends React.PureComponent {
           disabled={this.state.activeStep === 0}
           startIcon={<ReplayIcon />}
           onClick={() => {
-            this.handleLeaveStepTen();
+            this.handleLeaveFinalStep();
           }}
           color="primary"
           variant="outlined"
@@ -672,24 +657,21 @@ class GeosuiteExportView extends React.PureComponent {
 
   renderNextAndBackButtons = (nextButtonName, backButtonName) => {
     const step = this.state.activeStep;
-    const { classes } = this.props;
 
     return (
-      <Box display="flex">
+      <Box display="flex" mt={1} gridColumnGap={"10px"}>
         <Button
-          className={classes.stepButton}
           onClick={() => {
             this.setState({ activeStep: step + 1 });
           }}
           variant="contained"
           aria-label="Fortsätt till nästa steg"
-          disabled={!this.state.steps?.[step + 1]?.["canEnter"]}
+          disabled={!this.state.steps?.[step + 1]?.["enterable"]}
           color="primary"
         >
           {nextButtonName || "Fortsätt"}
         </Button>
         <Button
-          className={classes.stepButton}
           disabled={step === 0}
           onClick={() => {
             this.setState({ activeStep: step - 1 });
@@ -704,9 +686,11 @@ class GeosuiteExportView extends React.PureComponent {
     );
   };
 
+  //Toggle whether a step should be enabled or not.
+  //If a step is not enabled, the button to enter that step will be disabled.
   toggleStepEnabled = (step, isEnabled) => {
     const stepState = { ...this.state.steps };
-    stepState[step].canEnter = isEnabled;
+    stepState[step].enterable = isEnabled;
     this.setState({ steps: stepState });
   };
 
@@ -736,7 +720,7 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    //When the step of the stepper tool changes.
+    //When the step of the stepper tool change, leave the current step and enter the new active step.
     if (prevState.activeStep !== this.state.activeStep) {
       this.handleLeaveStep(prevState.activeStep);
       this.handleEnterStep(this.state.activeStep);
@@ -745,7 +729,7 @@ class GeosuiteExportView extends React.PureComponent {
     //When the selected area of interest changes.
     if (prevState.isAreaSelected !== this.state.isAreaSelected) {
       const updatedSteps = { ...this.state.steps };
-      updatedSteps[1].canEnter = this.state.isAreaSelected;
+      updatedSteps[1].enterable = this.state.isAreaSelected;
       this.setState({ steps: updatedSteps });
     }
 
@@ -758,7 +742,6 @@ class GeosuiteExportView extends React.PureComponent {
       const selectedForOrder = this.state.projects.filter(
         (proj) => proj.selected
       );
-
       this.toggleStepEnabled(
         3,
         selectedForOrder.length && this.state.emailValid
@@ -798,7 +781,11 @@ class GeosuiteExportView extends React.PureComponent {
                     aria-label="selektera produkt"
                     name="select-product"
                     value={this.state.selectedProduct}
-                    onChange={this.handleSelectProduct}
+                    onChange={(e) =>
+                      this.setState({
+                        selectedProduct: e.target.value,
+                      })
+                    }
                   >
                     <FormControlLabel
                       value="document"
@@ -825,7 +812,7 @@ class GeosuiteExportView extends React.PureComponent {
             </Step>
             <Step key="confirmation" completed={false}>
               <StepLabel>Bekräftelse</StepLabel>
-              <StepContent>{this.renderConfirmStep()}</StepContent>
+              <StepContent>{this.renderConfirmationStep()}</StepContent>
             </Step>
           </Stepper>
         </div>
