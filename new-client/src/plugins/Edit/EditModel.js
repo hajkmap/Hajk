@@ -354,20 +354,29 @@ class EditModel {
   };
 
   loadData(source, extent, done) {
-    // Prepare the URL for retrieving data in a proper manner:
+    // Prepare the URL for retrieving WFS data. We will want to set
+    // some search params later on, but we want to avoid any duplicates.
+    // The values we will set below should override any existing, if
+    // same key already exists in URL.
+    // To ensure it will happen, we read the possible current params…
     const url = new URL(source.url);
 
-    // Read potential existing search params from provided WFS URL
-    const existingSearchParams = Object.fromEntries(url.searchParams.entries());
+    // …and make sure that the keys are in UPPER CASE.
+    const existingSearchParams = {};
+    for (const [k, v] of url.searchParams.entries()) {
+      existingSearchParams[k.toUpperCase()] = v;
+    }
 
-    // Merge those with other params that we want to append to the search params string
+    // Now we merge the possible existing params with the rest, defined
+    // below. We can be confident that we won't have duplicates and that
+    // our values "win", as they are defined last.
     const mergedSearchParams = {
       ...existingSearchParams,
-      service: "WFS",
-      version: "1.1.0",
-      request: "GetFeature",
-      typename: source.layers[0],
-      srsname: source.projection,
+      SERVICE: "WFS",
+      VERSION: "1.1.0",
+      REQUEST: "GetFeature",
+      TYPENAME: source.layers[0],
+      SRSNAME: source.projection,
     };
 
     // Create a new URLSearchParams object from the merged object…
@@ -375,7 +384,7 @@ class EditModel {
     // …and update our URL's search string with the new value
     url.search = searchParams.toString();
 
-    // .toString() since hfetch expects it
+    // Send a String as HFetch doesn't currently accept true URL objects
     hfetch(url.toString())
       .then((response) => {
         if (response.status !== 200) {
