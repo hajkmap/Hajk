@@ -169,13 +169,23 @@ class KmlModel {
   // Extracts the feature style from its properties and applies it.
   #setFeatureStyleFromProps = (feature, styleProperty) => {
     try {
+      // Parse the string to a real object
       const parsedStyle = JSON.parse(styleProperty);
+      // Get the geometry-type so that we can check if we're
+      // dealing with a text drawn with the draw-plugin
       const geometryType = feature.getProperties().geometryType;
+      // If the type is set to text, we are dealing with a draw-plugin
+      // text, and we have to handle it separately. (We don't want to
+      // extract information from the point-object which is it built upon).
       if (geometryType === "Text") {
         this.#setFeatureTextProperty(feature, parsedStyle.text);
       } else {
+        // If we're not dealing with a text-object from the draw-plugin,
+        // we can extract information from the feature itself.
         this.#setFeaturePropertiesFromGeometry(feature);
       }
+      // Then we create a style and apply it on the feature to make
+      // sure the import looks like the features drawn in the draw-plugin.
       feature.setStyle(this.#createFeatureStyle(parsedStyle));
     } catch (exception) {
       console.error(
