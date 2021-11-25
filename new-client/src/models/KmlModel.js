@@ -5,6 +5,7 @@ import { Circle } from "ol/geom.js";
 import { fromCircle } from "ol/geom/Polygon.js";
 import { createXML } from "../utils/KMLWriter";
 import { saveAs } from "file-saver";
+import { Fill, Stroke, Style } from "ol/style.js";
 
 /*
  * A model supplying useful KML-functionality.
@@ -15,8 +16,8 @@ import { saveAs } from "file-saver";
  * - map: (olMap): The current map-object.
  *
  * Exposes a couple of methods:
- * - parseFeatures(kmlString): Accepts a KML-string and tries to parse it to OL-features.
- * - import(kmlString): Accepts a KML-string and adds the KML-features to the layer.
+ * - parseFeatures(kmlString, settings): Accepts a KML-string and tries to parse it to OL-features.
+ * - import(kmlString, settings): Accepts a KML-string and adds the KML-features to the layer.
  * - export(): Exports all features in the current kml-layer.
  * - removeImportedFeatures(): Removes all imported features from the kml-source.
  * - zoomToCurrentExtent(): Zooms the map to the current extent of the kml-source.
@@ -141,26 +142,151 @@ class KmlModel {
   // Translates the supplied feature to the map-views coordinate system.
   #translateFeatureToViewSrs = (feature) => {
     // Let's get the geometry-type to begin with
-    const geometryType = feature?.getGeometry?.().getType?.() ?? null;
+    const baseGeometryType = feature?.getGeometry?.().getType?.() ?? null;
     // If no geometry-type could be fetched from the supplied feature, we make sure
     // to terminate to avoid errors.
-    if (geometryType === null) return null;
+    if (baseGeometryType === null) return null;
     // We are going to be using the view of the map when translating, let's get it
     const mapViewProjection = this.#map.getView().getProjection();
-    // The kml-parser which has been used to extract features from the .kml-file can return
-    // a bunch of geometry-types. We have to make sure that we handle each of them.
+    // Finally we translate the feature to the view-projection.
     feature.getGeometry().transform("EPSG:4326", mapViewProjection);
   };
 
-  // Translates the supplied features to the map-views coordinate system.
-  #translateFeaturesToViewSrs = (features) => {
+  // Extracts style from the feature props or style func and applies it.
+  #setFeatureStyle = (feature) => {
+    // First, we try to get the style from the feature props
+    const styleProperty = feature?.getProperties()?.style ?? null;
+    // If it exists, we apply the style using this prop.
+    if (styleProperty !== null) {
+      return this.#setFeatureStyleFromProps(feature, styleProperty);
+    }
+    const styleFunc = feature?.getStyleFunction() ?? null;
+    if (styleFunc !== null) {
+      return this.#setStyleFromStyleFunction(feature, styleFunc);
+    }
+  };
+
+  // Extracts the feature style from its properties and applies it.
+  #setFeatureStyleFromProps = (feature, styleProperty) => {
+    try {
+      const parsedStyle = JSON.parse(styleProperty);
+      const geometryType = feature.getProperties().geometryType;
+      if (geometryType === "Text") {
+        this.#setFeatureTextProperty(feature, parsedStyle.text);
+      } else {
+        this.#setFeaturePropertiesFromGeometry(feature);
+      }
+      feature.setStyle(this.#createFeatureStyle(parsedStyle));
+    } catch (exception) {
+      console.error(
+        "KML-model: Style attribute could not be parsed.",
+        exception
+      );
+    }
+  };
+
+  // Extracts the style from the style function and applies it.
+  #setStyleFromStyleFunction = (feature, styleFunction) => {
+    // Let's create the style using the style function. The views resolution
+    // must be passed since the style might behave differently when resolution change.
+    const style = styleFunction(feature, this.map.getView().getResolution());
+    // Checks if the fill is nullish, if it is, we must make sure to set _something_
+    // to avoid issues when adding the feature to the map.
+    if (this.#styleFillIsNullish(style)) {
+      style[0].setFill(
+        new Fill({
+          color: [0, 0, 0, 0],
+        })
+      );
+    }
+    // Finally, we apply the style on the feature.
+    feature.setStyle(style);
+  };
+
+  // Checks wether the supplied style exist and has a nullish fill.
+  #styleFillIsNullish = (style) => {
+    return style[0] && style[0].getFill && style[0].getFill() === null;
+  };
+
+  // Sets the text property on the supplied feature.
+  #setFeatureTextProperty = (feature, text) => {
+    feature.setProperties({
+      type: "Text",
+      text: text,
+    });
+  };
+
+  // Creates a style-object from the special settings that are
+  // added when drawing features in the draw-plugin. E.g. stroke-dash
+  // and so on. TODO: (1) Add image and text styles
+  // TODO: (2) Get rid of this and use standard ol stuff.
+  #createFeatureStyle = (parsedStyle) => {
+    const { fillColor, strokeColor, strokeWidth, lineDash } = parsedStyle;
+    return [
+      new Style({
+        fill: new Fill({ color: fillColor }),
+        stroke: new Stroke({
+          color: strokeColor,
+          width: strokeWidth,
+          lineDash: lineDash,
+        }),
+        image: null,
+        text: null,
+      }),
+    ];
+  };
+
+  // Extracts some information from the geometry and sets it as properties on
+  // the feature.
+  #setFeaturePropertiesFromGeometry = (feature) => {
+    // We're gonna need an object to keep track of some extracted settings
+    const extractedSettings = {};
+    // Extracting the geometry and geometry type
+    const featureGeometry = feature.getGeometry();
+    const geometryType = featureGeometry.getType();
+    // Let's extract some information about the geometry
+    extractedSettings.position = this.#getFeaturePointPosition(featureGeometry);
+    extractedSettings.length = featureGeometry.getLength?.() ?? null;
+    extractedSettings.area = featureGeometry.getArea?.() ?? null;
+    extractedSettings.radius = featureGeometry.getRadius?.() ?? null;
+    // And set the information as properties
+    feature.setProperties({
+      type: geometryType,
+      length: extractedSettings.length,
+      area: extractedSettings.area,
+      radius: extractedSettings.radius,
+      position: extractedSettings.position,
+    });
+  };
+
+  // Extracts the coordinates for the
+  #getFeaturePointPosition = (featureGeometry) => {
+    // First we have to get the geometry type, since we only
+    // want to extract the coordinates when we're dealing with a point.
+    const geometryType = featureGeometry.getType();
+    // If we're not dealing with a point, return.
+    if (geometryType !== "Point") return null;
+    // Otherwise we get the coordinates
+    const coordinates = featureGeometry.getCoordinates();
+    // And return them formatted...
+    return {
+      n: coordinates[1],
+      e: coordinates[0],
+    };
+  };
+
+  // Prepares the supplied features for injection in the map.
+  // Includes translating and styling of the features.
+  #prepareForMapInjection = (features) => {
     // If no features are supplied, we abort!
     if (!features || features?.length === 0) {
       return null;
     }
-    // Otherwise we translate every feature to the map-views coordinate system.
+    // Otherwise we translate every feature to the map-views coordinate system
+    // and apply the feature style.
     features.forEach((feature) => {
       this.#translateFeatureToViewSrs(feature);
+      this.#setFeatureStyle(feature);
     });
   };
 
@@ -203,17 +329,23 @@ class KmlModel {
   // Returns an object on the following form:
   // {features: <Array of ol-features>, error: <String with potential error message>}
   // **The returned features are translated to the map-views coordinate system.**
-  parseFeatures = (kmlString, translateToViewSrs = true) => {
+  parseFeatures = (kmlString, settings = { prepareForMapInjection: true }) => {
+    // The method accepts a setting-object, lets extract the settings we need.
+    // The settings includes a possibility to set prepareForMapInjection to false,
+    // (default to true), allowing for the return-object to contain the pure parsed
+    // features (not styled or translated).
+    const prepareForMapInjection = settings.prepareForMapInjection;
+    // Then we start parsing
     try {
       // First we must parse the string to ol-features
       const features = this.#parser.readFeatures(kmlString) ?? [];
       // Let's make sure to tag all imported features so that we can
       // distinguish them from "ordinary" features.
       this.#tagFeaturesAsImported(features);
-      // Then we must make sure to translate all the features to
-      // the current map-views coordinate system. (If the user has not
-      // explicitly told us no to!)
-      translateToViewSrs && this.#translateFeaturesToViewSrs(features);
+      // Then we must make sure to prepare all the features for
+      // map-injection. This includes translating the features to
+      // the current map-views coordinate system, and setting some style.
+      prepareForMapInjection && this.#prepareForMapInjection(features);
       // Then we can return the features
       return { features: features, error: null };
     } catch (exception) {
@@ -227,7 +359,7 @@ class KmlModel {
   // the kml-source.
   // Accepts an kmlString and an optional parameter stating if the map should
   // zoom the the imported features extent or not.
-  import = (kmlString, zoomToExtent = true) => {
+  import = (kmlString, settings = { zoomToExtent: true }) => {
     // Start by trying to parse the kml-string
     const { features, error } = this.parseFeatures(kmlString);
     // If the parsing led to any kind of error, we make sure to abort
@@ -242,7 +374,7 @@ class KmlModel {
     this.#currentExtent = this.#kmlSource.getExtent();
     // Then we make sure to zoom to the current extent (unless the initiator
     // has told us not to!).
-    zoomToExtent && this.zoomToCurrentExtent();
+    settings.zoomToExtent && this.zoomToCurrentExtent();
     // Finally we return a success message to the initiator.
     return { status: "SUCCESS", error: null };
   };
