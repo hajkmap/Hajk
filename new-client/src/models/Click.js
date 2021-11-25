@@ -295,8 +295,9 @@ export function handleClick(evt, map, callback) {
         evt.pixel,
         (feature, layer) => {
           if (
-            layer.get("queryable") === true ||
-            layer.get("type") === "searchResultLayer"
+            layer &&
+            (layer.get("queryable") === true ||
+              layer.get("type") === "searchResultLayer")
           ) {
             feature.layer = layer;
             features.push(feature);
