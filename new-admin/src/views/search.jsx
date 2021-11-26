@@ -93,7 +93,7 @@ class Search extends Component {
   /**
    *
    */
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:layers");
   }
   /**

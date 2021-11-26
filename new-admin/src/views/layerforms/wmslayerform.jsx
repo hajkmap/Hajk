@@ -112,7 +112,7 @@ class WMSLayerForm extends Component {
     });
   }
 
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:legend");
     this.props.model.off("change:select-legend-icon");
   }
