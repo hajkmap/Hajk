@@ -15,6 +15,9 @@ import VectorSource from "ol/source/Vector";
  * - removeDrawnFeatures():  Removes all drawn features from the current draw-source.
  * - setLayer(layerName <string>): Sets (or creates) the layer that should be connected to the draw-model.
  * - zoomToCurrentExtent(): Fits the map-view to the current extent of the current draw-source.
+ * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
+ * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
+ * - get/set showFeatureMeasurements(): Get or set wether drawn feature measurements should be shown or not.
  */
 class DrawModel {
   #map;
@@ -22,6 +25,9 @@ class DrawModel {
   #drawSource;
   #drawLayer;
   #currentExtent;
+  #showDrawTooltip;
+  #showFeatureMeasurements;
+  #drawStyleSettings;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -32,6 +38,10 @@ class DrawModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    this.#showDrawTooltip = settings.drawTooltip ?? true;
+    this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
+    this.#drawStyleSettings =
+      settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
     // We are going to be keeping track of the current extent of the draw-source.
     this.#currentExtent = null;
     // A Draw-model is not really useful without a vector-layer, let's initiate it
@@ -42,6 +52,13 @@ class DrawModel {
       "Initiation of Draw-model successful. Note that the model has not been properly tested yet and should not be used in critical operation."
     );
   }
+
+  // Returns the default style settings used by the draw-model.
+  #getDefaultDrawStyleSettings = () => {
+    const strokeColor = "rgba(74,74,74,0.5)";
+    const fillColor = "rgba(255,255,255,0.07)";
+    return { strokeColor: strokeColor, fillColor: fillColor };
+  };
 
   // If required parameters are missing, we have to make sure we abort the
   // initiation of the draw-model.
@@ -189,6 +206,24 @@ class DrawModel {
     this.#currentExtent = this.#drawSource.getExtent();
   };
 
+  // Set:er allowing us to change if a tooltip should be shown when drawing
+  // TODO: Handle side effects
+  setShowDrawTooltip = (drawTooltipActive) => {
+    this.#showDrawTooltip = drawTooltipActive;
+  };
+
+  // Set:er allowing us to change if measurements of the drawn features should
+  // be shown or not. // TODO: Handle side effects
+  setShowFeatureMeasurements = (showFeatureMeasurements) => {
+    this.#showFeatureMeasurements = showFeatureMeasurements;
+  };
+
+  // Set:er allowing us to change the style settings used in the draw-layer
+  // TODO: Handle side effects
+  setDrawStyleSettings = (newStyleSettings) => {
+    this.#drawStyleSettings = newStyleSettings;
+  };
+
   // Get:er returning the name of the draw-layer.
   getCurrentLayerName = () => {
     return this.#layerName;
@@ -197,6 +232,21 @@ class DrawModel {
   // Get:er returning the current extent of the draw-source.
   getCurrentExtent = () => {
     return this.#currentExtent;
+  };
+
+  // Get:er returning the state of the showDrawTooltip
+  getShowDrawTooltip = () => {
+    return this.#showDrawTooltip;
+  };
+
+  // Get:er returning the state of the showFeatureMeasurements
+  getShowFeatureMeasurements = () => {
+    return this.#showFeatureMeasurements;
+  };
+
+  // Get:er returning the current draw-style settings
+  getDrawStyleSettings = () => {
+    return this.#drawStyleSettings;
   };
 }
 export default DrawModel;
