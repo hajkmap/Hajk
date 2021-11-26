@@ -3,7 +3,6 @@ import VectorSource from "ol/source/Vector";
 import KML from "ol/format/KML.js";
 import { Circle } from "ol/geom.js";
 import { fromCircle } from "ol/geom/Polygon.js";
-import { createXML } from "../utils/KMLWriter";
 import { saveAs } from "file-saver";
 import { Fill, Stroke, Style, Text } from "ol/style.js";
 
@@ -49,6 +48,10 @@ class KmlModel {
     // A KML-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
     this.#initiateKmlLayer();
+    // Let's display a warning for now, remove once it's properly tested. TODO: @Hallbergs
+    console.info(
+      "Initiation of KML-model successful. Note that the model has not been properly tested yet and should not be used in critical operation."
+    );
   }
 
   // If required parameters are missing, we have to make sure we abort the
@@ -444,7 +447,7 @@ class KmlModel {
       };
     }
     // If we do have compatible features, we can create the kml-xml
-    const postData = createXML(
+    const postData = this.#parser.writeFeatures(
       compatibleFeatures,
       `${this.#layerName}-kml-export`
     );
