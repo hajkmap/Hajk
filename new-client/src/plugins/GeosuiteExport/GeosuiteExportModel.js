@@ -31,14 +31,16 @@ class GeosuiteExportModel {
     this.#options = settings.options;
     this.#localObserver = settings.localObserver;
 
+    // Current selection state-model
     this.#selection = {
       borehole: {
-        boreholeIds: [], // Member: String(Trimble borehole id)
-        projects: {}, // Key: ProjectId, Value: JSON-object with Project details:
-        // { id<String>, name<String>, boreholeIds<Array[String]>, numBoreHolesSelected<Number>, numBoreHolesTotal<Number> }
+        boreholeIds: [], // Array members: Trimble borehole id<String>
+        projects: {}, // Projects selection object with keys: id<String>, value: Project details object:
+        // { id: <String>, name: <String>, boreholeIds: <Array[String]>, numBoreHolesSelected: <Number>, numBoreHolesTotal: <Number> }
       },
-      // In a future layer-agnostic extension of this tool the document selection can be keyed by e.g. WFS source key for multi-source capability
-      document: {}, // DocumentSelection: key String<id>, value: { title: title<String>, link: String<download url> }
+      // Room for improvement:
+      // In a future layer-agnostic extension of this tool the document selection can be keyed by e.g. WFS source key, for multi-source capability
+      document: {}, // Document selection object with keys: id<String>, value: Document details object: { id: <String>, title: <String>, link: <String> }
     };
     this.#source = new VectorSource();
     this.#vector = new VectorLayer({
@@ -110,7 +112,6 @@ class GeosuiteExportModel {
 
   handleWindowOpen = () => {
     //pass to the view, so we can re-set the view state.
-    //TODO - can we just handle what we need to here in the model?
     this.#localObserver.publish("window-opened");
   };
 
@@ -148,7 +149,6 @@ class GeosuiteExportModel {
   };
 
   removeDrawInteraction = () => {
-    console.log("removeDrawInteraction");
     if (this.#draw !== null) {
       this.#map.removeInteraction(this.#draw);
       this.#draw = null;
@@ -156,9 +156,10 @@ class GeosuiteExportModel {
     this.#map.clickLock.delete("geosuiteexport");
 
     /*
-    Add the maps doubleclick zoom interaction back to map when we leave drawing mode (the doubleclick zoom interaction is removed from the map when we enter drawing mode, to avoid a zoom when doubleclicking to finish drawing).
-    TODO - do this without a timeout. (timeout because otherwise the map still zooms).
-    TODO - is there a better way to cancel the doubleclick zoom without removing and the re-adding the interaction?
+    Add the maps doubleclick zoom interaction back to map when we leave drawing mode
+    (the doubleclick zoom interaction is removed from the map when we enter drawing mode, to avoid a zoom when doubleclicking to finish drawing).
+    Timeout is used to avoid a map zooms on re-add.
+    Room for future improvement: Investigate other ways of cancelling double-click zoom.
     */
     if (this.#doubleClick) {
       setTimeout(() => {
@@ -210,12 +211,6 @@ class GeosuiteExportModel {
    * @param {*} projectIds array of strings, where each string represents the external identity of a full project to export
    */
   orderGeoSuiteExport = (email, boreholeIds, projectIds) => {
-    console.log(
-      "GeosuiteExportView: orderGeoSuiteExport. email=%s, boreholeIds, projectIds",
-      email,
-      boreholeIds,
-      projectIds
-    );
     if (
       !email ||
       ((!boreholeIds || boreholeIds.size === 0) &&
@@ -247,7 +242,9 @@ class GeosuiteExportModel {
     )
       .then((response) => {
         if (!response.ok) {
-          console.log("orderGeoSuiteExport: API query rejected");
+          console.warn(
+            "GeosuiteExportModel: orderGeoSuiteExport: API query rejected"
+          );
           throw new TypeError("Rejected");
         }
         this.#localObserver.publish("geosuite-export-completed");
@@ -281,7 +278,6 @@ class GeosuiteExportModel {
    * Clear borehole and project selection state.
    */
   clearSelection = () => {
-    console.log("GeosuiteExportModel: clearSelection");
     this.#clearSelectionState();
     this.#source.clear();
   };
@@ -319,34 +315,20 @@ class GeosuiteExportModel {
     featureSelectCallback,
     postFeatureSelectionCallback
   ) => {
-    console.log(
-      "#updateSelectionStateFromWfs: Calling WFS GetFeature using spatial filter from user selection geometry:",
-      selectionGeometry
-    );
     if (!selectionGeometry) {
       return;
     }
 
     const layerSrs = wfsConfig.layer.projection ?? this.#config.srsName;
-    console.log(
-      "Projections: map=%s, layer=%s. wfsConfig:",
-      this.#config.srsName,
-      layerSrs,
-      wfsConfig
-    );
     let filterGeometry = selectionGeometry;
     if (this.#config.srsName !== layerSrs) {
-      console.log(
-        "Reprojecting selection geometry from %s to %s",
-        this.#config.srsName,
-        layerSrs
-      );
       filterGeometry = selectionGeometry
         .clone()
         .transform(this.#config.srsName, layerSrs);
     }
 
-    // TODO: Replace code-duplication with shared model with search (SearchModel) before PR is created.
+    // Room for future improvement: Share searchModel to reduce plug-in specific code.
+    // Some minor extensions from here must then be backported to search model.
     const filter = wfsConfig.spatialFilter ?? within;
     const spatialFilter = filter(
       wfsConfig.layer.geometryField,
@@ -363,8 +345,6 @@ class GeosuiteExportModel {
       geometryName: wfsConfig.layer.geometryField,
       filter: spatialFilter,
     };
-    console.log("WFS config:", wfsConfig);
-    console.log("WFS GetFeature options:", wfsGetFeatureOtions);
     if (wfsConfig.maxFeatures > 0) {
       wfsGetFeatureOtions["maxFeatures"] = wfsConfig.maxFeatures;
     }
@@ -384,40 +364,21 @@ class GeosuiteExportModel {
       },
       body: wfsBoreholesBodyXml,
     };
-    console.log(
-      "#updateSelectionStateFromWfs: Calling boreholes WFS GetFeature using body:",
-      wfsBoreholesRequest.body
-    );
     hfetch(wfsConfig.layer.url, wfsBoreholesRequest)
       .then((response) => {
         if (!response.ok) {
-          console.log("#updateSelectionStateFromWfs: WFS query rejected");
+          console.warn(
+            "GeosuiteExportModel: #updateSelectionStateFromWfs: WFS query rejected"
+          );
           throw new TypeError("Rejected"); // E.g. CORS error or similar
         }
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
-          // TODO: REMOVE:
-          response.text().then((body) => {
-            console.log(
-              "#updateSelectionStateFromWfs: response is not JSON:",
-              body
-            );
-          });
           throw new TypeError("Response is not JSON"); // E.g. server error or OGC XML for WFS exceptions
         }
         return response.json();
       })
       .then((featureCollection) => {
-        console.log(
-          "#updateSelectionStateFromWfs: WFS response fetched:",
-          featureCollection
-        );
-        console.log(
-          "#updateSelectionStateFromWfs: got %d features of matched %d (out of total %d)",
-          featureCollection.numberReturned,
-          featureCollection.numberMatched,
-          featureCollection.totalFeatures
-        );
         if (featureCollection.numberReturned > 0) {
           featureCollection.features.forEach((feature) => {
             featureSelectCallback(feature);
@@ -428,8 +389,10 @@ class GeosuiteExportModel {
         }
       })
       .catch((error) => {
-        //TODO: Error handling
-        console.log("#updateSelectionStateFromWfs: WFS error", error);
+        console.warn(
+          "GeosuiteExportModel: #updateSelectionStateFromWfs: WFS error",
+          error
+        );
       });
   };
 
@@ -446,12 +409,13 @@ class GeosuiteExportModel {
     const link = props[this.#config.projects.attributes.link];
 
     if (!featureId || !title || !link) {
-      console.error(
-        "#selectDocument: WFS is missing feature id, title (%s) or link attribute (%s). Feature=",
+      console.warn(
+        "GeoSuiteExportModel: #selectDocument: WFS is missing feature id, title (%s) or link attribute (%s). Check attribute names in admin. Feature=",
         this.#config.projects.attributes.title,
         this.#config.projects.attributes.link,
         feature
       );
+      // Don't throw an error on invidiual document selection failure, since we can handle other links/results
       return;
     }
     const documentDetail = this.#getDocumentById(featureId);
@@ -468,12 +432,15 @@ class GeosuiteExportModel {
       props[this.#config.boreholes.attributes.external_project_id];
 
     if (!boreholeId || !projectId) {
-      console.log(
-        "#selectBoreHole: WFS is missing id (%s) or project id attribute (%s)",
+      console.warn(
+        "GeoSuiteExportModel: #selectBoreHole: WFS is missing id (%s) or project id attribute (%s). Check attribute names in admin. Feature=",
         this.#config.boreholes.attributes.external_id,
-        this.#config.boreholes.attributes.external_project_id
+        this.#config.boreholes.attributes.external_project_id,
+        feature
       );
-      throw new TypeError("Internt fel, identiteter saknas.");
+      throw new TypeError(
+        "Internal error, required borehole identities missing from WFS."
+      );
     }
     const project = this.#getBoreholeProjectById(projectId);
     if (!this.#selection.borehole.boreholeIds.includes(boreholeId)) {
@@ -493,7 +460,6 @@ class GeosuiteExportModel {
   };
 
   #updateSelectedProjectsDetailsFromTrimbleApi = () => {
-    console.log("#updateSelectedProjectsDetailsFromTrimbleApi");
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -522,7 +488,6 @@ class GeosuiteExportModel {
           .then((response) => {
             if (!response.ok) {
               reject("Trimble response not ok.");
-              console.log(response);
             }
             resolve(response);
           })
@@ -552,12 +517,18 @@ class GeosuiteExportModel {
             this.#localObserver.publish("borehole-selection-updated");
           })
           .catch((error) => {
-            console.error(error);
+            console.warn(
+              "GeosuiteExportModel: #updateSelectedProjectsDetailsFromTrimbleApi: Trimble API response failure",
+              error
+            );
             this.#localObserver.publish("borehole-selection-failed");
           });
       })
       .catch((error) => {
-        console.error(error);
+        console.warn(
+          "GeosuiteExportModel: #updateSelectedProjectsDetailsFromTrimbleApi: Trimble API request failure",
+          error
+        );
         this.#localObserver.publish("borehole-selection-failed");
       });
   };
@@ -575,11 +546,7 @@ class GeosuiteExportModel {
     const apiUrlPrefix =
       this.#options.services?.trimble?.url ??
       "https://geoarkiv-api.goteborg.se/prod";
-    let apiUrl = apiUrlPrefix.concat(endpointAddress);
-
-    // TODO: REMOVE: Work-around pending customer technical solution to CORS pre-flight for POST requests
-    const proxy = this.#app.config?.appConfig?.searchProxy ?? "";
-    apiUrl = proxy.concat(apiUrl);
+    const apiUrl = apiUrlPrefix.concat(endpointAddress);
 
     const apiRequestOptions = {
       credentials: "same-origin",
@@ -622,8 +589,6 @@ class GeosuiteExportModel {
   // Callback for updating document details. Currently a no-op/signal handler only since all document details
   // are returned in WFS query.
   #updateDocumentDetails = () => {
-    console.log("#updateDocumentDetails");
-    // TODO: Fix WFS call error handling: this.#localObserver.publish("document-selection-failed");
     this.#localObserver.publish("document-selection-updated");
   };
 
@@ -656,14 +621,6 @@ class GeosuiteExportModel {
   // Set layer config to result of merge of by-id-referenced search layer,
   // with overwrite/merge from our own plug-in's layer config or defaults.
   #initWfsLayers = () => {
-    console.log(
-      "#initWfsLayers: projects: pre merge our config=",
-      this.#config.projects.layer
-    );
-    console.log(
-      "#initWfsLayers: boreholes: pre merge our config=",
-      this.#config.boreholes.layer
-    );
     const projectsLayerByRefOrDefaults = this.#getSearchLayerByRefOrDefaults(
       this.#config.projects.layer.id,
       {
@@ -690,29 +647,12 @@ class GeosuiteExportModel {
       boreholesLayerByRefOrDefaults,
       this.#config.boreholes.layer
     );
-    console.log(
-      "#initWfsLayers: projects: get layer by ref or defaults=",
-      projectsLayerByRefOrDefaults
-    );
-    console.log(
-      "#initWfsLayers: projects: post merge our config=",
-      this.#config.projects.layer
-    );
-    console.log(
-      "#initWfsLayers: boreholes: get layer by ref or defaults=",
-      boreholesLayerByRefOrDefaults
-    );
-    console.log(
-      "#initWfsLayers: boreholes: post merge our config=",
-      this.#config.boreholes.layer
-    );
   };
 
   // Returns layer from configured Search layers, given layer id reference.
   // If no reference is found, the given defaults are used as a static layer.
   #getSearchLayerByRefOrDefaults = (id, defaults) => {
     var layer = this.#getSearchLayerById(id);
-    console.log("Get layer by %s:", id, layer);
     if (!layer) {
       console.warn(
         "GeosuiteExport: Layer not found, please configure search layer via admin and mark as active in search plug-in. Using defaults. Reference id=%s.",
@@ -726,7 +666,6 @@ class GeosuiteExportModel {
   // Returns layer from configured Search layers, given layer id reference.
   #getSearchLayerById = (id) => {
     return (this.#app.searchModel?.getSources() ?? []).find((layer) => {
-      console.log("Checking ref %s against: %s", id, layer.id, layer);
       return layer.id === id;
     });
   };

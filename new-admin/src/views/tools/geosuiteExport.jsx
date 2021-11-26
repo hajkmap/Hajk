@@ -102,7 +102,7 @@ class ToolOptions extends Component {
 
   /**
    * Updates current state property with new value, potentially recursively on a nested property path.
-   * Inspired by https://stackoverflow.com/a/50392139/13508133, modified by Sweco to to handle empty tail and work on current state
+   * Inspired by https://stackoverflow.com/a/50392139/13508133, modified by Sweco to to handle empty tail.
    * @param {*} obj current value object for setting updated state key, should be an empty object on first level call
    * @param {*} propPath flat or nested path to state key to update, nesting is specified by double underscores (__)
    * @param {*} value new value to set on specified state key
@@ -110,7 +110,6 @@ class ToolOptions extends Component {
   getUpdatedStateProp = (obj, propPath, value) => {
     const [head, ...tail] = propPath.split('__');
 
-    console.log("getUpdatedStateProp: propPath=%s, head=%s, tail=%s, obj:", propPath, head, tail, obj);
     if (!tail || !tail.length) {
       if (!obj) {
         console.warn(
@@ -123,7 +122,6 @@ class ToolOptions extends Component {
       return obj;
     }
     const parentObject = obj[head];
-    console.log("getUpdatedStateProp: parentObject=", parentObject);
     this.getUpdatedStateProp(parentObject, tail.join('__'), value);
     return parentObject;
   }
@@ -139,7 +137,6 @@ class ToolOptions extends Component {
     const [head, ...tail] = name.split('__');
     var newState;
     if (!tail || !tail.length) {
-      console.log("handleInputChange: name=%s, no tail, value=%s", name, value);
       newState = {
         [name]: value
       };
@@ -147,12 +144,10 @@ class ToolOptions extends Component {
       const currentState = {
         [head]: this.state[head]
       };
-      console.log("handleInputChange: name=%s, head=%s, value=%s, currentState:", name, head, value, currentState);
       newState = {
         [head]: this.getUpdatedStateProp(currentState, name, value)
       };
     }
-    console.log("handleInputChange: state change - new state:", newState);
     this.setState(newState);
   }
 

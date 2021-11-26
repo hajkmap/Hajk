@@ -222,10 +222,10 @@ class GeosuiteExportView extends React.PureComponent {
     });
   };
 
-  //update the documents state if the projects on the model have been updated.
-  //The added 'selected property' can used select/deselect the project in UI's selection list. OBS. the
-  //'selected' property is not currently used. Bul will be used in planned changes to the document list by Gothenburg
-  //SBK.
+  // Update the documents state if the projects on the model have been updated.
+  // The added 'selected property' can be used to select/deselect the project in UI's selection list.
+  // NB! The 'selected' property is not currently used, it is prepared for the next development
+  // iteration with planned changes to the document list by SBK Gothenburg.
   documentSelectionUpdated = () => {
     let documents = this.props.model.getSelectedDocuments();
     documents.forEach((document) => {
