@@ -1,3 +1,5 @@
+import { Draw } from "ol/interaction";
+import { createBox, createRegularPolygon } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill } from "ol/style";
@@ -29,6 +31,7 @@ class DrawModel {
   #showDrawTooltip;
   #showFeatureMeasurements;
   #drawStyleSettings;
+  #drawInteraction;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -43,8 +46,10 @@ class DrawModel {
     this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
-    // We are going to be keeping track of the current extent of the draw-source.
+    // We are going to be keeping track of the current extent of the draw-source...
     this.#currentExtent = null;
+    // And the current draw interaction.
+    this.#drawInteraction = null;
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
     this.#initiateDrawLayer();
@@ -198,6 +203,64 @@ class DrawModel {
       padding: [20, 20, 20, 20],
       maxZoom: 7,
     });
+  };
+
+  // TODO: Remove all event-listeners.
+  #removeEventListeners = () => {
+    return;
+  };
+
+  // Disables the current draw interaction
+  #disableDrawInteraction = () => {
+    // If there isn't an active draw interaction currently, we just return.
+    if (!this.#drawInteraction) return;
+    // Otherwise, we remove the interaction from the map.
+    this.#map.removeInteraction(this.#drawInteraction);
+    // Then we'll make sure to remove all event-listeners
+    this.#removeEventListeners();
+    // And remove the click-lock!
+    this.#map.clickLock.delete("coreDrawModel");
+  };
+
+  // Toggles the current draw interaction. To enable the draw interaction,
+  // pass one of the allowed draw-interactions: "Polygon", "Rectangle", or "Circle"
+  // as the first parameter. To disable the draw-interaction, pass nothing, or an empty string.
+  toggleDrawInteraction = (drawMethod, settings) => {
+    // Check if we are supposed to be toggling the draw interaction off.
+    if (!drawMethod || drawMethod === "") {
+      return this.#disableDrawInteraction();
+    }
+    // Check if there is a draw interaction active currently. If there is,
+    // disable it before moving on.
+    if (this.#drawInteraction) {
+      this.#disableDrawInteraction();
+    }
+    // If we've made it this far it's time to enable a new draw interaction!
+    // First we must make sure to gather some settings and defaults.
+    // Which draw-type should we use? (Rectangles should be created with the
+    // "Circle" method apparently).
+    const type = drawMethod === "Rectangle" ? "Circle" : drawMethod;
+    // Are we going free-hand drawing? (We're always free if we're drawing circles
+    // or rectangles).
+    const freehand = ["Circle", "Rectangle"].includes(drawMethod)
+      ? true
+      : settings.freehand ?? false;
+    // Then we'll add the interaction!
+    this.#drawInteraction = new Draw({
+      source: this.#drawSource,
+      type: type,
+      freehand: freehand,
+      stopClick: true,
+      geometryFunction:
+        drawMethod === "Rectangle"
+          ? createBox()
+          : drawMethod === "Circle"
+          ? createRegularPolygon()
+          : null,
+      style: this.#getDrawStyle(),
+    });
+    // Let's add the clickLock to avoid the featureInfo etc.
+    this.#map.clickLock.add("coreDrawModel");
   };
 
   // Fits the map to the extent of the drawn features in the draw-source
