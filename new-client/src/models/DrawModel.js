@@ -1,5 +1,6 @@
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
+import { Stroke, Style, Circle, Fill } from "ol/style";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -126,7 +127,7 @@ class DrawModel {
   #createNewDrawLayer = () => {
     // Let's grab a vector-source.
     this.#drawSource = this.#getNewVectorSource();
-    // Let's create a layer
+    // Then we'll create the layer
     this.#drawLayer = this.#getNewVectorLayer(this.#drawSource);
     // Make sure to set the layer type to something understandable.
     // TODO: Make sure type is the way to go, a bit confusing setting the
@@ -134,6 +135,41 @@ class DrawModel {
     this.#drawLayer.set("type", this.#layerName);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
+  };
+
+  // Returns an OL style to be used in the draw-interaction.
+  #getDrawStyle = () => {
+    return new Style({
+      stroke: this.#getDrawStrokeStyle(),
+      fill: this.#getDrawFillStyle(),
+      image: this.#getDrawImageStyle(),
+    });
+  };
+
+  // Returns the stroke style (based on the style settings)
+  #getDrawStrokeStyle = () => {
+    return new Stroke({
+      color: this.#drawStyleSettings.strokeColor,
+      width: 4,
+    });
+  };
+
+  // Returns the fill style (based on the style settings)
+  #getDrawFillStyle = () => {
+    return new Fill({
+      color: this.#drawStyleSettings.fillColor,
+    });
+  };
+
+  // Returns the image style (based on the style settings)
+  #getDrawImageStyle = () => {
+    return new Circle({
+      radius: 6,
+      stroke: new Stroke({
+        color: this.#drawStyleSettings.strokeColor,
+        width: 2,
+      }),
+    });
   };
 
   // Returns a new vector source.
