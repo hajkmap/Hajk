@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import propTypes from "prop-types";
 
 import { Button, Paper, Tooltip, Menu, MenuItem } from "@material-ui/core";
-import Bookmarks from "@material-ui/icons/Bookmarks";
+import FolderSpecial from "@material-ui/icons/FolderSpecial";
 
 import Dialog from "../components/Dialog.js";
 
@@ -231,7 +231,7 @@ class Preset extends React.PureComponent {
                 className={classes.button}
                 onClick={this.handleClick}
               >
-                <Bookmarks />
+                <FolderSpecial />
               </Button>
             </Paper>
           </Tooltip>
