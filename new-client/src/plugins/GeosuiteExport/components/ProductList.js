@@ -41,7 +41,7 @@ class ProductList extends React.PureComponent {
   state = {
     anchorEl: undefined,
     activeProject: undefined,
-    globalExportAll: false,
+    globalExportSetting: "withinArea",
   };
 
   static propTypes = {
@@ -85,27 +85,31 @@ class ProductList extends React.PureComponent {
               <Chip
                 className={classes.leftChip}
                 onClick={() => {
-                  this.setState({ globalExportAll: false });
+                  this.setState({ globalExportSetting: "withinArea" });
                   handleExportAll(false);
                 }}
                 icon={<Crop32Icon />}
                 label="Inom markering"
                 size="medium"
                 variant={`${
-                  this.state.globalExportAll ? "outlined" : "default"
+                  this.state.globalExportSetting === "withinArea"
+                    ? "default"
+                    : "outlined"
                 }`}
               />
               <Chip
                 className={classes.rightChip}
                 onClick={() => {
-                  this.setState({ globalExportAll: true });
+                  this.setState({ globalExportSetting: "withinProject" });
                   handleExportAll(true);
                 }}
                 icon={<WorkIcon />}
                 label=" Hela projektet"
                 size="medium"
                 variant={`${
-                  this.state.globalExportAll ? "default" : "outlined"
+                  this.state.globalExportSetting === "withinProject"
+                    ? "default"
+                    : "outlined"
                 }`}
               />
             </Box>
@@ -148,7 +152,7 @@ class ProductList extends React.PureComponent {
                           </IconButton>
                         )}
                       </Box>
-                      <Paper elevation={1}>
+                      <Paper elevation={0}>
                         <Menu
                           id="choice-menu"
                           autoFocus={false}
@@ -175,7 +179,10 @@ class ProductList extends React.PureComponent {
                                 this.state.activeProject.id,
                                 false
                               );
-                              this.setState({ anchorEl: undefined });
+                              this.setState({
+                                anchorEl: undefined,
+                                globalExportSetting: undefined,
+                              });
                             }}
                           >
                             <Box display="flex" gridColumnGap={"8px"}>
@@ -189,7 +196,10 @@ class ProductList extends React.PureComponent {
                                 this.state.activeProject.id,
                                 true
                               );
-                              this.setState({ anchorEl: undefined });
+                              this.setState({
+                                anchorEl: undefined,
+                                globalExportSetting: undefined,
+                              });
                             }}
                           >
                             <Box display="flex" gridColumnGap={"8px"}>
