@@ -377,10 +377,10 @@ class DrawModel {
   #addCustomEventListeners = (settings) => {
     // Let's update all internal fields so that we can keep track of the
     // custom handlers.
-    this.#customHandleDrawStart = settings.handleDrawStart ?? null;
-    this.#customHandleDrawEnd = settings.handleDrawEnd ?? null;
-    this.#customHandlePointerMove = settings.handlePointerMove ?? null;
-    this.#customHandleAddFeature = settings.handleAddFeature ?? null;
+    this.#customHandleDrawStart = settings.handleDrawStart || null;
+    this.#customHandleDrawEnd = settings.handleDrawEnd || null;
+    this.#customHandlePointerMove = settings.handlePointerMove || null;
+    this.#customHandleAddFeature = settings.handleAddFeature || null;
     // Then we'll add the listeners if the corresponding handler exists
     this.#customHandleDrawStart &&
       this.#drawInteraction.on("drawstart", this.#customHandleDrawStart);
@@ -529,7 +529,7 @@ class DrawModel {
   // We will need a way to remove all drawn features from the draw-source.
   // Why aren't we using a simple "clear()" one might ask =>  simply because
   // the draw-source might be connected to the search-source for example, and we
-  //  don't want to remove all search features, only the user drawn ones.
+  // don't want to remove all search features, only the user drawn ones.
   removeDrawnFeatures = () => {
     // Let's get all the features in the draw-source that have been drawn
     const drawnFeatures = this.#getAllDrawnFeatures();
