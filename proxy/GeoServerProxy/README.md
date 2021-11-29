@@ -1,6 +1,6 @@
 # GeoServer Proxy
 
-The main purpose for this proxy is to proxy requests to a local installed GeoServer, adding a header with the user's name.
+The main purpose for this proxy is to proxy requests to a locally installed GeoServer, adding a header with the user's name.
 Through this proxy users may access secured layers in GeoServer depending on AD-group membership.
 
 If you change the Proxy Base URL setting in GeoServer you will also be able to use these layers from QGIS and other GIS clients.
