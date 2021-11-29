@@ -3,6 +3,7 @@ import { createBox, createRegularPolygon } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill } from "ol/style";
+import { Circle as CircleGeometry, LineString } from "ol/geom.js";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -32,6 +33,8 @@ class DrawModel {
   #showFeatureMeasurements;
   #drawStyleSettings;
   #drawInteraction;
+  #labelFormat;
+  #showFeatureArea;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -46,6 +49,8 @@ class DrawModel {
     this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
+    this.#labelFormat = settings.labelFormat ?? "M2"; // ["M2", "KM2"]
+    this.#showFeatureArea = settings.showFeatureArea ?? true;
     // We are going to be keeping track of the current extent of the draw-source...
     this.#currentExtent = null;
     // And the current draw interaction.
@@ -140,6 +145,79 @@ class DrawModel {
     this.#drawLayer.set("type", this.#layerName);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
+  };
+
+  // Returns the style that should be used on the drawn features
+  #getFeatureStyle = (feature) => {
+    // Let's start by grabbing the standard draw style as a baseline
+    const baseLineStyle = this.#getDrawStyle();
+    // If showFeatureArea is set to true, we create a text-style which
+    // will allow us to show the area of the drawn feature.
+    const textStyle = this.#showFeatureArea
+      ? this.#getFeatureTextStyle(feature)
+      : null;
+    // Apply the text-style to the baseline style...
+    baseLineStyle.setText(textStyle);
+    // And return the finished style.
+    return baseLineStyle;
+  };
+
+  // Returns a text-style that shows the tooltip-label
+  // (i.e. the area of the feature in a readable format).
+  #getFeatureTextStyle = (feature) => {
+    return new Text({
+      textAlign: "center",
+      textBaseline: "middle",
+      font: "12pt sans-serif",
+      fill: new Fill({ color: "#FFF" }),
+      text: this.#getFeatureMeasurementLabel(feature),
+      overflow: true,
+      stroke: new Stroke({
+        color: "rgba(0, 0, 0, 0.5)",
+        width: 3,
+      }),
+      offsetX: 0,
+      offsetY: 0,
+      rotation: 0,
+      scale: 1,
+    });
+  };
+
+  // Returns the area of the supplied feature in a readable format.
+  #getFeatureMeasurementLabel = (feature) => {
+    // First we must get the feature area or length
+    const featureMeasure = this.#getFeatureAreaOrLength(feature);
+    // Then we'll check if we're dealing with a length measurement
+    const measureIsLength = feature.getGeometry() instanceof LineString;
+    // Let's check if we're gonna show the area in square kilometers
+    if (this.#labelFormat === "KM2") {
+      // If so, we'll show the area in km². Rounded to show 3 decimals.
+      return `${(featureMeasure / 1e6).toFixed(3)} ${
+        measureIsLength ? "km" : "km²"
+      }`;
+    }
+    // Otherwise m² will do. (Displayed in local format).
+    return `${featureMeasure.toLocaleString()} ${measureIsLength ? "m" : "m²"}`;
+  };
+
+  // Calculates the area of the supplied feature.
+  // Accepts an OL-feature, and is tested for Circle and Polygon.
+  #getFeatureAreaOrLength = (feature) => {
+    const geometry = feature.getGeometry();
+    // Apparently the circle geometry instance does not expose a
+    // getArea method. Here's a quick fix. (Remember that this area
+    // is only used as an heads-up for the user.)
+    if (geometry instanceof CircleGeometry) {
+      const radius = geometry.getRadius();
+      return Math.round(Math.pow(radius, 2) * Math.PI);
+    }
+    // If we're dealing with a line we cannot calculate an area,
+    // instead, we return the length.
+    if (geometry instanceof LineString) {
+      return Math.round(geometry.getLength());
+    }
+    // If we're not dealing with a circle or a line, we can just return the area.
+    return Math.round(geometry.getArea());
   };
 
   // Returns an OL style to be used in the draw-interaction.
