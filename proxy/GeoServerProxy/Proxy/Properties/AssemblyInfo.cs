@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Proxy")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("SWECO")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Proxy")]
-[assembly: AssemblyCopyright("Copyright © SWECO 2015")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
