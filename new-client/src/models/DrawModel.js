@@ -39,6 +39,10 @@ class DrawModel {
   #drawInteraction;
   #labelFormat;
   #showFeatureArea;
+  #customHandleDrawStart;
+  #customHandleDrawEnd;
+  #customHandlePointerMove;
+  #customHandleAddFeature;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -65,6 +69,12 @@ class DrawModel {
     this.#drawTooltipElement = null;
     this.#drawTooltipElementStyle =
       "position: relative; background: rgba(0, 0, 0, 0.5); border-radius: 4px; color: white; padding: 4px 8px; opacity: 0.7; white-space: nowrap;";
+    // There might be some custom event-listeners passed when initiating the draw interaction,
+    // we have to keep track of them.
+    this.#customHandleDrawStart = null;
+    this.#customHandleDrawEnd = null;
+    this.#customHandlePointerMove = null;
+    this.#customHandleAddFeature = null;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -294,59 +304,85 @@ class DrawModel {
     });
   };
 
-  // TODO: Handle un-named arrow-functions
+  // Removes all event-listeners that have been set when initiating the
+  // draw interaction.
   #removeEventListeners = () => {
+    // Remove the "ordinary" listeners
     this.#drawInteraction.un("drawstart", this.#handleDrawStart);
     this.#drawInteraction.un("drawend", this.#handleDrawEnd);
     this.#map.un("pointermove", this.#handlePointerMove);
     this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
+    // Then we'll remove the custom listeners
+    this.#removeCustomEventListeners();
   };
 
-  #addDrawListeners = (settings) => {
+  // Adds all event-listeners needed for the the draw interaction.
+  #addEventListeners = (settings) => {
     // The initiator of the draw interaction might have passed some custom functions
-    // that should be called when the appropriate event fires. Make sure to pass these
-    // functions to the handlers.
-    const {
-      handleDrawStart,
-      handleDrawEnd,
-      handlePointerMove,
-      handleAddFeature,
-    } = settings;
+    // that should be called when the appropriate event fires. We have to make sure
+    // to bind those if they exist.
+    settings && this.#addCustomEventListeners(settings);
     // Add a listener for the draw-start-event
-    this.#drawInteraction.on("drawstart", (e) =>
-      this.#handleDrawStart(e, handleDrawStart)
-    );
+    this.#drawInteraction.on("drawstart", this.#handleDrawStart);
     // Add a listener for the draw-end-event
-    this.#drawInteraction.on("drawend", (e) =>
-      this.#handleDrawEnd(e, handleDrawEnd)
-    );
+    this.#drawInteraction.on("drawend", this.#handleDrawEnd);
     // We'll also want a handler for the pointer event to keep
     // track of where the users pointer is located.
-    this.#map.on("pointermove", (e) =>
-      this.#handlePointerMove(e, handlePointerMove)
-    );
+    this.#map.on("pointermove", this.#handlePointerMove);
     // We need a listener for when a feature is added to the source.
-    this.#drawSource.on("addfeature", (e) =>
-      this.#handleDrawFeatureAdded(e, handleAddFeature)
-    );
+    this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
+  };
+
+  // Adds listeners that might have been passed in the settings when
+  // initiating the draw interaction.
+  #addCustomEventListeners = (settings) => {
+    // Let's update all internal fields so that we can keep track of the
+    // custom handlers.
+    this.#customHandleDrawStart = settings.handleDrawStart ?? null;
+    this.#customHandleDrawEnd = settings.handleDrawEnd ?? null;
+    this.#customHandlePointerMove = settings.handlePointerMove ?? null;
+    this.#customHandleAddFeature = settings.handleAddFeature ?? null;
+    // Then we'll add the listeners if the corresponding handler exists
+    this.#customHandleDrawStart &&
+      this.#drawInteraction.on("drawstart", this.#customHandleDrawStart);
+    this.#customHandleDrawEnd &&
+      this.#drawInteraction.on("drawstart", this.#customHandleDrawEnd);
+    this.#customHandlePointerMove &&
+      this.#drawInteraction.on("drawstart", this.#customHandlePointerMove);
+    this.#customHandleAddFeature &&
+      this.#drawInteraction.on("drawstart", this.#customHandleAddFeature);
+  };
+
+  // Removes listeners that might have been passed in the settings when
+  // initiating the draw interaction.
+  #removeCustomEventListeners = () => {
+    // Let's unbind the listers if they ever existed
+    this.#customHandleDrawStart &&
+      this.#drawInteraction.un("drawstart", this.#customHandleDrawStart);
+    this.#customHandleDrawEnd &&
+      this.#drawInteraction.un("drawstart", this.#customHandleDrawEnd);
+    this.#customHandlePointerMove &&
+      this.#drawInteraction.un("drawstart", this.#customHandlePointerMove);
+    this.#customHandleAddFeature &&
+      this.#drawInteraction.un("drawstart", this.#customHandleAddFeature);
+    // Then we have to make sure to remove the reference to the handlers.
+    this.#customHandleDrawStart = null;
+    this.#customHandleDrawEnd = null;
+    this.#customHandlePointerMove = null;
+    this.#customHandleAddFeature = null;
   };
 
   // This handler has one job; add a change listener to the feature
-  // currently being drawn. (Besides running the eventual passed function)
-  #handleDrawStart = (e, upstreamFunction) => {
-    // First of all, lets run the supplied function
-    upstreamFunction && upstreamFunction(e);
-    // Then we'll add the listener
+  // currently being drawn.
+  #handleDrawStart = (e) => {
     const feature = e.feature;
     feature.on("change", this.#handleFeatureChange);
   };
 
   // This handler will make sure that the overlay will be removed
-  // when the feature drawing is done. (And run the eventual passed function)
-  #handleDrawEnd = (e, upstreamFunction) => {
-    // First of all, lets run the supplied function
-    upstreamFunction && upstreamFunction(e);
-    // Then we'll make sure to remove the draw tooltip
+  // when the feature drawing is done.
+  #handleDrawEnd = (e) => {
+    // Let's make sure to remove the draw tooltip
     const { feature } = e;
     this.#drawTooltipElement.innerHTML = null;
     this.#currentPointerCoordinate = null;
@@ -366,18 +402,13 @@ class DrawModel {
   };
 
   // This handler has one job; get the coordinate from the event,
-  // and store it for later use. (Besides running the eventual passed function)
-  #handlePointerMove = (e, upstreamFunction) => {
-    // First of all, lets run the supplied function
-    upstreamFunction && upstreamFunction(e);
-    // Then we'll store the coordinate
+  // and store it for later use.
+  #handlePointerMove = (e) => {
     this.#currentPointerCoordinate = e.coordinate;
   };
 
   // We're probably going to need a handler for when a feature is added
-  #handleDrawFeatureAdded = (e, upstreamFunction) => {
-    // First of all, lets run the supplied function
-    upstreamFunction && upstreamFunction(e);
+  #handleDrawFeatureAdded = (e) => {
     console.log("Handle feature added! e: ", e);
   };
 
@@ -433,7 +464,7 @@ class DrawModel {
     // Let's add the clickLock to avoid the featureInfo etc.
     this.#map.clickLock.add("coreDrawModel");
     // Then we'll add all draw listeners
-    this.#addDrawListeners(settings);
+    this.#addEventListeners(settings);
     // Then we'll add the interaction to the map!
     this.#map.addInteraction(this.#drawInteraction);
   };
