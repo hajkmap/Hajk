@@ -387,11 +387,11 @@ class DrawModel {
     this.#customHandleDrawStart &&
       this.#drawInteraction.on("drawstart", this.#customHandleDrawStart);
     this.#customHandleDrawEnd &&
-      this.#drawInteraction.on("drawstart", this.#customHandleDrawEnd);
+      this.#drawInteraction.on("drawend", this.#customHandleDrawEnd);
     this.#customHandlePointerMove &&
-      this.#drawInteraction.on("drawstart", this.#customHandlePointerMove);
+      this.#map.on("pointermove", this.#customHandlePointerMove);
     this.#customHandleAddFeature &&
-      this.#drawInteraction.on("drawstart", this.#customHandleAddFeature);
+      this.#drawSource.on("addfeature", this.#customHandleAddFeature);
   };
 
   // Removes listeners that might have been passed in the settings when
@@ -401,11 +401,11 @@ class DrawModel {
     this.#customHandleDrawStart &&
       this.#drawInteraction.un("drawstart", this.#customHandleDrawStart);
     this.#customHandleDrawEnd &&
-      this.#drawInteraction.un("drawstart", this.#customHandleDrawEnd);
+      this.#drawInteraction.un("drawend", this.#customHandleDrawEnd);
     this.#customHandlePointerMove &&
-      this.#drawInteraction.un("drawstart", this.#customHandlePointerMove);
+      this.#map.on("pointermove", this.#customHandlePointerMove);
     this.#customHandleAddFeature &&
-      this.#drawInteraction.un("drawstart", this.#customHandleAddFeature);
+      this.#drawSource.un("addfeature", this.#customHandleAddFeature);
     // Then we have to make sure to remove the reference to the handlers.
     this.#customHandleDrawStart = null;
     this.#customHandleDrawEnd = null;
