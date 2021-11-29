@@ -29,6 +29,10 @@ class DrawModel {
   #drawSource;
   #drawLayer;
   #currentExtent;
+  #drawTooltipElement;
+  #drawTooltipElementStyle;
+  #drawTooltip;
+  #currentPointerCoordinate;
   #showDrawTooltip;
   #showFeatureMeasurements;
   #drawStyleSettings;
@@ -55,6 +59,13 @@ class DrawModel {
     this.#currentExtent = null;
     // And the current draw interaction.
     this.#drawInteraction = null;
+    // We're also keeping track of the tooltip-settings
+    this.#drawTooltip = null;
+    this.#currentPointerCoordinate = null;
+    this.#drawTooltipElement = null;
+    this.#drawTooltipElementStyle =
+      "position: relative; background: rgba(0, 0, 0, 0.5); border-radius: 4px; color: white; padding: 4px 8px; opacity: 0.7; white-space: nowrap;";
+
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
     this.#initiateDrawLayer();
@@ -283,9 +294,91 @@ class DrawModel {
     });
   };
 
-  // TODO: Remove all event-listeners.
+  // TODO: Handle un-named arrow-functions
   #removeEventListeners = () => {
-    return;
+    this.#drawInteraction.un("drawstart", this.#handleDrawStart);
+    this.#drawInteraction.un("drawend", this.#handleDrawEnd);
+    this.#map.un("pointermove", this.#handlePointerMove);
+    this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
+  };
+
+  #addDrawListeners = (settings) => {
+    // The initiator of the draw interaction might have passed some custom functions
+    // that should be called when the appropriate event fires. Make sure to pass these
+    // functions to the handlers.
+    const {
+      handleDrawStart,
+      handleDrawEnd,
+      handlePointerMove,
+      handleAddFeature,
+    } = settings;
+    // Add a listener for the draw-start-event
+    this.#drawInteraction.on("drawstart", (e) =>
+      this.#handleDrawStart(e, handleDrawStart)
+    );
+    // Add a listener for the draw-end-event
+    this.#drawInteraction.on("drawend", (e) =>
+      this.#handleDrawEnd(e, handleDrawEnd)
+    );
+    // We'll also want a handler for the pointer event to keep
+    // track of where the users pointer is located.
+    this.#map.on("pointermove", (e) =>
+      this.#handlePointerMove(e, handlePointerMove)
+    );
+    // We need a listener for when a feature is added to the source.
+    this.#drawSource.on("addfeature", (e) =>
+      this.#handleDrawFeatureAdded(e, handleAddFeature)
+    );
+  };
+
+  // This handler has one job; add a change listener to the feature
+  // currently being drawn. (Besides running the eventual passed function)
+  #handleDrawStart = (e, upstreamFunction) => {
+    // First of all, lets run the supplied function
+    upstreamFunction && upstreamFunction(e);
+    // Then we'll add the listener
+    const feature = e.feature;
+    feature.on("change", this.#handleFeatureChange);
+  };
+
+  // This handler will make sure that the overlay will be removed
+  // when the feature drawing is done. (And run the eventual passed function)
+  #handleDrawEnd = (e, upstreamFunction) => {
+    // First of all, lets run the supplied function
+    upstreamFunction && upstreamFunction(e);
+    // Then we'll make sure to remove the draw tooltip
+    const { feature } = e;
+    this.#drawTooltipElement.innerHTML = null;
+    this.#currentPointerCoordinate = null;
+    this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
+    // And set a nice style on the feature to be added.
+    feature.setStyle(this.#getFeatureStyle(feature));
+  };
+
+  // This handler will make sure that we keep the area calculation
+  // updated during the feature changes.
+  #handleFeatureChange = (e) => {
+    // Make the area calculations and update the tooltip
+    const feature = e.target;
+    const toolTipText = this.#getFeatureMeasurementLabel(feature);
+    this.#drawTooltipElement.innerHTML = toolTipText;
+    this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
+  };
+
+  // This handler has one job; get the coordinate from the event,
+  // and store it for later use. (Besides running the eventual passed function)
+  #handlePointerMove = (e, upstreamFunction) => {
+    // First of all, lets run the supplied function
+    upstreamFunction && upstreamFunction(e);
+    // Then we'll store the coordinate
+    this.#currentPointerCoordinate = e.coordinate;
+  };
+
+  // We're probably going to need a handler for when a feature is added
+  #handleDrawFeatureAdded = (e, upstreamFunction) => {
+    // First of all, lets run the supplied function
+    upstreamFunction && upstreamFunction(e);
+    console.log("Handle feature added! e: ", e);
   };
 
   // Disables the current draw interaction
@@ -339,6 +432,10 @@ class DrawModel {
     });
     // Let's add the clickLock to avoid the featureInfo etc.
     this.#map.clickLock.add("coreDrawModel");
+    // Then we'll add all draw listeners
+    this.#addDrawListeners(settings);
+    // Then we'll add the interaction to the map!
+    this.#map.addInteraction(this.#drawInteraction);
   };
 
   // Fits the map to the extent of the drawn features in the draw-source
