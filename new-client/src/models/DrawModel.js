@@ -2,8 +2,9 @@ import { Draw } from "ol/interaction";
 import { createBox, createRegularPolygon } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
-import { Stroke, Style, Circle, Fill } from "ol/style";
+import { Stroke, Style, Circle, Fill, Text } from "ol/style";
 import { Circle as CircleGeometry, LineString } from "ol/geom.js";
+import Overlay from "ol/Overlay.js";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -79,6 +80,8 @@ class DrawModel {
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
     this.#initiateDrawLayer();
+    // We also have to initiate the element for the draw-tooltip
+    this.#createDrawTooltip();
     // Let's display a warning for now, remove once it's properly tested. TODO: @Hallbergs
     console.info(
       "Initiation of Draw-model successful. Note that the model has not been properly tested yet and should not be used in critical operation."
@@ -166,6 +169,44 @@ class DrawModel {
     this.#drawLayer.set("type", this.#layerName);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
+  };
+
+  // Creates the element and overlay used to display the area of the feature
+  // currently being drawn.
+  #createDrawTooltip = () => {
+    // If the element already exists in the dom (which it will if #drawTooltipElement
+    //  isn't nullish), we must make sure to remove it.
+    this.#removeEventualDrawTooltipElement();
+    // Let's crete a element that we can use in the overlay.
+    this.#drawTooltipElement = document.createElement("div");
+    // Let's style the element a bit so it looks prettier...
+    this.#drawTooltipElement.setAttribute(
+      "style",
+      this.#drawTooltipElementStyle
+    );
+    // Then let's create the overlay...
+    this.#drawTooltip = new Overlay({
+      element: this.#drawTooltipElement,
+      offset: [30, -5],
+      positioning: "bottom-center",
+    });
+    // And add it to the map!
+    this.#map.addOverlay(this.#drawTooltip);
+  };
+
+  // We have to make sure that we remove eventual unused elements
+  // from the dom tree so they're not lurking around.
+  #removeEventualDrawTooltipElement = () => {
+    // Before we do anything else, we make sire that there actually is
+    // an element present.
+    if (this.#drawTooltipElement) {
+      // Then we can remove it
+      this.#drawTooltipElement.parentNode.removeElement(
+        this.#drawTooltipElement
+      );
+      // And clear the variable
+      this.#drawTooltipElement = null;
+    }
   };
 
   // Returns the style that should be used on the drawn features
@@ -427,7 +468,7 @@ class DrawModel {
   // Toggles the current draw interaction. To enable the draw interaction,
   // pass one of the allowed draw-interactions: "Polygon", "Rectangle", or "Circle"
   // as the first parameter. To disable the draw-interaction, pass nothing, or an empty string.
-  toggleDrawInteraction = (drawMethod, settings) => {
+  toggleDrawInteraction = (drawMethod = "", settings = {}) => {
     // Check if we are supposed to be toggling the draw interaction off.
     if (!drawMethod || drawMethod === "") {
       return this.#disableDrawInteraction();
