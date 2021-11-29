@@ -426,6 +426,9 @@ class DrawModel {
     this.#drawTooltipElement.innerHTML = null;
     this.#currentPointerCoordinate = null;
     this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
+    // We set the USER_DRAWN prop to true so that we can keep track
+    // of the user drawn features.
+    feature.set("USER_DRAWN", true);
     // And set a nice style on the feature to be added.
     feature.setStyle(this.#getFeatureStyle(feature));
   };
