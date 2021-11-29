@@ -39,7 +39,6 @@ class DrawModel {
   #drawStyleSettings;
   #drawInteraction;
   #labelFormat;
-  #showFeatureArea;
   #customHandleDrawStart;
   #customHandleDrawEnd;
   #customHandlePointerMove;
@@ -54,17 +53,16 @@ class DrawModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
-    this.#showDrawTooltip = settings.drawTooltip ?? true;
     this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
     this.#labelFormat = settings.labelFormat ?? "M2"; // ["M2", "KM2"]
-    this.#showFeatureArea = settings.showFeatureArea ?? true;
     // We are going to be keeping track of the current extent of the draw-source...
     this.#currentExtent = null;
     // And the current draw interaction.
     this.#drawInteraction = null;
     // We're also keeping track of the tooltip-settings
+    this.#showDrawTooltip = settings.showDrawTooltip ?? true;
     this.#drawTooltip = null;
     this.#currentPointerCoordinate = null;
     this.#drawTooltipElement = null;
@@ -213,9 +211,9 @@ class DrawModel {
   #getFeatureStyle = (feature) => {
     // Let's start by grabbing the standard draw style as a baseline
     const baseLineStyle = this.#getDrawStyle();
-    // If showFeatureArea is set to true, we create a text-style which
-    // will allow us to show the area of the drawn feature.
-    const textStyle = this.#showFeatureArea
+    // If showFeatureMeasurements is set to true, we create a text-style which
+    // will allow us to show the measurements of the drawn feature.
+    const textStyle = this.#showFeatureMeasurements
       ? this.#getFeatureTextStyle(feature)
       : null;
     // Apply the text-style to the baseline style...
@@ -432,13 +430,15 @@ class DrawModel {
     feature.setStyle(this.#getFeatureStyle(feature));
   };
 
-  // This handler will make sure that we keep the area calculation
+  // This handler will make sure that we keep the measurement calculation
   // updated during the feature changes.
   #handleFeatureChange = (e) => {
-    // Make the area calculations and update the tooltip
+    // Make the measurement calculations and update the tooltip
     const feature = e.target;
     const toolTipText = this.#getFeatureMeasurementLabel(feature);
-    this.#drawTooltipElement.innerHTML = toolTipText;
+    this.#drawTooltipElement.innerHTML = this.#showDrawTooltip
+      ? toolTipText
+      : null;
     this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
   };
 
