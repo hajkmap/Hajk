@@ -833,7 +833,14 @@ class Search extends React.PureComponent {
 
   hasEnoughCharsForSearch = () => {
     const { searchString } = this.state;
-    return searchString.length >= 3;
+    // It may seem small with 1 character, but we must allow users to force
+    // a search. Please note that this will not be invoked for autocomplete
+    // searches (they still need to be at least 3 characters to start searching).
+    // This will however allow for search terms such as "K4*", which can well
+    // be a valid prefix for some attribute value, and users must be able to
+    // search for that.
+    // However, >=1 means that we don't allow completely empty searches.
+    return searchString.length >= 1;
   };
 
   getSearchResultsFetchSettings = () => {
