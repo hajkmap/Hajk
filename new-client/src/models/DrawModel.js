@@ -56,7 +56,7 @@ class DrawModel {
     this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
-    this.#labelFormat = settings.labelFormat ?? "M2"; // ["M2", "KM2"]
+    this.#labelFormat = settings.labelFormat ?? "AUTO"; // ["AUTO", "M2", "KM2"]
     // We are going to be keeping track of the current extent of the draw-source...
     this.#currentExtent = null;
     // And the current draw interaction.
@@ -252,15 +252,48 @@ class DrawModel {
     const featureMeasure = this.#getFeatureAreaOrLength(feature);
     // Then we'll check if we're dealing with a length measurement
     const measureIsLength = feature.getGeometry() instanceof LineString;
-    // Let's check if we're gonna show the area in square kilometers
-    if (this.#labelFormat === "KM2") {
-      // If so, we'll show the area in km² (Or km if we're measuring length).
-      // Rounded to show 3 decimals.
-      return `${(featureMeasure / (measureIsLength ? 1e3 : 1e6)).toFixed(3)} ${
-        measureIsLength ? "km" : "km²"
-      }`;
+    // Let's check how we're gonna present the label
+    switch (this.#labelFormat) {
+      case "AUTO":
+        // If the format is AUTO, we're checking if the measurement is large
+        // enough to show it in kilometers or not. First, we need to check
+        // where the cutoff point for the kilometer display is. (It will vary
+        // depending on if we're measuring length or area).
+        const kilometerCutoff = measureIsLength ? 1e3 : 1e6;
+        // If the measurement is larger or equal to the cutoff, we return a string
+        // formatted in kilometers.
+        if (featureMeasure >= kilometerCutoff) {
+          return this.#getKilometerMeasurementString(
+            featureMeasure,
+            measureIsLength
+          );
+        }
+        // Otherwise we return a string formatted in meters.
+        return this.#getMeasurementString(featureMeasure, measureIsLength);
+      case "KM2":
+        // If the format is "KM2", we'll show the measurement in km²
+        // (Or km if we're measuring length). Rounded to show 3 decimals.
+        return this.#getKilometerMeasurementString(
+          featureMeasure,
+          measureIsLength
+        );
+      default:
+        // Otherwise m² (or m) will do. (Displayed in local format).
+        return this.#getMeasurementString(featureMeasure, measureIsLength);
     }
-    // Otherwise m² will do. (Displayed in local format).
+  };
+
+  // Returns the supplied measurement as a kilometer-formatted string.
+  // If we're measuring area, km² is returned, otherwise, km is returned.
+  #getKilometerMeasurementString = (featureMeasure, measureIsLength) => {
+    return `${(featureMeasure / (measureIsLength ? 1e3 : 1e6)).toFixed(3)} ${
+      measureIsLength ? "km" : "km²"
+    }`;
+  };
+
+  // Returns the supplied measurement as a locally formatted string.
+  // If we're measuring area m² is returned, otherwise, m is returned.
+  #getMeasurementString = (featureMeasure, measureIsLength) => {
     return `${featureMeasure.toLocaleString()} ${measureIsLength ? "m" : "m²"}`;
   };
 
