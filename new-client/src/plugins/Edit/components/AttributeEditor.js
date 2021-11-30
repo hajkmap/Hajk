@@ -84,6 +84,8 @@ class AttributeEditor extends React.Component {
           valueMap[field.name] =
             featureProps[field.name] || field.defaultValue || "";
         }
+      } else {
+        valueMap[field.name] = field.defaultValue || "";
       }
     });
     return valueMap;
@@ -93,7 +95,7 @@ class AttributeEditor extends React.Component {
     const featureProps = this.props.model.editFeature.getProperties();
     Object.keys(this.state.formValues).forEach((key) => {
       let value = this.state.formValues[key];
-      if (value === "") value = null;
+      if (value === "" || typeof value === "undefined") value = null;
       if (Array.isArray(value)) {
         value = value
           .filter((v) => v.checked)
@@ -105,7 +107,7 @@ class AttributeEditor extends React.Component {
 
     this.props.editSource?.nonEditableFields?.forEach((field) => {
       let value = field.defaultValue;
-      if (value === "") value = null;
+      if (value === "" || typeof value === "undefined") value = null;
       if (Array.isArray(value)) {
         value = value
           .filter((v) => v.checked)
