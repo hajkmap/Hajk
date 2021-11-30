@@ -126,12 +126,18 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
         <Table size="small">
           <TableBody>
             {Object.entries(feature.getProperties()).map((row) => {
-              return (
+              // feature.getProperties() can contain values of any data type
+              // (whatever is set on the current feature). But since we can not
+              // render e.g. Date or Point objects, we must do the following check
+              // and only allow String, Number or Array:
+              return typeof row[1] === "string" ||
+                typeof row[1] === "number" ||
+                Array.isArray(row[1]) ? (
                 <TableRow key={row[0]}>
                   {this.renderTableCell(row[0])}
                   {this.renderTableCell(row[1], "right")}
                 </TableRow>
-              );
+              ) : null;
             })}
           </TableBody>
         </Table>

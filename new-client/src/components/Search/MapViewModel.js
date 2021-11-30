@@ -306,8 +306,16 @@ class MapViewModel {
   };
 
   handleDrawFeatureAdded = (e) => {
-    this.map.removeInteraction(this.draw);
-    this.map.clickLock.delete("search");
+    // OpenLayers seems to have a problem stopping the clicks if
+    // the draw interaction is removed too early. This fix is not pretty,
+    // but it gets the job done. It seems to be enough to remove the draw
+    // interaction after one cpu-cycle.
+    // If this is not added, the user will get a zoom-event when closing
+    // a polygon drawing.
+    setTimeout(() => {
+      this.map.removeInteraction(this.draw);
+      this.map.clickLock.delete("search");
+    }, 1);
     this.localObserver.publish("on-draw-end", e.feature);
   };
 

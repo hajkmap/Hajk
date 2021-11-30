@@ -44,6 +44,7 @@ class MapOptions extends Component {
         logoLight: config.logoLight || "logoLight.png",
         logoDark: config.logoDark || "logoDark.png",
         resolutions: config.resolutions,
+        extraPrintResolutions: config.extraPrintResolutions,
         extent: config.extent,
         origin: config.origin,
         constrainOnlyCenter: config.constrainOnlyCenter,
@@ -62,6 +63,7 @@ class MapOptions extends Component {
         mapcleaner: config.mapcleaner,
         mapresetter: config.mapresetter,
         showThemeToggler: config.showThemeToggler,
+        showUserAvatar: config.showUserAvatar,
         drawerVisible: config.drawerVisible,
         drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
@@ -83,7 +85,7 @@ class MapOptions extends Component {
     });
   }
 
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:mapConfig");
   }
 
@@ -111,6 +113,7 @@ class MapOptions extends Component {
       logoLight: mapConfig.logoLight || "logoLight.png",
       logoDark: mapConfig.logoDark || "logoDark.png",
       resolutions: mapConfig.resolutions,
+      extraPrintResolutions: mapConfig.extraPrintResolutions,
       extent: mapConfig.extent,
       origin: mapConfig.origin,
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
@@ -131,6 +134,7 @@ class MapOptions extends Component {
       mapcleaner: mapConfig.mapcleaner,
       mapresetter: mapConfig.mapresetter,
       showThemeToggler: mapConfig.showThemeToggler,
+      showUserAvatar: mapConfig.showUserAvatar,
       drawerVisible: mapConfig.drawerVisible,
       drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
@@ -166,7 +170,15 @@ class MapOptions extends Component {
       )
     )
       value = parseInt(value);
-    if (["origin", "extent", "center", "resolutions"].includes(fieldName))
+    if (
+      [
+        "origin",
+        "extent",
+        "center",
+        "resolutions",
+        "extraPrintResolutions",
+      ].includes(fieldName)
+    )
       value = value.split(",").map((v) => parseFloat(v));
 
     if (fieldName === "title") {
@@ -249,6 +261,11 @@ class MapOptions extends Component {
           valid = false;
         }
         break;
+      case "extraPrintResolutions":
+        if (!resolutions(value)) {
+          valid = false;
+        }
+        break;
       case "extent":
         if (!extent(value)) {
           valid = false;
@@ -290,6 +307,7 @@ class MapOptions extends Component {
       case "mapcleaner":
       case "mapresetter":
       case "showThemeToggler":
+      case "showUserAvatar":
       case "drawerVisible":
       case "drawVisibleMobile":
       case "drawerPermanent":
@@ -331,6 +349,7 @@ class MapOptions extends Component {
         config.logoLight = this.getValue("logoLight");
         config.logoDark = this.getValue("logoDark");
         config.resolutions = this.getValue("resolutions");
+        config.extraPrintResolutions = this.getValue("extraPrintResolutions");
         config.extent = this.getValue("extent");
         config.origin = this.getValue("origin");
         config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
@@ -351,6 +370,7 @@ class MapOptions extends Component {
         config.mapcleaner = this.getValue("mapcleaner");
         config.mapresetter = this.getValue("mapresetter");
         config.showThemeToggler = this.getValue("showThemeToggler");
+        config.showUserAvatar = this.getValue("showUserAvatar");
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
@@ -582,6 +602,27 @@ class MapOptions extends Component {
                 onChange={(e) => {
                   this.setState({ resolutions: e.target.value }, () =>
                     this.validateField("resolutions")
+                  );
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Upplösningar (Extra för utskrift){" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Extra upplösningar som läggs på befintliga upplösningar vid utskrift"
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_extraPrintResolutions"
+                value={this.state.extraPrintResolutions}
+                className={this.getValidationClass("extraPrintResolutions")}
+                onChange={(e) => {
+                  this.setState({ extraPrintResolutions: e.target.value }, () =>
+                    this.validateField("extraPrintResolutions")
                   );
                 }}
               />
@@ -1107,6 +1148,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktiv kommer en knapp som möjliggör temaväxling att visas"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_showUserAvatar"
+                type="checkbox"
+                ref="input_showUserAvatar"
+                onChange={(e) => {
+                  this.setState({ showUserAvatar: e.target.checked });
+                }}
+                checked={this.state.showUserAvatar}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_showUserAvatar">
+                Visa en knapp med användarens initialer intill zoomknapparna{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om AD-kopplingen är aktiv kommer en avatar-ikon bestående av användarens initialer att visas bland kartkontrollerna"
                 />
               </label>
             </div>

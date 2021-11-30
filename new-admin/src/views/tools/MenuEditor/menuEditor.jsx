@@ -87,6 +87,7 @@ class ToolOptions extends Component {
       textAreaBackgroundColor: "",
       textAreaDividerColor: "",
     },
+    tree: {},
   };
   treeKeys = [];
   menuConfig = {

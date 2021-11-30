@@ -75,7 +75,7 @@ class Manager extends Component {
     this.props.model.fetchAllMapConfigsToModel();
   }
 
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:layers");
   }
 
