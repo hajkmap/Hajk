@@ -520,7 +520,7 @@ class DrawModel {
 
   // We're probably going to need a handler for when a feature is added
   #handleDrawFeatureAdded = (e) => {
-    console.log("Handle feature added! e: ", e);
+    return;
   };
 
   // We want to handle key-up events so that we can let the user
