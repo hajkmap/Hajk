@@ -373,6 +373,7 @@ class DrawModel {
     this.#drawInteraction.un("drawend", this.#handleDrawEnd);
     this.#map.un("pointermove", this.#handlePointerMove);
     this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
+    document.removeEventListener("keyup", this.#handleKeyUp);
     // Then we'll remove the custom listeners
     this.#removeCustomEventListeners();
   };
@@ -392,6 +393,9 @@ class DrawModel {
     this.#map.on("pointermove", this.#handlePointerMove);
     // We need a listener for when a feature is added to the source.
     this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
+    // We need a listener for keyboard input. For example, pressing the escape
+    // key will allow the users to remove the last point.
+    document.addEventListener("keyup", this.#handleKeyUp);
   };
 
   // Adds listeners that might have been passed in the settings when
@@ -479,6 +483,15 @@ class DrawModel {
   // We're probably going to need a handler for when a feature is added
   #handleDrawFeatureAdded = (e) => {
     console.log("Handle feature added! e: ", e);
+  };
+
+  // We want to handle key-up events so that we can let the user
+  // remove the last drawn point by pressing the escape key. (And perhaps more...?)
+  #handleKeyUp = (e) => {
+    const { keyCode } = e;
+    if (keyCode === 27) {
+      this.#drawInteraction.removeLastPoint();
+    }
   };
 
   // Disables the current draw interaction
