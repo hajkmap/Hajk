@@ -251,8 +251,9 @@ class DrawModel {
     const measureIsLength = feature.getGeometry() instanceof LineString;
     // Let's check if we're gonna show the area in square kilometers
     if (this.#labelFormat === "KM2") {
-      // If so, we'll show the area in km². Rounded to show 3 decimals.
-      return `${(featureMeasure / 1e6).toFixed(3)} ${
+      // If so, we'll show the area in km² (Or km if we're measuring length).
+      // Rounded to show 3 decimals.
+      return `${(featureMeasure / (measureIsLength ? 1e3 : 1e6)).toFixed(3)} ${
         measureIsLength ? "km" : "km²"
       }`;
     }
