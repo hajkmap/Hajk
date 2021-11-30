@@ -3,7 +3,7 @@ import { createBox, createRegularPolygon } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill, Text } from "ol/style";
-import { Circle as CircleGeometry, LineString } from "ol/geom.js";
+import { Circle as CircleGeometry, LineString, Point } from "ol/geom.js";
 import Overlay from "ol/Overlay.js";
 
 /*
@@ -255,10 +255,22 @@ class DrawModel {
 
   // Returns the area of the supplied feature in a readable format.
   #getFeatureMeasurementLabel = (feature) => {
-    // First we must get the feature area or length
-    const featureMeasure = this.#getFeatureAreaOrLength(feature);
+    // First we must get the feature area, length, or placement.
+    // (Depending on if we're dealing with Point, LineString, or surface).
+    const featureMeasure = this.#getFeatureMeasurement(feature);
+    // Let's grab the geometry so that we can check what we're dealing with.
+    const featureGeometry = feature.getGeometry();
+    // First we'll check if we're dealing with a point. If we are, we return it's
+    // placement right a way. The measurement will be an array containing it's coordinates.
+    if (featureGeometry instanceof Point) {
+      // If we're dealing with a point, the measurement will be an array containing
+      // it's coordinates.
+      return `N: ${Math.round(featureMeasure[1])} E: ${Math.round(
+        featureMeasure[0]
+      )}`;
+    }
     // Then we'll check if we're dealing with a length measurement
-    const measureIsLength = feature.getGeometry() instanceof LineString;
+    const measureIsLength = featureGeometry instanceof LineString;
     // Let's check how we're gonna present the label
     switch (this.#labelFormat) {
       case "AUTO":
@@ -320,10 +332,16 @@ class DrawModel {
     return `${featureMeasure.toLocaleString()} ${measureIsLength ? "m" : "m²"}`;
   };
 
-  // Calculates the area of the supplied feature.
-  // Accepts an OL-feature, and is tested for Circle and Polygon.
-  #getFeatureAreaOrLength = (feature) => {
+  // Calculates the area, length, or placement of the supplied feature.
+  // Accepts an OL-feature, and is tested for Circle, LineString, Point, and Polygon.
+  #getFeatureMeasurement = (feature) => {
+    // Let's get the geometry-type to begin with, we are going
+    // to be handling points, line-strings, and surfaces differently.
     const geometry = feature.getGeometry();
+    // If we're dealing with a point, we simply return the coordinates of the point.
+    if (geometry instanceof Point) {
+      return geometry.getCoordinates();
+    }
     // Apparently the circle geometry instance does not expose a
     // getArea method. Here's a quick fix. (Remember that this area
     // is only used as an heads-up for the user.)
