@@ -421,9 +421,7 @@ class DrawModel {
     this.#drawInteraction.on("drawstart", this.#handleDrawStart);
     // Add a listener for the draw-end-event
     this.#drawInteraction.on("drawend", this.#handleDrawEnd);
-    // We'll also want a handler for the pointer event to keep
-    // track of where the users pointer is located.
-    this.#map.on("pointermove", this.#handlePointerMove);
+
     // We need a listener for when a feature is added to the source.
     this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
     // We need a listener for keyboard input. For example, pressing the escape
@@ -470,9 +468,13 @@ class DrawModel {
     this.#customHandleAddFeature = null;
   };
 
-  // This handler has one job; add a change listener to the feature
-  // currently being drawn.
+  // This handler has a couple of jobs; add a change listener to the feature
+  // currently being drawn, and register an event-handler for pointer moves.
   #handleDrawStart = (e) => {
+    // Let's add a handler for the pointer event to keep
+    // track of where the users pointer is located.
+    this.#map.on("pointermove", this.#handlePointerMove);
+    // Then we'll add a handler handling feature changes.
     const feature = e.feature;
     feature.on("change", this.#handleFeatureChange);
   };
@@ -490,6 +492,9 @@ class DrawModel {
     feature.set("USER_DRAWN", true);
     // And set a nice style on the feature to be added.
     feature.setStyle(this.#getFeatureStyle(feature));
+    // Make sure to remove the event-listener for the pointer-moves.
+    // (We don't want the pointer to keep updating while we're not drawing).
+    this.#map.un("pointermove", this.#handlePointerMove);
   };
 
   // This handler will make sure that we keep the measurement calculation
