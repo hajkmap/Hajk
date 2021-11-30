@@ -404,6 +404,7 @@ class DrawModel {
     // Remove the "ordinary" listeners
     this.#drawInteraction.un("drawstart", this.#handleDrawStart);
     this.#drawInteraction.un("drawend", this.#handleDrawEnd);
+    this.#drawInteraction.un("drawabort", this.#handleDrawAbort);
     this.#map.un("pointermove", this.#handlePointerMove);
     this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
     document.removeEventListener("keyup", this.#handleKeyUp);
@@ -421,7 +422,9 @@ class DrawModel {
     this.#drawInteraction.on("drawstart", this.#handleDrawStart);
     // Add a listener for the draw-end-event
     this.#drawInteraction.on("drawend", this.#handleDrawEnd);
-
+    // Add a listener for when drawing is aborted (e.g. if all points are
+    // removed by pressing esc several times).
+    this.#drawInteraction.on("drawabort", this.#handleDrawAbort);
     // We need a listener for when a feature is added to the source.
     this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
     // We need a listener for keyboard input. For example, pressing the escape
@@ -482,11 +485,9 @@ class DrawModel {
   // This handler will make sure that the overlay will be removed
   // when the feature drawing is done.
   #handleDrawEnd = (e) => {
-    // Let's make sure to remove the draw tooltip
+    // Let's make sure to reset the draw tooltip
+    this.#resetDrawTooltip();
     const { feature } = e;
-    this.#drawTooltipElement.innerHTML = null;
-    this.#currentPointerCoordinate = null;
-    this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
     // We set the USER_DRAWN prop to true so that we can keep track
     // of the user drawn features.
     feature.set("USER_DRAWN", true);
@@ -495,6 +496,17 @@ class DrawModel {
     // Make sure to remove the event-listener for the pointer-moves.
     // (We don't want the pointer to keep updating while we're not drawing).
     this.#map.un("pointermove", this.#handlePointerMove);
+  };
+
+  // Cleans up if the drawing is aborted.
+  #handleDrawAbort = () => {
+    this.#resetDrawTooltip();
+  };
+
+  #resetDrawTooltip = () => {
+    this.#drawTooltipElement.innerHTML = null;
+    this.#currentPointerCoordinate = null;
+    this.#drawTooltip.setPosition(this.#currentPointerCoordinate);
   };
 
   // This handler will make sure that we keep the measurement calculation
