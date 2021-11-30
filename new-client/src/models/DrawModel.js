@@ -224,13 +224,16 @@ class DrawModel {
 
   // Returns a text-style that shows the tooltip-label
   // (i.e. the area of the feature in a readable format).
+  // *If the measurement-label is supposed to be shown!*
   #getFeatureTextStyle = (feature) => {
     return new Text({
       textAlign: "center",
       textBaseline: "middle",
       font: "12pt sans-serif",
       fill: new Fill({ color: "#FFF" }),
-      text: this.#getFeatureMeasurementLabel(feature),
+      text: this.#showFeatureMeasurements
+        ? this.#getFeatureMeasurementLabel(feature)
+        : "",
       overflow: true,
       stroke: new Stroke({
         color: "rgba(0, 0, 0, 0.5)",
@@ -313,6 +316,24 @@ class DrawModel {
         color: this.#drawStyleSettings.strokeColor,
         width: 2,
       }),
+    });
+  };
+
+  // Updates the text-style on all drawn features. Used when toggling
+  // if the measurement-label should be shown or not for example.
+  #refreshFeaturesTextStyle = () => {
+    // Get all the drawn features
+    const drawnFeatures = this.#getAllDrawnFeatures();
+    // Iterate the drawn features...
+    drawnFeatures.forEach((feature) => {
+      // Get the current style.
+      const featureStyle = feature.getStyle();
+      // Get an updated text-style (which depends on #showFeatureMeasurements).
+      const textStyle = this.#getFeatureTextStyle(feature);
+      // Set the updated text-style on the base-style.
+      featureStyle.setText(textStyle);
+      // Then update the feature style.
+      feature.setStyle(featureStyle);
     });
   };
 
@@ -566,9 +587,10 @@ class DrawModel {
   };
 
   // Set:er allowing us to change if measurements of the drawn features should
-  // be shown or not. // TODO: Handle side effects
+  // be shown or not. Also makes sure to refresh the current features text-style.
   setShowFeatureMeasurements = (showFeatureMeasurements) => {
     this.#showFeatureMeasurements = showFeatureMeasurements;
+    this.#refreshFeaturesTextStyle();
   };
 
   // Set:er allowing us to change the style settings used in the draw-layer
