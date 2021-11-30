@@ -38,6 +38,7 @@ class DrawModel {
   #showFeatureMeasurements;
   #drawStyleSettings;
   #drawInteraction;
+  #allowedLabelFormats;
   #labelFormat;
   #customHandleDrawStart;
   #customHandleDrawEnd;
@@ -56,7 +57,8 @@ class DrawModel {
     this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
-    this.#labelFormat = settings.labelFormat ?? "AUTO"; // ["AUTO", "M2", "KM2"]
+    this.#allowedLabelFormats = ["AUTO", "M2", "KM2", "HECTARE"];
+    this.#labelFormat = settings.labelFormat ?? "AUTO"; // One of #allowedLabelFormats
     // We are going to be keeping track of the current extent of the draw-source...
     this.#currentExtent = null;
     // And the current draw interaction.
@@ -282,6 +284,14 @@ class DrawModel {
           featureMeasure,
           measureIsLength
         );
+      case "HECTARE":
+        // If the format is "HECTARE" we will show the measurement in hectare
+        // if we're dealing with a surface. If we're dealing with a lineString
+        // we will return the measurement with "M2" format.
+        return this.#getHectareMeasurementString(
+          featureMeasure,
+          measureIsLength
+        );
       default:
         // Otherwise m² (or m) will do. (Displayed in local format).
         return this.#getMeasurementString(featureMeasure, measureIsLength);
@@ -294,6 +304,14 @@ class DrawModel {
     return `${(featureMeasure / (measureIsLength ? 1e3 : 1e6)).toFixed(3)} ${
       measureIsLength ? "km" : "km²"
     }`;
+  };
+
+  // Returns the measurement in hectare if we're dealing with a surface, and if
+  // we're dealing with a line-string we return the measurement in metres.
+  #getHectareMeasurementString = (featureMeasure, measureIsLength) => {
+    return measureIsLength
+      ? this.#getMeasurementString(featureMeasure, measureIsLength)
+      : `${(featureMeasure / 1e4).toFixed(3)} ha`;
   };
 
   // Returns the supplied measurement as a locally formatted string.
@@ -639,6 +657,18 @@ class DrawModel {
     this.#currentExtent = this.#drawSource.getExtent();
   };
 
+  setLabelFormat = (format) => {
+    if (!format || !this.#allowedLabelFormats.includes(format)) {
+      return {
+        status: "FAILED",
+        message: "Provided label-format is not supported.",
+      };
+    }
+    this.#labelFormat = format;
+    this.#refreshFeaturesTextStyle();
+    return { status: "SUCCESS", message: "Label-format changed." };
+  };
+
   // Set:er allowing us to change which layer the draw-model will interact with
   setLayer = (layerName) => {
     // We're not allowing the layer to be changed while the draw interaction is active...
@@ -686,6 +716,11 @@ class DrawModel {
   // Get:er returning the current extent of the draw-source.
   getCurrentExtent = () => {
     return this.#currentExtent;
+  };
+
+  // Get:er returning the current label-format
+  getLabelFormat = () => {
+    return this.#labelFormat;
   };
 
   // Get:er returning the state of the showDrawTooltip
