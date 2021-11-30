@@ -447,9 +447,12 @@ class DrawModel {
   };
 
   // This handler has one job; get the coordinate from the event,
-  // and store it for later use.
+  // and store it for later use. *But only if the draw tooltip should be active! If
+  // the draw tooltip is disabled, we set the coordinate to null*
   #handlePointerMove = (e) => {
-    this.#currentPointerCoordinate = e.coordinate;
+    this.#currentPointerCoordinate = this.#showDrawTooltip
+      ? e.coordinate
+      : null;
   };
 
   // We're probably going to need a handler for when a feature is added
