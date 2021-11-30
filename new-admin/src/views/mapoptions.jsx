@@ -84,7 +84,7 @@ class MapOptions extends Component {
     });
   }
 
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:mapConfig");
   }
 
