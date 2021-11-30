@@ -620,9 +620,10 @@ class DrawModel {
   setLayer = (layerName) => {
     // We're not allowing the layer to be changed while the draw interaction is active...
     if (this.#drawInteraction !== null) {
-      return console.warn(
+      console.warn(
         "The layer cannot be changed. The draw interaction is currently active. Disable the draw interaction before changing layer."
       );
+      return { status: "FAILED" };
     }
     // First we must update the private field holding the current layer name
     this.#layerName = layerName;
@@ -632,6 +633,7 @@ class DrawModel {
     // When the current layer changes, the current extent will obviously
     // change as well.
     this.#currentExtent = this.#drawSource.getExtent();
+    return { status: "SUCCESS" };
   };
 
   // Set:er allowing us to change if a tooltip should be shown when drawing
