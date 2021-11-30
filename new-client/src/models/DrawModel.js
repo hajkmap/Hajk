@@ -535,6 +535,8 @@ class DrawModel {
     this.#map.removeInteraction(this.#drawInteraction);
     // Then we'll make sure to remove all event-listeners
     this.#removeEventListeners();
+    // We're also making sure to set the private field to null
+    this.#drawInteraction = null;
     // And remove the click-lock!
     this.#map.clickLock.delete("coreDrawModel");
   };
@@ -616,6 +618,12 @@ class DrawModel {
 
   // Set:er allowing us to change which layer the draw-model will interact with
   setLayer = (layerName) => {
+    // We're not allowing the layer to be changed while the draw interaction is active...
+    if (this.#drawInteraction !== null) {
+      return console.warn(
+        "The layer cannot be changed. The draw interaction is currently active. Disable the draw interaction before changing layer."
+      );
+    }
     // First we must update the private field holding the current layer name
     this.#layerName = layerName;
     // Then we must initiate the draw-layer. This will either get the layer
