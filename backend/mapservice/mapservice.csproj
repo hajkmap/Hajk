@@ -191,7 +191,6 @@
     </Content>
     <Content Include="App_Data\layers.json" />
     <Content Include="App_Data\map_1.json" />
-    <Content Include="App_Data\documents\oversiktsplan.json" />
     <Content Include="App_Data\templates\projections.template" />
     <Content Include="App_Data\templates\map.template" />
     <None Include="Properties\PublishProfiles\File.pubxml" />
@@ -209,6 +208,7 @@
     <Compile Include="Components\Util.cs" />
     <Compile Include="Controllers\FmeProxyController.cs" />
     <Compile Include="Controllers\EdpController.cs" />
+    <Compile Include="Controllers\FirController.cs" />
     <Compile Include="Controllers\InformativeController.cs" />
     <Compile Include="Controllers\LayerMenuController.cs" />
     <Compile Include="Controllers\ToolSettingsController.cs" />
@@ -278,6 +278,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App_Data\documents\" />
     <Folder Include="Temp\" />
     <Folder Include="Views\" />
   </ItemGroup>

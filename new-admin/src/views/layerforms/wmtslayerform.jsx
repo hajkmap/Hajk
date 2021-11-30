@@ -72,7 +72,7 @@ class WMTSLayerForm extends Component {
     });
   }
 
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:select-image");
     this.props.model.off("change:select-legend-icon");
   }

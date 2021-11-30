@@ -43,7 +43,7 @@ class ToolOptions extends Component {
     );
   }
 
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off(
       "change:urlMapConfig",
       this.onUrlMapConfigChanged.bind(this)
