@@ -89,8 +89,13 @@ class DrawModel {
   // Returns the default style settings used by the draw-model.
   #getDefaultDrawStyleSettings = () => {
     const strokeColor = "rgba(74,74,74,0.5)";
+    const strokeDash = null;
     const fillColor = "rgba(255,255,255,0.07)";
-    return { strokeColor: strokeColor, fillColor: fillColor };
+    return {
+      strokeColor: strokeColor,
+      lineDash: strokeDash,
+      fillColor: fillColor,
+    };
   };
 
   // If required parameters are missing, we have to make sure we abort the
@@ -330,6 +335,7 @@ class DrawModel {
   #getDrawStrokeStyle = () => {
     return new Stroke({
       color: this.#drawStyleSettings.strokeColor,
+      lineDash: this.#drawStyleSettings.lineDash,
       width: 4,
     });
   };
