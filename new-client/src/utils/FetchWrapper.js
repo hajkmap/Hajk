@@ -171,9 +171,25 @@ function overrideLayerSourceParams(source) {
 function hfetch(...args) {
   let fw = fetchWrapper;
   fw.reset();
-  fw.url = args[0];
 
   fw.options = args[1] || {};
+
+  // Handle all types that the original fetch accepts. The next 2 comment are from fetch documentation.
+  // "A string or any other object with a stringifier — including a URL object — that provides the URL of the resource you want to fetch."
+  // "A Request object."
+
+  if (typeof args[0] === "string") {
+    fw.url = args[0];
+  } else if (args[0] instanceof URL) {
+    fw.url = args[0].href;
+  } else if (args[0] instanceof Request) {
+    // The Request object is deconstructed then reconstructed by original fetch. Not perfect...
+    fw.url = args[0].url;
+    fw.options = args[0];
+  } else {
+    fw.url = args[0].toString();
+  }
+
   fw.overrideOptions();
   //console.log("hfetch", fw.url, fw.options);
   return originalFetch(fw.url, fw.options);
