@@ -59,6 +59,8 @@ class MapViewModel {
       .filter((layer) => {
         return (
           (layer instanceof TileLayer || layer instanceof ImageLayer) &&
+          layer.layersInfo !== undefined &&
+          // searchSources.has(layer.layersInfo.id) &&
           // We consider a layer to be visible only if…
           layer.getVisible() && // …it's visible…
           layer.getProperties().name &&
@@ -70,44 +72,8 @@ class MapViewModel {
   getVisibleSearchLayers = () => {
     const searchSources = this.options.sources;
     const visibleLayers = this.getVisibleLayers();
-
-    const visibleSearchLayers = [];
-    // TODO: visibleLayers.filter() first to find out which
-    // layers do exist in searchSources. In that way, we could
-    // omit the loop-within-a-loop below.
-    visibleLayers.forEach((vl) => {
-      if (vl.layersInfo !== undefined) {
-        const subLayers = Object.values(vl.layersInfo);
-        // TODO: Could there be a chance where we have more than
-        // one element in the subLayers array? I'm thinking of
-        // WMS group layers that are exposed as searchable -
-        // those can consist of multiple sub layers.
-        const sl = subLayers[0];
-        searchSources.forEach((wms) => {
-          const vsl = [];
-          if (wms.id === sl.id) {
-            vsl.id = sl.id;
-            vsl.pid = vl.id;
-            vsl.caption = sl.caption;
-            vsl.url = sl.searchUrl;
-            vsl.layers = [sl.id];
-            vsl.searchFields =
-              typeof sl.searchPropertyName === "string"
-                ? sl.searchPropertyName.split(",")
-                : [];
-            vsl.infobox = sl.infobox;
-            vsl.aliasDict = "foo";
-            vsl.displayFields =
-              typeof sl.searchDisplayName === "string"
-                ? sl.searchDisplayName.split(",")
-                : [];
-            vsl.geometryField = sl.searchGeometryField;
-            vsl.outputFormat = sl.searchOutputFormat;
-
-            visibleSearchLayers.push(vsl);
-          }
-        });
-      }
+    const visibleSearchLayers = searchSources.filter((s) => {
+      return visibleLayers.find((l) => l.layersInfo[l.subLayers].id === s.id);
     });
     return visibleSearchLayers;
   };
