@@ -60,7 +60,6 @@ class MapViewModel {
         return (
           (layer instanceof TileLayer || layer instanceof ImageLayer) &&
           layer.layersInfo !== undefined &&
-          // searchSources.has(layer.layersInfo.id) &&
           // We consider a layer to be visible only if…
           layer.getVisible() && // …it's visible…
           layer.getProperties().name &&
