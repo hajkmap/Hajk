@@ -19,9 +19,11 @@ import Overlay from "ol/Overlay.js";
  * - getCurrentLayerName(): Returns the name of the layer currently connected to the draw-model.
  * - removeDrawnFeatures():  Removes all drawn features from the current draw-source.
  * - setLayer(layerName <string>): Sets (or creates) the layer that should be connected to the draw-model.
+ * - toggleDrawInteraction(drawType, settings): Accepts a string with the drawType and an object containing settings.
  * - zoomToCurrentExtent(): Fits the map-view to the current extent of the current draw-source.
- * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
  * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
+ * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
+ * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
  * - get/set showFeatureMeasurements(): Get or set wether drawn feature measurements should be shown or not.
  */
 class DrawModel {
