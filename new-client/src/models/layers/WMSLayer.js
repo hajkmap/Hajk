@@ -88,10 +88,32 @@ class WMSLayer {
 
     this.layer.layersInfo = config.layersInfo;
     this.layer.subLayers = this.subLayers;
-    this.layer.layerType = this.subLayers.length > 1 ? "group" : "layer";
+    this.layer.layerType = this.getLayerType();
     this.layer.getSource().set("url", config.url);
     this.type = "wms";
     this.bindHandlers();
+  }
+
+  // If the layerType is set as a base-layer in the config-mapper,
+  // it should be kept as a base-layer, *even if it has sub-layers*.
+  // The old behavior (before this commit) was that the base-layer was
+  // "transformed" to a "group-layer" if it had more than one subLayer.
+  // Since base-layers might be constructed with several subLayers, we
+  // shouldn't do that transformation... If the baseLayer is transformed
+  // to a "group-layer" we will get several errors, since the baseLayers
+  // does not contain all necessary information to render a "group-layer".
+  getLayerType() {
+    // Destruct the layerType from the layerInfo
+    const { layerType } = this.layerInfo;
+    // Check if the type is set to "base", and if it is,
+    // return "base". If it is not, we check if we have more than
+    // one subLayer; if we do, we return "group", and otherwise it is
+    // a regular "layer".
+    return layerType === "base"
+      ? "base"
+      : this.subLayers.length > 1
+      ? "group"
+      : "layer";
   }
 
   /**
