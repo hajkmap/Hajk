@@ -600,6 +600,15 @@ class DrawModel {
     this.#map.clickLock.delete("coreDrawModel");
   };
 
+  // Creates an object that can be returned to the initiator of a
+  // set:er if the set:er fails due to a bad value provided.
+  #getSetFailedObject = (field, providedValue) => {
+    return {
+      status: "FAILED",
+      message: `Set:er failed. The set:er only accepts ${typeof field}, and was provided ${typeof providedValue}`,
+    };
+  };
+
   // Toggles the current draw interaction. To enable the draw interaction,
   // pass one of the allowed draw-interactions: "Polygon", "Rectangle", or "Circle"
   // as the first parameter. To disable the draw-interaction, pass nothing, or an empty string.
@@ -684,7 +693,7 @@ class DrawModel {
     }
     this.#labelFormat = format;
     this.#refreshFeaturesTextStyle();
-    return { status: "SUCCESS", message: "Label-format changed." };
+    return { status: "SUCCESS", message: `Label-format changed to ${format}` };
   };
 
   // Set:er allowing us to change which layer the draw-model will interact with
@@ -694,7 +703,7 @@ class DrawModel {
       console.warn(
         "The layer cannot be changed. The draw interaction is currently active. Disable the draw interaction before changing layer."
       );
-      return { status: "FAILED" };
+      return { status: "FAILED", message: "Disable draw to change layer." };
     }
     // First we must update the private field holding the current layer name
     this.#layerName = layerName;
@@ -704,20 +713,48 @@ class DrawModel {
     // When the current layer changes, the current extent will obviously
     // change as well.
     this.#currentExtent = this.#drawSource.getExtent();
-    return { status: "SUCCESS" };
+    return { status: "SUCCESS", message: `Layer changed to ${layerName}` };
   };
 
   // Set:er allowing us to change if a tooltip should be shown when drawing
   // TODO: Handle side effects
   setShowDrawTooltip = (drawTooltipActive) => {
+    // Let's make sure we're provided proper input before we set anything
+    if (typeof drawTooltipActive !== "boolean") {
+      // If we were not, let's return a fail message
+      return this.#getSetFailedObject(this.#showDrawTooltip, drawTooltipActive);
+    }
+    // If we've made it this far, we can go ahead and set the internal value.
     this.#showDrawTooltip = drawTooltipActive;
+    // And return a success-message
+    return {
+      status: "SUCCESS",
+      message: `Draw tooltip is now ${drawTooltipActive ? "shown" : "hidden"}`,
+    };
   };
 
   // Set:er allowing us to change if measurements of the drawn features should
   // be shown or not. Also makes sure to refresh the current features text-style.
   setShowFeatureMeasurements = (showFeatureMeasurements) => {
+    // Let's make sure we're provided proper input before we set anything
+    if (typeof showFeatureMeasurements !== "boolean") {
+      // If we were not, let's return a fail message
+      return this.#getSetFailedObject(
+        this.showFeatureMeasurements,
+        showFeatureMeasurements
+      );
+    }
+    // If we've made it this far, we can go ahead and set the internal value.
     this.#showFeatureMeasurements = showFeatureMeasurements;
+    // Then we have to refresh the style so that the change is shown.
     this.#refreshFeaturesTextStyle();
+    // And return a success-message
+    return {
+      status: "SUCCESS",
+      message: `Measurement labels are now ${
+        showFeatureMeasurements ? "shown" : "hidden"
+      }`,
+    };
   };
 
   // Set:er allowing us to change the style settings used in the draw-layer
