@@ -18,6 +18,7 @@
     "Print",
     "Routing",
     "Search",
+    "Sketch",
     "StreetView",
     "Suggest",
     "TimeSlider"
@@ -41,6 +42,7 @@
     "Print",
     "Routing",
     "Search",
+    "Sketch",
     "StreetView",
     "Suggest",
     "TimeSlider",
