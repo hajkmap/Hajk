@@ -96,7 +96,9 @@ class SearchResultsDataset extends React.Component {
     const { featureSortingStrategy, getFeatureTitle } = this.props;
 
     const featuresAtoZSorted = features.sort((a, b) =>
-      getFeatureTitle(a).localeCompare(getFeatureTitle(b), "sv")
+      getFeatureTitle(a).localeCompare(getFeatureTitle(b), undefined, {
+        numeric: true, // Ensure that 1 < 2 < 10
+      })
     );
 
     switch (featureSortingStrategy) {

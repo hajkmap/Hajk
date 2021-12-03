@@ -592,7 +592,8 @@ class Search extends React.PureComponent {
     return flatAutocompleteArray.sort((a, b) =>
       decodeCommas(a.autocompleteEntry).localeCompare(
         decodeCommas(b.autocompleteEntry),
-        "sv"
+        undefined,
+        { numeric: true }
       )
     );
   };
@@ -862,15 +863,6 @@ class Search extends React.PureComponent {
     });
   };
 
-  #sortAndShortenSearchResults = (featureCollections, maxSlots) => {
-    featureCollections.sort((a, b) => {
-      const sourceNameA = a.source.caption.toUpperCase();
-      const sourceNameB = b.source.caption.toUpperCase();
-      return sourceNameA.localeCompare(sourceNameB, "sv");
-    });
-    return featureCollections.slice(0, maxSlots);
-  };
-
   prepareAutocompleteList = (searchResults) => {
     let maxSlots = 7;
     let numSourcesWithResults = searchResults.featureCollections.length;
@@ -880,10 +872,6 @@ class Search extends React.PureComponent {
         0,
         maxSlots
       );
-      // searchResults.featureCollections = this.#sortAndShortenSearchResults(
-      //   searchResults.featureCollections,
-      //   maxSlots
-      // );
     }
 
     let numResults = 0;

@@ -281,7 +281,9 @@ const FmeServerView = (props) => {
       return product.group === activeGroup;
     });
     // Then we sort the products alphabetically
-    filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+    filteredProducts.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true })
+    );
     // Return the sorted products
     return filteredProducts;
   }

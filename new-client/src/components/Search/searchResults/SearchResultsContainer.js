@@ -832,7 +832,7 @@ class SearchResultsContainer extends React.PureComponent {
     const { featureCollectionSortingStrategy } = this.state;
 
     const featureCollectionsAtoZSorted = featureCollections.sort((a, b) =>
-      a.source.caption.localeCompare(b.source.caption, "sv")
+      a.source.caption.localeCompare(b.source.caption)
     );
 
     switch (featureCollectionSortingStrategy) {
