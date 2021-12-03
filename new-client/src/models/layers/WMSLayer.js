@@ -72,9 +72,6 @@ class WMSLayer {
         minMaxZoomAlertOnToggleOnly:
           config.minMaxZoomAlertOnToggleOnly || false,
       });
-      if (minZoom > 0) {
-        console.log(config);
-      }
     } else {
       this.layer = new TileLayer({
         name: config.name,
