@@ -69,6 +69,7 @@ class WMSLayer {
         timeSliderEnd: config?.timeSliderEnd,
         minZoom: minZoom,
         maxZoom: maxZoom,
+        minMaxZoomAlertOnToggleOnly: config.minMaxZoomAlertOnToggleOnly || true,
       });
     } else {
       this.layer = new TileLayer({
@@ -83,6 +84,7 @@ class WMSLayer {
         timeSliderEnd: config?.timeSliderEnd,
         minZoom: minZoom,
         maxZoom: maxZoom,
+        minMaxZoomAlertOnToggleOnly: config.minMaxZoomAlertOnToggleOnly || true,
       });
     }
 
