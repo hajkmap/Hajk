@@ -26,9 +26,8 @@ import {
   AccordionSummary,
   AccordionDetails,
   OutlinedInput,
-  InputAdornment,
-  InputLabel,
   CircularProgress,
+  FormLabel,
 } from "@material-ui/core";
 import ProductList from "./components/ProductList";
 import LinkItem from "./components/LinkItem";
@@ -403,7 +402,7 @@ class GeosuiteExportView extends React.PureComponent {
           <Link href={termsAndConditionsLink} target="_blank">
             <Box display="flex" alignItems="center" gridColumnGap="4px">
               {"Villkor för nyttjande"}
-              <LaunchIcon />
+              <LaunchIcon fontSize="small" />
             </Box>
           </Link>
         </Grid>
@@ -549,22 +548,23 @@ class GeosuiteExportView extends React.PureComponent {
             </Accordion>
           </Grid>
 
-          <Grid item xs={12} style={{ marginTop: "20px" }}>
+          <Grid item xs={12} style={{ marginTop: "16px" }}>
             <FormControl fullWidth>
-              <InputLabel htmlFor="emailInput">Din e-postadress</InputLabel>
+              <FormLabel required style={{ padding: "4px 0px" }}>
+                Din e-postadress
+              </FormLabel>
               <OutlinedInput
                 id="emailInput"
                 required
                 value={this.state.email}
+                margin="dense"
+                placeholder="E-postadress"
                 error={
                   this.state.email.length === 0 ? false : !this.state.emailValid
                 }
                 onChange={(e) => {
                   this.handleEmailChange(e.target.value);
                 }}
-                startAdornment={
-                  <InputAdornment position="start">@</InputAdornment>
-                }
               />
             </FormControl>
           </Grid>
@@ -578,7 +578,7 @@ class GeosuiteExportView extends React.PureComponent {
             <Link href={termsAndConditionsLink} target="_blank">
               <Box display="flex" alignItems="center" gridColumnGap="4px">
                 {"Villkor för nyttjande"}
-                <LaunchIcon />
+                <LaunchIcon fontSize="small" />
               </Box>
             </Link>
           </Grid>
