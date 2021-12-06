@@ -8,6 +8,7 @@ import SketchView from "./SketchView";
 
 // Models
 import SketchModel from "./models/SketchModel";
+import DrawModel from "../../models/DrawModel";
 
 const Sketch = (props) => {
   // The local observer will handle the communication between models and views.
@@ -15,11 +16,16 @@ const Sketch = (props) => {
 
   // A model used to interact with the map etc. We want to
   // keep the view free from direct interactions.
+  // There's a possibility that this model won't be needed since most
+  // (if not all) of the functionality should exist in the core Draw-model.
   const sketchModel = new SketchModel({
     localObserver: localObserver,
     app: props.app,
     options: props.options,
   });
+
+  // Initiate a new DrawModel (core).
+  const drawModel = new DrawModel({ layerName: "sketchLayer", map: props.map });
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // disable the draw interaction if it is active. Let's publish a couple events. (TODO)
@@ -34,7 +40,7 @@ const Sketch = (props) => {
       custom={{
         icon: <GestureIcon />,
         title: "Rita",
-        description: "Rita, mät, importera och exportera",
+        description: "Skapa dina helt egna geometrier!",
         height: "dynamic",
         width: 400,
         onWindowHide: onWindowHide,
@@ -42,6 +48,7 @@ const Sketch = (props) => {
     >
       <SketchView
         model={sketchModel}
+        drawModel={drawModel}
         options={props.options}
         localObserver={localObserver}
       />
