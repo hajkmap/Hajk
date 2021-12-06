@@ -53,71 +53,31 @@ class MapViewModel {
   };
 
   getVisibleLayers = () => {
-    //console.log("this:", this);
-    // const ll = this.map
-    //   .getLayers()
-    //   .getArray()
-    //   .find((layer) => {
-    //     return (
-    //       "kba:sam_grundskolor_p" === layer.values_.name //&& layer.getVisible()
-    //     );
-    //   });
-    // console.log("kba:sam_grundskolor_p:", ll);
-    // const vl = this.map
-    //   .getLayers()
-    //   .getArray()
-    //   .filter((layer) => {
-    //     return (
-    //       (layer instanceof TileLayer || layer instanceof ImageLayer) &&
-    //       layer.getVisible() &&
-    //       layer.getProperties().source.hasOwnProperty("params_")
-    //     );
-    //   })
-    //   .map((layer) => layer.values_.source.params_);
-    // console.log("vl: ", vl);
-    // vl.forEach((l) => {
-    //   const src = l.getProperties().source;
-    //   console.log("src: ", src);
-    //   if (src.hasOwnProperty("params_")) {
-    //     const ll = l.getSource().getParams();
-    //     console.log("lparams: ", ll["LAYERS"]);
-    //   }
-    // });
-
-    // const layrs = this.map.getLayers().getArray();
-    // console.log("layrs:", layrs);
-
-    return (
-      this.map
-        .getLayers()
-        .getArray()
-        .filter((layer) => {
-          return (
-            (layer instanceof TileLayer || layer instanceof ImageLayer) &&
-            layer.layersInfo !== undefined &&
-            // We consider a layer to be visible only if…
-            layer.getVisible() && // …it's visible…
-            layer.getProperties().source.hasOwnProperty("params_") &&
-            layer.getProperties().name &&
-            isValidLayerId(layer.getProperties().name) // …has a specified name property…
-          );
-        })
-        //.map((layer) => layer.subLayers)
-        .map((layer) => layer.values_.source.params_["LAYERS"])
-        .join(",")
-        .split(",")
-    );
+    return this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => {
+        return (
+          (layer instanceof TileLayer || layer instanceof ImageLayer) &&
+          layer.layersInfo !== undefined &&
+          // We consider a layer to be visible only if…
+          layer.getVisible() && // …it's visible…
+          layer.getProperties().source.hasOwnProperty("params_") &&
+          layer.getProperties().name &&
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
+        );
+      })
+      .map((layer) => layer.values_.source.params_["LAYERS"])
+      .join(",")
+      .split(",");
   };
 
   getVisibleSearchLayers = () => {
     const searchSources = this.options.sources;
-    console.log("searchSources: ", searchSources);
     const visibleLayers = this.getVisibleLayers();
-    console.log("visibleLayers: ", visibleLayers);
     const visibleSearchLayers = searchSources.filter((s) => {
-      return visibleLayers.find((x) => x === s.id);
+      return visibleLayers.find((l_id) => l_id === s.id);
     });
-    console.log("visibleSearchLayers:", visibleSearchLayers);
     return visibleSearchLayers;
   };
 
