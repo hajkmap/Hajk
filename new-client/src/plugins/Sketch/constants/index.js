@@ -1,28 +1,16 @@
-import AddIcon from "@material-ui/icons/Add";
-import EditIcon from "@material-ui/icons/Edit";
+import CreateIcon from "@material-ui/icons/Create";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
-import SettingsIcon from "@material-ui/icons/Settings";
 
 export const TABS = [
   {
-    tooltip: "Skapa nya objekt",
-    label: "Lägg till",
-    icon: <AddIcon />,
+    tooltip: "Lägg till, redigera, eller ta bort objekt från kartan.",
+    label: "Rita",
+    icon: <CreateIcon />,
   },
   {
-    tooltip: "Editera existerande objekt",
-    label: "Editera",
-    icon: <EditIcon />,
-  },
-  {
-    tooltip: "Importera och exportera till/från en .kml fil.",
+    tooltip: "Spara ritade objekt i webbläsaren eller till en fil.",
     label: "Spara",
     icon: <ImportExportIcon />,
-  },
-  {
-    tooltip: "Inställningar",
-    label: "Inställningar",
-    icon: <SettingsIcon />,
   },
 ];
 

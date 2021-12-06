@@ -1,42 +1,32 @@
 import React from "react";
-import { Grid, Tab, Tabs, Typography } from "@material-ui/core";
-import { Drawer, Tooltip } from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import Fab from "@material-ui/core/Fab";
+import { Grid, Typography } from "@material-ui/core";
+import { AppBar, Tab, Tabs, Tooltip } from "@material-ui/core";
 import { TABS, PLUGIN_MARGIN } from "./constants";
 
 const SketchView = () => {
   const [activeTab, setActiveTab] = React.useState(0);
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
-  const handleTabChange = (e, activeTab) => {
-    setActiveTab(activeTab);
-    setDrawerOpen(false);
-  };
-
-  const renderOpenDrawerButton = () => {
+  const renderAppBar = () => {
     return (
-      <div
-        style={{
-          position: "absolute",
-          top: PLUGIN_MARGIN,
-          left: PLUGIN_MARGIN,
-        }}
-      >
-        <Tooltip title="Öppna verktygsmeny">
-          <Fab
-            size="small"
-            onClick={() => setDrawerOpen(true)}
-            aria-label="open-menu"
-          >
-            <MenuIcon />
-          </Fab>
-        </Tooltip>
-      </div>
+      <AppBar position="sticky" color="default" style={{ top: -10 }}>
+        <Tabs
+          variant="fullWidth"
+          onChange={(e, activeTab) => setActiveTab(activeTab)}
+          value={activeTab}
+        >
+          {TABS.map((tab, index) => {
+            return (
+              <Tooltip title={tab.tooltip} key={index}>
+                <Tab icon={tab.icon} />
+              </Tooltip>
+            );
+          })}
+        </Tabs>
+      </AppBar>
     );
   };
 
-  const renderHeader = () => {
+  const renderInformationHeader = () => {
     return (
       <Grid
         container
@@ -49,52 +39,23 @@ const SketchView = () => {
     );
   };
 
-  const renderTabs = () => {
-    return (
-      <Tabs orientation="vertical" onChange={handleTabChange} value={activeTab}>
-        {TABS.map((tab, index) => {
-          return (
-            <Tooltip title={tab.tooltip} key={index}>
-              <Tab icon={tab.icon} label={tab.label} />
-            </Tooltip>
-          );
-        })}
-      </Tabs>
-    );
+  const renderContent = () => {
+    return activeTab === 0 ? renderDrawView() : renderSaveView();
   };
 
-  const renderDrawer = () => {
-    return (
-      <Drawer
-        anchor="left"
-        open={drawerOpen}
-        PaperProps={{ style: { position: "absolute" } }}
-        BackdropProps={{ style: { position: "absolute" } }}
-        ModalProps={{
-          container: document.getElementById("sketch-plugin-container"),
-          style: { position: "absolute" },
-        }}
-        onClose={() => setDrawerOpen(false)}
-      >
-        {renderTabs()}
-      </Drawer>
-    );
+  const renderDrawView = () => {
+    return <h2>RITA</h2>;
+  };
+
+  const renderSaveView = () => {
+    return <h2>SPARA</h2>;
   };
 
   return (
-    <div
-      id="sketch-plugin-container"
-      style={{
-        position: "relative",
-        margin: -PLUGIN_MARGIN,
-        minHeight: "30rem",
-      }}
-    >
-      {renderDrawer()}
-      <Grid container id="sketch-plugin-main-content">
-        {renderOpenDrawerButton()}
-        {renderHeader()}
-      </Grid>
+    <div id="sketch-plugin-main-content" style={{ margin: -10 }}>
+      {renderAppBar()}
+      {renderInformationHeader()}
+      {renderContent()}
     </div>
   );
 };
