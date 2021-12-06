@@ -42,10 +42,6 @@ const styles = (theme) => ({
   bold: {
     fontWeight: 500,
   },
-  link: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-  },
   subheading: {
     padding: theme.spacing(1),
     fontWeight: theme.typography.fontWeightMedium,
@@ -399,18 +395,16 @@ class GeosuiteExportView extends React.PureComponent {
         <Typography>{documentDescription}</Typography>
         {this.renderDocumentOrderResult()}
         <Grid
-          className={classes.link}
           container
           direction="row"
           alignItems="center"
+          style={{ marginTop: "16px", marginBottom: "8px" }}
         >
-          <LaunchIcon />
-          <Link
-            href={termsAndConditionsLink}
-            className={classes.link}
-            target="_blank"
-          >
-            {"Villkor för nyttjande"}
+          <Link href={termsAndConditionsLink} target="_blank">
+            <Box display="flex" alignItems="center" gridColumnGap="4px">
+              {"Villkor för nyttjande"}
+              <LaunchIcon />
+            </Box>
           </Link>
         </Grid>
         {this.renderNextAndBackButtons("Beställ", null)}
@@ -576,19 +570,16 @@ class GeosuiteExportView extends React.PureComponent {
           </Grid>
 
           <Grid
-            className={classes.link}
-            style={{ marginTop: "10px" }}
+            style={{ marginTop: "16px", marginBottom: "8px" }}
             container
             direction="row"
             alignItems="center"
           >
-            <LaunchIcon />
-            <Link
-              href={termsAndConditionsLink}
-              className={classes.link}
-              target="_blank"
-            >
-              {"Villkor för nyttjande"}
+            <Link href={termsAndConditionsLink} target="_blank">
+              <Box display="flex" alignItems="center" gridColumnGap="4px">
+                {"Villkor för nyttjande"}
+                <LaunchIcon />
+              </Box>
             </Link>
           </Grid>
 
