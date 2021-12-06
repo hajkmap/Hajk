@@ -771,6 +771,8 @@ class WMSLayerForm extends Component {
           infoClickSortProperty: layer.infoClickSortProperty ?? "",
           infoClickSortType: layer.infoClickSortType ?? "string",
           hideExpandArrow: layer.hideExpandArrow ?? false,
+          minMaxZoomAlertOnToggleOnly:
+            layer.minMaxZoomAlertOnToggleOnly ?? false,
         },
         () => {
           this.setServerType();
