@@ -28,7 +28,8 @@ const defaultState = {
     wfs: {
       projects: {
         layer: {
-          id: ""
+          id: "",
+          geometryField: "geom",
         },
         spatialFilter: "intersects",
         attributes: {
@@ -40,6 +41,7 @@ const defaultState = {
       boreholes: {
         layer: {
           id: "",
+          geometryField: "geom",
         },
         attributes: {
           external_id: "externt_id",
@@ -195,12 +197,18 @@ class ToolOptions extends Component {
 
     function update() {
       this.props.model.updateToolConfig(
-        this.props.model.get("toolConfig"),
-        () => {
-          this.props.parent.props.parent.setState({
-            alert: true,
-            alertMessage: "Uppdateringen lyckades",
-          });
+        this.props.model.get("toolConfig"), (success) => {
+          if (success) {
+            this.props.parent.props.parent.setState({
+              alert: true,
+              alertMessage: "Uppdateringen lyckades.",
+            });
+          } else {
+            this.props.parent.props.parent.setState({
+              alert: true,
+              alertMessage: "Uppdateringen misslyckades.",
+            });
+          }
         }
       );
     }
@@ -359,22 +367,22 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="services__wfs__projects__layer__projection">
-              Projektion{" "}
+            <label htmlFor="services__wfs__projects__layer__geometryField">
+              Geometriattribut{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Söklagerprojektion i plan, anges om WFS-tjänsten kräver specifik projektion för sökning. Standardinställning är kartans projektion."
+                title="Attributnamn för WFS-tjänstens geometri."
               />
             </label>
             <input
               type="text"
-              id="services__wfs__projects__layer__projection"
-              name="services__wfs__projects__layer__projection"
+              id="services__wfs__projects__layer__geometryField"
+              name="services__wfs__projects__layer__geometryField"
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
-              value={this.state.services.wfs.projects.layer?.projection || ""}
+              value={this.state.services.wfs.projects.layer?.geometryField || ""}
             />
           </div>
           <div>
@@ -458,22 +466,22 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="services__wfs__boreholes__layer__projection">
-              Projektion{" "}
+            <label htmlFor="services__wfs__boreholes__layer__geometryField">
+            Geometriattribut{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Söklagerprojektion i plan, anges om WFS-tjänsten kräver specifik projektion för sökning. Standardinställning är kartans projektion."
+                title="Attributnamn för WFS-tjänstens geometri."
               />
             </label>
             <input
               type="text"
-              id="services__wfs__boreholes__layer__projection"
-              name="services__wfs__boreholes__layer__projection"
+              id="services__wfs__boreholes__layer__geometryField"
+              name="services__wfs__boreholes__layer__geometryField"
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
-              value={this.state.services.wfs.boreholes.layer?.projection || ""}
+              value={this.state.services.wfs.boreholes.layer?.geometryField || ""}
             />
           </div>
           <div>

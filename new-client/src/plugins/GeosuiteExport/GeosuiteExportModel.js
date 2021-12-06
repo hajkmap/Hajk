@@ -9,7 +9,6 @@ import { WFS } from "ol/format";
 
 /**
  * GeosuiteExport plug-in, model class.
- * Dependency: Search plug-in.
  */
 class GeosuiteExportModel {
   #map;
@@ -59,12 +58,43 @@ class GeosuiteExportModel {
 
     // Set configuration from defaults and option overrides, if any
     this.#config = {
+      projects: {
+        layer: {
+          // Configurable plug-in options
+          id: this.#options.services?.wfs?.projects?.layer?.id ?? "",
+          geometryField:
+            this.#options.services?.wfs?.projects?.layer?.geometryField ??
+            "geom",
+          // Static defaults used as fallback if layer reference lookup by id fails
+          version: "1.1.0",
+          url: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
+          featurePrefixName: "geoteknik-v2-utv",
+          featureName: "geoteknisk_utredning",
+        },
+        spatialFilter: this.#getSpatialFilter(
+          this.#options.services?.wfs?.projects?.spatialFilter
+        ),
+        attributes: {
+          title:
+            this.#options.services?.wfs?.projects?.attributes?.title ??
+            "projektnamn",
+          link:
+            this.#options.services?.wfs?.projects?.attributes?.link ?? "url",
+        },
+        maxFeatures: this.#options.services?.wfs?.projects?.maxFeatures ?? 0,
+      },
       boreholes: {
         layer: {
+          // Configurable plug-in options
           id: this.#options.services?.wfs?.boreholes?.layer?.id ?? "",
-          projection:
-            this.#options.services?.wfs?.boreholes?.layer?.projection ??
-            "EPSG:3006",
+          geometryField:
+            this.#options.services?.wfs?.boreholes?.layer?.geometryField ??
+            "geom",
+          // Static defaults used as fallback if layer reference lookup by id fails
+          version: "1.1.0",
+          url: "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
+          featurePrefixName: "borrhal-v2",
+          featureName: "borrhal",
         },
         spatialFilter: this.#getSpatialFilter(
           this.#options.services?.wfs?.boreholes?.spatialFilter
@@ -78,25 +108,6 @@ class GeosuiteExportModel {
               ?.external_project_id ?? "externt_projekt_id",
         },
         maxFeatures: this.#options.services?.wfs?.boreholes?.maxFeatures ?? 0,
-      },
-      projects: {
-        layer: {
-          id: this.#options.services?.wfs?.projects?.layer?.id ?? "",
-          projection:
-            this.#options.services?.wfs?.projects?.layer?.projection ??
-            "EPSG:3006",
-        },
-        spatialFilter: this.#getSpatialFilter(
-          this.#options.services?.wfs?.projects?.spatialFilter
-        ),
-        attributes: {
-          title:
-            this.#options.services?.wfs?.projects?.attributes?.title ??
-            "projektnamn",
-          link:
-            this.#options.services?.wfs?.projects?.attributes?.link ?? "url",
-        },
-        maxFeatures: this.#options.services?.wfs?.projects?.maxFeatures ?? 0,
       },
     };
     this.#initWfsLayers();
@@ -249,7 +260,7 @@ class GeosuiteExportModel {
         }
         this.#localObserver.publish("geosuite-export-completed");
       })
-      .catch((error) => {
+      .catch(() => {
         this.#localObserver.publish("geosuite-export-failed");
       });
   };
@@ -308,7 +319,6 @@ class GeosuiteExportModel {
     return documents;
   };
 
-  // Work in progress, re-use search model
   #updateSelectionStateFromWfs = (
     wfsConfig,
     selectionGeometry,
@@ -327,7 +337,7 @@ class GeosuiteExportModel {
         .transform(this.#config.srsName, layerSrs);
     }
 
-    // Room for future improvement: Share searchModel to reduce plug-in specific code.
+    // Room for future improvement: Re-use searchModel to reduce plug-in specific code.
     // Some minor extensions from here must then be backported to search model.
     const filter = wfsConfig.spatialFilter ?? within;
     const spatialFilter = filter(
@@ -337,10 +347,11 @@ class GeosuiteExportModel {
     );
 
     const wfsGetFeatureOtions = {
+      version: wfsConfig.layer.version,
       srsName: this.#config.srsName,
       featureNS: "", // Must be blank for older IE GML parsing
-      featurePrefix: wfsConfig.layer.layers[0].split(":")[0], //featurePrefixName,
-      featureTypes: [wfsConfig.layer.layers[0].split(":")[1]], //[wfsConfig.layer.featureName],
+      featurePrefix: wfsConfig.layer.featurePrefixName,
+      featureTypes: [wfsConfig.layer.featureName],
       outputFormat: "application/json",
       geometryName: wfsConfig.layer.geometryField,
       filter: spatialFilter,
@@ -618,26 +629,16 @@ class GeosuiteExportModel {
     this.#selection.document = {};
   };
 
-  // Set layer config to result of merge of by-id-referenced search layer,
+  // Set layer config to result of merge of by-id-referenced vector layer,
   // with overwrite/merge from our own plug-in's layer config or defaults.
   #initWfsLayers = () => {
-    const projectsLayerByRefOrDefaults = this.#getSearchLayerByRefOrDefaults(
+    const projectsLayerByRefOrDefaults = this.#getVectorLayerByRefOrDefaults(
       this.#config.projects.layer.id,
-      {
-        url: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
-        featurePrefixName: "geoteknik-v2-utv",
-        featureName: "geoteknisk_utredning",
-        geometryField: "geom",
-      }
+      this.#config.projects.layer
     );
-    const boreholesLayerByRefOrDefaults = this.#getSearchLayerByRefOrDefaults(
+    const boreholesLayerByRefOrDefaults = this.#getVectorLayerByRefOrDefaults(
       this.#config.boreholes.layer.id,
-      {
-        url: "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
-        featurePrefixName: "borrhal-v2",
-        featureName: "borrhal",
-        geometryField: "geom",
-      }
+      this.#config.boreholes.layer
     );
     this.#config.projects.layer = Object.assign(
       projectsLayerByRefOrDefaults,
@@ -649,13 +650,13 @@ class GeosuiteExportModel {
     );
   };
 
-  // Returns layer from configured Search layers, given layer id reference.
+  // Returns layer from configured Vector layers, given layer id reference.
   // If no reference is found, the given defaults are used as a static layer.
-  #getSearchLayerByRefOrDefaults = (id, defaults) => {
-    var layer = this.#getSearchLayerById(id);
+  #getVectorLayerByRefOrDefaults = (id, defaults) => {
+    var layer = this.#getVectorLayerById(id);
     if (!layer) {
       console.warn(
-        "GeosuiteExport: Layer not found, please configure search layer via admin and mark as active in search plug-in. Using defaults. Reference id=%s.",
+        "GeosuiteExport: Layer not found, please configure as vector layer via admin. Using defaults. Reference id=%s.",
         id
       );
       layer = defaults;
@@ -663,10 +664,10 @@ class GeosuiteExportModel {
     return layer;
   };
 
-  // Returns layer from configured Search layers, given layer id reference.
-  #getSearchLayerById = (id) => {
-    return (this.#app.searchModel?.getSources() ?? []).find((layer) => {
-      return layer.id === id;
+  // Returns layer from configured Vector layers, given layer id reference.
+  #getVectorLayerById = (id) => {
+    return (this.#app.config?.layersConfig ?? []).find((layer) => {
+      return layer.id === id && layer.type === "vector";
     });
   };
 }
