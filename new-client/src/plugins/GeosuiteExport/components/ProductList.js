@@ -27,13 +27,9 @@ const styles = (theme) => ({
     padding: theme.spacing(1),
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
   },
-  leftChip: {
-    width: "50%",
-    marginLeft: "5%",
-  },
-  rightChip: {
-    width: "50%",
-    marginRight: "7%", //take the scrollbar into account.
+  //chips same size
+  chip: {
+    minWidth: "40%",
   },
 });
 
@@ -81,9 +77,9 @@ class ProductList extends React.PureComponent {
       return (
         <Grid container style={{ marginTop: "10px" }}>
           <Grid item xs={12}>
-            <Box display="flex" justifyContent="center" gridColumnGap="5%">
+            <Box display="flex" justifyContent="start" gridColumnGap="8px">
               <Chip
-                className={classes.leftChip}
+                className={classes.chip}
                 onClick={() => {
                   this.setState({ globalExportSetting: "withinArea" });
                   handleExportAll(false);
@@ -98,7 +94,7 @@ class ProductList extends React.PureComponent {
                 }`}
               />
               <Chip
-                className={classes.rightChip}
+                className={classes.chip}
                 onClick={() => {
                   this.setState({ globalExportSetting: "withinProject" });
                   handleExportAll(true);
