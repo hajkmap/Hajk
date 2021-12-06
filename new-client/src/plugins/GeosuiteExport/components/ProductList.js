@@ -20,20 +20,16 @@ const styles = (theme) => ({
     maxHeight: 350,
     overflowY: "scroll",
     overflowX: "hidden",
-    marginTop: "10px",
+    marginTop: theme.spacing(1),
+    border: `1px solid ${theme.palette.divider}`,
   },
   listItemContainer: {
-    //Override the padding of the stepper to allow more space for the results.
-    paddingBottom: "5px",
+    padding: theme.spacing(1),
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
   },
-  leftChip: {
-    width: "50%",
-    marginLeft: "5%",
-  },
-  rightChip: {
-    width: "50%",
-    marginRight: "7%", //take the scrollbar into account.
+  //chips same size
+  chip: {
+    minWidth: "40%",
   },
 });
 
@@ -81,9 +77,9 @@ class ProductList extends React.PureComponent {
       return (
         <Grid container style={{ marginTop: "10px" }}>
           <Grid item xs={12}>
-            <Box display="flex" justifyContent="center" gridColumnGap="5%">
+            <Box display="flex" justifyContent="start" gridColumnGap="8px">
               <Chip
-                className={classes.leftChip}
+                className={classes.chip}
                 onClick={() => {
                   this.setState({ globalExportSetting: "withinArea" });
                   handleExportAll(false);
@@ -98,13 +94,13 @@ class ProductList extends React.PureComponent {
                 }`}
               />
               <Chip
-                className={classes.rightChip}
+                className={classes.chip}
                 onClick={() => {
                   this.setState({ globalExportSetting: "withinProject" });
                   handleExportAll(true);
                 }}
                 icon={<WorkIcon />}
-                label=" Hela projektet"
+                label=" Hela projekt"
                 size="medium"
                 variant={`${
                   this.state.globalExportSetting === "withinProject"
@@ -204,7 +200,7 @@ class ProductList extends React.PureComponent {
                           >
                             <Box display="flex" gridColumnGap={"8px"}>
                               <WorkIcon />
-                              <Typography>{`Hela projektet (${this.state.activeProject?.numBoreHolesTotal})`}</Typography>
+                              <Typography>{`Hela projekt (${this.state.activeProject?.numBoreHolesTotal})`}</Typography>
                             </Box>
                           </MenuItem>
                         </Menu>

@@ -26,20 +26,20 @@ import {
   AccordionSummary,
   AccordionDetails,
   OutlinedInput,
-  InputAdornment,
-  InputLabel,
   CircularProgress,
+  FormLabel,
 } from "@material-ui/core";
 import ProductList from "./components/ProductList";
 import LinkItem from "./components/LinkItem";
 
 const styles = (theme) => ({
+  //specific request from SBK to reduce the default MUI stepper padding.
+  stepper: {
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+  },
   bold: {
     fontWeight: 500,
-  },
-  link: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
   },
   subheading: {
     padding: theme.spacing(1),
@@ -394,18 +394,16 @@ class GeosuiteExportView extends React.PureComponent {
         <Typography>{documentDescription}</Typography>
         {this.renderDocumentOrderResult()}
         <Grid
-          className={classes.link}
           container
           direction="row"
           alignItems="center"
+          style={{ marginTop: "16px", marginBottom: "8px" }}
         >
-          <LaunchIcon />
-          <Link
-            href={termsAndConditionsLink}
-            className={classes.link}
-            target="_blank"
-          >
-            {"Villkor för nyttjande"}
+          <Link href={termsAndConditionsLink} target="_blank">
+            <Box display="flex" alignItems="center" gridColumnGap="4px">
+              {"Villkor för nyttjande"}
+              <LaunchIcon fontSize="small" />
+            </Box>
           </Link>
         </Grid>
         {this.renderNextAndBackButtons("Beställ", null)}
@@ -550,40 +548,38 @@ class GeosuiteExportView extends React.PureComponent {
             </Accordion>
           </Grid>
 
-          <Grid item xs={12} style={{ marginTop: "20px" }}>
+          <Grid item xs={12} style={{ marginTop: "16px" }}>
             <FormControl fullWidth>
-              <InputLabel htmlFor="emailInput">Din e-postadress</InputLabel>
+              <FormLabel required style={{ padding: "4px 0px" }}>
+                Din e-postadress
+              </FormLabel>
               <OutlinedInput
                 id="emailInput"
                 required
                 value={this.state.email}
+                margin="dense"
+                placeholder="E-postadress"
                 error={
                   this.state.email.length === 0 ? false : !this.state.emailValid
                 }
                 onChange={(e) => {
                   this.handleEmailChange(e.target.value);
                 }}
-                startAdornment={
-                  <InputAdornment position="start">@</InputAdornment>
-                }
               />
             </FormControl>
           </Grid>
 
           <Grid
-            className={classes.link}
-            style={{ marginTop: "10px" }}
+            style={{ marginTop: "16px", marginBottom: "8px" }}
             container
             direction="row"
             alignItems="center"
           >
-            <LaunchIcon />
-            <Link
-              href={termsAndConditionsLink}
-              className={classes.link}
-              target="_blank"
-            >
-              {"Villkor för nyttjande"}
+            <Link href={termsAndConditionsLink} target="_blank">
+              <Box display="flex" alignItems="center" gridColumnGap="4px">
+                {"Villkor för nyttjande"}
+                <LaunchIcon fontSize="small" />
+              </Box>
             </Link>
           </Grid>
 
@@ -772,7 +768,7 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   render() {
-    const { options } = this.props;
+    const { options, classes } = this.props;
     const description =
       options.view?.digitizeDescription ??
       "Rita ditt område i kartan, avsluta genom att dubbelklicka.";
@@ -782,7 +778,7 @@ class GeosuiteExportView extends React.PureComponent {
           <Stepper
             activeStep={this.state.activeStep}
             orientation="vertical"
-            style={{ paddingLeft: "0px", paddingRight: "0px" }}
+            className={classes.stepper}
           >
             <Step key="selectArea" completed={false}>
               <StepLabel>Markera område</StepLabel>
