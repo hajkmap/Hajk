@@ -25,3 +25,5 @@ export const TABS = [
     icon: <SettingsIcon />,
   },
 ];
+
+export const PLUGIN_MARGIN = 10;

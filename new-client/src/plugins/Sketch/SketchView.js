@@ -1,16 +1,52 @@
 import React from "react";
-import { IconButton, Grid, Tab, Tabs } from "@material-ui/core";
+import { Grid, Tab, Tabs, Typography } from "@material-ui/core";
 import { Drawer, Tooltip } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
-import { TABS } from "./constants";
+import Fab from "@material-ui/core/Fab";
+import { TABS, PLUGIN_MARGIN } from "./constants";
 
 const SketchView = () => {
-  const [activeTab, setActiveTab] = React.useState(1);
+  const [activeTab, setActiveTab] = React.useState(0);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   const handleTabChange = (e, activeTab) => {
     setActiveTab(activeTab);
     setDrawerOpen(false);
+  };
+
+  const renderOpenDrawerButton = () => {
+    return (
+      <div
+        style={{
+          position: "absolute",
+          top: PLUGIN_MARGIN,
+          left: PLUGIN_MARGIN,
+        }}
+      >
+        <Tooltip title="Öppna verktygsmeny">
+          <Fab
+            size="small"
+            onClick={() => setDrawerOpen(true)}
+            aria-label="open-menu"
+          >
+            <MenuIcon />
+          </Fab>
+        </Tooltip>
+      </div>
+    );
+  };
+
+  const renderHeader = () => {
+    return (
+      <Grid
+        container
+        style={{ padding: PLUGIN_MARGIN, minHeight: 60 }}
+        justify="center"
+        alignItems="center"
+      >
+        <Typography variant="button">{TABS[activeTab].label}</Typography>
+      </Grid>
+    );
   };
 
   const renderTabs = () => {
@@ -48,15 +84,16 @@ const SketchView = () => {
   return (
     <div
       id="sketch-plugin-container"
-      style={{ position: "relative", margin: -10, minHeight: "30rem" }}
+      style={{
+        position: "relative",
+        margin: -PLUGIN_MARGIN,
+        minHeight: "30rem",
+      }}
     >
       {renderDrawer()}
       <Grid container id="sketch-plugin-main-content">
-        <Tooltip title="Öppna verktygsmeny">
-          <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
-            <MenuIcon />
-          </IconButton>
-        </Tooltip>
+        {renderOpenDrawerButton()}
+        {renderHeader()}
       </Grid>
     </div>
   );
