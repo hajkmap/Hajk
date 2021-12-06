@@ -1,12 +1,8 @@
 import React from "react";
 import { IconButton, Grid, Tab, Tabs } from "@material-ui/core";
 import { Drawer, Tooltip } from "@material-ui/core";
-
-import AddIcon from "@material-ui/icons/Add";
-import EditIcon from "@material-ui/icons/Edit";
-import ImportExportIcon from "@material-ui/icons/ImportExport";
 import MenuIcon from "@material-ui/icons/Menu";
-import SettingsIcon from "@material-ui/icons/Settings";
+import { TABS } from "./constants";
 
 const SketchView = () => {
   const [activeTab, setActiveTab] = React.useState(1);
@@ -20,21 +16,13 @@ const SketchView = () => {
   const renderTabs = () => {
     return (
       <Tabs orientation="vertical" onChange={handleTabChange} value={activeTab}>
-        <Tooltip title="Skapa nya objekt">
-          <Tab icon={<AddIcon />} label="Lägg till" />
-        </Tooltip>
-        <Tooltip title="Editera existerande objekt">
-          <Tab icon={<SettingsIcon />} label="Editera" />
-        </Tooltip>
-        <Tooltip title="Editera existerande objekt">
-          <Tab icon={<EditIcon />} label="Editera" />
-        </Tooltip>
-        <Tooltip title="Importera och exportera till/från en .kml fil.">
-          <Tab icon={<ImportExportIcon />} label="Spara" />
-        </Tooltip>
-        <Tooltip title="Inställningar">
-          <Tab icon={<SettingsIcon />} label="Inställningar" />
-        </Tooltip>
+        {TABS.map((tab, index) => {
+          return (
+            <Tooltip title={tab.tooltip} key={index}>
+              <Tab icon={tab.icon} label={tab.label} />
+            </Tooltip>
+          );
+        })}
       </Tabs>
     );
   };
@@ -51,7 +39,6 @@ const SketchView = () => {
           style: { position: "absolute" },
         }}
         onClose={() => setDrawerOpen(false)}
-        variant="temporary"
       >
         {renderTabs()}
       </Drawer>
@@ -60,7 +47,6 @@ const SketchView = () => {
 
   return (
     <div
-      container
       id="sketch-plugin-container"
       style={{ position: "relative", margin: -10, minHeight: "30rem" }}
     >
