@@ -85,13 +85,15 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   getHtmlItemInfoBox = () => {
     const { feature } = this.props;
     const source = feature.source ?? this.props.source;
-    feature.properties = this.featurePropsParsing.extractPropertiesFromJson(
-      feature.properties
+    feature.setProperties(
+      this.featurePropsParsing.extractPropertiesFromJson(
+        feature.getProperties()
+      )
     );
     this.featurePropsParsing
       .setMarkdownAndProperties({
         markdown: source.infobox,
-        properties: feature.properties,
+        properties: feature.getProperties(),
       })
       .mergeFeaturePropsWithMarkdown()
       .then((MarkdownComponent) => {
@@ -123,13 +125,19 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       <TableContainer>
         <Table size="small">
           <TableBody>
-            {Object.entries(feature.properties).map((row) => {
-              return (
+            {Object.entries(feature.getProperties()).map((row) => {
+              // feature.getProperties() can contain values of any data type
+              // (whatever is set on the current feature). But since we can not
+              // render e.g. Date or Point objects, we must do the following check
+              // and only allow String, Number or Array:
+              return typeof row[1] === "string" ||
+                typeof row[1] === "number" ||
+                Array.isArray(row[1]) ? (
                 <TableRow key={row[0]}>
                   {this.renderTableCell(row[0])}
                   {this.renderTableCell(row[1], "right")}
                 </TableRow>
-              );
+              ) : null;
             })}
           </TableBody>
         </Table>
@@ -146,7 +154,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   getFeatureIndex = (feature, features) => {
     return (
       features?.findIndex((f) => {
-        return f.id === feature.id;
+        return f.getId() === feature.getId();
       }) ?? -1
     );
   };

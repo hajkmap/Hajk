@@ -189,6 +189,7 @@ var menu = Model.extend({
     url = prepareProxyUrl(url, this.get("config").url_proxy);
     $.ajax(url, {
       data: {
+        service: "WFS",
         request: "describeFeatureType",
         typename: layer,
       },

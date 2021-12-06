@@ -184,6 +184,13 @@ class Alert extends Component {
                 <h4 className="modal-title">
                   {options.caption || "Meddelande"}
                 </h4>
+                <ColorButtonGreen
+                  variant="contained"
+                  className="btn"
+                  onClick={options.onClick}
+                >
+                  OK
+                </ColorButtonGreen>
               </div>
               <div className="modal-body">
                 {options.contentType === "react" ? (

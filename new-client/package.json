@@ -1,6 +1,6 @@
 {
   "name": "hajk-client",
-  "version": "3.7.0-rc.1",
+  "version": "3.8.0",
   "description": "Hajk Client UI",
   "homepage": ".",
   "repository": {
@@ -41,6 +41,8 @@
   },
   "dependencies": {
     "@date-io/date-fns": "^1.3.13",
+    "@fontsource/material-icons": "^4.5.0",
+    "@fontsource/open-sans": "^4.5.2",
     "@fontsource/roboto": "^4.4.5",
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",

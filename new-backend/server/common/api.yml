@@ -17,6 +17,8 @@ tags:
     description: Resources for working with ActiveDirectory
   - name: Sokigo FB Proxy
     description: Proxy specified in working with Sokigo's FB API
+  - name: FME-server Proxy
+    description: Proxy for tunneling authenticated requests against FME server
   - name: Specification
     description: The OpenAPI specification
 paths:
@@ -472,6 +474,22 @@ paths:
       responses:
         200:
           description: Result will vary depending on response from the API
+          content: {}
+  /fmeproxy/{query}:
+    get:
+      tags:
+        - FME-server Proxy
+      parameters:
+        - name: query
+          in: path
+          description: Path corresponding to an endpoint on the FME-server REST API.
+          required: true
+          schema:
+            type: string
+      description: Proxy the specified query to FME-server REST API. For information on available endpoints, checkout the [FME-server API documentation](https://docs.safe.com/fme/html/FME_REST/apidoc/v3/#). The proxy will forward all HTTP-methods, not only GET.
+      responses:
+        200:
+          description: Result will vary depending on response from the API.
           content: {}
   /spec:
     get:

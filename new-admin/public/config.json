@@ -31,6 +31,7 @@
   },
   "mapsettings": {
     "url_proxy": "",
+    "url_base": "http://localhost:55630",
     "url_map": "http://localhost:55630/config",
     "url_map_create": "http://localhost:55630/config/create",
     "url_map_delete": "http://localhost:55630/config/delete",
