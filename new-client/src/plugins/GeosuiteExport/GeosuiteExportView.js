@@ -616,25 +616,25 @@ class GeosuiteExportView extends React.PureComponent {
         <br />
         <div>
           <Button
+            disabled={step === 0}
+            onClick={() => {
+              this.setState({ activeStep: 100 });
+            }}
+            variant="contained"
+            color="primary"
+            aria-label="Klar"
+          >
+            Klar
+          </Button>
+          <Button
             onClick={() => {
               this.setState({ activeStep: 1 });
             }}
-            variant="contained"
             aria-label="Välj mer produkter"
             disabled={false}
             color="primary"
           >
             Välj mer
-          </Button>
-          <Button
-            disabled={step === 0}
-            onClick={() => {
-              this.setState({ activeStep: 100 });
-            }}
-            color="primary"
-            aria-label="Klar"
-          >
-            Klar
           </Button>
         </div>
       </>
