@@ -20,11 +20,11 @@ const styles = (theme) => ({
     maxHeight: 350,
     overflowY: "scroll",
     overflowX: "hidden",
-    marginTop: "10px",
+    marginTop: theme.spacing(1),
+    border: `1px solid ${theme.palette.divider}`,
   },
   listItemContainer: {
-    //Override the padding of the stepper to allow more space for the results.
-    paddingBottom: "5px",
+    padding: theme.spacing(1),
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
   },
   leftChip: {
