@@ -34,6 +34,11 @@ import ProductList from "./components/ProductList";
 import LinkItem from "./components/LinkItem";
 
 const styles = (theme) => ({
+  //specific request from SBK to reduce the default MUI stepper padding.
+  stepper: {
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+  },
   bold: {
     fontWeight: 500,
   },
@@ -772,7 +777,7 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   render() {
-    const { options } = this.props;
+    const { options, classes } = this.props;
     const description =
       options.view?.digitizeDescription ??
       "Rita ditt område i kartan, avsluta genom att dubbelklicka.";
@@ -782,7 +787,7 @@ class GeosuiteExportView extends React.PureComponent {
           <Stepper
             activeStep={this.state.activeStep}
             orientation="vertical"
-            style={{ paddingLeft: "0px", paddingRight: "0px" }}
+            className={classes.stepper}
           >
             <Step key="selectArea" completed={false}>
               <StepLabel>Markera område</StepLabel>
