@@ -100,7 +100,7 @@ class ProductList extends React.PureComponent {
                   handleExportAll(true);
                 }}
                 icon={<WorkIcon />}
-                label=" Hela projektet"
+                label=" Hela projekt"
                 size="medium"
                 variant={`${
                   this.state.globalExportSetting === "withinProject"
@@ -200,7 +200,7 @@ class ProductList extends React.PureComponent {
                           >
                             <Box display="flex" gridColumnGap={"8px"}>
                               <WorkIcon />
-                              <Typography>{`Hela projektet (${this.state.activeProject?.numBoreHolesTotal})`}</Typography>
+                              <Typography>{`Hela projekt (${this.state.activeProject?.numBoreHolesTotal})`}</Typography>
                             </Box>
                           </MenuItem>
                         </Menu>
