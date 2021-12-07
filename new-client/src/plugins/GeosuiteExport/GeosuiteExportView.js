@@ -571,7 +571,7 @@ class GeosuiteExportView extends React.PureComponent {
 
           <Grid item xs={12} style={{ marginTop: "16px" }}>
             <FormControl fullWidth>
-              <FormLabel required style={{ padding: "4px 0px" }}>
+              <FormLabel style={{ padding: "4px 0px" }}>
                 Din e-postadress
               </FormLabel>
               <OutlinedInput
