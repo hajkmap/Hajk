@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0",
+  "version": "3.8.0",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -50,32 +50,37 @@
     {
       "type": "layerswitcher",
       "options": {
+        "groups": [
+          {
+            "id": "357eaadc-6874-9785-849b-910a29c9d191",
+            "type": "group",
+            "name": "Kartlager",
+            "toggled": true,
+            "expanded": true,
+            "parent": "-1",
+            "layers": [
+              {
+                "id": "mnmm8k",
+                "drawOrder": 1000,
+                "visibleAtStart": true,
+                "infobox": ""
+              },
+              {
+                "id": "n2g2ct",
+                "drawOrder": 1000,
+                "visibleAtStart": false,
+                "infobox": ""
+              }
+            ],
+            "groups": []
+          }
+        ],
         "baselayers": [
           {
             "id": "1",
             "visibleAtStart": true,
             "drawOrder": 0,
-            "visibleForGroups": null,
             "infobox": ""
-          }
-        ],
-        "groups": [
-          {
-            "id": "357eaadc-6874-9785-849b-910a29c9d191",
-            "parent": "-1",
-            "name": "Kartlager",
-            "toggled": true,
-            "expanded": true,
-            "layers": [
-              {
-                "id": "mnmm8k",
-                "visibleAtStart": true,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": ""
-              }
-            ],
-            "groups": []
           }
         ],
         "active": true,
@@ -86,46 +91,23 @@
         "enableOSM": false,
         "showBreadcrumbs": true,
         "enableTransparencySlider": true,
-        "target": "control",
-        "position": "right",
-        "width": 0,
-        "height": 0,
-        "title": "Lagerhanterare",
-        "description": "Välj vad du vill visa i kartan.",
+        "instruction": "",
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Uttagsklient standardkarta",
-        "instruction": "",
-        "visibleForGroups": []
+        "visibleForGroups": [],
+        "target": "control",
+        "position": "right",
+        "width": "",
+        "height": "",
+        "title": "Lagerhanterare",
+        "description": "Välj vad du vill visa i kartan."
       },
       "index": 1
-    },
-    {
-      "type": "infoclick",
-      "options": {
-        "target": "",
-        "displayPopup": false,
-        "markerImg": "/marker.png",
-        "anchor": [
-          0.5,
-          1
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "popupOffsetY": 0,
-        "visibleForGroups": []
-      },
-      "index": 2
     },
     {
       "type": "search",
       "options": {
         "layers": [
-          {
-            "id": "4",
-            "visibleForGroups": []
-          },
           {
             "id": "0022ac0a-d764-b704-9d6a-9a4ba12d401a",
             "visibleForGroups": []
@@ -133,8 +115,13 @@
           {
             "id": "6e3fc475-eeaf-2fd9-230c-f1c6936d983e",
             "visibleForGroups": []
+          },
+          {
+            "id": "a71a9b40-4447-4c16-deb1-9ae68c2b33ae",
+            "visibleForGroups": []
           }
         ],
+        "selectedSources": [],
         "visibleForGroups": [],
         "maxResultsPerDataset": 100,
         "anchor": [
@@ -147,6 +134,7 @@
         "searchBarPlaceholder": "Sök...",
         "autocompleteWildcardAtStart": false,
         "enablePolygonSearch": true,
+        "showCorrespondingWMSLayers": false,
         "enableRadiusSearch": true,
         "enableSelectSearch": true,
         "enableExtentSearch": true,
@@ -180,9 +168,67 @@
       "options": {
         "target": "control",
         "position": "right",
-        "visibleAtStart": false
+        "visibleAtStart": false,
+        "services": {
+          "trimble": {
+            "url": "https://geoarkiv-api.goteborg.se/prod",
+            "projectDetailsMethod": "/investigation",
+            "exportMethod": "/export"
+          },
+          "wfs": {
+            "projects": {
+              "layer": {
+                "id": "6e3fc475-eeaf-2fd9-230c-f1c6936d983e",
+                "projection": "EPSG:3006"
+              },
+              "spatialFilter": "intersects",
+              "attributes": {
+                "title": "projektnamn",
+                "link": "url"
+              },
+              "maxFeatures": 100
+            },
+            "boreholes": {
+              "layer": {
+                "id": "a71a9b40-4447-4c16-deb1-9ae68c2b33ae"
+              },
+              "attributes": {
+                "external_id": "externt_id",
+                "external_project_id": "externt_projekt_id"
+              },
+              "maxFeatures": 0
+            }
+          }
+        },
+        "view": {
+          "termsAndConditionsLink": "https://goteborg.se/wps/portal/om-webbplatsen",
+          "errorMessage": "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår.",
+          "digitizeDescription": "Rita ditt område i kartan, avsluta genom att dubbelklicka.",
+          "projects": {
+            "order": {
+              "description": "Välj geoteknisk utredning nedan för att hämta motsvarande handlingar."
+            }
+          },
+          "boreholes": {
+            "order": {
+              "intro": "Nedan visas alla borrhålsprojekt med undersökningspunkter inom det markerade området.",
+              "description": "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.",
+              "referenceSystemText": "Geotekniska undersökningspunkter är i koordinatsystemet SWEREF 99 12 00 samt höjdsystemet RH2000.",
+              "informationText": "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets molntjänst.",
+              "informationLink": {
+                "linkText": "(https://gbg.geosuitecloud.se)",
+                "linkHref": "https://gbg.geosuitecloud.se/"
+              }
+            },
+            "confirmation": {
+              "header": "Tack för din beställning!",
+              "informationText": "Ett e-postmeddelande med vidare instruktioner kommer att skickas till dig.",
+              "whereNextText": "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR."
+            }
+          }
+        }
       },
-      "index": 4
+      "index": 5
     },
     {
       "type": "information",
@@ -192,19 +238,10 @@
         "buttonText": "Stäng",
         "title": "Visa informationsruta",
         "visibleAtStart": true,
-        "showInfoOnce": false,
+        "showInfoOnce": true,
         "visibleForGroups": []
       },
       "index": 3
-    },
-    {
-      "type": "geosuiteExport",
-      "options": {
-        "target": "control",
-        "position": "right",
-        "visibleAtStart": true
-      },
-      "index": 5
     }
   ],
   "map": {
@@ -213,7 +250,7 @@
       150700,
       6399400
     ],
-    "title": "Hajk 3",
+    "title": "Uttagsklient",
     "projection": "EPSG:3007",
     "zoom": 1,
     "maxZoom": 10,
@@ -231,6 +268,7 @@
       0.14,
       0.07
     ],
+    "extraPrintResolutions": null,
     "origin": [
       0.0,
       0.0

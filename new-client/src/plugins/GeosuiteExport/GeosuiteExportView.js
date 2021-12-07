@@ -505,6 +505,11 @@ class GeosuiteExportView extends React.PureComponent {
     const deliveryInformationText =
       options.view?.boreholes?.order?.informationText ??
       "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets molntjänst.";
+    const deliveryInformationLink = options.view?.boreholes?.order
+      ?.informationLink || {
+      linkText: "",
+      linkHref: "",
+    };
     return (
       <div>
         <Grid container>
@@ -543,7 +548,23 @@ class GeosuiteExportView extends React.PureComponent {
                 </Typography>
               </AccordionSummary>
               <AccordionDetails style={{ padding: "0px" }}>
-                <Typography>{deliveryInformationText}</Typography>
+                <Grid container>
+                  <Grid item xs={12}>
+                    <Typography>{deliveryInformationText}</Typography>
+                  </Grid>
+                  {deliveryInformationLink.linkText && (
+                    <Grid item xs={12}>
+                      <Link
+                        href={deliveryInformationLink.linkHref}
+                        target="_blank"
+                      >
+                        <Typography>
+                          {deliveryInformationLink.linkText}
+                        </Typography>
+                      </Link>
+                    </Grid>
+                  )}
+                </Grid>
               </AccordionDetails>
             </Accordion>
           </Grid>

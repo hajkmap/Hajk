@@ -66,6 +66,10 @@ const defaultState = {
         description: "Välj om du vill ladda ner hela borrhålsprojektet eller endast punkter inom markering. Du kan välja generellt för alla eller ställa in för varje projekt.",
         referenceSystemText: "Geotekniska undersökningspunkter är i koordinatsystemet SWEREF 99 12 00 samt höjdsystemet RH2000.",
         informationText: "Informationen levereras i GeoSuite Toolbox-format via en länk som du får skickad till din e-postadress. För att kunna genomföra beställningen krävs att e-postadressen är registrerad i Geoarkivets molntjänst.",
+        informationLink: {
+          linkText: "",
+          linkHref: "",
+        }
       },
       confirmation: {
         header: "Tack för din beställning!",
@@ -699,6 +703,44 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               value={this.state.view.boreholes.order.informationText}
+            />
+          </div>
+          <div>
+            <label htmlFor="view__boreholes__order__informationLink__linkText">
+              Leveransinformation länk text {" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Synlig text till länk till vidare information om leveransinformation. Lämna tom för att inte visa en länk"
+              />
+            </label>
+            <input
+              type="text"
+              id="view__boreholes__order__informationLink__linkText"
+              name="view__boreholes__order__informationLink__linkText"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.view.boreholes.order.informationLink.linkText}
+            />
+          </div>
+          <div>
+            <label htmlFor="view__boreholes__order__informationLink__linkHref">
+              Leveransinformation länk adress {" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Synlig text till länk till vidare information om leveransinformation"
+              />
+            </label>
+            <input
+              type="text"
+              id="view__boreholes__order__informationLink__linkHref"
+              name="view__boreholes__order__informationLink__linkHref"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.view.boreholes.order.informationLink.linkHref}
             />
           </div>
 
