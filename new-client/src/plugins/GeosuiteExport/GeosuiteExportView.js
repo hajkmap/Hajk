@@ -49,6 +49,7 @@ const styles = (theme) => ({
     maxHeight: 200,
     overflowY: "scroll",
     overflowX: "hidden",
+    border: `1px solid ${theme.palette.divider}`,
   },
   noResultMessage: {
     display: "flex",

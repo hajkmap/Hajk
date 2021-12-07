@@ -4,9 +4,9 @@ import { withStyles, Link } from "@material-ui/core";
 
 const styles = (theme) => ({
   listItemContainer: {
-    paddingLeft: "0",
-    paddingTop: "5px",
-    paddingBottom: "5px",
+    paddingLeft: theme.spacing(1),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
   },
   listItem: {
