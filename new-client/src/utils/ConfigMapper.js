@@ -132,6 +132,7 @@ export default class ConfigMapper {
         opacity: args.opacity || 1,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
+        minMaxZoomAlertOnToggleOnly: args.minMaxZoomAlertOnToggleOnly,
         infoClickSortType: args.infoClickSortType,
         infoClickSortDesc: args.infoClickSortDesc,
         infoClickSortProperty: args.infoClickSortProperty,
