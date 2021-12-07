@@ -62,12 +62,12 @@ class MapViewModel {
           layer.layersInfo !== undefined &&
           // We consider a layer to be visible only if…
           layer.getVisible() && // …it's visible…
-          layer.getProperties().source.hasOwnProperty("params_") &&
+          layer.getProperties().source.getParams()["LAYERS"] &&
           layer.getProperties().name &&
           isValidLayerId(layer.getProperties().name) // …has a specified name property…
         );
       })
-      .map((layer) => layer.values_.source.params_["LAYERS"])
+      .map((layer) => layer.getProperties().source.getParams()["LAYERS"])
       .join(",")
       .split(",");
   };
