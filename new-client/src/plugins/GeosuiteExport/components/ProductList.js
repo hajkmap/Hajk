@@ -148,63 +148,65 @@ class ProductList extends React.PureComponent {
                           </IconButton>
                         )}
                       </Box>
-                      <Paper elevation={0}>
-                        <Menu
-                          id="choice-menu"
-                          autoFocus={false}
-                          anchorEl={anchorEl}
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "right",
-                          }}
-                          transformOrigin={{
-                            vertical: "top",
-                            horizontal: "center",
-                          }}
-                          open={Boolean(anchorEl)}
-                          onClose={() =>
-                            this.setState({
-                              anchorEl: undefined,
-                            })
-                          }
-                        >
-                          <MenuItem
-                            onClick={() => {
-                              handleToggleProjectExport(
-                                this.state.activeProject.id,
-                                false
-                              );
+                      {project.id === this.state.activeProject?.id && (
+                        <Paper elevation={0}>
+                          <Menu
+                            id="choice-menu"
+                            autoFocus={false}
+                            anchorEl={anchorEl}
+                            getContentAnchorEl={null}
+                            anchorOrigin={{
+                              vertical: "bottom",
+                              horizontal: "right",
+                            }}
+                            transformOrigin={{
+                              vertical: "top",
+                              horizontal: "center",
+                            }}
+                            open={Boolean(anchorEl)}
+                            onClose={() =>
                               this.setState({
                                 anchorEl: undefined,
-                                globalExportSetting: undefined,
-                              });
-                            }}
+                              })
+                            }
                           >
-                            <Box display="flex" gridColumnGap={"8px"}>
-                              <Crop32Icon />
-                              <Typography>{`Inom markering (${this.state.activeProject?.numBoreHolesSelected})`}</Typography>
-                            </Box>
-                          </MenuItem>
-                          <MenuItem
-                            onClick={() => {
-                              handleToggleProjectExport(
-                                this.state.activeProject.id,
-                                true
-                              );
-                              this.setState({
-                                anchorEl: undefined,
-                                globalExportSetting: undefined,
-                              });
-                            }}
-                          >
-                            <Box display="flex" gridColumnGap={"8px"}>
-                              <WorkIcon />
-                              <Typography>{`Hela projekt (${this.state.activeProject?.numBoreHolesTotal})`}</Typography>
-                            </Box>
-                          </MenuItem>
-                        </Menu>
-                      </Paper>
+                            <MenuItem
+                              onClick={() => {
+                                handleToggleProjectExport(
+                                  this.state.activeProject.id,
+                                  false
+                                );
+                                this.setState({
+                                  anchorEl: undefined,
+                                  globalExportSetting: undefined,
+                                });
+                              }}
+                            >
+                              <Box display="flex" gridColumnGap={"8px"}>
+                                <Crop32Icon />
+                                <Typography>{`Inom markering (${this.state.activeProject?.numBoreHolesSelected})`}</Typography>
+                              </Box>
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => {
+                                handleToggleProjectExport(
+                                  this.state.activeProject.id,
+                                  true
+                                );
+                                this.setState({
+                                  anchorEl: undefined,
+                                  globalExportSetting: undefined,
+                                });
+                              }}
+                            >
+                              <Box display="flex" gridColumnGap={"8px"}>
+                                <WorkIcon />
+                                <Typography>{`Hela projekt (${this.state.activeProject?.numBoreHolesTotal})`}</Typography>
+                              </Box>
+                            </MenuItem>
+                          </Menu>
+                        </Paper>
+                      )}
                     </Grid>
                     <Grid item xs={9} md={10}>
                       <Typography>{`Id: ${project.id}`}</Typography>
