@@ -17,6 +17,8 @@ const ColorButtonBlue = withStyles((theme) => ({
 const defaultState = {
   active: false,
   index: 0,
+  title: "Hämta data",
+  description: "Hämta data med urvalsområde",
   target: "toolbar",
   visibleAtStart: false,
   services: {
@@ -93,6 +95,8 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        title: tool.options.title || "Hämta data",
+        description: tool.options.description || "Hämta data med urvalsområde",
         target: tool.options.target || "toolbar",
         visibleAtStart: tool.options.visibleAtStart,
         position: tool.options.position,
@@ -191,6 +195,8 @@ class ToolOptions extends Component {
       options: {
         target: this.state.target,
         position: this.state.position,
+        title: this.state.title,
+        description: this.state.description,
         visibleAtStart: this.state.visibleAtStart,
         services: this.state.services,
         view: this.state.view,
@@ -273,6 +279,57 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
+          <div>
+            <label htmlFor="title">
+              Titel{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Visningsnamn för verktyget"
+              />
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.title}
+            />
+          </div>
+          <div>
+            <label htmlFor="description">
+              Instruktion{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Visas som tooltip vid mouseover på verktygsknappen"
+              />
+            </label>
+            <textarea
+              type="text"
+              id="description"
+              name="description"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.description}
+            />
           </div>
           <div className="separator">Fönsterinställningar</div>
           <div>
@@ -801,21 +858,6 @@ class ToolOptions extends Component {
               }}
               value={this.state.view.boreholes.confirmation.whereNextText}
             />
-          </div>
-
-          <div className="separator">Övriga inställningar</div>
-          <div>
-            <input
-              id="visibleAtStart"
-              name="visibleAtStart"
-              type="checkbox"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.visibleAtStart}
-            />
-            &nbsp;
-            <label htmlFor="visibleAtStart">Synlig vid start</label>
           </div>
         </form>
       </div>
