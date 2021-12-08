@@ -548,6 +548,27 @@ class WMSLayerForm extends Component {
           />
         </div>
         <div>
+          <label>Kort visningsfält</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchShortDisplayName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchShortDisplayName =
+                e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
           <label>Utdataformat</label>
           <input
             style={{ marginRight: "5px" }}
@@ -1026,6 +1047,7 @@ class WMSLayerForm extends Component {
       searchUrl: this.getValue("searchUrl"),
       searchPropertyName: this.getValue("searchPropertyName"),
       searchDisplayName: this.getValue("searchDisplayName"),
+      searchShortDisplayName: this.getValue("searchShortDisplayName"),
       searchOutputFormat: this.getValue("searchOutputFormat"),
       searchGeometryField: this.getValue("searchGeometryField"),
       infoVisible: this.getValue("infoVisible"),

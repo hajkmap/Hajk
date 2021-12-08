@@ -29,6 +29,9 @@ class MapViewModel {
 
   refreshFeatureStyle = (options) => {
     this.featureStyle = new FeatureStyle(deepMerge(this.options, options));
+    // Make sure to set the new style on the results layer. This way
+    // we'll get correct labels (if user wants to show them).
+    this.resultsLayer.setStyle(this.featureStyle.getDefaultSearchResultStyle);
   };
 
   getDrawStyleSettings = () => {
@@ -51,10 +54,11 @@ class MapViewModel {
 
   initMapLayers = () => {
     this.resultSource = this.getNewVectorSource();
-    const defaultStyle = this.featureStyle.getDefaultSearchResultStyle();
     this.resultsLayer = this.getNewVectorLayer(
       this.resultSource,
-      this.options.showResultFeaturesInMap ?? true ? defaultStyle : null
+      this.options.showResultFeaturesInMap ?? true
+        ? this.featureStyle.getDefaultSearchResultStyle
+        : null
     );
     this.resultsLayer.set("type", "searchResultLayer");
     this.drawSource = this.getNewVectorSource();
@@ -182,12 +186,7 @@ class MapViewModel {
     }
     const mapFeature = this.getFeatureFromResultSourceById(feature.getId());
     return mapFeature?.setStyle(
-      this.featureStyle.getFeatureStyle(
-        mapFeature,
-        feature.featureTitle,
-        [],
-        "highlight"
-      )
+      this.featureStyle.getFeatureStyle(mapFeature, "highlight")
     );
   };
 
@@ -212,26 +211,14 @@ class MapViewModel {
         featureInfo.feature.getId()
       );
       return feature?.setStyle(
-        this.featureStyle.getFeatureStyle(
-          feature,
-          featureInfo.featureTitle,
-          [],
-          "selection"
-        )
+        this.featureStyle.getFeatureStyle(feature, "selection")
       );
     });
   };
 
   addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
     const feature = featureInfo.feature;
-    feature.setStyle(
-      this.featureStyle.getFeatureStyle(
-        feature,
-        featureInfo.featureTitle,
-        [],
-        "highlight"
-      )
-    );
+    feature.setStyle(this.featureStyle.getFeatureStyle(feature, "highlight"));
     this.resultSource.addFeature(feature);
     this.fitMapToSearchResult();
   };
