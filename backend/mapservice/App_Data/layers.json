@@ -1,25 +1,72 @@
 {
-  "wmtslayers": [],
-  "wmslayers": [
+  "wmtslayers": [
     {
       "id": "1",
-      "caption": "Stadskarta",
+      "caption": "Topografiska webbkartan, öppna data",
+      "url": "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/b84e03e0-c917-313e-9f7d-fb5303034148/",
+      "owner": null,
+      "date": "1582209573601",
+      "content": "Topowebbkartan i WMTS-format",
+      "legend": "",
+      "projection": "EPSG:3006",
+      "visibleAtStart": false,
+      "layer": "topowebb_nedtonad",
+      "style": "default",
+      "matrixSet": "3006",
+      "origin": [
+        "-1200000",
+        "8500000"
+      ],
+      "resolutions": [
+        "2048",
+        "1024",
+        "512",
+        "256",
+        "128",
+        "64",
+        "32",
+        "16",
+        "8"
+      ],
+      "matrixIds": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "attribution": "Lantmäteriet",
+      "infoVisible": false,
+      "infoTitle": "Topowebbkartan i WMTS-format",
+      "infoText": "Bakgrundskarta från Lantmäteriet i WMTS-format.",
+      "infoUrl": "https://www.lantmateriet.se/globalassets/kartor-och-geografisk-information/geodatatjanster/tb_twkvisningv1.0.4.pdf",
+      "infoUrlText": "Information om tjänsten",
+      "infoOwner": "Lantmäteriet",
+      "zIndex": null
+    }
+  ],
+  "wmslayers": [
+    {
+      "id": "2",
+      "caption": "Nedtonad stadskarta, Göteborg",
       "url": "https://opengeodata.goteborg.se/services/stadskarta/wms/v4",
       "owner": "",
-      "date": "1619431279112",
+      "date": "1580375228781",
       "content": "",
       "legend": "",
-      "legendIcon": "",
-      "projection": "EPSG:3007",
+      "projection": "EPSG:3006",
       "layers": [
-        "stadskarta"
+        "stadskarta_nedtonad"
       ],
       "layersInfo": [
         {
-          "id": "stadskarta",
+          "id": "stadskarta_nedtonad",
           "caption": "",
           "legend": "",
-          "legendIcon": "",
           "infobox": "",
           "style": "",
           "queryable": false
@@ -29,21 +76,65 @@
       "displayFields": null,
       "visibleAtStart": false,
       "tiled": true,
-      "opacity": 0,
+      "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
       "searchUrl": "",
-      "customRatio": 2,
-      "hidpi": false,
       "searchPropertyName": "",
       "searchDisplayName": "",
       "searchOutputFormat": "",
       "searchGeometryField": "",
       "infoVisible": false,
       "infoTitle": "",
-      "infoText": "Sammansatt bakgrundskarta i färg",
+      "infoText": "Sammansatt bakgrundskarta i gråton.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": "Stadsbyggnadskontoret Göteborg",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "zIndex": null
+    },
+    {
+      "id": "3",
+      "caption": "Ortofoto, Göteborg",
+      "url": "https://opengeodata.goteborg.se/services/ortofoto/wms/v1",
+      "owner": "",
+      "date": "1580738281023",
+      "content": "",
+      "legend": "",
+      "projection": "EPSG:3006",
+      "layers": [
+        "orto"
+      ],
+      "layersInfo": [
+        {
+          "id": "orto",
+          "caption": "",
+          "legend": "",
+          "infobox": "",
+          "style": "",
+          "queryable": false
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": true,
+      "opacity": 1.0,
+      "singleTile": false,
+      "imageFormat": "image/jpeg",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "Ortofoto senaste årgång i färg (RGB) med upplösning 0.25 m/pixel.",
       "infoUrl": "",
       "infoUrlText": "",
       "infoOwner": "",
@@ -52,25 +143,23 @@
       "zIndex": null
     },
     {
-      "id": "mnmm8k",
-      "caption": "Borrhål",
-      "url": "https://opengeodata.goteborg.se/services/borrhal-v2/wms",
+      "id": "7",
+      "caption": "Riksintresse Kulturmiljövård",
+      "url": "https://ext-geodata.lansstyrelsen.se/arcgis/services/WMS/LST_WMS_riksintressen_3_6_raa/mapserver/wmsserver?",
       "owner": "",
-      "date": "1633676003847",
+      "date": "1582210968096",
       "content": "",
       "legend": "",
-      "legendIcon": "",
-      "projection": "EPSG:3007",
+      "projection": "EPSG:3006",
       "layers": [
-        "borrhal"
+        "RAA_Riksintresse_Kulturmiljovard_MB3kap6"
       ],
       "layersInfo": [
         {
-          "id": "borrhal",
-          "caption": "Borrhål",
+          "id": "RAA_Riksintresse_Kulturmiljovard_MB3kap6",
+          "caption": "",
           "legend": "",
-          "legendIcon": "https://opengeodata.goteborg.se/services/borrhal-v2/wms?REQUEST=GetLegendGraphic&VERSION=1.1.1&FORMAT=image/png&LAYER=borrhal",
-          "infobox": "",
+          "infobox": "<b>Namn:</b>\n{NAMN}\n<p>\n<b>Beskrivning:</b>\n{BESKRIVNIN}\n<p>\n<a href=\"{OBJEKTLANK}\" target=\"_blank\">Länk till mer information</a>",
           "style": "",
           "queryable": true
         }
@@ -79,63 +168,56 @@
       "displayFields": null,
       "visibleAtStart": false,
       "tiled": false,
-      "opacity": 1,
-      "maxZoom": -1,
-      "minZoom": -1,
-      "singleTile": true,
-      "hidpi": false,
-      "customRatio": 0,
+      "opacity": 1.0,
+      "singleTile": false,
       "imageFormat": "image/png",
-      "serverType": "geoserver",
+      "serverType": "arcgis",
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
       "searchDisplayName": "",
       "searchOutputFormat": "",
       "searchGeometryField": "",
-      "infoVisible": false,
-      "infoTitle": "",
-      "infoText": "Borrhål",
-      "infoUrl": "",
-      "infoUrlText": "",
+      "infoVisible": true,
+      "infoTitle": "Information",
+      "infoText": "Text om Kulturmiljövård kan finnas här.",
+      "infoUrl": "https://ext-geodatakatalog.lansstyrelsen.se/GeodataKatalogen/GetMetaDataById?id=378391e2-f11e-495c-930d-2ddbcbfebb23",
+      "infoUrlText": "Länk till metadata",
       "infoOwner": "",
       "version": "1.3.0",
-      "infoFormat": "application/json",
-      "infoClickSortProperty": "",
-      "infoClickSortDesc": true,
-      "infoClickSortType": "string",
-      "hideExpandArrow": true,
+      "infoFormat": "application/geojson",
       "zIndex": null
-    }
-  ],
-  "wfslayers": [
-    {
-      "id": "501",
-      "caption": "Adress Sök",
-      "url": "https://opengeodata.goteborg.se/services/adresser/wfs/v1",
-      "layers": [
-        "adresser-v1:adresser"
-      ],
-      "searchFields": [
-        "adress"
-      ],
-      "infobox": "{adress}  ",
-      "aliasDict": "",
-      "displayFields": [
-        "adress"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
     },
     {
-      "id": "0022ac0a-d764-b704-9d6a-9a4ba12d401a",
-      "caption": "Adresser",
-      "url": "https://opengeodata.goteborg.se/services/adresser/wfs/v1",
+      "id": "8",
+      "caption": "Riksintresse Natura2000",
+      "url": "https://ext-geodata.lansstyrelsen.se/arcgis/services/WMS/LST_WMS_riksintressen_4_nv/mapserver/wmsserver",
+      "owner": "",
+      "date": "1582210010534",
+      "content": "",
+      "legend": "",
+      "projection": "EPSG:3006",
       "layers": [
-        "adresser-v1:adresser"
+        "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Habitatdirektivet_SCI_MB4",
+        "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Fageldirektivet_SPA_MB4"
       ],
-      "searchFields": [
-        "adress"
+      "layersInfo": [
+        {
+          "id": "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Habitatdirektivet_SCI_MB4",
+          "caption": "Habitatdirektivet",
+          "legend": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true
+        },
+        {
+          "id": "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Fageldirektivet_SPA_MB4",
+          "caption": "Fågeldirektivet",
+          "legend": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true
+        }
       ],
       "searchFields": null,
       "displayFields": null,
@@ -171,7 +253,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["hajk_medlem"],
+      "layers": [
+        "hajk_medlem"
+      ],
       "layersInfo": [
         {
           "id": "hajk_medlem",
@@ -215,22 +299,29 @@
   ],
   "wfslayers": [
     {
-      "id": "6e3fc475-eeaf-2fd9-230c-f1c6936d983e",
-      "caption": "Borrhål",
-      "url": "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
+      "id": "4",
+      "caption": "Adresser Göteborg",
+      "url": "https://opengeodata.goteborg.se/services/adresser/wfs/v1",
       "layers": [
-        "borrhal-v2:borrhal"
+        "adresser.wfs.v1:adresser"
       ],
       "searchFields": [
-        "projektnamn"
+        "adress"
       ],
-      "infobox": "",
+      "infobox": "**Adress:** {adress}  ",
       "aliasDict": "",
       "displayFields": [
-        "projektnamn"
+        "adress"
       ],
       "geometryField": "geom",
-      "outputFormat": "GML3"
+      "outputFormat": "GML2",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null,
+      "zIndex": null
     }
   ],
   "vectorlayers": [],
