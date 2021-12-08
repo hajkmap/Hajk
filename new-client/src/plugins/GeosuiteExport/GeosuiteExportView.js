@@ -50,6 +50,7 @@ const styles = (theme) => ({
     overflowY: "scroll",
     overflowX: "hidden",
     border: `1px solid ${theme.palette.divider}`,
+    marginTop: theme.spacing(2),
   },
   noResultMessage: {
     display: "flex",
