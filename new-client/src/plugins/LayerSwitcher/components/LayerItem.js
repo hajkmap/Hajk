@@ -160,7 +160,9 @@ class LayerItem extends React.PureComponent {
       this.listenToZoomChange(visible);
     });
 
-    this.triggerZoomCheck(null, this.state.visible);
+    if (this.state.visible) {
+      this.triggerZoomCheck(null, this.state.visible);
+    }
     this.listenToZoomChange(this.state.visible);
 
     // Set load status by subscribing to a global event. Expect ID (int) of layer
