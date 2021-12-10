@@ -172,6 +172,7 @@ class Manager extends Component {
         this.refs["ArcGISLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           infobox: layer.infobox,
@@ -213,6 +214,7 @@ class Manager extends Component {
           id: layer.id,
           dataFormat: layer.dataFormat || "WFS",
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           infobox: layer.infobox,
@@ -340,6 +342,7 @@ class Manager extends Component {
         this.refs["WMTSLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           infobox: layer.infobox,
