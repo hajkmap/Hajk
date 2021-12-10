@@ -47,6 +47,7 @@ const defaultState = {
   addedLayers: [],
   id: "",
   caption: "",
+  internalLayerName: "",
   date: "Fylls i per automatik",
   searchFields: "",
   infobox: "",
@@ -134,6 +135,7 @@ class Search extends Component {
       mode: "edit",
       id: layer.id,
       caption: layer.caption,
+      internalLayerName: layer.internalLayerName || layer.caption,
       searchFields: layer.searchFields,
       infobox: layer.infobox,
       aliasDict: layer.aliasDict,
@@ -167,7 +169,8 @@ class Search extends Component {
         });
 
         layer.layers.forEach((layer) => {
-          this.refs[layer].checked = true;
+          if (this && this.refs && this.refs[layer])
+            this.refs[layer].checked = true;
         });
       });
     }, 0);
@@ -273,7 +276,14 @@ class Search extends Component {
    */
   getLayersWithFilter(filter) {
     return this.props.model.get("layers").filter((layer) => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      return (
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.caption.toLowerCase()
+        ) ||
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.internalLayerName?.toLowerCase()
+        )
+      );
     });
   }
   /**
@@ -289,20 +299,32 @@ class Search extends Component {
 
     if (this.state.filter) {
       layers.forEach((layer) => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.caption.toLowerCase().indexOf(this.state.filter.toLowerCase()) ===
+          0 ||
+        layer.internalLayerName
+          ?.toLowerCase()
+          .indexOf(this.state.filter.toLowerCase()) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
       alphabetically.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
@@ -310,7 +332,11 @@ class Search extends Component {
     }
     return layers.map((layer, i) => (
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
-        <span>{layer.caption}</span>
+        <span>
+          {layer.internalLayerName?.length > 0
+            ? layer.internalLayerName
+            : layer.caption}
+        </span>
         <i
           title="Radera lager"
           onClick={(e) => this.removeLayer(e, layer)}
@@ -454,6 +480,7 @@ class Search extends Component {
       let layer = {
         id: this.state.id,
         caption: this.getValue("caption"),
+        internalLayerName: this.getValue("internalLayerName"),
         url: this.getValue("url"),
         layers: this.getValue("layers"),
         searchFields: this.getValue("searchFields"),
@@ -803,7 +830,18 @@ class Search extends Component {
                   className={this.getValidationClass("caption")}
                 />
               </div>
-
+              <div>
+                <label>Visningsnamn Admin</label>
+                <input
+                  type="text"
+                  ref="input_internalLayerName"
+                  value={this.state.internalLayerName}
+                  onChange={(e) => {
+                    this.setState({ internalLayerName: e.target.value });
+                    this.validateField("internalLayerName");
+                  }}
+                />
+              </div>
               <div>
                 <label>Inforuta</label>
                 <textarea

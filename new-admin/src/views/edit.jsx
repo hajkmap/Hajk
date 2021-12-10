@@ -231,7 +231,14 @@ class Edit extends Component {
    */
   getLayersWithFilter(filter) {
     return this.props.model.get("layers").filter((layer) => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      return (
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.caption.toLowerCase()
+        ) ||
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.internalLayerName?.toLowerCase()
+        )
+      );
     });
   }
   /**
@@ -724,20 +731,32 @@ class Edit extends Component {
 
     if (this.state.filter) {
       layers.forEach((layer) => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.caption.toLowerCase().indexOf(this.state.filter.toLowerCase()) ===
+          0 ||
+        layer.internalLayerName
+          ?.toLowerCase()
+          .indexOf(this.state.filter.toLowerCase()) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
       alphabetically.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
