@@ -56,11 +56,11 @@ namespace MapService.Models.Config
                 hex = hex.ToString(),
                 opacity = opacity
             };
-        }        
+        }
     }
 
     public class VectorConfig : ILayerConfig
-    {        
+    {
         public List<Components.MapExport.Feature> Load(string url, int srs, double[] extent)
         {
             List<Components.MapExport.Feature> features = new List<Components.MapExport.Feature>();
@@ -99,12 +99,12 @@ namespace MapService.Models.Config
             {
                 case GeoJsonType.Point:
                     Point p = feature.Geometry as Point;
-                    coordinates.Add(new double[] 
+                    coordinates.Add(new double[]
                     {
                         p.Coordinates.Longitude,
                         p.Coordinates.Latitude,
-                    });                    
-                    return coordinates;                    
+                    });
+                    return coordinates;
 
                 case GeoJsonType.LineString:
                     LineString lineString = feature.Geometry as LineString;
@@ -132,9 +132,9 @@ namespace MapService.Models.Config
         {
             List<List<double[]>> holes = new List<List<double[]>>();
             if (feature.Geometry.Type == GeoJsonType.Polygon)
-            {                
+            {
                 Polygon polygon = feature.Geometry as Polygon;
-                IEnumerable<LinearRing> innerRings = polygon.Coordinates.Skip(1);                
+                IEnumerable<LinearRing> innerRings = polygon.Coordinates.Skip(1);
                 holes = innerRings.Select(r => r.Coordinates.Select(c => new double[] {
                     c.Longitude,
                     c.Latitude
@@ -142,47 +142,54 @@ namespace MapService.Models.Config
             }
             return holes;
         }
-        
+
         public string attribution { get; set; }
         public string caption { get; set; }
         public string content { get; set; }
         public string dataFormat { get; set; }
         public string date { get; set; }
+        public string fillColor { get; set; }
         public string filterAttribute { get; set; }
         public string filterComparer { get; set; }
         public string filterValue { get; set; }
-        public bool   filterable { get; set; }
+        public bool filterable { get; set; }
+        public string icon { get; set; }
         public string id { get; set; }
         public string infoOwner { get; set; }
         public string infoText { get; set; }
         public string infoTitle { get; set; }
         public string infoUrl { get; set; }
         public string infoUrlText { get; set; }
-        public bool   infoVisible { get; set; }
+        public bool infoVisible { get; set; }
         public string infobox { get; set; }
-        public bool   timeSliderVisible { get; set; }
+        public bool timeSliderVisible { get; set; }
         public string timeSliderStart { get; set; }
         public string timeSliderEnd { get; set; }
         public string layer { get; set; }
         public string legend { get; set; }
         public string legendIcon { get; set; }
-        public int    maxZoom { get; set; }
-        public int    minZoom { get; set; }
+        public string lineColor { get; set; }
+        public string lineStyle { get; set; }
+        public string lineWidth { get; set; }
+        public int minZoom { get; set; }
         public string infoClickSortType { get; set; }
-        public bool   infoClickSortDesc { get; set; }
-        public string infoClickSortProperty { get; set; }        
+        public bool infoClickSortDesc { get; set; }
+        public string infoClickSortProperty { get; set; }
         public double opacity { get; set; }
+        public double pointSize { get; set; }
         public string projection { get; set; }
-        public bool   queryable { get; set; }
-        public string sldStyle { get; set; }       
-        public string sldText { get; set; }       
+        public bool queryable { get; set; }
+        public string sldStyle { get; set; }
+        public string sldText { get; set; }
         public string sldUrl { get; set; }
+        public string symbolXOffset { get; set; }
+        public string symbolYOffset { get; set; }
         public string url { get; set; }
         public string version { get; set; }
-        public bool   visibleAtStart { get; set; }
+        public bool visibleAtStart { get; set; }
 
         public bool hideExpandArrow { get; set; }
-        public int?   zIndex { get; set; }
+        public int? zIndex { get; set; }
 
     }
 }

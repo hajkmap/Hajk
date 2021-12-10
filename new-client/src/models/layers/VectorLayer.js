@@ -4,6 +4,8 @@ import GeoJSON from "ol/format/GeoJSON";
 import GML2 from "ol/format/GML2";
 import GML3 from "ol/format/GML3";
 import WFS from "ol/format/WFS";
+import Feature from "ol/Feature";
+import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
 import { all as strategyAll, bbox as bboxStrategy } from "ol/loadingstrategy";
 import { getPointResolution, transform } from "ol/proj";
 
@@ -26,6 +28,119 @@ const vectorLayerProperties = {
   showLabels: true,
 };
 
+function createStyle(feature, forcedPointRadius) {
+  const icon = this.config.icon;
+  //const icon = this.config.legendIcon;
+  const fillColor = this.config.fillColor;
+  const lineColor = this.config.lineColor;
+  const lineStyle = this.config.lineStyle;
+  const lineWidth = this.config.lineWidth;
+  const symbolXOffset = this.config.symbolXOffset;
+  const symbolYOffset = this.config.symbolYOffset;
+  const rotation = 0.0;
+  const align = this.config.labelAlign;
+  const baseline = this.config.labelBaseline;
+  const size = this.config.labelSize;
+  const offsetX = this.config.labelOffsetX;
+  const offsetY = this.config.labelOffsetY;
+  const weight = this.config.labelWeight;
+  const font = weight + " " + size + " " + this.config.labelFont;
+  const labelFillColor = this.config.labelFillColor;
+  const outlineColor = this.config.labelOutlineColor;
+  const outlineWidth = this.config.labelOutlineWidth;
+  const labelAttribute = this.config.labelAttribute;
+  const showLabels = this.config.showLabels;
+  const pointSize = forcedPointRadius || this.config.pointSize;
+  //const pointSize = this.config.pointSize;
+
+  feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
+
+  function getLineDash() {
+    var scale = (a, f) => a.map((b) => f * b),
+      width = lineWidth,
+      style = lineStyle,
+      dash = [12, 7],
+      dot = [2, 7];
+    switch (style) {
+      case "dash":
+        return width > 3 ? scale(dash, 2) : dash;
+      case "dot":
+        return width > 3 ? scale(dot, 2) : dot;
+      default:
+        return undefined;
+    }
+  }
+
+  function getFill() {
+    return new Fill({
+      color: fillColor,
+    });
+  }
+
+  function getText() {
+    return new Text({
+      textAlign: align,
+      textBaseline: baseline,
+      font: font,
+      text: feature ? feature.getProperties()[labelAttribute] : "",
+      fill: new Fill({
+        color: labelFillColor,
+      }),
+      stroke: new Stroke({
+        color: outlineColor,
+        width: outlineWidth,
+      }),
+      offsetX: offsetX,
+      offsetY: offsetY,
+      rotation: rotation,
+    });
+  }
+
+  function getImage() {
+    return icon === "" ? getPoint() : getIcon();
+  }
+
+  function getIcon() {
+    return new Icon({
+      src: icon,
+      scale: 1,
+      anchorXUnits: "pixels",
+      anchorYUnits: "pixels",
+      anchor: [symbolXOffset, symbolYOffset],
+    });
+  }
+
+  function getPoint() {
+    return new Circle({
+      fill: getFill(),
+      stroke: getStroke(),
+      radius: parseInt(pointSize, 10) || 4,
+    });
+  }
+
+  function getStroke() {
+    return new Stroke({
+      color: lineColor,
+      width: lineWidth,
+      lineDash: getLineDash(),
+    });
+  }
+
+  function getStyleObj() {
+    var obj = {
+      fill: getFill(),
+      image: getImage(),
+      stroke: getStroke(),
+    };
+    if (showLabels) {
+      obj.text = getText();
+    }
+
+    return obj;
+  }
+
+  return [new Style(getStyleObj())];
+}
 class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
     this.config = {
@@ -34,6 +149,7 @@ class WFSVectorLayer {
     };
     this.proxyUrl = proxyUrl;
     this.map = map;
+    this.style = createStyle.apply(this);
 
     this.type = "vector"; // We're dealing with a vector layer
 
@@ -85,6 +201,8 @@ class WFSVectorLayer {
       timeSliderStart: config?.timeSliderStart,
       timeSliderEnd: config?.timeSliderEnd,
     });
+    this.layer.setStyle(this.getStyle());
+    console.log("layer: ", this.layer);
 
     // Styling section starts here.
     // First read some values from config
@@ -92,7 +210,7 @@ class WFSVectorLayer {
     this.sldText = config?.sldText;
     this.sldStyle = config?.sldStyle ?? "Default Styler";
 
-    // Try fetching the URL, if specified, and style with the resulting SLD
+    //Try fetching the URL, if specified, and style with the resulting SLD
     if (typeof this.sldUrl === "string" && this.sldUrl.trim().length > 0) {
       hfetch(this.sldUrl)
         .then((response) => response.text())
@@ -293,12 +411,12 @@ class WFSVectorLayer {
     });
   }
 
-  // getStyle(forcedPointRadius) {
-  //   if (forcedPointRadius) {
-  //     return createStyle.call(this, undefined, forcedPointRadius);
-  //   }
-  //   return this.style;
-  // }
+  getStyle(forcedPointRadius) {
+    if (forcedPointRadius) {
+      return createStyle.call(this, undefined, forcedPointRadius);
+    }
+    return this.style;
+  }
 
   // generateLegend(callback) {
   //   var url = this.proxyUrl + this.createUrl();
