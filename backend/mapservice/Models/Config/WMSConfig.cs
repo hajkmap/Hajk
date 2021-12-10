@@ -15,7 +15,12 @@ namespace MapService.Models.Config
         public string legendIcon { get; set; }
         public string infobox { get; set; }
         public string style { get; set; }
-        public bool queryable { get; set; }    
+        public bool queryable { get; set; }
+        public string searchDisplayName { get; set; }
+        public string searchGeometryField { get; set; }
+        public string searchOutputFormat { get; set; }
+        public string searchPropertyName { get; set; }
+        public string searchUrl { get; set; }
     }
 
     public class WMSConfig : ILayerConfig
