@@ -561,7 +561,7 @@ class Search extends React.PureComponent {
       return {
         dataset,
         autocompleteEntry,
-        origin: origin,
+        origin,
       };
     });
   };
@@ -584,7 +584,12 @@ class Search extends React.PureComponent {
     const resultsPerDataset = searchResults.featureCollections.map(
       (featureCollection) => {
         this.sortSearchFieldsOnFeatures(featureCollection, wordsInTextField);
-        return this.getAutocompleteDataset(featureCollection);
+        // The final filter is to ensure that we get rid of objects that lack
+        // the 'autocompleteEntry' property, which is necessary for the
+        // MUI Autocomplete component.
+        return this.getAutocompleteDataset(featureCollection).filter(
+          (e) => e.autocompleteEntry
+        );
       }
     );
 
@@ -664,6 +669,19 @@ class Search extends React.PureComponent {
         // It's possible to handle any errors in the UI by checking if Search Model returned any
         searchResults.errors.length > 0 &&
           console.error("Autocomplete error: ", searchResults.errors);
+
+        // Prepare all features so that they do have titles/short titles
+        searchResults.featureCollections.forEach((fc) => {
+          fc.value.features.forEach((f) => {
+            const { featureTitle, shortFeatureTitle } = this.getFeatureLabels(
+              f,
+              fc.source
+            );
+            f.featureTitle = featureTitle;
+            f.shortFeatureTitle = shortFeatureTitle;
+          });
+        });
+
         return searchResults;
       })
       .catch((error) => {
@@ -735,34 +753,29 @@ class Search extends React.PureComponent {
     // unless clean mode is true. In that case, there's another event we want to publish.
     else if (this.props.app.appModel.config.mapConfig.map.clean === true) {
       const feature = features[0];
-      const featureTitle = this.getFeatureTitle(
-        feature,
-        searchResults.featureCollections[0].source
-      );
 
       this.localObserver.publish(
         "map.addAndHighlightFeatureInSearchResultLayer",
         {
           feature,
-          featureTitle,
         }
       );
     }
   }
 
-  // FIXME: Obtain featureTitle directly in extractFeaturesFromFeatureCollections,
-  // set title as property on feature, and remove this.
-  getFeatureTitle = (feature, source) => {
-    if (feature.featureTitle) {
-      return feature.featureTitle;
+  getFeatureLabels = (feature, source) => {
+    if (feature.featureTitle && feature.shortFeatureTitle) {
+      return {
+        featureTitle: feature.featureTitle,
+        shortFeatureTitle: feature.shortFeatureTitle,
+      };
     }
 
-    return source.displayFields.reduce((featureTitleString, df) => {
+    const reducerFn = (featureTitleString, df) => {
       let displayField = feature.get(df);
       if (Array.isArray(displayField)) {
         displayField = displayField.join(", ");
       }
-
       if (displayField) {
         if (featureTitleString.length > 0) {
           featureTitleString = featureTitleString.concat(` | ${displayField}`);
@@ -770,10 +783,22 @@ class Search extends React.PureComponent {
           featureTitleString = displayField.toString();
         }
       }
-
-      feature.featureTitle = featureTitleString;
       return featureTitleString;
-    }, "");
+    };
+
+    // Prepare the title be using the defined displayFields. Note that this
+    // can not be left empty: it is used as input to the MUI Autocomplete component
+    // and supplying an empty string is not allowed here. See also the
+    // comment on shortFeatureTitle below.
+    const featureTitle =
+      source.displayFields?.reduce(reducerFn, "") || "Visningsfält saknas";
+
+    // Also, try to prepare the short title. It's possible that
+    // this array is not defined though, and in that case, we want
+    // an empty label as shortFeatureTitle.
+    const shortFeatureTitle =
+      source.shortDisplayFields?.reduce(reducerFn, "") || "";
+    return { featureTitle, shortFeatureTitle };
   };
 
   filterFeaturesWithGeometry = (features) => {
@@ -783,9 +808,15 @@ class Search extends React.PureComponent {
   };
 
   extractFeaturesFromFeatureCollections = (featureCollections) => {
+    // Let's return an Array of features. While we're on it,
+    // let's also decorate each feature with two properties,
+    // featureTitle and shortFeature title, so they're ready to
+    // use when we're styling the features in the ol.Source.
     return featureCollections
       .map((fc) => {
-        return fc.value.features;
+        return fc.value.features.map((f) => {
+          return f;
+        });
       })
       .flat();
   };
@@ -843,7 +874,14 @@ class Search extends React.PureComponent {
 
   hasEnoughCharsForSearch = () => {
     const { searchString } = this.state;
-    return searchString.length >= 3;
+    // It may seem small with 1 character, but we must allow users to force
+    // a search. Please note that this will not be invoked for autocomplete
+    // searches (they still need to be at least 3 characters to start searching).
+    // This will however allow for search terms such as "K4*", which can well
+    // be a valid prefix for some attribute value, and users must be able to
+    // search for that.
+    // However, >=1 means that we don't allow completely empty searches.
+    return searchString.length >= 1;
   };
 
   getSearchResultsFetchSettings = () => {
