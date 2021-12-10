@@ -13,6 +13,9 @@ _A full-fledged open source web GIS solution based on OpenLayers_
 
 If you are a new user of Hajk, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk) for more information about Hajk.
 
+## Looking for support?
+You can easily reach out to our community using the [Dicussions on GitHub](https://github.com/hajkmap/Hajk/discussions). 
+
 ## Live examples
 
 The official automatic build of the latest version can be found here: https://hajk-demo.netlify.app/.

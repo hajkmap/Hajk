@@ -75,7 +75,7 @@ class Manager extends Component {
     this.props.model.fetchAllMapConfigsToModel();
   }
 
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:layers");
   }
 
@@ -310,6 +310,7 @@ class Manager extends Component {
           searchUrl: layer.searchUrl || "",
           searchPropertyName: layer.searchPropertyName || "",
           searchDisplayName: layer.searchDisplayName || "",
+          searchShortDisplayName: layer.searchShortDisplayName || "",
           searchOutputFormat: layer.searchOutputFormat || "",
           searchGeometryField: layer.searchGeometryField || "",
           infoVisible: layer.infoVisible,

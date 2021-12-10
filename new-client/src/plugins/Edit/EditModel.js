@@ -354,20 +354,29 @@ class EditModel {
   };
 
   loadData(source, extent, done) {
-    // Prepare the URL for retrieving data in a proper manner:
+    // Prepare the URL for retrieving WFS data. We will want to set
+    // some search params later on, but we want to avoid any duplicates.
+    // The values we will set below should override any existing, if
+    // same key already exists in URL.
+    // To ensure it will happen, we read the possible current params…
     const url = new URL(source.url);
 
-    // Read potential existing search params from provided WFS URL
-    const existingSearchParams = Object.fromEntries(url.searchParams.entries());
+    // …and make sure that the keys are in UPPER CASE.
+    const existingSearchParams = {};
+    for (const [k, v] of url.searchParams.entries()) {
+      existingSearchParams[k.toUpperCase()] = v;
+    }
 
-    // Merge those with other params that we want to append to the search params string
+    // Now we merge the possible existing params with the rest, defined
+    // below. We can be confident that we won't have duplicates and that
+    // our values "win", as they are defined last.
     const mergedSearchParams = {
       ...existingSearchParams,
-      service: "WFS",
-      version: "1.1.0",
-      request: "GetFeature",
-      typename: source.layers[0],
-      srsname: source.projection,
+      SERVICE: "WFS",
+      VERSION: "1.1.0",
+      REQUEST: "GetFeature",
+      TYPENAME: source.layers[0],
+      SRSNAME: source.projection,
     };
 
     // Create a new URLSearchParams object from the merged object…
@@ -375,7 +384,8 @@ class EditModel {
     // …and update our URL's search string with the new value
     url.search = searchParams.toString();
 
-    hfetch(url)
+    // Send a String as HFetch doesn't currently accept true URL objects
+    hfetch(url.toString())
       .then((response) => {
         if (response.status !== 200) {
           return done("data-load-error");
@@ -488,12 +498,21 @@ class EditModel {
       source: this.vectorSource,
       style: this.getSketchStyle(),
       type: geometryType,
+      stopClick: true,
       geometryName: this.geometryName,
     });
     this.draw.on("drawend", (event) => {
       event.feature.modification = "added";
       this.editAttributes(event.feature);
-      this.deactivateInteraction();
+      // OpenLayers seems to have a problem stopping the clicks if
+      // the draw interaction is removed too early. This fix is not pretty,
+      // but it gets the job done. It seems to be enough to remove the draw
+      // interaction after one cpu-cycle.
+      // If this is not added, the user will get a zoom-event when closing
+      // a polygon drawing.
+      setTimeout(() => {
+        this.deactivateInteraction();
+      }, 1);
     });
     this.map.addInteraction(this.draw);
     this.map.clickLock.add("edit");

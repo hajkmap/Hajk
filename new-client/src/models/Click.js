@@ -20,11 +20,22 @@ function query(map, layer, evt) {
     currentZoom <= layer.getMaxZoom()
   ) {
     const subLayers = Object.values(layer.layersInfo);
-    const visibleSubLayers = layer.getSource().getParams()["LAYERS"];
+    // First we must get the string containing the active sub-layers in this
+    // group-layer.
+    const visibleSubLayersString =
+      layer.getSource().getParams()["LAYERS"] || "";
+    // The string will contain the layers, separated with a comma. We'll split
+    // the string to get an array.
+    const visibleSubLayersArray = visibleSubLayersString.split(",");
+    // Then we'll create a Set from the array. The Set will allow us to
+    // check wether a sub-layer should be queried or not in a simple manner.
+    const visibleSubLayersSet = new Set(visibleSubLayersArray);
+    // Then we'll loop trough the subLayers that should be queried, and make sure
+    // to remove layers that are 1. Not queryable, or 2. Not visible.
     subLayersToQuery = subLayers
       .filter(
         (subLayer) =>
-          subLayer.queryable === true && visibleSubLayers === subLayer.id
+          subLayer.queryable === true && visibleSubLayersSet.has(subLayer.id)
       ) // QUERY_LAYERS must not include anything that's not in LAYERS, see https://github.com/hajkmap/Hajk/issues/211
       .map((queryableSubLayer) => {
         return queryableSubLayer.id;
@@ -284,8 +295,9 @@ export function handleClick(evt, map, callback) {
         evt.pixel,
         (feature, layer) => {
           if (
-            layer.get("queryable") === true ||
-            layer.get("type") === "searchResultLayer"
+            layer &&
+            (layer.get("queryable") === true ||
+              layer.get("type") === "searchResultLayer")
           ) {
             feature.layer = layer;
             features.push(feature);

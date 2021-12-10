@@ -119,6 +119,7 @@ class LayerItem extends React.PureComponent {
     this.infoOwner = layerInfo.infoOwner;
     this.localObserver = layer.localObserver;
     this.usesMinMaxZoom = this.layerUsesMinMaxZoom();
+    this.minMaxZoomAlertOnToggleOnly = layer.get("minMaxZoomAlertOnToggleOnly");
 
     this.state = {
       visible: layer.get("visible"),
@@ -158,7 +159,10 @@ class LayerItem extends React.PureComponent {
 
       this.listenToZoomChange(visible);
     });
-    this.triggerZoomCheck(this.state.visible);
+
+    if (this.state.visible) {
+      this.triggerZoomCheck(null, this.state.visible);
+    }
     this.listenToZoomChange(this.state.visible);
 
     // Set load status by subscribing to a global event. Expect ID (int) of layer
@@ -192,7 +196,22 @@ class LayerItem extends React.PureComponent {
     const lprops = this.props.layer.getProperties();
     const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
 
-    if (this.state.zoomVisible && !layerIsZoomVisible) {
+    let showSnack = false;
+
+    if (this.minMaxZoomAlertOnToggleOnly === true) {
+      if (!this.state.visible && !layerIsZoomVisible && e?.type === "click") {
+        showSnack = true;
+      }
+    } else {
+      if (
+        !layerIsZoomVisible &&
+        (this.state.zoomVisible || !this.state.visible)
+      ) {
+        showSnack = true;
+      }
+    }
+
+    if (showSnack === true) {
       this.showZoomSnack();
     }
 
@@ -236,14 +255,12 @@ class LayerItem extends React.PureComponent {
     );
   }
 
-  triggerZoomCheck(visible) {
+  triggerZoomCheck(e, visible) {
     if (!this.usesMinMaxZoom) return;
 
-    if (visible) {
-      if (!this.zoomEndHandler()) {
-        this.showZoomSnack();
-      }
-    } else {
+    this.zoomEndHandler(e);
+
+    if (visible === false) {
       if (!this.zoomWarningSnack) return;
       this.props.closeSnackbar(this.zoomWarningSnack);
       this.zoomWarningSnack = null;
@@ -282,7 +299,7 @@ class LayerItem extends React.PureComponent {
         visible,
       });
       this.props.layer.setVisible(visible);
-      this.triggerZoomCheck(visible);
+      this.triggerZoomCheck(e, visible);
     }
   };
 

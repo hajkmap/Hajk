@@ -68,7 +68,7 @@ export default class FeatureStyle {
     };
   };
 
-  getFeatureStyle = (feature, featureTitle, displayFields, type) => {
+  getFeatureStyle = (feature, type) => {
     // Helper for the cumbersome type check: scale and anchor values, when unset in admin,
     // will consist of empty strings, perfectly legal but unusable in our case. So we must ensure
     // that the value we get can be parsed to a finite number, else fallback to something else.
@@ -114,35 +114,36 @@ export default class FeatureStyle {
         scale: (isValidNumber(scale) ? scale : 1) * multiplier,
         src: markerImg?.length > 0 ? markerImg : defaultMarker,
       }),
-      text: new Text({
-        textAlign: textAlign,
-        textBaseline: "middle",
-        font: `${settings.fontSize}pt "Roboto", sans-serif`,
-        fill: new Fill({
-          color: settings.textFillColor,
+      ...(this.#enableLabelOnHighlight && {
+        text: new Text({
+          textAlign: textAlign,
+          textBaseline: "middle",
+          font: `${settings.fontSize}pt "Roboto", sans-serif`,
+          fill: new Fill({
+            color: settings.textFillColor,
+          }),
+          text: feature.featureTitle,
+          overflow: true,
+          stroke: new Stroke({
+            color: settings.textStrokeColor,
+            width: 3,
+          }),
+          offsetX: 0,
+          offsetY: offsetY,
+          rotation: 0,
+          scale: 1,
         }),
-        text: this.#getHighlightLabelValueFromFeature(
-          feature,
-          featureTitle,
-          displayFields
-        ),
-        overflow: true,
-        stroke: new Stroke({
-          color: settings.textStrokeColor,
-          width: 3,
-        }),
-        offsetX: 0,
-        offsetY: offsetY,
-        rotation: 0,
-        scale: 1,
       }),
     });
   };
 
-  getDefaultSearchResultStyle = () => {
+  getDefaultSearchResultStyle = (feature) => {
+    const settings = this.#defaultSelectionStyleSettings;
+
     const fill = new Fill({
       color: this.#defaultDisplayStyleSettings.fillColor,
     });
+
     const stroke = new Stroke({
       color: this.#defaultDisplayStyleSettings.strokeColor,
       width: 2,
@@ -153,44 +154,28 @@ export default class FeatureStyle {
       image: new Circle({
         fill: fill,
         stroke: stroke,
-        radius: 5,
+        radius: 10,
+      }),
+      ...(this.#enableLabelOnHighlight && {
+        text: new Text({
+          textAlign: "center",
+          textBaseline: "middle",
+          font: `10pt "Roboto", sans-serif`,
+          fill: new Fill({
+            color: settings.textFillColor,
+          }),
+          text: feature.shortFeatureTitle,
+          overflow: true,
+          stroke: new Stroke({
+            color: settings.textStrokeColor,
+            width: 3,
+          }),
+          offsetX: 0,
+          offsetY: 0,
+          rotation: 0,
+          scale: 1,
+        }),
       }),
     });
-  };
-
-  #getHighlightLabelValueFromFeature = (
-    feature,
-    featureTitle,
-    displayFields
-  ) => {
-    if (this.#enableLabelOnHighlight) {
-      if (!featureTitle || featureTitle.length === 0) {
-        if (!displayFields || displayFields.length === 0) {
-          return `Visningsfält saknas`;
-        }
-        return this.#getFeatureTitle(feature, displayFields);
-      } else {
-        return featureTitle;
-      }
-    }
-  };
-
-  #getFeatureTitle = (feature, displayFields) => {
-    return displayFields.reduce((featureTitleString, df) => {
-      let displayField = feature.get(df);
-      if (Array.isArray(displayField)) {
-        displayField = displayField.join(", ");
-      }
-
-      if (displayField) {
-        if (featureTitleString.length > 0) {
-          featureTitleString = featureTitleString.concat(` | ${displayField}`);
-        } else {
-          featureTitleString = displayField;
-        }
-      }
-
-      return featureTitleString;
-    }, "");
   };
 }

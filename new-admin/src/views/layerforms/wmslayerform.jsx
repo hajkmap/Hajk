@@ -25,6 +25,7 @@ const defaultState = {
   opacity: 1.0,
   maxZoom: -1,
   minZoom: -1,
+  minMaxZoomAlertOnToggleOnly: false,
   tiled: false,
   singleTile: false,
   hidpi: true,
@@ -113,7 +114,7 @@ class WMSLayerForm extends Component {
     });
   }
 
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:legend");
     this.props.model.off("change:select-legend-icon");
   }
@@ -412,8 +413,11 @@ class WMSLayerForm extends Component {
                 () => {
                   this.validateField("select-layers-info-legend-icon");
                   let addedLayersInfo = this.state.addedLayersInfo;
-                  addedLayersInfo[layerInfo.id].legendIcon =
-                    this.props.model.get("select-layers-info-legend-icon");
+                  addedLayersInfo[
+                    layerInfo.id
+                  ].legendIcon = this.props.model.get(
+                    "select-layers-info-legend-icon"
+                  );
                   this.setState(
                     {
                       addedLayersInfo: addedLayersInfo,
@@ -533,6 +537,27 @@ class WMSLayerForm extends Component {
             onChange={(e) => {
               let addedLayersInfo = this.state.addedLayersInfo;
               addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Kort visningsfält</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchShortDisplayName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchShortDisplayName =
+                e.target.value;
               this.setState(
                 {
                   addedLayersInfo: addedLayersInfo,
@@ -768,6 +793,8 @@ class WMSLayerForm extends Component {
           infoClickSortProperty: layer.infoClickSortProperty ?? "",
           infoClickSortType: layer.infoClickSortType ?? "string",
           hideExpandArrow: layer.hideExpandArrow ?? false,
+          minMaxZoomAlertOnToggleOnly:
+            layer.minMaxZoomAlertOnToggleOnly ?? false,
         },
         () => {
           this.setServerType();
@@ -889,8 +916,8 @@ class WMSLayerForm extends Component {
       this.state.capabilities.Capability.Request &&
       this.state.capabilities.Capability.Request.GetFeatureInfo
     ) {
-      formats =
-        this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
+      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
+        .Format;
     }
     if (formats && formats.indexOf("application/geojson") > -1) {
       this.setState({ serverType: "arcgis" });
@@ -929,8 +956,8 @@ class WMSLayerForm extends Component {
       this.state.capabilities.Capability.Request &&
       this.state.capabilities.Capability.Request.GetFeatureInfo
     ) {
-      formats =
-        this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
+      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
+        .Format;
     }
 
     let formatEles = formats
@@ -1011,6 +1038,7 @@ class WMSLayerForm extends Component {
       opacity: this.getValue("opacity"),
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
+      minMaxZoomAlertOnToggleOnly: this.getValue("minMaxZoomAlertOnToggleOnly"),
       singleTile: this.getValue("singleTile"),
       hidpi: this.getValue("hidpi"),
       customRatio: this.getValue("customRatio"),
@@ -1021,6 +1049,7 @@ class WMSLayerForm extends Component {
       searchUrl: this.getValue("searchUrl"),
       searchPropertyName: this.getValue("searchPropertyName"),
       searchDisplayName: this.getValue("searchDisplayName"),
+      searchShortDisplayName: this.getValue("searchShortDisplayName"),
       searchOutputFormat: this.getValue("searchOutputFormat"),
       searchGeometryField: this.getValue("searchGeometryField"),
       infoVisible: this.getValue("infoVisible"),
@@ -1069,6 +1098,7 @@ class WMSLayerForm extends Component {
       value = Number(value || -1);
       return value === 0 ? -1 : value;
     }
+    if (fieldName === "minMaxZoomAlertOnToggleOnly") value = input.checked;
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
@@ -1657,6 +1687,22 @@ class WMSLayerForm extends Component {
                 this.validateField("maxZoom")
               );
             }}
+          />
+        </div>
+        <div>
+          <label>
+            Visa endast Min/Max varningsruta vid klick.
+            <abbr title="Som standard visas även varningsruta vid start samt när lagret blir dolt pga zoombegränsningen (Min zoom och Max zoom).">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="checkbox"
+            ref="input_minMaxZoomAlertOnToggleOnly"
+            onChange={(e) =>
+              this.setState({ minMaxZoomAlertOnToggleOnly: e.target.checked })
+            }
+            checked={this.state.minMaxZoomAlertOnToggleOnly}
           />
         </div>
         <div className="separator">Metadata</div>

@@ -72,6 +72,8 @@ namespace MapService.Models.Config
 
         public int maxZoom { get; set; }
 
+        public bool minMaxZoomAlertOnToggleOnly { get; set; }
+
         public bool singleTile { get; set; }
 
         public string imageFormat { get; set; }

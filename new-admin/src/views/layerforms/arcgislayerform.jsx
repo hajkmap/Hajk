@@ -46,7 +46,7 @@ class ArcGISLayerForm extends Component {
     });
   }
 
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:legend");
   }
 
