@@ -10,7 +10,6 @@ import Intersects from "ol/format/filter/Intersects";
 import Within from "ol/format/filter/Within";
 import { fromCircle } from "ol/geom/Polygon";
 
-// import { arraySort } from "../utils/ArraySort";
 import { decodeCommas } from "../utils/StringCommaCoder";
 import { hfetch } from "utils/FetchWrapper";
 
@@ -193,19 +192,6 @@ class SearchModel {
 
     // Do some magic on our valid results
     successfulResponses.forEach((r) => {
-      // FIXME: Investigate if this sorting is really needed, and if so,
-      // if we can find some Unicode variant and not only for Swedish characters.
-      // FIXME: NB: This can't be done like this as it only works for GeoJSON
-      // responses. GML won't have an object assigned to r.value, so there won't
-      // be any "features" that can be sorted like this (in GML response, the r.value
-      // is a XML string).
-      // if (r.value?.features?.length > 0) {
-      //   arraySort({
-      //     array: r.value.features,
-      //     index: r.source.searchFields[0],
-      //   });
-      // }
-
       switch (r.source.outputFormat) {
         case "application/json":
         case "application/vnd.geo+json": {

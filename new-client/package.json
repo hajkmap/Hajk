@@ -1,6 +1,6 @@
 {
   "name": "hajk-client",
-  "version": "3.8.0",
+  "version": "3.9.0-alpha.1",
   "description": "Hajk Client UI",
   "homepage": ".",
   "repository": {
@@ -28,15 +28,13 @@
       "last 2 versions",
       "Firefox ESR",
       "not dead",
-      "ie 11",
       "last 100 edge versions"
     ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version",
-      "ie 11",
-      "last 100 edge versions"
+      "last 1 edge version"
     ]
   },
   "dependencies": {

@@ -5,10 +5,10 @@
  * once (in index.js), so you don't have to worry about the details.
  * Just get/set whatever you want.
  *
- * Please not however that THERE IS A TWIST HERE TO THE  USUAL LOCALSTORAGE
+ * Please note however that THERE IS A TWIST HERE TO THE  USUAL LOCALSTORAGE
  * behavior!
  *
- * A. This helper is map-specific. That means that ALL SETTINGS RELEATED TO A
+ * A. This helper is map-specific. That means that ALL SETTINGS RELATED TO A
  * MAPCONFIG WILL BE HELD IN ONE KEY/VALUE PAIR IN LOCALSTOREGE.
  * B. Because we only have one value to play with for all the settings, and
  * LocalStorage stores values as string, we utilized JSON.stringify and JSON.parse.

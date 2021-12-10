@@ -1,12 +1,3 @@
-// IE 11 starts here.
-// If you don't need IE 11, comment out those lines line.
-// Also, change 'browserslist' in package.json to exclude ie11.
-import "react-app-polyfill/ie11";
-import "react-app-polyfill/stable";
-import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
-import "allsettled-polyfill";
-// IE 11 ends here.
-
 // iOS 12 and other older touch devices need this polyfill to
 // support OpenLayers map interactions through Pointer Events API.
 // See: https://github.com/hajkmap/Hajk/issues/606
@@ -18,10 +9,6 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
-
-// We want to support open-sans locally as well (If someone sets open-sans
-// in the customTheme.json, we still want to avoid requests to outside CDN)
-import "@fontsource/open-sans";
 
 // The documentHandler imports icons in a dynamic way. To avoid requests against
 // an outside CDN, we make sure to install the required font for the icons as well.
@@ -249,4 +236,4 @@ hfetch("appConfig.json", { cacheBuster: true })
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+reportWebVitals(console.log);
