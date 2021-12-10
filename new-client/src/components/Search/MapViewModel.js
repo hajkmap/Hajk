@@ -6,8 +6,11 @@ import { extend, createEmpty, isEmpty } from "ol/extent";
 import Feature from "ol/Feature";
 import FeatureStyle from "./utils/FeatureStyle";
 import { fromExtent } from "ol/geom/Polygon";
+import TileLayer from "ol/layer/Tile";
+import ImageLayer from "ol/layer/Image";
 import { handleClick } from "../../models/Click";
 import { deepMerge } from "utils/DeepMerge";
+import { isValidLayerId } from "../../utils/Validator";
 
 class MapViewModel {
   constructor(settings) {
@@ -50,6 +53,35 @@ class MapViewModel {
       source: source,
       style: style,
     });
+  };
+
+  getVisibleLayers = () => {
+    return this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => {
+        return (
+          (layer instanceof TileLayer || layer instanceof ImageLayer) &&
+          layer.layersInfo !== undefined &&
+          // We consider a layer to be visible only if…
+          layer.getVisible() && // …it's visible…
+          layer.getSource().getParams()["LAYERS"] &&
+          layer.getProperties().name &&
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
+        );
+      })
+      .map((layer) => layer.getSource().getParams()["LAYERS"])
+      .join(",")
+      .split(",");
+  };
+
+  getVisibleSearchLayers = () => {
+    const searchSources = this.options.sources;
+    const visibleLayers = this.getVisibleLayers();
+    const visibleSearchLayers = searchSources.filter((s) => {
+      return visibleLayers.find((l_id) => l_id === s.id);
+    });
+    return visibleSearchLayers;
   };
 
   initMapLayers = () => {
