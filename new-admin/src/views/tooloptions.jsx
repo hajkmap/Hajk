@@ -22,6 +22,7 @@ import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
 import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 import TimeSlider from "./tools/timeslider.jsx";
+import GeosuiteExport from "./tools/geosuiteExport.jsx";
 
 var defaultState = {
   activeTool: "",
@@ -108,6 +109,8 @@ class ToolOptions extends Component {
         return <TimeSlider parent={this} model={this.props.model} />;
       case "documenthandler":
         return <MenuEditor parent={this} model={this.props.model} />;
+      case "geosuiteexport":
+        return <GeosuiteExport parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -172,6 +175,7 @@ class ToolOptions extends Component {
       dummy: "Dummy plugin",
       timeslider: "Tidslinje",
       documenthandler: "Dokumenthanterare 2.0",
+      geosuiteexport: "GeoSuite export"
     };
 
     return (

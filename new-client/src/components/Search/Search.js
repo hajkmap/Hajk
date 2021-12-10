@@ -23,6 +23,7 @@ const styles = () => ({
 class Search extends React.PureComponent {
   defaultSearchOptions = {
     enableLabelOnHighlight: true,
+    searchInVisibleLayers: false,
     wildcardAtStart: false,
     wildcardAtEnd: true,
     matchCase: false,
@@ -122,7 +123,12 @@ class Search extends React.PureComponent {
   initMapViewModel = () => {
     const { app } = this.props;
     this.mapViewModel = new MapViewModel({
-      options: { ...this.props.options, ...this.state.searchOptions }, // Init the MapViewModel using merged options from both admin ("options")and user's setting ("this.state.options")
+      // Init the MapViewModel using merged options from both
+      // Admin UI ("options") and user's setting ("this.state.options")
+      options: {
+        ...this.props.options,
+        ...this.state.searchOptions,
+      },
       localObserver: this.localObserver,
       map: this.map,
       app: app,
@@ -639,6 +645,10 @@ class Search extends React.PureComponent {
 
     if (searchSources.length === 0) {
       searchSources = this.searchModel.getSources();
+    }
+
+    if (this.state.searchOptions.searchInVisibleLayers) {
+      searchSources = this.mapViewModel.getVisibleSearchLayers();
     }
 
     let active = true;
