@@ -171,6 +171,7 @@ namespace MapService.Models.Config
         public string lineColor { get; set; }
         public string lineStyle { get; set; }
         public string lineWidth { get; set; }
+        public int maxZoom { get; set; }
         public int minZoom { get; set; }
         public string infoClickSortType { get; set; }
         public bool infoClickSortDesc { get; set; }
