@@ -1,30 +1,27 @@
 // Base
 import React from "react";
 // Constants
-import { PLUGIN_MARGIN } from "./constants";
-// Components
-import SketchAppBar from "./components/SketchAppBar";
+import { PLUGIN_MARGIN } from "../constants";
+// Components and views
+import SketchAppBar from "../components/SketchAppBar";
+import CreateView from "./CreateView";
+import SaveUploadView from "./SaveUploadView";
 
+// The SketchView is the main view for the Sketch-plugin.
 const SketchView = () => {
   const [activeTab, setActiveTab] = React.useState(0);
 
-  const renderContent = () => {
+  // The current view depends on which tab the user has
+  // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
+  const renderCurrentView = () => {
     switch (activeTab) {
       case 0:
-        return renderCreateView();
+        return <CreateView />;
       case 1:
-        return renderSaveView();
+        return <SaveUploadView />;
       default:
         return null;
     }
-  };
-
-  const renderCreateView = () => {
-    return <h2>Skapa</h2>;
-  };
-
-  const renderSaveView = () => {
-    return <h2>SPARA</h2>;
   };
 
   return (
@@ -33,7 +30,7 @@ const SketchView = () => {
     // therefore, we add a negative margin to the root container.
     <div id="sketch-plugin-main-content" style={{ margin: -PLUGIN_MARGIN }}>
       <SketchAppBar activeTab={activeTab} setActiveTab={setActiveTab} />
-      {renderContent()}
+      {renderCurrentView()}
     </div>
   );
 };

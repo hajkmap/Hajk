@@ -4,7 +4,7 @@ import GestureIcon from "@material-ui/icons/Gesture";
 
 // Views
 import BaseWindowPlugin from "../BaseWindowPlugin";
-import SketchView from "./SketchView";
+import SketchView from "./views/SketchView";
 
 // Models
 import SketchModel from "./models/SketchModel";
