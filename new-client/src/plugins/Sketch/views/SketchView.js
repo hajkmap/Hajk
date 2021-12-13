@@ -1,23 +1,24 @@
 // Base
 import React from "react";
+import { Grid } from "@material-ui/core";
 // Constants
 import { PLUGIN_MARGIN } from "../constants";
 // Components and views
-import SketchAppBar from "../components/SketchAppBar";
-import CreateView from "./CreateView";
+import ActivityMenu from "../components/ActivityMenu";
+import AddView from "./AddView";
 import SaveUploadView from "./SaveUploadView";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = () => {
-  const [activeTab, setActiveTab] = React.useState(0);
+  const [activity, setActivity] = React.useState("ADD");
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
   const renderCurrentView = () => {
-    switch (activeTab) {
-      case 0:
-        return <CreateView />;
-      case 1:
+    switch (activity) {
+      case "ADD":
+        return <AddView />;
+      case "SAVE":
         return <SaveUploadView />;
       default:
         return null;
@@ -26,12 +27,16 @@ const SketchView = () => {
 
   return (
     // The base plugin-window (in which we render the plugins) has a padding
-    // of 10 set. In this plugin we want to render the content without this padding,
-    // therefore, we add a negative margin to the root container.
-    <div id="sketch-plugin-main-content" style={{ margin: -PLUGIN_MARGIN }}>
-      <SketchAppBar activeTab={activeTab} setActiveTab={setActiveTab} />
-      {renderCurrentView()}
-    </div>
+    // of 10 set. In this plugin we want to render the <ActivityMenu /> at the
+    // border of the window, hence we must set a negative margin of 10.
+    <Grid container>
+      <Grid item xs={3} style={{ marginLeft: -PLUGIN_MARGIN }}>
+        <ActivityMenu activity={activity} setActivity={setActivity} />
+      </Grid>
+      <Grid item xs={9}>
+        {renderCurrentView()}
+      </Grid>
+    </Grid>
   );
 };
 
