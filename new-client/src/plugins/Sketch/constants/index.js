@@ -4,7 +4,7 @@ import ImportExportIcon from "@material-ui/icons/ImportExport";
 export const TABS = [
   {
     tooltip: "Lägg till, redigera, eller ta bort objekt från kartan.",
-    label: "Rita",
+    label: "Skapa",
     icon: <CreateIcon />,
   },
   {
