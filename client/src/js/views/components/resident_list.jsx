@@ -151,6 +151,10 @@ var ResidentList = {
       columns.push(_config.koenDisplayName);
     }
 
+    features = features.filter((feature) => {
+      return feature.get(_config.alderFieldName) >= this.state.minAge || 0;
+    });
+
     features.forEach(
       function (f) {
         var row = [];
@@ -173,14 +177,6 @@ var ResidentList = {
         row.push(f.get(_config.adressFieldName));
         row.push(f.get(_config.postnrFieldName));
         row.push(f.get(_config.postortFieldName));
-
-        if (
-          f.get(_config.alderFieldName) &&
-          parseInt(f.get(_config.alderFieldName)) <
-            parseInt(document.getElementById("min-age").value)
-        ) {
-          return;
-        }
 
         if (this.state.includeAge) {
           row.push(f.get(_config.alderFieldName));
