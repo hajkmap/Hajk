@@ -1,8 +1,15 @@
 import React from "react";
 import { Grid, Paper, Tooltip } from "@material-ui/core";
 import ToggleButton from "@material-ui/lab/ToggleButton";
+import { withStyles } from "@material-ui/core";
 
 import { ACTIVITIES } from "../constants";
+
+const StyledToggleButton = withStyles((theme) => ({
+  root: {
+    color: theme.palette.text.primary,
+  },
+}))(ToggleButton);
 
 const ActivityMenu = (props) => {
   return (
@@ -15,7 +22,7 @@ const ActivityMenu = (props) => {
           return (
             <div key={index} style={{ padding: 8 }}>
               <Tooltip title={activity.tooltip}>
-                <ToggleButton
+                <StyledToggleButton
                   value={activity.id}
                   selected={props.activity === activity.id}
                   onChange={() => {
@@ -23,7 +30,7 @@ const ActivityMenu = (props) => {
                   }}
                 >
                   {activity.icon}
-                </ToggleButton>
+                </StyledToggleButton>
               </Tooltip>
             </div>
           );
