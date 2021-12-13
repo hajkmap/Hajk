@@ -154,6 +154,7 @@ export default class ConfigMapper {
         searchUrl: args.searchUrl,
         searchPropertyName: args.searchPropertyName,
         searchDisplayName: args.searchDisplayName,
+        searchShortDisplayName: args.searchShortDisplayName,
         searchOutputFormat: args.searchOutputFormat,
         searchGeometryField: args.searchGeometryField,
         legend: getLegends(),

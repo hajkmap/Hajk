@@ -50,11 +50,8 @@ class SearchResultsDownloadMenu extends React.PureComponent {
   };
 
   handleKMLDownloadClick = () => {
-    const { localObserver, featureCollections, featureId } = this.props;
-    localObserver.publish("downloadMenu.exportKMLClick", {
-      featureCollections: featureCollections,
-      featureId: featureId,
-    });
+    const { localObserver, featureCollections } = this.props;
+    localObserver.publish("downloadMenu.exportKMLClick", featureCollections);
     this.setState({ anchorEl: null });
   };
 
