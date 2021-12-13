@@ -3,10 +3,15 @@ import React from "react";
 import { Grid } from "@material-ui/core";
 // Constants
 import { PLUGIN_MARGIN } from "../constants";
-// Components and views
+// Components
 import ActivityMenu from "../components/ActivityMenu";
+// Views
 import AddView from "./AddView";
 import SaveUploadView from "./SaveUploadView";
+import DeleteView from "./DeleteView";
+import MoveView from "./MoveView";
+import EditView from "./EditView";
+import SettingsView from "./SettingsView";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
@@ -22,8 +27,16 @@ const SketchView = (props) => {
     switch (activity) {
       case "ADD":
         return <AddView />;
+      case "DELETE":
+        return <DeleteView />;
+      case "EDIT":
+        return <EditView />;
+      case "MOVE":
+        return <MoveView />;
       case "SAVE":
         return <SaveUploadView />;
+      case "SETTINGS":
+        return <SettingsView />;
       default:
         return null;
     }
