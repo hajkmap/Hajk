@@ -640,13 +640,14 @@ class GeosuiteExportModel {
       this.#config.boreholes.layer.id,
       this.#config.boreholes.layer
     );
+    // Override tool config (or defaults) with actual layer properties
     this.#config.projects.layer = Object.assign(
-      projectsLayerByRefOrDefaults,
-      this.#config.projects.layer
+      this.#config.projects.layer,
+      projectsLayerByRefOrDefaults
     );
     this.#config.boreholes.layer = Object.assign(
-      boreholesLayerByRefOrDefaults,
-      this.#config.boreholes.layer
+      this.#config.boreholes.layer,
+      boreholesLayerByRefOrDefaults
     );
   };
 
