@@ -25,6 +25,9 @@ const FmeServerView = (props) => {
   const { localObserver } = props;
   // We're also gonna be needing the model
   const { model } = props;
+  // The user might want to decorate the "group" label with something
+  // else. Let's grab the potential value from the plugin-options.
+  const groupDisplayName = props.options.groupDisplayName || "Grupp";
   // We're gonna need some state, e.g. which step are we on,
   // or which product-group the user has selected and so on.
   const [activeStep, setActiveStep] = React.useState(0);
@@ -68,7 +71,10 @@ const FmeServerView = (props) => {
   // Let's create an object with all the steps to be rendered. This
   // will allow us to add another step in a simple manner.
   const steps = [
-    { label: "Välj grupp", renderFunction: renderChooseGroupStep },
+    {
+      label: `Välj ${groupDisplayName.toLowerCase()}`,
+      renderFunction: renderChooseGroupStep,
+    },
     { label: "Välj produkt", renderFunction: renderChooseProductStep },
     { label: "Välj omfattning", renderFunction: renderDrawGeometryStep },
     { label: "Fyll i parametrar", renderFunction: renderEnterParametersStep },
@@ -571,12 +577,14 @@ const FmeServerView = (props) => {
         {groupsToRender.length > 0 ? (
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel id="fme-server-select-group-label">Grupp</InputLabel>
+              <InputLabel id="fme-server-select-group-label">
+                {groupDisplayName}
+              </InputLabel>
               <Select
                 labelId="fme-server-select-group-label"
                 id="fme-server-select-group"
                 value={activeGroup}
-                label="Grupp"
+                label={groupDisplayName}
                 onChange={(e) => setActiveGroup(e.target.value)}
               >
                 {groupsToRender.map((group, index) => {
