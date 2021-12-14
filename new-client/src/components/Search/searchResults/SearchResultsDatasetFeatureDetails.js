@@ -229,7 +229,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   renderFeatureTitle = () => {
-    const { featureTitle, classes } = this.props;
+    const { feature, classes } = this.props;
     return (
       <Typography
         noWrap
@@ -238,7 +238,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
         variant="button"
         align="left"
       >
-        {featureTitle}
+        {feature.featureTitle}
       </Typography>
     );
   };

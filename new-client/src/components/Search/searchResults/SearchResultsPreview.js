@@ -40,14 +40,8 @@ const styles = (theme) => ({
 
 class SearchResultsPreview extends React.PureComponent {
   renderFeaturePreview = () => {
-    const {
-      classes,
-      activeFeatureCollection,
-      previewFeature,
-      anchorEl,
-      app,
-      getFeatureTitle,
-    } = this.props;
+    const { classes, activeFeatureCollection, previewFeature, anchorEl, app } =
+      this.props;
 
     return (
       <Popover
@@ -80,7 +74,6 @@ class SearchResultsPreview extends React.PureComponent {
           <Grid item className={classes.previewContentContainer} xs={12}>
             <SearchResultsDatasetFeatureDetails
               feature={previewFeature}
-              featureTitle={getFeatureTitle(previewFeature)}
               app={app}
               source={activeFeatureCollection.source}
             />

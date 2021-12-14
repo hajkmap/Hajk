@@ -52,6 +52,7 @@ const defaultState = {
   infobox: "",
   aliasDict: "",
   displayFields: "",
+  shortDisplayFields: "",
   geometryField: "",
   url: "",
   outputFormat: undefined,
@@ -138,6 +139,7 @@ class Search extends Component {
       infobox: layer.infobox,
       aliasDict: layer.aliasDict,
       displayFields: layer.displayFields,
+      shortDisplayFields: layer.shortDisplayFields,
       geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || "GML3",
       serverType: layer.serverType || "geoserver",
@@ -149,6 +151,7 @@ class Search extends Component {
       this.validateField("url", true);
       this.validateField("searchFields", true);
       this.validateField("displayFields", true);
+      this.validateField("shortDisplayFields", true);
       this.validateField("geometryField", true);
       this.validateField("outputFormat", true);
       this.validateField("serverType", true);
@@ -332,6 +335,7 @@ class Search extends Component {
 
     switch (fieldName) {
       case "displayFields":
+      case "shortDisplayFields":
       case "searchFields":
         valid = value.every((val) => /^\w+$/.test(val));
         if (value.length === 1 && value[0] === "") {
@@ -397,6 +401,7 @@ class Search extends Component {
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "searchFields") value = value.split(",");
     if (fieldName === "displayFields") value = value.split(",");
+    if (fieldName === "shortDisplayFields") value = value.split(",");
 
     return value;
   }
@@ -435,6 +440,7 @@ class Search extends Component {
         "layers",
         "searchFields",
         "displayFields",
+        "shortDisplayFields",
         "geometryField",
         "outputFormat",
         "serverType",
@@ -460,6 +466,7 @@ class Search extends Component {
         infobox: this.getValue("infobox"),
         aliasDict: this.getValue("aliasDict"),
         displayFields: this.getValue("displayFields"),
+        shortDisplayFields: this.getValue("shortDisplayFields"),
         geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat"),
         serverType: this.getValue("serverType"),
@@ -854,6 +861,23 @@ class Search extends Component {
                   }}
                   value={this.state.displayFields}
                   className={this.getValidationClass("displayFields")}
+                />
+              </div>
+              <div>
+                <label>Kort visningsfält</label>
+                <input
+                  type="text"
+                  ref="input_shortDisplayFields"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        shortDisplayFields: e.target.value,
+                      },
+                      () => this.validateField("shortDisplayFields", true)
+                    );
+                  }}
+                  value={this.state.shortDisplayFields}
+                  className={this.getValidationClass("shortDisplayFields")}
                 />
               </div>
               <div>
