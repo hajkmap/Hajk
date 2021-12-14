@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import MapOptions from "./mapoptions.jsx";
@@ -182,13 +160,16 @@ $.fn.editable = function (component) {
     });
 
     if (node.parent().attr("data-expanded")) {
-      checkbox.attr("checked", "checked");
+      checkbox.attr("checked", JSON.parse(node.parent().attr("data-expanded")));
     }
     if (node.parent().attr("data-toggled")) {
-      checkbox2.attr("checked", "checked");
+      checkbox2.attr("checked", JSON.parse(node.parent().attr("data-toggled")));
     }
     if (node.parent().attr("data-visibleatstart")) {
-      checkbox3.attr("checked", "checked");
+      checkbox3.attr(
+        "checked",
+        JSON.parse(node.parent().attr("data-visibleatstart"))
+      );
     }
     if (node.parent().attr("data-visibleforgroups")) {
       input3.val(node.parent().attr("data-visibleforgroups"));
@@ -425,7 +406,6 @@ class Menu extends Component {
   /**
    *
    */
-  componentWillMount() {}
 
   /**
    *

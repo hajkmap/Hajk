@@ -150,15 +150,17 @@ class ConfigServiceV2 {
     // each of the following constants. Hence the frequent use of '?.' and '||'.
 
     // Grab layers and baselayers from LayerSwitcher
-    const lsOptions = mapConfig.tools.find((t) => t.type === "layerswitcher")
-      ?.options;
+    const lsOptions = mapConfig.tools.find(
+      (t) => t.type === "layerswitcher"
+    )?.options;
     const baseLayerIds = lsOptions?.baselayers.map((bl) => bl.id) || [];
     const layerIds =
       lsOptions?.groups.flatMap((g) => getLayerIdsFromGroup(g)) || [];
 
     // Grab layers from Search
-    const searchOptions = mapConfig.tools.find((t) => t.type === "search")
-      ?.options;
+    const searchOptions = mapConfig.tools.find(
+      (t) => t.type === "search"
+    )?.options;
     const searchLayerIds = searchOptions?.layers.map((l) => l.id) || [];
 
     // Grab layers from Edit
@@ -258,14 +260,21 @@ class ConfigServiceV2 {
         layersStore
       );
 
-      // Finally, take a look in LayerSwitcher.options and see
+      // Next, take a look in LayerSwitcher.options and see
       // whether user specific maps are needed. If so, grab them.
       let userSpecificMaps = []; // Set to empty array, client will do .map() on it.
       if (mapConfig.map.mapselector === true) {
         userSpecificMaps = await this.getUserSpecificMaps(user);
       }
 
-      return { mapConfig, layersConfig, userSpecificMaps };
+      // Finally, if we're running with authentication on, let's send
+      // some user details to the client.
+      let userDetails = undefined;
+      if (user !== undefined && process.env.AD_EXPOSE_USER_OBJECT === "true") {
+        userDetails = await ad.findUser(user);
+      }
+
+      return { mapConfig, layersConfig, userSpecificMaps, userDetails };
     } catch (error) {
       return { error };
     }
@@ -452,6 +461,30 @@ class ConfigServiceV2 {
           )
       );
       mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
+    }
+
+    // Part 5: Wash FME-server products
+    const fmeServerIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "fmeServer"
+    );
+
+    if (fmeServerIndexInTools !== -1) {
+      // The FME-server tool got a bunch of products, and each one of them
+      // can be controlled to be visible only for some groups.
+      let { products } = mapConfig.tools[fmeServerIndexInTools].options;
+      // So let's remove the products that the current user does not have
+      // access to.
+      products = await asyncFilter(
+        products,
+        async (product) =>
+          await this.filterByGroupVisibility(
+            product.visibleForGroups,
+            user,
+            `FME-server product "${product.name}"`
+          )
+      );
+      // And then update the mapConfig with the products.
+      mapConfig.tools[fmeServerIndexInTools].options.products = products;
     }
 
     return mapConfig;

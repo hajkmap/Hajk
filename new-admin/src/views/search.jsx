@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import Alert from "../views/alert.jsx";
@@ -74,9 +52,11 @@ const defaultState = {
   infobox: "",
   aliasDict: "",
   displayFields: "",
+  shortDisplayFields: "",
   geometryField: "",
   url: "",
   outputFormat: undefined,
+  serverType: "geoserver",
   alert: false,
   corfirm: false,
   alertMessage: "",
@@ -159,8 +139,10 @@ class Search extends Component {
       infobox: layer.infobox,
       aliasDict: layer.aliasDict,
       displayFields: layer.displayFields,
+      shortDisplayFields: layer.shortDisplayFields,
       geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || "GML3",
+      serverType: layer.serverType || "geoserver",
       url: layer.url,
       addedLayers: [],
     });
@@ -169,8 +151,10 @@ class Search extends Component {
       this.validateField("url", true);
       this.validateField("searchFields", true);
       this.validateField("displayFields", true);
+      this.validateField("shortDisplayFields", true);
       this.validateField("geometryField", true);
       this.validateField("outputFormat", true);
+      this.validateField("serverType", true);
 
       this.loadWMSCapabilities(undefined, () => {
         this.setState({
@@ -351,6 +335,7 @@ class Search extends Component {
 
     switch (fieldName) {
       case "displayFields":
+      case "shortDisplayFields":
       case "searchFields":
         valid = value.every((val) => /^\w+$/.test(val));
         if (value.length === 1 && value[0] === "") {
@@ -371,6 +356,7 @@ class Search extends Component {
         }
         break;
       case "outputFormat":
+      case "serverType":
         if (value === "") {
           valid = false;
         }
@@ -415,6 +401,7 @@ class Search extends Component {
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "searchFields") value = value.split(",");
     if (fieldName === "displayFields") value = value.split(",");
+    if (fieldName === "shortDisplayFields") value = value.split(",");
 
     return value;
   }
@@ -453,8 +440,10 @@ class Search extends Component {
         "layers",
         "searchFields",
         "displayFields",
+        "shortDisplayFields",
         "geometryField",
         "outputFormat",
+        "serverType",
       ];
 
     validationFields.forEach((fieldName) => {
@@ -477,8 +466,10 @@ class Search extends Component {
         infobox: this.getValue("infobox"),
         aliasDict: this.getValue("aliasDict"),
         displayFields: this.getValue("displayFields"),
+        shortDisplayFields: this.getValue("shortDisplayFields"),
         geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat"),
+        serverType: this.getValue("serverType"),
       };
 
       if (this.state.mode === "add") {
@@ -756,8 +747,33 @@ class Search extends Component {
                     );
                   }}
                 >
+                  <option value="application/json">application/json</option>
+                  <option value="application/vnd.geo+json">
+                    application/vnd.geo+json
+                  </option>
                   <option value="GML3">GML3</option>
                   <option value="GML2">GML2</option>
+                </select>
+              </div>
+              <div>
+                <label>Servertyp</label>
+                <select
+                  ref="input_serverType"
+                  value={this.state.serverType}
+                  className="control-fixed-width"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        serverType: e.target.value,
+                      },
+                      () => this.validateField("serverType", true)
+                    );
+                  }}
+                >
+                  <option value="geoserver">GeoServer</option>
+                  <option value="qgis">QGIS Server</option>
+                  <option value="arcgis">ArcGIS Server</option>
+                  <option value="mapserver">MapServer</option>
                 </select>
               </div>
               <div className="separator">Tillgängliga lager</div>
@@ -845,6 +861,23 @@ class Search extends Component {
                   }}
                   value={this.state.displayFields}
                   className={this.getValidationClass("displayFields")}
+                />
+              </div>
+              <div>
+                <label>Kort visningsfält</label>
+                <input
+                  type="text"
+                  ref="input_shortDisplayFields"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        shortDisplayFields: e.target.value,
+                      },
+                      () => this.validateField("shortDisplayFields", true)
+                    );
+                  }}
+                  value={this.state.shortDisplayFields}
+                  className={this.getValidationClass("shortDisplayFields")}
                 />
               </div>
               <div>

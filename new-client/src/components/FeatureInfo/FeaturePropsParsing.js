@@ -1,11 +1,13 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { withStyles } from "@material-ui/core";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
 import {
   Divider,
   Link,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -15,7 +17,13 @@ import {
   Typography,
 } from "@material-ui/core";
 
-// Styled Component, makes every second row colored
+const Paragraph = withStyles((theme) => ({
+  root: {
+    marginBottom: "1.1rem",
+  },
+}))(Typography);
+
+// Styled Table Row Component, makes every second row in a Table colored
 const StyledTableRow = withStyles((theme) => ({
   root: {
     "&:nth-of-type(even)": {
@@ -24,14 +32,33 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
+const StyledTableContainer = withStyles((theme) => ({
+  root: {
+    marginBottom: "1.1rem",
+  },
+}))(TableContainer);
+
+const StyledPaper = withStyles((theme) => ({
+  root: {
+    padding: theme.spacing(1),
+    marginBottom: "1.1rem",
+    backgroundColor: theme.palette.background.default,
+    "& p": {
+      marginBottom: "0",
+    },
+  },
+}))(Paper);
+
 const StyledTypography = withStyles((theme) => ({
   h1: {
     fontSize: "1.6rem",
     fontWeight: "500",
+    marginBottom: "0.375rem",
   },
   h2: {
     fontSize: "1.4rem",
     fontWeight: "500",
+    marginBottom: "0.018rem",
   },
   h3: {
     fontSize: "1.2rem",
@@ -67,52 +94,106 @@ export default class FeaturePropsParsing {
     // Default to true to ensure backwards compatibility with old configs that predominately use HTML
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
 
-    // Here we define the renderers used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-node-types
-    this.renderers = {
-      text: (text) => {
-        // This helper is passed to ReactMarkdown at render. At this stage,
-        // we expect that the only remaining {stuff} will contain digits, and
-        // that those numbers represent element index in this.asyncComponentsPromises.
-        // So we want to replace all of them with the corresponding component from promises.
-        const match = text.value.match(/{(\d+)}/);
-        if (match) {
-          return this.resolvedPromisesWithComponents[match[1]];
-        } else return text.children;
+    // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
+    this.components = {
+      p: (props) => {
+        if (!props.children) {
+          return null;
+        }
+
+        const r = props.children.map((child, index) => {
+          // Initiate a holder for external components. If a regex matches below,
+          // this variable will be filled with correct value.
+          let externalComponent = null;
+
+          if (child && typeof child === "string") {
+            // This helper is passed to ReactMarkdown at render. At this stage,
+            // we expect that the only remaining {stuff} will contain digits, and
+            // that those numbers represent element index in this.resolvedPromisesWithComponents.
+            // Let's try to match the regex for a number within curly brackets.
+            const match = child.match(/{(\d+)}/);
+            if (
+              match &&
+              this.resolvedPromisesWithComponents.hasOwnProperty(match[1])
+            ) {
+              // If matched, replace the placeholder with the corresponding component.
+              externalComponent = this.resolvedPromisesWithComponents[match[1]];
+            }
+          }
+          // If externalComponent isn't null anymore, render it. Else, just render the children.
+          return externalComponent || child;
+        });
+
+        return <Paragraph variant="body2">{r}</Paragraph>;
       },
-      thematicBreak: () => <Divider />,
-      link: (a) => {
-        return (
-          <Link href={a.href} title={a.title} target="_blank">
-            {a.children}
+      hr: () => <Divider />,
+      a: ({ children, href, title }) => {
+        return children ? (
+          <Link href={href} title={title} target="_blank">
+            {children}
           </Link>
-        );
+        ) : null;
       },
-      heading: ({ level, children }) => {
+      h1: this.#markdownHeaderComponent,
+      h2: this.#markdownHeaderComponent,
+      h3: this.#markdownHeaderComponent,
+      h4: this.#markdownHeaderComponent,
+      h5: this.#markdownHeaderComponent,
+      h6: this.#markdownHeaderComponent,
+      table: ({ children, className, style }) => {
         return (
-          <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
+          <StyledTableContainer component="div">
+            <Table size="small" className={className} style={style}>
+              {children}
+            </Table>
+          </StyledTableContainer>
         );
       },
-      table: (a) => {
+      thead: ({ children }) => {
+        return <TableHead>{children}</TableHead>;
+      },
+      tbody: ({ children }) => {
+        return <TableBody>{children}</TableBody>;
+      },
+      tr: ({ children }) => {
+        return <StyledTableRow>{children}</StyledTableRow>;
+      },
+      td: this.#markdownTableCellComponent,
+      th: this.#markdownTableCellComponent,
+      style: ({ children }) => {
+        return <style type="text/css">{children}</style>;
+      },
+      div: ({ children, className, style }) => {
         return (
-          <TableContainer component="div">
-            <Table size="small">{a.children}</Table>
-          </TableContainer>
+          <div className={className} style={style}>
+            {children}
+          </div>
         );
       },
-      tableHead: (a) => {
-        return <TableHead>{a.children}</TableHead>;
-      },
-      tableBody: (a) => {
-        return <TableBody>{a.children}</TableBody>;
-      },
-      tableRow: (a) => {
-        return <StyledTableRow>{a.children}</StyledTableRow>;
-      },
-      tableCell: (a) => {
-        return <TableCell align={a.align || "inherit"}>{a.children}</TableCell>;
+      blockquote: (props) => {
+        return <StyledPaper variant="outlined">{props.children}</StyledPaper>;
       },
     };
   }
+
+  #markdownTableCellComponent = ({ children, style, isHeader, className }) => {
+    return (
+      <TableCell
+        variant={isHeader ? "head" : "body"}
+        align={style?.textAlign || "inherit"}
+        style={style}
+        className={className}
+      >
+        {children}
+      </TableCell>
+    );
+  };
+
+  #markdownHeaderComponent = ({ level, children }) => {
+    return (
+      <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
+    );
+  };
 
   #valueFromJson = (str) => {
     if (typeof str !== "string") return false;
@@ -214,6 +295,7 @@ export default class FeaturePropsParsing {
       return null;
     }
   };
+
   /**
    * @summary The evaluator helper used in the final stage of markdown string
    * parsing. Extracts <if> tags and either keeps the content (if value evaluates)
@@ -265,6 +347,7 @@ export default class FeaturePropsParsing {
         return args[0];
     }
   };
+
   /**
    * @summary Ensure that the href part in Markdown links is well-formatted
    * @description Href in Markdown should be UTF8 formatted and have whitespace
@@ -336,7 +419,7 @@ export default class FeaturePropsParsing {
    * 1. The markdown is used as a template, anything between { and } gets replaced
    * with the real value from properties object, or is left empty.
    * 2. Next we apply conditional rendering, where conditions are between {{ and }} while
-   * content is between {{condition}} and {{/condition}}.
+   * content is between {{condition}} and {{/condition}}.
    * Currently, if-condition is the only one supported, but more might become available.
    * Depending on the condition value, replacing can occur within our markdown string.
    * 3. The final markdown string is passed to the ReactMarkdown component.
@@ -412,13 +495,17 @@ export default class FeaturePropsParsing {
         this.pendingPromises
       );
 
+      // If admin wants to allow HTML in Markdown, add rehypeRaw plugin.
+      // Note that the gfm plugin is always added: it gives access to Table syntax.
+      const rehypePlugins = this.allowDangerousHtml ? [rehypeRaw] : [];
+
       // Now, when promises are fulfilled, we can render. One of the render's helpers
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
       return (
         <ReactMarkdown
-          plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
-          allowDangerousHtml={this.allowDangerousHtml}
-          renderers={this.renderers} // Custom renderers, see definition in this.renderers
+          remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+          rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
+          components={this.components} // Custom renderers for components, see definition in this.components
           children={this.markdown} // Our MD, as a text string
         />
       );

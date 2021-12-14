@@ -174,8 +174,7 @@ class ImageButton extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      url:
-        "https://www.kitchentreaty.com/wp-content/uploads/2017/05/vegan-vanilla-bean-waffles-image-660x430.jpg",
+      url: "https://www.kitchentreaty.com/wp-content/uploads/2017/05/vegan-vanilla-bean-waffles-image-660x430.jpg",
       urlInputVisible: false,
     };
   }

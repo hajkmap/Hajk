@@ -134,8 +134,8 @@ export default class DocumentTextEditor extends React.Component {
         return {
           type: "blockquote",
           data: {
-            dividerColor: element.attributes.getNamedItem("data-divider-color")
-              ?.value,
+            dividerColor:
+              element.attributes.getNamedItem("data-divider-color")?.value,
             backgroundColor: element.attributes.getNamedItem(
               "data-background-color"
             )?.value,
@@ -263,14 +263,8 @@ export default class DocumentTextEditor extends React.Component {
 
   _confirmLink(e) {
     e.preventDefault();
-    const {
-      editorState,
-      urlValue,
-      imageAlt,
-      urlType,
-      urlTitle,
-      urlTitleId,
-    } = this.state;
+    const { editorState, urlValue, imageAlt, urlType, urlTitle, urlTitleId } =
+      this.state;
     const data = {
       url: urlValue,
       alt: imageAlt,

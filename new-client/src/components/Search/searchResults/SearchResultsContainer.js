@@ -188,7 +188,7 @@ class SearchResultsContainer extends React.PureComponent {
 
     // Get the clicked feature
     const feature = featureCollection.value.features.find(
-      (feature) => feature.id === featureId
+      (feature) => feature.getId() === featureId
     );
 
     // If the feature has onClickName set we won't show the details
@@ -204,7 +204,7 @@ class SearchResultsContainer extends React.PureComponent {
     return featureCollections.find((featureCollection) => {
       return (
         featureCollection.value.features.findIndex(
-          (feature) => feature.id === featureId
+          (feature) => feature.getId() === featureId
         ) > -1
       );
     });
@@ -257,7 +257,7 @@ class SearchResultsContainer extends React.PureComponent {
     const { activeFeatureCollection } = this.state;
     const selectedFeatures = [...this.state.selectedFeatures];
 
-    const featureIndex = this.getSelectedFeatureIndex(feature.id);
+    const featureIndex = this.getSelectedFeatureIndex(feature.getId());
     selectedFeatures.splice(featureIndex, 1);
 
     if (activeFeatureCollection?.origin === "USERSELECT") {
@@ -282,7 +282,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   getSelectedFeatureIndex = (featureId) => {
     return this.state.selectedFeatures.findIndex((featureInfo) => {
-      return featureInfo.feature.id === featureId;
+      return featureInfo.feature.getId() === featureId;
     });
   };
 
@@ -692,7 +692,7 @@ class SearchResultsContainer extends React.PureComponent {
     if (activeFeature) {
       const featureIndex = selectedFeatures.findIndex((featureInfo) => {
         return (
-          featureInfo.feature.id === activeFeature.id &&
+          featureInfo.feature.getId() === activeFeature.getId() &&
           featureInfo.initiator !== "userSelect"
         );
       });
@@ -732,7 +732,7 @@ class SearchResultsContainer extends React.PureComponent {
   featureIsSelected = (feature) => {
     const { selectedFeatures } = this.state;
     return selectedFeatures.some((featureInfo) => {
-      return featureInfo.feature.id === feature.id;
+      return featureInfo.feature.getId() === feature.getId();
     });
   };
 
@@ -740,12 +740,9 @@ class SearchResultsContainer extends React.PureComponent {
     if (!nextFeature.source) {
       nextFeature.source = nextCollection.source;
     }
-    const featureTitle = this.getFeatureTitle(nextFeature);
-    nextFeature.featureTitle = featureTitle;
 
     return {
       feature: nextFeature,
-      featureTitle: featureTitle,
       sourceId: nextFeature.source ?? nextCollection.source.id,
       initiator: initiator,
     };
@@ -848,34 +845,6 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
-  getFeatureTitle = (feature) => {
-    const { activeFeatureCollection } = this.state;
-
-    if (feature.featureTitle) {
-      return feature.featureTitle;
-    }
-
-    const source = feature.source ?? activeFeatureCollection.source;
-
-    return source.displayFields.reduce((featureTitleString, df) => {
-      let displayField = feature.properties[df];
-      if (Array.isArray(displayField)) {
-        displayField = displayField.join(", ");
-      }
-
-      if (displayField) {
-        if (featureTitleString.length > 0) {
-          featureTitleString = featureTitleString.concat(` | ${displayField}`);
-        } else {
-          featureTitleString = displayField.toString();
-        }
-      }
-
-      feature.featureTitle = featureTitleString;
-      return featureTitleString;
-    }, "");
-  };
-
   keyPressIsEnter = (event) => {
     return event.which === 13 || event.keyCode === 13;
   };
@@ -887,8 +856,7 @@ class SearchResultsContainer extends React.PureComponent {
         if (activeFeatureCollection) {
           if (fc.source.id === activeFeatureCollection.source.id) {
             return fc.value.features.filter((f) => {
-              const featureTitle = this.getFeatureTitle(f);
-              return featureTitle
+              return f.featureTitle
                 .toLowerCase()
                 .includes(featureFilter.toLowerCase());
             });
@@ -916,7 +884,7 @@ class SearchResultsContainer extends React.PureComponent {
       filteredFeatureCollections
     );
     const currentFeatureIds = filteredFeatures.map((feature) => {
-      return feature.id;
+      return feature.getId();
     });
 
     this.setState({
@@ -1056,9 +1024,7 @@ class SearchResultsContainer extends React.PureComponent {
     const featureCollectionTitle = activeFeatureCollection
       ? activeFeatureCollection.source.caption
       : "";
-    const featureTitle = activeFeature
-      ? this.getFeatureTitle(activeFeature)
-      : "";
+    const featureTitle = activeFeature ? activeFeature.featureTitle : "";
     const shouldRenderHeaderInfoBar =
       !activeFeature || activeFeature?.onClickName;
 
@@ -1152,7 +1118,6 @@ class SearchResultsContainer extends React.PureComponent {
                   featureSortingStrategy={featureSortingStrategy}
                   enableFeaturePreview={options.enableFeaturePreview ?? true}
                   enableFeatureToggler={options.enableFeatureToggler ?? true}
-                  getFeatureTitle={this.getFeatureTitle}
                   addFeatureToSelected={this.addFeatureToSelected}
                   removeFeatureFromSelected={this.removeFeatureFromSelected}
                   selectedFeatures={this.state.selectedFeatures}

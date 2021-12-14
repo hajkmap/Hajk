@@ -6,6 +6,7 @@ import * as PDFjs from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 
 import Vector from "ol/layer/Vector.js";
+import View from "ol/View";
 import VectorSource from "ol/source/Vector.js";
 import Polygon from "ol/geom/Polygon";
 import Feature from "ol/Feature.js";
@@ -25,6 +26,26 @@ export default class PrintModel {
     this.copyright = settings.options.copyright ?? "";
     this.disclaimer = settings.options.disclaimer ?? "";
     this.localObserver = settings.localObserver;
+    this.mapConfig = settings.mapConfig;
+
+    // Let's keep track of the original view, since we're gonna change the view
+    // under the print-process. (And we want to be able to change back to the original one).
+    this.originalView = this.map.getView();
+    this.originalMapSize = null; // Needed to restore view. It is set when print().
+
+    // We must initiate a "print-view" that includes potential "hidden" resolutions.
+    // These "hidden" resolutions allows the print-process to zoom more than what the
+    // users are allowed (which is required if we want to print in high resolutions).
+    this.printView = new View({
+      center: this.originalView.getCenter(),
+      constrainOnlyCenter: this.mapConfig.constrainOnlyCenter,
+      constrainResolution: false,
+      maxZoom: 24,
+      minZoom: 0,
+      projection: this.originalView.getProjection(),
+      resolutions: this.mapConfig.allResolutions, // allResolutions includes the "hidden" resolutions
+      zoom: this.originalView.getZoom(),
+    });
   }
 
   scaleBarLengths = {
@@ -53,10 +74,6 @@ export default class PrintModel {
 
   // Used to store the calculated margin.
   margin = 0;
-
-  // Used to store some values that will be needed for resetting the map
-  valuesToRestoreFrom = {};
-
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
@@ -78,10 +95,16 @@ export default class PrintModel {
   }
 
   getMapScale = () => {
+    // We have to make sure to get (and set on the printView) the current zoom
+    //  of the "original" view. Otherwise, the scale calculation could be wrong
+    // since it depends on the static zoom of the printView.
+    this.printView.setZoom(this.originalView.getZoom());
+    // When this is updated, we're ready to calculate the scale, which depends on the
+    // dpi, mpu, inchPerMeter, and resolution. (TODO: (@hallbergs) Clarify these calculations).
     const dpi = 25.4 / 0.28,
-      mpu = this.map.getView().getProjection().getMetersPerUnit(),
+      mpu = this.printView.getProjection().getMetersPerUnit(),
       inchesPerMeter = 39.37,
-      res = this.map.getView().getResolution();
+      res = this.printView.getResolution();
 
     return res * mpu * inchesPerMeter * dpi;
   };
@@ -325,7 +348,9 @@ export default class PrintModel {
     color,
     scaleBarLength,
     scale,
-    scaleBarLengthMeters
+    scaleBarLengthMeters,
+    format,
+    orientation
   ) => {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
     pdf.setFontSize(8);
@@ -339,7 +364,11 @@ export default class PrintModel {
     );
     pdf.setFontSize(10);
     pdf.text(
-      `Skala: ${this.getUserFriendlyScale(scale)}`,
+      `Skala: ${this.getUserFriendlyScale(
+        scale
+      )} (vid ${format.toUpperCase()} ${
+        orientation === "landscape" ? "liggande" : "stående"
+      })`,
       scaleBarPosition.x,
       scaleBarPosition.y + 1
     );
@@ -377,7 +406,9 @@ export default class PrintModel {
     scale,
     resolution,
     scaleBarPlacement,
-    scaleResolution
+    scaleResolution,
+    format,
+    orientation
   ) => {
     const millimetersPerInch = 25.4;
     const pixelSize = millimetersPerInch / resolution / scaleResolution;
@@ -400,7 +431,9 @@ export default class PrintModel {
       color,
       scaleBarLength,
       scale,
-      scaleBarLengthMeters
+      scaleBarLengthMeters,
+      format,
+      orientation
     );
   };
 
@@ -416,8 +449,8 @@ export default class PrintModel {
     );
 
     // The desired options are OK if they result in a resolution bigger than the minimum
-    // resolution of the map.
-    return desiredResolution >= this.map.getView().getMinResolution();
+    // resolution of the print-view.
+    return desiredResolution >= this.printView.getMinResolution();
   };
 
   getScaleResolution = (scale, resolution, center) => {
@@ -454,30 +487,22 @@ export default class PrintModel {
 
     const width = Math.round((dim[0] * resolution) / 25.4);
     const height = Math.round((dim[1] * resolution) / 25.4);
-    const size = this.map.getSize();
-    const originalResolution = this.map.getView().getResolution();
-    const originalCenter = this.map.getView().getCenter();
 
-    // We must check if the resolution is constrained, if it is, we must
-    // turn it off while printing so that the map can be zoomed to the correct extent.
-    // Saving the value so that we can put everything back to normal when done.
-    const resolutionConstrained = this.map.getView().getConstrainResolution();
-    resolutionConstrained && this.map.getView().setConstrainResolution(false);
+    // Before we're printing we must make sure to change the map-view from the
+    // original one, to the print-view.
+    this.printView.setCenter(this.originalView.getCenter());
+    this.map.setView(this.printView);
+
+    // Store mapsize, it's needed when map is restored after print or cancel.
+    this.originalMapSize = this.map.getSize();
 
     const scaleResolution = this.getScaleResolution(
       scale,
       resolution,
-      originalCenter
+      this.map.getView().getCenter()
     );
 
     // Save some of our values that are necessary to use if user want to cancel the process
-    this.valuesToRestoreFrom = {
-      size,
-      originalCenter,
-      originalResolution,
-      scaleResolution,
-      resolutionConstrained,
-    };
 
     this.map.once("rendercomplete", async () => {
       if (this.pdfCreationCancelled === true) {
@@ -613,7 +638,9 @@ export default class PrintModel {
           options.scale,
           options.resolution,
           options.scaleBarPlacement,
-          scaleResolution
+          scaleResolution,
+          options.format,
+          options.orientation
         );
       }
 
@@ -679,12 +706,7 @@ export default class PrintModel {
         })
         .finally(() => {
           // Reset map to how it was before print
-          this.previewLayer.setVisible(true);
-          resolutionConstrained &&
-            this.map.getView().setConstrainResolution(true);
-          this.map.setSize(size);
-          this.map.getView().setResolution(originalResolution);
-          this.map.getView().setCenter(originalCenter);
+          this.restoreOriginalView();
         });
     });
 
@@ -704,6 +726,12 @@ export default class PrintModel {
     this.map.setSize(printSize);
     this.map.getView().setCenter(printCenter);
     this.map.getView().setResolution(scaleResolution);
+  };
+
+  restoreOriginalView = () => {
+    this.previewLayer.setVisible(true);
+    this.map.setSize(this.originalMapSize);
+    this.map.setView(this.originalView);
   };
 
   saveToFile = (pdf, width, type) => {
@@ -754,14 +782,7 @@ export default class PrintModel {
     this.pdfCreationCancelled = true;
 
     // Reset map to how it was before print
-    this.previewLayer.setVisible(true);
-    this.map.setSize(this.valuesToRestoreFrom.size);
-    this.map
-      .getView()
-      .setResolution(this.valuesToRestoreFrom.originalResolution);
-    this.map.getView().setCenter(this.valuesToRestoreFrom.originalCenter);
-    this.valuesToRestoreFrom.resolutionConstrained &&
-      this.map.getView().setConstrainResolution(true);
+    this.restoreOriginalView();
   };
 
   /**

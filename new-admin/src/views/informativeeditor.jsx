@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import ReactModal from "react-modal";
@@ -36,7 +14,7 @@ import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
-import MuiAlert from '@material-ui/lab/Alert';
+import MuiAlert from "@material-ui/lab/Alert";
 
 const ColorButtonRed = withStyles((theme) => ({
   root: {
@@ -154,7 +132,7 @@ class InformativeEditor extends Component {
           showModal: true,
           modalContent: result,
           showAbortButton: false,
-          modalConfirmCallback: () => { },
+          modalConfirmCallback: () => {},
         });
       }
     );
@@ -208,7 +186,7 @@ class InformativeEditor extends Component {
       showModal: false,
       modalStyle: {},
       okButtonText: "OK",
-      modalConfirmCallback: () => { },
+      modalConfirmCallback: () => {},
     });
   }
 
@@ -507,12 +485,12 @@ class InformativeEditor extends Component {
         <div className="subChapters">
           {chapter.expanded
             ? chapter.chapters.map((innerChapter, innerIndex) => {
-              return this.renderChapter(
-                chapter.chapters,
-                innerChapter,
-                innerIndex
-              );
-            })
+                return this.renderChapter(
+                  chapter.chapters,
+                  innerChapter,
+                  innerIndex
+                );
+              })
             : null}
         </div>
       </div>
@@ -688,10 +666,15 @@ class InformativeEditor extends Component {
           style={{
             marginTop: "15px",
             marginBottom: "15px",
-          }}>
-          <Alert severity="error">Denna version av dokumenthanteraren kommer inte stödjas framöver. Vänligen använd den nya version under fliken "Dokumenthanteraren 2.0"</Alert>
+          }}
+        >
+          <Alert severity="error">
+            Denna version av dokumenthanteraren kommer inte stödjas framöver.
+            Vänligen använd den nya version under fliken "Dokumenthanteraren
+            2.0"
+          </Alert>
         </div>
-        { this.renderModal()}
+        {this.renderModal()}
         <div className="margined">
           <ColorButtonGreen
             variant="contained"
@@ -736,7 +719,7 @@ class InformativeEditor extends Component {
           </ColorButtonRed>
         </div>
         <div className="chapters">{this.renderData()}</div>
-      </div >
+      </div>
     );
   }
 }

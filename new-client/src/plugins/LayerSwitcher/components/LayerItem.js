@@ -1,18 +1,22 @@
 import React from "react";
-import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
+import { withSnackbar } from "notistack";
 import { withStyles } from "@material-ui/core/styles";
+import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
+
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import InfoIcon from "@material-ui/icons/Info";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import RadioButtonChecked from "@material-ui/icons/RadioButtonChecked";
+import RadioButtonUnchecked from "@material-ui/icons/RadioButtonUnchecked";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CloseIcon from "@material-ui/icons/Close";
+
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink.js";
-import { withSnackbar } from "notistack";
 
 const styles = (theme) => ({
   button: {
@@ -44,6 +48,13 @@ const styles = (theme) => ({
     paddingBottom: "5px",
     borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
     marginLeft: "45px",
+  },
+  layerItemBackgroundContainer: {
+    paddingLeft: "0",
+    paddingTop: "6px",
+    paddingBottom: "5px",
+    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+    marginLeft: "0px",
   },
   layerItemInfo: {
     display: "flex",
@@ -95,27 +106,44 @@ class LayerItem extends React.PureComponent {
     super(props);
     const { layer } = props;
     const layerInfo = layer.get("layerInfo");
+
+    this.isBackgroundLayer = layerInfo.layerType === "base";
+    this.caption = layerInfo.caption;
+    this.name = layer.get("name");
+    this.legend = layerInfo.legend;
+    this.legendIcon = layerInfo.legendIcon;
+    this.infoTitle = layerInfo.infoTitle;
+    this.infoText = layerInfo.infoText;
+    this.infoUrl = layerInfo.infoUrl;
+    this.infoUrlText = layerInfo.infoUrlText;
+    this.infoOwner = layerInfo.infoOwner;
+    this.localObserver = layer.localObserver;
+    this.usesMinMaxZoom = this.layerUsesMinMaxZoom();
+    this.minMaxZoomAlertOnToggleOnly = layer.get("minMaxZoomAlertOnToggleOnly");
+
     this.state = {
-      caption: layerInfo.caption,
       visible: layer.get("visible"),
-      expanded: false,
-      name: layer.get("name"),
-      legend: layerInfo.legend,
-      legendIcon: layerInfo.legendIcon,
       status: "ok",
-      infoVisible: false,
-      infoTitle: layerInfo.infoTitle,
-      infoText: layerInfo.infoText,
-      infoUrl: layerInfo.infoUrl,
-      infoUrlText: layerInfo.infoUrlText,
-      infoOwner: layerInfo.infoOwner,
-      infoExpanded: false,
-      instruction: layerInfo.instruction,
+      zoomVisible: true,
       open: false,
       toggleSettings: false,
-      usesMinMaxZoom: this.layerUsesMinMaxZoom(),
-      zoomVisible: true,
+      infoVisible: false,
     };
+
+    // Subscribe to events sent when another background layer is clicked and
+    // disable all other layers to implement the RadioButton behaviour
+    if (this.isBackgroundLayer) {
+      layer.localObserver.subscribe("backgroundLayerChanged", (activeLayer) => {
+        if (activeLayer !== this.name) {
+          if (!layer.isFakeMapLayer) {
+            layer.setVisible(false);
+          }
+          this.setState({
+            visible: false,
+          });
+        }
+      });
+    }
   }
 
   /**
@@ -123,7 +151,7 @@ class LayerItem extends React.PureComponent {
    * @instance
    */
   componentDidMount() {
-    this.props.layer.on("change:visible", (e) => {
+    this.props.layer.on?.("change:visible", (e) => {
       const visible = !e.oldValue;
       this.setState({
         visible,
@@ -131,7 +159,10 @@ class LayerItem extends React.PureComponent {
 
       this.listenToZoomChange(visible);
     });
-    this.triggerZoomCheck(this.state.visible);
+
+    if (this.state.visible) {
+      this.triggerZoomCheck(null, this.state.visible);
+    }
     this.listenToZoomChange(this.state.visible);
 
     // Set load status by subscribing to a global event. Expect ID (int) of layer
@@ -143,7 +174,7 @@ class LayerItem extends React.PureComponent {
       "layerswitcher.wmsLayerLoadStatus",
       (d) => {
         this.state.status !== "loaderror" &&
-          this.state.name === d.id &&
+          this.name === d.id &&
           this.setState({
             status: d.status,
           });
@@ -165,7 +196,22 @@ class LayerItem extends React.PureComponent {
     const lprops = this.props.layer.getProperties();
     const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
 
-    if (this.state.zoomVisible && !layerIsZoomVisible) {
+    let showSnack = false;
+
+    if (this.minMaxZoomAlertOnToggleOnly === true) {
+      if (!this.state.visible && !layerIsZoomVisible && e?.type === "click") {
+        showSnack = true;
+      }
+    } else {
+      if (
+        !layerIsZoomVisible &&
+        (this.state.zoomVisible || !this.state.visible)
+      ) {
+        showSnack = true;
+      }
+    }
+
+    if (showSnack === true) {
       this.showZoomSnack();
     }
 
@@ -176,7 +222,7 @@ class LayerItem extends React.PureComponent {
   };
 
   listenToZoomChange(bListen) {
-    if (!this.state.usesMinMaxZoom) return;
+    if (!this.usesMinMaxZoom) return;
 
     const eventName = "core.zoomEnd";
     if (bListen && !this.zoomEndListener) {
@@ -198,7 +244,7 @@ class LayerItem extends React.PureComponent {
   showZoomSnack() {
     if (this.zoomWarningSnack) return;
     this.zoomWarningSnack = this.props.enqueueSnackbar(
-      `Lagret "${this.state.caption}" visas endast vid specifika skalor.`,
+      `Lagret "${this.caption}" visas endast vid specifika skalor.`,
       {
         variant: "warning",
         preventDuplicate: true,
@@ -209,14 +255,12 @@ class LayerItem extends React.PureComponent {
     );
   }
 
-  triggerZoomCheck(visible) {
-    if (!this.state.usesMinMaxZoom) return;
+  triggerZoomCheck(e, visible) {
+    if (!this.usesMinMaxZoom) return;
 
-    if (visible) {
-      if (!this.zoomEndHandler()) {
-        this.showZoomSnack();
-      }
-    } else {
+    this.zoomEndHandler(e);
+
+    if (visible === false) {
       if (!this.zoomWarningSnack) return;
       this.props.closeSnackbar(this.zoomWarningSnack);
       this.zoomWarningSnack = null;
@@ -229,13 +273,34 @@ class LayerItem extends React.PureComponent {
    * "status" is "loaderror", and it should be reset if user unchecks layer).
    * @instance
    */
-  toggleVisible = () => {
-    const visible = !this.state.visible;
-    this.setState({
-      visible,
-    });
-    this.props.layer.setVisible(visible);
-    this.triggerZoomCheck(visible);
+  toggleVisible = (e) => {
+    const layer = this.props.layer;
+    if (this.isBackgroundLayer) {
+      document.getElementById("map").style.backgroundColor = "#FFF"; // sets the default background color to white
+      if (layer.isFakeMapLayer) {
+        switch (this.name) {
+          case "-2":
+            document.getElementById("map").style.backgroundColor = "#000";
+            break;
+          case "-1":
+          default:
+            document.getElementById("map").style.backgroundColor = "#FFF";
+            break;
+        }
+      } else {
+        layer.setVisible(true);
+      }
+      this.setState({ visible: true });
+      // Publish event to ensure all other background layers are disabled
+      layer.localObserver.publish("backgroundLayerChanged", this.name);
+    } else {
+      const visible = !this.state.visible;
+      this.setState({
+        visible,
+      });
+      this.props.layer.setVisible(visible);
+      this.triggerZoomCheck(e, visible);
+    }
   };
 
   /**
@@ -257,24 +322,20 @@ class LayerItem extends React.PureComponent {
   }
 
   renderLegendImage() {
-    var src =
-      this.state.legend[0] && this.state.legend[0].url
-        ? this.state.legend[0].url
+    const src =
+      this.legend && this.legend[0] && this.legend[0].url
+        ? this.legend[0].url
         : "";
     return src ? <img width="30" alt="legend" src={src} /> : null;
   }
 
   isInfoEmpty() {
-    let chaptersWithLayer = this.findChapters(
-      this.props.layer.get("name"),
-      this.props.chapters
-    );
-    const { infoCaption, infoUrl, infoOwner, infoText } = this.state;
+    let chaptersWithLayer = this.findChapters(this.name, this.props.chapters);
     return !(
-      infoCaption ||
-      infoUrl ||
-      infoOwner ||
-      infoText ||
+      this.infoCaption ||
+      this.infoUrl ||
+      this.infoOwner ||
+      this.infoText ||
       chaptersWithLayer.length > 0
     );
   }
@@ -284,7 +345,7 @@ class LayerItem extends React.PureComponent {
   };
 
   findChapters(id, chapters) {
-    var result = [];
+    let result = [];
     if (Array.isArray(chapters)) {
       result = chapters.reduce((chaptersWithLayer, chapter) => {
         if (Array.isArray(chapter.layers)) {
@@ -307,10 +368,7 @@ class LayerItem extends React.PureComponent {
   renderChapterLinks(chapters) {
     const { classes } = this.props;
     if (chapters && chapters.length > 0) {
-      let chaptersWithLayer = this.findChapters(
-        this.props.layer.get("name"),
-        chapters
-      );
+      let chaptersWithLayer = this.findChapters(this.name, chapters);
       if (chaptersWithLayer.length > 0) {
         return (
           <div className={classes.infoTextContainer}>
@@ -350,16 +408,15 @@ class LayerItem extends React.PureComponent {
   }
 
   renderInfo() {
-    const { infoTitle, infoText } = this.state;
     const { classes } = this.props;
-    if (infoText) {
+    if (this.infoText) {
       return (
         <div className={classes.infoTextContainer}>
-          <Typography variant="subtitle2">{infoTitle}</Typography>
+          <Typography variant="subtitle2">{this.infoTitle}</Typography>
           <Typography
             variant="body2"
             dangerouslySetInnerHTML={{
-              __html: infoText,
+              __html: this.infoText,
             }}
           />
         </div>
@@ -370,13 +427,12 @@ class LayerItem extends React.PureComponent {
   }
 
   renderMetadataLink() {
-    const { infoUrl, infoUrlText } = this.state;
     const { classes } = this.props;
-    if (infoUrl) {
+    if (this.infoUrl) {
       return (
         <div className={classes.infoTextContainer}>
-          <a href={infoUrl} target="_blank" rel="noopener noreferrer">
-            {infoUrlText || infoUrl}
+          <a href={this.infoUrl} target="_blank" rel="noopener noreferrer">
+            {this.infoUrlText || this.infoUrl}
           </a>
         </div>
       );
@@ -386,14 +442,13 @@ class LayerItem extends React.PureComponent {
   }
 
   renderOwner() {
-    const { infoOwner } = this.state;
     const { classes } = this.props;
-    if (infoOwner) {
+    if (this.infoOwner) {
       return (
         <div className={classes.infoTextContainer}>
           <Typography
             variant="body2"
-            dangerouslySetInnerHTML={{ __html: infoOwner }}
+            dangerouslySetInnerHTML={{ __html: this.infoOwner }}
           />
         </div>
       );
@@ -429,13 +484,12 @@ class LayerItem extends React.PureComponent {
 
   renderLegendIcon() {
     const { classes } = this.props;
-    const { legendIcon } = this.state;
     return (
       <Grid item>
         <div className={classes.legendIconContainer}>
           <img
             alt="Teckenförklaring"
-            src={legendIcon}
+            src={this.legendIcon}
             className={classes.legendIcon}
           />
         </div>
@@ -445,13 +499,12 @@ class LayerItem extends React.PureComponent {
 
   render() {
     const { classes, layer, model, app, chapters } = this.props;
-    const { visible, legendIcon } = this.state;
-    const caption = layer.get("caption");
+    const { visible } = this.state;
 
     const cqlFilterVisible =
       this.props.app.config.mapConfig.map?.cqlFilterVisible || false;
 
-    if (!caption) {
+    if (!this.caption) {
       return null;
     }
 
@@ -476,42 +529,57 @@ class LayerItem extends React.PureComponent {
     }
 
     return (
-      <div className={classes.layerItemContainer}>
+      <div
+        className={
+          this.isBackgroundLayer
+            ? classes.layerItemBackgroundContainer
+            : classes.layerItemContainer
+        }
+      >
         <div className={classes.layerItem}>
           <div>
             <Grid
               wrap="nowrap"
               alignItems="center"
               container
-              onClick={this.toggleVisible}
+              onClick={this.toggleVisible.bind(this)}
             >
               {visible ? (
-                <CheckBoxIcon
-                  className={`${classes.checkBoxIcon} ${
-                    !this.state.zoomVisible && this.state.visible
-                      ? classes.checkBoxIconWarning
-                      : ""
-                  }`}
-                />
+                this.isBackgroundLayer ? (
+                  <RadioButtonChecked className={classes.checkBoxIcon} />
+                ) : (
+                  <CheckBoxIcon
+                    className={`${classes.checkBoxIcon} ${
+                      !this.state.zoomVisible && this.state.visible
+                        ? classes.checkBoxIconWarning
+                        : ""
+                    }`}
+                  />
+                )
+              ) : this.isBackgroundLayer ? (
+                <RadioButtonUnchecked className={classes.checkBoxIcon} />
               ) : (
                 <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
               )}
 
-              {legendIcon && this.renderLegendIcon()}
+              {this.legendIcon && this.renderLegendIcon()}
               <Grid item>
                 <Typography className={classes.captionText}>
-                  {caption}
+                  {this.caption}
                 </Typography>
               </Grid>
             </Grid>
           </div>
           <div className={classes.layerButtons}>
-            <DownloadLink
-              layer={this.props.layer}
-              enableDownloadLink={
-                this.props.app.config.mapConfig.map.enableDownloadLink
-              }
-            />
+            {layer.isFakeMapLayer ? null : (
+              <DownloadLink
+                layer={this.props.layer}
+                enableDownloadLink={
+                  this.props.app.config.mapConfig.map.enableDownloadLink
+                }
+              />
+            )}
+
             {this.renderStatus()}
             {!this.isInfoEmpty() && (
               <div className={classes.layerButton}>
@@ -555,14 +623,16 @@ class LayerItem extends React.PureComponent {
           !this.isInfoEmpty() ? (
             <hr />
           ) : null}
-          <LayerSettings
-            options={this.props.options}
-            layer={layer}
-            toggled={this.state.toggleSettings}
-            showOpacity={true}
-            showLegend={true}
-            cqlFilterVisible={cqlFilterVisible}
-          />
+          {layer.isFakeMapLayer ? null : (
+            <LayerSettings
+              options={this.props.options}
+              layer={layer}
+              toggled={this.state.toggleSettings}
+              showOpacity={true}
+              showLegend={true}
+              cqlFilterVisible={cqlFilterVisible}
+            />
+          )}
         </div>
       </div>
     );

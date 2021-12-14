@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import Alert from "../views/alert.jsx";
@@ -29,6 +7,7 @@ import AddIcon from "@material-ui/icons/Add";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { withStyles } from "@material-ui/core/styles";
 import { green, blue } from "@material-ui/core/colors";
+import TextArea from "antd/lib/input/TextArea";
 
 const ColorButtonGreen = withStyles((theme) => ({
   root: {
@@ -63,8 +42,11 @@ const defaultState = {
   uri: "",
   projection: "",
   point: false,
+  multipoint: false,
   linestring: false,
+  multilinestring: false,
   polygon: false,
+  multipolygon: false,
   layerProperties: [],
   alert: false,
   corfirm: false,
@@ -150,8 +132,11 @@ class Edit extends Component {
       projection: layer.projection || "EPSG:3006",
       addedLayers: [],
       point: layer.editPoint,
+      multipoint: layer.editMultiPoint,
       linestring: layer.editLine,
+      multilinestring: layer.editMultiLine,
       polygon: layer.editPolygon,
+      multipolygon: layer.editMultiPolygon,
     });
 
     setTimeout(() => {
@@ -301,6 +286,8 @@ class Edit extends Component {
       return {
         index: item.index,
         name: item.name,
+        alias: item.alias || item.name,
+        description: item.description || "",
         dataType: item.localType,
         textType: item.textType || null,
         values: item.listValues || null,
@@ -310,6 +297,30 @@ class Edit extends Component {
     };
 
     filter = (item) => item.checked === true;
+
+    return this.state.layerProperties.filter(filter).map(mapper);
+  }
+
+  /**
+   *
+   */
+  getNonEditableFields() {
+    var filter, mapper;
+    mapper = (item) => {
+      return {
+        index: item.index,
+        name: item.name,
+        alias: item.alias || item.name,
+        description: item.description || "",
+        dataType: item.localType,
+        textType: item.textType || null,
+        values: item.listValues || null,
+        hidden: item.hidden,
+        defaultValue: item.defaultValue,
+      };
+    };
+
+    filter = (item) => !item.checked || item.checked === false; // checked is missing if the checkbox has not been touched
 
     return this.state.layerProperties.filter(filter).map(mapper);
   }
@@ -335,6 +346,9 @@ class Edit extends Component {
     if (fieldName === "point") value = input.checked;
     if (fieldName === "polygon") value = input.checked;
     if (fieldName === "linestring") value = input.checked;
+    if (fieldName === "multipoint") value = input.checked;
+    if (fieldName === "multipolygon") value = input.checked;
+    if (fieldName === "multilinestring") value = input.checked;
 
     return value;
   }
@@ -385,14 +399,34 @@ class Edit extends Component {
       this.refs.input_url.value,
       layerName,
       (properties) => {
-        if (layer && layer.editableFields) {
-          layer.editableFields.forEach((editableField) => {
-            properties[editableField.index].listValues = editableField.values;
-            properties[editableField.index].textType = editableField.textType;
-            properties[editableField.index].checked = true;
-            properties[editableField.index].hidden = editableField.hidden;
-            properties[editableField.index].defaultValue =
-              editableField.defaultValue;
+        if (layer) {
+          if (layer?.editableFields)
+            layer.editableFields.forEach((editableField) => {
+              properties[editableField.index].listValues = editableField.values;
+              properties[editableField.index].textType = editableField.textType;
+              properties[editableField.index].alias = editableField.alias;
+              properties[editableField.index].description =
+                editableField.description;
+              properties[editableField.index].checked = true;
+              properties[editableField.index].hidden = editableField.hidden;
+              properties[editableField.index].defaultValue =
+                editableField.defaultValue;
+            });
+        }
+
+        if (layer?.nonEditableFields) {
+          layer.nonEditableFields.forEach((nonEditableField) => {
+            properties[nonEditableField.index].listValues =
+              nonEditableField.values;
+            properties[nonEditableField.index].textType =
+              nonEditableField.textType;
+            properties[nonEditableField.index].alias = nonEditableField.alias;
+            properties[nonEditableField.index].description =
+              nonEditableField.description;
+            properties[nonEditableField.index].checked = false;
+            properties[nonEditableField.index].hidden = nonEditableField.hidden;
+            properties[nonEditableField.index].defaultValue =
+              nonEditableField.defaultValue;
           });
         }
 
@@ -424,6 +458,166 @@ class Edit extends Component {
       props.listValues.push(e.target.value);
     }
   }
+
+  tooltipText(type) {
+    if (type === "string") {
+      return "Skriv in en text. För lista, skriv in ett värde och tryck på enterknappen för att lägga till som valbart element.";
+    } else if (type === "int") {
+      return "Skriv in ett heltal. Vid ja/nej så ange 1 för ja och 0 för nej";
+    } else if (type === "date") {
+      return "Skriv in ett datum på följande format: YYYY-MM-DD. Exempel 2021-08-09";
+    } else if (type === "date-time") {
+      return "Skriv in ett datum samt tid på följande format: YYYY-MM-DDThh:mm. Exempel 2021-08-09T01:23";
+    } else if (type === "number") {
+      return "Skriv in ett tal";
+    } else if (type === "boolean") {
+      return "Skriv antingen ja eller nej";
+    }
+    return "";
+  }
+
+  validateEditableFields() {
+    let errors = [];
+
+    // Check the entered values
+    this.getEditableFields().forEach((field) => {
+      if (field.dataType === "string") {
+        if (field.value && typeof field.value !== "string") {
+          errors.push(
+            field.name + " is not a string. Was " + typeof field.value
+          );
+        }
+      } else if (field.dataType === "date") {
+        if (field.value) {
+          const d = new Date(field.value);
+          try {
+            d.getDate();
+          } catch (error) {
+            errors.push(
+              field.name + " is not a valid date. Was " + field.value
+            );
+          }
+        }
+      } else if (field.dataType === "date-time") {
+        if (field.value) {
+          const d = new Date(field.value);
+          try {
+            d.getDate();
+          } catch (error) {
+            errors.push(
+              field.name + " is not a valid date time. Was " + field.value
+            );
+          }
+        }
+      } else if (field.dataType === "int") {
+        if (field.value && isNaN(parseInt(field.value))) {
+          errors.push(
+            field.name + " is not a integer. Value was " + field.value
+          );
+        } else if (field.localType === "Positiva heltal") {
+          if (field.value && parseInt(field.value) <= 0) {
+            errors.push(
+              field.name + " is not a positive number. Was " + field.value
+            );
+          }
+        }
+      } else if (field.dataType === "number") {
+        if (field.value && isNaN(parseFloat(field.value))) {
+          errors.push(
+            field.name + " is not a number. Value was " + field.value
+          );
+        }
+      } else if (field.dataType === "boolean") {
+        if (field.value && field.value !== "ja" && field.value !== "nej") {
+          errors.push(
+            field.name + " is not a ja or nej. Value was " + field.value
+          );
+        }
+      }
+    });
+
+    // Check the entered default values
+    this.getEditableFields().forEach((field) => {
+      if (field.dataType === "string") {
+        if (field.defaultValue && typeof field.defaultValue !== "string") {
+          errors.push(
+            field.name +
+              " default value is not a string. Was " +
+              typeof field.defaultValue
+          );
+        }
+      } else if (field.dataType === "date") {
+        if (field.defaultValue) {
+          const d = new Date(field.defaultValue);
+          try {
+            d.getDate();
+          } catch (error) {
+            errors.push(
+              field.name +
+                " default value is not a valid date. Was " +
+                field.defaultValue
+            );
+          }
+        }
+      } else if (field.dataType === "date-time") {
+        if (field.defaultValue) {
+          const d = new Date(field.defaultValue);
+          try {
+            d.getDate();
+          } catch (error) {
+            errors.push(
+              field.name +
+                " default value is not a valid date time. Was " +
+                field.defaultValue
+            );
+          }
+        }
+      } else if (field.dataType === "int") {
+        if (field.defaultValue && isNaN(parseInt(field.defaultValue))) {
+          errors.push(
+            field.name +
+              " default value is not a integer. Value was " +
+              field.defaultValue
+          );
+        } else if (field.localType === "Positiva heltal") {
+          if (field.defaultValue && parseInt(field.defaultValue) <= 0) {
+            errors.push(
+              field.name +
+                " default value is not a positive number. Was " +
+                field.defaultValue
+            );
+          }
+        }
+      } else if (field.dataType === "number") {
+        if (field.defaultValue && isNaN(parseFloat(field.defaultValue))) {
+          errors.push(
+            field.name +
+              " default value is not a number. Value was " +
+              field.defaultValue
+          );
+        }
+      } else if (field.dataType === "boolean") {
+        if (
+          field.defaultValue &&
+          field.defaultValue !== "ja" &&
+          field.defaultValue !== "nej"
+        ) {
+          errors.push(field.name + " default value is not ja or nej.");
+        }
+      }
+    });
+    return errors;
+  }
+
+  modifyBooleans(layer) {
+    layer.editableFields.forEach((field) => {
+      if (field.textType === "boolean") {
+        field.defaultValue = field.defaultValue === "ja";
+      }
+      console.log(field);
+    });
+  }
+
   /**
    *
    */
@@ -436,11 +630,13 @@ class Edit extends Component {
         validationErrors.push(fieldName);
       }
     });
+    var editableErrors = this.validateEditableFields();
     this.setState({
       validationErrors: validationErrors,
+      editableErrors: editableErrors,
     });
 
-    if (validationErrors.length === 0) {
+    if (validationErrors.length === 0 && editableErrors.length === 0) {
       let layer = {
         id: this.state.id,
         caption: this.getValue("caption"),
@@ -449,10 +645,16 @@ class Edit extends Component {
         layers: this.getValue("layers"),
         projection: this.getValue("projection"),
         editableFields: this.getValue("editableFields"),
+        nonEditableFields: this.getNonEditableFields(),
         editPoint: this.getValue("point"),
+        editMultiPoint: this.getValue("multipoint"),
         editPolygon: this.getValue("polygon"),
+        editMultiPolygon: this.getValue("multipolygon"),
         editLine: this.getValue("linestring"),
+        editMultiLine: this.getValue("multilinestring"),
       };
+
+      this.modifyBooleans(layer);
 
       if (this.state.mode === "add") {
         layer.id = this.createGuid(this.props.model.get("layers"));
@@ -495,6 +697,14 @@ class Edit extends Component {
           }
         });
       }
+    } else {
+      let errorString = "Felaktig indata, se nedan\n";
+      errorString += validationErrors.join("\n");
+      if (editableErrors.length !== 0 && validationErrors.length !== 0) {
+        errorString += "\n";
+      }
+      errorString += editableErrors.join("\n");
+      alert(errorString);
     }
     e.preventDefault();
   }
@@ -623,6 +833,68 @@ class Edit extends Component {
               <option value="url">Url</option>
             </select>
           );
+        } else if (type === "date") {
+          return (
+            <select
+              defaultValue={property.textType}
+              onChange={(e) => {
+                property.textType = e.target.value;
+              }}
+            >
+              <option value="datum">Datum</option>
+            </select>
+          );
+        } else if (type === "date-time") {
+          return (
+            <>
+              <select
+                defaultValue={property.textType}
+                onChange={(e) => {
+                  property.textType = e.target.value;
+                }}
+              >
+                <option value="datumtid">Datum & Tid</option>
+                <option value="datum">Datum</option>
+              </select>
+            </>
+          );
+        } else if (type === "int") {
+          return (
+            <select
+              defaultValue={property.textType}
+              onChange={(e) => {
+                property.textType = e.target.value;
+              }}
+            >
+              <option value="heltal">Heltal</option>
+              <option value="positive">Positiva heltal</option>
+              <option value="negative">Negativa heltal</option>
+              <option value="boolean">Ja/nej</option>
+            </select>
+          );
+        } else if (type === "number") {
+          return (
+            <select
+              defaultValue={property.textType}
+              onChange={(e) => {
+                property.textType = e.target.value;
+              }}
+            >
+              <option value="tal">Reella tal</option>
+              <option value="heltal">Heltal</option>
+            </select>
+          );
+        } else if (type === "boolean") {
+          return (
+            <select
+              defaultValue={property.textType}
+              onChange={(e) => {
+                property.textType = e.target.value;
+              }}
+            >
+              <option value="boolean">Ja/nej</option>
+            </select>
+          );
         }
         return null;
       };
@@ -650,13 +922,61 @@ class Edit extends Component {
       };
 
       var defaultValueEditor = (type, value) => {
+        if (type === "boolean") {
+          if (value === "true") {
+            value = "ja";
+          } else if (value === "false") {
+            value = "nej";
+          }
+          property.defaultValue = value;
+        }
+        return (
+          <>
+            <div className="grid  edit-fields-table-default">
+              <div className="row">
+                <div className="col-sm">
+                  <input
+                    defaultValue={value}
+                    type="text"
+                    onChange={(e) => {
+                      property.defaultValue = e.target.value;
+                    }}
+                  />
+                  {"  "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title={this.tooltipText(property.localType)}
+                  />
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      };
+
+      var aliasEditor = (type, value) => {
         return (
           <div>
             <input
               defaultValue={value}
               type="text"
               onChange={(e) => {
-                property.defaultValue = e.target.value;
+                property.alias = e.target.value;
+              }}
+            />
+          </div>
+        );
+      };
+
+      var descriptionEditor = (type, value) => {
+        return (
+          <div>
+            <TextArea
+              defaultValue={value}
+              rows={3}
+              onChange={(e) => {
+                property.description = e.target.value;
               }}
             />
           </div>
@@ -695,6 +1015,8 @@ class Edit extends Component {
             />
           </td>
           <td>{property.name}</td>
+          <td>{aliasEditor(property.localType, property.alias)}</td>
+          <td>{descriptionEditor(property.localType, property.description)}</td>
           <td>{stringDataTypes(property.localType)}</td>
           <td>{property.localType}</td>
           <td>{listEditor(property.localType)}</td>
@@ -712,6 +1034,8 @@ class Edit extends Component {
             <th>Redigerbar</th>
             <th>Dold</th>
             <th>Namn</th>
+            <th>Alias</th>
+            <th>Beskrivning</th>
             <th>Typ</th>
             <th>Datatyp</th>
             <th>Listvärden</th>
@@ -947,7 +1271,11 @@ class Edit extends Component {
                   <input
                     checked={this.state.point}
                     onChange={(e) => {
-                      this.setState({ point: e.target.checked }, () =>
+                      const newSt = { point: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["multipoint"] = false;
+                      }
+                      this.setState(newSt, () =>
                         this.validateField("point", true)
                       );
                     }}
@@ -959,9 +1287,31 @@ class Edit extends Component {
                   <label htmlFor="point">&nbsp;Punkter</label>
                   <br />
                   <input
+                    checked={this.state.multipoint}
+                    onChange={(e) => {
+                      const newSt = { multipoint: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["point"] = false;
+                      }
+                      this.setState(newSt, () =>
+                        this.validateField("multipoint", true)
+                      );
+                    }}
+                    ref="input_multipoint"
+                    name="multipoint"
+                    id="multipoint"
+                    type="checkbox"
+                  />
+                  <label htmlFor="multipoint">&nbsp;Multipunkter</label>
+                  <br />
+                  <input
                     checked={this.state.linestring}
                     onChange={(e) => {
-                      this.setState({ linestring: e.target.checked }, () =>
+                      const newSt = { linestring: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["multilinestring"] = false;
+                      }
+                      this.setState(newSt, () =>
                         this.validateField("linestring", true)
                       );
                     }}
@@ -973,9 +1323,31 @@ class Edit extends Component {
                   <label htmlFor="linestring">&nbsp;Linjer</label>
                   <br />
                   <input
+                    checked={this.state.multilinestring}
+                    onChange={(e) => {
+                      const newSt = { multilinestring: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["linestring"] = false;
+                      }
+                      this.setState(newSt, () =>
+                        this.validateField("multilinestring", true)
+                      );
+                    }}
+                    ref="input_multilinestring"
+                    name="multilinestring"
+                    id="multilinestring"
+                    type="checkbox"
+                  />
+                  <label htmlFor="multilinestring">&nbsp;Multilinjer</label>
+                  <br />
+                  <input
                     checked={this.state.polygon}
                     onChange={(e) => {
-                      this.setState({ polygon: e.target.checked }, () =>
+                      const newSt = { polygon: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["multipolygon"] = false;
+                      }
+                      this.setState(newSt, () =>
                         this.validateField("polygon", true)
                       );
                     }}
@@ -985,6 +1357,24 @@ class Edit extends Component {
                     type="checkbox"
                   />
                   <label htmlFor="polygon">&nbsp;Ytor</label>
+                  <br />
+                  <input
+                    checked={this.state.multipolygon}
+                    onChange={(e) => {
+                      const newSt = { multipolygon: e.target.checked };
+                      if (e.target.checked) {
+                        newSt["polygon"] = false;
+                      }
+                      this.setState(newSt, () =>
+                        this.validateField("multipolygon", true)
+                      );
+                    }}
+                    ref="input_multipolygon"
+                    name="multipolygon"
+                    id="multipolygon"
+                    type="checkbox"
+                  />
+                  <label htmlFor="multipolygon">&nbsp;Multiytor</label>
                 </div>
               </div>
               <div>

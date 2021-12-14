@@ -5,7 +5,6 @@ import { saveAs } from "file-saver";
 import { Circle as CircleStyle, Icon } from "ol/style.js";
 import { fromCircle } from "ol/geom/Polygon.js";
 import { Circle } from "ol/geom.js";
-import GeoJSON from "ol/format/GeoJSON";
 
 export default class KmlExport {
   #featureStyle;
@@ -27,46 +26,37 @@ export default class KmlExport {
   // - If feature is undefined, it exports all features in all collections
   // - Otherwise, it exports the supplied feature. (The collection is needed
   //   to create the labels.
-  export = (exportItems) => {
-    const { featureCollections, feature } = exportItems;
-    const exportFeatures = this.#getStyledFeatures(featureCollections, feature);
+  export = (featureCollections) => {
+    const exportFeatures = this.#getStyledFeatures(featureCollections);
     this.#exportFeatures(exportFeatures);
   };
 
-  #getStyledFeatures = (featureCollections, feature) => {
-    if (feature) {
-      // If a feature is supplied, we assume that we only got one
-      // collection passed.
-      const featureCollection = featureCollections[0];
-      const displayFields = featureCollection?.source?.displayFields ?? [];
-
-      return [this.#getStyledFeature(feature, displayFields)];
-    } else {
-      return featureCollections
-        .map((featureCollection) => {
-          const displayFields = featureCollection?.source?.displayFields ?? [];
-          return featureCollection.value.features.map((feature) => {
-            return this.#getStyledFeature(
-              feature,
-              feature.featureTitle ?? "",
-              displayFields
-            );
-          });
-        })
-        .flat();
-    }
+  #getStyledFeatures = (featureCollections) => {
+    return featureCollections
+      .map((featureCollection) => {
+        return featureCollection.value.features.map((feature) => {
+          // Loop all Feature Collections, and loop each Feature
+          // within in order to extract a new, correctly styled
+          // OL Feature that will be used by the KML writer.
+          return this.#getStyledFeature(feature);
+        });
+      })
+      .flat();
   };
 
-  #getStyledFeature = (feature, featureTitle, displayFields) => {
-    const gjFeature = new GeoJSON().readFeature(feature);
-    gjFeature.setStyle(); // We must reset the current style before applying new...
+  #getStyledFeature = (feature) => {
+    // Don't modify existing features
+    const gjFeature = feature.clone();
+
+    // .clone() doesn't take care of our custom properties,
+    // so we must add them manually.
+    gjFeature.featureTitle = feature.featureTitle;
+    gjFeature.shortFeatureTitle = feature.shortFeatureTitle;
+
+    // Reset the current style before applying new one
+    gjFeature.setStyle();
     gjFeature.setStyle(
-      this.#featureStyle.getFeatureStyle(
-        gjFeature,
-        featureTitle,
-        displayFields,
-        "selection"
-      )
+      this.#featureStyle.getFeatureStyle(gjFeature, "selection")
     );
     return gjFeature;
   };

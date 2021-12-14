@@ -109,11 +109,9 @@ class ToolOptions extends Component {
     });
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
     const target = event.target;

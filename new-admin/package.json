@@ -1,8 +1,27 @@
 {
   "name": "hajk-admin",
-  "version": "3.7.0-rc.1",
-  "private": true,
+  "version": "3.8.0",
+  "description": "Hajk Admin UI",
   "homepage": ".",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hajkmap/Hajk.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": [
+    ">0.5% in SE",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead",
+    "ie 11",
+    "last 100 edge versions"
+  ],
   "dependencies": {
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.9.1",
@@ -26,30 +45,9 @@
     "typescript": "^3.9.10",
     "x2js": "^3.4.1"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
-  },
   "devDependencies": {
     "draft-convert": "^2.1.11",
     "draft-extend": "^1.6.5",
-    "husky": "^4.3.7",
-    "prettier": "^2.3.2",
-    "pretty-quick": "^2.0.1"
-  },
-  "browserslist": [
-    ">0.5% in SE",
-    "last 2 versions",
-    "Firefox ESR",
-    "not dead",
-    "ie 11",
-    "last 100 edge versions"
-  ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
+    "prettier": "^2.3.2"
   }
 }
