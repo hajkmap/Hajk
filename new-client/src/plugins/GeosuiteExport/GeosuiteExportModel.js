@@ -6,6 +6,9 @@ import { Vector as VectorLayer } from "ol/layer";
 import { intersects, within } from "ol/format/filter";
 import { hfetch } from "utils/FetchWrapper";
 import { WFS } from "ol/format";
+import { saveAs } from "file-saver";
+
+const JSZip = require("jszip");
 
 /**
  * GeosuiteExport plug-in, model class.
@@ -669,6 +672,61 @@ class GeosuiteExportModel {
     return (this.#app.config?.layersConfig ?? []).find((layer) => {
       return layer.id === id && layer.type === "vector";
     });
+  };
+
+  zipDocuments = (documents) => {
+    let zip = new JSZip();
+    let deliveryInfo = "";
+    let usedFileNames = [];
+
+    documents.forEach((doc) => {
+      if (doc.selected) {
+        let fileLink = doc.link;
+        let filePath = fileLink.split("/").pop();
+        let fileName = filePath
+          .split("/")
+          .pop()
+          .replace(/\.[^/.]+$/, ""); // Get file name
+        let fileExtension = filePath.split(".").pop(); // Get file extension
+
+        let blob = hfetch(fileLink).then((r) => r.blob());
+
+        let fileNameToUse = filePath;
+        for (let n = 1; true; n++) {
+          let found = usedFileNames.indexOf(fileNameToUse);
+          if (found === -1) break;
+          fileNameToUse = fileName + "(" + n + ")." + fileExtension;
+        }
+
+        deliveryInfo =
+          deliveryInfo +
+          "Projekt: " +
+          doc.title +
+          "\nDokument: " +
+          fileNameToUse +
+          "\n\n";
+
+        usedFileNames.push(fileNameToUse);
+        zip.file(fileNameToUse, blob);
+      }
+    });
+
+    zip.file("Leveransinformation.txt", deliveryInfo); // Create text file and add information about documents
+
+    zip
+      .generateAsync({
+        type: "blob",
+      })
+      .then((blob) => {
+        saveAs(
+          blob,
+          "Geotekniska_utredningar_" + new Date().toJSON().slice(0, 10) + ".zip"
+        );
+        this.#localObserver.publish("document-save-done");
+      })
+      .catch((error) => {
+        this.#localObserver.publish("document-save-failed");
+      });
   };
 }
 
