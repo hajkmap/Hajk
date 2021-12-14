@@ -21,7 +21,6 @@ const ImageComponent = (props) => {
 
   const { readOnlyMode } = props.blockProps;
   const entity = props.contentState.getEntity(props.block.getEntityAt(0));
-  const [entityKey, setEntityKey] = useState(entity);
 
   const { src } = entity.getData();
   const data = entity.getData();
@@ -97,6 +96,7 @@ const ImageComponent = (props) => {
     popup,
     dataImagePosition,
     imagePosition,
+    dataType,
   ]);
 
   const handleOpen = (e) => {
@@ -195,7 +195,7 @@ const ImageComponent = (props) => {
     }
   };
 
-  const popupDisabled = dataType != "image";
+  const popupDisabled = dataType !== "image";
 
   const body = (
     <div className={classes.paper}>
