@@ -51,7 +51,7 @@ const styles = (theme) => ({
     overflowX: "hidden",
     border: `1px solid ${theme.palette.divider}`,
     width: "100%",
-    //marginTop: theme.spacing(2),
+    padding: "0px 0px 0px 5px",
   },
   noResultMessage: {
     display: "flex",
@@ -286,7 +286,7 @@ class GeosuiteExportView extends React.PureComponent {
 
   handleDocumentSelectAllClear = (event) => {
     let documents = this.props.model.getSelectedDocuments();
-    let selectAll = event.target.value === "true" ? true : false;
+    let selectAll = event.target.innerText !== "RENSA" ? true : false;
     documents.forEach((document) => {
       document.selected = selectAll;
     });
@@ -438,9 +438,6 @@ class GeosuiteExportView extends React.PureComponent {
     const documentDescription =
       options.view?.projects?.order?.description ??
       "Välj geoteknisk utredning nedan för att hämta motsvarande handlingar.";
-    const documentSaveDescription =
-      options.view?.projects?.order?.saveDescription ??
-      'När du trycker "SPARA FIL" kommer en dialog att visas när alla undersökningar har hämtats';
     return (
       <>
         <Grid container direction="row" alignItems="center">
@@ -449,25 +446,35 @@ class GeosuiteExportView extends React.PureComponent {
             {"Geotekniska utredningar"}
           </Typography>
         </Grid>
-        <Typography>{documentDescription}</Typography>
-        <Grid container direction="row" alignItems="center">
-          <Grid item xs={6}>
-            <Link
-              component="button"
-              value={true}
-              onClick={this.handleDocumentSelectAllClear}
-            >
-              {"Välj Alla"}
-            </Link>
-          </Grid>
-          <Grid item xs={6} style={{ textAlign: "right" }}>
-            <Link
-              component="button"
-              value={false}
+        <Typography style={{ marginBottom: "8px" }}>
+          {documentDescription}
+        </Typography>
+        <Grid
+          container
+          direction="row-reverse"
+          spacing={1}
+          alignItems="center"
+          style={{ width: "100%" }}
+        >
+          <Grid item>
+            <Button
+              variant="text"
+              aria-label="Rensa"
+              color="primary"
               onClick={this.handleDocumentSelectAllClear}
             >
               {"Rensa"}
-            </Link>
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
+              variant="text"
+              aria-label="Välj Alla"
+              color="primary"
+              onClick={this.handleDocumentSelectAllClear}
+            >
+              {"Välj Alla"}
+            </Button>
           </Grid>
         </Grid>
         {this.renderDocumentOrderResult()}
@@ -484,15 +491,7 @@ class GeosuiteExportView extends React.PureComponent {
             </Box>
           </Link>
         </Grid>
-        <Grid
-          container
-          direction="row"
-          alignItems="center"
-          style={{ marginTop: "16px", marginBottom: "8px" }}
-        >
-          <Typography>{documentSaveDescription}</Typography>
-        </Grid>
-        {this.renderNextAndBackButtons("Spara fil", null)}
+        {this.renderNextAndBackButtons("Ladda Ner", null)}
       </>
     );
   }
@@ -767,16 +766,30 @@ class GeosuiteExportView extends React.PureComponent {
   renderConfirmStepDocument = () => {
     const { classes, options } = this.props;
     const deliveryConfirmationHeader =
-      options.view?.boreholes?.confirmation?.header ??
+      options.view?.projects?.confirmation?.header ??
       "Tack för din beställning!";
+    const confirmDeliveryInformationText =
+      options.view?.projects?.confirmation?.informationText ?? "";
     const whereNextText =
-      options.view?.boreholes?.confirmation?.whereNextText ??
+      options.view?.projects?.confirmation?.whereNextText ??
       "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.";
     //const step = this.state.activeStep;
     const { savingFile, step } = this.state;
 
     if (savingFile) {
       return this.renderPending("Skapar ZIP-fil...");
+    }
+
+    let jsxConfirmDeliveryInformationText = null;
+    if (confirmDeliveryInformationText.length > 0) {
+      jsxConfirmDeliveryInformationText = (
+        <>
+          <Typography variant="body1">
+            {confirmDeliveryInformationText}
+          </Typography>
+          <br />
+        </>
+      );
     }
 
     return (
@@ -786,6 +799,7 @@ class GeosuiteExportView extends React.PureComponent {
           {deliveryConfirmationHeader}
         </Typography>
         <br />
+        {jsxConfirmDeliveryInformationText}
         <Typography variant="body1">{whereNextText}</Typography>
         <br />
         <div>
