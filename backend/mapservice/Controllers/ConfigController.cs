@@ -657,10 +657,7 @@ namespace MapService.Controllers
                 if (Path.GetExtension(file).ToLower() == ".png" || Path.GetExtension(file).ToLower() == ".jpg" || Path.GetExtension(file).ToLower() == ".jpeg")
                 {
                     fileName = Path.GetFileName(file);
-                    if (fileName != "layers")
-                    {
-                        fileList.Add(fileName);
-                    }
+                    fileList.Add(fileName);
                 }
             }
             return JsonConvert.SerializeObject(fileList);
@@ -684,10 +681,7 @@ namespace MapService.Controllers
                 if (Path.GetExtension(file).ToLower() == ".mp4" || Path.GetExtension(file).ToLower() == ".mov" || Path.GetExtension(file).ToLower() == ".ogg")
                 {
                     fileName = Path.GetFileName(file);
-                    if (fileName != "layers")
-                    {
-                        fileList.Add(fileName);
-                    }
+                    fileList.Add(fileName);
                 }
             }
             return JsonConvert.SerializeObject(fileList);
@@ -711,10 +705,7 @@ namespace MapService.Controllers
                 if (Path.GetExtension(file).ToLower() == ".mp3" || Path.GetExtension(file).ToLower() == ".wav" || Path.GetExtension(file).ToLower() == ".ogg")
                 {
                     fileName = Path.GetFileName(file);
-                    if (fileName != "layers")
-                    {
-                        fileList.Add(fileName);
-                    }
+                    fileList.Add(fileName);
                 }
             }
             return JsonConvert.SerializeObject(fileList);
