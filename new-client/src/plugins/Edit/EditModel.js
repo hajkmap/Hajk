@@ -459,6 +459,7 @@ class EditModel {
     });
 
     this.layer = new Vector({
+      name: "pluginEdit",
       source: this.vectorSource,
       style: this.getVectorStyle(),
     });

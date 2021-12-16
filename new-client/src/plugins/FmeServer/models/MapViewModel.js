@@ -52,6 +52,9 @@ class MapViewModel {
     );
     // Make sure to set the layer type to something understandable.
     this.#drawLayer.set("type", "fmeServerDrawLayer");
+    // FIXME: Remove "type", use only "name" throughout
+    // the application. Should be done as part of #883.
+    this.#drawLayer.set("name", "fmeServerDrawLayer");
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
   };
