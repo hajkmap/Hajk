@@ -726,6 +726,10 @@ class AppModel {
                 typeof sl.searchDisplayName === "string"
                   ? sl.searchDisplayName.split(",")
                   : [],
+              shortDisplayFields:
+                typeof sl.searchShortDisplayName === "string"
+                  ? sl.searchShortDisplayName.split(",")
+                  : [],
               geometryField: sl.searchGeometryField || "geom",
               outputFormat: sl.searchOutputFormat || "GML3",
               serverType: layer.serverType || "geoserver",

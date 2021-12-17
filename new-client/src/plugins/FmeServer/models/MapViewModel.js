@@ -11,6 +11,7 @@ import { handleClick } from "../../../models/Click";
 class MapViewModel {
   #map;
   #localObserver;
+  #options;
   #drawStyleSettings;
   #draw;
   #drawSource;
@@ -24,6 +25,7 @@ class MapViewModel {
   constructor(settings) {
     this.#map = settings.map;
     this.#localObserver = settings.localObserver;
+    this.#options = settings.options;
     this.#draw = null;
     this.#drawTooltipElement = null;
     this.#drawTooltip = null;
@@ -50,6 +52,9 @@ class MapViewModel {
     );
     // Make sure to set the layer type to something understandable.
     this.#drawLayer.set("type", "fmeServerDrawLayer");
+    // FIXME: Remove "type", use only "name" throughout
+    // the application. Should be done as part of #883.
+    this.#drawLayer.set("name", "fmeServerDrawLayer");
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
   };
@@ -130,8 +135,8 @@ class MapViewModel {
 
   // Returns the style settings used in the OL-style.
   #getDrawStyleSettings = () => {
-    const strokeColor = "rgba(74,74,74,0.5)";
-    const fillColor = "rgba(255,255,255,0.07)";
+    const strokeColor = this.#options.drawStrokeColor || "rgba(74,74,74,0.5)";
+    const fillColor = this.#options.drawFillColor || "rgba(255,255,255,0.07)";
     return { strokeColor: strokeColor, fillColor: fillColor };
   };
 
