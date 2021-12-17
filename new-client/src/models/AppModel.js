@@ -38,7 +38,8 @@ class AppModel {
    * @param object Config
    * @param Observer observer
    */
-  constructor(config, globalObserver) {
+  constructor(settings) {
+    const { config, globalObserver, refreshMUITheme } = settings;
     this.map = undefined;
     this.windows = [];
     this.plugins = {};
@@ -53,6 +54,7 @@ class AppModel {
     this.cqlFiltersFromParams = {};
     register(this.coordinateSystemLoader.getProj4());
     this.hfetch = hfetch;
+    this.refreshMUITheme = refreshMUITheme;
   }
 
   decorateConfig() {

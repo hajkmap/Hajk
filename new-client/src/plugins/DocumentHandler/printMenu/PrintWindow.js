@@ -285,6 +285,11 @@ class PrintWindow extends React.PureComponent {
   };
 
   handlePrintCompleted = () => {
+    // Since we've altered the theme while printing, we must refresh to make sure
+    // the original theme has the highest specificity when the printing is done.
+    // Otherwise the entire application will follow the theming used in the print-contents.
+    this.props.app.refreshMUITheme();
+    // Then we'll update the view
     this.toggleAllDocuments(false);
     this.setState({
       pdfLoading: false,
@@ -342,7 +347,7 @@ class PrintWindow extends React.PureComponent {
         printWindow.focus(); // necessary for IE >= 10*/
         printWindow.print();
         printWindow.close();
-
+        // When the user closes the print-window we have to do some cleanup...
         this.handlePrintCompleted();
       });
     });
