@@ -131,7 +131,7 @@ class FirWfsService {
     });
 
     let p = { ...params };
-    p.searchType = this.getBaseSearchType();
+    p.searchType = this.model.config.wfsRealEstateLayer;
     p.searchType.searchProp = p.searchType.idField;
     p.searchType.featureType = p.searchType.layers[0];
     p.designations = ids;
@@ -157,12 +157,6 @@ class FirWfsService {
       });
   }
 
-  getBaseSearchType = () => {
-    return this.model.getSearchTypeById(
-      this.model.config.wfsRealEstateLayer.id
-    );
-  };
-
   search(params) {
     let _params = { ...this.params, ...params };
 
@@ -173,7 +167,7 @@ class FirWfsService {
 
     let baseSearchType = this.model.baseSearchType;
 
-    let searchType = this.model.getSearchTypeById(_params.searchTypeId);
+    let searchType = this.model.getWfsById(_params.searchTypeId);
     searchType.searchProp = searchType.searchFields[0];
     searchType.featureType = searchType.layers[0];
     const isDesignationSearch =
