@@ -559,6 +559,16 @@ namespace MapService.Controllers
                     return ListImage();
                 }
 
+                if (name.ToLower() == "listvideo")
+                {
+                    return ListVideo();
+                }
+
+                if (name.ToLower() == "listaudio")
+                {
+                    return ListAudio();
+                }
+
                 string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, name);
 
                 if (System.IO.File.Exists(file))
@@ -647,10 +657,55 @@ namespace MapService.Controllers
                 if (Path.GetExtension(file).ToLower() == ".png" || Path.GetExtension(file).ToLower() == ".jpg" || Path.GetExtension(file).ToLower() == ".jpeg")
                 {
                     fileName = Path.GetFileName(file);
-                    if (fileName != "layers")
-                    {
-                        fileList.Add(fileName);
-                    }
+                    fileList.Add(fileName);
+                }
+            }
+            return JsonConvert.SerializeObject(fileList);
+        }
+
+        public string ListVideo()
+        {
+            Response.Expires = 0;
+            Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
+            Response.ContentType = "application/json; charset=utf-8";
+            Response.Headers.Add("Cache-Control", "private, no-cache");
+
+            string tempPath = "/Upload";
+            string folder = Server.MapPath(tempPath);
+
+            IEnumerable<string> files = Directory.GetFiles(folder);
+            List<string> fileList = new List<string>();
+            foreach (string file in files)
+            {
+                string fileName = String.Empty;
+                if (Path.GetExtension(file).ToLower() == ".mp4" || Path.GetExtension(file).ToLower() == ".mov" || Path.GetExtension(file).ToLower() == ".ogg")
+                {
+                    fileName = Path.GetFileName(file);
+                    fileList.Add(fileName);
+                }
+            }
+            return JsonConvert.SerializeObject(fileList);
+        }
+
+        public string ListAudio()
+        {
+            Response.Expires = 0;
+            Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
+            Response.ContentType = "application/json; charset=utf-8";
+            Response.Headers.Add("Cache-Control", "private, no-cache");
+
+            string tempPath = "/Upload";
+            string folder = Server.MapPath(tempPath);
+
+            IEnumerable<string> files = Directory.GetFiles(folder);
+            List<string> fileList = new List<string>();
+            foreach (string file in files)
+            {
+                string fileName = String.Empty;
+                if (Path.GetExtension(file).ToLower() == ".mp3" || Path.GetExtension(file).ToLower() == ".wav" || Path.GetExtension(file).ToLower() == ".ogg")
+                {
+                    fileName = Path.GetFileName(file);
+                    fileList.Add(fileName);
                 }
             }
             return JsonConvert.SerializeObject(fileList);
