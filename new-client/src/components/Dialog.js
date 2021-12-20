@@ -1,170 +1,99 @@
-import React, { Component } from "react";
-import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
+import React, { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import gfm from "remark-gfm";
 
-import ReactDialog from "@material-ui/core/Dialog";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
+// FIXME: Will we need this or is ReactMarkdown parser enough?
+// import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
+import { useTheme } from "@material-ui/core/styles";
 
-const styles = (theme) => ({
-  container: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    width: 200,
-  },
-  dense: {
-    marginTop: 19,
-  },
-  menu: {
-    width: 200,
-  },
-});
+export default function ResponsiveDialog(props) {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
-class Dialog extends Component {
-  state = {
-    open: false,
-    text: "",
+  const {
+    onAbort,
+    onClose,
+    open,
+    options: {
+      abortText,
+      allowDangerousHtml, // TODO: To be implemented?
+      buttonText,
+      headerText,
+      prompt,
+      text,
+    },
+  } = props;
+
+  // Will hold a return value for those Dialogs that are ment to be
+  // used as prompt input fields.
+  const [promptText, setPromptText] = useState("");
+
+  // FIXME: Figure out if we want to send it as an option or always
+  // allow HTML by default.
+  const rehypePlugins = allowDangerousHtml || true ? [rehypeRaw] : [];
+
+  const handleAbort = () => {
+    onAbort(promptText);
   };
 
-  static propTypes = {
-    classes: propTypes.object.isRequired,
-    onClose: propTypes.func.isRequired,
-    open: propTypes.bool.isRequired,
-    options: propTypes.object.isRequired,
+  const handleClose = () => {
+    onClose(promptText);
   };
 
-  /*
-   * If the lifecycle of the component is not controlled by itself
-   * the render method can be used to make the component
-   * update its state when props changes.
-   *
-   * It is not recommended to mutate the state of this component
-   * if the keys have the same name, it will duplicate the update event and
-   * the last prop value will be taken.
-   *
-   * NOTE: this method is considered safer than using legacy componentWillRecieveProps.
-   *
-   * @param {object} props - new props
-   * @param {object} state - current state
-   * @return {object} state - updated state
-   */
-  static getDerivedStateFromProps(props, state) {
-    return {
-      open: props.open,
-    };
-  }
-
-  handleChange = (name) => (event) => {
-    this.setState({
-      [name]: event.target.value,
-    });
-  };
-
-  handleClose = (e) => {
-    e.stopPropagation();
-    this.props.onClose(this.state.text);
-  };
-
-  handleAbort = (e) => {
-    e.stopPropagation();
-    this.props.onAbort(this.state.text);
-  };
-
-  handleDialogClick = (e) => {
-    e.stopPropagation();
-    return false;
-  };
-
-  getHtml(text) {
-    return {
-      __html: text,
-    };
-  }
-
-  renderDialogContent(text) {
-    if (typeof text === "string") {
-      return (
-        <DialogContentText>
-          <span dangerouslySetInnerHTML={this.getHtml(text)} />
-        </DialogContentText>
-      );
-    } else {
-      return text;
-    }
-  }
-
-  renderPromptInput() {
-    const { classes, options } = this.props;
-    if (!options.prompt) return null;
-
-    return (
-      <form
-        className={classes.container}
-        noValidate
-        autoComplete="off"
-        onSubmit={(e) => {
-          e.preventDefault();
-          this.props.onClose(this.state.text);
-          return false;
-        }}
-      >
-        <TextField
-          id="prompt-text"
-          label=""
-          className={classes.textField}
-          value={this.state.text}
-          onChange={this.handleChange("text")}
-          margin="normal"
-          autoFocus={true}
+  return (
+    <Dialog
+      aria-labelledby="responsive-dialog-title"
+      fullScreen={fullScreen}
+      onClose={handleClose}
+      open={open}
+    >
+      {headerText && (
+        <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
+      )}
+      <DialogContent>
+        {/* <DialogContentText> */}
+        <ReactMarkdown
+          remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+          rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
+          // components={this.components} // Custom renderers for components, see definition in this.components
+          children={text} // Our MD, as a text string
         />
-      </form>
-    );
-  }
-
-  render() {
-    const { options } = this.props;
-
-    var text = "",
-      header = "";
-
-    if (options) {
-      header = options.headerText;
-      text = options.text;
-    }
-
-    var fullScreen = document.body.clientWidth < 600;
-
-    return (
-      <ReactDialog
-        fullScreen={fullScreen}
-        open={this.state.open}
-        onClose={this.handleClose}
-        aria-labelledby="responsive-dialog-title"
-      >
-        <DialogTitle id="responsive-dialog-title">{header}</DialogTitle>
-        <DialogContent>
-          {this.renderDialogContent(text)}
-          {this.renderPromptInput()}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.handleClose}>
-            {options.buttonText || "Stäng"}
-          </Button>
-          {options.abortText ? (
-            <Button onClick={this.handleAbort}>{options.abortText}</Button>
-          ) : null}
-        </DialogActions>
-      </ReactDialog>
-    );
-  }
+        {/* </DialogContentText> */}
+        {prompt && (
+          <form
+            noValidate
+            autoComplete="off"
+            onSubmit={(e) => {
+              e.preventDefault();
+              props.onClose(promptText);
+              return false;
+            }}
+          >
+            <TextField
+              id="prompt-text"
+              label=""
+              value={promptText}
+              onChange={(e) => {
+                setPromptText(e.target.value);
+              }}
+              margin="normal"
+              autoFocus={true}
+            />
+          </form>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>{buttonText}</Button>
+        {abortText && <Button onClick={handleAbort}>{abortText}</Button>}
+      </DialogActions>
+    </Dialog>
+  );
 }
-
-export default withStyles(styles)(Dialog);
