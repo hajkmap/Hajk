@@ -12,6 +12,7 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import Input from "@material-ui/core/Input";
+import TextField from "@material-ui/core/TextField";
 
 import InputAdornment from "@material-ui/core/InputAdornment";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -111,26 +112,34 @@ class KirSearchView extends React.PureComponent {
   };
 
   handleAgeChange = (e, newValues) => {
-    const minValue = Math.min(...newValues);
-    const maxValue = Math.max(...newValues);
-
+    // const minValue = Math.min(...newValues);
+    // const maxValue = Math.max(...newValues);
     this.setState({
       ageValues: newValues,
-      minInputValue: minValue,
-      maxInputValue: maxValue,
+      // minInputValue: minValue,
+      // maxInputValue: maxValue,
     });
 
-    this.inputMinAge.current.value = minValue;
-    this.inputMaxAge.current.value = maxValue;
+    // this.inputMinAge.current.value = minValue;
+    // this.inputMaxAge.current.value = maxValue;
   };
 
-  ageInputChanged = (e, newValue) => {
-    console.log(e, newValue);
-    // this.setState({
-    //   ageValues: newValues,
-    //   maxInputValue: Math.max(...newValues),
-    //   minInputValue: Math.min(...newValues),
-    // });
+  inputMinAgeChanged = (e, newValue) => {
+    this.setState({
+      ageValues: [
+        e.target.value === "" ? 120 : parseInt(e.target.value),
+        this.state.ageValues[1],
+      ],
+    });
+  };
+
+  inputMaxAgeChanged = (e, newValue) => {
+    this.setState({
+      ageValues: [
+        this.state.ageValues[0],
+        e.target.value === "" ? 120 : parseInt(e.target.value),
+      ],
+    });
   };
 
   render() {
@@ -236,25 +245,28 @@ class KirSearchView extends React.PureComponent {
                 variant="subtitle2"
                 className={classes.subtitleShallow}
               >
-                Ålder:
+                Ålder (från, till):
               </Typography>
               <Grid container spacing={0} alignItems="center">
-                <Grid item xs={8}>
+                <Grid item xs={6}>
                   <Slider
                     value={this.state.ageValues}
                     onChange={this.handleAgeChange}
-                    valueLabelDisplay="auto"
+                    valueLabelDisplay="off"
                     aria-labelledby="range-slider"
                     step={1}
                     min={0}
                     max={this.state.maxAge}
                   />
                 </Grid>
-                <Grid item xs={2}>
-                  <Input
+                <Grid item xs={3} className={classes.ageInputContainer}>
+                  <TextField
                     fullWidth
+                    variant="outlined"
+                    size="small"
+                    value={this.state.ageValues[0]}
                     className={classes.input}
-                    onChange={this.ageInputChanged}
+                    onChange={this.inputMinAgeChanged}
                     inputRef={this.inputMinAge}
                     inputProps={{
                       step: 1,
@@ -264,11 +276,14 @@ class KirSearchView extends React.PureComponent {
                     }}
                   />
                 </Grid>
-                <Grid item xs={2}>
-                  <Input
+                <Grid item xs={3} className={classes.ageInputContainer}>
+                  <TextField
                     fullWidth
+                    variant="outlined"
+                    size="small"
+                    value={this.state.ageValues[1]}
                     className={classes.input}
-                    onChange={this.ageInputChanged}
+                    onChange={this.inputMaxAgeChanged}
                     inputRef={this.inputMaxAge}
                     inputProps={{
                       step: 1,
@@ -321,6 +336,9 @@ class KirSearchView extends React.PureComponent {
 }
 
 const styles = (theme) => ({
+  ageInputContainer: {
+    paddingLeft: theme.spacing(2),
+  },
   input: {
     marginTop: "-4px",
   },
