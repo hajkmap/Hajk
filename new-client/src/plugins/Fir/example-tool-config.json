@@ -11,21 +11,52 @@
     },
     "wfsLayers": [
       {
-        "id": "9246",
+        "id": "1246",
         "idField": "fnr",
         "areaField": "omrade",
+        "caption": "Fastighetsbeteckning",
+        "url": "https://x",
+        "layers": ["x:x"],
+        "searchFields": ["fastbet"],
+        "displayFields": ["fastbet"],
+        "geometryField": "geom",
         "visibleForGroups": []
       },
       {
-        "id": "9248",
+        "id": "1248",
         "idField": "fnr",
         "areaField": "omrade",
+        "caption": "Ägare",
+        "url": "https://x",
+        "layers": ["x:x"],
+        "searchFields": ["namn"],
+        "aliasDict": "{\"fnr\":\"FNR\"}",
+        "displayFields": ["fastighet"],
+        "geometryField": "geom",
         "visibleForGroups": []
       },
       {
-        "id": "9249",
+        "id": "1249",
         "idField": "nyckel",
         "areaField": "omrade",
+        "caption": "Adress",
+        "url": "https://x",
+        "layers": ["x:x"],
+        "searchFields": ["adress"],
+        "aliasDict": "",
+        "displayFields": ["fastbet"],
+        "geometryField": "geom",
+        "visibleForGroups": []
+      },
+      {
+        "id": "1247",
+        "caption": "Kommuninvånare",
+        "url": "https://x",
+        "layers": ["x:x"],
+        "searchFields": ["tillnamn"],
+        "aliasDict": "",
+        "displayFields": ["tillnamn"],
+        "geometryField": "geom",
         "visibleForGroups": []
       }
     ],
@@ -35,12 +66,17 @@
       "idField": "fnr"
     },
     "wfsRealEstateLayer": {
-      "id": "9246",
+      "id": "1246",
       "areaField": "omrade",
       "geometryField": "geom",
       "idField": "fnr",
       "labelField": "block_enhet",
-      "maxFeatures": "10000"
+      "maxFeatures": "10000",
+      "caption": "Fastighetsbeteckning",
+      "url": "https://x",
+      "layers": ["x:x"],
+      "searchFields": ["fastbet"],
+      "displayFields": ["fastbet"]
     },
     "resultsList": {
       "sortByField": "fastbet",

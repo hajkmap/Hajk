@@ -1,12 +1,15 @@
 version: "3"
 
 volumes:
+  backend-appdata:
   geo-db-data:
   geoserver-data:
 
 services:
   hajk:
-    image: hajk-backend-with-client-and-admin
+    image: hajk-backend-with-client-and-admin:1.0.0
+    volumes:
+      - backend-appdata:/usr/app/App_Data
     expose:
       - 3002
   nginx:
@@ -21,7 +24,7 @@ services:
     volumes:
       - geo-db-data:/var/lib/postgresql
     ports:
-      - "5432:5432"
+      - 5432:5432
     environment:
       - POSTGRES_DB=hajkGeoData
       - POSTGRES_USER=postgres
@@ -34,7 +37,7 @@ services:
     volumes:
       - geoserver-data:/opt/geoserver/data_dir
     ports:
-      - "8080:8080"
+      - 8080:8080
     restart: on-failure
     environment:
       - GEOSERVER_DATA_DIR=/opt/geoserver/data_dir

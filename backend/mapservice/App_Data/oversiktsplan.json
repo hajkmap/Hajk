@@ -799,6 +799,7 @@
         "tableOfContents": {
           "expanded": false,
           "active": true,
+          "printMode": "partial",
           "chapterLevelsToShow": 2,
           "title": ""
         },

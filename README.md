@@ -75,6 +75,10 @@ npm run dev
 1. Build and publish.
 1. Deploy to IIS. Make sure that everything is running (choose "Browse" from IIS to see the mapservice page that lists available commands - if you see that, you're good to go).
 
+#### Alternative 3: NodeJS backend using Docker
+
+See Docker [README](Docker/README.md) for more information.
+
 ### Launch the Client app
 
 Now when Backend is up and running, it's time to start the Client (and optionally Admin) applications.

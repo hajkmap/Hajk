@@ -1,6 +1,7 @@
 import React from "react";
 import { Component } from "react";
 import { hfetch } from "utils/FetchWrapper";
+import { SketchPicker } from "react-color";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
@@ -72,7 +73,34 @@ const defaultState = {
   newGroupError: false,
   loading: true,
   loadingError: false,
+  drawFillColor: "rgba(255,255,255,0.07)",
+  drawStrokeColor: "rgba(74,74,74,0.5)",
+  groupDisplayName: "Grupp",
 };
+
+class RGBA {
+  static toString(o) {
+    return `rgba(${o.r},${o.g},${o.b},${o.a})`;
+  }
+
+  static parse(s) {
+    try {
+      // 1. RegEx that matches stuff between a set of parentheses
+      // 2. Execute that regex on the input string, but first remove any whitespace it may contain
+      // 3. RegEx exec returns an array. Grab the second element, which will contain the value.
+      // 4. Split the value to extract individual rgba values
+      const o = /\(([^)]+)\)/.exec(s.replace(/\s/g, ""))[1].split(",");
+      return {
+        r: o[0],
+        g: o[1],
+        b: o[2],
+        a: o[3],
+      };
+    } catch (error) {
+      console.error("RGBA parsing failed: " + error.message);
+    }
+  }
+}
 
 class ToolOptions extends Component {
   constructor(props) {
@@ -125,6 +153,11 @@ class ToolOptions extends Component {
         loading: false,
         // If we fail to fetch repositories, we for sure have a loading error.
         loadingError: availableRepositories.length === 0,
+        drawFillColor: tool.options.drawFillColor || this.state.drawFillColor,
+        drawStrokeColor:
+          tool.options.drawStrokeColor || this.state.drawStrokeColor,
+        groupDisplayName:
+          tool.options.groupDisplayName || this.state.groupDisplayName,
       });
     } else {
       this.setState({
@@ -224,6 +257,10 @@ class ToolOptions extends Component {
     });
   }
 
+  handleColorChange = (target, color) => {
+    this.setState({ [target]: RGBA.toString(color.rgb) });
+  };
+
   getTool() {
     return this.props.model
       .get("toolConfig")
@@ -269,7 +306,10 @@ class ToolOptions extends Component {
           Function.prototype.call,
           String.prototype.trim
         ),
+        drawFillColor: this.state.drawFillColor,
+        drawStrokeColor: this.state.drawStrokeColor,
         productGroups: this.state.productGroups,
+        groupDisplayName: this.state.groupDisplayName,
         products: this.state.products,
       },
     };
@@ -1054,6 +1094,40 @@ class ToolOptions extends Component {
               value={this.state.description}
             />
           </div>
+          <div className="separator">
+            Inställningar för selektering i kartan
+          </div>
+          <span
+            className="pull-left"
+            style={{ marginLeft: "10px", marginRight: "20px" }}
+          >
+            <div>
+              <div>
+                <label className="long-label" htmlFor="drawFillColor">
+                  Fyllnadsfärg
+                </label>
+              </div>
+              <SketchPicker
+                color={RGBA.parse(this.state.drawFillColor)}
+                onChangeComplete={(color) =>
+                  this.handleColorChange("drawFillColor", color)
+                }
+              />
+            </div>
+          </span>
+          <div>
+            <div>
+              <label className="long-label" htmlFor="drawStrokeColor">
+                Ramfärg
+              </label>
+            </div>
+            <SketchPicker
+              color={RGBA.parse(this.state.drawStrokeColor)}
+              onChangeComplete={(color) =>
+                this.handleColorChange("drawStrokeColor", color)
+              }
+            />
+          </div>
           <div className="separator">Övriga inställningar</div>
           <div>
             <input
@@ -1089,6 +1163,26 @@ class ToolOptions extends Component {
           </div>
           <div>{this.renderVisibleForGroups()}</div>
           <div className="separator">Grupper</div>
+          <div>
+            <label htmlFor="groupDisplayName">
+              Visningsnamn för "Grupp"{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Grupp-etikett, exemepelvis Produktkategori. Om ej anjett visas 'Grupp'."
+              />
+            </label>
+            <input
+              type="text"
+              id="groupDisplayName"
+              name="groupDisplayName"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.groupDisplayName}
+            />
+          </div>
           <Grid container item xs={12}>
             <Grid item xs={12}>
               <p>

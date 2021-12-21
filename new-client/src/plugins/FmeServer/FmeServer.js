@@ -19,6 +19,7 @@ const FmeServer = (props) => {
   const mapViewModel = new MapViewModel({
     localObserver: localObserver,
     map: props.map,
+    options: props.options,
   });
 
   // A model used to interact with the FME-server instance etc. We want to
