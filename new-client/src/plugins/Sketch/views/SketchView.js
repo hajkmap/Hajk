@@ -20,8 +20,9 @@ const SketchView = (props) => {
   const { position: pluginPosition } = props.options ?? "left";
   // We are going to be using the sketch- and draw-model. Let's destruct them.
   const { model, drawModel } = props;
-  // We're gonna need to keep track of the current chosen activity
+  // We're gonna need to keep track of the current chosen activity etc.
   const [activityId, setActivityId] = React.useState("ADD");
+  const [activeDrawType, setActiveDrawType] = React.useState("Polygon");
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
@@ -29,7 +30,15 @@ const SketchView = (props) => {
     // Let's check which activity we're supposed to render!
     switch (activityId) {
       case "ADD":
-        return <AddView id={activityId} model={model} drawModel={drawModel} />;
+        return (
+          <AddView
+            id={activityId}
+            model={model}
+            drawModel={drawModel}
+            activeDrawType={activeDrawType}
+            setActiveDrawType={setActiveDrawType}
+          />
+        );
       case "DELETE":
         return (
           <DeleteView id={activityId} model={model} drawModel={drawModel} />
