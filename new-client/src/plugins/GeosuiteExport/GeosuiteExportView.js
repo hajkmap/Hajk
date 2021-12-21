@@ -51,7 +51,10 @@ const styles = (theme) => ({
     overflowX: "hidden",
     border: `1px solid ${theme.palette.divider}`,
     width: "100%",
-    padding: "0px 0px 0px 5px",
+    padding: "0px 0px 0px 10px",
+  },
+  checkBoxItem: {
+    marginBottom: "-10px",
   },
   noResultMessage: {
     display: "flex",
@@ -454,7 +457,11 @@ class GeosuiteExportView extends React.PureComponent {
           direction="row-reverse"
           spacing={1}
           alignItems="center"
-          style={{ width: "100%" }}
+          style={{
+            width: "100%",
+            margin: "0px 0px 0px 5px",
+            padding: "0px 0px 0px 0px",
+          }}
         >
           <Grid item>
             <Button
@@ -482,7 +489,7 @@ class GeosuiteExportView extends React.PureComponent {
           container
           direction="row"
           alignItems="center"
-          style={{ marginTop: "16px", marginBottom: "8px" }}
+          style={{ marginTop: "24px", marginBottom: "24px" }}
         >
           <Link href={termsAndConditionsLink} target="_blank">
             <Box display="flex" alignItems="center" gridColumnGap="4px">
@@ -564,7 +571,7 @@ class GeosuiteExportView extends React.PureComponent {
         <div className={classes.checkBoxList}>
           {this.state.documents.map((document) => {
             return (
-              <Grid item key={document.id}>
+              <Grid item key={document.id} className={classes.checkBoxItem}>
                 <FormControlLabel
                   control={
                     <Checkbox
