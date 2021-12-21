@@ -10,7 +10,6 @@ const DrawTypeSelector = (props) => {
       variant="outlined"
       size="small"
       select
-      label="Typ"
       value={props.activeDrawType}
       onChange={(e) => props.setActiveDrawType(e.target.value)}
     >

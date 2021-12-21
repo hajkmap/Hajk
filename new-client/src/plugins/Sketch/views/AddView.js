@@ -1,8 +1,9 @@
 import React from "react";
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 
 import DrawTypeSelector from "../components/DrawTypeSelector";
 import Information from "../components/Information";
+import DrawStyleSelector from "../components/DrawStyleSelector";
 
 const AddView = (props) => {
   // Let's destruct some properties from the props
@@ -15,10 +16,23 @@ const AddView = (props) => {
         <Information text={activity.information} />
       </Grid>
       <Grid item xs={12} style={{ marginTop: 16 }}>
-        <DrawTypeSelector
-          activeDrawType={activeDrawType}
-          setActiveDrawType={setActiveDrawType}
-        />
+        <Grid item xs={12} style={{ marginBottom: 4 }}>
+          <Typography align="center">Typ</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <DrawTypeSelector
+            activeDrawType={activeDrawType}
+            setActiveDrawType={setActiveDrawType}
+          />
+        </Grid>
+      </Grid>
+      <Grid item xs={12} style={{ marginTop: 16 }}>
+        <Grid item xs={12} style={{ marginBottom: 4 }}>
+          <Typography align="center">Utseende</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <DrawStyleSelector />
+        </Grid>
       </Grid>
     </Grid>
   );
