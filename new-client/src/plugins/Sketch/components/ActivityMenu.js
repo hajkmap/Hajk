@@ -17,16 +17,16 @@ const ActivityMenu = (props) => {
       container
       justify={props.pluginPosition === "right" ? "flex-end" : "flex-start"}
     >
-      <Paper style={{ maxWidth: 64 }}>
+      <Paper elevation={4}>
         {ACTIVITIES.map((activity, index) => {
           return (
             <div key={index} style={{ padding: 8 }}>
               <Tooltip title={activity.tooltip}>
                 <StyledToggleButton
                   value={activity.id}
-                  selected={props.activity === activity.id}
+                  selected={props.activityId === activity.id}
                   onChange={() => {
-                    props.setActivity(activity.id);
+                    props.setActivityId(activity.id);
                   }}
                 >
                   {activity.icon}

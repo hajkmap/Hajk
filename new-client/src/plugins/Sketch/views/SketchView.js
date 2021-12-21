@@ -18,25 +18,34 @@ const SketchView = (props) => {
   // We want to render the ActivityMenu on the same side as the plugin
   // is rendered (left or right). Let's grab the prop stating where it is rendered!
   const { position: pluginPosition } = props.options ?? "left";
+  // We are going to be using the sketch- and draw-model. Let's destruct them.
+  const { model, drawModel } = props;
   // We're gonna need to keep track of the current chosen activity
-  const [activity, setActivity] = React.useState("ADD");
+  const [activityId, setActivityId] = React.useState("ADD");
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
   const renderCurrentView = () => {
-    switch (activity) {
+    // Let's check which activity we're supposed to render!
+    switch (activityId) {
       case "ADD":
-        return <AddView />;
+        return <AddView id={activityId} model={model} drawModel={drawModel} />;
       case "DELETE":
-        return <DeleteView />;
+        return (
+          <DeleteView id={activityId} model={model} drawModel={drawModel} />
+        );
       case "EDIT":
-        return <EditView />;
+        return <EditView id={activityId} model={model} drawModel={drawModel} />;
       case "MOVE":
-        return <MoveView />;
+        return <MoveView id={activityId} model={model} drawModel={drawModel} />;
       case "SAVE":
-        return <SaveUploadView />;
+        return (
+          <SaveUploadView id={activityId} model={model} drawModel={drawModel} />
+        );
       case "SETTINGS":
-        return <SettingsView />;
+        return (
+          <SettingsView id={activityId} model={model} drawModel={drawModel} />
+        );
       default:
         return null;
     }
@@ -51,8 +60,8 @@ const SketchView = (props) => {
         <Grid item xs={3} style={{ marginLeft: -PLUGIN_MARGIN }}>
           <ActivityMenu
             pluginPosition={pluginPosition}
-            activity={activity}
-            setActivity={setActivity}
+            activityId={activityId}
+            setActivityId={setActivityId}
           />
         </Grid>
         <Grid item xs={9}>
@@ -74,8 +83,8 @@ const SketchView = (props) => {
         <Grid item xs={3} style={{ marginRight: -PLUGIN_MARGIN }}>
           <ActivityMenu
             pluginPosition={pluginPosition}
-            activity={activity}
-            setActivity={setActivity}
+            activityId={activityId}
+            setActivityId={setActivityId}
           />
         </Grid>
       </Grid>

@@ -42,7 +42,7 @@ const Sketch = (props) => {
         title: "Rita",
         description: "Skapa dina helt egna geometrier!",
         height: "dynamic",
-        width: 400,
+        width: 350,
         onWindowHide: onWindowHide,
       }}
     >
