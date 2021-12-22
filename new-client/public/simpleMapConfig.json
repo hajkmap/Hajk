@@ -488,6 +488,36 @@
         "visibleForGroups": []
       },
       "index": 2
+    },
+    {
+      "type": "infodialog",
+      "index": 0,
+      "options": [
+        {
+          "target": "control",
+          "name": "help",
+          "icon": "helpcenter",
+          "headerText": "Hjälp",
+          "text": "Ett hjälpavsnitt, här får man jättemycket hjälp med det mesta.",
+          "buttonText": "Stäng",
+          "title": "Visa hjälp",
+          "visibleAtStart": true,
+          "showOnlyOnce": true,
+          "visibleForGroups": []
+        },
+        {
+          "target": "right",
+          "name": "announcements",
+          "headerText": "Nyheter i Hajk",
+          "icon": "announcement",
+          "text": "### 3.8.0\n\nVi har lagt till grejer som är riktigt, riktigt bra!\n\n### 3.7.0\n\nDet här är en jättefin release!",
+          "buttonText": "Ok, uppfattat!",
+          "title": "Visa nyheter",
+          "visibleAtStart": true,
+          "showOnlyOnce": true,
+          "visibleForGroups": []
+        }
+      ]
     }
   ],
   "map": {
