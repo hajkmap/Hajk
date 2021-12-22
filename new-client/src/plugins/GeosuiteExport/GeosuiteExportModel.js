@@ -7,6 +7,7 @@ import { intersects, within } from "ol/format/filter";
 import { hfetch } from "utils/FetchWrapper";
 import { WFS } from "ol/format";
 import { saveAs } from "file-saver";
+//import { JSZip } from "jszip";
 
 const JSZip = require("jszip");
 
@@ -675,21 +676,21 @@ class GeosuiteExportModel {
   };
 
   zipDocuments = (documents) => {
-    let zip = new JSZip();
+    const zip = new JSZip();
     let deliveryInfo = "";
-    let usedFileNames = [];
+    const usedFileNames = [];
 
     documents.forEach((doc) => {
       if (doc.selected) {
-        let fileLink = doc.link;
-        let filePath = fileLink.split("/").pop();
-        let fileName = filePath
+        const fileLink = doc.link;
+        const filePath = fileLink.split("/").pop();
+        const fileName = filePath
           .split("/")
           .pop()
           .replace(/\.[^/.]+$/, ""); // Get file name
-        let fileExtension = filePath.split(".").pop(); // Get file extension
+        const fileExtension = filePath.split(".").pop(); // Get file extension
 
-        let blob = hfetch(fileLink).then((r) => r.blob());
+        const blob = hfetch(fileLink).then((r) => r.blob());
 
         let fileNameToUse = filePath;
         for (let n = 1; true; n++) {

@@ -780,7 +780,7 @@ class GeosuiteExportView extends React.PureComponent {
     const whereNextText =
       options.view?.projects?.confirmation?.whereNextText ??
       "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.";
-    //const step = this.state.activeStep;
+
     const { savingFile, step } = this.state;
 
     if (savingFile) {
