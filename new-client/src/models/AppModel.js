@@ -105,21 +105,32 @@ class AppModel {
   }
 
   /**
-   * A plugin may have the 'target' option. Currently we use three
-   * targets: toolbar, left and right. Toolbar means it's a
+   * @summary Helper used by getBothDrawerAndWidgetPlugins(), checks
+   * that the supplied parameter has one of the valid "target" values.
+   *
+   * @param {string} t Target to be tested
+   * @returns {boolean}
+   */
+  #validPluginTarget = (t) => {
+    // FIXME: Why is "hidden" included in this list, anyone?
+    return ["toolbar", "left", "right", "control", "hidden"].includes(t);
+  };
+
+  /**
+   * A plugin may have the 'target' option. Currently we use four
+   * targets: toolbar, control, left and right. Toolbar means it's a
    * plugin that will be visible in Drawer list. Left and right
    * are Widget plugins, that on large displays show on left/right
    * side of the map viewport, while on small screens change its
-   * appearance and end up as Drawer list plugins too.
+   * appearance and end up as Drawer list plugins too. Control buttons
+   * are displayed in the same area as map controls, e.g. zoom buttons.
    *
    * This method filters out those plugins that should go into
-   * the Drawer or Widget list and returns them.
+   * the Drawer, Widget or Control list and returns them.
    *
    * It is used in AppModel to initiate all plugins' Components,
    * so whatever is returned here will result in a render() for
-   * that plugin. That is the reason why 'search' is filtered out
-   * from the results: we render Search plugin separately in App,
-   * and we don't want a second render invoked from here.
+   * that plugin.
    *
    * @returns array of Plugins
    * @memberof AppModel
@@ -127,8 +138,14 @@ class AppModel {
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
       .filter((plugin) => {
-        return ["toolbar", "left", "right", "control", "hidden"].includes(
-          plugin.options.target
+        return (
+          // If "options" is an Array (of plugin entities) we must
+          // look for the "target" property inside that array. As soon
+          // as one of the entities has a valid "target" value, we
+          // consider the entire plugin to be valid and included in this list.
+          plugin.options.some?.((p) => this.#validPluginTarget(p.target)) ||
+          // If "options" isn't an array, we can grab the "target" directly.
+          this.#validPluginTarget(plugin.options.target)
         );
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
