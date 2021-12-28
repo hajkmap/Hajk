@@ -1,8 +1,8 @@
 import React from "react";
 import { Grid, Typography, Paper } from "@material-ui/core";
-import { SliderPicker } from "react-color";
+import { CirclePicker, SliderPicker } from "react-color";
 
-const DrawStyleSelector = () => {
+const DrawStyleSelector = (props) => {
   const renderLineColorSelector = () => {
     return (
       <Paper style={{ padding: 8, marginBottom: 16 }}>
@@ -10,7 +10,12 @@ const DrawStyleSelector = () => {
           <Typography variant="caption">Linjefärg</Typography>
         </Grid>
         <Grid item xs={12}>
-          <SliderPicker />
+          <CirclePicker
+            color={props.drawColor.stroke}
+            onChangeComplete={(e) =>
+              props.setDrawColor({ ...props.drawColor, stroke: e.hex })
+            }
+          />
         </Grid>
       </Paper>
     );
@@ -23,7 +28,7 @@ const DrawStyleSelector = () => {
           <Typography variant="caption">Fyllnadsfärg</Typography>
         </Grid>
         <Grid item xs={12}>
-          <SliderPicker />
+          <SliderPicker color={props.drawColor.fill} />
         </Grid>
       </Paper>
     );

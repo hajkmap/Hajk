@@ -23,6 +23,10 @@ const SketchView = (props) => {
   // We're gonna need to keep track of the current chosen activity etc.
   const [activityId, setActivityId] = React.useState("ADD");
   const [activeDrawType, setActiveDrawType] = React.useState("Polygon");
+  const [drawColor, setDrawColor] = React.useState({
+    stroke: "#000000",
+    fill: "#fcba03",
+  });
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
@@ -37,6 +41,8 @@ const SketchView = (props) => {
             drawModel={drawModel}
             activeDrawType={activeDrawType}
             setActiveDrawType={setActiveDrawType}
+            drawColor={drawColor}
+            setDrawColor={setDrawColor}
           />
         );
       case "DELETE":
