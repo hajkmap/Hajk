@@ -7,9 +7,7 @@ import { intersects, within } from "ol/format/filter";
 import { hfetch } from "utils/FetchWrapper";
 import { WFS } from "ol/format";
 import { saveAs } from "file-saver";
-//import { JSZip } from "jszip";
-
-const JSZip = require("jszip");
+import JSZip from "jszip";
 
 /**
  * GeosuiteExport plug-in, model class.
