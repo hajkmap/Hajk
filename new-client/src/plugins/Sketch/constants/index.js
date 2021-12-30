@@ -80,5 +80,10 @@ export const DRAW_TYPES = [
     tooltip:
       "Välj ett objekt från befintliga objekt i kartan och importera detta till din ritning.",
   },
+  {
+    type: "Text",
+    label: "Text",
+    tooltip: "Infoga text i kartan genom att klicka där du vill ha texten.",
+  },
 ];
 export const PLUGIN_MARGIN = 10;
