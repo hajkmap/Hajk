@@ -13,33 +13,81 @@ export default function DrawStyleSelector(props) {
     props.setDrawColor({ ...props.drawColor, fill: e.hex });
   };
 
-  // If we're drawing an area, we need to provide the possibility to change
-  // the fill color and opacity, but if we're not it's enough if we provide
-  // the possibility to change the line-style.
-  const drawTypeIncludesFill = props.activeDrawType !== "Line";
+  // The style settings for area-drawings!
+  // TODO: Opacity-style settings and stroke-width-settings!
+  const renderFillStyleSettings = () => {
+    return (
+      <Grid container>
+        <Grid item xs={12}>
+          <ColorPickerAccordion
+            title="Fyllnadsfärg"
+            color={props.drawColor.fill}
+            handleColorChange={handleFillColorChange}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ColorPickerAccordion
+            title="Linjefärg"
+            color={props.drawColor.stroke}
+            handleColorChange={handleStrokeColorChange}
+          />
+        </Grid>
+      </Grid>
+    );
+  };
 
-  return drawTypeIncludesFill ? (
-    <Grid container>
-      <Grid item xs={12}>
-        <ColorPickerAccordion
-          title="Fyllnadsfärg"
-          color={props.drawColor.fill}
-          handleColorChange={handleFillColorChange}
-        />
+  // The style settings for text-drawings!
+  // TODO: color-handlers and font-size-settings!
+  const renderTextStyleSettings = () => {
+    return (
+      <Grid container>
+        <Grid item xs={12}>
+          <ColorPickerAccordion
+            title="Färg"
+            color={props.drawColor.fill}
+            handleColorChange={handleFillColorChange}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ColorPickerAccordion
+            title="Bakgrundsfärg"
+            color={props.drawColor.stroke}
+            handleColorChange={handleStrokeColorChange}
+          />
+        </Grid>
       </Grid>
-      <Grid item xs={12}>
-        <ColorPickerAccordion
-          title="Linjefärg"
-          color={props.drawColor.stroke}
-          handleColorChange={handleStrokeColorChange}
-        />
+    );
+  };
+
+  // The style settings for line-drawings!
+  // Why are we grid-ing these? Cause we're gonna be implementing more settings.
+  // TODO: Stroke-width-settings!
+  const renderLineStyleSettings = () => {
+    return (
+      <Grid container>
+        <Grid item xs={12}>
+          <ColorPickerAccordion
+            title="Färg"
+            color={props.drawColor.stroke}
+            handleColorChange={handleStrokeColorChange}
+          />
+        </Grid>
       </Grid>
-    </Grid>
-  ) : (
-    <ColorPickerAccordion
-      title="Färg"
-      color={props.drawColor.stroke}
-      handleColorChange={handleStrokeColorChange}
-    />
-  );
+    );
+  };
+
+  // We want to display different settings depending on what the user is drawing!
+  // Let's check and render the appropriate settings.
+  const renderStyleSettings = () => {
+    switch (props.activeDrawType) {
+      case "Line":
+        return renderLineStyleSettings();
+      case "Text":
+        return renderTextStyleSettings();
+      default:
+        return renderFillStyleSettings();
+    }
+  };
+
+  return renderStyleSettings();
 }
