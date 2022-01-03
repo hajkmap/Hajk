@@ -13,6 +13,7 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
 
 import LegacyNonMarkdownRenderer from "./LegacyNonMarkdownRenderer";
+import { customComponentsForReactMarkdown } from "./customComponentsForReactMarkdown";
 
 export default function ResponsiveDialog(props) {
   const theme = useTheme();
@@ -64,7 +65,7 @@ export default function ResponsiveDialog(props) {
           <ReactMarkdown
             remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
             rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
-            // components={this.components} // Custom renderers for components, see definition in this.components
+            components={customComponentsForReactMarkdown} // Custom renderers for components, see definition in components
             children={text} // Our MD, as a text string
           />
         )}
