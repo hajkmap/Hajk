@@ -1,16 +1,20 @@
 import React from "react";
 import { Grid } from "@material-ui/core";
 
-import ColorPickerAccordion from "./ColorPickerAccordion";
+import DrawStyleAccordion from "./DrawStyleAccordion";
 
 export default function DrawStyleSelector(props) {
   // We need a handler that can update the stroke color
   const handleStrokeColorChange = (e) => {
-    props.setDrawColor({ ...props.drawColor, stroke: e.hex });
+    props.setDrawStyle({ ...props.drawStyle, stroke: e.hex });
   };
   // We need a handler that can update the fill color
   const handleFillColorChange = (e) => {
-    props.setDrawColor({ ...props.drawColor, fill: e.hex });
+    props.setDrawStyle({ ...props.drawStyle, fill: e.hex });
+  };
+  // We need a handler that can update the opacity value
+  const handleOpacityChange = (e, value) => {
+    props.setDrawStyle({ ...props.drawStyle, opacity: value });
   };
 
   // The style settings for area-drawings!
@@ -19,16 +23,19 @@ export default function DrawStyleSelector(props) {
     return (
       <Grid container>
         <Grid item xs={12}>
-          <ColorPickerAccordion
-            title="Fyllnadsfärg"
-            color={props.drawColor.fill}
+          <DrawStyleAccordion
+            title="Fyllnad"
+            showOpacitySlider
+            color={props.drawStyle.fill}
+            opacity={props.drawStyle.opacity}
             handleColorChange={handleFillColorChange}
+            handleOpacityChange={handleOpacityChange}
           />
         </Grid>
         <Grid item xs={12}>
-          <ColorPickerAccordion
-            title="Linjefärg"
-            color={props.drawColor.stroke}
+          <DrawStyleAccordion
+            title="Linje"
+            color={props.drawStyle.stroke}
             handleColorChange={handleStrokeColorChange}
           />
         </Grid>
@@ -42,16 +49,16 @@ export default function DrawStyleSelector(props) {
     return (
       <Grid container>
         <Grid item xs={12}>
-          <ColorPickerAccordion
+          <DrawStyleAccordion
             title="Färg"
-            color={props.drawColor.fill}
+            color={props.drawStyle.fill}
             handleColorChange={handleFillColorChange}
           />
         </Grid>
         <Grid item xs={12}>
-          <ColorPickerAccordion
+          <DrawStyleAccordion
             title="Bakgrundsfärg"
-            color={props.drawColor.stroke}
+            color={props.drawStyle.stroke}
             handleColorChange={handleStrokeColorChange}
           />
         </Grid>
@@ -66,9 +73,9 @@ export default function DrawStyleSelector(props) {
     return (
       <Grid container>
         <Grid item xs={12}>
-          <ColorPickerAccordion
-            title="Färg"
-            color={props.drawColor.stroke}
+          <DrawStyleAccordion
+            title="Färg och linjebredd"
+            color={props.drawStyle.stroke}
             handleColorChange={handleStrokeColorChange}
           />
         </Grid>

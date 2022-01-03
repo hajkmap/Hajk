@@ -33,8 +33,8 @@ const AddView = (props) => {
         <Grid item xs={12}>
           <DrawStyleSelector
             activeDrawType={activeDrawType}
-            drawColor={props.drawColor}
-            setDrawColor={props.setDrawColor}
+            drawStyle={props.drawStyle}
+            setDrawStyle={props.setDrawStyle}
           />
         </Grid>
       </Grid>
