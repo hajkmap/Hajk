@@ -2,7 +2,9 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { TwitterPicker } from "react-color";
 
-import { Box, Grid, Typography, Tooltip, Slider } from "@material-ui/core";
+import { Box, Grid, Typography, Tooltip } from "@material-ui/core";
+import { Paper, Slider } from "@material-ui/core";
+
 import {
   Accordion,
   AccordionDetails,
@@ -50,16 +52,18 @@ const ColorBadge = ({ color }) => {
 const OpacitySlider = ({ opacity, handleOpacityChange }) => {
   return (
     <Grid item xs={12}>
-      <Slider
-        min={0}
-        max={100}
-        value={opacity}
-        step={1}
-        onChange={handleOpacityChange}
-        valueLabelFormat={(value) => `${value}%`}
-        valueLabelDisplay="auto"
-      />
-      <Typography variant="caption">{`Opacitet: ${opacity}%`}</Typography>
+      <Paper style={{ padding: 8, marginTop: 8 }}>
+        <Typography variant="caption">{`Opacitet: ${opacity}%`}</Typography>
+        <Slider
+          min={0}
+          max={100}
+          value={opacity}
+          step={1}
+          onChange={handleOpacityChange}
+          valueLabelFormat={(value) => `${value}%`}
+          valueLabelDisplay="auto"
+        />
+      </Paper>
     </Grid>
   );
 };
