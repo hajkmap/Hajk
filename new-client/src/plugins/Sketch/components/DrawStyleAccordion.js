@@ -42,6 +42,7 @@ const ColorBadge = ({ color }) => {
         width: "1.1rem",
         backgroundColor: color,
         borderRadius: "10%",
+        marginLeft: 4,
       }}
     />
   );
@@ -68,6 +69,20 @@ const OpacitySlider = ({ opacity, handleOpacityChange }) => {
   );
 };
 
+const AccordionSummaryContents = ({ color, opacity, title }) => {
+  return (
+    <Grid container justify="space-between" alignItems="center">
+      <Typography variant="button">{title}</Typography>
+      <Grid container item xs={4} justify="flex-end" alignItems="center">
+        {typeof opacity === "number" && (
+          <Typography variant="caption">{`${opacity}%`}</Typography>
+        )}
+        <ColorBadge color={color} />
+      </Grid>
+    </Grid>
+  );
+};
+
 // The draw-style-accordion includes a summary showing the current draw-style-settings.
 // It also includes tools to update the current style.
 const DrawStyleAccordion = (props) => {
@@ -75,10 +90,11 @@ const DrawStyleAccordion = (props) => {
     <Accordion size="small" style={{ marginBottom: 8 }}>
       <Tooltip title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}>
         <StyledAccordionSummary>
-          <Grid container justify="space-between" alignItems="center">
-            <Typography variant="button">{props.title}</Typography>
-            <ColorBadge color={props.color} />
-          </Grid>
+          <AccordionSummaryContents
+            title={props.title}
+            color={props.color}
+            opacity={props.opacity}
+          />
         </StyledAccordionSummary>
       </Tooltip>
       <AccordionDetails style={{ maxWidth: "100%" }}>
