@@ -97,7 +97,10 @@ export default function DrawStyleSelector(props) {
   // Let's check and render the appropriate settings.
   const renderStyleSettings = () => {
     switch (props.activeDrawType) {
-      case "Line":
+      case "Arrow":
+      case "DashedLine":
+      case "DottedLine":
+      case "SolidLine":
         return renderLineStyleSettings();
       case "Text":
         return renderTextStyleSettings();

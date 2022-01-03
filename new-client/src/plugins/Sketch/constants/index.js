@@ -57,10 +57,22 @@ export const DRAW_TYPES = [
       "Rita en yta i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
-    type: "Line",
-    label: "Linje",
+    type: "SolidLine",
+    label: "Linje - solid",
     tooltip:
-      "Rita en linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
+      "Rita en solid linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
+  },
+  {
+    type: "DashedLine",
+    label: "Linje - streckad",
+    tooltip:
+      "Rita en streckad linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
+  },
+  {
+    type: "DottedLine",
+    label: "Linje - punktad",
+    tooltip:
+      "Rita en punktad linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
     type: "Rectangle",
@@ -73,6 +85,12 @@ export const DRAW_TYPES = [
     label: "Cirkel",
     tooltip:
       "Rita en cikel i kartan genom att klicka en gång där cikeln ska börja, dra sedan till önskad storlek och släpp.",
+  },
+  {
+    type: "Arrow",
+    label: "Pil",
+    tooltip:
+      "Rita en pil i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
     type: "Select",
