@@ -69,13 +69,37 @@ const OpacitySlider = ({ opacity, handleOpacityChange }) => {
   );
 };
 
-const AccordionSummaryContents = ({ color, opacity, title }) => {
+// We want to be able to change the opacity of the fill color. Let's
+// create a slider that can be used to change the value.
+const StrokeWidthSlider = ({ strokeWidth, handleStrokeWidthChange }) => {
+  return (
+    <Grid item xs={12}>
+      <Paper style={{ padding: 8, marginTop: 8 }}>
+        <Typography variant="caption">{`Linjebredd: ${strokeWidth}px`}</Typography>
+        <Slider
+          min={1}
+          max={5}
+          value={strokeWidth}
+          step={0.5}
+          onChange={handleStrokeWidthChange}
+          valueLabelFormat={(value) => `${value}`}
+          valueLabelDisplay="auto"
+        />
+      </Paper>
+    </Grid>
+  );
+};
+
+const AccordionSummaryContents = ({ color, opacity, title, strokeWidth }) => {
   return (
     <Grid container justify="space-between" alignItems="center">
       <Typography variant="button">{title}</Typography>
       <Grid container item xs={4} justify="flex-end" alignItems="center">
         {typeof opacity === "number" && (
           <Typography variant="caption">{`${opacity}%`}</Typography>
+        )}
+        {typeof strokeWidth === "number" && (
+          <Typography variant="caption">{`${strokeWidth}px`}</Typography>
         )}
         <ColorBadge color={color} />
       </Grid>
@@ -94,6 +118,7 @@ const DrawStyleAccordion = (props) => {
             title={props.title}
             color={props.color}
             opacity={props.opacity}
+            strokeWidth={props.strokeWidth}
           />
         </StyledAccordionSummary>
       </Tooltip>
@@ -118,6 +143,12 @@ const DrawStyleAccordion = (props) => {
             <OpacitySlider
               handleOpacityChange={props.handleOpacityChange}
               opacity={props.opacity}
+            />
+          )}
+          {props.showStrokeWidthSlider && (
+            <StrokeWidthSlider
+              handleStrokeWidthChange={props.handleStrokeWidthChange}
+              strokeWidth={props.strokeWidth}
             />
           )}
         </Grid>

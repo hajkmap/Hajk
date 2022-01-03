@@ -16,6 +16,10 @@ export default function DrawStyleSelector(props) {
   const handleOpacityChange = (e, value) => {
     props.setDrawStyle({ ...props.drawStyle, opacity: value });
   };
+  // We need a handler that can update the strokeWidth value
+  const handleStrokeWidthChange = (e, value) => {
+    props.setDrawStyle({ ...props.drawStyle, strokeWidth: value });
+  };
 
   // The style settings for area-drawings!
   // TODO: Opacity-style settings and stroke-width-settings!
@@ -35,8 +39,11 @@ export default function DrawStyleSelector(props) {
         <Grid item xs={12}>
           <DrawStyleAccordion
             title="Linje"
+            showStrokeWidthSlider
             color={props.drawStyle.stroke}
+            strokeWidth={props.drawStyle.strokeWidth}
             handleColorChange={handleStrokeColorChange}
+            handleStrokeWidthChange={handleStrokeWidthChange}
           />
         </Grid>
       </Grid>
@@ -74,9 +81,12 @@ export default function DrawStyleSelector(props) {
       <Grid container>
         <Grid item xs={12}>
           <DrawStyleAccordion
-            title="Färg och linjebredd"
+            title="Bredd och färg"
+            showStrokeWidthSlider
             color={props.drawStyle.stroke}
+            strokeWidth={props.drawStyle.strokeWidth}
             handleColorChange={handleStrokeColorChange}
+            handleStrokeWidthChange={handleStrokeWidthChange}
           />
         </Grid>
       </Grid>
