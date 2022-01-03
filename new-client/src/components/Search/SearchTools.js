@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@material-ui/core";
 
-import Dialog from "../Dialog.js";
+import Dialog from "../Dialog/Dialog";
 import SearchSettings from "./SearchSettings";
 
 const styles = (theme) => ({});

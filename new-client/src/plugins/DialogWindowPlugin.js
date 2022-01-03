@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 
 import Card from "components/Card";
-import Dialog from "components/Dialog";
+import Dialog from "components/Dialog/Dialog";
 import PluginControlButton from "components/PluginControlButton";
 
 class DialogWindowPlugin extends React.PureComponent {
@@ -91,11 +91,9 @@ class DialogWindowPlugin extends React.PureComponent {
   };
 
   renderDialog() {
-    const { headerText, text, buttonText } = this.props.options;
-
     return createPortal(
       <Dialog
-        options={{ headerText, text, buttonText }}
+        options={this.props.options}
         open={this.state.dialogOpen}
         onClose={this.#onClose}
       />,
