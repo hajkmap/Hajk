@@ -31,12 +31,12 @@ export default class FeaturePropsParsing {
     // a MUI Typography component).
     this.components = {
       ...customComponentsForReactMarkdown,
-      p: (props) => {
-        if (!props.children) {
+      p: ({ children }) => {
+        if (!children) {
           return null;
         }
 
-        const r = props.children.map((child, index) => {
+        return children.map((child, index) => {
           // Initiate a holder for external components. If a regex matches below,
           // this variable will be filled with correct value.
           let externalComponent = null;
@@ -56,10 +56,12 @@ export default class FeaturePropsParsing {
             }
           }
           // If externalComponent isn't null anymore, render it. Else, just render the children.
-          return externalComponent || child;
+          return (
+            <Paragraph variant="body2" key={index}>
+              {externalComponent || child}
+            </Paragraph>
+          );
         });
-
-        return <Paragraph variant="body2">{r}</Paragraph>;
       },
     };
   }
