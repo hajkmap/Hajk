@@ -95,10 +95,12 @@ class DrawModel {
   #getDefaultDrawStyleSettings = () => {
     const strokeColor = "rgba(74,74,74,0.5)";
     const strokeDash = null;
+    const strokeWidth = 2;
     const fillColor = "rgba(255,255,255,0.07)";
     return {
       strokeColor: strokeColor,
       lineDash: strokeDash,
+      strokeWidth: strokeWidth,
       fillColor: fillColor,
     };
   };
@@ -378,7 +380,7 @@ class DrawModel {
     return new Stroke({
       color: this.#drawStyleSettings.strokeColor,
       lineDash: this.#drawStyleSettings.lineDash,
-      width: 4,
+      width: this.#drawStyleSettings.strokeWidth,
     });
   };
 
