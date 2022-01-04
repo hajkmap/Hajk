@@ -24,10 +24,10 @@ const SketchView = (props) => {
   const [activityId, setActivityId] = React.useState("ADD");
   const [activeDrawType, setActiveDrawType] = React.useState("Polygon");
   const [drawStyle, setDrawStyle] = React.useState({
-    strokeColor: { r: 0, g: 0, b: 0, a: 1 },
-    fillColor: { r: 255, g: 105, b: 0, a: 0.5 },
+    strokeColor: { r: 10, g: 10, b: 10, a: 1 },
+    fillColor: { r: 60, g: 60, b: 60, a: 0.3 },
     strokeType: "solid",
-    strokeWidth: 2,
+    strokeWidth: 1,
     textSize: 2,
   });
 
