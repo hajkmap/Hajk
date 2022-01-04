@@ -11,6 +11,8 @@ import {
   AccordionSummary,
 } from "@material-ui/core";
 
+import { DRAW_COLORS } from "../constants";
+
 // We want to use an accordion-summary, but we have to style it a bit so
 // it looks OK. Let's create a styled accordion-summary.
 const StyledAccordionSummary = withStyles({
@@ -126,6 +128,7 @@ const DrawStyleAccordion = (props) => {
         <Grid container>
           <Grid item xs={12}>
             <TwitterPicker
+              colors={DRAW_COLORS}
               triangle="hide"
               onChange={props.handleColorChange}
               styles={{
