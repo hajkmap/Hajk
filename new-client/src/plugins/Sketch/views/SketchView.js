@@ -42,6 +42,12 @@ const SketchView = (props) => {
     }
   }, [activeDrawType, activityId, drawModel]);
 
+  // This effect makes sure to update the draw-style-settings in the draw-model when
+  // the user changes the style-settings in the view.
+  React.useEffect(() => {
+    return drawModel.setDrawStyleSettings(drawStyle);
+  }, [drawModel, drawStyle]);
+
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
   const renderCurrentView = () => {

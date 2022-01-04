@@ -770,9 +770,30 @@ class DrawModel {
   };
 
   // Set:er allowing us to change the style settings used in the draw-layer
+  // The fill- and strokeColor passed might be either a string, or an object containing
+  // r-, g-, b-, and a-properties. If they are objects, we have to make sure to parse them
+  // to strings before setting the new style-settings.
   // TODO: Handle side effects
   setDrawStyleSettings = (newStyleSettings) => {
-    this.#drawStyleSettings = newStyleSettings;
+    // The fill- and strokeColor might have to be parsed to strings, let's
+    // destruct them and parse them if we have to.
+    const { fillColor, strokeColor } = newStyleSettings;
+    // Create a new object containing the potentially parsed objects.
+    const parsedStyle = {
+      // We still want to pass all the other settings...
+      ...newStyleSettings,
+      //... and the potentially parsed colors.
+      fillColor:
+        typeof fillColor === "object"
+          ? this.getRGBAString(fillColor)
+          : fillColor,
+      strokeColor:
+        typeof strokeColor === "object"
+          ? this.getRGBAString(strokeColor)
+          : strokeColor,
+    };
+    // Then we'll update the style.
+    this.#drawStyleSettings = parsedStyle;
   };
 
   // Get:er returning the name of the draw-layer.
