@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid, MenuItem, Paper } from "@material-ui/core";
 import { TextField, Tooltip, Typography } from "@material-ui/core";
-import { STROKE_DASHES } from "../constants";
+import { STROKE_TYPES } from "../constants";
 
 const StrokeTypeSelector = (props) => {
   return (
@@ -22,7 +22,7 @@ const StrokeTypeSelector = (props) => {
           value={props.strokeType}
           onChange={props.handleStrokeTypeChange}
         >
-          {STROKE_DASHES.map((option) => (
+          {STROKE_TYPES.map((option) => (
             <MenuItem key={option.type} value={option.type}>
               {
                 <Tooltip title={option.tooltip}>

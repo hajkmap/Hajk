@@ -4,6 +4,8 @@ import { Grid } from "@material-ui/core";
 import DrawStyleAccordion from "./DrawStyleAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
+import { STROKE_DASHES } from "../constants";
+
 export default function DrawStyleSelector(props) {
   // We need a handler that can update the stroke color
   const handleStrokeColorChange = (e) => {
@@ -26,7 +28,18 @@ export default function DrawStyleSelector(props) {
   };
   // We need a handler that can update the stroke-dash setting
   const handleStrokeTypeChange = (e) => {
-    props.setDrawStyle({ ...props.drawStyle, strokeType: e.target.value });
+    // We are storing both the stroke-type (e.g. "dashed", "dotted", or "solid") as well as
+    // the actual line-dash array which corresponds to the stroke-type.
+    // The stroke-type comes from the select-event
+    const strokeType = e.target.value;
+    // And corresponds to a line-dash from the constants
+    const lineDash = STROKE_DASHES.get(strokeType);
+    // When everything we need is fetched, we update the draw-style.
+    props.setDrawStyle({
+      ...props.drawStyle,
+      strokeType: strokeType,
+      lineDash: lineDash,
+    });
   };
 
   // The style settings for area-drawings!
@@ -120,7 +133,7 @@ export default function DrawStyleSelector(props) {
   const renderStyleSettings = () => {
     switch (props.activeDrawType) {
       case "Arrow":
-      case "Line":
+      case "LineString":
         return renderLineStyleSettings();
       case "Text":
         return renderTextStyleSettings();

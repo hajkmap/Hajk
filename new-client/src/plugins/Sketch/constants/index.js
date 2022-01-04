@@ -71,7 +71,7 @@ export const DRAW_TYPES = [
       "Rita en yta i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
-    type: "Line",
+    type: "LineString",
     label: "Linje",
     tooltip:
       "Rita en linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
@@ -108,7 +108,7 @@ export const DRAW_TYPES = [
 ];
 export const PLUGIN_MARGIN = 10;
 
-export const STROKE_DASHES = [
+export const STROKE_TYPES = [
   {
     type: "solid",
     label: "Heldragen",
@@ -125,3 +125,9 @@ export const STROKE_DASHES = [
     tooltip: "Streckad linje.",
   },
 ];
+
+export const STROKE_DASHES = new Map([
+  ["solid", null],
+  ["dotted", [2, 7]],
+  ["dashed", [12, 7]],
+]);
