@@ -24,12 +24,23 @@ const SketchView = (props) => {
   const [activityId, setActivityId] = React.useState("ADD");
   const [activeDrawType, setActiveDrawType] = React.useState("Polygon");
   const [drawStyle, setDrawStyle] = React.useState({
-    stroke: "#000000",
-    fill: "#fcba03",
+    strokeColor: { r: 0, g: 0, b: 0, a: 1 },
+    fillColor: { r: 255, g: 105, b: 0, a: 0.5 },
+    lineDash: null,
     strokeWidth: 2,
-    opacity: 50,
     textSize: 2,
   });
+
+  // This effect makes sure that we activate the proper draw-interaction when the draw-type
+  // or activity-id changes. (This includes activating the first draw-interaction on first render).
+  React.useEffect(() => {
+    switch (activityId) {
+      case "ADD":
+        return drawModel.toggleDrawInteraction(activeDrawType);
+      default:
+        return drawModel.toggleDrawInteraction("");
+    }
+  }, [activeDrawType, activityId, drawModel]);
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".

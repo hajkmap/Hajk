@@ -56,14 +56,16 @@ const OpacitySlider = ({ opacity, handleOpacityChange }) => {
   return (
     <Grid item xs={12}>
       <Paper style={{ padding: 8, marginTop: 8 }}>
-        <Typography variant="caption">{`Opacitet: ${opacity}%`}</Typography>
+        <Typography variant="caption">{`Opacitet: ${Math.floor(
+          opacity * 100
+        )}%`}</Typography>
         <Slider
           min={0}
-          max={100}
+          max={1}
           value={opacity}
-          step={1}
+          step={0.01}
           onChange={handleOpacityChange}
-          valueLabelFormat={(value) => `${value}%`}
+          valueLabelFormat={(value) => `${Math.floor(value * 100)}%`}
           valueLabelDisplay="auto"
         />
       </Paper>
@@ -92,18 +94,23 @@ const StrokeWidthSlider = ({ strokeWidth, handleStrokeWidthChange }) => {
   );
 };
 
-const AccordionSummaryContents = ({ color, opacity, title, strokeWidth }) => {
+const AccordionSummaryContents = (props) => {
+  // We need to get the string-representation of the supplied color-object
+  // to be used in the color badge...
+  const colorString = props.drawModel.getRGBAString(props.color);
   return (
     <Grid container justify="space-between" alignItems="center">
-      <Typography variant="button">{title}</Typography>
+      <Typography variant="button">{props.title}</Typography>
       <Grid container item xs={4} justify="flex-end" alignItems="center">
-        {typeof opacity === "number" && (
-          <Typography variant="caption">{`${opacity}%`}</Typography>
+        {props.showOpacitySlider && (
+          <Typography variant="caption">{`${Math.floor(
+            props.color.a * 100
+          )}%`}</Typography>
         )}
-        {typeof strokeWidth === "number" && (
-          <Typography variant="caption">{`${strokeWidth}px`}</Typography>
+        {typeof props.strokeWidth === "number" && (
+          <Typography variant="caption">{`${props.strokeWidth}px`}</Typography>
         )}
-        <ColorBadge color={color} />
+        <ColorBadge color={colorString} />
       </Grid>
     </Grid>
   );
@@ -119,8 +126,9 @@ const DrawStyleAccordion = (props) => {
           <AccordionSummaryContents
             title={props.title}
             color={props.color}
-            opacity={props.opacity}
+            showOpacitySlider={props.showOpacitySlider}
             strokeWidth={props.strokeWidth}
+            drawModel={props.drawModel}
           />
         </StyledAccordionSummary>
       </Tooltip>
@@ -145,7 +153,7 @@ const DrawStyleAccordion = (props) => {
           {props.showOpacitySlider && (
             <OpacitySlider
               handleOpacityChange={props.handleOpacityChange}
-              opacity={props.opacity}
+              opacity={props.color.a}
             />
           )}
           {props.showStrokeWidthSlider && (

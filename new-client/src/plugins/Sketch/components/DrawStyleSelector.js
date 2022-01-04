@@ -6,15 +6,18 @@ import DrawStyleAccordion from "./DrawStyleAccordion";
 export default function DrawStyleSelector(props) {
   // We need a handler that can update the stroke color
   const handleStrokeColorChange = (e) => {
-    props.setDrawStyle({ ...props.drawStyle, stroke: e.hex });
+    props.setDrawStyle({ ...props.drawStyle, strokeColor: e.rgb });
   };
   // We need a handler that can update the fill color
   const handleFillColorChange = (e) => {
-    props.setDrawStyle({ ...props.drawStyle, fill: e.hex });
+    props.setDrawStyle({ ...props.drawStyle, fillColor: e.rgb });
   };
   // We need a handler that can update the opacity value
   const handleOpacityChange = (e, value) => {
-    props.setDrawStyle({ ...props.drawStyle, opacity: value });
+    props.setDrawStyle({
+      ...props.drawStyle,
+      fillColor: { ...props.drawStyle.fillColor, a: value },
+    });
   };
   // We need a handler that can update the strokeWidth value
   const handleStrokeWidthChange = (e, value) => {
@@ -30,20 +33,21 @@ export default function DrawStyleSelector(props) {
           <DrawStyleAccordion
             title="Fyllnad"
             showOpacitySlider
-            color={props.drawStyle.fill}
-            opacity={props.drawStyle.opacity}
+            color={props.drawStyle.fillColor}
             handleColorChange={handleFillColorChange}
             handleOpacityChange={handleOpacityChange}
+            drawModel={props.drawModel}
           />
         </Grid>
         <Grid item xs={12}>
           <DrawStyleAccordion
             title="Linje"
             showStrokeWidthSlider
-            color={props.drawStyle.stroke}
+            color={props.drawStyle.strokeColor}
             strokeWidth={props.drawStyle.strokeWidth}
             handleColorChange={handleStrokeColorChange}
             handleStrokeWidthChange={handleStrokeWidthChange}
+            drawModel={props.drawModel}
           />
         </Grid>
       </Grid>
@@ -58,15 +62,17 @@ export default function DrawStyleSelector(props) {
         <Grid item xs={12}>
           <DrawStyleAccordion
             title="Färg"
-            color={props.drawStyle.fill}
+            color={props.drawStyle.fillColor}
             handleColorChange={handleFillColorChange}
+            drawModel={props.drawModel}
           />
         </Grid>
         <Grid item xs={12}>
           <DrawStyleAccordion
             title="Bakgrundsfärg"
-            color={props.drawStyle.stroke}
+            color={props.drawStyle.strokeColor}
             handleColorChange={handleStrokeColorChange}
+            drawModel={props.drawModel}
           />
         </Grid>
       </Grid>
@@ -83,10 +89,11 @@ export default function DrawStyleSelector(props) {
           <DrawStyleAccordion
             title="Bredd och färg"
             showStrokeWidthSlider
-            color={props.drawStyle.stroke}
+            color={props.drawStyle.strokeColor}
             strokeWidth={props.drawStyle.strokeWidth}
             handleColorChange={handleStrokeColorChange}
             handleStrokeWidthChange={handleStrokeWidthChange}
+            drawModel={props.drawModel}
           />
         </Grid>
       </Grid>

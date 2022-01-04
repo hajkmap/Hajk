@@ -21,6 +21,7 @@ import Overlay from "ol/Overlay.js";
  * - setLayer(layerName <string>): Sets (or creates) the layer that should be connected to the draw-model.
  * - toggleDrawInteraction(drawType, settings): Accepts a string with the drawType and an object containing settings.
  * - zoomToCurrentExtent(): Fits the map-view to the current extent of the current draw-source.
+ * - getRGBAString(RGBA-object <object>): Accepts an object with r-, g-, b-, and a-properties and returns the string representation.
  * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
  * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
  * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
@@ -612,6 +613,12 @@ class DrawModel {
       status: "FAILED",
       message: `Set:er failed. The set:er only accepts ${typeof field}, and was provided ${typeof providedValue}`,
     };
+  };
+
+  // Accepts an RGBA-object containing r-, g-, b-, and a-properties and
+  // returns the string representation of the supplied object.
+  getRGBAString = (o) => {
+    return `rgba(${o.r},${o.g},${o.b},${o.a})`;
   };
 
   // Toggles the current draw interaction. To enable the draw interaction,
