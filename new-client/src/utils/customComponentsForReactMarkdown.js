@@ -134,7 +134,7 @@ export const MarkdownTableCellComponent = ({
 // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
 export const customComponentsForReactMarkdown = {
   p: ({ children }) => {
-    return <Paragraph variant="body2">{children}</Paragraph>;
+    return !children ? null : <Paragraph variant="body2">{children}</Paragraph>;
   },
   hr: () => <Divider />,
   a: ({ children, href, title }) => {
