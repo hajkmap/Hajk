@@ -530,6 +530,8 @@ class DrawModel {
     // Then we'll add a handler handling feature changes.
     const feature = e.feature;
     feature.on("change", this.#handleFeatureChange);
+    // Finally, we'll make sure the feature being drawn has the correct style:
+    feature.setStyle(this.#getDrawStyle());
   };
 
   // This handler will make sure that the overlay will be removed
