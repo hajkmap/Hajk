@@ -4,7 +4,7 @@ import { Grid } from "@material-ui/core";
 import DrawStyleAccordion from "./DrawStyleAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
-import { STROKE_DASHES } from "../constants";
+import { STROKE_DASHES } from "../../constants";
 
 export default function DrawStyleSelector(props) {
   // We need a handler that can update the stroke color

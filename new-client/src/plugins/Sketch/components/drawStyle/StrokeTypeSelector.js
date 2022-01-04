@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid, MenuItem, Paper } from "@material-ui/core";
 import { TextField, Tooltip, Typography } from "@material-ui/core";
-import { STROKE_TYPES } from "../constants";
+import { STROKE_TYPES } from "../../constants";
 
 const StrokeTypeSelector = (props) => {
   return (

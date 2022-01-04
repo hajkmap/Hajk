@@ -11,7 +11,7 @@ import {
   AccordionSummary,
 } from "@material-ui/core";
 
-import { DRAW_COLORS } from "../constants";
+import { DRAW_COLORS } from "../../constants";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
 // We want to use an accordion-summary, but we have to style it a bit so

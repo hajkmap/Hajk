@@ -3,7 +3,7 @@ import { Grid, Typography } from "@material-ui/core";
 
 import DrawTypeSelector from "../components/DrawTypeSelector";
 import Information from "../components/Information";
-import DrawStyleSelector from "../components/DrawStyleSelector";
+import DrawStyleSelector from "../components/drawStyle/DrawStyleSelector";
 
 const AddView = (props) => {
   // Let's destruct some properties from the props
