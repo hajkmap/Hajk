@@ -13,7 +13,7 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
 
 import LegacyNonMarkdownRenderer from "./LegacyNonMarkdownRenderer";
-import { customComponentsForReactMarkdown } from "./customComponentsForReactMarkdown";
+import { customComponentsForReactMarkdown } from "utils/customComponentsForReactMarkdown";
 
 export default function ResponsiveDialog(props) {
   const theme = useTheme();

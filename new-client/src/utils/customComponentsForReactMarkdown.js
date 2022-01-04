@@ -3,15 +3,40 @@
  * The purpose of this components library is to consolidate the mapping
  * between Markdown and MUI Components.
  *
- * This library has one export, CustomComponents, which is an object
- * formatted accordingly to the requirements set in react-markdown.
+ * This library has one main export, customComponentsForReactMarkdown, which
+ * is an object formatted accordingly to the requirements set in react-markdown.
+ *
+ * customComponentsForReactMarkdown makes use of other styled components defined
+ * in this library. To make it possible for other implementations to override
+ * customComponentsForReactMarkdown even further, we export all the other styled
+ * components as well.
+ *
+ * To use in your code with the default styled components, you basically:
+ *
+ * ```
+ * import { customComponentsForReactMarkdown } from "utils/customComponentsForReactMarkdown";
+ * <ReactMarkdown
+ *    components={customComponentsForReactMarkdown}
+ *    // other props
+ * />
+ * ```
+ * To override a specific part, use the spread operator on the exported object:
+ *
+ * ```
+ * import { customComponentsForReactMarkdown, Paragraph } from "utils/customComponentsForReactMarkdown";
+ * const evenMoreComponentsComponents = {
+ *    ...customComponentsForReactMarkdown, // spread the imported
+ *    p: (props) => <Paragraph variant="subtitle">{props.children}</Paragraph> // override definition of P
+ * };
+ * <ReactMarkdown
+ *    components={evenMoreComponentsComponents}
+ *    // other props
+ * />
+ * ```
  *
  * For reference and to see which other components can be provided,
  * please refer to https://github.com/remarkjs/react-markdown#appendix-b-components.
  */
-
-// TODO: 1. Move to somewhere more generic
-// TODO: 2. Adopt in FeaturePropsParsing.js
 
 import {
   Divider,
@@ -28,22 +53,22 @@ import {
 
 import { styled } from "@material-ui/core/styles";
 
-const Paragraph = styled(Typography)(() => ({
+export const Paragraph = styled(Typography)(() => ({
   marginBottom: "1.1rem",
 }));
 
 // Styled Table Row Component, makes every second row in a Table colored
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
+export const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(even)": {
     backgroundColor: theme.palette.action.hover,
   },
 }));
 
-const StyledTableContainer = styled(TableContainer)(() => ({
+export const StyledTableContainer = styled(TableContainer)(() => ({
   marginBottom: "1.1rem",
 }));
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
+export const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(1),
   marginBottom: "1.1rem",
   backgroundColor: theme.palette.background.default,
@@ -52,7 +77,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   },
 }));
 
-const StyledTypography = styled(Typography)(({ variant }) => {
+export const StyledTypography = styled(Typography)(({ variant }) => {
   return {
     ...(variant === "h1" && {
       fontSize: "1.6rem",
@@ -84,11 +109,11 @@ const StyledTypography = styled(Typography)(({ variant }) => {
   };
 });
 
-const MarkdownHeaderComponent = ({ level, children }) => {
+export const MarkdownHeaderComponent = ({ level, children }) => {
   return <StyledTypography variant={`h${level}`}>{children}</StyledTypography>;
 };
 
-const MarkdownTableCellComponent = ({
+export const MarkdownTableCellComponent = ({
   children,
   style,
   isHeader,
