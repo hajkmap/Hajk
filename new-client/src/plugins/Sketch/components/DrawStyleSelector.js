@@ -2,6 +2,7 @@ import React from "react";
 import { Grid } from "@material-ui/core";
 
 import DrawStyleAccordion from "./DrawStyleAccordion";
+import StrokeTypeSelector from "./StrokeTypeSelector";
 
 export default function DrawStyleSelector(props) {
   // We need a handler that can update the stroke color
@@ -22,6 +23,10 @@ export default function DrawStyleSelector(props) {
   // We need a handler that can update the strokeWidth value
   const handleStrokeWidthChange = (e, value) => {
     props.setDrawStyle({ ...props.drawStyle, strokeWidth: value });
+  };
+  // We need a handler that can update the stroke-dash setting
+  const handleStrokeTypeChange = (e) => {
+    props.setDrawStyle({ ...props.drawStyle, strokeType: e.target.value });
   };
 
   // The style settings for area-drawings!
@@ -48,6 +53,9 @@ export default function DrawStyleSelector(props) {
             handleColorChange={handleStrokeColorChange}
             handleStrokeWidthChange={handleStrokeWidthChange}
             drawModel={props.drawModel}
+            showStrokeTypeSelector
+            handleStrokeTypeChange={handleStrokeTypeChange}
+            strokeType={props.drawStyle.strokeType}
           />
         </Grid>
       </Grid>
@@ -96,6 +104,13 @@ export default function DrawStyleSelector(props) {
             drawModel={props.drawModel}
           />
         </Grid>
+        <Grid item xs={12}>
+          <StrokeTypeSelector
+            handleStrokeTypeChange={handleStrokeTypeChange}
+            strokeType={props.drawStyle.strokeType}
+            includeContainer={false}
+          />
+        </Grid>
       </Grid>
     );
   };
@@ -105,9 +120,7 @@ export default function DrawStyleSelector(props) {
   const renderStyleSettings = () => {
     switch (props.activeDrawType) {
       case "Arrow":
-      case "DashedLine":
-      case "DottedLine":
-      case "SolidLine":
+      case "Line":
         return renderLineStyleSettings();
       case "Text":
         return renderTextStyleSettings();

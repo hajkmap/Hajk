@@ -26,7 +26,7 @@ const SketchView = (props) => {
   const [drawStyle, setDrawStyle] = React.useState({
     strokeColor: { r: 0, g: 0, b: 0, a: 1 },
     fillColor: { r: 255, g: 105, b: 0, a: 0.5 },
-    lineDash: null,
+    strokeType: "solid",
     strokeWidth: 2,
     textSize: 2,
   });

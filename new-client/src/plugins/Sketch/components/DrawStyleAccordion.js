@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core";
 
 import { DRAW_COLORS } from "../constants";
+import StrokeTypeSelector from "./StrokeTypeSelector";
 
 // We want to use an accordion-summary, but we have to style it a bit so
 // it looks OK. Let's create a styled accordion-summary.
@@ -161,6 +162,14 @@ const DrawStyleAccordion = (props) => {
               handleStrokeWidthChange={props.handleStrokeWidthChange}
               strokeWidth={props.strokeWidth}
             />
+          )}
+          {props.showStrokeTypeSelector && (
+            <Grid item xs={12} style={{ marginTop: 8 }}>
+              <StrokeTypeSelector
+                handleStrokeTypeChange={props.handleStrokeTypeChange}
+                strokeType={props.strokeType}
+              />
+            </Grid>
           )}
         </Grid>
       </AccordionDetails>

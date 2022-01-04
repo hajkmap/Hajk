@@ -71,22 +71,10 @@ export const DRAW_TYPES = [
       "Rita en yta i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
-    type: "SolidLine",
-    label: "Linje - solid",
+    type: "Line",
+    label: "Linje",
     tooltip:
-      "Rita en solid linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
-  },
-  {
-    type: "DashedLine",
-    label: "Linje - streckad",
-    tooltip:
-      "Rita en streckad linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
-  },
-  {
-    type: "DottedLine",
-    label: "Linje - punktad",
-    tooltip:
-      "Rita en punktad linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
+      "Rita en linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
     type: "Rectangle",
@@ -119,3 +107,21 @@ export const DRAW_TYPES = [
   },
 ];
 export const PLUGIN_MARGIN = 10;
+
+export const STROKE_DASHES = [
+  {
+    type: "solid",
+    label: "Heldragen",
+    tooltip: "Heldragen linje.",
+  },
+  {
+    type: "dotted",
+    label: "Punktad",
+    tooltip: "Punktad linje.",
+  },
+  {
+    type: "dashed",
+    label: "Streckad",
+    tooltip: "Streckad linje.",
+  },
+];
