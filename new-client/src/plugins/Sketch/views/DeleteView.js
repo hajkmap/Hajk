@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Grid } from "@material-ui/core";
+import { Button, Grid, Typography } from "@material-ui/core";
 import Information from "../components/Information";
 
 const DeleteView = ({ id, model, drawModel }) => {
@@ -12,8 +12,13 @@ const DeleteView = ({ id, model, drawModel }) => {
       justify="space-between"
       style={{ height: "100%" }}
     >
-      <Grid item>
-        <Information text={activity.information} />
+      <Grid container>
+        <Grid item>
+          <Information text={activity.information} />
+        </Grid>
+        <Grid item style={{ marginTop: 8 }}>
+          <Typography variant="caption">Senast borttagna objekt:</Typography>
+        </Grid>
       </Grid>
       <Grid item>
         <Button
