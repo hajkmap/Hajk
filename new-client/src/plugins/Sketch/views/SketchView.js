@@ -37,6 +37,8 @@ const SketchView = (props) => {
     switch (activityId) {
       case "ADD":
         return drawModel.toggleDrawInteraction(activeDrawType);
+      case "DELETE":
+        return drawModel.toggleDrawInteraction("Delete");
       default:
         return drawModel.toggleDrawInteraction("");
     }

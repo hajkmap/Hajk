@@ -41,6 +41,7 @@ class DrawModel {
   #showFeatureMeasurements;
   #drawStyleSettings;
   #drawInteraction;
+  #removeInteractionActive;
   #allowedLabelFormats;
   #labelFormat;
   #customHandleDrawStart;
@@ -66,6 +67,9 @@ class DrawModel {
     this.#currentExtent = null;
     // And the current draw interaction.
     this.#drawInteraction = null;
+    // We also have to make sure to keep track of if any other interaction is active.
+    // E.g. "Remove", or "Edit".
+    this.#removeInteractionActive = false;
     // We're also keeping track of the tooltip-settings
     this.#showDrawTooltip = settings.showDrawTooltip ?? true;
     this.#drawTooltip = null;
@@ -597,7 +601,12 @@ class DrawModel {
   };
 
   // Disables the current draw interaction
-  #disableDrawInteraction = () => {
+  #disablePotentialInteraction = () => {
+    // First we check if any of the "special" interactions are active, and if they
+    // are, we disable them.
+    if (this.#removeInteractionActive) {
+      return this.#disableRemoveInteraction();
+    }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
     // Otherwise, we remove the interaction from the map.
@@ -619,6 +628,34 @@ class DrawModel {
     };
   };
 
+  // Removes the first feature that is present at the supplied
+  // pixel from the click-event.
+  #removeClickedFeature = (e) => {
+    const clickedFeatures = this.#map.getFeaturesAtPixel(e.pixel);
+    clickedFeatures.length > 0 &&
+      this.#drawSource.removeFeature(clickedFeatures[0]);
+  };
+
+  // Enables a remove-interaction which allows the user to remove drawn features by clicking on them.
+  // We're also making sure to enable the click-lock so that the feature-info does not infer.
+  #enableRemoveInteraction = () => {
+    // We have to make sure to set a field so that the handlers responsible for deleting
+    // all active interactions knows that there is a remove interaction to delete.
+    this.#removeInteractionActive = true;
+    // Let's add the clickLock to avoid the featureInfo etc.
+    this.#map.clickLock.add("coreDrawModel");
+    // Then we'll add the event-handler responsible for removing clicked features.
+    this.#map.on("singleclick", this.#removeClickedFeature);
+  };
+
+  // Disables the remove interaction by removing the event-listener and disabling
+  // the click-lock.
+  #disableRemoveInteraction = () => {
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.un("singleclick", this.#removeClickedFeature);
+    this.#removeInteractionActive = false;
+  };
+
   // Accepts an RGBA-object containing r-, g-, b-, and a-properties and
   // returns the string representation of the supplied object.
   getRGBAString = (o) => {
@@ -626,17 +663,22 @@ class DrawModel {
   };
 
   // Toggles the current draw interaction. To enable the draw interaction,
-  // pass one of the allowed draw-interactions: "Polygon", "Rectangle", or "Circle"
+  // pass one of the allowed draw-interactions: "Polygon", "Rectangle", "Circle", or "Delete"
   // as the first parameter. To disable the draw-interaction, pass nothing, or an empty string.
   toggleDrawInteraction = (drawMethod = "", settings = {}) => {
-    // Check if we are supposed to be toggling the draw interaction off.
+    // If this method is fired, the first thing we have to do is to remove the (potentially)
+    // already active interaction. (We never want two interactions active at the same time...)
+    this.#disablePotentialInteraction();
+    // Check if we are supposed to be toggling the draw interaction off. If we're toggling off,
+    // we make sure to abort so that we're not activating anything.
     if (!drawMethod || drawMethod === "") {
-      return this.#disableDrawInteraction();
+      return;
     }
-    // Check if there is a draw interaction active currently. If there is,
-    // disable it before moving on.
-    if (this.#drawInteraction) {
-      this.#disableDrawInteraction();
+    // Check if the supplied method is set to "Delete", if it is, we activate the remove
+    // interaction. Since the remove-interaction is a special interaction, (not a real ol-draw-interaction)
+    // we make sure not to continue executing.
+    if (drawMethod === "Delete") {
+      return this.#enableRemoveInteraction();
     }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
