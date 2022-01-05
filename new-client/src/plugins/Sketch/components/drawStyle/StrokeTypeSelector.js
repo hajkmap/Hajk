@@ -10,9 +10,11 @@ const StrokeTypeSelector = (props) => {
       elevation={props.includeContainer !== false ? 3 : 0}
     >
       <Grid container>
-        <Grid item xs={12}>
-          <Typography variant="caption">Linjetyp</Typography>
-        </Grid>
+        {props.includeContainer !== false ? (
+          <Grid item xs={12}>
+            <Typography variant="caption">Linjetyp</Typography>
+          </Grid>
+        ) : null}
         <TextField
           fullWidth
           id="select-stroke-type"

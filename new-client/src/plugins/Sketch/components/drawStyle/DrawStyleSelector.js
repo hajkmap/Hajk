@@ -2,9 +2,6 @@ import React from "react";
 import { Grid } from "@material-ui/core";
 
 import DrawStyleAccordion from "./DrawStyleAccordion";
-import StrokeTypeSelector from "./StrokeTypeSelector";
-
-import { STROKE_DASHES } from "../../constants";
 
 export default function DrawStyleSelector(props) {
   // We need a handler that can update the stroke color
@@ -25,21 +22,6 @@ export default function DrawStyleSelector(props) {
   // We need a handler that can update the strokeWidth value
   const handleStrokeWidthChange = (e, value) => {
     props.setDrawStyle({ ...props.drawStyle, strokeWidth: value });
-  };
-  // We need a handler that can update the stroke-dash setting
-  const handleStrokeTypeChange = (e) => {
-    // We are storing both the stroke-type (e.g. "dashed", "dotted", or "solid") as well as
-    // the actual line-dash array which corresponds to the stroke-type.
-    // The stroke-type comes from the select-event
-    const strokeType = e.target.value;
-    // And corresponds to a line-dash from the constants
-    const lineDash = STROKE_DASHES.get(strokeType);
-    // When everything we need is fetched, we update the draw-style.
-    props.setDrawStyle({
-      ...props.drawStyle,
-      strokeType: strokeType,
-      lineDash: lineDash,
-    });
   };
 
   // The style settings for area-drawings!
@@ -67,7 +49,7 @@ export default function DrawStyleSelector(props) {
             handleStrokeWidthChange={handleStrokeWidthChange}
             drawModel={props.drawModel}
             showStrokeTypeSelector
-            handleStrokeTypeChange={handleStrokeTypeChange}
+            handleStrokeTypeChange={props.handleStrokeTypeChange}
             strokeType={props.drawStyle.strokeType}
           />
         </Grid>
@@ -102,29 +84,17 @@ export default function DrawStyleSelector(props) {
 
   // The style settings for line-drawings!
   // Why are we grid-ing these? Cause we're gonna be implementing more settings.
-  // TODO: Stroke-width-settings!
   const renderLineStyleSettings = () => {
     return (
-      <Grid container>
-        <Grid item xs={12}>
-          <DrawStyleAccordion
-            title="Bredd och färg"
-            showStrokeWidthSlider
-            color={props.drawStyle.strokeColor}
-            strokeWidth={props.drawStyle.strokeWidth}
-            handleColorChange={handleStrokeColorChange}
-            handleStrokeWidthChange={handleStrokeWidthChange}
-            drawModel={props.drawModel}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <StrokeTypeSelector
-            handleStrokeTypeChange={handleStrokeTypeChange}
-            strokeType={props.drawStyle.strokeType}
-            includeContainer={false}
-          />
-        </Grid>
-      </Grid>
+      <DrawStyleAccordion
+        title="Bredd och färg"
+        showStrokeWidthSlider
+        color={props.drawStyle.strokeColor}
+        strokeWidth={props.drawStyle.strokeWidth}
+        handleColorChange={handleStrokeColorChange}
+        handleStrokeWidthChange={handleStrokeWidthChange}
+        drawModel={props.drawModel}
+      />
     );
   };
 
