@@ -91,14 +91,32 @@ function getBlockStyle(block) {
   }
 }
 
+const Audio = (props) => {
+  return <audio controls src={props.src} />;
+};
+
 const Image = (props) => {
   return <img src={props.src} alt="external" />;
+};
+
+const Video = (props) => {
+  return <video controls src={props.src} />;
 };
 
 const Media = (props) => {
   const entity = props.contentState.getEntity(props.block.getEntityAt(0));
   const { src } = entity.getData();
-  let media = <Image src={src} />;
+  const type = entity.getType();
+
+  let media;
+  if (type === "audio") {
+    media = <Audio src={src} />;
+  } else if (type === "image") {
+    media = <Image src={src} />;
+  } else if (type === "video") {
+    media = <Video src={src} />;
+  }
+
   return media;
 };
 
@@ -221,6 +239,7 @@ class ImageButton extends Component {
       color: "black",
       marginBottom: "5px",
     };
+
     return (
       <div>
         <span

@@ -343,7 +343,11 @@ class App extends React.PureComponent {
     }
 
     this.globalObserver = new Observer();
-    this.appModel = new AppModel(props.config, this.globalObserver);
+    this.appModel = new AppModel({
+      config: props.config,
+      globalObserver: this.globalObserver,
+      refreshMUITheme: props.refreshMUITheme,
+    });
   }
 
   hasAnyToolbarTools = () => {

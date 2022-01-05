@@ -15,7 +15,7 @@ export const hasSubMenu = (item) => {
 
 export const flattenChaptersTree = (chapters) => {
   return chapters.reduce((acc, chapter) => {
-    if (chapter.html && chapter.header) {
+    if (chapter.header) {
       let chapterStrippedFromSubChapters = { ...chapter };
       chapterStrippedFromSubChapters.chapters = [];
       acc = [...acc, chapterStrippedFromSubChapters];
