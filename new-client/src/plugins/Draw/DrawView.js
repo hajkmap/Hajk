@@ -14,7 +14,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Typography from "@material-ui/core/Typography/Typography";
 import Checkbox from "@material-ui/core/Checkbox";
 import { withSnackbar } from "notistack";
-import Dialog from "../../components/Dialog.js";
+import Dialog from "../../components/Dialog/Dialog";
 import Symbology from "./components/Symbology.js";
 
 import "./draw.css";
