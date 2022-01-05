@@ -22,6 +22,7 @@ import Overlay from "ol/Overlay.js";
  * - toggleDrawInteraction(drawType, settings): Accepts a string with the drawType and an object containing settings.
  * - zoomToCurrentExtent(): Fits the map-view to the current extent of the current draw-source.
  * - getRGBAString(RGBA-object <object>): Accepts an object with r-, g-, b-, and a-properties and returns the string representation.
+ * - getCurrentVectorSource(): Returns the vector-source currently connected to the draw-model.
  * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
  * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
  * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
@@ -740,6 +741,7 @@ class DrawModel {
     // When the drawn features has been removed, we have to make sure
     // to update the current extent.
     this.#currentExtent = this.#drawSource.getExtent();
+    return { status: "SUCCESS", removedFeatures: drawnFeatures };
   };
 
   setLabelFormat = (format) => {
@@ -845,6 +847,11 @@ class DrawModel {
   // Get:er returning the name of the draw-layer.
   getCurrentLayerName = () => {
     return this.#layerName;
+  };
+
+  // Get:er returning the currently connected Vector-source
+  getCurrentVectorSource = () => {
+    return this.#drawSource;
   };
 
   // Get:er returning the current extent of the draw-source.
