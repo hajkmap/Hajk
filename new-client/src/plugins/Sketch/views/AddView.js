@@ -75,6 +75,7 @@ const AddView = (props) => {
             drawStyle={props.drawStyle}
             drawModel={props.drawModel}
             setDrawStyle={props.setDrawStyle}
+            handleStrokeTypeChange={handleStrokeTypeChange}
           />
         </Grid>
       </Grid>
