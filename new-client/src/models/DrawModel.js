@@ -14,6 +14,10 @@ import Overlay from "ol/Overlay.js";
  *   to that layer. Otherwise, a new vector-layer will be created and added to the map.
  * - map: (olMap): The current map-object.
  *
+ * Optional settings:
+ * - observer: (Observer): An observer on which the drawModel can publish events, for example when a geometry has been deleted.
+ * - observerPrefix (String): A string acting as a prefix on all messages published on the observer.
+ *
  * Exposes a couple of methods:
  * - getCurrentExtent(): Returns the current extent of the current draw-layer.
  * - getCurrentLayerName(): Returns the name of the layer currently connected to the draw-model.
@@ -31,6 +35,8 @@ import Overlay from "ol/Overlay.js";
 class DrawModel {
   #map;
   #layerName;
+  #observer;
+  #observerPrefix;
   #drawSource;
   #drawLayer;
   #currentExtent;
@@ -59,6 +65,12 @@ class DrawModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    // An observer might be supplied. If it is, the drawModel will publish messages when features are deleted etc.
+    this.#observer = settings.observer || null;
+    // There might be an "observerPrefix" (string) passed. States a string
+    // which will act as a prefix on all messages published on the
+    // supplied observer.
+    this.#observerPrefix = this.#getObserverPrefix(settings);
     this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
@@ -95,6 +107,31 @@ class DrawModel {
       "Initiation of Draw-model successful. Note that the model has not been properly tested yet and should not be used in critical operation."
     );
   }
+
+  // Returns the supplied observerPrefix from the supplied settings or an empty string
+  #getObserverPrefix = (settings) => {
+    return typeof settings.observerPrefix === "string"
+      ? settings.observerPrefix
+      : null;
+  };
+
+  // Helper function that accepts an object containing two parameters:
+  // - subject: (string): The subject to be published on the observer
+  // - payLoad: (any): The payload to send when publishing.
+  #publishInformation = ({ subject, payLoad }) => {
+    // If no observer has been set-up, or if the subject or payload is missing,
+    // we abort.
+    if (!this.#observer || !subject || !payLoad) {
+      return;
+    }
+    // Otherwise we create the prefixed-subject to send. (The drawModel might have
+    // been initiated with a prefix that should be added on all subjects).
+    const prefixedSubject = this.#observerPrefix
+      ? `${this.observerPrefix}.${subject}`
+      : subject;
+    // Then we publish the event!
+    this.#observer.publish(prefixedSubject, payLoad);
+  };
 
   // Returns the default style settings used by the draw-model.
   #getDefaultDrawStyleSettings = () => {
@@ -632,9 +669,25 @@ class DrawModel {
   // Removes the first feature that is present at the supplied
   // pixel from the click-event.
   #removeClickedFeature = (e) => {
+    // Get features present at the clicked feature.
     const clickedFeatures = this.#map.getFeaturesAtPixel(e.pixel);
-    clickedFeatures.length > 0 &&
-      this.#drawSource.removeFeature(clickedFeatures[0]);
+    // We only care about features that have been drawn by a user.
+    const userDrawnFeatures = clickedFeatures.filter((f) =>
+      f.get("USER_DRAWN")
+    );
+    // Let's make sure we found some feature(s) to remove. We're only removing
+    // the first one. TODO: Remove all? No? Yes? Maybe?
+    if (userDrawnFeatures.length > 0) {
+      // Let's get the first user-drawn feature
+      const feature = userDrawnFeatures[0];
+      // Then we remove it from the draw-source
+      this.#drawSource.removeFeature(feature);
+      // Then we (potentially) publish that we've removed a feature.
+      this.#publishInformation({
+        subject: "drawModel.featureRemoved",
+        payLoad: feature,
+      });
+    }
   };
 
   // Enables a remove-interaction which allows the user to remove drawn features by clicking on them.

@@ -25,7 +25,11 @@ const Sketch = (props) => {
   });
 
   // Initiate a new DrawModel (core).
-  const drawModel = new DrawModel({ layerName: "sketchLayer", map: props.map });
+  const drawModel = new DrawModel({
+    layerName: "sketchLayer",
+    map: props.map,
+    observer: localObserver,
+  });
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // disable the draw interaction if it is active. Let's publish a couple events. (TODO)

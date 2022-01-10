@@ -50,6 +50,17 @@ const SketchView = (props) => {
     return drawModel.setDrawStyleSettings(drawStyle);
   }, [drawModel, drawStyle]);
 
+  // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
+  React.useEffect(() => {
+    // Fires when a feature has been removed from the draw-source.
+    props.localObserver.subscribe("drawModel.featureRemoved", (payLoad) => {
+      console.log("Feature removed: ", payLoad);
+    });
+    return () => {
+      props.localObserver.unsubscribe("drawModel.featureRemoved");
+    };
+  }, [props.localObserver]);
+
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
   const renderCurrentView = () => {
