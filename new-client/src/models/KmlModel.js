@@ -126,6 +126,9 @@ class KmlModel {
     // TODO: Make sure type is the way to go, a bit confusing setting the
     // layer name on that property. Hmm...
     this.#kmlLayer.set("type", this.#layerName);
+    // FIXME: Remove "type", use only "name" throughout
+    // the application. Should be done as part of #883.
+    this.#kmlLayer.set("name", this.#layerName);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#kmlLayer);
   };

@@ -1,83 +1,13 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { withStyles } from "@material-ui/core";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
+
 import {
-  Divider,
-  Link,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@material-ui/core";
-
-const Paragraph = withStyles((theme) => ({
-  root: {
-    marginBottom: "1.1rem",
-  },
-}))(Typography);
-
-// Styled Table Row Component, makes every second row in a Table colored
-const StyledTableRow = withStyles((theme) => ({
-  root: {
-    "&:nth-of-type(even)": {
-      backgroundColor: theme.palette.action.hover,
-    },
-  },
-}))(TableRow);
-
-const StyledTableContainer = withStyles((theme) => ({
-  root: {
-    marginBottom: "1.1rem",
-  },
-}))(TableContainer);
-
-const StyledPaper = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    marginBottom: "1.1rem",
-    backgroundColor: theme.palette.background.default,
-    "& p": {
-      marginBottom: "0",
-    },
-  },
-}))(Paper);
-
-const StyledTypography = withStyles((theme) => ({
-  h1: {
-    fontSize: "1.6rem",
-    fontWeight: "500",
-    marginBottom: "0.375rem",
-  },
-  h2: {
-    fontSize: "1.4rem",
-    fontWeight: "500",
-    marginBottom: "0.018rem",
-  },
-  h3: {
-    fontSize: "1.2rem",
-    fontWeight: "500",
-  },
-  h4: {
-    fontSize: "1rem",
-    fontWeight: "500",
-  },
-  h5: {
-    fontSize: "0.875rem",
-    fontWeight: "500",
-  },
-  h6: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-    fontStyle: "italic",
-  },
-}))(Typography);
+  customComponentsForReactMarkdown,
+  Paragraph,
+} from "utils/customComponentsForReactMarkdown";
 
 export default class FeaturePropsParsing {
   constructor(settings) {
@@ -95,13 +25,18 @@ export default class FeaturePropsParsing {
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
 
     // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
+    // Note that we import customComponentsForReactMarkdown from our shared library, spread those
+    // objects and finally override the definition of "p", as it differs in this case (we want to
+    // import external components in FeatureInfo, while the normal "p" implementation just maps P to
+    // a MUI Typography component).
     this.components = {
-      p: (props) => {
-        if (!props.children) {
+      ...customComponentsForReactMarkdown,
+      p: ({ children }) => {
+        if (!children) {
           return null;
         }
 
-        const r = props.children.map((child, index) => {
+        return children.map((child, index) => {
           // Initiate a holder for external components. If a regex matches below,
           // this variable will be filled with correct value.
           let externalComponent = null;
@@ -121,79 +56,15 @@ export default class FeaturePropsParsing {
             }
           }
           // If externalComponent isn't null anymore, render it. Else, just render the children.
-          return externalComponent || child;
+          return (
+            <Paragraph variant="body2" key={index}>
+              {externalComponent || child}
+            </Paragraph>
+          );
         });
-
-        return <Paragraph variant="body2">{r}</Paragraph>;
-      },
-      hr: () => <Divider />,
-      a: ({ children, href, title }) => {
-        return children ? (
-          <Link href={href} title={title} target="_blank">
-            {children}
-          </Link>
-        ) : null;
-      },
-      h1: this.#markdownHeaderComponent,
-      h2: this.#markdownHeaderComponent,
-      h3: this.#markdownHeaderComponent,
-      h4: this.#markdownHeaderComponent,
-      h5: this.#markdownHeaderComponent,
-      h6: this.#markdownHeaderComponent,
-      table: ({ children, className, style }) => {
-        return (
-          <StyledTableContainer component="div">
-            <Table size="small" className={className} style={style}>
-              {children}
-            </Table>
-          </StyledTableContainer>
-        );
-      },
-      thead: ({ children }) => {
-        return <TableHead>{children}</TableHead>;
-      },
-      tbody: ({ children }) => {
-        return <TableBody>{children}</TableBody>;
-      },
-      tr: ({ children }) => {
-        return <StyledTableRow>{children}</StyledTableRow>;
-      },
-      td: this.#markdownTableCellComponent,
-      th: this.#markdownTableCellComponent,
-      style: ({ children }) => {
-        return <style type="text/css">{children}</style>;
-      },
-      div: ({ children, className, style }) => {
-        return (
-          <div className={className} style={style}>
-            {children}
-          </div>
-        );
-      },
-      blockquote: (props) => {
-        return <StyledPaper variant="outlined">{props.children}</StyledPaper>;
       },
     };
   }
-
-  #markdownTableCellComponent = ({ children, style, isHeader, className }) => {
-    return (
-      <TableCell
-        variant={isHeader ? "head" : "body"}
-        align={style?.textAlign || "inherit"}
-        style={style}
-        className={className}
-      >
-        {children}
-      </TableCell>
-    );
-  };
-
-  #markdownHeaderComponent = ({ level, children }) => {
-    return (
-      <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
-    );
-  };
 
   #valueFromJson = (str) => {
     if (typeof str !== "string") return false;

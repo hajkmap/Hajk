@@ -37,11 +37,8 @@ COPY /new-backend/App_Data ./App_Data
 COPY /new-backend/static ./static
 COPY --from=clientBuilder /usr/app/build ./static/client
 COPY --from=adminBuilder /usr/app/build ./static/admin
+VOLUME /usr/app/App_Data
 EXPOSE 3002
 CMD node index.js
 
-# Build the container
-# docker build -t hajk-backend-with-client-and-admin .
-
-# And run it. Check out the result at localhost:1337
-# docker run -p 1337:3002 hajk-backend-with-client-and-admin
+# See HAJK Docker/README.md for example usage

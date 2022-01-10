@@ -6,7 +6,7 @@ import propTypes from "prop-types";
 import { Button, Paper, Tooltip, Menu, MenuItem } from "@material-ui/core";
 import FolderSpecial from "@material-ui/icons/FolderSpecial";
 
-import Dialog from "../components/Dialog.js";
+import Dialog from "../components/Dialog/Dialog";
 
 const styles = (theme) => {
   return {
