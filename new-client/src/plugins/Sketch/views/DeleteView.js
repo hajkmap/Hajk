@@ -27,7 +27,7 @@ const DeleteView = ({ id, model, drawModel }) => {
           <Information text={activity.information} />
         </Grid>
         <Grid item style={{ marginTop: 8 }}>
-          <Typography variant="caption">Senast borttagna objekt:</Typography>
+          <Typography variant="caption">Senast borttagna:</Typography>
         </Grid>
       </Grid>
       <Grid item>
@@ -36,7 +36,7 @@ const DeleteView = ({ id, model, drawModel }) => {
           variant="contained"
           onClick={handleRemoveAllFeaturesClick}
         >
-          Ta bort alla rit-objekt
+          Ta bort alla ritobjekt
         </Button>
       </Grid>
     </Grid>
