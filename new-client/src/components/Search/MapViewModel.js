@@ -92,12 +92,16 @@ class MapViewModel {
         ? this.featureStyle.getDefaultSearchResultStyle
         : null
     );
+    // FIXME: Remove "type", use only "name" throughout
+    // the application. Should be done as part of #883.
     this.resultsLayer.set("type", "searchResultLayer");
+    this.resultsLayer.set("name", "pluginSearchResults");
     this.drawSource = this.getNewVectorSource();
     this.drawLayer = this.getNewVectorLayer(
       this.drawSource,
       this.getDrawStyle()
     );
+    this.drawLayer.set("name", "pluginSearchDraw");
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
   };

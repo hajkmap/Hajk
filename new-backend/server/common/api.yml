@@ -227,6 +227,24 @@ paths:
         200:
           description: Available images were fetched successfully
           content: {}
+  /mapconfig/listvideo:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available videos in the upload folder
+      responses:
+        200:
+          description: Available videos were fetched successfully
+          content: {}
+  /mapconfig/listaudio:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available audio files in the upload folder
+      responses:
+        200:
+          description: Available audio files were fetched successfully
+          content: {}
   /mapconfig/{map}:
     get:
       tags:

@@ -51,7 +51,7 @@ class MapOptions extends Component {
         constrainResolution: config.constrainResolution,
         enableDownloadLink: config.enableDownloadLink,
         altShiftDragRotate: config.altShiftDragRotate || true,
-        onFocusOnly: config.onFocusOnly || true,
+        onFocusOnly: config.onFocusOnly || false,
         doubleClickZoom: config.doubleClickZoom || true,
         keyboard: config.keyboard || true,
         mouseWheelZoom: config.mouseWheelZoom || true,
@@ -771,8 +771,8 @@ class MapOptions extends Component {
                 scroll is desired for maps that do not have the browser's focus."
                 >
                   focus
-                </abbr>
-                .
+                </abbr>{" "}
+                (default: false).
               </label>
             </div>
             <div>

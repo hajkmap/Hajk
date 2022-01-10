@@ -292,6 +292,7 @@ class Manager extends Component {
           legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
+          customGetMapUrl: layer.customGetMapUrl || "",
           opacity: layer.opacity,
           minZoom: layer.minZoom,
           maxZoom: layer.maxZoom,

@@ -1,7 +1,9 @@
 import React from "react";
-import { Button, Grid, Typography } from "@material-ui/core";
+import { Button, Grid, TextField, Typography } from "@material-ui/core";
 import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
 import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
+import { IconButton, InputAdornment, Tooltip } from "@material-ui/core";
+import HelpIcon from "@material-ui/icons/Help";
 import { LinearProgress } from "@material-ui/core";
 import { useSnackbar } from "notistack";
 
@@ -25,6 +27,9 @@ const FmeServerView = (props) => {
   const { localObserver } = props;
   // We're also gonna be needing the model
   const { model } = props;
+  // The user might want to decorate the "group" label with something
+  // else. Let's grab the potential value from the plugin-options.
+  const groupDisplayName = props.options.groupDisplayName || "Grupp";
   // We're gonna need some state, e.g. which step are we on,
   // or which product-group the user has selected and so on.
   const [activeStep, setActiveStep] = React.useState(0);
@@ -68,7 +73,10 @@ const FmeServerView = (props) => {
   // Let's create an object with all the steps to be rendered. This
   // will allow us to add another step in a simple manner.
   const steps = [
-    { label: "Välj grupp", renderFunction: renderChooseGroupStep },
+    {
+      label: `Välj ${groupDisplayName.toLowerCase()}`,
+      renderFunction: renderChooseGroupStep,
+    },
     { label: "Välj produkt", renderFunction: renderChooseProductStep },
     { label: "Välj omfattning", renderFunction: renderDrawGeometryStep },
     { label: "Fyll i parametrar", renderFunction: renderEnterParametersStep },
@@ -281,7 +289,9 @@ const FmeServerView = (props) => {
       return product.group === activeGroup;
     });
     // Then we sort the products alphabetically
-    filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+    filteredProducts.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true })
+    );
     // Return the sorted products
     return filteredProducts;
   }
@@ -569,12 +579,14 @@ const FmeServerView = (props) => {
         {groupsToRender.length > 0 ? (
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel id="fme-server-select-group-label">Grupp</InputLabel>
+              <InputLabel id="fme-server-select-group-label">
+                {groupDisplayName}
+              </InputLabel>
               <Select
                 labelId="fme-server-select-group-label"
                 id="fme-server-select-group"
                 value={activeGroup}
-                label="Grupp"
+                label={groupDisplayName}
                 onChange={(e) => setActiveGroup(e.target.value)}
               >
                 {groupsToRender.map((group, index) => {
@@ -606,20 +618,44 @@ const FmeServerView = (props) => {
     // We only want to render the products that belong to the active group,
     // so letch get those.
     const productsInActiveGroup = getProductsInActiveGroup();
+    // We might want to display an icon which refers the user to the product
+    // information page. However, it's not certain that a valid url exists for
+    // the product, and if it doesn't we're not supposed to render the icon.
+    // Let's grab the potential url:
+    const product = model.getProduct(activeGroup, activeProduct);
+    const infoUrl = product?.infoUrl || "";
+    // Then we render!
     return (
       <Grid container item xs={12}>
         {productsInActiveGroup.length > 0 ? (
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel id="fme-server-select-product-label">
-                Produkt
-              </InputLabel>
-              <Select
-                labelId="fme-server-select-product-label"
+              <TextField
+                select
                 id="fme-server-select-product"
                 value={activeProduct}
                 label="Produkt"
                 onChange={(e) => setActiveProduct(e.target.value)}
+                InputProps={
+                  infoUrl.length > 0
+                    ? {
+                        startAdornment: (
+                          <Tooltip title="Öppna länk till produktinformation.">
+                            <InputAdornment position="start">
+                              <IconButton
+                                aria-label="Open information page"
+                                href={infoUrl}
+                                target="_blank"
+                                edge="start"
+                              >
+                                <HelpIcon />
+                              </IconButton>
+                            </InputAdornment>
+                          </Tooltip>
+                        ),
+                      }
+                    : null
+                }
               >
                 {productsInActiveGroup.map((product, index) => {
                   return (
@@ -628,7 +664,7 @@ const FmeServerView = (props) => {
                     </MenuItem>
                   );
                 })}
-              </Select>
+              </TextField>
             </FormControl>
           </Grid>
         ) : (
