@@ -41,6 +41,8 @@ namespace MapService.Models.Config
 
         public string url { get; set; }
 
+        public string customGetMapUrl { get; set; }
+
         public string owner { get; set; }
 
         public string date { get; set; }

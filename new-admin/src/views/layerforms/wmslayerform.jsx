@@ -21,6 +21,7 @@ const defaultState = {
   legendIcon: "",
   owner: "",
   url: "",
+  customGetMapUrl: "",
   opacity: 1.0,
   maxZoom: -1,
   minZoom: -1,
@@ -412,11 +413,8 @@ class WMSLayerForm extends Component {
                 () => {
                   this.validateField("select-layers-info-legend-icon");
                   let addedLayersInfo = this.state.addedLayersInfo;
-                  addedLayersInfo[
-                    layerInfo.id
-                  ].legendIcon = this.props.model.get(
-                    "select-layers-info-legend-icon"
-                  );
+                  addedLayersInfo[layerInfo.id].legendIcon =
+                    this.props.model.get("select-layers-info-legend-icon");
                   this.setState(
                     {
                       addedLayersInfo: addedLayersInfo,
@@ -915,8 +913,8 @@ class WMSLayerForm extends Component {
       this.state.capabilities.Capability.Request &&
       this.state.capabilities.Capability.Request.GetFeatureInfo
     ) {
-      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
-        .Format;
+      formats =
+        this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     }
     if (formats && formats.indexOf("application/geojson") > -1) {
       this.setState({ serverType: "arcgis" });
@@ -955,8 +953,8 @@ class WMSLayerForm extends Component {
       this.state.capabilities.Capability.Request &&
       this.state.capabilities.Capability.Request.GetFeatureInfo
     ) {
-      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
-        .Format;
+      formats =
+        this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     }
 
     let formatEles = formats
@@ -1021,6 +1019,7 @@ class WMSLayerForm extends Component {
       id: this.state.id,
       caption: this.getValue("caption"),
       url: this.getValue("url"),
+      customGetMapUrl: this.getValue("customGetMapUrl"),
       owner: this.getValue("owner"),
       date: this.getValue("date"),
       content: this.getValue("content"),
@@ -1354,7 +1353,24 @@ class WMSLayerForm extends Component {
         </div>
 
         <div className="separator">Inställningar för request</div>
-
+        <div>
+          <label>
+            GetMap-url{" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="OBS: Ange endast om GetMap-url:en skall vara en annan än den url som är angiven ovan. Majoriteten av administratörer lämnar detta fält tomt."
+            />
+          </label>
+          <input
+            type="text"
+            ref="input_customGetMapUrl"
+            value={this.state.customGetMapUrl}
+            onChange={(e) => {
+              this.setState({ customGetMapUrl: e.target.value });
+            }}
+          />
+        </div>
         <div>
           <label>Version</label>
           <select
