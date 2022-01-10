@@ -108,7 +108,7 @@ class DrawModel {
     );
   }
 
-  // Returns the supplied observerPrefix from the supplied settings or an empty string
+  // Returns the supplied observerPrefix from the supplied settings or null if none was supplied.
   #getObserverPrefix = (settings) => {
     return typeof settings.observerPrefix === "string"
       ? settings.observerPrefix
