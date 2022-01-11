@@ -15,6 +15,7 @@ const defaultState = {
   addedLayersInfo: {},
   id: "",
   caption: "",
+  internalLayerName: "",
   content: "",
   date: "Fylls i per automatik",
   legend: "",
@@ -1018,6 +1019,7 @@ class WMSLayerForm extends Component {
       type: this.state.layerType,
       id: this.state.id,
       caption: this.getValue("caption"),
+      internalLayerName: this.getValue("internalLayerName"),
       url: this.getValue("url"),
       customGetMapUrl: this.getValue("customGetMapUrl"),
       owner: this.getValue("owner"),
@@ -1534,6 +1536,18 @@ class WMSLayerForm extends Component {
               this.validateField("caption");
             }}
             className={this.getValidationClass("caption")}
+          />
+        </div>
+        <div>
+          <label>Visningsnamn Admin</label>
+          <input
+            type="text"
+            ref="input_internalLayerName"
+            value={this.state.internalLayerName}
+            onChange={(e) => {
+              this.setState({ internalLayerName: e.target.value });
+              this.validateField("internalLayerName");
+            }}
           />
         </div>
 

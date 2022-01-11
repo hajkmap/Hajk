@@ -512,9 +512,12 @@ class ToolOptions extends Component {
   }
 
   flattern(groups) {
+    if (!groups) {
+      return [];
+    }
     return groups.reduce((i, group) => {
       var layers = [];
-      if (group.groups.length !== 0) {
+      if (group.groups?.length !== 0) {
         layers = [...this.flattern(group.groups)];
       }
       return [...i, ...group.layers, ...layers];
