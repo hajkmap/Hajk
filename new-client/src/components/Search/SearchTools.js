@@ -67,6 +67,7 @@ class SearchTools extends React.PureComponent {
             ),
             headerText: "Sökinställningar",
             buttonText: "OK",
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={settingsDialog}
           onClose={() => {
