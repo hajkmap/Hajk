@@ -842,7 +842,7 @@ class Search extends Component {
                 <input
                   type="text"
                   ref="input_internalLayerName"
-                  value={this.state.internalLayerName}
+                  value={this.state.internalLayerName || ""}
                   onChange={(e) => {
                     this.setState({ internalLayerName: e.target.value });
                     this.validateField("internalLayerName");
