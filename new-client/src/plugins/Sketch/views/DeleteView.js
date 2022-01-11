@@ -1,19 +1,34 @@
 import React from "react";
-import { Button, Grid, Typography } from "@material-ui/core";
+import { Button, IconButton } from "@material-ui/core";
+import { Grid, Typography, Tooltip, Paper } from "@material-ui/core";
 import Information from "../components/Information";
+import { styled } from "@material-ui/core";
+import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 
-const DeleteView = ({ id, model, drawModel }) => {
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  width: "100%",
+  padding: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+}));
+
+const RemovedFeatureItem = ({ onRestoreClick, title }) => {
+  return (
+    <StyledPaper>
+      <Grid container justify="space-between" alignItems="center">
+        <Typography variant="button">{title}</Typography>
+        <Tooltip title="Klicka för att återställa ritobjektet.">
+          <IconButton size="small" onClick={onRestoreClick}>
+            <SettingsBackupRestoreIcon />
+          </IconButton>
+        </Tooltip>
+      </Grid>
+    </StyledPaper>
+  );
+};
+
+const DeleteView = ({ id, model, drawModel, removedFeatures }) => {
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(id);
-
-  // We have to handle the click on the "remove all features" button. When clicked, we
-  // want to display the features that were just removed in a list.
-  const handleRemoveAllFeaturesClick = () => {
-    const { removedFeatures } = drawModel.removeDrawnFeatures();
-    // These features (or at least some of them) can be added to
-    // the list of recently removed features.
-    console.log("Removed Features: ", removedFeatures);
-  };
 
   return (
     <Grid
@@ -29,12 +44,22 @@ const DeleteView = ({ id, model, drawModel }) => {
         <Grid item style={{ marginTop: 8 }}>
           <Typography variant="caption">Senast borttagna:</Typography>
         </Grid>
+        <Grid container>
+          {removedFeatures.map((feature) => {
+            return (
+              <RemovedFeatureItem
+                key={feature.get("HANDLED_ID")}
+                title={feature.get("HANDLED_AT")}
+              />
+            );
+          })}
+        </Grid>
       </Grid>
       <Grid item>
         <Button
           style={{ width: "100%" }}
           variant="contained"
-          onClick={handleRemoveAllFeaturesClick}
+          onClick={drawModel.removeDrawnFeatures}
         >
           Ta bort alla ritobjekt
         </Button>

@@ -36,9 +36,22 @@ class SketchModel {
   };
 
   // Returns the current date and time on YYYY-MM-DD HH:MM:SS
-  getDateTimeString = () => {
+  #getDateTimeString = () => {
     const date = new Date();
     return date.toLocaleString("default", this.#dateTimeOptions);
+  };
+
+  // Generates a random string that can be used as an ID.
+  #generateRandomString = () => {
+    return Math.random().toString(36).slice(2, 9);
+  };
+
+  // We're gonna need to set some properties on the handled feature so that we can keep
+  // track of it. (The "HANDLED_AT" prop will show the user at what time the feature was
+  // removed, and the "HANDLED_ID" will be used if the user choses to restore the feature).
+  decorateFeature = (feature) => {
+    feature.set("HANDLED_AT", this.#getDateTimeString());
+    feature.set("HANDLED_ID", this.#generateRandomString());
   };
 
   // Returns the earlier removed features which are stored in local-storage
@@ -61,7 +74,7 @@ class SketchModel {
     const parsedFeature = this.#geoJSONParser.writeFeature(feature);
     this.#setStoredRemovedFeatures([
       parsedFeature,
-      ...removedFeatures.slice(0, MAX_REMOVED_FEATURES - 1),
+      ...removedFeatures.slice(0, MAX_REMOVED_FEATURES),
     ]);
   };
 }

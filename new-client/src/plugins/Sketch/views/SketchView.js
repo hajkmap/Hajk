@@ -42,27 +42,45 @@ const SketchView = (props) => {
   // Handler making sure to keep the removed features updated when a new feature is removed.
   const handleFeatureRemoved = React.useCallback(
     (feature) => {
-      feature.set("REMOVED_AT", model.getDateTimeString());
+      // We're gonna need to decorate the removed feature so that we can keep track of it.
+      model.decorateFeature(feature);
       // We have to make sure to update the local storage with the newly removed feature so that
       // the removed features are kept between sessions.
       model.addRemovedFeatureToStorage(feature);
       // Then we'll update the state
       setRemovedFeatures([
         feature,
-        ...removedFeatures.slice(0, MAX_REMOVED_FEATURES - 1),
+        ...removedFeatures.slice(0, MAX_REMOVED_FEATURES),
       ]);
     },
-    [model, setRemovedFeatures, removedFeatures]
+    [model, removedFeatures]
   );
 
   // Handler making sure to keep the removed features updated when the user has pressed "removed all features".
   const handleFeaturesRemoved = React.useCallback(
     (features) => {
-      for (const feature of features.slice(0, MAX_REMOVED_FEATURES - 1)) {
-        handleFeatureRemoved(feature);
+      // Since we might be dealing with thousands of features removed at the same time, we make sure
+      // to grab only the first "MAX_REMOVED_FEATURES" (around 5).
+      const lastRemovedFeatures = features.slice(0, MAX_REMOVED_FEATURES);
+      // Then we'll loop over these features and decorate them with id:s and dates.
+      for (const feature of lastRemovedFeatures) {
+        // We're gonna need to decorate the removed feature so that we can keep track of it.
+        model.decorateFeature(feature);
+        // We have to make sure to update the local storage with the newly removed feature so that
+        // the removed features are kept between sessions.
+        model.addRemovedFeatureToStorage(feature);
       }
+      // Since we might _not_ be dealing with enough features to fill the list of removed features,
+      // we have to make sure to merge the features that were just deleted with the features that
+      // we might have from earlier, and then extract the last "MAX_REMOVED_FEATURES" of them.
+      const removedFeaturesToShow = [
+        ...lastRemovedFeatures,
+        ...removedFeatures,
+      ].slice(0, MAX_REMOVED_FEATURES);
+      // Then we'll update the state.
+      setRemovedFeatures(removedFeaturesToShow);
     },
-    [handleFeatureRemoved]
+    [model, removedFeatures]
   );
 
   // This effect makes sure that we activate the proper draw-interaction when the draw-type

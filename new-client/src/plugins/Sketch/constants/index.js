@@ -107,7 +107,7 @@ export const DRAW_TYPES = [
   },
 ];
 
-export const MAX_REMOVED_FEATURES = 5;
+export const MAX_REMOVED_FEATURES = 4;
 export const PLUGIN_MARGIN = 10;
 
 export const STROKE_TYPES = [
