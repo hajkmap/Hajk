@@ -55,6 +55,16 @@ const SketchView = (props) => {
     [model, setRemovedFeatures, removedFeatures]
   );
 
+  // Handler making sure to keep the removed features updated when the user has pressed "removed all features".
+  const handleFeaturesRemoved = React.useCallback(
+    (features) => {
+      for (const feature of features.slice(0, MAX_REMOVED_FEATURES - 1)) {
+        handleFeatureRemoved(feature);
+      }
+    },
+    [handleFeatureRemoved]
+  );
+
   // This effect makes sure that we activate the proper draw-interaction when the draw-type
   // or activity-id changes. (This includes activating the first draw-interaction on first render).
   React.useEffect(() => {
@@ -78,10 +88,12 @@ const SketchView = (props) => {
   React.useEffect(() => {
     // Fires when a feature has been removed from the draw-source.
     localObserver.subscribe("drawModel.featureRemoved", handleFeatureRemoved);
+    localObserver.subscribe("drawModel.featuresRemoved", handleFeaturesRemoved);
     return () => {
       localObserver.unsubscribe("drawModel.featureRemoved");
+      localObserver.unsubscribe("drawModel.featuresRemoved");
     };
-  }, [localObserver, handleFeatureRemoved]);
+  }, [localObserver, handleFeatureRemoved, handleFeaturesRemoved]);
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
@@ -102,7 +114,12 @@ const SketchView = (props) => {
         );
       case "DELETE":
         return (
-          <DeleteView id={activityId} model={model} drawModel={drawModel} />
+          <DeleteView
+            id={activityId}
+            model={model}
+            drawModel={drawModel}
+            removedFeatures={removedFeatures}
+          />
         );
       case "EDIT":
         return <EditView id={activityId} model={model} drawModel={drawModel} />;

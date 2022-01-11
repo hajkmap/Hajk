@@ -794,6 +794,11 @@ class DrawModel {
     // When the drawn features has been removed, we have to make sure
     // to update the current extent.
     this.#currentExtent = this.#drawSource.getExtent();
+    // Then we (potentially) publish that we've removed a bunch of features.
+    this.#publishInformation({
+      subject: "drawModel.featuresRemoved",
+      payLoad: drawnFeatures,
+    });
     return { status: "SUCCESS", removedFeatures: drawnFeatures };
   };
 
