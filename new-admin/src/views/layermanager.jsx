@@ -172,6 +172,7 @@ class Manager extends Component {
         this.refs["ArcGISLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           infobox: layer.infobox,
@@ -213,6 +214,7 @@ class Manager extends Component {
           id: layer.id,
           dataFormat: layer.dataFormat || "WFS",
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           infobox: layer.infobox,
@@ -283,6 +285,7 @@ class Manager extends Component {
         this.refs["WMSLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           legend: layer.legend,
@@ -340,6 +343,7 @@ class Manager extends Component {
         this.refs["WMTSLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           infobox: layer.infobox,
@@ -449,7 +453,14 @@ class Manager extends Component {
 
   getLayersWithFilter(filter) {
     return this.props.model.get("layers").filter((layer) => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      return (
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.caption.toLowerCase()
+        ) ||
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.internalLayerName?.toLowerCase()
+        )
+      );
     });
   }
 
@@ -463,20 +474,32 @@ class Manager extends Component {
 
     if (this.state.filter) {
       layers.forEach((layer) => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.caption.toLowerCase().indexOf(this.state.filter.toLowerCase()) ===
+          0 ||
+        layer.internalLayerName
+          ?.toLowerCase()
+          .indexOf(this.state.filter.toLowerCase()) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
       alphabetically.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
@@ -506,7 +529,10 @@ class Manager extends Component {
         <li onClick={(e) => this.loadLayer(e, layer)} key={"layer_" + i}>
           <div className="main-box">
             <span>
-              {layer.caption} {displayType}
+              {layer.internalLayerName?.length > 0
+                ? layer.internalLayerName
+                : layer.caption}{" "}
+              {displayType}
             </span>
           </div>
           <div className="options-box">

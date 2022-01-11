@@ -9,6 +9,7 @@ const defaultState = {
   validationErrors: [],
   id: "",
   caption: "",
+  internalLayerName: "",
   content: "",
   date: "Fylls i per automatik",
   infobox: "",
@@ -114,6 +115,7 @@ class ArcGISLayerForm extends Component {
       type: this.state.layerType,
       id: this.state.id,
       caption: this.getValue("caption"),
+      internalLayerName: this.getValue("internalLayerName"),
       url: this.getValue("url"),
       date: this.getValue("date"),
       content: this.getValue("content"),
@@ -497,6 +499,18 @@ class ArcGISLayerForm extends Component {
               this.setState({ caption: v }, () =>
                 this.validateField("caption", v)
               );
+            }}
+          />
+        </div>
+        <div>
+          <label>Visningsnamn Admin</label>
+          <input
+            type="text"
+            ref="input_internalLayerName"
+            value={this.state.internalLayerName}
+            onChange={(e) => {
+              this.setState({ internalLayerName: e.target.value });
+              this.validateField("internalLayerName");
             }}
           />
         </div>
