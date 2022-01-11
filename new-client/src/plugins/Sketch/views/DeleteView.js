@@ -1,9 +1,10 @@
 import React from "react";
+import { styled } from "@material-ui/core";
 import { Button, IconButton } from "@material-ui/core";
 import { Grid, Typography, Tooltip, Paper } from "@material-ui/core";
-import Information from "../components/Information";
-import { styled } from "@material-ui/core";
 import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
+
+import Information from "../components/Information";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
