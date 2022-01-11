@@ -30,6 +30,7 @@ class FirToolbarView extends React.PureComponent {
 
   static propTypes = {
     model: PropTypes.object.isRequired,
+    prefix: PropTypes.string,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
@@ -42,11 +43,13 @@ class FirToolbarView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.prefix = this.props.prefix || "fir";
+    console.log(this.prefix);
     this.initListeners();
   }
 
   initListeners = () => {
-    this.localObserver.subscribe("fir.search.clear", () => {
+    this.localObserver.subscribe(`${this.prefix}.search.clear`, () => {
       this.deactivateDraw();
       this.setState({ files: { list: [] } });
       this.deselectButtonItems();
@@ -91,22 +94,22 @@ class FirToolbarView extends React.PureComponent {
     this.model.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
       // Handles both drawn features and buffer features. Remove them at the same time as they are linked.
 
-      const firType = feature.get("fir_type");
-      if (firType && (firType === "draw" || firType === "buffer") && first) {
+      const type = feature.get(`${this.prefix}_type`);
+      if (type && (type === "draw" || type === "buffer") && first) {
         let findFn = null;
 
-        if (firType === "draw") {
+        if (type === "draw") {
           findFn = (f) => {
             return feature.ol_uid === f.get("owner_ol_uid");
           };
-        } else if (firType === "buffer") {
+        } else if (type === "buffer") {
           findFn = (f) => {
             return feature.get("owner_ol_uid") === f.ol_uid;
           };
         }
 
-        this.model.layers[firType].getSource().removeFeature(feature);
-        const layerName = firType === "draw" ? "buffer" : "draw";
+        this.model.layers[type].getSource().removeFeature(feature);
+        const layerName = type === "draw" ? "buffer" : "draw";
         let secondaryLayer = this.model.layers[layerName];
         let secondaryFeature = secondaryLayer
           .getSource()
@@ -165,7 +168,7 @@ class FirToolbarView extends React.PureComponent {
     if (this.interaction) {
       this.interaction.abortDrawing();
       this.model.map.removeInteraction(this.interaction);
-      this.model.map.clickLock.delete("fir-draw");
+      this.model.map.clickLock.delete(`${this.prefix}-draw`);
       window.removeEventListener("keydown", this.handleKeyDown);
     }
     this.updateNumberOfObjects();
@@ -173,7 +176,7 @@ class FirToolbarView extends React.PureComponent {
 
   activateDraw = () => {
     this.model.map.addInteraction(this.interaction);
-    this.model.map.clickLock.add("fir-draw");
+    this.model.map.clickLock.add(`${this.prefix}-draw`);
     window.addEventListener("keydown", this.handleKeyDown);
     this.updateNumberOfObjects();
   };
@@ -197,7 +200,10 @@ class FirToolbarView extends React.PureComponent {
     if (e && e.target) {
       this.setState({ files: { list: e.target.files || [] } });
       if (e.target.files.length > 0) {
-        this.localObserver.publish("fir.file.import", e.target.files[0]);
+        this.localObserver.publish(
+          `${this.prefix}.file.import`,
+          e.target.files[0]
+        );
         setTimeout(() => {
           e.target.value = "";
         }, 500);
@@ -342,9 +348,12 @@ class FirToolbarView extends React.PureComponent {
                 const bufferValue = parseInt(v);
                 this.setState({ buffer: bufferValue });
 
-                this.localObserver.publish("fir.layers.bufferValueChanged", {
-                  value: bufferValue,
-                });
+                this.localObserver.publish(
+                  `${this.prefix}.layers.bufferValueChanged`,
+                  {
+                    value: bufferValue,
+                  }
+                );
               }}
               onFocus={(e) => {
                 if (this.state.buffer === 0) {

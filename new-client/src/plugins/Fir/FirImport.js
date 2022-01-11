@@ -6,8 +6,12 @@ export default class FirImport {
     this.localObserver = options.localObserver;
     this.layerController = options.layerController;
     this.map = options.map;
+    const eventPrefix = options.eventPrefix || "fir";
 
-    this.localObserver.subscribe("fir.file.import", this.handleFileImport);
+    this.localObserver.subscribe(
+      `${eventPrefix}.file.import`,
+      this.handleFileImport
+    );
   }
 
   handleFileImport = (file) => {

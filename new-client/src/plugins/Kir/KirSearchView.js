@@ -20,7 +20,7 @@ import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import KirToolbarView from "./KirToolbarView";
+import KirToolbarView from "../Fir/FirToolbarView";
 import Grid from "@material-ui/core/Grid";
 import Slider from "@material-ui/core/Slider";
 
@@ -112,16 +112,9 @@ class KirSearchView extends React.PureComponent {
   };
 
   handleAgeChange = (e, newValues) => {
-    // const minValue = Math.min(...newValues);
-    // const maxValue = Math.max(...newValues);
     this.setState({
       ageValues: newValues,
-      // minInputValue: minValue,
-      // maxInputValue: maxValue,
     });
-
-    // this.inputMinAge.current.value = minValue;
-    // this.inputMaxAge.current.value = maxValue;
   };
 
   inputMinAgeChanged = (e, newValue) => {
@@ -160,6 +153,7 @@ class KirSearchView extends React.PureComponent {
           <AccordionDetails style={{ display: "block" }}>
             <FormControl className={classes.formControl} fullWidth={true}>
               <KirToolbarView
+                prefix="kir"
                 model={this.model}
                 app={this.props.app}
                 localObserver={this.localObserver}

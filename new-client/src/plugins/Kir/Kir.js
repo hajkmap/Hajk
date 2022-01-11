@@ -3,8 +3,10 @@ import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import Observer from "react-event-observer";
 import PluginIcon from "@material-ui/icons/PermContactCalendar";
+import KirLayerController from "./KirLayerController";
 import KirModel from "./KirModel";
 import KirView from "./KirView";
+import KirImport from "../Fir/FirImport";
 
 class Kir extends React.PureComponent {
   state = {
@@ -31,6 +33,18 @@ class Kir extends React.PureComponent {
       localObserver: this.localObserver,
       app: props.app,
       map: props.map,
+    });
+
+    this.layerController = new KirLayerController(
+      this.model,
+      this.localObserver
+    );
+
+    this.import = new KirImport({
+      localObserver: this.localObserver,
+      layerController: this.layerController,
+      map: props.map,
+      eventPrefix: "kir",
     });
   }
 

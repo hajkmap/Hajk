@@ -5,6 +5,12 @@ export default class KirModel {
     this.localObserver = settings.localObserver;
     this.config = this.app.plugins.kir.options;
     this.config.srsName = this.map.getView().getProjection().getCode();
+
+    this.layers = {
+      buffer: null,
+      draw: null,
+      markers: null,
+    };
   }
 
   getMap() {
