@@ -11,11 +11,11 @@ import SketchModel from "./models/SketchModel";
 import DrawModel from "../../models/DrawModel";
 
 const Sketch = (props) => {
-  // The local observer will handle the communication between models and views.
-  const localObserver = Observer();
-
   // We're gonna need to keep track of the currently active draw-type
   const [activeDrawType, setActiveDrawType] = React.useState("Polygon");
+
+  // The local observer will handle the communication between models and views.
+  const [localObserver] = React.useState(() => Observer());
 
   // We need a model used to interact with the map etc. We want to
   // keep the view free from direct interactions.

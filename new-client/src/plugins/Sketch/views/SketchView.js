@@ -34,6 +34,10 @@ const SketchView = (props) => {
     textSize: 2,
   });
 
+  const handleFeatureRemoved = React.useCallback((payLoad) => {
+    console.log("payLoad: ", payLoad);
+  }, []);
+
   // This effect makes sure that we activate the proper draw-interaction when the draw-type
   // or activity-id changes. (This includes activating the first draw-interaction on first render).
   React.useEffect(() => {
@@ -56,13 +60,11 @@ const SketchView = (props) => {
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
     // Fires when a feature has been removed from the draw-source.
-    localObserver.subscribe("drawModel.featureRemoved", (payLoad) => {
-      console.log("payload: ", payLoad);
-    });
+    localObserver.subscribe("drawModel.featureRemoved", handleFeatureRemoved);
     return () => {
       localObserver.unsubscribe("drawModel.featureRemoved");
     };
-  }, [localObserver]);
+  }, [localObserver, handleFeatureRemoved]);
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
