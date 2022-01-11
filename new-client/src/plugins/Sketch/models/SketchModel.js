@@ -5,10 +5,19 @@ import GeoJSON from "ol/format/GeoJSON";
 class SketchModel {
   #geoJSONParser;
   #storageKey;
+  #dateTimeOptions;
 
   constructor() {
     this.#geoJSONParser = new GeoJSON();
     this.#storageKey = "sketch";
+    this.#dateTimeOptions = {
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    };
   }
 
   // Updates the removed features in the local-storage
@@ -28,10 +37,8 @@ class SketchModel {
 
   // Returns the current date and time on YYYY-MM-DD HH:MM:SS
   getDateTimeString = () => {
-    const today = new Date();
-    const date = today.toISOString().split("T")[0];
-    const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
-    return `${date} ${time}`;
+    const date = new Date();
+    return date.toLocaleString("default", this.#dateTimeOptions);
   };
 
   // Returns the earlier removed features which are stored in local-storage
