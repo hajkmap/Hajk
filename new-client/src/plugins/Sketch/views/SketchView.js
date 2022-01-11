@@ -20,9 +20,12 @@ const SketchView = (props) => {
   const { position: pluginPosition } = props.options ?? "left";
   // We are going to be using the sketch- and draw-model. Let's destruct them.
   const { model, drawModel } = props;
+  // We are gonna need the localObserver
+  const { localObserver } = props;
+  // The current draw-type is also required, along with it's set:er.
+  const { activeDrawType, setActiveDrawType } = props;
   // We're gonna need to keep track of the current chosen activity etc.
   const [activityId, setActivityId] = React.useState("ADD");
-  const [activeDrawType, setActiveDrawType] = React.useState("Polygon");
   const [drawStyle, setDrawStyle] = React.useState({
     strokeColor: { r: 10, g: 10, b: 10, a: 1 },
     fillColor: { r: 60, g: 60, b: 60, a: 0.3 },
@@ -53,13 +56,13 @@ const SketchView = (props) => {
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
     // Fires when a feature has been removed from the draw-source.
-    props.localObserver.subscribe("drawModel.featureRemoved", (payLoad) => {
-      console.log("Feature removed: ", payLoad);
+    localObserver.subscribe("drawModel.featureRemoved", (payLoad) => {
+      console.log("payload: ", payLoad);
     });
     return () => {
-      props.localObserver.unsubscribe("drawModel.featureRemoved");
+      localObserver.unsubscribe("drawModel.featureRemoved");
     };
-  }, [props.localObserver]);
+  }, [localObserver]);
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
