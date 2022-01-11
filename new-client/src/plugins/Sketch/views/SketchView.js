@@ -83,6 +83,24 @@ const SketchView = (props) => {
     [model, removedFeatures]
   );
 
+  // Handler for when a feature is added to the draw-source via the addFeature-method
+  // in the drawModel.
+  const handleFeatureAdded = React.useCallback(
+    (feature) => {
+      // We only care about features that contain the "HANDLED_ID"-prop (which basically) means
+      // we're dealing with a feature that was removed at an earlier stage, and is now being restored.
+      const handledId = feature.get("HANDLED_ID");
+      if (handledId) {
+        // If we're restoring a feature from the list of removed features, we have to update the list
+        // of removed features obviously.
+        setRemovedFeatures(
+          removedFeatures.filter((f) => f.get("HANDLED_ID") !== handledId)
+        );
+      }
+    },
+    [removedFeatures]
+  );
+
   // This effect makes sure that we activate the proper draw-interaction when the draw-type
   // or activity-id changes. (This includes activating the first draw-interaction on first render).
   React.useEffect(() => {
@@ -107,11 +125,18 @@ const SketchView = (props) => {
     // Fires when a feature has been removed from the draw-source.
     localObserver.subscribe("drawModel.featureRemoved", handleFeatureRemoved);
     localObserver.subscribe("drawModel.featuresRemoved", handleFeaturesRemoved);
+    localObserver.subscribe("drawModel.featureAdded", handleFeatureAdded);
     return () => {
       localObserver.unsubscribe("drawModel.featureRemoved");
       localObserver.unsubscribe("drawModel.featuresRemoved");
+      localObserver.unsubscribe("drawModel.featureAdded");
     };
-  }, [localObserver, handleFeatureRemoved, handleFeaturesRemoved]);
+  }, [
+    localObserver,
+    handleFeatureRemoved,
+    handleFeaturesRemoved,
+    handleFeatureAdded,
+  ]);
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".

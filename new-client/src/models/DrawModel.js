@@ -710,6 +710,22 @@ class DrawModel {
     this.#removeInteractionActive = false;
   };
 
+  // Adds the supplied feature to the draw-source
+  addFeature = (feature) => {
+    try {
+      this.#drawSource.addFeature(feature);
+      this.#publishInformation({
+        subject: "drawModel.featureAdded",
+        payLoad: feature,
+      });
+    } catch (error) {
+      this.#publishInformation({
+        subject: "drawModel.addFeature.error",
+        payLoad: error,
+      });
+    }
+  };
+
   // Accepts an RGBA-object containing r-, g-, b-, and a-properties and
   // returns the string representation of the supplied object.
   getRGBAString = (o) => {

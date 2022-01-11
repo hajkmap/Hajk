@@ -74,7 +74,7 @@ class SketchModel {
     const parsedFeature = this.#geoJSONParser.writeFeature(feature);
     this.#setStoredRemovedFeatures([
       parsedFeature,
-      ...removedFeatures.slice(0, MAX_REMOVED_FEATURES),
+      ...removedFeatures.slice(0, MAX_REMOVED_FEATURES - 1),
     ]);
   };
 }

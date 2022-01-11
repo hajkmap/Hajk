@@ -50,6 +50,7 @@ const DeleteView = ({ id, model, drawModel, removedFeatures }) => {
               <RemovedFeatureItem
                 key={feature.get("HANDLED_ID")}
                 title={feature.get("HANDLED_AT")}
+                onRestoreClick={() => drawModel.addFeature(feature)}
               />
             );
           })}
