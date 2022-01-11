@@ -106,6 +106,8 @@ export const DRAW_TYPES = [
     tooltip: "Infoga text i kartan genom att klicka där du vill ha texten.",
   },
 ];
+
+export const MAX_REMOVED_FEATURES = 5;
 export const PLUGIN_MARGIN = 10;
 
 export const STROKE_TYPES = [

@@ -2,7 +2,7 @@
 import React from "react";
 import { Grid } from "@material-ui/core";
 // Constants
-import { PLUGIN_MARGIN } from "../constants";
+import { PLUGIN_MARGIN, MAX_REMOVED_FEATURES } from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
 // Views
@@ -33,10 +33,26 @@ const SketchView = (props) => {
     strokeWidth: 1,
     textSize: 2,
   });
+  // We want to keep track of the last removed features so that the user can restore
+  // features that they potentially removed by mistake.
+  const [removedFeatures, setRemovedFeatures] = React.useState(
+    model.getRemovedFeaturesFromStorage()
+  );
 
-  const handleFeatureRemoved = React.useCallback((payLoad) => {
-    console.log("payLoad: ", payLoad);
-  }, []);
+  // Handler making sure to keep the removed features updated when a new feature is removed.
+  const handleFeatureRemoved = React.useCallback(
+    (feature) => {
+      // We have to make sure to update the local storage with the newly removed feature so that
+      // the removed features are kept between sessions.
+      model.addRemovedFeatureToStorage(feature);
+      // Then we'll update the state
+      setRemovedFeatures([
+        feature,
+        ...removedFeatures.slice(0, MAX_REMOVED_FEATURES - 1),
+      ]);
+    },
+    [model, setRemovedFeatures, removedFeatures]
+  );
 
   // This effect makes sure that we activate the proper draw-interaction when the draw-type
   // or activity-id changes. (This includes activating the first draw-interaction on first render).
