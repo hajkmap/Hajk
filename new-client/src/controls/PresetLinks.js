@@ -198,6 +198,7 @@ class Preset extends React.PureComponent {
             headerText: "Visa snabbval",
             buttonText: "OK",
             abortText: "Avbryt",
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={this.state.dialogOpen}
           onClose={this.closeDialog}

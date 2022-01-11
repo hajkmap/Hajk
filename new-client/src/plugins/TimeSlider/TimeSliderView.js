@@ -440,6 +440,7 @@ class TimeSliderView extends React.PureComponent {
             ),
             headerText: "Tidslinjeinställningar",
             buttonText: "OK",
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={settingsDialog}
           onClose={() => {
