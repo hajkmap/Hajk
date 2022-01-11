@@ -26,6 +26,14 @@ class SketchModel {
     });
   };
 
+  // Returns the current date and time on YYYY-MM-DD HH:MM:SS
+  getDateTimeString = () => {
+    const today = new Date();
+    const date = today.toISOString().split("T")[0];
+    const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
+    return `${date} ${time}`;
+  };
+
   // Returns the earlier removed features which are stored in local-storage
   // If the first parameter is omitted, the method will return parsed OL-features,
   // otherwise, it will return the actual local-storage value.

@@ -42,6 +42,7 @@ const SketchView = (props) => {
   // Handler making sure to keep the removed features updated when a new feature is removed.
   const handleFeatureRemoved = React.useCallback(
     (feature) => {
+      feature.set("REMOVED_AT", model.getDateTimeString());
       // We have to make sure to update the local storage with the newly removed feature so that
       // the removed features are kept between sessions.
       model.addRemovedFeatureToStorage(feature);
