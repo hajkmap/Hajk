@@ -105,6 +105,12 @@ export const DRAW_TYPES = [
     label: "Text",
     tooltip: "Infoga text i kartan genom att klicka där du vill ha texten.",
   },
+  {
+    type: "Point",
+    label: "Punkt",
+    tooltip:
+      "Infoga en punkt i kartan genom att klicka där du vill ha punkten.",
+  },
 ];
 
 export const MAX_REMOVED_FEATURES = 4;

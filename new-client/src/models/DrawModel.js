@@ -284,6 +284,10 @@ class DrawModel {
   // (i.e. the area of the feature in a readable format).
   // *If the measurement-label is supposed to be shown!*
   #getFeatureTextStyle = (feature) => {
+    // Before we create the text-style we have to check if we,re dealing with a
+    // point. If we are, we have to make sure to offset the text in the negative y-direction.
+    const featureIsPoint = feature?.getGeometry() instanceof Point;
+    // Then we can create and return the style
     return new Text({
       textAlign: "center",
       textBaseline: "middle",
@@ -298,7 +302,7 @@ class DrawModel {
         width: 3,
       }),
       offsetX: 0,
-      offsetY: 0,
+      offsetY: featureIsPoint ? -15 : 0,
       rotation: 0,
       scale: 1,
     });
@@ -450,7 +454,14 @@ class DrawModel {
         color: settings
           ? settings.strokeStyle.color
           : this.#drawStyleSettings.strokeColor,
-        width: 2,
+        width: settings
+          ? settings.strokeStyle.width
+          : this.#drawStyleSettings.strokeWidth,
+      }),
+      fill: new Fill({
+        color: settings
+          ? settings.fillStyle.color
+          : this.#drawStyleSettings.fillColor,
       }),
     });
   };
