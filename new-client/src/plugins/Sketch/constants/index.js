@@ -65,10 +65,10 @@ export const DRAW_COLORS = [
 
 export const DRAW_TYPES = [
   {
-    type: "Polygon",
-    label: "Yta",
+    type: "Circle",
+    label: "Cirkel",
     tooltip:
-      "Rita en yta i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
+      "Rita en cikel i kartan genom att klicka en gång där cikeln ska börja, dra sedan till önskad storlek och släpp.",
   },
   {
     type: "LineString",
@@ -83,33 +83,27 @@ export const DRAW_TYPES = [
       "Rita en rektangel i kartan genom att klicka en gång där rektangeln ska börja, dra sedan till önskad storlek och släpp.",
   },
   {
-    type: "Circle",
-    label: "Cirkel",
-    tooltip:
-      "Rita en cikel i kartan genom att klicka en gång där cikeln ska börja, dra sedan till önskad storlek och släpp.",
-  },
-  {
     type: "Arrow",
     label: "Pil",
     tooltip:
       "Rita en pil i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
-    type: "Select",
-    label: "Välj i kartan",
+    type: "Polygon",
+    label: "Polygon",
     tooltip:
-      "Välj ett objekt från befintliga objekt i kartan och importera detta till din ritning.",
-  },
-  {
-    type: "Text",
-    label: "Text",
-    tooltip: "Infoga text i kartan genom att klicka där du vill ha texten.",
+      "Rita en polygon i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
     type: "Point",
     label: "Punkt",
     tooltip:
       "Infoga en punkt i kartan genom att klicka där du vill ha punkten.",
+  },
+  {
+    type: "Text",
+    label: "Text",
+    tooltip: "Infoga text i kartan genom att klicka där du vill ha texten.",
   },
 ];
 
