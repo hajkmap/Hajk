@@ -48,10 +48,9 @@ const SketchView = (props) => {
       // the removed features are kept between sessions.
       model.addRemovedFeatureToStorage(feature);
       // Then we'll update the state
-      setRemovedFeatures([
-        feature,
-        ...removedFeatures.slice(0, MAX_REMOVED_FEATURES),
-      ]);
+      setRemovedFeatures(
+        [feature, ...removedFeatures].slice(0, MAX_REMOVED_FEATURES)
+      );
     },
     [model, removedFeatures]
   );
