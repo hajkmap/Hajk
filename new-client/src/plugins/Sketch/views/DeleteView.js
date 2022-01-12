@@ -1,6 +1,6 @@
 import React from "react";
 import { styled } from "@material-ui/core";
-import { Button, IconButton } from "@material-ui/core";
+import { Button, IconButton, Zoom } from "@material-ui/core";
 import { Grid, Typography, Tooltip, Paper } from "@material-ui/core";
 import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 
@@ -14,16 +14,18 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 
 const RemovedFeatureItem = ({ onRestoreClick, title }) => {
   return (
-    <StyledPaper>
-      <Grid container justify="space-between" alignItems="center">
-        <Typography variant="button">{title}</Typography>
-        <Tooltip title="Klicka för att återställa ritobjektet.">
-          <IconButton size="small" onClick={onRestoreClick}>
-            <SettingsBackupRestoreIcon />
-          </IconButton>
-        </Tooltip>
-      </Grid>
-    </StyledPaper>
+    <Zoom in appear>
+      <StyledPaper>
+        <Grid container justify="space-between" alignItems="center">
+          <Typography variant="button">{title}</Typography>
+          <Tooltip title="Klicka för att återställa ritobjektet.">
+            <IconButton size="small" onClick={onRestoreClick}>
+              <SettingsBackupRestoreIcon />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+      </StyledPaper>
+    </Zoom>
   );
 };
 
