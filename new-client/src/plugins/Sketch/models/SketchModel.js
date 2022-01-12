@@ -133,9 +133,9 @@ class SketchModel {
 
   // Updates the storage by removing the feature corresponding to the supplied id
   removeFeatureFromStorage = (id) => {
-    const storedFeatures = this.getRemovedFeaturesFromStorage();
+    const storedFeatures = this.getRemovedFeaturesFromStorage("STRINGS");
     this.#setStoredRemovedFeatures(
-      storedFeatures.filter((f) => f.get("HANDLED_ID") !== id)
+      storedFeatures.filter((f) => !f.includes(id))
     );
   };
 }
