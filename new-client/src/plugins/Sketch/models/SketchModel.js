@@ -35,6 +35,58 @@ class SketchModel {
     });
   };
 
+  // Extracts the fill-style from the supplied feature-style
+  #getFillStyle = (featureStyle) => {
+    try {
+      const color = featureStyle.getFill().getColor();
+      return { color };
+    } catch (error) {
+      console.error(`Failed to extract fill-style, ${error.message}`);
+      return { color: null };
+    }
+  };
+
+  // Extracts the stroke-style from the supplied feature-style
+  #getStrokeStyle = (featureStyle) => {
+    try {
+      const s = featureStyle.getStroke();
+      const color = s.getColor();
+      const dash = s.getLineDash();
+      const width = s.getWidth();
+      return {
+        color,
+        dash,
+        width,
+      };
+    } catch (error) {
+      console.error(`Failed to extract stroke-style, ${error.message}`);
+      return { color: null, dash: null, width: null };
+    }
+  };
+
+  // Extracts and returns information about the feature style.
+  #extractFeatureStyle = (feature) => {
+    // Let's run this in a try-catch since we cannot be sure that a
+    // real feature is supplied. (I.e. getStyle() etc. might not exist).
+    try {
+      const featureStyle = feature?.getStyle();
+      // If no feature was supplied, or if we're unable to extract the style,
+      // we return null.
+      if (!featureStyle) {
+        return { fillColor: null, strokeStyle: null };
+      }
+      // If we were able to extract the style we can continue by extracting
+      // the fill- and stroke-style.
+      const fillStyle = this.#getFillStyle(featureStyle);
+      const strokeStyle = this.#getStrokeStyle(featureStyle);
+      // And return an object containing them
+      return { fillStyle, strokeStyle };
+    } catch (error) {
+      console.error(error);
+      return { fillColor: null, strokeStyle: null };
+    }
+  };
+
   // Returns the current date and time on YYYY-MM-DD HH:MM:SS
   #getDateTimeString = () => {
     const date = new Date();
@@ -50,6 +102,7 @@ class SketchModel {
   // track of it. (The "HANDLED_AT" prop will show the user at what time the feature was
   // removed, and the "HANDLED_ID" will be used if the user choses to restore the feature).
   decorateFeature = (feature) => {
+    feature.set("EXTRACTED_STYLE", this.#extractFeatureStyle(feature));
     feature.set("HANDLED_AT", this.#getDateTimeString());
     feature.set("HANDLED_ID", this.#generateRandomString());
   };
