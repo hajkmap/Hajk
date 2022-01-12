@@ -10,7 +10,10 @@ export default function DrawStyleSelector(props) {
   };
   // We need a handler that can update the fill color
   const handleFillColorChange = (e) => {
-    props.setDrawStyle({ ...props.drawStyle, fillColor: e.rgb });
+    props.setDrawStyle({
+      ...props.drawStyle,
+      fillColor: { ...e.rgb, a: props.drawStyle.fillColor.a },
+    });
   };
   // We need a handler that can update the opacity value
   const handleOpacityChange = (e, value) => {
