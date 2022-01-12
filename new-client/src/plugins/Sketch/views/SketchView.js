@@ -46,7 +46,7 @@ const SketchView = (props) => {
       model.decorateFeature(feature);
       // We have to make sure to update the local storage with the newly removed feature so that
       // the removed features are kept between sessions.
-      model.addRemovedFeatureToStorage(feature);
+      model.addFeatureToStorage(feature);
       // Then we'll update the state
       setRemovedFeatures(
         [feature, ...removedFeatures].slice(0, MAX_REMOVED_FEATURES)
@@ -67,7 +67,7 @@ const SketchView = (props) => {
         model.decorateFeature(feature);
         // We have to make sure to update the local storage with the newly removed feature so that
         // the removed features are kept between sessions.
-        model.addRemovedFeatureToStorage(feature);
+        model.addFeatureToStorage(feature);
       }
       // Since we might _not_ be dealing with enough features to fill the list of removed features,
       // we have to make sure to merge the features that were just deleted with the features that
@@ -95,9 +95,11 @@ const SketchView = (props) => {
         setRemovedFeatures(
           removedFeatures.filter((f) => f.get("HANDLED_ID") !== handledId)
         );
+        // We also have to remove the restored feature from the storage
+        model.removeFeatureFromStorage(handledId);
       }
     },
-    [removedFeatures]
+    [model, removedFeatures]
   );
 
   // This effect makes sure that we activate the proper draw-interaction when the draw-type

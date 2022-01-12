@@ -122,13 +122,21 @@ class SketchModel {
 
   // Updates the local-storage by adding the removed feature and potentially
   // removing old removed features. (We want to keep a maximum of MAX_REMOVED_FEATURES).
-  addRemovedFeatureToStorage = (feature) => {
+  addFeatureToStorage = (feature) => {
     const removedFeatures = this.getRemovedFeaturesFromStorage("STRINGS");
     const parsedFeature = this.#geoJSONParser.writeFeature(feature);
     this.#setStoredRemovedFeatures([
       parsedFeature,
       ...removedFeatures.slice(0, MAX_REMOVED_FEATURES - 1),
     ]);
+  };
+
+  // Updates the storage by removing the feature corresponding to the supplied id
+  removeFeatureFromStorage = (id) => {
+    const storedFeatures = this.getRemovedFeaturesFromStorage();
+    this.#setStoredRemovedFeatures(
+      storedFeatures.filter((f) => f.get("HANDLED_ID") !== id)
+    );
   };
 }
 export default SketchModel;
