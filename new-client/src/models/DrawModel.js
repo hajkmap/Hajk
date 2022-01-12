@@ -825,7 +825,6 @@ class DrawModel {
     // Since OL does not supply a "removeFeatures" method, we have to map
     // over the array, and remove every single feature one by one...
     drawnFeatures.forEach((feature) => {
-      console.log("Feature: ", feature.getStyle());
       this.#drawSource.removeFeature(feature);
     });
     // When the drawn features has been removed, we have to make sure
