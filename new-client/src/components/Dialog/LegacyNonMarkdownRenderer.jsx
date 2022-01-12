@@ -3,13 +3,12 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 
 export default function LegacyNonMarkdownRenderer(props) {
   const { text } = props;
-  return (
+
+  return typeof text === "string" ? (
     <DialogContentText>
-      {typeof text === "string" ? (
-        <span dangerouslySetInnerHTML={{ __html: text }} />
-      ) : (
-        text
-      )}
+      <span dangerouslySetInnerHTML={{ __html: text }} />
     </DialogContentText>
+  ) : (
+    text
   );
 }
