@@ -46,6 +46,7 @@ import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import MapIcon from "@material-ui/icons/Map";
 import ThemeToggler from "../controls/ThemeToggler";
+import { CookieLevel } from "../models/Cookie.js";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -759,22 +760,6 @@ class App extends React.PureComponent {
 
     const showMapSwitcher =
       clean === false && config.activeMap !== "simpleMapConfig";
-    const showCookieNotice =
-      config.mapConfig.map.showCookieNotice !== undefined
-        ? config.mapConfig.map.showCookieNotice
-        : true;
-
-    const defaultCookieNoticeMessage = this.isString(
-      this.props.config.mapConfig.map.defaultCookieNoticeMessage
-    )
-      ? this.props.config.mapConfig.map.defaultCookieNoticeMessage
-      : undefined;
-
-    const defaultCookieNoticeUrl = this.isString(
-      this.props.config.mapConfig.map.defaultCookieNoticeUrl
-    )
-      ? this.props.config.mapConfig.map.defaultCookieNoticeUrl
-      : undefined;
 
     return (
       <SnackbarProvider
@@ -798,13 +783,13 @@ class App extends React.PureComponent {
                 currentMap={this.props.config.activeMap}
               />
             )}
-          {clean === false && showCookieNotice && (
-            <CookieNotice
-              globalObserver={this.globalObserver}
-              defaultCookieNoticeMessage={defaultCookieNoticeMessage}
-              defaultCookieNoticeUrl={defaultCookieNoticeUrl}
-            />
-          )}
+          {clean === false &&
+            this.appModel.cookieManager.showCookieNotice() && (
+              <CookieNotice
+                globalObserver={this.globalObserver}
+                appModel={this.appModel}
+              />
+            )}
           <Alert
             open={this.state.alert}
             message={this.state.alertMessage}
