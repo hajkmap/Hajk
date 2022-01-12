@@ -10,6 +10,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(1),
   marginBottom: theme.spacing(1),
+  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.success.main}`,
 }));
 
 const RemovedFeatureItem = ({ onRestoreClick, title }) => {
