@@ -284,6 +284,12 @@ class DrawModel {
   // (i.e. the area of the feature in a readable format).
   // *If the measurement-label is supposed to be shown!*
   #getFeatureTextStyle = (feature) => {
+    // We're not supposed to be showing text on all types of features
+    // (As of now, all features except arrows should have a text-style)
+    // If we're dealing with an arrow, let's return null.
+    if (feature?.get("DRAW_METHOD") === "Arrow") {
+      return null;
+    }
     // Before we create the text-style we have to check if we,re dealing with a
     // point. If we are, we have to make sure to offset the text in the negative y-direction.
     const featureIsPoint = feature?.getGeometry() instanceof Point;
@@ -306,6 +312,12 @@ class DrawModel {
       rotation: 0,
       scale: 1,
     });
+  };
+
+  // Returns a svg-string that is used to display arrows in the draw-source.
+  #createArrowSvg = (color) => {
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32pt" height="32pt" fill="${color}"><path d="M 0 1 L 1 5 L 15 13 L 1 21 L 0 25 L 20 13"/></svg>`;
+    return `data:image/svg+xml;base64,${window.btoa(svgString)}`; // We need base64 for kml-exports to work.
   };
 
   // Returns the area of the supplied feature in a readable format.
@@ -605,8 +617,10 @@ class DrawModel {
     this.#resetDrawTooltip();
     const { feature } = e;
     // We set the USER_DRAWN prop to true so that we can keep track
-    // of the user drawn features.
+    // of the user drawn features. We also set "DRAW_TYPE" so that we can
+    // handle special features, such as arrows.
     feature.set("USER_DRAWN", true);
+    feature.set("DRAW_METHOD", this.#drawInteraction.get("DRAW_METHOD"));
     // And set a nice style on the feature to be added.
     feature.setStyle(this.#getFeatureStyle(feature));
     // Make sure to remove the event-listener for the pointer-moves.
@@ -784,8 +798,13 @@ class DrawModel {
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
     // Which draw-type should we use? (Rectangles should be created with the
-    // "Circle" method apparently).
-    const type = drawMethod === "Rectangle" ? "Circle" : drawMethod;
+    // "Circle" method apparently) and arrows are created with Line-strings.
+    const type =
+      drawMethod === "Rectangle"
+        ? "Circle"
+        : drawMethod === "Arrow"
+        ? "LineString"
+        : drawMethod;
     // Are we going free-hand drawing? (We're always free if we're drawing circles
     // or rectangles).
     const freehand = ["Circle", "Rectangle"].includes(drawMethod)
@@ -805,6 +824,9 @@ class DrawModel {
           : null,
       style: this.#getDrawStyle(),
     });
+    // Let's set the supplied draw-method as a property on the draw-interaction
+    // so that we can keep track of if we're creating special features (arrows etc).
+    this.#drawInteraction.set("DRAW_METHOD", drawMethod);
     // Let's add the clickLock to avoid the featureInfo etc.
     this.#map.clickLock.add("coreDrawModel");
     // Then we'll add all draw listeners
