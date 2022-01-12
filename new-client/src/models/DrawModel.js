@@ -265,9 +265,10 @@ class DrawModel {
   };
 
   // Returns the style that should be used on the drawn features
-  #getFeatureStyle = (feature) => {
-    // Let's start by grabbing the standard draw style as a baseline
-    const baseLineStyle = this.#getDrawStyle();
+  #getFeatureStyle = (feature, settingsOverride) => {
+    // Let's start by grabbing the standard draw style as a baseline.
+    // The standard style can be overridden if the override is supplied.
+    const baseLineStyle = this.#getDrawStyle(settingsOverride);
     // If showFeatureMeasurements is set to true, we create a text-style which
     // will allow us to show the measurements of the drawn feature.
     const textStyle = this.#showFeatureMeasurements
@@ -409,36 +410,46 @@ class DrawModel {
   };
 
   // Returns an OL style to be used in the draw-interaction.
-  #getDrawStyle = () => {
+  #getDrawStyle = (settings) => {
     return new Style({
-      stroke: this.#getDrawStrokeStyle(),
-      fill: this.#getDrawFillStyle(),
-      image: this.#getDrawImageStyle(),
+      stroke: this.#getDrawStrokeStyle(settings),
+      fill: this.#getDrawFillStyle(settings),
+      image: this.#getDrawImageStyle(settings),
     });
   };
 
   // Returns the stroke style (based on the style settings)
-  #getDrawStrokeStyle = () => {
+  #getDrawStrokeStyle = (settings) => {
     return new Stroke({
-      color: this.#drawStyleSettings.strokeColor,
-      lineDash: this.#drawStyleSettings.lineDash,
-      width: this.#drawStyleSettings.strokeWidth,
+      color: settings
+        ? settings.strokeStyle.color
+        : this.#drawStyleSettings.strokeColor,
+      lineDash: settings
+        ? settings.strokeStyle.dash
+        : this.#drawStyleSettings.lineDash,
+      width: settings
+        ? settings.strokeStyle.width
+        : this.#drawStyleSettings.strokeWidth,
     });
   };
 
   // Returns the fill style (based on the style settings)
-  #getDrawFillStyle = () => {
+  #getDrawFillStyle = (settings) => {
     return new Fill({
-      color: this.#drawStyleSettings.fillColor,
+      color: settings
+        ? settings.fillStyle.color
+        : this.#drawStyleSettings.fillColor,
     });
   };
 
   // Returns the image style (based on the style settings)
-  #getDrawImageStyle = () => {
+  #getDrawImageStyle = (settings) => {
     return new Circle({
       radius: 6,
       stroke: new Stroke({
-        color: this.#drawStyleSettings.strokeColor,
+        color: settings
+          ? settings.strokeStyle.color
+          : this.#drawStyleSettings.strokeColor,
         width: 2,
       }),
     });
@@ -710,10 +721,19 @@ class DrawModel {
     this.#removeInteractionActive = false;
   };
 
-  // Adds the supplied feature to the draw-source
+  // CUSTOM ADDER: Adds the supplied feature to the draw-source
+  // TODO: Explain!
   addFeature = (feature) => {
     try {
+      // The supplied feature might contain a property with style-information
+      // that has been set in an earlier session. Let's apply that style (if present)
+      // before we add the feature to the source.
+      const extractedStyle = feature.get("EXTRACTED_STYLE");
+      extractedStyle &&
+        feature.setStyle(this.#getFeatureStyle(feature, extractedStyle));
+      // When we're done styling we can add the feature.
       this.#drawSource.addFeature(feature);
+      // Then we'll publish some information about the addition.
       this.#publishInformation({
         subject: "drawModel.featureAdded",
         payLoad: feature,
@@ -805,6 +825,7 @@ class DrawModel {
     // Since OL does not supply a "removeFeatures" method, we have to map
     // over the array, and remove every single feature one by one...
     drawnFeatures.forEach((feature) => {
+      console.log("Feature: ", feature.getStyle());
       this.#drawSource.removeFeature(feature);
     });
     // When the drawn features has been removed, we have to make sure
