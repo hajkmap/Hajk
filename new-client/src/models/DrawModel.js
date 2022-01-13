@@ -2,7 +2,7 @@ import { Draw } from "ol/interaction";
 import { createBox, createRegularPolygon } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
-import { Stroke, Style, Circle, Fill, Text } from "ol/style";
+import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
 import { Circle as CircleGeometry, LineString, Point } from "ol/geom.js";
 import Overlay from "ol/Overlay.js";
 
@@ -266,7 +266,11 @@ class DrawModel {
 
   // Returns the style that should be used on the drawn features
   #getFeatureStyle = (feature, settingsOverride) => {
-    // Let's start by grabbing the standard draw style as a baseline.
+    // If we're dealing with "Arrow" we'll return a special style array
+    if (feature?.get("DRAW_METHOD") === "Arrow") {
+      return this.#getArrowStyle(feature, settingsOverride);
+    }
+    // Let's grab the standard draw style as a baseline.
     // The standard style can be overridden if the override is supplied.
     const baseLineStyle = this.#getDrawStyle(settingsOverride);
     // If showFeatureMeasurements is set to true, we create a text-style which
@@ -318,6 +322,39 @@ class DrawModel {
   #createArrowSvg = (color) => {
     const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32pt" height="32pt" fill="${color}"><path d="M 0 1 L 1 5 L 15 13 L 1 21 L 0 25 L 20 13"/></svg>`;
     return `data:image/svg+xml;base64,${window.btoa(svgString)}`; // We need base64 for kml-exports to work.
+  };
+
+  // Returns a style array that is used to style arrow features.
+  // (All other features consist of a single style-object).
+  #getArrowStyle = (feature, settings) => {
+    // First we create the style-array and insert a baseline-style
+    const styles = [this.#getDrawStyle(settings)];
+    // Then we'll add the arrow-head at the end of every line-segment.
+    feature?.getGeometry().forEachSegment((start, end) => {
+      // We'll have to rotate the arrow-head, let's calculate the
+      // line-segments rotation.
+      const dx = end[0] - start[0];
+      const dy = end[1] - start[1];
+      const rotation = Math.atan2(dy, dx);
+      // Then we'll push a style for each arrow-head.
+      styles.push(
+        new Style({
+          geometry: new Point(end),
+          image: new Icon({
+            src: this.#createArrowSvg(
+              settings
+                ? settings.strokeStyle.color
+                : this.#drawStyleSettings.strokeColor
+            ),
+            anchor: [0.7, 0.53],
+            rotateWithView: true,
+            rotation: -rotation,
+          }),
+        })
+      );
+    });
+    // And finally return the style-array.
+    return styles;
   };
 
   // Returns the area of the supplied feature in a readable format.
