@@ -2,6 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import propTypes from "prop-types";
+import { withSnackbar } from "notistack";
 
 import { Button, Paper, Tooltip, Menu, MenuItem } from "@material-ui/core";
 import FolderSpecial from "@material-ui/icons/FolderSpecial";
@@ -251,4 +252,4 @@ class Preset extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(Preset);
+export default withStyles(styles)(withSnackbar(Preset));
