@@ -7,7 +7,7 @@ import { Slider, Button, Badge, Grid, Tooltip } from "@material-ui/core";
 import { Vector as VectorLayer } from "ol/layer";
 
 import TimeSliderSettings from "./components/TimeSliderSettings.js";
-import Dialog from "../../components/Dialog.js";
+import Dialog from "../../components/Dialog/Dialog";
 
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
@@ -440,6 +440,7 @@ class TimeSliderView extends React.PureComponent {
             ),
             headerText: "Tidslinjeinställningar",
             buttonText: "OK",
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={settingsDialog}
           onClose={() => {

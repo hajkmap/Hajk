@@ -7,12 +7,13 @@ import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
-// FIXME: Will we need this or is ReactMarkdown parser enough?
-// import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
+
+import LegacyNonMarkdownRenderer from "./LegacyNonMarkdownRenderer";
+import { customComponentsForReactMarkdown } from "utils/customComponentsForReactMarkdown";
 
 export default function ResponsiveDialog(props) {
   const theme = useTheme();
@@ -24,11 +25,12 @@ export default function ResponsiveDialog(props) {
     open,
     options: {
       abortText,
-      allowDangerousHtml, // TODO: To be implemented?
+      allowDangerousHtml, // ReactMarkdown disables HTML by default but we let the Admin decide
       buttonText,
       headerText,
       prompt,
       text,
+      useLegacyNonMarkdownRenderer, // Admin can choose to pass-by the ReactMarkdown and just use dangerouslySetInnerHtml
     },
   } = props;
 
@@ -36,9 +38,7 @@ export default function ResponsiveDialog(props) {
   // used as prompt input fields.
   const [promptText, setPromptText] = useState("");
 
-  // FIXME: Figure out if we want to send it as an option or always
-  // allow HTML by default.
-  const rehypePlugins = allowDangerousHtml || true ? [rehypeRaw] : [];
+  const rehypePlugins = allowDangerousHtml === true ? [rehypeRaw] : [];
 
   const handleAbort = () => {
     onAbort(promptText);
@@ -59,14 +59,17 @@ export default function ResponsiveDialog(props) {
         <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
       )}
       <DialogContent>
-        {/* <DialogContentText> */}
-        <ReactMarkdown
-          remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
-          rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
-          // components={this.components} // Custom renderers for components, see definition in this.components
-          children={text} // Our MD, as a text string
-        />
-        {/* </DialogContentText> */}
+        {useLegacyNonMarkdownRenderer === true ? (
+          <LegacyNonMarkdownRenderer text={text} />
+        ) : (
+          <ReactMarkdown
+            remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+            rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
+            components={customComponentsForReactMarkdown} // Custom renderers for components, see definition in components
+            children={text} // Our MD, as a text string
+          />
+        )}
+
         {prompt && (
           <form
             noValidate

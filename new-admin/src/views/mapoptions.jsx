@@ -179,7 +179,10 @@ class MapOptions extends Component {
         "extraPrintResolutions",
       ].includes(fieldName)
     )
-      value = value.split(",").map((v) => parseFloat(v));
+      value =
+        value.trim().length > 0
+          ? value.split(",").map((v) => parseFloat(v))
+          : [];
 
     if (fieldName === "title") {
       if (value === "") {
