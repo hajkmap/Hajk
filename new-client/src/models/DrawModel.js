@@ -797,6 +797,14 @@ class DrawModel {
     this.#removeInteractionActive = false;
   };
 
+  // Toggles the draw-interaction on and off if it is currently on.
+  // This refresh makes sure new settings are applied.
+  #refreshDrawInteraction = () => {
+    if (this.#drawInteraction) {
+      this.toggleDrawInteraction(this.#drawInteraction.get("DRAW_METHOD"));
+    }
+  };
+
   // CUSTOM ADDER: Adds the supplied feature to the draw-source
   // TODO: Explain!
   addFeature = (feature) => {
@@ -1020,6 +1028,9 @@ class DrawModel {
     };
     // Then we'll update the style.
     this.#drawStyleSettings = parsedStyle;
+    // To make sure the new style is shown in the draw-interaction, we have
+    // to refresh the interaction if it is currently active.
+    this.#refreshDrawInteraction();
   };
 
   // Get:er returning the name of the draw-layer.
