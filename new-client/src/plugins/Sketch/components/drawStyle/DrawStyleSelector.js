@@ -85,6 +85,19 @@ export default function DrawStyleSelector(props) {
     );
   };
 
+  // The style-settings for arrows! We are not showing a stroke-width-slider
+  // when creating arrows, since they should have a standard width.
+  const renderArrowStyleSettings = () => {
+    return (
+      <DrawStyleAccordion
+        title="Färg"
+        color={props.drawStyle.strokeColor}
+        handleColorChange={handleStrokeColorChange}
+        drawModel={props.drawModel}
+      />
+    );
+  };
+
   // The style settings for line-drawings!
   // Why are we grid-ing these? Cause we're gonna be implementing more settings.
   const renderLineStyleSettings = () => {
@@ -106,6 +119,7 @@ export default function DrawStyleSelector(props) {
   const renderStyleSettings = () => {
     switch (props.activeDrawType) {
       case "Arrow":
+        return renderArrowStyleSettings();
       case "LineString":
         return renderLineStyleSettings();
       case "Text":

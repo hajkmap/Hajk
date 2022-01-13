@@ -318,6 +318,18 @@ class DrawModel {
     });
   };
 
+  #getArrowBaseStyle = (settings) => {
+    // First we'll grab the feature base-style
+    const baseStyle = this.#getDrawStyle(settings);
+    // Then we'll alter the base-style a bit... We don't want to apply
+    // eventual line-dash, and we also want a hard-coded stroke-width.
+    const baseStroke = baseStyle.getStroke();
+    baseStroke.setWidth(5);
+    baseStroke.setLineDash(null);
+    // Then we return the altered base-style
+    return baseStyle;
+  };
+
   // Returns a svg-string that is used to display arrows in the draw-source.
   #createArrowSvg = (color) => {
     const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32pt" height="32pt" fill="${color}"><path d="M 1 5 L 1 5 L 1 13 L 1 21 L 1 21 L 12 13"/></svg>`;
@@ -327,8 +339,10 @@ class DrawModel {
   // Returns a style array that is used to style arrow features.
   // (All other features consist of a single style-object).
   #getArrowStyle = (feature, settings) => {
-    // First we create the style-array and insert a baseline-style
-    const styles = [this.#getDrawStyle(settings)];
+    // First we'll grab the arrow base-style
+    const baseStyle = this.#getArrowBaseStyle(settings);
+    // Then we'll add the base-style to the styles-array
+    const styles = [baseStyle];
     // Then we'll add the arrow-head at the end of every line-segment.
     feature?.getGeometry().forEachSegment((start, end) => {
       // We'll have to rotate the arrow-head, let's calculate the
