@@ -63,8 +63,7 @@ const AddView = (props) => {
           />
         </Grid>
       </Grid>
-      {["Arrow", "LineString"].includes(activeDrawType) &&
-        renderStrokeTypeSelector()}
+      {activeDrawType === "LineString" && renderStrokeTypeSelector()}
       <Grid item xs={12} style={{ marginTop: 16 }}>
         <Grid item xs={12} style={{ marginBottom: 4 }}>
           <Typography align="center">Utseende</Typography>
