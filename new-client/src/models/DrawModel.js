@@ -320,7 +320,7 @@ class DrawModel {
 
   // Returns a svg-string that is used to display arrows in the draw-source.
   #createArrowSvg = (color) => {
-    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32pt" height="32pt" fill="${color}"><path d="M 0 1 L 1 5 L 15 13 L 1 21 L 0 25 L 20 13"/></svg>`;
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32pt" height="32pt" fill="${color}"><path d="M 1 5 L 1 5 L 1 13 L 1 21 L 1 21 L 12 13"/></svg>`;
     return `data:image/svg+xml;base64,${window.btoa(svgString)}`; // We need base64 for kml-exports to work.
   };
 
@@ -346,7 +346,7 @@ class DrawModel {
                 ? settings.strokeStyle.color
                 : this.#drawStyleSettings.strokeColor
             ),
-            anchor: [0.7, 0.53],
+            anchor: [0.38, 0.53],
             rotateWithView: true,
             rotation: -rotation,
           }),
