@@ -38,7 +38,12 @@ class SketchModel {
   // Extracts the fill-style from the supplied feature-style
   #getFillStyle = (featureStyle) => {
     try {
-      const color = featureStyle.getFill().getColor();
+      // Since we might be dealing with a style-array instead of a style-object
+      // (in case of the special Arrow feature-type) we have to make sure to get
+      // the actual base-style (which is located at position 0 in the style-array).
+      const color = Array.isArray(featureStyle)
+        ? featureStyle[0].getFill().getColor()
+        : featureStyle.getFill().getColor();
       return { color };
     } catch (error) {
       console.error(`Failed to extract fill-style, ${error.message}`);
@@ -49,7 +54,12 @@ class SketchModel {
   // Extracts the stroke-style from the supplied feature-style
   #getStrokeStyle = (featureStyle) => {
     try {
-      const s = featureStyle.getStroke();
+      // Since we might be dealing with a style-array instead of a style-object
+      // (in case of the special Arrow feature-type) we have to make sure to get
+      // the actual base-style (which is located at position 0 in the style-array).
+      const s = Array.isArray(featureStyle)
+        ? featureStyle[0].getStroke()
+        : featureStyle.getStroke();
       const color = s.getColor();
       const dash = s.getLineDash();
       const width = s.getWidth();
