@@ -7,6 +7,7 @@ import KirLayerController from "./KirLayerController";
 import KirModel from "./KirModel";
 import KirView from "./KirView";
 import KirImport from "../Fir/FirImport";
+import KirWfsService from "./KirWfsService";
 
 class Kir extends React.PureComponent {
   state = {
@@ -29,6 +30,9 @@ class Kir extends React.PureComponent {
 
     this.localObserver = new Observer();
 
+    this.localObserver.subscribe("kir.search.search", this.handleSearch);
+    this.localObserver.subscribe("kir.search.load", this.loadFeatures);
+
     this.model = new KirModel({
       localObserver: this.localObserver,
       app: props.app,
@@ -46,7 +50,50 @@ class Kir extends React.PureComponent {
       map: props.map,
       eventPrefix: "kir",
     });
+
+    this.service = new KirWfsService(this.model);
   }
+
+  onWindowShow = () => {
+    this.model.windowIsVisible = true;
+  };
+
+  onWindowHide = () => {
+    this.model.windowIsVisible = false;
+  };
+
+  loadFeatures = (features) => {
+    this.layerController.clearBeforeSearch();
+    this.layerController.addFeatures(features, { zoomToLayer: true });
+    this.localObserver.publish("kir.search.completed", features);
+  };
+
+  handleSearch = (params = {}) => {
+    let features = this.model.layers.buffer.getSource().getFeatures();
+
+    if (features.length === 0) {
+      features = this.model.layers.draw.getSource().getFeatures();
+    }
+
+    const defaultParams = {
+      features: features,
+      app: this.props.app,
+      map: this.props.map,
+      searchTypeId: this.model.config.wfsId,
+    };
+
+    this.layerController.clearBeforeSearch(params);
+    this.localObserver.publish("kir.search.started", params);
+    this.service
+      .search(defaultParams, params)
+      .then((features) => {
+        this.layerController.addFeatures(features, params);
+        this.localObserver.publish("kir.search.completed", features);
+      })
+      .catch((error) => {
+        this.localObserver.publish("kir.search.error", error);
+      });
+  };
 
   render() {
     return (

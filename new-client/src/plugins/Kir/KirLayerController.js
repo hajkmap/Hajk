@@ -1,6 +1,7 @@
 import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
-import { Circle } from "ol/style";
+import { IconMarker } from "../Fir/FirIcons";
+import { Fill, Stroke, Style, Circle, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
 import LinearRing from "ol/geom/LinearRing.js";
 import {
@@ -11,9 +12,7 @@ import {
   MultiLineString,
   MultiPolygon,
 } from "ol/geom.js";
-// import styles from "./FirStyles";
-import { hfetch } from "utils/FetchWrapper";
-import { GeoJSON } from "ol/format";
+import styles from "../Fir/FirStyles";
 import * as jsts from "jsts";
 
 class KirLayerController {
@@ -28,14 +27,6 @@ class KirLayerController {
   }
 
   initLayers() {
-    // this.model.layers.highlight = new VectorLayer({
-    //   caption: "FIRHighlightsLayer",
-    //   name: "FIRHighlightsLayer",
-    //   source: new VectorSource(),
-    //   queryable: false,
-    //   visible: true,
-    // });
-
     this.model.layers.buffer = new VectorLayer({
       caption: "FIRBufferLayer",
       name: "FIRBufferLayer",
@@ -65,12 +56,25 @@ class KirLayerController {
       visible: true,
     });
 
+    this.model.layers.marker = new VectorLayer({
+      caption: "KIRMarker",
+      name: "KIRMarker",
+      source: new VectorSource(),
+      queryable: false,
+      visible: true,
+    });
+
     this.model.map.addLayer(this.model.layers.buffer);
     this.model.map.addLayer(this.model.layers.draw);
     this.model.map.addLayer(this.model.layers.features);
+    this.model.map.addLayer(this.model.layers.marker);
+
+    this.addMarker();
   }
 
   initListeners() {
+    this.observer.subscribe("kir.search.results.mark", this.mark);
+
     this.observer.subscribe("kir.search.clear", this.handleClearSearch);
     this.observer.subscribe(
       "kir.search.results.delete",
@@ -93,37 +97,8 @@ class KirLayerController {
 
     this.model.map.on("singleclick", this.handleFeatureClicks);
 
-    this.observer.subscribe(
-      "kir.search.results.addFeatureByMapClick",
-      (data) => {
-        this.clickLock(data.active);
-        // this.model.layers.wmsRealEstate.setVisible(data.active);
-        // this.model.layers.wmsRealEstate.setOpacity(1.0);
-        this.removeIsActive = false;
-      }
-    );
-    this.observer.subscribe(
-      "kir.search.results.removeFeatureByMapClick",
-      (data) => {
-        this.clickLock(data.active);
-        this.removeIsActive = data.active;
-      }
-    );
     this.observer.subscribe("kir.zoomToFeature", (feature) => {
       this.zoomToFeature(feature);
-    });
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key?.toLowerCase() === "control") {
-        this.ctrlKeyIsDown = true;
-      }
-    });
-
-    window.addEventListener("keyup", (e) => {
-      if (this.ctrlKeyIsDown && e.key?.toLowerCase() === "control") {
-        this.ctrlKeyIsDown = false;
-        this.handleFeatureClicksCancelled();
-      }
     });
   }
 
@@ -131,41 +106,64 @@ class KirLayerController {
     return this.model.layers[name];
   }
 
-  clickLock(bLock) {
-    this.model.map.clickLock[bLock === true ? "add" : "delete"](
-      "kir-addremove-feature"
-    );
-  }
+  mark = (data) => {
+    if (data.open) {
+      const point = new Point(data.feature.getGeometry().getCoordinates());
+      this.markerFeature.setGeometry(point);
+      this.markerFeatureBg.setGeometry(point);
+    }
+    this.model.layers.marker.setVisible(data.open);
+  };
 
-  // addMarker = () => {
-  //   this.markerFeature = new Feature({ geometry: new Point([0, 0]) });
-  //   const styleMarker = new Style({
-  //     image: new Icon({
-  //       anchor: [0.5, 1.18],
-  //       scale: 0.15,
-  //       src: IconMarker(),
-  //     }),
-  //   });
-  //   this.markerFeature.setStyle(styleMarker);
-  //   this.model.layers.markers.getSource().addFeature(this.markerFeature);
-  //   this.model.layers.markers.setVisible(false);
-  // };
+  addMarker = () => {
+    this.markerFeature = new Feature({ geometry: new Point([0, 0]) });
+    const styleMarker = new Style({
+      zIndex: 1,
+      image: new Icon({
+        anchor: [0.5, 1.18],
+        scale: 0.15,
+        src: IconMarker(),
+      }),
+    });
+    this.markerFeature.setStyle(styleMarker);
+
+    this.markerFeatureBg = new Feature({ geometry: new Point([0, 0]) });
+    const styleMarkerBg = new Style({
+      zIndex: 0,
+      image: new Circle({
+        fill: new Fill({
+          color: "rgba(255,255,0,0.0)",
+        }),
+        stroke: new Stroke({
+          color: "rgba(0,255,0,0.3)",
+          width: 10,
+        }),
+        radius: 10,
+      }),
+    });
+
+    this.markerFeatureBg.setStyle(styleMarkerBg);
+
+    this.model.layers.marker.getSource().addFeature(this.markerFeatureBg);
+    this.model.layers.marker.getSource().addFeature(this.markerFeature);
+    this.model.layers.marker.setVisible(false);
+  };
 
   addFeatures = (arr, options = { zoomToLayer: true }) => {
     if (!arr) {
       return;
     }
 
-    // arr.forEach((feature) => {
-    //   feature.setStyle(styles.getResultStyle());
-    // });
+    arr.forEach((feature) => {
+      feature.setStyle(styles.getPointStyle());
+    });
 
     this.model.layers.features.getSource().addFeatures(arr);
     if (options.zoomToLayer) {
       this.zoomToLayer(this.model.layers.features);
     }
 
-    // Force rendering of buffer and label to next tick to prevent gui freeze.
+    // Force rendering of buffer to next tick to prevent gui freeze.
     // buffer is throttled for good reasons.
     clearTimeout(this.renderDelay_tm);
     this.renderDelay_tm = setTimeout(() => {
@@ -180,87 +178,27 @@ class KirLayerController {
 
   clearBeforeSearch = () => {
     this.model.layers.features.getSource().clear();
-    this.model.layers.buffer.getSource().clear();
+    this.model.layers.marker.setVisible(false);
   };
-
-  getFeaturesAtCoordinates(coordinate) {
-    if (!this.model.layers.wmsRealEstate) {
-      return;
-    }
-    const view = this.model.map.getView();
-
-    const url = this.model.layers.wmsRealEstate
-      .getSource()
-      .getFeatureInfoUrl(
-        coordinate,
-        view.getResolution(),
-        view.getProjection().getCode(),
-        {
-          INFO_FORMAT: "application/json",
-        }
-      );
-
-    hfetch(url)
-      .then((response) => {
-        return response ? response.json() : null;
-      })
-      .then((data) => {
-        try {
-          let features = new GeoJSON().readFeatures(data);
-          this.addFeatures(features, { zoomToLayer: false });
-          this.observer.publish("kir.search.add", features);
-        } catch (err) {
-          console.warn(err);
-        }
-      });
-  }
 
   handleFeatureClicks = (e) => {
-    let first = true;
-    this.model.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
-      if (first === true && layer === this.model.layers.features && feature) {
-        if (this.removeIsActive === true) {
-          this.removeFeature(feature);
-        } else {
-          // this.toggleHighlight(feature);
-        }
-        first = false;
-      }
-    });
-    if (first === true) {
-      // no feature was clicked, check realestate layer for features.
-      if (this.model.layers.wmsRealEstate?.getVisible() === true) {
-        this.getFeaturesAtCoordinates(e.coordinate);
-      }
-    }
-    if (e.originalEvent.ctrlKey === true) {
-      // allow multiple add/removes
+    if (this.model.windowIsVisible !== true) {
       return;
     }
-
-    this.handleFeatureClicksCancelled();
-  };
-
-  handleFeatureClicksCancelled = () => {
-    this.observer.publish("kir.search.results.addFeatureByMapClick", {
-      active: false,
+    let featureFound = null;
+    this.model.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
+      if (!featureFound && layer === this.model.layers.features && feature) {
+        featureFound = feature;
+      }
     });
-    this.observer.publish("kir.search.results.removeFeatureByMapClick", {
-      active: false,
-    });
-    this.removeIsActive = false;
-    // this.model.layers.wmsRealEstate.setVisible(false);
-    this.clickLock(false);
-  };
 
-  // handleHighlight = (data) => {
-  //   this.model.layers.highlight.getSource().clear();
-  //   if (data.feature && data.highlight === true) {
-  //     this.toggleHighlight(data.feature);
-  //   } else {
-  //     this.model.layers.markers.setVisible(false);
-  //   }
-  // };
+    if (featureFound) {
+      this.mark({ open: true, feature: featureFound });
+      this.observer.publish("kir.search.feature.selected", featureFound);
+    } else {
+      this.mark({ open: false, feature: featureFound });
+    }
+  };
 
   handleRemoveFeature = (uid) => {
     const feature = this.model.layers.features.getSource().getFeatureByUid(uid);
@@ -276,6 +214,11 @@ class KirLayerController {
   };
 
   bufferFeatures = (options) => {
+    if (!this.bufferValue) {
+      this.getLayer("buffer").getSource().clear();
+      return;
+    }
+
     const parser = new jsts.io.OL3Parser();
     parser.inject(
       Point,

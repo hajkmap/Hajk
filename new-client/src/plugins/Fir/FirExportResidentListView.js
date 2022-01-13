@@ -17,7 +17,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import Collapse from "@material-ui/core/Collapse";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import DownloadIcon from "@material-ui/icons/GetApp";
-import { WFS } from "ol/format";
+import { WFS, GeoJSON } from "ol/format";
 import {
   or as orFilter,
   intersects as intersectsFilter,
@@ -34,6 +34,7 @@ class FirExportResidentListView extends React.PureComponent {
     age: 18,
     loading: false,
     downloadUrl: null,
+    results: [],
   };
 
   static propTypes = {
@@ -41,6 +42,7 @@ class FirExportResidentListView extends React.PureComponent {
     model: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
+    type: PropTypes.string,
   };
 
   static defaultProps = {};
@@ -48,8 +50,21 @@ class FirExportResidentListView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.model = this.props.model;
+    this.type = this.props.type; // kir or fir
     this.localObserver = this.props.localObserver;
     this.options = this.model.app.plugins.fir.options;
+
+    this.localObserver.subscribe("kir.results.filtered", (list) => {
+      this.setState({ results: [...list] });
+      this.forceUpdate();
+    });
+  }
+
+  componentDidMount() {
+    if (this.type === "kir") {
+      // Kir only have one item in accordion, expand it automatically.
+      this.setState({ accordionExpanded: true });
+    }
   }
 
   getGeometryFilters(features) {
@@ -102,14 +117,11 @@ class FirExportResidentListView extends React.PureComponent {
     return new XMLSerializer().serializeToString(featureRequest);
   }
 
-  getResidentExportData = (rawFeatures) => {
-    /* rawFeatures is not converted to openlayer features */
-    let features = rawFeatures;
-
+  getResidentExportData = (features) => {
     const mappings = this.options.residentList.mappings;
 
     features = features.filter((feature) => {
-      return feature.properties[mappings.ageFieldName] >= this.state.age || 0;
+      return feature.get(mappings.ageFieldName) >= this.state.age || 0;
     });
 
     let columns = [];
@@ -148,8 +160,8 @@ class FirExportResidentListView extends React.PureComponent {
       columns.push(mappings.genderDisplayName);
     }
 
-    function getValue(rawFeature, key) {
-      return rawFeature.properties[key];
+    function getValue(feature, key) {
+      return feature.get(key);
     }
 
     // create rows
@@ -201,8 +213,8 @@ class FirExportResidentListView extends React.PureComponent {
     return objectToSend;
   };
 
-  sendResidentData = (rawFeatures) => {
-    const data = this.getResidentExportData(rawFeatures);
+  sendResidentData = (features) => {
+    const data = this.getResidentExportData(features);
 
     let searchParams = new URLSearchParams();
     searchParams.append("json", JSON.stringify(data));
@@ -257,8 +269,7 @@ class FirExportResidentListView extends React.PureComponent {
       })
       .then((data) => {
         if (data.features?.length > 0) {
-          // Note that this is raw json. No need to convert as we will not use it in OL.
-          this.sendResidentData(data.features);
+          this.sendResidentData(new GeoJSON().readFeatures(data));
         }
       })
       .catch((err) => {
@@ -278,7 +289,12 @@ class FirExportResidentListView extends React.PureComponent {
     this.setState({ downloadUrl: null });
     // detach
     setTimeout(() => {
-      this.getResidentData();
+      if (this.props.type === "kir") {
+        // In KIR we already have the data so we just send it.
+        this.sendResidentData(this.state.results);
+      } else {
+        this.getResidentData();
+      }
     }, 25);
   };
 

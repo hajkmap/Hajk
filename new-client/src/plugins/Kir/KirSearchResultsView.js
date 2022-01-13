@@ -13,17 +13,14 @@ import Divider from "@material-ui/core/Divider";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Collapse from "@material-ui/core/Collapse";
-import FirSearchResultItemView from "./FirSearchResultItemView";
+import KirSearchResultItemView from "./KirSearchResultItemView";
 import Pagination from "@material-ui/lab/Pagination";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
-import AddCircle from "@material-ui/icons/AddCircleOutline";
-import RemoveCircle from "@material-ui/icons/RemoveCircleOutline";
-
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-class FirSearchResultsView extends React.PureComponent {
+class KirSearchResultsView extends React.PureComponent {
   state = {
     resultsExpanded: true,
     open: false,
@@ -57,57 +54,37 @@ class FirSearchResultsView extends React.PureComponent {
     this.itemsPerPage = 10;
     this.accordionList = React.createRef();
     this.sortByField = this.model.config.resultsList.sortByField.trim();
-    this.textField = this.model.config.resultsList.textField.trim();
+    this.genderField = this.model.config.genderField;
     this.initListeners();
   }
 
   initListeners = () => {
-    this.localObserver.subscribe("fir.search.started", () => {
+    this.localObserver.subscribe("kir.search.started", () => {
       this.clearResults();
       this.setState({ loading: true });
     });
 
-    this.localObserver.subscribe("fir.search.error", () => {
+    this.localObserver.subscribe("kir.search.error", () => {
       this.setState({ loading: false });
     });
 
-    this.localObserver.subscribe("fir.search.add", (features) => {
-      this.addFeatures(features, false);
-    });
-
-    this.localObserver.subscribe("fir.search.remove", (feature) => {
+    this.localObserver.subscribe("kir.search.remove", (feature) => {
       this.removeFeature(feature);
     });
 
-    this.localObserver.subscribe("fir.search.completed", (features) => {
+    this.localObserver.subscribe("kir.search.completed", (features) => {
       this.setState({ loading: false });
       this.addFeatures(features, true);
     });
-    this.localObserver.subscribe("fir.search.feature.selected", (feature) => {
+    this.localObserver.subscribe("kir.search.feature.selected", (feature) => {
       this.expandFeatureByMapClick(feature, true);
     });
-    this.localObserver.subscribe("fir.search.feature.deselected", (feature) => {
+    this.localObserver.subscribe("kir.search.feature.deselected", (feature) => {
       this.expandFeatureByMapClick(feature, false);
     });
-    this.localObserver.subscribe("fir.search.clear", this.clearResults);
+    this.localObserver.subscribe("kir.search.clear", this.clearResults);
 
-    this.localObserver.subscribe(
-      "fir.search.results.addFeatureByMapClick",
-      (data) => {
-        if (data.active === false) {
-          this.setState({ addFeatureByMapClickActive: data.active });
-        }
-      }
-    );
-    this.localObserver.subscribe(
-      "fir.search.results.removeFeatureByMapClick",
-      (data) => {
-        if (data.active === false) {
-          this.setState({ removeFeatureByMapClickActive: data.active });
-        }
-      }
-    );
-    this.localObserver.subscribe("fir.results.filtered", (list) => {
+    this.localObserver.subscribe("kir.results.filtered", (list) => {
       this.setState({ results: { list: list } });
       this.setPage(1);
       this.forceUpdate();
@@ -140,13 +117,6 @@ class FirSearchResultsView extends React.PureComponent {
 
   clearResults = () => {
     this.updateResultList([], 1);
-  };
-
-  highlight = (feature, _highlight = false) => {
-    this.localObserver.publish("fir.search.results.highlight", {
-      feature: feature,
-      highlight: _highlight,
-    });
   };
 
   expandFeatureByMapClick = (feature, expand) => {
@@ -189,9 +159,12 @@ class FirSearchResultsView extends React.PureComponent {
   handleItemClick(e, data) {
     this.expandFeature(data, !data.open);
     if (data.open) {
-      this.localObserver.publish("fir.zoomToFeature", data);
+      this.localObserver.publish("kir.zoomToFeature", data);
     }
-    this.highlight(data, data.open);
+    this.localObserver.publish("kir.search.results.mark", {
+      feature: data,
+      open: data.open,
+    });
   }
 
   addFeatureClick = (e) => {
@@ -209,7 +182,7 @@ class FirSearchResultsView extends React.PureComponent {
     this.setState({
       addFeatureByMapClickActive: active,
     });
-    this.localObserver.publish("fir.search.results.addFeatureByMapClick", {
+    this.localObserver.publish("kir.search.results.addFeatureByMapClick", {
       active: active,
     });
   };
@@ -218,7 +191,7 @@ class FirSearchResultsView extends React.PureComponent {
     this.setState({
       removeFeatureByMapClickActive: active,
     });
-    this.localObserver.publish("fir.search.results.removeFeatureByMapClick", {
+    this.localObserver.publish("kir.search.results.removeFeatureByMapClick", {
       active: active,
     });
   };
@@ -238,7 +211,7 @@ class FirSearchResultsView extends React.PureComponent {
     this.setState({ results: { list: list } });
     setTimeout(() => {
       // push to next draw
-      this.localObserver.publish("fir.results.filtered", list);
+      this.localObserver.publish("kir.results.filtered", list);
       this.setPage(page);
     }, 25);
   };
@@ -248,10 +221,9 @@ class FirSearchResultsView extends React.PureComponent {
     const index = list.findIndex((f) => f.ol_uid === feature.ol_uid);
     if (index >= 0) {
       let uid = list[index].ol_uid;
-      this.highlight(null, false);
       list.splice(index, 1);
       this.updateResultList(list);
-      this.localObserver.publish("fir.search.results.delete", uid);
+      this.localObserver.publish("kir.search.results.delete", uid);
     }
   };
 
@@ -320,39 +292,7 @@ class FirSearchResultsView extends React.PureComponent {
                   </Typography>
                 </Badge>
               </div>
-              <div>
-                <IconButton
-                  disabled={
-                    this.state.results.list.length === 0 ||
-                    this.state.addFeatureByMapClickActive === true
-                  }
-                  edge="end"
-                  title="Ta bort"
-                  color={
-                    this.state.removeFeatureByMapClickActive
-                      ? "primary"
-                      : "default"
-                  }
-                  className={classes.btnIcon}
-                  onClick={this.removeFeatureClick}
-                >
-                  <RemoveCircle />
-                </IconButton>
-                <IconButton
-                  disabled={this.state.removeFeatureByMapClickActive === true}
-                  edge="end"
-                  title="Lägg till"
-                  color={
-                    this.state.addFeatureByMapClickActive
-                      ? "primary"
-                      : "default"
-                  }
-                  className={classes.btnIcon}
-                  onClick={this.addFeatureClick}
-                >
-                  <AddCircle />
-                </IconButton>
-              </div>
+              <div>&nbsp;</div>
             </div>
           </AccordionSummary>
           <AccordionDetails style={{ display: "block", padding: 0 }}>
@@ -375,7 +315,14 @@ class FirSearchResultsView extends React.PureComponent {
                         this.handleItemClick(e, data);
                       }}
                     >
-                      <ListItemText primary={data.get(this.textField)} />
+                      <ListItemText
+                        primary={`${
+                          data.get(this.genderField) ===
+                          this.model.config.genderMale
+                            ? "Man"
+                            : "Kvinna"
+                        }, ${data.get(this.model.config.ageField)} år`}
+                      />
 
                       <ListItemSecondaryAction>
                         <IconButton
@@ -393,7 +340,7 @@ class FirSearchResultsView extends React.PureComponent {
                     <Collapse in={data.open} timeout="auto" unmountOnExit>
                       <Divider />
                       <div className={classes.resultItemData}>
-                        <FirSearchResultItemView
+                        <KirSearchResultItemView
                           model={data}
                           rootModel={this.model}
                           app={this.props.app}
@@ -507,4 +454,4 @@ const styles = (theme) => ({
   },
 });
 
-export default withStyles(styles)(withSnackbar(FirSearchResultsView));
+export default withStyles(styles)(withSnackbar(KirSearchResultsView));

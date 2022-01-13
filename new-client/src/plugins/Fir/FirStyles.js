@@ -1,4 +1,4 @@
-import { Fill, Stroke, Style, Text } from "ol/style";
+import { Fill, Stroke, Style, Text, Circle } from "ol/style";
 
 class FirStyles {
   constructor() {
@@ -11,6 +11,7 @@ class FirStyles {
     this.model = {};
     this.setResultStyle();
     this.setHighlightStyle();
+    this.setPointStyle();
   }
 
   getColor(key) {
@@ -64,6 +65,30 @@ class FirStyles {
         }),
         text: feature.get(this.model.baseSearchType.labelField) || "",
       }),
+    });
+  }
+
+  getPointStyle() {
+    return this.pointStyle;
+  }
+
+  setPointStyle() {
+    const fill = new Fill({
+      color: this.getColor("colorResult"),
+    });
+    const stroke = new Stroke({
+      color: this.getColor("colorResultStroke"),
+      width: 2,
+    });
+
+    this.pointStyle = new Style({
+      image: new Circle({
+        fill: fill,
+        stroke: stroke,
+        radius: 5,
+      }),
+      fill: fill,
+      stroke: stroke,
     });
   }
 }

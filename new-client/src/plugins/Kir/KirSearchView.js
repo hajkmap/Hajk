@@ -4,18 +4,11 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Button from "@material-ui/core/Button";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import SearchIcon from "@material-ui/icons/Search";
 import { Typography } from "@material-ui/core";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import Input from "@material-ui/core/Input";
 import TextField from "@material-ui/core/TextField";
-
-import InputAdornment from "@material-ui/core/InputAdornment";
-import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -81,34 +74,16 @@ class KirSearchView extends React.PureComponent {
     this.setState({ searchText: "" });
   };
 
-  handleSearch = (overrideOptions = {}) => {
+  handleSearch = () => {
     let options = {
-      text: this.state.searchText,
       genderMale: this.state.genderMale || false,
       genderFemale: this.state.genderFemale || false,
-      showDesignation: this.state.showDesignation || false,
-      showSearchArea: this.state.showSearchArea || false,
-      buffer: this.state.buffer || 0,
-      searchTypeId: this.state.searchTypeId,
+      ageLower: this.state.ageValues[0],
+      ageUpper: this.state.ageValues[1],
       zoomToLayer: true,
     };
 
-    options = { ...options, ...overrideOptions };
-
     this.localObserver.publish("kir.search.search", options);
-  };
-
-  handleSearchTextChange = (e) => {
-    this.setState({
-      searchText: e.target.value || "",
-    });
-    if (e.target.value && e.target.value.length >= 4) {
-      // Throttle!
-      clearTimeout(this.search_tm);
-      this.search_tm = setTimeout(() => {
-        this.handleSearch({ zoomToLayer: false });
-      }, 500);
-    }
   };
 
   handleAgeChange = (e, newValues) => {
@@ -234,7 +209,6 @@ class KirSearchView extends React.PureComponent {
             </div>
 
             <div className={classes.containerTopPadded}>
-              {/* <FormControl fullWidth={true}> */}
               <Typography
                 variant="subtitle2"
                 className={classes.subtitleShallow}
@@ -288,7 +262,6 @@ class KirSearchView extends React.PureComponent {
                   />
                 </Grid>
               </Grid>
-              {/* </FormControl> */}
             </div>
 
             <div
@@ -332,6 +305,10 @@ class KirSearchView extends React.PureComponent {
 const styles = (theme) => ({
   ageInputContainer: {
     paddingLeft: theme.spacing(2),
+    "& input": {
+      paddingRight: "8px",
+      paddingLeft: "8px",
+    },
   },
   input: {
     marginTop: "-4px",

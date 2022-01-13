@@ -9,9 +9,14 @@ export default class KirModel {
     this.layers = {
       buffer: null,
       draw: null,
-      markers: null,
+      marker: null,
+      features: null,
     };
   }
+
+  getWfsById = (id) => {
+    return this.config.wfsLayers.find((layer) => layer.id === id);
+  };
 
   getMap() {
     return this.map;

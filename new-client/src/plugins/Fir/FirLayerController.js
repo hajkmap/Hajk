@@ -308,6 +308,9 @@ class FirLayerController {
   }
 
   handleFeatureClicks = (e) => {
+    if (this.model.windowIsVisible !== true) {
+      return;
+    }
     let first = true;
     this.model.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
       if (first === true && layer === this.model.layers.feature && feature) {

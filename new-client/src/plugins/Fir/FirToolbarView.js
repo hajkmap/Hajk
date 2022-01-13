@@ -44,7 +44,6 @@ class FirToolbarView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
     this.prefix = this.props.prefix || "fir";
-    console.log(this.prefix);
     this.initListeners();
   }
 

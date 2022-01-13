@@ -6,6 +6,8 @@ import AppBar from "@material-ui/core/AppBar";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
 import KirSearchView from "./KirSearchView";
+import KirExportView from "./KirExportView";
+import KirSearchResultsView from "./KirSearchResultsView";
 
 class KirView extends React.PureComponent {
   state = {
@@ -68,17 +70,21 @@ class KirView extends React.PureComponent {
               app={this.props.app}
               localObserver={this.localObserver}
             />
+            <KirSearchResultsView
+              model={this.props.model}
+              app={this.props.app}
+              localObserver={this.localObserver}
+            />
           </div>
           <div
             className={classes.tabContent}
             style={this.state.activeTab === 1 ? {} : { display: "none" }}
           >
-            Some exporting
-            {/* <FirExportView
+            <KirExportView
               model={this.props.model}
               app={this.props.app}
               localObserver={this.localObserver}
-            /> */}
+            />
           </div>
         </div>
       </>
