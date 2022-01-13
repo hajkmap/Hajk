@@ -156,6 +156,7 @@ class KirLayerController {
 
     arr.forEach((feature) => {
       feature.setStyle(styles.getPointStyle());
+      feature.set("kir_type", "feature");
     });
 
     this.model.layers.features.getSource().addFeatures(arr);
