@@ -711,9 +711,13 @@ class DrawModel {
       : null;
   };
 
-  // We're probably going to need a handler for when a feature is added
+  // We're probably going to need a handler for when a feature is added.
+  // For now, let's publish an event on the observer.
   #handleDrawFeatureAdded = (e) => {
-    return;
+    this.#publishInformation({
+      subject: "drawModel.featureAdded",
+      payLoad: e.feature,
+    });
   };
 
   // We want to handle key-up events so that we can let the user
@@ -805,6 +809,22 @@ class DrawModel {
     }
   };
 
+  // Returns a valid draw-interaction-type from the supplied
+  // draw-method. For example, if the user wants to create a rectangle,
+  // the draw-interaction-type should apparently be "Circle".
+  #getDrawInteractionType = (method) => {
+    switch (method) {
+      case "Arrow":
+        return "LineString";
+      case "Rectangle":
+        return "Circle";
+      case "Text":
+        return "Point";
+      default:
+        return method;
+    }
+  };
+
   // CUSTOM ADDER: Adds the supplied feature to the draw-source
   // TODO: Explain!
   addFeature = (feature) => {
@@ -856,14 +876,7 @@ class DrawModel {
     }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
-    // Which draw-type should we use? (Rectangles should be created with the
-    // "Circle" method apparently) and arrows are created with Line-strings.
-    const type =
-      drawMethod === "Rectangle"
-        ? "Circle"
-        : drawMethod === "Arrow"
-        ? "LineString"
-        : drawMethod;
+    const type = this.#getDrawInteractionType(drawMethod);
     // Are we going free-hand drawing? (We're always free if we're drawing circles
     // or rectangles).
     const freehand = ["Circle", "Rectangle"].includes(drawMethod)

@@ -5,6 +5,7 @@ import DrawTypeSelector from "../components/DrawTypeSelector";
 import Information from "../components/Information";
 import DrawStyleSelector from "../components/drawStyle/DrawStyleSelector";
 import StrokeTypeSelector from "../components/drawStyle/StrokeTypeSelector";
+import FeatureTextSetter from "../components/FeatureTextSetter";
 
 import { STROKE_DASHES } from "../constants";
 
@@ -78,6 +79,10 @@ const AddView = (props) => {
           />
         </Grid>
       </Grid>
+      <FeatureTextSetter
+        localObserver={props.localObserver}
+        drawModel={props.drawModel}
+      />
     </Grid>
   );
 };

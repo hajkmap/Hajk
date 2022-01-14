@@ -149,6 +149,7 @@ const SketchView = (props) => {
           <AddView
             id={activityId}
             model={model}
+            localObserver={localObserver}
             drawModel={drawModel}
             activeDrawType={activeDrawType}
             setActiveDrawType={setActiveDrawType}
