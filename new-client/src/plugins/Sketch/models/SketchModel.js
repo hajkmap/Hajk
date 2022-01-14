@@ -108,6 +108,17 @@ class SketchModel {
     return Math.random().toString(36).slice(2, 9);
   };
 
+  // When a feature is removed, we should usually add it to the list of
+  // removed features. However, there is one case where we should not!
+  // If we've added a text-feature, and the user has chosen to abort the
+  // input of text to apply to the feature, we make sure to remove it, and
+  // that removed feature should not be shown in the list of removed features.
+  featureShouldBeAddedToStorage = (feature) => {
+    return !(
+      feature.get("DRAW_METHOD") === "Text" && !feature.get("USER_TEXT")
+    );
+  };
+
   // We're gonna need to set some properties on the handled feature so that we can keep
   // track of it. (The "HANDLED_AT" prop will show the user at what time the feature was
   // removed, and the "HANDLED_ID" will be used if the user choses to restore the feature).

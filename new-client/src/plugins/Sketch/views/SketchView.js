@@ -42,6 +42,12 @@ const SketchView = (props) => {
   // Handler making sure to keep the removed features updated when a new feature is removed.
   const handleFeatureRemoved = React.useCallback(
     (feature) => {
+      // There are some special cases where the removed feature should not be added
+      // to the list of removed features. More information can be found in the method
+      // declaration.
+      if (!model.featureShouldBeAddedToStorage(feature)) {
+        return;
+      }
       // We're gonna need to decorate the removed feature so that we can keep track of it.
       model.decorateFeature(feature);
       // We have to make sure to update the local storage with the newly removed feature so that
