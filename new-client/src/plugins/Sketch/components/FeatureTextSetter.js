@@ -28,6 +28,7 @@ const FeatureTextSetter = ({ drawModel, localObserver }) => {
         drawModel.removeFeature(feature);
       } else {
         feature.set("USER_TEXT", textFieldValue);
+        drawModel.refreshFeatureStyle();
       }
       setFeature(null);
     },

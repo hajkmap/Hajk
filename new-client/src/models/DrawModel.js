@@ -319,9 +319,7 @@ class DrawModel {
       textBaseline: "middle",
       font: "12pt sans-serif",
       fill: new Fill({ color: "#FFF" }),
-      text: this.#showFeatureMeasurements
-        ? this.#getFeatureMeasurementLabel(feature)
-        : "",
+      text: this.#getFeatureLabelText(feature),
       overflow: true,
       stroke: new Stroke({
         color: "rgba(0, 0, 0, 0.5)",
@@ -442,6 +440,22 @@ class DrawModel {
         // Otherwise m² (or m) will do. (Displayed in local format).
         return this.#getMeasurementString(featureMeasure, measureIsLength);
     }
+  };
+
+  // Returns the label text that should be shown on the feature.
+  // Usually the text is constructed by the measurement of the feature,
+  // but if the feature is of text-type, we show the user-added-text.
+  #getFeatureLabelText = (feature) => {
+    // Are we dealing with a text-feature? Let's return the user-
+    // added-text.
+    if (feature.get("DRAW_METHOD") === "Text") {
+      return feature.get("USER_TEXT") ?? "";
+    }
+    // Otherwise we return the measurement-text (If we're supposed to
+    // show it)!
+    return this.#showFeatureMeasurements
+      ? this.#getFeatureMeasurementLabel(feature)
+      : "";
   };
 
   // Returns the supplied measurement as a kilometer-formatted string.
@@ -842,6 +856,14 @@ class DrawModel {
     return ["Circle", "Rectangle"].includes(drawMethod)
       ? true
       : settings.freehand ?? false;
+  };
+
+  // Refreshes the style on the features in the draw-source. Useful for when a feature-prop
+  // has been changed and the style has to be updated.
+  refreshFeatureStyle = () => {
+    this.#drawSource.forEachFeature((f) => {
+      f.setStyle(this.#getFeatureStyle(f));
+    });
   };
 
   // CUSTOM ADDER: Adds the supplied feature to the draw-source
