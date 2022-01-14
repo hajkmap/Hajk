@@ -76,14 +76,14 @@ namespace MapService.Components
                         }
                         catch (Exception e)
                         {
-                            _log.ErrorFormat("Kunde inte koppla upp mot Active Directory, container '{0}', ERROR: {1}", containerArray[i], e.Message);
+                            _log.ErrorFormat("Could not connect to Active Directory, container '{0}', ERROR: {1}", containerArray[i], e.Message);
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                _log.ErrorFormat("Kunde inte koppla upp mot Active Directory, kontrollera inloggningsuppgifter: error {0}", e.Message);
+                _log.ErrorFormat("Could not connect to Active Directory, error: {0}", e.Message);
             }
             return userPrincipal;
         }
