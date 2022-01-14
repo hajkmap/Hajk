@@ -22,15 +22,23 @@ const FeatureTextSetter = ({ drawModel, localObserver }) => {
   // We are also going to need a handler for when the user closes the dialog
   const handleCloseClick = React.useCallback(
     (textFieldValue) => {
+      // If the user did not write any text, we remove the feature from
+      // the draw-source. (Since we don't want text-features without text).
       if (textFieldValue.length === 0) {
-        // Remove feature
+        drawModel.removeFeature(feature);
       } else {
         feature.set("USER_TEXT", textFieldValue);
       }
       setFeature(null);
     },
-    [feature]
+    [drawModel, feature]
   );
+
+  // If the user aborts, we make sure to remove the feature from the source
+  const handleAbortClick = React.useCallback(() => {
+    drawModel.removeFeature(feature);
+    setFeature(null);
+  }, [drawModel, feature]);
 
   // Let's add an effect where we can subscribe to the addFeature-event
   React.useEffect(() => {
@@ -52,7 +60,7 @@ const FeatureTextSetter = ({ drawModel, localObserver }) => {
           }}
           open={feature !== null}
           onClose={handleCloseClick}
-          onAbort={handleCloseClick}
+          onAbort={handleAbortClick}
         />,
         document.getElementById("map")
       )
