@@ -11,14 +11,9 @@
     "Edit",
     "Export",
     "FmeServer",
-<<<<<<< HEAD
-    "Fir",
-=======
     "GeosuiteExport",
     "InfoDialog",
->>>>>>> origin/develop
     "Informative",
-    "Kir",
     "LayerSwitcher",
     "Location",
     "Measure",
@@ -41,12 +36,9 @@
     "Edit",
     "Export",
     "FmeServer",
-<<<<<<< HEAD
-    "Fir",
-=======
+	"Fir",
     "GeosuiteExport",
     "InfoDialog",
->>>>>>> origin/develop
     "Informative",
     "Kir",
     "LayerSwitcher",
