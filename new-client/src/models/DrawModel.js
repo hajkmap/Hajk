@@ -50,6 +50,7 @@ class DrawModel {
   #showDrawTooltip;
   #showFeatureMeasurements;
   #drawStyleSettings;
+  #textStyleSettings;
   #drawInteraction;
   #removeInteractionActive;
   #allowedLabelFormats;
@@ -77,6 +78,8 @@ class DrawModel {
     this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
+    this.#textStyleSettings =
+      settings.textStyleSettings ?? this.#getDefaultTextStyleSettings();
     this.#allowedLabelFormats = ["AUTO", "M2", "KM2", "HECTARE"];
     this.#labelFormat = settings.labelFormat ?? "AUTO"; // One of #allowedLabelFormats
     // We are going to be keeping track of the current extent of the draw-source...
@@ -148,6 +151,14 @@ class DrawModel {
       strokeWidth: strokeWidth,
       fillColor: fillColor,
     };
+  };
+
+  // Returns the default text-style settings used by the draw-model.
+  #getDefaultTextStyleSettings = () => {
+    const foregroundColor = "#FFFFFF";
+    const backgroundColor = "#000000";
+    const size = 14;
+    return { foregroundColor, backgroundColor, size };
   };
 
   // If required parameters are missing, we have to make sure we abort the
@@ -314,20 +325,30 @@ class DrawModel {
     // Before we create the text-style we have to check if we,re dealing with a
     // point. If we are, we have to make sure to offset the text in the negative y-direction.
     const featureIsPoint = feature?.getGeometry() instanceof Point;
+    // We also have to check if we're dealing with a text-feature or not
+    const featureIsTextType = feature?.get("DRAW_METHOD") === "Text";
     // Then we can create and return the style
     return new Text({
       textAlign: "center",
       textBaseline: "middle",
-      font: "12pt sans-serif",
-      fill: new Fill({ color: "#FFF" }),
+      font: `${
+        featureIsTextType ? this.#textStyleSettings.size : 12
+      }pt sans-serif`,
+      fill: new Fill({
+        color: featureIsTextType
+          ? this.#textStyleSettings.foregroundColor
+          : "#FFF",
+      }),
       text: this.#getFeatureLabelText(feature),
       overflow: true,
       stroke: new Stroke({
-        color: "rgba(0, 0, 0, 0.5)",
+        color: featureIsTextType
+          ? this.#textStyleSettings.backgroundColor
+          : "rgba(0, 0, 0, 0.5)",
         width: 3,
       }),
       offsetX: 0,
-      offsetY: featureIsPoint ? -15 : 0,
+      offsetY: featureIsPoint && !featureIsTextType ? -15 : 0,
       rotation: 0,
       scale: 1,
     });
@@ -1097,6 +1118,10 @@ class DrawModel {
     this.#refreshDrawInteraction();
   };
 
+  setTextStyleSettings = (newStyleSettings) => {
+    this.#textStyleSettings = newStyleSettings;
+  };
+
   // Get:er returning the name of the draw-layer.
   getCurrentLayerName = () => {
     return this.#layerName;
@@ -1130,6 +1155,11 @@ class DrawModel {
   // Get:er returning the current draw-style settings
   getDrawStyleSettings = () => {
     return this.#drawStyleSettings;
+  };
+
+  // Get:er returning the current text-style settings
+  getDrawStyleSettings = () => {
+    return this.#textStyleSettings;
   };
 }
 export default DrawModel;

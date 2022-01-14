@@ -24,14 +24,20 @@ const SketchView = (props) => {
   const { localObserver } = props;
   // The current draw-type is also required, along with it's set:er.
   const { activeDrawType, setActiveDrawType } = props;
-  // We're gonna need to keep track of the current chosen activity etc.
+  // We're gonna need to keep track of the current chosen activity.
   const [activityId, setActivityId] = React.useState("ADD");
+  // We're gonna need to keep track of some draw-styling...
   const [drawStyle, setDrawStyle] = React.useState({
     strokeColor: { r: 10, g: 10, b: 10, a: 1 },
     fillColor: { r: 60, g: 60, b: 60, a: 0.3 },
     strokeType: "solid",
     strokeWidth: 1,
-    textSize: 2,
+  });
+  // ...and some text-styling.
+  const [textStyle, setTextStyle] = React.useState({
+    foregroundColor: "#FFFFFF",
+    backgroundColor: "#000000",
+    size: 14,
   });
   // We want to keep track of the last removed features so that the user can restore
   // features that they potentially removed by mistake.
@@ -127,6 +133,12 @@ const SketchView = (props) => {
     return drawModel.setDrawStyleSettings(drawStyle);
   }, [drawModel, drawStyle]);
 
+  // This effect makes sure to update the text-style-settings in the draw-model when
+  // the user changes the text-style-settings in the view.
+  React.useEffect(() => {
+    return drawModel.setTextStyleSettings(textStyle);
+  }, [drawModel, textStyle]);
+
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
     // Fires when a feature has been removed from the draw-source.
@@ -161,6 +173,8 @@ const SketchView = (props) => {
             setActiveDrawType={setActiveDrawType}
             drawStyle={drawStyle}
             setDrawStyle={setDrawStyle}
+            textStyle={textStyle}
+            setTextStyle={setTextStyle}
           />
         );
       case "DELETE":
