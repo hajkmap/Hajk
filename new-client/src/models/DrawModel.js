@@ -19,6 +19,7 @@ import Overlay from "ol/Overlay.js";
  * - observerPrefix (String): A string acting as a prefix on all messages published on the observer.
  *
  * Exposes a couple of methods:
+ * - refreshFeatureStyle(): Refreshes the style on all features in the draw-source.
  * - addFeature(feature): Adds the supplied feature to the draw-source.
  * - removeFeature(feature): Removes the supplied feature from the draw-source.
  * - getCurrentExtent(): Returns the current extent of the current draw-layer.
