@@ -19,6 +19,8 @@ import Overlay from "ol/Overlay.js";
  * - observerPrefix (String): A string acting as a prefix on all messages published on the observer.
  *
  * Exposes a couple of methods:
+ * - addFeature(feature): Adds the supplied feature to the draw-source.
+ * - removeFeature(feature): Removes the supplied feature from the draw-source.
  * - getCurrentExtent(): Returns the current extent of the current draw-layer.
  * - getCurrentLayerName(): Returns the name of the layer currently connected to the draw-model.
  * - removeDrawnFeatures():  Removes all drawn features from the current draw-source.
@@ -772,12 +774,7 @@ class DrawModel {
       // Let's get the first user-drawn feature
       const feature = userDrawnFeatures[0];
       // Then we remove it from the draw-source
-      this.#drawSource.removeFeature(feature);
-      // Then we (potentially) publish that we've removed a feature.
-      this.#publishInformation({
-        subject: "drawModel.featureRemoved",
-        payLoad: feature,
-      });
+      this.removeFeature(feature);
     }
   };
 
@@ -848,6 +845,18 @@ class DrawModel {
         payLoad: error,
       });
     }
+  };
+
+  // CUSTOM REMOVER: Removes the supplied feature from the draw-source
+  // TODO: Explain!
+  removeFeature = (feature) => {
+    // Let's start by removing the supplied feature from the draw-source
+    this.#drawSource.removeFeature(feature);
+    // Then we (potentially) publish that we've removed a feature.
+    this.#publishInformation({
+      subject: "drawModel.featureRemoved",
+      payLoad: feature,
+    });
   };
 
   // Accepts an RGBA-object containing r-, g-, b-, and a-properties and
