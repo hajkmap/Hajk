@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, TextField, Typography } from "@material-ui/core";
 
 import DrawTypeSelector from "../components/DrawTypeSelector";
 import Information from "../components/Information";
@@ -31,6 +31,14 @@ const AddView = (props) => {
     });
   };
 
+  // We need a handler that can update the text-size setting
+  const handleTextSizeChange = (e) => {
+    props.setTextStyle({
+      ...props.textStyle,
+      size: e.target.value,
+    });
+  };
+
   const renderStrokeTypeSelector = () => {
     return (
       <Grid item xs={12} style={{ marginTop: 16 }}>
@@ -43,6 +51,26 @@ const AddView = (props) => {
             strokeType={props.drawStyle.strokeType}
             includeContainer={false}
           />
+        </Grid>
+      </Grid>
+    );
+  };
+
+  const renderTextSizeSelector = () => {
+    return (
+      <Grid item xs={12} style={{ marginTop: 16 }}>
+        <Grid item xs={12} style={{ marginBottom: 4 }}>
+          <Typography align="center">Textstorlek</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            variant="outlined"
+            type="number"
+            size="small"
+            fullWidth
+            value={props.textStyle.size}
+            onChange={handleTextSizeChange}
+          ></TextField>
         </Grid>
       </Grid>
     );
@@ -65,6 +93,7 @@ const AddView = (props) => {
         </Grid>
       </Grid>
       {activeDrawType === "LineString" && renderStrokeTypeSelector()}
+      {activeDrawType === "Text" && renderTextSizeSelector()}
       <Grid item xs={12} style={{ marginTop: 16 }}>
         <Grid item xs={12} style={{ marginBottom: 4 }}>
           <Typography align="center">Utseende</Typography>

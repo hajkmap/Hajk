@@ -19,7 +19,7 @@ import Overlay from "ol/Overlay.js";
  * - observerPrefix (String): A string acting as a prefix on all messages published on the observer.
  *
  * Exposes a couple of methods:
- * - refreshFeatureStyle(): Refreshes the style on all features in the draw-source.
+ * - refreshFeaturesTextStyle(): Refreshes the text-style on all features in the draw-source.
  * - addFeature(feature): Adds the supplied feature to the draw-source.
  * - removeFeature(feature): Removes the supplied feature from the draw-source.
  * - getCurrentExtent(): Returns the current extent of the current draw-layer.
@@ -332,18 +332,22 @@ class DrawModel {
       textAlign: "center",
       textBaseline: "middle",
       font: `${
-        featureIsTextType ? this.#textStyleSettings.size : 12
+        featureIsTextType
+          ? feature.get("TEXT_SETTINGS")?.size ?? this.#textStyleSettings.size
+          : 12
       }pt sans-serif`,
       fill: new Fill({
         color: featureIsTextType
-          ? this.#textStyleSettings.foregroundColor
+          ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
+            this.#textStyleSettings.foregroundColor
           : "#FFF",
       }),
       text: this.#getFeatureLabelText(feature),
       overflow: true,
       stroke: new Stroke({
         color: featureIsTextType
-          ? this.#textStyleSettings.backgroundColor
+          ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
+            this.#textStyleSettings.backgroundColor
           : "rgba(0, 0, 0, 0.5)",
         width: 3,
       }),
@@ -724,6 +728,7 @@ class DrawModel {
     // handle special features, such as arrows.
     feature.set("USER_DRAWN", true);
     feature.set("DRAW_METHOD", this.#drawInteraction.get("DRAW_METHOD"));
+    feature.set("TEXT_SETTINGS", this.#textStyleSettings);
     // And set a nice style on the feature to be added.
     feature.setStyle(this.#getFeatureStyle(feature));
     // Make sure to remove the event-listener for the pointer-moves.
@@ -880,12 +885,10 @@ class DrawModel {
       : settings.freehand ?? false;
   };
 
-  // Refreshes the style on the features in the draw-source. Useful for when a feature-prop
-  // has been changed and the style has to be updated.
-  refreshFeatureStyle = () => {
-    this.#drawSource.forEachFeature((f) => {
-      f.setStyle(this.#getFeatureStyle(f));
-    });
+  // Refreshes the text-style on the features in the draw-source. Useful for when a feature-prop
+  // has been changed and the text-style has to be updated.
+  refreshFeaturesTextStyle = () => {
+    this.#refreshFeaturesTextStyle();
   };
 
   // CUSTOM ADDER: Adds the supplied feature to the draw-source
@@ -906,6 +909,7 @@ class DrawModel {
         payLoad: feature,
       });
     } catch (error) {
+      console.error(`Error while adding feature: ${error}`);
       this.#publishInformation({
         subject: "drawModel.addFeature.error",
         payLoad: error,

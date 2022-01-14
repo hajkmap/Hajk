@@ -46,7 +46,7 @@ const ColorBadge = ({ color }) => {
         backgroundColor: color,
         borderRadius: "10%",
         marginLeft: 4,
-        border: color === "#FFFFFF" ? "1px solid black" : null,
+        border: color.toLowerCase() === "#ffffff" ? "1px solid black" : null,
       }}
     />
   );
