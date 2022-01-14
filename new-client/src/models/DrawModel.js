@@ -822,6 +822,14 @@ class DrawModel {
     }
   };
 
+  // Returns wether we should be free-hand-drawing or not.
+  // Circles and Rectangles are always drawn with free-hand set to true.
+  #isFreeHandDrawing = (drawMethod, settings) => {
+    return ["Circle", "Rectangle"].includes(drawMethod)
+      ? true
+      : settings.freehand ?? false;
+  };
+
   // CUSTOM ADDER: Adds the supplied feature to the draw-source
   // TODO: Explain!
   addFeature = (feature) => {
@@ -886,11 +894,8 @@ class DrawModel {
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
     const type = this.#getDrawInteractionType(drawMethod);
-    // Are we going free-hand drawing? (We're always free if we're drawing circles
-    // or rectangles).
-    const freehand = ["Circle", "Rectangle"].includes(drawMethod)
-      ? true
-      : settings.freehand ?? false;
+    // Are we going to be free-hand drawing?
+    const freehand = this.#isFreeHandDrawing(drawMethod, settings);
     // Then we'll add the interaction!
     this.#drawInteraction = new Draw({
       source: this.#drawSource,
