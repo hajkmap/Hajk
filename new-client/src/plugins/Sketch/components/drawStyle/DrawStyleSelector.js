@@ -26,6 +26,20 @@ export default function DrawStyleSelector(props) {
   const handleStrokeWidthChange = (e, value) => {
     props.setDrawStyle({ ...props.drawStyle, strokeWidth: value });
   };
+  // We need a handler that can update the text-foreground-color change
+  const handleForegroundColorChange = (e) => {
+    props.setTextStyle({
+      ...props.textStyle,
+      foregroundColor: e.hex,
+    });
+  };
+  // We need a handler that can update the text-background-color change
+  const handleBackgroundColorChange = (e) => {
+    props.setTextStyle({
+      ...props.textStyle,
+      backgroundColor: e.hex,
+    });
+  };
 
   // The style settings for area-drawings!
   // TODO: Opacity-style settings and stroke-width-settings!
@@ -67,17 +81,17 @@ export default function DrawStyleSelector(props) {
       <Grid container>
         <Grid item xs={12}>
           <DrawStyleAccordion
-            title="Färg"
-            color={props.drawStyle.fillColor}
-            handleColorChange={handleFillColorChange}
+            title="Färg - förgrund"
+            color={props.textStyle.foregroundColor}
+            handleColorChange={handleForegroundColorChange}
             drawModel={props.drawModel}
           />
         </Grid>
         <Grid item xs={12}>
           <DrawStyleAccordion
-            title="Bakgrundsfärg"
-            color={props.drawStyle.strokeColor}
-            handleColorChange={handleStrokeColorChange}
+            title="Färg - bakgrund"
+            color={props.textStyle.backgroundColor}
+            handleColorChange={handleBackgroundColorChange}
             drawModel={props.drawModel}
           />
         </Grid>

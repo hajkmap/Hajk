@@ -46,6 +46,7 @@ const ColorBadge = ({ color }) => {
         backgroundColor: color,
         borderRadius: "10%",
         marginLeft: 4,
+        border: color === "#FFFFFF" ? "1px solid black" : null,
       }}
     />
   );
@@ -97,8 +98,12 @@ const StrokeWidthSlider = ({ strokeWidth, handleStrokeWidthChange }) => {
 
 const AccordionSummaryContents = (props) => {
   // We need to get the string-representation of the supplied color-object
-  // to be used in the color badge...
-  const colorString = props.drawModel.getRGBAString(props.color);
+  // to be used in the color badge... (If it not already a string).
+  const colorString =
+    typeof props.color === "string"
+      ? props.color
+      : props.drawModel.getRGBAString(props.color);
+  // Then we'll render everything!
   return (
     <Grid container justify="space-between" alignItems="center">
       <Typography variant="button">{props.title}</Typography>
