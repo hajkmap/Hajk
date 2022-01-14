@@ -151,6 +151,7 @@ const SketchView = (props) => {
       localObserver.unsubscribe("drawModel.featureAdded");
     };
   }, [
+    activityId,
     localObserver,
     handleFeatureRemoved,
     handleFeaturesRemoved,
