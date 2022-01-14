@@ -286,14 +286,28 @@ class DrawModel {
     return baseLineStyle;
   };
 
+  // Method returning if we're supposed to be showing text on the feature
+  // or not. We're showing text in two cases: One: if the feature is of text-type,
+  // or two: if we're supposed to be showing feature measurements. If the feature is
+  // of arrow-type, we're never showing text.
+  #shouldShowText = (feature) => {
+    // Let's get the draw-method
+    const featureDrawMethod = feature?.get("DRAW_METHOD");
+    // And check if we're supposed to be showing text or not.
+    return (
+      featureDrawMethod !== "Arrow" &&
+      (this.#showFeatureMeasurements || featureDrawMethod === "Text")
+    );
+  };
+
   // Returns a text-style that shows the tooltip-label
   // (i.e. the area of the feature in a readable format).
   // *If the measurement-label is supposed to be shown!*
   #getFeatureTextStyle = (feature) => {
-    // We're not supposed to be showing text on all types of features
-    // (As of now, all features except arrows should have a text-style)
-    // If we're dealing with an arrow, let's return null.
-    if (feature?.get("DRAW_METHOD") === "Arrow") {
+    // First we have to make sure we're supposed to be showing text on the feature.
+    const shouldShowText = this.#shouldShowText(feature);
+    // If we're not supposed to be showing any text, we can just return null
+    if (!shouldShowText) {
       return null;
     }
     // Before we create the text-style we have to check if we,re dealing with a
