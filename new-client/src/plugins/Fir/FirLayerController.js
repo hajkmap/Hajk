@@ -139,6 +139,7 @@ class FirLayerController {
       (data) => {
         this.clickLock(data.active);
         this.model.layers.wmsRealEstate.setVisible(data.active);
+        this.model.layers.wmsRealEstate.setOpacity(1.0);
         this.removeIsActive = false;
       }
     );
@@ -154,13 +155,13 @@ class FirLayerController {
     });
 
     window.addEventListener("keydown", (e) => {
-      if (e.key.toLowerCase() === "control") {
+      if (e.key?.toLowerCase() === "control") {
         this.ctrlKeyIsDown = true;
       }
     });
 
     window.addEventListener("keyup", (e) => {
-      if (this.ctrlKeyIsDown && e.key.toLowerCase() === "control") {
+      if (this.ctrlKeyIsDown && e.key?.toLowerCase() === "control") {
         this.ctrlKeyIsDown = false;
         this.handleFeatureClicksCancelled();
       }

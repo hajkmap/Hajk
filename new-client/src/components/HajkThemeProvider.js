@@ -110,6 +110,12 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
   // Keep the app's theme in state so it can be changed dynamically.
   const [theme, setTheme] = useState(getTheme(config, customTheme));
 
+  // We need a state-variable so that we are able to re-render the theme-provider
+  // without changing the theme. Why, you might ask? Since we're using a custom theme
+  // when invoking the document-handler-print we must be able to reset the theme back
+  // to the original one (which requires a re-render).
+  const [themeUID, setThemeUID] = useState(Math.random());
+
   // Handles theme toggling
   const toggleMUITheme = () => {
     // If there's a override in customTheme.json, toggling is not possible.
@@ -144,6 +150,15 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
     setTheme(newTheme);
   };
 
+  // This will cause a re-render, allowing for the "standard" theme to be injected
+  // again - which will make sure that the "standard" theme has the highest css-specificity.
+  // Useful for those rare occasions where you might have used a custom theme inside components.
+  // An example of this is in the document-handler print solution, where we're injecting a custom
+  // print theme, which we want to get rid of.
+  const refreshMUITheme = () => {
+    setThemeUID(themeUID + Math.random());
+  };
+
   // Take the theme object from state and generate a MUI-theme
   const muiTheme = createMuiTheme(theme);
 
@@ -155,7 +170,8 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
         activeTools={activeTools}
         config={config}
         theme={muiTheme}
-        toggleMUITheme={toggleMUITheme} // Pass the toggle handler, so we can call it from another component later on
+        toggleMUITheme={toggleMUITheme}
+        refreshMUITheme={refreshMUITheme}
       />
     </MuiThemeProvider>
   );

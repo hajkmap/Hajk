@@ -1,6 +1,11 @@
 {
   "typography": {
     "fontSize": 14,
+    "h1": {
+      "fontSize": "2.0rem",
+      "fontWeight": 800,
+      "margin-bottom": "0.25em"
+    },
     "h2": {
       "fontSize": "1.5rem",
       "fontWeight": 800,
@@ -30,7 +35,13 @@
       "padding-top": "1em",
       "margin-bottom": "0.25em"
     },
-    "body1": { "fontSize": "0.88rem", "margin-bottom": "0.625em" },
-    "subtitle2": { "fontSize": "0.88rem", "fontStyle": "italic" }
+    "body1": {
+      "fontSize": "0.88rem",
+      "margin-bottom": "0.625em"
+    },
+    "subtitle2": {
+      "fontSize": "0.88rem",
+      "fontStyle": "italic"
+    }
   }
 }
