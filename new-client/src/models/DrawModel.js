@@ -1,5 +1,5 @@
 import { Draw, Modify } from "ol/interaction";
-import { createBox, createRegularPolygon } from "ol/interaction/Draw";
+import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
@@ -1009,12 +1009,7 @@ class DrawModel {
       type: type,
       freehand: freehand,
       stopClick: true,
-      geometryFunction:
-        drawMethod === "Rectangle"
-          ? createBox()
-          : drawMethod === "Circle"
-          ? createRegularPolygon()
-          : null,
+      geometryFunction: drawMethod === "Rectangle" ? createBox() : null,
       style: this.#getDrawStyle(),
     });
     // Let's set the supplied draw-method as a property on the draw-interaction
