@@ -25,7 +25,7 @@ const SketchView = (props) => {
   // The current draw-type is also required, along with it's set:er.
   const { activeDrawType, setActiveDrawType } = props;
   // We're gonna need to keep track of the current chosen activity.
-  const [activityId, setActivityId] = React.useState("ADD");
+  const { activityId, setActivityId } = props;
   // We're gonna need to keep track of some draw-styling...
   const [drawStyle, setDrawStyle] = React.useState({
     strokeColor: { r: 10, g: 10, b: 10, a: 1 },
@@ -113,19 +113,6 @@ const SketchView = (props) => {
     },
     [model, removedFeatures]
   );
-
-  // This effect makes sure that we activate the proper draw-interaction when the draw-type
-  // or activity-id changes. (This includes activating the first draw-interaction on first render).
-  React.useEffect(() => {
-    switch (activityId) {
-      case "ADD":
-        return drawModel.toggleDrawInteraction(activeDrawType);
-      case "DELETE":
-        return drawModel.toggleDrawInteraction("Delete");
-      default:
-        return drawModel.toggleDrawInteraction("");
-    }
-  }, [activeDrawType, activityId, drawModel]);
 
   // This effect makes sure to update the draw-style-settings in the draw-model when
   // the user changes the style-settings in the view.

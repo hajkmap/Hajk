@@ -11,9 +11,14 @@ import SketchModel from "./models/SketchModel";
 import DrawModel from "../../models/DrawModel";
 
 const Sketch = (props) => {
-  // We're gonna need to keep track of the currently active draw-type
+  // We're gonna need to keep track of the current chosen activity. ("ADD", "REMOVE", etc).
+  const [activityId, setActivityId] = React.useState("ADD");
+  // We're gonna need to keep track of the currently active draw-type. ("Polygon", "Rectangle", etc).
   const [activeDrawType, setActiveDrawType] = React.useState("Polygon");
-
+  // We're gonna need to keep track of if the actual plugin is shown or not.
+  const [pluginShown, setPluginShown] = React.useState(
+    props.options.visibleAtStart ?? false
+  );
   // The local observer will handle the communication between models and views.
   const [localObserver] = React.useState(() => Observer());
 
@@ -40,15 +45,34 @@ const Sketch = (props) => {
       })
   );
 
+  // This effect makes sure that we activate the proper draw-interaction when the draw-type,
+  // activity-id, or plugin-visibility changes. (This includes activating the first draw-interaction on first render).
+  React.useEffect(() => {
+    // If the plugin is not shown, we have to make sure to disable
+    // the potential draw-interaction.
+    if (!pluginShown) {
+      return drawModel.toggleDrawInteraction("");
+    }
+    // Otherwise, we make sure to toggle the draw-interaction to the correct one.
+    switch (activityId) {
+      case "ADD":
+        return drawModel.toggleDrawInteraction(activeDrawType);
+      case "DELETE":
+        return drawModel.toggleDrawInteraction("Delete");
+      default:
+        return drawModel.toggleDrawInteraction("");
+    }
+  }, [activeDrawType, activityId, drawModel, pluginShown]);
+
   // We're gonna need to catch if the user closes the window, and make sure to
-  // disable the draw interaction if it is active.
+  // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {
-    drawModel.toggleDrawInteraction("");
+    setPluginShown(false);
   };
-  // If the user opens the window again, we have to make sure to toggle the draw-
-  // interaction back to whatever it was before the user closed it.
+  // We're gonna need to catch if the user opens the window, and make sure to
+  // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowShow = () => {
-    drawModel.toggleDrawInteraction(activeDrawType);
+    setPluginShown(true);
   };
 
   // We're rendering the view in a BaseWindowPlugin, since this is a
@@ -73,6 +97,8 @@ const Sketch = (props) => {
         options={props.options}
         localObserver={localObserver}
         activeDrawType={activeDrawType}
+        activityId={activityId}
+        setActivityId={setActivityId}
         setActiveDrawType={setActiveDrawType}
       />
     </BaseWindowPlugin>
