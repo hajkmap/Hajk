@@ -145,9 +145,13 @@ filters.add("lt", function (value, test, lessValue, greaterValue) {
   const t = typeof test === "string" ? parseFloat(test) : test;
 
   if (val < t) {
-    return lessValue.length === 0 ? value : lessValue;
+    return typeof lessValue === "string" && lessValue.length === 0
+      ? value
+      : lessValue;
   } else {
-    return greaterValue.length === 0 ? value : greaterValue;
+    return typeof greaterValue === "string" && greaterValue.length === 0
+      ? value
+      : greaterValue;
   }
 });
 
