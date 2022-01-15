@@ -129,6 +129,29 @@ filters.add("default", function (value, defaultValue) {
 filters.addAlias("fallback", "default");
 
 /*
+  lt - lessThan
+  If lessValue or greaterValue is an empty string the original value will be returned
+  Example:
+  {10.3|lt(11, 'LessThan', 'GreaterThan')}
+  outputs: 'LessThan'
+  {10.3|lt(11, '', 'GreaterThan')}
+  outputs: 10.3
+*/
+filters.add("lt", function (value, test, lessValue, greaterValue) {
+  if (isNaN(value) || isNaN(test)) {
+    return value;
+  }
+  const val = typeof value === "string" ? parseFloat(value) : value;
+  const t = typeof test === "string" ? parseFloat(test) : test;
+
+  if (val < t) {
+    return lessValue.length === 0 ? value : lessValue;
+  } else {
+    return greaterValue.length === 0 ? value : greaterValue;
+  }
+});
+
+/*
   equals
   Example:
   {'true'|equals('true', 'yes', 'no')}
