@@ -849,6 +849,27 @@ class DrawModel {
     }
   };
 
+  // Publishes a modify-message with the clicked feature in the payload.
+  #modifyClickedFeature = (e) => {
+    // Get features present at the clicked feature.
+    const clickedFeatures = this.#map.getFeaturesAtPixel(e.pixel);
+    // We only care about features that have been drawn by a user.
+    const userDrawnFeatures = clickedFeatures.filter((f) =>
+      f.get("USER_DRAWN")
+    );
+    // Let's make sure we found some feature(s) to remove. We're only removing
+    // the first one. TODO: Remove all? No? Yes? Maybe?
+    if (userDrawnFeatures.length > 0) {
+      // Let's get the first user-drawn feature
+      const feature = userDrawnFeatures[0];
+      // Then we'll publish a modify-message with the clicked feature in the payload.
+      this.#publishInformation({
+        subject: "drawModel.modifyFeature",
+        payLoad: feature,
+      });
+    }
+  };
+
   // Enables a remove-interaction which allows the user to remove drawn features by clicking on them.
   // We're also making sure to enable the click-lock so that the feature-info does not infer.
   #enableRemoveInteraction = () => {
@@ -879,6 +900,7 @@ class DrawModel {
     // We're gonna need a handler that can update the feature-style when
     // the modification is completed.
     this.#editInteraction.on("modifyend", this.#handleModifyEnd);
+    this.#map.on("singleclick", this.#modifyClickedFeature);
     // Then we'll add the interaction to the map.
     this.#map.addInteraction(this.#editInteraction);
     // Let's add the clickLock to avoid the featureInfo etc.
@@ -894,6 +916,7 @@ class DrawModel {
     this.#map.removeInteraction(this.#editInteraction);
     // Remove the feature-change event-listener.
     this.#editInteraction.un("modifyend", this.#handleModifyEnd);
+    this.#map.un("singleclick", this.#modifyClickedFeature);
     // Finally, we reset the field so we know that the interaction is no longer active.
     this.#editInteraction = null;
   };
