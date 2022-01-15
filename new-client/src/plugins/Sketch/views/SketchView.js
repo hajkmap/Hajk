@@ -175,7 +175,14 @@ const SketchView = (props) => {
           />
         );
       case "EDIT":
-        return <EditView id={activityId} model={model} drawModel={drawModel} />;
+        return (
+          <EditView
+            id={activityId}
+            model={model}
+            drawModel={drawModel}
+            localObserver={localObserver}
+          />
+        );
       case "MOVE":
         return <MoveView id={activityId} model={model} drawModel={drawModel} />;
       case "SAVE":

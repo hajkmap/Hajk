@@ -127,9 +127,8 @@ class DrawModel {
   // - subject: (string): The subject to be published on the observer
   // - payLoad: (any): The payload to send when publishing.
   #publishInformation = ({ subject, payLoad }) => {
-    // If no observer has been set-up, or if the subject or payload is missing,
-    // we abort.
-    if (!this.#observer || !subject || !payLoad) {
+    // If no observer has been set-up, or if the subject is missing, we abort
+    if (!this.#observer || !subject) {
       return;
     }
     // Otherwise we create the prefixed-subject to send. (The drawModel might have
@@ -857,17 +856,13 @@ class DrawModel {
     const userDrawnFeatures = clickedFeatures.filter((f) =>
       f.get("USER_DRAWN")
     );
-    // Let's make sure we found some feature(s) to remove. We're only removing
-    // the first one. TODO: Remove all? No? Yes? Maybe?
-    if (userDrawnFeatures.length > 0) {
-      // Let's get the first user-drawn feature
-      const feature = userDrawnFeatures[0];
-      // Then we'll publish a modify-message with the clicked feature in the payload.
-      this.#publishInformation({
-        subject: "drawModel.modifyFeature",
-        payLoad: feature,
-      });
-    }
+    // Let's get the (potential) first user-drawn feature, otherwise null.
+    const feature = userDrawnFeatures.length > 0 ? userDrawnFeatures[0] : null;
+    // Then we'll publish a modify-message with the clicked feature in the payload (or null).
+    this.#publishInformation({
+      subject: "drawModel.modify.mapClick",
+      payLoad: feature,
+    });
   };
 
   // Enables a remove-interaction which allows the user to remove drawn features by clicking on them.
