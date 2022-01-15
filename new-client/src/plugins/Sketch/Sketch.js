@@ -59,6 +59,8 @@ const Sketch = (props) => {
         return drawModel.toggleDrawInteraction(activeDrawType);
       case "DELETE":
         return drawModel.toggleDrawInteraction("Delete");
+      case "EDIT":
+        return drawModel.toggleDrawInteraction("Edit");
       default:
         return drawModel.toggleDrawInteraction("");
     }
