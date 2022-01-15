@@ -590,8 +590,11 @@ class DrawModel {
   // Updates the text-style on all drawn features. Used when toggling
   // if the measurement-label should be shown or not for example.
   #refreshFeaturesTextStyle = () => {
-    // Get all the drawn features
-    const drawnFeatures = this.#getAllDrawnFeatures();
+    // Get all the drawn features (Except for arrows, these doesn't have any text
+    // and shouldn't be refreshed)...
+    const drawnFeatures = this.#getAllDrawnFeatures().filter(
+      (f) => f.get("DRAW_METHOD") !== "Arrow"
+    );
     // Iterate the drawn features...
     drawnFeatures.forEach((feature) => {
       // Get the current style.
