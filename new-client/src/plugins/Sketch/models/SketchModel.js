@@ -1,6 +1,7 @@
 import { ACTIVITIES, MAX_REMOVED_FEATURES } from "../constants";
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
 import GeoJSON from "ol/format/GeoJSON";
+import { STROKE_DASHES } from "../constants";
 
 class SketchModel {
   #geoJSONParser;
@@ -110,6 +111,21 @@ class SketchModel {
     return Math.random().toString(36).slice(2, 9);
   };
 
+  // Accepts an array containing the line-dash, and returns the line (stroke) type
+  // that corresponds to that value.
+  #getStrokeType = (lineDash) => {
+    for (const [key, value] of STROKE_DASHES.entries()) {
+      if (value === lineDash) {
+        return key;
+      }
+    }
+    // If it wasn't found, we'll log an error and return null.
+    console.error(
+      `Could not find corresponding stroke-type from supplied line-dash. The supplied line-dash was: ${lineDash}`
+    );
+    return null;
+  };
+
   // Returns the feature-style in a form that fits the feature-style-editor
   getFeatureStyle = (feature) => {
     try {
@@ -125,6 +141,7 @@ class SketchModel {
         ),
         lineDash: featureBaseStyle?.strokeStyle.dash,
         strokeWidth: featureBaseStyle?.strokeStyle.width,
+        strokeType: this.#getStrokeType(featureBaseStyle?.strokeStyle.dash),
         fillColor: this.#drawModel.parseRGBAString(
           featureBaseStyle?.fillStyle.color
         ),

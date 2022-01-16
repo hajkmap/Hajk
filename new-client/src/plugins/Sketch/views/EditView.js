@@ -4,7 +4,7 @@ import { Grid, Typography } from "@material-ui/core";
 import Information from "../components/Information";
 import FeatureStyleEditor from "../components/FeatureStyleEditor";
 
-const EditView = ({ model, editFeature, id }) => {
+const EditView = ({ model, drawModel, editFeature, id }) => {
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(id);
   return (
@@ -18,7 +18,11 @@ const EditView = ({ model, editFeature, id }) => {
             Klicka på ett objekt i kartan för att ändra dess utseende.
           </Typography>
         ) : (
-          <FeatureStyleEditor feature={editFeature} model={model} />
+          <FeatureStyleEditor
+            feature={editFeature}
+            model={model}
+            drawModel={drawModel}
+          />
         )}
       </Grid>
     </Grid>
