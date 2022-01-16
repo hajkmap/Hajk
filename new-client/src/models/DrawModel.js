@@ -1013,10 +1013,10 @@ class DrawModel {
       // 4. Split the value to extract individual rgba values
       const o = /\(([^)]+)\)/.exec(s.replace(/\s/g, ""))[1].split(",");
       return {
-        r: o[0],
-        g: o[1],
-        b: o[2],
-        a: o[3],
+        r: parseFloat(o[0]),
+        g: parseFloat(o[1]),
+        b: parseFloat(o[2]),
+        a: parseFloat(o[3]),
       };
     } catch (error) {
       console.error("RGBA parsing failed: " + error.message);
