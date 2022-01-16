@@ -180,7 +180,7 @@ const SketchView = (props) => {
             id={activityId}
             model={model}
             drawModel={drawModel}
-            localObserver={localObserver}
+            editFeature={props.editFeature}
           />
         );
       case "MOVE":

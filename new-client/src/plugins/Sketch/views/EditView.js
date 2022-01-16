@@ -1,27 +1,10 @@
 import React from "react";
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
+
 import Information from "../components/Information";
-import { useEffect } from "react";
+import FeatureStyleEditor from "../components/FeatureStyleEditor";
 
-const EditView = ({ model, localObserver, id }) => {
-  // We have to keep track of if we have a feature chosen for modification
-  const [feature, setFeature] = React.useState(null);
-
-  // We need a handler that can handle the information sent from the drawModel
-  // via the observer. (If the user clicks the map while in edit-mode, the
-  // drawModel will publish a message containing the feature clicked (or null).
-  const handleModifyMapClick = React.useCallback((clickedFeature) => {
-    setFeature(clickedFeature);
-  }, []);
-
-  // Let's subscribe to the events that we care about in this view.
-  useEffect(() => {
-    localObserver.subscribe("drawModel.modify.mapClick", handleModifyMapClick);
-    return () => {
-      localObserver.unsubscribe("drawModel.modify.mapClick");
-    };
-  }, [localObserver, handleModifyMapClick]);
-
+const EditView = ({ model, editFeature, id }) => {
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(id);
   return (
@@ -29,8 +12,14 @@ const EditView = ({ model, localObserver, id }) => {
       <Grid item xs={12}>
         <Information text={activity.information} />
       </Grid>
-      <Grid item xs={12}>
-        <pre>{JSON.stringify(feature)}</pre>
+      <Grid item xs={12} style={{ marginTop: 8 }}>
+        {editFeature === null ? (
+          <Typography>
+            Klicka på ett objekt i kartan för att ändra dess utseende.
+          </Typography>
+        ) : (
+          <FeatureStyleEditor feature={editFeature} />
+        )}
       </Grid>
     </Grid>
   );

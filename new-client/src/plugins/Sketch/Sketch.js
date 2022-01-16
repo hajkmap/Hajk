@@ -15,6 +15,8 @@ const Sketch = (props) => {
   const [activityId, setActivityId] = React.useState("ADD");
   // We're gonna need to keep track of the currently active draw-type. ("Polygon", "Rectangle", etc).
   const [activeDrawType, setActiveDrawType] = React.useState("Polygon");
+  // We have to keep track of the eventual feature that has been selected for modification.
+  const [editFeature, setEditFeature] = React.useState(null);
   // We're gonna need to keep track of if the actual plugin is shown or not.
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
@@ -44,6 +46,23 @@ const Sketch = (props) => {
         observer: localObserver,
       })
   );
+
+  // This functions handles events from the draw-model that are sent
+  // when we are in edit-mode and the map is clicked. A feature might be sent
+  // in the payload, but if the user clicked the map where no drawn feature exists,
+  // null is sent.
+  const handleModifyMapClick = React.useCallback((clickedFeature) => {
+    setEditFeature(clickedFeature);
+  }, []);
+
+  // This effect makes sure to subscribe (and un-subscribe) to all observer-events
+  // we are interested in in this view.
+  React.useEffect(() => {
+    localObserver.subscribe("drawModel.modify.mapClick", handleModifyMapClick);
+    return () => {
+      localObserver.unsubscribe("drawModel.modify.mapClick");
+    };
+  }, [localObserver, handleModifyMapClick]);
 
   // This effect makes sure that we activate the proper draw-interaction when the draw-type,
   // activity-id, or plugin-visibility changes. (This includes activating the first draw-interaction on first render).
@@ -75,6 +94,7 @@ const Sketch = (props) => {
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowShow = () => {
     setPluginShown(true);
+    setEditFeature(null);
   };
 
   // We're rendering the view in a BaseWindowPlugin, since this is a
@@ -102,6 +122,7 @@ const Sketch = (props) => {
         activityId={activityId}
         setActivityId={setActivityId}
         setActiveDrawType={setActiveDrawType}
+        editFeature={editFeature}
       />
     </BaseWindowPlugin>
   );
