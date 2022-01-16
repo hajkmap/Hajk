@@ -17,6 +17,7 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
       activeDrawType={feature.get("DRAW_METHOD")}
       drawStyle={featureStyle}
       drawModel={drawModel}
+      setDrawStyle={setFeatureStyle}
     />
   );
 };
