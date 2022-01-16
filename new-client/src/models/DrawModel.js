@@ -29,6 +29,7 @@ import Overlay from "ol/Overlay.js";
  * - toggleDrawInteraction(drawType, settings): Accepts a string with the drawType and an object containing settings.
  * - zoomToCurrentExtent(): Fits the map-view to the current extent of the current draw-source.
  * - getRGBAString(RGBA-object <object>): Accepts an object with r-, g-, b-, and a-properties and returns the string representation.
+ * - parseRGBAString(RGBA-string <string>): Accepts a string and returns an object with r-, g-, b-, and a-properties.
  * - getCurrentVectorSource(): Returns the vector-source currently connected to the draw-model.
  * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
  * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
@@ -996,6 +997,26 @@ class DrawModel {
   // returns the string representation of the supplied object.
   getRGBAString = (o) => {
     return `rgba(${o.r},${o.g},${o.b},${o.a})`;
+  };
+
+  // Accepts a RGBA-string and returns an object containing r-, g-, b-, and a-properties.
+  parseRGBAString = (s) => {
+    try {
+      // 1. RegEx that matches stuff between a set of parentheses
+      // 2. Execute that regex on the input string, but first remove any whitespace it may contain
+      // 3. RegEx exec returns an array. Grab the second element, which will contain the value.
+      // 4. Split the value to extract individual rgba values
+      const o = /\(([^)]+)\)/.exec(s.replace(/\s/g, ""))[1].split(",");
+      return {
+        r: o[0],
+        g: o[1],
+        b: o[2],
+        a: o[3],
+      };
+    } catch (error) {
+      console.error("RGBA parsing failed: " + error.message);
+      return null;
+    }
   };
 
   // Toggles the current draw interaction. To enable the draw interaction,
